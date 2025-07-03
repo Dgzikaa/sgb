@@ -1,0 +1,435 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fontes personalizadas */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* Base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  color: #334155;
+  background-color: transparent;
+  overflow-x: hidden;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  /* Mobile adjustments */
+  .sidebar-mobile {
+    width: 100vw;
+    max-width: 320px;
+  }
+  
+  .header-mobile {
+    padding: 0.75rem 1rem;
+  }
+  
+  .content-mobile {
+    padding: 1rem;
+  }
+  
+  .big-numbers-mobile {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .big-number-card {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Small mobile adjustments */
+  .dashboard-header {
+    padding: 1rem;
+  }
+  
+  .dashboard-title {
+    font-size: 1.5rem;
+    line-height: 1.4;
+  }
+  
+  .big-number-value {
+    font-size: 1.75rem;
+  }
+}
+
+/* Smooth transitions */
+.transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Loading animations */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #f1f5f9 0px, #e2e8f0 40px, #f1f5f9 80px);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* Glass effect for modern cards */
+.glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Hover effects */
+.hover-lift {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Focus styles for accessibility */
+.focus-ring:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: transparent;
+}
+
+/* Tema minimalista inspirado no Nubank */
+.nubank-bg {
+  background: #ffffff;
+}
+
+.nubank-accent {
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+}
+
+/* Cards minimalistas */
+.minimal-card {
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 16px;
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.minimal-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 10px 25px rgba(0, 0, 0, 0.1),
+    0 4px 6px rgba(0, 0, 0, 0.05);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+/* Header minimalista */
+.minimal-header {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+/* Botões minimalistas */
+.minimal-button {
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(99, 102, 241, 0.4);
+}
+
+.minimal-button:hover {
+  background: #5b21b6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.minimal-button-secondary {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.minimal-button-secondary:hover {
+  background: #e2e8f0;
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #6366f1;
+}
+
+/* Select minimalista */
+.minimal-select {
+  background: white;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 12px;
+  padding: 8px 16px;
+  color: #334155;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.minimal-select:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Cores do tema */
+:root {
+  --primary: #6366f1;
+  --primary-light: #a78bfa;
+  --secondary: #ec4899;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --text: #1e293b;
+  --text-light: #64748b;
+  --text-lighter: #94a3b8;
+  --bg: #f8fafc;
+  --bg-card: #ffffff;
+  --border: rgba(148, 163, 184, 0.2);
+}
+
+/* Estilos elegantes para campos de entrada */
+.elegant-input {
+  appearance: none;
+  background: linear-gradient(to right, #ffffff, #f8fafc, #f1f5f9);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  color: #1e293b;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(99, 102, 241, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  font-size: 14px;
+  min-width: 160px;
+}
+
+.elegant-input:hover {
+  background: linear-gradient(to right, #f8fafc, #f1f5f9, #e2e8f0);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+  transform: translateY(-1px);
+}
+
+.elegant-input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 
+    0 0 0 3px rgba(99, 102, 241, 0.1),
+    0 8px 25px rgba(99, 102, 241, 0.15);
+  background: linear-gradient(to right, #ffffff, #f8fafc, #f1f5f9);
+}
+
+/* Dropdown elegante */
+.elegant-select {
+  appearance: none;
+  background: linear-gradient(to right, #ffffff, #f8fafc, #f1f5f9);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  color: #1e293b;
+  font-weight: 600;
+  padding: 12px 16px 12px 16px;
+  padding-right: 48px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(99, 102, 241, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  font-size: 14px;
+  min-width: 160px;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236366f1' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+  position: relative;
+  z-index: 60;
+}
+
+.elegant-select:hover {
+  background: linear-gradient(to right, #f8fafc, #f1f5f9, #e2e8f0);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+  transform: translateY(-1px);
+}
+
+.elegant-select:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 
+    0 0 0 3px rgba(99, 102, 241, 0.1),
+    0 8px 25px rgba(99, 102, 241, 0.15);
+  background: linear-gradient(to right, #ffffff, #f8fafc, #f1f5f9);
+}
+
+/* Container com efeito glassmorphism */
+.elegant-form-group {
+  position: relative;
+  display: inline-block;
+}
+
+.elegant-form-group::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 100%
+  );
+  border-radius: 12px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.elegant-form-group:hover::after {
+  opacity: 1;
+}
+
+/* Loading state para inputs */
+.elegant-input.loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.elegant-input.loading::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(99, 102, 241, 0.3);
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+/* Options do select */
+.elegant-select option {
+  background: #ffffff;
+  color: #1e293b;
+  padding: 12px 16px;
+  font-weight: 500;
+}
+
+/* Estilos para tabelas elegantes */
+.elegant-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.elegant-table thead th {
+  color: #475569;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 12px 16px;
+  border-bottom: 2px solid #e2e8f0;
+  text-align: left;
+}
+
+.elegant-table tbody td {
+  color: #1e293b !important;
+  font-size: 14px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  font-weight: 500;
+}
+
+.elegant-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.elegant-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Forçar visibilidade do texto das tabelas */
+table td {
+  color: #1e293b !important;
+}
+
+table th {
+  color: #475569 !important;
+}

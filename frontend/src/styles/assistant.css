@@ -1,0 +1,160 @@
+/* Estilos para o SGB Assistant */
+
+/* Scrollbar customizada para o chat */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.8);
+}
+
+/* Animações para mensagens */
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-enter {
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+/* Efeito de digitação */
+@keyframes typing {
+  0%, 50% { opacity: 0.4; }
+  25%, 75% { opacity: 1; }
+}
+
+.typing-indicator {
+  animation: typing 1.5s infinite;
+}
+
+/* Gradiente animado para o header */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animated-gradient {
+  background: linear-gradient(-45deg, #6366f1, #8b5cf6, #a855f7, #6366f1);
+  background-size: 400% 400%;
+  animation: gradientShift 8s ease infinite;
+}
+
+/* Efeito hover para botões de feedback */
+.feedback-button {
+  transition: all 0.2s ease;
+}
+
+.feedback-button:hover {
+  transform: scale(1.1);
+}
+
+/* Efeito de pulse para notificações */
+@keyframes pulse-notification {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+.notification-pulse {
+  animation: pulse-notification 2s infinite;
+}
+
+/* Efeito de bounce para o botão flutuante */
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.bounce-gentle {
+  animation: bounce-gentle 2s infinite;
+}
+
+/* Responsividade para mobile */
+@media (max-width: 768px) {
+  .assistant-container {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+  }
+  
+  .assistant-button-mobile {
+    bottom: 20px !important;
+    right: 20px !important;
+    width: 56px !important;
+    height: 56px !important;
+  }
+}
+
+/* Efeito de glass morphism */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Animação de loading para análises */
+@keyframes dataAnalysis {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.analysis-loading {
+  animation: dataAnalysis 2s linear infinite;
+}
+
+/* Efeito de highlight para comandos rápidos */
+.quick-command {
+  transition: all 0.2s ease;
+}
+
+.quick-command:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Fix para garantir visibilidade do texto no input */
+.assistant-input {
+  color: #1f2937 !important;
+  background-color: #ffffff !important;
+}
+
+.assistant-input::placeholder {
+  color: #6b7280 !important;
+}
+
+.assistant-input:focus {
+  color: #1f2937 !important;
+} 
