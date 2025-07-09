@@ -577,6 +577,128 @@ ${detalhes.total_erros > 0 ? `⚠️ Erros: ${detalhes.total_erros}` : '🎯 Sem
     }
   };
 
+  const handleColetarDados = async () => {
+    if (!selectedBar) return;
+    
+    // Confirmar antes de iniciar
+    if (!confirm('Iniciar COLETA RÁPIDA dos dados do ContaAzul?\n\nEsta operação irá:\n- Coletar TODOS os dados brutos (JSON) de 2024-2027\n- Salvar no banco sem processamento\n- Coleta rápida: ~2-3 minutos\n- Depois você pode processar os dados\n\nContinuar?')) {
+      return;
+    }
+    
+    setTestingConnection(true);
+    try {
+      const response = await fetch('/api/contaazul/coletar-dados', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          bar_id: selectedBar.id
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log('📥 COLETA RÁPIDA COMPLETA:', data);
+        
+        toast({
+          title: "Coleta Concluída!",
+          description: `${data.detalhes.total_paginas_coletadas} páginas coletadas. Execute o processamento.`
+        });
+        
+        const { detalhes } = data;
+        alert(`
+📥 COLETA RÁPIDA FINALIZADA!
+
+📊 RESUMO:
+✅ Páginas coletadas: ${detalhes.total_paginas_coletadas}
+💰 Receitas: ${detalhes.receitas.coletados} páginas
+💸 Despesas: ${detalhes.despesas.coletados} páginas
+📋 Categorias: ${detalhes.categorias.coletados} página
+🏦 Contas: ${detalhes.contas.coletados} página
+${detalhes.total_erros > 0 ? `⚠️ Erros: ${detalhes.total_erros}` : '🎯 Sem erros!'}
+
+🚀 Dados JSON brutos salvos no banco!
+📋 Próximo passo: ${detalhes.proximo_passo}
+        `);
+      } else {
+        toast({
+          title: "Erro",
+          description: data.error || "Erro na coleta de dados",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: error instanceof Error ? error.message : "Erro na coleta de dados",
+        variant: "destructive"
+      });
+    } finally {
+      setTestingConnection(false);
+    }
+  };
+
+  const handleProcessarDados = async () => {
+    if (!selectedBar) return;
+    
+    // Confirmar antes de iniciar
+    if (!confirm('Processar dados coletados para tabelas estruturadas?\n\nEsta operação irá:\n- Processar dados JSON brutos\n- Transformar em dados estruturados\n- Inserir nas tabelas finais\n- Sem limite de timeout\n\nContinuar?')) {
+      return;
+    }
+    
+    setTestingConnection(true);
+    try {
+      const response = await fetch('/api/contaazul/processar-dados', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          bar_id: selectedBar.id
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log('🔄 PROCESSAMENTO COMPLETO:', data);
+        
+        toast({
+          title: "Processamento Concluído!",
+          description: `${data.detalhes.total_processados} registros processados nas tabelas.`
+        });
+        
+        const { detalhes } = data;
+        alert(`
+🔄 PROCESSAMENTO FINALIZADO!
+
+📊 RESUMO:
+✅ Registros processados: ${detalhes.total_processados}
+${detalhes.total_erros > 0 ? `⚠️ Erros: ${detalhes.total_erros}` : '🎯 Sem erros!'}
+
+🚀 Dados estruturados nas tabelas finais!
+🎯 Sistema pronto para Visão de Competência!
+        `);
+      } else {
+        toast({
+          title: "Erro",
+          description: data.error || "Erro no processamento",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: error instanceof Error ? error.message : "Erro no processamento",
+        variant: "destructive"
+      });
+    } finally {
+      setTestingConnection(false);
+    }
+  };
+
   const handleSincronizarDados = async () => {
     if (!selectedBar) return;
     
@@ -918,6 +1040,36 @@ ${detalhes.total_erros > 0 ? `⚠️ Erros: ${detalhes.total_erros} registros` :
                 </Button>
                 
                 <Button 
+                  onClick={handleColetarDados}
+                  disabled={testingConnection}
+                  variant="outline"
+                  size="sm"
+                  className="bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200"
+                >
+                  {testingConnection ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                  )}
+                  📥 Coletar Dados
+                </Button>
+                
+                <Button 
+                  onClick={handleProcessarDados}
+                  disabled={testingConnection}
+                  variant="outline"
+                  size="sm"
+                  className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200"
+                >
+                  {testingConnection ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                  )}
+                  🔄 Processar Dados
+                </Button>
+                
+                <Button 
                   onClick={handleSincronizarReceitas}
                   disabled={testingConnection}
                   variant="outline"
@@ -929,7 +1081,7 @@ ${detalhes.total_erros > 0 ? `⚠️ Erros: ${detalhes.total_erros} registros` :
                   ) : (
                     <RefreshCw className="w-4 h-4 mr-2" />
                   )}
-                  💰 Sync Receitas
+                  💰 Sync Receitas (Old)
                 </Button>
                 
                 <Button 
@@ -944,7 +1096,7 @@ ${detalhes.total_erros > 0 ? `⚠️ Erros: ${detalhes.total_erros} registros` :
                   ) : (
                     <RefreshCw className="w-4 h-4 mr-2" />
                   )}
-                  🔄 Sync Completo
+                  🔄 Sync Completo (Old)
                 </Button>
                 
                 <Button 
