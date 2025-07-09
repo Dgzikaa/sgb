@@ -124,12 +124,12 @@ export async function GET(request: NextRequest) {
           tamanho_pagina: 10,
           data_vencimento_de: dataInicio,
           data_vencimento_ate: dataFim,
-          data_competencia_de: '2024-01-01',
-          data_competencia_ate: '2024-12-31',
+          data_competencia_de: dataInicio,
+          data_competencia_ate: dataFim,
           campo_ordenado_descendente: 'data_vencimento'
         },
         official: true,
-        description: 'Teste com filtro de competência (2024)'
+        description: 'Teste com filtro de competência (2024-2027)'
       },
       
       {
@@ -142,11 +142,11 @@ export async function GET(request: NextRequest) {
           data_vencimento_de: dataInicio,
           data_vencimento_ate: dataFim,
           status: ['RECEBIDO'],
-          data_pagamento_de: '2024-01-01',
-          data_pagamento_ate: '2024-12-31'
+          data_pagamento_de: dataInicio,
+          data_pagamento_ate: dataFim
         },
         official: true,
-        description: 'Apenas receitas já recebidas em 2024'
+        description: 'Apenas receitas já recebidas (2024-2027)'
       }
     ];
 
