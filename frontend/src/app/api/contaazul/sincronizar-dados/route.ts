@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
         tipo_sincronizacao: 'COMPLETA',
         status: 'EM_ANDAMENTO',
         data_inicio: inicioSincronizacao,
-        periodo_inicio: '2024-01-01',
+        periodo_inicio: '2024-01-01', 
         periodo_fim: '2027-01-01'
       })
       .select()
@@ -153,16 +153,20 @@ async function sincronizarReceitas(accessToken: string, barId: number) {
   let processados = 0;
   let erros = 0;
   let pagina = 1;
-  const itensPorPagina = 50;
+  const itensPorPagina = 100; // Aumentado de 50 para 100
+  const maxPaginas = 25; // Limite aumentado para pegar mais dados
 
-  while (true) {
+  while (pagina <= maxPaginas) {
     try {
       const params = new URLSearchParams({
         pagina: pagina.toString(),
         tamanho_pagina: itensPorPagina.toString(),
-        data_vencimento_de: '2024-01-01',
+        data_vencimento_de: '2024-01-01', // Período completo conforme solicitado
         data_vencimento_ate: '2027-01-01'
       });
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
       const response = await fetch(
         `https://api-v2.contaazul.com/v1/financeiro/eventos-financeiros/contas-a-receber/buscar?${params}`,
@@ -171,9 +175,12 @@ async function sincronizarReceitas(accessToken: string, barId: number) {
             'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
-          }
+          },
+          signal: controller.signal
         }
       );
+      
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         console.error(`Erro ao buscar receitas página ${pagina}:`, response.status);
@@ -217,9 +224,10 @@ async function sincronizarDespesas(accessToken: string, barId: number) {
   let processados = 0;
   let erros = 0;
   let pagina = 1;
-  const itensPorPagina = 50;
+  const itensPorPagina = 100; // Aumentado de 50 para 100
+  const maxPaginas = 20; // Limite para evitar timeout nas despesas
 
-  while (true) {
+  while (pagina <= maxPaginas) {
     try {
       const params = new URLSearchParams({
         pagina: pagina.toString(),
@@ -228,6 +236,9 @@ async function sincronizarDespesas(accessToken: string, barId: number) {
         data_vencimento_ate: '2027-01-01'
       });
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
       const response = await fetch(
         `https://api-v2.contaazul.com/v1/financeiro/eventos-financeiros/contas-a-pagar/buscar?${params}`,
         {
@@ -235,9 +246,12 @@ async function sincronizarDespesas(accessToken: string, barId: number) {
             'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
-          }
+          },
+          signal: controller.signal
         }
       );
+      
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         console.error(`Erro ao buscar despesas página ${pagina}:`, response.status);
