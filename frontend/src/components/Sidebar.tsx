@@ -112,6 +112,7 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
       title: 'Conta Azul',
       icon: '🔗',
       items: [
+        { id: 'dashboard-financeiro', label: 'Dashboard Financeiro', icon: '💰', route: '/dashboard-financeiro', requiredModule: 'relatorio_produtos' },
         { id: 'contaazul-competencia', label: 'Relatório Competência', icon: '📊', route: '/relatorios/contaazul-competencia', requiredModule: 'relatorio_produtos' },
       ]
     },
