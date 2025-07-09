@@ -457,6 +457,66 @@ Detalhes completos no console (F12)!
     }
   };
 
+  const handleSetupDatabase = async () => {
+    if (!selectedBar) return;
+    
+    setTestingConnection(true);
+    try {
+      const response = await fetch('/api/contaazul/setup-database', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          barId: selectedBar.id
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log('🏗️ SETUP DO BANCO CONCLUÍDO:', data);
+        
+        toast({
+          title: "Banco Configurado!",
+          description: `${data.tabelas_criadas.length} tabelas criadas para Visão de Competência`
+        });
+        
+        alert(`
+🏗️ SETUP DO BANCO CONCLUÍDO COM SUCESSO!
+
+📋 TABELAS CRIADAS:
+${data.tabelas_criadas.map((tabela: string) => `✅ ${tabela}`).join('\n')}
+
+🎯 ESTRUTURA CRIADA:
+• contaazul_financeiro → Dados financeiros normalizados
+• contaazul_sincronizacao → Controle de sincronizações  
+• contaazul_categorias → Cache de categorias
+• contaazul_contas_financeiras → Cache de contas
+
+🚀 PRÓXIMOS PASSOS:
+${data.proximos_passos.map((passo: string, i: number) => `${i + 1}. ${passo}`).join('\n')}
+
+✅ Agora pode implementar a sincronização dos dados!
+        `);
+      } else {
+        toast({
+          title: "Erro",
+          description: data.error || "Erro ao configurar banco",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao configurar estrutura do banco",
+        variant: "destructive"
+      });
+    } finally {
+      setTestingConnection(false);
+    }
+  };
+
   const handleFixRedirectUri = async () => {
     if (!selectedBar) return;
     
@@ -714,6 +774,21 @@ Detalhes completos no console (F12)!
                     <Shield className="w-4 h-4 mr-2" />
                   )}
                   🔍 Ver Dados
+                </Button>
+                
+                <Button 
+                  onClick={handleSetupDatabase}
+                  disabled={testingConnection}
+                  variant="outline"
+                  size="sm"
+                  className="bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200"
+                >
+                  {testingConnection ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Shield className="w-4 h-4 mr-2" />
+                  )}
+                  🏗️ Setup Banco
                 </Button>
                 
                 <Button 
