@@ -382,7 +382,7 @@ async function handleTestConnection(barId: string) {
     }
 
     // Testar conexão fazendo uma chamada à API da ContaAzul
-    const response = await fetch('https://api.contaazul.com/v1/company', {
+    const response = await fetch('https://api-v2.contaazul.com/v1/servicos', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${credentials.access_token}`,
@@ -399,24 +399,19 @@ async function handleTestConnection(barId: string) {
       }, { status: 400 });
     }
 
-    // Atualizar informações da empresa se a conexão for bem-sucedida
-    await supabase
-      .from('api_credentials')
-      .update({
-        empresa_id: data.id,
-        empresa_nome: data.name,
-        empresa_cnpj: data.document
-      })
-      .eq('bar_id', parseInt(barId))
-      .eq('sistema', 'contaazul');
+    // Log da resposta para debug
+    console.log('✅ Resposta da API ContaAzul:', data);
 
+    // Verificar se conseguiu acessar os serviços
+    const servicosCount = data[0]?.itens?.length || 0;
+    
     return NextResponse.json({
       success: true,
       message: 'Conexão testada com sucesso',
-      empresa: {
-        id: data.id,
-        nome: data.name,
-        cnpj: data.document
+      apiInfo: {
+        endpoint: '/v1/servicos',
+        servicosEncontrados: servicosCount,
+        status: 'API v2 funcionando'
       }
     });
   } catch (error) {
