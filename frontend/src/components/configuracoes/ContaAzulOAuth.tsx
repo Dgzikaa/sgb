@@ -252,6 +252,49 @@ export default function ContaAzulOAuth() {
     }
   };
 
+  const handleTestEndpoints = async () => {
+    if (!selectedBar) return;
+    
+    setTestingConnection(true);
+    try {
+      const response = await fetch(`/api/contaazul/test-endpoints?barId=${selectedBar.id}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log('📊 Resultados dos testes de endpoints:', data);
+        const { summary, results } = data;
+        
+        toast({
+          title: "Teste de Endpoints Concluído",
+          description: `${summary.successful}/${summary.total} endpoints funcionando. Veja o console para detalhes.`
+        });
+        
+        // Opcional: mostrar resultados em modal ou expandir interface
+        alert(`
+Resultados dos Testes de Endpoints:
+✅ Funcionando: ${summary.successful}/${summary.total}
+📊 Com dados: ${summary.withData}
+
+Veja o console (F12) para detalhes completos dos endpoints.
+        `);
+      } else {
+        toast({
+          title: "Erro",
+          description: data.error || "Erro ao testar endpoints",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao testar endpoints financeiros",
+        variant: "destructive"
+      });
+    } finally {
+      setTestingConnection(false);
+    }
+  };
+
   const handleFixRedirectUri = async () => {
     if (!selectedBar) return;
     
@@ -449,6 +492,21 @@ export default function ContaAzulOAuth() {
                     <Shield className="w-4 h-4 mr-2" />
                   )}
                   Testar
+                </Button>
+                
+                <Button 
+                  onClick={handleTestEndpoints}
+                  disabled={testingConnection}
+                  variant="outline"
+                  size="sm"
+                  className="bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200"
+                >
+                  {testingConnection ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Shield className="w-4 h-4 mr-2" />
+                  )}
+                  Testar Endpoints 💰
                 </Button>
                 
                 <Button 
