@@ -400,6 +400,63 @@ Detalhes completos no console (F12)!
     }
   };
 
+  const handleVerEstruturaDados = async () => {
+    if (!selectedBar) return;
+    
+    setTestingConnection(true);
+    try {
+      const response = await fetch(`/api/contaazul/ver-dados-estrutura?barId=${selectedBar.id}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log('🔍 ESTRUTURA DOS DADOS REAIS:', data);
+        const { dados_encontrados, estruturas_mapeadas, analise_implementacao } = data;
+        
+        toast({
+          title: "Estrutura de Dados Mapeada!",
+          description: "Dados reais do ContaAzul analisados. Veja o console!"
+        });
+        
+        // Mostrar resumo dos dados encontrados
+        const totalReceitas = dados_encontrados.receitas?.total_encontrado || 0;
+        const totalDespesas = dados_encontrados.despesas?.total_encontrado || 0;
+        const totalCategorias = dados_encontrados.categorias?.total_encontrado || 0;
+        const totalContas = dados_encontrados.contas_financeiras?.total_encontrado || 0;
+        
+        alert(`
+🔍 ESTRUTURA DOS DADOS REAIS MAPEADA:
+📅 Período: ${data.periodo_pesquisado.descricao}
+
+📊 DADOS ENCONTRADOS:
+💰 Receitas: ${totalReceitas} registros
+💸 Despesas: ${totalDespesas} registros  
+📋 Categorias: ${totalCategorias} itens
+🏦 Contas: ${totalContas} contas
+
+🎯 Status: ${analise_implementacao.pronto_para_sincronizar ? 'PRONTO para sincronizar!' : 'Necessário ajustes'}
+
+💡 Próximo passo: ${analise_implementacao.proximo_passo}
+
+🔍 Veja o console (F12) para a estrutura COMPLETA dos dados!
+        `);
+      } else {
+        toast({
+          title: "Erro",
+          description: data.error || "Erro ao mapear estrutura dos dados",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao buscar estrutura dos dados",
+        variant: "destructive"
+      });
+    } finally {
+      setTestingConnection(false);
+    }
+  };
+
   const handleFixRedirectUri = async () => {
     if (!selectedBar) return;
     
@@ -642,6 +699,21 @@ Detalhes completos no console (F12)!
                     <Shield className="w-4 h-4 mr-2" />
                   )}
                   📋 Docs Oficial
+                </Button>
+                
+                <Button 
+                  onClick={handleVerEstruturaDados}
+                  disabled={testingConnection}
+                  variant="outline"
+                  size="sm"
+                  className="bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200"
+                >
+                  {testingConnection ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Shield className="w-4 h-4 mr-2" />
+                  )}
+                  🔍 Ver Dados
                 </Button>
                 
                 <Button 
