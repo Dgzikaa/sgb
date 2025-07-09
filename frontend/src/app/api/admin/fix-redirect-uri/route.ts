@@ -15,8 +15,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'barId é obrigatório' }, { status: 400 });
     }
 
-    // URL fixa do Vercel
-    const fixedRedirectUri = 'https://sgb-v2.vercel.app/contaazul-callback';
+    // URL fixa do Netlify
+    const fixedRedirectUri = 'https://sgb-sistema.netlify.app/contaazul-callback';
 
     // Atualizar redirect_uri no banco
     const { data, error } = await supabase
