@@ -699,6 +699,62 @@ ${detalhes.total_erros > 0 ? `⚠️ Erros: ${detalhes.total_erros}` : '🎯 Sem
     }
   };
 
+  const handleVerificarColeta = async () => {
+    if (!selectedBar) return;
+    
+    setTestingConnection(true);
+    try {
+      const response = await fetch(`/api/contaazul/verificar-dados-coletados?barId=${selectedBar.id}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log('🔍 VERIFICAÇÃO DA COLETA:', data);
+        
+        const { estatisticas, processamento, analise } = data;
+        
+        toast({
+          title: "Verificação Concluída!",
+          description: `${estatisticas.receitas.total_registros + estatisticas.despesas.total_registros} registros coletados`
+        });
+        
+        alert(`
+🔍 VERIFICAÇÃO DA COLETA DE DADOS
+
+📊 DADOS COLETADOS:
+💰 Receitas: ${estatisticas.receitas.paginas_coletadas} páginas (${estatisticas.receitas.total_registros} registros)
+   └ Última página: ${estatisticas.receitas.ultima_pagina_tamanho} itens
+💸 Despesas: ${estatisticas.despesas.paginas_coletadas} páginas (${estatisticas.despesas.total_registros} registros)  
+   └ Última página: ${estatisticas.despesas.ultima_pagina_tamanho} itens
+
+🔄 DADOS PROCESSADOS:
+✅ Receitas processadas: ${processamento.receitas_processadas}
+✅ Despesas processadas: ${processamento.despesas_processadas}
+
+📈 ANÁLISE:
+${analise.coleta_completa ? '✅ Coleta completa!' : '⚠️ Pode ter mais dados'}
+${analise.pode_continuar_receitas ? '💰 Receitas: Pode ter mais dados (última página = 500 itens)' : ''}
+${analise.pode_continuar_despesas ? '💸 Despesas: Pode ter mais dados (última página = 500 itens)' : ''}
+
+💡 ${analise.recomendacao}
+        `);
+      } else {
+        toast({
+          title: "Erro",
+          description: data.error || "Erro na verificação",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: error instanceof Error ? error.message : "Erro na verificação",
+        variant: "destructive"
+      });
+    } finally {
+      setTestingConnection(false);
+    }
+  };
+
   const handleSincronizarDados = async () => {
     if (!selectedBar) return;
     
@@ -1067,6 +1123,21 @@ ${detalhes.total_erros > 0 ? `⚠️ Erros: ${detalhes.total_erros} registros` :
                     <RefreshCw className="w-4 h-4 mr-2" />
                   )}
                   🔄 Processar Dados
+                </Button>
+                
+                <Button 
+                  onClick={handleVerificarColeta}
+                  disabled={testingConnection}
+                  variant="outline"
+                  size="sm"
+                  className="bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200"
+                >
+                  {testingConnection ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                  )}
+                  🔍 Verificar Coleta
                 </Button>
                 
                 <Button 
