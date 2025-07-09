@@ -517,6 +517,81 @@ ${data.proximos_passos.map((passo: string, i: number) => `${i + 1}. ${passo}`).j
     }
   };
 
+  const handleSincronizarDados = async () => {
+    if (!selectedBar) return;
+    
+    // Confirmar antes de iniciar (pode demorar)
+    if (!confirm('Iniciar sincronização completa dos dados do ContaAzul?\n\nEsta operação pode demorar alguns minutos e irá sincronizar:\n- Receitas e Despesas de 2024-2027\n- Categorias\n- Contas Financeiras\n\nContinuar?')) {
+      return;
+    }
+    
+    setTestingConnection(true);
+    try {
+      // Buscar access_token atual
+      const statusResponse = await fetch(`/api/contaazul/auth?action=status&barId=${selectedBar.id}`);
+      const statusData = await statusResponse.json();
+      
+      if (!statusResponse.ok || !statusData.access_token) {
+        throw new Error('Token de acesso não disponível. Reconecte a integração.');
+      }
+      
+      const response = await fetch('/api/contaazul/sincronizar-dados', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          bar_id: selectedBar.id,
+          access_token: statusData.access_token
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log('🔄 SINCRONIZAÇÃO COMPLETA:', data);
+        
+        toast({
+          title: "Sincronização Concluída!",
+          description: `${data.detalhes.total_processados} registros processados de 2024-2027`
+        });
+        
+        const { detalhes } = data;
+        alert(`
+🔄 SINCRONIZAÇÃO COMPLETA FINALIZADA!
+
+📊 RESUMO DOS DADOS SINCRONIZADOS:
+💰 Receitas: ${detalhes.receitas.processados} registros
+💸 Despesas: ${detalhes.despesas.processados} registros
+📋 Categorias: ${detalhes.categorias.processados} itens
+🏦 Contas: ${detalhes.contas.processados} contas
+
+📅 Período: 01/01/2024 até 01/01/2027
+
+✅ Total processado: ${detalhes.total_processados} registros
+${detalhes.total_erros > 0 ? `⚠️ Erros: ${detalhes.total_erros} registros` : '🎯 Sem erros!'}
+
+🚀 Dados do ContaAzul sincronizados no banco!
+🎯 Pronto para implementar a Visão de Competência!
+        `);
+      } else {
+        toast({
+          title: "Erro",
+          description: data.error || "Erro ao sincronizar dados",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: error instanceof Error ? error.message : "Erro ao sincronizar dados",
+        variant: "destructive"
+      });
+    } finally {
+      setTestingConnection(false);
+    }
+  };
+
   const handleFixRedirectUri = async () => {
     if (!selectedBar) return;
     
@@ -789,6 +864,21 @@ ${data.proximos_passos.map((passo: string, i: number) => `${i + 1}. ${passo}`).j
                     <Shield className="w-4 h-4 mr-2" />
                   )}
                   🏗️ Setup Banco
+                </Button>
+                
+                <Button 
+                  onClick={handleSincronizarDados}
+                  disabled={testingConnection}
+                  variant="outline"
+                  size="sm"
+                  className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                >
+                  {testingConnection ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                  )}
+                  🔄 Sincronizar Dados
                 </Button>
                 
                 <Button 
