@@ -641,7 +641,7 @@ Detalhes completos no console (F12)!
                   ) : (
                     <Shield className="w-4 h-4 mr-2" />
                   )}
-                  Docs Oficial 📋
+                  📋 Docs Oficial
                 </Button>
                 
                 <Button 
