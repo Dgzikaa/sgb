@@ -517,6 +517,66 @@ ${data.proximos_passos.map((passo: string, i: number) => `${i + 1}. ${passo}`).j
     }
   };
 
+  const handleSincronizarReceitas = async () => {
+    if (!selectedBar) return;
+    
+    // Confirmar antes de iniciar
+    if (!confirm('Sincronizar APENAS as receitas do ContaAzul?\n\nEsta operação irá sincronizar:\n- Receitas (contas a receber) de 2024-2027\n- Até 25.000 registros\n- Tempo estimado: 3-4 minutos\n\nContinuar?')) {
+      return;
+    }
+    
+    setTestingConnection(true);
+    try {
+      const response = await fetch('/api/contaazul/sincronizar-receitas', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          bar_id: selectedBar.id
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log('💰 SINCRONIZAÇÃO DE RECEITAS COMPLETA:', data);
+        
+        toast({
+          title: "Receitas Sincronizadas!",
+          description: `${data.detalhes.total_processados} receitas processadas de 2024-2027`
+        });
+        
+        const { detalhes } = data;
+        alert(`
+💰 SINCRONIZAÇÃO DE RECEITAS FINALIZADA!
+
+📊 RESUMO:
+✅ Receitas processadas: ${detalhes.receitas.processados}
+${detalhes.total_erros > 0 ? `⚠️ Erros: ${detalhes.total_erros}` : '🎯 Sem erros!'}
+
+📅 Período: 01/01/2024 até 01/01/2027
+
+🚀 Receitas sincronizadas no banco!
+        `);
+      } else {
+        toast({
+          title: "Erro",
+          description: data.error || "Erro ao sincronizar receitas",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: error instanceof Error ? error.message : "Erro ao sincronizar receitas",
+        variant: "destructive"
+      });
+    } finally {
+      setTestingConnection(false);
+    }
+  };
+
   const handleSincronizarDados = async () => {
     if (!selectedBar) return;
     
@@ -858,6 +918,21 @@ ${detalhes.total_erros > 0 ? `⚠️ Erros: ${detalhes.total_erros} registros` :
                 </Button>
                 
                 <Button 
+                  onClick={handleSincronizarReceitas}
+                  disabled={testingConnection}
+                  variant="outline"
+                  size="sm"
+                  className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+                >
+                  {testingConnection ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                  )}
+                  💰 Sync Receitas
+                </Button>
+                
+                <Button 
                   onClick={handleSincronizarDados}
                   disabled={testingConnection}
                   variant="outline"
@@ -869,7 +944,7 @@ ${detalhes.total_erros > 0 ? `⚠️ Erros: ${detalhes.total_erros} registros` :
                   ) : (
                     <RefreshCw className="w-4 h-4 mr-2" />
                   )}
-                  🔄 Sincronizar Dados
+                  🔄 Sync Completo
                 </Button>
                 
                 <Button 
