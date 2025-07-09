@@ -348,6 +348,58 @@ Veja o console (F12) para detalhes completos!
     }
   };
 
+  const handleTestOfficialDocs = async () => {
+    if (!selectedBar) return;
+    
+    setTestingConnection(true);
+    try {
+      const response = await fetch(`/api/contaazul/test-official-docs?barId=${selectedBar.id}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log('📋 Resultados dos testes DOCUMENTAÇÃO OFICIAL:', data);
+        const { summary, implementation, dateRange, nextStep } = data;
+        
+        toast({
+          title: "Teste Documentação Oficial Concluído",
+          description: `${summary.successful}/${summary.total} endpoints da documentação funcionando!`
+        });
+        
+        // Mostrar resultados detalhados
+        const workingEndpoints = implementation.workingEndpoints.length;
+        const officialWorking = summary.officialWorking;
+        const dataFound = summary.dataFound;
+        
+        alert(`
+📋 TESTE BASEADO NA DOCUMENTAÇÃO OFICIAL:
+📅 Período: ${dateRange.description} (${dateRange.dataInicio} a ${dateRange.dataFim})
+
+✅ Funcionando: ${summary.successful}/${summary.total}
+📊 Endpoints oficiais: ${officialWorking}
+💾 Total de dados: ${dataFound} registros
+
+${implementation.canImplementVisaoCompetencia ? '🎯 ' + nextStep : '⚠️ ' + nextStep}
+
+Detalhes completos no console (F12)!
+        `);
+      } else {
+        toast({
+          title: "Erro",
+          description: data.error || "Erro ao testar documentação oficial",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao testar documentação oficial",
+        variant: "destructive"
+      });
+    } finally {
+      setTestingConnection(false);
+    }
+  };
+
   const handleFixRedirectUri = async () => {
     if (!selectedBar) return;
     
@@ -575,6 +627,21 @@ Veja o console (F12) para detalhes completos!
                     <Shield className="w-4 h-4 mr-2" />
                   )}
                   Teste Avançado 🚀
+                </Button>
+                
+                <Button 
+                  onClick={handleTestOfficialDocs}
+                  disabled={testingConnection}
+                  variant="outline"
+                  size="sm"
+                  className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
+                >
+                  {testingConnection ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Shield className="w-4 h-4 mr-2" />
+                  )}
+                  Docs Oficial 📋
                 </Button>
                 
                 <Button 
