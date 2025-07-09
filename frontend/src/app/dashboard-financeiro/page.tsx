@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+
+// Forçar renderização dinâmica para evitar problemas de build
+export const dynamic = 'force-dynamic';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,9 +28,15 @@ export default function DashboardFinanceiro() {
   const { selectedBar } = useBarContext();
   const [dados, setDados] = useState<DadosFinanceiros | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Evitar problemas de hidratação
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const carregarDados = async () => {
-    if (!selectedBar) return;
+    if (!selectedBar || !isMounted) return;
     
     setLoading(true);
     try {
@@ -47,8 +56,22 @@ export default function DashboardFinanceiro() {
   };
 
   useEffect(() => {
-    carregarDados();
-  }, [selectedBar]);
+    if (isMounted) {
+      carregarDados();
+    }
+  }, [selectedBar, isMounted]);
+
+  // Loading durante hidratação
+  if (!isMounted) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="text-center py-8">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Carregando dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!selectedBar) {
     return (
