@@ -295,6 +295,59 @@ Veja o console (F12) para detalhes completos dos endpoints.
     }
   };
 
+  const handleTestAdvancedEndpoints = async () => {
+    if (!selectedBar) return;
+    
+    setTestingConnection(true);
+    try {
+      const response = await fetch(`/api/contaazul/test-endpoints-advanced?barId=${selectedBar.id}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log('🚀 Resultados dos testes AVANÇADOS:', data);
+        const { summary, recommendations, dateRange, nextSteps } = data;
+        
+        toast({
+          title: "Teste Avançado Concluído",
+          description: `${summary.successful}/${summary.total} endpoints funcionando com parâmetros!`
+        });
+        
+        // Mostrar resultados detalhados
+        const workingEndpoints = recommendations.workingEndpoints.length;
+        const entriesEndpoints = recommendations.forEntradas.length;
+        const expensesEndpoints = recommendations.forSaidas.length;
+        
+        alert(`
+🚀 TESTE AVANÇADO COM PARÂMETROS:
+📅 Período: ${dateRange.description} (${dateRange.dataInicio} a ${dateRange.dataFim})
+
+✅ Funcionando: ${summary.successful}/${summary.total}
+📊 Com dados: ${summary.withData}
+💰 Entradas: ${entriesEndpoints} endpoints
+💸 Saídas: ${expensesEndpoints} endpoints
+
+${nextSteps.implementVisaoCompetencia ? '🎯 PRONTO para implementar Visão de Competência!' : '⚠️ Precisa de mais testes'}
+
+Veja o console (F12) para detalhes completos!
+        `);
+      } else {
+        toast({
+          title: "Erro",
+          description: data.error || "Erro ao testar endpoints avançados",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao testar endpoints avançados",
+        variant: "destructive"
+      });
+    } finally {
+      setTestingConnection(false);
+    }
+  };
+
   const handleFixRedirectUri = async () => {
     if (!selectedBar) return;
     
@@ -507,6 +560,21 @@ Veja o console (F12) para detalhes completos dos endpoints.
                     <Shield className="w-4 h-4 mr-2" />
                   )}
                   Testar Endpoints 💰
+                </Button>
+                
+                <Button 
+                  onClick={handleTestAdvancedEndpoints}
+                  disabled={testingConnection}
+                  variant="outline"
+                  size="sm"
+                  className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+                >
+                  {testingConnection ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Shield className="w-4 h-4 mr-2" />
+                  )}
+                  Teste Avançado 🚀
                 </Button>
                 
                 <Button 
