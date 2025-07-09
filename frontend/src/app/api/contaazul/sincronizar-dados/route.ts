@@ -157,15 +157,20 @@ async function sincronizarReceitas(accessToken: string, barId: number) {
 
   while (true) {
     try {
+      const params = new URLSearchParams({
+        pagina: pagina.toString(),
+        tamanho_pagina: itensPorPagina.toString(),
+        data_vencimento_de: '2024-01-01',
+        data_vencimento_ate: '2027-01-01'
+      });
+
       const response = await fetch(
-        `https://api.contaazul.com/v2/account-receivable/buscar?` +
-        `page=${pagina}&size=${itensPorPagina}` +
-        `&startDueDate=2024-01-01&endDueDate=2027-01-01` +
-        `&status=PAID,UNPAID,OVERDUE,PARTIALLY_PAID,CANCELLED`,
+        `https://api-v2.contaazul.com/v1/financeiro/eventos-financeiros/contas-a-receber/buscar?${params}`,
         {
           headers: {
             'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
           }
         }
       );
@@ -176,7 +181,7 @@ async function sincronizarReceitas(accessToken: string, barId: number) {
       }
 
       const data = await response.json();
-      const receitas = data.list || [];
+      const receitas = data.itens || [];
 
       if (receitas.length === 0) break;
 
@@ -216,15 +221,20 @@ async function sincronizarDespesas(accessToken: string, barId: number) {
 
   while (true) {
     try {
+      const params = new URLSearchParams({
+        pagina: pagina.toString(),
+        tamanho_pagina: itensPorPagina.toString(),
+        data_vencimento_de: '2024-01-01',
+        data_vencimento_ate: '2027-01-01'
+      });
+
       const response = await fetch(
-        `https://api.contaazul.com/v2/account-payable/buscar?` +
-        `page=${pagina}&size=${itensPorPagina}` +
-        `&startDueDate=2024-01-01&endDueDate=2027-01-01` +
-        `&status=PAID,UNPAID,OVERDUE,PARTIALLY_PAID,CANCELLED`,
+        `https://api-v2.contaazul.com/v1/financeiro/eventos-financeiros/contas-a-pagar/buscar?${params}`,
         {
           headers: {
             'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
           }
         }
       );
@@ -235,7 +245,7 @@ async function sincronizarDespesas(accessToken: string, barId: number) {
       }
 
       const data = await response.json();
-      const despesas = data.list || [];
+      const despesas = data.itens || [];
 
       if (despesas.length === 0) break;
 
@@ -270,10 +280,11 @@ async function sincronizarCategorias(accessToken: string, barId: number) {
   let erros = 0;
 
   try {
-    const response = await fetch('https://api.contaazul.com/v2/categories', {
+    const response = await fetch('https://api-v2.contaazul.com/v1/categorias', {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       }
     });
 
@@ -281,7 +292,8 @@ async function sincronizarCategorias(accessToken: string, barId: number) {
       throw new Error(`Erro ao buscar categorias: ${response.status}`);
     }
 
-    const categorias = await response.json();
+    const categoriasData = await response.json();
+    const categorias = Array.isArray(categoriasData) ? categoriasData : (categoriasData.itens || [categoriasData]);
 
     for (const categoria of categorias) {
       try {
@@ -320,10 +332,11 @@ async function sincronizarContasFinanceiras(accessToken: string, barId: number) 
   let erros = 0;
 
   try {
-    const response = await fetch('https://api.contaazul.com/v2/financial-accounts', {
+    const response = await fetch('https://api-v2.contaazul.com/v1/conta-financeira', {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       }
     });
 
@@ -331,7 +344,8 @@ async function sincronizarContasFinanceiras(accessToken: string, barId: number) 
       throw new Error(`Erro ao buscar contas financeiras: ${response.status}`);
     }
 
-    const contas = await response.json();
+    const contasData = await response.json();
+    const contas = Array.isArray(contasData) ? contasData : (contasData.itens || [contasData]);
 
     for (const conta of contas) {
       try {
