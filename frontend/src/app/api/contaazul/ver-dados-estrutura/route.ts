@@ -132,17 +132,24 @@ export async function GET(request: NextRequest) {
 
       if (categoriasResponse.ok) {
         const categoriasData = await categoriasResponse.json();
+        
+        // Verificar se é array ou objeto
+        const isArray = Array.isArray(categoriasData);
+        const categoriasList = isArray ? categoriasData : (categoriasData.itens || [categoriasData]);
+        
         dadosEstruturados.dados_encontrados.categorias = {
-          total_encontrado: categoriasData.length || 0,
-          primeiras_5_categorias: categoriasData.slice(0, 5) || [],
-          estrutura_resposta: Array.isArray(categoriasData) ? 'array' : Object.keys(categoriasData)
+          total_encontrado: isArray ? categoriasData.length : (categoriasData.itens_totais || Object.keys(categoriasData).length),
+          primeiras_5_categorias: Array.isArray(categoriasList) ? categoriasList.slice(0, 5) : [categoriasData],
+          estrutura_resposta: isArray ? 'array' : Object.keys(categoriasData),
+          dados_brutos: categoriasData // Para debug
         };
 
         // Mapear estrutura do primeiro item
-        if (categoriasData && categoriasData[0]) {
+        const primeiroItem = Array.isArray(categoriasList) ? categoriasList[0] : categoriasData;
+        if (primeiroItem && typeof primeiroItem === 'object') {
           dadosEstruturados.estruturas_mapeadas.categoria = {
-            campos_disponíveis: Object.keys(categoriasData[0]),
-            exemplo_valores: categoriasData[0]
+            campos_disponíveis: Object.keys(primeiroItem),
+            exemplo_valores: primeiroItem
           };
         }
       }
@@ -160,17 +167,24 @@ export async function GET(request: NextRequest) {
 
       if (contasResponse.ok) {
         const contasData = await contasResponse.json();
+        
+        // Verificar se é array ou objeto
+        const isArray = Array.isArray(contasData);
+        const contasList = isArray ? contasData : (contasData.itens || [contasData]);
+        
         dadosEstruturados.dados_encontrados.contas_financeiras = {
-          total_encontrado: contasData.length || 0,
-          todas_as_contas: contasData || [],
-          estrutura_resposta: Array.isArray(contasData) ? 'array' : Object.keys(contasData)
+          total_encontrado: isArray ? contasData.length : (contasData.itens_totais || Object.keys(contasData).length),
+          todas_as_contas: Array.isArray(contasList) ? contasList : [contasData],
+          estrutura_resposta: isArray ? 'array' : Object.keys(contasData),
+          dados_brutos: contasData // Para debug
         };
 
         // Mapear estrutura do primeiro item
-        if (contasData && contasData[0]) {
+        const primeiroItem = Array.isArray(contasList) ? contasList[0] : contasData;
+        if (primeiroItem && typeof primeiroItem === 'object') {
           dadosEstruturados.estruturas_mapeadas.conta_financeira = {
-            campos_disponíveis: Object.keys(contasData[0]),
-            exemplo_valores: contasData[0]
+            campos_disponíveis: Object.keys(primeiroItem),
+            exemplo_valores: primeiroItem
           };
         }
       }
