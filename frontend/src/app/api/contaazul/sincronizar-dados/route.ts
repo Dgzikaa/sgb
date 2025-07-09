@@ -10,14 +10,40 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🔄 Iniciando sincronização completa dos dados ContaAzul...');
     
-    const { bar_id, access_token } = await request.json();
+    const { bar_id } = await request.json();
     
-    if (!bar_id || !access_token) {
+    if (!bar_id) {
       return NextResponse.json(
-        { success: false, message: 'bar_id e access_token são obrigatórios' },
+        { success: false, message: 'bar_id é obrigatório' },
         { status: 400 }
       );
     }
+
+    // Buscar credenciais do banco
+    const { data: credentials } = await supabase
+      .from('api_credentials')
+      .select('*')
+      .eq('bar_id', parseInt(bar_id))
+      .eq('sistema', 'contaazul')
+      .single();
+
+    if (!credentials || !credentials.access_token) {
+      return NextResponse.json(
+        { success: false, message: 'Token de acesso não disponível. Reconecte a integração.' },
+        { status: 400 }
+      );
+    }
+
+    // Verificar se o token não expirou
+    const tokenValid = credentials.expires_at ? new Date(credentials.expires_at) > new Date() : false;
+    if (!tokenValid) {
+      return NextResponse.json(
+        { success: false, message: 'Token expirado. Renove o token ou reconecte a integração.' },
+        { status: 400 }
+      );
+    }
+
+    const access_token = credentials.access_token;
 
     // Registrar início da sincronização
     const inicioSincronizacao = new Date().toISOString();
@@ -122,7 +148,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Função para sincronizar receitas
+// Função para sincronizar receitas (contas a receber)
 async function sincronizarReceitas(accessToken: string, barId: number) {
   let processados = 0;
   let erros = 0;
@@ -132,7 +158,7 @@ async function sincronizarReceitas(accessToken: string, barId: number) {
   while (true) {
     try {
       const response = await fetch(
-        `https://api.contaazul.com/v2/account-payable/buscar?` +
+        `https://api.contaazul.com/v2/account-receivable/buscar?` +
         `page=${pagina}&size=${itensPorPagina}` +
         `&startDueDate=2024-01-01&endDueDate=2027-01-01` +
         `&status=PAID,UNPAID,OVERDUE,PARTIALLY_PAID,CANCELLED`,
@@ -181,7 +207,7 @@ async function sincronizarReceitas(accessToken: string, barId: number) {
   return { processados, erros };
 }
 
-// Função para sincronizar despesas
+// Função para sincronizar despesas (contas a pagar)
 async function sincronizarDespesas(accessToken: string, barId: number) {
   let processados = 0;
   let erros = 0;
@@ -191,7 +217,7 @@ async function sincronizarDespesas(accessToken: string, barId: number) {
   while (true) {
     try {
       const response = await fetch(
-        `https://api.contaazul.com/v2/account-receivable/buscar?` +
+        `https://api.contaazul.com/v2/account-payable/buscar?` +
         `page=${pagina}&size=${itensPorPagina}` +
         `&startDueDate=2024-01-01&endDueDate=2027-01-01` +
         `&status=PAID,UNPAID,OVERDUE,PARTIALLY_PAID,CANCELLED`,

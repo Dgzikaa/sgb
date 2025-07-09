@@ -527,22 +527,13 @@ ${data.proximos_passos.map((passo: string, i: number) => `${i + 1}. ${passo}`).j
     
     setTestingConnection(true);
     try {
-      // Buscar access_token atual
-      const statusResponse = await fetch(`/api/contaazul/auth?action=status&barId=${selectedBar.id}`);
-      const statusData = await statusResponse.json();
-      
-      if (!statusResponse.ok || !statusData.access_token) {
-        throw new Error('Token de acesso não disponível. Reconecte a integração.');
-      }
-      
       const response = await fetch('/api/contaazul/sincronizar-dados', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          bar_id: selectedBar.id,
-          access_token: statusData.access_token
+          bar_id: selectedBar.id
         })
       });
       
