@@ -521,7 +521,7 @@ ${data.proximos_passos.map((passo: string, i: number) => `${i + 1}. ${passo}`).j
     if (!selectedBar) return;
     
     // Confirmar antes de iniciar
-    if (!confirm('Sincronizar APENAS as receitas do ContaAzul?\n\nEsta operação irá sincronizar:\n- Receitas (contas a receber) de 2024-2027\n- Até 25.000 registros\n- Tempo estimado: 3-4 minutos\n\nContinuar?')) {
+    if (!confirm('Sincronizar RECEITAS do ContaAzul (lote otimizado)?\n\nEsta operação irá sincronizar:\n- Receitas (contas a receber) de 2024-2027\n- Até 2.000 registros por execução\n- Processamento em lotes (muito mais rápido)\n- Tempo estimado: 2-3 minutos\n\nContinuar?')) {
       return;
     }
     

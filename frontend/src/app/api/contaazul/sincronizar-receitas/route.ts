@@ -123,8 +123,8 @@ async function sincronizarReceitas(accessToken: string, barId: number) {
   let processados = 0;
   let erros = 0;
   let pagina = 1;
-  const itensPorPagina = 500; // MUITO MAIOR - 500 itens por página
-  const maxPaginas = 50; // Permite até 25.000 registros
+  const itensPorPagina = 200; // Reduzido para 200 itens por página
+  const maxPaginas = 10; // Limitado a 10 páginas para evitar timeout
 
   while (pagina <= maxPaginas) {
     try {
@@ -162,15 +162,13 @@ async function sincronizarReceitas(accessToken: string, barId: number) {
 
       if (receitas.length === 0) break;
 
-      // Processar cada receita
-      for (const receita of receitas) {
-        try {
-          await upsertRegistroFinanceiro(receita, 'RECEITA', barId);
-          processados++;
-        } catch (error) {
-          console.error('Erro ao processar receita:', receita.id, error);
-          erros++;
-        }
+      // Processar receitas em LOTES para melhor performance
+      try {
+        await upsertRegistrosFinanceirosBatch(receitas, 'RECEITA', barId);
+        processados += receitas.length;
+      } catch (error) {
+        console.error('Erro ao processar lote de receitas:', error);
+        erros += receitas.length;
       }
 
       console.log(`📈 Receitas página ${pagina}: ${receitas.length} itens processados (total: ${processados})`);
@@ -189,7 +187,36 @@ async function sincronizarReceitas(accessToken: string, barId: number) {
   return { processados, erros };
 }
 
-// Função para fazer UPSERT de registro financeiro
+// Função para fazer UPSERT de registros financeiros em LOTE (melhor performance)
+async function upsertRegistrosFinanceirosBatch(registros: any[], tipo: 'RECEITA' | 'DESPESA', barId: number) {
+  const dadosFinanceiros = registros.map(registro => ({
+    bar_id: barId,
+    conta_id: registro.id,
+    tipo,
+    status: registro.status || 'UNKNOWN',
+    descricao: registro.description || registro.name || 'Sem descrição',
+    valor: parseFloat(registro.value || registro.totalValue || '0'),
+    data_vencimento: registro.dueDate || registro.date,
+    data_competencia: registro.competenceDate || registro.dueDate || registro.date,
+    data_pagamento: registro.paymentDate || null,
+    categoria_id: registro.category?.id || null,
+    categoria_nome: registro.category?.name || null,
+    conta_financeira_id: registro.financialAccount?.id || null,
+    conta_financeira_nome: registro.financialAccount?.name || null,
+    centro_custo_id: registro.costCenter?.id || null,
+    dados_originais: registro,
+    ultima_sincronizacao: new Date().toISOString()
+  }));
+
+  // UPSERT em lote - muito mais rápido
+  await supabase
+    .from('contaazul_financeiro')
+    .upsert(dadosFinanceiros, {
+      onConflict: 'bar_id,conta_id'
+    });
+}
+
+// Função para fazer UPSERT de registro financeiro individual (mantida para compatibilidade)
 async function upsertRegistroFinanceiro(registro: any, tipo: 'RECEITA' | 'DESPESA', barId: number) {
   const dadosFinanceiro = {
     bar_id: barId,
