@@ -41,7 +41,7 @@ export default function ContaAzulOAuth() {
   const [config, setConfig] = useState({
     clientId: '',
     clientSecret: '',
-    redirectUri: 'https://sgb-sistema.netlify.app/contaazul-callback',
+    redirectUri: 'https://sgb-contaazul.vercel.app/contaazul-callback',
     ambiente: 'producao'
   });
 

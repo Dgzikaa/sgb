@@ -1,38 +1,57 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server'
 
-export async function GET() {
-  // Teste básico das variáveis de ambiente
-  const env = {
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || 'NÃO DEFINIDA',
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'DEFINIDA' : 'NÃO DEFINIDA',
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'DEFINIDA' : 'NÃO DEFINIDA',
-    SERVICE_ROLE_KEY: process.env.SERVICE_ROLE_KEY ? 'DEFINIDA' : 'NÃO DEFINIDA',
-    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ? 'DEFINIDA' : 'NÃO DEFINIDA',
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'NÃO DEFINIDA',
-    NODE_ENV: process.env.NODE_ENV || 'NÃO DEFINIDA'
-  };
-
-  // Teste de fetch básico
-  let fetchTest = 'Não testado';
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    try {
-      const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/`;
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''}`
-        }
-      });
-      fetchTest = `Status: ${response.status} - ${response.statusText}`;
-    } catch (error: any) {
-      fetchTest = `Erro: ${error.message}`;
+export async function GET(request: NextRequest) {
+  console.log('🔍 Teste básico - API funcionando')
+  
+  try {
+    const timestamp = new Date().toISOString()
+    const env = process.env.NODE_ENV || 'unknown'
+    
+    // Verificar se as variáveis de ambiente principais existem
+    const envCheck = {
+      NODE_ENV: env,
+      NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+      NEXTAUTH_SECRET: !!process.env.NEXTAUTH_SECRET,
+      NEXTAUTH_URL: !!process.env.NEXTAUTH_URL
     }
+    
+    console.log('✅ Teste básico executado com sucesso')
+    
+    return NextResponse.json({
+      success: true,
+      message: 'API funcionando normalmente',
+      timestamp,
+      environment: envCheck
+    })
+    
+  } catch (error: any) {
+    console.error('❌ Erro no teste básico:', error)
+    
+    return NextResponse.json({
+      success: false,
+      error: 'Erro no teste básico',
+      details: error.message
+    }, { status: 500 })
   }
+}
 
-  return NextResponse.json({
-    variaveisAmbiente: env,
-    testeFetch: fetchTest,
-    timestamp: new Date().toISOString()
-  });
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    
+    return NextResponse.json({
+      success: true,
+      message: 'POST funcionando',
+      receivedData: body
+    })
+    
+  } catch (error: any) {
+    return NextResponse.json({
+      success: false,
+      error: 'Erro no POST',
+      details: error.message
+    }, { status: 500 })
+  }
 } 
