@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils"
 
 interface PopoverProps {
   children: React.ReactNode
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 interface PopoverTriggerProps {
@@ -21,8 +23,18 @@ const PopoverContext = React.createContext<{
   setOpen: (open: boolean) => void
 }>({ open: false, setOpen: () => {} })
 
-const Popover: React.FC<PopoverProps> = ({ children }) => {
-  const [open, setOpen] = React.useState(false)
+const Popover: React.FC<PopoverProps> = ({ children, open: controlledOpen, onOpenChange }) => {
+  const [internalOpen, setInternalOpen] = React.useState(false)
+  
+  // Use controlled state if provided, otherwise use internal state
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen
+  const setOpen = React.useCallback((newOpen: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(newOpen)
+    } else {
+      setInternalOpen(newOpen)
+    }
+  }, [onOpenChange])
   
   return (
     <PopoverContext.Provider value={{ open, setOpen }}>

@@ -30,6 +30,37 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
+    // Calcular percentual de aderência à receita baseado nos insumos
+    let percentual_aderencia_receita = 100 // Default se não há insumos
+    let total_desvio_insumos = 0
+    let insumos_validos = 0
+
+    if (body.insumos && Array.isArray(body.insumos) && body.insumos.length > 0) {
+      console.log('📊 Calculando aderência à receita com', body.insumos.length, 'insumos')
+      
+      body.insumos.forEach((insumo: any, index: number) => {
+        const planejado = parseFloat(insumo.quantidade_necessaria) || 0
+        const calculado = parseFloat(insumo.quantidade_calculada) || planejado
+        const real = parseFloat(insumo.quantidade_real) || 0
+        
+        if (calculado > 0 && real > 0) {
+          // Calcular desvio percentual do real vs calculado
+          const aderencia = (real / calculado) * 100
+          const desvio = Math.abs(100 - aderencia)
+          total_desvio_insumos += desvio
+          insumos_validos++
+          
+          console.log(`📋 Insumo ${index + 1} (${insumo.nome}): Calculado=${calculado}${insumo.unidade_medida}, Real=${real}${insumo.unidade_medida}, Aderência=${aderencia.toFixed(1)}%`)
+        }
+      })
+      
+      if (insumos_validos > 0) {
+        const desvio_medio = total_desvio_insumos / insumos_validos
+        percentual_aderencia_receita = Math.max(0, 100 - desvio_medio)
+        console.log(`🎯 Desvio médio: ${desvio_medio.toFixed(1)}% | Aderência final: ${percentual_aderencia_receita.toFixed(1)}%`)
+      }
+    }
+
     // Preparar dados para inserção
     const dadosProducao = {
       bar_id: body.bar_id || 3,
@@ -46,12 +77,13 @@ export async function POST(request: NextRequest) {
       insumo_chefe_id: body.insumo_chefe_id,
       insumo_chefe_nome: body.insumo_chefe_nome,
       peso_insumo_chefe: parseFloat(body.peso_insumo_chefe || 0),
+      percentual_aderencia_receita: Math.round(percentual_aderencia_receita * 100) / 100, // 2 decimais
       observacoes: body.observacoes || '',
       status: body.status || 'finalizada'
     }
 
     // Inserir produção
-    const { data, error } = await supabase
+    const { data: producaoSalva, error } = await supabase
       .from('producoes')
       .insert([dadosProducao])
       .select('*')
@@ -65,12 +97,44 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
 
-    console.log('✅ Produção salva com sucesso:', data.id)
+    console.log('✅ Produção salva com sucesso:', producaoSalva.id)
+
+    // Salvar dados detalhados dos insumos se fornecidos
+    if (body.insumos && Array.isArray(body.insumos) && body.insumos.length > 0) {
+      console.log('💾 Salvando dados detalhados de', body.insumos.length, 'insumos...')
+      
+      const insumosParaSalvar = body.insumos.map((insumo: any) => ({
+        producao_id: producaoSalva.id,
+        codigo_insumo: insumo.codigo || '',
+        nome_insumo: insumo.nome || '',
+        unidade: insumo.unidade_medida || 'g',
+        quantidade_planejada: parseFloat(insumo.quantidade_necessaria) || 0,
+        quantidade_calculada: parseFloat(insumo.quantidade_calculada) || parseFloat(insumo.quantidade_necessaria) || 0,
+        quantidade_utilizada_real: parseFloat(insumo.quantidade_real) || 0,
+        is_chefe: insumo.is_chefe || false
+      }))
+
+      const { data: insumosData, error: insumosError } = await supabase
+        .from('producao_insumos_calculados')
+        .insert(insumosParaSalvar)
+        .select('*')
+
+      if (insumosError) {
+        console.error('⚠️ Erro ao salvar insumos (produção salva):', insumosError)
+        // Não falhar a produção por erro nos insumos
+      } else {
+        console.log('✅ Salvos', insumosData?.length || 0, 'insumos detalhados')
+      }
+    }
 
     return NextResponse.json({
       success: true,
       message: 'Produção salva com sucesso',
-      data: data
+      data: {
+        ...producaoSalva,
+        percentual_aderencia_receita,
+        insumos_salvos: body.insumos?.length || 0
+      }
     })
 
   } catch (error) {

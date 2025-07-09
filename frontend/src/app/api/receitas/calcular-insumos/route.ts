@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
         peso_limpo_g: pesoLimpo,
         peso_referencia_g: pesoReferencia,
         fator_proporcional: fatorProporcional,
-        exemplo: `Base ${pesoReferencia}g → Produzindo ${pesoLimpo}g (${(fatorProporcional * 100).toFixed(1)}%)`
+                  calculo_detalhado: `Base ${pesoReferencia}g → Produzindo ${pesoLimpo}g (${(fatorProporcional * 100).toFixed(1)}%)`
       },
       insumos: insumosCalculados,
       estatisticas: {

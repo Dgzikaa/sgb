@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ContaAzul - Callback</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            color: white;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+        }
+        .success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="spinner"></div>
+        <h2>Processando autorização...</h2>
+        <p>Aguarde enquanto processamos sua autorização do ContaAzul</p>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+
+        function processCallback() {
+            try {
+                // Obter parâmetros da URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const code = urlParams.get('code');
+                const error = urlParams.get('error');
+                const errorDescription = urlParams.get('error_description');
+
+                console.log('🔄 Callback recebido:', { code: code?.substring(0, 20), error });
+
+                if (error) {
+                    updateStatus(`❌ Erro na autorização: ${error}${errorDescription ? ` - ${errorDescription}` : ''}`, 'error');
+                    
+                    // Enviar erro para a janela pai
+                    if (window.opener) {
+                        window.opener.postMessage({
+                            type: 'CONTAAZUL_CALLBACK',
+                            error: error,
+                            errorDescription: errorDescription
+                        }, '*');
+                        
+                        setTimeout(() => window.close(), 3000);
+                    }
+                    return;
+                }
+
+                if (!code) {
+                    updateStatus('❌ Código de autorização não encontrado', 'error');
+                    
+                    if (window.opener) {
+                        window.opener.postMessage({
+                            type: 'CONTAAZUL_CALLBACK',
+                            error: 'no_code'
+                        }, '*');
+                        
+                        setTimeout(() => window.close(), 3000);
+                    }
+                    return;
+                }
+
+                // Sucesso - código obtido
+                updateStatus('✅ Autorização bem-sucedida! Fechando janela...', 'success');
+                
+                // Enviar código para a janela pai
+                if (window.opener) {
+                    window.opener.postMessage({
+                        type: 'CONTAAZUL_CALLBACK',
+                        code: code
+                    }, '*');
+                    
+                    // Fechar janela após enviar o código
+                    setTimeout(() => window.close(), 1000);
+                } else {
+                    updateStatus('⚠️ Janela pai não encontrada - feche manualmente', 'error');
+                }
+
+            } catch (error) {
+                console.error('❌ Erro ao processar callback:', error);
+                updateStatus(`❌ Erro interno: ${error.message}`, 'error');
+                
+                if (window.opener) {
+                    window.opener.postMessage({
+                        type: 'CONTAAZUL_CALLBACK',
+                        error: 'internal_error',
+                        errorDescription: error.message
+                    }, '*');
+                }
+            }
+        }
+
+        // Processar callback quando a página carregar
+        window.addEventListener('load', processCallback);
+
+        // Também processar se a URL mudar (SPAs)
+        window.addEventListener('popstate', processCallback);
+    </script>
+</body>
+</html> 

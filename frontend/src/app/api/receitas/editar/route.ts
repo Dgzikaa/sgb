@@ -4,14 +4,14 @@ import { getSupabaseClient } from '@/lib/supabase'
 export async function PUT(request: NextRequest) {
   try {
     const { 
-      receita_id, 
-      produto_codigo, 
-      produto_nome, 
-      tipo_local, 
-      rendimento_esperado, 
-      tempo_preparo_min, 
-      instrucoes, 
-      insumos 
+      receita_codigo,
+      receita_nome,
+      receita_categoria,
+      tipo_local,
+      rendimento_esperado,
+      insumos,
+      ativo,
+      bar_id
     } = await request.json()
 
     const supabase = await getSupabaseClient()
@@ -19,31 +19,35 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 })
     }
 
-    // Atualizar produto
-    const { data: produto, error: produtoError } = await supabase
-      .from('produtos')
-      .update({
-        codigo: produto_codigo,
-        nome: produto_nome,
-        tipo_local: tipo_local,
-        rendimento: rendimento_esperado
-      })
-      .eq('id', receita_id)
-      .select()
-      .single()
-
-    if (produtoError) {
+    // Validações básicas
+    if (!receita_codigo?.trim() || !receita_nome?.trim()) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Erro ao atualizar produto: ' + produtoError.message 
-      }, { status: 500 })
+        error: 'Código e nome da receita são obrigatórios' 
+      }, { status: 400 })
     }
 
-    // Remover receitas antigas
+    if (!insumos || insumos.length === 0) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Pelo menos um insumo é obrigatório' 
+      }, { status: 400 })
+    }
+
+    const temChefe = insumos.some((i: any) => i.is_chefe)
+    if (!temChefe) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Um insumo chefe deve ser selecionado' 
+      }, { status: 400 })
+    }
+
+    // Remover todas as receitas antigas com o mesmo código
     const { error: deleteError } = await supabase
       .from('receitas')
       .delete()
-      .eq('produto_id', receita_id)
+      .eq('receita_codigo', receita_codigo)
+      .eq('bar_id', bar_id)
 
     if (deleteError) {
       return NextResponse.json({ 
@@ -52,30 +56,44 @@ export async function PUT(request: NextRequest) {
       }, { status: 500 })
     }
 
-    // Inserir novas receitas
+    // Inserir novas receitas com os insumos atualizados
     const insumoChefe = insumos.find((i: any) => i.is_chefe)
     const receitasData = insumos.map((insumo: any) => ({
-      produto_id: receita_id,
-      insumo_id: insumo.insumo_id,
-      quantidade_necessaria: insumo.quantidade_necessaria,
-      insumo_chefe_id: insumoChefe?.insumo_id
+      bar_id: bar_id,
+      receita_codigo: receita_codigo.trim(),
+      receita_nome: receita_nome.trim(),
+      receita_categoria: receita_categoria?.trim() || '',
+      insumo_id: insumo.id,
+      quantidade_necessaria: insumo.quantidade_necessaria || 0,
+      insumo_chefe_id: insumoChefe?.id,
+      rendimento_esperado: insumo.is_chefe ? rendimento_esperado : 0,
+      ativo: ativo !== undefined ? ativo : true,
+      updated_at: new Date().toISOString()
     }))
 
-    const { error: receitasError } = await supabase
+    const { data: novasReceitas, error: receitasError } = await supabase
       .from('receitas')
       .insert(receitasData)
+      .select()
 
     if (receitasError) {
+      console.error('❌ Erro ao inserir receitas:', receitasError)
       return NextResponse.json({ 
         success: false, 
-        error: 'Erro ao inserir receitas: ' + receitasError.message 
+        error: 'Erro ao atualizar receitas: ' + receitasError.message 
       }, { status: 500 })
     }
+
+    console.log('✅ Receita atualizada com sucesso:', receita_codigo)
 
     return NextResponse.json({
       success: true,
       message: 'Receita atualizada com sucesso',
-      data: produto
+      data: {
+        receita_codigo,
+        receita_nome,
+        insumos_count: novasReceitas?.length || 0
+      }
     })
 
   } catch (error) {

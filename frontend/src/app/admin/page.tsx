@@ -80,6 +80,10 @@ export default function AdminPage() {
     notifications_enabled: true
   });
 
+  // Estados para verificação de receitas
+  const [verificandoReceitas, setVerificandoReceitas] = useState(false);
+  const [resultadoVerificacao, setResultadoVerificacao] = useState<any>(null);
+
   useEffect(() => {
     loadBars();
     loadConfigs();
@@ -115,16 +119,7 @@ export default function AdminPage() {
       } else {
         setMessage(`❌ Erro ao carregar bares: ${result.error}`);
         console.error('❌ Erro da API:', result.error);
-        
-        // Fallback para dados locais apenas se for erro de API
-        setBars([
-          { id: 1, nome: 'Bar Principal (Fallback)', endereco: 'Rua A, 123', telefone: '11999999999', status: 'ativo', created_at: '2025-01-01' }
-        ]);
-        
-        // Selecionar o bar fallback
-        if (!selectedBarId) {
-          setSelectedBarId(1);
-        }
+        setBars([]);
       }
     } catch (error) {
       console.error('💥 Erro ao carregar bares:', error);
@@ -589,6 +584,94 @@ export default function AdminPage() {
     );
   };
 
+  const verificarReceitasProblematicas = async () => {
+    if (!selectedBarId) {
+      setMessage('❌ Selecione um bar primeiro');
+      return;
+    }
+
+    setVerificandoReceitas(true);
+    try {
+      console.log(`🔍 Verificando receitas problemáticas para bar ${selectedBarId}...`);
+      
+      const response = await fetch(`/api/admin/verificar-receitas-sem-nome?bar_id=${selectedBarId}`);
+      const result = await response.json();
+      
+      if (result.success) {
+        setResultadoVerificacao(result.data);
+        
+        const { estatisticas } = result.data;
+        let mensagem = `✅ Verificação concluída!\n\n`;
+        mensagem += `📊 ESTATÍSTICAS:\n`;
+        mensagem += `• Total de receitas: ${estatisticas.total_receitas}\n`;
+        mensagem += `• Total de problemas: ${estatisticas.total_problemas}\n\n`;
+        
+        if (estatisticas.total_problemas > 0) {
+          mensagem += `❌ PROBLEMAS ENCONTRADOS:\n`;
+          if (estatisticas.codigo_sem_nome > 0) {
+            mensagem += `• ${estatisticas.codigo_sem_nome} insumos com código mas sem nome\n`;
+          }
+          if (estatisticas.nome_sem_codigo > 0) {
+            mensagem += `• ${estatisticas.nome_sem_codigo} insumos com nome mas sem código\n`;
+          }
+          if (estatisticas.sem_codigo_e_nome > 0) {
+            mensagem += `• ${estatisticas.sem_codigo_e_nome} insumos sem código e sem nome\n`;
+          }
+          mensagem += `\n📋 Verifique o console para mais detalhes.`;
+        } else {
+          mensagem += `✅ Nenhum problema encontrado! Todas as receitas estão OK.`;
+        }
+        
+        setMessage(mensagem);
+        
+        // Log detalhado no console
+        if (result.data.problemas.length > 0) {
+          console.log(`⚠️ PROBLEMAS ENCONTRADOS:`, result.data.problemas);
+          console.log(`📋 RECEITAS COM PROBLEMAS:`, result.data.receitas_com_problemas);
+        }
+      } else {
+        setMessage(`❌ Erro na verificação: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Erro ao verificar receitas:', error);
+      setMessage('❌ Erro ao verificar receitas problemáticas');
+    } finally {
+      setVerificandoReceitas(false);
+      setTimeout(() => setMessage(''), 10000); // Mensagem mais longa
+    }
+  };
+
+  const adicionarCamposProducao = async () => {
+    setLoading(true);
+    try {
+      console.log('🔧 Executando migration para campos de aderência à receita...');
+      
+      const response = await fetch('/api/admin/adicionar-campos-producao', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        setMessage(`✅ Migration executada com sucesso!\n\n` +
+                  `📊 Detalhes:\n` +
+                  `• Campo na tabela produções: ${result.detalhes.campo_producoes}\n` +
+                  `• Atualização tabela insumos: ${result.detalhes.tabela_insumos}\n` +
+                  `• Criação de índices: ${result.detalhes.indices}\n\n` +
+                  `🎯 Agora o sistema pode calcular o percentual de aderência à receita!`);
+      } else {
+        setMessage(`❌ Erro na migration: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Erro ao executar migration:', error);
+      setMessage('❌ Erro ao executar migration de campos');
+    } finally {
+      setLoading(false);
+      setTimeout(() => setMessage(''), 10000);
+    }
+  };
+
   return (
     <div className="admin-container">
       <div className="admin-header">
@@ -806,6 +889,22 @@ export default function AdminPage() {
                   </button>
                   <button className="btn btn-outline btn-full">
                     🔑 Gerar Nova API Key
+                  </button>
+                  <button 
+                    onClick={verificarReceitasProblematicas}
+                    disabled={verificandoReceitas || !selectedBarId}
+                    className="btn btn-outline btn-full"
+                    title={!selectedBarId ? 'Selecione um bar primeiro' : 'Verificar receitas com insumos problemáticos'}
+                  >
+                    {verificandoReceitas ? '🔍 Verificando...' : '🧪 Verificar Receitas'}
+                  </button>
+                  <button 
+                    onClick={adicionarCamposProducao}
+                    disabled={loading}
+                    className="btn btn-outline btn-full"
+                    title="Adicionar campos para controle de aderência à receita"
+                  >
+                    {loading ? '🔧 Executando...' : '📊 Migrar Campos Produção'}
                   </button>
                 </div>
               </div>

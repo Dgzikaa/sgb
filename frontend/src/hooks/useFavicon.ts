@@ -50,7 +50,7 @@ export const useFavicon = ({ barName }: FaviconOptions) => {
               document.title = 'SGB - Sistema de Gestão de Bares'
             }
 
-            console.log('🎨 Favicon atualizado para:', barName, '- Caminho:', faviconPath)
+            // Favicon atualizado silenciosamente
           } catch (error) {
             console.debug('Erro ao atualizar favicon:', error)
           } finally {

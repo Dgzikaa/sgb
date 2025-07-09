@@ -1,0 +1,21 @@
+{
+  "name": "package-json",
+  "version": "1.0",
+  "description": "back end scripts package",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.50.3"
+  },
+  "keywords": [
+    "supabase",
+    "contahub",
+    "sgb",
+    "sgbv2"
+  ],
+  "author": "dgzikaa <rodrigo@grupomenosemais.com.br>",
+  "license": "ISC",
+  "type": "commonjs"
+}

@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       }, { status: 500 })
     }
 
-    // OTIMIZAÇÃO: Buscar TODAS as receitas e insumos em uma única consulta
+    // OTIMIZAÇÃO: Buscar TODAS as receitas ATIVAS e insumos em uma única consulta
     const { data: todasReceitas, error: receitasError } = await supabase
       .from('receitas')
       .select(`
@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
         rendimento_esperado,
         insumo_id,
         quantidade_necessaria,
+        ativo,
         insumos!receitas_insumo_id_fkey(
           id,
           codigo,
@@ -37,6 +38,7 @@ export async function GET(request: NextRequest) {
         )
       `)
       .eq('bar_id', barId)
+      .eq('ativo', true)
       .order('receita_codigo')
 
     if (receitasError) {

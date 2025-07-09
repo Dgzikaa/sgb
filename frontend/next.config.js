@@ -20,6 +20,9 @@ const nextConfig = {
   
   trailingSlash: false,
   
+  // Disable font optimization to avoid Google Fonts connectivity issues during build
+  optimizeFonts: false,
+  
   // PWA Configuration
   async headers() {
     return [

@@ -202,7 +202,7 @@ export async function GET(request: NextRequest) {
 
     console.log(`📊 Telefones únicos encontrados: ${telefoneMap.size}`);
 
-    // Debug: mostrar alguns exemplos de telefones processados
+          // Debug: mostrar alguns telefones processados
     let debugCount = 0;
     for (const [telefoneNormalizado, dadosTelefone] of telefoneMap.entries()) {
       if (debugCount < 5) {

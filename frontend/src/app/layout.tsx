@@ -1,14 +1,15 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 import '../styles/assistant.css'
 import { PWAInstaller } from '@/components/PWAInstaller'
+import { ToastProvider, GlobalToastListener } from '@/components/ui/toast'
+import { ConfirmDialogProvider, GlobalConfirmListener } from '@/components/ui/confirm-dialog'
 
-const inter = Inter({ subsets: ['latin'] })
+// Using system fonts instead of Google Fonts to avoid build connectivity issues
 
 export const metadata: Metadata = {
   title: 'SGB - Sistema de Gestão de Bares',
-  description: 'Sistema completo para gerenciamento de bares do Grupo Menos é Mais',
+  description: 'Sistema de Gestão de Bares - Grupo Menos é Mais',
   manifest: '/site.webmanifest',
   appleWebApp: {
     capable: true,
@@ -72,11 +73,17 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#6366f1" />
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
-      <body className={inter.className}>
-        <div className="min-h-screen">
-          {children}
-          <PWAInstaller />
-        </div>
+      <body className="font-sans">
+        <ToastProvider>
+          <ConfirmDialogProvider>
+            <div className="min-h-screen">
+              {children}
+              <PWAInstaller />
+              <GlobalToastListener />
+              <GlobalConfirmListener />
+            </div>
+          </ConfirmDialogProvider>
+        </ToastProvider>
 {/* Service Worker desabilitado temporariamente para testes */}
         {/*
         <script

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useBarLogo } from '@/hooks/useBarLogo'
+import { usePageTitle } from '@/contexts/PageTitleContext'
 
 interface Bar {
   id: number
@@ -18,157 +19,199 @@ interface HeaderProps {
 
 export default function Header({ onMenuToggle, selectedBar, availableBars, onBarChange }: HeaderProps) {
   const [showBarSelector, setShowBarSelector] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
   const { logoUrl, shouldUseLogo } = useBarLogo({ barName: selectedBar?.nome, size: 'small' })
+  const { pageTitle } = usePageTitle()
+
+  // Mock notifications - em produção viria de uma API
+  const notifications = [
+    { id: 1, title: 'Nova sincronização', message: 'ContaHub sincronizado com sucesso', time: '2m ago', unread: true },
+    { id: 2, title: 'Relatório gerado', message: 'Relatório semanal disponível', time: '5m ago', unread: true },
+    { id: 3, title: 'Sistema atualizado', message: 'Nova versão do SGB disponível', time: '1h ago', unread: false },
+  ]
+
+  const unreadCount = notifications.filter(n => n.unread).length
 
   return (
-    <header className="bg-white/95 backdrop-blur-sm border-b border-gray-200/50 px-4 py-3 lg:px-6 relative z-[100]">
+    <header className="bg-gradient-to-r from-slate-800 via-slate-900 to-black border-b border-slate-700/50 px-4 py-3 lg:px-6 relative z-[100] shadow-2xl shadow-black/20">
       <div className="flex items-center justify-between">
-        {/* Menu Hambúrguer e Título */}
+        {/* Left Section - Menu e Título */}
         <div className="flex items-center space-x-4">
           <button
             onClick={onMenuToggle}
-            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="lg:hidden p-2 rounded-xl hover:bg-white/10 transition-colors group"
           >
-            <svg className="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
           
-          <div className="hidden lg:block">
+          <div>
             <div className="flex items-center space-x-3">
-              <h1 className="text-xl font-bold text-slate-800">Dashboard</h1>
-              <div id="status-badge-placeholder"></div>
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                  <span className="text-white font-bold text-sm">S</span>
+                </div>
+                <h1 className="text-xl font-bold text-white">
+                  SGB
+                </h1>
+              </div>
+              {pageTitle && (
+                <>
+                  <div className="w-1 h-1 bg-slate-300 rounded-full"></div>
+                  <h2 className="text-lg font-semibold text-white">{pageTitle}</h2>
+                </>
+              )}
             </div>
-            <p className="text-sm text-slate-500">SGB</p>
+            
+
           </div>
         </div>
 
-        {/* Seletor de Bar */}
-        <div className="flex items-center space-x-4">
-          {availableBars.length > 0 ? (
-            <>
-              <div className="relative">
-                <button
-                  onClick={() => availableBars.length > 1 && setShowBarSelector(!showBarSelector)}
-                  className={`flex items-center space-x-3 px-4 py-2 bg-white border border-gray-200 rounded-xl shadow-sm transition-colors ${
-                    availableBars.length > 1 ? 'hover:bg-gray-50 cursor-pointer' : 'cursor-default'
-                  }`}
-                >
-                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-                    {shouldUseLogo && logoUrl ? (
-                      <img 
-                        src={logoUrl} 
-                        alt={selectedBar?.nome}
-                        className="w-full h-full rounded-lg object-cover"
-                      />
-                    ) : selectedBar?.avatar ? (
-                      <img 
-                        src={selectedBar.avatar} 
-                        alt={selectedBar.nome}
-                        className="w-full h-full rounded-lg object-cover"
-                      />
-                    ) : (
-                      <span className="text-sm text-white">🏪</span>
-                    )}
-                  </div>
-                  <span className="font-medium text-slate-700 hidden sm:block">
-                    {selectedBar?.nome || 'Carregando...'}
-                  </span>
-                  {availableBars.length > 1 && (
-                    <svg 
-                      className={`w-4 h-4 text-slate-400 transition-transform ${showBarSelector ? 'rotate-180' : ''}`}
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  )}
-                </button>
+        {/* Right Section - Notificações e Controles */}
+        <div className="flex items-center space-x-3">
+          {/* Search Button */}
+          <button className="p-2 rounded-xl hover:bg-white/10 transition-colors group">
+            <svg className="w-5 h-5 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
 
-                {/* Dropdown - apenas se houver mais de um bar */}
-                {showBarSelector && availableBars.length > 1 && (
-                  <>
-                    {/* Overlay para fechar o dropdown */}
-                    <div 
-                      className="fixed inset-0 z-[9998]"
-                      onClick={() => setShowBarSelector(false)}
-                    />
-                    
-                    <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-xl drop-shadow-lg z-[10000]">
-                      <div className="p-2">
-                        <div className="text-xs font-medium text-slate-500 px-3 py-2 uppercase tracking-wide">
-                          Selecionar Bar
-                        </div>
-                        {availableBars.map((bar) => (
-                          <button
-                            key={bar.id}
-                            onClick={() => {
-                              onBarChange(bar)
-                              setShowBarSelector(false)
-                            }}
-                            className={`
-                              w-full flex items-center space-x-3 px-3 py-3 rounded-lg text-left transition-colors
-                              ${selectedBar?.id === bar.id 
-                                ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' 
-                                : 'hover:bg-gray-50 text-slate-700'
-                              }
-                            `}
-                          >
-                            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-                              {bar.nome?.toLowerCase().includes('ordinário') || bar.nome?.toLowerCase().includes('ordinario') ? (
-                                <img 
-                                  src="/favicons/ordinario/favicon-32x32.png" 
-                                  alt={bar.nome}
-                                  className="w-full h-full rounded-lg object-cover"
-                                />
-                              ) : bar.avatar ? (
-                                <img 
-                                  src={bar.avatar} 
-                                  alt={bar.nome}
-                                  className="w-full h-full rounded-lg object-cover"
-                                />
-                              ) : (
-                                <span className="text-sm text-white">🏪</span>
-                              )}
-                            </div>
-                            <div className="flex-1">
-                              <span className="font-medium">{bar.nome}</span>
-                              {selectedBar?.id === bar.id && (
-                                <div className="text-xs text-indigo-600">Selecionado</div>
-                              )}
-                            </div>
-                            {selectedBar?.id === bar.id && (
-                              <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Indicador se há apenas um bar */}
-              {availableBars.length === 1 && (
-                <div className="text-xs text-slate-500 hidden sm:block">
-                  1 bar disponível
+          {/* Notifications */}
+          <div className="relative">
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="p-2 rounded-xl hover:bg-white/10 transition-colors group relative"
+            >
+              <svg className="w-5 h-5 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM10.5 3.74a6 6 0 0 1 8.25 8.98m0 0A6 6 0 0 1 5.25 8.98m0 0a6.002 6.002 0 0 0-3.75 5.25m0 0a6 6 0 0 0 6 6c1.66 0 3.14-.69 4.22-1.78M12 3a6.002 6.002 0 0 0-3.75 5.25m0 0a6 6 0 0 0 6 6c1.66 0 3.14-.69 4.22-1.78" />
+              </svg>
+              {unreadCount > 0 && (
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">{unreadCount}</span>
                 </div>
               )}
-            </>
-          ) : (
-            /* Mostrar quando não há bares disponíveis */
-            <div className="flex items-center space-x-3 px-4 py-2 bg-red-50 border border-red-200 rounded-xl">
-              <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center">
-                <span className="text-sm text-white">⚠️</span>
-              </div>
-              <span className="font-medium text-red-700 hidden sm:block">
-                Nenhum bar disponível
-              </span>
+            </button>
+
+            {/* Notifications Dropdown */}
+            {showNotifications && (
+              <>
+                <div 
+                  className="fixed inset-0 z-[9998]"
+                  onClick={() => setShowNotifications(false)}
+                />
+                
+                <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[10000] overflow-hidden">
+                  <div className="p-4 border-b border-slate-200">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-slate-800">Notificações</h3>
+                      <span className="text-xs text-slate-500">{unreadCount} não lidas</span>
+                    </div>
+                  </div>
+                  
+                  <div className="max-h-96 overflow-y-auto">
+                    {notifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        className={`p-4 border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer ${
+                          notification.unread ? 'bg-blue-50/50' : ''
+                        }`}
+                      >
+                        <div className="flex items-start space-x-3">
+                          <div className={`w-2 h-2 rounded-full mt-2 ${notification.unread ? 'bg-blue-500' : 'bg-slate-300'}`}></div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-slate-800 text-sm">{notification.title}</h4>
+                            <p className="text-slate-600 text-sm mt-1">{notification.message}</p>
+                            <span className="text-xs text-slate-400 mt-2 block">{notification.time}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="p-3 border-t border-slate-200">
+                    <button className="w-full text-center text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                      Ver todas as notificações
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+                    {/* Settings */}
+          <button className="p-2 rounded-xl hover:bg-white/10 transition-colors group">
+            <svg className="w-5 h-5 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
+
+          {/* User Profile */}
+          <div className="flex items-center space-x-2 pl-2 border-l border-slate-700">
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-md">
+              <span className="text-white text-sm font-bold">RO</span>
             </div>
-          )}
+            <div className="hidden sm:block">
+              <div className="text-sm font-semibold text-white">Rodrigo Oliveira</div>
+              <div className="text-xs text-slate-400">Administrador</div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Bar Selector Dropdown */}
+      {showBarSelector && availableBars.length > 1 && (
+        <>
+          <div 
+            className="fixed inset-0 z-[9998]"
+            onClick={() => setShowBarSelector(false)}
+          />
+          
+          <div className="absolute left-4 top-full mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[10000] overflow-hidden">
+            <div className="p-3">
+              <div className="text-sm font-semibold text-slate-800 mb-3">Selecionar Estabelecimento</div>
+              
+              <div className="space-y-1">
+                {availableBars.map((bar) => (
+                  <button
+                    key={bar.id}
+                    onClick={() => {
+                      onBarChange(bar)
+                      setShowBarSelector(false)
+                    }}
+                    className={`
+                      w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-left transition-colors
+                      ${selectedBar?.id === bar.id 
+                        ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' 
+                        : 'hover:bg-slate-50 text-slate-700'
+                      }
+                    `}
+                  >
+                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                      {bar.avatar ? (
+                        <img 
+                          src={bar.avatar} 
+                          alt={bar.nome}
+                          className="w-full h-full rounded-lg object-cover"
+                        />
+                      ) : (
+                        <span className="text-white text-xs font-bold">🏪</span>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <span className="font-medium text-sm">{bar.nome}</span>
+                      {selectedBar?.id === bar.id && (
+                        <div className="text-xs text-indigo-600">Selecionado</div>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </header>
   )
 } 

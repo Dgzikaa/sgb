@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
+import { getAdminClient } from '@/lib/supabase-admin'
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,13 +11,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'bar_id é obrigatório' }, { status: 400 })
     }
 
-    const supabase = await getSupabaseClient()
-    if (!supabase) {
-      return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 })
+    // Usar cliente administrativo
+    let adminClient
+    try {
+      adminClient = await getAdminClient()
+    } catch (adminError) {
+      console.error('❌ Erro ao obter cliente administrativo:', adminError)
+      return NextResponse.json({ error: 'Configuração administrativa não disponível' }, { status: 500 })
     }
 
     // Buscar metas do bar
-    const { data: metasData, error } = await supabase
+    const { data: metasData, error } = await adminClient
       .from('metas_bar')
       .select('*')
       .eq('bar_id', parseInt(bar_id))
@@ -86,13 +91,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'bar_id é obrigatório' }, { status: 400 })
     }
 
-    const supabase = await getSupabaseClient()
-    if (!supabase) {
-      return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 })
+    // Usar cliente administrativo
+    let adminClient
+    try {
+      adminClient = await getAdminClient()
+    } catch (adminError) {
+      console.error('❌ Erro ao obter cliente administrativo:', adminError)
+      return NextResponse.json({ error: 'Configuração administrativa não disponível' }, { status: 500 })
     }
 
     // Verificar se já existe registro para este bar
-    const { data: existente } = await supabase
+    const { data: existente } = await adminClient
       .from('metas_bar')
       .select('id')
       .eq('bar_id', parseInt(bar_id))
@@ -119,7 +128,7 @@ export async function POST(request: NextRequest) {
     let result
     if (existente) {
       // Atualizar registro existente
-      result = await supabase
+      result = await adminClient
         .from('metas_bar')
         .update(metasParaBanco)
         .eq('bar_id', parseInt(bar_id))
@@ -127,7 +136,7 @@ export async function POST(request: NextRequest) {
     } else {
       // Criar novo registro
       metasParaBanco.criado_em = new Date().toISOString()
-      result = await supabase
+      result = await adminClient
         .from('metas_bar')
         .insert([metasParaBanco])
         .select()

@@ -4,10 +4,10 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 let supabaseClient: any = null
 let configLoaded = false
 
-// Configurações do projeto (hardcoded temporariamente para resolver erro)
+// Configurações do projeto - URL fixa, anon key atualizada automaticamente
 const SUPABASE_CONFIG = {
-  url: process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://uqtgsvujwcbymjmvkjhy.supabase.co',
-  anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxdGdzdnVqd2NieW1qbXZramh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQzNzY3NjQsImV4cCI6MjA0OTk1Mjc2NH0.gApVhN9HdwWUKQnw8FHqDUNgmtQFb1i_cz0IucQzY-g'
+  url: 'https://uqtgsvujwcbymjmvkjhy.supabase.co',
+  anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxdGdzdnVqd2NieW1qbXZramh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMTExNjYsImV4cCI6MjA2Njg4NzE2Nn0.59x53jDOpNe9yVevnP-TcXr6Dkj0QjU8elJb636xV6M'
 }
 
 // Função para inicializar o cliente Supabase
@@ -17,10 +17,6 @@ async function initializeSupabaseClient() {
   }
 
   try {
-    console.log('🔐 Inicializando cliente Supabase...')
-    console.log('🔗 URL:', SUPABASE_CONFIG.url)
-    console.log('🔑 Anon Key presente:', !!SUPABASE_CONFIG.anonKey)
-    
     // Criar cliente com configurações públicas
     supabaseClient = createSupabaseClient(
       SUPABASE_CONFIG.url,
@@ -34,7 +30,6 @@ async function initializeSupabaseClient() {
     )
     
     configLoaded = true
-    console.log('✅ Cliente Supabase inicializado com sucesso')
     return supabaseClient
 
   } catch (error) {
@@ -107,7 +102,6 @@ export async function getConfig() {
 export async function getApiTokens() {
   // Tokens ficam seguros nas Edge Functions do servidor
   // Esta função retorna vazio para evitar exposição de secrets
-  console.log('ℹ️ Tokens de API são gerenciados server-side por segurança')
   return {
     sympla: '',
     yuzer: '',

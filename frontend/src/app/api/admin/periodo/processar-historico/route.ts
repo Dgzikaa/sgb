@@ -71,9 +71,14 @@ export async function POST(request: NextRequest) {
     let totalProcessados = 0;
     let totalComCliente = 0
 
-    // LOGIN CONTAHUB (uma vez sÃ³)
-    const contahub_email = "digao@3768";
-    const contahub_senha = "Geladeira@001";
+    // LOGIN CONTAHUB (usando secrets do sistema)
+    const contahub_email = process.env.CONTAHUB_EMAIL;
+    const contahub_senha = process.env.CONTAHUB_PASSWORD;
+    
+    if (!contahub_email || !contahub_senha) {
+      throw new Error('CONTAHUB_EMAIL e CONTAHUB_PASSWORD devem estar configurados nos secrets do sistema');
+    }
+    
     const passwordSha1Hex = sha1(contahub_senha)
 
     const loginData = new URLSearchParams({

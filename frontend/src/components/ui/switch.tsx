@@ -18,14 +18,25 @@ const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
         <input
           type="checkbox"
           ref={ref}
-          className="sr-only"
+          className="sr-only peer"
           checked={checked}
           onChange={handleChange}
           {...props}
         />
         <div
+          data-state={checked ? "checked" : "unchecked"}
           className={cn(
-            "relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600",
+            // Base styles
+            "relative w-11 h-6 rounded-full transition-colors duration-200 ease-in-out",
+            // Default colors (gray when unchecked, blue when checked)
+            "bg-gray-300 peer-checked:bg-blue-600",
+            // Focus styles
+            "peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 peer-focus:ring-offset-2",
+            // Toggle ball styles
+            "after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform after:duration-200 after:ease-in-out",
+            // Move ball when checked
+            "peer-checked:after:translate-x-5",
+            // Custom className can override colors (like data-[state=checked]:bg-green-500)
             className
           )}
         />
