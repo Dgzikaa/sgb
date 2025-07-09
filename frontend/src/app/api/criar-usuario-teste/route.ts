@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { randomBytes } from 'crypto';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -22,51 +21,12 @@ export async function GET(request: Request) {
     }
 
     // Criar cliente Supabase
-    const supabase = createClient(supabaseUrl, serviceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    });
+    const supabase = createClient(supabaseUrl, serviceKey);
 
     // Email e senha do usuário teste
     const email = 'teste@sgbsistema.com';
     const senha = 'teste123';
     const nome = 'Usuário Teste';
-
-    // Criar usuário no Auth
-    const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-      email,
-      password: senha,
-      email_confirm: true
-    });
-
-    if (authError && !authError.message.includes('already registered')) {
-      return NextResponse.json({ 
-        error: 'Erro ao criar usuário no Auth',
-        details: authError.message
-      }, { status: 500 });
-    }
-
-    // Obter o user_id
-    let userId = authUser?.user?.id;
-    
-    // Se o usuário já existe, buscar o ID pela tabela auth.users
-    if (!userId) {
-      const { data: existingUsers } = await supabase
-        .from('auth.users')
-        .select('id')
-        .eq('email', email)
-        .single();
-      
-      userId = existingUsers?.id;
-    }
-
-    if (!userId) {
-      return NextResponse.json({ 
-        error: 'Não foi possível obter o ID do usuário'
-      }, { status: 500 });
-    }
 
     // Verificar se já existe na tabela usuarios_bar
     const { data: existing } = await supabase
@@ -80,7 +40,6 @@ export async function GET(request: Request) {
       await supabase
         .from('usuarios_bar')
         .update({
-          user_id: userId,
           ativo: true,
           senha_redefinida: true
         })
@@ -97,10 +56,13 @@ export async function GET(request: Request) {
     }
 
     // Criar novo usuário na tabela usuarios_bar
+    // Usar um ID temporário
+    const tempUserId = `temp_${Date.now()}`;
+    
     const { error: dbError } = await supabase
       .from('usuarios_bar')
       .insert({
-        user_id: userId,
+        user_id: tempUserId,
         bar_id: 1, // Bar ID padrão
         email,
         nome,
@@ -124,7 +86,8 @@ export async function GET(request: Request) {
         email,
         senha,
         info: 'Use estas credenciais para fazer login'
-      }
+      },
+      nota: 'Este usuário foi criado apenas na tabela usuarios_bar. O login real ainda precisa ser criado no Supabase Auth.'
     });
 
   } catch (error: any) {
