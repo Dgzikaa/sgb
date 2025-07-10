@@ -3,26 +3,61 @@ import { createClient } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const { searchParams } = new URL(request.url);
+    const barId = searchParams.get('barId');
     
     console.log('🔍 INVESTIGANDO CATEGORIAS ESPECÍFICAS...');
+    console.log('Bar ID recebido:', barId);
 
-    // Buscar token válido - primeiro tentar encontrar qualquer token ativo do ContaAzul
-    const { data: contaAzulData } = await supabase
-      .from('api_credentials')
-      .select('*')
-      .eq('sistema', 'contaazul')
-      .not('access_token', 'is', null)
-      .gte('expires_at', new Date().toISOString())
-      .order('last_token_refresh', { ascending: false })
-      .limit(1)
-      .single();
+    // Usar a mesma API que o ContaAzulOAuth usa para buscar o token
+    let contaAzulData: any = null;
+    
+    if (barId) {
+      // Tentar usar a API auth para buscar o status (igual ao ContaAzulOAuth)
+      try {
+        const authResponse = await fetch(`${request.nextUrl.origin}/api/contaazul/auth?action=status&barId=${barId}`);
+        const authData = await authResponse.json();
+        
+        if (authResponse.ok && authData.connected) {
+          // Se conectado, buscar os dados completos do banco
+          const supabase = await createClient();
+          const { data } = await supabase
+            .from('api_credentials')
+            .select('*')
+            .eq('bar_id', parseInt(barId))
+            .eq('sistema', 'contaazul')
+            .single();
+          
+          contaAzulData = data;
+          console.log('Token encontrado via API auth:', !!contaAzulData?.access_token);
+        }
+      } catch (error) {
+        console.log('Erro ao usar API auth, tentando busca direta:', error);
+      }
+    }
+
+    // Fallback: buscar diretamente no banco se não funcionou via API auth
+    if (!contaAzulData) {
+      const supabase = await createClient();
+      const { data } = await supabase
+        .from('api_credentials')
+        .select('*')
+        .eq('sistema', 'contaazul')
+        .not('access_token', 'is', null)
+        .order('last_token_refresh', { ascending: false })
+        .limit(1)
+        .single();
+      
+      contaAzulData = data;
+      console.log('Token encontrado via busca direta:', !!contaAzulData?.access_token);
+    }
 
     if (!contaAzulData?.access_token) {
       return NextResponse.json({ error: 'Token ContaAzul não encontrado' }, { status: 400 });
     }
 
     // Buscar categorias cadastradas
+    const supabase = await createClient();
     const { data: categorias } = await supabase
       .from('contaazul_categorias')
       .select('*')
@@ -177,6 +212,12 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       investigacao: 'Teste de endpoints específicos por categoria',
+      debug_info: {
+        bar_id_recebido: barId,
+        token_encontrado: !!contaAzulData?.access_token,
+        token_expira_em: contaAzulData?.expires_at,
+        metodo_busca: contaAzulData ? 'sucesso' : 'falhou'
+      },
       analise,
       resultados_detalhados: resultados,
       recomendacoes: analise.descobertas.length > 0 ? 

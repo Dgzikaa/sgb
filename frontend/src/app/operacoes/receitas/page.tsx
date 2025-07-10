@@ -726,174 +726,245 @@ export default function ReceitasPage() {
     }, 200)
   }
 
-  if (!selectedBar?.id) {
+  if (!selectedBar) {
     return (
-      <div className="p-6">
+      <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <p className="text-red-600 font-medium">⚠️ Selecione um bar primeiro</p>
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">⚠️ Selecione um Bar</h1>
+          <p className="text-gray-600">Você precisa selecionar um bar para gerenciar receitas e insumos.</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <p className="text-gray-700">Cadastro de insumos e criação de receitas</p>
-        <p className="text-gray-600 text-sm">
-          Bar: <strong>{selectedBar.nome}</strong>
-        </p>
+    <div className="p-3 sm:p-6 max-w-full">
+      {/* Header mobile-first */}
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">🧪 Gestão de Receitas</h1>
+        <p className="text-sm sm:text-base text-gray-700">Cadastro de insumos e criação de receitas</p>
+        <div className="mt-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
+          <p className="text-sm text-blue-800">
+            📍 <strong>{selectedBar.nome}</strong>
+          </p>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="insumos">📦 Insumos ({insumos.length})</TabsTrigger>
-          <TabsTrigger value="receitas">👨‍🍳 Receitas ({receitas.length})</TabsTrigger>
+        {/* Mobile-optimized tabs */}
+        <TabsList className="grid w-full grid-cols-2 h-14 sm:h-auto mb-4">
+          <TabsTrigger 
+            value="insumos" 
+            className="text-xs sm:text-sm px-2 sm:px-4 py-3 sm:py-2 touch-manipulation"
+          >
+            <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
+              <span className="text-lg sm:text-base">📦</span>
+              <span>Insumos ({insumos.length})</span>
+            </div>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="receitas" 
+            className="text-xs sm:text-sm px-2 sm:px-4 py-3 sm:py-2 touch-manipulation"
+          >
+            <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
+              <span className="text-lg sm:text-base">👨‍🍳</span>
+              <span>Receitas ({receitas.length})</span>
+            </div>
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="insumos" className="space-y-6">
-          {/* Formulário de Insumos */}
+        <TabsContent value="insumos" className="space-y-4 sm:space-y-6">
+          {/* Formulário de Insumos - Mobile Optimized */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-black font-semibold">➕ Novo Insumo</CardTitle>
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-lg sm:text-xl text-black font-semibold flex items-center gap-2">
+                <span className="text-2xl">➕</span>
+                Novo Insumo
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent className="space-y-4 sm:space-y-6">
+              {/* Mobile-first form layout */}
+              <div className="space-y-4">
                 <div>
-                  <Label className="text-black font-semibold">Código *</Label>
+                  <Label className="text-black font-semibold text-base mb-2 block">
+                    🏷️ Código *
+                  </Label>
                   <Input
                     value={novoInsumo.codigo}
                     onChange={(e) => setNovoInsumo(prev => ({ ...prev, codigo: e.target.value }))}
                     placeholder="Ex: i0001"
-                    className="text-black font-medium border-2 border-gray-300"
+                    className="text-black font-medium border-2 border-gray-300 h-12 sm:h-10 text-lg sm:text-base touch-manipulation"
                   />
                 </div>
+                
                 <div>
-                  <Label className="text-black font-semibold">Nome *</Label>
+                  <Label className="text-black font-semibold text-base mb-2 block">
+                    📦 Nome *
+                  </Label>
                   <Input
                     value={novoInsumo.nome}
                     onChange={(e) => setNovoInsumo(prev => ({ ...prev, nome: e.target.value }))}
                     placeholder="Ex: Frango a passarinho"
-                    className="text-black font-medium border-2 border-gray-300"
+                    className="text-black font-medium border-2 border-gray-300 h-12 sm:h-10 text-lg sm:text-base touch-manipulation"
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-black font-semibold">Categoria</Label>
-                  <Select 
-                    value={novoInsumo.categoria} 
-                    onValueChange={(value) => setNovoInsumo(prev => ({ ...prev, categoria: value }))}
-                  >
-                    <SelectTrigger className="text-black font-medium border-2 border-gray-300">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cozinha">🍽️ Cozinha</SelectItem>
-                      <SelectItem value="bar">🍺 Bar</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-black font-semibold text-base mb-2 block">
+                      🏪 Categoria
+                    </Label>
+                    <Select 
+                      value={novoInsumo.categoria} 
+                      onValueChange={(value) => setNovoInsumo(prev => ({ ...prev, categoria: value }))}
+                    >
+                      <SelectTrigger className="text-black font-medium border-2 border-gray-300 h-12 sm:h-10 text-lg sm:text-base touch-manipulation">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cozinha">🍽️ Cozinha</SelectItem>
+                        <SelectItem value="bar">🍺 Bar</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label className="text-black font-semibold text-base mb-2 block">
+                      📏 Unidade de Medida
+                    </Label>
+                    <Select 
+                      value={novoInsumo.unidade_medida} 
+                      onValueChange={(value) => setNovoInsumo(prev => ({ ...prev, unidade_medida: value }))}
+                    >
+                      <SelectTrigger className="text-black font-medium border-2 border-gray-300 h-12 sm:h-10 text-lg sm:text-base touch-manipulation">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="g">Gramas (g)</SelectItem>
+                        <SelectItem value="kg">Quilos (kg)</SelectItem>
+                        <SelectItem value="ml">Mililitros (ml)</SelectItem>
+                        <SelectItem value="l">Litros (l)</SelectItem>
+                        <SelectItem value="un">Unidades (un)</SelectItem>
+                        <SelectItem value="cx">Caixas (cx)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
+
                 <div>
-                  <Label className="text-black font-semibold">Unidade de Medida</Label>
-                  <Select 
-                    value={novoInsumo.unidade_medida} 
-                    onValueChange={(value) => setNovoInsumo(prev => ({ ...prev, unidade_medida: value }))}
-                  >
-                    <SelectTrigger className="text-black font-medium border-2 border-gray-300">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="g">Gramas (g)</SelectItem>
-                      <SelectItem value="kg">Quilos (kg)</SelectItem>
-                      <SelectItem value="ml">Mililitros (ml)</SelectItem>
-                      <SelectItem value="l">Litros (l)</SelectItem>
-                      <SelectItem value="un">Unidades (un)</SelectItem>
-                      <SelectItem value="cx">Caixas (cx)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label className="text-black font-semibold text-base mb-2 block">
+                    📝 Observações
+                  </Label>
+                  <Textarea
+                    value={novoInsumo.observacoes || ''}
+                    onChange={(e) => setNovoInsumo(prev => ({ ...prev, observacoes: e.target.value }))}
+                    placeholder="Observações adicionais..."
+                    className="text-black font-medium border-2 border-gray-300 min-h-[100px] text-lg sm:text-base touch-manipulation"
+                  />
                 </div>
-                <div className="md:col-span-2">
+
+                {/* Action buttons - Mobile first */}
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                   <Button
                     onClick={carregarProximoCodigo}
                     variant="outline"
-                    size="sm"
-                    className="border-2 border-blue-300 text-blue-600 hover:text-blue-800"
+                    className="border-2 border-blue-300 text-blue-600 hover:text-blue-800 h-12 sm:h-10 text-lg sm:text-base touch-manipulation"
                   >
-                    🔄 Próximo Código
+                    <span className="text-xl mr-2">🔄</span>
+                    Próximo Código
+                  </Button>
+                  
+                  <Button
+                    onClick={salvarInsumo}
+                    disabled={isLoading}
+                    className="bg-green-600 hover:bg-green-700 text-white font-bold h-12 sm:h-10 text-lg sm:text-base touch-manipulation"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center">
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                        Salvando...
+                      </div>
+                    ) : (
+                      <>
+                        <span className="text-xl mr-2">💾</span>
+                        Salvar Insumo
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
-
-              <div>
-                <Label className="text-black font-semibold">Observações</Label>
-                <Textarea
-                  value={novoInsumo.observacoes || ''}
-                  onChange={(e) => setNovoInsumo(prev => ({ ...prev, observacoes: e.target.value }))}
-                  placeholder="Observações adicionais..."
-                  className="text-black font-medium border-2 border-gray-300"
-                />
-              </div>
-
-              <Button
-                onClick={salvarInsumo}
-                disabled={isLoading}
-                className="bg-green-600 hover:bg-green-700 text-white font-bold"
-              >
-                {isLoading ? '⏳ Salvando...' : '💾 Salvar Insumo'}
-              </Button>
             </CardContent>
           </Card>
 
-          {/* Lista de Insumos */}
+          {/* Lista de Insumos - Mobile Optimized */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-black font-semibold">📋 Lista de Insumos</CardTitle>
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-lg sm:text-xl text-black font-semibold flex items-center gap-2">
+                <span className="text-2xl">📋</span>
+                Lista de Insumos
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Campo de busca para insumos */}
+              {/* Mobile-optimized search */}
               <div className="mb-4">
                 <Input
                   type="text"
                   value={buscaInsumosList}
                   onChange={(e) => setBuscaInsumosList(e.target.value)}
-                  placeholder="🔍 Buscar insumo por nome ou código..."
-                  className="text-black font-medium border-2 border-gray-300 placeholder:text-gray-600"
+                  placeholder="🔍 Buscar insumo..."
+                  className="text-black font-medium border-2 border-gray-300 placeholder:text-gray-600 h-12 sm:h-10 text-lg sm:text-base touch-manipulation"
                 />
               </div>
               
               {insumosFiltrados.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
-                  {buscaInsumosList ? `Nenhum insumo encontrado para "${buscaInsumosList}"` : 'Nenhum insumo cadastrado ainda.'}
-                </p>
+                <div className="text-center py-8 px-4">
+                  <div className="text-6xl mb-4">📦</div>
+                  <p className="text-gray-500 text-lg mb-2">
+                    {buscaInsumosList ? 'Nenhum insumo encontrado' : 'Nenhum insumo cadastrado ainda'}
+                  </p>
+                  {buscaInsumosList && (
+                    <p className="text-gray-400 text-sm">
+                      Busca por: "{buscaInsumosList}"
+                    </p>
+                  )}
+                </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {insumosFiltrados.map((insumo) => (
                     <div 
                       key={insumo.id}
-                      className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                      className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
                     >
-                      <div className="flex justify-between items-start mb-2">
-                        <Badge variant="outline" className="text-xs">
+                      <div className="flex justify-between items-start mb-3">
+                        <Badge variant="outline" className="text-xs font-medium">
                           {insumo.codigo}
                         </Badge>
                         <Button
                           onClick={() => abrirModalEditarInsumo(insumo)}
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 hover:bg-blue-100"
+                          className="h-8 w-8 p-0 hover:bg-blue-100 touch-manipulation"
                         >
-                          ✏️
+                          <span className="text-lg">✏️</span>
                         </Button>
                       </div>
-                      <h3 className="font-semibold text-black text-sm mb-1">{insumo.nome}</h3>
-                      <div className="flex justify-between items-center text-xs text-gray-600">
-                        <span>{insumo.categoria === 'bar' ? '🍺' : '🍽️'} {insumo.categoria}</span>
-                        <span>{insumo.unidade_medida}</span>
+                      
+                      <h3 className="font-semibold text-black text-base mb-2 leading-tight">
+                        {insumo.nome}
+                      </h3>
+                      
+                      <div className="flex justify-between items-center text-sm text-gray-600 mb-2">
+                        <span className="flex items-center gap-1">
+                          <span className="text-base">{insumo.categoria === 'bar' ? '🍺' : '🍽️'}</span>
+                          {insumo.categoria}
+                        </span>
+                        <span className="font-medium">{insumo.unidade_medida}</span>
                       </div>
+                      
                       {insumo.observacoes && (
-                        <p className="text-xs text-gray-500 mt-2 italic">{insumo.observacoes}</p>
+                        <p className="text-xs text-gray-500 italic bg-gray-50 p-2 rounded mt-2">
+                          {insumo.observacoes}
+                        </p>
                       )}
                     </div>
                   ))}
@@ -903,117 +974,150 @@ export default function ReceitasPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="receitas" className="space-y-6">
-          {/* Formulário de Receitas */}
+        <TabsContent value="receitas" className="space-y-4 sm:space-y-6">
+          {/* Formulário de Receitas - Mobile Optimized */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-black font-semibold">➕ Nova Receita</CardTitle>
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-lg sm:text-xl text-black font-semibold flex items-center gap-2">
+                <span className="text-2xl">➕</span>
+                Nova Receita
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent className="space-y-4 sm:space-y-6">
+              {/* Mobile-first form layout */}
+              <div className="space-y-4">
                 <div>
-                  <Label className="text-black font-semibold">Código da Receita *</Label>
+                  <Label className="text-black font-semibold text-base mb-2 block">
+                    🏷️ Código da Receita *
+                  </Label>
                   <Input
                     value={novaReceita.receita_codigo}
                     onChange={(e) => setNovaReceita(prev => ({ ...prev, receita_codigo: e.target.value }))}
                     placeholder="Ex: pc0001"
-                    className="text-black font-medium border-2 border-gray-300"
+                    className="text-black font-medium border-2 border-gray-300 h-12 sm:h-10 text-lg sm:text-base touch-manipulation"
                   />
                 </div>
+                
                 <div>
-                  <Label className="text-black font-semibold">Nome da Receita *</Label>
+                  <Label className="text-black font-semibold text-base mb-2 block">
+                    🍽️ Nome da Receita *
+                  </Label>
                   <Input
                     value={novaReceita.receita_nome}
                     onChange={(e) => setNovaReceita(prev => ({ ...prev, receita_nome: e.target.value }))}
                     placeholder="Ex: Frango a Passarinho"
-                    className="text-black font-medium border-2 border-gray-300"
+                    className="text-black font-medium border-2 border-gray-300 h-12 sm:h-10 text-lg sm:text-base touch-manipulation"
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                  <Label className="text-black font-semibold">Categoria</Label>
-                  <Input
-                    value={novaReceita.receita_categoria}
-                    onChange={(e) => setNovaReceita(prev => ({ ...prev, receita_categoria: e.target.value }))}
-                    placeholder="Ex: COZINHA - PREPAROS"
-                    className="text-black font-medium border-2 border-gray-300"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-black font-semibold text-base mb-2 block">
+                      📁 Categoria
+                    </Label>
+                    <Input
+                      value={novaReceita.receita_categoria}
+                      onChange={(e) => setNovaReceita(prev => ({ ...prev, receita_categoria: e.target.value }))}
+                      placeholder="Ex: COZINHA - PREPAROS"
+                      className="text-black font-medium border-2 border-gray-300 h-12 sm:h-10 text-lg sm:text-base touch-manipulation"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label className="text-black font-semibold text-base mb-2 block">
+                      🏪 Local
+                    </Label>
+                    <Select 
+                      value={novaReceita.tipo_local} 
+                      onValueChange={(value) => setNovaReceita(prev => ({ ...prev, tipo_local: value as 'bar' | 'cozinha' }))}
+                    >
+                      <SelectTrigger className="text-black font-medium border-2 border-gray-300 h-12 sm:h-10 text-lg sm:text-base touch-manipulation">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cozinha">🍽️ Cozinha</SelectItem>
+                        <SelectItem value="bar">🍺 Bar</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
+
                 <div>
-                  <Label className="text-black font-semibold">Local</Label>
-                  <Select 
-                    value={novaReceita.tipo_local} 
-                    onValueChange={(value) => setNovaReceita(prev => ({ ...prev, tipo_local: value as 'bar' | 'cozinha' }))}
-                  >
-                    <SelectTrigger className="text-black font-medium border-2 border-gray-300">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cozinha">🍽️ Cozinha</SelectItem>
-                      <SelectItem value="bar">🍺 Bar</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label className="text-black font-semibold">Rendimento Esperado (g)</Label>
+                  <Label className="text-black font-semibold text-base mb-2 block">
+                    📏 Rendimento Esperado (g)
+                  </Label>
                   <Input
                     type="number"
                     value={novaReceita.rendimento_esperado}
                     onChange={(e) => setNovaReceita(prev => ({ ...prev, rendimento_esperado: parseFloat(e.target.value) || 0 }))}
                     placeholder="Ex: 1000"
-                    className="text-black font-medium border-2 border-gray-300"
+                    className="text-black font-medium border-2 border-gray-300 h-12 sm:h-10 text-lg sm:text-base touch-manipulation"
                   />
                 </div>
-                <div className="flex flex-col gap-4">
-                  <div>
-                    <Button
-                      onClick={carregarProximoCodigoReceita}
-                      variant="outline"
-                      size="sm"
-                      className="border-2 border-blue-300 text-blue-600 hover:text-blue-800 w-full"
-                    >
-                      🔄 Próximo Código
-                    </Button>
-                  </div>
-                  <div className="flex items-center space-x-2">
+
+                {/* Action buttons */}
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                  <Button
+                    onClick={carregarProximoCodigoReceita}
+                    variant="outline"
+                    className="border-2 border-blue-300 text-blue-600 hover:text-blue-800 h-12 sm:h-10 text-lg sm:text-base touch-manipulation"
+                  >
+                    <span className="text-xl mr-2">🔄</span>
+                    Próximo Código
+                  </Button>
+                  
+                  <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
                     <input
                       type="checkbox"
                       id="receita-ativa"
                       checked={novaReceita.ativo}
                       onChange={(e) => setNovaReceita(prev => ({ ...prev, ativo: e.target.checked }))}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                      className="w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 touch-manipulation"
                     />
-                    <Label htmlFor="receita-ativa" className="text-black font-semibold text-sm">
-                      ✅ Receita Ativa
+                    <Label htmlFor="receita-ativa" className="text-black font-semibold text-base">
+                      <span className="text-xl mr-2">✅</span>
+                      Receita Ativa
                     </Label>
                   </div>
                 </div>
               </div>
 
-              {/* Insumos da Receita */}
-              <div className="border-t pt-4">
-                <div className="flex justify-between items-center mb-4">
-                  <Label className="text-black font-semibold">🧪 Insumos da Receita</Label>
+              {/* Insumos da Receita - MOBILE OPTIMIZED */}
+              <div className="border-t pt-4 sm:pt-6">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">🧪</span>
+                    <Label className="text-black font-semibold text-lg">Insumos da Receita</Label>
+                  </div>
                   <Button
                     onClick={adicionarInsumoReceita}
                     variant="outline"
-                    size="sm"
-                    className="border-2 border-green-300 text-green-600 hover:text-green-800"
+                    className="border-2 border-green-300 text-green-600 hover:text-green-800 h-12 sm:h-10 text-lg sm:text-base touch-manipulation"
                   >
-                    ➕ Adicionar Insumo
+                    <span className="text-xl mr-2">➕</span>
+                    Adicionar Insumo
                   </Button>
                 </div>
 
                 {novaReceita.insumos.length === 0 ? (
-                  <p className="text-gray-500 text-center py-4">Nenhum insumo adicionado ainda.</p>
+                  <div className="text-center py-8 px-4 bg-gray-50 rounded-lg">
+                    <div className="text-6xl mb-4">🧪</div>
+                    <p className="text-gray-500 text-lg">Nenhum insumo adicionado ainda</p>
+                    <p className="text-gray-400 text-sm mt-2">
+                      Clique em "Adicionar Insumo" para começar
+                    </p>
+                  </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {novaReceita.insumos.map((insumo, index) => (
-                      <div key={index} className="border border-gray-200 rounded-lg p-3">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
+                      <div key={index} className="border-2 border-gray-200 rounded-lg p-4 bg-white">
+                        {/* Mobile-optimized insumo input */}
+                        <div className="space-y-4">
+                          {/* Busca de insumo */}
                           <div className="relative">
+                            <Label className="text-black font-semibold text-base mb-2 block">
+                              🔍 Buscar Insumo
+                            </Label>
                             <Input
                               type="text"
                               value={buscaInsumos[index] || ''}
@@ -1021,8 +1125,8 @@ export default function ReceitasPage() {
                                 setBuscaInsumos(prev => ({ ...prev, [index]: e.target.value }))
                                 setDropdownAberto(prev => ({ ...prev, [index]: true }))
                               }}
-                              placeholder="🔍 Buscar insumo por nome ou código..."
-                              className="text-black font-medium border-2 border-gray-300 pr-10"
+                              placeholder="Digite o nome ou código do insumo..."
+                              className="text-black font-medium border-2 border-gray-300 h-12 sm:h-10 text-lg sm:text-base touch-manipulation"
                               onFocus={() => abrirDropdownInsumo(index)}
                               onBlur={() => fecharDropdownInsumo(index)}
                             />
@@ -1035,124 +1139,215 @@ export default function ReceitasPage() {
                                 }}
                                 variant="ghost"
                                 size="sm"
-                                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 h-6 w-6 p-0"
+                                className="absolute right-2 top-9 sm:top-8 h-8 w-8 p-0 text-gray-500 hover:text-gray-700 touch-manipulation"
                               >
-                                ❌
+                                <span className="text-lg">❌</span>
                               </Button>
                             )}
                             
-                                                         {dropdownAberto[index] && (
-                               <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white rounded-lg border-2 border-gray-300 shadow-lg max-h-60 overflow-y-auto">
-                                 {filtrarInsumos(index).length > 0 ? (
-                                   <>
-                                     {!buscaInsumos[index] && insumos.length > 10 && (
-                                       <div className="p-2 bg-blue-50 text-blue-700 text-xs text-center border-b border-gray-100">
-                                         💡 Digite para filtrar entre {insumos.length} insumos
-                                       </div>
-                                     )}
-                                     {filtrarInsumos(index).map((ins) => (
-                                       <div
-                                         key={ins.id}
-                                         className="p-3 cursor-pointer hover:bg-blue-50 border-b border-gray-100 transition-colors"
-                                         onClick={() => selecionarInsumo(index, ins)}
-                                       >
-                                         <div className="font-semibold text-black text-sm">{ins.codigo} - {ins.nome}</div>
-                                         <div className="text-xs text-gray-600">{ins.categoria} • {ins.unidade_medida}</div>
-                                       </div>
-                                     ))}
-                                   </>
-                                 ) : (
-                                   <div className="p-4 text-center text-gray-500">
-                                     🔍 Nenhum insumo encontrado para "{buscaInsumos[index]}"
-                                   </div>
-                                 )}
-                               </div>
-                             )}
+                            {dropdownAberto[index] && (
+                              <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white rounded-lg border-2 border-gray-300 shadow-lg max-h-60 overflow-y-auto">
+                                {filtrarInsumos(index).length > 0 ? (
+                                  <>
+                                    {!buscaInsumos[index] && insumos.length > 10 && (
+                                      <div className="p-3 bg-blue-50 text-blue-700 text-sm text-center border-b border-gray-100">
+                                        💡 Digite para filtrar entre {insumos.length} insumos
+                                      </div>
+                                    )}
+                                    {filtrarInsumos(index).map((ins) => (
+                                      <div
+                                        key={ins.id}
+                                        className="p-4 cursor-pointer hover:bg-blue-50 border-b border-gray-100 transition-colors touch-manipulation"
+                                        onClick={() => selecionarInsumo(index, ins)}
+                                      >
+                                        <div className="font-semibold text-black text-base">
+                                          {ins.codigo} - {ins.nome}
+                                        </div>
+                                        <div className="text-sm text-gray-600 flex items-center gap-2 mt-1">
+                                          <span>{ins.categoria === 'bar' ? '🍺' : '🍽️'}</span>
+                                          <span>{ins.categoria}</span>
+                                          <span>•</span>
+                                          <span>{ins.unidade_medida}</span>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </>
+                                ) : (
+                                  <div className="p-4 text-center text-gray-500">
+                                    <div className="text-4xl mb-2">🔍</div>
+                                    <p>Nenhum insumo encontrado</p>
+                                    <p className="text-sm mt-1">"{buscaInsumos[index]}"</p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
+                          
+                          {/* Quantidade */}
                           <div>
+                            <Label className="text-black font-semibold text-base mb-2 block">
+                              📏 Quantidade Necessária
+                            </Label>
                             <Input
                               type="number"
-                              placeholder="Quantidade"
-                              value={insumo.quantidade_necessaria}
+                              step="0.01"
+                              placeholder="Ex: 500"
+                              value={insumo.quantidade_necessaria || ''}
                               onChange={(e) => atualizarInsumoReceita(index, 'quantidade_necessaria', parseFloat(e.target.value) || 0)}
-                              className="text-black font-medium border-2 border-gray-300"
+                              className="text-black font-medium border-2 border-gray-300 h-12 sm:h-10 text-lg sm:text-base touch-manipulation"
                             />
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <Button
-                              onClick={() => definirInsumoChefe(index)}
-                              variant={insumo.is_chefe ? "default" : "outline"}
-                              size="sm"
-                              className={insumo.is_chefe ? "bg-red-600 hover:bg-red-700 text-white" : "border-red-300 text-red-600 hover:text-red-800"}
-                            >
-                              {insumo.is_chefe ? "👑 CHEFE" : "Tornar Chefe"}
-                            </Button>
+                          
+                          {/* INSUMO CHEFE - MOBILE OPTIMIZED */}
+                          <div className="bg-gradient-to-r from-red-50 to-orange-50 p-4 rounded-lg border-2 border-red-200">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="text-3xl">👑</div>
+                                <div>
+                                  <Label className="text-black font-bold text-lg block">
+                                    Insumo Chefe
+                                  </Label>
+                                  <p className="text-sm text-gray-600">
+                                    O insumo principal da receita
+                                  </p>
+                                </div>
+                              </div>
+                              <Button
+                                onClick={() => definirInsumoChefe(index)}
+                                variant={insumo.is_chefe ? "default" : "outline"}
+                                className={`h-14 px-6 text-lg font-bold touch-manipulation ${
+                                  insumo.is_chefe 
+                                    ? "bg-red-600 hover:bg-red-700 text-white shadow-lg" 
+                                    : "border-2 border-red-300 text-red-600 hover:text-red-800 hover:bg-red-50"
+                                }`}
+                              >
+                                {insumo.is_chefe ? (
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xl">👑</span>
+                                    <span>CHEFE</span>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xl">🔄</span>
+                                    <span>Tornar Chefe</span>
+                                  </div>
+                                )}
+                              </Button>
+                            </div>
                           </div>
-                          <div>
+                          
+                          {/* Remover insumo */}
+                          <div className="flex justify-end pt-2">
                             <Button
                               onClick={() => removerInsumoReceita(index)}
                               variant="outline"
-                              size="sm"
-                              className="border-red-300 text-red-600 hover:text-red-800"
+                              className="border-2 border-red-300 text-red-600 hover:text-red-800 hover:bg-red-50 h-12 sm:h-10 px-6 text-lg sm:text-base touch-manipulation"
                             >
-                              🗑️
+                              <span className="text-xl mr-2">🗑️</span>
+                              Remover
                             </Button>
                           </div>
                         </div>
+                        
+                        {/* Resumo do insumo selecionado */}
+                        {insumo.insumo_id > 0 && (
+                          <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">✅</span>
+                              <div className="flex-1">
+                                <p className="text-black font-medium text-base">
+                                  {buscaInsumos[index]?.split(' - ')[1] || 'Insumo selecionado'}
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                  {insumo.quantidade_necessaria}g
+                                  {insumo.is_chefe && (
+                                    <span className="ml-2 text-red-600 font-bold">
+                                      👑 CHEFE
+                                    </span>
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
                 )}
               </div>
 
+              {/* Botão criar receita */}
               <Button
                 onClick={criarNovaReceita}
                 disabled={isLoading}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold w-full"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold w-full h-14 text-lg touch-manipulation"
               >
-                {isLoading ? '⏳ Criando...' : '🍽️ Criar Receita'}
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    Criando Receita...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">🍽️</span>
+                    <span>Criar Receita</span>
+                  </div>
+                )}
               </Button>
             </CardContent>
           </Card>
 
-          {/* Lista de Receitas */}
+          {/* Lista de Receitas - Mobile Optimized */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-black font-semibold">📋 Lista de Receitas</CardTitle>
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-lg sm:text-xl text-black font-semibold flex items-center gap-2">
+                <span className="text-2xl">📋</span>
+                Lista de Receitas
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Campo de busca para receitas */}
+              {/* Mobile-optimized search */}
               <div className="mb-4">
                 <Input
                   type="text"
                   value={buscaReceitasList}
                   onChange={(e) => setBuscaReceitasList(e.target.value)}
-                  placeholder="🔍 Buscar receita por nome ou código..."
-                  className="text-black font-medium border-2 border-gray-300 placeholder:text-gray-600"
+                  placeholder="🔍 Buscar receita..."
+                  className="text-black font-medium border-2 border-gray-300 placeholder:text-gray-600 h-12 sm:h-10 text-lg sm:text-base touch-manipulation"
                 />
               </div>
               
               {receitasFiltradas.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
-                  {buscaReceitasList ? `Nenhuma receita encontrada para "${buscaReceitasList}"` : 'Nenhuma receita cadastrada ainda.'}
-                </p>
+                <div className="text-center py-8 px-4">
+                  <div className="text-6xl mb-4">🍽️</div>
+                  <p className="text-gray-500 text-lg mb-2">
+                    {buscaReceitasList ? 'Nenhuma receita encontrada' : 'Nenhuma receita cadastrada ainda'}
+                  </p>
+                  {buscaReceitasList && (
+                    <p className="text-gray-400 text-sm">
+                      Busca por: "{buscaReceitasList}"
+                    </p>
+                  )}
+                </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {receitasFiltradas.map((receita) => (
                     <div
                       key={receita.receita_codigo}
-                      className={`border rounded-lg p-4 hover:shadow-md transition-shadow ${
+                      className={`border-2 rounded-lg p-4 hover:shadow-md transition-shadow ${
                         receita.ativo === false ? 'border-red-200 bg-red-50' : 'border-gray-200 bg-white'
                       }`}
                     >
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex gap-2">
-                          <Badge variant="outline" className="text-xs">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex flex-col gap-2">
+                          <Badge variant="outline" className="text-xs font-medium w-fit">
                             {receita.receita_codigo}
                           </Badge>
                           <Badge 
                             variant="outline" 
-                            className={receita.ativo === false ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}
+                            className={`text-xs font-medium w-fit ${
+                              receita.ativo === false ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                            }`}
                           >
                             {receita.ativo === false ? '❌ Inativa' : '✅ Ativa'}
                           </Badge>
@@ -1161,26 +1356,47 @@ export default function ReceitasPage() {
                           onClick={() => abrirModalEditarReceita(receita)}
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 hover:bg-blue-100"
+                          className="h-10 w-10 p-0 hover:bg-blue-100 touch-manipulation"
                         >
-                          ✏️
+                          <span className="text-lg">✏️</span>
                         </Button>
                       </div>
-                      <h3 className={`font-semibold text-sm mb-1 ${receita.ativo === false ? 'text-red-800' : 'text-black'}`}>
+                      
+                      <h3 className={`font-semibold text-base mb-2 leading-tight ${
+                        receita.ativo === false ? 'text-red-800' : 'text-black'
+                      }`}>
                         {receita.receita_nome}
                       </h3>
-                      <div className="flex justify-between items-center text-xs text-gray-600 mb-2">
-                        <span>{receita.tipo_local === 'bar' ? '🍺' : '🍽️'} {receita.tipo_local}</span>
-                        <span>{receita.insumos?.length || 0} insumos</span>
+                      
+                      <div className="flex justify-between items-center text-sm text-gray-600 mb-3">
+                        <span className="flex items-center gap-1">
+                          <span className="text-base">{receita.tipo_local === 'bar' ? '🍺' : '🍽️'}</span>
+                          {receita.tipo_local}
+                        </span>
+                        <span className="font-medium">{receita.insumos?.length || 0} insumos</span>
                       </div>
-                      <div className="text-xs text-gray-500">
+                      
+                      <div className="text-sm text-gray-500 space-y-1">
                         <p><strong>Categoria:</strong> {receita.receita_categoria}</p>
                         {receita.rendimento_esperado && (
                           <p><strong>Rendimento:</strong> {receita.rendimento_esperado}g</p>
                         )}
+                        
+                        {/* Mostrar insumo chefe */}
+                        {receita.insumos && receita.insumos.length > 0 && (
+                          <div className="pt-2 border-t border-gray-200">
+                            {receita.insumos.filter(i => i.is_chefe).map((insumoChefe) => (
+                              <div key={insumoChefe.id} className="flex items-center gap-2 text-red-600 font-medium">
+                                <span className="text-base">👑</span>
+                                <span className="text-xs">{insumoChefe.nome}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
+                      
                       {receita.ativo === false && (
-                        <div className="mt-2 text-xs text-red-600 font-medium">
+                        <div className="mt-3 p-2 bg-red-100 rounded text-xs text-red-700 font-medium">
                           ⚠️ Esta receita não aparecerá no terminal de produção
                         </div>
                       )}
@@ -1494,6 +1710,9 @@ export default function ReceitasPage() {
                         <div key={index} className="border border-gray-200 rounded-lg p-3">
                           <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
                             <div className="relative">
+                              <Label className="text-black font-semibold text-base mb-2 block">
+                                🔍 Buscar Insumo
+                              </Label>
                               <Input
                                 type="text"
                                 value={buscaInsumosEdicao[index] || ''}
@@ -1571,7 +1790,11 @@ export default function ReceitasPage() {
                                 insumo.is_chefe ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
                               }`}>
                                 {insumo.codigo} - {insumo.nome} • {insumo.quantidade_necessaria} {insumo.unidade_medida}
-                                {insumo.is_chefe && ' 👑'}
+                                {insumo.is_chefe && (
+                                  <span className="ml-2 text-red-600 font-bold">
+                                    👑 CHEFE
+                                  </span>
+                                )}
                               </span>
                             </div>
                           )}

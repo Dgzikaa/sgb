@@ -3,20 +3,54 @@ import { createClient } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    
-    console.log('🔍 INVESTIGAÇÃO COMPLETA - TESTANDO TUDO POSSÍVEL...');
+    const { searchParams } = new URL(request.url);
+    const barId = searchParams.get('barId');
 
-    // Buscar token válido - primeiro tentar encontrar qualquer token ativo do ContaAzul
-    const { data: contaAzulData } = await supabase
-      .from('api_credentials')
-      .select('*')
-      .eq('sistema', 'contaazul')
-      .not('access_token', 'is', null)
-      .gte('expires_at', new Date().toISOString())
-      .order('last_token_refresh', { ascending: false })
-      .limit(1)
-      .single();
+    console.log('🔍 INVESTIGAÇÃO COMPLETA - TESTANDO TUDO POSSÍVEL...');
+    console.log('Bar ID recebido:', barId);
+
+    // Usar a mesma API que o ContaAzulOAuth usa para buscar o token
+    let contaAzulData: any = null;
+    
+    if (barId) {
+      // Tentar usar a API auth para buscar o status (igual ao ContaAzulOAuth)
+      try {
+        const authResponse = await fetch(`${request.nextUrl.origin}/api/contaazul/auth?action=status&barId=${barId}`);
+        const authData = await authResponse.json();
+        
+        if (authResponse.ok && authData.connected) {
+          // Se conectado, buscar os dados completos do banco
+          const supabase = await createClient();
+          const { data } = await supabase
+            .from('api_credentials')
+            .select('*')
+            .eq('bar_id', parseInt(barId))
+            .eq('sistema', 'contaazul')
+            .single();
+          
+          contaAzulData = data;
+          console.log('Token encontrado via API auth:', !!contaAzulData?.access_token);
+        }
+      } catch (error) {
+        console.log('Erro ao usar API auth, tentando busca direta:', error);
+      }
+    }
+
+    // Fallback: buscar diretamente no banco se não funcionou via API auth
+    if (!contaAzulData) {
+      const supabase = await createClient();
+      const { data } = await supabase
+        .from('api_credentials')
+        .select('*')
+        .eq('sistema', 'contaazul')
+        .not('access_token', 'is', null)
+        .order('last_token_refresh', { ascending: false })
+        .limit(1)
+        .single();
+      
+      contaAzulData = data;
+      console.log('Token encontrado via busca direta:', !!contaAzulData?.access_token);
+    }
 
     if (!contaAzulData?.access_token) {
       return NextResponse.json({ error: 'Token ContaAzul não encontrado' }, { status: 400 });
@@ -28,6 +62,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Buscar alguns eventos recentes para investigar
+    const supabase = await createClient();
     const { data: eventosRecentes } = await supabase
       .from('contaazul_visao_competencia')
       .select('evento_id, parcela_id, tipo, descricao')
@@ -100,39 +135,39 @@ export async function GET(request: NextRequest) {
             },
           });
 
-                     const resultado: any = {
-             status: response.status,
-             ok: response.ok,
-             headers: Object.fromEntries(response.headers.entries()),
-           };
+          const resultado: any = {
+            status: response.status,
+            ok: response.ok,
+            headers: Object.fromEntries(response.headers.entries()),
+          };
 
-           if (response.ok) {
-             const data = await response.json();
-             resultado.sucesso = true;
-             resultado.dados = data;
-             resultado.tem_rateio = !!(data.rateio || data.evento?.rateio);
-             resultado.tem_categorias = !!(data.categorias || data.categoria || data.categoria_id);
-             resultado.tem_centros_custo = !!(data.centros_custo || data.centro_custo || data.centro_custo_id);
-             resultado.campos_primeiro_nivel = Object.keys(data);
-             
-             // Análise específica para diferentes tipos de resposta
-             if (endpoint.nome === 'evento_completo' && data.rateio) {
-               resultado.detalhes_rateio = {
-                 total_itens: data.rateio.length,
-                 categorias_encontradas: data.rateio.map((r: any) => r.categoria_id || r.id_categoria).filter(Boolean),
-                 centros_custo_encontrados: data.rateio.flatMap((r: any) => 
-                   (r.rateio_centro_custo || r.centros_custo || []).map((c: any) => c.centro_custo_id || c.id_centro_custo)
-                 ).filter(Boolean)
-               };
-             }
-             
-             console.log(`   ✅ ${endpoint.nome}: SUCESSO (${response.status})`);
-           } else {
-             const errorText = await response.text();
-             resultado.sucesso = false;
-             resultado.erro = errorText;
-             console.log(`   ❌ ${endpoint.nome}: ERRO (${response.status})`);
-           }
+          if (response.ok) {
+            const data = await response.json();
+            resultado.sucesso = true;
+            resultado.dados = data;
+            resultado.tem_rateio = !!(data.rateio || data.evento?.rateio);
+            resultado.tem_categorias = !!(data.categorias || data.categoria || data.categoria_id);
+            resultado.tem_centros_custo = !!(data.centros_custo || data.centro_custo || data.centro_custo_id);
+            resultado.campos_primeiro_nivel = Object.keys(data);
+            
+            // Análise específica para diferentes tipos de resposta
+            if (endpoint.nome === 'evento_completo' && data.rateio) {
+              resultado.detalhes_rateio = {
+                total_itens: data.rateio.length,
+                categorias_encontradas: data.rateio.map((r: any) => r.categoria_id || r.id_categoria).filter(Boolean),
+                centros_custo_encontrados: data.rateio.flatMap((r: any) => 
+                  (r.rateio_centro_custo || r.centros_custo || []).map((c: any) => c.centro_custo_id || c.id_centro_custo)
+                ).filter(Boolean)
+              };
+            }
+            
+            console.log(`   ✅ ${endpoint.nome}: SUCESSO (${response.status})`);
+          } else {
+            const errorText = await response.text();
+            resultado.sucesso = false;
+            resultado.erro = errorText;
+            console.log(`   ❌ ${endpoint.nome}: ERRO (${response.status})`);
+          }
 
           investigacaoEvento.testes[endpoint.nome] = resultado;
           
@@ -190,6 +225,12 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       investigacao: 'Teste de todos os endpoints possíveis',
+      debug_info: {
+        bar_id_recebido: barId,
+        token_encontrado: !!contaAzulData?.access_token,
+        token_expira_em: contaAzulData?.expires_at,
+        metodo_busca: contaAzulData ? 'sucesso' : 'falhou'
+      },
       analise,
       resultados_detalhados: resultados,
       recomendacoes: analise.descobertas.length > 0 ? 

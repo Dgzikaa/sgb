@@ -60,12 +60,17 @@ export default function ConfiguracoesPage() {
 
   // Funções para Investigação ContaAzul
   const executarInvestigacaoCompleta = async () => {
+    if (!selectedBar?.id) {
+      setInvestigacaoError('Nenhum bar selecionado');
+      return;
+    }
+
     setInvestigacaoLoading(true)
     setInvestigacaoError(null)
     setInvestigacaoResultado(null)
 
     try {
-      const response = await fetch('/api/contaazul/investigar-tudo-possivel')
+      const response = await fetch(`/api/contaazul/investigar-tudo-possivel?barId=${selectedBar.id}`)
       const data = await response.json()
       
       if (!response.ok) {
@@ -81,12 +86,17 @@ export default function ConfiguracoesPage() {
   }
 
   const executarInvestigacaoCategorias = async () => {
+    if (!selectedBar?.id) {
+      setInvestigacaoError('Nenhum bar selecionado');
+      return;
+    }
+
     setInvestigacaoLoading(true)
     setInvestigacaoError(null)
     setInvestigacaoResultado(null)
 
     try {
-      const response = await fetch('/api/contaazul/investigar-categorias-especificas')
+      const response = await fetch(`/api/contaazul/investigar-categorias-especificas?barId=${selectedBar.id}`)
       const data = await response.json()
       
       if (!response.ok) {
