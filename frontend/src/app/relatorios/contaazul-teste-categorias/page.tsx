@@ -201,7 +201,7 @@ export default function TesteVisaoCompetenciaPage() {
       const ultimoDia = new Date(parseInt(ano), parseInt(mes), 0).getDate()
       const dataFim = `${ano}-${mes}-${ultimoDia.toString().padStart(2, '0')}`
 
-      const response = await fetch('/api/contaazul/coletar-com-detalhes', {
+      const response = await fetch('/api/contaazul/coletar-com-detalhes-otimizado', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
