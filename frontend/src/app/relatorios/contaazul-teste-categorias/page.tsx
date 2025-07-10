@@ -52,6 +52,11 @@ export default function TesteVisaoCompetenciaPage() {
   const [mesAno, setMesAno] = useState('')
   const [filtroTipo, setFiltroTipo] = useState('TODOS')
   const [ultimaColeta, setUltimaColeta] = useState<string>('')
+  const [statsInsercao, setStatsInsercao] = useState({
+    total_registros_banco: 0,
+    ultima_insercao: '',
+    registros_hoje: 0
+  })
 
   useEffect(() => {
     setPageTitle('🎯 Teste - Visão de Competência com Categorias')
@@ -71,6 +76,49 @@ export default function TesteVisaoCompetenciaPage() {
       carregarDados()
     }
   }, [selectedBar?.id, mesAno])
+
+  const verificarStatsInsercao = async () => {
+    if (!selectedBar?.id) return
+
+    const supabase = await getSupabaseClient()
+    if (!supabase) return
+
+    try {
+      // Total de registros no banco para este bar
+      const { count: totalRegistros } = await supabase
+        .from('contaazul_visao_competencia')
+        .select('*', { count: 'exact', head: true })
+        .eq('bar_id', selectedBar.id)
+
+      // Registros inseridos hoje
+      const hoje = new Date().toISOString().split('T')[0]
+      const { count: registrosHoje } = await supabase
+        .from('contaazul_visao_competencia')
+        .select('*', { count: 'exact', head: true })
+        .eq('bar_id', selectedBar.id)
+        .gte('coletado_em', `${hoje}T00:00:00`)
+
+      // Última inserção
+      const { data: ultimaInsercao } = await supabase
+        .from('contaazul_visao_competencia')
+        .select('coletado_em')
+        .eq('bar_id', selectedBar.id)
+        .order('coletado_em', { ascending: false })
+        .limit(1)
+        .single()
+
+      setStatsInsercao({
+        total_registros_banco: totalRegistros || 0,
+        ultima_insercao: ultimaInsercao?.coletado_em 
+          ? new Date(ultimaInsercao.coletado_em).toLocaleString('pt-BR')
+          : 'Nunca',
+        registros_hoje: registrosHoje || 0
+      })
+
+    } catch (error) {
+      console.error('Erro ao verificar stats:', error)
+    }
+  }
 
   const carregarDados = async () => {
     if (!selectedBar?.id || !mesAno) return
@@ -132,6 +180,9 @@ export default function TesteVisaoCompetenciaPage() {
         setUltimaColeta(new Date(configData.ultima_sincronizacao).toLocaleString('pt-BR'))
       }
 
+      // Verificar estatísticas de inserção
+      await verificarStatsInsercao()
+
     } catch (error) {
       console.error('Erro:', error)
     } finally {
@@ -170,8 +221,11 @@ export default function TesteVisaoCompetenciaPage() {
       
       console.log('🎯 Resultado da coleta:', resultado)
       
-      // Recarregar dados após a coleta
-      setTimeout(carregarDados, 2000)
+      // Recarregar dados e stats após a coleta
+      setTimeout(() => {
+        carregarDados()
+        verificarStatsInsercao()
+      }, 2000)
 
     } catch (error) {
       console.error('Erro na coleta:', error)
@@ -220,7 +274,7 @@ export default function TesteVisaoCompetenciaPage() {
       </div>
 
       {/* Controles */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Mês/Ano (Competência):
@@ -258,15 +312,25 @@ export default function TesteVisaoCompetenciaPage() {
           </Button>
         </div>
         
-        <div className="flex flex-col justify-end">
-          <Button
-            onClick={executarColetaComDetalhes}
-            disabled={coletando || !selectedBar?.id}
-            className="bg-green-500 hover:bg-green-600"
-          >
-            {coletando ? '🚀 Coletando...' : '🚀 Coletar Dados'}
-          </Button>
-        </div>
+                 <div className="flex flex-col justify-end">
+           <Button
+             onClick={executarColetaComDetalhes}
+             disabled={coletando || !selectedBar?.id}
+             className="bg-green-500 hover:bg-green-600"
+           >
+             {coletando ? '🚀 Coletando...' : '🚀 Coletar Dados'}
+           </Button>
+         </div>
+         
+         <div className="flex flex-col justify-end">
+           <Button
+             onClick={verificarStatsInsercao}
+             disabled={loading}
+             className="bg-purple-500 hover:bg-purple-600"
+           >
+             🗄️ Verificar Banco
+           </Button>
+         </div>
       </div>
 
       {/* Resumo */}
@@ -338,18 +402,41 @@ export default function TesteVisaoCompetenciaPage() {
         </Card>
       </div>
 
-      {/* Status */}
-      <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-sm font-medium text-gray-700">Última coleta:</span>
-            <span className="ml-2 text-sm text-gray-600">
-              {ultimaColeta || 'Nunca executada'}
-            </span>
+      {/* Status e Estatísticas de Inserção */}
+      <div className="mb-6 space-y-4">
+        <div className="p-4 bg-gray-50 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-sm font-medium text-gray-700">Última coleta:</span>
+              <span className="ml-2 text-sm text-gray-600">
+                {ultimaColeta || 'Nunca executada'}
+              </span>
+            </div>
+            <div>
+              <span className="text-sm font-medium text-gray-700">Registros encontrados:</span>
+              <span className="ml-2 text-sm text-gray-600">{dadosFiltrados.length}</span>
+            </div>
           </div>
-          <div>
-            <span className="text-sm font-medium text-gray-700">Registros encontrados:</span>
-            <span className="ml-2 text-sm text-gray-600">{dadosFiltrados.length}</span>
+        </div>
+
+        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <h3 className="font-semibold text-blue-800 mb-3">🗄️ Estatísticas de Inserção no Banco</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <span className="text-sm font-medium text-blue-700">Total no banco:</span>
+              <div className="text-2xl font-bold text-blue-600">{statsInsercao.total_registros_banco}</div>
+            </div>
+            <div>
+              <span className="text-sm font-medium text-blue-700">Inseridos hoje:</span>
+              <div className="text-2xl font-bold text-green-600">{statsInsercao.registros_hoje}</div>
+            </div>
+            <div>
+              <span className="text-sm font-medium text-blue-700">Última inserção:</span>
+              <div className="text-sm text-blue-600">{statsInsercao.ultima_insercao}</div>
+            </div>
+          </div>
+          <div className="mt-3 text-xs text-blue-600">
+            💡 Estes números mostram se a API está realmente inserindo dados na tabela contaazul_visao_competencia
           </div>
         </div>
       </div>
