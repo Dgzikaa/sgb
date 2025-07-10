@@ -8,7 +8,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "validate-pages": "node scripts/validate-pages.js",
+    "fix-pages": "node scripts/fix-pages-automatically.js",
+    "prebuild": "npm run validate-pages"
   },
   "dependencies": {
     "@radix-ui/react-select": "^2.2.5",

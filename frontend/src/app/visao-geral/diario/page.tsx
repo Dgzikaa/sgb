@@ -5,7 +5,6 @@ import { useBar } from '@/contexts/BarContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { PageBase, PageHeader, PageContent, PageCard, PageText } from '@/components/ui/page-base'
 import { 
   CalendarDays, 
   TrendingUp, 
@@ -164,23 +163,23 @@ function DashboardDiarioContent() {
 
   if (loading) {
     return (
-      <PageBase className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-        <PageHeader title="📊 Dashboard Diário" />
-        <PageContent>
+      <div className="space-y-6">
+        
+        
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
               <PageText className="text-gray-600">Carregando métricas diárias...</PageText>
             </div>
           </div>
-        </PageContent>
-      </PageBase>
+        
+      </div>
     )
   }
 
   return (
-    <PageBase className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <PageHeader title="📊 Dashboard Diário" />
+    <div className="space-y-6">
+      
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
           <PageText className="text-gray-600 capitalize">{dataAtual}</PageText>
@@ -197,7 +196,7 @@ function DashboardDiarioContent() {
         </Button>
       </div>
       
-      <PageContent>
+      
         {/* Alertas */}
         {metricas.alertas.length > 0 && (
           <div className="mb-6 space-y-2">
@@ -511,8 +510,8 @@ function DashboardDiarioContent() {
             </div>
           </CardContent>
         </Card>
-      </PageContent>
-    </PageBase>
+      
+    </div>
   )
 }
 

@@ -477,11 +477,70 @@ export default function ContaAzulOAuth() {
               </ul>
               
               <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
-                <p className="text-blue-800 font-medium text-sm">🎯 Próxima Funcionalidade:</p>
+                <p className="text-blue-800 font-medium text-sm">🎯 Estratégia de Categorização:</p>
                 <p className="text-blue-700 text-sm">
-                  Teste da estratégia de 2 etapas será implementado em breve para buscar categorias e centros de custo.
+                  Baseado na análise da API financeira da ContaAzul, implementaremos uma estratégia de 2 etapas para obter categorias e centros de custo.
                 </p>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Análise da API e Estratégia */}
+      {status?.connected && (
+        <Card className="border-amber-200 bg-amber-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-amber-600" />
+              📊 Análise da API ContaAzul
+            </CardTitle>
+            <CardDescription>
+              Limitações identificadas e estratégia para categorização
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <h4 className="font-medium text-amber-800">🔍 Limitações Identificadas:</h4>
+                <ul className="text-amber-700 text-sm space-y-1">
+                  <li>• Endpoints de busca não retornam categorias diretamente</li>
+                  <li>• Dados de rateio não inclusos nas respostas padrão</li>
+                  <li>• Necessário múltiplas chamadas para dados completos</li>
+                  <li>• Performance comprometida com muitas transações</li>
+                </ul>
+              </div>
+              
+              <div className="space-y-3">
+                <h4 className="font-medium text-amber-800">🎯 Estratégia de 2 Etapas:</h4>
+                <ul className="text-amber-700 text-sm space-y-1">
+                  <li>• <strong>Etapa 1:</strong> Buscar lista básica de transações</li>
+                  <li>• <strong>Etapa 2:</strong> Para cada transação, buscar detalhes via /parcelas/ID</li>
+                  <li>• Implementar cache para otimizar performance</li>
+                  <li>• Processar em lotes para evitar rate limiting</li>
+                </ul>
+              </div>
+            </div>
+
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="text-sm">
+                <strong>Endpoints utilizados:</strong><br/>
+                • <code>/v1/financeiro/eventos-financeiros/contas-a-receber/buscar</code> - Lista básica<br/>
+                • <code>/v1/financeiro/eventos-financeiros/parcelas/[id]</code> - Detalhes com categorias<br/>
+                • <code>/v1/categorias</code> - Gerenciar categorias<br/>
+                • <code>/v1/centro-de-custo</code> - Gerenciar centros de custo
+              </AlertDescription>
+            </Alert>
+
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <h4 className="font-medium text-blue-800 mb-2">🚀 Próximos Passos:</h4>
+              <ol className="text-blue-700 text-sm space-y-1">
+                <li>1. Implementar Edge Function para processamento em lotes</li>
+                <li>2. Criar sistema de cache para categorias e centros de custo</li>
+                <li>3. Desenvolver interface para visualização dos dados</li>
+                <li>4. Adicionar mapeamento inteligente com IA</li>
+              </ol>
             </div>
           </CardContent>
         </Card>

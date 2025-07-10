@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { PageBase, PageHeader, PageContent, PageCard, PageText } from '@/components/ui/page-base'
+
 
 interface ContaHubStatus {
   contahub_disponivel: boolean;
@@ -457,13 +457,10 @@ export default function ContaHubTestePage() {
   };
 
   return (
-    <PageBase>
-      <PageHeader
-        title="🧪 Teste ContaHub"
-        description="Teste de coleta de dados de 5 dias do ContaHub"
-      />
+    <div className="space-y-6">
+      
 
-      <PageContent>
+      
         {/* Banner de Status do ContaHub */}
         {statusLoading ? (
           <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
@@ -1629,7 +1626,7 @@ export default function ContaHubTestePage() {
             </div>
           </div>
         </PageCard>
-      </PageContent>
-    </PageBase>
+      
+    </div>
   )
 } 
