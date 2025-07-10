@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { usePageTitle } from '@/contexts/PageTitleContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -64,7 +63,6 @@ const estadosBrasil = [
 ]
 
 export default function MinhaContaPage() {
-  const { setPageTitle } = usePageTitle()
   const { user } = usePermissions()
   
   const [perfil, setPerfil] = useState<PerfilUsuario | null>(null)
@@ -83,9 +81,8 @@ export default function MinhaContaPage() {
   const [salvandoSenha, setSalvandoSenha] = useState(false)
 
   useEffect(() => {
-    setPageTitle('Minha conta')
     carregarPerfil()
-  }, [setPageTitle])
+  }, [])
 
   const carregarPerfil = async () => {
     try {

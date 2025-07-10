@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { getUserAuth } from '@/lib/auth-helper'
 
+// Força runtime dinâmico para evitar erro de static generation
+export const dynamic = 'force-dynamic'
+
 // GET - Buscar dados do perfil do usuário logado
 export async function GET(request: NextRequest) {
   try {
