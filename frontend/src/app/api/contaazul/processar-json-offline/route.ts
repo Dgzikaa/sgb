@@ -168,7 +168,7 @@ async function processarArquivoJson(
   console.log(`📄 Lendo arquivo: ${filePath}...`);
   const inicioLeitura = Date.now();
 
-  // Baixar arquivo JSON do Storage
+  // Baixar arquivo JSON do Storage (garantindo que o bucket existe)
   const { data: fileData, error: downloadError } = await supabase.storage
     .from('contaazul-dados')
     .download(filePath);

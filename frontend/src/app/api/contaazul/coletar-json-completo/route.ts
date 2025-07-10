@@ -114,6 +114,36 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// Garantir que o bucket existe no Storage
+async function garantirBucketExiste() {
+  try {
+    // Tentar listar o bucket para ver se existe
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const bucketExists = buckets?.some(bucket => bucket.name === 'contaazul-dados');
+    
+    if (!bucketExists) {
+      console.log('📦 Bucket não existe, criando...');
+      const { error: createError } = await supabase.storage.createBucket('contaazul-dados', {
+        public: false,
+        allowedMimeTypes: ['application/json'],
+        fileSizeLimit: 1024 * 1024 * 100 // 100MB max
+      });
+      
+      if (createError) {
+        console.error('❌ Erro ao criar bucket:', createError);
+        throw createError;
+      }
+      
+      console.log('✅ Bucket contaazul-dados criado com sucesso!');
+    } else {
+      console.log('✅ Bucket contaazul-dados já existe');
+    }
+  } catch (error) {
+    console.error('❌ Erro ao verificar/criar bucket:', error);
+    throw error;
+  }
+}
+
 // FASE 1: Coletar dados auxiliares (pequenos - inserir direto)
 async function coletarDadosAuxiliares(accessToken: string, barId: number, resultado: any) {
   const headers = {
@@ -232,7 +262,7 @@ async function coletarTodosOsJsons(
     : 'contas-a-pagar/buscar';
   
   let pagina = 1;
-  const tamanhoPagina = 50;
+  const tamanhoPagina = 500; // Muito mais eficiente!
   let todasParcelas: any[] = [];
   let totalPaginas = 0;
 
@@ -281,8 +311,8 @@ async function coletarTodosOsJsons(
 
       pagina++;
       
-      // Pausa para evitar rate limit
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Pausa maior para evitar rate limit (páginas maiores = mais cuidado)
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
     } catch (error) {
       console.error(`❌ Erro na página ${pagina} de ${tipo}:`, error);
@@ -309,6 +339,9 @@ async function coletarTodosOsJsons(
 
   const fileName = `${tipo}_${dataInicio}_${dataFim}.json`;
   const filePath = `${resultado.storage_path}${fileName}`;
+  
+  // Garantir que o bucket existe
+  await garantirBucketExiste();
   
   const { data: uploadData, error: uploadError } = await supabase.storage
     .from('contaazul-dados')
