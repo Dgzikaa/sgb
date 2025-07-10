@@ -30,7 +30,8 @@ export default function ContaAzulOAuth() {
   const { toast } = useToast();
   const { selectedBar } = useBarContext();
   
-  console.log('🔍 ContaAzulOAuth renderizando...', { selectedBar });
+  // Remover console.log excessivo
+  // console.log('🔍 ContaAzulOAuth renderizando...', { selectedBar });
   
   const [status, setStatus] = useState<ContaAzulStatus | null>(null);
   const [loading, setLoading] = useState(false);
