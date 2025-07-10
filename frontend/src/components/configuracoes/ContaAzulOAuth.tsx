@@ -31,6 +31,9 @@ export default function ContaAzulOAuth() {
   const { toast } = useToast();
   const { selectedBar } = useBarContext();
   
+  // DEBUG: Log para identificar problemas
+  console.log('🔍 ContaAzulOAuth renderizando...', { selectedBar });
+  
   const [status, setStatus] = useState<ContaAzulStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [configuring, setConfiguring] = useState(false);

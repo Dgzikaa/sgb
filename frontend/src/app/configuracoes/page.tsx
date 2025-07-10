@@ -1514,7 +1514,23 @@ function ConfiguracoesContent() {
                 
                 <div className="space-y-6">
                   {/* ContaAzul OAuth Integration */}
-                  <ContaAzulOAuth />
+                  <ErrorBoundary fallback={
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                      <h3 className="text-lg font-semibold text-red-800 mb-2">⚠️ Erro no ContaAzul</h3>
+                      <p className="text-red-700 mb-4">
+                        Ocorreu um erro ao carregar a integração do ContaAzul. 
+                        Isso pode ser um problema temporário.
+                      </p>
+                      <button 
+                        onClick={() => window.location.reload()}
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                      >
+                        🔄 Recarregar Página
+                      </button>
+                    </div>
+                  }>
+                    <ContaAzulOAuth />
+                  </ErrorBoundary>
 
                   {/* Placeholder for other integrations */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
