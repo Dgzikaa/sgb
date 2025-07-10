@@ -123,10 +123,9 @@ async function garantirBucketExiste() {
     
     if (!bucketExists) {
       console.log('📦 Bucket não existe, criando...');
+      // Criação simples do bucket - sem configurações complexas que podem causar erro 413
       const { error: createError } = await supabase.storage.createBucket('contaazul-dados', {
-        public: false,
-        allowedMimeTypes: ['application/json'],
-        fileSizeLimit: 1024 * 1024 * 100 // 100MB max
+        public: false
       });
       
       if (createError) {
