@@ -241,9 +241,9 @@ export default function ContaAzulOAuth() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           bar_id: selectedBar.id,
-          // Coletar mês atual por padrão
-          data_inicio: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
-          data_fim: new Date().toISOString().split('T')[0]
+          // Período amplo para capturar todos os dados históricos
+          data_inicio: '2024-01-01',
+          data_fim: '2027-01-01'
         })
       });
       

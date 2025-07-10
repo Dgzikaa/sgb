@@ -25,9 +25,9 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Parâmetros recebidos:', { bar_id, data_inicio, data_fim });
 
-    // Definir período padrão se não fornecido
-    const dataInicio = data_inicio || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
-    const dataFim = data_fim || new Date().toISOString().split('T')[0];
+    // Definir período padrão se não fornecido (período amplo para capturar todos os dados)
+    const dataInicio = data_inicio || '2024-01-01';
+    const dataFim = data_fim || '2027-01-01';
     
     console.log(`📅 Período: ${dataInicio} até ${dataFim}`);
 
