@@ -1,12 +1,25 @@
-import EmConstrucao from '@/components/EmConstrucao'
+'use client'
 
-export default function RecorrenciaPage() {
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+
+export default function RecorrenciaRedirect() {
+  const router = useRouter()
+
+  useEffect(() => {
+    // Redirecionar para a nova localização
+    router.replace('/reservas/recorrencia')
+  }, [router])
+
   return (
-    <EmConstrucao 
-      titulo="Análise de Recorrência"
-      descricao="Análise de clientes recorrentes, frequência de visitas e padrões de consumo."
-      prioridade="media"
-      previsao="3-4 semanas"
-    />
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+        <p className="text-slate-600">Redirecionando para nova localização...</p>
+        <p className="text-sm text-slate-400 mt-2">
+          Esta página foi movida para <strong>/reservas/recorrencia</strong>
+        </p>
+      </div>
+    </div>
   )
 } 

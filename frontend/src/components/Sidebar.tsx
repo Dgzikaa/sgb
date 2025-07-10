@@ -76,10 +76,10 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
       icon: '📋',
       items: [
         { id: 'funcionario-checklists', label: 'Meus Checklists', icon: '📝', route: '/funcionario/checklists', requiredModule: null },
-        { id: 'checklist-abertura', label: 'Checklist Abertura', icon: '✅', route: '/operacoes/checklist-abertura', requiredModule: 'operacoes' },
+        { id: 'checklist-abertura', label: 'Checklist Abertura', icon: '✅', route: '/checklists/abertura', requiredModule: 'operacoes' },
         { id: 'checklists-admin', label: 'Admin Checklists', icon: '🔧', route: '/admin/checklists', requiredModule: 'operacoes', requiredRole: 'admin' },
         { id: 'templates', label: 'Templates', icon: '📄', route: '/admin/templates', requiredModule: 'operacoes', requiredRole: 'admin' },
-        { id: 'relatorios-checklists', label: 'Relatórios Checklists', icon: '📊', route: '/admin/relatorios/checklists', requiredModule: 'operacoes', requiredRole: 'admin' },
+        { id: 'relatorios-checklists', label: 'Relatórios Checklists', icon: '📊', route: '/relatorios/checklists', requiredModule: 'operacoes', requiredRole: 'admin' },
       ]
     },
 

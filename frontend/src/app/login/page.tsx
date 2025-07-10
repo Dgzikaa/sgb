@@ -11,6 +11,10 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotLoading, setForgotLoading] = useState(false)
+  const [forgotSuccess, setForgotSuccess] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   
@@ -64,6 +68,39 @@ export default function LoginPage() {
       return () => clearTimeout(timer)
     }
   }, [success])
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setForgotLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: forgotEmail })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        setForgotSuccess(true)
+        setTimeout(() => {
+          setShowForgotPassword(false)
+          setForgotSuccess(false)
+          setForgotEmail('')
+        }, 3000)
+      } else {
+        setError(result.error || 'Erro ao enviar e-mail de recuperação')
+      }
+    } catch (error: any) {
+      setError('Erro na conexão: ' + error.message)
+    } finally {
+      setForgotLoading(false)
+    }
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -231,9 +268,13 @@ export default function LoginPage() {
 
           {/* Links adicionais */}
           <div className="mt-8 text-center">
-            <a href="#" className="text-sm text-slate-500 hover:text-indigo-600 transition-colors font-medium">
+            <button
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
+              className="text-sm text-slate-500 hover:text-indigo-600 transition-colors font-medium"
+            >
               Esqueceu sua senha?
-            </a>
+            </button>
           </div>
         </div>
 
@@ -242,6 +283,83 @@ export default function LoginPage() {
           <p>© 2025 Sistema de Gestão de Bares - Todos os direitos reservados</p>
         </div>
       </div>
+
+      {/* Modal Esqueci Minha Senha */}
+      {showForgotPassword && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                <span className="text-2xl">🔑</span>
+              </div>
+              <h2 className="text-2xl font-bold text-slate-800 mb-2">
+                Recuperar Senha
+              </h2>
+              <p className="text-slate-600">
+                Digite seu e-mail para receber as instruções de recuperação
+              </p>
+            </div>
+
+            {forgotSuccess ? (
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                  <span className="text-2xl text-green-600">✓</span>
+                </div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                  E-mail Enviado!
+                </h3>
+                <p className="text-slate-600 mb-4">
+                  Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.
+                </p>
+                <div className="text-sm text-slate-500">
+                  Este modal será fechado automaticamente...
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    E-mail
+                  </label>
+                  <input
+                    type="email"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    className="elegant-input w-full"
+                    placeholder="seu@email.com"
+                    required
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowForgotPassword(false)
+                      setForgotEmail('')
+                      setError(null)
+                    }}
+                    className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-3 px-4 rounded-xl transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={forgotLoading}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {forgotLoading ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto" />
+                    ) : (
+                      'Enviar'
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 } 

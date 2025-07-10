@@ -577,3 +577,472 @@ export async function createWhatsAppService(barId: number): Promise<WhatsAppNoti
   
   return initialized ? service : null;
 } 
+
+// =====================================================
+// 📱 SERVIÇO WHATSAPP - LEMBRETES E COMPARTILHAMENTO
+// =====================================================
+
+interface ChecklistAlert {
+  id: string
+  checklistId: string
+  titulo: string
+  categoria: string
+  nivel: 'baixo' | 'medio' | 'alto' | 'critico'
+  tempoAtraso: number
+  horaEsperada: string
+  responsavel?: string
+  setor?: string
+}
+
+interface ChecklistExecution {
+  id: string
+  checklist_id: string
+  titulo: string
+  responsavel: string
+  setor: string
+  tempo_execucao: number
+  total_itens: number
+  itens_ok: number
+  itens_problema: number
+  status: string
+  observacoes_gerais?: string
+  concluido_em: string
+}
+
+interface WhatsAppMessageTemplates {
+  reminder: string
+  alert: string
+  completion: string
+  share: string
+}
+
+// =====================================================
+// 🔔 SISTEMA DE LEMBRETES AUTOMÁTICOS
+// =====================================================
+
+export class WhatsAppService {
+  
+  // Templates padrão de mensagens
+  private static templates: WhatsAppMessageTemplates = {
+    reminder: `🔔 *Lembrete SGB*
+
+Olá {FUNCIONARIO}! Você tem um checklist pendente:
+
+📋 *{CHECKLIST_NOME}*
+⏰ Horário: {HORARIO}
+📍 Setor: {SETOR}
+⚡ Prioridade: {PRIORIDADE}
+
+Por favor, execute o checklist no horário programado.
+
+_Sistema de Gestão de Bares_`,
+
+    alert: `🚨 *ALERTA - Checklist Atrasado*
+
+⚠️ O checklist está atrasado!
+
+📋 *{CHECKLIST_NOME}*
+👤 Responsável: {FUNCIONARIO}
+⏰ Era para: {HORARIO}
+⏱️ Atraso: {TEMPO_ATRASO}
+🎯 Nível: {NIVEL_URGENCIA}
+
+Por favor, execute URGENTEMENTE!
+
+_Sistema de Gestão de Bares_`,
+
+    completion: `✅ *Checklist Concluído*
+
+📋 *{CHECKLIST_NOME}*
+👤 Responsável: {FUNCIONARIO}
+📍 Setor: {SETOR}
+⏱️ Tempo: {TEMPO_EXECUCAO}min
+📊 Status: {STATUS}
+
+{RESUMO_RESULTADOS}
+
+_Sistema de Gestão de Bares_`,
+
+    share: `📋 *Relatório de Checklist*
+
+✅ *{CHECKLIST_NOME}*
+📅 Data: {DATA}
+👤 Responsável: {FUNCIONARIO}
+📍 Setor: {SETOR}
+
+📊 *Resultados:*
+• ✅ Itens OK: {ITENS_OK}
+• ❌ Problemas: {ITENS_PROBLEMA}
+• 📊 Total: {TOTAL_ITENS}
+• ⏱️ Tempo: {TEMPO_EXECUCAO}min
+
+{OBSERVACOES}
+
+_Sistema de Gestão de Bares_`
+  }
+
+  // =====================================================
+  // 📤 ENVIAR MENSAGEM
+  // =====================================================
+  
+  static async sendMessage(to: string, message: string): Promise<boolean> {
+    try {
+      const response = await fetch('/api/whatsapp/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          to: to.replace(/\D/g, ''), // Remove tudo que não é número
+          message
+        })
+      })
+
+      const result = await response.json()
+      return result.success
+    } catch (error) {
+      console.error('Erro ao enviar mensagem WhatsApp:', error)
+      return false
+    }
+  }
+
+  // =====================================================
+  // 🔔 LEMBRETE DE CHECKLIST
+  // =====================================================
+  
+  static async sendReminder(
+    phoneNumber: string,
+    checklistNome: string,
+    horario: string,
+    setor: string,
+    funcionario: string,
+    prioridade: string
+  ): Promise<boolean> {
+    
+    const message = this.templates.reminder
+      .replace('{FUNCIONARIO}', funcionario)
+      .replace('{CHECKLIST_NOME}', checklistNome)
+      .replace('{HORARIO}', horario)
+      .replace('{SETOR}', setor)
+      .replace('{PRIORIDADE}', this.formatPrioridade(prioridade))
+
+    return this.sendMessage(phoneNumber, message)
+  }
+
+  // =====================================================
+  // 🚨 ALERTA DE ATRASO
+  // =====================================================
+  
+  static async sendAlert(phoneNumber: string, alert: ChecklistAlert): Promise<boolean> {
+    
+    const tempoAtraso = this.formatTempoAtraso(alert.tempoAtraso)
+    const nivelUrgencia = this.formatNivelUrgencia(alert.nivel)
+    
+    const message = this.templates.alert
+      .replace('{CHECKLIST_NOME}', alert.titulo)
+      .replace('{FUNCIONARIO}', alert.responsavel || 'Responsável')
+      .replace('{HORARIO}', alert.horaEsperada)
+      .replace('{TEMPO_ATRASO}', tempoAtraso)
+      .replace('{NIVEL_URGENCIA}', nivelUrgencia)
+
+    return this.sendMessage(phoneNumber, message)
+  }
+
+  // =====================================================
+  // ✅ CONFIRMAÇÃO DE CONCLUSÃO
+  // =====================================================
+  
+  static async sendCompletion(
+    phoneNumber: string,
+    execution: ChecklistExecution
+  ): Promise<boolean> {
+    
+    const resumoResultados = this.generateResultSummary(execution)
+    const status = this.formatStatus(execution.status)
+    
+    const message = this.templates.completion
+      .replace('{CHECKLIST_NOME}', execution.titulo)
+      .replace('{FUNCIONARIO}', execution.responsavel)
+      .replace('{SETOR}', execution.setor)
+      .replace('{TEMPO_EXECUCAO}', execution.tempo_execucao.toString())
+      .replace('{STATUS}', status)
+      .replace('{RESUMO_RESULTADOS}', resumoResultados)
+
+    return this.sendMessage(phoneNumber, message)
+  }
+
+  // =====================================================
+  // 📤 COMPARTILHAR CHECKLIST
+  // =====================================================
+  
+  static async shareChecklist(
+    phoneNumbers: string[],
+    execution: ChecklistExecution
+  ): Promise<{ success: number; failed: number }> {
+    
+    const data = new Date(execution.concluido_em).toLocaleDateString('pt-BR')
+    const observacoes = execution.observacoes_gerais 
+      ? `💬 *Observações:*\n${execution.observacoes_gerais}`
+      : ''
+    
+    const message = this.templates.share
+      .replace('{CHECKLIST_NOME}', execution.titulo)
+      .replace('{DATA}', data)
+      .replace('{FUNCIONARIO}', execution.responsavel)
+      .replace('{SETOR}', execution.setor)
+      .replace('{ITENS_OK}', execution.itens_ok.toString())
+      .replace('{ITENS_PROBLEMA}', execution.itens_problema.toString())
+      .replace('{TOTAL_ITENS}', execution.total_itens.toString())
+      .replace('{TEMPO_EXECUCAO}', execution.tempo_execucao.toString())
+      .replace('{OBSERVACOES}', observacoes)
+
+    let success = 0
+    let failed = 0
+
+    // Enviar para cada número com delay para não sobrecarregar
+    for (const phoneNumber of phoneNumbers) {
+      const sent = await this.sendMessage(phoneNumber, message)
+      
+      if (sent) {
+        success++
+      } else {
+        failed++
+      }
+      
+      // Delay de 1 segundo entre envios
+      if (phoneNumbers.indexOf(phoneNumber) < phoneNumbers.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      }
+    }
+
+    return { success, failed }
+  }
+
+  // =====================================================
+  // 🧪 TESTE DE CONEXÃO
+  // =====================================================
+  
+  static async testConnection(phoneNumber: string): Promise<boolean> {
+    try {
+      const response = await fetch(`/api/whatsapp/send?to=${phoneNumber}`)
+      const result = await response.json()
+      return result.success
+    } catch (error) {
+      console.error('Erro no teste de conexão WhatsApp:', error)
+      return false
+    }
+  }
+
+  // =====================================================
+  // 🔧 FUNÇÕES AUXILIARES
+  // =====================================================
+  
+  private static formatPrioridade(prioridade: string): string {
+    const prioridades: Record<string, string> = {
+      'baixa': '🟢 Baixa',
+      'media': '🟡 Média',
+      'alta': '🟠 Alta',
+      'critica': '🔴 Crítica'
+    }
+    return prioridades[prioridade] || prioridade
+  }
+
+  private static formatNivelUrgencia(nivel: string): string {
+    const niveis: Record<string, string> = {
+      'baixo': '🔵 BAIXO',
+      'medio': '🟡 MÉDIO',
+      'alto': '🟠 ALTO',
+      'critico': '🔴 CRÍTICO'
+    }
+    return niveis[nivel] || nivel.toUpperCase()
+  }
+
+  private static formatTempoAtraso(minutos: number): string {
+    if (minutos < 60) {
+      return `${minutos} minutos`
+    }
+    
+    const horas = Math.floor(minutos / 60)
+    const mins = minutos % 60
+    
+    if (mins === 0) {
+      return `${horas} hora${horas > 1 ? 's' : ''}`
+    }
+    
+    return `${horas}h ${mins}min`
+  }
+
+  private static formatStatus(status: string): string {
+    const statusMap: Record<string, string> = {
+      'completed': '✅ Concluído',
+      'completed_with_issues': '⚠️ Concluído com Problemas',
+      'partial': '🔶 Parcialmente Concluído',
+      'failed': '❌ Falhou'
+    }
+    return statusMap[status] || status
+  }
+
+  private static generateResultSummary(execution: ChecklistExecution): string {
+    const total = execution.total_itens
+    const ok = execution.itens_ok
+    const problemas = execution.itens_problema
+    const percentualOk = total > 0 ? Math.round((ok / total) * 100) : 0
+
+    let summary = `📊 *${percentualOk}% Concluído*\n`
+    summary += `• ✅ ${ok} itens OK\n`
+    
+    if (problemas > 0) {
+      summary += `• ❌ ${problemas} problemas\n`
+    }
+    
+    summary += `• 📋 ${total} itens total`
+
+    // Adicionar emoji baseado na performance
+    if (percentualOk >= 95) {
+      summary += '\n\n🎉 Excelente trabalho!'
+    } else if (percentualOk >= 80) {
+      summary += '\n\n👍 Bom trabalho!'
+    } else if (percentualOk >= 60) {
+      summary += '\n\n⚠️ Precisa melhorar'
+    } else {
+      summary += '\n\n🚨 Atenção necessária'
+    }
+
+    return summary
+  }
+
+  // =====================================================
+  // 📝 TEMPLATES CUSTOMIZADOS
+  // =====================================================
+  
+  static setCustomTemplates(customTemplates: Partial<WhatsAppMessageTemplates>): void {
+    this.templates = { ...this.templates, ...customTemplates }
+  }
+
+  static getTemplates(): WhatsAppMessageTemplates {
+    return { ...this.templates }
+  }
+
+  // =====================================================
+  // 📊 ESTATÍSTICAS DE ENVIO
+  // =====================================================
+  
+  static async getMessageStats(userId: string): Promise<{
+    total: number
+    sent: number
+    failed: number
+    lastSent?: string
+  }> {
+    try {
+      const response = await fetch(`/api/whatsapp/stats?user_id=${userId}`)
+      const result = await response.json()
+      return result
+    } catch (error) {
+      console.error('Erro ao buscar estatísticas WhatsApp:', error)
+      return { total: 0, sent: 0, failed: 0 }
+    }
+  }
+
+  // =====================================================
+  // 🔄 PROCESSAMENTO DE LEMBRETES AUTOMÁTICOS
+  // =====================================================
+  
+  static async processScheduledReminders(): Promise<void> {
+    try {
+      await fetch('/api/whatsapp/process-reminders', {
+        method: 'POST'
+      })
+    } catch (error) {
+      console.error('Erro ao processar lembretes automáticos:', error)
+    }
+  }
+
+  // =====================================================
+  // 📱 VALIDAÇÃO DE NÚMERO
+  // =====================================================
+  
+  static validatePhoneNumber(phoneNumber: string): boolean {
+    // Remove tudo que não é número
+    const cleaned = phoneNumber.replace(/\D/g, '')
+    
+    // Verifica se tem pelo menos 10 dígitos (considerando números brasileiros)
+    if (cleaned.length < 10) return false
+    
+    // Se começar com 55 (código do Brasil), deve ter 13 dígitos
+    if (cleaned.startsWith('55') && cleaned.length !== 13) return false
+    
+    // Se não começar com 55, deve ter 11 dígitos (com DDD)
+    if (!cleaned.startsWith('55') && cleaned.length !== 11) return false
+    
+    return true
+  }
+
+  static formatPhoneNumber(phoneNumber: string): string {
+    const cleaned = phoneNumber.replace(/\D/g, '')
+    
+    // Se não começar com 55, adiciona
+    if (!cleaned.startsWith('55')) {
+      return `55${cleaned}`
+    }
+    
+    return cleaned
+  }
+}
+
+// =====================================================
+// 🎯 HOOK PARA WHATSAPP
+// =====================================================
+
+export function useWhatsApp() {
+  const sendMessage = async (to: string, message: string) => {
+    return WhatsAppService.sendMessage(to, message)
+  }
+
+  const sendReminder = async (
+    phoneNumber: string,
+    checklistNome: string,
+    horario: string,
+    setor: string,
+    funcionario: string,
+    prioridade: string
+  ) => {
+    return WhatsAppService.sendReminder(
+      phoneNumber, checklistNome, horario, setor, funcionario, prioridade
+    )
+  }
+
+  const sendAlert = async (phoneNumber: string, alert: ChecklistAlert) => {
+    return WhatsAppService.sendAlert(phoneNumber, alert)
+  }
+
+  const sendCompletion = async (phoneNumber: string, execution: ChecklistExecution) => {
+    return WhatsAppService.sendCompletion(phoneNumber, execution)
+  }
+
+  const shareChecklist = async (phoneNumbers: string[], execution: ChecklistExecution) => {
+    return WhatsAppService.shareChecklist(phoneNumbers, execution)
+  }
+
+  const testConnection = async (phoneNumber: string) => {
+    return WhatsAppService.testConnection(phoneNumber)
+  }
+
+  const validatePhone = (phoneNumber: string) => {
+    return WhatsAppService.validatePhoneNumber(phoneNumber)
+  }
+
+  const formatPhone = (phoneNumber: string) => {
+    return WhatsAppService.formatPhoneNumber(phoneNumber)
+  }
+
+  return {
+    sendMessage,
+    sendReminder,
+    sendAlert,
+    sendCompletion,
+    shareChecklist,
+    testConnection,
+    validatePhone,
+    formatPhone
+  }
+} 

@@ -7,9 +7,9 @@ export async function POST(request: NextRequest) {
 
     console.log('🔐 Redefinindo senha para:', { email })
 
-    if (!email || !novaSenha) {
+    if (!email || !novaSenha || !token) {
       return NextResponse.json(
-        { success: false, error: 'Email e nova senha são obrigatórios' },
+        { success: false, error: 'Email, nova senha e token são obrigatórios' },
         { status: 400 }
       )
     }
@@ -33,23 +33,35 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Buscar usuário pelo email
-    console.log('🔍 Buscando usuário no banco...')
+    // Buscar usuário pelo email e validar token
+    console.log('🔍 Buscando usuário e validando token...')
     const { data: usuarioData, error: usuarioError } = await adminClient
-      .from('usuarios_bar')
-      .select('user_id, nome')
+      .from('usuario_bares')
+      .select('user_id, nome, reset_token, reset_token_expiry')
       .eq('email', email)
+      .eq('reset_token', token)
       .single()
 
     if (usuarioError || !usuarioData) {
-      console.error('❌ Usuário não encontrado:', usuarioError)
+      console.error('❌ Usuário não encontrado ou token inválido:', usuarioError)
       return NextResponse.json(
-        { success: false, error: 'Usuário não encontrado' },
+        { success: false, error: 'Token inválido ou expirado' },
         { status: 404 }
       )
     }
 
-    console.log('✅ Usuário encontrado:', usuarioData.nome)
+    // Verificar se o token não expirou
+    if (usuarioData.reset_token_expiry) {
+      const tokenExpiry = new Date(usuarioData.reset_token_expiry)
+      if (tokenExpiry < new Date()) {
+        return NextResponse.json(
+          { success: false, error: 'Token expirado. Solicite uma nova recuperação de senha' },
+          { status: 400 }
+        )
+      }
+    }
+
+    console.log('✅ Usuário encontrado e token válido:', usuarioData.nome)
 
     // Atualizar senha no Supabase Auth
     console.log('🔑 Atualizando senha no Auth...')
@@ -71,11 +83,13 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Senha atualizada com sucesso')
 
-    // Opcionalmente, marcar que o usuário já redefiniu a senha
+    // Limpar token de reset e marcar que o usuário já redefiniu a senha
     await adminClient
-      .from('usuarios_bar')
+      .from('usuario_bares')
       .update({ 
         senha_redefinida: true,
+        reset_token: null,
+        reset_token_expiry: null,
         atualizado_em: new Date().toISOString()
       })
       .eq('user_id', usuarioData.user_id)
