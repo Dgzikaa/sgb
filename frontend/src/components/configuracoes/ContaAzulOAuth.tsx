@@ -1119,6 +1119,7 @@ export default function ContaAzulOAuth() {
               <div>
                 <Label htmlFor="dataInicio">Data Início</Label>
                 <Input
+                  id="dataInicio"
                   type="date"
                   value={dataInicio}
                   onChange={(e) => setDataInicio(e.target.value)}
@@ -1127,6 +1128,7 @@ export default function ContaAzulOAuth() {
               <div>
                 <Label htmlFor="dataFim">Data Fim</Label>
                 <Input
+                  id="dataFim"
                   type="date"
                   value={dataFim}
                   onChange={(e) => setDataFim(e.target.value)}
