@@ -216,7 +216,7 @@ async function coletarFinanceiroRaw(
   const tipoMaiusculo = tipo === 'receitas' ? 'RECEITA' : 'DESPESA';
   
   let pagina = 1;
-  const tamanhoPagina = 500; // MAIOR para ser mais rápido
+  const tamanhoPagina = 200; // REDUZIR para 200 (vs 500) para ser mais rápido
   let continuarColetando = true;
 
   while (continuarColetando) {
@@ -250,27 +250,35 @@ async function coletarFinanceiroRaw(
       resultado[tipo].paginas = pagina;
       console.log(`📋 ${parcelas.length} ${tipo} coletadas na página ${pagina}`);
 
-      // SALVAR RAW: apenas JSON básico na tabela RAW
-      for (const parcela of parcelas) {
-        await supabase
-          .from('contaazul_raw_parcelas')
-          .upsert({
-            bar_id: barId,
-            parcela_id: parcela.id,
-            tipo: tipoMaiusculo,
-            raw_data: parcela, // JSON completo da parcela
-            processado: false, // Marcar como não processado
-            coletado_em: new Date().toISOString()
-          }, {
-            onConflict: 'bar_id,parcela_id'
-          });
+      // OTIMIZAÇÃO: BATCH INSERT em vez de inserts individuais
+      const parcelasParaInserir = parcelas.map((parcela: any) => ({
+        bar_id: barId,
+        parcela_id: parcela.id,
+        tipo: tipoMaiusculo,
+        raw_data: parcela, // JSON completo da parcela
+        processado: false, // Marcar como não processado
+        coletado_em: new Date().toISOString()
+      }));
+
+      // BATCH INSERT: inserir todas de uma vez
+      const { error: insertError } = await supabase
+        .from('contaazul_raw_parcelas')
+        .upsert(parcelasParaInserir, {
+          onConflict: 'bar_id,parcela_id'
+        });
+
+      if (insertError) {
+        console.error(`❌ Erro ao inserir lote de ${tipo}:`, insertError);
+        // Continuar mesmo com erro
+      } else {
+        console.log(`✅ Lote de ${parcelas.length} ${tipo} inserido com sucesso`);
       }
 
       pagina++;
       
       // Pequena pausa para não sobrecarregar
-      if (pagina % 3 === 0) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+      if (pagina % 2 === 0) {
+        await new Promise(resolve => setTimeout(resolve, 300));
       }
 
     } catch (error) {

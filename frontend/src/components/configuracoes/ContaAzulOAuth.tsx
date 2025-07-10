@@ -416,6 +416,57 @@ export default function ContaAzulOAuth() {
     }
   };
 
+  const handleTesteUltraRapido = async () => {
+    if (!selectedBar) {
+      toast({
+        title: "Erro",
+        description: "Nenhum bar selecionado. Selecione um bar primeiro.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setProcessando(true);
+    try {
+      console.log('🧪 Iniciando teste ultra-rápido...');
+      
+      const response = await fetch('/api/contaazul/coletar-dados-teste-rapido', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          bar_id: selectedBar.id
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        const resultado = data.resultado;
+        const totalTeste = resultado.receitas.total + resultado.despesas.total;
+        
+        toast({
+          title: "🧪 Teste Ultra-Rápido Concluído!",
+          description: `${totalTeste} parcelas coletadas em ${Math.round(data.tempo_execucao_ms / 1000)}s (${resultado.receitas.total} receitas, ${resultado.despesas.total} despesas). Batch insert funcionou!`
+        });
+        loadStatus();
+      } else {
+        toast({
+          title: "Erro",
+          description: data.error || "Erro no teste ultra-rápido",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro no teste ultra-rápido",
+        variant: "destructive"
+      });
+    } finally {
+      setProcessando(false);
+    }
+  };
+
 
 
   const getStatusIcon = () => {
@@ -569,6 +620,21 @@ export default function ContaAzulOAuth() {
                         <RefreshCw className="w-4 h-4 mr-2" />
                       )}
                       ⚡ 1. Coletar RAW (Rápido)
+                    </Button>
+                    
+                    <Button 
+                      onClick={handleTesteUltraRapido}
+                      disabled={processando}
+                      variant="outline"
+                      size="sm"
+                      className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                    >
+                      {processando ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                      )}
+                      🧪 Teste Ultra-Rápido
                     </Button>
                     
                     <Button 
