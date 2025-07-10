@@ -30,11 +30,12 @@ export async function POST(request: NextRequest) {
     
     console.log(`📅 Período: ${dataInicio} até ${dataFim}`);
 
-    // Buscar credenciais
+    // Buscar credenciais DO CONTAAZUL especificamente
     const { data: credentials } = await supabase
       .from('api_credentials')
       .select('*')
       .eq('bar_id', parseInt(bar_id))
+      .eq('sistema', 'contaazul')
       .single();
 
     if (!credentials?.access_token) {
