@@ -2299,167 +2299,160 @@ table th {
 }
 
 /* Regras CSS para garantir que textos nunca fiquem em branco visualmente */
+/* APENAS para conteúdo principal - não afetar sidebar, header, footer */
 
-/* Textos de configuração e labels importantes */
-.text-blue-600,
-.text-blue-700,
-.text-blue-800 {
-  color: #2563eb !important;
+/* Conteúdo principal das páginas */
+main, 
+.page-content, 
+.container, 
+.content-area,
+[class*="page-"], 
+[class*="admin-"], 
+[class*="relatorio-"] {
+  /* Textos de títulos e subtítulos */
 }
 
-/* Textos de títulos e subtítulos */
-h1, h2, h3, h4, h5, h6 {
+main h1, main h2, main h3, main h4, main h5, main h6,
+.page-content h1, .page-content h2, .page-content h3, .page-content h4, .page-content h5, .page-content h6,
+.container h1, .container h2, .container h3, .container h4, .container h5, .container h6 {
   color: #1f2937 !important;
 }
 
-/* Labels de formulários */
-label {
+/* Labels de formulários APENAS no conteúdo principal */
+main label, 
+.page-content label, 
+.container label,
+.card label,
+.form-container label {
   color: #374151 !important;
   font-weight: 500 !important;
 }
 
-/* Textos de descrição e explicação */
-.text-gray-600,
-.text-gray-700,
-.text-gray-500 {
-  color: #6b7280 !important;
-}
-
-/* Textos de botões */
-button {
-  color: inherit !important;
-}
-
-/* Textos de inputs e selects */
-input, select, textarea {
+/* Inputs APENAS no conteúdo principal */
+main input, main select, main textarea,
+.page-content input, .page-content select, .page-content textarea,
+.container input, .container select, .container textarea,
+.card input, .card select, .card textarea {
   color: #1f2937 !important;
 }
 
-/* Textos de cards e seções */
-.card-text,
-.section-text {
-  color: #374151 !important;
-}
-
-/* Textos de status e badges */
-.badge,
-.status-text {
-  color: #ffffff !important;
-}
-
-/* Textos de links */
-a {
+/* Links APENAS no conteúdo principal */
+main a, 
+.page-content a, 
+.container a,
+.card a {
   color: #2563eb !important;
 }
 
-/* Textos de tabelas */
-table td,
-table th {
+/* Tabelas APENAS no conteúdo principal */
+main table td, main table th,
+.page-content table td, .page-content table th,
+.container table td, .container table th,
+.card table td, .card table th {
   color: #1f2937 !important;
 }
 
-/* Textos de modais e dialogs */
-.modal-content,
-.dialog-content {
-  color: #374151 !important;
-}
-
-/* Textos de notificações */
-.notification-text,
-.toast-text {
-  color: #1f2937 !important;
-}
-
-/* Garantir que textos em elementos com background escuro tenham cor clara */
-.bg-gray-800 *,
-.bg-gray-900 *,
-.bg-slate-800 *,
-.bg-slate-900 *,
-.dark * {
-  color: #f9fafb !important;
-}
-
-/* Textos de sidebar */
-.sidebar-text,
-.nav-text {
-  color: #374151 !important;
-}
-
-/* Textos de breadcrumb */
-.breadcrumb-text {
-  color: #6b7280 !important;
-}
-
-/* Textos de placeholder que não devem ficar invisíveis */
-::placeholder {
+/* Placeholders APENAS no conteúdo principal */
+main ::placeholder,
+.page-content ::placeholder,
+.container ::placeholder,
+.card ::placeholder {
   color: #9ca3af !important;
   opacity: 1 !important;
 }
 
-/* Textos de tooltip */
-.tooltip-text {
-  color: #ffffff !important;
-}
-
-/* Anti-regra para evitar textos completamente transparentes */
-* {
-  color: inherit;
-}
-
-*:not([class*="bg-"]):not([style*="background"]) {
-  color: #1f2937;
-}
-
-/* Regras específicas para componentes comuns */
-.form-label {
+/* Regras específicas para componentes comuns - APENAS no conteúdo principal */
+main .form-label,
+.page-content .form-label,
+.container .form-label,
+.card .form-label {
   color: #374151 !important;
   font-weight: 500 !important;
 }
 
-.form-description {
+main .form-description,
+.page-content .form-description,
+.container .form-description,
+.card .form-description {
   color: #6b7280 !important;
 }
 
-.page-title {
+main .page-title,
+.page-content .page-title,
+.container .page-title,
+.card .page-title {
   color: #1f2937 !important;
   font-weight: 600 !important;
 }
 
-.page-subtitle {
+main .page-subtitle,
+.page-content .page-subtitle,
+.container .page-subtitle,
+.card .page-subtitle {
   color: #6b7280 !important;
 }
 
-.section-title {
+main .section-title,
+.page-content .section-title,
+.container .section-title,
+.card .section-title {
   color: #1f2937 !important;
   font-weight: 500 !important;
 }
 
-/* Garantir visibilidade em componentes específicos do projeto */
-.contaazul-config *,
-.meta-config *,
-.oauth-config * {
+/* Garantir visibilidade em componentes específicos do projeto - APENAS no conteúdo principal */
+main .contaazul-config *,
+main .meta-config *,
+main .oauth-config *,
+main .test-config *,
+main .api-config *,
+main .integration-config *,
+.page-content .contaazul-config *,
+.page-content .meta-config *,
+.page-content .oauth-config *,
+.page-content .test-config *,
+.page-content .api-config *,
+.page-content .integration-config *,
+.container .contaazul-config *,
+.container .meta-config *,
+.container .oauth-config *,
+.container .test-config *,
+.container .api-config *,
+.container .integration-config *,
+.card .contaazul-config *,
+.card .meta-config *,
+.card .oauth-config *,
+.card .test-config *,
+.card .api-config *,
+.card .integration-config * {
   color: #374151 !important;
 }
 
-.test-config *,
-.api-config *,
-.integration-config * {
-  color: #374151 !important;
-}
-
-/* Textos de erro e sucesso */
-.error-text {
+/* Textos de erro e sucesso - APENAS no conteúdo principal */
+main .error-text,
+.page-content .error-text,
+.container .error-text,
+.card .error-text {
   color: #dc2626 !important;
 }
 
-.success-text {
+main .success-text,
+.page-content .success-text,
+.container .success-text,
+.card .success-text {
   color: #16a34a !important;
 }
 
-.warning-text {
+main .warning-text,
+.page-content .warning-text,
+.container .warning-text,
+.card .warning-text {
   color: #d97706 !important;
 }
 
-.info-text {
+main .info-text,
+.page-content .info-text,
+.container .info-text,
+.card .info-text {
   color: #2563eb !important;
 }

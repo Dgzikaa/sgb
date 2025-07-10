@@ -8,7 +8,8 @@ Textos que ficam **visualmente em branco** na interface por falta de cor definid
 ### Soluções Implementadas
 
 #### 1. CSS Global Aplicado (globals.css)
-- Todas as regras CSS foram adicionadas para garantir visibilidade
+- Regras CSS específicas para conteúdo principal (`main`, `.container`, `.card`)
+- **NÃO afeta sidebar, header, footer** (mantém estilos originais)
 - Cores definidas com `!important` para sobrescrever conflitos
 - Suporte para modo escuro e claro
 
