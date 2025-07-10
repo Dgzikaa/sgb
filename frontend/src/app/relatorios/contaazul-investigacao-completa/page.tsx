@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertCircle, CheckCircle, XCircle, Search, Target, BarChart3, Building2 } from 'lucide-react';
+import ContaAzulOAuth from '@/components/configuracoes/ContaAzulOAuth';
 
 export default function ContaAzulInvestigacaoCompleta() {
   const [loading, setLoading] = useState(false);
@@ -77,6 +78,10 @@ export default function ContaAzulInvestigacaoCompleta() {
           <p className="text-gray-600">
             Testando TODOS os endpoints possíveis para encontrar dados de categorização
           </p>
+        </div>
+
+        <div className="mb-6">
+          <ContaAzulOAuth />
         </div>
 
         <div className="mb-6 space-y-4">

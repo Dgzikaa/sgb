@@ -17,7 +17,7 @@ import {
   ChevronRight,
   FileText,
   Filter,
-  SelectAll,
+  CheckSquare,
   ArrowRight,
   Clipboard,
   Target
@@ -192,7 +192,7 @@ export default function CopyItemsDialog({
                 onClick={handleSelectAll}
                 className="touch-manipulation"
               >
-                <SelectAll className="w-4 h-4 mr-1" />
+                <CheckSquare className="w-4 h-4 mr-1" />
                 {filteredItems.every(item => selectedItems.includes(item.id)) ? 'Desmarcar' : 'Selecionar'} Todos
               </Button>
             </div>
@@ -468,11 +468,12 @@ export default function CopyItemsDialog({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
+    <>
+      <div onClick={() => setIsOpen(true)}>
         {children}
-      </DialogTrigger>
-      <DialogContent className="max-w-md mx-auto">
+      </div>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="max-w-md mx-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Copy className="w-5 h-5 text-blue-600" />
@@ -498,8 +499,9 @@ export default function CopyItemsDialog({
         <Separator className="my-4" />
         
         {renderFooter()}
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 
