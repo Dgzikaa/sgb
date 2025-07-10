@@ -1,3 +1,238 @@
 ---
-alwaysApply: false
+alwaysApply: true
 ---
+
+# Regras Específicas do Frontend - SGB_V2
+
+## ESTRUTURA OBRIGATÓRIA DO FRONTEND
+
+### 1. App Router (Next.js 14+)
+Sempre usar a estrutura do App Router em `frontend/src/app/`:
+
+```
+src/app/
+├── (auth)/              # Grupo de rotas de autenticação
+│   ├── login/
+│   └── redefinir-senha/
+├── admin/               # Área administrativa
+│   ├── layout.tsx       # Layout específico do admin
+│   ├── page.tsx         # Dashboard admin
+│   ├── usuarios/
+│   ├── relatorios/
+│   └── configuracoes/
+├── operacoes/           # Funcionalidades operacionais
+├── relatorios/          # Relatórios públicos
+├── configuracoes/       # Configurações do usuário
+├── api/                 # API Routes do Next.js
+│   ├── admin/
+│   ├── auth/
+│   └── publico/
+├── globals.css          # Estilos globais
+├── layout.tsx           # Layout principal
+└── page.tsx             # Página inicial
+```
+
+### 2. COMPONENTES (`src/components/`)
+
+#### Estrutura de Componentes:
+```
+src/components/
+├── ui/                  # Componentes base (Button, Input, etc.)
+│   ├── button.tsx
+│   ├── input.tsx
+│   ├── dialog.tsx
+│   └── data-table.tsx
+├── forms/               # Formulários específicos
+│   ├── LoginForm.tsx
+│   ├── UserForm.tsx
+│   └── RelatorialForm.tsx
+├── layouts/             # Layouts reutilizáveis
+│   ├── DarkSidebarLayout.tsx
+│   ├── StandardPageLayout.tsx
+│   └── index.ts
+├── configuracoes/       # Componentes de configuração
+│   ├── ContaAzulOAuth.tsx
+│   └── MetaAPIConfig.tsx
+├── uploads/             # Componentes de upload
+│   ├── CameraCapture.tsx
+│   ├── PhotoUpload.tsx
+│   └── SignaturePad.tsx
+└── marketing/           # Componentes de marketing
+    └── AdvancedCharts.tsx
+```
+
+### 3. HOOKS CUSTOMIZADOS (`src/hooks/`)
+
+Sempre criar hooks reutilizáveis:
+```typescript
+// ✅ CORRETO
+export function useAuth() {
+  // Lógica de autenticação
+}
+
+export function useSupabase() {
+  // Lógica do Supabase
+}
+
+// ❌ ERRADO - hooks inline nos componentes
+```
+
+### 4. CONTEXTS (`src/contexts/`)
+
+Para estado global da aplicação:
+```typescript
+// ✅ CORRETO
+export const AuthContext = createContext()
+export const BarContext = createContext()
+export const SidebarContext = createContext()
+```
+
+### 5. REGRAS DE IMPORTS
+
+#### SEMPRE usar path aliases:
+```typescript
+// ✅ CORRETO
+import { Button } from '@/components/ui/button'
+import { useAuth } from '@/hooks/useAuth'
+import { supabase } from '@/lib/supabase'
+import { cn } from '@/lib/utils'
+
+// ❌ ERRADO
+import { Button } from '../../../components/ui/button'
+import { useAuth } from '../../hooks/useAuth'
+```
+
+### 6. APIS ROUTES (`src/app/api/`)
+
+#### Estrutura de API Routes:
+```
+src/app/api/
+├── admin/               # APIs administrativas
+│   ├── usuarios/
+│   │   └── route.ts
+│   ├── relatorios/
+│   │   └── route.ts
+│   └── configuracoes/
+│       └── route.ts
+├── auth/                # APIs de autenticação
+│   ├── login/
+│   │   └── route.ts
+│   └── logout/
+│       └── route.ts
+├── contaazul/           # Integrações ContaAzul
+│   ├── oauth/
+│   │   └── route.ts
+│   └── sync/
+│       └── route.ts
+└── publico/             # APIs públicas
+    └── status/
+        └── route.ts
+```
+
+### 7. PÁGINAS (`src/app/`)
+
+#### Convenções de Páginas:
+- **`page.tsx`**: Página principal da rota
+- **`layout.tsx`**: Layout da seção
+- **`loading.tsx`**: Estado de carregamento
+- **`error.tsx`**: Página de erro
+- **`not-found.tsx`**: Página 404
+
+#### Estrutura de Página:
+```typescript
+// ✅ CORRETO - Estrutura padrão
+import { StandardPageLayout } from '@/components/layouts'
+
+export default function MinhaPage() {
+  return (
+    <StandardPageLayout title="Título da Página">
+      {/* Conteúdo */}
+    </StandardPageLayout>
+  )
+}
+```
+
+### 8. ESTILOS
+
+#### CSS Modules ou Tailwind:
+```typescript
+// ✅ CORRETO - Tailwind classes
+<div className="flex items-center space-x-4 p-4">
+
+// ✅ CORRETO - CSS personalizado apenas quando necessário
+<div className="custom-component">
+```
+
+### 9. VALIDAÇÃO DE FORMS
+
+Sempre usar react-hook-form com zod:
+```typescript
+// ✅ CORRETO
+const schema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+})
+
+const form = useForm<z.infer<typeof schema>>({
+  resolver: zodResolver(schema),
+})
+```
+
+### 10. TRATAMENTO DE ERROS
+
+```typescript
+// ✅ CORRETO - Error boundaries e try/catch
+try {
+  const response = await fetch('/api/data')
+  if (!response.ok) throw new Error('Falha na requisição')
+} catch (error) {
+  console.error('Erro:', error)
+  toast.error('Erro ao carregar dados')
+}
+```
+
+### 11. NOMENCLATURA DE ARQUIVOS
+
+- **Componentes**: `PascalCase.tsx` (ex: `UserForm.tsx`)
+- **Páginas**: `page.tsx` (obrigatório App Router)
+- **Layouts**: `layout.tsx` (obrigatório App Router)
+- **APIs**: `route.ts` (obrigatório App Router)
+- **Hooks**: `camelCase.ts` (ex: `useAuth.ts`)
+- **Utils**: `kebab-case.ts` (ex: `api-client.ts`)
+
+### 12. PASTA DE TESTES E EXEMPLOS (`exemplo_teste/`)
+
+#### Estrutura para Testes:
+```
+exemplo_teste/
+├── mockups/             # Mockups e protótipos
+├── apis/                # Exemplos de APIs externas
+├── dados/               # Dados de exemplo/teste
+├── integracoes/         # Testes de integração
+└── documentos/          # Documentos de exemplo
+```
+
+#### Regras para `exemplo_teste/`:
+- **Sempre usar** esta pasta para criar testes, exemplos e protótipos
+- **Arquivos temporários** de desenvolvimento devem ir aqui
+- **Dados de teste** e mockups ficam organizados aqui
+- **Exemplos de integração** com APIs externas
+- **Não committar** dados sensíveis mesmo que seja pasta de teste
+
+### 13. CHECKLIST ANTES DE CRIAR ARQUIVO
+
+Antes de criar qualquer arquivo no frontend:
+
+1. ✅ Está em `frontend/src/`?
+2. ✅ É um componente? → `src/components/`
+3. ✅ É uma página? → `src/app/`
+4. ✅ É uma API? → `src/app/api/`
+5. ✅ É um hook? → `src/hooks/`
+6. ✅ É um utilitário? → `src/lib/`
+7. ✅ É teste/exemplo? → `exemplo_teste/`
+8. ✅ Segue a convenção de nomenclatura?
+9. ✅ Não duplica funcionalidade existente?
+
+---
+
+**LEMBRE-SE**: Sempre manter a estrutura existente e perguntar se tiver dúvidas sobre onde colocar um arquivo!

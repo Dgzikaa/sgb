@@ -1,6 +1,8 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     // Inicializar cliente Supabase
@@ -30,45 +32,36 @@ export async function GET(request: NextRequest) {
       .from('getin_reservas')
       .select(`
         getin_id,
-        name,
-        people,
-        date,
-        time,
+        cliente_nome,
+        numero_pessoas,
+        data_reserva,
+        hora_reserva,
         status,
-        mobile,
-        email,
-        info,
-        discount,
-        confirmation_sent,
-        unit_id,
-        unit_name,
-        unit_address,
-        unit_city,
-        unit_cuisine,
-        sector_id,
-        sector_name,
-        custom_fields,
-        monetize,
-        data_busca
+        cliente_telefone,
+        cliente_email,
+        observacoes,
+        valor_entrada,
+        mesa_numero,
+        source,
+        created_at,
+        updated_at,
+        dados_extras
       `);
 
     // Aplicar filtro de data(s)
     if (consultaPeriodo) {
-      query = query.gte('date', data_inicio).lte('date', data_fim);
+      query = query.gte('data_reserva', data_inicio).lte('data_reserva', data_fim);
     } else {
-      query = query.eq('date', data);
+      query = query.eq('data_reserva', data);
     }
 
     // CORREÇÃO: Buscar TODAS as reservas (não filtrar por status)
     // query = query.in('status', ['confirmed', 'seated']);
 
-    // Se for o Bar Ordinário, incluir TODAS as variações do nome + unit_name NULL
-    if (bar_id === 1) {
-      // Incluir todas as variações conhecidas do nome do bar + registros sem unit_name
-      query = query.or('unit_name.is.null,unit_name.ilike.%Ordinário%,unit_name.ilike.%Ordinario%,unit_name.ilike.%Bar%Música%,unit_name.ilike.%Bar%Masica%,unit_name.ilike.%Bar%Musica%');
-    }
+    // Filtrar por bar_id
+    query = query.eq('bar_id', bar_id);
 
-    query = query.order('time', { ascending: true });
+    query = query.order('hora_reserva', { ascending: true });
 
     const { data: reservas, error } = await query;
 
@@ -83,9 +76,9 @@ export async function GET(request: NextRequest) {
     console.log(`📊 ${reservas?.length || 0} reservas encontradas (TODOS OS STATUS)`);
 
     // Calcular estatísticas - CORRIGIDO para incluir todos os status
-    const statusCancelados = ['canceled-agent', 'canceled-user', 'no-show'];
-    const statusConfirmados = ['confirmed', 'seated'];
-    const statusPendentes = ['pending'];
+    const statusCancelados = ['cancelada', 'no_show'];
+    const statusConfirmados = ['confirmada', 'finalizada'];
+    const statusPendentes = ['pendente'];
     
     console.log('📊 ANÁLISE DETALHADA DE STATUS:');
     
@@ -107,30 +100,30 @@ export async function GET(request: NextRequest) {
 
     const stats = {
       total_reservas: reservas?.length || 0,
-      total_pessoas: reservas?.reduce((sum: number, r: any) => sum + (r.people || 0), 0) || 0,
-      confirmed: reservas?.filter((r: any) => r.status === 'confirmed').length || 0,
-      seated: reservas?.filter((r: any) => r.status === 'seated').length || 0,
-      pending: reservas?.filter((r: any) => r.status === 'pending').length || 0,
+      total_pessoas: reservas?.reduce((sum: number, r: any) => sum + (r.numero_pessoas || 0), 0) || 0,
+      confirmed: reservas?.filter((r: any) => r.status === 'confirmada').length || 0,
+      seated: reservas?.filter((r: any) => r.status === 'finalizada').length || 0,
+      pending: reservas?.filter((r: any) => r.status === 'pendente').length || 0,
       
       // **NOVA MÉTRICA: Confirmadas apenas (confirmed + seated)**
       reservas_confirmadas: reservas?.filter((r: any) => statusConfirmados.includes(r.status)).length || 0,
-      pessoas_confirmadas: reservas?.filter((r: any) => statusConfirmados.includes(r.status)).reduce((sum: number, r: any) => sum + (r.people || 0), 0) || 0,
+      pessoas_confirmadas: reservas?.filter((r: any) => statusConfirmados.includes(r.status)).reduce((sum: number, r: any) => sum + (r.numero_pessoas || 0), 0) || 0,
       
       // **NOVA MÉTRICA: Confirmadas + Pendentes (como no planejamento)**
       reservas_confirmadas_mais_pendentes: reservas?.filter((r: any) => [...statusConfirmados, ...statusPendentes].includes(r.status)).length || 0,
-      pessoas_confirmadas_mais_pendentes: reservas?.filter((r: any) => [...statusConfirmados, ...statusPendentes].includes(r.status)).reduce((sum: number, r: any) => sum + (r.people || 0), 0) || 0,
+      pessoas_confirmadas_mais_pendentes: reservas?.filter((r: any) => [...statusConfirmados, ...statusPendentes].includes(r.status)).reduce((sum: number, r: any) => sum + (r.numero_pessoas || 0), 0) || 0,
       
-      reservas_pendentes: reservas?.filter((r: any) => r.status === 'pending').length || 0,
-      pessoas_pendentes: reservas?.filter((r: any) => r.status === 'pending').reduce((sum: number, r: any) => sum + (r.people || 0), 0) || 0,
+      reservas_pendentes: reservas?.filter((r: any) => r.status === 'pendente').length || 0,
+      pessoas_pendentes: reservas?.filter((r: any) => r.status === 'pendente').reduce((sum: number, r: any) => sum + (r.numero_pessoas || 0), 0) || 0,
       
-      canceled: reservas?.filter((r: any) => r.status?.includes('canceled')).length || 0,
-      no_show: reservas?.filter((r: any) => r.status === 'no-show').length || 0,
+      canceled: reservas?.filter((r: any) => r.status?.includes('cancelada')).length || 0,
+      no_show: reservas?.filter((r: any) => r.status === 'no_show').length || 0,
       canceladas_total: reservas?.filter((r: any) => statusCancelados.includes(r.status)).length || 0,
-      pessoas_canceladas: reservas?.filter((r: any) => statusCancelados.includes(r.status)).reduce((sum: number, r: any) => sum + (r.people || 0), 0) || 0,
+      pessoas_canceladas: reservas?.filter((r: any) => statusCancelados.includes(r.status)).reduce((sum: number, r: any) => sum + (r.numero_pessoas || 0), 0) || 0,
       
       // Agrupamento por horário
       por_horario: reservas?.reduce((acc: any, reserva: any) => {
-        const hora = reserva.time?.substring(0, 2) || '00';
+        const hora = reserva.hora_reserva?.substring(0, 2) || '00';
         if (!acc[hora]) {
           acc[hora] = {
             horario: `${hora}:00`,
@@ -139,22 +132,22 @@ export async function GET(request: NextRequest) {
           };
         }
         acc[hora].reservas++;
-        acc[hora].pessoas += reserva.people || 0;
+        acc[hora].pessoas += reserva.numero_pessoas || 0;
         return acc;
       }, {}) || {},
 
-      // Agrupamento por setor/mesa
-      por_setor: reservas?.reduce((acc: any, reserva: any) => {
-        const setor = reserva.sector_name || 'Sem setor';
-        if (!acc[setor]) {
-          acc[setor] = {
-            setor,
+      // Agrupamento por mesa
+      por_mesa: reservas?.reduce((acc: any, reserva: any) => {
+        const mesa = reserva.mesa_numero || 'Sem mesa definida';
+        if (!acc[mesa]) {
+          acc[mesa] = {
+            mesa,
             reservas: 0,
             pessoas: 0
           };
         }
-        acc[setor].reservas++;
-        acc[setor].pessoas += reserva.people || 0;
+        acc[mesa].reservas++;
+        acc[mesa].pessoas += reserva.numero_pessoas || 0;
         return acc;
       }, {}) || {}
     };
@@ -169,7 +162,7 @@ export async function GET(request: NextRequest) {
         data_consultada: dataConsulta,
         bar_id: bar_id,
         tipo_consulta: consultaPeriodo ? 'periodo' : 'dia_unico',
-        filtros_aplicados: ['confirmed', 'seated']
+        filtros_aplicados: ['confirmada', 'finalizada', 'pendente', 'cancelada', 'no_show']
       }
     });
 

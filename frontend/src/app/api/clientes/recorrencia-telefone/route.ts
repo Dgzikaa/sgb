@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic'
+
 // Função para normalizar telefone
 function normalizarTelefone(telefone: string): string {
   if (!telefone) return '';

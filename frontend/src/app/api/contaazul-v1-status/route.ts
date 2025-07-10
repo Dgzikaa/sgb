@@ -31,9 +31,8 @@ export async function GET(request: NextRequest) {
         const fileContent = fs.readFileSync(statusFilePath, 'utf-8')
         statusData = JSON.parse(fileContent)
         console.log('✅ [V1] Status encontrado no arquivo:', statusData)
-      } else {
-        console.log('⚠️ [V1] Arquivo de status não encontrado, usando status padrão')
       }
+      // Nota: É normal não existir arquivo de status na primeira execução
     } catch (fileError) {
       console.error('❌ [V1] Erro ao ler arquivo de status:', fileError)
     }

@@ -1,0 +1,174 @@
+# Regras de Organização do Projeto SGB_V2
+
+## Estrutura do Projeto
+Este é um projeto fullstack com:
+- **Frontend**: Next.js 14+ com TypeScript (pasta `frontend/`)
+- **Backend**: Supabase Edge Functions com Deno (pasta `backend/`)
+- **Documentação**: Pasta `docs/`
+- **Testes e Exemplos**: Pasta `exemplo_teste/` para protótipos, testes e dados de exemplo
+
+## REGRAS OBRIGATÓRIAS DE ORGANIZAÇÃO
+
+### 1. ESTRUTURA DE PASTAS OBRIGATÓRIA
+
+**Frontend (`frontend/`):**
+- `src/app/` - App Router do Next.js (páginas, layouts, APIs)
+- `src/components/` - Componentes reutilizáveis
+- `src/lib/` - Utilitários e configurações
+- `src/hooks/` - React hooks customizados
+- `src/contexts/` - Context providers
+- `src/middleware/` - Middlewares do Next.js
+- `src/styles/` - Arquivos CSS globais
+- `src/templates/` - Templates de página
+
+**Backend (`backend/`):**
+- `supabase/functions/` - Edge Functions do Supabase
+- `package.json` - Dependências do backend
+
+**Documentação (`docs/`):**
+- Documentação técnica e resumos
+
+**Testes e Exemplos (`exemplo_teste/`):**
+- Mockups e protótipos
+- Dados de exemplo/teste
+- Exemplos de APIs externas
+- Testes de integração
+- Documentos de exemplo
+- Arquivos temporários de desenvolvimento
+
+### 2. REGRAS DE CRIAÇÃO DE ARQUIVOS
+
+#### Para APIs (SEMPRE em `frontend/src/app/api/`)
+```
+✅ CORRETO: frontend/src/app/api/usuarios/route.ts
+✅ CORRETO: frontend/src/app/api/admin/clientes/route.ts
+❌ ERRADO: backend/api/usuarios.ts
+❌ ERRADO: frontend/api/usuarios.ts
+```
+
+#### Para Edge Functions (SEMPRE em `backend/supabase/functions/`)
+```
+✅ CORRETO: backend/supabase/functions/processar-dados/index.ts
+✅ CORRETO: backend/supabase/functions/login/index.ts
+❌ ERRADO: frontend/functions/processar-dados.ts
+❌ ERRADO: backend/functions/processar-dados.ts
+```
+
+#### Para Páginas (SEMPRE em `frontend/src/app/`)
+```
+✅ CORRETO: frontend/src/app/admin/usuarios/page.tsx
+✅ CORRETO: frontend/src/app/relatorios/financeiro/page.tsx
+❌ ERRADO: frontend/pages/admin/usuarios.tsx
+❌ ERRADO: frontend/src/pages/relatorios.tsx
+```
+
+#### Para Componentes (SEMPRE em `frontend/src/components/`)
+```
+✅ CORRETO: frontend/src/components/ui/button.tsx
+✅ CORRETO: frontend/src/components/forms/LoginForm.tsx
+❌ ERRADO: frontend/src/app/components/button.tsx
+❌ ERRADO: frontend/components/button.tsx
+```
+
+### 3. CONVENÇÕES DE NOMENCLATURA
+
+#### Arquivos e Pastas:
+- **Pastas**: `kebab-case` (ex: `user-management`, `api-routes`)
+- **Componentes**: `PascalCase` (ex: `UserForm.tsx`, `DataTable.tsx`)
+- **Páginas**: `page.tsx` (padrão App Router)
+- **Layouts**: `layout.tsx` (padrão App Router)
+- **APIs**: `route.ts` (padrão App Router)
+- **Edge Functions**: `index.ts` dentro da pasta da função
+
+#### Estrutura de APIs:
+```
+frontend/src/app/api/
+├── admin/
+│   ├── usuarios/
+│   │   └── route.ts
+│   └── relatorios/
+│       └── route.ts
+├── auth/
+│   └── login/
+│       └── route.ts
+└── publico/
+    └── status/
+        └── route.ts
+```
+
+### 4. REGRAS ESPECÍFICAS POR ÁREA
+
+#### Admin (sempre em `frontend/src/app/admin/`)
+- Páginas administrativas
+- Relatórios administrativos
+- Configurações do sistema
+
+#### Operações (sempre em `frontend/src/app/operacoes/`)
+- Funcionalidades operacionais
+- Checklists
+- Processos do dia a dia
+
+#### Relatórios (sempre em `frontend/src/app/relatorios/`)
+- Todos os tipos de relatórios
+- Dashboards específicos
+
+#### Configurações (sempre em `frontend/src/app/configuracoes/`)
+- Configurações do usuário
+- Integrações
+- Personalizações
+
+### 5. REGRAS DE IMPORTS
+
+#### Frontend:
+```typescript
+// ✅ CORRETO - imports relativos do projeto
+import { Button } from '@/components/ui/button'
+import { useAuth } from '@/hooks/useAuth'
+import { supabase } from '@/lib/supabase'
+
+// ❌ ERRADO - imports absolutos longos
+import { Button } from '../../../components/ui/button'
+```
+
+#### Backend (Edge Functions):
+```typescript
+// ✅ CORRETO - imports do Deno
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+```
+
+### 6. QUANDO CRIAR NOVOS ARQUIVOS
+
+#### SEMPRE PERGUNTE ANTES:
+1. **"Este arquivo deveria ir no frontend ou backend?"**
+2. **"Qual é a categoria? (admin, operacoes, relatorios, etc.)"**
+3. **"É uma página, componente, API ou função?"**
+
+#### DIRETRIZES:
+- **Lógica de negócio**: Backend (Edge Functions)
+- **Interface do usuário**: Frontend (componentes/páginas)
+- **APIs internas**: Frontend (`app/api/`)
+- **Autenticação externa**: Backend (Edge Functions)
+- **Testes e protótipos**: `exemplo_teste/` (dados de exemplo, mockups, testes)
+
+### 7. ESTRUTURA DE COMMITS
+
+Sempre seguir o padrão:
+```
+feat(frontend): adiciona componente de upload
+fix(backend): corrige autenticação OAuth
+docs: atualiza documentação da API
+```
+
+### 8. VALIDAÇÃO ANTES DE CRIAR ARQUIVOS
+
+Antes de criar qualquer arquivo, CONFIRME:
+1. ✅ Estou na pasta correta? (frontend/, backend/, docs/, exemplo_teste/)
+2. ✅ A subpasta está correta? (app/, components/, functions/, etc.)
+3. ✅ É teste/exemplo? → `exemplo_teste/`
+4. ✅ O nome segue a convenção?
+5. ✅ Não estou duplicando funcionalidade existente?
+
+---
+
+**IMPORTANTE**: Sempre que houver dúvida sobre onde colocar um arquivo, priorize manter a estrutura existente e pergunte para confirmar a localização correta. 

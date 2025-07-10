@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
+export const dynamic = 'force-dynamic'
+
 // FUNÇÃO COMPLETAMENTE NOVA PARA FORÇAR RECOMPILAÇÃO
 async function getDashboardSemanalCorrigido(request: NextRequest) {
   const VERSAO_DOMINGO_CORRIGIDA = "V5_FINAL_" + Date.now()

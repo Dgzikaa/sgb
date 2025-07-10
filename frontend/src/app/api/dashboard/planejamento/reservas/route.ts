@@ -41,9 +41,9 @@ export async function GET(request: NextRequest) {
     const { data: reservas, error: reservasError } = await supabase
       .from('getin_reservas')
       .select('*')
-      .gte('date', startDate)
-      .lte('date', endDate)
-      .order('date', { ascending: true });
+      .gte('data_reserva', startDate)
+      .lte('data_reserva', endDate)
+      .order('data_reserva', { ascending: true });
 
     if (reservasError) {
       console.error('❌ Erro reservas:', reservasError);
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
         estatisticas: {
           total_reservas: reservas?.length || 0,
           total_eventos: eventos?.length || 0,
-          total_pessoas: reservas?.reduce((sum: number, r: any) => sum + (r.people || 0), 0) || 0
+          total_pessoas: reservas?.reduce((sum: number, r: any) => sum + (r.numero_pessoas || 0), 0) || 0
         },
         count_tabela: count,
         amostra_reservas: reservas?.slice(0, 3),
@@ -146,7 +146,7 @@ function processarAnalise(reservas: any[], eventos: any[], capacidadeMaxima: num
 
   // Processar reservas por dia
   reservas.forEach((reserva: any) => {
-    const data = reserva.date;
+    const data = reserva.data_reserva;
     if (!diasMap.has(data)) {
       diasMap.set(data, {
         data,
@@ -165,27 +165,27 @@ function processarAnalise(reservas: any[], eventos: any[], capacidadeMaxima: num
     
     const dia = diasMap.get(data);
     dia.reservas++;
-    dia.pessoas += reserva.people || 0;
+    dia.pessoas += reserva.numero_pessoas || 0;
     
     // Classificar por status - CORRIGIDO
-    const statusCancelados = ['canceled-agent', 'canceled-user', 'no-show'];
-    const statusConfirmados = ['confirmed', 'seated'];
+    const statusCancelados = ['cancelada', 'no_show'];
+    const statusConfirmados = ['confirmada', 'finalizada'];
     
     if (statusCancelados.includes(reserva.status)) {
       dia.canceladas++;
-      dia.pessoasCanceladas += reserva.people || 0;
+      dia.pessoasCanceladas += reserva.numero_pessoas || 0;
     } else if (statusConfirmados.includes(reserva.status)) {
       dia.confirmadas++;
-      dia.pessoasConfirmadas += reserva.people || 0;
+      dia.pessoasConfirmadas += reserva.numero_pessoas || 0;
     } else {
       // Pendentes, etc. - contar como confirmadas por enquanto
       dia.confirmadas++;
-      dia.pessoasConfirmadas += reserva.people || 0;
+      dia.pessoasConfirmadas += reserva.numero_pessoas || 0;
     }
     
     // Receita apenas das confirmadas (não canceladas)
     if (!statusCancelados.includes(reserva.status)) {
-      dia.receita_estimada += (reserva.people || 0) * metaTicketMedio;
+      dia.receita_estimada += (reserva.numero_pessoas || 0) * metaTicketMedio;
     }
     
     // Taxa de ocupação baseada apenas nas confirmadas

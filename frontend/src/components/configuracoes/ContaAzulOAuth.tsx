@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { useBarContext } from '@/contexts/BarContext';
-import { Loader2, Settings, Shield, RefreshCw, ExternalLink, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Loader2, Settings, RefreshCw, ExternalLink, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
 interface ContaAzulStatus {
   connected: boolean;
@@ -35,8 +35,7 @@ export default function ContaAzulOAuth() {
   const [configuring, setConfiguring] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
-  const [testingConnection, setTestingConnection] = useState(false);
-  const [fixingUri, setFixingUri] = useState(false);
+  const [processando, setProcessando] = useState(false);
   
   const [config, setConfig] = useState({
     clientId: '',
@@ -173,39 +172,6 @@ export default function ContaAzulOAuth() {
     }
   };
 
-  const handleTestConnection = async () => {
-    if (!selectedBar) return;
-    
-    setTestingConnection(true);
-    try {
-      const response = await fetch(`/api/contaazul/auth?action=test&barId=${selectedBar.id}`);
-      const data = await response.json();
-      
-      if (response.ok) {
-        toast({
-          title: "Sucesso",
-          description: "Conexão testada com sucesso!"
-        });
-        // Recarregar status para atualizar informações da empresa
-        loadStatus();
-      } else {
-        toast({
-          title: "Erro",
-          description: data.error || "Erro ao testar conexão",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao testar conexão",
-        variant: "destructive"
-      });
-    } finally {
-      setTestingConnection(false);
-    }
-  };
-
   const handleDisconnect = async () => {
     if (!selectedBar) return;
     
@@ -252,403 +218,69 @@ export default function ContaAzulOAuth() {
     }
   };
 
-  const handleTestEndpoints = async () => {
-    if (!selectedBar) return;
-    
-    setTestingConnection(true);
-    try {
-      const response = await fetch(`/api/contaazul/test-endpoints?barId=${selectedBar.id}`);
-      const data = await response.json();
-      
-      if (response.ok) {
-        console.log('📊 Resultados dos testes de endpoints:', data);
-        const { summary, results } = data;
-        
-        toast({
-          title: "Teste de Endpoints Concluído",
-          description: `${summary.successful}/${summary.total} endpoints funcionando. Veja o console para detalhes.`
-        });
-        
-        // Opcional: mostrar resultados em modal ou expandir interface
-        alert(`
-Resultados dos Testes de Endpoints:
-✅ Funcionando: ${summary.successful}/${summary.total}
-📊 Com dados: ${summary.withData}
-
-Veja o console (F12) para detalhes completos dos endpoints.
-        `);
-      } else {
-        toast({
-          title: "Erro",
-          description: data.error || "Erro ao testar endpoints",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao testar endpoints financeiros",
-        variant: "destructive"
-      });
-    } finally {
-      setTestingConnection(false);
-    }
-  };
-
-  const handleTestAdvancedEndpoints = async () => {
-    if (!selectedBar) return;
-    
-    setTestingConnection(true);
-    try {
-      const response = await fetch(`/api/contaazul/test-endpoints-advanced?barId=${selectedBar.id}`);
-      const data = await response.json();
-      
-      if (response.ok) {
-        console.log('🚀 Resultados dos testes AVANÇADOS:', data);
-        const { summary, recommendations, dateRange, nextSteps } = data;
-        
-        toast({
-          title: "Teste Avançado Concluído",
-          description: `${summary.successful}/${summary.total} endpoints funcionando com parâmetros!`
-        });
-        
-        // Mostrar resultados detalhados
-        const workingEndpoints = recommendations.workingEndpoints.length;
-        const entriesEndpoints = recommendations.forEntradas.length;
-        const expensesEndpoints = recommendations.forSaidas.length;
-        
-        alert(`
-🚀 TESTE AVANÇADO COM PARÂMETROS:
-📅 Período: ${dateRange.description} (${dateRange.dataInicio} a ${dateRange.dataFim})
-
-✅ Funcionando: ${summary.successful}/${summary.total}
-📊 Com dados: ${summary.withData}
-💰 Entradas: ${entriesEndpoints} endpoints
-💸 Saídas: ${expensesEndpoints} endpoints
-
-${nextSteps.implementVisaoCompetencia ? '🎯 PRONTO para implementar Visão de Competência!' : '⚠️ Precisa de mais testes'}
-
-Veja o console (F12) para detalhes completos!
-        `);
-      } else {
-        toast({
-          title: "Erro",
-          description: data.error || "Erro ao testar endpoints avançados",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao testar endpoints avançados",
-        variant: "destructive"
-      });
-    } finally {
-      setTestingConnection(false);
-    }
-  };
-
-  const handleTestOfficialDocs = async () => {
-    if (!selectedBar) return;
-    
-    setTestingConnection(true);
-    try {
-      const response = await fetch(`/api/contaazul/test-official-docs?barId=${selectedBar.id}`);
-      const data = await response.json();
-      
-      if (response.ok) {
-        console.log('📋 Resultados dos testes DOCUMENTAÇÃO OFICIAL:', data);
-        const { summary, implementation, dateRange, nextStep } = data;
-        
-        toast({
-          title: "Teste Documentação Oficial Concluído",
-          description: `${summary.successful}/${summary.total} endpoints da documentação funcionando!`
-        });
-        
-        // Mostrar resultados detalhados
-        const workingEndpoints = implementation.workingEndpoints.length;
-        const officialWorking = summary.officialWorking;
-        const dataFound = summary.dataFound;
-        
-        alert(`
-📋 TESTE BASEADO NA DOCUMENTAÇÃO OFICIAL:
-📅 Período: ${dateRange.description} (${dateRange.dataInicio} a ${dateRange.dataFim})
-
-✅ Funcionando: ${summary.successful}/${summary.total}
-📊 Endpoints oficiais: ${officialWorking}
-💾 Total de dados: ${dataFound} registros
-
-${implementation.canImplementVisaoCompetencia ? '🎯 ' + nextStep : '⚠️ ' + nextStep}
-
-Detalhes completos no console (F12)!
-        `);
-      } else {
-        toast({
-          title: "Erro",
-          description: data.error || "Erro ao testar documentação oficial",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao testar documentação oficial",
-        variant: "destructive"
-      });
-    } finally {
-      setTestingConnection(false);
-    }
-  };
-
-  const handleVerEstruturaDados = async () => {
-    if (!selectedBar) return;
-    
-    setTestingConnection(true);
-    try {
-      const response = await fetch(`/api/contaazul/ver-dados-estrutura?barId=${selectedBar.id}`);
-      const data = await response.json();
-      
-      if (response.ok) {
-        console.log('🔍 ESTRUTURA DOS DADOS REAIS:', data);
-        const { dados_encontrados, estruturas_mapeadas, analise_implementacao } = data;
-        
-        toast({
-          title: "Estrutura de Dados Mapeada!",
-          description: "Dados reais do ContaAzul analisados. Veja o console!"
-        });
-        
-        // Mostrar resumo dos dados encontrados
-        const totalReceitas = dados_encontrados.receitas?.total_encontrado || 0;
-        const totalDespesas = dados_encontrados.despesas?.total_encontrado || 0;
-        const totalCategorias = dados_encontrados.categorias?.total_encontrado || 0;
-        const totalContas = dados_encontrados.contas_financeiras?.total_encontrado || 0;
-        
-        alert(`
-🔍 ESTRUTURA DOS DADOS REAIS MAPEADA:
-📅 Período: ${data.periodo_pesquisado.descricao}
-
-📊 DADOS ENCONTRADOS:
-💰 Receitas: ${totalReceitas} registros
-💸 Despesas: ${totalDespesas} registros  
-📋 Categorias: ${totalCategorias} itens
-🏦 Contas: ${totalContas} contas
-
-🎯 Status: ${analise_implementacao.pronto_para_sincronizar ? 'PRONTO para sincronizar!' : 'Necessário ajustes'}
-
-💡 Próximo passo: ${analise_implementacao.proximo_passo}
-
-🔍 Veja o console (F12) para a estrutura COMPLETA dos dados!
-        `);
-      } else {
-        toast({
-          title: "Erro",
-          description: data.error || "Erro ao mapear estrutura dos dados",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao buscar estrutura dos dados",
-        variant: "destructive"
-      });
-    } finally {
-      setTestingConnection(false);
-    }
-  };
-
-  const handleSetupDatabase = async () => {
-    if (!selectedBar) return;
-    
-    setTestingConnection(true);
-    try {
-      const response = await fetch('/api/contaazul/setup-database', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          barId: selectedBar.id
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        console.log('🏗️ SETUP DO BANCO CONCLUÍDO:', data);
-        
-        toast({
-          title: "Banco Configurado!",
-          description: `${data.tabelas_criadas.length} tabelas criadas para Visão de Competência`
-        });
-        
-        alert(`
-🏗️ SETUP DO BANCO CONCLUÍDO COM SUCESSO!
-
-📋 TABELAS CRIADAS:
-${data.tabelas_criadas.map((tabela: string) => `✅ ${tabela}`).join('\n')}
-
-🎯 ESTRUTURA CRIADA:
-• contaazul_financeiro → Dados financeiros normalizados
-• contaazul_sincronizacao → Controle de sincronizações  
-• contaazul_categorias → Cache de categorias
-• contaazul_contas_financeiras → Cache de contas
-
-🚀 PRÓXIMOS PASSOS:
-${data.proximos_passos.map((passo: string, i: number) => `${i + 1}. ${passo}`).join('\n')}
-
-✅ Agora pode implementar a sincronização dos dados!
-        `);
-      } else {
-        toast({
-          title: "Erro",
-          description: data.error || "Erro ao configurar banco",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao configurar estrutura do banco",
-        variant: "destructive"
-      });
-    } finally {
-      setTestingConnection(false);
-    }
-  };
-
-  const handleSincronizarReceitas = async () => {
-    if (!selectedBar) return;
-    
-    // Confirmar antes de iniciar
-    if (!confirm('Sincronizar RECEITAS do ContaAzul (lote otimizado)?\n\nEsta operação irá sincronizar:\n- Receitas (contas a receber) de 2024-2027\n- Até 2.000 registros por execução\n- Processamento em lotes (muito mais rápido)\n- Tempo estimado: 2-3 minutos\n\nContinuar?')) {
-      return;
-    }
-    
-    setTestingConnection(true);
-    try {
-      const response = await fetch('/api/contaazul/sincronizar-receitas', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          bar_id: selectedBar.id
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        console.log('💰 SINCRONIZAÇÃO DE RECEITAS COMPLETA:', data);
-        
-        toast({
-          title: "Receitas Sincronizadas!",
-          description: `${data.detalhes.total_processados} receitas processadas de 2024-2027`
-        });
-        
-        const { detalhes } = data;
-        alert(`
-💰 SINCRONIZAÇÃO DE RECEITAS FINALIZADA!
-
-📊 RESUMO:
-✅ Receitas processadas: ${detalhes.receitas.processados}
-${detalhes.total_erros > 0 ? `⚠️ Erros: ${detalhes.total_erros}` : '🎯 Sem erros!'}
-
-📅 Período: 01/01/2024 até 01/01/2027
-
-🚀 Receitas sincronizadas no banco!
-        `);
-      } else {
-        toast({
-          title: "Erro",
-          description: data.error || "Erro ao sincronizar receitas",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: error instanceof Error ? error.message : "Erro ao sincronizar receitas",
-        variant: "destructive"
-      });
-    } finally {
-      setTestingConnection(false);
-    }
-  };
-
   const handleColetarDados = async () => {
-    if (!selectedBar) return;
-    
-    // Confirmar antes de iniciar
-    if (!confirm('Iniciar COLETA RÁPIDA dos dados do ContaAzul?\n\nEsta operação irá:\n- Coletar TODOS os dados brutos (JSON) de 2024-2027\n- Salvar no banco sem processamento\n- Coleta rápida: ~2-3 minutos\n- Depois você pode processar os dados\n\nContinuar?')) {
+    if (!selectedBar) {
+      console.error('❌ selectedBar não está definido!');
+      toast({
+        title: "Erro",
+        description: "Nenhum bar selecionado. Selecione um bar primeiro.",
+        variant: "destructive"
+      });
       return;
     }
     
-    setTestingConnection(true);
+    console.log('🚀 selectedBar:', selectedBar);
+    console.log('🚀 selectedBar.id:', selectedBar.id);
+    
+    setProcessando(true);
     try {
-      const response = await fetch('/api/contaazul/coletar-dados', {
+      console.log('🚀 Iniciando coleta com detalhes (fluxo correto)...');
+      
+      const response = await fetch('/api/contaazul/coletar-com-detalhes', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          bar_id: selectedBar.id
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          bar_id: selectedBar.id,
+          // Coletar mês atual por padrão
+          data_inicio: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
+          data_fim: new Date().toISOString().split('T')[0]
         })
       });
       
       const data = await response.json();
       
       if (response.ok) {
-        console.log('📥 COLETA RÁPIDA COMPLETA:', data);
+        const resultado = data.resultado;
+        const totalProcessados = resultado.receitas.processadas + resultado.despesas.processadas;
+        const totalAuxiliares = resultado.dados_auxiliares.categorias + resultado.dados_auxiliares.centros_custo + resultado.dados_auxiliares.contas;
         
         toast({
-          title: "Coleta Concluída!",
-          description: `${data.detalhes.total_paginas_coletadas} páginas coletadas. Execute o processamento.`
+          title: "✅ Coleta Concluída!",
+          description: `${totalProcessados} registros processados (${resultado.receitas.processadas} receitas, ${resultado.despesas.processadas} despesas) + ${totalAuxiliares} dados auxiliares com categoria e centro de custo!`
         });
-        
-        const { detalhes } = data;
-        alert(`
-📥 COLETA RÁPIDA FINALIZADA!
-
-📊 RESUMO:
-✅ Páginas coletadas: ${detalhes.total_paginas_coletadas}
-💰 Receitas: ${detalhes.receitas.coletados} páginas
-💸 Despesas: ${detalhes.despesas.coletados} páginas
-📋 Categorias: ${detalhes.categorias.coletados} página
-🏦 Contas: ${detalhes.contas.coletados} página
-${detalhes.total_erros > 0 ? `⚠️ Erros: ${detalhes.total_erros}` : '🎯 Sem erros!'}
-
-🚀 Dados JSON brutos salvos no banco!
-📋 Próximo passo: ${detalhes.proximo_passo}
-        `);
+        loadStatus();
       } else {
         toast({
           title: "Erro",
-          description: data.error || "Erro na coleta de dados",
+          description: data.error || "Erro ao coletar dados",
           variant: "destructive"
         });
       }
     } catch (error) {
       toast({
         title: "Erro",
-        description: error instanceof Error ? error.message : "Erro na coleta de dados",
+        description: "Erro ao coletar dados com detalhes",
         variant: "destructive"
       });
     } finally {
-      setTestingConnection(false);
+      setProcessando(false);
     }
   };
 
   const handleProcessarDados = async () => {
     if (!selectedBar) return;
     
-    // Confirmar antes de iniciar
-    if (!confirm('Processar dados coletados para tabelas estruturadas?\n\nEsta operação irá:\n- Processar dados JSON brutos\n- Transformar em dados estruturados\n- Inserir nas tabelas finais\n- Sem limite de timeout\n\nContinuar?')) {
-      return;
-    }
-    
-    setTestingConnection(true);
+    setProcessando(true);
     try {
       const response = await fetch('/api/contaazul/processar-dados', {
         method: 'POST',
@@ -663,198 +295,29 @@ ${detalhes.total_erros > 0 ? `⚠️ Erros: ${detalhes.total_erros}` : '🎯 Sem
       const data = await response.json();
       
       if (response.ok) {
-        console.log('🔄 PROCESSAMENTO COMPLETO:', data);
-        
-        toast({
-          title: "Processamento Concluído!",
-          description: `${data.detalhes.total_processados} registros processados nas tabelas.`
-        });
-        
-        const { detalhes } = data;
-        alert(`
-🔄 PROCESSAMENTO FINALIZADO!
-
-📊 RESUMO:
-✅ Registros processados: ${detalhes.total_processados}
-${detalhes.total_erros > 0 ? `⚠️ Erros: ${detalhes.total_erros}` : '🎯 Sem erros!'}
-
-🚀 Dados estruturados nas tabelas finais!
-🎯 Sistema pronto para Visão de Competência!
-        `);
-      } else {
-        toast({
-          title: "Erro",
-          description: data.error || "Erro no processamento",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: error instanceof Error ? error.message : "Erro no processamento",
-        variant: "destructive"
-      });
-    } finally {
-      setTestingConnection(false);
-    }
-  };
-
-  const handleVerificarColeta = async () => {
-    if (!selectedBar) return;
-    
-    setTestingConnection(true);
-    try {
-      const response = await fetch(`/api/contaazul/verificar-dados-coletados?barId=${selectedBar.id}`);
-      const data = await response.json();
-      
-      if (response.ok) {
-        console.log('🔍 VERIFICAÇÃO DA COLETA:', data);
-        
-        const { estatisticas, processamento, analise } = data;
-        
-        toast({
-          title: "Verificação Concluída!",
-          description: `${estatisticas.receitas.total_registros + estatisticas.despesas.total_registros} registros coletados`
-        });
-        
-        alert(`
-🔍 VERIFICAÇÃO DA COLETA DE DADOS
-
-📊 DADOS COLETADOS:
-💰 Receitas: ${estatisticas.receitas.paginas_coletadas} páginas (${estatisticas.receitas.total_registros} registros)
-   └ Última página: ${estatisticas.receitas.ultima_pagina_tamanho} itens
-💸 Despesas: ${estatisticas.despesas.paginas_coletadas} páginas (${estatisticas.despesas.total_registros} registros)  
-   └ Última página: ${estatisticas.despesas.ultima_pagina_tamanho} itens
-
-🔄 DADOS PROCESSADOS:
-✅ Receitas processadas: ${processamento.receitas_processadas}
-✅ Despesas processadas: ${processamento.despesas_processadas}
-
-📈 ANÁLISE:
-${analise.coleta_completa ? '✅ Coleta completa!' : '⚠️ Pode ter mais dados'}
-${analise.pode_continuar_receitas ? '💰 Receitas: Pode ter mais dados (última página = 500 itens)' : ''}
-${analise.pode_continuar_despesas ? '💸 Despesas: Pode ter mais dados (última página = 500 itens)' : ''}
-
-💡 ${analise.recomendacao}
-        `);
-      } else {
-        toast({
-          title: "Erro",
-          description: data.error || "Erro na verificação",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: error instanceof Error ? error.message : "Erro na verificação",
-        variant: "destructive"
-      });
-    } finally {
-      setTestingConnection(false);
-    }
-  };
-
-  const handleSincronizarDados = async () => {
-    if (!selectedBar) return;
-    
-    // Confirmar antes de iniciar (pode demorar)
-    if (!confirm('Iniciar sincronização completa dos dados do ContaAzul?\n\nEsta operação pode demorar alguns minutos e irá sincronizar:\n- Receitas e Despesas de 2024-2027\n- Categorias\n- Contas Financeiras\n\nContinuar?')) {
-      return;
-    }
-    
-    setTestingConnection(true);
-    try {
-      const response = await fetch('/api/contaazul/sincronizar-dados', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          bar_id: selectedBar.id
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        console.log('🔄 SINCRONIZAÇÃO COMPLETA:', data);
-        
-        toast({
-          title: "Sincronização Concluída!",
-          description: `${data.detalhes.total_processados} registros processados de 2024-2027`
-        });
-        
-        const { detalhes } = data;
-        alert(`
-🔄 SINCRONIZAÇÃO COMPLETA FINALIZADA!
-
-📊 RESUMO DOS DADOS SINCRONIZADOS:
-💰 Receitas: ${detalhes.receitas.processados} registros
-💸 Despesas: ${detalhes.despesas.processados} registros
-📋 Categorias: ${detalhes.categorias.processados} itens
-🏦 Contas: ${detalhes.contas.processados} contas
-
-📅 Período: 01/01/2024 até 01/01/2027
-
-✅ Total processado: ${detalhes.total_processados} registros
-${detalhes.total_erros > 0 ? `⚠️ Erros: ${detalhes.total_erros} registros` : '🎯 Sem erros!'}
-
-🚀 Dados do ContaAzul sincronizados no banco!
-🎯 Pronto para implementar a Visão de Competência!
-        `);
-      } else {
-        toast({
-          title: "Erro",
-          description: data.error || "Erro ao sincronizar dados",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: error instanceof Error ? error.message : "Erro ao sincronizar dados",
-        variant: "destructive"
-      });
-    } finally {
-      setTestingConnection(false);
-    }
-  };
-
-  const handleFixRedirectUri = async () => {
-    if (!selectedBar) return;
-    
-    setFixingUri(true);
-    try {
-      const response = await fetch(`/api/admin/fix-redirect-uri?barId=${selectedBar.id}`, {
-        method: 'POST'
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
         toast({
           title: "Sucesso",
-          description: "Redirect URI corrigida para: https://sgbv2.vercel.app/contaazul-callback"
+          description: `Dados processados com sucesso! ${data.summary?.total_processado || 0} registros`
         });
-        loadStatus();
       } else {
         toast({
           title: "Erro",
-          description: data.error || "Erro ao corrigir redirect URI",
+          description: data.error || "Erro ao processar dados",
           variant: "destructive"
         });
       }
     } catch (error) {
       toast({
         title: "Erro",
-        description: "Erro ao corrigir redirect URI",
+        description: error instanceof Error ? error.message : "Erro ao processar dados",
         variant: "destructive"
       });
     } finally {
-      setFixingUri(false);
+      setProcessando(false);
     }
   };
+
+
 
   const getStatusIcon = () => {
     if (loading) return <Loader2 className="w-5 h-5 animate-spin text-blue-500" />;
@@ -973,23 +436,7 @@ ${detalhes.total_erros > 0 ? `⚠️ Erros: ${detalhes.total_erros} registros` :
               {showConfig ? 'Ocultar' : 'Configurar'}
             </Button>
             
-            {/* Botão temporário para corrigir redirect URI */}
-            {status?.configured && !status?.connected && (
-              <Button 
-                onClick={handleFixRedirectUri}
-                disabled={fixingUri}
-                variant="outline"
-                size="sm"
-                className="bg-yellow-100 hover:bg-yellow-200 text-yellow-800"
-              >
-                {fixingUri ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <AlertCircle className="w-4 h-4 mr-2" />
-                )}
-                Corrigir URL
-              </Button>
-            )}
+
             
             <Button 
               onClick={handleAuthorize}
@@ -1007,102 +454,13 @@ ${detalhes.total_erros > 0 ? `⚠️ Erros: ${detalhes.total_erros} registros` :
             {status?.connected && (
               <>
                 <Button 
-                  onClick={handleTestConnection}
-                  disabled={testingConnection}
-                  variant="outline"
-                  size="sm"
-                >
-                  {testingConnection ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Shield className="w-4 h-4 mr-2" />
-                  )}
-                  Testar
-                </Button>
-                
-                <Button 
-                  onClick={handleTestEndpoints}
-                  disabled={testingConnection}
-                  variant="outline"
-                  size="sm"
-                  className="bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200"
-                >
-                  {testingConnection ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Shield className="w-4 h-4 mr-2" />
-                  )}
-                  Testar Endpoints 💰
-                </Button>
-                
-                <Button 
-                  onClick={handleTestAdvancedEndpoints}
-                  disabled={testingConnection}
-                  variant="outline"
-                  size="sm"
-                  className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
-                >
-                  {testingConnection ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Shield className="w-4 h-4 mr-2" />
-                  )}
-                  Teste Avançado 🚀
-                </Button>
-                
-                <Button 
-                  onClick={handleTestOfficialDocs}
-                  disabled={testingConnection}
-                  variant="outline"
-                  size="sm"
-                  className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
-                >
-                  {testingConnection ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Shield className="w-4 h-4 mr-2" />
-                  )}
-                  📋 Docs Oficial
-                </Button>
-                
-                <Button 
-                  onClick={handleVerEstruturaDados}
-                  disabled={testingConnection}
-                  variant="outline"
-                  size="sm"
-                  className="bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200"
-                >
-                  {testingConnection ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Shield className="w-4 h-4 mr-2" />
-                  )}
-                  🔍 Ver Dados
-                </Button>
-                
-                <Button 
-                  onClick={handleSetupDatabase}
-                  disabled={testingConnection}
-                  variant="outline"
-                  size="sm"
-                  className="bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200"
-                >
-                  {testingConnection ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Shield className="w-4 h-4 mr-2" />
-                  )}
-                  🏗️ Setup Banco
-                </Button>
-                
-                <Button 
                   onClick={handleColetarDados}
-                  disabled={testingConnection}
+                  disabled={processando}
                   variant="outline"
                   size="sm"
                   className="bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200"
                 >
-                  {testingConnection ? (
+                  {processando ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   ) : (
                     <RefreshCw className="w-4 h-4 mr-2" />
@@ -1112,62 +470,17 @@ ${detalhes.total_erros > 0 ? `⚠️ Erros: ${detalhes.total_erros} registros` :
                 
                 <Button 
                   onClick={handleProcessarDados}
-                  disabled={testingConnection}
+                  disabled={processando}
                   variant="outline"
                   size="sm"
                   className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200"
                 >
-                  {testingConnection ? (
+                  {processando ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   ) : (
                     <RefreshCw className="w-4 h-4 mr-2" />
                   )}
                   🔄 Processar Dados
-                </Button>
-                
-                <Button 
-                  onClick={handleVerificarColeta}
-                  disabled={testingConnection}
-                  variant="outline"
-                  size="sm"
-                  className="bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200"
-                >
-                  {testingConnection ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                  )}
-                  🔍 Verificar Coleta
-                </Button>
-                
-                <Button 
-                  onClick={handleSincronizarReceitas}
-                  disabled={testingConnection}
-                  variant="outline"
-                  size="sm"
-                  className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
-                >
-                  {testingConnection ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                  )}
-                  💰 Sync Receitas (Old)
-                </Button>
-                
-                <Button 
-                  onClick={handleSincronizarDados}
-                  disabled={testingConnection}
-                  variant="outline"
-                  size="sm"
-                  className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
-                >
-                  {testingConnection ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                  )}
-                  🔄 Sync Completo (Old)
                 </Button>
                 
                 <Button 

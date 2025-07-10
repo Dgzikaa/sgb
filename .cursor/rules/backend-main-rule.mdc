@@ -1,0 +1,329 @@
+---
+alwaysApply: true
+---
+
+# Regras Específicas do Backend - SGB_V2
+
+## ESTRUTURA OBRIGATÓRIA DO BACKEND
+
+### 1. Edge Functions (Supabase + Deno)
+Sempre usar a estrutura do Supabase em `backend/supabase/functions/`:
+
+```
+backend/
+├── supabase/
+│   ├── config.toml          # Configuração do Supabase
+│   └── functions/           # Edge Functions
+│       ├── login/
+│       │   └── index.ts
+│       ├── processar-dados/
+│       │   └── index.ts
+│       ├── contaazul-oauth/
+│       │   └── index.ts
+│       └── contahub-sync/
+│           └── index.ts
+└── package.json             # Dependências do backend
+```
+
+### 2. ESTRUTURA DE EDGE FUNCTIONS
+
+#### Template Padrão de Edge Function:
+```typescript
+// ✅ CORRETO - Estrutura base
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+interface RequestBody {
+  // Tipagem da requisição
+}
+
+interface ResponseBody {
+  // Tipagem da resposta
+}
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+serve(async (req: Request): Promise<Response> => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  try {
+    // Validação de método
+    if (req.method !== 'POST') {
+      throw new Error('Method not allowed')
+    }
+
+    // Configuração do Supabase
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: { Authorization: req.headers.get('Authorization')! },
+        },
+      }
+    )
+
+    // Lógica principal
+    const body: RequestBody = await req.json()
+    
+    // Processamento...
+    
+    const response: ResponseBody = {
+      // Resultado
+    }
+
+    return new Response(JSON.stringify(response), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200,
+    })
+
+  } catch (error) {
+    console.error('Erro:', error)
+    return new Response(
+      JSON.stringify({ 
+        error: error.message || 'Erro interno do servidor' 
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      }
+    )
+  }
+})
+```
+
+### 3. IMPORTS E DEPENDÊNCIAS
+
+#### Imports Permitidos (Deno):
+```typescript
+// ✅ CORRETO - Deno std library
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { crypto } from 'https://deno.land/std@0.168.0/crypto/mod.ts'
+
+// ✅ CORRETO - NPM packages via esm.sh
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import axios from 'https://esm.sh/axios@1.6.0'
+
+// ✅ CORRETO - JSR packages
+import { z } from 'jsr:@valibot/valibot'
+
+// ❌ ERRADO - Node.js imports
+import fs from 'fs'
+import path from 'path'
+```
+
+### 4. CATEGORIAS DE EDGE FUNCTIONS
+
+#### Autenticação e OAuth:
+```
+functions/
+├── login/               # Login básico
+├── contaazul-oauth/     # OAuth ContaAzul
+├── meta-oauth/          # OAuth Meta/Facebook
+└── google-oauth/        # OAuth Google
+```
+
+#### Processamento de Dados:
+```
+functions/
+├── processar-vendas/    # Processamento de vendas
+├── sync-contaazul/      # Sincronização ContaAzul
+├── backup-dados/        # Backup automático
+└── contahub-coleta/     # Coleta ContaHub
+```
+
+#### Integrações Externas:
+```
+functions/
+├── whatsapp-webhook/    # Webhook WhatsApp
+├── discord-notify/      # Notificações Discord
+├── meta-api-sync/       # Sincronização Meta API
+└── google-reviews/      # Integração Google Reviews
+```
+
+#### Relatórios e Analytics:
+```
+functions/
+├── gerar-relatorio/     # Geração de relatórios
+├── calcular-metricas/   # Cálculos de métricas
+├── analytics-process/   # Processamento analytics
+└── competencia-dados/   # Dados por competência
+```
+
+### 5. NOMENCLATURA DE FUNCTIONS
+
+#### Convenções:
+- **Pastas**: `kebab-case` (ex: `processar-dados`, `contaazul-sync`)
+- **Arquivo**: sempre `index.ts`
+- **Funções**: `camelCase` (ex: `processarVendas`, `enviarNotificacao`)
+- **Interfaces**: `PascalCase` (ex: `RequestBody`, `VendaData`)
+
+### 6. VARIÁVEIS DE AMBIENTE
+
+#### Obrigatórias:
+```typescript
+// ✅ SEMPRE verificar se existem
+const supabaseUrl = Deno.env.get('SUPABASE_URL')
+const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')
+const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Variáveis de ambiente obrigatórias não encontradas')
+}
+```
+
+#### Para Integrações:
+```typescript
+// ContaAzul
+const contaAzulClientId = Deno.env.get('CONTA_AZUL_CLIENT_ID')
+const contaAzulClientSecret = Deno.env.get('CONTA_AZUL_CLIENT_SECRET')
+
+// Meta API
+const metaAccessToken = Deno.env.get('META_ACCESS_TOKEN')
+const metaAppSecret = Deno.env.get('META_APP_SECRET')
+
+// WhatsApp
+const whatsappToken = Deno.env.get('WHATSAPP_TOKEN')
+```
+
+### 7. TRATAMENTO DE ERROS
+
+#### Padrão de Error Handling:
+```typescript
+// ✅ CORRETO
+try {
+  // Lógica principal
+  const resultado = await processarDados(body)
+  
+  return new Response(JSON.stringify(resultado), {
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    status: 200,
+  })
+  
+} catch (error) {
+  console.error('Erro detalhado:', {
+    message: error.message,
+    stack: error.stack,
+    timestamp: new Date().toISOString(),
+    functionName: 'processar-dados',
+    input: body
+  })
+  
+  return new Response(
+    JSON.stringify({ 
+      error: 'Erro interno do servidor',
+      code: 'PROCESSING_ERROR',
+      timestamp: new Date().toISOString()
+    }),
+    {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500,
+    }
+  )
+}
+```
+
+### 8. AUTENTICAÇÃO E AUTORIZAÇÃO
+
+#### Verificação de Usuário:
+```typescript
+// ✅ CORRETO - Sempre verificar autenticação
+const authHeader = req.headers.get('Authorization')
+if (!authHeader) {
+  throw new Error('Token de autorização obrigatório')
+}
+
+const token = authHeader.replace('Bearer ', '')
+const { data: { user }, error } = await supabase.auth.getUser(token)
+
+if (error || !user) {
+  throw new Error('Usuário não autenticado')
+}
+
+// Verificação de permissões (se necessário)
+const { data: profile } = await supabase
+  .from('profiles')
+  .select('role')
+  .eq('id', user.id)
+  .single()
+
+if (profile?.role !== 'admin') {
+  throw new Error('Acesso negado')
+}
+```
+
+### 9. LOGS E MONITORAMENTO
+
+#### Estrutura de Logs:
+```typescript
+// ✅ CORRETO - Logs estruturados
+console.log('INFO:', {
+  function: 'processar-vendas',
+  userId: user.id,
+  action: 'inicio_processamento',
+  timestamp: new Date().toISOString(),
+  metadata: { parametros: body }
+})
+
+console.error('ERROR:', {
+  function: 'processar-vendas',
+  userId: user.id,
+  error: error.message,
+  stack: error.stack,
+  timestamp: new Date().toISOString()
+})
+```
+
+### 10. VALIDAÇÃO DE DADOS
+
+#### Sempre validar entrada:
+```typescript
+// ✅ CORRETO - Validação com Zod ou similar
+const RequestSchema = z.object({
+  barId: z.string().uuid(),
+  data: z.string().datetime(),
+  tipo: z.enum(['vendas', 'produtos', 'clientes'])
+})
+
+try {
+  const validatedBody = RequestSchema.parse(body)
+} catch (error) {
+  throw new Error(`Dados inválidos: ${error.message}`)
+}
+```
+
+### 11. CHECKLIST ANTES DE CRIAR EDGE FUNCTION
+
+Antes de criar uma nova Edge Function:
+
+1. ✅ Está em `backend/supabase/functions/`?
+2. ✅ Nome da pasta em `kebab-case`?
+3. ✅ Arquivo se chama `index.ts`?
+4. ✅ Inclui tratamento CORS?
+5. ✅ Inclui tratamento de erros?
+6. ✅ Valida dados de entrada?
+7. ✅ Verifica autenticação (se necessário)?
+8. ✅ Usa variáveis de ambiente corretamente?
+9. ✅ Logs estruturados implementados?
+10. ✅ Tipagem TypeScript adequada?
+
+### 12. DEPLOY E TESTING
+
+#### Para testar localmente:
+```bash
+# Na pasta backend/
+supabase functions serve --no-verify-jwt
+
+# Para deploy:
+supabase functions deploy nome-da-funcao
+```
+
+---
+
+**IMPORTANTE**: Edge Functions são executadas no runtime Deno, não Node.js. Sempre usar imports compatíveis com Deno!

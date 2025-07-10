@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
+export const dynamic = 'force-dynamic'
+
 // GET - Buscar TODAS as receitas (ativas e inativas) para dashboard
 export async function GET(request: NextRequest) {
   try {

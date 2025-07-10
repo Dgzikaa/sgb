@@ -19,16 +19,24 @@ class GoogleOAuthManager {
     this.clientId = GOOGLE_OAUTH_CLIENT_ID
     this.clientSecret = GOOGLE_OAUTH_CLIENT_SECRET
     this.redirectUri = REDIRECT_URI
+  }
 
+  private checkCredentials(): boolean {
     if (!this.clientId || !this.clientSecret) {
       console.error('❌ Google OAuth credentials não configuradas')
+      return false
     }
+    return true
   }
 
   /**
    * Gerar URL de autorização OAuth
    */
   getAuthUrl(state?: string): string {
+    if (!this.checkCredentials()) {
+      throw new Error('Google OAuth credentials não configuradas')
+    }
+
     const scopes = [
       'https://www.googleapis.com/auth/business.manage',
       'https://www.googleapis.com/auth/plus.business.manage',
@@ -58,6 +66,10 @@ class GoogleOAuthManager {
     expires_in: number
     token_type: string
   } | null> {
+    if (!this.checkCredentials()) {
+      return null
+    }
+
     try {
       const response = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
@@ -97,6 +109,10 @@ class GoogleOAuthManager {
     expires_in: number
     token_type: string
   } | null> {
+    if (!this.checkCredentials()) {
+      return null
+    }
+
     try {
       const response = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',

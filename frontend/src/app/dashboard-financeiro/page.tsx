@@ -10,6 +10,22 @@ import { Badge } from '@/components/ui/badge';
 import { useBarContext } from '@/contexts/BarContext';
 import { Loader2, TrendingUp, TrendingDown, Database, Calendar } from 'lucide-react';
 
+// Hook seguro que não falha se não estiver no provider
+function useSafeBarContext() {
+  try {
+    return useBarContext();
+  } catch (error) {
+    // Se não estiver no provider, retornar valores padrão
+    return {
+      selectedBar: { id: 1, nome: 'Bar Padrão' },
+      availableBars: [],
+      setSelectedBar: () => {},
+      isLoading: false,
+      resetBars: () => {}
+    };
+  }
+}
+
 interface DadosFinanceiros {
   receitas: any[];
   despesas: any[];
@@ -25,7 +41,7 @@ interface DadosFinanceiros {
 }
 
 export default function DashboardFinanceiro() {
-  const { selectedBar } = useBarContext();
+  const { selectedBar } = useSafeBarContext();
   const [dados, setDados] = useState<DadosFinanceiros | null>(null);
   const [loading, setLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);

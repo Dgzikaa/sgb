@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 /**
  * Callback do OAuth Google
  * Recebe o código de autorização e redireciona para página de sucesso
