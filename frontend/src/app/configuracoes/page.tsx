@@ -16,7 +16,7 @@ import WhatsAppConfig from '@/components/whatsapp/WhatsAppConfig'
 
 export default function ConfiguracoesPage() {
   const { selectedBar } = useBar()
-  const { hasPermission, isRole } = usePermissions()
+  const { hasPermission, isRole, user } = usePermissions()
   const [activeTab, setActiveTab] = useState('metas')
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -33,6 +33,11 @@ export default function ConfiguracoesPage() {
   const [investigacaoLoading, setInvestigacaoLoading] = useState(false)
   const [investigacaoResultado, setInvestigacaoResultado] = useState<any>(null)
   const [investigacaoError, setInvestigacaoError] = useState<string | null>(null)
+
+  // Efeito para carregar dados quando necessário
+  useEffect(() => {
+    // Implementar lógica de carregamento se necessário
+  }, [selectedBar])
 
   const updateMeta = (field: string, value: number) => {
     setMetas(prev => ({ ...prev, [field]: value }))
@@ -60,17 +65,12 @@ export default function ConfiguracoesPage() {
 
   // Funções para Investigação ContaAzul
   const executarInvestigacaoCompleta = async () => {
-    if (!selectedBar?.id) {
-      setInvestigacaoError('Nenhum bar selecionado');
-      return;
-    }
-
     setInvestigacaoLoading(true)
     setInvestigacaoError(null)
     setInvestigacaoResultado(null)
 
     try {
-      const response = await fetch(`/api/contaazul/investigar-tudo-possivel?barId=${selectedBar.id}`)
+      const response = await fetch('/api/contaazul/investigar-tudo-possivel')
       const data = await response.json()
       
       if (!response.ok) {
@@ -86,17 +86,12 @@ export default function ConfiguracoesPage() {
   }
 
   const executarInvestigacaoCategorias = async () => {
-    if (!selectedBar?.id) {
-      setInvestigacaoError('Nenhum bar selecionado');
-      return;
-    }
-
     setInvestigacaoLoading(true)
     setInvestigacaoError(null)
     setInvestigacaoResultado(null)
 
     try {
-      const response = await fetch(`/api/contaazul/investigar-categorias-especificas?barId=${selectedBar.id}`)
+      const response = await fetch('/api/contaazul/investigar-categorias-especificas')
       const data = await response.json()
       
       if (!response.ok) {
@@ -121,9 +116,11 @@ export default function ConfiguracoesPage() {
 
   // Verificar quais abas mostrar baseado nas permissões
   const showUsersTab = isRole('admin')
-  const showIntegracoesTab = isRole('admin')
-  const showMarketingTab = hasPermission('marketing_360')
+  const showIntegracoesTab = isRole('admin') 
+  const showMarketingTab = isRole('admin') || hasPermission('marketing_360') // Admins sempre podem ver
   const showWhatsAppTab = isRole('admin') // WhatsApp disponível para admins
+
+  // Configuração das abas visíveis
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
