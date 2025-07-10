@@ -152,28 +152,63 @@ async function coletarTesteRapido(
       resultado[tipo].paginas = pagina;
       console.log(`📋 ${parcelas.length} ${tipo} coletadas na página ${pagina}`);
 
-      // BATCH INSERT OTIMIZADO
-      const parcelasParaInserir = parcelas.map((parcela: any) => ({
-        bar_id: barId,
-        parcela_id: parcela.id,
-        tipo: tipoMaiusculo,
-        raw_data: parcela,
-        processado: false,
-        coletado_em: new Date().toISOString()
-      }));
+      // Esta variável não é mais usada - removida para evitar confusão
+      // const parcelasParaInserir = ...
 
-      console.log(`💾 Inserindo lote de ${parcelasParaInserir.length} ${tipo}...`);
+      console.log(`💾 Inserindo lote de parcelas ${tipo}...`);
 
-      const { error: insertError } = await supabase
+      // 🔍 DEBUG: Mostrar estrutura da tabela esperada
+      console.log('🔍 DEBUG: Estrutura de dados que será inserida:');
+      console.log('🔍 DEBUG: Campos esperados na tabela contaazul_raw_parcelas:');
+      console.log('🔍 - bar_id (integer)');
+      console.log('🔍 - conta_receber_id (text)'); 
+      console.log('🔍 - parcela_numero (integer)');
+      console.log('🔍 - data_vencimento (date)');
+      console.log('🔍 - valor (numeric)');
+      console.log('🔍 - status (text)');
+      console.log('🔍 - dados_completos (jsonb)');
+      console.log('🔍 - processado (boolean)');
+
+      // 🛠️ CORREÇÃO: Usar estrutura correta da tabela
+      const parcelasCorrigidas = parcelas.map((item: any, index: number) => {
+        // Extrair informações das parcelas dentro do item
+        const parcelas_item = item.parcelas || [{ numero: 1, data_vencimento: item.data_vencimento, valor: item.valor, status: item.status }];
+        
+        return parcelas_item.map((parcela: any) => ({
+          bar_id: barId,
+          conta_receber_id: item.id.toString(),
+          parcela_numero: parcela.numero || 1,
+          data_vencimento: parcela.data_vencimento || item.data_vencimento || null,
+          valor: parseFloat(parcela.valor || item.valor || '0'),
+          status: parcela.status || item.status || '',
+          dados_completos: {
+            item_original: item,
+            parcela_original: parcela,
+            tipo: tipoMaiusculo
+          },
+          processado: false
+        }));
+      }).flat();
+
+      console.log(`🔍 DEBUG: Preparando ${parcelasCorrigidas.length} parcelas para inserção`);
+      console.log('🔍 DEBUG: Primeira parcela exemplo:', JSON.stringify(parcelasCorrigidas[0], null, 2));
+
+      const { data: insertData, error: insertError } = await supabase
         .from('contaazul_raw_parcelas')
-        .upsert(parcelasParaInserir, {
-          onConflict: 'bar_id,parcela_id'
+        .upsert(parcelasCorrigidas, {
+          onConflict: 'bar_id,conta_receber_id,parcela_numero'
         });
 
       if (insertError) {
-        console.error(`❌ Erro ao inserir lote de ${tipo}:`, insertError);
+        console.error(`❌ ERRO DETALHADO ao inserir lote de ${tipo}:`);
+        console.error('❌ Erro completo:', JSON.stringify(insertError, null, 2));
+        console.error('❌ Erro message:', insertError.message);
+        console.error('❌ Erro details:', insertError.details);
+        console.error('❌ Erro hint:', insertError.hint);
+        console.error('❌ Erro code:', insertError.code);
       } else {
-        console.log(`✅ Lote de ${parcelas.length} ${tipo} inserido com sucesso`);
+        console.log(`✅ Lote de ${parcelasCorrigidas.length} ${tipo} inserido com sucesso`);
+        console.log('✅ Insert realizado com sucesso');
       }
 
       // Pequena pausa

@@ -317,7 +317,113 @@ export default function ContaAzulOAuth() {
     }
   };
 
-  // NOVOS HANDLERS PARA ABORDAGEM EM 2 ETAPAS
+  // NOVOS HANDLERS PARA EDGE FUNCTIONS OTIMIZADAS (MCP)
+  const handleColetaRapidaEdgeFunction = async () => {
+    if (!selectedBar) {
+      toast({
+        title: "Erro",
+        description: "Nenhum bar selecionado. Selecione um bar primeiro.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setProcessando(true);
+    try {
+      console.log('🚀 Iniciando coleta RÁPIDA via Edge Function...');
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/contaazul-coleta-rapida`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({ 
+          barId: selectedBar.id,
+          competenciaInicio: '2024-01-01',
+          competenciaFim: '2027-01-01',
+          batchSize: 100
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        const stats = data.stats;
+        
+        toast({
+          title: "🚀 Coleta Rápida Concluída!",
+          description: `${stats.totalSalvo} parcelas salvas em ${Math.round(stats.tempoExecucao / 1000)}s. Pronto para processamento!`
+        });
+        loadStatus();
+      } else {
+        toast({
+          title: "Erro",
+          description: data.error || "Erro na coleta rápida",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Erro na coleta rápida:', error);
+      toast({
+        title: "Erro",
+        description: "Erro na coleta rápida via Edge Function",
+        variant: "destructive"
+      });
+    } finally {
+      setProcessando(false);
+    }
+  };
+
+  const handleProcessarParcelasEdgeFunction = async () => {
+    if (!selectedBar) return;
+    
+    setProcessando(true);
+    try {
+      console.log('🔄 Iniciando processamento via Edge Function...');
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/contaazul-processar-parcelas`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({
+          barId: selectedBar.id,
+          batchSize: 50,
+          maxBatches: 10
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        const stats = data.stats;
+        
+        toast({
+          title: "🔄 Processamento Concluído!",
+          description: `${stats.totalSucesso} parcelas processadas, ${stats.totalErro} erros em ${Math.round(stats.tempoExecucao / 1000)}s. ${stats.batchesProcessados} lotes processados.`
+        });
+        loadStatus();
+      } else {
+        toast({
+          title: "Erro",
+          description: data.error || "Erro no processamento",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Erro no processamento:', error);
+      toast({
+        title: "Erro",
+        description: "Erro no processamento via Edge Function",
+        variant: "destructive"
+      });
+    } finally {
+      setProcessando(false);
+    }
+  };
+
   const handleColetarDadosRaw = async () => {
     if (!selectedBar) {
       toast({
@@ -603,9 +709,48 @@ export default function ContaAzulOAuth() {
             
             {status?.connected && (
               <>
-                {/* ABORDAGEM EM 2 ETAPAS - RECOMENDADA */}
+                {/* NOVA ABORDAGEM COM EDGE FUNCTIONS - RECOMENDADA */}
+                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 w-full">
+                  <p className="text-xs text-emerald-700 font-medium mb-2">🚀 NOVA ABORDAGEM - EDGE FUNCTIONS (SEM TIMEOUT)</p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button 
+                      onClick={handleColetaRapidaEdgeFunction}
+                      disabled={processando}
+                      variant="outline"
+                      size="sm"
+                      className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
+                    >
+                      {processando ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                      )}
+                      🚀 1. Coleta Rápida (Edge)
+                    </Button>
+                    
+                    <Button 
+                      onClick={handleProcessarParcelasEdgeFunction}
+                      disabled={processando}
+                      variant="outline"
+                      size="sm"
+                      className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
+                    >
+                      {processando ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                      )}
+                      🔄 2. Processar Lotes (Edge)
+                    </Button>
+                  </div>
+                  <p className="text-xs text-emerald-600 mt-1">
+                    Edge Functions do Supabase - 100% sem timeout! Coleta dados brutos → Processa em lotes controlados
+                  </p>
+                </div>
+
+                {/* ABORDAGEM EM 2 ETAPAS - API ROUTES (PODE DAR TIMEOUT) */}
                 <div className="bg-green-50 border border-green-200 rounded-lg p-3 w-full">
-                  <p className="text-xs text-green-700 font-medium mb-2">✅ ABORDAGEM OTIMIZADA (2 ETAPAS)</p>
+                  <p className="text-xs text-green-700 font-medium mb-2">✅ ABORDAGEM API ROUTES (PODE DAR TIMEOUT)</p>
                   <div className="flex flex-wrap gap-2">
                     <Button 
                       onClick={handleColetarDadosRaw}
@@ -653,7 +798,7 @@ export default function ContaAzulOAuth() {
                     </Button>
                   </div>
                   <p className="text-xs text-green-600 mt-1">
-                    1º Coleta dados em 500/página (rápido) → 2º Processa em lotes com detalhes (evita timeout)
+                    API Routes - 1º Coleta dados em 500/página → 2º Processa em lotes (ainda pode dar timeout)
                   </p>
                 </div>
 

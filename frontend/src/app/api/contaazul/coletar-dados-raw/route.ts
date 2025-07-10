@@ -251,27 +251,40 @@ async function coletarFinanceiroRaw(
       console.log(`📋 ${parcelas.length} ${tipo} coletadas na página ${pagina}`);
 
       // OTIMIZAÇÃO: BATCH INSERT em vez de inserts individuais
-      const parcelasParaInserir = parcelas.map((parcela: any) => ({
-        bar_id: barId,
-        parcela_id: parcela.id,
-        tipo: tipoMaiusculo,
-        raw_data: parcela, // JSON completo da parcela
-        processado: false, // Marcar como não processado
-        coletado_em: new Date().toISOString()
-      }));
+      const parcelasParaInserir = parcelas.map((item: any) => {
+        // Extrair parcelas do item (cada item pode ter múltiplas parcelas)
+        const parcelas_item = item.parcelas || [{ numero: 1, data_vencimento: item.data_vencimento, valor: item.valor, status: item.status }];
+        
+        return parcelas_item.map((parcela: any) => ({
+          bar_id: barId,
+          conta_receber_id: item.id.toString(),
+          parcela_numero: parcela.numero || 1,
+          data_vencimento: parcela.data_vencimento || item.data_vencimento || null,
+          valor: parseFloat(parcela.valor || item.valor || '0'),
+          status: parcela.status || item.status || '',
+          dados_completos: {
+            item_original: item,
+            parcela_original: parcela,
+            tipo: tipoMaiusculo
+          },
+          processado: false
+        }));
+      }).flat();
+
+      console.log(`💾 Preparando ${parcelasParaInserir.length} parcelas para inserção...`);
 
       // BATCH INSERT: inserir todas de uma vez
       const { error: insertError } = await supabase
         .from('contaazul_raw_parcelas')
         .upsert(parcelasParaInserir, {
-          onConflict: 'bar_id,parcela_id'
+          onConflict: 'bar_id,conta_receber_id,parcela_numero'
         });
 
       if (insertError) {
         console.error(`❌ Erro ao inserir lote de ${tipo}:`, insertError);
         // Continuar mesmo com erro
       } else {
-        console.log(`✅ Lote de ${parcelas.length} ${tipo} inserido com sucesso`);
+        console.log(`✅ Lote de ${parcelasParaInserir.length} ${tipo} inserido com sucesso`);
       }
 
       pagina++;
