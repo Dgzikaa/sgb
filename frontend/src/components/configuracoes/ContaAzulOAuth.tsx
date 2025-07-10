@@ -16,7 +16,7 @@ interface ContaAzulStatus {
   configured: boolean;
   tokenExpired: boolean;
   expiresAt: string;
-  access_token?: string; // Adicionar token de acesso
+  access_token?: string;
   empresa: {
     id: string;
     nome: string;
@@ -27,11 +27,9 @@ interface ContaAzulStatus {
 }
 
 export default function ContaAzulOAuth() {
-  // Force rebuild - timestamp
   const { toast } = useToast();
   const { selectedBar } = useBarContext();
   
-  // DEBUG: Log para identificar problemas
   console.log('🔍 ContaAzulOAuth renderizando...', { selectedBar });
   
   const [status, setStatus] = useState<ContaAzulStatus | null>(null);
@@ -39,7 +37,6 @@ export default function ContaAzulOAuth() {
   const [configuring, setConfiguring] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
-  const [processando, setProcessando] = useState(false);
   
   const [config, setConfig] = useState({
     clientId: '',
@@ -126,7 +123,6 @@ export default function ContaAzulOAuth() {
     
     setLoading(true);
     try {
-      // Armazenar temporariamente o barId para uso no callback
       localStorage.setItem('contaazul_bar_id', selectedBar.id.toString());
       
       const response = await fetch(`/api/contaazul/auth?action=authorize&barId=${selectedBar.id}`);
@@ -136,7 +132,6 @@ export default function ContaAzulOAuth() {
         throw new Error(data.error || 'Erro ao iniciar autorização');
       }
       
-      // Redirecionar para a página de autorização da ContaAzul
       window.location.href = data.authUrl;
     } catch (error) {
       toast({
@@ -221,417 +216,6 @@ export default function ContaAzulOAuth() {
       setLoading(false);
     }
   };
-
-  const handleColetarDados = async () => {
-    if (!selectedBar) {
-      console.error('❌ selectedBar não está definido!');
-      toast({
-        title: "Erro",
-        description: "Nenhum bar selecionado. Selecione um bar primeiro.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    console.log('🚀 selectedBar:', selectedBar);
-    console.log('🚀 selectedBar.id:', selectedBar.id);
-    
-    setProcessando(true);
-    try {
-      console.log('🚀 Iniciando coleta com detalhes (fluxo correto)...');
-      
-      const response = await fetch('/api/contaazul/coletar-com-detalhes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          bar_id: selectedBar.id,
-          // Período amplo para capturar todos os dados históricos
-          data_inicio: '2024-01-01',
-          data_fim: '2027-01-01'
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        const resultado = data.resultado;
-        const totalProcessados = resultado.receitas.processadas + resultado.despesas.processadas;
-        const totalAuxiliares = resultado.dados_auxiliares.categorias + resultado.dados_auxiliares.centros_custo + resultado.dados_auxiliares.contas;
-        
-        toast({
-          title: "✅ Coleta Concluída!",
-          description: `${totalProcessados} registros processados (${resultado.receitas.processadas} receitas, ${resultado.despesas.processadas} despesas) + ${totalAuxiliares} dados auxiliares com categoria e centro de custo!`
-        });
-        loadStatus();
-      } else {
-        toast({
-          title: "Erro",
-          description: data.error || "Erro ao coletar dados",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao coletar dados com detalhes",
-        variant: "destructive"
-      });
-    } finally {
-      setProcessando(false);
-    }
-  };
-
-  const handleProcessarDados = async () => {
-    if (!selectedBar) return;
-    
-    setProcessando(true);
-    try {
-      const response = await fetch('/api/contaazul/processar-dados', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          bar_id: selectedBar.id
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        toast({
-          title: "Sucesso",
-          description: `Dados processados com sucesso! ${data.summary?.total_processado || 0} registros`
-        });
-      } else {
-        toast({
-          title: "Erro",
-          description: data.error || "Erro ao processar dados",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: error instanceof Error ? error.message : "Erro ao processar dados",
-        variant: "destructive"
-      });
-    } finally {
-      setProcessando(false);
-    }
-  };
-
-  // NOVOS HANDLERS PARA EDGE FUNCTIONS OTIMIZADAS (MCP)
-  const handleColetaRapidaEdgeFunction = async () => {
-    if (!selectedBar) {
-      toast({
-        title: "Erro",
-        description: "Nenhum bar selecionado. Selecione um bar primeiro.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setProcessando(true);
-    try {
-      console.log('🚀 Iniciando coleta RÁPIDA via Edge Function...');
-      
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/contaazul-coleta-rapida`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify({ 
-          barId: selectedBar.id,
-          competenciaInicio: '2024-01-01',
-          competenciaFim: '2027-01-01',
-          batchSize: 100
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok && data.success) {
-        const stats = data.stats;
-        
-        toast({
-          title: "🚀 Coleta Rápida Concluída!",
-          description: `${stats.totalSalvo} parcelas salvas em ${Math.round(stats.tempoExecucao / 1000)}s. Pronto para processamento!`
-        });
-        loadStatus();
-      } else {
-        toast({
-          title: "Erro",
-          description: data.error || "Erro na coleta rápida",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error('Erro na coleta rápida:', error);
-      toast({
-        title: "Erro",
-        description: "Erro na coleta rápida via Edge Function",
-        variant: "destructive"
-      });
-    } finally {
-      setProcessando(false);
-    }
-  };
-
-  const handleProcessarParcelasEdgeFunction = async () => {
-    if (!selectedBar) return;
-    
-    setProcessando(true);
-    try {
-      console.log('🔄 Iniciando processamento via Edge Function...');
-      
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/contaazul-processar-parcelas`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify({
-          barId: selectedBar.id,
-          batchSize: 50,
-          maxBatches: 10
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok && data.success) {
-        const stats = data.stats;
-        
-        toast({
-          title: "🔄 Processamento Concluído!",
-          description: `${stats.totalSucesso} parcelas processadas, ${stats.totalErro} erros em ${Math.round(stats.tempoExecucao / 1000)}s. ${stats.batchesProcessados} lotes processados.`
-        });
-        loadStatus();
-      } else {
-        toast({
-          title: "Erro",
-          description: data.error || "Erro no processamento",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error('Erro no processamento:', error);
-      toast({
-        title: "Erro",
-        description: "Erro no processamento via Edge Function",
-        variant: "destructive"
-      });
-    } finally {
-      setProcessando(false);
-    }
-  };
-
-  const handleColetarDadosRaw = async () => {
-    if (!selectedBar) {
-      toast({
-        title: "Erro",
-        description: "Nenhum bar selecionado. Selecione um bar primeiro.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setProcessando(true);
-    try {
-      console.log('⚡ Iniciando coleta RAW rápida...');
-      
-      const response = await fetch('/api/contaazul/coletar-dados-raw', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          bar_id: selectedBar.id,
-          data_inicio: '2024-01-01',
-          data_fim: '2027-01-01'
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        const resultado = data.resultado;
-        const totalRaw = resultado.receitas.total + resultado.despesas.total;
-        const totalAuxiliares = resultado.dados_auxiliares.categorias + resultado.dados_auxiliares.centros_custo + resultado.dados_auxiliares.contas;
-        
-        toast({
-          title: "⚡ Coleta RAW Concluída!",
-          description: `${totalRaw} parcelas coletadas rapidamente (${resultado.receitas.total} receitas, ${resultado.despesas.total} despesas) + ${totalAuxiliares} dados auxiliares. Tempo: ${Math.round(data.tempo_execucao_ms / 1000)}s`
-        });
-        loadStatus();
-      } else {
-        toast({
-          title: "Erro",
-          description: data.error || "Erro ao coletar dados RAW",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao coletar dados RAW",
-        variant: "destructive"
-      });
-    } finally {
-      setProcessando(false);
-    }
-  };
-
-  const handleProcessarDadosRaw = async () => {
-    if (!selectedBar) return;
-    
-    setProcessando(true);
-    try {
-      console.log('🔄 Iniciando processamento de dados RAW...');
-      
-      const response = await fetch('/api/contaazul/processar-dados-raw', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          bar_id: selectedBar.id,
-          lote_size: 50
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        const lote = data.resultado.lote_processado;
-        
-        toast({
-          title: "🔄 Processamento Concluído!",
-          description: `${lote.processadas} parcelas processadas com detalhes (${lote.erros} erros). ${lote.processadas > 0 ? 'Execute novamente para próximo lote.' : 'Todos os dados foram processados!'}`
-        });
-        loadStatus();
-      } else {
-        toast({
-          title: "Erro",
-          description: data.error || "Erro ao processar dados RAW",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao processar dados RAW",
-        variant: "destructive"
-      });
-    } finally {
-      setProcessando(false);
-    }
-  };
-
-  const handleTesteUltraRapido = async () => {
-    if (!selectedBar) {
-      toast({
-        title: "Erro",
-        description: "Nenhum bar selecionado. Selecione um bar primeiro.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setProcessando(true);
-    try {
-      console.log('🧪 Iniciando teste ultra-rápido...');
-      
-      const response = await fetch('/api/contaazul/coletar-dados-teste-rapido', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          bar_id: selectedBar.id
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        const resultado = data.resultado;
-        const totalTeste = resultado.receitas.total + resultado.despesas.total;
-        
-        toast({
-          title: "🧪 Teste Ultra-Rápido Concluído!",
-          description: `${totalTeste} parcelas coletadas em ${Math.round(data.tempo_execucao_ms / 1000)}s (${resultado.receitas.total} receitas, ${resultado.despesas.total} despesas). Batch insert funcionou!`
-        });
-        loadStatus();
-      } else {
-        toast({
-          title: "Erro",
-          description: data.error || "Erro no teste ultra-rápido",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro no teste ultra-rápido",
-        variant: "destructive"
-      });
-    } finally {
-      setProcessando(false);
-    }
-  };
-
-  const handleTestarMapeamentoCategoria = async () => {
-    if (!selectedBar) return;
-    
-    setProcessando(true);
-    try {
-      console.log('🧠 Testando mapeamento inteligente de categorias...');
-      
-      const response = await fetch('/api/contaazul/testar-mapeamento-categoria', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          bar_id: selectedBar.id,
-          limite: 100
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        const resultado = data.resultado;
-        const confiancaMedia = resultado.confianca_media;
-        const precisaRevisao = resultado.precisa_revisao;
-        
-        toast({
-          title: "🧠 Análise de Mapeamento Concluída!",
-          description: `${resultado.total_analisado} parcelas analisadas. Confiança média: ${Math.round(confiancaMedia)}%. ${precisaRevisao} casos precisam de revisão manual.`
-        });
-      } else {
-        toast({
-          title: "Erro",
-          description: data.error || "Erro no teste de mapeamento",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro no teste de mapeamento inteligente",
-        variant: "destructive"
-      });
-    } finally {
-      setProcessando(false);
-    }
-  };
-
-  // NOVO: Teste de Categorias em 2 Etapas
-  // const [testeCategoriaLoading, setTesteCategoriaLoading] = useState(false);
-  // const [testeCategoriaResultado, setTesteCategoriaResultado] = useState<any>(null);
-  // const [dataInicio, setDataInicio] = useState('2024-01-01');
-  // const [dataFim, setDataFim] = useState('2024-12-31');
-
-  // const handleTesteBuscaCategorias = async () => {
-  //   // Função temporariamente desabilitada
-  // };
-
 
   const getStatusIcon = () => {
     if (loading) return <Loader2 className="w-5 h-5 animate-spin text-blue-500" />;
@@ -750,8 +334,6 @@ export default function ContaAzulOAuth() {
               {showConfig ? 'Ocultar' : 'Configurar'}
             </Button>
             
-
-            
             <Button 
               onClick={handleAuthorize}
               disabled={!status?.configured || loading}
@@ -767,162 +349,6 @@ export default function ContaAzulOAuth() {
             
             {status?.connected && (
               <>
-                {/* NOVA ABORDAGEM COM EDGE FUNCTIONS - RECOMENDADA */}
-                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 w-full">
-                  <p className="text-xs text-emerald-700 font-medium mb-2">🚀 NOVA ABORDAGEM - EDGE FUNCTIONS (SEM TIMEOUT)</p>
-                  <div className="flex flex-wrap gap-2">
-                    <Button 
-                      onClick={handleColetaRapidaEdgeFunction}
-                      disabled={processando}
-                      variant="outline"
-                      size="sm"
-                      className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
-                    >
-                      {processando ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                      )}
-                      🚀 1. Coleta Rápida (Edge)
-                    </Button>
-                    
-                    <Button 
-                      onClick={handleProcessarParcelasEdgeFunction}
-                      disabled={processando}
-                      variant="outline"
-                      size="sm"
-                      className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
-                    >
-                      {processando ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                      )}
-                      🔄 2. Processar Lotes (Edge)
-                    </Button>
-                  </div>
-                  <p className="text-xs text-emerald-600 mt-1">
-                    Edge Functions do Supabase - 100% sem timeout! Coleta dados brutos → Processa em lotes controlados
-                  </p>
-                </div>
-
-                {/* ABORDAGEM EM 2 ETAPAS - API ROUTES (PODE DAR TIMEOUT) */}
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3 w-full">
-                  <p className="text-xs text-green-700 font-medium mb-2">✅ ABORDAGEM API ROUTES (PODE DAR TIMEOUT)</p>
-                  <div className="flex flex-wrap gap-2">
-                    <Button 
-                      onClick={handleColetarDadosRaw}
-                      disabled={processando}
-                      variant="outline"
-                      size="sm"
-                      className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
-                    >
-                      {processando ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                      )}
-                      ⚡ 1. Coletar RAW (Rápido)
-                    </Button>
-                    
-                    <Button 
-                      onClick={handleTesteUltraRapido}
-                      disabled={processando}
-                      variant="outline"
-                      size="sm"
-                      className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
-                    >
-                      {processando ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                      )}
-                      🧪 Teste Ultra-Rápido
-                    </Button>
-                    
-                    <Button 
-                      onClick={handleProcessarDadosRaw}
-                      disabled={processando}
-                      variant="outline"
-                      size="sm"
-                      className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
-                    >
-                      {processando ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                      )}
-                      🔄 2. Processar Detalhes
-                    </Button>
-                  </div>
-                  <p className="text-xs text-green-600 mt-1">
-                    API Routes - 1º Coleta dados em 500/página → 2º Processa em lotes (ainda pode dar timeout)
-                  </p>
-                </div>
-
-                {/* SISTEMA DE MAPEAMENTO INTELIGENTE */}
-                <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 w-full">
-                  <p className="text-xs text-purple-700 font-medium mb-2">🧠 SISTEMA DE MAPEAMENTO INTELIGENTE</p>
-                  <div className="flex flex-wrap gap-2">
-                    <Button 
-                      onClick={handleTestarMapeamentoCategoria}
-                      disabled={processando}
-                      variant="outline"
-                      size="sm"
-                      className="bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200"
-                    >
-                      {processando ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                      )}
-                      🧠 Testar Mapeamento IA
-                    </Button>
-                  </div>
-                  <p className="text-xs text-purple-600 mt-1">
-                    IA analisa descrições e categoriza automaticamente: "Pix recebido" → VENDAS, "CAESB" → UTILIDADES, etc.
-                  </p>
-                </div>
-
-                {/* ABORDAGEM ANTIGA - PODE DAR TIMEOUT */}
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 w-full">
-                  <p className="text-xs text-yellow-700 font-medium mb-2">⚠️ ABORDAGEM ANTIGA (PODE DAR TIMEOUT)</p>
-                  <div className="flex flex-wrap gap-2">
-                    <Button 
-                      onClick={handleColetarDados}
-                      disabled={processando}
-                      variant="outline"
-                      size="sm"
-                      className="bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200"
-                    >
-                      {processando ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                      )}
-                      📥 Coletar Tudo Junto
-                    </Button>
-                    
-                    <Button 
-                      onClick={handleProcessarDados}
-                      disabled={processando}
-                      variant="outline"
-                      size="sm"
-                      className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200"
-                    >
-                      {processando ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                      )}
-                      🔄 Processar Dados
-                    </Button>
-                  </div>
-                  <p className="text-xs text-yellow-600 mt-1">
-                    Processa tudo em tempo real (750+ chamadas individuais = timeout no Vercel)
-                  </p>
-                </div>
-                
                 <Button 
                   onClick={handleRefresh}
                   disabled={refreshing}
@@ -934,7 +360,7 @@ export default function ContaAzulOAuth() {
                   ) : (
                     <RefreshCw className="w-4 h-4 mr-2" />
                   )}
-                  Renovar
+                  Renovar Token
                 </Button>
                 
                 <Button 
@@ -1028,69 +454,28 @@ export default function ContaAzulOAuth() {
         </Card>
       )}
 
-      {/* NOVO: Teste de Categorias (2 Etapas) - TEMPORARIAMENTE DESABILITADO */}
-      {false && status?.connected && (
-        <Card className="border-blue-200">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              🎯 Teste: Buscar Categorias (2 Etapas)
-            </CardTitle>
-            <CardDescription>
-              Testa a estratégia correta: buscar lista básica + detalhes com categoria
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* SEÇÃO COMENTADA TEMPORARIAMENTE */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-yellow-800 font-medium">🚧 Seção em manutenção</p>
-              <p className="text-yellow-700 text-sm">
-                O teste de categorias está temporariamente desabilitado enquanto corrigimos um erro de JavaScript.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Seção de Teste Alternativa - Simples */}
+      {/* Status de Funcionalidades */}
       {status?.connected && (
         <Card className="border-green-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              🧪 Teste Simples de Categorias
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              Integração Ativa
             </CardTitle>
             <CardDescription>
-              Versão simplificada para testar a estratégia de 2 etapas
+              A integração com ContaAzul está funcionando corretamente
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h4 className="font-medium mb-2">📋 Estratégia de 2 Etapas</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-start gap-2">
-                  <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">1</span>
-                  <div>
-                    <span className="font-medium">Buscar Lista Básica</span>
-                    <p className="text-gray-600">GET /v1/financeiro/eventos-financeiros/contas-a-receber/buscar</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">2</span>
-                  <div>
-                    <span className="font-medium">Buscar Detalhes com Categoria</span>
-                    <p className="text-gray-600">GET /v1/financeiro/eventos-financeiros/parcelas/{id}</p>
-                  </div>
-                </div>
-              </div>
+          <CardContent>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <p className="text-green-800 font-medium mb-2">✅ Funcionalidades Disponíveis:</p>
+              <ul className="text-green-700 text-sm space-y-1">
+                <li>• Autenticação OAuth 2.0 ativa</li>
+                <li>• Acesso às APIs financeiras</li>
+                <li>• Renovação automática de tokens</li>
+                <li>• Sincronização de dados</li>
+              </ul>
             </div>
-
-            <Button 
-              onClick={() => {
-                alert('🎯 Teste de categorias será implementado em breve!\n\nA estratégia correta é:\n1. Buscar lista básica de parcelas\n2. Para cada parcela, buscar detalhes com categoria');
-              }}
-              className="w-full"
-            >
-              🎯 Executar Teste (Em Desenvolvimento)
-            </Button>
           </CardContent>
         </Card>
       )}
