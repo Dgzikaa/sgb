@@ -521,36 +521,7 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
           </nav>
 
           {/* Footer */}
-          <div className="p-3 border-t border-slate-700/50 space-y-2">
-            {/* Botão Minha Conta */}
-            <button
-              onClick={() => handleMenuClick('/minha-conta')}
-              disabled={isPending}
-              className={`
-                group w-full flex items-center space-x-2 p-2 rounded-xl hover:bg-white/10 transition-colors disabled:opacity-50 font-medium
-                ${isSidebarCollapsed ? 'justify-center' : ''}
-                ${pathname === '/minha-conta' 
-                  ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm border border-white/30' 
-                  : 'text-slate-300 hover:text-white'
-                }
-              `}
-              title={isSidebarCollapsed ? "Minha conta" : undefined}
-            >
-              <div className="relative z-10 flex items-center w-full">
-                <span className={`text-lg transition-transform duration-300 ${pathname === '/minha-conta' ? 'scale-110' : 'group-hover:scale-110'}`}>
-                  👤
-                </span>
-                {!isSidebarCollapsed && (
-                  <>
-                    <span className="flex-1 ml-3">Minha conta</span>
-                    {pathname === '/minha-conta' && (
-                      <div className="w-2 h-2 bg-white rounded-full shadow-lg"></div>
-                    )}
-                  </>
-                )}
-              </div>
-            </button>
-
+          <div className="p-3 border-t border-slate-700/50">
             {/* Botão de Logout */}
             <button
               onClick={handleLogout}

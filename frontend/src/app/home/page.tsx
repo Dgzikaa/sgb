@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, Suspense, Component, ReactNode } from 'react'
-import { DarkSidebarLayout } from '@/components/layouts'
 import { usePermissions } from '@/hooks/usePermissions'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 
@@ -118,9 +117,5 @@ function HomeEmConstrucao() {
 }
 
 export default function HomePage() {
-  return (
-    <DarkSidebarLayout>
-      <HomeEmConstrucao />
-    </DarkSidebarLayout>
-  )
+  return <HomeEmConstrucao />
 } 
