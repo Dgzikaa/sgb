@@ -2297,3 +2297,169 @@ table th {
     transform: rotate(360deg);
   }
 }
+
+/* Regras CSS para garantir que textos nunca fiquem em branco visualmente */
+
+/* Textos de configuração e labels importantes */
+.text-blue-600,
+.text-blue-700,
+.text-blue-800 {
+  color: #2563eb !important;
+}
+
+/* Textos de títulos e subtítulos */
+h1, h2, h3, h4, h5, h6 {
+  color: #1f2937 !important;
+}
+
+/* Labels de formulários */
+label {
+  color: #374151 !important;
+  font-weight: 500 !important;
+}
+
+/* Textos de descrição e explicação */
+.text-gray-600,
+.text-gray-700,
+.text-gray-500 {
+  color: #6b7280 !important;
+}
+
+/* Textos de botões */
+button {
+  color: inherit !important;
+}
+
+/* Textos de inputs e selects */
+input, select, textarea {
+  color: #1f2937 !important;
+}
+
+/* Textos de cards e seções */
+.card-text,
+.section-text {
+  color: #374151 !important;
+}
+
+/* Textos de status e badges */
+.badge,
+.status-text {
+  color: #ffffff !important;
+}
+
+/* Textos de links */
+a {
+  color: #2563eb !important;
+}
+
+/* Textos de tabelas */
+table td,
+table th {
+  color: #1f2937 !important;
+}
+
+/* Textos de modais e dialogs */
+.modal-content,
+.dialog-content {
+  color: #374151 !important;
+}
+
+/* Textos de notificações */
+.notification-text,
+.toast-text {
+  color: #1f2937 !important;
+}
+
+/* Garantir que textos em elementos com background escuro tenham cor clara */
+.bg-gray-800 *,
+.bg-gray-900 *,
+.bg-slate-800 *,
+.bg-slate-900 *,
+.dark * {
+  color: #f9fafb !important;
+}
+
+/* Textos de sidebar */
+.sidebar-text,
+.nav-text {
+  color: #374151 !important;
+}
+
+/* Textos de breadcrumb */
+.breadcrumb-text {
+  color: #6b7280 !important;
+}
+
+/* Textos de placeholder que não devem ficar invisíveis */
+::placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+/* Textos de tooltip */
+.tooltip-text {
+  color: #ffffff !important;
+}
+
+/* Anti-regra para evitar textos completamente transparentes */
+* {
+  color: inherit;
+}
+
+*:not([class*="bg-"]):not([style*="background"]) {
+  color: #1f2937;
+}
+
+/* Regras específicas para componentes comuns */
+.form-label {
+  color: #374151 !important;
+  font-weight: 500 !important;
+}
+
+.form-description {
+  color: #6b7280 !important;
+}
+
+.page-title {
+  color: #1f2937 !important;
+  font-weight: 600 !important;
+}
+
+.page-subtitle {
+  color: #6b7280 !important;
+}
+
+.section-title {
+  color: #1f2937 !important;
+  font-weight: 500 !important;
+}
+
+/* Garantir visibilidade em componentes específicos do projeto */
+.contaazul-config *,
+.meta-config *,
+.oauth-config * {
+  color: #374151 !important;
+}
+
+.test-config *,
+.api-config *,
+.integration-config * {
+  color: #374151 !important;
+}
+
+/* Textos de erro e sucesso */
+.error-text {
+  color: #dc2626 !important;
+}
+
+.success-text {
+  color: #16a34a !important;
+}
+
+.warning-text {
+  color: #d97706 !important;
+}
+
+.info-text {
+  color: #2563eb !important;
+}

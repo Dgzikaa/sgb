@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Loader2, CheckCircle, XCircle, Search, Database, Key } from 'lucide-react'
+import { Loader2, CheckCircle, XCircle, Search, Database, Key, RefreshCw } from 'lucide-react'
 import { getSupabaseClient } from '@/lib/supabase'
 import { useBar } from '@/contexts/BarContext'
 
@@ -17,7 +17,8 @@ export default function TesteCategoriaEtapas() {
   const [accessToken, setAccessToken] = useState('')
   const [dataInicio, setDataInicio] = useState('2024-01-01')
   const [dataFim, setDataFim] = useState('2024-12-31')
-  const [tokenStatus, setTokenStatus] = useState<'idle' | 'loading' | 'found' | 'not_found'>('idle')
+  const [tokenStatus, setTokenStatus] = useState<'idle' | 'loading' | 'found' | 'not_found' | 'expired'>('idle')
+  const [tokenExpiresAt, setTokenExpiresAt] = useState<string | null>(null)
 
   // Buscar token automaticamente quando o bar for selecionado
   useEffect(() => {
@@ -53,16 +54,27 @@ export default function TesteCategoriaEtapas() {
       }
 
       if (data?.access_token) {
-        // Verificar se o token ainda é válido
-        const isValid = data.expires_at ? new Date(data.expires_at) > new Date() : true
+        setTokenExpiresAt(data.expires_at)
         
-        if (isValid) {
+        // Verificar se o token ainda é válido
+        if (data.expires_at) {
+          const expiresAt = new Date(data.expires_at)
+          const now = new Date()
+          const isValid = expiresAt > now
+          
+          if (isValid) {
+            setAccessToken(data.access_token)
+            setTokenStatus('found')
+            console.log('✅ Token ContaAzul encontrado e válido até:', expiresAt.toLocaleString('pt-BR'))
+          } else {
+            setTokenStatus('expired')
+            console.log('⚠️ Token ContaAzul expirado em:', expiresAt.toLocaleString('pt-BR'))
+          }
+        } else {
+          // Token sem data de expiração - assumir válido
           setAccessToken(data.access_token)
           setTokenStatus('found')
-          console.log('✅ Token ContaAzul encontrado e válido')
-        } else {
-          setTokenStatus('not_found')
-          console.log('⚠️ Token ContaAzul expirado')
+          console.log('✅ Token ContaAzul encontrado (sem data de expiração)')
         }
       } else {
         setTokenStatus('not_found')
@@ -78,7 +90,7 @@ export default function TesteCategoriaEtapas() {
 
   const executarTeste = async () => {
     if (!accessToken) {
-      alert('Por favor, insira o token de acesso ou conecte o ContaAzul')
+      alert('Por favor, conecte o ContaAzul primeiro ou insira um token válido')
       return
     }
 
@@ -99,7 +111,18 @@ export default function TesteCategoriaEtapas() {
       })
 
       const data = await response.json()
-      setResultado(data)
+      
+      // Verificar se o erro é de token inválido
+      if (data.error && data.details && data.details.includes('invalid_token')) {
+        setTokenStatus('expired')
+        setResultado({
+          error: 'Token ContaAzul expirado ou inválido',
+          details: 'O token de acesso precisa ser renovado. Clique em "Reconectar ContaAzul" para obter um novo token.',
+          token_expired: true
+        })
+      } else {
+        setResultado(data)
+      }
     } catch (error) {
       console.error('Erro:', error)
       setResultado({
@@ -109,6 +132,11 @@ export default function TesteCategoriaEtapas() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const abrirConfiguracaoContaAzul = () => {
+    // Abrir em nova aba a página de configuração correta
+    window.open('/configuracoes/integracoes/contaazul', '_blank')
   }
 
   return (
@@ -136,20 +164,29 @@ export default function TesteCategoriaEtapas() {
             <div className={`w-3 h-3 rounded-full ${
               tokenStatus === 'found' ? 'bg-green-500' :
               tokenStatus === 'loading' ? 'bg-yellow-500 animate-pulse' :
+              tokenStatus === 'expired' ? 'bg-orange-500' :
               tokenStatus === 'not_found' ? 'bg-red-500' : 'bg-gray-400'
             }`}></div>
             <span className="text-sm">
               {tokenStatus === 'found' ? '✅ Token encontrado e válido' :
                tokenStatus === 'loading' ? '🔄 Buscando token...' :
-               tokenStatus === 'not_found' ? '❌ Token não encontrado ou expirado' : 'Aguardando...'}
+               tokenStatus === 'expired' ? '⚠️ Token expirado' :
+               tokenStatus === 'not_found' ? '❌ Token não encontrado' : 'Aguardando...'}
             </span>
-            {tokenStatus === 'not_found' && (
+            {tokenExpiresAt && tokenStatus === 'found' && (
+              <span className="text-xs text-gray-500">
+                (expira em {new Date(tokenExpiresAt).toLocaleString('pt-BR')})
+              </span>
+            )}
+            {(tokenStatus === 'not_found' || tokenStatus === 'expired') && (
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={() => window.open('/configuracoes/integracoes/contaazul', '_blank')}
+                onClick={abrirConfiguracaoContaAzul}
+                className="flex items-center gap-2"
               >
-                Conectar ContaAzul
+                <RefreshCw className="h-4 w-4" />
+                {tokenStatus === 'expired' ? 'Reconectar ContaAzul' : 'Conectar ContaAzul'}
               </Button>
             )}
           </div>
@@ -163,7 +200,11 @@ export default function TesteCategoriaEtapas() {
             </label>
             <Input
               type="password"
-              placeholder={tokenStatus === 'found' ? 'Token carregado automaticamente' : 'Cole o Bearer token do ContaAzul aqui'}
+              placeholder={
+                tokenStatus === 'found' ? 'Token carregado automaticamente' :
+                tokenStatus === 'expired' ? 'Token expirado - reconecte o ContaAzul' :
+                'Cole o Bearer token do ContaAzul aqui'
+              }
               value={accessToken}
               onChange={(e) => setAccessToken(e.target.value)}
               className="font-mono"
@@ -174,7 +215,32 @@ export default function TesteCategoriaEtapas() {
                 Token carregado automaticamente do banco de dados
               </p>
             )}
+            {tokenStatus === 'expired' && (
+              <p className="text-xs text-orange-600 mt-1">
+                Token expirado. Reconecte o ContaAzul para obter um novo token.
+              </p>
+            )}
           </div>
+
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={buscarTokenContaAzul}
+            disabled={loadingToken || !selectedBar}
+            className="w-full"
+          >
+            {loadingToken ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Buscando Token...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Recarregar Token
+              </>
+            )}
+          </Button>
         </CardContent>
       </Card>
 
@@ -211,7 +277,7 @@ export default function TesteCategoriaEtapas() {
 
           <Button 
             onClick={executarTeste}
-            disabled={loading || !accessToken}
+            disabled={loading || !accessToken || tokenStatus === 'expired'}
             className="w-full"
           >
             {loading ? (
@@ -285,6 +351,17 @@ export default function TesteCategoriaEtapas() {
                 <p className="text-red-700">{resultado.error}</p>
                 {resultado.details && (
                   <p className="text-sm text-red-600 mt-2">{resultado.details}</p>
+                )}
+                {resultado.token_expired && (
+                  <div className="mt-4">
+                    <Button 
+                      onClick={abrirConfiguracaoContaAzul}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Reconectar ContaAzul
+                    </Button>
+                  </div>
                 )}
               </div>
             ) : (
