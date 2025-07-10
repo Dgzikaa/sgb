@@ -1,0 +1,112 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Protocolos",
+    "version": "v1",
+    "description": "API para gerenciamento de protocolos"
+  },
+  "servers": [
+    {
+      "url": "https://api-public.contaazul.com",
+      "description": "Servidor de produção"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Protocolo",
+      "description": "Operações relacionadas a protocolos"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/protocolo/{id}": {
+      "get": {
+        "operationId": "buscarProtocoloPorId",
+        "summary": "Busca protocolo por id",
+        "description": "Retorna o protocolo correspondente ao id fornecido",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Protocolo encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolResponseDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Protocolo não encontrado"
+          }
+        },
+        "tags": [
+          "Protocolo"
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "ProtocolResponseDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identificador do protocolo",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "resposta": {
+            "type": "string",
+            "description": "Mensagem do protocolo",
+            "example": "Operação realizada com sucesso."
+          },
+          "status": {
+            "type": "string",
+            "description": "Status do protocolo: - PENDING: em processamento - SUCCESS: criado - ERROR: erro na criação",
+            "enum": [
+              "PENDING",
+              "SUCCESS",
+              "ERROR"
+            ],
+            "example": "SUCCESS"
+          },
+          "evento_financeiro_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identificador do evento financeiro",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          }
+        }
+      }
+    }
+  }
+}

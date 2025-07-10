@@ -1,0 +1,348 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Contratos",
+    "description": "API para gerenciamento de contratos.",
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "https://api-v2.contaazul.com",
+      "description": "Servidor de produção"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Contratos",
+      "description": "Operações relacionadas a contratos"
+    }
+  ],
+  "paths": {
+    "/v1/contratos": {
+      "post": {
+        "summary": "Cria um novo contrato",
+        "description": "Cria um novo contrato com base nos dados fornecidos.",
+        "operationId": "createContract",
+        "tags": [
+          "Contratos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContratoToCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contrato criado com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContratoToCreateResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "ContratoToCreateRequest": {
+        "type": "object",
+        "required": [
+          "id_cliente",
+          "itens",
+          "condicao_pagamento",
+          "termos"
+        ],
+        "properties": {
+          "id_cliente": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID do cliente.",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "data_emissao": {
+            "type": "string",
+            "format": "date",
+            "description": "Data de emissão.",
+            "example": "2021-01-01"
+          },
+          "id_categoria": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID da categoria.",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "id_centro_custo": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID do centro de custo.",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "id_vendedor": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID do vendedor.",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "observacoes": {
+            "type": "string",
+            "description": "Observações do pagamento.",
+            "example": "Pagamento realizado em parcela única."
+          },
+          "observacoes_pagamento": {
+            "type": "string",
+            "description": "Observações complementares da nota fiscal.",
+            "example": "Pagamento à vista."
+          },
+          "termos": {
+            "$ref": "#/components/schemas/Termo"
+          },
+          "composicao_de_valor": {
+            "$ref": "#/components/schemas/ComposicaoDeValor"
+          },
+          "condicao_pagamento": {
+            "$ref": "#/components/schemas/CondicaoPagamento"
+          },
+          "itens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          }
+        }
+      },
+      "ComposicaoDeValor": {
+        "type": "object",
+        "properties": {
+          "frete": {
+            "type": "number",
+            "format": "double",
+            "description": "Valor do frete.",
+            "example": 10
+          },
+          "desconto": {
+            "$ref": "#/components/schemas/Desconto"
+          }
+        }
+      },
+      "Desconto": {
+        "type": "object",
+        "required": [
+          "tipo",
+          "valor"
+        ],
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "description": "Tipo de desconto.",
+            "enum": [
+              "PORCENTAGEM",
+              "VALOR"
+            ],
+            "example": "PORCENTAGEM"
+          },
+          "valor": {
+            "type": "number",
+            "format": "double",
+            "description": "Valor do desconto.",
+            "example": 10
+          }
+        }
+      },
+      "ContratoToCreateResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID do contrato.",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "id_legado": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID legado.",
+            "example": 1234
+          },
+          "id_venda": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID da venda.",
+            "example": "6bac0a7f-0422-48a9-86ea-0b1f0a6f9db9"
+          }
+        }
+      },
+      "Termo": {
+        "type": "object",
+        "required": [
+          "tipo_frequencia",
+          "tipo_expiracao",
+          "data_inicio",
+          "data_fim",
+          "numero"
+        ],
+        "properties": {
+          "tipo_frequencia": {
+            "type": "string",
+            "enum": [
+              "MENSAL",
+              "ANUAL"
+            ],
+            "example": "MENSAL"
+          },
+          "tipo_expiracao": {
+            "type": "string",
+            "enum": [
+              "DATA",
+              "NUNCA"
+            ],
+            "example": "DATA"
+          },
+          "data_inicio": {
+            "type": "string",
+            "format": "date",
+            "description": "Data de início.",
+            "example": "2021-01-01"
+          },
+          "data_fim": {
+            "type": "string",
+            "format": "date",
+            "description": "Data de fim.",
+            "example": "2021-12-31"
+          },
+          "intervalo_frequencia": {
+            "type": "integer",
+            "description": "Intervalo de frequência deve ser sempre maior ou igual a 1.",
+            "example": 1
+          },
+          "dia_emissao_venda": {
+            "type": "integer",
+            "description": "Dia de emissão do contrato.",
+            "example": 1
+          },
+          "numero": {
+            "type": "integer",
+            "description": "O número do contrato deve ser único.",
+            "example": 1
+          }
+        }
+      },
+      "CondicaoPagamento": {
+        "type": "object",
+        "required": [
+          "dia_vencimento",
+          "primeira_data_vencimento"
+        ],
+        "properties": {
+          "tipo_pagamento": {
+            "type": "string",
+            "description": "Tipo de pagamento.",
+            "enum": [
+              "BOLETO_BANCARIO",
+              "CARTAO_CREDITO",
+              "CARTAO_DEBITO",
+              "CARTEIRA_DIGITAL",
+              "CASHBACK",
+              "CHEQUE",
+              "CREDITO_LOJA",
+              "CREDITO_VIRTUAL",
+              "DEPOSITO_BANCARIO",
+              "DINHEIRO",
+              "OUTRO",
+              "DEBITO_AUTOMATICO",
+              "CARTAO_CREDITO_VIA_LINK",
+              "PIX_PAGAMENTO_INSTANTANEO",
+              "PIX_COBRANCA",
+              "PROGRAMA_FIDELIDADE",
+              "SEM_PAGAMENTO",
+              "TRANSFERENCIA_BANCARIA",
+              "VALE_ALIMENTACAO",
+              "VALE_COMBUSTIVEL",
+              "VALE_PRESENTE",
+              "VALE_REFEICAO"
+            ],
+            "example": "BOLETO_BANCARIO"
+          },
+          "id_conta_financeira": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID da conta financeira.",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "dia_vencimento": {
+            "type": "integer",
+            "description": "Dia de vencimento.",
+            "example": 10
+          },
+          "primeira_data_vencimento": {
+            "type": "string",
+            "format": "date",
+            "description": "Primeira data de vencimento.",
+            "example": "2021-01-10"
+          }
+        }
+      },
+      "Item": {
+        "type": "object",
+        "required": [
+          "id",
+          "quantidade",
+          "valor"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID do item.",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "quantidade": {
+            "type": "integer",
+            "description": "Quantidade do produto.",
+            "example": 10
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição do produto.",
+            "example": "Produto 1"
+          },
+          "valor": {
+            "type": "number",
+            "format": "double",
+            "description": "Valor unitário do item.",
+            "example": 100
+          },
+          "valor_custo": {
+            "type": "number",
+            "format": "double",
+            "description": "Valor de custo do item.",
+            "example": 100
+          }
+        }
+      }
+    }
+  }
+}

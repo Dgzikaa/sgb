@@ -85,8 +85,33 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 3. Calcular nota geral (pode ser implementado depois)
-    // TODO: Implementar cálculo de nota baseado nas respostas
+    // 3. Calcular nota geral usando sistema inteligente
+    try {
+      const { calcularScoreFinal } = await import('@/lib/checklist-scoring')
+      const mockExecucao = {
+        respostas: { secoes: respostas.map((r: any) => ({ itens: [r] })) },
+        estrutura_checklist: { secoes: [] } // Estrutura simplificada para compatibilidade
+      }
+      const scoreResult = calcularScoreFinal(mockExecucao)
+      
+      // Atualizar execução com score calculado
+      const { error: scoreError } = await supabase
+        .from('checklist_execucoes')
+        .update({
+          score_final: scoreResult.score_total,
+          score_detalhado: scoreResult,
+          categoria_score: scoreResult.categoria
+        })
+        .eq('id', execucao.id)
+
+      if (scoreError) {
+        console.error('❌ Erro ao salvar score:', scoreError)
+      } else {
+        console.log(`✅ Score calculado: ${scoreResult.score_total}/100 (${scoreResult.categoria})`)
+      }
+    } catch (scoreError) {
+      console.error('❌ Erro no cálculo de score:', scoreError)
+    }
 
     return NextResponse.json({
       success: true,

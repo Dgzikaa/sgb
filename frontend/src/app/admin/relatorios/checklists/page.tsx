@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import ScoreDisplay from '@/components/ScoreDisplay'
 import { 
   Eye,
   Calendar,
@@ -52,6 +53,7 @@ interface ChecklistRelatorio {
   possui_problemas: boolean
   atrasado: boolean
   last_input: string
+  score_detalhado?: any
 }
 
 interface ChecklistDetalhe {
@@ -552,8 +554,18 @@ export default function RelatoriosChecklists() {
                                   {relatorio.itens_ok}/{relatorio.total_itens} OK
                                 </div>
                                 <div className="flex items-center gap-1">
-                                  <BarChart3 className="w-4 h-4" />
-                                  Nota: {relatorio.nota_geral.toFixed(1)}
+                                  {relatorio.score_detalhado ? (
+                                    <ScoreDisplay 
+                                      scoreResult={relatorio.score_detalhado} 
+                                      variant="compact" 
+                                      showProblems={false} 
+                                    />
+                                  ) : (
+                                    <>
+                                      <BarChart3 className="w-4 h-4" />
+                                      Nota: {relatorio.nota_geral.toFixed(1)}
+                                    </>
+                                  )}
                                 </div>
                                 <div className="flex items-center gap-1 font-medium">
                                   <span className="text-blue-600">Last input: {relatorio.last_input}</span>

@@ -78,7 +78,8 @@ export async function POST(
       }, { status: 400 })
     }
 
-    // Calcular score final
+    // Calcular score final usando o sistema inteligente
+    const { calcularScoreFinal } = await import('@/lib/checklist-scoring')
     const scoreResult = calcularScoreFinal(execucao)
 
     // Calcular tempo total decorrido
