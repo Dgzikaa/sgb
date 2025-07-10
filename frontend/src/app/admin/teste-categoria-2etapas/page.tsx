@@ -136,14 +136,14 @@ export default function TesteCategoriaEtapas() {
 
   const abrirConfiguracaoContaAzul = () => {
     // Abrir em nova aba a página de configuração correta
-    window.open('/configuracoes/integracoes/contaazul', '_blank')
+    window.open('/configuracoes', '_blank')
   }
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">🎯 Teste: Buscar Categorias (2 Etapas)</h1>
-        <p className="text-gray-600">
+        <h1 className="page-title text-3xl font-bold mb-2">🎯 Teste: Buscar Categorias (2 Etapas)</h1>
+        <p className="page-subtitle">
           Testa a estratégia correta: buscar lista básica + detalhes com categoria
         </p>
       </div>
@@ -155,7 +155,7 @@ export default function TesteCategoriaEtapas() {
             <Key className="h-5 w-5" />
             Token de Acesso ContaAzul
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="form-description">
             {selectedBar ? `Token para o bar: ${selectedBar.nome}` : 'Selecione um bar primeiro'}
           </CardDescription>
         </CardHeader>
@@ -192,7 +192,7 @@ export default function TesteCategoriaEtapas() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="form-label block text-sm font-medium mb-1">
               Token de Acesso
               {loadingToken && (
                 <Loader2 className="inline ml-2 h-4 w-4 animate-spin" />
@@ -201,9 +201,9 @@ export default function TesteCategoriaEtapas() {
             <Input
               type="password"
               placeholder={
-                tokenStatus === 'found' ? 'Token carregado automaticamente' :
-                tokenStatus === 'expired' ? 'Token expirado - reconecte o ContaAzul' :
-                'Cole o Bearer token do ContaAzul aqui'
+                tokenStatus === 'found' ? 'Token carregado automaticamente do banco de dados' :
+                tokenStatus === 'expired' ? 'Token expirado - reconecte o ContaAzul para continuar' :
+                'Cole seu Bearer token do ContaAzul aqui (ex: Bearer abc123...)'
               }
               value={accessToken}
               onChange={(e) => setAccessToken(e.target.value)}
@@ -211,13 +211,13 @@ export default function TesteCategoriaEtapas() {
               disabled={loadingToken}
             />
             {tokenStatus === 'found' && (
-              <p className="text-xs text-green-600 mt-1">
-                Token carregado automaticamente do banco de dados
+              <p className="success-text text-xs mt-1">
+                ✅ Token carregado automaticamente do banco de dados
               </p>
             )}
             {tokenStatus === 'expired' && (
-              <p className="text-xs text-orange-600 mt-1">
-                Token expirado. Reconecte o ContaAzul para obter um novo token.
+              <p className="warning-text text-xs mt-1">
+                ⚠️ Token expirado. Reconecte o ContaAzul para obter um novo token.
               </p>
             )}
           </div>
@@ -251,14 +251,14 @@ export default function TesteCategoriaEtapas() {
             <Search className="h-5 w-5" />
             Configuração do Teste
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="form-description">
             Configure os parâmetros para testar a busca em 2 etapas
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Data Início</label>
+              <label className="form-label block text-sm font-medium mb-1">Data Início</label>
               <Input
                 type="date"
                 value={dataInicio}
@@ -266,7 +266,7 @@ export default function TesteCategoriaEtapas() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Data Fim</label>
+              <label className="form-label block text-sm font-medium mb-1">Data Fim</label>
               <Input
                 type="date"
                 value={dataFim}
@@ -298,7 +298,7 @@ export default function TesteCategoriaEtapas() {
       {/* Estratégia */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>📋 Estratégia de 2 Etapas</CardTitle>
+          <CardTitle className="section-title">📋 Estratégia de 2 Etapas</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -306,10 +306,10 @@ export default function TesteCategoriaEtapas() {
               <Badge variant="outline" className="mt-1">1</Badge>
               <div>
                 <h4 className="font-medium">Buscar Lista Básica</h4>
-                <p className="text-sm text-gray-600">
+                <p className="info-text text-sm">
                   <code>GET /v1/financeiro/eventos-financeiros/contas-a-receber/buscar</code>
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="form-description text-sm">
                   Retorna ContasAReceberResponse com campos básicos (id, valor, etc.)
                 </p>
               </div>
@@ -319,10 +319,10 @@ export default function TesteCategoriaEtapas() {
               <Badge variant="outline" className="mt-1">2</Badge>
               <div>
                 <h4 className="font-medium">Buscar Detalhes com Categoria</h4>
-                <p className="text-sm text-gray-600">
+                <p className="info-text text-sm">
                   <code>GET /v1/financeiro/eventos-financeiros/parcelas/&#123;id&#125;</code>
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="form-description text-sm">
                   Retorna Parcela completa com evento.rateio contendo categoria_id
                 </p>
               </div>
@@ -347,10 +347,10 @@ export default function TesteCategoriaEtapas() {
           <CardContent>
             {resultado.error ? (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <h4 className="font-medium text-red-800 mb-2">Erro</h4>
-                <p className="text-red-700">{resultado.error}</p>
+                <h4 className="error-text font-medium mb-2">❌ Erro</h4>
+                <p className="error-text">{resultado.error}</p>
                 {resultado.details && (
-                  <p className="text-sm text-red-600 mt-2">{resultado.details}</p>
+                  <p className="error-text text-sm mt-2">{resultado.details}</p>
                 )}
                 {resultado.token_expired && (
                   <div className="mt-4">
@@ -372,35 +372,35 @@ export default function TesteCategoriaEtapas() {
                     <div className="text-2xl font-bold text-blue-600">
                       {resultado.etapa1?.total_parcelas || 0}
                     </div>
-                    <div className="text-sm text-blue-600">Parcelas Totais</div>
+                    <div className="info-text text-sm">Parcelas Totais</div>
                   </div>
                   
                   <div className="bg-green-50 p-4 rounded-lg">
                     <div className="text-2xl font-bold text-green-600">
                       {resultado.etapa2?.com_categoria || 0}
                     </div>
-                    <div className="text-sm text-green-600">Com Categoria</div>
+                    <div className="success-text text-sm">Com Categoria</div>
                   </div>
                   
                   <div className="bg-yellow-50 p-4 rounded-lg">
                     <div className="text-2xl font-bold text-yellow-600">
                       {resultado.etapa2?.sem_categoria || 0}
                     </div>
-                    <div className="text-sm text-yellow-600">Sem Categoria</div>
+                    <div className="warning-text text-sm">Sem Categoria</div>
                   </div>
                   
                   <div className="bg-red-50 p-4 rounded-lg">
                     <div className="text-2xl font-bold text-red-600">
                       {resultado.erros?.length || 0}
                     </div>
-                    <div className="text-sm text-red-600">Erros</div>
+                    <div className="error-text text-sm">Erros</div>
                   </div>
                 </div>
 
                 {/* Dados Detalhados */}
                 {resultado.dados && resultado.dados.length > 0 && (
                   <div>
-                    <h4 className="font-medium mb-3">Parcelas Processadas</h4>
+                    <h4 className="section-title font-medium mb-3">📋 Parcelas Processadas</h4>
                     <div className="space-y-3">
                       {resultado.dados.map((parcela: any, index: number) => (
                         <div key={index} className="border rounded-lg p-4">
@@ -423,15 +423,15 @@ export default function TesteCategoriaEtapas() {
                           
                           {parcela.categorias && parcela.categorias.length > 0 && (
                             <div className="mt-3 bg-gray-50 p-3 rounded">
-                              <h6 className="font-medium text-sm mb-2">Categorias:</h6>
+                              <h6 className="section-title font-medium text-sm mb-2">🏷️ Categorias:</h6>
                               {parcela.categorias.map((cat: any, catIndex: number) => (
                                 <div key={catIndex} className="text-sm">
                                   <span className="font-mono">{cat.categoria_id}</span>
                                   <span className="mx-2">-</span>
                                   <span>R$ {cat.valor_categoria?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                   {cat.centros_custo && cat.centros_custo.length > 0 && (
-                                    <div className="ml-4 mt-1 text-gray-600">
-                                      Centros de Custo: {cat.centros_custo.length}
+                                    <div className="form-description ml-4 mt-1 text-sm">
+                                      🏢 Centros de Custo: {cat.centros_custo.length}
                                     </div>
                                   )}
                                 </div>
@@ -447,7 +447,7 @@ export default function TesteCategoriaEtapas() {
                 {/* Erros */}
                 {resultado.erros && resultado.erros.length > 0 && (
                   <div>
-                    <h4 className="font-medium mb-3 text-red-600">Erros Encontrados</h4>
+                    <h4 className="section-title error-text font-medium mb-3">❌ Erros Encontrados</h4>
                     <div className="space-y-2">
                       {resultado.erros.map((erro: any, index: number) => (
                         <div key={index} className="bg-red-50 border border-red-200 rounded p-3">
