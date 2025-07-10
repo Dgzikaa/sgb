@@ -26,6 +26,20 @@ interface ContaAzulStatus {
   refreshCount: number;
 }
 
+interface TesteResultado {
+  etapa1: {
+    total_encontrado: number;
+    parcelas_basicas: any[];
+  };
+  etapa2: {
+    total_processado: number;
+    com_categoria: number;
+    com_centro_custo: number;
+    parcelas_detalhadas: any[];
+  };
+  tempo_execucao: number;
+}
+
 export default function ContaAzulOAuth() {
   const { toast } = useToast();
   const { selectedBar } = useBarContext();
@@ -37,6 +51,8 @@ export default function ContaAzulOAuth() {
   const [configuring, setConfiguring] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
+  const [testando, setTestando] = useState(false);
+  const [testeResultado, setTesteResultado] = useState<TesteResultado | null>(null);
   
   const [config, setConfig] = useState({
     clientId: '',
@@ -214,6 +230,63 @@ export default function ContaAzulOAuth() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // NOVA FUNCIONALIDADE: Teste da Estratégia de 2 Etapas
+  const handleTesteEstrategia2Etapas = async () => {
+    if (!selectedBar) {
+      toast({
+        title: "Erro",
+        description: "Nenhum bar selecionado",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setTestando(true);
+    setTesteResultado(null);
+    
+    try {
+      console.log('🎯 Iniciando teste da estratégia de 2 etapas...');
+      
+      const response = await fetch('/api/contaazul/teste-estrategia-2etapas', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bar_id: selectedBar.id,
+          limite_teste: 5 // Apenas 5 parcelas para teste
+        })
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setTesteResultado(data.resultado);
+        
+        const resultado = data.resultado;
+        toast({
+          title: "🎯 Teste Concluído!",
+          description: `Etapa 1: ${resultado.etapa1.total_encontrado} parcelas encontradas. Etapa 2: ${resultado.etapa2.com_categoria} com categoria, ${resultado.etapa2.com_centro_custo} com centro de custo.`
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: data.error || "Erro no teste da estratégia",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Erro no teste:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao executar teste da estratégia",
+        variant: "destructive"
+      });
+    } finally {
+      setTestando(false);
     }
   };
 
@@ -454,6 +527,97 @@ export default function ContaAzulOAuth() {
         </Card>
       )}
 
+      {/* NOVO: Teste da Estratégia de 2 Etapas */}
+      {status?.connected && (
+        <Card className="border-blue-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              🎯 Teste: Estratégia de 2 Etapas
+            </CardTitle>
+            <CardDescription>
+              Testa a busca de categorias e centros de custo usando nossa estratégia planejada
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-medium mb-2">📋 Como Funciona:</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-start gap-2">
+                  <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">1</span>
+                  <div>
+                    <span className="font-medium">Buscar Lista Básica</span>
+                    <p className="text-gray-600">GET /contas-a-receber/buscar (apenas IDs e dados básicos)</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">2</span>
+                  <div>
+                    <span className="font-medium">Buscar Detalhes Individuais</span>
+                    <p className="text-gray-600">GET /parcelas/{id} (categoria e centro de custo)</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <Button 
+              onClick={handleTesteEstrategia2Etapas}
+              disabled={testando}
+              className="w-full"
+            >
+              {testando ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4 mr-2" />
+              )}
+              🎯 Executar Teste (5 parcelas)
+            </Button>
+
+            {/* Resultados do Teste */}
+            {testeResultado && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h4 className="font-medium text-green-800 mb-3">✅ Resultados do Teste</h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="font-medium text-green-700">Etapa 1 - Lista Básica:</p>
+                    <p className="text-green-600">📋 {testeResultado.etapa1.total_encontrado} parcelas encontradas</p>
+                  </div>
+                  
+                  <div>
+                    <p className="font-medium text-green-700">Etapa 2 - Detalhes:</p>
+                    <p className="text-green-600">🔍 {testeResultado.etapa2.total_processado} parcelas processadas</p>
+                    <p className="text-green-600">📂 {testeResultado.etapa2.com_categoria} com categoria</p>
+                    <p className="text-green-600">🏢 {testeResultado.etapa2.com_centro_custo} com centro de custo</p>
+                  </div>
+                </div>
+                
+                <div className="mt-3 pt-3 border-t border-green-200">
+                  <p className="text-green-600 text-sm">
+                    ⏱️ Tempo de execução: {Math.round(testeResultado.tempo_execucao / 1000)}s
+                  </p>
+                </div>
+
+                {/* Detalhes das Parcelas (se houver) */}
+                {testeResultado.etapa2.parcelas_detalhadas.length > 0 && (
+                  <div className="mt-4">
+                    <p className="font-medium text-green-700 mb-2">📋 Amostras Encontradas:</p>
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                      {testeResultado.etapa2.parcelas_detalhadas.slice(0, 3).map((parcela, index) => (
+                        <div key={index} className="bg-white p-2 rounded border text-xs">
+                          <p><strong>Descrição:</strong> {parcela.descricao || 'N/A'}</p>
+                          <p><strong>Categoria:</strong> {parcela.categoria?.nome || 'N/A'}</p>
+                          <p><strong>Centro de Custo:</strong> {parcela.centro_custo?.nome || 'N/A'}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Status de Funcionalidades */}
       {status?.connected && (
         <Card className="border-green-200">
@@ -474,6 +638,7 @@ export default function ContaAzulOAuth() {
                 <li>• Acesso às APIs financeiras</li>
                 <li>• Renovação automática de tokens</li>
                 <li>• Sincronização de dados</li>
+                <li>• Teste de estratégia de 2 etapas</li>
               </ul>
             </div>
           </CardContent>
