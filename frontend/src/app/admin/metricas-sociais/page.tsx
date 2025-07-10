@@ -107,8 +107,10 @@ export default function MetricasSociaisPage() {
   })
 
   useEffect(() => {
-    loadData()
-    loadCollectionStatus()
+    // Temporariamente desabilitado para evitar chamadas automáticas durante build
+    // Descomente as linhas abaixo quando quiser reativar o carregamento automático
+    // loadData()
+    // loadCollectionStatus()
   }, [selectedBar?.id, dateRange])
 
   useEffect(() => {

@@ -8,7 +8,13 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔍 Testando APIs REAIS da Meta...')
+    // Desabilitar durante build para evitar chamadas automáticas
+    return NextResponse.json({ 
+      error: 'API temporariamente desabilitada durante build',
+      message: 'Esta API está desabilitada para evitar chamadas durante a geração estática'
+    }, { status: 503 })
+    
+    // console.log('🔍 Testando APIs REAIS da Meta...')
 
     // Buscar configuração da Meta
     const { data: config, error: configError } = await supabase

@@ -5,6 +5,7 @@ import { useBar } from '@/contexts/BarContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { PageText } from '@/components/ui/page-base'
 import { 
   CalendarDays, 
   TrendingUp, 

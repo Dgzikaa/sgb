@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { PageCard, PageText } from '@/components/ui/page-base'
 
 
 interface ContaHubStatus {

@@ -102,7 +102,9 @@ export default function Marketing360Page() {
   // ========================================
 
   useEffect(() => {
-    loadMarketingData()
+    // Temporariamente desabilitado para evitar chamadas automáticas durante build
+    // Descomente a linha abaixo quando quiser reativar o carregamento automático
+    // loadMarketingData()
   }, [])
 
   const loadMarketingData = async () => {
