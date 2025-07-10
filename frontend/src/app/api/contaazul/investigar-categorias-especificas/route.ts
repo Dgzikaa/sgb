@@ -7,12 +7,15 @@ export async function GET(request: NextRequest) {
     
     console.log('🔍 INVESTIGANDO CATEGORIAS ESPECÍFICAS...');
 
-    // Buscar token válido
+    // Buscar token válido - primeiro tentar encontrar qualquer token ativo do ContaAzul
     const { data: contaAzulData } = await supabase
       .from('api_credentials')
       .select('*')
       .eq('sistema', 'contaazul')
-      .eq('ativo', true)
+      .not('access_token', 'is', null)
+      .gte('expires_at', new Date().toISOString())
+      .order('last_token_refresh', { ascending: false })
+      .limit(1)
       .single();
 
     if (!contaAzulData?.access_token) {
