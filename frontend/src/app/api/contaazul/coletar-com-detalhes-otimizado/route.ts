@@ -247,6 +247,8 @@ async function coletarFinanceiroEmLotes(
       const url = `https://api-v2.contaazul.com/v1/financeiro/eventos-financeiros/${endpoint}?` +
         `data_competencia_de=${dataInicio}&` +
         `data_competencia_ate=${dataFim}&` +
+        `data_vencimento_de=${dataInicio}&` +
+        `data_vencimento_ate=${dataFim}&` +
         `pagina=${pagina}&` +
         `tamanho_pagina=${tamanhoPagina}`;
 
