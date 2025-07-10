@@ -322,44 +322,70 @@ async function coletarTodosOsJsons(
 
   console.log(`✅ Total de ${tipo} coletadas: ${todasParcelas.length} em ${totalPaginas} páginas`);
 
-  // ETAPA 2: Salvar JSON completo no Supabase Storage
-  console.log(`💾 Salvando ${todasParcelas.length} ${tipo} no Supabase Storage...`);
+  // ETAPA 2: Salvar JSONs em CHUNKS (arquivos menores) no Supabase Storage
+  console.log(`💾 Salvando ${todasParcelas.length} ${tipo} em chunks no Supabase Storage...`);
   
-  const jsonData = {
-    metadata: {
-      bar_id: barId,
-      tipo,
-      data_coleta: new Date().toISOString(),
-      periodo: { inicio: dataInicio, fim: dataFim },
-      total_parcelas: todasParcelas.length,
-      total_paginas: totalPaginas
-    },
-    parcelas: todasParcelas
-  };
-
-  const fileName = `${tipo}_${dataInicio}_${dataFim}.json`;
-  const filePath = `${resultado.storage_path}${fileName}`;
-  
-  // Garantir que o bucket existe
+  // Garantir que o bucket existe ANTES de tentar salvar
   await garantirBucketExiste();
-  
-  const { data: uploadData, error: uploadError } = await supabase.storage
-    .from('contaazul-dados')
-    .upload(filePath, JSON.stringify(jsonData, null, 2), {
-      contentType: 'application/json',
-      upsert: true
-    });
 
-  if (uploadError) {
-    console.error(`❌ Erro ao salvar ${fileName}:`, uploadError);
-    throw uploadError;
+  const CHUNK_SIZE = 1000; // 1000 parcelas por arquivo para evitar limite de tamanho
+  const totalChunks = Math.ceil(todasParcelas.length / CHUNK_SIZE);
+  
+  console.log(`📁 Dividindo em ${totalChunks} arquivos de até ${CHUNK_SIZE} ${tipo} cada...`);
+
+  const arquivosSalvos: string[] = [];
+  
+  for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+    const inicio = chunkIndex * CHUNK_SIZE;
+    const fim = Math.min(inicio + CHUNK_SIZE, todasParcelas.length);
+    const chunk = todasParcelas.slice(inicio, fim);
+    
+    const jsonData = {
+      metadata: {
+        bar_id: barId,
+        tipo,
+        data_coleta: new Date().toISOString(),
+        periodo: { inicio: dataInicio, fim: dataFim },
+        chunk_info: {
+          chunk_numero: chunkIndex + 1,
+          total_chunks: totalChunks,
+          parcelas_neste_chunk: chunk.length,
+          parcelas_inicio: inicio,
+          parcelas_fim: fim - 1
+        },
+        total_parcelas_completo: todasParcelas.length,
+        total_paginas: totalPaginas
+      },
+      parcelas: chunk
+    };
+
+    const fileName = `${tipo}_${dataInicio}_${dataFim}_chunk_${(chunkIndex + 1).toString().padStart(3, '0')}.json`;
+    const filePath = `${resultado.storage_path}${fileName}`;
+    
+    console.log(`💾 Salvando chunk ${chunkIndex + 1}/${totalChunks}: ${chunk.length} ${tipo} em ${fileName}...`);
+    
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('contaazul-dados')
+      .upload(filePath, JSON.stringify(jsonData, null, 2), {
+        contentType: 'application/json',
+        upsert: true
+      });
+
+    if (uploadError) {
+      console.error(`❌ Erro ao salvar chunk ${chunkIndex + 1}: ${fileName}:`, uploadError);
+      throw uploadError;
+    }
+    
+    arquivosSalvos.push(filePath);
+    resultado.arquivos_gerados.push(filePath);
+    
+    console.log(`✅ Chunk ${chunkIndex + 1}/${totalChunks} salvo: ${fileName} (${chunk.length} ${tipo})`);
   }
 
   resultado[tipo].total_parcelas = todasParcelas.length;
   resultado[tipo].total_paginas = totalPaginas;
-  resultado[tipo].arquivo_salvo = filePath;
-  resultado.arquivos_gerados.push(filePath);
+  resultado[tipo].arquivo_salvo = `${totalChunks} chunks salvos`;
 
-  console.log(`✅ Arquivo ${fileName} salvo com sucesso no Storage!`);
-  console.log(`📊 Resumo: ${todasParcelas.length} parcelas em ${totalPaginas} páginas`);
+  console.log(`✅ Todos os chunks de ${tipo} salvos com sucesso!`);
+  console.log(`📊 Resumo: ${todasParcelas.length} parcelas em ${totalPaginas} páginas, ${totalChunks} arquivos`);
 } 

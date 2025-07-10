@@ -65,6 +65,12 @@ export async function POST(request: NextRequest) {
 
       const jsonFiles = files?.filter(file => file.name.endsWith('.json')) || [];
       console.log(`📄 Encontrados ${jsonFiles.length} arquivos JSON para processar`);
+      
+      // Separar arquivos por tipo e ordenar chunks
+      const receitasFiles = jsonFiles.filter(f => f.name.includes('receitas')).sort((a, b) => a.name.localeCompare(b.name));
+      const despesasFiles = jsonFiles.filter(f => f.name.includes('despesas')).sort((a, b) => a.name.localeCompare(b.name));
+      
+      console.log(`📊 Detalhamento: ${receitasFiles.length} arquivos de receitas, ${despesasFiles.length} arquivos de despesas`);
 
       if (jsonFiles.length === 0) {
         return NextResponse.json({
@@ -77,17 +83,39 @@ export async function POST(request: NextRequest) {
       console.log('🏷️ Carregando cache de categorias e centros de custo...');
       const cache = await carregarCache(parseInt(bar_id));
 
-      // Processar cada arquivo JSON
-      for (const file of jsonFiles) {
-        const filePath = `${storage_path}${file.name}`;
-        console.log(`📄 Processando arquivo: ${file.name}...`);
-        
-        try {
-          await processarArquivoJson(parseInt(bar_id), filePath, cache, resultado);
-          resultado.arquivos_processados.push(filePath);
-        } catch (error) {
-          console.error(`❌ Erro ao processar ${file.name}:`, error);
-          // Continuar com próximo arquivo mesmo se um falhar
+      // Processar arquivos de receitas primeiro
+      if (receitasFiles.length > 0) {
+        console.log(`💰 Processando ${receitasFiles.length} arquivos de RECEITAS...`);
+        for (let i = 0; i < receitasFiles.length; i++) {
+          const file = receitasFiles[i];
+          const filePath = `${storage_path}${file.name}`;
+          console.log(`📄 [${i + 1}/${receitasFiles.length}] Processando receitas: ${file.name}...`);
+          
+          try {
+            await processarArquivoJson(parseInt(bar_id), filePath, cache, resultado);
+            resultado.arquivos_processados.push(filePath);
+          } catch (error) {
+            console.error(`❌ Erro ao processar ${file.name}:`, error);
+            // Continuar com próximo arquivo mesmo se um falhar
+          }
+        }
+      }
+
+      // Processar arquivos de despesas depois
+      if (despesasFiles.length > 0) {
+        console.log(`💸 Processando ${despesasFiles.length} arquivos de DESPESAS...`);
+        for (let i = 0; i < despesasFiles.length; i++) {
+          const file = despesasFiles[i];
+          const filePath = `${storage_path}${file.name}`;
+          console.log(`📄 [${i + 1}/${despesasFiles.length}] Processando despesas: ${file.name}...`);
+          
+          try {
+            await processarArquivoJson(parseInt(bar_id), filePath, cache, resultado);
+            resultado.arquivos_processados.push(filePath);
+          } catch (error) {
+            console.error(`❌ Erro ao processar ${file.name}:`, error);
+            // Continuar com próximo arquivo mesmo se um falhar
+          }
         }
       }
 
@@ -185,7 +213,16 @@ async function processarArquivoJson(
   const parcelas = jsonData.parcelas;
   const tipo = metadata.tipo === 'receitas' ? 'RECEITA' : 'DESPESA';
   
-  console.log(`📊 Arquivo lido em ${tempoLeitura}ms: ${parcelas.length} ${metadata.tipo} do período ${metadata.periodo.inicio} a ${metadata.periodo.fim}`);
+  // Detectar se é um chunk ou arquivo único
+  const isChunk = metadata.chunk_info !== undefined;
+  if (isChunk) {
+    const chunkInfo = metadata.chunk_info;
+    console.log(`📊 Chunk lido em ${tempoLeitura}ms: ${parcelas.length} ${metadata.tipo} (chunk ${chunkInfo.chunk_numero}/${chunkInfo.total_chunks})`);
+    console.log(`   └── Intervalo: parcelas ${chunkInfo.parcelas_inicio + 1}-${chunkInfo.parcelas_fim + 1} de ${metadata.total_parcelas_completo}`);
+  } else {
+    console.log(`📊 Arquivo lido em ${tempoLeitura}ms: ${parcelas.length} ${metadata.tipo} do período ${metadata.periodo.inicio} a ${metadata.periodo.fim}`);
+  }
+  
   resultado.performance.tempo_leitura += tempoLeitura;
 
   // FASE 1: Buscar detalhes de TODAS as parcelas (OFFLINE - sem API)
