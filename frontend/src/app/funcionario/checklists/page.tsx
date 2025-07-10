@@ -647,7 +647,7 @@ export default function ChecklistsFuncionario() {
               value={item.valor || ''}
               onChange={(e) => atualizar(e.target.value)}
               placeholder={item.opcoes?.placeholder || 'Digite aqui...'}
-              className="text-base text-gray-900 border-gray-300 bg-white focus:border-blue-500 focus:ring-blue-500"
+              className="text-base text-gray-900 border-gray-300 bg-white focus:border-blue-500 focus:ring-blue-500 p-3 min-h-[48px] touch-manipulation"
             />
           )}
 
@@ -659,16 +659,16 @@ export default function ChecklistsFuncionario() {
               placeholder={item.opcoes?.placeholder || '0'}
               min={item.opcoes?.min}
               max={item.opcoes?.max}
-              className="text-base text-gray-900 border-gray-300 bg-white focus:border-blue-500 focus:ring-blue-500"
+              className="text-base text-gray-900 border-gray-300 bg-white focus:border-blue-500 focus:ring-blue-500 p-3 min-h-[48px] touch-manipulation"
             />
           )}
 
           {item.tipo === 'sim_nao' && (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               <Button
                 variant={item.valor === true ? 'default' : 'outline'}
                 onClick={() => atualizar(true)}
-                className={`p-4 text-base font-medium border-2 transition-all ${
+                className={`p-4 text-lg font-medium border-2 transition-all min-h-[56px] touch-manipulation ${
                   item.valor === true 
                     ? 'bg-green-600 hover:bg-green-700 text-white border-green-600' 
                     : 'border-green-300 text-green-700 hover:bg-green-50 hover:text-green-800 bg-white'
@@ -679,7 +679,7 @@ export default function ChecklistsFuncionario() {
               <Button
                 variant={item.valor === false ? 'default' : 'outline'}
                 onClick={() => atualizar(false)}
-                className={`p-4 text-base font-medium border-2 transition-all ${
+                className={`p-4 text-lg font-medium border-2 transition-all min-h-[56px] touch-manipulation ${
                   item.valor === false 
                     ? 'bg-red-600 hover:bg-red-700 text-white border-red-600' 
                     : 'border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800 bg-white'
@@ -691,13 +691,13 @@ export default function ChecklistsFuncionario() {
           )}
 
           {item.tipo === 'avaliacao' && (
-            <div className="flex justify-center gap-2">
+            <div className="flex justify-center gap-3">
               {[1, 2, 3, 4, 5].map((rating) => (
                 <button
                   key={rating}
                   onClick={() => atualizar(rating)}
-                  className={`text-4xl p-2 rounded transition-all ${
-                    item.valor === rating ? 'bg-yellow-100 scale-110' : 'hover:bg-gray-100'
+                  className={`text-5xl p-3 rounded-lg transition-all min-h-[64px] min-w-[64px] touch-manipulation ${
+                    item.valor === rating ? 'bg-yellow-100 scale-110 ring-2 ring-yellow-400' : 'hover:bg-gray-100'
                   }`}
                 >
                   {rating === 1 ? '😞' : rating === 2 ? '😐' : rating === 3 ? '🙂' : rating === 4 ? '😊' : '😍'}
@@ -711,7 +711,7 @@ export default function ChecklistsFuncionario() {
               <Button
                 variant="outline"
                 onClick={() => abrirCamera(secaoId, item.id)}
-                className={`w-full p-6 border-2 border-dashed font-medium transition-all ${
+                className={`w-full p-6 border-2 border-dashed font-medium transition-all min-h-[60px] touch-manipulation text-lg ${
                   item.valor 
                     ? 'border-green-300 bg-green-50 text-green-700 hover:bg-green-100' 
                     : 'border-blue-300 bg-white text-blue-700 hover:bg-blue-50 hover:border-blue-400'
@@ -786,9 +786,9 @@ export default function ChecklistsFuncionario() {
                     console.log('🖊️ Botão "Capturar Assinatura" clicado', { secaoId, itemId: item.id, tipo: item.tipo })
                     abrirAssinaturaPad(secaoId, item.id)
                   }}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium min-h-[52px] touch-manipulation text-lg"
                 >
-                  <PenTool className="w-4 h-4 mr-2" />
+                  <PenTool className="w-5 h-5 mr-2" />
                   Capturar Assinatura
                 </Button>
               )}
@@ -814,13 +814,13 @@ export default function ChecklistsFuncionario() {
 
         {/* Campo de observações */}
         <div>
-          <label className="text-sm text-gray-700 font-medium mb-1 block">Observações (opcional):</label>
+          <label className="text-base text-gray-700 font-medium mb-2 block">Observações (opcional):</label>
           <Textarea
             value={item.observacoes || ''}
             onChange={(e) => atualizar(item.valor, e.target.value)}
             placeholder="Adicione observações se necessário..."
-            rows={2}
-            className="text-sm text-gray-900 border-gray-300 bg-white focus:border-blue-500 focus:ring-blue-500 placeholder-gray-400"
+            rows={3}
+            className="text-base text-gray-900 border-gray-300 bg-white focus:border-blue-500 focus:ring-blue-500 placeholder-gray-400 p-3 touch-manipulation resize-none"
           />
         </div>
       </div>
@@ -854,9 +854,9 @@ export default function ChecklistsFuncionario() {
               </div>
               <Button
                 variant="outline"
-                size="sm"
+                size="lg"
                 onClick={() => setChecklistAtivo(null)}
-                className="border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 font-medium"
+                className="border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 font-medium min-h-[44px] touch-manipulation"
               >
                 ← Voltar
               </Button>
@@ -920,18 +920,18 @@ export default function ChecklistsFuncionario() {
               onClick={compartilharChecklist}
               variant="outline"
               disabled={progresso === 0}
-              className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-50 font-medium"
+              className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-50 font-medium min-h-[52px] touch-manipulation text-base"
             >
-              <Share2 className="w-4 h-4 mr-2" />
+              <Share2 className="w-5 h-5 mr-2" />
               Compartilhar
             </Button>
             
             <Button
               onClick={enviarChecklist}
               disabled={!podeEnviar() || loading}
-              className="flex-2 bg-green-600 hover:bg-green-700 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-2 bg-green-600 hover:bg-green-700 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px] touch-manipulation text-base"
             >
-              <Send className="w-4 h-4 mr-2" />
+              <Send className="w-5 h-5 mr-2" />
               {loading ? 'Enviando...' : `Enviar (${progresso.toFixed(0)}%)`}
             </Button>
           </div>
@@ -952,7 +952,7 @@ export default function ChecklistsFuncionario() {
           <div className="flex border-b">
             <button
               onClick={() => setAba('pendentes')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              className={`px-6 py-3 text-base font-medium border-b-2 transition-colors touch-manipulation min-h-[48px] ${
                 aba === 'pendentes'
                   ? 'border-blue-500 text-blue-600 bg-blue-50'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -962,7 +962,7 @@ export default function ChecklistsFuncionario() {
             </button>
             <button
               onClick={() => setAba('realizados')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              className={`px-6 py-3 text-base font-medium border-b-2 transition-colors touch-manipulation min-h-[48px] ${
                 aba === 'realizados'
                   ? 'border-green-500 text-green-600 bg-green-50'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -1033,7 +1033,7 @@ export default function ChecklistsFuncionario() {
 
                       <Button 
                         onClick={() => iniciarChecklist(checklist)}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-all hover:shadow-md"
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-all hover:shadow-md min-h-[48px] touch-manipulation text-base"
                       >
                         {checklist.status === 'em_andamento' ? 'Continuar' : 'Iniciar'} Checklist
                       </Button>

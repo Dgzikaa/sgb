@@ -14,15 +14,19 @@ import {
   Clock,
   Eye,
   EyeOff,
-  Grip
+  Grip,
+  Camera,
+  Upload,
+  Star
 } from 'lucide-react'
 
 // =====================================================
-// 🎨 COMPONENTE DE SEÇÃO VISUAL MELHORADA
+// 🎨 COMPONENTE DE SEÇÃO VISUAL MELHORADA (MOBILE-FIRST)
 // =====================================================
 // Implementa clusterização visual conforme documento:
 // "A lógica se separar por áreas da segunda ref é muito boa"
 // "Clusterizar as perguntas por área/seção"
+// + Otimização completa para mobile
 
 interface ChecklistItem {
   id: string
@@ -176,7 +180,7 @@ export default function ChecklistSecaoCard({
   return (
     <Card 
       className={`
-        transition-all duration-300 hover:shadow-lg
+        transition-all duration-300 hover:shadow-lg touch-manipulation
         ${getCorSecao()}
         ${isHovered ? 'shadow-md scale-[1.02]' : ''}
         ${expanded ? 'ring-2 ring-blue-200' : ''}
@@ -184,47 +188,50 @@ export default function ChecklistSecaoCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Header da Seção */}
-      <CardHeader className={`${getHeaderColor()} cursor-pointer`} onClick={onToggleExpand}>
+      {/* Header da Seção - MOBILE OTIMIZADO */}
+      <CardHeader 
+        className={`${getHeaderColor()} cursor-pointer touch-manipulation min-h-[60px] p-4`} 
+        onClick={onToggleExpand}
+      >
         <div className="flex items-center justify-between">
           {/* Lado Esquerdo */}
-          <div className="flex items-center gap-3">
-            {/* Ícone de Expansão */}
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            {/* Ícone de Expansão - MAIOR PARA MOBILE */}
+            <div className="flex items-center gap-2 touch-manipulation">
               {expanded ? (
-                <ChevronDown className="w-5 h-5" />
+                <ChevronDown className="w-6 h-6" />
               ) : (
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="w-6 h-6" />
               )}
               
               {/* Ícone da Seção */}
               {secao.icone && (
-                <span className="text-xl">{secao.icone}</span>
+                <span className="text-2xl">{secao.icone}</span>
               )}
             </div>
 
             {/* Informações Principais */}
-            <div>
-              <h3 className="font-semibold text-lg">{secao.nome}</h3>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-lg truncate">{secao.nome}</h3>
               {secao.descricao && (
-                <p className="text-sm opacity-90 mt-1">{secao.descricao}</p>
+                <p className="text-sm opacity-90 mt-1 truncate">{secao.descricao}</p>
               )}
             </div>
           </div>
 
-          {/* Lado Direito */}
-          <div className="flex items-center gap-3">
+          {/* Lado Direito - MOBILE STACK */}
+          <div className="flex flex-col items-end gap-2 ml-2">
             {/* Status Visual */}
-            {getIconeStatus()}
+            <div className="flex items-center gap-2">
+              {getIconeStatus()}
+              {renderProgressoBadge()}
+            </div>
             
-            {/* Progress Badge */}
-            {renderProgressoBadge()}
-            
-            {/* Estimativa de Tempo */}
-            {renderEstimativaTempo()}
-            
-            {/* Prioridade */}
-            {renderPrioridade()}
+            {/* Informações Secundárias */}
+            <div className="flex items-center gap-2 text-xs">
+              {renderEstimativaTempo()}
+              {renderPrioridade()}
+            </div>
           </div>
         </div>
         
@@ -233,9 +240,9 @@ export default function ChecklistSecaoCard({
           <div className="mt-3 space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span>Progresso Geral</span>
-              <span>{progresso}%</span>
+              <span className="font-semibold">{progresso}%</span>
             </div>
-            <Progress value={progresso} className="h-2 bg-white/30">
+            <Progress value={progresso} className="h-3 bg-white/30 touch-manipulation">
               <div 
                 className="h-full bg-white rounded-full transition-all duration-500"
                 style={{ width: `${progresso}%` }}
@@ -246,9 +253,9 @@ export default function ChecklistSecaoCard({
               <>
                 <div className="flex items-center justify-between text-xs">
                   <span>Itens Obrigatórios</span>
-                  <span>{progressoObrigatorios}%</span>
+                  <span className="font-semibold">{progressoObrigatorios}%</span>
                 </div>
-                <Progress value={progressoObrigatorios} className="h-1 bg-white/30">
+                <Progress value={progressoObrigatorios} className="h-2 bg-white/30 touch-manipulation">
                   <div 
                     className="h-full bg-yellow-300 rounded-full transition-all duration-500"
                     style={{ width: `${progressoObrigatorios}%` }}
@@ -263,40 +270,56 @@ export default function ChecklistSecaoCard({
       {/* Conteúdo Expandido */}
       {expanded && (
         <CardContent className="p-0">
-          {/* Barra de Ações */}
+          {/* Barra de Ações - MOBILE OTIMIZADA */}
           {!readonly && variant === 'execution' && (
-            <div className="p-4 bg-gray-50 border-b flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {secao.status === 'pendente' && onStartSection && (
-                  <Button size="sm" onClick={onStartSection} className="bg-blue-500 hover:bg-blue-600">
-                    ▶️ Iniciar Seção
-                  </Button>
-                )}
-                {secao.status === 'em_andamento' && onCompleteSection && (
-                  <Button size="sm" onClick={onCompleteSection} className="bg-green-500 hover:bg-green-600">
-                    ✅ Finalizar Seção
-                  </Button>
-                )}
-              </div>
-              
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                {secao.responsavel && (
-                  <span>👤 {secao.responsavel}</span>
-                )}
-                {secao.iniciadoEm && (
-                  <span>🕐 Iniciado: {new Date(secao.iniciadoEm).toLocaleTimeString()}</span>
-                )}
+            <div className="p-4 bg-gray-50 border-b">
+              <div className="flex flex-col gap-3">
+                {/* Botões de Ação */}
+                <div className="flex gap-2">
+                  {secao.status === 'pendente' && onStartSection && (
+                    <Button 
+                      size="lg" 
+                      onClick={onStartSection} 
+                      className="flex-1 bg-blue-500 hover:bg-blue-600 touch-manipulation min-h-[48px]"
+                    >
+                      ▶️ Iniciar Seção
+                    </Button>
+                  )}
+                  {secao.status === 'em_andamento' && onCompleteSection && (
+                    <Button 
+                      size="lg" 
+                      onClick={onCompleteSection} 
+                      className="flex-1 bg-green-500 hover:bg-green-600 touch-manipulation min-h-[48px]"
+                    >
+                      ✅ Finalizar Seção
+                    </Button>
+                  )}
+                </div>
+                
+                {/* Informações da Seção */}
+                <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600">
+                  {secao.responsavel && (
+                    <Badge variant="outline" className="bg-white">
+                      👤 {secao.responsavel}
+                    </Badge>
+                  )}
+                  {secao.iniciadoEm && (
+                    <Badge variant="outline" className="bg-white">
+                      🕐 {new Date(secao.iniciadoEm).toLocaleTimeString()}
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
           )}
 
-          {/* Lista de Itens */}
-          <div className="p-4 space-y-3">
+          {/* Lista de Itens - MOBILE OTIMIZADA */}
+          <div className="p-4 space-y-4">
             {secao.itens.map((item, index) => (
               <div 
                 key={item.id}
                 className={`
-                  p-3 rounded-lg border-l-4 transition-all duration-200
+                  p-4 rounded-lg border-l-4 transition-all duration-200 touch-manipulation
                   ${item.status === 'ok' || item.status === 'preenchido' 
                     ? 'border-green-500 bg-green-50' 
                     : item.status === 'problema'
@@ -306,50 +329,52 @@ export default function ChecklistSecaoCard({
                   hover:shadow-sm
                 `}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm font-medium text-gray-700">
-                        {index + 1}. {item.titulo}
-                      </span>
-                      {item.obrigatorio && (
-                        <Badge className="bg-red-100 text-red-800 text-xs">
-                          Obrigatório
-                        </Badge>
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-sm font-medium text-gray-700">
+                          {index + 1}. {item.titulo}
+                        </span>
+                        {item.obrigatorio && (
+                          <Badge className="bg-red-100 text-red-800 text-xs">
+                            Obrigatório
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Status do Item */}
+                    <div className="ml-3 flex-shrink-0">
+                      {item.status === 'ok' || item.status === 'preenchido' ? (
+                        <CheckCircle className="w-6 h-6 text-green-600" />
+                      ) : item.status === 'problema' ? (
+                        <XCircle className="w-6 h-6 text-red-600" />
+                      ) : (
+                        <Clock className="w-6 h-6 text-gray-400" />
                       )}
                     </div>
-                    
-                    {/* Renderizar campo baseado no tipo */}
-                    <div className="mt-2">
-                      {renderCampoItem(item, onItemChange, readonly)}
-                    </div>
-                    
-                    {/* Observações */}
-                    {item.observacoes && (
-                      <div className="mt-2 p-2 bg-white rounded border">
-                        <p className="text-xs text-gray-600 font-medium">Observações:</p>
-                        <p className="text-sm text-gray-700">{item.observacoes}</p>
-                      </div>
-                    )}
-                    
-                    {/* Validação */}
-                    {item.validacao && !item.validacao.valido && (
-                      <div className="mt-2 p-2 bg-red-50 rounded border border-red-200">
-                        <p className="text-xs text-red-600 font-medium">⚠️ {item.validacao.erro}</p>
-                      </div>
-                    )}
                   </div>
                   
-                  {/* Status do Item */}
-                  <div className="ml-3">
-                    {item.status === 'ok' || item.status === 'preenchido' ? (
-                      <CheckCircle className="w-5 h-5 text-green-600" />
-                    ) : item.status === 'problema' ? (
-                      <XCircle className="w-5 h-5 text-red-600" />
-                    ) : (
-                      <Clock className="w-5 h-5 text-gray-400" />
-                    )}
+                  {/* Renderizar campo baseado no tipo */}
+                  <div className="w-full">
+                    {renderCampoItem(item, onItemChange, readonly)}
                   </div>
+                  
+                  {/* Observações */}
+                  {item.observacoes && (
+                    <div className="p-3 bg-white rounded border">
+                      <p className="text-xs text-gray-600 font-medium mb-1">Observações:</p>
+                      <p className="text-sm text-gray-700">{item.observacoes}</p>
+                    </div>
+                  )}
+                  
+                  {/* Validação */}
+                  {item.validacao && !item.validacao.valido && (
+                    <div className="p-3 bg-red-50 rounded border border-red-200">
+                      <p className="text-xs text-red-600 font-medium">⚠️ {item.validacao.erro}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -361,7 +386,7 @@ export default function ChecklistSecaoCard({
 }
 
 // =====================================================
-// 🔧 FUNÇÃO PARA RENDERIZAR CAMPOS POR TIPO
+// 🔧 FUNÇÃO PARA RENDERIZAR CAMPOS POR TIPO (MOBILE-FIRST)
 // =====================================================
 
 function renderCampoItem(
@@ -379,22 +404,22 @@ function renderCampoItem(
   switch (item.tipo) {
     case 'sim_nao':
       return (
-        <div className="flex gap-2">
+        <div className="flex gap-3 w-full">
           <Button
-            size="sm"
+            size="lg"
             variant={item.valor === true ? 'default' : 'outline'}
             onClick={() => handleChange(true)}
             disabled={readonly}
-            className="text-xs"
+            className="flex-1 min-h-[48px] touch-manipulation text-base"
           >
             ✅ Sim
           </Button>
           <Button
-            size="sm"
+            size="lg"
             variant={item.valor === false ? 'default' : 'outline'}
             onClick={() => handleChange(false)}
             disabled={readonly}
-            className="text-xs"
+            className="flex-1 min-h-[48px] touch-manipulation text-base"
           >
             ❌ Não
           </Button>
@@ -403,34 +428,46 @@ function renderCampoItem(
     
     case 'avaliacao':
       return (
-        <div className="flex gap-1">
-          {[1, 2, 3, 4, 5].map(nota => (
-            <Button
-              key={nota}
-              size="sm"
-              variant="ghost"
-              onClick={() => handleChange(nota)}
-              disabled={readonly}
-              className="p-1 h-8 w-8"
-            >
-              <span className={item.valor >= nota ? 'text-yellow-500' : 'text-gray-300'}>
-                ⭐
+        <div className="space-y-2">
+          <div className="flex justify-center gap-2">
+            {[1, 2, 3, 4, 5].map(nota => (
+              <Button
+                key={nota}
+                size="lg"
+                variant="ghost"
+                onClick={() => handleChange(nota)}
+                disabled={readonly}
+                className="p-2 h-12 w-12 touch-manipulation"
+              >
+                <Star 
+                  className={`w-6 h-6 ${
+                    item.valor >= nota 
+                      ? 'text-yellow-500 fill-yellow-500' 
+                      : 'text-gray-300'
+                  }`} 
+                />
+              </Button>
+            ))}
+          </div>
+          {item.valor && (
+            <div className="text-center">
+              <span className="text-base font-medium text-gray-700">
+                {item.valor}/5 estrelas
               </span>
-            </Button>
-          ))}
-          {item.valor && <span className="text-sm text-gray-600 ml-2">{item.valor}/5</span>}
+            </div>
+          )}
         </div>
       )
     
     case 'texto':
       return (
-        <input
-          type="text"
+        <textarea
           value={item.valor || ''}
           onChange={(e) => handleChange(e.target.value)}
           disabled={readonly}
-          className="w-full p-2 border rounded text-sm"
-          placeholder="Digite aqui..."
+          rows={3}
+          className="w-full p-3 border rounded-lg text-base touch-manipulation resize-none"
+          placeholder="Digite sua resposta aqui..."
         />
       )
     
@@ -441,8 +478,8 @@ function renderCampoItem(
           value={item.valor || ''}
           onChange={(e) => handleChange(parseFloat(e.target.value))}
           disabled={readonly}
-          className="w-32 p-2 border rounded text-sm"
-          placeholder="0"
+          className="w-full p-3 border rounded-lg text-base touch-manipulation"
+          placeholder="Digite um número"
         />
       )
     
@@ -453,22 +490,67 @@ function renderCampoItem(
           value={item.valor || ''}
           onChange={(e) => handleChange(e.target.value)}
           disabled={readonly}
-          className="w-40 p-2 border rounded text-sm"
+          className="w-full p-3 border rounded-lg text-base touch-manipulation"
         />
       )
     
     case 'foto_camera':
     case 'foto_upload':
       return (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {!readonly && (
-            <Button size="sm" variant="outline" className="text-xs">
-              📷 {item.tipo === 'foto_camera' ? 'Tirar Foto' : 'Upload Foto'}
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="w-full min-h-[48px] touch-manipulation text-base"
+              onClick={() => {
+                // Implementar captura/upload de foto
+                console.log('Foto:', item.tipo)
+              }}
+            >
+              {item.tipo === 'foto_camera' ? (
+                <>
+                  <Camera className="w-5 h-5 mr-2" />
+                  📷 Tirar Foto
+                </>
+              ) : (
+                <>
+                  <Upload className="w-5 h-5 mr-2" />
+                  📁 Escolher Foto
+                </>
+              )}
             </Button>
           )}
           {item.valor && (
-            <div className="w-20 h-20 bg-gray-200 rounded border flex items-center justify-center">
-              <span className="text-xs">📷</span>
+            <div className="w-full h-32 bg-gray-200 rounded-lg border flex items-center justify-center">
+              <div className="text-center">
+                <Camera className="w-8 h-8 mx-auto mb-2 text-gray-500" />
+                <span className="text-sm text-gray-600">Foto anexada</span>
+              </div>
+            </div>
+          )}
+        </div>
+      )
+    
+    case 'assinatura':
+      return (
+        <div className="space-y-3">
+          {!readonly && (
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="w-full min-h-[48px] touch-manipulation text-base"
+              onClick={() => {
+                // Implementar assinatura digital
+                console.log('Assinatura digital')
+              }}
+            >
+              ✏️ Assinar Digitalmente
+            </Button>
+          )}
+          {item.valor && (
+            <div className="w-full h-24 bg-gray-200 rounded-lg border flex items-center justify-center">
+              <span className="text-sm text-gray-600">✓ Assinado</span>
             </div>
           )}
         </div>
@@ -476,9 +558,15 @@ function renderCampoItem(
     
     default:
       return (
-        <div className="text-sm text-gray-500 italic">
-          Campo tipo: {item.tipo}
-          {item.valor && <span className="ml-2">Valor: {String(item.valor)}</span>}
+        <div className="p-3 bg-gray-50 rounded-lg border">
+          <div className="text-sm text-gray-600 mb-1">
+            Campo tipo: <span className="font-medium">{item.tipo}</span>
+          </div>
+          {item.valor && (
+            <div className="text-sm text-gray-800">
+              Valor: <span className="font-medium">{String(item.valor)}</span>
+            </div>
+          )}
         </div>
       )
   }
