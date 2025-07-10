@@ -5,15 +5,21 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
     
-    // Buscar um token válido
+    // Buscar um token válido na tabela api_credentials
     const { data: contaAzulData } = await supabase
-      .from('contaazul_configuracoes')
+      .from('api_credentials')
       .select('*')
+      .eq('sistema', 'contaazul')
       .eq('ativo', true)
       .single();
 
     if (!contaAzulData?.access_token) {
-      return NextResponse.json({ error: 'Token não encontrado' }, { status: 400 });
+      return NextResponse.json({ error: 'Token ContaAzul não encontrado. Configure a integração em /configuracoes' }, { status: 400 });
+    }
+
+    // Verificar se token não expirou
+    if (contaAzulData.expires_at && new Date(contaAzulData.expires_at) < new Date()) {
+      return NextResponse.json({ error: 'Token ContaAzul expirado. Renove em /configuracoes' }, { status: 400 });
     }
 
     console.log('🔍 Investigando campos não documentados...');

@@ -7,8 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Target, Users, Settings, Puzzle, BarChart3 } from 'lucide-react'
+import ContaAzulOAuth from '@/components/configuracoes/ContaAzulOAuth'
 
 export default function ConfiguracoesPage() {
   const { selectedBar } = useBar()
@@ -206,21 +208,49 @@ export default function ConfiguracoesPage() {
 
             {showIntegracoesTab && (
               <TabsContent value="integracoes">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Integrações Externas</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600">
-                      Configure suas integrações com sistemas externos como ContaAzul, sistemas de pagamento e outras APIs
-                    </p>
-                    <div className="mt-4 p-4 bg-orange-50 rounded-lg">
-                      <p className="text-orange-700 font-medium">
-                        Funcionalidade em desenvolvimento...
+                <div className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Integrações Externas</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 mb-6">
+                        Configure suas integrações com sistemas externos como ContaAzul, sistemas de pagamento e outras APIs
                       </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+
+                  {/* ContaAzul Integration */}
+                  <ContaAzulOAuth />
+
+                  {/* Outras integrações futuras */}
+                  <Card className="border-gray-200 bg-gray-50">
+                    <CardHeader>
+                      <CardTitle className="text-gray-600">🔧 Outras Integrações</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="p-4 bg-white rounded-lg border border-gray-200">
+                          <h4 className="font-medium text-gray-800 mb-2">💳 Sistemas de Pagamento</h4>
+                          <p className="text-sm text-gray-600 mb-3">Stone, Mercado Pago, PagSeguro</p>
+                          <Badge variant="outline">Em breve</Badge>
+                        </div>
+                        
+                        <div className="p-4 bg-white rounded-lg border border-gray-200">
+                          <h4 className="font-medium text-gray-800 mb-2">📊 Analytics</h4>
+                          <p className="text-sm text-gray-600 mb-3">Google Analytics, Facebook Pixel</p>
+                          <Badge variant="outline">Em breve</Badge>
+                        </div>
+                        
+                        <div className="p-4 bg-white rounded-lg border border-gray-200">
+                          <h4 className="font-medium text-gray-800 mb-2">📱 WhatsApp Business</h4>
+                          <p className="text-sm text-gray-600 mb-3">Integração com API oficial</p>
+                          <Badge variant="outline">Em breve</Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </TabsContent>
             )}
 

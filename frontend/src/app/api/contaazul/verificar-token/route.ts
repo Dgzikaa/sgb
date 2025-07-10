@@ -5,11 +5,12 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
     
-    // Buscar configurações do ContaAzul
+    // Buscar configurações do ContaAzul na tabela api_credentials
     const { data: configuracoes, error } = await supabase
-      .from('contaazul_configuracoes')
+      .from('api_credentials')
       .select('*')
-      .order('created_at', { ascending: false });
+      .eq('sistema', 'contaazul')
+      .order('criado_em', { ascending: false });
 
     if (error) {
       return NextResponse.json({ error: 'Erro ao buscar configurações', details: error.message }, { status: 500 });
@@ -22,27 +23,39 @@ export async function GET(request: NextRequest) {
       tem_configuracao_ativa: !!configuracaoAtiva,
       configuracao_ativa: configuracaoAtiva ? {
         id: configuracaoAtiva.id,
+        bar_id: configuracaoAtiva.bar_id,
+        sistema: configuracaoAtiva.sistema,
+        ambiente: configuracaoAtiva.ambiente,
         client_id: configuracaoAtiva.client_id ? 'Configurado' : 'Não configurado',
         client_secret: configuracaoAtiva.client_secret ? 'Configurado' : 'Não configurado',
         access_token: configuracaoAtiva.access_token ? 'Configurado' : 'Não configurado',
         refresh_token: configuracaoAtiva.refresh_token ? 'Configurado' : 'Não configurado',
-        token_expires_at: configuracaoAtiva.token_expires_at,
-        token_expirado: configuracaoAtiva.token_expires_at ? 
-          new Date(configuracaoAtiva.token_expires_at) < new Date() : 
+        expires_at: configuracaoAtiva.expires_at,
+        token_expirado: configuracaoAtiva.expires_at ? 
+          new Date(configuracaoAtiva.expires_at) < new Date() : 
           'Não informado',
-        created_at: configuracaoAtiva.created_at,
-        updated_at: configuracaoAtiva.updated_at,
+        empresa_nome: configuracaoAtiva.empresa_nome,
+        empresa_cnpj: configuracaoAtiva.empresa_cnpj,
+        criado_em: configuracaoAtiva.criado_em,
+        atualizado_em: configuracaoAtiva.atualizado_em,
+        last_token_refresh: configuracaoAtiva.last_token_refresh,
+        token_refresh_count: configuracaoAtiva.token_refresh_count,
         ativo: configuracaoAtiva.ativo,
       } : null,
       todas_configuracoes: configuracoes?.map((config: any) => ({
         id: config.id,
+        bar_id: config.bar_id,
+        sistema: config.sistema,
+        ambiente: config.ambiente,
         ativo: config.ativo,
         tem_access_token: !!config.access_token,
-        token_expires_at: config.token_expires_at,
-        token_expirado: config.token_expires_at ? 
-          new Date(config.token_expires_at) < new Date() : 
+        expires_at: config.expires_at,
+        token_expirado: config.expires_at ? 
+          new Date(config.expires_at) < new Date() : 
           'Não informado',
-        created_at: config.created_at,
+        empresa_nome: config.empresa_nome,
+        criado_em: config.criado_em,
+        last_token_refresh: config.last_token_refresh,
       })) || [],
     };
 
