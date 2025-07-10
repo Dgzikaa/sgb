@@ -23,6 +23,110 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+const CONTAAZUL_TOKEN_URL = 'https://auth.contaazul.com/oauth2/token'
+
+// Função para obter token válido com renovação automática
+async function getValidContaAzulToken(supabaseClient: any, barId: number): Promise<string | null> {
+  try {
+    console.log(`🔑 Verificando token válido para bar_id: ${barId}`)
+    
+    const { data: credentials } = await supabaseClient
+      .from('api_credentials')
+      .select('*')
+      .eq('bar_id', barId)
+      .eq('sistema', 'contaazul')
+      .single()
+
+    if (!credentials?.access_token) {
+      console.error('❌ Credenciais não encontradas')
+      return null
+    }
+
+    // Verificar se token expira em menos de 5 minutos
+    const agora = new Date()
+    const expiraEm = new Date(credentials.expires_at)
+    const margemSeguranca = 5 * 60 * 1000 // 5 minutos
+    
+    if (expiraEm.getTime() - agora.getTime() > margemSeguranca) {
+      console.log(`✅ Token válido até: ${expiraEm.toISOString()}`)
+      return credentials.access_token
+    }
+
+    console.log(`⚠️ Token expira em: ${expiraEm.toISOString()}, renovando...`)
+    
+    const newToken = await renewContaAzulToken(supabaseClient, credentials)
+    if (newToken) {
+      console.log('✅ Token renovado com sucesso!')
+      return newToken
+    }
+
+    console.error('❌ Falha ao renovar token')
+    return null
+
+  } catch (error) {
+    console.error('❌ Erro ao verificar/renovar token:', error)
+    return null
+  }
+}
+
+async function renewContaAzulToken(supabaseClient: any, credentials: any): Promise<string | null> {
+  try {
+    if (!credentials.refresh_token) {
+      throw new Error('Refresh token não disponível')
+    }
+
+    const basicAuth = btoa(`${credentials.client_id}:${credentials.client_secret}`)
+    
+    const response = await fetch(CONTAAZUL_TOKEN_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${basicAuth}`
+      },
+      body: new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: credentials.refresh_token
+      })
+    })
+
+    const data = await response.json()
+    
+    if (!response.ok) {
+      throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`)
+    }
+
+    const expiresAt = new Date(Date.now() + (data.expires_in * 1000))
+    
+    await supabaseClient
+      .from('api_credentials')
+      .update({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token || credentials.refresh_token,
+        expires_at: expiresAt.toISOString(),
+        last_token_refresh: new Date().toISOString(),
+        token_refresh_count: (credentials.token_refresh_count || 0) + 1
+      })
+      .eq('id', credentials.id)
+
+    console.log(`🔄 Token renovado - novo expira em: ${expiresAt.toISOString()}`)
+    return data.access_token
+
+  } catch (error) {
+    console.error('❌ Erro ao renovar token:', error)
+    
+    await supabaseClient
+      .from('api_credentials')
+      .update({
+        ativo: false,
+        access_token: null,
+        refresh_token: null
+      })
+      .eq('id', credentials.id)
+      
+    return null
+  }
+}
+
 serve(async (req: Request): Promise<Response> => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -30,25 +134,17 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   try {
-    // Validação de método
     if (req.method !== 'POST') {
       throw new Error('Method not allowed')
     }
 
     console.log('🚀 EDGE FUNCTION: ContaAzul Sync iniciada...')
 
-    // Configuração do Supabase
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Parse do body
     const body: SyncRequest = await req.json()
     const barId = body.bar_id
 
@@ -57,6 +153,13 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     console.log(`📊 Iniciando sincronização para bar_id: ${barId}`)
+
+    // Obter token válido com renovação automática
+    const accessToken = await getValidContaAzulToken(supabaseClient, barId)
+    
+    if (!accessToken) {
+      throw new Error('Token do ContaAzul não disponível ou não foi possível renovar')
+    }
 
     // Verificar se já foi sincronizado hoje (se não for forçado)
     if (!body.force) {
@@ -81,17 +184,6 @@ serve(async (req: Request): Promise<Response> => {
           status: 200,
         })
       }
-    }
-
-    // Buscar credenciais
-    const { data: credentials } = await supabaseClient
-      .from('api_credentials')
-      .select('*')
-      .eq('bar_id', barId)
-      .single()
-
-    if (!credentials?.access_token) {
-      throw new Error('Credenciais do ContaAzul não encontradas')
     }
 
     // Definir período (padrão: mês atual)
@@ -127,12 +219,12 @@ serve(async (req: Request): Promise<Response> => {
     try {
       // FASE 1: Coletar dados auxiliares
       console.log('📥 FASE 1: Coletando dados auxiliares...')
-      await coletarDadosAuxiliares(credentials.access_token, barId, resultado, supabaseClient)
+      await coletarDadosAuxiliares(accessToken, barId, resultado, supabaseClient)
 
       // FASE 2: Coletar RECEITAS com detalhes
       console.log('💰 FASE 2: Coletando RECEITAS com detalhes...')
       await coletarFinanceiroComDetalhes(
-        credentials.access_token, 
+        accessToken, 
         barId, 
         'receitas',
         dataInicio, 
@@ -144,7 +236,7 @@ serve(async (req: Request): Promise<Response> => {
       // FASE 3: Coletar DESPESAS com detalhes
       console.log('💸 FASE 3: Coletando DESPESAS com detalhes...')
       await coletarFinanceiroComDetalhes(
-        credentials.access_token, 
+        accessToken, 
         barId, 
         'despesas',
         dataInicio, 
@@ -229,7 +321,6 @@ async function coletarDadosAuxiliares(accessToken: string, barId: number, result
   }
 
   try {
-    // Coletar categorias
     console.log('🏷️ Coletando categorias...')
     const categoriasResponse = await fetch('https://api-v2.contaazul.com/v1/categorias?tamanho_pagina=100', { headers })
     
@@ -255,9 +346,10 @@ async function coletarDadosAuxiliares(accessToken: string, barId: number, result
       
       resultado.dados_auxiliares.categorias = categorias.length
       console.log(`✅ ${categorias.length} categorias coletadas`)
+    } else {
+      console.error(`❌ Erro ao coletar categorias: ${categoriasResponse.status}`)
     }
 
-    // Coletar centros de custo
     console.log('🎯 Coletando centros de custo...')
     const centrosResponse = await fetch('https://api-v2.contaazul.com/v1/centro-de-custo?tamanho_pagina=100', { headers })
     
@@ -279,9 +371,10 @@ async function coletarDadosAuxiliares(accessToken: string, barId: number, result
       
       resultado.dados_auxiliares.centros_custo = centros.length
       console.log(`✅ ${centros.length} centros de custo coletados`)
+    } else {
+      console.error(`❌ Erro ao coletar centros de custo: ${centrosResponse.status}`)
     }
 
-    // Coletar contas financeiras
     console.log('🏦 Coletando contas financeiras...')
     const contasResponse = await fetch('https://api-v2.contaazul.com/v1/conta-financeira?tamanho_pagina=100', { headers })
     
@@ -307,6 +400,8 @@ async function coletarDadosAuxiliares(accessToken: string, barId: number, result
       
       resultado.dados_auxiliares.contas = contas.length
       console.log(`✅ ${contas.length} contas financeiras coletadas`)
+    } else {
+      console.error(`❌ Erro ao coletar contas financeiras: ${contasResponse.status}`)
     }
 
   } catch (error) {
@@ -343,7 +438,6 @@ async function coletarFinanceiroComDetalhes(
     try {
       console.log(`📄 ${tipo} - Página ${pagina}...`)
       
-      // PASSO 1: Buscar parcelas por competência
       const url = `https://api-v2.contaazul.com/v1/financeiro/eventos-financeiros/${endpoint}?` +
         `data_competencia_de=${dataInicio}&` +
         `data_competencia_ate=${dataFim}&` +
@@ -353,7 +447,10 @@ async function coletarFinanceiroComDetalhes(
       const response = await fetch(url, { headers })
       
       if (!response.ok) {
-        throw new Error(`Erro na API: ${response.status} ${response.statusText}`)
+        console.error(`❌ Erro na API ContaAzul: ${response.status} ${response.statusText}`)
+        const errorText = await response.text()
+        console.error(`❌ Detalhes do erro: ${errorText}`)
+        throw new Error(`Erro na API ContaAzul: ${response.status} - ${errorText}`)
       }
 
       const data = await response.json()
@@ -367,7 +464,6 @@ async function coletarFinanceiroComDetalhes(
       resultado[tipo].total += parcelas.length
       console.log(`📋 ${parcelas.length} ${tipo} encontradas na página ${pagina}`)
 
-      // PASSO 2: Para cada parcela, buscar evento completo
       for (const parcela of parcelas) {
         try {
           await processarParcelaComDetalhes(accessToken, barId, parcela, tipoMaiusculo, supabase)
@@ -381,7 +477,6 @@ async function coletarFinanceiroComDetalhes(
 
       pagina++
       
-      // Pausa para evitar rate limit
       if (pagina % 5 === 0) {
         await new Promise(resolve => setTimeout(resolve, 1000))
       }
@@ -406,7 +501,6 @@ async function processarParcelaComDetalhes(
     'Content-Type': 'application/json'
   }
 
-  // PASSO 2: Buscar detalhes completos da parcela
   const detalhesUrl = `https://api-v2.contaazul.com/v1/financeiro/eventos-financeiros/parcelas/${parcela.id}`
   
   const detalhesResponse = await fetch(detalhesUrl, { headers })
@@ -419,17 +513,14 @@ async function processarParcelaComDetalhes(
   const evento = detalhesData.evento
   
   if (!evento || !evento.rateio) {
-    // Inserir sem categoria/centro custo se não tiver rateio
     await inserirVisaoCompetencia(barId, parcela, null, null, tipo, supabase)
     return
   }
 
-  // PASSO 3: Processar cada item do rateio (categoria + centro custo)
   for (const itemRateio of evento.rateio) {
     const categoriaId = itemRateio.id_categoria
     let categoriaNome = null
     
-    // Buscar nome da categoria no cache
     if (categoriaId) {
       const { data: categoria } = await supabase
         .from('contaazul_categorias')
@@ -440,18 +531,15 @@ async function processarParcelaComDetalhes(
       categoriaNome = categoria?.nome
     }
 
-    // Processar centros de custo do rateio
     const centrosCusto = itemRateio.rateio_centro_custo || []
     
     if (centrosCusto.length === 0) {
-      // Inserir sem centro de custo
       await inserirVisaoCompetencia(barId, parcela, {
         id: categoriaId,
         nome: categoriaNome,
         valor: itemRateio.valor
       }, null, tipo, supabase)
     } else {
-      // Inserir para cada centro de custo
       for (const centroCusto of centrosCusto) {
         let centroCustoNome = null
         

@@ -277,10 +277,12 @@ async function coletarFinanceiroComDetalhes(
     try {
       console.log(`📄 ${tipo} - Página ${pagina}...`);
       
-      // PASSO 1: Buscar parcelas por competência (API básica)
+      // PASSO 1: Buscar parcelas por competência E vencimento (API atualizada)
       const url = `https://api-v2.contaazul.com/v1/financeiro/eventos-financeiros/${endpoint}?` +
         `data_competencia_de=${dataInicio}&` +
         `data_competencia_ate=${dataFim}&` +
+        `data_vencimento_de=${dataInicio}&` +
+        `data_vencimento_ate=${dataFim}&` +
         `pagina=${pagina}&` +
         `tamanho_pagina=${tamanhoPagina}`;
 
