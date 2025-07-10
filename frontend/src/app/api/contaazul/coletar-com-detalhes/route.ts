@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getValidContaAzulToken, makeContaAzulRequest } from '@/lib/contaazul-auth-helper';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,40 +31,24 @@ export async function POST(request: NextRequest) {
     
     console.log(`📅 Período: ${dataInicio} até ${dataFim}`);
 
-    // Buscar credenciais DO CONTAAZUL especificamente
-    const { data: credentials } = await supabase
-      .from('api_credentials')
-      .select('*')
-      .eq('bar_id', parseInt(bar_id))
-      .eq('sistema', 'contaazul')
-      .single();
-
-    if (!credentials?.access_token) {
-      console.error('❌ Credenciais não encontradas para bar_id:', bar_id);
-      console.error('❌ Credenciais encontradas:', { 
-        exists: !!credentials, 
-        has_token: !!credentials?.access_token,
-        sistema: credentials?.sistema,
-        ativo: credentials?.ativo 
-      });
-      
+    // Obter token válido (com renovação automática se necessário)
+    const accessToken = await getValidContaAzulToken(parseInt(bar_id));
+    
+    if (!accessToken) {
       return NextResponse.json(
         { 
           success: false, 
-          message: 'Credenciais do ContaAzul não encontradas',
+          message: 'Token do ContaAzul não disponível ou não foi possível renovar',
           debug: {
             bar_id: parseInt(bar_id),
-            credentials_found: !!credentials,
-            has_access_token: !!credentials?.access_token,
-            sistema: credentials?.sistema,
-            ativo: credentials?.ativo
+            action: 'Verifique se as credenciais estão configuradas e se a autorização foi feita'
           }
         },
         { status: 400 }
       );
     }
 
-    console.log('✅ Credenciais encontradas para bar_id:', bar_id);
+    console.log('✅ Token válido obtido para bar_id:', bar_id);
 
     // Registrar início da sincronização
     const { data: logEntry } = await supabase
@@ -90,12 +75,12 @@ export async function POST(request: NextRequest) {
     try {
       // FASE 1: Coletar dados auxiliares primeiro (cache)
       console.log('📥 FASE 1: Coletando dados auxiliares...');
-      await coletarDadosAuxiliares(credentials.access_token, parseInt(bar_id), resultado);
+      await coletarDadosAuxiliares(accessToken, parseInt(bar_id), resultado);
 
       // FASE 2: Coletar RECEITAS com detalhes
       console.log('💰 FASE 2: Coletando RECEITAS com detalhes...');
       await coletarFinanceiroComDetalhes(
-        credentials.access_token, 
+        accessToken, 
         parseInt(bar_id), 
         'receitas',
         dataInicio, 
@@ -106,7 +91,7 @@ export async function POST(request: NextRequest) {
       // FASE 3: Coletar DESPESAS com detalhes
       console.log('💸 FASE 3: Coletando DESPESAS com detalhes...');
       await coletarFinanceiroComDetalhes(
-        credentials.access_token, 
+        accessToken, 
         parseInt(bar_id), 
         'despesas',
         dataInicio, 
@@ -302,7 +287,16 @@ async function coletarFinanceiroComDetalhes(
       const response = await fetch(url, { headers });
       
       if (!response.ok) {
-        throw new Error(`Erro na API: ${response.status} ${response.statusText}`);
+        // Capturar detalhes do erro da API ContaAzul
+        let errorDetails = `${response.status} ${response.statusText}`;
+        try {
+          const errorBody = await response.text();
+          console.error(`❌ ContaAzul API Error [${response.status}]:`, errorBody);
+          errorDetails += ` - ${errorBody}`;
+        } catch (e) {
+          console.error(`❌ ContaAzul API Error [${response.status}] - Não foi possível ler response`);
+        }
+        throw new Error(`Erro na API ContaAzul: ${errorDetails}`);
       }
 
       const data = await response.json();
