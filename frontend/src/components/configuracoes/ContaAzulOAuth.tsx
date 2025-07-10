@@ -623,91 +623,14 @@ export default function ContaAzulOAuth() {
   };
 
   // NOVO: Teste de Categorias em 2 Etapas
-  const [testeCategoriaLoading, setTesteCategoriaLoading] = useState(false);
-  const [testeCategoriaResultado, setTesteCategoriaResultado] = useState<any>(null);
-  const [dataInicio, setDataInicio] = useState('2024-01-01');
-  const [dataFim, setDataFim] = useState('2024-12-31');
+  // const [testeCategoriaLoading, setTesteCategoriaLoading] = useState(false);
+  // const [testeCategoriaResultado, setTesteCategoriaResultado] = useState<any>(null);
+  // const [dataInicio, setDataInicio] = useState('2024-01-01');
+  // const [dataFim, setDataFim] = useState('2024-12-31');
 
-  const handleTesteBuscaCategorias = async () => {
-    if (!selectedBar || !status?.connected) {
-      toast({
-        title: "Erro",
-        description: "ContaAzul deve estar conectado para executar o teste",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setTesteCategoriaLoading(true);
-    setTesteCategoriaResultado(null);
-
-    try {
-      console.log('🎯 Executando teste de busca de categorias (2 etapas)...');
-      
-      // Buscar token do banco
-      const tokenResponse = await fetch(`/api/contaazul/auth?action=get_token&barId=${selectedBar.id}`);
-      const tokenData = await tokenResponse.json();
-      
-      if (!tokenResponse.ok || !tokenData.access_token) {
-        toast({
-          title: "Erro",
-          description: "Não foi possível obter o token de acesso. Reconecte o ContaAzul.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      const response = await fetch('/api/contaazul/teste-buscar-com-categoria', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          access_token: tokenData.access_token,
-          data_inicio: dataInicio,
-          data_fim: dataFim
-        })
-      });
-
-      const data = await response.json();
-      
-      // Verificar se o erro é de token inválido
-      if (data.error && data.details && data.details.includes('invalid_token')) {
-        toast({
-          title: "Token Expirado",
-          description: "O token de acesso precisa ser renovado. Clique em 'Renovar Token' acima.",
-          variant: "destructive"
-        });
-      } else {
-        setTesteCategoriaResultado(data);
-        
-        if (data.error) {
-          toast({
-            title: "Erro no Teste",
-            description: data.error,
-            variant: "destructive"
-          });
-        } else {
-          const comCategoria = data.etapa2?.com_categoria || 0;
-          const total = data.etapa1?.total_parcelas || 0;
-          
-          toast({
-            title: "🎯 Teste de Categorias Concluído!",
-            description: `${comCategoria}/${total} parcelas têm categoria. ${data.erros?.length || 0} erros encontrados.`
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Erro:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao executar teste de categorias",
-        variant: "destructive"
-      });
-    } finally {
-      setTesteCategoriaLoading(false);
-    }
-  };
+  // const handleTesteBuscaCategorias = async () => {
+  //   // Função temporariamente desabilitada
+  // };
 
 
   const getStatusIcon = () => {
@@ -1105,8 +1028,8 @@ export default function ContaAzulOAuth() {
         </Card>
       )}
 
-      {/* NOVO: Teste de Categorias (2 Etapas) */}
-      {status?.connected && (
+      {/* NOVO: Teste de Categorias (2 Etapas) - TEMPORARIAMENTE DESABILITADO */}
+      {false && status?.connected && (
         <Card className="border-blue-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -1117,41 +1040,41 @@ export default function ContaAzulOAuth() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Configuração do Teste */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="dataInicio">Data Início</Label>
-                <Input
-                  id="dataInicio"
-                  type="date"
-                  value={dataInicio}
-                  onChange={(e) => setDataInicio(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="dataFim">Data Fim</Label>
-                <Input
-                  id="dataFim"
-                  type="date"
-                  value={dataFim}
-                  onChange={(e) => setDataFim(e.target.value)}
-                />
-              </div>
+            {/* SEÇÃO COMENTADA TEMPORARIAMENTE */}
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-yellow-800 font-medium">🚧 Seção em manutenção</p>
+              <p className="text-yellow-700 text-sm">
+                O teste de categorias está temporariamente desabilitado enquanto corrigimos um erro de JavaScript.
+              </p>
             </div>
+          </CardContent>
+        </Card>
+      )}
 
-            {/* Estratégia */}
-            <div className="bg-gray-50 p-4 rounded-lg">
+      {/* Seção de Teste Alternativa - Simples */}
+      {status?.connected && (
+        <Card className="border-green-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              🧪 Teste Simples de Categorias
+            </CardTitle>
+            <CardDescription>
+              Versão simplificada para testar a estratégia de 2 etapas
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-blue-50 p-4 rounded-lg">
               <h4 className="font-medium mb-2">📋 Estratégia de 2 Etapas</h4>
               <div className="space-y-2 text-sm">
                 <div className="flex items-start gap-2">
-                  <Badge variant="outline" className="mt-0.5">1</Badge>
+                  <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">1</span>
                   <div>
                     <span className="font-medium">Buscar Lista Básica</span>
                     <p className="text-gray-600">GET /v1/financeiro/eventos-financeiros/contas-a-receber/buscar</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
-                  <Badge variant="outline" className="mt-0.5">2</Badge>
+                  <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">2</span>
                   <div>
                     <span className="font-medium">Buscar Detalhes com Categoria</span>
                     <p className="text-gray-600">GET /v1/financeiro/eventos-financeiros/parcelas/{id}</p>
@@ -1160,116 +1083,14 @@ export default function ContaAzulOAuth() {
               </div>
             </div>
 
-            {/* Botão de Teste */}
             <Button 
-              onClick={handleTesteBuscaCategorias}
-              disabled={testeCategoriaLoading || !status?.connected}
+              onClick={() => {
+                alert('🎯 Teste de categorias será implementado em breve!\n\nA estratégia correta é:\n1. Buscar lista básica de parcelas\n2. Para cada parcela, buscar detalhes com categoria');
+              }}
               className="w-full"
             >
-              {testeCategoriaLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Executando Teste...
-                </>
-              ) : (
-                <>
-                  🎯 Executar Teste de 2 Etapas
-                </>
-              )}
+              🎯 Executar Teste (Em Desenvolvimento)
             </Button>
-
-            {/* Resultados */}
-            {testeCategoriaResultado && (
-              <div className="mt-4">
-                {testeCategoriaResultado.error ? (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <h4 className="font-medium text-red-800 mb-2">Erro</h4>
-                    <p className="text-red-700">{testeCategoriaResultado.error}</p>
-                    {testeCategoriaResultado.details && (
-                      <p className="text-sm text-red-600 mt-2">{testeCategoriaResultado.details}</p>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {/* Resumo */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="bg-blue-50 p-3 rounded-lg text-center">
-                        <div className="text-xl font-bold text-blue-600">
-                          {testeCategoriaResultado.etapa1?.total_parcelas || 0}
-                        </div>
-                        <div className="text-xs text-blue-600">Parcelas Totais</div>
-                      </div>
-                      
-                      <div className="bg-green-50 p-3 rounded-lg text-center">
-                        <div className="text-xl font-bold text-green-600">
-                          {testeCategoriaResultado.etapa2?.com_categoria || 0}
-                        </div>
-                        <div className="text-xs text-green-600">Com Categoria</div>
-                      </div>
-                      
-                      <div className="bg-yellow-50 p-3 rounded-lg text-center">
-                        <div className="text-xl font-bold text-yellow-600">
-                          {testeCategoriaResultado.etapa2?.sem_categoria || 0}
-                        </div>
-                        <div className="text-xs text-yellow-600">Sem Categoria</div>
-                      </div>
-                      
-                      <div className="bg-red-50 p-3 rounded-lg text-center">
-                        <div className="text-xl font-bold text-red-600">
-                          {testeCategoriaResultado.erros?.length || 0}
-                        </div>
-                        <div className="text-xs text-red-600">Erros</div>
-                      </div>
-                    </div>
-
-                    {/* Dados Detalhados (primeiras 3 parcelas) */}
-                    {testeCategoriaResultado.dados && testeCategoriaResultado.dados.length > 0 && (
-                      <div>
-                        <h4 className="font-medium mb-2">Primeiras Parcelas Processadas</h4>
-                        <div className="space-y-2">
-                          {testeCategoriaResultado.dados.slice(0, 3).map((parcela: any, index: number) => (
-                            <div key={index} className="border rounded-lg p-3 text-sm">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <div className="font-medium">{parcela.descricao}</div>
-                                  <div className="text-gray-600">ID: {parcela.parcela_id}</div>
-                                </div>
-                                <div className="text-right">
-                                  <div className="font-medium">
-                                    R$ {parcela.valor?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                  </div>
-                                  <Badge variant={parcela.tem_rateio ? 'default' : 'secondary'} className="text-xs">
-                                    {parcela.tem_rateio ? 'Com Rateio' : 'Sem Rateio'}
-                                  </Badge>
-                                </div>
-                              </div>
-                              
-                              {parcela.categorias && parcela.categorias.length > 0 && (
-                                <div className="mt-2 bg-gray-50 p-2 rounded text-xs">
-                                  <div className="font-medium">Categorias:</div>
-                                  {parcela.categorias.map((cat: any, catIndex: number) => (
-                                    <div key={catIndex}>
-                                      <span className="font-mono">{cat.categoria_id}</span>
-                                      <span className="mx-1">-</span>
-                                      <span>R$ {cat.valor_categoria?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                          {testeCategoriaResultado.dados.length > 3 && (
-                            <p className="text-xs text-gray-500 text-center">
-                              ... e mais {testeCategoriaResultado.dados.length - 3} parcelas
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
           </CardContent>
         </Card>
       )}
