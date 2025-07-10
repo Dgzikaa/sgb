@@ -165,11 +165,11 @@ async function coletarDadosAuxiliares(accessToken: string, barId: number, result
   try {
     // Coletar categorias
     console.log('🏷️ Coletando categorias...');
-    const categoriasResponse = await fetch('https://api-v2.contaazul.com/v1/categorias?tamanho_pagina=100', { headers });
+    const categoriasResponse = await fetch('https://api-v2.contaazul.com/v1/categorias?pagina=1&tamanho_pagina=100&permite_apenas_filhos=false', { headers });
     
     if (categoriasResponse.ok) {
       const categoriasData = await categoriasResponse.json();
-      const categorias = categoriasData.dados || [];
+      const categorias = categoriasData.itens || categoriasData.dados || [];
       
       for (const categoria of categorias) {
         await supabase
@@ -189,15 +189,19 @@ async function coletarDadosAuxiliares(accessToken: string, barId: number, result
       
       resultado.dados_auxiliares.categorias = categorias.length;
       console.log(`✅ ${categorias.length} categorias coletadas`);
+    } else {
+      const errorText = await categoriasResponse.text();
+      console.error('❌ Erro categorias:', categoriasResponse.status, errorText);
+      resultado.detalhes.push(`❌ Categorias erro: ${categoriasResponse.status} - ${errorText}`);
     }
 
     // Coletar centros de custo
     console.log('🎯 Coletando centros de custo...');
-    const centrosResponse = await fetch('https://api-v2.contaazul.com/v1/centro-de-custo?tamanho_pagina=100', { headers });
+    const centrosResponse = await fetch('https://api-v2.contaazul.com/v1/centro-de-custo?pagina=1&tamanho_pagina=100', { headers });
     
     if (centrosResponse.ok) {
       const centrosData = await centrosResponse.json();
-      const centros = centrosData.dados || [];
+      const centros = centrosData.itens || centrosData.dados || [];
       
       for (const centro of centros) {
         await supabase
@@ -213,15 +217,19 @@ async function coletarDadosAuxiliares(accessToken: string, barId: number, result
       
       resultado.dados_auxiliares.centros_custo = centros.length;
       console.log(`✅ ${centros.length} centros de custo coletados`);
+    } else {
+      const errorText = await centrosResponse.text();
+      console.error('❌ Erro centros custo:', centrosResponse.status, errorText);
+      resultado.detalhes.push(`❌ Centros custo erro: ${centrosResponse.status} - ${errorText}`);
     }
 
     // Coletar contas financeiras
     console.log('🏦 Coletando contas financeiras...');
-    const contasResponse = await fetch('https://api-v2.contaazul.com/v1/conta-financeira?tamanho_pagina=100', { headers });
+    const contasResponse = await fetch('https://api-v2.contaazul.com/v1/conta-financeira?pagina=1&tamanho_pagina=100', { headers });
     
     if (contasResponse.ok) {
       const contasData = await contasResponse.json();
-      const contas = contasData.dados || [];
+      const contas = contasData.itens || contasData.dados || [];
       
       for (const conta of contas) {
         await supabase
@@ -241,6 +249,10 @@ async function coletarDadosAuxiliares(accessToken: string, barId: number, result
       
       resultado.dados_auxiliares.contas = contas.length;
       console.log(`✅ ${contas.length} contas financeiras coletadas`);
+    } else {
+      const errorText = await contasResponse.text();
+      console.error('❌ Erro contas financeiras:', contasResponse.status, errorText);
+      resultado.detalhes.push(`❌ Contas financeiras erro: ${contasResponse.status} - ${errorText}`);
     }
 
   } catch (error) {
@@ -302,7 +314,7 @@ async function coletarFinanceiroComDetalhes(
       }
 
       const data = await response.json();
-      const parcelas = data.dados || [];
+      const parcelas = data.itens || data.dados || [];
       
       if (parcelas.length === 0) {
         continuarColetando = false;
