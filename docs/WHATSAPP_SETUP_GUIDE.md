@@ -49,7 +49,7 @@ Instance ID: sgb-checklists
 3. Aguarde confirmação de conexão
 
 #### **5. Configurar no SGB**
-1. Acesse `/admin/whatsapp-demo`
+1. Acesse `/configuracoes/whatsapp`
 2. Selecione "Evolution API"
 3. Preencha os dados:
    - **URL da API**: `https://evolution-api.com`
@@ -97,7 +97,7 @@ WhatsApp Number: whatsapp:+14155238886
 ```
 
 #### **4. Configurar no SGB**
-1. Acesse `/admin/whatsapp-demo`
+1. Acesse `/configuracoes/whatsapp`
 2. Selecione "Twilio"
 3. Preencha os dados da Twilio
 4. Teste a conexão
@@ -199,7 +199,7 @@ WHERE table_schema = 'public'
 
 ### **1. Acesse a Página de Testes**
 ```
-https://seudominio.com/admin/whatsapp-demo
+https://seudominio.com/configuracoes/whatsapp
 ```
 
 ### **2. Configure um Provedor**
@@ -469,7 +469,7 @@ console.log(logs)
 - **Baileys**: https://github.com/WhiskeySockets/Baileys/issues
 
 ### **Configuração SGB:**
-- Acesse `/admin/whatsapp-demo` para testes
+- Acesse `/configuracoes/whatsapp` para configurações e testes
 - Verifique logs em `whatsapp_messages`
 - Use a API `/api/whatsapp/send` para envios diretos
 

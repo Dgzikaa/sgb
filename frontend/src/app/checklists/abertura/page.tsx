@@ -67,8 +67,22 @@ interface HistoricoChecklist {
 }
 
 export default function ChecklistAbertura() {
-  const { selectedBar } = useBar()
+  const { selectedBar, isLoading: barLoading } = useBar()
   const { setPageTitle } = usePageTitle()
+  
+  // Renderização condicional para evitar erros durante SSR/SSG
+  if (barLoading || !selectedBar) {
+    return (
+      <div className="p-6 max-w-7xl mx-auto">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando checklist...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
   
   // Estados principais
   const [checklistAtivo, setChecklistAtivo] = useState<ChecklistItem[]>([])
@@ -186,9 +200,11 @@ export default function ChecklistAbertura() {
 
   // Carregar checklist do dia
   useEffect(() => {
-    carregarChecklistDia()
-    carregarHistorico()
-  }, [selectedBar?.id])
+    if (selectedBar?.id && !barLoading) {
+      carregarChecklistDia()
+      carregarHistorico()
+    }
+  }, [selectedBar?.id, barLoading])
 
   useEffect(() => {
     setPageTitle('✅ Checklist de Abertura')
@@ -196,11 +212,13 @@ export default function ChecklistAbertura() {
   }, [setPageTitle])
 
   const carregarChecklistDia = async () => {
+    if (!selectedBar?.id) return
+    
     try {
       const hoje = new Date().toISOString().split('T')[0]
       
       // Verificar se já existe checklist para hoje
-      const response = await fetch(`/api/operacoes/checklist-abertura?bar_id=${selectedBar?.id}&data=${hoje}`)
+      const response = await fetch(`/api/operacoes/checklist-abertura?bar_id=${selectedBar.id}&data=${hoje}`)
       
       if (response.ok) {
         const data = await response.json()
@@ -231,8 +249,10 @@ export default function ChecklistAbertura() {
   }
 
   const carregarHistorico = async () => {
+    if (!selectedBar?.id) return
+    
     try {
-      const response = await fetch(`/api/operacoes/checklist-abertura/historico?bar_id=${selectedBar?.id}`)
+      const response = await fetch(`/api/operacoes/checklist-abertura/historico?bar_id=${selectedBar.id}`)
       if (response.ok) {
         const data = await response.json()
         setHistorico(data.historico || [])
@@ -273,9 +293,11 @@ export default function ChecklistAbertura() {
   }
 
   const salvarChecklist = async () => {
+    if (!selectedBar?.id) return
+    
     try {
       const dadosChecklistCompleto = {
-        bar_id: selectedBar?.id,
+        bar_id: selectedBar.id,
         data: new Date().toISOString().split('T')[0],
         hora_inicio: horaInicio,
         hora_conclusao: new Date().toLocaleTimeString('pt-BR', { 

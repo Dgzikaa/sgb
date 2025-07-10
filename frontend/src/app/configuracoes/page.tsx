@@ -9,8 +9,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Target, Users, Settings, Puzzle, BarChart3 } from 'lucide-react'
+import { Target, Users, Settings, Puzzle, BarChart3, MessageSquare, Search, AlertCircle, CheckCircle, XCircle, Building2 } from 'lucide-react'
+import { Textarea } from '@/components/ui/textarea'
 import ContaAzulOAuth from '@/components/configuracoes/ContaAzulOAuth'
+import WhatsAppConfig from '@/components/whatsapp/WhatsAppConfig'
 
 export default function ConfiguracoesPage() {
   const { selectedBar } = useBar()
@@ -26,6 +28,11 @@ export default function ConfiguracoesPage() {
     ticketMedioTarget: 93,
     reservasDiarias: 133,
   })
+
+  // Estados para Investigação ContaAzul
+  const [investigacaoLoading, setInvestigacaoLoading] = useState(false)
+  const [investigacaoResultado, setInvestigacaoResultado] = useState<any>(null)
+  const [investigacaoError, setInvestigacaoError] = useState<string | null>(null)
 
   const updateMeta = (field: string, value: number) => {
     setMetas(prev => ({ ...prev, [field]: value }))
@@ -51,10 +58,62 @@ export default function ConfiguracoesPage() {
     }
   }
 
+  // Funções para Investigação ContaAzul
+  const executarInvestigacaoCompleta = async () => {
+    setInvestigacaoLoading(true)
+    setInvestigacaoError(null)
+    setInvestigacaoResultado(null)
+
+    try {
+      const response = await fetch('/api/contaazul/investigar-tudo-possivel')
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro na investigação')
+      }
+
+      setInvestigacaoResultado(data)
+    } catch (err) {
+      setInvestigacaoError(err instanceof Error ? err.message : 'Erro desconhecido')
+    } finally {
+      setInvestigacaoLoading(false)
+    }
+  }
+
+  const executarInvestigacaoCategorias = async () => {
+    setInvestigacaoLoading(true)
+    setInvestigacaoError(null)
+    setInvestigacaoResultado(null)
+
+    try {
+      const response = await fetch('/api/contaazul/investigar-categorias-especificas')
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro na investigação de categorias')
+      }
+
+      setInvestigacaoResultado(data)
+    } catch (err) {
+      setInvestigacaoError(err instanceof Error ? err.message : 'Erro desconhecido')
+    } finally {
+      setInvestigacaoLoading(false)
+    }
+  }
+
+  const StatusIcon = ({ sucesso }: { sucesso: boolean }) => {
+    return sucesso ? (
+      <CheckCircle className="w-4 h-4 text-green-500" />
+    ) : (
+      <XCircle className="w-4 h-4 text-red-500" />
+    )
+  }
+
   // Verificar quais abas mostrar baseado nas permissões
   const showUsersTab = isRole('admin')
   const showIntegracoesTab = isRole('admin')
   const showMarketingTab = hasPermission('marketing_360')
+  const showWhatsAppTab = isRole('admin') // WhatsApp disponível para admins
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -68,7 +127,7 @@ export default function ConfiguracoesPage() {
         
         <div className="space-y-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-5 bg-white border border-gray-200 p-1 rounded-lg shadow-sm">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6 bg-white border border-gray-200 p-1 rounded-lg shadow-sm">
               <TabsTrigger value="metas" className="flex items-center space-x-2">
                 <Target className="w-4 h-4" />
                 <span className="hidden sm:inline">Metas & KPIs</span>
@@ -96,6 +155,14 @@ export default function ConfiguracoesPage() {
                   <BarChart3 className="w-4 h-4" />
                   <span className="hidden sm:inline">Marketing</span>
                   <span className="sm:hidden">Social</span>
+                </TabsTrigger>
+              )}
+
+              {showWhatsAppTab && (
+                <TabsTrigger value="whatsapp" className="flex items-center space-x-2">
+                  <MessageSquare className="w-4 h-4" />
+                  <span className="hidden sm:inline">WhatsApp</span>
+                  <span className="sm:hidden">WPP</span>
                 </TabsTrigger>
               )}
             </TabsList>
@@ -223,6 +290,145 @@ export default function ConfiguracoesPage() {
                   {/* ContaAzul Integration */}
                   <ContaAzulOAuth />
 
+                  {/* Investigação ContaAzul */}
+                  <Card className="border-blue-200 bg-blue-50">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Search className="w-5 h-5 text-blue-600" />
+                        🔍 Investigação ContaAzul
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-blue-700 mb-6">
+                        Teste todos os endpoints possíveis para encontrar dados de categorização no ContaAzul
+                      </p>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <Button 
+                          onClick={executarInvestigacaoCompleta}
+                          disabled={investigacaoLoading}
+                          className="w-full"
+                          size="lg"
+                        >
+                          {investigacaoLoading ? (
+                            <>
+                              <Search className="w-4 h-4 mr-2 animate-spin" />
+                              Investigando...
+                            </>
+                          ) : (
+                            <>
+                              <Search className="w-4 h-4 mr-2" />
+                              🚀 Investigação Completa
+                            </>
+                          )}
+                        </Button>
+                        
+                        <Button 
+                          onClick={executarInvestigacaoCategorias}
+                          disabled={investigacaoLoading}
+                          className="w-full"
+                          size="lg"
+                          variant="outline"
+                        >
+                          {investigacaoLoading ? (
+                            <>
+                              <Building2 className="w-4 h-4 mr-2 animate-spin" />
+                              Investigando...
+                            </>
+                          ) : (
+                            <>
+                              <Building2 className="w-4 h-4 mr-2" />
+                              🎯 Investigar Categorias
+                            </>
+                          )}
+                        </Button>
+                      </div>
+
+                      {investigacaoError && (
+                        <Card className="mb-6 border-red-200 bg-red-50">
+                          <CardHeader>
+                            <CardTitle className="text-red-800 flex items-center">
+                              <AlertCircle className="w-5 h-5 mr-2" />
+                              Erro
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-red-700">{investigacaoError}</p>
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {investigacaoResultado && (
+                        <Card className="border-green-200 bg-green-50">
+                          <CardHeader>
+                            <CardTitle className="text-green-800 flex items-center">
+                              <CheckCircle className="w-5 h-5 mr-2" />
+                              📊 Resultados da Investigação
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                              <div>
+                                <p className="text-sm text-gray-600">Testes realizados</p>
+                                <p className="text-2xl font-bold text-blue-600">
+                                  {investigacaoResultado.analise?.total_eventos_testados || investigacaoResultado.analise?.total_categorias_testadas || 0}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-gray-600">Descobertas importantes</p>
+                                <p className="text-2xl font-bold text-green-600">
+                                  {investigacaoResultado.analise?.descobertas?.length || 0}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-gray-600">Endpoints com sucesso</p>
+                                <p className="text-2xl font-bold text-purple-600">
+                                  {Object.values(investigacaoResultado.analise?.endpoints_com_sucesso || {}).reduce((sum: number, val: any) => sum + Number(val), 0)}
+                                </p>
+                              </div>
+                            </div>
+
+                            {investigacaoResultado.analise?.descobertas?.length > 0 && (
+                              <div className="mb-4">
+                                <h4 className="font-semibold mb-2 text-green-800">🎉 Descobertas Importantes:</h4>
+                                <div className="space-y-2">
+                                  {investigacaoResultado.analise.descobertas.map((descoberta: string, index: number) => (
+                                    <div key={index} className="flex items-center space-x-2">
+                                      <CheckCircle className="w-4 h-4 text-green-600" />
+                                      <span className="text-green-700">{descoberta}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="mb-4">
+                              <h4 className="font-semibold mb-2 text-blue-800">📋 Recomendações:</h4>
+                              <div className="space-y-1">
+                                {investigacaoResultado.recomendacoes?.map((recomendacao: string, index: number) => (
+                                  <div key={index} className="flex items-start space-x-2">
+                                    <span className="text-blue-600">•</span>
+                                    <span className="text-blue-700 text-sm">{recomendacao}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div>
+                              <h4 className="font-semibold mb-2 text-gray-800">📝 JSON Completo:</h4>
+                              <Textarea
+                                value={JSON.stringify(investigacaoResultado, null, 2)}
+                                readOnly
+                                rows={15}
+                                className="font-mono text-xs"
+                              />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </CardContent>
+                  </Card>
+
                   {/* Outras integrações futuras */}
                   <Card className="border-gray-200 bg-gray-50">
                     <CardHeader>
@@ -243,8 +449,8 @@ export default function ConfiguracoesPage() {
                         </div>
                         
                         <div className="p-4 bg-white rounded-lg border border-gray-200">
-                          <h4 className="font-medium text-gray-800 mb-2">📱 WhatsApp Business</h4>
-                          <p className="text-sm text-gray-600 mb-3">Integração com API oficial</p>
+                          <h4 className="font-medium text-gray-800 mb-2">🔔 Notificações Push</h4>
+                          <p className="text-sm text-gray-600 mb-3">Notificações via browser e mobile</p>
                           <Badge variant="outline">Em breve</Badge>
                         </div>
                       </div>
@@ -271,6 +477,71 @@ export default function ConfiguracoesPage() {
                     </div>
                   </CardContent>
                 </Card>
+              </TabsContent>
+            )}
+
+            {showWhatsAppTab && (
+              <TabsContent value="whatsapp">
+                <div className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-3">
+                        <MessageSquare className="w-6 h-6 text-green-600" />
+                        Integração WhatsApp
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 mb-6">
+                        Configure lembretes automáticos, alertas de atraso e compartilhamento de checklists via WhatsApp. 
+                        Suporte completo para Evolution API, Twilio, WhatsApp Business e Baileys.
+                      </p>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span className="font-medium text-green-800">Lembretes Automáticos</span>
+                          </div>
+                          <p className="text-sm text-green-700">
+                            Envio automático 2h antes dos checklists agendados
+                          </p>
+                        </div>
+                        
+                        <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                            <span className="font-medium text-orange-800">Alertas de Atraso</span>
+                          </div>
+                          <p className="text-sm text-orange-700">
+                            Notificações quando checklists estão atrasados
+                          </p>
+                        </div>
+                        
+                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span className="font-medium text-blue-800">Compartilhamento</span>
+                          </div>
+                          <p className="text-sm text-blue-700">
+                            Relatórios de checklists via WhatsApp
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Configuração WhatsApp */}
+                  <WhatsAppConfig
+                    onConfigSave={async (config) => {
+                      console.log('Salvando configuração WhatsApp:', config)
+                      return true
+                    }}
+                    onTestConnection={async (config) => {
+                      console.log('Testando conexão WhatsApp:', config)
+                      return true
+                    }}
+                  />
+                </div>
               </TabsContent>
             )}
           </Tabs>

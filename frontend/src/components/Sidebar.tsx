@@ -89,7 +89,7 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
       title: 'Operações',
       icon: '🏭',
       items: [
-        { id: 'receitas', label: 'Receitas & Insumos', icon: '🧪', route: '/producao/receitas', requiredModule: 'receitas_insumos' },
+        { id: 'receitas', label: 'Receitas & Insumos', icon: '🧪', route: '/operacoes/receitas', requiredModule: 'receitas_insumos' },
         { id: 'terminal-producao', label: 'Terminal Produção', icon: '🏭', route: '/producao/terminal', requiredModule: 'terminal_producao' },
         { id: 'relatorio-producoes', label: 'Relatório Produções', icon: '📊', route: '/producao/relatorios/producoes', requiredModule: 'relatorio_producoes' },
       ]
@@ -101,7 +101,7 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
       title: 'Reservas',
       icon: '🎫',
       items: [
-        { id: 'recorrencia', label: 'Recorrência Clientes', icon: '👥', route: '/operacoes/recorrencia', requiredModule: 'recorrencia' },
+        { id: 'recorrencia', label: 'Recorrência Clientes', icon: '👥', route: '/reservas/recorrencia', requiredModule: 'recorrencia' },
         { id: 'planejamento', label: 'Planejamento', icon: '🎵', route: '/operacoes/planejamento', requiredModule: 'planejamento' },
       ]
     },
