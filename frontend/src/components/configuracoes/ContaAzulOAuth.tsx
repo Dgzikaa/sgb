@@ -573,6 +573,60 @@ export default function ContaAzulOAuth() {
     }
   };
 
+  const handleTestarMapeamentoCategoria = async () => {
+    if (!selectedBar) {
+      toast({
+        title: "Erro",
+        description: "Nenhum bar selecionado. Selecione um bar primeiro.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setProcessando(true);
+    try {
+      console.log('🧠 Iniciando teste de mapeamento inteligente...');
+      
+      const response = await fetch('/api/contaazul/testar-mapeamento-categoria', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          bar_id: selectedBar.id
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        const stats = data.estatisticas;
+        
+        console.log('📊 Relatório de Mapeamento:', data.relatorio_completo);
+        console.log('🎯 Padrões Identificados:', data.padroes_identificados);
+        console.log('💡 Exemplos:', data.exemplos_mapeamento);
+        
+        toast({
+          title: "🧠 Mapeamento Inteligente Concluído!",
+          description: `${stats.classificadas}/${stats.total_parcelas} parcelas categorizadas (${stats.percentual_classificado}%) com ${stats.confianca_media}% de confiança média. ${stats.categorias_unicas} categorias identificadas!`
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: data.error || "Erro no teste de mapeamento",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Erro no mapeamento:', error);
+      toast({
+        title: "Erro",
+        description: "Erro no teste de mapeamento inteligente",
+        variant: "destructive"
+      });
+    } finally {
+      setProcessando(false);
+    }
+  };
+
 
 
   const getStatusIcon = () => {
@@ -799,6 +853,30 @@ export default function ContaAzulOAuth() {
                   </div>
                   <p className="text-xs text-green-600 mt-1">
                     API Routes - 1º Coleta dados em 500/página → 2º Processa em lotes (ainda pode dar timeout)
+                  </p>
+                </div>
+
+                {/* SISTEMA DE MAPEAMENTO INTELIGENTE */}
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 w-full">
+                  <p className="text-xs text-purple-700 font-medium mb-2">🧠 SISTEMA DE MAPEAMENTO INTELIGENTE</p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button 
+                      onClick={handleTestarMapeamentoCategoria}
+                      disabled={processando}
+                      variant="outline"
+                      size="sm"
+                      className="bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200"
+                    >
+                      {processando ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                      )}
+                      🧠 Testar Mapeamento IA
+                    </Button>
+                  </div>
+                  <p className="text-xs text-purple-600 mt-1">
+                    IA analisa descrições e categoriza automaticamente: "Pix recebido" → VENDAS, "CAESB" → UTILIDADES, etc.
                   </p>
                 </div>
 
