@@ -82,7 +82,9 @@ export default function TesteVisaoCompetenciaPage() {
     try {
       const [ano, mes] = mesAno.split('-')
       const dataInicio = `${ano}-${mes}-01`
-      const dataFim = `${ano}-${mes}-31`
+      // Calcular último dia do mês corretamente
+      const ultimoDia = new Date(parseInt(ano), parseInt(mes), 0).getDate()
+      const dataFim = `${ano}-${mes}-${ultimoDia.toString().padStart(2, '0')}`
 
       // Carregar dados da visão de competência
       const { data: dadosVisao, error } = await supabase
@@ -144,7 +146,9 @@ export default function TesteVisaoCompetenciaPage() {
     try {
       const [ano, mes] = mesAno.split('-')
       const dataInicio = `${ano}-${mes}-01`
-      const dataFim = `${ano}-${mes}-31`
+      // Calcular último dia do mês corretamente
+      const ultimoDia = new Date(parseInt(ano), parseInt(mes), 0).getDate()
+      const dataFim = `${ano}-${mes}-${ultimoDia.toString().padStart(2, '0')}`
 
       const response = await fetch('/api/contaazul/coletar-com-detalhes', {
         method: 'POST',
