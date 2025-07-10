@@ -235,6 +235,103 @@ export default function TesteVisaoCompetenciaPage() {
     }
   }
 
+  const executarColetaJsonCompleta = async () => {
+    if (!selectedBar?.id) return
+
+    setColetando(true)
+    try {
+      console.log('📁 Iniciando coleta JSON completa (3 anos)...')
+      
+      const response = await fetch('/api/contaazul/coletar-json-completo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          bar_id: selectedBar.id,
+          data_inicio: '2024-01-01',
+          data_fim: '2027-01-01'
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`Erro ${response.status}: ${await response.text()}`)
+      }
+
+      const resultado = await response.json()
+      
+      console.log('📁 Resultado da coleta JSON:', resultado)
+      
+      alert(`✅ Coleta JSON concluída!\n\n` +
+            `📊 Receitas: ${resultado.resultado.receitas.total_parcelas} parcelas\n` +
+            `💸 Despesas: ${resultado.resultado.despesas.total_parcelas} parcelas\n` +
+            `📁 Arquivos: ${resultado.resultado.arquivos_gerados.length} salvos\n\n` +
+            `⚙️ Próximo passo: Clique em "Processar JSONs Offline"`)
+
+    } catch (error) {
+      console.error('Erro na coleta JSON:', error)
+      alert(`Erro na coleta JSON: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
+    } finally {
+      setColetando(false)
+    }
+  }
+
+  const processarJsonsOffline = async () => {
+    if (!selectedBar?.id) return
+
+    // Solicitar o storage_path do usuário
+    const storagePath = prompt(
+      '📁 Digite o storage_path dos JSONs coletados:\n\n' +
+      'Formato: contaazul-dados/3/2025-07-10T15-30-00-123Z/\n\n' +
+      '💡 Este path foi mostrado no resultado da coleta JSON anterior.'
+    )
+
+    if (!storagePath) return
+
+    setColetando(true)
+    try {
+      console.log('⚙️ Iniciando processamento offline...')
+      
+      const response = await fetch('/api/contaazul/processar-json-offline', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          bar_id: selectedBar.id,
+          storage_path: storagePath
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`Erro ${response.status}: ${await response.text()}`)
+      }
+
+      const resultado = await response.json()
+      
+      console.log('⚙️ Resultado do processamento:', resultado)
+      
+      alert(`✅ Processamento offline concluído!\n\n` +
+            `📊 Total inserido: ${resultado.resumo.total_geral} registros\n` +
+            `💰 Receitas: ${resultado.resumo.total_receitas}\n` +
+            `💸 Despesas: ${resultado.resumo.total_despesas}\n` +
+            `📁 Arquivos: ${resultado.resumo.arquivos_processados}\n\n` +
+            `🎉 Dados disponíveis na tabela!`)
+
+      // Recarregar dados e stats após o processamento
+      setTimeout(() => {
+        carregarDados()
+        verificarStatsInsercao()
+      }, 2000)
+
+    } catch (error) {
+      console.error('Erro no processamento offline:', error)
+      alert(`Erro no processamento: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
+    } finally {
+      setColetando(false)
+    }
+  }
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -267,8 +364,9 @@ export default function TesteVisaoCompetenciaPage() {
           <ul className="text-sm text-blue-700 space-y-1">
             <li>• <strong>Busca dados:</strong> Consulta a tabela `contaazul_visao_competencia`</li>
             <li>• <strong>Mostra categorias:</strong> Cada transação com sua categoria e centro de custo</li>
-            <li>• <strong>Coleta dados:</strong> Usa a API `/api/contaazul/coletar-com-detalhes`</li>
-            <li>• <strong>Estratégia 2 etapas:</strong> Busca lista básica + detalhes individuais</li>
+            <li>• <strong>Coleta mensal:</strong> API `/api/contaazul/coletar-com-detalhes-otimizado` (1 mês)</li>
+            <li>• <strong>Coleta completa:</strong> API `/api/contaazul/coletar-json-completo` (3 anos → JSONs)</li>
+            <li>• <strong>Processamento offline:</strong> API `/api/contaazul/processar-json-offline` (JSONs → Banco)</li>
           </ul>
         </div>
       </div>
@@ -318,7 +416,7 @@ export default function TesteVisaoCompetenciaPage() {
              disabled={coletando || !selectedBar?.id}
              className="bg-green-500 hover:bg-green-600"
            >
-             {coletando ? '🚀 Coletando...' : '🚀 Coletar Dados'}
+             {coletando ? '🚀 Coletando...' : '🚀 Coletar Dados (Mês)'}
            </Button>
          </div>
          
@@ -331,6 +429,30 @@ export default function TesteVisaoCompetenciaPage() {
              🗄️ Verificar Banco
            </Button>
          </div>
+      </div>
+
+      {/* Nova Seção: Estratégia Offline */}
+      <div className="mb-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
+        <h3 className="font-semibold text-orange-800 mb-3">📁 Estratégia Offline - 3 Anos Completos</h3>
+        <div className="mb-4 text-sm text-orange-700">
+          <p><strong>Vantagem:</strong> Coleta todos os dados de 2024-2027 de uma vez, salva em JSONs e processa offline (sem rate limits).</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Button
+            onClick={executarColetaJsonCompleta}
+            disabled={coletando || !selectedBar?.id}
+            className="bg-orange-500 hover:bg-orange-600"
+          >
+            {coletando ? '📁 Coletando...' : '📁 Coletar JSONs (2024-2027)'}
+          </Button>
+          <Button
+            onClick={processarJsonsOffline}
+            disabled={coletando || !selectedBar?.id}
+            className="bg-indigo-500 hover:bg-indigo-600"
+          >
+            {coletando ? '⚙️ Processando...' : '⚙️ Processar JSONs Offline'}
+          </Button>
+        </div>
       </div>
 
       {/* Resumo */}
