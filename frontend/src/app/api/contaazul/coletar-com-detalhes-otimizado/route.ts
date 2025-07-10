@@ -305,9 +305,9 @@ async function coletarFinanceiroEmLotes(
       
       console.log(`✅ LOTE ${i + 1} concluído em ${tempoLote}ms`);
       
-      // Pausa entre lotes para evitar sobrecarga
+      // Pausa maior entre lotes para evitar rate limit
       if (i < totalLotes - 1) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 2000));
       }
       
     } catch (error) {
@@ -333,12 +333,12 @@ async function processarLoteOtimizado(
   console.log(`📋 Iniciando processamento de ${parcelas.length} parcelas do tipo ${tipo}...`);
   const inicioProcessamento = Date.now();
 
-  // PASSO 1: Buscar detalhes de TODAS as parcelas em paralelo (máx 10 simultâneas)
-  const BATCH_SIZE = 10;
+  // PASSO 1: Buscar detalhes de TODAS as parcelas em paralelo (máx 3 simultâneas para evitar rate limit)
+  const BATCH_SIZE = 3;
   const parcelasDetalhadas: any[] = [];
   const totalBatches = Math.ceil(parcelas.length / BATCH_SIZE);
   
-  console.log(`🔄 Buscando detalhes em ${totalBatches} batches de ${BATCH_SIZE} parcelas...`);
+  console.log(`🔄 Buscando detalhes em ${totalBatches} batches de ${BATCH_SIZE} parcelas (reduzido para evitar rate limit)...`);
   
   for (let i = 0; i < parcelas.length; i += BATCH_SIZE) {
     const batchNum = Math.floor(i / BATCH_SIZE) + 1;
@@ -348,24 +348,43 @@ async function processarLoteOtimizado(
     const inicioBatch = Date.now();
     
     const promisesDetalhes = batch.map(async (parcela, index) => {
-      try {
-        const detalhesUrl = `https://api-v2.contaazul.com/v1/financeiro/eventos-financeiros/parcelas/${parcela.id}`;
-        const inicioReq = Date.now();
-        const response = await fetch(detalhesUrl, { headers });
-        const tempoReq = Date.now() - inicioReq;
-        
-        if (response.ok) {
-          const detalhes = await response.json();
-          console.log(`✅ Parcela ${parcela.id} (${index + 1}/${batch.length}): detalhes obtidos em ${tempoReq}ms`);
-          return { ...parcela, detalhes };
-        } else {
-          console.warn(`⚠️ Parcela ${parcela.id} (${index + 1}/${batch.length}): erro ${response.status} em ${tempoReq}ms`);
+      const MAX_RETRIES = 2;
+      let tentativa = 0;
+      
+      while (tentativa <= MAX_RETRIES) {
+        try {
+          const detalhesUrl = `https://api-v2.contaazul.com/v1/financeiro/eventos-financeiros/parcelas/${parcela.id}`;
+          const inicioReq = Date.now();
+          const response = await fetch(detalhesUrl, { headers });
+          const tempoReq = Date.now() - inicioReq;
+          
+          if (response.ok) {
+            const detalhes = await response.json();
+            console.log(`✅ Parcela ${parcela.id} (${index + 1}/${batch.length}): detalhes obtidos em ${tempoReq}ms${tentativa > 0 ? ` (tentativa ${tentativa + 1})` : ''}`);
+            return { ...parcela, detalhes };
+          } else if (response.status === 429 && tentativa < MAX_RETRIES) {
+            // Rate limit - aguardar e tentar novamente
+            const waitTime = Math.pow(2, tentativa) * 1000; // Backoff exponencial: 1s, 2s, 4s
+            console.warn(`🔄 Parcela ${parcela.id} (${index + 1}/${batch.length}): rate limit, tentativa ${tentativa + 1}/${MAX_RETRIES + 1}, aguardando ${waitTime}ms...`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+            tentativa++;
+            continue;
+          } else {
+            console.warn(`⚠️ Parcela ${parcela.id} (${index + 1}/${batch.length}): erro ${response.status} em ${tempoReq}ms${tentativa > 0 ? ` (após ${tentativa + 1} tentativas)` : ''}`);
+            return { ...parcela, detalhes: null };
+          }
+        } catch (error) {
+          console.error(`❌ Parcela ${parcela.id} (${index + 1}/${batch.length}): exceção na tentativa ${tentativa + 1}`, error);
+          if (tentativa < MAX_RETRIES) {
+            tentativa++;
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            continue;
+          }
           return { ...parcela, detalhes: null };
         }
-      } catch (error) {
-        console.error(`❌ Parcela ${parcela.id} (${index + 1}/${batch.length}): exceção`, error);
-        return { ...parcela, detalhes: null };
       }
+      
+      return { ...parcela, detalhes: null };
     });
 
     const batchResultados = await Promise.all(promisesDetalhes);
@@ -377,8 +396,8 @@ async function processarLoteOtimizado(
     
     console.log(`📊 Batch ${batchNum} concluído em ${tempoBatch}ms: ${sucessos} sucessos, ${erros} erros`);
     
-    // Pequena pausa entre batches
-    await new Promise(resolve => setTimeout(resolve, 200));
+    // Pausa maior entre batches para evitar rate limit
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
   const tempoDetalhes = Date.now() - inicioProcessamento;
