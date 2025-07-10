@@ -1,22 +1,84 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Loader2, CheckCircle, XCircle, Search, Database } from 'lucide-react'
+import { Loader2, CheckCircle, XCircle, Search, Database, Key } from 'lucide-react'
+import { getSupabaseClient } from '@/lib/supabase'
+import { useBar } from '@/contexts/BarContext'
 
 export default function TesteCategoriaEtapas() {
+  const { selectedBar } = useBar()
   const [loading, setLoading] = useState(false)
+  const [loadingToken, setLoadingToken] = useState(false)
   const [resultado, setResultado] = useState<any>(null)
   const [accessToken, setAccessToken] = useState('')
   const [dataInicio, setDataInicio] = useState('2024-01-01')
   const [dataFim, setDataFim] = useState('2024-12-31')
+  const [tokenStatus, setTokenStatus] = useState<'idle' | 'loading' | 'found' | 'not_found'>('idle')
+
+  // Buscar token automaticamente quando o bar for selecionado
+  useEffect(() => {
+    if (selectedBar) {
+      buscarTokenContaAzul()
+    }
+  }, [selectedBar])
+
+  const buscarTokenContaAzul = async () => {
+    if (!selectedBar) return
+
+    setLoadingToken(true)
+    setTokenStatus('loading')
+
+    try {
+      const supabase = await getSupabaseClient()
+      if (!supabase) {
+        console.error('❌ Erro ao conectar com banco')
+        setTokenStatus('not_found')
+        return
+      }
+
+      const { data, error } = await supabase
+        .from('contaazul_config')
+        .select('access_token, expires_at')
+        .eq('bar_id', selectedBar.id)
+        .single()
+
+      if (error) {
+        console.error('❌ Erro ao buscar token:', error)
+        setTokenStatus('not_found')
+        return
+      }
+
+      if (data?.access_token) {
+        // Verificar se o token ainda é válido
+        const isValid = data.expires_at ? new Date(data.expires_at) > new Date() : true
+        
+        if (isValid) {
+          setAccessToken(data.access_token)
+          setTokenStatus('found')
+          console.log('✅ Token ContaAzul encontrado e válido')
+        } else {
+          setTokenStatus('not_found')
+          console.log('⚠️ Token ContaAzul expirado')
+        }
+      } else {
+        setTokenStatus('not_found')
+        console.log('❌ Token ContaAzul não encontrado')
+      }
+    } catch (error) {
+      console.error('❌ Erro ao buscar token:', error)
+      setTokenStatus('not_found')
+    } finally {
+      setLoadingToken(false)
+    }
+  }
 
   const executarTeste = async () => {
     if (!accessToken) {
-      alert('Por favor, insira o token de acesso')
+      alert('Por favor, insira o token de acesso ou conecte o ContaAzul')
       return
     }
 
@@ -58,6 +120,64 @@ export default function TesteCategoriaEtapas() {
         </p>
       </div>
 
+      {/* Status do Token */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Key className="h-5 w-5" />
+            Token de Acesso ContaAzul
+          </CardTitle>
+          <CardDescription>
+            {selectedBar ? `Token para o bar: ${selectedBar.nome}` : 'Selecione um bar primeiro'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className={`w-3 h-3 rounded-full ${
+              tokenStatus === 'found' ? 'bg-green-500' :
+              tokenStatus === 'loading' ? 'bg-yellow-500 animate-pulse' :
+              tokenStatus === 'not_found' ? 'bg-red-500' : 'bg-gray-400'
+            }`}></div>
+            <span className="text-sm">
+              {tokenStatus === 'found' ? '✅ Token encontrado e válido' :
+               tokenStatus === 'loading' ? '🔄 Buscando token...' :
+               tokenStatus === 'not_found' ? '❌ Token não encontrado ou expirado' : 'Aguardando...'}
+            </span>
+            {tokenStatus === 'not_found' && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => window.open('/configuracoes/integracoes/contaazul', '_blank')}
+              >
+                Conectar ContaAzul
+              </Button>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Token de Acesso
+              {loadingToken && (
+                <Loader2 className="inline ml-2 h-4 w-4 animate-spin" />
+              )}
+            </label>
+            <Input
+              type="password"
+              placeholder={tokenStatus === 'found' ? 'Token carregado automaticamente' : 'Cole o Bearer token do ContaAzul aqui'}
+              value={accessToken}
+              onChange={(e) => setAccessToken(e.target.value)}
+              className="font-mono"
+              disabled={loadingToken}
+            />
+            {tokenStatus === 'found' && (
+              <p className="text-xs text-green-600 mt-1">
+                Token carregado automaticamente do banco de dados
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Configuração */}
       <Card className="mb-6">
         <CardHeader>
@@ -70,17 +190,6 @@ export default function TesteCategoriaEtapas() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Token de Acesso</label>
-            <Input
-              type="password"
-              placeholder="Bearer token do ContaAzul"
-              value={accessToken}
-              onChange={(e) => setAccessToken(e.target.value)}
-              className="font-mono"
-            />
-          </div>
-          
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">Data Início</label>
