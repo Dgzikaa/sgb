@@ -26,6 +26,8 @@ interface ReorderableItem {
   tipo: string
   obrigatorio: boolean
   ordem: number
+  secao?: string
+  placeholder?: string
 }
 
 interface MobileItemReorderProps {
