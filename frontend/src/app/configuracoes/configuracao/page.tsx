@@ -42,6 +42,10 @@ export default function ConfiguracaoPage() {
   const [novoUsuario, setNovoUsuario] = useState<any>({})
   const [carregandoUsuarios, setCarregandoUsuarios] = useState(true)
   
+  // Estados para funções
+  const [funcoes, setFuncoes] = useState<any[]>([])
+  const [carregandoFuncoes, setCarregandoFuncoes] = useState(true)
+  
   // Estados para modais
   const [modalEditarUsuario, setModalEditarUsuario] = useState(false)
   const [modalPermissoesUsuario, setModalPermissoesUsuario] = useState(false)
@@ -99,9 +103,43 @@ export default function ConfiguracaoPage() {
   useEffect(() => {
     if (selectedBar?.id) {
       carregarUsuarios()
+      carregarFuncoes()
       carregarStatsImportacao()
     }
   }, [selectedBar?.id])
+
+  // Carregar funções disponíveis
+  const carregarFuncoes = async () => {
+    try {
+      setCarregandoFuncoes(true)
+      console.log('📊 Carregando funções disponíveis...')
+      const response = await fetch('/api/usuarios/funcoes')
+      const data = await response.json()
+      
+      if (data.success) {
+        setFuncoes(data.funcoes)
+        console.log('✅ Funções carregadas:', data.funcoes)
+      } else {
+        console.error('❌ Erro ao buscar funções:', data)
+        // Usar funções padrão em caso de erro
+        setFuncoes([
+          { id: 'funcionario', nome: 'Funcionário', descricao: 'Acesso básico', nivel: 1, cor: 'bg-blue-100 text-blue-800 border-blue-200', icone: '👤' },
+          { id: 'gerente', nome: 'Gerente', descricao: 'Acesso intermediário', nivel: 2, cor: 'bg-yellow-100 text-yellow-800 border-yellow-200', icone: '👨‍💼' },
+          { id: 'admin', nome: 'Administrador', descricao: 'Acesso completo', nivel: 3, cor: 'bg-red-100 text-red-800 border-red-200', icone: '👑' }
+        ])
+      }
+    } catch (error) {
+      console.error('❌ Erro ao carregar funções:', error)
+      // Usar funções padrão em caso de erro
+      setFuncoes([
+        { id: 'funcionario', nome: 'Funcionário', descricao: 'Acesso básico', nivel: 1, cor: 'bg-blue-100 text-blue-800 border-blue-200', icone: '👤' },
+        { id: 'gerente', nome: 'Gerente', descricao: 'Acesso intermediário', nivel: 2, cor: 'bg-yellow-100 text-yellow-800 border-yellow-200', icone: '👨‍💼' },
+        { id: 'admin', nome: 'Administrador', descricao: 'Acesso completo', nivel: 3, cor: 'bg-red-100 text-red-800 border-red-200', icone: '👑' }
+      ])
+    } finally {
+      setCarregandoFuncoes(false)
+    }
+  }
 
   // Carregar usuários do banco
   const carregarUsuarios = async () => {
@@ -257,11 +295,44 @@ export default function ConfiguracaoPage() {
   }
 
   // Funções para usuários
-  const salvarUsuario = () => {
+  const salvarUsuario = async () => {
     if (editandoUsuario) {
-      setUsuarios((prev: any[]) => prev.map(u => u.id === editandoUsuario.id ? editandoUsuario : u))
-      setEditandoUsuario(null)
+      try {
+        console.log('💾 Salvando usuário editado:', editandoUsuario)
+        
+        const response = await fetch(`/api/usuarios/${editandoUsuario.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            bar_id: selectedBar?.id,
+            nome: editandoUsuario.nome,
+            email: editandoUsuario.email,
+            role: editandoUsuario.role,
+            ativo: editandoUsuario.ativo
+          })
+        })
+
+        const data = await response.json()
+        
+        if (data.success) {
+          // Atualizar lista de usuários
+          setUsuarios((prev: any[]) => prev.map(u => 
+            u.id === editandoUsuario.id ? { ...u, ...editandoUsuario } : u
+          ))
+          setEditandoUsuario(null)
+          console.log('✅ Usuário salvo com sucesso!')
+        } else {
+          console.error('❌ Erro ao salvar usuário:', data.error)
+          alert('Erro ao salvar usuário: ' + (data.error || 'Erro desconhecido'))
+        }
+      } catch (error) {
+        console.error('❌ Erro na requisição:', error)
+        alert('Erro na conexão com o servidor')
+      }
     } else if (novoUsuario.nome && novoUsuario.email && novoUsuario.role) {
+      // Criação de novo usuário (mantém lógica atual)
       const id = Math.max(...usuarios.map(u => u.id)) + 1
       setUsuarios((prev: any[]) => [...prev, { 
         id, 
@@ -384,6 +455,22 @@ export default function ConfiguracaoPage() {
     }
   }
 
+  // Funções auxiliares para roles
+  const getRoleColor = (role: string) => {
+    const funcao = funcoes.find(f => f.id === role)
+    return funcao ? funcao.cor : 'bg-gray-100 text-gray-800 border-gray-200'
+  }
+
+  const getRoleLabel = (role: string) => {
+    const funcao = funcoes.find(f => f.id === role)
+    return funcao ? funcao.nome : role
+  }
+  
+  const getRoleIcon = (role: string) => {
+    const funcao = funcoes.find(f => f.id === role)
+    return funcao ? funcao.icone : '👤'
+  }
+
   // Função para agrupar módulos por categoria
   const agruparModulosPorCategoria = () => {
     const dashboards = modulosDisponiveis.filter(m => m.id.startsWith('dashboard_'))
@@ -477,14 +564,14 @@ export default function ConfiguracaoPage() {
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
                             <span className="text-white text-lg font-bold">
-                              {usuario.role === 'admin' ? '👑' : usuario.role === 'gerente' ? '👨‍💼' : '👤'}
+                              {getRoleIcon(usuario.role)}
                             </span>
                           </div>
                           <div>
                             <h3 className="font-bold text-black text-lg">{usuario.nome}</h3>
                             <p className="text-gray-600 font-medium">{usuario.email}</p>
                             <Badge variant={usuario.role === 'admin' ? 'default' : 'secondary'} className="mt-1">
-                              {usuario.role === 'admin' ? 'Administrador' : usuario.role === 'gerente' ? 'Gerente' : 'Funcionário'}
+                              {getRoleLabel(usuario.role)}
                             </Badge>
                           </div>
                         </div>
@@ -958,14 +1045,17 @@ export default function ConfiguracaoPage() {
                       <Select 
                         value={editandoUsuario.role} 
                         onValueChange={(value) => setEditandoUsuario((prev: any) => prev ? { ...prev, role: value } : null)}
+                        disabled={carregandoFuncoes}
                       >
                         <SelectTrigger className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 text-gray-900">
-                          <SelectValue />
+                          <SelectValue placeholder={carregandoFuncoes ? "Carregando funções..." : "Selecione uma função"} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="admin">👑 Administrador</SelectItem>
-                          <SelectItem value="gerente">👨‍💼 Gerente</SelectItem>
-                          <SelectItem value="funcionario">👤 Funcionário</SelectItem>
+                          {funcoes.map((funcao) => (
+                            <SelectItem key={funcao.id} value={funcao.id}>
+                              {funcao.icone} {funcao.nome}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -1007,8 +1097,8 @@ export default function ConfiguracaoPage() {
                     </div>
                     <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
                       <div className="text-center">
-                        <p className="text-lg font-bold text-purple-800">{editandoUsuario.role === 'admin' ? '👑' : editandoUsuario.role === 'gerente' ? '👨‍💼' : '👤'}</p>
-                        <p className="text-sm text-purple-600 font-medium">{editandoUsuario.role === 'admin' ? 'Admin' : editandoUsuario.role === 'gerente' ? 'Gerente' : 'Funcionário'}</p>
+                        <p className="text-lg font-bold text-purple-800">{getRoleIcon(editandoUsuario.role)}</p>
+                                                  <p className="text-sm text-purple-600 font-medium">{getRoleLabel(editandoUsuario.role)}</p>
                       </div>
                     </div>
                   </div>
@@ -1039,8 +1129,8 @@ export default function ConfiguracaoPage() {
                 Cancelar
               </Button>
               <Button
-                onClick={() => {
-                  // Salvar usuário
+                onClick={async () => {
+                  await salvarUsuario()
                   setModalEditarUsuario(false)
                 }}
                 className="bg-gradient-to-r from-orange-500 to-yellow-600 hover:from-orange-600 hover:to-yellow-700 text-white shadow-lg transition-all duration-300 hover:shadow-xl flex items-center gap-2 ml-auto"
@@ -1079,7 +1169,7 @@ export default function ConfiguracaoPage() {
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-full bg-gradient-to-r from-orange-500 to-yellow-600 flex items-center justify-center shadow-lg">
                       <span className="text-white text-2xl">
-                        {usuarioPermissoes.role === 'admin' ? '👑' : usuarioPermissoes.role === 'gerente' ? '👨‍💼' : '👤'}
+                        {getRoleIcon(usuarioPermissoes.role)}
                       </span>
                     </div>
                     <div className="flex-1">
@@ -1087,7 +1177,7 @@ export default function ConfiguracaoPage() {
                       <p className="text-gray-600 font-medium">{usuarioPermissoes.email}</p>
                       <div className="flex gap-2 mt-2">
                         <Badge variant={usuarioPermissoes.role === 'admin' ? 'default' : 'secondary'}>
-                          {usuarioPermissoes.role === 'admin' ? 'Administrador' : usuarioPermissoes.role === 'gerente' ? 'Gerente' : 'Funcionário'}
+                          {getRoleLabel(usuarioPermissoes.role)}
                         </Badge>
                         <Badge variant={usuarioPermissoes.ativo ? 'default' : 'secondary'} className={usuarioPermissoes.ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
                           {usuarioPermissoes.ativo ? 'Ativo' : 'Inativo'}

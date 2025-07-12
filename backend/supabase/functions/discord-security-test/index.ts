@@ -21,11 +21,12 @@ serve(async (req) => {
     console.log('🧪 Iniciando teste do webhook Discord de segurança...')
 
     // Buscar webhook da configuração
-    const { data: webhookConfig, error: configError } = await supabaseClient
-      .from('webhook_configs')
-      .select('configuracoes')
-      .eq('bar_id', 'ordinario')
-      .single()
+          const { data: webhookConfig, error: configError } = await supabaseClient
+        .from('api_credentials')
+        .select('configuracoes')
+        .eq('bar_id', 3)
+        .eq('sistema', 'webhook')
+        .single()
 
     if (configError || !webhookConfig?.configuracoes?.sistema) {
       console.error('❌ Webhook não configurado:', configError)

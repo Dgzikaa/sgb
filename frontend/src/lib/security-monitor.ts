@@ -31,7 +31,7 @@ class SecurityMonitor {
   private webhookUrl?: string;
 
   private constructor() {
-    // Webhook será carregado dinamicamente da tabela webhook_configs
+    // Webhook será carregado dinamicamente da tabela api_credentials
     this.loadWebhookConfig();
   }
 
@@ -49,9 +49,10 @@ class SecurityMonitor {
         const supabase = await getAdminClient();
         
         const { data, error } = await supabase
-          .from('webhook_configs')
+          .from('api_credentials')
           .select('configuracoes')
-          .eq('bar_id', 'ordinario')
+          .eq('bar_id', 3)
+          .eq('sistema', 'webhook')
           .single();
 
         if (!error && data?.configuracoes?.sistema) {

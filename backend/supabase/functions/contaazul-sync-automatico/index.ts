@@ -11,11 +11,12 @@ const CONTAAZUL_TOKEN_URL = 'https://auth.contaazul.com/oauth2/token'
 
 // Função para buscar webhook da tabela
 async function getWebhookUrl(barId: string, webhookType: string = 'contaazul', supabaseClient: any) {
-  const { data: webhookConfig, error } = await supabaseClient
-    .from('webhook_configs')
-    .select('configuracoes')
-    .eq('bar_id', barId)
-    .single()
+      const { data: webhookConfig, error } = await supabaseClient
+      .from('api_credentials')
+      .select('configuracoes')
+      .eq('bar_id', barId)
+      .eq('sistema', 'webhook')
+      .single()
 
   if (error || !webhookConfig) {
     console.warn(`⚠️ Webhook config não encontrada para bar ${barId}, usando fallback`)

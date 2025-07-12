@@ -25,9 +25,10 @@ export async function GET(request: NextRequest) {
 
     // Buscar configurações existentes
     const { data: configs, error } = await supabase
-      .from('webhook_configs')
+      .from('api_credentials')
       .select('*')
       .eq('bar_id', barId)
+      .eq('sistema', 'webhook')
       .single()
 
     console.log('📊 Resultado da query:', { configs, error })
@@ -103,12 +104,14 @@ export async function POST(request: NextRequest) {
 
     // Salvar configurações no banco
     const { data, error } = await supabase
-      .from('webhook_configs')
+      .from('api_credentials')
       .upsert({
         bar_id,
-        configuracoes
+        sistema: 'webhook',
+        configuracoes,
+        ativo: true
       }, {
-        onConflict: 'bar_id'
+        onConflict: 'bar_id,sistema'
       })
 
     if (error) {

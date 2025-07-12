@@ -32,9 +32,10 @@ export async function POST(request: NextRequest) {
 
     // Buscar configurações de webhook do banco
     const { data: configData, error: configError } = await supabase
-      .from('webhook_configs')
+      .from('api_credentials')
       .select('configuracoes')
       .eq('bar_id', body.bar_id)
+      .eq('sistema', 'webhook')
       .single()
 
     console.log('📊 Config do banco:', { configData, configError })

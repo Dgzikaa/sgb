@@ -197,7 +197,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { data: config } = await supabase
-      .from('meta_configuracoes')
+      .from('api_credentials')
       .select('ultima_coleta, proxima_coleta, frequencia_coleta_horas')
       .eq('bar_id', 3)
       .eq('ativo', true)

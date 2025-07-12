@@ -18,9 +18,10 @@ export async function GET(request: NextRequest) {
 
     // Buscar configuração da Meta
     const { data: config, error: configError } = await supabase
-      .from('meta_configuracoes')
+      .from('api_credentials')
       .select('*')
       .eq('bar_id', 3)
+      .eq('sistema', 'meta')
       .single()
 
     if (configError || !config) {
@@ -31,8 +32,9 @@ export async function GET(request: NextRequest) {
     }
 
     const accessToken = config.access_token
-    const instagramId = config.instagram_account_id
-    const pageId = config.page_id
+    const configs = config.configuracoes || {}
+    const instagramId = configs.instagram_account_id
+    const pageId = configs.page_id
 
     console.log('📷 Testando API 1: Dados básicos do Instagram...')
     

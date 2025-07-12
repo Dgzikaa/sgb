@@ -30,9 +30,10 @@ async function getWebhookUrl(barId: string, webhookType: string = 'sistema') {
   )
 
   const { data: webhookConfig, error } = await supabaseClient
-    .from('webhook_configs')
+    .from('api_credentials')
     .select('configuracoes')
     .eq('bar_id', barId)
+    .eq('sistema', 'webhook')
     .single()
 
   if (error || !webhookConfig) {

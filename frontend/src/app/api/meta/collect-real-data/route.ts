@@ -18,9 +18,10 @@ export async function GET(request: NextRequest) {
 
     // Buscar configuração da Meta
     const { data: config, error: configError } = await supabase
-      .from('meta_configuracoes')
+      .from('api_credentials')
       .select('*')
       .eq('bar_id', 3)
+      .eq('sistema', 'meta')
       .eq('ativo', true)
       .single()
 
@@ -31,9 +32,10 @@ export async function GET(request: NextRequest) {
       }, { status: 404 })
     }
 
+    const configs = config.configuracoes || {}
     const accessToken = config.access_token
-    const pageId = config.page_id
-    const instagramId = config.instagram_account_id
+    const pageId = configs.page_id
+    const instagramId = configs.instagram_account_id
 
     console.log('📘 Buscando dados reais do Facebook...')
     

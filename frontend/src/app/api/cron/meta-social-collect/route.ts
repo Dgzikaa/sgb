@@ -29,10 +29,10 @@ export async function POST(request: NextRequest) {
 
     // Buscar todas as configurações ativas
     const { data: configuracoes, error: configError } = await supabase
-      .from('meta_configuracoes')
-      .select('bar_id, proxima_coleta, frequencia_coleta_horas, ultima_coleta')
+      .from('api_credentials')
+      .select('bar_id, configuracoes')
       .eq('ativo', true)
-      .eq('coleta_automatica', true)
+      .eq('sistema', 'meta')
 
     if (configError) {
       console.error(`❌ [${executionId}] Erro ao buscar configurações:`, configError)
@@ -124,12 +124,16 @@ export async function POST(request: NextRequest) {
           proximaColetaFutura.setHours(proximaColetaFutura.getHours() + config.frequencia_coleta_horas)
 
           await supabase
-            .from('meta_configuracoes')
+            .from('api_credentials')
             .update({
-              ultima_coleta: now.toISOString(),
-              proxima_coleta: proximaColetaFutura.toISOString()
+              configuracoes: {
+                ...config.configuracoes,
+                ultima_coleta: now.toISOString(),
+                proxima_coleta: proximaColetaFutura.toISOString()
+              }
             })
             .eq('bar_id', barId)
+            .eq('sistema', 'meta')
 
           resultDetail.status = 'success'
           resultDetail.collections = ['facebook_metrics', 'instagram_metrics', 'posts', 'consolidated']
@@ -198,17 +202,14 @@ export async function GET(request: NextRequest) {
 
     // Buscar configurações com próximas coletas
     const { data: configuracoes, error } = await supabase
-      .from('meta_configuracoes')
+      .from('api_credentials')
       .select(`
         bar_id,
         ativo,
-        coleta_automatica,
-        frequencia_coleta_horas,
-        ultima_coleta,
-        proxima_coleta
+        configuracoes
       `)
       .eq('ativo', true)
-      .order('proxima_coleta')
+      .eq('sistema', 'meta')
 
     if (error) {
       console.error('❌ Erro ao buscar configurações:', error)

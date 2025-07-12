@@ -32,10 +32,25 @@ export async function PUT(
       )
     }
 
+    // Debug das variáveis de ambiente
+    console.log('🔍 Verificando variáveis de ambiente...')
+    console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Configurada' : 'Não configurada')
+    console.log('SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Configurada' : 'Não configurada')
+    console.log('SERVICE_ROLE_KEY:', process.env.SERVICE_ROLE_KEY ? 'Configurada' : 'Não configurada')
+
     // Obter cliente administrativo
     console.log('🔧 Obtendo cliente administrativo...')
-    const adminClient = await getAdminClient()
-    console.log('✅ Cliente administrativo obtido')
+    let adminClient
+    try {
+      adminClient = await getAdminClient()
+      console.log('✅ Cliente administrativo obtido')
+    } catch (adminError) {
+      console.error('❌ Erro ao obter cliente administrativo:', adminError)
+      return NextResponse.json(
+        { success: false, error: 'Erro de configuração do servidor - verifique as variáveis de ambiente' },
+        { status: 500 }
+      )
+    }
 
     // Atualizar usuário na tabela usuarios_bar
     console.log('🔄 Atualizando usuário na tabela usuarios_bar...')

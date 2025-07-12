@@ -11,6 +11,8 @@ interface MetaConfig {
   facebook_page_id?: string
   instagram_account_id?: string
   api_version: string
+  page_id?: string
+  business_id?: string
 }
 
 interface RateLimitInfo {
@@ -171,9 +173,10 @@ export class MetaSocialService {
       console.log('🔧 Inicializando configuração Meta para bar:', this.barId)
 
       const { data, error } = await this.supabase
-        .from('meta_configuracoes')
+        .from('api_credentials')
         .select('*')
         .eq('bar_id', this.barId)
+        .eq('sistema', 'meta')
         .eq('ativo', true)
         .single()
 
@@ -182,7 +185,19 @@ export class MetaSocialService {
         return false
       }
 
-      this.config = data
+      // Combinar dados básicos com configurações unificadas
+      const configs = data.configuracoes || {}
+      this.config = {
+        access_token: data.access_token,
+        app_id: data.client_id,
+        app_secret: data.client_secret,
+        api_version: configs.api_version || 'v18.0',
+        facebook_page_id: configs.page_id,
+        instagram_account_id: configs.instagram_account_id,
+        page_id: configs.page_id,
+        business_id: configs.configuracoes_adicionais?.business_id || configs.business_id
+      }
+
       console.log('✅ Configuração Meta carregada')
       return true
     } catch (error) {
@@ -216,9 +231,10 @@ export class MetaSocialService {
         
         // Atualizar timestamp de último teste
         await this.supabase
-          .from('meta_configuracoes')
-          .update({ last_tested_at: new Date().toISOString() })
+          .from('api_credentials')
+          .update({ atualizado_em: new Date().toISOString() })
           .eq('bar_id', this.barId)
+          .eq('sistema', 'meta')
 
         return true
       } else {
