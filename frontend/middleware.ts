@@ -26,8 +26,6 @@ const ROUTE_PERMISSIONS: Record<string, { modules?: string[], roles?: string[], 
   // Checklists
   '/funcionario/checklists': { modules: ['checklists'] },
   '/checklists/abertura': { modules: ['checklists'] },
-  '/admin/checklists': { modules: ['checklists_admin'], roles: ['admin'] },
-  '/admin/templates': { modules: ['operacoes'], roles: ['admin'] },
   '/relatorios/checklists': { modules: ['checklists'], roles: ['admin'] },
   
   // Operações
@@ -75,23 +73,14 @@ const ROUTE_PERMISSIONS: Record<string, { modules?: string[], roles?: string[], 
   '/relatorios/dados/relatorio-produtos': { modules: ['relatorio_produtos'] },
   '/relatorios/financeiro-competencia': { modules: ['relatorio_produtos'] },
   
-  // Admin
-  '/admin': { roles: ['admin'] },
-  '/admin/atribuicoes': { roles: ['admin'] },
-  '/admin/contahub-automatico': { modules: ['relatorio_produtos'], roles: ['admin'] },
-  '/admin/debug-inserção-contaazul': { roles: ['admin'] },
-  '/admin/desempenho': { modules: ['dashboard_diario'], roles: ['admin'] },
-  '/admin/fix-contaazul': { roles: ['admin'] },
-  '/admin/meta-configuracao': { roles: ['admin'] },
-  '/admin/metricas-sociais': { roles: ['admin'] },
-  '/admin/relatorios': { roles: ['admin'] },
-  '/admin/test-discord-checklist': { roles: ['admin'] },
-  '/admin/teste-categoria-2etapas': { roles: ['admin'] },
-  '/admin/whatsapp-demo': { roles: ['admin'] },
-  
   // Configurações
   '/configuracoes': { modules: ['configuracoes'] },
   '/configuracoes/configuracao': { modules: ['configuracoes'] },
+  '/configuracoes/checklists': { modules: ['checklists_admin'], roles: ['admin'] },
+  '/configuracoes/templates': { modules: ['operacoes'], roles: ['admin'] },
+  '/configuracoes/contahub-automatico': { modules: ['relatorio_produtos'], roles: ['admin'] },
+  '/configuracoes/desempenho': { modules: ['dashboard_diario'], roles: ['admin'] },
+  '/configuracoes/metas': { modules: ['configuracoes'], roles: ['admin'] },
   '/configuracoes/discord': { modules: ['configuracoes'] },
   '/configuracoes/integracoes': { modules: ['configuracoes'] },
   '/configuracoes/whatsapp': { modules: ['configuracoes'] },

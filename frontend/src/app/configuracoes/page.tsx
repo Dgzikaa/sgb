@@ -327,7 +327,7 @@ function ConfiguracoesContent() {
                     Gerencie todas as suas metas financeiras, operacionais e de performance de forma organizada
                   </p>
                   <Button 
-                    onClick={() => window.location.href = '/paginas/configuracoes/metas'}
+                    onClick={() => window.location.href = '/configuracoes/metas'}
                     className="bg-green-600 hover:bg-green-700 text-white"
                   >
                     🎯 Acessar Metas Completas

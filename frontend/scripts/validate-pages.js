@@ -11,7 +11,7 @@ const srcPath = path.join(__dirname, '..', 'src', 'app');
 const adminPath = path.join(srcPath, 'admin');
 if (fs.existsSync(adminPath)) {
   console.error('❌ ERRO: Pasta /admin/ ainda existe! Deve ser removida.');
-  console.error('   Páginas admin devem estar em /paginas/configuracoes/');
+  console.error('   Páginas admin devem estar em /configuracoes/');
   process.exit(1);
 }
 
@@ -23,11 +23,11 @@ if (fs.existsSync(apiAdminPath)) {
   process.exit(1);
 }
 
-// Verificar se pasta paginas existe
+// Verificar se pasta paginas ainda existe (não deve mais existir)
 const paginasPath = path.join(srcPath, 'paginas');
-if (!fs.existsSync(paginasPath)) {
-  console.error('❌ ERRO: Pasta /paginas/ não existe!');
-  console.error('   Todas as páginas devem estar em /paginas/[categoria]/');
+if (fs.existsSync(paginasPath)) {
+  console.error('❌ ERRO: Pasta /paginas/ ainda existe!');
+  console.error('   Estrutura foi simplificada - páginas devem estar na raiz.');
   process.exit(1);
 }
 
@@ -39,20 +39,21 @@ if (!fs.existsSync(apiPath)) {
   process.exit(1);
 }
 
-// Verificar estrutura de páginas
-const paginasCategories = ['configuracoes', 'relatorios', 'operacoes', 'funcionario', 'dashboard', 'visao-geral'];
-let paginasFound = 0;
+// Verificar estrutura de páginas principais na raiz
+const mainPages = ['home', 'login', 'configuracoes', 'relatorios', 'operacoes', 'funcionario', 'dashboard-financeiro', 'visao-geral'];
+let pagesFound = 0;
 
-paginasCategories.forEach(category => {
-  const categoryPath = path.join(paginasPath, category);
-  if (fs.existsSync(categoryPath)) {
-    paginasFound++;
-    console.log(`✅ Encontrada categoria: /paginas/${category}/`);
+mainPages.forEach(page => {
+  const pagePath = path.join(srcPath, page);
+  if (fs.existsSync(pagePath)) {
+    pagesFound++;
+    console.log(`✅ Encontrada página: /${page}/`);
   }
 });
 
-if (paginasFound === 0) {
-  console.error('❌ ERRO: Nenhuma categoria encontrada em /paginas/');
+if (pagesFound < 6) {
+  console.error('❌ ERRO: Páginas principais não encontradas na raiz');
+  console.error('   Estrutura esperada: /home/, /login/, /configuracoes/, etc.');
   process.exit(1);
 }
 
@@ -74,7 +75,7 @@ if (apisFound === 0) {
 }
 
 console.log(`✅ Validação concluída com sucesso!`);
-console.log(`   - ${paginasFound} categorias de páginas encontradas`);
+console.log(`   - ${pagesFound} páginas principais encontradas na raiz`);
 console.log(`   - ${apisFound} APIs essenciais encontradas`);
-console.log(`   - Estrutura admin antiga removida corretamente`);
+console.log(`   - Estrutura simplificada implementada corretamente`);
 console.log(''); 
