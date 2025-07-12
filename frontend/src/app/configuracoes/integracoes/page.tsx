@@ -14,7 +14,6 @@ import { usePageTitle } from '@/contexts/PageTitleContext'
 import { 
   ArrowLeft, 
   Save, 
-  Activity, 
   Shield, 
   CheckCircle, 
   MessageSquare, 
@@ -358,6 +357,12 @@ export default function IntegracoesPage() {
                     <Label htmlFor="webhook-sistema" className="font-medium">
                       Webhook Sistema & Segurança
                     </Label>
+                    <div className="flex items-center space-x-1 ml-2">
+                      <div className={`w-2 h-2 rounded-full ${webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                      <span className={`text-xs ${webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
+                        {webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'Conectado' : 'Não configurado'}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <Input
@@ -392,6 +397,12 @@ export default function IntegracoesPage() {
                     <Label htmlFor="webhook-contaazul" className="font-medium">
                       Webhook ContaAzul
                     </Label>
+                    <div className="flex items-center space-x-1 ml-2">
+                      <div className={`w-2 h-2 rounded-full ${webhookConfigs.contaazul && webhookConfigs.contaazul.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                      <span className={`text-xs ${webhookConfigs.contaazul && webhookConfigs.contaazul.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
+                        {webhookConfigs.contaazul && webhookConfigs.contaazul.trim() !== '' ? 'Conectado' : 'Não configurado'}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <Input
@@ -426,6 +437,12 @@ export default function IntegracoesPage() {
                     <Label htmlFor="webhook-meta" className="font-medium">
                       Webhook Meta & Social
                     </Label>
+                    <div className="flex items-center space-x-1 ml-2">
+                      <div className={`w-2 h-2 rounded-full ${webhookConfigs.meta && webhookConfigs.meta.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                      <span className={`text-xs ${webhookConfigs.meta && webhookConfigs.meta.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
+                        {webhookConfigs.meta && webhookConfigs.meta.trim() !== '' ? 'Conectado' : 'Não configurado'}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <Input
@@ -460,6 +477,12 @@ export default function IntegracoesPage() {
                     <Label htmlFor="webhook-checklists" className="font-medium">
                       Webhook Checklists & Operações
                     </Label>
+                    <div className="flex items-center space-x-1 ml-2">
+                      <div className={`w-2 h-2 rounded-full ${webhookConfigs.checklists && webhookConfigs.checklists.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                      <span className={`text-xs ${webhookConfigs.checklists && webhookConfigs.checklists.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
+                        {webhookConfigs.checklists && webhookConfigs.checklists.trim() !== '' ? 'Conectado' : 'Não configurado'}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <Input
@@ -495,6 +518,12 @@ export default function IntegracoesPage() {
                       Webhook ContaHub
                     </Label>
                     <Badge variant="secondary" className="text-xs">Em breve</Badge>
+                    <div className="flex items-center space-x-1 ml-2">
+                      <div className={`w-2 h-2 rounded-full ${webhookConfigs.contahub && webhookConfigs.contahub.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                      <span className={`text-xs ${webhookConfigs.contahub && webhookConfigs.contahub.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
+                        {webhookConfigs.contahub && webhookConfigs.contahub.trim() !== '' ? 'Conectado' : 'Não configurado'}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <Input
@@ -528,6 +557,12 @@ export default function IntegracoesPage() {
                     <Label htmlFor="webhook-vendas" className="font-medium">
                       Webhook Vendas & Receitas
                     </Label>
+                    <div className="flex items-center space-x-1 ml-2">
+                      <div className={`w-2 h-2 rounded-full ${webhookConfigs.vendas && webhookConfigs.vendas.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                      <span className={`text-xs ${webhookConfigs.vendas && webhookConfigs.vendas.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
+                        {webhookConfigs.vendas && webhookConfigs.vendas.trim() !== '' ? 'Conectado' : 'Não configurado'}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <Input
@@ -562,6 +597,12 @@ export default function IntegracoesPage() {
                     <Label htmlFor="webhook-reservas" className="font-medium">
                       Webhook Reservas & Eventos
                     </Label>
+                    <div className="flex items-center space-x-1 ml-2">
+                      <div className={`w-2 h-2 rounded-full ${webhookConfigs.reservas && webhookConfigs.reservas.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                      <span className={`text-xs ${webhookConfigs.reservas && webhookConfigs.reservas.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
+                        {webhookConfigs.reservas && webhookConfigs.reservas.trim() !== '' ? 'Conectado' : 'Não configurado'}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <Input
@@ -585,34 +626,6 @@ export default function IntegracoesPage() {
                   <p className="text-xs text-gray-500">
                     Novas reservas, cancelamentos, eventos especiais, occupancy rate
                   </p>
-                </div>
-
-                {/* Status dos Webhooks */}
-                <div className="border-t pt-6">
-                  <h4 className="font-semibold mb-4 flex items-center text-gray-900 dark:text-gray-100">
-                    <Activity className="w-4 h-4 mr-2" />
-                    Status dos Webhooks
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                    {Object.entries(webhookConfigs).map(([type, url]) => (
-                      <div key={type} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                        <span className="capitalize font-medium text-gray-800">{type}:</span>
-                        <div className="flex items-center space-x-2">
-                          {url && url.trim() !== '' ? (
-                            <>
-                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                              <span className="text-green-600 font-medium">Configurado</span>
-                            </>
-                          ) : (
-                            <>
-                              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                              <span className="text-gray-500">Não configurado</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
                 </div>
 
                 {/* Botão de Salvar */}

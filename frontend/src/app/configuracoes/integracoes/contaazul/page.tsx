@@ -121,7 +121,7 @@ export default function ContaAzulPage() {
     setStatus('connecting')
 
     try {
-      const response = await fetch('/api/contaazul/oauth', {
+      const response = await fetch('/api/contaazul/auth', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -157,7 +157,7 @@ export default function ContaAzulPage() {
 
     setLoading(true)
     try {
-      const response = await fetch('/api/contaazul/oauth', {
+      const response = await fetch('/api/contaazul/auth', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -233,148 +233,144 @@ export default function ContaAzulPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto p-6 max-w-4xl">
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              onClick={() => router.push('/configuracoes/integracoes')}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Voltar
-            </Button>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                <span className="text-white text-sm font-bold">CA</span>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">ContaAzul</h1>
-                <p className="text-gray-600">Conecte seu ContaAzul para sincronizar dados financeiros</p>
-              </div>
-            </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          onClick={() => router.push('/configuracoes/integracoes')}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Voltar
+        </Button>
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+            <span className="text-white text-sm font-bold">CA</span>
           </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">ContaAzul</h1>
+            <p className="text-gray-600">Conecte seu ContaAzul para sincronizar dados financeiros</p>
+          </div>
+        </div>
+      </div>
 
-          {/* Status da Conexão */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Link2 className="w-5 h-5" />
-                Status da Integração
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${
-                    status === 'connected' ? 'bg-green-500' :
-                    status === 'connecting' ? 'bg-yellow-500 animate-pulse' :
-                    status === 'error' ? 'bg-red-500' : 'bg-gray-400'
-                  }`}></div>
-                  <div>
-                    <div className="font-medium">
-                      {status === 'connected' ? 'Conectado' :
-                       status === 'connecting' ? 'Conectando...' :
-                       status === 'error' ? 'Erro na conexão' : 'Não conectado'}
-                    </div>
-                    {config.empresa_id && (
-                      <div className="text-sm text-gray-500">Empresa: {config.empresa_id}</div>
-                    )}
-                    {config.ultima_sync && (
-                      <div className="text-sm text-gray-500">
-                        Última sync: {new Date(config.ultima_sync).toLocaleString('pt-BR')}
-                      </div>
-                    )}
-                  </div>
+      {/* Status da Conexão */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Link2 className="w-5 h-5" />
+            Status da Integração
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className={`w-3 h-3 rounded-full ${
+                status === 'connected' ? 'bg-green-500' :
+                status === 'connecting' ? 'bg-yellow-500 animate-pulse' :
+                status === 'error' ? 'bg-red-500' : 'bg-gray-400'
+              }`}></div>
+              <div>
+                <div className="font-medium">
+                  {status === 'connected' ? 'Conectado' :
+                   status === 'connecting' ? 'Conectando...' :
+                   status === 'error' ? 'Erro na conexão' : 'Não conectado'}
                 </div>
-                
-                <div className="flex items-center gap-2">
-                  {config.conectado ? (
-                    <>
-                      <Button
-                        onClick={sincronizarDados}
-                        disabled={loading}
-                        variant="outline"
-                        size="sm"
-                      >
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        Sincronizar
-                      </Button>
-                      <Button
-                        onClick={desconectar}
-                        disabled={loading}
-                        variant="destructive"
-                        size="sm"
-                      >
-                        Desconectar
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      onClick={conectarContaAzul}
-                      disabled={loading || !selectedBar}
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      {loading ? (
-                        <>
-                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                          Conectando...
-                        </>
-                      ) : (
-                        <>
-                          <Link2 className="w-4 h-4 mr-2" />
-                          Conectar ContaAzul
-                        </>
-                      )}
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Informações da Integração */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Como funciona</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-semibold text-blue-800 mb-2">🔗 Conexão Segura</h4>
-                    <p className="text-sm text-blue-700">
-                      Conecta-se ao ContaAzul usando OAuth2 para máxima segurança.
-                    </p>
-                  </div>
-                  <div className="p-4 bg-green-50 rounded-lg">
-                    <h4 className="font-semibold text-green-800 mb-2">📊 Sincronização</h4>
-                    <p className="text-sm text-green-700">
-                      Sincroniza receitas, despesas e categorias automaticamente.
-                    </p>
-                  </div>
-                </div>
-                
-                {!config.conectado && (
-                  <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                    <div className="flex items-start gap-3">
-                      <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
-                      <div>
-                        <h4 className="font-semibold text-yellow-800">Primeiro acesso</h4>
-                        <p className="text-sm text-yellow-700 mt-1">
-                          Clique em "Conectar ContaAzul" para autorizar o acesso e começar a sincronizar seus dados.
-                        </p>
-                      </div>
-                    </div>
+                {config.empresa_id && (
+                  <div className="text-sm text-gray-500">Empresa: {config.empresa_id}</div>
+                )}
+                {config.ultima_sync && (
+                  <div className="text-sm text-gray-500">
+                    Última sync: {new Date(config.ultima_sync).toLocaleString('pt-BR')}
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              {config.conectado ? (
+                <>
+                  <Button
+                    onClick={sincronizarDados}
+                    disabled={loading}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Sincronizar
+                  </Button>
+                  <Button
+                    onClick={desconectar}
+                    disabled={loading}
+                    variant="destructive"
+                    size="sm"
+                  >
+                    Desconectar
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={conectarContaAzul}
+                  disabled={loading || !selectedBar}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {loading ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      Conectando...
+                    </>
+                  ) : (
+                    <>
+                      <Link2 className="w-4 h-4 mr-2" />
+                      Conectar ContaAzul
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Informações da Integração */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Como funciona</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <h4 className="font-semibold text-blue-800 mb-2">🔗 Conexão Segura</h4>
+                <p className="text-sm text-blue-700">
+                  Conecta-se ao ContaAzul usando OAuth2 para máxima segurança.
+                </p>
+              </div>
+              <div className="p-4 bg-green-50 rounded-lg">
+                <h4 className="font-semibold text-green-800 mb-2">📊 Sincronização</h4>
+                <p className="text-sm text-green-700">
+                  Sincroniza receitas, despesas e categorias automaticamente.
+                </p>
+              </div>
+            </div>
+            
+            {!config.conectado && (
+              <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-yellow-800">Primeiro acesso</h4>
+                    <p className="text-sm text-yellow-700 mt-1">
+                      Clique em "Conectar ContaAzul" para autorizar o acesso e começar a sincronizar seus dados.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 } 

@@ -137,6 +137,17 @@ function ConfiguracoesContent() {
   })
   const [dialogAberto, setDialogAberto] = useState(false)
   const [senhaVisivel, setSenhaVisivel] = useState(false)
+  
+  // Estados para funções/roles dinâmicas
+  const [funcoes, setFuncoes] = useState<Array<{
+    id: string
+    nome: string
+    descricao: string
+    nivel: number
+    cor: string
+    icone: string
+  }>>([])
+  const [funcoesLoading, setFuncoesLoading] = useState(false)
 
   // Módulos disponíveis para permissões
   const modulosDisponiveis = [
@@ -195,6 +206,7 @@ function ConfiguracoesContent() {
   useEffect(() => {
     if (activeTab === 'usuarios') {
       buscarUsuarios()
+      buscarFuncoes()
     }
   }, [activeTab, selectedBar])
 
@@ -281,6 +293,38 @@ function ConfiguracoesContent() {
       setUsuariosLoading(false)
     }
   }
+  
+  // Buscar funções disponíveis
+  const buscarFuncoes = async () => {
+    try {
+      setFuncoesLoading(true)
+      const response = await fetch('/api/usuarios/funcoes')
+      const data = await response.json()
+      
+      if (data.success) {
+        setFuncoes(data.funcoes)
+        console.log('✅ Funções carregadas:', data.funcoes)
+      } else {
+        console.error('❌ Erro ao buscar funções:', data)
+        // Usar funções padrão em caso de erro
+        setFuncoes([
+          { id: 'funcionario', nome: 'Funcionário', descricao: 'Acesso básico', nivel: 1, cor: 'bg-blue-100 text-blue-800 border-blue-200', icone: '👤' },
+          { id: 'gerente', nome: 'Gerente', descricao: 'Acesso intermediário', nivel: 2, cor: 'bg-yellow-100 text-yellow-800 border-yellow-200', icone: '👨‍💼' },
+          { id: 'admin', nome: 'Administrador', descricao: 'Acesso completo', nivel: 3, cor: 'bg-red-100 text-red-800 border-red-200', icone: '👑' }
+        ])
+      }
+    } catch (error) {
+      console.error('Erro ao buscar funções:', error)
+      // Usar funções padrão em caso de erro
+      setFuncoes([
+        { id: 'funcionario', nome: 'Funcionário', descricao: 'Acesso básico', nivel: 1, cor: 'bg-blue-100 text-blue-800 border-blue-200', icone: '👤' },
+        { id: 'gerente', nome: 'Gerente', descricao: 'Acesso intermediário', nivel: 2, cor: 'bg-yellow-100 text-yellow-800 border-yellow-200', icone: '👨‍💼' },
+        { id: 'admin', nome: 'Administrador', descricao: 'Acesso completo', nivel: 3, cor: 'bg-red-100 text-red-800 border-red-200', icone: '👑' }
+      ])
+    } finally {
+      setFuncoesLoading(false)
+    }
+  }
 
   const criarUsuario = async () => {
     if (!selectedBar) return
@@ -340,6 +384,13 @@ function ConfiguracoesContent() {
     
     try {
       setLoading(true)
+      
+      console.log('📊 Dados sendo enviados para API:', {
+        bar_id: selectedBar.id,
+        usuarioId: usuarioEditando.id,
+        dados: { ...usuarioEditando }
+      })
+      
       const response = await fetch(`/api/usuarios/${usuarioEditando.id}`, {
         method: 'PUT',
         headers: {
@@ -351,7 +402,14 @@ function ConfiguracoesContent() {
         })
       })
       
+      console.log('📡 Resposta da API:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      })
+      
       const data = await response.json()
+      console.log('📄 Dados da resposta:', data)
       
       if (data.success) {
         toast({
@@ -361,17 +419,18 @@ function ConfiguracoesContent() {
         setUsuarioEditando(null)
         buscarUsuarios()
       } else {
+        console.error('❌ Erro retornado pela API:', data)
         toast({
           title: '❌ Erro ao atualizar usuário',
-          description: data.error || 'Erro desconhecido',
+          description: data.details ? `${data.error}: ${data.details}` : (data.error || 'Erro desconhecido'),
           variant: 'destructive'
         })
       }
     } catch (error) {
-      console.error('Erro ao editar usuário:', error)
+      console.error('❌ Erro ao editar usuário:', error)
       toast({
         title: '❌ Erro ao atualizar usuário',
-        description: 'Erro de conexão com o servidor',
+        description: `Erro de conexão com o servidor: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
         variant: 'destructive'
       })
     } finally {
@@ -705,21 +764,18 @@ function ConfiguracoesContent() {
   }
 
   const getRoleColor = (role: string) => {
-    switch (role) {
-      case 'admin': return 'bg-red-100 text-red-800 border-red-200'
-      case 'gerente': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'funcionario': return 'bg-blue-100 text-blue-800 border-blue-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
-    }
+    const funcao = funcoes.find(f => f.id === role)
+    return funcao ? funcao.cor : 'bg-gray-100 text-gray-800 border-gray-200'
   }
 
   const getRoleLabel = (role: string) => {
-    switch (role) {
-      case 'admin': return 'Administrador'
-      case 'gerente': return 'Gerente'
-      case 'funcionario': return 'Funcionário'
-      default: return role
-    }
+    const funcao = funcoes.find(f => f.id === role)
+    return funcao ? funcao.nome : role
+  }
+  
+  const getRoleIcon = (role: string) => {
+    const funcao = funcoes.find(f => f.id === role)
+    return funcao ? funcao.icone : '👤'
   }
 
   const renderModulosPermitidos = (modulos: string[]) => {
@@ -910,9 +966,15 @@ function ConfiguracoesContent() {
                                 <SelectValue placeholder="Selecione a função" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="funcionario">Funcionário</SelectItem>
-                                <SelectItem value="gerente">Gerente</SelectItem>
-                                <SelectItem value="admin">Administrador</SelectItem>
+                                {funcoesLoading ? (
+                                  <SelectItem value="" disabled>Carregando funções...</SelectItem>
+                                ) : (
+                                  funcoes.map(funcao => (
+                                    <SelectItem key={funcao.id} value={funcao.id}>
+                                      {funcao.icone} {funcao.nome}
+                                    </SelectItem>
+                                  ))
+                                )}
                               </SelectContent>
                             </Select>
                           </div>
@@ -1046,9 +1108,15 @@ function ConfiguracoesContent() {
                           <SelectValue placeholder="Selecione a função" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="funcionario">Funcionário</SelectItem>
-                          <SelectItem value="gerente">Gerente</SelectItem>
-                          <SelectItem value="admin">Administrador</SelectItem>
+                          {funcoesLoading ? (
+                            <SelectItem value="" disabled>Carregando funções...</SelectItem>
+                          ) : (
+                            funcoes.map(funcao => (
+                              <SelectItem key={funcao.id} value={funcao.id}>
+                                {funcao.icone} {funcao.nome}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
@@ -1185,7 +1253,7 @@ function ConfiguracoesContent() {
                               usuario.role === 'admin' ? 'bg-red-500' : 
                               usuario.role === 'gerente' ? 'bg-yellow-500' : 'bg-blue-500'
                             }`}>
-                              {usuario.role === 'admin' ? '👑' : usuario.role === 'gerente' ? '👨‍💼' : '👤'}
+                              {getRoleIcon(usuario.role)}
                             </div>
                             <div>
                               <h3 className="font-semibold text-lg">{usuario.nome}</h3>
@@ -1311,6 +1379,14 @@ function ConfiguracoesContent() {
                 </div>
                 
                 <div className="flex items-center gap-4">
+                  <Button
+                    onClick={() => window.location.href = '/paginas/configuracoes/seguranca'}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Shield className="w-4 h-4 mr-2" />
+                    Acessar Dashboard Completo
+                  </Button>
+                  
                   <Button
                     onClick={fetchSecurityData}
                     disabled={securityLoading}

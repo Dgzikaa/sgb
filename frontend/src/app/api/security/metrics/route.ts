@@ -1,63 +1,167 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseClient } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+import { securityMonitor } from '@/lib/security-monitor'
 
-interface SecurityEvent {
-  level: string
-  category: string
-  event_type: string
-  ip_address?: string
-}
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!
+)
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await getSupabaseClient()
-    if (!supabase) {
+    // Buscar métricas das últimas 24 horas
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+    const today = new Date()
+    
+    // Buscar eventos de segurança das últimas 24 horas
+    const { data: events, error: eventsError } = await supabase
+      .from('security_events')
+      .select('*')
+      .gte('timestamp', oneDayAgo.toISOString())
+      .lte('timestamp', today.toISOString())
+
+    if (eventsError) {
+      console.error('Erro ao buscar eventos:', eventsError)
       return NextResponse.json(
-        { success: false, error: 'Erro ao conectar com banco' },
+        { success: false, error: 'Erro ao buscar eventos de segurança' },
         { status: 500 }
       )
     }
 
-    // Buscar métricas de segurança das últimas 24 horas
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+    // Buscar métricas do dia atual
+    const { data: todayMetrics, error: metricsError } = await supabase
+      .from('security_metrics')
+      .select('*')
+      .eq('date', today.toISOString().split('T')[0])
+      .single()
 
-    // Buscar eventos de segurança
-    const { data: events, error: eventsError } = await supabase
-      .from('security_events')
-      .select('level, category, event_type, ip_address')
-      .gte('timestamp', oneDayAgo)
-
-    if (eventsError) {
-      console.error('❌ Erro ao buscar eventos de segurança:', eventsError)
+    if (metricsError && metricsError.code !== 'PGRST116') {
+      console.error('Erro ao buscar métricas:', metricsError)
+      return NextResponse.json(
+        { success: false, error: 'Erro ao buscar métricas de segurança' },
+        { status: 500 }
+      )
     }
 
-    // Calcular métricas
-    const securityEvents: SecurityEvent[] = events || []
+    // Calcular métricas em tempo real dos eventos
+    const totalEvents = events?.length || 0
+    const criticalEvents = events?.filter(e => e.level === 'critical').length || 0
+    const warningEvents = events?.filter(e => e.level === 'warning').length || 0
+    const infoEvents = events?.filter(e => e.level === 'info').length || 0
+    const authEvents = events?.filter(e => e.category === 'auth').length || 0
+    const accessEvents = events?.filter(e => e.category === 'access').length || 0
+    const injectionEvents = events?.filter(e => e.category === 'injection').length || 0
+    const rateLimitEvents = events?.filter(e => e.category === 'rate_limit').length || 0
+    const apiAbuseEvents = events?.filter(e => e.category === 'api_abuse').length || 0
+    const backupEvents = events?.filter(e => e.category === 'backup').length || 0
+    const systemEvents = events?.filter(e => e.category === 'system').length || 0
     
+    const uniqueIps = new Set(events?.map(e => e.ip_address).filter(Boolean)).size
+    const failedLogins = events?.filter(e => e.event_type === 'failed_login').length || 0
+    
+    // Usar métricas do banco se disponíveis, caso contrário usar calculadas
     const metrics = {
-      total_events: securityEvents.length,
-      critical_events: securityEvents.filter((e: SecurityEvent) => e.level === 'critical').length,
-      warning_events: securityEvents.filter((e: SecurityEvent) => e.level === 'warning').length,
-      info_events: securityEvents.filter((e: SecurityEvent) => e.level === 'info').length,
-      auth_events: securityEvents.filter((e: SecurityEvent) => e.category === 'authentication').length,
-      access_events: securityEvents.filter((e: SecurityEvent) => e.category === 'access_control').length,
-      injection_events: securityEvents.filter((e: SecurityEvent) => e.category === 'sql_injection').length,
-      rate_limit_events: securityEvents.filter((e: SecurityEvent) => e.category === 'rate_limiting').length,
-      api_abuse_events: securityEvents.filter((e: SecurityEvent) => e.category === 'api_abuse').length,
-      backup_events: securityEvents.filter((e: SecurityEvent) => e.category === 'backup').length,
-      system_events: securityEvents.filter((e: SecurityEvent) => e.category === 'system').length,
-      unique_ips: new Set(securityEvents.map((e: SecurityEvent) => e.ip_address).filter(Boolean)).size,
-      failed_logins: securityEvents.filter((e: SecurityEvent) => e.event_type === 'login_failed').length,
-      blocked_ips: securityEvents.filter((e: SecurityEvent) => e.event_type === 'ip_blocked').length
+      total_events: todayMetrics?.total_events || totalEvents,
+      critical_events: todayMetrics?.critical_events || criticalEvents,
+      warning_events: todayMetrics?.warning_events || warningEvents,
+      info_events: todayMetrics?.info_events || infoEvents,
+      auth_events: todayMetrics?.auth_events || authEvents,
+      access_events: todayMetrics?.access_events || accessEvents,
+      injection_events: todayMetrics?.injection_events || injectionEvents,
+      rate_limit_events: todayMetrics?.rate_limit_events || rateLimitEvents,
+      api_abuse_events: todayMetrics?.api_abuse_events || apiAbuseEvents,
+      backup_events: todayMetrics?.backup_events || backupEvents,
+      system_events: todayMetrics?.system_events || systemEvents,
+      unique_ips: todayMetrics?.unique_ips || uniqueIps,
+      failed_logins: todayMetrics?.failed_logins || failedLogins,
+      blocked_ips: todayMetrics?.blocked_ips || 0
     }
+
+    // Buscar últimos eventos para o timeline
+    const { data: recentEvents, error: recentEventsError } = await supabase
+      .from('security_events')
+      .select('*')
+      .order('timestamp', { ascending: false })
+      .limit(10)
+
+    if (recentEventsError) {
+      console.error('Erro ao buscar eventos recentes:', recentEventsError)
+    }
+
+    // Registrar evento de consulta de métricas
+    await securityMonitor.logEvent({
+      level: 'info',
+      category: 'access',
+      event_type: 'security_metrics_accessed',
+      ip_address: request.ip || request.headers.get('x-forwarded-for') || 'unknown',
+      user_agent: request.headers.get('user-agent') || 'unknown',
+      endpoint: '/api/security/metrics',
+      details: { metrics_count: totalEvents },
+      risk_score: 10
+    })
 
     return NextResponse.json({
       success: true,
-      metrics
+      metrics,
+      recent_events: recentEvents || [],
+      last_updated: new Date().toISOString()
     })
 
   } catch (error) {
-    console.error('❌ Erro na API de métricas de segurança:', error)
+    console.error('Erro interno na API:', error)
+    
+    // Registrar erro como evento de segurança
+    await securityMonitor.logEvent({
+      level: 'warning',
+      category: 'api_abuse',
+      event_type: 'metrics_api_error',
+      ip_address: request.ip || request.headers.get('x-forwarded-for') || 'unknown',
+      user_agent: request.headers.get('user-agent') || 'unknown',
+      endpoint: '/api/security/metrics',
+      details: { error: error instanceof Error ? error.message : 'Unknown error' },
+      risk_score: 40
+    })
+    
+    return NextResponse.json(
+      { success: false, error: 'Erro interno do servidor' },
+      { status: 500 }
+    )
+  }
+}
+
+// Endpoint para registrar um evento de segurança
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    
+    // Validar dados de entrada
+    if (!body.level || !body.category || !body.event_type) {
+      return NextResponse.json(
+        { success: false, error: 'Dados obrigatórios ausentes: level, category, event_type' },
+        { status: 400 }
+      )
+    }
+
+    // Usar o SecurityMonitor para registrar o evento
+    await securityMonitor.logEvent({
+      level: body.level,
+      category: body.category,
+      event_type: body.event_type,
+      user_id: body.user_id,
+      ip_address: body.ip_address || request.ip || request.headers.get('x-forwarded-for') || 'unknown',
+      user_agent: body.user_agent || request.headers.get('user-agent') || 'unknown',
+      endpoint: body.endpoint,
+      details: body.details || {},
+      risk_score: body.risk_score || 0
+    })
+
+    return NextResponse.json({
+      success: true,
+      message: 'Evento de segurança registrado com sucesso'
+    })
+
+  } catch (error) {
+    console.error('Erro interno na API POST:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },
       { status: 500 }

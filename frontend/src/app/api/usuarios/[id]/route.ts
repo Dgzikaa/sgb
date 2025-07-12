@@ -7,10 +7,25 @@ export async function PUT(
 ) {
   try {
     const body = await request.json()
+    console.log('📊 PUT /api/usuarios/[id] - Body recebido:', JSON.stringify(body, null, 2))
+    
     const { bar_id, nome, email, role, telefone, observacoes, modulos_permitidos, ativo } = body
     const usuarioId = params.id
+    
+    console.log('🔍 Dados extraídos:', {
+      bar_id,
+      usuarioId,
+      nome,
+      email,
+      role,
+      telefone,
+      observacoes,
+      modulos_permitidos,
+      ativo
+    })
 
     if (!bar_id || !usuarioId) {
+      console.error('❌ Dados obrigatórios ausentes:', { bar_id, usuarioId })
       return NextResponse.json(
         { success: false, error: 'ID do usuário e bar_id são obrigatórios' },
         { status: 400 }
@@ -18,21 +33,28 @@ export async function PUT(
     }
 
     // Obter cliente administrativo
+    console.log('🔧 Obtendo cliente administrativo...')
     const adminClient = await getAdminClient()
+    console.log('✅ Cliente administrativo obtido')
 
     // Atualizar usuário na tabela usuarios_bar
+    console.log('🔄 Atualizando usuário na tabela usuarios_bar...')
+    const updateData = {
+      nome,
+      email,
+      role,
+      telefone,
+      observacoes,
+      modulos_permitidos,
+      ativo,
+      atualizado_em: new Date().toISOString()
+    }
+    
+    console.log('📝 Dados para atualização:', JSON.stringify(updateData, null, 2))
+    
     const { data: usuarioAtualizado, error } = await adminClient
       .from('usuarios_bar')
-      .update({
-        nome,
-        email,
-        role,
-        telefone,
-        observacoes,
-        modulos_permitidos,
-        ativo,
-        atualizado_em: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('id', usuarioId)
       .eq('bar_id', bar_id)
       .select()
@@ -40,12 +62,28 @@ export async function PUT(
 
     if (error) {
       console.error('❌ Erro ao atualizar usuário:', error)
+      console.error('📋 Detalhes do erro:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      })
       return NextResponse.json(
-        { success: false, error: 'Erro ao atualizar usuário' },
+        { success: false, error: 'Erro ao atualizar usuário', details: error.message },
         { status: 500 }
       )
     }
 
+    if (!usuarioAtualizado) {
+      console.error('❌ Usuário não encontrado ou não atualizado')
+      return NextResponse.json(
+        { success: false, error: 'Usuário não encontrado ou não pôde ser atualizado' },
+        { status: 404 }
+      )
+    }
+
+    console.log('✅ Usuário atualizado com sucesso:', usuarioAtualizado)
+    
     return NextResponse.json({
       success: true,
       usuario: usuarioAtualizado
@@ -53,8 +91,9 @@ export async function PUT(
 
   } catch (error) {
     console.error('❌ Erro na API de edição de usuário:', error)
+    console.error('📋 Stack trace:', error instanceof Error ? error.stack : 'N/A')
     return NextResponse.json(
-      { success: false, error: 'Erro interno do servidor' },
+      { success: false, error: 'Erro interno do servidor', details: error instanceof Error ? error.message : 'Erro desconhecido' },
       { status: 500 }
     )
   }

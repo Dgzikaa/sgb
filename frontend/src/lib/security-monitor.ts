@@ -4,7 +4,7 @@ export interface SecurityEvent {
   id?: string;
   timestamp: string;
   level: 'info' | 'warning' | 'critical';
-  category: 'auth' | 'access' | 'data' | 'injection' | 'rate_limit' | 'api_abuse';
+  category: 'auth' | 'access' | 'data' | 'injection' | 'rate_limit' | 'api_abuse' | 'system' | 'backup';
   event_type: string;
   user_id?: string;
   ip_address?: string;
@@ -31,8 +31,8 @@ class SecurityMonitor {
   private webhookUrl?: string;
 
   private constructor() {
-    // Configurar webhook Discord para alertas críticos
-    this.webhookUrl = 'https://discord.com/api/webhooks/1393646423748116602/3zUhIrSKFHmq0zNRLf5AzrkSZNzTj7oYk6f45Tpj2LZWChtmGTKKTHxhfaNZigyLXN4y';
+    // Webhook será carregado dinamicamente da tabela webhook_configs
+    this.loadWebhookConfig();
   }
 
   public static getInstance(): SecurityMonitor {
@@ -40,6 +40,32 @@ class SecurityMonitor {
       SecurityMonitor.instance = new SecurityMonitor();
     }
     return SecurityMonitor.instance;
+  }
+
+  private async loadWebhookConfig(): Promise<void> {
+    try {
+      if (typeof window === 'undefined') { // Server-side
+        const { getAdminClient } = await import('@/lib/supabase-admin');
+        const supabase = await getAdminClient();
+        
+        const { data, error } = await supabase
+          .from('webhook_configs')
+          .select('configuracoes')
+          .eq('bar_id', 'ordinario')
+          .single();
+
+        if (!error && data?.configuracoes?.sistema) {
+          this.webhookUrl = data.configuracoes.sistema;
+          console.log('🔗 Security webhook loaded from database');
+        } else {
+          console.warn('⚠️ Security webhook not configured in database');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load webhook config:', error);
+      // Fallback para webhook hardcoded se necessário
+      this.webhookUrl = 'https://discord.com/api/webhooks/1393646423748116602/3zUhIrSKFHmq0zNRLf5AzrkSZNzTj7oYk6f45Tpj2LZWChtmGTKKTHxhfaNZigyLXN4y';
+    }
   }
 
   async logEvent(event: Omit<SecurityEvent, 'id' | 'timestamp'>): Promise<void> {
@@ -223,7 +249,15 @@ class SecurityMonitor {
   }
 
   private async sendCriticalAlert(event: SecurityEvent): Promise<void> {
-    if (!this.webhookUrl) return;
+    // Garantir que temos a URL mais recente
+    if (!this.webhookUrl) {
+      await this.loadWebhookConfig();
+    }
+
+    if (!this.webhookUrl) {
+      console.error('Discord webhook não configurado para alertas de segurança');
+      return;
+    }
 
     try {
       const message = {
@@ -243,20 +277,34 @@ class SecurityMonitor {
               inline: true
             },
             {
+              name: 'Categoria',
+              value: event.category.toUpperCase(),
+              inline: true
+            },
+            {
               name: 'Detalhes',
               value: JSON.stringify(event.details, null, 2).substring(0, 500),
               inline: false
             }
           ],
-          timestamp: event.timestamp
+          timestamp: event.timestamp,
+          footer: {
+            text: '🔐 SGB Security Monitor - Sistema Automático'
+          }
         }]
       };
 
-      await fetch(this.webhookUrl, {
+      const response = await fetch(this.webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(message)
       });
+
+      if (!response.ok) {
+        console.error('Falha ao enviar alerta Discord:', response.status, response.statusText);
+      } else {
+        console.log('✅ Alerta crítico de segurança enviado para Discord');
+      }
     } catch (error) {
       console.error('Failed to send critical alert:', error);
     }
@@ -311,6 +359,21 @@ class SecurityMonitor {
   private async temporaryIPBlock(ip: string, seconds: number): Promise<void> {
     // Implementar bloqueio temporário (Redis, cache, etc.)
     console.warn(`🚫 IP ${ip} temporarily blocked for ${seconds} seconds`);
+    
+    // Registrar evento de bloqueio
+    await this.logEvent({
+      level: 'warning',
+      category: 'system',
+      event_type: 'ip_blocked',
+      ip_address: ip,
+      user_agent: 'security-monitor',
+      endpoint: '/system/ip-block',
+      details: { 
+        block_duration: seconds,
+        reason: 'automated_security_response'
+      },
+      risk_score: 70
+    });
   }
 
   private async increaseLoginDelay(ip: string): Promise<void> {
@@ -319,8 +382,44 @@ class SecurityMonitor {
   }
 
   private async notifyAdmins(event: SecurityEvent): Promise<void> {
-    // Notificar administradores via email/Discord
+    // Notificar administradores via Discord
     console.warn(`📧 Admins notified about security event: ${event.event_type}`);
+    
+    if (this.webhookUrl) {
+      try {
+        const message = {
+          embeds: [{
+            title: '⚠️ Evento de Segurança - Atenção Necessária',
+            description: `**Evento:** ${event.event_type}\n**IP:** ${event.ip_address}`,
+            color: 0xffa500, // Orange
+            fields: [
+              {
+                name: 'Risk Score',
+                value: `${event.risk_score}/100`,
+                inline: true
+              },
+              {
+                name: 'Endpoint',
+                value: event.endpoint || 'N/A',
+                inline: true
+              }
+            ],
+            timestamp: event.timestamp,
+            footer: {
+              text: '⚠️ SGB Security - Notificação Admin'
+            }
+          }]
+        };
+
+        await fetch(this.webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(message)
+        });
+      } catch (error) {
+        console.error('Failed to notify admins:', error);
+      }
+    }
   }
 }
 
