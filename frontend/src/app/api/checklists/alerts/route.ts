@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
+import DiscordChecklistService from '@/lib/discord-checklist-service'
 
 // =====================================================
 // 🚨 API PARA DETECTAR E GERENCIAR ALERTAS DE ATRASO
@@ -72,12 +73,40 @@ export async function GET(req: NextRequest) {
 
     const alerts = await generateAlerts(schedules || [], executions || [])
 
+    // 🔥 ENVIAR ALERTAS CRÍTICOS PARA DISCORD
+    const criticalAlerts = alerts.filter(a => a.nivel === 'critico')
+    const urgentAlerts = alerts.filter(a => a.nivel === 'alto')
+    
+    // Enviar alertas críticos imediatamente para Discord
+    for (const criticalAlert of criticalAlerts) {
+      try {
+        await DiscordChecklistService.sendCriticalAlert(criticalAlert)
+        console.log(`🔴 Alerta crítico enviado para Discord: ${criticalAlert.titulo}`)
+      } catch (error) {
+        console.error('❌ Erro ao enviar alerta crítico para Discord:', error)
+      }
+    }
+
+    // Enviar alertas urgentes também para Discord
+    for (const urgentAlert of urgentAlerts) {
+      try {
+        await DiscordChecklistService.sendAlert(urgentAlert)
+        console.log(`🟠 Alerta urgente enviado para Discord: ${urgentAlert.titulo}`)
+      } catch (error) {
+        console.error('❌ Erro ao enviar alerta urgente para Discord:', error)
+      }
+    }
+
     return NextResponse.json({
       success: true,
       alerts,
       totalAlerts: alerts.length,
-      criticalAlerts: alerts.filter(a => a.nivel === 'critico').length,
-      urgentAlerts: alerts.filter(a => a.nivel === 'alto').length
+      criticalAlerts: criticalAlerts.length,
+      urgentAlerts: urgentAlerts.length,
+      discord_notifications: {
+        critical_sent: criticalAlerts.length,
+        urgent_sent: urgentAlerts.length
+      }
     })
 
   } catch (error) {

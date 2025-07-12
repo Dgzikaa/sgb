@@ -1,159 +1,109 @@
 #!/usr/bin/env node
 
-/**
- * 🚀 SCRIPT DE CORREÇÃO AUTOMÁTICA - SGB_V2
- * 
- * Este script corrige automaticamente os problemas encontrados pela validação:
- * 1. Cria layout.tsx onde necessário
- * 2. Remove PageBase de páginas que usam
- * 3. Aplica as regras obrigatórias
- * 
- * USO:
- * node frontend/scripts/fix-pages-automatically.js
- */
-
 const fs = require('fs');
 const path = require('path');
 
-const APP_DIR = path.join(__dirname, '../src/app');
+console.log('🔧 Corrigindo estrutura de páginas automaticamente...');
 
-// Template do layout padrão
-const LAYOUT_TEMPLATE = `import { DarkSidebarLayout } from '@/components/layouts'
+const srcPath = path.join(__dirname, '..', 'src', 'app');
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-  return (
-    <DarkSidebarLayout>
-      {children}
-    </DarkSidebarLayout>
-  )
-}`;
-
-// Páginas que PRECISAM de layout próprio (não herdam)
-const PAGES_NEED_OWN_LAYOUT = [
-  '/home',
-  '/dashboard-financeiro', 
-  '/contaazul-callback',
-  '/configuracoes/configuracao',
-  '/configuracoes/integracoes/contaazul',
-  '/configuracoes/integracoes/contaazul/financeiro'
-];
-
-// Páginas que devem remover PageBase
-const PAGES_REMOVE_PAGEBASE = [
-  '/configuracoes',
-  '/relatorios/contahub-teste',
-  '/visao-geral/diario'
-];
-
-const colors = {
-  red: '\x1b[31m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  reset: '\x1b[0m',
-  bold: '\x1b[1m'
-};
-
-function log(color, message) {
-  console.log(`${color}${message}${colors.reset}`);
-}
-
-function createLayoutFile(dirPath, relativePath) {
-  const layoutPath = path.join(dirPath, 'layout.tsx');
-  
-  if (!fs.existsSync(layoutPath)) {
-    fs.writeFileSync(layoutPath, LAYOUT_TEMPLATE);
-    log(colors.green, `✅ Criado: ${relativePath}/layout.tsx`);
+// Função para mover arquivos
+function moveFile(source, destination) {
+  try {
+    // Criar diretório de destino se não existir
+    const destDir = path.dirname(destination);
+    if (!fs.existsSync(destDir)) {
+      fs.mkdirSync(destDir, { recursive: true });
+    }
+    
+    // Mover arquivo
+    fs.renameSync(source, destination);
+    console.log(`✅ Movido: ${source} → ${destination}`);
     return true;
+  } catch (error) {
+    console.error(`❌ Erro ao mover ${source}:`, error.message);
+    return false;
   }
-  return false;
 }
 
-function removePageBaseFromFile(filePath, relativePath) {
-  if (!fs.existsSync(filePath)) return false;
+// Função para encontrar arquivos page.tsx fora da estrutura
+function findIncorrectPages(dir, incorrectPages = []) {
+  if (!fs.existsSync(dir)) return incorrectPages;
   
-  let content = fs.readFileSync(filePath, 'utf8');
-  let modified = false;
-  
-  // Remover imports do PageBase
-  if (content.includes('PageBase')) {
-    content = content.replace(/import.*PageBase.*from.*['"]@\/components\/ui\/page-base['"];?\n?/g, '');
-    content = content.replace(/import.*{[^}]*PageBase[^}]*}.*from.*['"]@\/components\/ui\/page-base['"];?\n?/g, '');
-    
-    // Remover uso do PageBase
-    content = content.replace(/<PageBase[^>]*>/g, '<div className="space-y-6">');
-    content = content.replace(/<\/PageBase>/g, '</div>');
-    
-    // Remover PageHeader e PageContent se existirem
-    content = content.replace(/<PageHeader[^>]*\/>/g, '');
-    content = content.replace(/<PageHeader[^>]*>.*?<\/PageHeader>/gs, '');
-    content = content.replace(/<PageContent[^>]*>/g, '');
-    content = content.replace(/<\/PageContent>/g, '');
-    
-    fs.writeFileSync(filePath, content);
-    modified = true;
-    log(colors.green, `✅ Removido PageBase de: ${relativePath}`);
-  }
-  
-  return modified;
-}
-
-function scanAndFix(dir, relativePath = '') {
   const items = fs.readdirSync(dir);
   
-  let hasPageTsx = false;
-  let hasLayoutTsx = false;
-  
-  // Verificar se há page.tsx e layout.tsx
   for (const item of items) {
-    if (item === 'page.tsx') hasPageTsx = true;
-    if (item === 'layout.tsx') hasLayoutTsx = true;
-  }
-  
-  const currentPath = relativePath || '/';
-  
-  // Criar layout.tsx se necessário
-  if (hasPageTsx && !hasLayoutTsx && PAGES_NEED_OWN_LAYOUT.includes(currentPath)) {
-    createLayoutFile(dir, relativePath);
-  }
-  
-  // Remover PageBase se necessário
-  if (hasPageTsx && PAGES_REMOVE_PAGEBASE.includes(currentPath)) {
-    const pagePath = path.join(dir, 'page.tsx');
-    removePageBaseFromFile(pagePath, currentPath);
-  }
-  
-  // Recursivamente processar subpastas
-  for (const item of items) {
-    const itemPath = path.join(dir, item);
-    const stat = fs.lstatSync(itemPath);
+    const fullPath = path.join(dir, item);
+    const stat = fs.statSync(fullPath);
     
-    if (stat.isDirectory() && !item.startsWith('.') && !item.startsWith('_')) {
-      const newRelativePath = relativePath ? `${relativePath}/${item}` : `/${item}`;
-      scanAndFix(itemPath, newRelativePath);
+    if (stat.isDirectory()) {
+      // Pular pastas que estão corretas
+      if (item === 'api' || item === 'paginas' || item === 'components') {
+        continue;
+      }
+      
+      // Procurar recursivamente
+      findIncorrectPages(fullPath, incorrectPages);
+    } else if (item === 'page.tsx') {
+      // Verificar se está fora da estrutura correta
+      const relativePath = path.relative(srcPath, fullPath);
+      if (!relativePath.startsWith('paginas/')) {
+        incorrectPages.push(fullPath);
+      }
     }
+  }
+  
+  return incorrectPages;
+}
+
+// Encontrar páginas incorretas
+const incorrectPages = findIncorrectPages(srcPath);
+
+if (incorrectPages.length === 0) {
+  console.log('✅ Todas as páginas estão na estrutura correta!');
+  process.exit(0);
+}
+
+console.log(`📋 Encontradas ${incorrectPages.length} páginas fora da estrutura:`);
+incorrectPages.forEach(page => {
+  console.log(`  - ${path.relative(srcPath, page)}`);
+});
+
+// Sugerir correções automáticas
+console.log('\n🔄 Aplicando correções automáticas...');
+
+let fixedCount = 0;
+
+for (const pagePath of incorrectPages) {
+  const relativePath = path.relative(srcPath, pagePath);
+  const dirName = path.dirname(relativePath);
+  
+  let newPath;
+  
+  // Determinar onde mover baseado no nome da pasta
+  if (dirName.includes('admin') || dirName.includes('config')) {
+    newPath = path.join(srcPath, 'paginas', 'configuracoes', path.basename(dirName), 'page.tsx');
+  } else if (dirName.includes('relatorio')) {
+    newPath = path.join(srcPath, 'paginas', 'relatorios', path.basename(dirName), 'page.tsx');
+  } else if (dirName.includes('operacao')) {
+    newPath = path.join(srcPath, 'paginas', 'operacoes', path.basename(dirName), 'page.tsx');
+  } else if (dirName.includes('funcionario')) {
+    newPath = path.join(srcPath, 'paginas', 'funcionario', path.basename(dirName), 'page.tsx');
+  } else {
+    // Mover para configurações por padrão
+    newPath = path.join(srcPath, 'paginas', 'configuracoes', path.basename(dirName), 'page.tsx');
+  }
+  
+  if (moveFile(pagePath, newPath)) {
+    fixedCount++;
   }
 }
 
-console.log('\n' + '='.repeat(60));
-log(colors.bold + colors.blue, '🚀 CORREÇÃO AUTOMÁTICA - SGB_V2');
-console.log('='.repeat(60));
+console.log(`\n✅ Correções aplicadas: ${fixedCount}/${incorrectPages.length}`);
 
-log(colors.blue, '\n📋 Aplicando correções...\n');
+if (fixedCount > 0) {
+  console.log('\n⚠️  IMPORTANTE: Verifique se as páginas movidas estão nos locais corretos!');
+  console.log('   Você pode precisar ajustar manualmente algumas rotas.');
+}
 
-try {
-  scanAndFix(APP_DIR);
-  
-  log(colors.bold + colors.green, '\n✅ CORREÇÕES APLICADAS COM SUCESSO!');
-  
-  log(colors.blue, '\n📊 Próximos passos:');
-  log(colors.blue, '1. Execute: npm run validate-pages');
-  log(colors.blue, '2. Teste as páginas no navegador');
-  log(colors.blue, '3. Commit das mudanças');
-  
-  console.log('\n' + '='.repeat(60));
-  
-} catch (error) {
-  log(colors.red, `❌ Erro durante correção: ${error.message}`);
-  process.exit(1);
-} 
+console.log(''); 

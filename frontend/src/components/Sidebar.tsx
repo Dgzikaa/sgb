@@ -40,6 +40,8 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
   const { hasPermission, isRole, user } = usePermissions()
   const { isSidebarCollapsed, toggleSidebarCollapse } = useSidebar()
   const [showBarMenu, setShowBarMenu] = useState(false)
+  const [hoveredSection, setHoveredSection] = useState<string | null>(null)
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
 
   // Estado para controlar quais seções estão expandidas
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -77,8 +79,8 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
       items: [
         { id: 'funcionario-checklists', label: 'Meus Checklists', icon: '📝', route: '/funcionario/checklists', requiredModule: null },
         { id: 'checklist-abertura', label: 'Checklist Abertura', icon: '✅', route: '/checklists/abertura', requiredModule: 'operacoes' },
-        { id: 'checklists-admin', label: 'Admin Checklists', icon: '🔧', route: '/admin/checklists', requiredModule: 'operacoes', requiredRole: 'admin' },
-        { id: 'templates', label: 'Templates', icon: '📄', route: '/admin/templates', requiredModule: 'operacoes', requiredRole: 'admin' },
+        { id: 'checklists-admin', label: 'Admin Checklists', icon: '🔧', route: '/configuracoes/checklists', requiredModule: 'operacoes', requiredRole: 'admin' },
+        { id: 'templates', label: 'Templates', icon: '📄', route: '/configuracoes/templates', requiredModule: 'operacoes', requiredRole: 'admin' },
         { id: 'relatorios-checklists', label: 'Relatórios Checklists', icon: '📊', route: '/relatorios/checklists', requiredModule: 'operacoes', requiredRole: 'admin' },
       ]
     },
@@ -146,7 +148,7 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
         
         // ContaHub específico
         { id: 'contahub-teste', label: 'Teste ContaHub', icon: '🧪', route: '/relatorios/contahub-teste', requiredModule: 'relatorio_produtos' },
-        { id: 'contahub-automatico', label: 'Coleta Automática', icon: '🔄', route: '/admin/contahub-automatico', requiredModule: 'relatorio_produtos', requiredRole: 'admin' },
+        { id: 'contahub-automatico', label: 'Coleta Automática', icon: '🔄', route: '/configuracoes/contahub-automatico', requiredModule: 'relatorio_produtos', requiredRole: 'admin' },
       ]
     },
 
@@ -166,7 +168,7 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
       title: 'Desempenho',
       icon: '📊',
       items: [
-        { id: 'tabela-desempenho', label: 'Tabela de Desempenho', icon: '📈', route: '/admin/desempenho/tabela', requiredModule: 'dashboard_diario', requiredRole: 'admin' },
+        { id: 'tabela-desempenho', label: 'Tabela de Desempenho', icon: '📈', route: '/configuracoes/desempenho/tabela', requiredModule: 'dashboard_diario', requiredRole: 'admin' },
       ]
     },
 
@@ -253,6 +255,21 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
     }
   }, [pathname, isPending, router, onToggle])
 
+  // Função para lidar com hover nas seções colapsadas
+  const handleSectionHover = useCallback((sectionId: string | null, event?: React.MouseEvent) => {
+    if (!isSidebarCollapsed) return
+    
+    if (sectionId && event) {
+      const rect = event.currentTarget.getBoundingClientRect()
+      setTooltipPosition({
+        x: rect.right + 10,
+        y: rect.top
+      })
+    }
+    
+    setHoveredSection(sectionId)
+  }, [isSidebarCollapsed])
+
   // Memoizar o componente de botão para evitar re-renders
   const renderMenuButton = useCallback((item: MenuItem, isActive: boolean) => {
     return (
@@ -297,6 +314,8 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
         {/* Header da seção */}
         <button
           onClick={() => !isSidebarCollapsed && toggleSection(section.id)}
+          onMouseEnter={(e) => handleSectionHover(section.id, e)}
+          onMouseLeave={() => handleSectionHover(null)}
           className={`
             group w-full flex items-center space-x-2 p-2 rounded-xl hover:bg-white/10 transition-colors
             ${isSidebarCollapsed ? 'justify-center' : 'justify-between'} 
@@ -344,7 +363,7 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
         )}
       </div>
     )
-  }, [expandedSections, pathname, toggleSection, renderMenuButton, isSidebarCollapsed])
+  }, [expandedSections, pathname, toggleSection, renderMenuButton, isSidebarCollapsed, handleSectionHover])
 
   return (
     <>
@@ -354,6 +373,60 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
           className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm"
           onClick={onToggle}
         />
+      )}
+
+      {/* Tooltip/Submenu para seções colapsadas */}
+      {isSidebarCollapsed && hoveredSection && (
+        <div 
+          className="fixed z-[60] bg-slate-800 border border-slate-700 rounded-xl shadow-2xl py-2 min-w-[200px] max-w-[250px]"
+          style={{
+            left: `${tooltipPosition.x}px`,
+            top: `${tooltipPosition.y}px`,
+          }}
+          onMouseEnter={() => setHoveredSection(hoveredSection)}
+          onMouseLeave={() => setHoveredSection(null)}
+        >
+          {(() => {
+            const section = visibleSections.find(s => s.id === hoveredSection)
+            if (!section) return null
+            
+            return (
+              <div>
+                <div className="px-3 py-2 border-b border-slate-700/50">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">{section.icon}</span>
+                    <span className="text-sm font-semibold text-white">{section.title}</span>
+                  </div>
+                </div>
+                <div className="py-1">
+                  {section.items.map((item) => {
+                    const isActive = pathname === item.route
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => handleMenuClick(item.route)}
+                        disabled={isPending}
+                        className={`
+                          w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-slate-700/50 transition-colors disabled:opacity-50 text-sm
+                          ${isActive 
+                            ? 'bg-slate-700/50 text-white' 
+                            : 'text-slate-300 hover:text-white'
+                          }
+                        `}
+                      >
+                        <span className="text-base">{item.icon}</span>
+                        <span className="flex-1">{item.label}</span>
+                        {isActive && (
+                          <div className="w-2 h-2 bg-white rounded-full shadow-lg"></div>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })()}
+        </div>
       )}
 
       {/* Sidebar */}

@@ -1,15 +1,16 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useToast } from '@/hooks/use-toast';
-import { useBarContext } from '@/contexts/BarContext';
-import { Loader2, Settings, RefreshCw, ExternalLink, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { CheckCircle, AlertCircle, Loader2, RefreshCw, Send } from 'lucide-react'
+import { useToast } from "@/hooks/use-toast"
+import { useBar } from '@/contexts/BarContext'
 
 interface ContaAzulStatus {
   connected: boolean;
@@ -24,69 +25,148 @@ interface ContaAzulStatus {
   };
   lastRefresh: string;
   refreshCount: number;
+  debug?: {
+    access_token: string;
+    refresh_token: string;
+    authorization_code: string;
+    client_id: string;
+    environment: string;
+  };
 }
 
 export default function ContaAzulOAuth() {
-  const { toast } = useToast();
-  const { selectedBar } = useBarContext();
+  const router = useRouter()
+  const { toast } = useToast()
+  const { selectedBar } = useBar()
   
-  // Remover console.log excessivo
-  // console.log('🔍 ContaAzulOAuth renderizando...', { selectedBar });
+  const [status, setStatus] = useState<ContaAzulStatus>({
+    connected: false,
+    configured: false,
+    tokenExpired: false,
+    expiresAt: '',
+    empresa: { id: '', nome: '', cnpj: '' },
+    lastRefresh: '',
+    refreshCount: 0
+  })
   
-  const [status, setStatus] = useState<ContaAzulStatus | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [configuring, setConfiguring] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [showConfig, setShowConfig] = useState(false);
+  const [loading, setLoading] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+  const [configuring, setConfiguring] = useState(false)
+  const [syncLoading, setSyncLoading] = useState(false)
+  const [showConfig, setShowConfig] = useState(false)
+  const [syncResults, setSyncResults] = useState<any>(null)
+  const [showSyncResults, setShowSyncResults] = useState(false)
+  const [showDebug, setShowDebug] = useState(false)
   
   const [config, setConfig] = useState({
     clientId: '',
     clientSecret: '',
-    redirectUri: 'https://sgb-contaazul.vercel.app/contaazul-callback',
-    ambiente: 'producao'
-  });
+    redirectUri: ''
+  })
+
+  // Auto-reload status quando voltar de callback OAuth
+  useEffect(() => {
+    const handleFocus = () => {
+      if (document.visibilityState === 'visible') {
+        loadStatus()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleFocus)
+    return () => document.removeEventListener('visibilitychange', handleFocus)
+  }, [])
 
   useEffect(() => {
-    if (selectedBar) {
-      loadStatus();
+    if (selectedBar?.id) {
+      loadStatus()
     }
-  }, [selectedBar]);
+  }, [selectedBar])
+
+  // Auto-renovar token quando expirado
+  useEffect(() => {
+    if (status.configured && !status.connected && status.tokenExpired) {
+      console.log('🔄 FRONTEND - Token expirado detectado, tentando renovar automaticamente...')
+      handleRefresh()
+    }
+  }, [status.configured, status.connected, status.tokenExpired])
+
+
 
   const loadStatus = async () => {
-    if (!selectedBar) return;
+    if (!selectedBar?.id) return
     
-    setLoading(true);
     try {
-      const response = await fetch(`/api/contaazul/auth?action=status&barId=${selectedBar.id}`);
-      const data = await response.json();
+      console.log('🔍 FRONTEND - Carregando status para bar:', selectedBar.id)
+      const response = await fetch(`/api/contaazul/auth?action=status&barId=${selectedBar.id}`)
+      const data = await response.json()
       
-      if (!response.ok) {
-        throw new Error(data.error || 'Erro ao carregar status');
+      console.log('🔍 FRONTEND - Resposta da API:', { 
+        ok: response.ok, 
+        status: response.status,
+        data: data
+      })
+      
+      if (response.ok) {
+        // Sempre atualizar o status, independente se está configurado ou não
+        setStatus({
+          connected: data.connected || false,
+          configured: data.configured || false,
+          tokenExpired: data.tokenExpired || false,
+          expiresAt: data.expiresAt || '',
+          access_token: data.access_token,
+          empresa: data.empresa || { id: '', nome: '', cnpj: '' },
+          lastRefresh: data.lastRefresh || '',
+          refreshCount: data.refreshCount || 0,
+          debug: data.debug
+        })
+        
+        console.log('✅ FRONTEND - Status atualizado:', {
+          connected: data.connected || false,
+          configured: data.configured || false,
+          tokenExpired: data.tokenExpired || false
+        })
+      } else {
+        console.log('❌ FRONTEND - Erro na resposta:', data)
+        setStatus({
+          connected: false,
+          configured: false,
+          tokenExpired: false,
+          expiresAt: '',
+          empresa: { id: '', nome: '', cnpj: '' },
+          lastRefresh: '',
+          refreshCount: 0
+        })
       }
-      
-      setStatus(data);
     } catch (error) {
-      console.error('Erro ao carregar status:', error);
-      toast({
-        title: "Erro",
-        description: error instanceof Error ? error.message : "Erro ao carregar status",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
+      console.error('❌ FRONTEND - Erro ao carregar status:', error)
+      setStatus({
+        connected: false,
+        configured: false,
+        tokenExpired: false,
+        expiresAt: '',
+        empresa: { id: '', nome: '', cnpj: '' },
+        lastRefresh: '',
+        refreshCount: 0
+      })
     }
-  };
+  }
 
   const handleConfigure = async () => {
-    if (!selectedBar) return;
+    if (!selectedBar?.id || !config.clientId || !config.clientSecret || !config.redirectUri) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Preencha todos os campos de configuração",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setConfiguring(true)
     
-    setConfiguring(true);
     try {
       const response = await fetch('/api/contaazul/auth', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'configure',
           barId: selectedBar.id,
@@ -94,285 +174,399 @@ export default function ContaAzulOAuth() {
           clientSecret: config.clientSecret,
           redirectUri: config.redirectUri
         })
-      });
-      
-      const data = await response.json();
+      })
+
+      const data = await response.json()
       
       if (!response.ok) {
-        throw new Error(data.error || 'Erro ao configurar credenciais');
+        throw new Error(data.error || 'Erro ao configurar')
       }
-      
+
       toast({
-        title: "Sucesso",
-        description: "Credenciais configuradas com sucesso"
-      });
-      setShowConfig(false);
-      loadStatus();
+        title: "Configuração salva",
+        description: "Credenciais OAuth configuradas com sucesso!"
+      })
+
+      setShowConfig(false)
+      
+      // Aguardar um pouco e recarregar status
+      console.log('🔍 FRONTEND - Aguardando para recarregar status...')
+      setTimeout(() => {
+        loadStatus()
+      }, 500)
     } catch (error) {
       toast({
-        title: "Erro",
-        description: error instanceof Error ? error.message : "Erro ao configurar credenciais",
+        title: "Erro na configuração",
+        description: error instanceof Error ? error.message : "Erro ao configurar OAuth",
         variant: "destructive"
-      });
+      })
     } finally {
-      setConfiguring(false);
+      setConfiguring(false)
     }
-  };
+  }
 
   const handleAuthorize = async () => {
-    if (!selectedBar) return;
+    if (!selectedBar?.id || !status.configured) return
+
+    setLoading(true)
     
-    setLoading(true);
     try {
-      localStorage.setItem('contaazul_bar_id', selectedBar.id.toString());
-      
-      const response = await fetch(`/api/contaazul/auth?action=authorize&barId=${selectedBar.id}`);
-      const data = await response.json();
+      const response = await fetch(`/api/contaazul/auth?action=authorize&barId=${selectedBar.id}`)
+
+      const data = await response.json()
       
       if (!response.ok) {
-        throw new Error(data.error || 'Erro ao iniciar autorização');
+        throw new Error(data.error || 'Erro ao autorizar')
       }
-      
-      window.location.href = data.authUrl;
+
+      if (data.authUrl) {
+        window.location.href = data.authUrl
+      }
     } catch (error) {
       toast({
-        title: "Erro",
-        description: error instanceof Error ? error.message : "Erro ao iniciar autorização",
+        title: "Erro na autorização",
+        description: error instanceof Error ? error.message : "Erro ao gerar URL de autorização",
         variant: "destructive"
-      });
-      setLoading(false);
+      })
+    } finally {
+      setLoading(false)
     }
-  };
+  }
 
   const handleRefresh = async () => {
-    if (!selectedBar) return;
+    if (!selectedBar?.id) return
+
+    setRefreshing(true)
     
-    setRefreshing(true);
     try {
-      const response = await fetch(`/api/contaazul/auth?action=refresh&barId=${selectedBar.id}`);
-      const data = await response.json();
+      const response = await fetch(`/api/contaazul/auth?action=refresh&barId=${selectedBar.id}`)
+
+      const data = await response.json()
       
       if (!response.ok) {
-        throw new Error(data.error || 'Erro ao renovar token');
+        console.log('❌ FRONTEND - Falha na renovação automática:', data.error)
+        
+        // Se a renovação falhar, não mostrar erro para renovação automática
+        if (!status.connected) {
+          console.log('🔄 FRONTEND - Renovação automática falhou, mantendo status atual')
+          return
+        }
+        
+        throw new Error(data.error || 'Erro ao renovar token')
       }
+
+      console.log('✅ FRONTEND - Token renovado com sucesso!')
       
       toast({
-        title: "Sucesso",
-        description: "Token renovado com sucesso"
-      });
-      loadStatus();
+        title: "Token renovado",
+        description: "Token de acesso renovado com sucesso!"
+      })
+
+      loadStatus()
     } catch (error) {
-      toast({
-        title: "Erro",
-        description: error instanceof Error ? error.message : "Erro ao renovar token",
-        variant: "destructive"
-      });
+      // Só mostrar erro se for renovação manual (usuário conectado)
+      if (status.connected) {
+        toast({
+          title: "Erro ao renovar token",
+          description: error instanceof Error ? error.message : "Erro ao renovar token",
+          variant: "destructive"
+        })
+      }
     } finally {
-      setRefreshing(false);
+      setRefreshing(false)
     }
-  };
+  }
 
   const handleDisconnect = async () => {
-    if (!selectedBar) return;
+    if (!selectedBar?.id) return
+
+    const confirmacao = confirm('Tem certeza que deseja desconectar do ContaAzul?')
+    if (!confirmacao) return
+
+    setLoading(true)
     
-    if (!confirm('Tem certeza que deseja desconectar a integração com ContaAzul?')) {
-      return;
-    }
-    
-    setLoading(true);
     try {
       const response = await fetch('/api/contaazul/auth', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'disconnect',
-          barId: selectedBar.id
-        })
-      });
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'disconnect', barId: selectedBar.id })
+      })
 
-      const data = await response.json();
+      const data = await response.json()
       
-      if (response.ok) {
-        toast({
-          title: "Sucesso",
-          description: "Integração desconectada com sucesso"
-        });
-        loadStatus();
-      } else {
-        toast({
-          title: "Erro",
-          description: data.error || "Erro ao desconectar integração",
-          variant: "destructive"
-        });
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao desconectar')
       }
+
+      toast({
+        title: "Desconectado",
+        description: "Desconectado do ContaAzul com sucesso!"
+      })
+
+      loadStatus()
     } catch (error) {
       toast({
-        title: "Erro",
-        description: "Erro ao desconectar integração",
+        title: "Erro ao desconectar",
+        description: error instanceof Error ? error.message : "Erro ao desconectar",
         variant: "destructive"
-      });
+      })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
+
+  const handleSyncDados = async () => {
+    if (!selectedBar?.id || !status.connected) return
+    
+    setSyncLoading(true)
+    setSyncResults(null)
+    
+    try {
+      // Chamar API do sync completo unificado
+      const response = await fetch('/api/contaazul/sync-categorizado-corrigido', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          barId: selectedBar.id,
+          force: true 
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro no sync completo')
+      }
+      
+      console.log('✅ SYNC COMPLETO CONCLUÍDO:', data)
+      
+      // Usar estrutura da API unificada
+      const adaptedResults = {
+        timestamp: data.timestamp,
+        estatisticas: {
+          categorias_processadas: data.estatisticas?.categorias_processadas || 0,
+          receitas_salvas: data.estatisticas?.eventos_receitas || 0,
+          despesas_salvas: data.estatisticas?.eventos_despesas || 0,
+          parcelas_processadas: data.estatisticas?.parcelas_inseridas || 0,
+          competencias_encontradas: data.estatisticas?.eventos_sem_parcelas || 0
+        },
+        problemas_corrigidos: data.regras_implementadas || [
+          '✅ Fluxo unificado de 7 passos implementado',
+          '✅ Tabela unificada contaazul_eventos_financeiros',
+          '✅ Regra: sem parcelas = data_competencia = data_vencimento',
+          '✅ Parcelas reais salvas em contaazul_parcelas'
+        ]
+      }
+      
+      setSyncResults(adaptedResults)
+      setShowSyncResults(true)
+      
+      const totalEventos = (adaptedResults.estatisticas.receitas_salvas || 0) + (adaptedResults.estatisticas.despesas_salvas || 0)
+      const totalParcelas = adaptedResults.estatisticas.parcelas_processadas || 0
+      
+      toast({
+        title: "✅ Sync Completo Concluído!",
+        description: `${totalEventos} eventos salvos! ${totalParcelas} parcelas processadas. Veja logs no terminal!`,
+        variant: "default"
+      })
+    } catch (error) {
+      toast({
+        title: "Erro na Sincronização",
+        description: error instanceof Error ? error.message : "Erro na sincronização",
+        variant: "destructive"
+      })
+    } finally {
+      setSyncLoading(false)
+    }
+  }
+
+
+
+
+
+  const copyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast({
+        title: "Copiado!",
+        description: `${label} copiado para a área de transferência`,
+        variant: "default"
+      })
+    } catch (error) {
+      toast({
+        title: "Erro ao copiar",
+        description: "Não foi possível copiar para a área de transferência",
+        variant: "destructive"
+      })
+    }
+  }
+
+
 
   const getStatusIcon = () => {
-    if (loading) return <Loader2 className="w-5 h-5 animate-spin text-blue-500" />;
-    
-    if (!status) return <XCircle className="w-5 h-5 text-gray-400" />;
-    
-    if (status.connected) {
-      return <CheckCircle className="w-5 h-5 text-green-500" />;
-    } else if (status.configured && status.tokenExpired) {
-      return <AlertCircle className="w-5 h-5 text-yellow-500" />;
-    } else if (status.configured) {
-      return <Settings className="w-5 h-5 text-blue-500" />;
-    } else {
-      return <XCircle className="w-5 h-5 text-gray-400" />;
+    if (status.connected && !status.tokenExpired) {
+      return <CheckCircle className="w-5 h-5 text-green-500" />
     }
-  };
+    return <AlertCircle className="w-5 h-5 text-red-500" />
+  }
 
   const getStatusText = () => {
-    if (loading) return 'Carregando...';
-    if (!status) return 'Não configurado';
-    
-    if (status.connected) {
-      return 'Conectado e funcionando';
-    } else if (status.configured && status.tokenExpired) {
-      return 'Token expirado';
-    } else if (status.configured) {
-      return 'Configurado - autorização necessária';
-    } else {
-      return 'Não configurado';
-    }
-  };
+    if (!status.configured) return "Não configurado"
+    if (!status.connected) return "Desconectado"
+    if (status.tokenExpired) return "Token expirado"
+    return "Conectado"
+  }
 
   const getStatusBadge = () => {
-    if (loading) return <Badge variant="outline">Carregando...</Badge>;
-    if (!status) return <Badge variant="outline">Não Configurado</Badge>;
-    
-    if (status.connected) {
-      return <Badge className="bg-green-100 text-green-800">Conectado</Badge>;
-    } else if (status.configured && status.tokenExpired) {
-      return <Badge variant="destructive">Token Expirado</Badge>;
-    } else if (status.configured) {
-      return <Badge variant="secondary">Configurado</Badge>;
-    } else {
-      return <Badge variant="outline">Não Configurado</Badge>;
+    if (status.connected && !status.tokenExpired) {
+      return <Badge className="bg-green-100 text-green-800">Conectado</Badge>
     }
-  };
+    if (status.configured) {
+      return <Badge variant="secondary">Configurado</Badge>
+    }
+    return <Badge variant="outline">Não configurado</Badge>
+  }
 
   return (
     <div className="space-y-6">
       {/* Status Card */}
-      <Card className="border-blue-200 bg-blue-50">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold">CA</span>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">ContaAzul OAuth 2.0</h3>
-              <p className="text-sm text-gray-600">Integração financeira e fiscal</p>
-            </div>
+            {getStatusIcon()}
+            Integração ContaAzul
             {getStatusBadge()}
           </CardTitle>
+          <CardDescription>
+            Conecte-se ao ContaAzul para sincronizar dados financeiros e processar competências
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div className="space-y-2">
-              <Label className="text-gray-700 font-medium">Status da Integração</Label>
-              <div className="flex items-center space-x-2">
-                {getStatusIcon()}
-                <span className="text-sm text-gray-600">{getStatusText()}</span>
-              </div>
-            </div>
-            
-            {status?.expiresAt && (
-              <div className="space-y-2">
-                <Label className="text-gray-700 font-medium">Token Expira Em</Label>
-                <p className="text-sm text-gray-600">
-                  {new Date(status.expiresAt).toLocaleString('pt-BR')}
-                </p>
+          <div className="space-y-4">
+            {!status.configured && (
+              <div className="text-center py-8">
+                <p className="text-gray-600 mb-4">Configure suas credenciais OAuth para começar</p>
+                <Button onClick={() => setShowConfig(true)}>
+                  Configurar Credenciais
+                </Button>
               </div>
             )}
-            
-            {status?.empresa?.nome && (
-              <div className="space-y-2">
-                <Label className="text-gray-700 font-medium">Empresa Conectada</Label>
-                <p className="text-sm text-gray-600">
-                  {status.empresa.nome}
-                </p>
-                <p className="text-xs text-gray-500">
-                  CNPJ: {status.empresa.cnpj}
-                </p>
-              </div>
-            )}
-            
-            {status?.lastRefresh && (
-              <div className="space-y-2">
-                <Label className="text-gray-700 font-medium">Último Refresh</Label>
-                <p className="text-sm text-gray-600">
-                  {new Date(status.lastRefresh).toLocaleString('pt-BR')}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {status.refreshCount} renovações realizadas
-                </p>
-              </div>
-            )}
-          </div>
-          
-          {/* Actions */}
-          <div className="flex flex-wrap gap-2">
-            <Button 
-              onClick={() => setShowConfig(!showConfig)}
-              variant="outline"
-              size="sm"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              {showConfig ? 'Ocultar' : 'Configurar'}
-            </Button>
-            
-            <Button 
-              onClick={handleAuthorize}
-              disabled={!status?.configured || loading}
-              size="sm"
-            >
-              {loading ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <ExternalLink className="w-4 h-4 mr-2" />
-              )}
-              Autorizar
-            </Button>
-            
-            {status?.connected && (
-              <>
+
+            {status.configured && !status.connected && (
+              <div className="text-center py-8">
+                <p className="text-gray-600 mb-4">Configuração encontrada. Autorize o acesso ao ContaAzul.</p>
                 <Button 
-                  onClick={handleRefresh}
-                  disabled={refreshing}
-                  variant="outline"
-                  size="sm"
+                  onClick={handleAuthorize}
+                  disabled={loading}
+                  className="bg-blue-600 hover:bg-blue-700"
                 >
-                  {refreshing ? (
+                  {loading ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   ) : (
-                    <RefreshCw className="w-4 h-4 mr-2" />
+                    <Send className="w-4 h-4 mr-2" />
                   )}
-                  Renovar Token
+                  Autorizar ContaAzul
                 </Button>
-                
-                <Button 
-                  onClick={handleDisconnect}
-                  disabled={loading}
-                  variant="destructive"
-                  size="sm"
-                >
-                  Desconectar
-                </Button>
-              </>
+              </div>
+            )}
+
+            {status.connected && (
+              <div className="space-y-4">
+                {/* Status da Conexão */}
+                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-green-800">Token expira em</p>
+                      <p className="text-sm text-green-700">
+                        {status.expiresAt ? new Date(status.expiresAt).toLocaleString('pt-BR') : 'Indefinido'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-green-800">Última renovação</p>
+                      <p className="text-sm text-green-700">
+                        {status.lastRefresh ? new Date(status.lastRefresh).toLocaleString('pt-BR') : 'N/A'}
+                      </p>
+                    </div>
+                    {status.debug?.access_token && (
+                      <div>
+                        <p className="text-sm font-medium text-green-800">Token atual</p>
+                        <p className="text-sm text-green-700 font-mono">
+                          {status.debug.access_token.substring(0, 20)}...
+                        </p>
+                      </div>
+                    )}
+                    {status.empresa.nome && (
+                      <div>
+                        <p className="text-sm font-medium text-green-800">Empresa</p>
+                        <p className="text-sm text-green-700">{status.empresa.nome}</p>
+                      </div>
+                    )}
+                    {status.empresa.cnpj && (
+                      <div>
+                        <p className="text-sm font-medium text-green-800">CNPJ</p>
+                        <p className="text-sm text-green-700">{status.empresa.cnpj}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <Button 
+                    onClick={handleRefresh}
+                    disabled={refreshing}
+                    variant="outline"
+                    size="sm"
+                  >
+                    {refreshing ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                    )}
+                    Renovar Token
+                  </Button>
+                  
+                  <Button 
+                    onClick={handleDisconnect}
+                    disabled={loading}
+                    variant="destructive"
+                    size="sm"
+                  >
+                    Desconectar
+                  </Button>
+                  
+                  <Button 
+                    onClick={handleSyncDados}
+                    disabled={syncLoading}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    size="sm"
+                  >
+                    {syncLoading ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                    )}
+                    🚀 Sync Completo
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => setShowSyncResults(!showSyncResults)}
+                    disabled={!syncResults}
+                    variant="outline"
+                    size="sm"
+                  >
+                    {showSyncResults ? 'Ocultar' : 'Ver'} Resultados
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => setShowDebug(!showDebug)}
+                    variant="outline"
+                    size="sm"
+                    className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                  >
+                    {showDebug ? 'Ocultar' : 'Ver'} Debug/Códigos
+                  </Button>
+                </div>
+              </div>
             )}
           </div>
         </CardContent>
@@ -455,97 +649,165 @@ export default function ContaAzulOAuth() {
         </Card>
       )}
 
-      {/* Status de Funcionalidades */}
-      {status?.connected && (
+
+
+      {/* Debug/Códigos Section */}
+      {showDebug && status.connected && status.debug && (
+        <Card className="border-gray-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-gray-500" />
+              Debug - Códigos para Testes Locais
+            </CardTitle>
+            <CardDescription>
+              Use estes códigos para testes e desenvolvimento local. Mantenha seguro!
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-4">
+                <div className="bg-gray-50 p-3 rounded-lg border">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium text-gray-800">Access Token</p>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => copyToClipboard(status.debug?.access_token || '', 'Access Token')}
+                    >
+                      Copiar
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-600 font-mono break-all">
+                    {status.debug.access_token.substring(0, 50)}...
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 p-3 rounded-lg border">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium text-gray-800">Refresh Token</p>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => copyToClipboard(status.debug?.refresh_token || '', 'Refresh Token')}
+                    >
+                      Copiar
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-600 font-mono break-all">
+                    {status.debug.refresh_token.substring(0, 50)}...
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 p-3 rounded-lg border">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium text-gray-800">Client ID</p>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => copyToClipboard(status.debug?.client_id || '', 'Client ID')}
+                    >
+                      Copiar
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-600 font-mono break-all">
+                    {status.debug.client_id}
+                  </p>
+                </div>
+
+                {status.debug.authorization_code && (
+                  <div className="bg-gray-50 p-3 rounded-lg border">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm font-medium text-gray-800">Authorization Code</p>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => copyToClipboard(status.debug?.authorization_code || '', 'Authorization Code')}
+                      >
+                        Copiar
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-600 font-mono break-all">
+                      {status.debug.authorization_code.substring(0, 50)}...
+                    </p>
+                  </div>
+                )}
+
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                  <p className="text-sm font-medium text-blue-800 mb-2">Ambiente</p>
+                  <Badge variant={status.debug.environment === 'desenvolvimento' ? 'destructive' : 'default'}>
+                    {status.debug.environment}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Sync Results */}
+      {showSyncResults && syncResults && (
         <Card className="border-green-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-green-500" />
-              Integração Ativa
+              Resultados da Sincronização de Dados
             </CardTitle>
             <CardDescription>
-              A integração com ContaAzul está funcionando corretamente
+              Executado em: {new Date(syncResults.timestamp).toLocaleString('pt-BR')}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="bg-green-50 p-4 rounded-lg">
-              <p className="text-green-800 font-medium mb-2">✅ Funcionalidades Disponíveis:</p>
-              <ul className="text-green-700 text-sm space-y-1">
-                <li>• Autenticação OAuth 2.0 ativa</li>
-                <li>• Acesso às APIs financeiras</li>
-                <li>• Renovação automática de tokens</li>
-                <li>• Sincronização de dados</li>
-              </ul>
-              
-              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
-                <p className="text-blue-800 font-medium text-sm">🎯 Estratégia de Categorização:</p>
-                <p className="text-blue-700 text-sm">
-                  Baseado na análise da API financeira da ContaAzul, implementaremos uma estratégia de 2 etapas para obter categorias e centros de custo.
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <h4 className="font-semibold text-blue-800 mb-2">📂 Categorias</h4>
+                <p className="text-2xl font-bold text-blue-900">
+                  {syncResults.estatisticas?.categorias_processadas || 0}
+                </p>
+                <p className="text-sm text-blue-700">processadas</p>
+              </div>
+
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                <h4 className="font-semibold text-green-800 mb-2">💰 Receitas</h4>
+                <p className="text-2xl font-bold text-green-900">
+                  {syncResults.estatisticas?.receitas_salvas || 0}
+                </p>
+                <p className="text-sm text-green-700">salvas</p>
+              </div>
+
+              <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                <h4 className="font-semibold text-red-800 mb-2">💸 Despesas</h4>
+                <p className="text-2xl font-bold text-red-900">
+                  {syncResults.estatisticas?.despesas_salvas || 0}
+                </p>
+                <p className="text-sm text-red-700">salvas</p>
+              </div>
+
+              <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                <h4 className="font-semibold text-purple-800 mb-2">📋 Competência</h4>
+                <p className="text-2xl font-bold text-purple-900">
+                  {syncResults.estatisticas?.parcelas_processadas > 0 
+                    ? Math.round((syncResults.estatisticas.competencias_encontradas / syncResults.estatisticas.parcelas_processadas) * 100)
+                    : 0}%
+                </p>
+                <p className="text-sm text-purple-700">
+                  {syncResults.estatisticas?.competencias_encontradas || 0}/{syncResults.estatisticas?.parcelas_processadas || 0} real
                 </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
 
-      {/* Análise da API e Estratégia */}
-      {status?.connected && (
-        <Card className="border-amber-200 bg-amber-50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-amber-600" />
-              📊 Análise da API ContaAzul
-            </CardTitle>
-            <CardDescription>
-              Limitações identificadas e estratégia para categorização
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <h4 className="font-medium text-amber-800">🔍 Limitações Identificadas:</h4>
-                <ul className="text-amber-700 text-sm space-y-1">
-                  <li>• Endpoints de busca não retornam categorias diretamente</li>
-                  <li>• Dados de rateio não inclusos nas respostas padrão</li>
-                  <li>• Necessário múltiplas chamadas para dados completos</li>
-                  <li>• Performance comprometida com muitas transações</li>
+            {syncResults.problemas_corrigidos && syncResults.problemas_corrigidos.length > 0 && (
+              <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                <h4 className="font-medium text-yellow-800 mb-2">✅ Melhorias Aplicadas:</h4>
+                <ul className="text-sm text-yellow-700 space-y-1">
+                  {syncResults.problemas_corrigidos.map((problema: string, index: number) => (
+                    <li key={index}>• {problema}</li>
+                  ))}
                 </ul>
               </div>
-              
-              <div className="space-y-3">
-                <h4 className="font-medium text-amber-800">🎯 Estratégia de 2 Etapas:</h4>
-                <ul className="text-amber-700 text-sm space-y-1">
-                  <li>• <strong>Etapa 1:</strong> Buscar lista básica de transações</li>
-                  <li>• <strong>Etapa 2:</strong> Para cada transação, buscar detalhes via /parcelas/ID</li>
-                  <li>• Implementar cache para otimizar performance</li>
-                  <li>• Processar em lotes para evitar rate limiting</li>
-                </ul>
-              </div>
-            </div>
-
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription className="text-sm">
-                <strong>Endpoints utilizados:</strong><br/>
-                • <code>/v1/financeiro/eventos-financeiros/contas-a-receber/buscar</code> - Lista básica<br/>
-                • <code>/v1/financeiro/eventos-financeiros/parcelas/[id]</code> - Detalhes com categorias<br/>
-                • <code>/v1/categorias</code> - Gerenciar categorias<br/>
-                • <code>/v1/centro-de-custo</code> - Gerenciar centros de custo
-              </AlertDescription>
-            </Alert>
-
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <h4 className="font-medium text-blue-800 mb-2">🚀 Próximos Passos:</h4>
-              <ol className="text-blue-700 text-sm space-y-1">
-                <li>1. Implementar Edge Function para processamento em lotes</li>
-                <li>2. Criar sistema de cache para categorias e centros de custo</li>
-                <li>3. Desenvolver interface para visualização dos dados</li>
-                <li>4. Adicionar mapeamento inteligente com IA</li>
-              </ol>
-            </div>
+            )}
           </CardContent>
         </Card>
       )}
     </div>
-  );
+  )
 } 

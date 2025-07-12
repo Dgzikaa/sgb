@@ -1,7 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { logLogout } from '@/lib/audit-logger'
 
 export async function POST(request: NextRequest) {
   try {
+    // Capturar informações do cliente para logging
+    const forwarded = request.headers.get('x-forwarded-for');
+    const clientIp = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+    const sessionId = request.headers.get('x-session-id') || `session_${Date.now()}`;
+    
+    // Tentar obter dados do usuário do cookie antes de limpar
+    let userInfo = null;
+    try {
+      const userCookie = request.cookies.get('sgb_user');
+      if (userCookie?.value) {
+        userInfo = JSON.parse(userCookie.value);
+      }
+    } catch (cookieError) {
+      // Ignorar erro do cookie
+    }
+    
+    // Log de logout
+    await logLogout({
+      userId: userInfo?.id,
+      userEmail: userInfo?.email,
+      userName: userInfo?.nome,
+      barId: userInfo?.bar_id,
+      ipAddress: clientIp,
+      userAgent,
+      sessionId
+    });
+    
     // Criar response
     const response = NextResponse.json(
       { success: true, message: 'Logout realizado com sucesso' },

@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { createEnhancedNotificationService } from './notifications-enhanced';
 import { sgbDiscordService, isHorarioRelatorioMatinal } from './discord-service';
 import { notifyMarketingUpdate } from './discord-marketing-service';
+import DiscordChecklistService from './discord-checklist-service';
 
 // Configuração do Supabase
 const supabase = createClient(
@@ -215,6 +216,7 @@ export class AIIntelligentAgent {
       if (isHorarioRelatorioMatinal()) {
         await this.enviarRelatorioMatinal();
         await this.enviarRelatorioMarketingMatinal();
+        await this.enviarRelatorioChecklistMatinal();
       }
 
       const endTime = new Date();
@@ -1169,6 +1171,76 @@ export class AIIntelligentAgent {
         'erro',
         error.message || String(error)
       );
+    }
+  }
+
+  /**
+   * 📋 Enviar relatório matinal de checklists às 8h
+   */
+  private async enviarRelatorioChecklistMatinal(): Promise<void> {
+    try {
+      console.log('📋 Gerando relatório matinal de checklists...')
+
+      // Buscar estatísticas de ontem
+      const ontem = new Date()
+      ontem.setDate(ontem.getDate() - 1)
+      const dataOntem = ontem.toISOString().split('T')[0]
+
+      // Buscar execuções de ontem
+      const { data: execucoes } = await supabase
+        .from('checklist_execucoes')
+        .select('status, tempo_execucao_minutos, score_final')
+        .eq('bar_id', this.barId)
+        .gte('created_at', `${dataOntem}T00:00:00Z`)
+        .lt('created_at', `${dataOntem}T23:59:59Z`)
+
+      // Buscar alertas ativos agora
+      const { data: alertasData } = await fetch('/api/checklists/alerts')
+        .then(res => res.json())
+        .catch(() => ({ alerts: [] }))
+
+      const totalExecucoes = execucoes?.length || 0
+      const execucoesConcluidas = execucoes?.filter(e => e.status === 'concluido').length || 0
+      const execucoesPendentes = totalExecucoes - execucoesConcluidas
+
+      const temposExecucao = execucoes?.filter(e => e.tempo_execucao_minutos).map(e => e.tempo_execucao_minutos) || []
+      const tempoMedio = temposExecucao.length > 0 ? temposExecucao.reduce((a, b) => a + b, 0) / temposExecucao.length : 0
+
+      const scores = execucoes?.filter(e => e.score_final).map(e => e.score_final) || []
+      const scoreMedio = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0
+
+      const alertasAtivos = alertasData?.alerts?.length || 0
+      const alertasCriticos = alertasData?.alerts?.filter((a: any) => a.nivel === 'critico').length || 0
+
+      const checklistStats = {
+        total_execucoes: totalExecucoes,
+        execucoes_concluidas: execucoesConcluidas,
+        execucoes_pendentes: execucoesPendentes,
+        tempo_medio_execucao: tempoMedio,
+        score_medio: scoreMedio,
+        alertas_ativos: alertasAtivos,
+        alertas_criticos: alertasCriticos
+      }
+
+      // Enviar para Discord
+      await DiscordChecklistService.sendDailyReport(checklistStats)
+      console.log('✅ Relatório matinal de checklists enviado para Discord')
+
+      // Log da ação
+      await this.logProcess(
+        'relatorio_checklist',
+        'Relatório Checklist Matinal Enviado',
+        'concluido'
+      )
+
+    } catch (error: any) {
+      console.error('❌ Erro ao enviar relatório matinal de checklists:', error)
+      await this.logProcess(
+        'relatorio_checklist',
+        'Erro no Relatório Checklist Matinal',
+        'erro',
+        error.message || String(error)
+      )
     }
   }
 

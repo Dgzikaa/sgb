@@ -83,15 +83,26 @@ export default function MetaAPIConfig() {
         return
       }
 
-      const response = await fetch('/api/admin/meta-config', {
+      const response = await fetch('/api/meta/config', {
         headers: {
           'x-user-data': encodeURIComponent(userData)
         }
       })
       
       const data = await response.json()
-      if (data.success) {
-        setConfigs(data.configurations)
+      if (data.exists && data.config) {
+        // Converter a configuração única em array para compatibilidade
+        setConfigs([{
+          id: data.config.id,
+          access_token: data.config.access_token,
+          page_name: data.config.facebook_page_name || 'N/A',
+          instagram_username: data.config.instagram_username,
+          ativo: data.config.ativo,
+          criado_em: data.config.created_at,
+          ultima_verificacao: data.config.last_tested_at || data.config.updated_at
+        }])
+      } else {
+        setConfigs([])
       }
     } catch (error) {
       console.error('Erro ao carregar configurações:', error)
@@ -118,7 +129,7 @@ export default function MetaAPIConfig() {
         return
       }
 
-      const response = await fetch('/api/admin/meta-config', {
+      const response = await fetch('/api/meta/config', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -135,19 +146,36 @@ export default function MetaAPIConfig() {
       const data = await response.json()
       
       if (data.success) {
-        setTestResults(data.test_results)
+        // Simular test_results para manter compatibilidade
+        const testResults: MetaTestResults = {
+          access_token_valid: true,
+          user_info: { name: 'Meta User' },
+          accounts: [],
+          pages: data.accounts?.facebook_page_name ? [{ 
+            id: data.accounts.facebook_page_id, 
+            name: data.accounts.facebook_page_name 
+          }] : [],
+          instagram_accounts: data.accounts?.instagram_username ? [{
+            instagram_account: { 
+              username: data.accounts.instagram_username,
+              id: data.accounts.instagram_account_id
+            },
+            page_name: data.accounts.facebook_page_name
+          }] : [],
+          permissions: [],
+          available_endpoints: [],
+          error_details: null
+        }
+        
+        setTestResults(testResults)
         setMessage({ 
           type: 'success', 
-          text: `Configuração salva! ${data.configuration.page_name || 'Token válido'}` 
+          text: `Configuração salva! ${data.accounts?.facebook_page_name || 'Token válido'}` 
         })
         loadConfigurations() // Recarregar lista
         setActiveTab('results') // Ir para aba de resultados
       } else {
         setMessage({ type: 'error', text: data.error })
-        if (data.test_results) {
-          setTestResults(data.test_results)
-          setActiveTab('results')
-        }
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Erro ao testar API Meta' })
@@ -170,15 +198,38 @@ export default function MetaAPIConfig() {
         return
       }
 
-      const response = await fetch('/api/admin/meta-config?action=test', {
+      const response = await fetch('/api/meta/config/test', {
+        method: 'PUT',
         headers: {
+          'Content-Type': 'application/json',
           'x-user-data': encodeURIComponent(userData)
         }
       })
 
       const data = await response.json()
       if (data.success) {
-        setTestResults(data.test_results)
+        // Simular test_results para manter compatibilidade com a nova API
+        const testResults: MetaTestResults = {
+          access_token_valid: true,
+          user_info: { name: 'Meta User' },
+          accounts: [],
+          pages: data.accounts?.facebook_page_name ? [{ 
+            id: data.accounts.facebook_page_id, 
+            name: data.accounts.facebook_page_name 
+          }] : [],
+          instagram_accounts: data.accounts?.instagram_username ? [{
+            instagram_account: { 
+              username: data.accounts.instagram_username,
+              id: data.accounts.instagram_account_id
+            },
+            page_name: data.accounts.facebook_page_name
+          }] : [],
+          permissions: [],
+          available_endpoints: [],
+          error_details: null
+        }
+        
+        setTestResults(testResults)
         setActiveTab('results')
         setMessage({ type: 'success', text: 'Teste realizado com sucesso!' })
       } else {

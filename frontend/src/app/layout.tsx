@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import '../styles/assistant.css'
-import { PWAInstaller } from '@/components/PWAInstaller'
 import { ToastProvider, GlobalToastListener } from '@/components/ui/toast'
 import { ConfirmDialogProvider, GlobalConfirmListener } from '@/components/ui/confirm-dialog'
 
@@ -48,12 +47,11 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
+  themeColor: '#6366f1',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  viewportFit: 'cover',
-  themeColor: '#6366f1',
 }
 
 export default function RootLayout({
@@ -78,7 +76,6 @@ export default function RootLayout({
           <ConfirmDialogProvider>
             <div className="min-h-screen">
               {children}
-              <PWAInstaller />
               <GlobalToastListener />
               <GlobalConfirmListener />
             </div>

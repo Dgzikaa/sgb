@@ -129,7 +129,7 @@ export function usePermissions(): PermissionsHook {
     
     try {
       setLoading(true)
-      const response = await fetch(`/api/admin/usuarios/${user.id}`)
+      const response = await fetch(`/api/usuarios/${user.id}`)
       if (response.ok) {
         const userData = await response.json()
         if (userData.success && userData.user) {

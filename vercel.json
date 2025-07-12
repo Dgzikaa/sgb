@@ -14,6 +14,7 @@
     }
   },
   "env": {
-    "CRON_SECRET": "@cron_secret"
+    "CRON_SECRET": "@cron_secret",
+    "TZ": "America/Sao_Paulo"
   }
 } 

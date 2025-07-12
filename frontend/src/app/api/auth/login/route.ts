@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { createClient } from '@supabase/supabase-js'
+import { logLoginSuccess, logLoginFailure } from '@/lib/audit-logger'
 
 export async function POST(request: NextRequest) {
   console.log('🚀 API de login iniciada')
+  
+  // Capturar informações do cliente para logging
+  const forwarded = request.headers.get('x-forwarded-for');
+  const clientIp = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown';
+  const userAgent = request.headers.get('user-agent') || 'unknown';
+  const sessionId = request.headers.get('x-session-id') || `session_${Date.now()}`;
   
   // Verificar variáveis de ambiente logo no início
   console.log('🔍 Verificando variáveis de ambiente...')
@@ -18,6 +25,14 @@ export async function POST(request: NextRequest) {
     console.log('🔐 Tentativa de login:', { email })
 
     if (!email || !senha) {
+      await logLoginFailure({
+        email: email || 'não fornecido',
+        reason: 'Email e senha são obrigatórios',
+        ipAddress: clientIp,
+        userAgent,
+        sessionId
+      });
+      
       return NextResponse.json(
         { success: false, error: 'Email e senha são obrigatórios' },
         { status: 400 }
@@ -54,6 +69,15 @@ export async function POST(request: NextRequest) {
 
     if (authError || !authData.user) {
       console.log('❌ Falha na autenticação:', authError?.message)
+      
+      await logLoginFailure({
+        email,
+        reason: authError?.message || 'Usuário não encontrado',
+        ipAddress: clientIp,
+        userAgent,
+        sessionId
+      });
+      
       return NextResponse.json(
         { success: false, error: 'Email ou senha incorretos' },
         { status: 401 }
@@ -160,6 +184,14 @@ export async function POST(request: NextRequest) {
       
       // Se ainda não encontrou usuário, retornar erro
       if (!usuarios || usuarios.length === 0) {
+        await logLoginFailure({
+          email,
+          reason: 'Usuário não encontrado ou inativo na tabela usuarios_bar',
+          ipAddress: clientIp,
+          userAgent,
+          sessionId
+        });
+        
         return NextResponse.json(
           { success: false, error: 'Usuário não encontrado ou inativo' },
           { status: 401 }
@@ -272,6 +304,18 @@ export async function POST(request: NextRequest) {
 
     console.log('🎉 LOGIN BEM-SUCEDIDO para:', usuarioPrincipal.nome)
     
+    // Log de login bem-sucedido
+    await logLoginSuccess({
+      userId: usuarioPrincipal.user_id,
+      userEmail: usuarioPrincipal.email,
+      userName: usuarioPrincipal.nome,
+      userRole: usuarioPrincipal.role,
+      barId: usuarioPrincipal.bar_id,
+      ipAddress: clientIp,
+      userAgent,
+      sessionId
+    });
+    
     // Criar resposta com cookie para o middleware
     const nextResponse = NextResponse.json(response)
     
@@ -294,6 +338,16 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('🔥 Erro fatal na API de login:', error)
+    
+    // Log de erro interno 
+    await logLoginFailure({
+      email: 'unknown',
+      reason: `Erro interno do servidor: ${error.message}`,
+      ipAddress: clientIp,
+      userAgent,
+      sessionId
+    });
+    
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },
       { status: 500 }

@@ -1,0 +1,46 @@
+# REGRAS DE ORGANIZAÇÃO - SGB_V2
+
+## ESTRUTURA OBRIGATÓRIA
+
+### Frontend (frontend/src/app/)
+- APIs: SEMPRE em `/api/[funcionalidade]/route.ts`
+- Páginas: SEMPRE em `/paginas/[categoria]/page.tsx`
+
+### NUNCA CRIAR:
+- /admin/ (ELIMINADA COMPLETAMENTE)
+- /api/admin/ (ELIMINADA COMPLETAMENTE)
+- APIs fora de /api/
+- Páginas fora de /paginas/
+
+### ESTRUTURA CORRETA:
+```
+src/app/
+├── api/                    ← TODAS AS APIS (route.ts)
+│   ├── usuarios/
+│   ├── bars/
+│   ├── eventos/
+│   ├── contahub/
+│   └── [outras-apis]/
+└── paginas/               ← TODAS AS PÁGINAS (page.tsx)
+    ├── configuracoes/     ← Ex-admin
+    ├── relatorios/
+    ├── operacoes/
+    ├── funcionario/
+    └── [outras-páginas]/
+```
+
+### ROTAS NO CÓDIGO:
+- Sidebar: `/paginas/[categoria]/[página]`
+- Fetch: `/api/[funcionalidade]`
+- Router: `router.push('/paginas/[categoria]')`
+
+### CHECKLIST OBRIGATÓRIO:
+1. É API? → `/api/[nome]/route.ts`
+2. É página? → `/paginas/[categoria]/page.tsx`
+3. Não duplica estrutura existente?
+4. Segue nomenclatura kebab-case?
+
+### BACKEND (backend/supabase/functions/)
+- Edge Functions: `[nome-function]/index.ts`
+- Sempre TypeScript + Deno imports
+- CORS obrigatório em todas as functions 

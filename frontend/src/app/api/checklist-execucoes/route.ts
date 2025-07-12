@@ -1,5 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import DiscordChecklistService from '@/lib/discord-checklist-service'
+
+// Forçar renderização dinâmica devido ao uso de request.url
+export const dynamic = 'force-dynamic';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -86,13 +90,14 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Calcular nota geral usando sistema inteligente
+    let scoreResult: any = null
     try {
       const { calcularScoreFinal } = await import('@/lib/checklist-scoring')
       const mockExecucao = {
         respostas: { secoes: respostas.map((r: any) => ({ itens: [r] })) },
         estrutura_checklist: { secoes: [] } // Estrutura simplificada para compatibilidade
       }
-      const scoreResult = calcularScoreFinal(mockExecucao)
+      scoreResult = calcularScoreFinal(mockExecucao)
       
       // Atualizar execução com score calculado
       const { error: scoreError } = await supabase
@@ -113,10 +118,51 @@ export async function POST(request: NextRequest) {
       console.error('❌ Erro no cálculo de score:', scoreError)
     }
 
+    // 4. 🔥 ENVIAR NOTIFICAÇÃO DISCORD DE CONCLUSÃO
+    try {
+      // Buscar dados do checklist e usuário para notificação completa
+      const { data: checklistData } = await supabase
+        .from('checklists')
+        .select('nome, categoria, setor')
+        .eq('id', checklist_id)
+        .single()
+
+      const { data: userData } = await supabase
+        .from('usuarios_sistema')
+        .select('nome')
+        .eq('id', responsavel_id)
+        .single()
+
+      if (checklistData && userData) {
+        const executionNotification = {
+          id: execucao.id,
+          checklist_id: checklist_id,
+          titulo: checklistData.nome || 'Checklist',
+          responsavel: userData.nome || 'Usuário',
+          setor: checklistData.setor || 'Não informado',
+          tempo_execucao: tempo_execucao || 0,
+          total_itens: total_itens || 0,
+          itens_ok: itens_ok || 0,
+          itens_problema: itens_problema || 0,
+          status: 'concluido',
+          observacoes_gerais: observacoes_gerais || '',
+          concluido_em: execucao.concluido_em,
+          pontuacao_final: scoreResult?.score_total || null
+        }
+
+        await DiscordChecklistService.sendCompletion(executionNotification)
+        console.log(`🎯 Notificação Discord enviada: ${checklistData.nome} concluído por ${userData.nome}`)
+      }
+    } catch (discordError) {
+      console.error('❌ Erro ao enviar notificação Discord:', discordError)
+      // Não falhar a operação se só o Discord der erro
+    }
+
     return NextResponse.json({
       success: true,
       execucao_id: execucao.id,
-      message: 'Checklist enviado com sucesso!'
+      message: 'Checklist enviado com sucesso!',
+      discord_notification: true
     })
 
   } catch (error: any) {

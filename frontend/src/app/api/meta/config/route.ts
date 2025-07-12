@@ -47,29 +47,22 @@ export async function GET(request: NextRequest) {
 
     console.log('🔍 Buscando configuração Meta para bar:', bar_id)
 
+    // Buscar na tabela api_credentials com sistema 'meta'
     const { data: config, error } = await supabase
-      .from('meta_configuracoes')
+      .from('api_credentials')
       .select(`
         id,
         access_token,
-        app_id,
-        app_secret,
-        facebook_page_id,
-        instagram_account_id,
+        client_id,
+        client_secret,
+        configuracoes_extras,
         ativo,
-        api_version,
-        coleta_automatica,
-        frequencia_coleta_horas,
-        horario_coleta_preferido,
-        dias_retencao_dados,
-        rate_limit_per_hour,
-        ultima_coleta,
-        proxima_coleta,
         created_at,
         updated_at,
         last_tested_at
       `)
       .eq('bar_id', bar_id)
+      .eq('sistema', 'meta')
       .single()
 
     if (error && error.code !== 'PGRST116') {
@@ -83,6 +76,7 @@ export async function GET(request: NextRequest) {
         exists: false,
         config: {
           ativo: false,
+          sistema: 'meta',
           api_version: 'v18.0',
           coleta_automatica: true,
           frequencia_coleta_horas: 6,
@@ -92,11 +86,28 @@ export async function GET(request: NextRequest) {
       })
     }
 
+    // Extrair configurações extras do JSON
+    const configExtras = config.configuracoes_extras || {}
+    
     // Mascarar dados sensíveis para retorno
     const configSafe = {
-      ...config,
+      id: config.id,
       access_token: config.access_token ? '***' + config.access_token.slice(-8) : null,
-      app_secret: config.app_secret ? '***' + config.app_secret.slice(-4) : null
+      app_id: config.client_id,
+      app_secret: config.client_secret ? '***' + config.client_secret.slice(-4) : null,
+      ativo: config.ativo,
+      sistema: 'meta',
+      created_at: config.created_at,
+      updated_at: config.updated_at,
+      last_tested_at: config.last_tested_at,
+      // Configurações extras vindas do JSON
+      facebook_page_id: configExtras.facebook_page_id,
+      instagram_account_id: configExtras.instagram_account_id,
+      api_version: configExtras.api_version || 'v18.0',
+      coleta_automatica: configExtras.coleta_automatica !== false,
+      frequencia_coleta_horas: configExtras.frequencia_coleta_horas || 6,
+      horario_coleta_preferido: configExtras.horario_coleta_preferido || '09:00',
+      rate_limit_per_hour: configExtras.rate_limit_per_hour || 200
     }
 
     console.log('✅ Configuração Meta encontrada')
@@ -175,17 +186,33 @@ export async function POST(request: NextRequest) {
       proximaColeta.setDate(proximaColeta.getDate() + 1)
     }
 
-    // Salvar no banco
+    // Preparar configurações extras para salvar no JSON
+    const configuracoes_extras = {
+      facebook_page_id: enhancedConfig.facebook_page_id,
+      instagram_account_id: enhancedConfig.instagram_account_id,
+      api_version: enhancedConfig.api_version || 'v18.0',
+      coleta_automatica: enhancedConfig.coleta_automatica !== false,
+      frequencia_coleta_horas: enhancedConfig.frequencia_coleta_horas || 6,
+      horario_coleta_preferido: enhancedConfig.horario_coleta_preferido || '09:00',
+      rate_limit_per_hour: enhancedConfig.rate_limit_per_hour || 200,
+      proxima_coleta: proximaColeta.toISOString(),
+      accounts: testResult.accounts
+    }
+
+    // Salvar na tabela api_credentials com sistema 'meta'
     const { data, error } = await supabase
-      .from('meta_configuracoes')
+      .from('api_credentials')
       .upsert({
         bar_id,
-        ...enhancedConfig,
+        sistema: 'meta',
+        access_token: enhancedConfig.access_token,
+        client_id: enhancedConfig.app_id,
+        client_secret: enhancedConfig.app_secret,
+        configuracoes_extras,
         ativo: true,
-        proxima_coleta: proximaColeta.toISOString(),
         last_tested_at: new Date().toISOString()
       }, {
-        onConflict: 'bar_id'
+        onConflict: 'bar_id,sistema'
       })
       .select()
       .single()
@@ -195,13 +222,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao salvar configuração' }, { status: 500 })
     }
 
-    console.log('✅ Configuração Meta salva com sucesso')
+    console.log('✅ Configuração Meta salva com sucesso na tabela api_credentials')
 
     // Retornar dados mascarados
     const responseSafe = {
-      ...data,
+      id: data.id,
+      sistema: 'meta',
       access_token: '***' + data.access_token.slice(-8),
-      app_secret: '***' + data.app_secret.slice(-4)
+      app_id: data.client_id,
+      app_secret: '***' + data.client_secret.slice(-4),
+      ativo: data.ativo,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      ...configuracoes_extras
     }
 
     return NextResponse.json({
@@ -388,9 +421,10 @@ export async function DELETE(request: NextRequest) {
     console.log('❌ Removendo configuração Meta para bar:', bar_id)
 
     const { error } = await supabase
-      .from('meta_configuracoes')
+      .from('api_credentials')
       .update({ ativo: false })
       .eq('bar_id', bar_id)
+      .eq('sistema', 'meta')
 
     if (error) {
       console.error('❌ Erro ao desativar configuração Meta:', error)

@@ -1,24 +1,71 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  output: 'standalone',
   experimental: {
-    serverActions: {
-      bodySizeLimit: '2mb',
-    },
+    optimizePackageImports: ['lucide-react', 'recharts'],
   },
-  // Ignorar erros de TypeScript durante o build
-  typescript: {
-    ignoreBuildErrors: true,
+  
+  // Otimizações de performance
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
   },
-  // Ignorar erros de ESLint durante o build
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  // Configurar para funcionar com Netlify
+  
+  // Configuração de bundling otimizada
+  swcMinify: true,
+  
+  // Configuração de imagens
   images: {
-    unoptimized: true,
+    formats: ['image/webp', 'image/avif'],
+    minimumCacheTTL: 60,
   },
-}
+  
+  // Webpack customizado
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Otimizações de produção
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            priority: 10,
+            reuseExistingChunk: true,
+          },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            priority: 5,
+            reuseExistingChunk: true,
+          },
+        },
+      };
+    }
+    
+    return config;
+  },
+  
+  // Headers para melhor performance
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+        ],
+      },
+    ];
+  },
+};
 
-module.exports = nextConfig 
+module.exports = nextConfig; 

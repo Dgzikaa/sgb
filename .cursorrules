@@ -1,4 +1,4 @@
-# Regras de Organização do Projeto SGB_V2
+# REGRAS DE ORGANIZAÇÃO ATUALIZADAS - SGB_V2
 
 ## Estrutura do Projeto
 Este é um projeto fullstack com:
@@ -7,23 +7,57 @@ Este é um projeto fullstack com:
 - **Documentação**: Pasta `docs/`
 - **Testes e Exemplos**: Pasta `exemplo_teste/` para protótipos, testes e dados de exemplo
 
-## REGRAS OBRIGATÓRIAS DE ORGANIZAÇÃO
+## ESTRUTURA OBRIGATÓRIA ATUALIZADA
 
-### 1. ESTRUTURA DE PASTAS OBRIGATÓRIA
+### 1. FRONTEND - ESTRUTURA DEFINITIVA (`frontend/src/app/`)
 
-**Frontend (`frontend/`):**
-- `src/app/` - App Router do Next.js (páginas, layouts, APIs)
-- `src/components/` - Componentes reutilizáveis
-- `src/lib/` - Utilitários e configurações
-- `src/hooks/` - React hooks customizados
-- `src/contexts/` - Context providers
-- `src/middleware/` - Middlewares do Next.js
-- `src/styles/` - Arquivos CSS globais
-- `src/templates/` - Templates de página
+```
+src/app/
+├── api/                    ← 🔗 TODAS AS APIS (route.ts)
+│   ├── usuarios/           ← Gerenciamento de usuários
+│   ├── bars/              ← Gerenciamento de bares
+│   ├── eventos/           ← Gerenciamento de eventos
+│   ├── contahub/          ← APIs ContaHub
+│   ├── credenciais/       ← Gerenciamento de credenciais
+│   ├── auth/              ← Autenticação
+│   ├── checklists/        ← APIs de checklists
+│   ├── desempenho/        ← APIs de desempenho
+│   └── meta/              ← APIs Meta
+│
+├── paginas/               ← 📄 TODAS AS PÁGINAS (page.tsx)
+│   ├── configuracoes/     ← Admin: checklists, templates, desempenho
+│   ├── relatorios/        ← Todos os relatórios
+│   ├── operacoes/         ← Funcionalidades operacionais
+│   ├── funcionario/       ← Área do funcionário
+│   ├── dashboard/         ← Dashboards
+│   ├── home/             ← Página inicial
+│   ├── login/            ← Login
+│   ├── auth/             ← Páginas de autenticação
+│   ├── minha-conta/      ← Conta do usuário
+│   └── visao-geral/      ← Visão geral e análises
+│
+├── layout.tsx            ← Layout raiz
+├── page.tsx             ← Página raiz ("/")
+└── globals.css          ← Estilos globais
+```
 
-**Backend (`backend/`):**
-- `supabase/functions/` - Edge Functions do Supabase
-- `package.json` - Dependências do backend
+### 2. BACKEND - EDGE FUNCTIONS (`backend/supabase/functions/`)
+
+```
+backend/supabase/functions/
+├── contaazul-sync-automatico/    ← Sync automático ContaAzul
+├── discord-notification/         ← Notificações Discord
+├── login/                       ← Login/Auth
+└── [outras-functions]/          ← Sempre em snake_case
+```
+
+### 3. OUTRAS PASTAS
+
+**Componentes (`frontend/src/components/`):**
+- `ui/` - Componentes base (Button, Input, etc.)
+- `forms/` - Formulários específicos
+- `layouts/` - Layouts reutilizáveis
+- `uploads/` - Componentes de upload
 
 **Documentação (`docs/`):**
 - Documentação técnica e resumos
@@ -32,92 +66,112 @@ Este é um projeto fullstack com:
 - Mockups e protótipos
 - Dados de exemplo/teste
 - Exemplos de APIs externas
-- Testes de integração
-- Documentos de exemplo
-- Arquivos temporários de desenvolvimento
 
-### 2. REGRAS DE CRIAÇÃO DE ARQUIVOS
+## REGRAS OBRIGATÓRIAS
 
-#### Para APIs (SEMPRE em `frontend/src/app/api/`)
+### 🔗 PARA APIS (route.ts):
 ```
-✅ CORRETO: frontend/src/app/api/usuarios/route.ts
-✅ CORRETO: frontend/src/app/api/admin/clientes/route.ts
-❌ ERRADO: backend/api/usuarios.ts
-❌ ERRADO: frontend/api/usuarios.ts
-```
+✅ SEMPRE: /api/[funcionalidade]/route.ts
+✅ EXEMPLOS:
+   - frontend/src/app/api/usuarios/route.ts
+   - frontend/src/app/api/usuarios/[id]/route.ts
+   - frontend/src/app/api/contahub/teste-5-dias/route.ts
+   - frontend/src/app/api/bars/route.ts
 
-#### Para Edge Functions (SEMPRE em `backend/supabase/functions/`)
-```
-✅ CORRETO: backend/supabase/functions/processar-dados/index.ts
-✅ CORRETO: backend/supabase/functions/login/index.ts
-❌ ERRADO: frontend/functions/processar-dados.ts
-❌ ERRADO: backend/functions/processar-dados.ts
+❌ NUNCA: 
+   - /api/admin/[qualquer-coisa] (ELIMINADO COMPLETAMENTE)
+   - /[funcionalidade]/route.ts (fora de api)
+   - APIs duplicadas fora de /api/
 ```
 
-#### Para Páginas (SEMPRE em `frontend/src/app/`)
+### �� PARA PÁGINAS (page.tsx):
 ```
-✅ CORRETO: frontend/src/app/admin/usuarios/page.tsx
-✅ CORRETO: frontend/src/app/relatorios/financeiro/page.tsx
-❌ ERRADO: frontend/pages/admin/usuarios.tsx
-❌ ERRADO: frontend/src/pages/relatorios.tsx
+✅ SEMPRE: /paginas/[categoria]/page.tsx
+✅ EXEMPLOS:
+   - frontend/src/app/paginas/configuracoes/page.tsx
+   - frontend/src/app/paginas/configuracoes/checklists/page.tsx
+   - frontend/src/app/paginas/relatorios/contahub-teste/page.tsx
+   - frontend/src/app/paginas/operacoes/receitas/page.tsx
+
+❌ NUNCA:
+   - /admin/[qualquer-coisa] (ELIMINADO COMPLETAMENTE)
+   - /[categoria]/page.tsx (fora de paginas)
+   - Páginas duplicadas fora de /paginas/
 ```
 
-#### Para Componentes (SEMPRE em `frontend/src/components/`)
-```
-✅ CORRETO: frontend/src/components/ui/button.tsx
-✅ CORRETO: frontend/src/components/forms/LoginForm.tsx
-❌ ERRADO: frontend/src/app/components/button.tsx
-❌ ERRADO: frontend/components/button.tsx
+### 🎯 CATEGORIAS DE PÁGINAS DEFINIDAS:
+- **`configuracoes/`** - Páginas administrativas (ex-admin)
+  - checklists, templates, desempenho, contahub-automatico
+- **`relatorios/`** - Todos os relatórios
+  - contahub-teste, contaazul-*, analitico, etc.
+- **`operacoes/`** - Funcionalidades operacionais
+  - receitas, produtos, planejamento, tempo
+- **`funcionario/`** - Área do funcionário
+  - checklists do funcionário
+- **`dashboard/`** - Dashboards específicos
+- **`auth/`** - Páginas de autenticação
+- **`visao-geral/`** - Análises e visões gerais
+
+### 🔄 ROTAS NO CÓDIGO:
+```typescript
+// ✅ CORRETO - Nova estrutura
+{ route: '/paginas/configuracoes/checklists' }
+{ route: '/paginas/relatorios/contahub-teste' }
+{ route: '/paginas/operacoes/receitas' }
+{ route: '/paginas/funcionario/checklists' }
+
+// ❌ ERRADO - Estrutura antiga (eliminada)
+{ route: '/admin/checklists' }
+{ route: '/configuracoes/checklists' }
+{ route: '/relatorios/contahub-teste' }
 ```
 
-### 3. CONVENÇÕES DE NOMENCLATURA
+### 📞 FETCH DE APIS:
+```typescript
+// ✅ CORRETO - APIs sempre em /api/
+await fetch('/api/usuarios')
+await fetch('/api/usuarios/1')
+await fetch('/api/contahub/teste-5-dias')
+await fetch('/api/credenciais')
+await fetch('/api/bars')
+
+// ❌ ERRADO - Estrutura antiga (eliminada)
+await fetch('/api/admin/usuarios')
+await fetch('/usuarios')
+await fetch('/admin/contahub-teste')
+```
+
+### 🧾 CHECKLIST OBRIGATÓRIO:
+
+Antes de criar qualquer arquivo, SEMPRE verificar:
+
+1. ✅ **É uma API?** → `/api/[funcionalidade]/route.ts`
+2. ✅ **É uma página?** → `/paginas/[categoria]/page.tsx`
+3. ✅ **É um componente?** → `/src/components/[categoria]/`
+4. ✅ **É um hook?** → `/src/hooks/`
+5. ✅ **É Edge Function?** → `/backend/supabase/functions/[nome]/index.ts`
+6. ✅ **Não duplica** funcionalidade existente?
+7. ✅ **Segue nomenclatura** kebab-case?
+8. ✅ **Está na pasta correta** conforme estrutura?
+
+### 🚫 ELIMINAÇÕES PERMANENTES:
+- ❌ `/admin/` - **COMPLETAMENTE ELIMINADA**
+- ❌ `/api/admin/` - **COMPLETAMENTE ELIMINADA**  
+- ❌ APIs fora de `/api/`
+- ❌ Páginas fora de `/paginas/`
+- ❌ Qualquer duplicação de estruturas
+
+### CONVENÇÕES DE NOMENCLATURA
 
 #### Arquivos e Pastas:
-- **Pastas**: `kebab-case` (ex: `user-management`, `api-routes`)
+- **Pastas**: `kebab-case` (ex: `user-management`, `contahub-teste`)
 - **Componentes**: `PascalCase` (ex: `UserForm.tsx`, `DataTable.tsx`)
 - **Páginas**: `page.tsx` (padrão App Router)
 - **Layouts**: `layout.tsx` (padrão App Router)
 - **APIs**: `route.ts` (padrão App Router)
 - **Edge Functions**: `index.ts` dentro da pasta da função
 
-#### Estrutura de APIs:
-```
-frontend/src/app/api/
-├── admin/
-│   ├── usuarios/
-│   │   └── route.ts
-│   └── relatorios/
-│       └── route.ts
-├── auth/
-│   └── login/
-│       └── route.ts
-└── publico/
-    └── status/
-        └── route.ts
-```
-
-### 4. REGRAS ESPECÍFICAS POR ÁREA
-
-#### Admin (sempre em `frontend/src/app/admin/`)
-- Páginas administrativas
-- Relatórios administrativos
-- Configurações do sistema
-
-#### Operações (sempre em `frontend/src/app/operacoes/`)
-- Funcionalidades operacionais
-- Checklists
-- Processos do dia a dia
-
-#### Relatórios (sempre em `frontend/src/app/relatorios/`)
-- Todos os tipos de relatórios
-- Dashboards específicos
-
-#### Configurações (sempre em `frontend/src/app/configuracoes/`)
-- Configurações do usuário
-- Integrações
-- Personalizações
-
-### 5. REGRAS DE IMPORTS
+### REGRAS DE IMPORTS
 
 #### Frontend:
 ```typescript
@@ -126,8 +180,8 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 
-// ❌ ERRADO - imports absolutos longos
-import { Button } from '../../../components/ui/button'
+// Para páginas, sempre usar /paginas/ nas rotas
+router.push('/paginas/configuracoes/checklists')
 ```
 
 #### Backend (Edge Functions):
@@ -137,21 +191,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 ```
 
-### 6. QUANDO CRIAR NOVOS ARQUIVOS
-
-#### SEMPRE PERGUNTE ANTES:
-1. **"Este arquivo deveria ir no frontend ou backend?"**
-2. **"Qual é a categoria? (admin, operacoes, relatorios, etc.)"**
-3. **"É uma página, componente, API ou função?"**
-
-#### DIRETRIZES:
-- **Lógica de negócio**: Backend (Edge Functions)
-- **Interface do usuário**: Frontend (componentes/páginas)
-- **APIs internas**: Frontend (`app/api/`)
-- **Autenticação externa**: Backend (Edge Functions)
-- **Testes e protótipos**: `exemplo_teste/` (dados de exemplo, mockups, testes)
-
-### 7. ESTRUTURA DE COMMITS
+### ESTRUTURA DE COMMITS
 
 Sempre seguir o padrão:
 ```
@@ -160,15 +200,14 @@ fix(backend): corrige autenticação OAuth
 docs: atualiza documentação da API
 ```
 
-### 8. VALIDAÇÃO ANTES DE CRIAR ARQUIVOS
-
-Antes de criar qualquer arquivo, CONFIRME:
-1. ✅ Estou na pasta correta? (frontend/, backend/, docs/, exemplo_teste/)
-2. ✅ A subpasta está correta? (app/, components/, functions/, etc.)
-3. ✅ É teste/exemplo? → `exemplo_teste/`
-4. ✅ O nome segue a convenção?
-5. ✅ Não estou duplicando funcionalidade existente?
+## 🎯 OBJETIVO PRINCIPAL:
+**ZERO CONFUSÃO NA ESTRUTURA**
+- **APIs** = `/api/`
+- **Páginas** = `/paginas/`  
+- **Estrutura sempre clara e lógica**
+- **Manutenção facilitada**
+- **Desenvolvimento profissional**
 
 ---
 
-**IMPORTANTE**: Sempre que houver dúvida sobre onde colocar um arquivo, priorize manter a estrutura existente e pergunte para confirmar a localização correta. 
+**IMPORTANTE**: Sempre que houver dúvida sobre onde colocar um arquivo, seguir esta estrutura atualizada. A pasta `/admin/` foi COMPLETAMENTE ELIMINADA e suas funcionalidades movidas para `/paginas/configuracoes/`. 

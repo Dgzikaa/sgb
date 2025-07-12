@@ -85,81 +85,24 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // Verificação da senha
-    const senhasValidas = {
-      'rodrigo@grupomenosemais.com.br': 'Geladeira@001'
-    }
-
-    if (senhasValidas[email as keyof typeof senhasValidas] !== password) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Senha incorreta' }),
-        { 
-          status: 401, 
-          headers: { 
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-          } 
-        }
-      )
-    }
-
-    // Pegar dados do usuário
-    const usuarioPrincipal = usuarios[0]
+    // REMOVIDO: Sistema de senhas hardcoded foi eliminado por segurança
+    // A autenticação deve ser feita exclusivamente via Supabase Auth
     
-    // Buscar dados completos dos bares que o usuário tem acesso
-    const barIds = [...new Set(usuarios.map(u => u.bar_id))]
-    
-    const { data: barsData } = await supabase
-      .from('bars')
-      .select('id, nome')
-      .in('id', barIds)
-      .eq('ativo', true)
-    
-    // Combinar dados dos bares com permissões do usuário
-    const baresAcesso = usuarios.map(u => {
-      const barInfo = barsData?.find(b => b.id === u.bar_id)
-      return {
-        id: u.bar_id,
-        nome: barInfo?.nome || 'Bar não encontrado',
-        role: u.role,
-        modulos_permitidos: u.modulos_permitidos
-      }
-    })
-
-    // Buscar credenciais de APIs para cada bar
-    const credenciaisPromises = baresAcesso.map(async (bar) => {
-      const { data: credenciais } = await supabase
-        .from('api_credentials')
-        .select('*')
-        .eq('bar_id', bar.bar_id)
-        .eq('ativo', true)
-
-      return {
-        bar_id: bar.bar_id,
-        credenciais: credenciais || []
-      }
-    })
-
-    const credenciaisPorBar = await Promise.all(credenciaisPromises)
-
-    const response: LoginResponse = {
-      success: true,
-      user: {
-        ...usuarioPrincipal,
-        bares_acesso: baresAcesso,
-        credenciais_apis: credenciaisPorBar
-      }
-    }
-
+    // Se chegou até aqui, significa que o usuário existe na tabela
+    // mas devemos usar apenas Supabase Auth para validação de senha
     return new Response(
-      JSON.stringify(response),
+      JSON.stringify({ success: false, error: 'Este endpoint está obsoleto. Use /api/auth/login no frontend.' }),
       { 
+        status: 410, // Gone - endpoint descontinuado
         headers: { 
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*'
         } 
       }
     )
+
+    // Esta edge function está obsoleta - toda autenticação deve ser feita via frontend
+    // Retornar sempre erro para forçar migração para sistema seguro
 
   } catch (error) {
     console.error('Erro na Edge Function de login:', error)

@@ -29,7 +29,7 @@ export default function ContaHubStatusBanner({
   const verificarStatusContaHub = async () => {
     try {
       setStatusLoading(true)
-      const response = await fetch('/api/admin/contahub-teste-5-dias')
+      const response = await fetch('/api/contahub/teste-5-dias')
       const data = await response.json()
       setContahubStatus(data)
     } catch (error) {
