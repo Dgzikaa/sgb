@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
-import { createClient } from '@supabase/supabase-js'
+import { createServiceRoleClient } from '@/lib/supabase-admin'
 import { z } from 'zod'
 
 // Schema de validação para configuração
@@ -17,111 +17,57 @@ const MetaConfigSchema = z.object({
   rate_limit_per_hour: z.number().int().min(50).max(1000).optional().default(200)
 })
 
-// Configuração do Supabase
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
 // ========================================
-// 🔍 GET /api/meta/config
-// Buscar configuração atual
+// 📊 GET /api/meta/config
 // ========================================
 export async function GET(request: NextRequest) {
   try {
-    const headersList = headers()
-    const userData = headersList.get('x-user-data')
+    const headersList = headers();
+    const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 })
+      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao } = JSON.parse(userData)
+    const { bar_id, permissao } = JSON.parse(userData);
 
     // Verificar permissões
     if (!['admin', 'financeiro'].includes(permissao)) {
-      return NextResponse.json({ 
-        error: 'Sem permissão para visualizar configurações da Meta' 
-      }, { status: 403 })
+      return NextResponse.json({ error: 'Sem permissão para acessar configurações' }, { status: 403 });
     }
 
-    console.log('🔍 Buscando configuração Meta para bar:', bar_id)
+    // Criar cliente Supabase
+    const supabase = createServiceRoleClient()
 
-    // Buscar na tabela api_credentials com sistema 'meta'
+    // Buscar configuração existente
     const { data: config, error } = await supabase
-      .from('api_credentials')
-      .select(`
-        id,
-        access_token,
-        client_id,
-        client_secret,
-        configuracoes_extras,
-        ativo,
-        created_at,
-        updated_at,
-        last_tested_at
-      `)
+      .from('meta_configuracoes')
+      .select('*')
       .eq('bar_id', bar_id)
-      .eq('sistema', 'meta')
-      .single()
+      .single();
 
-    if (error && error.code !== 'PGRST116') {
-      console.error('❌ Erro ao buscar configuração Meta:', error)
-      return NextResponse.json({ error: 'Erro ao buscar configuração' }, { status: 500 })
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // Nenhuma configuração encontrada
+        return NextResponse.json({ 
+          success: true,
+          config: null,
+          message: 'Nenhuma configuração encontrada'
+        });
+      }
+      
+      console.error('Erro ao buscar configuração:', error);
+      return NextResponse.json({ error: 'Erro ao buscar configuração' }, { status: 500 });
     }
 
-    // Se não existe configuração, retornar dados padrão
-    if (!config) {
-      return NextResponse.json({
-        exists: false,
-        config: {
-          ativo: false,
-          sistema: 'meta',
-          api_version: 'v18.0',
-          coleta_automatica: true,
-          frequencia_coleta_horas: 6,
-          horario_coleta_preferido: '09:00',
-          rate_limit_per_hour: 200
-        }
-      })
-    }
-
-    // Extrair configurações extras do JSON
-    const configExtras = config.configuracoes_extras || {}
-    
-    // Mascarar dados sensíveis para retorno
-    const configSafe = {
-      id: config.id,
-      access_token: config.access_token ? '***' + config.access_token.slice(-8) : null,
-      app_id: config.client_id,
-      app_secret: config.client_secret ? '***' + config.client_secret.slice(-4) : null,
-      ativo: config.ativo,
-      sistema: 'meta',
-      created_at: config.created_at,
-      updated_at: config.updated_at,
-      last_tested_at: config.last_tested_at,
-      // Configurações extras vindas do JSON
-      facebook_page_id: configExtras.facebook_page_id,
-      instagram_account_id: configExtras.instagram_account_id,
-      api_version: configExtras.api_version || 'v18.0',
-      coleta_automatica: configExtras.coleta_automatica !== false,
-      frequencia_coleta_horas: configExtras.frequencia_coleta_horas || 6,
-      horario_coleta_preferido: configExtras.horario_coleta_preferido || '09:00',
-      rate_limit_per_hour: configExtras.rate_limit_per_hour || 200
-    }
-
-    console.log('✅ Configuração Meta encontrada')
-    return NextResponse.json({
-      exists: true,
-      config: configSafe
-    })
-
-  } catch (error: any) {
-    console.error('❌ Erro ao buscar configuração Meta:', error)
     return NextResponse.json({ 
-      error: 'Erro interno do servidor',
-      details: error.message 
-    }, { status: 500 })
+      success: true,
+      config: config 
+    });
+
+  } catch (error) {
+    console.error('Erro na API de configuração Meta:', error);
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }
 
@@ -200,6 +146,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Salvar na tabela api_credentials com sistema 'meta'
+    const supabase = createServiceRoleClient()
     const { data, error } = await supabase
       .from('api_credentials')
       .upsert({
@@ -420,6 +367,7 @@ export async function DELETE(request: NextRequest) {
 
     console.log('❌ Removendo configuração Meta para bar:', bar_id)
 
+    const supabase = createServiceRoleClient()
     const { error } = await supabase
       .from('api_credentials')
       .update({ ativo: false })

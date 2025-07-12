@@ -33,4 +33,21 @@ async function getAdminClient() {
   }
 }
 
-export { getAdminClient } 
+// Função helper para rotas API (evita inicialização no módulo)
+function createServiceRoleClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Variáveis de ambiente Supabase não configuradas')
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  })
+}
+
+export { getAdminClient, createServiceRoleClient } 

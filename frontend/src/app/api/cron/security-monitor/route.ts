@@ -2,10 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { securityMonitor } from '@/lib/security-monitor'
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-)
+// Função para criar cliente Supabase com validação
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
+  
+  if (!supabaseUrl || !serviceKey) {
+    throw new Error('Variáveis de ambiente Supabase não configuradas')
+  }
+  
+  return createClient(supabaseUrl, serviceKey)
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,6 +24,9 @@ export async function GET(request: NextRequest) {
       console.log('❌ Acesso negado - token inválido')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    // Criar cliente Supabase apenas quando necessário
+    const supabase = getSupabaseClient()
 
     // 1. Verificar eventos suspeitos dos últimos 5 minutos
     const last5Minutes = new Date(Date.now() - 5 * 60 * 1000)
@@ -56,7 +66,7 @@ export async function GET(request: NextRequest) {
     await generateSystemEvents()
 
     // 6. Calcular e salvar métricas diárias
-    await calculateDailyMetrics()
+    await calculateDailyMetrics(supabase)
 
     const result = {
       success: true,
@@ -212,7 +222,7 @@ async function generateSystemEvents() {
 }
 
 // Calcular métricas diárias
-async function calculateDailyMetrics() {
+async function calculateDailyMetrics(supabase: any) {
   const today = new Date()
   const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate())
   
@@ -231,19 +241,19 @@ async function calculateDailyMetrics() {
   const metrics = {
     date: today.toISOString().split('T')[0],
     total_events: events.length,
-    critical_events: events.filter(e => e.level === 'critical').length,
-    warning_events: events.filter(e => e.level === 'warning').length,
-    info_events: events.filter(e => e.level === 'info').length,
-    auth_events: events.filter(e => e.category === 'auth').length,
-    access_events: events.filter(e => e.category === 'access').length,
-    injection_events: events.filter(e => e.category === 'injection').length,
-    rate_limit_events: events.filter(e => e.category === 'rate_limit').length,
-    api_abuse_events: events.filter(e => e.category === 'api_abuse').length,
-    backup_events: events.filter(e => e.category === 'backup').length,
-    system_events: events.filter(e => e.category === 'system').length,
-    unique_ips: new Set(events.map(e => e.ip_address).filter(Boolean)).size,
-    failed_logins: events.filter(e => e.event_type === 'failed_login').length,
-    blocked_ips: events.filter(e => e.event_type === 'ip_blocked').length
+    critical_events: events.filter((e: any) => e.level === 'critical').length,
+    warning_events: events.filter((e: any) => e.level === 'warning').length,
+    info_events: events.filter((e: any) => e.level === 'info').length,
+    auth_events: events.filter((e: any) => e.category === 'auth').length,
+    access_events: events.filter((e: any) => e.category === 'access').length,
+    injection_events: events.filter((e: any) => e.category === 'injection').length,
+    rate_limit_events: events.filter((e: any) => e.category === 'rate_limit').length,
+    api_abuse_events: events.filter((e: any) => e.category === 'api_abuse').length,
+    backup_events: events.filter((e: any) => e.category === 'backup').length,
+    system_events: events.filter((e: any) => e.category === 'system').length,
+    unique_ips: new Set(events.map((e: any) => e.ip_address).filter(Boolean)).size,
+    failed_logins: events.filter((e: any) => e.event_type === 'failed_login').length,
+    blocked_ips: events.filter((e: any) => e.event_type === 'ip_blocked').length
   }
 
   // Inserir ou atualizar métricas do dia

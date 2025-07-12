@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
-import { createClient } from '@supabase/supabase-js';
-
-// Configuração do Supabase
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { createServiceRoleClient } from '@/lib/supabase-admin';
 
 // Schema de validação para filtros
 const FilterInsightsSchema = z.object({
@@ -48,14 +42,14 @@ export async function GET(request: NextRequest) {
 
     const { bar_id, permissao } = JSON.parse(userData);
 
-    // Verificar permissões (admins e financeiros podem ver insights)
+    // Verificar permissões
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissão para acessar insights de IA' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permissão para acessar insights' }, { status: 403 });
     }
 
-    // Parse dos parâmetros de query
-    const url = new URL(request.url);
-    const rawParams = Object.fromEntries(url.searchParams.entries());
+    // Parsear parâmetros de consulta
+    const { searchParams } = new URL(request.url);
+    const rawParams = Object.fromEntries(searchParams.entries());
     
     // Converter tipos numéricos
     const processedParams: any = { ...rawParams };
@@ -63,139 +57,103 @@ export async function GET(request: NextRequest) {
     if (processedParams.limit) processedParams.limit = parseInt(processedParams.limit);
     if (processedParams.confianca_minima) processedParams.confianca_minima = parseFloat(processedParams.confianca_minima);
 
-    const params = FilterInsightsSchema.parse(processedParams);
+    const validatedParams = FilterInsightsSchema.parse(processedParams);
+
+    // Criar cliente Supabase
+    const supabase = createServiceRoleClient();
 
     // Construir query base
     let query = supabase
       .from('ai_insights')
       .select(`
-        id,
-        tipo_insight,
-        categoria,
-        titulo,
-        descricao,
-        confianca,
-        impacto,
-        urgencia,
-        status,
-        periodo_analise_inicio,
-        periodo_analise_fim,
-        projecao_impacto_dias,
-        acoes_sugeridas,
-        acao_tomada,
-        usuario_avaliacao,
-        util,
-        lido_por,
-        lido_em,
-        created_at,
-        expires_at,
+        *,
         usuarios_bar!ai_insights_lido_por_fkey(nome)
       `)
-      .eq('bar_id', bar_id)
-      .order(params.order_by, { ascending: params.order_direction === 'asc' });
+      .eq('bar_id', bar_id);
 
     // Aplicar filtros
-    if (params.tipo_insight) {
-      query = query.eq('tipo_insight', params.tipo_insight);
+    if (validatedParams.tipo_insight) {
+      query = query.eq('tipo_insight', validatedParams.tipo_insight);
     }
-    if (params.categoria) {
-      query = query.eq('categoria', params.categoria);
+    if (validatedParams.categoria) {
+      query = query.eq('categoria', validatedParams.categoria);
     }
-    if (params.impacto) {
-      query = query.eq('impacto', params.impacto);
+    if (validatedParams.impacto) {
+      query = query.eq('impacto', validatedParams.impacto);
     }
-    if (params.urgencia) {
-      query = query.eq('urgencia', params.urgencia);
+    if (validatedParams.urgencia) {
+      query = query.eq('urgencia', validatedParams.urgencia);
     }
-    if (params.status) {
-      query = query.eq('status', params.status);
+    if (validatedParams.status) {
+      query = query.eq('status', validatedParams.status);
     }
-    if (params.data_inicio) {
-      query = query.gte('created_at', params.data_inicio);
+    if (validatedParams.data_inicio) {
+      query = query.gte('created_at', validatedParams.data_inicio);
     }
-    if (params.data_fim) {
-      query = query.lte('created_at', params.data_fim);
+    if (validatedParams.data_fim) {
+      query = query.lte('created_at', validatedParams.data_fim);
     }
-    if (params.confianca_minima) {
-      query = query.gte('confianca', params.confianca_minima);
+    if (validatedParams.confianca_minima) {
+      query = query.gte('confianca', validatedParams.confianca_minima);
     }
 
-    // Filtrar insights não expirados
-    query = query.or('expires_at.is.null,expires_at.gte.' + new Date().toISOString());
+    // Aplicar ordenação
+    query = query.order(validatedParams.order_by, { 
+      ascending: validatedParams.order_direction === 'asc' 
+    });
 
-    // Paginação
-    const offset = (params.page - 1) * params.limit;
-    query = query.range(offset, offset + params.limit - 1);
+    // Aplicar paginação
+    const offset = (validatedParams.page - 1) * validatedParams.limit;
+    query = query.range(offset, offset + validatedParams.limit - 1);
 
-    const { data: insights, error } = await query;
+    const { data: insights, error, count } = await supabase
+      .from('ai_insights')
+      .select('*', { count: 'exact' })
+      .eq('bar_id', bar_id);
 
     if (error) {
       console.error('Erro ao buscar insights:', error);
       return NextResponse.json({ error: 'Erro ao buscar insights' }, { status: 500 });
     }
 
-    // Buscar estatísticas gerais
-    const { data: stats } = await supabase
-      .from('ai_insights')
-      .select('status, impacto, categoria, confianca')
-      .eq('bar_id', bar_id)
-      .or('expires_at.is.null,expires_at.gte.' + new Date().toISOString());
-
-    const estatisticas = {
-      total: stats?.length || 0,
+    // Calcular estatísticas
+    const stats = {
+      total: count || 0,
       por_status: {
-        novo: stats?.filter(s => s.status === 'novo').length || 0,
-        lido: stats?.filter(s => s.status === 'lido').length || 0,
-        em_acao: stats?.filter(s => s.status === 'em_acao').length || 0,
-        resolvido: stats?.filter(s => s.status === 'resolvido').length || 0,
-        ignorado: stats?.filter(s => s.status === 'ignorado').length || 0
+        novo: insights?.filter(i => i.status === 'novo').length || 0,
+        lido: insights?.filter(i => i.status === 'lido').length || 0,
+        em_acao: insights?.filter(i => i.status === 'em_acao').length || 0,
+        resolvido: insights?.filter(i => i.status === 'resolvido').length || 0,
+        ignorado: insights?.filter(i => i.status === 'ignorado').length || 0
       },
       por_impacto: {
-        critico: stats?.filter(s => s.impacto === 'critico').length || 0,
-        alto: stats?.filter(s => s.impacto === 'alto').length || 0,
-        medio: stats?.filter(s => s.impacto === 'medio').length || 0,
-        baixo: stats?.filter(s => s.impacto === 'baixo').length || 0
-      },
-      por_categoria: stats?.reduce((acc, s) => {
-        acc[s.categoria] = (acc[s.categoria] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>) || {},
-      confianca_media: stats?.length ? 
-        stats.reduce((sum, s) => sum + s.confianca, 0) / stats.length : 0
+        critico: insights?.filter(i => i.impacto === 'critico').length || 0,
+        alto: insights?.filter(i => i.impacto === 'alto').length || 0,
+        medio: insights?.filter(i => i.impacto === 'medio').length || 0,
+        baixo: insights?.filter(i => i.impacto === 'baixo').length || 0
+      }
     };
-
-    // Buscar insights críticos pendentes
-    const { data: criticos } = await supabase
-      .from('ai_insights')
-      .select('id, titulo, impacto')
-      .eq('bar_id', bar_id)
-      .eq('impacto', 'critico')
-      .in('status', ['novo', 'lido'])
-      .or('expires_at.is.null,expires_at.gte.' + new Date().toISOString())
-      .order('created_at', { ascending: false })
-      .limit(5);
 
     return NextResponse.json({
       success: true,
-      data: insights,
-      estatisticas,
-      insights_criticos: criticos || [],
+      data: insights || [],
       pagination: {
-        page: params.page,
-        limit: params.limit,
-        total: insights?.length || 0,
-        hasNext: insights?.length === params.limit
-      }
+        page: validatedParams.page,
+        limit: validatedParams.limit,
+        total: count || 0,
+        totalPages: Math.ceil((count || 0) / validatedParams.limit)
+      },
+      stats
     });
 
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({
+      return NextResponse.json({ 
         error: 'Parâmetros inválidos',
-        details: error.errors
+        details: error.errors 
       }, { status: 400 });
     }
-
+    
     console.error('Erro na API de insights:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
@@ -230,6 +188,7 @@ export async function PUT(request: NextRequest) {
     const validatedData = UpdateInsightSchema.parse(updateData);
 
     // Verificar se insight existe e pertence ao bar
+    const supabase = createServiceRoleClient();
     const { data: existing, error: fetchError } = await supabase
       .from('ai_insights')
       .select('id, status')
@@ -342,6 +301,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Atualizar múltiplos insights
+    const supabase = createServiceRoleClient();
     const { data, error } = await supabase
       .from('ai_insights')
       .update(updateData)

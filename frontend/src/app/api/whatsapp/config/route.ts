@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
-import { createClient } from '@supabase/supabase-js';
-
-// Configuração do Supabase
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { createServiceRoleClient } from '@/lib/supabase-admin';
 
 // Schema de validação para configurações WhatsApp
 const ConfigWhatsAppSchema = z.object({
@@ -28,6 +22,32 @@ const UpdateConfigSchema = ConfigWhatsAppSchema.partial().omit({
   phone_number_id: true // Phone Number ID não pode ser alterado
 });
 
+// Função para validar token WhatsApp
+async function validateWhatsAppToken(accessToken: string, phoneNumberId: string): Promise<boolean> {
+  try {
+    console.log('🔍 Validando token WhatsApp...');
+    
+    const response = await fetch(`https://graph.facebook.com/v18.0/${phoneNumberId}`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log('✅ Token WhatsApp válido:', data.display_phone_number);
+      return true;
+    } else {
+      console.error('❌ Token WhatsApp inválido:', response.status, response.statusText);
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ Erro ao validar token WhatsApp:', error);
+    return false;
+  }
+}
+
 // ========================================
 // 📱 GET /api/whatsapp/config
 // ========================================
@@ -43,30 +63,48 @@ export async function GET(request: NextRequest) {
     const { bar_id, permissao } = JSON.parse(userData);
 
     // Verificar permissões
-    if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissão para acessar configurações' }, { status: 403 });
+    if (permissao !== 'admin') {
+      return NextResponse.json({ error: 'Apenas admins podem visualizar configurações' }, { status: 403 });
     }
 
-    // Buscar configurações
+    // Criar cliente Supabase
+    const supabase = createServiceRoleClient();
+
+    // Buscar configuração existente
     const { data: config, error } = await supabase
       .from('whatsapp_configuracoes')
       .select('*')
       .eq('bar_id', bar_id)
       .single();
 
-    if (error && error.code !== 'PGRST116') {
-      console.error('Erro ao buscar configurações WhatsApp:', error);
-      return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // Nenhuma configuração encontrada
+        return NextResponse.json({ 
+          success: true,
+          config: null,
+          message: 'Nenhuma configuração encontrada'
+        });
+      }
+      
+      console.error('Erro ao buscar configuração:', error);
+      return NextResponse.json({ error: 'Erro ao buscar configuração' }, { status: 500 });
     }
 
-    return NextResponse.json({
+    // Mascarar dados sensíveis
+    const configSafe = {
+      ...config,
+      access_token: config.access_token ? '***' + config.access_token.slice(-8) : null,
+      webhook_verify_token: config.webhook_verify_token ? '***' + config.webhook_verify_token.slice(-4) : null
+    };
+
+    return NextResponse.json({ 
       success: true,
-      data: config || null,
-      message: config ? 'Configurações encontradas' : 'Nenhuma configuração encontrada'
+      config: configSafe 
     });
 
   } catch (error) {
-    console.error('Erro na API de configurações WhatsApp:', error);
+    console.error('Erro na API de configuração WhatsApp:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }
@@ -94,6 +132,7 @@ export async function POST(request: NextRequest) {
     const validatedData = ConfigWhatsAppSchema.parse(body);
 
     // Verificar se já existe configuração
+    const supabase = createServiceRoleClient();
     const { data: existing } = await supabase
       .from('whatsapp_configuracoes')
       .select('id')
@@ -176,6 +215,7 @@ export async function PUT(request: NextRequest) {
     const validatedData = UpdateConfigSchema.parse(body);
 
     // Verificar se configuração existe
+    const supabase = createServiceRoleClient();
     const { data: existing, error: fetchError } = await supabase
       .from('whatsapp_configuracoes')
       .select('*')
@@ -259,6 +299,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Verificar se há mensagens pendentes
+    const supabase = createServiceRoleClient();
     const { data: pendingMessages } = await supabase
       .from('whatsapp_mensagens')
       .select('id')
@@ -297,25 +338,6 @@ export async function DELETE(request: NextRequest) {
 // ========================================
 // 🔧 FUNÇÕES AUXILIARES
 // ========================================
-
-/**
- * Valida token WhatsApp com a API oficial (simulado)
- */
-async function validateWhatsAppToken(accessToken: string, phoneNumberId: string): Promise<boolean> {
-  try {
-    // Em produção, fazer chamada real para API WhatsApp
-    const response = await fetch(`https://graph.facebook.com/v18.0/${phoneNumberId}`, {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`
-      }
-    });
-
-    return response.ok;
-  } catch (error) {
-    console.error('Erro ao validar token WhatsApp:', error);
-    return false;
-  }
-}
 
 /**
  * Testa conectividade com WhatsApp Business API

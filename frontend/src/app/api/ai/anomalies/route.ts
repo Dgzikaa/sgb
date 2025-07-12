@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
-import { createClient } from '@supabase/supabase-js';
-
-// Configuração do Supabase
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { createServiceRoleClient } from '@/lib/supabase-admin';
 
 // Schema de validação para filtros
 const FilterAnomaliesSchema = z.object({
@@ -67,6 +61,9 @@ export async function GET(request: NextRequest) {
     if (processedParams.ainda_ativa) processedParams.ainda_ativa = processedParams.ainda_ativa === 'true';
 
     const params = FilterAnomaliesSchema.parse(processedParams);
+
+    // Criar cliente Supabase
+    const supabase = createServiceRoleClient();
 
     // Construir query base
     let query = supabase
@@ -150,25 +147,25 @@ export async function GET(request: NextRequest) {
 
     const estatisticas = {
       total: stats?.length || 0,
-      ativas: stats?.filter(s => s.ainda_ativa).length || 0,
-      resolvidas: stats?.filter(s => s.status === 'resolvida').length || 0,
-      falsos_positivos: stats?.filter(s => s.falso_positivo).length || 0,
+      ativas: stats?.filter((s: any) => s.ainda_ativa).length || 0,
+      resolvidas: stats?.filter((s: any) => s.status === 'resolvida').length || 0,
+      falsos_positivos: stats?.filter((s: any) => s.falso_positivo).length || 0,
       por_severidade: {
-        critica: stats?.filter(s => s.severidade === 'critica').length || 0,
-        alta: stats?.filter(s => s.severidade === 'alta').length || 0,
-        media: stats?.filter(s => s.severidade === 'media').length || 0,
-        baixa: stats?.filter(s => s.severidade === 'baixa').length || 0
+        critica: stats?.filter((s: any) => s.severidade === 'critica').length || 0,
+        alta: stats?.filter((s: any) => s.severidade === 'alta').length || 0,
+        media: stats?.filter((s: any) => s.severidade === 'media').length || 0,
+        baixa: stats?.filter((s: any) => s.severidade === 'baixa').length || 0
       },
-      por_tipo: stats?.reduce((acc, s) => {
+      por_tipo: stats?.reduce((acc: any, s: any) => {
         acc[s.tipo_anomalia] = (acc[s.tipo_anomalia] || 0) + 1;
         return acc;
       }, {} as Record<string, number>) || {},
-      por_status: stats?.reduce((acc, s) => {
+      por_status: stats?.reduce((acc: any, s: any) => {
         acc[s.status] = (acc[s.status] || 0) + 1;
         return acc;
       }, {} as Record<string, number>) || {},
       confianca_media: stats?.length ? 
-        stats.reduce((sum, s) => sum + s.confianca_deteccao, 0) / stats.length : 0
+        stats.reduce((sum: any, s: any) => sum + s.confianca_deteccao, 0) / stats.length : 0
     };
 
     // Buscar anomalias críticas ativas
@@ -268,6 +265,9 @@ export async function PUT(request: NextRequest) {
     }
 
     const validatedData = UpdateAnomalySchema.parse(updateData);
+
+    // Criar cliente Supabase
+    const supabase = createServiceRoleClient();
 
     // Verificar se anomalia existe e pertence ao bar
     const { data: existing, error: fetchError } = await supabase
@@ -419,6 +419,9 @@ export async function POST(request: NextRequest) {
       default:
         return NextResponse.json({ error: 'Ação inválida' }, { status: 400 });
     }
+
+    // Criar cliente Supabase
+    const supabase = createServiceRoleClient();
 
     // Atualizar múltiplas anomalias
     const { data, error } = await supabase
