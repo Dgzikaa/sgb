@@ -62,23 +62,42 @@ export default function IntegracoesPage() {
   }, [selectedBar])
 
   const loadWebhookConfigs = async () => {
-    if (!selectedBar) return
+    if (!selectedBar) {
+      console.log('❌ Nenhum bar selecionado para carregar webhooks')
+      return
+    }
+    
+    console.log('🔄 Carregando configurações de webhook para bar:', selectedBar.id)
     
     try {
       const response = await fetch(`/api/configuracoes/webhooks?bar_id=${selectedBar.id}`)
+      console.log('📡 Resposta da API:', response.status, response.statusText)
+      
       if (response.ok) {
         const data = await response.json()
+        console.log('📊 Dados recebidos da API:', data)
+        
         if (data.success && data.configuracoes) {
+          console.log('✅ Aplicando configurações:', data.configuracoes)
           setWebhookConfigs(data.configuracoes)
+        } else {
+          console.log('⚠️ Dados não encontrados ou formato inesperado:', data)
         }
+      } else {
+        console.error('❌ Erro na resposta da API:', response.status, response.statusText)
       }
     } catch (error) {
-      console.error('Erro ao carregar webhooks:', error)
+      console.error('❌ Erro ao carregar webhooks:', error)
     }
   }
 
   const handleSaveWebhooks = async () => {
+    console.log('💾 Iniciando salvamento de webhooks')
+    console.log('🏢 Bar selecionado:', selectedBar)
+    console.log('⚙️ Configurações atuais:', webhookConfigs)
+    
     if (!selectedBar) {
+      console.error('❌ Nenhum bar selecionado')
       toast({
         title: '❌ Erro',
         description: 'Nenhum bar selecionado',
@@ -89,6 +108,8 @@ export default function IntegracoesPage() {
     
     try {
       setWebhookLoading(true)
+      console.log('📡 Enviando requisição para API...')
+      
       const response = await fetch('/api/configuracoes/webhooks', {
         method: 'POST',
         headers: {
@@ -100,14 +121,23 @@ export default function IntegracoesPage() {
         })
       })
       
+      console.log('📊 Resposta da API:', {
+        status: response.status,
+        ok: response.ok,
+        statusText: response.statusText
+      })
+      
       const data = await response.json()
+      console.log('📋 Dados da resposta:', data)
       
       if (data.success) {
+        console.log('✅ Webhooks salvos com sucesso!')
         toast({
           title: '✅ Webhooks salvos com sucesso!',
           description: 'As configurações foram atualizadas no banco de dados.'
         })
       } else {
+        console.error('❌ Erro retornado pela API:', data)
         toast({
           title: '❌ Erro ao salvar webhooks',
           description: data.error || 'Erro desconhecido',
@@ -115,7 +145,7 @@ export default function IntegracoesPage() {
         })
       }
     } catch (error) {
-      console.error('Erro ao salvar webhooks:', error)
+      console.error('❌ Erro ao salvar webhooks:', error)
       toast({
         title: '❌ Erro ao salvar webhooks',
         description: 'Erro de conexão com o servidor',
@@ -123,12 +153,18 @@ export default function IntegracoesPage() {
       })
     } finally {
       setWebhookLoading(false)
+      console.log('🔄 Loading finalizado')
     }
   }
 
   const testWebhook = async (webhookType: string) => {
+    console.log('🧪 Iniciando teste de webhook:', webhookType)
+    
     const webhookUrl = webhookConfigs[webhookType as keyof typeof webhookConfigs]
+    console.log('🔗 URL do webhook:', webhookUrl ? webhookUrl.substring(0, 50) + '...' : 'VAZIO')
+    
     if (!webhookUrl || webhookUrl.trim() === '') {
+      console.error('❌ Webhook não configurado:', webhookType)
       toast({
         title: '❌ Webhook não configurado',
         description: `Configure o webhook ${webhookType} antes de testar`,
@@ -138,6 +174,7 @@ export default function IntegracoesPage() {
     }
     
     if (!selectedBar) {
+      console.error('❌ Nenhum bar selecionado para teste')
       toast({
         title: '❌ Erro',
         description: 'Nenhum bar selecionado',
@@ -148,58 +185,72 @@ export default function IntegracoesPage() {
     
     try {
       setTestingWebhook(webhookType)
+      console.log('📡 Enviando teste para API...')
+      
+      const testData = {
+        bar_id: selectedBar.id,
+        webhook_type: webhookType,
+        title: `🧪 Teste de Webhook - ${webhookType.toUpperCase()}`,
+        description: `Este é um teste do webhook **${webhookType}** realizado em ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}.\n\n✅ Se você está vendo esta mensagem, o webhook está funcionando corretamente!`,
+        color: getWebhookColor(webhookType),
+        fields: [
+          {
+            name: '🏢 Estabelecimento',
+            value: selectedBar.nome || selectedBar.id || 'N/A',
+            inline: true
+          },
+          {
+            name: '🔗 Tipo de Webhook',
+            value: webhookType.charAt(0).toUpperCase() + webhookType.slice(1),
+            inline: true
+          },
+          {
+            name: '⏰ Horário',
+            value: new Date().toLocaleString('pt-BR', {
+              timeZone: 'America/Sao_Paulo',
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            }),
+            inline: true
+          },
+          {
+            name: '✅ Status',
+            value: 'Configuração funcionando corretamente!',
+            inline: false
+          }
+        ]
+      }
+      
+      console.log('📋 Dados do teste:', testData)
       
       const response = await fetch('/api/edge-functions/discord-notification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          bar_id: selectedBar.id,
-          webhook_type: webhookType,
-          title: `🧪 Teste de Webhook - ${webhookType.toUpperCase()}`,
-          description: `Este é um teste do webhook **${webhookType}** realizado em ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}.\n\n✅ Se você está vendo esta mensagem, o webhook está funcionando corretamente!`,
-          color: getWebhookColor(webhookType),
-          fields: [
-            {
-              name: '🏢 Estabelecimento',
-              value: selectedBar.nome || selectedBar.id || 'N/A',
-              inline: true
-            },
-            {
-              name: '🔗 Tipo de Webhook',
-              value: webhookType.charAt(0).toUpperCase() + webhookType.slice(1),
-              inline: true
-            },
-            {
-              name: '⏰ Horário',
-              value: new Date().toLocaleString('pt-BR', {
-                timeZone: 'America/Sao_Paulo',
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              }),
-              inline: true
-            },
-            {
-              name: '✅ Status',
-              value: 'Configuração funcionando corretamente!',
-              inline: false
-            }
-          ]
-        })
+        body: JSON.stringify(testData)
+      })
+      
+      console.log('📊 Resposta do teste:', {
+        status: response.status,
+        ok: response.ok,
+        statusText: response.statusText
       })
       
       const data = await response.json()
+      console.log('📋 Dados da resposta do teste:', data)
       
       if (data.success) {
+        console.log('✅ Teste enviado com sucesso!')
         toast({
           title: '✅ Teste enviado com sucesso!',
           description: `Webhook ${webhookType} está funcionando corretamente.`
         })
       } else {
+        console.error('❌ Erro no teste:', data)
         toast({
           title: '❌ Erro no teste',
           description: data.error || 'Erro ao enviar teste',
@@ -207,7 +258,7 @@ export default function IntegracoesPage() {
         })
       }
     } catch (error) {
-      console.error('Erro ao testar webhook:', error)
+      console.error('❌ Erro ao testar webhook:', error)
       toast({
         title: '❌ Erro no teste',
         description: 'Erro de conexão com o servidor',
@@ -215,6 +266,7 @@ export default function IntegracoesPage() {
       })
     } finally {
       setTestingWebhook(null)
+      console.log('🔄 Teste finalizado')
     }
   }
 
@@ -537,24 +589,24 @@ export default function IntegracoesPage() {
 
                 {/* Status dos Webhooks */}
                 <div className="border-t pt-6">
-                  <h4 className="font-semibold mb-4 flex items-center">
+                  <h4 className="font-semibold mb-4 flex items-center text-gray-900 dark:text-gray-100">
                     <Activity className="w-4 h-4 mr-2" />
                     Status dos Webhooks
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                     {Object.entries(webhookConfigs).map(([type, url]) => (
                       <div key={type} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                        <span className="capitalize font-medium">{type}:</span>
+                        <span className="capitalize font-medium text-gray-800">{type}:</span>
                         <div className="flex items-center space-x-2">
                           {url && url.trim() !== '' ? (
                             <>
                               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                              <span className="text-green-600 text-xs">Configurado</span>
+                              <span className="text-green-600 font-medium">Configurado</span>
                             </>
                           ) : (
                             <>
                               <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                              <span className="text-gray-500 text-xs">Não configurado</span>
+                              <span className="text-gray-500">Não configurado</span>
                             </>
                           )}
                         </div>

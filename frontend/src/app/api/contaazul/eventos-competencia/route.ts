@@ -128,12 +128,28 @@ export async function GET(request: NextRequest) {
     if (resumoData && resumoData.length > 0) {
       console.log('💰 Calculando totais a partir de', resumoData.length, 'registros...')
       
+      // Debug: contar tipos de registros
+      const tiposCount = resumoData.reduce((acc: any, evento: any) => {
+        acc[evento.tipo] = (acc[evento.tipo] || 0) + 1
+        return acc
+      }, {})
+      console.log('📊 Tipos de registros encontrados:', tiposCount)
+      
+      // Debug: primeiros 5 registros de cada tipo
+      const receitas = resumoData.filter((e: any) => e.tipo === 'receita').slice(0, 5)
+      const despesas = resumoData.filter((e: any) => e.tipo === 'despesa').slice(0, 5)
+      console.log('💚 Primeiras 5 receitas:', receitas.map((r: any) => ({ tipo: r.tipo, valor: r.valor })))
+      console.log('❤️ Primeiras 5 despesas:', despesas.map((d: any) => ({ tipo: d.tipo, valor: d.valor })))
+      
       resumo = resumoData.reduce((acc, evento) => {
         const valor = parseFloat(evento.valor || 0)
+        
         if (evento.tipo === 'receita') {
           acc.total_receitas += valor
         } else if (evento.tipo === 'despesa') {
           acc.total_despesas += valor
+        } else {
+          console.warn(`⚠️ Tipo não reconhecido: ${evento.tipo}`)
         }
         acc.total_lancamentos++
         return acc
@@ -147,6 +163,17 @@ export async function GET(request: NextRequest) {
         saldo_liquido: `R$ ${resumo.saldo_liquido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
         total_lancamentos: resumo.total_lancamentos
       })
+      
+      // Debug final: comparar com contagem manual
+      const receitasManual = resumoData.filter((e: any) => e.tipo === 'receita').reduce((sum: number, e: any) => sum + parseFloat(e.valor || 0), 0)
+      const despesasManual = resumoData.filter((e: any) => e.tipo === 'despesa').reduce((sum: number, e: any) => sum + parseFloat(e.valor || 0), 0)
+      
+      console.log('🔍 Verificação manual:')
+      console.log(`   Receitas: R$ ${receitasManual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
+      console.log(`   Despesas: R$ ${despesasManual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
+      console.log(`   Diferença receitas: ${Math.abs(resumo.total_receitas - receitasManual) < 0.01 ? '✅ OK' : '❌ ERRO'}`)
+      console.log(`   Diferença despesas: ${Math.abs(resumo.total_despesas - despesasManual) < 0.01 ? '✅ OK' : '❌ ERRO'}`)
+      
     } else {
       console.log('⚠️ Nenhum dado encontrado para cálculo dos totais')
     }

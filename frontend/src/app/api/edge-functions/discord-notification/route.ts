@@ -5,8 +5,17 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     
+    console.log('🔄 Discord Notification API - Dados recebidos:', {
+      bar_id: body.bar_id,
+      title: body.title,
+      webhook_type: body.webhook_type,
+      hasDescription: !!body.description,
+      hasFields: !!body.fields
+    })
+    
     // Validar se bar_id foi fornecido
     if (!body.bar_id || !body.title) {
+      console.error('❌ Validação falhou:', { bar_id: body.bar_id, title: body.title })
       return NextResponse.json(
         { success: false, error: 'bar_id e title são obrigatórios' },
         { status: 400 }
@@ -28,6 +37,8 @@ export async function POST(request: NextRequest) {
       .eq('bar_id', body.bar_id)
       .single()
 
+    console.log('📊 Config do banco:', { configData, configError })
+
     let webhookConfigs = {
       sistema: 'https://discord.com/api/webhooks/1393646423748116602/3zUhIrSKFHmq0zNRLf5AzrkSZNzTj7oYk6f45Tpj2LZWChtmGTKKTHxhfaNZigyLXN4y',
       contaazul: 'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ',
@@ -41,13 +52,21 @@ export async function POST(request: NextRequest) {
     // Se encontrou configurações no banco, usar elas
     if (!configError && configData?.configuracoes) {
       webhookConfigs = { ...webhookConfigs, ...configData.configuracoes }
+      console.log('✅ Aplicando configurações do banco:', webhookConfigs)
     }
 
     // Determinar qual webhook usar
     const webhookType = body.webhook_type || 'sistema'
     const webhookUrl = webhookConfigs[webhookType as keyof typeof webhookConfigs]
 
+    console.log('🎯 Webhook selecionado:', { 
+      webhookType, 
+      webhookUrl: webhookUrl ? webhookUrl.substring(0, 50) + '...' : 'VAZIO',
+      hasUrl: !!webhookUrl 
+    })
+
     if (!webhookUrl || webhookUrl === '') {
+      console.error('❌ Webhook não configurado:', { webhookType, webhookConfigs })
       return NextResponse.json(
         { success: false, error: `Webhook ${webhookType} não configurado` },
         { status: 400 }
