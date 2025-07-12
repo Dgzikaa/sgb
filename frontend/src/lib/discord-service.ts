@@ -114,6 +114,103 @@ export class DiscordService {
     }
   }
 
+  // Método para enviar alertas de anomalia
+  static async enviarAlertaAnomalia(anomalia: any): Promise<boolean> {
+    try {
+      const data = {
+        bar_id: anomalia.bar_id || 'unknown',
+        webhook_type: 'sistema' as const,
+        title: `🚨 ${anomalia.titulo || 'Anomalia Detectada'}`,
+        description: anomalia.descricao || 'Anomalia crítica detectada pelo sistema de IA',
+        fields: [
+          {
+            name: '📊 Tipo',
+            value: anomalia.tipo_anomalia || 'N/A',
+            inline: true
+          },
+          {
+            name: '⚠️ Severidade',
+            value: anomalia.severidade || 'N/A',
+            inline: true
+          },
+          {
+            name: '📈 Valor Esperado',
+            value: anomalia.valor_esperado?.toString() || 'N/A',
+            inline: true
+          },
+          {
+            name: '📉 Valor Observado',
+            value: anomalia.valor_observado?.toString() || 'N/A',
+            inline: true
+          },
+          {
+            name: '📊 Desvio',
+            value: `${anomalia.desvio_percentual || 0}%`,
+            inline: true
+          },
+          {
+            name: '🎯 Confiança',
+            value: `${anomalia.confianca_deteccao || 0}%`,
+            inline: true
+          }
+        ],
+        color: anomalia.severidade === 'critica' ? 0xff0000 : 0xff6600 // Vermelho para crítica, laranja para outras
+      }
+
+      await this.sendNotification(data)
+      return true
+    } catch (error) {
+      console.error('❌ Erro ao enviar alerta de anomalia:', error)
+      return false
+    }
+  }
+
+  // Método para enviar relatório matinal
+  static async enviarRelatorioMatinal(dashboardData: any): Promise<boolean> {
+    try {
+      const data = {
+        bar_id: dashboardData.bar_id || 'unknown',
+        webhook_type: 'sistema' as const,
+        title: '🌅 Relatório Matinal - SGB Analytics',
+        description: `Resumo das análises e métricas do dia anterior gerado pelo sistema de IA`,
+        fields: [
+          {
+            name: '📊 Métricas Calculadas',
+            value: dashboardData.metricas_count?.toString() || '0',
+            inline: true
+          },
+          {
+            name: '🚨 Anomalias Detectadas',
+            value: dashboardData.anomalias_count?.toString() || '0',
+            inline: true
+          },
+          {
+            name: '💡 Insights Gerados',
+            value: dashboardData.insights_count?.toString() || '0',
+            inline: true
+          },
+          {
+            name: '📈 Score Geral',
+            value: dashboardData.score_geral?.toString() || 'N/A',
+            inline: true
+          },
+          {
+            name: '⏰ Horário de Geração',
+            value: new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
+            inline: true
+          }
+        ],
+        color: 0x00aa55 // Verde para relatório matinal
+      }
+
+      await this.sendNotification(data)
+      return true
+    } catch (error) {
+      console.error('❌ Erro ao enviar relatório matinal:', error)
+      return false
+    }
+  }
+
   // Métodos de conveniência para tipos específicos de webhook
   static async sendSystemNotification(barId: string, title: string, description: string, fields?: any[]) {
     return this.sendNotification({
