@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-)
+import { createServiceRoleClient } from '@/lib/supabase-admin'
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,6 +11,9 @@ export async function GET(request: NextRequest) {
 
     // Calcular timestamp para filtrar por horas
     const hoursAgo = new Date(Date.now() - hours * 60 * 60 * 1000)
+
+    // Criar cliente Supabase
+    const supabase = createServiceRoleClient()
 
     // Buscar logs de auditoria da tabela security_events 
     // (usando eventos de categoria 'audit' ou 'system')
@@ -82,6 +80,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    
+    // Criar cliente Supabase
+    const supabase = createServiceRoleClient()
     
     const { data, error } = await supabase
       .from('security_events')

@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createServiceRoleClient } from '@/lib/supabase-admin'
 import { securityMonitor } from '@/lib/security-monitor'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-)
 
 export async function GET(request: NextRequest) {
   try {
     // Buscar métricas das últimas 24 horas
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
     const today = new Date()
+    
+    // Criar cliente Supabase
+    const supabase = createServiceRoleClient()
     
     // Buscar eventos de segurança das últimas 24 horas
     const { data: events, error: eventsError } = await supabase
@@ -45,19 +43,19 @@ export async function GET(request: NextRequest) {
 
     // Calcular métricas em tempo real dos eventos
     const totalEvents = events?.length || 0
-    const criticalEvents = events?.filter(e => e.level === 'critical').length || 0
-    const warningEvents = events?.filter(e => e.level === 'warning').length || 0
-    const infoEvents = events?.filter(e => e.level === 'info').length || 0
-    const authEvents = events?.filter(e => e.category === 'auth').length || 0
-    const accessEvents = events?.filter(e => e.category === 'access').length || 0
-    const injectionEvents = events?.filter(e => e.category === 'injection').length || 0
-    const rateLimitEvents = events?.filter(e => e.category === 'rate_limit').length || 0
-    const apiAbuseEvents = events?.filter(e => e.category === 'api_abuse').length || 0
-    const backupEvents = events?.filter(e => e.category === 'backup').length || 0
-    const systemEvents = events?.filter(e => e.category === 'system').length || 0
+    const criticalEvents = events?.filter((e: any) => e.level === 'critical').length || 0
+    const warningEvents = events?.filter((e: any) => e.level === 'warning').length || 0
+    const infoEvents = events?.filter((e: any) => e.level === 'info').length || 0
+    const authEvents = events?.filter((e: any) => e.category === 'auth').length || 0
+    const accessEvents = events?.filter((e: any) => e.category === 'access').length || 0
+    const injectionEvents = events?.filter((e: any) => e.category === 'injection').length || 0
+    const rateLimitEvents = events?.filter((e: any) => e.category === 'rate_limit').length || 0
+    const apiAbuseEvents = events?.filter((e: any) => e.category === 'api_abuse').length || 0
+    const backupEvents = events?.filter((e: any) => e.category === 'backup').length || 0
+    const systemEvents = events?.filter((e: any) => e.category === 'system').length || 0
     
-    const uniqueIps = new Set(events?.map(e => e.ip_address).filter(Boolean)).size
-    const failedLogins = events?.filter(e => e.event_type === 'failed_login').length || 0
+    const uniqueIps = new Set(events?.map((e: any) => e.ip_address).filter(Boolean)).size
+    const failedLogins = events?.filter((e: any) => e.event_type === 'failed_login').length || 0
     
     // Usar métricas do banco se disponíveis, caso contrário usar calculadas
     const metrics = {
