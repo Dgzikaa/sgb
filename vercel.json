@@ -16,5 +16,13 @@
   "env": {
     "CRON_SECRET": "@cron_secret",
     "TZ": "America/Sao_Paulo"
+  },
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  },
+  "github": {
+    "autoAlias": false
   }
 } 
