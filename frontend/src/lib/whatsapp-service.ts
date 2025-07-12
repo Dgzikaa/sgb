@@ -1,10 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
-
-// Configuração do Supabase
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { getSupabaseClient } from '@/lib/supabase'
 
 // ========================================
 // 📱 WHATSAPP NOTIFICATION SERVICE
@@ -67,6 +61,7 @@ export class WhatsAppNotificationService {
    */
   async initialize(): Promise<boolean> {
     try {
+      const supabase = await getSupabaseClient()
       const { data: config } = await supabase
         .from('whatsapp_configuracoes')
         .select('*')
@@ -102,6 +97,7 @@ export class WhatsAppNotificationService {
    */
   async getContactByUserId(usuarioId: number): Promise<WhatsAppContact | null> {
     try {
+      const supabase = await getSupabaseClient()
       const { data: contato } = await supabase
         .from('whatsapp_contatos')
         .select('*')
@@ -120,6 +116,7 @@ export class WhatsAppNotificationService {
    */
   async getContactByPhone(numeroWhatsapp: string): Promise<WhatsAppContact | null> {
     try {
+      const supabase = await getSupabaseClient()
       const { data: contato } = await supabase
         .from('whatsapp_contatos')
         .select('*')
@@ -142,6 +139,7 @@ export class WhatsAppNotificationService {
     nomeContato: string
   ): Promise<WhatsAppContact | null> {
     try {
+      const supabase = await getSupabaseClient()
       const { data: contato } = await supabase
         .from('whatsapp_contatos')
         .insert({
@@ -170,6 +168,7 @@ export class WhatsAppNotificationService {
    */
   async getTemplate(templateName: string): Promise<WhatsAppTemplate | null> {
     try {
+      const supabase = await getSupabaseClient()
       const { data: template } = await supabase
         .from('whatsapp_templates')
         .select('*')
@@ -189,6 +188,7 @@ export class WhatsAppNotificationService {
    */
   async getTemplatesByModule(modulo: string): Promise<WhatsAppTemplate[]> {
     try {
+      const supabase = await getSupabaseClient()
       const { data: templates } = await supabase
         .from('whatsapp_templates')
         .select('*')
@@ -252,6 +252,7 @@ export class WhatsAppNotificationService {
       };
 
       // Salvar mensagem no banco
+      const supabase = await getSupabaseClient()
       const { data: mensagem, error: saveError } = await supabase
         .from('whatsapp_mensagens')
         .insert(messageData)
@@ -331,6 +332,7 @@ export class WhatsAppNotificationService {
 
     try {
       // Buscar dados do usuário destinatário
+      const supabase = await getSupabaseClient()
       const { data: usuario } = await supabase
         .from('usuarios_bar')
         .select('id, nome')

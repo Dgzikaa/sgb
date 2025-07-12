@@ -78,8 +78,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Deixar o Supabase/PostgreSQL gerenciar o timezone com a função criada
-    // O trigger automaticamente aplicará o timezone de Brasília
+    // Salvar configurações no banco
     const { data, error } = await supabase
       .from('webhook_configs')
       .upsert({
@@ -97,6 +96,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log('✅ Configurações de webhook salvas com sucesso:', { bar_id, configuracoes })
     return NextResponse.json({
       success: true,
       message: 'Configurações salvas com sucesso'

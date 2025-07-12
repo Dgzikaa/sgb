@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -34,7 +35,8 @@ import {
   Heart,
   Smile,
   UtensilsCrossed,
-  ChefHat
+  ChefHat,
+  ArrowLeft
 } from 'lucide-react';
 
 // Tipos
@@ -247,6 +249,7 @@ export default function MetasPage() {
   const [editingMeta, setEditingMeta] = useState<number | null>(null);
   const [salvandoMetas, setSalvandoMetas] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   // Carregar metas
   const carregarMetas = async () => {
@@ -342,14 +345,21 @@ export default function MetasPage() {
   return (
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Target className="h-6 w-6" />
-          Metas do Negócio
-        </h1>
-        <p className="text-muted-foreground">
-          Gerencie as metas financeiras, operacionais e de performance do seu bar
-        </p>
+      <div className="space-y-4">
+        <Button variant="ghost" onClick={() => router.push('/configuracoes')} className="flex items-center gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Voltar para Configurações
+        </Button>
+        
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <Target className="h-6 w-6" />
+            Metas do Negócio
+          </h1>
+          <p className="text-muted-foreground">
+            Gerencie as metas financeiras, operacionais e de performance do seu bar
+          </p>
+        </div>
       </div>
 
       {/* Tabs por categoria */}

@@ -1007,6 +1007,154 @@ function ConfiguracoesContent() {
                 </div>
               </CardHeader>
               <CardContent>
+
+          {/* Modal de Edição de Usuário */}
+          <Dialog open={!!usuarioEditando} onOpenChange={() => setUsuarioEditando(null)}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Editar Usuário</DialogTitle>
+              </DialogHeader>
+              {usuarioEditando && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="nome-edit">Nome Completo *</Label>
+                      <Input
+                        id="nome-edit"
+                        value={usuarioEditando.nome}
+                        onChange={(e) => setUsuarioEditando({...usuarioEditando, nome: e.target.value})}
+                        placeholder="Digite o nome completo"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="email-edit">Email *</Label>
+                      <Input
+                        id="email-edit"
+                        type="email"
+                        value={usuarioEditando.email}
+                        onChange={(e) => setUsuarioEditando({...usuarioEditando, email: e.target.value})}
+                        placeholder="usuario@exemplo.com"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="role-edit">Função *</Label>
+                      <Select value={usuarioEditando.role} onValueChange={(value) => setUsuarioEditando({...usuarioEditando, role: value as any})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a função" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="funcionario">Funcionário</SelectItem>
+                          <SelectItem value="gerente">Gerente</SelectItem>
+                          <SelectItem value="admin">Administrador</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="ativo-edit">Status</Label>
+                      <div className="flex items-center space-x-2 mt-2">
+                        <input
+                          type="checkbox"
+                          id="ativo-edit"
+                          checked={usuarioEditando.ativo}
+                          onChange={(e) => setUsuarioEditando({...usuarioEditando, ativo: e.target.checked})}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <Label htmlFor="ativo-edit">Usuário Ativo</Label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="telefone-edit">Telefone</Label>
+                    <Input
+                      id="telefone-edit"
+                      value={usuarioEditando.telefone || ''}
+                      onChange={(e) => setUsuarioEditando({...usuarioEditando, telefone: e.target.value})}
+                      placeholder="(11) 99999-9999"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="observacoes-edit">Observações</Label>
+                    <Textarea
+                      id="observacoes-edit"
+                      value={usuarioEditando.observacoes || ''}
+                      onChange={(e) => setUsuarioEditando({...usuarioEditando, observacoes: e.target.value})}
+                      placeholder="Observações sobre o usuário"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Permissões de Módulos</Label>
+                    <div className="mt-2 max-h-64 overflow-y-auto border rounded-lg p-4">
+                      {Object.entries(
+                        modulosDisponiveis.reduce((acc: Record<string, typeof modulosDisponiveis>, modulo) => {
+                          if (!acc[modulo.categoria]) acc[modulo.categoria] = []
+                          acc[modulo.categoria].push(modulo)
+                          return acc
+                        }, {} as Record<string, typeof modulosDisponiveis>)
+                      ).map(([categoria, modulos]) => (
+                        <div key={categoria} className="mb-4">
+                          <div className="font-semibold text-sm text-gray-700 mb-2">{categoria}</div>
+                          <div className="space-y-2">
+                            {modulos.map(modulo => (
+                              <div key={modulo.id} className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  id={`modulo-edit-${modulo.id}`}
+                                  checked={usuarioEditando.modulos_permitidos.includes(modulo.id)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setUsuarioEditando({
+                                        ...usuarioEditando,
+                                        modulos_permitidos: [...usuarioEditando.modulos_permitidos, modulo.id]
+                                      })
+                                    } else {
+                                      setUsuarioEditando({
+                                        ...usuarioEditando,
+                                        modulos_permitidos: usuarioEditando.modulos_permitidos.filter(m => m !== modulo.id)
+                                      })
+                                    }
+                                  }}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <Label htmlFor={`modulo-edit-${modulo.id}`} className="text-sm">
+                                  {modulo.nome}
+                                </Label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end space-x-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setUsuarioEditando(null)}
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Cancelar
+                    </Button>
+                    <Button
+                      onClick={editarUsuario}
+                      disabled={loading || !usuarioEditando.nome || !usuarioEditando.email}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <Save className="w-4 h-4 mr-2" />
+                      {loading ? 'Salvando...' : 'Salvar Alterações'}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
+
                 {usuariosLoading ? (
                   <div className="text-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
