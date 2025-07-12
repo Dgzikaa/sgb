@@ -764,23 +764,26 @@ function ConfiguracoesContent() {
   }
 
   const getRoleColor = (role: string) => {
-    const funcao = funcoes.find(f => f.id === role)
-    return funcao ? funcao.cor : 'bg-gray-100 text-gray-800 border-gray-200'
+    if (!role) return 'bg-gray-100 text-gray-800 border-gray-200'
+    const funcao = funcoes.find(f => f && f.id === role)
+    return (funcao && funcao.cor) ? funcao.cor : 'bg-gray-100 text-gray-800 border-gray-200'
   }
 
   const getRoleLabel = (role: string) => {
-    const funcao = funcoes.find(f => f.id === role)
-    return funcao ? funcao.nome : role
+    if (!role) return 'Sem função'
+    const funcao = funcoes.find(f => f && f.id === role)
+    return (funcao && funcao.nome) ? funcao.nome : role
   }
   
   const getRoleIcon = (role: string) => {
-    const funcao = funcoes.find(f => f.id === role)
-    return funcao ? funcao.icone : '👤'
+    if (!role) return '👤'
+    const funcao = funcoes.find(f => f && f.id === role)
+    return (funcao && funcao.icone) ? funcao.icone : '👤'
   }
 
   const renderModulosPermitidos = (modulos: string[]) => {
     const categorias = modulosDisponiveis.reduce((acc: Record<string, string[]>, modulo) => {
-      if (modulos.includes(modulo.id)) {
+      if (modulos.includes(modulo.id) && modulo.categoria && modulo.nome) {
         if (!acc[modulo.categoria]) acc[modulo.categoria] = []
         acc[modulo.categoria].push(modulo.nome)
       }
@@ -969,9 +972,9 @@ function ConfiguracoesContent() {
                                 {funcoesLoading ? (
                                   <SelectItem value="" disabled>Carregando funções...</SelectItem>
                                 ) : funcoes.length > 0 ? (
-                                  funcoes.map(funcao => (
+                                  funcoes.filter(funcao => funcao && funcao.id && funcao.nome).map(funcao => (
                                     <SelectItem key={funcao.id} value={funcao.id}>
-                                      {funcao.icone} {funcao.nome}
+                                      {funcao.icone || '👤'} {funcao.nome}
                                     </SelectItem>
                                   ))
                                 ) : (
@@ -1117,9 +1120,9 @@ function ConfiguracoesContent() {
                           {funcoesLoading ? (
                             <SelectItem value="" disabled>Carregando funções...</SelectItem>
                           ) : funcoes.length > 0 ? (
-                            funcoes.map(funcao => (
+                            funcoes.filter(funcao => funcao && funcao.id && funcao.nome).map(funcao => (
                               <SelectItem key={funcao.id} value={funcao.id}>
-                                {funcao.icone} {funcao.nome}
+                                {funcao.icone || '👤'} {funcao.nome}
                               </SelectItem>
                             ))
                           ) : (
@@ -1318,9 +1321,9 @@ function ConfiguracoesContent() {
                             )}
                           </div>
                           <div>
-                            <div className="text-gray-600 mb-1">Permissões ({usuario.modulos_permitidos.length}):</div>
+                            <div className="text-gray-600 mb-1">Permissões ({(usuario.modulos_permitidos || []).length}):</div>
                             <div className="max-h-32 overflow-y-auto">
-                              {renderModulosPermitidos(usuario.modulos_permitidos)}
+                              {renderModulosPermitidos(usuario.modulos_permitidos || [])}
                             </div>
                           </div>
                         </div>
