@@ -129,9 +129,9 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, onToggleActive }:
               <IconComponent className="h-4 w-4" style={{ color: meta.cor_categoria }} />
             </div>
             <div>
-              <CardTitle className="text-sm font-medium">{meta.nome_meta}</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-900 dark:text-gray-100">{meta.nome_meta}</CardTitle>
               {meta.subcategoria && (
-                <p className="text-xs text-muted-foreground mt-1">{meta.subcategoria}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{meta.subcategoria}</p>
               )}
             </div>
           </div>
@@ -162,7 +162,7 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, onToggleActive }:
           {/* Valor Semanal */}
           {(meta.valor_semanal !== null || isEditing) && (
             <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">Semanal</Label>
+              <Label className="text-xs text-gray-600 dark:text-gray-400">Semanal</Label>
               {isEditing ? (
                 <NumericInput
                   value={valores.valor_semanal}
@@ -172,7 +172,7 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, onToggleActive }:
                   className="h-8"
                 />
               ) : (
-                <div className="font-medium">
+                <div className="font-medium text-gray-900 dark:text-gray-100">
                   {formatarValor(meta.valor_semanal, meta.tipo_valor, meta.unidade)}
                 </div>
               )}
@@ -182,7 +182,7 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, onToggleActive }:
           {/* Valor Mensal */}
           {(meta.valor_mensal !== null || isEditing) && (
             <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">Mensal</Label>
+              <Label className="text-xs text-gray-600 dark:text-gray-400">Mensal</Label>
               {isEditing ? (
                 <NumericInput
                   value={valores.valor_mensal}
@@ -192,7 +192,7 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, onToggleActive }:
                   className="h-8"
                 />
               ) : (
-                <div className="font-medium">
+                <div className="font-medium text-gray-900 dark:text-gray-100">
                   {formatarValor(meta.valor_mensal, meta.tipo_valor, meta.unidade)}
                 </div>
               )}
@@ -202,7 +202,7 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, onToggleActive }:
           {/* Valor Único */}
           {(meta.valor_unico !== null || isEditing) && (
             <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">Meta</Label>
+              <Label className="text-xs text-gray-600 dark:text-gray-400">Meta</Label>
               {isEditing ? (
                 <NumericInput
                   value={valores.valor_unico}
@@ -212,7 +212,7 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, onToggleActive }:
                   className="h-8"
                 />
               ) : (
-                <div className="font-medium">
+                <div className="font-medium text-gray-900 dark:text-gray-100">
                   {formatarValor(meta.valor_unico, meta.tipo_valor, meta.unidade)}
                 </div>
               )}
@@ -352,11 +352,11 @@ export default function MetasPage() {
         </Button>
         
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <h1 className="text-2xl font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
             <Target className="h-6 w-6" />
             Metas do Negócio
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-gray-600 dark:text-gray-400">
             Gerencie as metas financeiras, operacionais e de performance do seu bar
           </p>
         </div>
@@ -388,8 +388,8 @@ export default function MetasPage() {
           <TabsContent key={categoria} value={categoria} className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold capitalize">{categoria.replace('_', ' ')}</h2>
-                <p className="text-sm text-muted-foreground">
+                <h2 className="text-xl font-semibold capitalize text-gray-900 dark:text-gray-100">{categoria.replace('_', ' ')}</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   {metasCategoria.filter((m: Meta) => m.meta_ativa).length} metas ativas
                 </p>
               </div>
@@ -414,8 +414,8 @@ export default function MetasPage() {
 
             {metasCategoria.length === 0 && (
               <div className="text-center py-8">
-                <Target className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">
+                <Target className="h-12 w-12 mx-auto text-gray-400 dark:text-gray-600 mb-4" />
+                <p className="text-gray-600 dark:text-gray-400">
                   Nenhuma meta encontrada para esta categoria
                 </p>
               </div>
@@ -429,7 +429,7 @@ export default function MetasPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg flex items-center gap-3">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-            <span>Salvando metas...</span>
+            <span className="text-gray-900">Salvando metas...</span>
           </div>
         </div>
       )}

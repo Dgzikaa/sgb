@@ -108,7 +108,7 @@ export default function ContaAzulCompetenciaPage() {
   }, [])
 
   // Buscar eventos
-  const buscarEventos = async (page = 1) => {
+  const buscarEventos = async (page = 1, newSortField?: SortField, newSortDirection?: SortDirection) => {
     setLoading(true)
     try {
       console.log('🔄 Carregando eventos financeiros...')
@@ -116,7 +116,9 @@ export default function ContaAzulCompetenciaPage() {
       const params = new URLSearchParams({
         bar_id: '3',
         page: page.toString(),
-        limit: itemsPerPage.toString()
+        limit: itemsPerPage.toString(),
+        sort_field: newSortField || sortField,
+        sort_direction: newSortDirection || sortDirection
       })
 
       // Adicionar filtros
@@ -174,7 +176,7 @@ export default function ContaAzulCompetenciaPage() {
   // Aplicar filtros
   const aplicarFiltros = () => {
     setCurrentPage(1)
-    buscarEventos(1)
+    buscarEventos(1, sortField, sortDirection)
   }
 
   // Limpar filtros
@@ -190,52 +192,21 @@ export default function ContaAzulCompetenciaPage() {
     setBuscaCategoria('')
     setTimeout(() => {
       setCurrentPage(1)
-      buscarEventos(1)
+      buscarEventos(1, sortField, sortDirection)
     }, 100)
   }
 
-  // Ordenação
+  // Ordenação - agora usa a API
   const handleSort = (field: SortField) => {
     const newDirection = sortField === field && sortDirection === 'asc' ? 'desc' : 'asc'
+    
+    console.log(`🔄 Ordenando por ${field} (${newDirection})`)
+    
     setSortField(field)
     setSortDirection(newDirection)
     
-    const sortedEventos = [...eventos].sort((a, b) => {
-      let aValue = a[field]
-      let bValue = b[field]
-      
-      if (field === 'valor') {
-        aValue = parseFloat(aValue.toString())
-        bValue = parseFloat(bValue.toString())
-      }
-      
-      if (field === 'data_competencia') {
-        // Garantir formato correto da data para ordenação
-        const parseDate = (dateStr: string) => {
-          // Se a data já está no formato ISO (YYYY-MM-DD), usar diretamente
-          if (dateStr.match(/^\d{4}-\d{2}-\d{2}/)) {
-            return new Date(dateStr).getTime()
-          }
-          // Se está no formato DD/MM/YYYY, converter
-          if (dateStr.match(/^\d{2}\/\d{2}\/\d{4}/)) {
-            const [day, month, year] = dateStr.split('/')
-            return new Date(`${year}-${month}-${day}`).getTime()
-          }
-          return new Date(dateStr).getTime()
-        }
-        
-        aValue = parseDate(aValue.toString())
-        bValue = parseDate(bValue.toString())
-      }
-      
-      if (newDirection === 'asc') {
-        return aValue > bValue ? 1 : -1
-      } else {
-        return aValue < bValue ? 1 : -1
-      }
-    })
-    
-    setEventos(sortedEventos)
+    // Buscar dados ordenados na API
+    buscarEventos(1, field, newDirection)
   }
 
   // Renderizar ícone de ordenação
@@ -644,7 +615,7 @@ export default function ContaAzulCompetenciaPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => buscarEventos(currentPage - 1)}
+                    onClick={() => buscarEventos(currentPage - 1, sortField, sortDirection)}
                     disabled={currentPage === 1 || loading}
                   >
                     Anterior
@@ -652,7 +623,7 @@ export default function ContaAzulCompetenciaPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => buscarEventos(currentPage + 1)}
+                    onClick={() => buscarEventos(currentPage + 1, sortField, sortDirection)}
                     disabled={currentPage === totalPages || loading}
                   >
                     Próxima
