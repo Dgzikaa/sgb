@@ -83,6 +83,37 @@ export class DiscordService {
     }
   }
 
+  // Método para testar conexão com Discord
+  static async testarConexao(): Promise<boolean> {
+    try {
+      const testData = {
+        bar_id: 'test',
+        webhook_type: 'sistema' as const,
+        title: '🧪 Teste de Conexão',
+        description: 'Este é um teste automático de conectividade com Discord',
+        fields: [
+          {
+            name: '⚡ Status',
+            value: 'Conexão funcionando corretamente',
+            inline: true
+          },
+          {
+            name: '🕐 Horário',
+            value: new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
+            inline: true
+          }
+        ],
+        color: 0x00ff00 // Verde para sucesso
+      }
+
+      await this.sendNotification(testData)
+      return true
+    } catch (error) {
+      console.error('❌ Erro ao testar conexão Discord:', error)
+      return false
+    }
+  }
+
   // Métodos de conveniência para tipos específicos de webhook
   static async sendSystemNotification(barId: string, title: string, description: string, fields?: any[]) {
     return this.sendNotification({
@@ -156,22 +187,10 @@ export class DiscordService {
 // ========================================
 
 /**
- * Criar instância do Discord Service
- */
-export function createDiscordService(webhookUrl: string): DiscordService {
-  return new DiscordService(
-    webhookUrl,
-    'SGB Analytics Bot',
-    'https://cdn.discordapp.com/embed/avatars/5.png'
-  );
-}
-
-/**
  * Discord Service para SGB (Ordinário)
+ * Como a classe é totalmente estática, exportamos diretamente
  */
-export const sgbDiscordService = createDiscordService(
-  'https://discord.com/api/webhooks/1391182158252609586/YXrYYQJImCOSZj9ZeDoz_jOLcK2CW7rGc-q-xV8BkaegBNNLq0nksg7JaI1y_B0F8Okz'
-);
+export const sgbDiscordService = DiscordService;
 
 // ========================================
 // 🕐 AGENDAMENTO PARA 8H DA MANHÃ
