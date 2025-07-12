@@ -5,6 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 import { PWAInstaller, usePWAInstaller } from '@/components/PWAInstaller'
@@ -13,7 +17,7 @@ import { usePermissions } from '@/hooks/usePermissions'
 import { useBar } from '@/contexts/BarContext'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Target, User, Settings, Smartphone, CheckCircle, Shield, AlertTriangle, Users, Activity, Server, Eye, EyeOff, RefreshCw } from 'lucide-react'
+import { Target, User, Settings, Smartphone, CheckCircle, Shield, AlertTriangle, Users, UserPlus, Edit, Trash2, Lock, Unlock, Save, X, Eye, EyeOff, Activity, Server, RefreshCw } from 'lucide-react'
 import PermissionGuard from '@/components/PermissionGuard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
@@ -68,6 +72,32 @@ interface AuditLog {
 interface RateLimitStatus {
   redisConnected: boolean
   totalKeys: number
+  lastCheck?: string
+  rateLimitingActive?: boolean
+  environment?: string
+}
+
+interface Usuario {
+  id: string
+  nome: string
+  email: string
+  role: 'admin' | 'gerente' | 'funcionario'
+  ativo: boolean
+  modulos_permitidos: string[]
+  criado_em: string
+  ultimo_login?: string
+  telefone?: string
+  observacoes?: string
+}
+
+interface NovoUsuario {
+  nome: string
+  email: string
+  password: string
+  role: 'admin' | 'gerente' | 'funcionario'
+  telefone?: string
+  observacoes?: string
+  modulos_permitidos: string[]
 }
 
 function ConfiguracoesContent() {
@@ -77,7 +107,7 @@ function ConfiguracoesContent() {
   const { selectedBar } = useBar()
   const { canInstall, isInstalled, install } = usePWAInstaller()
 
-  const [activeTab, setActiveTab] = useState<'metas' | 'usuarios' | 'integracoes' | 'seguranca'>('metas')
+  const [activeTab, setActiveTab] = useState<'metas' | 'usuarios' | 'integracoes' | 'seguranca' | 'aplicativo'>('metas')
   const [metas, setMetas] = useState({
     faturamento_diario: 37000,
     clientes_por_dia: 500,
@@ -92,24 +122,103 @@ function ConfiguracoesContent() {
   })
   const [loading, setLoading] = useState(false)
 
+  // Estados para usuários
+  const [usuarios, setUsuarios] = useState<Usuario[]>([])
+  const [usuariosLoading, setUsuariosLoading] = useState(false)
+  const [usuarioEditando, setUsuarioEditando] = useState<Usuario | null>(null)
+  const [novoUsuario, setNovoUsuario] = useState<NovoUsuario>({
+    nome: '',
+    email: '',
+    password: '',
+    role: 'funcionario',
+    telefone: '',
+    observacoes: '',
+    modulos_permitidos: []
+  })
+  const [dialogAberto, setDialogAberto] = useState(false)
+  const [senhaVisivel, setSenhaVisivel] = useState(false)
+
+  // Módulos disponíveis para permissões
+  const modulosDisponiveis = [
+    { id: 'dashboard', nome: 'Dashboard', categoria: 'Visualização' },
+    { id: 'relatorios', nome: 'Relatórios', categoria: 'Análise' },
+    { id: 'configuracoes', nome: 'Configurações', categoria: 'Administração' },
+    { id: 'usuarios', nome: 'Usuários', categoria: 'Administração' },
+    { id: 'checklists', nome: 'Checklists', categoria: 'Operações' },
+    { id: 'receitas', nome: 'Receitas', categoria: 'Financeiro' },
+    { id: 'desempenho', nome: 'Desempenho', categoria: 'Análise' },
+    { id: 'terminal_producao', nome: 'Terminal Produção', categoria: 'Operações' },
+    { id: 'meta_config', nome: 'Meta Config', categoria: 'Administração' },
+    { id: 'contaazul', nome: 'ContaAzul', categoria: 'Integração' },
+    { id: 'contahub', nome: 'ContaHub', categoria: 'Integração' },
+    { id: 'whatsapp', nome: 'WhatsApp', categoria: 'Comunicação' },
+    { id: 'discord', nome: 'Discord', categoria: 'Comunicação' },
+    { id: 'backup', nome: 'Backup', categoria: 'Sistema' },
+    { id: 'seguranca', nome: 'Segurança', categoria: 'Sistema' },
+    { id: 'auditoria', nome: 'Auditoria', categoria: 'Sistema' },
+    { id: 'integracao_sympla', nome: 'Sympla', categoria: 'Integração' },
+    { id: 'integracao_getin', nome: 'GetIn', categoria: 'Integração' },
+    { id: 'marketing', nome: 'Marketing', categoria: 'Marketing' },
+    { id: 'social_media', nome: 'Social Media', categoria: 'Marketing' },
+    { id: 'vendas', nome: 'Vendas', categoria: 'Financeiro' },
+    { id: 'reservas', nome: 'Reservas', categoria: 'Operações' },
+    { id: 'analytics', nome: 'Analytics', categoria: 'Análise' }
+  ]
+
   // Estados para segurança
+  const [autoRefresh, setAutoRefresh] = useState(false)
+  const [showSensitiveData, setShowSensitiveData] = useState(false)
+  const [securityLoading, setSecurityLoading] = useState(false)
   const [securityEvents, setSecurityEvents] = useState<SecurityEvent[]>([])
   const [securityMetrics, setSecurityMetrics] = useState<SecurityMetrics | null>(null)
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([])
   const [rateLimitStatus, setRateLimitStatus] = useState<RateLimitStatus | null>(null)
-  const [securityLoading, setSecurityLoading] = useState(false)
-  const [autoRefresh, setAutoRefresh] = useState(true)
-  const [showSensitiveData, setShowSensitiveData] = useState(false)
+
+  // Estados para webhooks Discord
+  const [webhookConfigs, setWebhookConfigs] = useState({
+    sistema: 'https://discord.com/api/webhooks/1393646423748116602/3zUhIrSKFHmq0zNRLf5AzrkSZNzTj7oYk6f45Tpj2LZWChtmGTKKTHxhfaNZigyLXN4y',
+    contaazul: 'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ',
+    meta: '',
+    checklists: '',
+    contahub: '',
+    vendas: '',
+    reservas: ''
+  })
+  const [webhookLoading, setWebhookLoading] = useState(false)
+  const [testingWebhook, setTestingWebhook] = useState<string | null>(null)
 
   useEffect(() => {
     setPageTitle('Configurações')
     return () => setPageTitle('')
   }, [setPageTitle])
 
+  useEffect(() => {
+    if (activeTab === 'usuarios') {
+      buscarUsuarios()
+    }
+  }, [activeTab, selectedBar])
+
+  // Auto-refresh para dados de segurança
+  useEffect(() => {
+    if (activeTab === 'seguranca') {
+      fetchSecurityData()
+      
+      let interval: NodeJS.Timeout | null = null
+      if (autoRefresh) {
+        interval = setInterval(fetchSecurityData, 30000) // 30 segundos
+      }
+      
+      return () => {
+        if (interval) clearInterval(interval)
+      }
+    }
+  }, [activeTab, autoRefresh])
+
   // Carregar dados de segurança
   const fetchSecurityData = async () => {
     try {
       setSecurityLoading(true)
+      
       const [eventsRes, metricsRes, auditRes, rateLimitRes] = await Promise.all([
         fetch('/api/security/events'),
         fetch('/api/security/metrics'),
@@ -143,49 +252,426 @@ function ConfiguracoesContent() {
     }
   }
 
-  // Auto-refresh para dados de segurança
-  useEffect(() => {
-    if (activeTab === 'seguranca') {
-      fetchSecurityData()
+  // Funções para gerenciar usuários
+  const buscarUsuarios = async () => {
+    if (!selectedBar) return
+    
+    try {
+      setUsuariosLoading(true)
+      const response = await fetch(`/api/usuarios?bar_id=${selectedBar.id}`)
+      const data = await response.json()
       
-      let interval: NodeJS.Timeout | null = null
-      if (autoRefresh) {
-        interval = setInterval(fetchSecurityData, 30000) // 30 segundos
+      if (data.success) {
+        setUsuarios(data.usuarios)
+      } else {
+        toast({
+          title: '❌ Erro ao buscar usuários',
+          description: data.error || 'Erro desconhecido',
+          variant: 'destructive'
+        })
       }
-      
-      return () => {
-        if (interval) clearInterval(interval)
-      }
+    } catch (error) {
+      console.error('Erro ao buscar usuários:', error)
+      toast({
+        title: '❌ Erro ao buscar usuários',
+        description: 'Erro de conexão com o servidor',
+        variant: 'destructive'
+      })
+    } finally {
+      setUsuariosLoading(false)
     }
-  }, [activeTab, autoRefresh])
-
-  // Formatadores para dados de segurança
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('pt-BR')
   }
 
+  const criarUsuario = async () => {
+    if (!selectedBar) return
+    
+    try {
+      setLoading(true)
+      const response = await fetch('/api/usuarios', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          bar_id: selectedBar.id,
+          ...novoUsuario
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        toast({
+          title: '✅ Usuário criado com sucesso!',
+          description: `${novoUsuario.nome} foi adicionado ao sistema.`
+        })
+        setNovoUsuario({
+          nome: '',
+          email: '',
+          password: '',
+          role: 'funcionario',
+          telefone: '',
+          observacoes: '',
+          modulos_permitidos: []
+        })
+        setDialogAberto(false)
+        buscarUsuarios()
+      } else {
+        toast({
+          title: '❌ Erro ao criar usuário',
+          description: data.error || 'Erro desconhecido',
+          variant: 'destructive'
+        })
+      }
+    } catch (error) {
+      console.error('Erro ao criar usuário:', error)
+      toast({
+        title: '❌ Erro ao criar usuário',
+        description: 'Erro de conexão com o servidor',
+        variant: 'destructive'
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const editarUsuario = async () => {
+    if (!selectedBar || !usuarioEditando) return
+    
+    try {
+      setLoading(true)
+      const response = await fetch(`/api/usuarios/${usuarioEditando.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          bar_id: selectedBar.id,
+          ...usuarioEditando
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        toast({
+          title: '✅ Usuário atualizado com sucesso!',
+          description: `${usuarioEditando.nome} foi atualizado.`
+        })
+        setUsuarioEditando(null)
+        buscarUsuarios()
+      } else {
+        toast({
+          title: '❌ Erro ao atualizar usuário',
+          description: data.error || 'Erro desconhecido',
+          variant: 'destructive'
+        })
+      }
+    } catch (error) {
+      console.error('Erro ao editar usuário:', error)
+      toast({
+        title: '❌ Erro ao atualizar usuário',
+        description: 'Erro de conexão com o servidor',
+        variant: 'destructive'
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const excluirUsuario = async (usuario: Usuario) => {
+    if (!selectedBar || !confirm(`Tem certeza que deseja excluir o usuário ${usuario.nome}?`)) return
+    
+    try {
+      setLoading(true)
+      const response = await fetch(`/api/usuarios/${usuario.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ bar_id: selectedBar.id })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        toast({
+          title: '✅ Usuário excluído com sucesso!',
+          description: `${usuario.nome} foi removido do sistema.`
+        })
+        buscarUsuarios()
+      } else {
+        toast({
+          title: '❌ Erro ao excluir usuário',
+          description: data.error || 'Erro desconhecido',
+          variant: 'destructive'
+        })
+      }
+    } catch (error) {
+      console.error('Erro ao excluir usuário:', error)
+      toast({
+        title: '❌ Erro ao excluir usuário',
+        description: 'Erro de conexão com o servidor',
+        variant: 'destructive'
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const toggleUsuarioAtivo = async (usuario: Usuario) => {
+    const novoStatus = !usuario.ativo
+    
+    try {
+      setLoading(true)
+      const response = await fetch(`/api/usuarios/${usuario.id}/toggle-ativo`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          bar_id: selectedBar?.id,
+          ativo: novoStatus 
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        toast({
+          title: novoStatus ? '✅ Usuário ativado!' : '🔒 Usuário desativado!',
+          description: `${usuario.nome} foi ${novoStatus ? 'ativado' : 'desativado'}.`
+        })
+        buscarUsuarios()
+      } else {
+        toast({
+          title: '❌ Erro ao alterar status',
+          description: data.error || 'Erro desconhecido',
+          variant: 'destructive'
+        })
+      }
+    } catch (error) {
+      console.error('Erro ao alterar status:', error)
+      toast({
+        title: '❌ Erro ao alterar status',
+        description: 'Erro de conexão com o servidor',
+        variant: 'destructive'
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Função para formatar data
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    // Usar timezone de Brasília
+    return date.toLocaleDateString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
+
+  // Função para cor do nível de severidade
   const getLevelColor = (level: string) => {
     switch (level) {
-      case 'critical': return 'bg-red-100 text-red-800 border-red-200'
-      case 'warning': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'info': return 'bg-blue-100 text-blue-800 border-blue-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+      case 'critical': return 'bg-red-500 text-white'
+      case 'warning': return 'bg-yellow-500 text-white'
+      case 'info': return 'bg-blue-500 text-white'
+      default: return 'bg-gray-500 text-white'
     }
   }
 
+  // Função para cor do risco
   const getRiskColor = (score: number) => {
     if (score >= 80) return 'text-red-600'
-    if (score >= 60) return 'text-yellow-600'
-    if (score >= 40) return 'text-orange-600'
+    if (score >= 50) return 'text-yellow-600'
     return 'text-green-600'
   }
 
+  // Função para mascarar dados sensíveis
   const maskSensitiveData = (data: string) => {
     if (!showSensitiveData) {
-      return data.replace(/(\d{1,3}\.){3}\d{1,3}/g, 'xxx.xxx.xxx.xxx')
-                 .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, 'xxx@xxx.xxx')
+      if (data.includes('@')) {
+        // Email
+        const [user, domain] = data.split('@')
+        return `${user.substring(0, 2)}***@${domain}`
+      }
+      if (data.includes('.')) {
+        // IP
+        const parts = data.split('.')
+        return `${parts[0]}.${parts[1]}.xxx.xxx`
+      }
     }
     return data
+  }
+
+  // Função para salvar configurações de webhook
+  const handleSaveWebhooks = async () => {
+    if (!selectedBar) return
+    
+    try {
+      setWebhookLoading(true)
+      
+      const response = await fetch('/api/configuracoes/webhooks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          bar_id: selectedBar.id,
+          configuracoes: webhookConfigs
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        toast({
+          title: '✅ Configurações salvas com sucesso!',
+          description: 'Os webhooks Discord foram atualizados.',
+        })
+      } else {
+        toast({
+          title: '❌ Erro ao salvar configurações',
+          description: data.error || 'Erro desconhecido',
+          variant: 'destructive',
+        })
+      }
+    } catch (error) {
+      console.error('Erro ao salvar configurações:', error)
+      toast({
+        title: '❌ Erro ao salvar configurações',
+        description: 'Erro de conexão com o servidor',
+        variant: 'destructive',
+      })
+    } finally {
+      setWebhookLoading(false)
+    }
+  }
+
+  // Função para carregar configurações de webhook
+  const loadWebhookConfigs = async () => {
+    if (!selectedBar) return
+    
+    try {
+      const response = await fetch(`/api/configuracoes/webhooks?bar_id=${selectedBar.id}`)
+      const data = await response.json()
+      
+      if (data.success && data.configuracoes) {
+        setWebhookConfigs(data.configuracoes)
+      }
+    } catch (error) {
+      console.error('Erro ao carregar configurações:', error)
+    }
+  }
+
+  // Carregar configurações ao selecionar um bar
+  useEffect(() => {
+    if (selectedBar && activeTab === 'integracoes') {
+      loadWebhookConfigs()
+    }
+  }, [selectedBar, activeTab])
+
+  // Função para testar webhook
+  const testWebhook = async (webhookType: string) => {
+    if (!selectedBar) {
+      toast({
+        title: '❌ Erro',
+        description: 'Nenhum bar selecionado',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    const webhook = webhookConfigs[webhookType as keyof typeof webhookConfigs]
+    if (!webhook || webhook.trim() === '') {
+      toast({
+        title: '❌ Webhook não configurado',
+        description: `Configure o webhook ${webhookType} antes de testar`,
+        variant: 'destructive'
+      })
+      return
+    }
+
+    try {
+      setTestingWebhook(webhookType)
+      
+      const response = await fetch('/api/edge-functions/discord-notification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          bar_id: selectedBar.id,
+          webhook_type: webhookType,
+          title: `🧪 Teste de Webhook - ${webhookType.toUpperCase()}`,
+          description: `Este é um teste do webhook **${webhookType}** configurado para o bar **${selectedBar.id}**.\n\n✅ Se você está vendo esta mensagem, o webhook está funcionando corretamente!`,
+          color: getWebhookColor(webhookType),
+          fields: [
+            {
+              name: '📍 Bar',
+              value: selectedBar.id,
+              inline: true
+            },
+            {
+              name: '🔗 Tipo de Webhook',
+              value: webhookType.charAt(0).toUpperCase() + webhookType.slice(1),
+              inline: true
+            },
+            {
+              name: '⏰ Horário',
+              value: new Date().toLocaleString('pt-BR', {
+                timeZone: 'America/Sao_Paulo'
+              }),
+              inline: true
+            }
+          ]
+        })
+      })
+
+      const result = await response.json()
+      
+      if (result.success) {
+        toast({
+          title: '✅ Teste realizado com sucesso!',
+          description: `Webhook ${webhookType} está funcionando. Verifique seu Discord.`
+        })
+      } else {
+        toast({
+          title: '❌ Erro no teste',
+          description: result.error || 'Erro desconhecido',
+          variant: 'destructive'
+        })
+      }
+    } catch (error) {
+      console.error('Erro ao testar webhook:', error)
+      toast({
+        title: '❌ Erro no teste',
+        description: 'Erro de conexão com o servidor',
+        variant: 'destructive'
+      })
+    } finally {
+      setTestingWebhook(null)
+    }
+  }
+
+  // Função para obter cor do webhook
+  const getWebhookColor = (webhookType: string) => {
+    const colors = {
+      sistema: 0xff0000,     // Vermelho
+      contaazul: 0x0066cc,   // Azul
+      meta: 0xff6600,        // Laranja
+      checklists: 0x00cc66,  // Verde
+      contahub: 0xff9900,    // Laranja escuro
+      vendas: 0x00ff00,      // Verde claro
+      reservas: 0x6600cc     // Roxo
+    }
+    return colors[webhookType as keyof typeof colors] || 0x808080
   }
 
   const handleSaveMetas = async () => {
@@ -218,11 +704,53 @@ function ConfiguracoesContent() {
     }
   }
 
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'admin': return 'bg-red-100 text-red-800 border-red-200'
+      case 'gerente': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+      case 'funcionario': return 'bg-blue-100 text-blue-800 border-blue-200'
+      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+    }
+  }
+
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case 'admin': return 'Administrador'
+      case 'gerente': return 'Gerente'
+      case 'funcionario': return 'Funcionário'
+      default: return role
+    }
+  }
+
+  const renderModulosPermitidos = (modulos: string[]) => {
+    const categorias = modulosDisponiveis.reduce((acc: Record<string, string[]>, modulo) => {
+      if (modulos.includes(modulo.id)) {
+        if (!acc[modulo.categoria]) acc[modulo.categoria] = []
+        acc[modulo.categoria].push(modulo.nome)
+      }
+      return acc
+    }, {} as Record<string, string[]>)
+
+    return Object.entries(categorias).map(([categoria, nomes]) => (
+      <div key={categoria} className="mb-2">
+        <div className="text-xs font-semibold text-gray-600 mb-1">{categoria}</div>
+        <div className="flex flex-wrap gap-1">
+          {nomes.map((nome: string) => (
+            <Badge key={nome} variant="secondary" className="text-xs">
+              {nome}
+            </Badge>
+          ))}
+        </div>
+      </div>
+    ))
+  }
+
   const tabs = [
     { id: 'metas', label: 'Metas', icon: Target },
     { id: 'usuarios', label: 'Usuários', icon: User },
     { id: 'integracoes', label: 'Integrações', icon: Settings },
     { id: 'seguranca', label: 'Segurança', icon: Shield },
+    { id: 'aplicativo', label: 'Aplicativo', icon: Smartphone },
   ]
 
   return (
@@ -243,7 +771,7 @@ function ConfiguracoesContent() {
                 </div>
               </div>
               <Button
-                onClick={() => window.location.href = '/configuracoes?tab=usuarios'}
+                onClick={() => setActiveTab('usuarios')}
                 className="bg-amber-100 hover:bg-amber-200 text-amber-800"
                 size="sm"
               >
@@ -279,34 +807,7 @@ function ConfiguracoesContent() {
             })}
           </div>
 
-          {/* Seção PWA Installer - Discreto */}
-          <div className="mt-6 pt-4 border-t border-gray-200">
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium text-gray-700 flex items-center space-x-2">
-                <Smartphone className="w-4 h-4" />
-                <span>Aplicativo</span>
-              </h3>
-              
-              {isInstalled ? (
-                <div className="flex items-center space-x-2 text-xs text-green-600">
-                  <CheckCircle className="w-4 h-4" />
-                  <span>App instalado</span>
-                </div>
-              ) : canInstall ? (
-                <PWAInstaller
-                  showButton={true}
-                  onInstall={handlePWAInstall}
-                  className="w-full text-xs py-1.5 px-2 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300"
-                  buttonText="Instalar App"
-                  buttonIcon="📱"
-                />
-              ) : (
-                <div className="text-xs text-gray-500">
-                  App não disponível
-                </div>
-              )}
-            </div>
-          </div>
+
         </div>
 
         {/* Conteúdo das tabs */}
@@ -340,194 +841,316 @@ function ConfiguracoesContent() {
           {activeTab === 'usuarios' && (
             <Card>
               <CardHeader>
-                <div className="flex items-center space-x-2">
-                  <User className="w-5 h-5 text-blue-600" />
-                  <CardTitle>Gerenciamento de Usuários</CardTitle>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Users className="w-5 h-5 text-blue-600" />
+                    <CardTitle>Gerenciamento de Usuários</CardTitle>
+                  </div>
+                  <Dialog open={dialogAberto} onOpenChange={setDialogAberto}>
+                    <button
+                      onClick={() => setDialogAberto(true)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+                    >
+                      <UserPlus className="w-4 h-4" />
+                      <span>Novo Usuário</span>
+                    </button>
+                    <DialogContent className="max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle>Criar Novo Usuário</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="nome">Nome Completo *</Label>
+                            <Input
+                              id="nome"
+                              value={novoUsuario.nome}
+                              onChange={(e) => setNovoUsuario({...novoUsuario, nome: e.target.value})}
+                              placeholder="Digite o nome completo"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="email">Email *</Label>
+                            <Input
+                              id="email"
+                              type="email"
+                              value={novoUsuario.email}
+                              onChange={(e) => setNovoUsuario({...novoUsuario, email: e.target.value})}
+                              placeholder="usuario@exemplo.com"
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="password">Senha *</Label>
+                            <div className="relative">
+                              <Input
+                                id="password"
+                                type={senhaVisivel ? 'text' : 'password'}
+                                value={novoUsuario.password}
+                                onChange={(e) => setNovoUsuario({...novoUsuario, password: e.target.value})}
+                                placeholder="Digite a senha"
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="absolute right-0 top-0 h-full"
+                                onClick={() => setSenhaVisivel(!senhaVisivel)}
+                              >
+                                {senhaVisivel ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                              </Button>
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="role">Função *</Label>
+                            <Select value={novoUsuario.role} onValueChange={(value) => setNovoUsuario({...novoUsuario, role: value as any})}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione a função" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="funcionario">Funcionário</SelectItem>
+                                <SelectItem value="gerente">Gerente</SelectItem>
+                                <SelectItem value="admin">Administrador</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label htmlFor="telefone">Telefone</Label>
+                          <Input
+                            id="telefone"
+                            value={novoUsuario.telefone}
+                            onChange={(e) => setNovoUsuario({...novoUsuario, telefone: e.target.value})}
+                            placeholder="(11) 99999-9999"
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="observacoes">Observações</Label>
+                          <Textarea
+                            id="observacoes"
+                            value={novoUsuario.observacoes}
+                            onChange={(e) => setNovoUsuario({...novoUsuario, observacoes: e.target.value})}
+                            placeholder="Observações sobre o usuário"
+                            rows={3}
+                          />
+                        </div>
+
+                        <div>
+                          <Label>Permissões de Módulos</Label>
+                          <div className="mt-2 max-h-64 overflow-y-auto border rounded-lg p-4">
+                            {Object.entries(
+                              modulosDisponiveis.reduce((acc: Record<string, typeof modulosDisponiveis>, modulo) => {
+                                if (!acc[modulo.categoria]) acc[modulo.categoria] = []
+                                acc[modulo.categoria].push(modulo)
+                                return acc
+                              }, {} as Record<string, typeof modulosDisponiveis>)
+                            ).map(([categoria, modulos]) => (
+                              <div key={categoria} className="mb-4">
+                                <div className="font-semibold text-sm text-gray-700 mb-2">{categoria}</div>
+                                <div className="space-y-2">
+                                  {modulos.map(modulo => (
+                                    <div key={modulo.id} className="flex items-center space-x-2">
+                                      <input
+                                        type="checkbox"
+                                        id={`modulo-${modulo.id}`}
+                                        checked={novoUsuario.modulos_permitidos.includes(modulo.id)}
+                                        onChange={(e) => {
+                                          if (e.target.checked) {
+                                            setNovoUsuario({
+                                              ...novoUsuario,
+                                              modulos_permitidos: [...novoUsuario.modulos_permitidos, modulo.id]
+                                            })
+                                          } else {
+                                            setNovoUsuario({
+                                              ...novoUsuario,
+                                              modulos_permitidos: novoUsuario.modulos_permitidos.filter(m => m !== modulo.id)
+                                            })
+                                          }
+                                        }}
+                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                      />
+                                      <Label htmlFor={`modulo-${modulo.id}`} className="text-sm">
+                                        {modulo.nome}
+                                      </Label>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end space-x-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => setDialogAberto(false)}
+                          >
+                            <X className="w-4 h-4 mr-2" />
+                            Cancelar
+                          </Button>
+                          <Button
+                            onClick={criarUsuario}
+                            disabled={loading || !novoUsuario.nome || !novoUsuario.email || !novoUsuario.password}
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                          >
+                            <Save className="w-4 h-4 mr-2" />
+                            {loading ? 'Criando...' : 'Criar Usuário'}
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <p className="text-gray-600">
-                    Funcionalidade de gerenciamento de usuários será implementada em breve.
-                  </p>
-                </div>
+                {usuariosLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="text-gray-600 mt-2">Carregando usuários...</p>
+                  </div>
+                ) : usuarios.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Users className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Nenhum usuário encontrado</h3>
+                    <p className="text-gray-600 mb-4">
+                      Comece criando o primeiro usuário para sua equipe
+                    </p>
+                    <Button
+                      onClick={() => setDialogAberto(true)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Criar Primeiro Usuário
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {usuarios.map((usuario) => (
+                      <div key={usuario.id} className="border rounded-lg p-4 bg-gradient-to-r from-white to-blue-50">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center space-x-3">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
+                              usuario.role === 'admin' ? 'bg-red-500' : 
+                              usuario.role === 'gerente' ? 'bg-yellow-500' : 'bg-blue-500'
+                            }`}>
+                              {usuario.role === 'admin' ? '👑' : usuario.role === 'gerente' ? '👨‍💼' : '👤'}
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-lg">{usuario.nome}</h3>
+                              <p className="text-gray-600">{usuario.email}</p>
+                              <div className="flex items-center space-x-2 mt-1">
+                                <Badge className={getRoleColor(usuario.role)}>
+                                  {getRoleLabel(usuario.role)}
+                                </Badge>
+                                <Badge variant={usuario.ativo ? 'default' : 'secondary'}>
+                                  {usuario.ativo ? 'Ativo' : 'Inativo'}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setUsuarioEditando(usuario)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => toggleUsuarioAtivo(usuario)}
+                            >
+                              {usuario.ativo ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => excluirUsuario(usuario)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <div className="text-gray-600 mb-1">Informações:</div>
+                            <div>📅 Criado em: {new Date(usuario.criado_em).toLocaleDateString('pt-BR')}</div>
+                            {usuario.ultimo_login && (
+                              <div>🕐 Último login: {new Date(usuario.ultimo_login).toLocaleDateString('pt-BR')}</div>
+                            )}
+                            {usuario.telefone && (
+                              <div>📞 Telefone: {usuario.telefone}</div>
+                            )}
+                          </div>
+                          <div>
+                            <div className="text-gray-600 mb-1">Permissões ({usuario.modulos_permitidos.length}):</div>
+                            <div className="max-h-32 overflow-y-auto">
+                              {renderModulosPermitidos(usuario.modulos_permitidos)}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {usuario.observacoes && (
+                          <div className="mt-3 p-2 bg-gray-50 rounded text-sm">
+                            <div className="text-gray-600 mb-1">Observações:</div>
+                            <div>{usuario.observacoes}</div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
 
           {activeTab === 'integracoes' && (
-            <div className="space-y-6">
-              {/* Discord Webhooks */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-[#5865F2] rounded-lg flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">D</span>
+            <Card>
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <Settings className="w-5 h-5 text-indigo-600" />
+                  <CardTitle>Central de Integrações</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Settings className="w-10 h-10 text-indigo-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">Todas as Integrações</h3>
+                  <p className="text-gray-600 mb-6">
+                    Acesse a central completa de integrações com abas organizadas para cada plataforma
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="p-4 border rounded-lg bg-[#5865F2]/10">
+                      <h4 className="font-semibold text-[#5865F2] mb-2">Discord</h4>
+                      <p className="text-sm text-gray-600">Webhooks e notificações</p>
                     </div>
-                    <CardTitle>Discord Webhooks</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Webhook Sistema/Segurança */}
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Shield className="w-4 h-4 text-red-500" />
-                      <Label htmlFor="webhook-sistema" className="font-medium">
-                        Webhook Sistema & Segurança
-                      </Label>
+                    <div className="p-4 border rounded-lg bg-green-50">
+                      <h4 className="font-semibold text-green-600 mb-2">WhatsApp</h4>
+                      <p className="text-sm text-gray-600">Business API</p>
                     </div>
-                    <Input
-                      id="webhook-sistema"
-                      placeholder="https://discord.com/api/webhooks/..."
-                      defaultValue="https://discord.com/api/webhooks/1393646423748116602/3zUhIrSKFHmq0zNRLf5AzrkSZNzTj7oYk6f45Tpj2LZWChtmGTKKTHxhfaNZigyLXN4y"
-                    />
-                    <p className="text-xs text-gray-500">
-                      Rate limiting, SQL injection, backups, eventos críticos de segurança
-                    </p>
-                  </div>
-
-                  <Separator />
-
-                  {/* Webhook ContaAzul */}
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 bg-blue-500 rounded" />
-                      <Label htmlFor="webhook-contaazul" className="font-medium">
-                        Webhook ContaAzul
-                      </Label>
+                    <div className="p-4 border rounded-lg bg-blue-50">
+                      <h4 className="font-semibold text-blue-600 mb-2">ContaAzul</h4>
+                      <p className="text-sm text-gray-600">OAuth e sincronização</p>
                     </div>
-                    <Input
-                      id="webhook-contaazul"
-                      placeholder="https://discord.com/api/webhooks/..."
-                      defaultValue="https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ"
-                    />
-                    <p className="text-xs text-gray-500">
-                      Sincronizações automáticas, renovação de tokens, dados financeiros
-                    </p>
                   </div>
-
-                  <Separator />
-
-                  {/* Webhook Meta/Social */}
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded" />
-                      <Label htmlFor="webhook-meta" className="font-medium">
-                        Webhook Meta & Social
-                      </Label>
-                    </div>
-                    <Input
-                      id="webhook-meta"
-                      placeholder="https://discord.com/api/webhooks/..."
-                    />
-                    <p className="text-xs text-gray-500">
-                      Instagram, Facebook, Google Reviews, campanhas de marketing
-                    </p>
-                  </div>
-
-                  <Separator />
-
-                  {/* Webhook Checklists */}
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle className="w-4 h-4 text-green-500" />
-                      <Label htmlFor="webhook-checklists" className="font-medium">
-                        Webhook Checklists & Operações
-                      </Label>
-                    </div>
-                    <Input
-                      id="webhook-checklists"
-                      placeholder="https://discord.com/api/webhooks/..."
-                    />
-                    <p className="text-xs text-gray-500">
-                      Conclusão de checklists, alertas operacionais, relatórios diários
-                    </p>
-                  </div>
-
-                  <Separator />
-
-                  {/* Webhook ContaHub */}
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 bg-orange-500 rounded" />
-                      <Label htmlFor="webhook-contahub" className="font-medium">
-                        Webhook ContaHub
-                      </Label>
-                      <Badge variant="secondary" className="text-xs">Em breve</Badge>
-                    </div>
-                    <Input
-                      id="webhook-contahub"
-                      placeholder="https://discord.com/api/webhooks/..."
-                      disabled
-                    />
-                    <p className="text-xs text-gray-500">
-                      Análises financeiras, relatórios automatizados, alertas de performance
-                    </p>
-                  </div>
-
-                  <Separator />
-
-                  {/* Webhook Vendas */}
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 bg-emerald-500 rounded" />
-                      <Label htmlFor="webhook-vendas" className="font-medium">
-                        Webhook Vendas & Receitas
-                      </Label>
-                    </div>
-                    <Input
-                      id="webhook-vendas"
-                      placeholder="https://discord.com/api/webhooks/..."
-                    />
-                    <p className="text-xs text-gray-500">
-                      Metas atingidas, vendas excepcionais, relatórios de faturamento
-                    </p>
-                  </div>
-
-                  <Separator />
-
-                  {/* Webhook Reservas */}
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 bg-indigo-500 rounded" />
-                      <Label htmlFor="webhook-reservas" className="font-medium">
-                        Webhook Reservas & Eventos
-                      </Label>
-                    </div>
-                    <Input
-                      id="webhook-reservas"
-                      placeholder="https://discord.com/api/webhooks/..."
-                    />
-                    <p className="text-xs text-gray-500">
-                      Novas reservas, cancelamentos, eventos especiais, occupancy rate
-                    </p>
-                  </div>
-
-                  <div className="flex justify-end pt-4">
-                    <Button>
-                      Salvar Configurações
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Outras Integrações */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center space-x-2">
-                    <Settings className="w-5 h-5 text-blue-600" />
-                    <CardTitle>Outras Integrações</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-8">
-                    <p className="text-gray-600">
-                      WhatsApp, Email, SMS e outras integrações serão implementadas em breve.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                  <Button 
+                    onClick={() => window.location.href = '/configuracoes/integracoes'}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                  >
+                    🔗 Acessar Central de Integrações
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {activeTab === 'seguranca' && (
@@ -810,6 +1433,154 @@ function ConfiguracoesContent() {
                   </div>
                 </TabsContent>
               </Tabs>
+            </div>
+          )}
+
+          {activeTab === 'aplicativo' && (
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center space-x-2">
+                    <Smartphone className="w-5 h-5 text-blue-600" />
+                    <CardTitle>SGB Dashboard - App</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {/* Status do App */}
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                          <Smartphone className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg">SGB Dashboard</h3>
+                          <p className="text-gray-600">Aplicativo Progressive Web App</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        {isInstalled ? (
+                          <div className="flex items-center space-x-2 text-green-600">
+                            <CheckCircle className="w-5 h-5" />
+                            <span className="font-medium">Instalado</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center space-x-2 text-gray-500">
+                            <Smartphone className="w-5 h-5" />
+                            <span className="font-medium">Não instalado</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Botão de instalação */}
+                    {!isInstalled && (
+                      <div className="text-center py-6">
+                        {canInstall ? (
+                          <div className="space-y-4">
+                            <h3 className="text-xl font-semibold">Instalar Aplicativo</h3>
+                            <p className="text-gray-600 mb-6">
+                              Instale o SGB Dashboard como um aplicativo em seu dispositivo para acesso rápido e experiência nativa.
+                            </p>
+                            <Button
+                              onClick={handlePWAInstall}
+                              size="lg"
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
+                            >
+                              <Smartphone className="w-5 h-5 mr-2" />
+                              Instalar Aplicativo
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            <h3 className="text-xl font-semibold text-gray-600">Instalação Indisponível</h3>
+                            <p className="text-gray-500">
+                              O aplicativo não pode ser instalado neste navegador ou dispositivo no momento.
+                            </p>
+                            <div className="text-sm text-gray-400">
+                              <p>• Certifique-se de estar usando um navegador compatível (Chrome, Edge, Safari)</p>
+                              <p>• O aplicativo pode já estar instalado</p>
+                              <p>• Alguns navegadores requerem HTTPS para instalação</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Recursos do App */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-4 border rounded-lg">
+                        <h4 className="font-semibold mb-2 flex items-center">
+                          <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+                          Acesso Offline
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          Funciona mesmo sem conexão com internet
+                        </p>
+                      </div>
+                      
+                      <div className="p-4 border rounded-lg">
+                        <h4 className="font-semibold mb-2 flex items-center">
+                          <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+                          Notificações Push
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          Receba alertas importantes instantaneamente
+                        </p>
+                      </div>
+
+                      <div className="p-4 border rounded-lg">
+                        <h4 className="font-semibold mb-2 flex items-center">
+                          <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+                          Inicialização Rápida
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          Carregamento instantâneo da tela inicial
+                        </p>
+                      </div>
+
+                      <div className="p-4 border rounded-lg">
+                        <h4 className="font-semibold mb-2 flex items-center">
+                          <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+                          Interface Nativa
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          Experiência como aplicativo nativo
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Informações técnicas */}
+                    <div className="border-t pt-6">
+                      <h4 className="font-semibold mb-4">Informações Técnicas</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="font-medium">Versão:</span> 2.0.0
+                        </div>
+                        <div>
+                          <span className="font-medium">Última atualização:</span> {new Date().toLocaleDateString('pt-BR')}
+                        </div>
+                        <div>
+                          <span className="font-medium">Tecnologia:</span> Progressive Web App (PWA)
+                        </div>
+                        <div>
+                          <span className="font-medium">Compatibilidade:</span> Chrome, Edge, Safari, Firefox
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Instruções */}
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="font-semibold mb-2 text-blue-800">Como instalar:</h4>
+                      <div className="text-sm text-blue-700 space-y-1">
+                        <p>• <strong>Chrome/Edge:</strong> Clique no botão "Instalar" acima ou no ícone de instalação na barra de endereços</p>
+                        <p>• <strong>Safari (iOS):</strong> Toque em "Compartilhar" e depois em "Adicionar à Tela de Início"</p>
+                        <p>• <strong>Android:</strong> Use o menu do navegador e selecione "Instalar app"</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
         </div>

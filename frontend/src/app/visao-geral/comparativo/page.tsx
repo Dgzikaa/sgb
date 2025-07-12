@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useBar } from '@/contexts/BarContext'
 import { getSupabaseClient } from '@/lib/supabase'
+import BarSelector from '@/components/BarSelector'
+import { useRouter } from 'next/navigation'
 
 interface DadosComparacao {
   data: string
@@ -59,6 +61,7 @@ type TipoComparacao = 'datas-especificas' | 'artistas'
 
 export default function ComparativoPage() {
   const { selectedBar } = useBar()
+  const router = useRouter()
   
   const [tipoComparacao, setTipoComparacao] = useState<TipoComparacao>('datas-especificas')
   
@@ -1346,105 +1349,169 @@ export default function ComparativoPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">🔍 Dashboard Comparativo</h1>
-        <p className="text-slate-600">Análise comparativa detalhada entre datas específicas e artistas do {selectedBar?.nome}</p>
-      </div>
-
-      {/* Seletor de tipo de comparação */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <h3 className="text-lg font-bold text-slate-800 mb-4">🎯 Tipo de Comparação</h3>
-        <div className="flex space-x-4">
-          <button
-            onClick={() => setTipoComparacao('datas-especificas')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              tipoComparacao === 'datas-especificas' 
-                ? 'bg-indigo-600 text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            📅 Datas Específicas
-          </button>
-          <button
-            onClick={() => setTipoComparacao('artistas')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              tipoComparacao === 'artistas' 
-                ? 'bg-indigo-600 text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            🎤 Artistas
-          </button>
+      {/* Botão de Voltar */}
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => router.push('/configuracoes')}
+          className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Voltar para Configurações
+        </button>
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold text-slate-800">📊 Comparação de Dados</h1>
+          <p className="text-slate-600 mt-1">Compare performance entre datas específicas ou artistas diferentes</p>
         </div>
       </div>
 
-      {/* Controles de Comparação de Datas */}
-      {tipoComparacao === 'datas-especificas' && (
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h3 className="text-lg font-bold text-slate-800 mb-4">📊 Comparação: Data 1 vs Data 2</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Adicionar CSS específico para valores monetários */}
+      <style jsx>{`
+        .valor-monetario {
+          font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+          font-weight: 700 !important;
+          font-size: 1.125rem !important;
+          line-height: 1.5 !important;
+          color: #1e293b !important;
+          display: block !important;
+          white-space: nowrap !important;
+          overflow: visible !important;
+          text-overflow: clip !important;
+          max-width: none !important;
+          width: auto !important;
+          height: auto !important;
+          min-height: 1.5rem !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          border: none !important;
+          background: transparent !important;
+          text-align: center !important;
+          user-select: text !important;
+          -webkit-user-select: text !important;
+          -moz-user-select: text !important;
+          -ms-user-select: text !important;
+        }
+        
+        .card-valor {
+          min-width: 120px !important;
+          text-align: center !important;
+          padding: 12px !important;
+          background: white !important;
+          border-radius: 8px !important;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+          overflow: visible !important;
+          position: relative !important;
+          z-index: 1 !important;
+        }
+        
+        .debug-valor {
+          border: 1px solid red !important;
+          background: yellow !important;
+          padding: 4px !important;
+          font-weight: bold !important;
+          font-size: 14px !important;
+          color: black !important;
+          display: block !important;
+          text-align: center !important;
+          margin: 2px 0 !important;
+        }
+      `}</style>
+
+      {/* Controles de Comparação */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <h2 className="text-xl font-bold text-slate-800 mb-4">📊 Comparação de Dados</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Tipo de Comparação */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Tipo de Comparação
+            </label>
+            <select 
+              value={tipoComparacao} 
+              onChange={(e) => setTipoComparacao(e.target.value as TipoComparacao)}
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="datas-especificas">🗓️ Comparar Datas Específicas</option>
+              <option value="artistas">🎤 Comparar Artistas</option>
+            </select>
+          </div>
+
+          {/* Seletor de Bar */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Bar
+            </label>
+            <BarSelector />
+          </div>
+        </div>
+
+        {/* Controles específicos para cada tipo */}
+        {tipoComparacao === 'datas-especificas' && (
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Data 1</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Data 1
+              </label>
               <input
                 type="date"
                 value={data1}
                 onChange={(e) => setData1(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
-                style={{ colorScheme: 'light' }}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Data 2</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Data 2
+              </label>
               <input
                 type="date"
                 value={data2}
                 onChange={(e) => setData2(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
-                style={{ colorScheme: 'light' }}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
             <div className="flex items-end">
               <button
                 onClick={buscarComparacaoDatas}
-                disabled={loading || !selectedBar || !data1 || !data2}
-                className="w-full px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!data1 || !data2 || loading}
+                className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? 'Comparando...' : '🔍 Comparar'}
+                {loading ? 'Comparando...' : 'Comparar Datas'}
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Controles de Comparação de Artistas */}
-      {tipoComparacao === 'artistas' && (
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h3 className="text-lg font-bold text-slate-800 mb-4">🎤 Comparação de Artistas</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {tipoComparacao === 'artistas' && (
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Artista 1</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Artista 1
+              </label>
               <select
                 value={artistaSelecionado1}
                 onChange={(e) => setArtistaSelecionado1(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
-                style={{ colorScheme: 'light' }}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="" className="text-gray-900">Selecione um artista</option>
+                <option value="">Selecione o artista 1</option>
                 {listaArtistas.map(artista => (
-                  <option key={artista} value={artista} className="text-gray-900">{artista}</option>
+                  <option key={artista} value={artista}>{artista}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Artista 2</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Artista 2
+              </label>
               <select
                 value={artistaSelecionado2}
                 onChange={(e) => setArtistaSelecionado2(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="">Selecione um artista</option>
-                {listaArtistas.map(artista => (
+                <option value="">Selecione o artista 2</option>
+                {listaArtistas.filter(a => a !== artistaSelecionado1).map(artista => (
                   <option key={artista} value={artista}>{artista}</option>
                 ))}
               </select>
@@ -1452,76 +1519,275 @@ export default function ComparativoPage() {
             <div className="flex items-end">
               <button
                 onClick={buscarComparacaoArtistas}
-                disabled={loading || !selectedBar || !artistaSelecionado1 || !artistaSelecionado2}
-                className="w-full px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!artistaSelecionado1 || !artistaSelecionado2 || loading}
+                className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? 'Comparando...' : '🔍 Comparar'}
+                {loading ? 'Comparando...' : 'Comparar Artistas'}
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {loading ? (
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-            <div className="h-64 bg-gray-200 rounded"></div>
-          </div>
-        </div>
-      ) : (
+      {/* Resultados da Comparação */}
+      {((tipoComparacao === 'datas-especificas' && dadosComparativos.length === 2) ||
+        (tipoComparacao === 'artistas' && dadosArtistas.artista1 && dadosArtistas.artista2)) && (
         <>
-          {/* Status dos Dados - Comparação de Datas */}
-          {tipoComparacao === 'datas-especificas' && dadosComparativos.length === 2 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-              <h3 className="text-sm font-medium text-yellow-800 mb-2">📊 Status dos Dados</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          {/* Visão Geral dos Dados */}
+          {tipoComparacao === 'artistas' && dadosArtistas.artista1 && dadosArtistas.artista2 && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <h3 className="text-lg font-bold text-slate-800 mb-4">🎯 Visão Geral dos Artistas</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <span className="font-medium">{data1}:</span>
-                  <span className={`ml-2 ${dadosComparativos[0]?.faturamento > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {dadosComparativos[0]?.faturamento > 0 ? '✅ Dados disponíveis' : '⚠️ Sem dados de faturamento'}
-                  </span>
-                  {dadosComparativos[0]?.faturamento > 0 && (
-                    <div className="mt-1 text-xs text-gray-600 space-y-1">
-                      <div>💰 Total: R$ {dadosComparativos[0].faturamento.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                      {dadosComparativos[0].faturamentoYuzer > 0 && (
-                        <div>🍻 Yuzer: R$ {dadosComparativos[0].faturamentoYuzer.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                      )}
-                      {dadosComparativos[0].faturamentoContaHub > 0 && (
-                        <div>🎫 ContaHub: R$ {dadosComparativos[0].faturamentoContaHub.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                      )}
-                      {dadosComparativos[0].faturamentoSympla > 0 && (
-                        <div>🎟️ Sympla: R$ {dadosComparativos[0].faturamentoSympla.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                      )}
-                    </div>
-                  )}
+                  <span className="font-medium">🎤 {dadosArtistas.artista1.nome}:</span>
+                  <span className="ml-2 text-green-600">✅ Dados disponíveis</span>
+                  <div className="mt-1 text-xs text-gray-600 space-y-1">
+                    <div>💰 Faturamento médio: R$ {dadosArtistas.artista1.faturamentoMedio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                    <div>📊 Faturamento total: R$ {dadosArtistas.artista1.faturamentoTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                    {dadosArtistas.artista1.faturamentoYuzerTotal > 0 && (
+                      <div>🍻 Yuzer total: R$ {dadosArtistas.artista1.faturamentoYuzerTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                    )}
+                    {dadosArtistas.artista1.faturamentoContaHubTotal > 0 && (
+                      <div>🎫 ContaHub total: R$ {dadosArtistas.artista1.faturamentoContaHubTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                    )}
+                    {dadosArtistas.artista1.faturamentoSymplaTotal > 0 && (
+                      <div>🎟️ Sympla total: R$ {dadosArtistas.artista1.faturamentoSymplaTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                    )}
+                    <div>👥 Clientes total: {dadosArtistas.artista1.clientesTotal.toLocaleString('pt-BR')}</div>
+                    <div>📊 {dadosArtistas.artista1.eventosComDados}/{dadosArtistas.artista1.totalEventos} eventos com dados</div>
+                  </div>
                 </div>
                 <div>
-                  <span className="font-medium">{data2}:</span>
-                  <span className={`ml-2 ${dadosComparativos[1]?.faturamento > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {dadosComparativos[1]?.faturamento > 0 ? '✅ Dados disponíveis' : '⚠️ Sem dados de faturamento'}
-                  </span>
-                  {dadosComparativos[1]?.faturamento > 0 && (
-                    <div className="mt-1 text-xs text-gray-600 space-y-1">
-                      <div>💰 Total: R$ {dadosComparativos[1].faturamento.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                      {dadosComparativos[1].faturamentoYuzer > 0 && (
-                        <div>🍻 Yuzer: R$ {dadosComparativos[1].faturamentoYuzer.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                      )}
-                      {dadosComparativos[1].faturamentoContaHub > 0 && (
-                        <div>🎫 ContaHub: R$ {dadosComparativos[1].faturamentoContaHub.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                      )}
-                      {dadosComparativos[1].faturamentoSympla > 0 && (
-                        <div>🎟️ Sympla: R$ {dadosComparativos[1].faturamentoSympla.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                      )}
-                    </div>
-                  )}
+                  <span className="font-medium">🎤 {dadosArtistas.artista2.nome}:</span>
+                  <span className="ml-2 text-green-600">✅ Dados disponíveis</span>
+                  <div className="mt-1 text-xs text-gray-600 space-y-1">
+                    <div>💰 Faturamento médio: R$ {dadosArtistas.artista2.faturamentoMedio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                    <div>📊 Faturamento total: R$ {dadosArtistas.artista2.faturamentoTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                    {dadosArtistas.artista2.faturamentoYuzerTotal > 0 && (
+                      <div>🍻 Yuzer total: R$ {dadosArtistas.artista2.faturamentoYuzerTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                    )}
+                    {dadosArtistas.artista2.faturamentoContaHubTotal > 0 && (
+                      <div>🎫 ContaHub total: R$ {dadosArtistas.artista2.faturamentoContaHubTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                    )}
+                    {dadosArtistas.artista2.faturamentoSymplaTotal > 0 && (
+                      <div>🎟️ Sympla total: R$ {dadosArtistas.artista2.faturamentoSymplaTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                    )}
+                    <div>👥 Clientes total: {dadosArtistas.artista2.clientesTotal.toLocaleString('pt-BR')}</div>
+                    <div>📊 {dadosArtistas.artista2.eventosComDados}/{dadosArtistas.artista2.totalEventos} eventos com dados</div>
+                  </div>
                 </div>
               </div>
-              {(dadosComparativos[0]?.faturamento === 0 || dadosComparativos[1]?.faturamento === 0) && (
-                <p className="text-yellow-700 text-xs mt-2">
-                  💡 Datas futuras podem não ter dados reais ainda. Dados estão disponíveis até aproximadamente junho/2025.
-                </p>
-              )}
+            </div>
+          )}
+
+          {/* Cards de Comparação - Datas */}
+          {tipoComparacao === 'datas-especificas' && dadosComparativos.length === 2 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {dadosComparativos.map((dados: any, index: any) => (
+                <div key={index} className={`bg-white rounded-xl p-6 shadow-sm border ${
+                  index === 0 ? 'border-blue-200 bg-blue-50' : 'border-green-200 bg-green-50'
+                }`}>
+                  <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
+                    {index === 0 ? '📅 Data 1' : '📅 Data 2'}
+                    <span className="ml-auto text-sm font-normal text-slate-600">
+                      {parseDataSemTimezone(dados.data).toLocaleDateString('pt-BR')}
+                    </span>
+                  </h3>
+
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="card-valor">
+                        <div className="text-2xl mb-1">💰</div>
+                        <div className="valor-monetario">
+                          R$ {dados.faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </div>
+                        <div className="debug-valor">
+                          DEBUG: {dados.faturamento}
+                        </div>
+                        <div className="text-xs text-slate-600">Faturamento</div>
+                      </div>
+                      <div className="card-valor">
+                        <div className="text-2xl mb-1">👥</div>
+                        <div className="valor-monetario">
+                          {dados.clientes}
+                        </div>
+                        <div className="text-xs text-slate-600">Clientes</div>
+                      </div>
+                      <div className="card-valor">
+                        <div className="text-2xl mb-1">🎯</div>
+                        <div className="valor-monetario">
+                          R$ {dados.ticketMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </div>
+                        <div className="debug-valor">
+                          DEBUG: {dados.ticketMedio}
+                        </div>
+                        <div className="text-xs text-slate-600">Ticket Médio</div>
+                      </div>
+                      <div className="card-valor">
+                        <div className="text-2xl mb-1">📅</div>
+                        <div className="valor-monetario">
+                          {dados.reservas}
+                        </div>
+                        <div className="text-xs text-slate-600">Reservas</div>
+                      </div>
+                    </div>
+
+                    {dados.tempoCozinha > 0 && dados.tempoBar > 0 && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="card-valor">
+                          <div className="text-2xl mb-1">👨‍🍳</div>
+                          <div className="valor-monetario">
+                            {dados.tempoCozinha.toFixed(1)} min
+                          </div>
+                          <div className="text-xs text-slate-600">Tempo Cozinha</div>
+                        </div>
+                        <div className="card-valor">
+                          <div className="text-2xl mb-1">🍹</div>
+                          <div className="valor-monetario">
+                            {dados.tempoBar.toFixed(1)} min
+                          </div>
+                          <div className="text-xs text-slate-600">Tempo Bar</div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="bg-white rounded-lg p-3">
+                      <div className="text-sm font-medium text-slate-700 mb-2">🎤 Artista: {dados.artista}</div>
+                      <div className="text-sm font-medium text-slate-700 mb-2">🍽️ Top Pratos:</div>
+                      <div className="space-y-1">
+                        {dados.pratos.slice(0, 3).map((prato: any, i: any) => (
+                          <div key={i} className="flex justify-between text-xs text-slate-600">
+                            <span>{prato.nome}</span>
+                            <span>{prato.quantidade}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Cards de Comparação - Artistas */}
+          {tipoComparacao === 'artistas' && dadosArtistas.artista1 && dadosArtistas.artista2 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[dadosArtistas.artista1, dadosArtistas.artista2].map((artista: any, index: any) => (
+                <div key={index} className={`bg-white rounded-xl p-6 shadow-sm border ${
+                  index === 0 ? 'border-blue-200 bg-blue-50' : 'border-green-200 bg-green-50'
+                }`}>
+                  <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
+                    🎤 Artista: {artista.nome}
+                    <span className="ml-auto text-sm font-normal text-slate-600">
+                      {artista.totalEventos} eventos ({artista.eventosComDados} com dados)
+                    </span>
+                  </h3>
+
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="card-valor">
+                        <div className="text-2xl mb-1">💰</div>
+                        <div className="valor-monetario">
+                          R$ {artista.faturamentoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </div>
+                        <div className="debug-valor">
+                          DEBUG: {artista.faturamentoTotal}
+                        </div>
+                        <div className="text-xs text-slate-600">Faturamento Total</div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Média: R$ {artista.faturamentoMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </div>
+                      </div>
+                      <div className="card-valor">
+                        <div className="text-2xl mb-1">👥</div>
+                        <div className="valor-monetario">
+                          {artista.clientesTotal.toLocaleString('pt-BR')}
+                        </div>
+                        <div className="text-xs text-slate-600">Clientes Total</div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Média: {artista.clientesMedio.toFixed(1)}
+                        </div>
+                      </div>
+                      <div className="card-valor">
+                        <div className="text-2xl mb-1">🎯</div>
+                        <div className="valor-monetario">
+                          R$ {artista.ticketMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </div>
+                        <div className="debug-valor">
+                          DEBUG: {artista.ticketMedio}
+                        </div>
+                        <div className="text-xs text-slate-600">Ticket Médio</div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          (Total ÷ Total clientes)
+                        </div>
+                      </div>
+                      <div className="card-valor">
+                        <div className="text-2xl mb-1">📅</div>
+                        <div className="valor-monetario">
+                          {artista.reservasTotal.toLocaleString('pt-BR')}
+                        </div>
+                        <div className="text-xs text-slate-600">Reservas Total</div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Média: {artista.reservasMedio.toFixed(1)}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="card-valor">
+                        <div className="text-2xl mb-1">🔄</div>
+                        <div className="valor-monetario">
+                          {artista.recorrenciaMedia.toFixed(1)}%
+                        </div>
+                        <div className="text-xs text-slate-600">Recorrência</div>
+                      </div>
+                      <div className="card-valor">
+                        <div className="text-2xl mb-1">💝</div>
+                        <div className="valor-monetario">
+                          {artista.fidelizacaoClientes.toFixed(1)}%
+                        </div>
+                        <div className="text-xs text-slate-600">Fidelização</div>
+                      </div>
+                    </div>
+
+                    {artista.tempoMedioCozinha > 0 && artista.tempoMedioBar > 0 && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="card-valor">
+                          <div className="text-2xl mb-1">👨‍🍳</div>
+                          <div className="valor-monetario">
+                            {artista.tempoMedioCozinha.toFixed(1)} min
+                          </div>
+                          <div className="text-xs text-slate-600">Tempo Cozinha</div>
+                        </div>
+                        <div className="card-valor">
+                          <div className="text-2xl mb-1">🍹</div>
+                          <div className="valor-monetario">
+                            {artista.tempoMedioBar.toFixed(1)} min
+                          </div>
+                          <div className="text-xs text-slate-600">Tempo Bar</div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="bg-white rounded-lg p-3">
+                      <div className="grid grid-cols-2 gap-4 text-center">
+                        <div>
+                          <div className="valor-monetario text-purple-800">
+                            {artista.fidelizacaoClientes.toFixed(1)}%
+                          </div>
+                          <div className="text-xs text-slate-600">Fidelização</div>
+                        </div>
+                        <div>
+                          <div className="valor-monetario text-orange-800">
+                            {artista.eficienciaAtendimento.toFixed(1)}%
+                          </div>
+                          <div className="text-xs text-slate-600">Eficiência</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
@@ -1636,252 +1902,6 @@ export default function ComparativoPage() {
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Status dos Dados - Comparação de Artistas */}
-          {tipoComparacao === 'artistas' && dadosArtistas.artista1 && dadosArtistas.artista2 && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-              <h3 className="text-sm font-medium text-green-800 mb-2">📊 Status dos Dados</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="font-medium">🎤 {dadosArtistas.artista1.nome}:</span>
-                  <span className="ml-2 text-green-600">✅ Dados disponíveis</span>
-                  <div className="mt-1 text-xs text-gray-600 space-y-1">
-                    <div>💰 Faturamento médio: R$ {dadosArtistas.artista1.faturamentoMedio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                    <div>📊 Faturamento total: R$ {dadosArtistas.artista1.faturamentoTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                    {dadosArtistas.artista1.faturamentoYuzerTotal > 0 && (
-                      <div>🍻 Yuzer total: R$ {dadosArtistas.artista1.faturamentoYuzerTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                    )}
-                    {dadosArtistas.artista1.faturamentoContaHubTotal > 0 && (
-                      <div>🎫 ContaHub total: R$ {dadosArtistas.artista1.faturamentoContaHubTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                    )}
-                    {dadosArtistas.artista1.faturamentoSymplaTotal > 0 && (
-                      <div>🎟️ Sympla total: R$ {dadosArtistas.artista1.faturamentoSymplaTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                    )}
-                    <div>👥 Clientes total: {dadosArtistas.artista1.clientesTotal.toLocaleString('pt-BR')}</div>
-                    <div>📊 {dadosArtistas.artista1.eventosComDados}/{dadosArtistas.artista1.totalEventos} eventos com dados</div>
-                  </div>
-                </div>
-                <div>
-                  <span className="font-medium">🎤 {dadosArtistas.artista2.nome}:</span>
-                  <span className="ml-2 text-green-600">✅ Dados disponíveis</span>
-                  <div className="mt-1 text-xs text-gray-600 space-y-1">
-                    <div>💰 Faturamento médio: R$ {dadosArtistas.artista2.faturamentoMedio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                    <div>📊 Faturamento total: R$ {dadosArtistas.artista2.faturamentoTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                    {dadosArtistas.artista2.faturamentoYuzerTotal > 0 && (
-                      <div>🍻 Yuzer total: R$ {dadosArtistas.artista2.faturamentoYuzerTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                    )}
-                    {dadosArtistas.artista2.faturamentoContaHubTotal > 0 && (
-                      <div>🎫 ContaHub total: R$ {dadosArtistas.artista2.faturamentoContaHubTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                    )}
-                    {dadosArtistas.artista2.faturamentoSymplaTotal > 0 && (
-                      <div>🎟️ Sympla total: R$ {dadosArtistas.artista2.faturamentoSymplaTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                    )}
-                    <div>👥 Clientes total: {dadosArtistas.artista2.clientesTotal.toLocaleString('pt-BR')}</div>
-                    <div>📊 {dadosArtistas.artista2.eventosComDados}/{dadosArtistas.artista2.totalEventos} eventos com dados</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Cards de Comparação - Datas */}
-          {tipoComparacao === 'datas-especificas' && dadosComparativos.length === 2 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {dadosComparativos.map((dados: any, index: any) => (
-                <div key={index} className={`bg-white rounded-xl p-6 shadow-sm border ${
-                  index === 0 ? 'border-blue-200 bg-blue-50' : 'border-green-200 bg-green-50'
-                }`}>
-                  <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
-                    {index === 0 ? '📅 Data 1' : '📅 Data 2'}
-                    <span className="ml-auto text-sm font-normal text-slate-600">
-                      {parseDataSemTimezone(dados.data).toLocaleDateString('pt-BR')}
-                    </span>
-                  </h3>
-
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-3 bg-white rounded-lg">
-                        <div className="text-2xl mb-1">💰</div>
-                        <div className="text-lg font-bold text-slate-800">
-                          R$ {dados.faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </div>
-                        <div className="text-xs text-slate-600">Faturamento</div>
-                      </div>
-                      <div className="text-center p-3 bg-white rounded-lg">
-                        <div className="text-2xl mb-1">👥</div>
-                        <div className="text-lg font-bold text-slate-800">
-                          {dados.clientes}
-                        </div>
-                        <div className="text-xs text-slate-600">Clientes</div>
-                      </div>
-                      <div className="text-center p-3 bg-white rounded-lg">
-                        <div className="text-2xl mb-1">🎯</div>
-                        <div className="text-lg font-bold text-slate-800">
-                          R$ {dados.ticketMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </div>
-                        <div className="text-xs text-slate-600">Ticket Médio</div>
-                      </div>
-                      <div className="text-center p-3 bg-white rounded-lg">
-                        <div className="text-2xl mb-1">📅</div>
-                        <div className="text-lg font-bold text-slate-800">
-                          {dados.reservas}
-                        </div>
-                        <div className="text-xs text-slate-600">Reservas</div>
-                      </div>
-                    </div>
-
-                    {dados.tempoCozinha > 0 && dados.tempoBar > 0 && (
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="text-center p-3 bg-white rounded-lg">
-                          <div className="text-2xl mb-1">👨‍🍳</div>
-                          <div className="text-lg font-bold text-slate-800">
-                            {dados.tempoCozinha.toFixed(1)} min
-                          </div>
-                          <div className="text-xs text-slate-600">Tempo Cozinha</div>
-                        </div>
-                        <div className="text-center p-3 bg-white rounded-lg">
-                          <div className="text-2xl mb-1">🍹</div>
-                          <div className="text-lg font-bold text-slate-800">
-                            {dados.tempoBar.toFixed(1)} min
-                          </div>
-                          <div className="text-xs text-slate-600">Tempo Bar</div>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="bg-white rounded-lg p-3">
-                      <div className="text-sm font-medium text-slate-700 mb-2">🎤 Artista: {dados.artista}</div>
-                      <div className="text-sm font-medium text-slate-700 mb-2">🍽️ Top Pratos:</div>
-                      <div className="space-y-1">
-                        {dados.pratos.slice(0, 3).map((prato: any, i: any) => (
-                          <div key={i} className="flex justify-between text-xs text-slate-600">
-                            <span>{prato.nome}</span>
-                            <span>{prato.quantidade}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Cards de Comparação - Artistas */}
-          {tipoComparacao === 'artistas' && dadosArtistas.artista1 && dadosArtistas.artista2 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[dadosArtistas.artista1, dadosArtistas.artista2].map((artista: any, index: any) => (
-                <div key={index} className={`bg-white rounded-xl p-6 shadow-sm border ${
-                  index === 0 ? 'border-blue-200 bg-blue-50' : 'border-green-200 bg-green-50'
-                }`}>
-                  <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
-                    🎤 Artista: {artista.nome}
-                    <span className="ml-auto text-sm font-normal text-slate-600">
-                      {artista.totalEventos} eventos ({artista.eventosComDados} com dados)
-                    </span>
-                  </h3>
-
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-3 bg-white rounded-lg">
-                        <div className="text-2xl mb-1">💰</div>
-                        <div className="text-lg font-bold text-slate-800">
-                          R$ {artista.faturamentoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </div>
-                        <div className="text-xs text-slate-600">Faturamento Total</div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          Média: R$ {artista.faturamentoMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </div>
-                      </div>
-                      <div className="text-center p-3 bg-white rounded-lg">
-                        <div className="text-2xl mb-1">👥</div>
-                        <div className="text-lg font-bold text-slate-800">
-                          {artista.clientesTotal.toLocaleString('pt-BR')}
-                        </div>
-                        <div className="text-xs text-slate-600">Clientes Total</div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          Média: {artista.clientesMedio.toFixed(1)}
-                        </div>
-                      </div>
-                      <div className="text-center p-3 bg-white rounded-lg">
-                        <div className="text-2xl mb-1">🎯</div>
-                        <div className="text-lg font-bold text-slate-800">
-                          R$ {artista.ticketMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </div>
-                        <div className="text-xs text-slate-600">Ticket Médio</div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          (Total ÷ Total clientes)
-                        </div>
-                      </div>
-                      <div className="text-center p-3 bg-white rounded-lg">
-                        <div className="text-2xl mb-1">📅</div>
-                        <div className="text-lg font-bold text-slate-800">
-                          {artista.reservasTotal.toLocaleString('pt-BR')}
-                        </div>
-                        <div className="text-xs text-slate-600">Reservas Total</div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          Média: {artista.reservasMedio.toFixed(1)}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-3 bg-white rounded-lg">
-                        <div className="text-2xl mb-1">🔄</div>
-                        <div className="text-lg font-bold text-slate-800">
-                          {artista.recorrenciaMedia.toFixed(1)}%
-                        </div>
-                        <div className="text-xs text-slate-600">Recorrência</div>
-                      </div>
-                      <div className="text-center p-3 bg-white rounded-lg">
-                        <div className="text-2xl mb-1">💝</div>
-                        <div className="text-lg font-bold text-slate-800">
-                          {artista.fidelizacaoClientes.toFixed(1)}%
-                        </div>
-                        <div className="text-xs text-slate-600">Fidelização</div>
-                      </div>
-                    </div>
-
-                    {artista.tempoMedioCozinha > 0 && artista.tempoMedioBar > 0 && (
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="text-center p-3 bg-white rounded-lg">
-                          <div className="text-2xl mb-1">👨‍🍳</div>
-                          <div className="text-lg font-bold text-slate-800">
-                            {artista.tempoMedioCozinha.toFixed(1)} min
-                          </div>
-                          <div className="text-xs text-slate-600">Tempo Cozinha</div>
-                        </div>
-                        <div className="text-center p-3 bg-white rounded-lg">
-                          <div className="text-2xl mb-1">🍹</div>
-                          <div className="text-lg font-bold text-slate-800">
-                            {artista.tempoMedioBar.toFixed(1)} min
-                          </div>
-                          <div className="text-xs text-slate-600">Tempo Bar</div>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="bg-white rounded-lg p-3">
-                      <div className="grid grid-cols-2 gap-4 text-center">
-                        <div>
-                          <div className="text-lg font-bold text-purple-800">
-                            {artista.fidelizacaoClientes.toFixed(1)}%
-                          </div>
-                          <div className="text-xs text-slate-600">Fidelização</div>
-                        </div>
-                        <div>
-                          <div className="text-lg font-bold text-orange-800">
-                            {artista.eficienciaAtendimento.toFixed(1)}%
-                          </div>
-                          <div className="text-xs text-slate-600">Eficiência</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
             </div>
           )}
 

@@ -8,7 +8,33 @@ const corsHeaders = {
 }
 
 const CONTAAZUL_TOKEN_URL = 'https://auth.contaazul.com/oauth2/token'
-const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ'
+
+// Função para buscar webhook da tabela
+async function getWebhookUrl(barId: string, webhookType: string = 'contaazul', supabaseClient: any) {
+  const { data: webhookConfig, error } = await supabaseClient
+    .from('webhook_configs')
+    .select('configuracoes')
+    .eq('bar_id', barId)
+    .single()
+
+  if (error || !webhookConfig) {
+    console.warn(`⚠️ Webhook config não encontrada para bar ${barId}, usando fallback`)
+    // Fallback para webhook padrão se não encontrar configuração
+    return 'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ'
+  }
+
+  const webhook = webhookConfig.configuracoes[webhookType]
+  
+  if (!webhook || webhook.trim() === '') {
+    console.warn(`⚠️ Webhook ${webhookType} não configurado para bar ${barId}, usando sistema como fallback`)
+    // Fallback para webhook sistema se o ContaAzul não estiver configurado
+    return webhookConfig.configuracoes['sistema'] || 
+           'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ'
+  }
+
+  console.log(`✅ Webhook ${webhookType} encontrado para bar ${barId}`)
+  return webhook
+}
 
 serve(async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') {
@@ -77,7 +103,7 @@ serve(async (req: Request): Promise<Response> => {
       console.log('✅ Token renovado com sucesso')
       
       // Notificar Discord sobre renovação de token
-      await notificarDiscord(`🔄 **Token ContaAzul Renovado!**\n\n🏢 **Bar ID:** ${barId}\n⏰ **Horário:** ${formatarDataHoraEdge(new Date())}\n🆕 **Novo token expira em:** ${novoToken.expires_at ? formatarDataHoraEdge(novoToken.expires_at) : 'N/A'}`)
+      await notificarDiscord(`🔄 **Token ContaAzul Renovado!**\n\n🏢 **Bar ID:** ${barId}\n⏰ **Horário:** ${formatarDataHoraEdge(new Date())}\n🆕 **Novo token expira em:** ${novoToken.expires_at ? formatarDataHoraEdge(novoToken.expires_at) : 'N/A'}`, barId, supabaseClient)
     }
 
     // 4. Executar coleta rápida de dados
@@ -87,9 +113,9 @@ serve(async (req: Request): Promise<Response> => {
 
     // 5. Notificar Discord sobre coleta
     if (coletaData.success) {
-      await notificarDiscord(`📊 **Coleta ContaAzul Automática!**\n\n🏢 **Bar ID:** ${barId}\n⏰ **Horário:** ${formatarDataHoraEdge(new Date())}\n📈 **Dados Coletados:**\n- Categorias: ${coletaData.estatisticas.categorias_processadas}\n- Páginas de Receitas: ${coletaData.estatisticas.receitas_paginas_coletadas}\n- Páginas de Despesas: ${coletaData.estatisticas.despesas_paginas_coletadas}\n- Tempo: ${Math.round(coletaData.estatisticas.tempo_execucao / 1000)}s\n\n⚡ **Processamento automático iniciado em background**`)
+      await notificarDiscord(`📊 **Coleta ContaAzul Automática!**\n\n🏢 **Bar ID:** ${barId}\n⏰ **Horário:** ${formatarDataHoraEdge(new Date())}\n📈 **Dados Coletados:**\n- Categorias: ${coletaData.estatisticas.categorias_processadas}\n- Páginas de Receitas: ${coletaData.estatisticas.receitas_paginas_coletadas}\n- Páginas de Despesas: ${coletaData.estatisticas.despesas_paginas_coletadas}\n- Tempo: ${Math.round(coletaData.estatisticas.tempo_execucao / 1000)}s\n\n⚡ **Processamento automático iniciado em background**`, barId, supabaseClient)
     } else {
-      await notificarDiscord(`❌ **Erro na Coleta ContaAzul!**\n\n🏢 **Bar ID:** ${barId}\n⏰ **Horário:** ${formatarDataHoraEdge(new Date())}\n🚨 **Erro:** ${coletaData.error}`)
+      await notificarDiscord(`❌ **Erro na Coleta ContaAzul!**\n\n🏢 **Bar ID:** ${barId}\n⏰ **Horário:** ${formatarDataHoraEdge(new Date())}\n🚨 **Erro:** ${coletaData.error}`, barId, supabaseClient)
     }
 
     return new Response(
@@ -118,7 +144,8 @@ serve(async (req: Request): Promise<Response> => {
       // Ignore error getting barId
     }
     
-    await notificarDiscord(`❌ **Erro no Sync Automático!**\n\n🏢 **Bar ID:** ${errorBarId}\n⏰ **Horário:** ${formatarDataHoraEdge(new Date())}\n🚨 **Erro:** ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
+    // Para notificação de erro, usar fallback webhook se necessário
+    await notificarDiscord(`❌ **Erro no Sync Automático!**\n\n🏢 **Bar ID:** ${errorBarId}\n⏰ **Horário:** ${formatarDataHoraEdge(new Date())}\n🚨 **Erro:** ${error instanceof Error ? error.message : 'Erro desconhecido'}`, errorBarId, null)
     
     return new Response(
       JSON.stringify({ 
@@ -379,9 +406,20 @@ async function executarColetaRapida(accessToken: string, barId: string, supabase
   }
 }
 
-async function notificarDiscord(mensagem: string) {
+async function notificarDiscord(mensagem: string, barId: string, supabaseClient: any) {
   try {
-    await fetch(DISCORD_WEBHOOK_URL, {
+    let webhookUrl = 'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ'
+    
+    // Tentar buscar webhook da tabela se supabaseClient estiver disponível
+    if (supabaseClient && barId && barId !== 'N/A') {
+      try {
+        webhookUrl = await getWebhookUrl(barId, 'contaazul', supabaseClient)
+      } catch (error) {
+        console.warn('⚠️ Erro ao buscar webhook, usando fallback:', error)
+      }
+    }
+
+    await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
