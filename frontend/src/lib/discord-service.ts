@@ -277,6 +277,45 @@ export class DiscordService {
       color: 0xff6600 // Laranja para Meta/Social
     })
   }
+
+  // Método para enviar embed diretamente (compatibilidade com bot)
+  static async sendEmbed(embed: DiscordEmbed): Promise<boolean> {
+    try {
+      const data = {
+        bar_id: 'bot',
+        webhook_type: 'sistema' as const,
+        title: embed.title || 'Mensagem do Bot',
+        description: embed.description || '',
+        fields: embed.fields || [],
+        color: embed.color || 0x5865F2
+      }
+
+      await this.sendNotification(data)
+      return true
+    } catch (error) {
+      console.error('❌ Erro ao enviar embed Discord:', error)
+      return false
+    }
+  }
+
+  // Método para enviar mensagem de texto simples
+  static async sendMessage(message: string): Promise<boolean> {
+    try {
+      const data = {
+        bar_id: 'bot',
+        webhook_type: 'sistema' as const,
+        title: '🤖 SGB Bot',
+        description: message,
+        color: 0x5865F2
+      }
+
+      await this.sendNotification(data)
+      return true
+    } catch (error) {
+      console.error('❌ Erro ao enviar mensagem Discord:', error)
+      return false
+    }
+  }
 }
 
 // ========================================
