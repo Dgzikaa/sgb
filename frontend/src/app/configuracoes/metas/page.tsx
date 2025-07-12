@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
@@ -82,13 +82,12 @@ const formatarValor = (valor: number | null, tipo: string): string => {
 };
 
 // Componente de Card de Meta
-const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, onToggleActive, isSaving }: {
+const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
   meta: Meta;
   isEditing: boolean;
   onEdit: () => void;
   onSave: (valores: any) => void;
   onCancel: () => void;
-  onToggleActive: (ativa: boolean) => void;
   isSaving: boolean;
 }) => {
   const [valores, setValores] = useState({
@@ -96,8 +95,6 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, onToggleActive, i
     valor_mensal: meta.valor_mensal?.toString() || '',
     valor_unico: meta.valor_unico?.toString() || ''
   });
-
-  const [isToggling, setIsToggling] = useState(false);
 
   useEffect(() => {
     if (isEditing) {
@@ -120,27 +117,17 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, onToggleActive, i
     onSave(valoresLimpos);
   };
 
-  const handleToggle = async (checked: boolean) => {
-    setIsToggling(true);
-    await onToggleActive(checked);
-    setIsToggling(false);
-  };
-
   return (
-    <Card className={`transition-all duration-200 hover:shadow-md ${
-      meta.meta_ativa 
-        ? 'bg-white border-l-4 shadow-sm' 
-        : 'bg-gray-50 border-l-4 border-gray-300 opacity-75'
-    }`}
-    style={{ borderLeftColor: meta.meta_ativa ? meta.cor_categoria : '#d1d5db' }}>
+    <Card className="transition-all duration-200 hover:shadow-md bg-white border-l-4 shadow-sm"
+    style={{ borderLeftColor: meta.cor_categoria }}>
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${meta.meta_ativa ? 'bg-opacity-10' : 'bg-gray-200'}`}
-                 style={{ backgroundColor: meta.meta_ativa ? `${meta.cor_categoria}20` : undefined }}>
+            <div className="p-2 rounded-lg bg-opacity-10"
+                 style={{ backgroundColor: `${meta.cor_categoria}20` }}>
               <IconComponent 
                 className="h-5 w-5" 
-                style={{ color: meta.meta_ativa ? meta.cor_categoria : '#6b7280' }} 
+                style={{ color: meta.cor_categoria }} 
               />
             </div>
             <div className="flex-1">
@@ -152,147 +139,130 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, onToggleActive, i
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center">
-              {isToggling ? (
-                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-              ) : (
-                <Switch 
-                  checked={meta.meta_ativa}
-                  onCheckedChange={handleToggle}
-                  disabled={isToggling}
-                />
-              )}
-            </div>
-            {meta.meta_ativa && (
-              <div className="flex items-center gap-1">
-                {!isEditing ? (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={onEdit}
-                    className="h-8 w-8 p-0 hover:bg-gray-100"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                ) : (
-                  <div className="flex gap-1">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={handleSave}
-                      disabled={isSaving}
-                      className="h-8 w-8 p-0 hover:bg-green-100 text-green-600"
-                    >
-                      {isSaving ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Save className="h-4 w-4" />
-                      )}
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={onCancel}
-                      disabled={isSaving}
-                      className="h-8 w-8 p-0 hover:bg-red-100 text-red-600"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
+          <div className="flex items-center gap-1">
+            {!isEditing ? (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onEdit}
+                className="h-8 w-8 p-0 hover:bg-gray-100"
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            ) : (
+              <div className="flex gap-1">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="h-8 w-8 p-0 hover:bg-green-100 text-green-600"
+                >
+                  {isSaving ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={onCancel}
+                  disabled={isSaving}
+                  className="h-8 w-8 p-0 hover:bg-red-100 text-red-600"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
             )}
           </div>
         </div>
       </CardHeader>
       
-      {meta.meta_ativa && (
-        <CardContent className="pt-0">
-          <div className="space-y-4">
-            {/* Valor Semanal */}
-            {(meta.valor_semanal !== null || isEditing) && (
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">
-                  Meta Semanal
-                </Label>
-                {isEditing ? (
-                  <Input
-                    type="text"
-                    value={valores.valor_semanal}
-                    onChange={(e) => setValores(prev => ({ ...prev, valor_semanal: e.target.value }))}
-                    placeholder="Digite a meta semanal"
-                    className="h-9 text-sm"
-                  />
-                ) : (
-                  <div className="bg-gray-50 border border-gray-200 rounded-md px-3 py-2">
-                    <span className="text-sm font-semibold text-gray-900">
-                      {formatarValor(meta.valor_semanal, meta.tipo_valor)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
+      <CardContent className="pt-0">
+        <div className="space-y-4">
+          {/* Valor Semanal */}
+          {(meta.valor_semanal !== null || isEditing) && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-700">
+                Meta Semanal
+              </Label>
+              {isEditing ? (
+                <Input
+                  type="text"
+                  value={valores.valor_semanal}
+                  onChange={(e) => setValores(prev => ({ ...prev, valor_semanal: e.target.value }))}
+                  placeholder="Digite a meta semanal"
+                  className="h-9 text-sm"
+                />
+              ) : (
+                <div className="bg-gray-50 border border-gray-200 rounded-md px-3 py-2">
+                  <span className="text-sm font-semibold text-gray-900">
+                    {formatarValor(meta.valor_semanal, meta.tipo_valor)}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
 
-            {/* Valor Mensal */}
-            {(meta.valor_mensal !== null || isEditing) && (
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">
-                  Meta Mensal
-                </Label>
-                {isEditing ? (
-                  <Input
-                    type="text"
-                    value={valores.valor_mensal}
-                    onChange={(e) => setValores(prev => ({ ...prev, valor_mensal: e.target.value }))}
-                    placeholder="Digite a meta mensal"
-                    className="h-9 text-sm"
-                  />
-                ) : (
-                  <div className="bg-gray-50 border border-gray-200 rounded-md px-3 py-2">
-                    <span className="text-sm font-semibold text-gray-900">
-                      {formatarValor(meta.valor_mensal, meta.tipo_valor)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
+          {/* Valor Mensal */}
+          {(meta.valor_mensal !== null || isEditing) && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-700">
+                Meta Mensal
+              </Label>
+              {isEditing ? (
+                <Input
+                  type="text"
+                  value={valores.valor_mensal}
+                  onChange={(e) => setValores(prev => ({ ...prev, valor_mensal: e.target.value }))}
+                  placeholder="Digite a meta mensal"
+                  className="h-9 text-sm"
+                />
+              ) : (
+                <div className="bg-gray-50 border border-gray-200 rounded-md px-3 py-2">
+                  <span className="text-sm font-semibold text-gray-900">
+                    {formatarValor(meta.valor_mensal, meta.tipo_valor)}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
 
-            {/* Valor Único */}
-            {(meta.valor_unico !== null || isEditing) && (
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">
-                  Meta Única
-                </Label>
-                {isEditing ? (
-                  <Input
-                    type="text"
-                    value={valores.valor_unico}
-                    onChange={(e) => setValores(prev => ({ ...prev, valor_unico: e.target.value }))}
-                    placeholder="Digite a meta única"
-                    className="h-9 text-sm"
-                  />
-                ) : (
-                  <div className="bg-gray-50 border border-gray-200 rounded-md px-3 py-2">
-                    <span className="text-sm font-semibold text-gray-900">
-                      {formatarValor(meta.valor_unico, meta.tipo_valor)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
+          {/* Valor Único */}
+          {(meta.valor_unico !== null || isEditing) && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-700">
+                Meta Única
+              </Label>
+              {isEditing ? (
+                <Input
+                  type="text"
+                  value={valores.valor_unico}
+                  onChange={(e) => setValores(prev => ({ ...prev, valor_unico: e.target.value }))}
+                  placeholder="Digite a meta única"
+                  className="h-9 text-sm"
+                />
+              ) : (
+                <div className="bg-gray-50 border border-gray-200 rounded-md px-3 py-2">
+                  <span className="text-sm font-semibold text-gray-900">
+                    {formatarValor(meta.valor_unico, meta.tipo_valor)}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
 
-            {/* Descrição */}
-            {meta.descricao && (
-              <div className="pt-2 border-t border-gray-100">
-                <p className="text-xs text-gray-500 leading-relaxed">
-                  {meta.descricao}
-                </p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      )}
+          {/* Descrição */}
+          {meta.descricao && (
+            <div className="pt-2 border-t border-gray-100">
+              <p className="text-xs text-gray-500 leading-relaxed">
+                {meta.descricao}
+              </p>
+            </div>
+          )}
+        </div>
+      </CardContent>
     </Card>
   );
 };
@@ -366,34 +336,7 @@ export default function MetasPage() {
     }
   };
 
-  // Toggle ativo/inativo
-  const toggleMetaAtiva = async (metaId: number, ativa: boolean) => {
-    try {
-      const response = await fetch(`/api/metas/${metaId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ meta_ativa: ativa })
-      });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Erro ao atualizar meta');
-      }
-
-      await carregarMetas();
-      toast({
-        title: "Sucesso",
-        description: `Meta ${ativa ? 'ativada' : 'desativada'} com sucesso!`,
-      });
-    } catch (error) {
-      console.error('Erro ao atualizar meta:', error);
-      toast({
-        title: "Erro",
-        description: error instanceof Error ? error.message : "Erro ao atualizar meta",
-        variant: "destructive",
-      });
-    }
-  };
 
   // Carregar dados ao montar
   useEffect(() => {
@@ -465,7 +408,6 @@ export default function MetasPage() {
         {/* Conteúdo das abas */}
         {categorias.map(({ key, label }) => {
           const metasCategoria = metas[key as keyof MetasOrganizadas];
-          const metasAtivas = metasCategoria.filter(m => m.meta_ativa);
           
           return (
             <TabsContent key={key} value={key} className="space-y-6">
@@ -473,7 +415,7 @@ export default function MetasPage() {
                 <div className="space-y-1">
                   <h2 className="text-2xl font-semibold text-gray-900">{label}</h2>
                   <p className="text-sm text-gray-600">
-                    {metasAtivas.length} de {metasCategoria.length} metas ativas
+                    {metasCategoria.length} metas configuradas
                   </p>
                 </div>
                 <Badge variant="secondary" className="text-sm">
@@ -491,7 +433,6 @@ export default function MetasPage() {
                       onEdit={() => setEditingMeta(meta.id)}
                       onSave={(valores) => salvarMeta(meta.id, valores)}
                       onCancel={() => setEditingMeta(null)}
-                      onToggleActive={(ativa) => toggleMetaAtiva(meta.id, ativa)}
                       isSaving={savingMeta === meta.id}
                     />
                   ))}

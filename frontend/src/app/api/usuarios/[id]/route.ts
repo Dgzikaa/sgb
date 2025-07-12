@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 
+// Função simples para log de debug
+const logDebug = (message: string, data?: any) => {
+  console.log(`[API-USUARIOS] ${message}`, data ? JSON.stringify(data, null, 2) : '')
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -32,6 +37,15 @@ export async function PUT(
       )
     }
 
+    // Validar dados básicos
+    if (!nome || !email) {
+      console.error('❌ Nome e email são obrigatórios')
+      return NextResponse.json(
+        { success: false, error: 'Nome e email são obrigatórios' },
+        { status: 400 }
+      )
+    }
+
     // Debug das variáveis de ambiente
     console.log('🔍 Verificando variáveis de ambiente...')
     console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Configurada' : 'Não configurada')
@@ -53,19 +67,19 @@ export async function PUT(
     }
 
     // Atualizar usuário na tabela usuarios_bar
-    console.log('🔄 Atualizando usuário na tabela usuarios_bar...')
+    logDebug('Atualizando usuário na tabela usuarios_bar...')
     const updateData = {
       nome,
       email,
       role,
-      telefone,
-      observacoes,
-      modulos_permitidos,
-      ativo,
+      telefone: telefone || null,
+      observacoes: observacoes || null,
+      modulos_permitidos: modulos_permitidos || [],
+      ativo: ativo !== undefined ? ativo : true,
       atualizado_em: new Date().toISOString()
     }
     
-    console.log('📝 Dados para atualização:', JSON.stringify(updateData, null, 2))
+    logDebug('Dados para atualização:', updateData)
     
     const { data: usuarioAtualizado, error } = await adminClient
       .from('usuarios_bar')
@@ -76,8 +90,7 @@ export async function PUT(
       .single()
 
     if (error) {
-      console.error('❌ Erro ao atualizar usuário:', error)
-      console.error('📋 Detalhes do erro:', {
+      logDebug('Erro ao atualizar usuário:', {
         message: error.message,
         details: error.details,
         hint: error.hint,
@@ -90,14 +103,14 @@ export async function PUT(
     }
 
     if (!usuarioAtualizado) {
-      console.error('❌ Usuário não encontrado ou não atualizado')
+      logDebug('Usuário não encontrado ou não atualizado')
       return NextResponse.json(
         { success: false, error: 'Usuário não encontrado ou não pôde ser atualizado' },
         { status: 404 }
       )
     }
 
-    console.log('✅ Usuário atualizado com sucesso:', usuarioAtualizado)
+    logDebug('Usuário atualizado com sucesso:', usuarioAtualizado)
     
     return NextResponse.json({
       success: true,
@@ -105,8 +118,10 @@ export async function PUT(
     })
 
   } catch (error) {
-    console.error('❌ Erro na API de edição de usuário:', error)
-    console.error('📋 Stack trace:', error instanceof Error ? error.stack : 'N/A')
+    logDebug('Erro na API de edição de usuário:', {
+      message: error instanceof Error ? error.message : 'Erro desconhecido',
+      stack: error instanceof Error ? error.stack : 'N/A'
+    })
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor', details: error instanceof Error ? error.message : 'Erro desconhecido' },
       { status: 500 }

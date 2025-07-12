@@ -968,12 +968,18 @@ function ConfiguracoesContent() {
                               <SelectContent>
                                 {funcoesLoading ? (
                                   <SelectItem value="" disabled>Carregando funções...</SelectItem>
-                                ) : (
+                                ) : funcoes.length > 0 ? (
                                   funcoes.map(funcao => (
                                     <SelectItem key={funcao.id} value={funcao.id}>
                                       {funcao.icone} {funcao.nome}
                                     </SelectItem>
                                   ))
+                                ) : (
+                                  <>
+                                    <SelectItem value="funcionario">👤 Funcionário</SelectItem>
+                                    <SelectItem value="gerente">👨‍💼 Gerente</SelectItem>
+                                    <SelectItem value="admin">👑 Administrador</SelectItem>
+                                  </>
                                 )}
                               </SelectContent>
                             </Select>
@@ -1110,12 +1116,18 @@ function ConfiguracoesContent() {
                         <SelectContent>
                           {funcoesLoading ? (
                             <SelectItem value="" disabled>Carregando funções...</SelectItem>
-                          ) : (
+                          ) : funcoes.length > 0 ? (
                             funcoes.map(funcao => (
                               <SelectItem key={funcao.id} value={funcao.id}>
                                 {funcao.icone} {funcao.nome}
                               </SelectItem>
                             ))
+                          ) : (
+                            <>
+                              <SelectItem value="funcionario">👤 Funcionário</SelectItem>
+                              <SelectItem value="gerente">👨‍💼 Gerente</SelectItem>
+                              <SelectItem value="admin">👑 Administrador</SelectItem>
+                            </>
                           )}
                         </SelectContent>
                       </Select>
