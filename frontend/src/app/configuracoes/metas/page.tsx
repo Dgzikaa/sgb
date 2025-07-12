@@ -158,11 +158,11 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, onToggleActive }:
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {/* Valor Semanal */}
           {(meta.valor_semanal !== null || isEditing) && (
-            <div className="space-y-1">
-              <Label className="text-xs text-gray-600 dark:text-gray-400">Semanal</Label>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Semanal</Label>
               {isEditing ? (
                 <NumericInput
                   value={valores.valor_semanal}
@@ -172,7 +172,11 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, onToggleActive }:
                   className="h-8"
                 />
               ) : (
-                <div className="font-medium text-gray-900 dark:text-gray-100">
+                <div className={`text-lg font-bold px-3 py-2 rounded-lg border ${
+                  meta.tipo_valor === 'moeda' 
+                    ? 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-950/50 border-green-200 dark:border-green-800' 
+                    : 'text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700'
+                }`}>
                   {formatarValor(meta.valor_semanal, meta.tipo_valor, meta.unidade)}
                 </div>
               )}
@@ -181,8 +185,8 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, onToggleActive }:
 
           {/* Valor Mensal */}
           {(meta.valor_mensal !== null || isEditing) && (
-            <div className="space-y-1">
-              <Label className="text-xs text-gray-600 dark:text-gray-400">Mensal</Label>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Mensal</Label>
               {isEditing ? (
                 <NumericInput
                   value={valores.valor_mensal}
@@ -192,7 +196,11 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, onToggleActive }:
                   className="h-8"
                 />
               ) : (
-                <div className="font-medium text-gray-900 dark:text-gray-100">
+                <div className={`text-lg font-bold px-3 py-2 rounded-lg border ${
+                  meta.tipo_valor === 'moeda' 
+                    ? 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-950/50 border-green-200 dark:border-green-800' 
+                    : 'text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700'
+                }`}>
                   {formatarValor(meta.valor_mensal, meta.tipo_valor, meta.unidade)}
                 </div>
               )}
@@ -201,8 +209,8 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, onToggleActive }:
 
           {/* Valor Único */}
           {(meta.valor_unico !== null || isEditing) && (
-            <div className="space-y-1">
-              <Label className="text-xs text-gray-600 dark:text-gray-400">Meta</Label>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Meta</Label>
               {isEditing ? (
                 <NumericInput
                   value={valores.valor_unico}
@@ -212,7 +220,11 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, onToggleActive }:
                   className="h-8"
                 />
               ) : (
-                <div className="font-medium text-gray-900 dark:text-gray-100">
+                <div className={`text-lg font-bold px-3 py-2 rounded-lg border ${
+                  meta.tipo_valor === 'moeda' 
+                    ? 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-950/50 border-green-200 dark:border-green-800' 
+                    : 'text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700'
+                }`}>
                   {formatarValor(meta.valor_unico, meta.tipo_valor, meta.unidade)}
                 </div>
               )}
