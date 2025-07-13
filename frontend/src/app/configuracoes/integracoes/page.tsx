@@ -62,6 +62,8 @@ export default function IntegracoesPage() {
   const [getinMessage, setGetinMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
   const [getinTestResults, setGetinTestResults] = useState<any>(null)
   const [getinLoading, setGetinLoading] = useState(false)
+  const [getinDebugResults, setGetinDebugResults] = useState<any>(null)
+  const [getinUrlTestResults, setGetinUrlTestResults] = useState<any>(null)
 
   useEffect(() => {
     setPageTitle('Integrações')
@@ -424,6 +426,100 @@ export default function IntegracoesPage() {
       setGetinMessage({ type: 'success', text: 'Desconectado com sucesso' })
     } catch (error) {
       setGetinMessage({ type: 'error', text: 'Erro ao desconectar' })
+    }
+  }
+
+  const handleGetinTestLogin = async () => {
+    setGetinLoading(true)
+    setGetinMessage(null)
+
+    try {
+      const response = await fetch('/api/getin/test-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: 'andressa.rocha0206@gmail.com',
+          password: '86285744Ordinario!'
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        console.log('🧪 Resultados do teste:', data.results)
+        setGetinDebugResults(data.results)
+        
+        // Encontrar o primeiro resultado bem-sucedido
+        const successResult = data.results.find((r: any) => r.ok)
+        
+        if (successResult) {
+          setGetinMessage({ 
+            type: 'success', 
+            text: `Teste bem-sucedido com ${successResult.variation}!` 
+          })
+        } else {
+          const statusCodes = data.results.map((r: any) => r.status).filter(Boolean)
+          const uniqueStatuses = [...new Set(statusCodes)]
+          
+          setGetinMessage({ 
+            type: 'error', 
+            text: `Todos os testes falharam. Status HTTP: ${uniqueStatuses.join(', ')}` 
+          })
+        }
+      } else {
+        setGetinMessage({ type: 'error', text: data.error || 'Erro no teste' })
+      }
+    } catch (error) {
+      setGetinMessage({ type: 'error', text: 'Erro interno no teste' })
+    } finally {
+      setGetinLoading(false)
+    }
+  }
+
+  const handleGetinTestUrls = async () => {
+    setGetinLoading(true)
+    setGetinMessage(null)
+    setGetinUrlTestResults(null)
+
+    try {
+      const response = await fetch('/api/getin/test-urls', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: 'andressa.rocha0206@gmail.com',
+          password: '86285744Ordinario!'
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        console.log('🔍 Resultados do teste de URLs:', data.results)
+        setGetinUrlTestResults(data)
+        
+        if (data.summary.working > 0) {
+          setGetinMessage({ 
+            type: 'success', 
+            text: `Encontradas ${data.summary.working} URLs funcionando de ${data.summary.total} testadas!` 
+          })
+        } else if (data.summary.authErrors > 0) {
+          setGetinMessage({ 
+            type: 'error', 
+            text: `${data.summary.authErrors} URLs retornaram erro de autenticação. Credenciais podem estar incorretas.` 
+          })
+        } else {
+          setGetinMessage({ 
+            type: 'error', 
+            text: `Nenhuma URL funcionou. ${data.summary.notFound} retornaram 404 (não encontrado).` 
+          })
+        }
+      } else {
+        setGetinMessage({ type: 'error', text: data.error || 'Erro no teste de URLs' })
+      }
+    } catch (error) {
+      setGetinMessage({ type: 'error', text: 'Erro interno no teste de URLs' })
+    } finally {
+      setGetinLoading(false)
     }
   }
 
@@ -932,14 +1028,32 @@ export default function IntegracoesPage() {
                         </Button>
                       </>
                     ) : (
-                      <Button 
-                        onClick={handleGetinAuth} 
-                        disabled={getinLoading}
-                        className="flex-1"
-                      >
-                        {getinLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Settings className="w-4 h-4 mr-2" />}
-                        Conectar com GetIn
-                      </Button>
+                      <>
+                        <Button 
+                          onClick={handleGetinAuth} 
+                          disabled={getinLoading}
+                          className="flex-1"
+                        >
+                          {getinLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Settings className="w-4 h-4 mr-2" />}
+                          Conectar com GetIn
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          onClick={handleGetinTestLogin}
+                          disabled={getinLoading}
+                          className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                        >
+                          🧪 Debug Login
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          onClick={handleGetinTestUrls}
+                          disabled={getinLoading}
+                          className="bg-purple-500 hover:bg-purple-600 text-white"
+                        >
+                          🔍 Testar URLs
+                        </Button>
+                      </>
                     )}
                   </div>
                 </div>
@@ -990,6 +1104,183 @@ export default function IntegracoesPage() {
                           <p className="text-sm text-red-700 mt-2">{getinTestResults.error}</p>
                         </div>
                       )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Resultados do Debug */}
+                {getinDebugResults && (
+                  <div className="space-y-4">
+                    <Separator />
+                    <div>
+                      <h4 className="font-medium mb-3">🧪 Resultados do Debug de Login</h4>
+                      <div className="space-y-3">
+                        {getinDebugResults.map((result: any, index: number) => (
+                          <div key={index} className="border rounded-lg p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <h5 className="font-medium text-sm">{result.variation}</h5>
+                              <div className="flex items-center space-x-2">
+                                {result.ok ? (
+                                  <Badge className="bg-green-100 text-green-800">✅ Sucesso</Badge>
+                                ) : (
+                                  <Badge variant="destructive">❌ Falhou</Badge>
+                                )}
+                                <Badge variant="outline">HTTP {result.status}</Badge>
+                              </div>
+                            </div>
+                            
+                            {result.error ? (
+                              <p className="text-sm text-red-600 mt-2">
+                                <strong>Erro:</strong> {result.error}
+                              </p>
+                            ) : (
+                              <div className="text-sm text-gray-600 mt-2">
+                                <p><strong>Status:</strong> {result.status}</p>
+                                {result.data && (
+                                  <div className="mt-2">
+                                    <p><strong>Resposta:</strong></p>
+                                    <pre className="bg-gray-100 p-2 rounded text-xs mt-1 overflow-x-auto">
+                                      {JSON.stringify(result.data, null, 2)}
+                                    </pre>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {/* Análise dos Resultados */}
+                      <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                        <h5 className="font-medium text-blue-800 mb-2">📊 Análise dos Resultados</h5>
+                        <div className="text-sm text-blue-700">
+                          {getinDebugResults.every((r: any) => r.status === 404) ? (
+                            <div>
+                              <p className="font-medium">🔍 Problema Identificado: Endpoint não encontrado (404)</p>
+                              <p className="mt-1">A URL da API parece estar incorreta ou o endpoint foi alterado.</p>
+                              <p className="mt-1"><strong>URL atual:</strong> https://agent.getinapis.com/auth/v1/login</p>
+                              <p className="mt-1"><strong>Sugestão:</strong> Verificar se a URL mudou ou se há uma nova versão da API.</p>
+                            </div>
+                          ) : getinDebugResults.every((r: any) => r.status === 401) ? (
+                            <div>
+                              <p className="font-medium">🔐 Problema Identificado: Credenciais inválidas (401)</p>
+                              <p className="mt-1">As credenciais podem estar incorretas ou a conta pode estar desativada.</p>
+                            </div>
+                          ) : (
+                            <div>
+                              <p className="font-medium">🔄 Resultados Mistos</p>
+                              <p className="mt-1">Diferentes headers estão retornando resultados diferentes.</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                                         </div>
+                   </div>
+                 )}
+
+                {/* Resultados do Teste de URLs */}
+                {getinUrlTestResults && (
+                  <div className="space-y-4">
+                    <Separator />
+                    <div>
+                      <h4 className="font-medium mb-3">🔍 Resultados do Teste de URLs</h4>
+                      
+                      {/* Resumo */}
+                      <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div className="text-center">
+                            <div className="font-bold text-lg text-blue-600">{getinUrlTestResults.summary.total}</div>
+                            <div className="text-gray-600">Total testadas</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="font-bold text-lg text-green-600">{getinUrlTestResults.summary.working}</div>
+                            <div className="text-gray-600">Funcionando</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="font-bold text-lg text-red-600">{getinUrlTestResults.summary.authErrors}</div>
+                            <div className="text-gray-600">Auth Error</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="font-bold text-lg text-gray-600">{getinUrlTestResults.summary.notFound}</div>
+                            <div className="text-gray-600">Not Found</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* URLs Funcionando */}
+                      {getinUrlTestResults.results.filter((r: any) => r.ok).length > 0 && (
+                        <div className="mb-4">
+                          <h5 className="font-medium text-green-800 mb-2">✅ URLs Funcionando</h5>
+                          <div className="space-y-2">
+                            {getinUrlTestResults.results.filter((r: any) => r.ok).map((result: any, index: number) => (
+                              <div key={index} className="bg-green-50 p-3 rounded-lg border border-green-200">
+                                <div className="flex items-center justify-between">
+                                  <code className="text-sm text-green-800">{result.url}</code>
+                                  <Badge className="bg-green-100 text-green-800">HTTP {result.status}</Badge>
+                                </div>
+                                {result.data && (
+                                  <pre className="text-xs text-green-700 mt-2 bg-green-100 p-2 rounded overflow-x-auto">
+                                    {JSON.stringify(result.data, null, 2)}
+                                  </pre>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* URLs com Erro de Autenticação */}
+                      {getinUrlTestResults.results.filter((r: any) => r.status === 401).length > 0 && (
+                        <div className="mb-4">
+                          <h5 className="font-medium text-yellow-800 mb-2">🔐 URLs com Erro de Autenticação</h5>
+                          <div className="space-y-2">
+                            {getinUrlTestResults.results.filter((r: any) => r.status === 401).map((result: any, index: number) => (
+                              <div key={index} className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                                <div className="flex items-center justify-between">
+                                  <code className="text-sm text-yellow-800">{result.url}</code>
+                                  <Badge variant="outline" className="text-yellow-800 border-yellow-800">HTTP {result.status}</Badge>
+                                </div>
+                                <p className="text-xs text-yellow-700 mt-1">
+                                  Endpoint encontrado, mas credenciais rejeitadas.
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* URLs Não Encontradas */}
+                      {getinUrlTestResults.results.filter((r: any) => r.status === 404).length > 0 && (
+                        <div className="mb-4">
+                          <h5 className="font-medium text-red-800 mb-2">❌ URLs Não Encontradas</h5>
+                          <div className="space-y-1">
+                            {getinUrlTestResults.results.filter((r: any) => r.status === 404).slice(0, 5).map((result: any, index: number) => (
+                              <div key={index} className="bg-red-50 p-2 rounded border border-red-200">
+                                <code className="text-xs text-red-800">{result.url}</code>
+                              </div>
+                            ))}
+                            {getinUrlTestResults.results.filter((r: any) => r.status === 404).length > 5 && (
+                              <div className="text-xs text-gray-600 text-center py-2">
+                                ... e mais {getinUrlTestResults.results.filter((r: any) => r.status === 404).length - 5} URLs
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Recomendações */}
+                      <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                        <h5 className="font-medium text-blue-800 mb-2">💡 Recomendações</h5>
+                        <div className="text-sm text-blue-700 space-y-1">
+                          {getinUrlTestResults.summary.working > 0 ? (
+                            <p>✅ Encontramos URLs funcionando! Use uma delas para atualizar a configuração.</p>
+                          ) : getinUrlTestResults.summary.authErrors > 0 ? (
+                            <p>🔐 Alguns endpoints foram encontrados mas as credenciais estão incorretas. Verifique email/senha.</p>
+                          ) : (
+                            <p>❌ Nenhuma URL funcionou. A API do GetIn pode ter mudado completamente ou estar fora do ar.</p>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}

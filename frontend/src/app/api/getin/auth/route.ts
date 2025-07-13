@@ -24,11 +24,18 @@ export async function POST(request: NextRequest) {
       .single()
     
     if (credError || !credentials) {
+      console.log('❌ Erro ao buscar credenciais:', credError)
       return NextResponse.json({
         success: false,
         error: 'Credenciais getIn não encontradas no banco'
       }, { status: 404 })
     }
+    
+    console.log('✅ Credenciais encontradas:')
+    console.log('   - Email:', credentials.username)
+    console.log('   - Base URL:', credentials.base_url)
+    console.log('   - Ativo:', credentials.ativo)
+    console.log('   - Configurações:', credentials.configuracoes)
     
     // Verificar se já temos token válido e não é refresh forçado
     if (!force_refresh && credentials.access_token && credentials.expires_at) {
@@ -51,26 +58,48 @@ export async function POST(request: NextRequest) {
     }
     
     // Fazer login com credenciais do banco
+    const loginPayload = {
+      email: credentials.username,
+      password: credentials.password
+    }
+    
+    const loginHeaders = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    }
+    
+    console.log('🚀 Enviando requisição para GetIn:')
+    console.log('   - URL:', 'https://agent.getinapis.com/auth/v1/login')
+    console.log('   - Headers:', loginHeaders)
+    console.log('   - Payload:', { ...loginPayload, password: '***' })
+    
     const loginResponse = await fetch('https://agent.getinapis.com/auth/v1/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      },
-      body: JSON.stringify({
-        email: credentials.username,
-        password: credentials.password
-      })
+      headers: loginHeaders,
+      body: JSON.stringify(loginPayload)
     })
     
     const loginData = await loginResponse.json()
     console.log('📊 Resposta do login getIn:', loginData)
+    console.log('🔍 Status HTTP:', loginResponse.status)
+    console.log('📋 Headers da resposta:', Object.fromEntries(loginResponse.headers.entries()))
     
     if (!loginResponse.ok || !loginData.success) {
+      console.log('❌ Detalhes do erro:')
+      console.log('   - Status:', loginResponse.status)
+      console.log('   - loginData.success:', loginData.success)
+      console.log('   - loginData.message:', loginData.message)
+      console.log('   - loginData completo:', JSON.stringify(loginData, null, 2))
+      
       return NextResponse.json({
         success: false,
-        error: loginData.message || 'Erro ao autenticar no getIn'
+        error: loginData.message || 'Erro ao autenticar no getIn',
+        details: {
+          status: loginResponse.status,
+          data: loginData,
+          headers: Object.fromEntries(loginResponse.headers.entries())
+        }
       }, { status: 401 })
     }
     
