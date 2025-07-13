@@ -1,15 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
+
 import { 
   TrendingUp, 
   Users, 
@@ -23,7 +22,6 @@ import {
   Activity,
   CheckCircle2,
   AlertCircle,
-  ArrowLeft,
   Loader2,
   Hash,
   Eye,
@@ -31,25 +29,24 @@ import {
   MessageSquare
 } from 'lucide-react';
 
-// Tipos
+// Interface da Meta (estrutura do banco)
 interface Meta {
   id: number;
   categoria: string;
-  subcategoria: string;
-  nome_meta: string;
-  tipo_valor: string;
-  valor_semanal: number | null;
-  valor_mensal: number | null;
-  valor_unico: number | null;
-  valor_diario: number | null;
+  nome: string;
+  valor_atual: number;
+  valor_meta: number;
   unidade: string;
-  meta_ativa: boolean;
   descricao: string;
+  icone: string;
+  meta_ativa: boolean;
   ordem_exibicao: number;
-  cor_categoria: string;
-  icone_categoria: string;
+  bar_id?: number | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
+// Interface para organizar metas por categoria
 interface MetasOrganizadas {
   financeiro: Meta[];
   clientes: Meta[];
@@ -58,33 +55,41 @@ interface MetasOrganizadas {
   marketing: Meta[];
 }
 
-// Mapeamento de ícones
+// Mapeamento de ícones do Lucide React
 const IconMap: { [key: string]: any } = {
   TrendingUp, Users, Star, Coffee, DollarSign, Target, Activity,
   CheckCircle2, AlertCircle, Hash, Eye, Share2, MessageSquare
 };
 
-// Função para formatar valores
-const formatarValor = (valor: number | null, tipo: string): string => {
-  if (valor === null || valor === undefined || valor === 0) return '-';
+// Função para formatar valores conforme a unidade
+const formatarValor = (valor: number, unidade: string): string => {
+  if (valor === null || valor === undefined) return '-';
   
-  switch (tipo) {
+  switch (unidade) {
+    case 'R$':
     case 'moeda':
       return new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: 'BRL'
       }).format(valor);
+    case '%':
     case 'percentual':
       return `${valor.toFixed(1)}%`;
-    case 'tempo_minutos':
-      return `${valor.toFixed(0)} min`;
-    case 'nota':
-      return `${valor.toFixed(1)}★`;
-    case 'numero':
-      return new Intl.NumberFormat('pt-BR').format(valor);
     default:
-      return valor.toString();
+      return `${valor.toLocaleString('pt-BR')} ${unidade}`;
   }
+};
+
+// Função para obter ícone da meta
+const getMetaIcon = (icone: string) => {
+  const IconComponent = IconMap[icone || 'Target'];
+  return IconComponent ? <IconComponent className="h-5 w-5" /> : <Target className="h-5 w-5" />;
+};
+
+// Função para calcular progresso da meta
+const calcularProgresso = (valorAtual: number, valorMeta: number): number => {
+  if (valorMeta === 0) return 0;
+  return Math.min((valorAtual / valorMeta) * 100, 100);
 };
 
 // Componente de Card de Meta
@@ -97,184 +102,151 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
   isSaving: boolean;
 }) => {
   const [valores, setValores] = useState({
-    valor_semanal: meta.valor_semanal?.toString() || '',
-    valor_mensal: meta.valor_mensal?.toString() || '',
-    valor_unico: meta.valor_unico?.toString() || ''
+    valor_atual: meta.valor_atual.toString(),
+    valor_meta: meta.valor_meta.toString()
   });
 
   useEffect(() => {
     if (isEditing) {
       setValores({
-        valor_semanal: meta.valor_semanal?.toString() || '',
-        valor_mensal: meta.valor_mensal?.toString() || '',
-        valor_unico: meta.valor_unico?.toString() || ''
+        valor_atual: meta.valor_atual.toString(),
+        valor_meta: meta.valor_meta.toString()
       });
     }
   }, [isEditing, meta]);
 
-  const IconComponent = IconMap[meta.icone_categoria] || Target;
-
-  // Determinar se é uma meta única ou por períodos
-  const isMetaUnica = meta.valor_unico !== null && meta.valor_unico !== undefined;
-  const isMetaPeriodos = (meta.valor_semanal !== null && meta.valor_semanal !== undefined) || 
-                         (meta.valor_mensal !== null && meta.valor_mensal !== undefined);
+  const progresso = calcularProgresso(meta.valor_atual, meta.valor_meta);
 
   const handleSave = () => {
-    if (isMetaUnica) {
-      const valoresLimpos = {
-        valor_unico: valores.valor_unico ? parseFloat(valores.valor_unico.replace(/[^\d.,]/g, '').replace(',', '.')) : null
-      };
-      onSave(valoresLimpos);
-    } else {
-      const valoresLimpos = {
-        valor_semanal: valores.valor_semanal ? parseFloat(valores.valor_semanal.replace(/[^\d.,]/g, '').replace(',', '.')) : null,
-        valor_mensal: valores.valor_mensal ? parseFloat(valores.valor_mensal.replace(/[^\d.,]/g, '').replace(',', '.')) : null
-      };
-      onSave(valoresLimpos);
-    }
+    const novoValorAtual = parseFloat(valores.valor_atual) || 0;
+    const novoValorMeta = parseFloat(valores.valor_meta) || 0;
+    
+    onSave({
+      valor_atual: novoValorAtual,
+      valor_meta: novoValorMeta
+    });
   };
 
   return (
-    <Card className="transition-all duration-200 hover:shadow-md bg-white border-l-4 shadow-sm"
-          style={{ borderLeftColor: meta.cor_categoria }}>
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-opacity-10"
-                 style={{ backgroundColor: `${meta.cor_categoria}20` }}>
-              <IconComponent 
-                className="h-5 w-5" 
-                style={{ color: meta.cor_categoria }} 
-              />
-            </div>
-            <div className="flex-1">
-              <CardTitle className="text-base font-semibold text-gray-900 leading-tight">
-                {meta.nome_meta}
-              </CardTitle>
-              {meta.subcategoria && (
-                <p className="text-sm text-gray-500 mt-1">{meta.subcategoria}</p>
-              )}
-            </div>
-          </div>
-          
-          {!isEditing ? (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={onEdit}
-              className="h-8 w-8 p-0 hover:bg-gray-100"
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-          ) : (
-            <div className="flex gap-1">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleSave}
-                disabled={isSaving}
-                className="h-8 w-8 p-0 hover:bg-green-100 text-green-600"
-              >
-                {isSaving ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={onCancel}
-                disabled={isSaving}
-                className="h-8 w-8 p-0 hover:bg-red-100 text-red-600"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-        </div>
-      </CardHeader>
-      
-      <CardContent>
-        <div className="space-y-3">
-          {/* Meta Única - para metas como Ticket Médio */}
-          {isMetaUnica && (
+    <div>
+      <Card className="relative overflow-hidden">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Label className="text-sm font-medium text-gray-700 w-20">
-                Meta
-              </Label>
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={valores.valor_unico}
-                  onChange={(e) => setValores(prev => ({ ...prev, valor_unico: e.target.value }))}
-                  placeholder="0,00"
-                  className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              <div className="p-2 rounded-lg bg-primary/10">
+                {getMetaIcon(meta.icone)}
+              </div>
+              <div>
+                <CardTitle className="text-lg">{meta.nome}</CardTitle>
+                <CardDescription>{meta.descricao}</CardDescription>
+              </div>
+            </div>
+            
+            {!isEditing ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onEdit}
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            ) : (
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={handleSave}
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={onCancel}
+                  disabled={isSaving}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+        </CardHeader>
+
+        <CardContent>
+          {isEditing ? (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Valor Atual</label>
+                <Input
+                  type="number"
+                  value={valores.valor_atual}
+                  onChange={(e) => setValores(prev => ({ ...prev, valor_atual: e.target.value }))}
+                  placeholder="Valor atual"
                 />
-              ) : (
-                <div className="flex-1 text-sm font-medium text-gray-900">
-                  {formatarValor(meta.valor_unico, meta.tipo_valor)}
+              </div>
+              <div>
+                <label className="text-sm font-medium">Meta</label>
+                <Input
+                  type="number"
+                  value={valores.valor_meta}
+                  onChange={(e) => setValores(prev => ({ ...prev, valor_meta: e.target.value }))}
+                  placeholder="Valor da meta"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-2xl font-bold">
+                  {formatarValor(meta.valor_atual, meta.unidade)}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  de {formatarValor(meta.valor_meta, meta.unidade)}
+                </span>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Progresso</span>
+                  <span>{progresso.toFixed(1)}%</span>
                 </div>
-              )}
+                <Progress value={progresso} className="h-2" />
+              </div>
+
+              <div className="flex items-center gap-2">
+                {progresso >= 100 ? (
+                  <Badge variant="default" className="bg-green-500">
+                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                    Meta Atingida
+                  </Badge>
+                ) : progresso >= 80 ? (
+                  <Badge variant="secondary" className="bg-yellow-500 text-white">
+                    <Activity className="h-3 w-3 mr-1" />
+                    Quase lá
+                  </Badge>
+                ) : (
+                  <Badge variant="outline">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    Em progresso
+                  </Badge>
+                )}
+              </div>
             </div>
           )}
-
-          {/* Metas por Períodos - para metas como Faturamento */}
-          {isMetaPeriodos && (
-            <>
-              {/* Valor Semanal */}
-              {(meta.valor_semanal !== null || isEditing) && (
-                <div className="flex items-center gap-3">
-                  <Label className="text-sm font-medium text-gray-700 w-20">
-                    Semanal
-                  </Label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={valores.valor_semanal}
-                      onChange={(e) => setValores(prev => ({ ...prev, valor_semanal: e.target.value }))}
-                      placeholder="0,00"
-                      className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                  ) : (
-                    <div className="flex-1 text-sm font-medium text-gray-900">
-                      {formatarValor(meta.valor_semanal, meta.tipo_valor)}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Valor Mensal */}
-              {(meta.valor_mensal !== null || isEditing) && (
-                <div className="flex items-center gap-3">
-                  <Label className="text-sm font-medium text-gray-700 w-20">
-                    Mensal
-                  </Label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={valores.valor_mensal}
-                      onChange={(e) => setValores(prev => ({ ...prev, valor_mensal: e.target.value }))}
-                      placeholder="0,00"
-                      className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                  ) : (
-                    <div className="flex-1 text-sm font-medium text-gray-900">
-                      {formatarValor(meta.valor_mensal, meta.tipo_valor)}
-                    </div>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
-// Componente principal
+// Componente principal da página
 export default function MetasPage() {
+  const [activeTab, setActiveTab] = useState('financeiro');
   const [metas, setMetas] = useState<MetasOrganizadas>({
     financeiro: [],
     clientes: [],
@@ -286,9 +258,8 @@ export default function MetasPage() {
   const [editingMeta, setEditingMeta] = useState<number | null>(null);
   const [savingMeta, setSavingMeta] = useState<number | null>(null);
   const { toast } = useToast();
-  const router = useRouter();
 
-  // Carregar metas
+  // Função para carregar metas da API
   const carregarMetas = async () => {
     try {
       setLoading(true);
@@ -296,178 +267,145 @@ export default function MetasPage() {
       const data = await response.json();
       
       if (data.success) {
-        const metasOrganizadas: MetasOrganizadas = {
-          financeiro: data.data.filter((meta: Meta) => meta.categoria === 'financeiro'),
-          clientes: data.data.filter((meta: Meta) => meta.categoria === 'clientes'),
-          avaliacoes: data.data.filter((meta: Meta) => meta.categoria === 'avaliacoes'),
-          cockpit_produtos: data.data.filter((meta: Meta) => meta.categoria === 'cockpit_produtos'),
-          marketing: data.data.filter((meta: Meta) => meta.categoria === 'marketing')
-        };
-        
-        setMetas(metasOrganizadas);
+        // A API já retorna as metas organizadas por categoria
+        setMetas(data.data);
       }
     } catch (error) {
       console.error('Erro ao carregar metas:', error);
       toast({
-        title: "Erro",
-        description: "Erro ao carregar metas",
-        variant: "destructive",
+        title: 'Erro',
+        description: 'Erro ao carregar metas',
+        variant: 'destructive'
       });
     } finally {
       setLoading(false);
     }
   };
 
-  // Salvar meta
+  // Função para salvar alterações na meta
   const salvarMeta = async (metaId: number, valores: any) => {
     try {
       setSavingMeta(metaId);
-      const response = await fetch(`/api/metas/${metaId}`, {
+      
+      const response = await fetch('/api/metas', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(valores)
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id: metaId,
+          ...valores
+        })
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Erro ao salvar meta');
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        toast({
+          title: 'Sucesso',
+          description: 'Meta atualizada com sucesso!'
+        });
+        
+        setEditingMeta(null);
+        await carregarMetas();
+      } else {
+        throw new Error(data.error || 'Erro ao salvar meta');
       }
-
-      toast({
-        title: "Sucesso",
-        description: "Meta atualizada com sucesso!",
-      });
-
-      await carregarMetas();
-      setEditingMeta(null);
     } catch (error) {
       console.error('Erro ao salvar meta:', error);
       toast({
-        title: "Erro",
-        description: error instanceof Error ? error.message : "Erro ao salvar meta",
-        variant: "destructive",
+        title: 'Erro',
+        description: 'Erro ao salvar meta',
+        variant: 'destructive'
       });
     } finally {
       setSavingMeta(null);
     }
   };
 
-
-
-  // Carregar dados ao montar
+  // Carregar metas ao montar o componente
   useEffect(() => {
     carregarMetas();
   }, []);
 
+  // Configuração das categorias
   const categorias = [
-    { key: 'financeiro', label: 'Financeiro', icon: DollarSign },
-    { key: 'clientes', label: 'Clientes', icon: Users },
-    { key: 'avaliacoes', label: 'Avaliações', icon: Star },
-    { key: 'cockpit_produtos', label: 'Produtos', icon: Coffee },
-    { key: 'marketing', label: 'Marketing', icon: Share2 },
+    { key: 'financeiro', label: '💰 Financeiro', color: 'bg-green-500' },
+    { key: 'clientes', label: '👥 Clientes', color: 'bg-blue-500' },
+    { key: 'avaliacoes', label: '⭐ Avaliações', color: 'bg-yellow-500' },
+    { key: 'cockpit_produtos', label: '☕ Produtos', color: 'bg-purple-500' },
+    { key: 'marketing', label: '📱 Marketing', color: 'bg-pink-500' }
   ];
 
+  // Tela de loading
   if (loading) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex items-center gap-4">
-          <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
-          <div className="h-8 w-64 bg-gray-200 rounded animate-pulse"></div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-48 bg-gray-200 rounded-lg animate-pulse"></div>
-          ))}
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Carregando metas...</p>
+          </div>
         </div>
       </div>
     );
   }
 
+  // Render principal
   return (
     <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="space-y-4">
-        <Button 
-          variant="outline" 
-          onClick={() => router.push('/configuracoes')} 
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Voltar para Configurações
-        </Button>
-        
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <Target className="h-8 w-8 text-blue-600" />
-            Metas do Negócio
-          </h1>
-          <p className="text-gray-600 text-lg">
-            Gerencie as metas financeiras, operacionais e de performance do seu bar
+      {/* Header da página */}
+      <div className="flex items-center gap-3">
+        <Target className="h-8 w-8 text-primary" />
+        <div>
+          <h1 className="text-3xl font-bold">Metas e Objetivos</h1>
+          <p className="text-muted-foreground">
+            Acompanhe e gerencie suas metas por categoria
           </p>
         </div>
       </div>
 
       {/* Tabs por categoria */}
-      <Tabs defaultValue="financeiro" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 mb-8 bg-gray-100 p-1 rounded-lg">
-          {categorias.map(({ key, label, icon: Icon }) => (
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid grid-cols-5 w-full">
+          {categorias.map(categoria => (
             <TabsTrigger 
-              key={key}
-              value={key} 
-              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+              key={categoria.key} 
+              value={categoria.key}
+              className="text-sm"
             >
-              <Icon className="h-4 w-4" />
-              <span className="hidden sm:inline">{label}</span>
+              {categoria.label}
             </TabsTrigger>
           ))}
         </TabsList>
 
-        {/* Conteúdo das abas */}
-        {categorias.map(({ key, label }) => {
-          const metasCategoria = metas[key as keyof MetasOrganizadas];
-          
-          return (
-            <TabsContent key={key} value={key} className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <h2 className="text-2xl font-semibold text-gray-900">{label}</h2>
-                  <p className="text-sm text-gray-600">
-                    {metasCategoria.length} metas configuradas
-                  </p>
+        {/* Conteúdo de cada categoria */}
+        {categorias.map(categoria => (
+          <TabsContent key={categoria.key} value={categoria.key} className="mt-6">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {metas[categoria.key as keyof MetasOrganizadas]?.map((meta) => (
+                <div key={meta.id} className="group">
+                  <MetaCard
+                    meta={meta}
+                    isEditing={editingMeta === meta.id}
+                    onEdit={() => setEditingMeta(meta.id)}
+                    onSave={(valores) => salvarMeta(meta.id, valores)}
+                    onCancel={() => setEditingMeta(null)}
+                    isSaving={savingMeta === meta.id}
+                  />
                 </div>
-                <Badge variant="secondary" className="text-sm">
-                  {metasCategoria.length} total
-                </Badge>
-              </div>
-
-              {metasCategoria.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {metasCategoria.map((meta) => (
-                    <MetaCard
-                      key={meta.id}
-                      meta={meta}
-                      isEditing={editingMeta === meta.id}
-                      onEdit={() => setEditingMeta(meta.id)}
-                      onSave={(valores) => salvarMeta(meta.id, valores)}
-                      onCancel={() => setEditingMeta(null)}
-                      isSaving={savingMeta === meta.id}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <Target className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    Nenhuma meta encontrada
-                  </h3>
-                  <p className="text-gray-600">
-                    Não há metas configuradas para a categoria {label.toLowerCase()}.
-                  </p>
-                </div>
+              )) || (
+                <Card className="col-span-full">
+                  <CardContent className="flex items-center justify-center h-32">
+                    <p className="text-muted-foreground">
+                      Nenhuma meta encontrada para esta categoria
+                    </p>
+                  </CardContent>
+                </Card>
               )}
-            </TabsContent>
-          );
-        })}
+            </div>
+          </TabsContent>
+        ))}
       </Tabs>
     </div>
   );
