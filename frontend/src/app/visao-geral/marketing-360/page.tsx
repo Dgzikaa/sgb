@@ -619,29 +619,119 @@ export default function Marketing360Page() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600">Carregando análises...</p>
+      <ProtectedRoute requiredModule="18" errorMessage="sem_permissao_marketing">
+        <StandardPageLayout>
+          <div className="min-h-[600px] flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-xl border border-gray-200">
+            <div className="text-center space-y-8 max-w-md mx-auto">
+              
+              {/* Logo/Ícones Animados */}
+              <div className="flex items-center justify-center space-x-6">
+                <div className="animate-bounce delay-0">
+                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                    <Users className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+                <div className="animate-bounce delay-150">
+                  <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                    <Heart className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+                <div className="animate-bounce delay-300">
+                  <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                    <Eye className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+                <div className="animate-bounce delay-450">
+                  <div className="w-16 h-16 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center shadow-lg">
+                    <DollarSign className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Spinner Central Duplo */}
+              <div className="relative">
+                <div className="w-20 h-20 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+                <div className="absolute inset-0 w-20 h-20 border-4 border-transparent border-r-purple-500 rounded-full animate-spin" style={{animationDirection: 'reverse', animationDuration: '1.5s'}}></div>
+              </div>
+
+              {/* Texto Principal */}
+              <div className="space-y-4">
+                <h2 className="text-3xl font-bold text-gray-800 animate-pulse">
+                  🚀 Marketing 360° Iniciando
+                </h2>
+                <p className="text-lg text-gray-600">
+                  Carregando funcionalidades avançadas...
+                </p>
+              </div>
+
+              {/* Status Steps */}
+              <div className="space-y-3 text-left">
+                <div className="flex items-center space-x-3 text-sm">
+                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs">✓</span>
+                  </div>
+                  <span className="text-gray-700 font-medium">Conectando com Meta API</span>
+                </div>
+                <div className="flex items-center space-x-3 text-sm">
+                  <div className="w-6 h-6 border-2 border-blue-500 rounded-full animate-pulse"></div>
+                  <span className="text-gray-700 font-medium">Coletando métricas das campanhas</span>
+                </div>
+                <div className="flex items-center space-x-3 text-sm">
+                  <div className="w-6 h-6 border-2 border-purple-500 rounded-full animate-pulse"></div>
+                  <span className="text-gray-700 font-medium">Analisando performance das redes sociais</span>
+                </div>
+                <div className="flex items-center space-x-3 text-sm">
+                  <div className="w-6 h-6 border-2 border-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-gray-700 font-medium">Processando funcionalidades avançadas</span>
+                </div>
+                <div className="flex items-center space-x-3 text-sm">
+                  <div className="w-6 h-6 border-2 border-yellow-500 rounded-full animate-pulse"></div>
+                  <span className="text-gray-700 font-medium">Calculando ROI e oportunidades</span>
+                </div>
+              </div>
+
+              {/* Barra de Progresso Animada */}
+              <div className="w-full max-w-sm mx-auto">
+                <div className="bg-gray-200 rounded-full h-3 overflow-hidden">
+                  <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-full rounded-full animate-pulse w-full"></div>
+                </div>
+                <p className="text-xs text-gray-500 mt-2 text-center">Preparando insights em tempo real...</p>
+              </div>
+
+              {/* Cards de Preview das Funcionalidades */}
+              <div className="grid grid-cols-2 gap-4 mt-8">
+                <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-lg animate-pulse">
+                  <div className="w-10 h-10 bg-blue-200 rounded-full mx-auto mb-3"></div>
+                  <div className="h-3 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-2 bg-gray-200 rounded w-3/4 mx-auto"></div>
+                </div>
+                <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-lg animate-pulse delay-75">
+                  <div className="w-10 h-10 bg-purple-200 rounded-full mx-auto mb-3"></div>
+                  <div className="h-3 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-2 bg-gray-200 rounded w-3/4 mx-auto"></div>
+                </div>
+                <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-lg animate-pulse delay-150">
+                  <div className="w-10 h-10 bg-green-200 rounded-full mx-auto mb-3"></div>
+                  <div className="h-3 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-2 bg-gray-200 rounded w-3/4 mx-auto"></div>
+                </div>
+                <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-lg animate-pulse delay-225">
+                  <div className="w-10 h-10 bg-yellow-200 rounded-full mx-auto mb-3"></div>
+                  <div className="h-3 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-2 bg-gray-200 rounded w-3/4 mx-auto"></div>
+                </div>
+              </div>
+
+              {/* Mensagem de Rodapé */}
+              <div className="mt-8 p-4 bg-white/50 rounded-lg border border-gray-200">
+                <p className="text-sm text-gray-600 text-center">
+                  ✨ <strong>5 funcionalidades avançadas</strong> sendo carregadas para otimizar seu marketing
+                </p>
+              </div>
             </div>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map(i => (
-              <Card key={i} className="minimal-card">
-                <CardContent className="p-6">
-                  <div className="animate-pulse space-y-3">
-                    <div className="h-4 bg-gray-200 rounded w-24"></div>
-                    <div className="h-8 bg-gray-200 rounded w-16"></div>
-                    <div className="h-2 bg-gray-200 rounded w-full"></div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </div>
+        </StandardPageLayout>
+      </ProtectedRoute>
     )
   }
 
@@ -681,91 +771,8 @@ export default function Marketing360Page() {
           </div>
         </div>
 
-        {/* Loading Profissional */}
-        {isLoading ? (
-          <div className="min-h-[500px] flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-xl border border-gray-200">
-            <div className="text-center space-y-6">
-              {/* Ícones Animados */}
-              <div className="flex items-center justify-center space-x-4">
-                <div className="animate-bounce delay-0">
-                  <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
-                    <Users className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-                <div className="animate-bounce delay-150">
-                  <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
-                    <Heart className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-                <div className="animate-bounce delay-300">
-                  <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-                    <Eye className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-                <div className="animate-bounce delay-450">
-                  <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center">
-                    <DollarSign className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Spinner Central */}
-              <div className="relative">
-                <div className="w-16 h-16 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
-                <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-purple-500 rounded-full animate-spin" style={{animationDirection: 'reverse'}}></div>
-              </div>
-
-              {/* Texto Animado */}
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold text-gray-800 animate-pulse">
-                  Carregando Marketing 360°
-                </h3>
-                <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
-                  <span className="animate-pulse">📊</span>
-                  <span>Coletando métricas das campanhas</span>
-                  <span className="animate-pulse">📱</span>
-                </div>
-                <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
-                  <span className="animate-pulse">🎯</span>
-                  <span>Analisando performance das redes sociais</span>
-                  <span className="animate-pulse">📈</span>
-                </div>
-              </div>
-
-              {/* Barra de Progresso Animada */}
-              <div className="w-80 max-w-md mx-auto">
-                <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
-                  <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-full rounded-full animate-pulse"></div>
-                </div>
-                <p className="text-xs text-gray-500 mt-2">Conectando com Meta API...</p>
-              </div>
-
-              {/* Cards de Preview */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-                <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 animate-pulse">
-                  <div className="w-8 h-8 bg-blue-200 rounded-full mx-auto mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded mb-1"></div>
-                  <div className="h-2 bg-gray-200 rounded w-3/4 mx-auto"></div>
-                </div>
-                <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 animate-pulse delay-75">
-                  <div className="w-8 h-8 bg-purple-200 rounded-full mx-auto mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded mb-1"></div>
-                  <div className="h-2 bg-gray-200 rounded w-3/4 mx-auto"></div>
-                </div>
-                <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 animate-pulse delay-150">
-                  <div className="w-8 h-8 bg-green-200 rounded-full mx-auto mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded mb-1"></div>
-                  <div className="h-2 bg-gray-200 rounded w-3/4 mx-auto"></div>
-                </div>
-                <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 animate-pulse delay-225">
-                  <div className="w-8 h-8 bg-yellow-200 rounded-full mx-auto mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded mb-1"></div>
-                  <div className="h-2 bg-gray-200 rounded w-3/4 mx-auto"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
+        {/* Conteúdo Principal */}
+        {(
           <>
             {/* KPIs Principais */}
             {data.metrics && (
