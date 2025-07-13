@@ -10,26 +10,28 @@ const supabase = createClient(
 const CRON_TOKEN = 'sgb-meta-cron-2025'
 
 // Função para buscar webhook da tabela api_credentials
-async function getWebhookUrl(barId: number, webhookType: string = 'sistema') {
+async function getWebhookUrl(barId: number, webhookType: string = 'meta') {
   const { data: webhookConfig, error } = await supabase
     .from('api_credentials')
     .select('configuracoes')
     .eq('bar_id', barId)
-    .eq('sistema', 'webhook')
+    .eq('sistema', 'meta')
+    .eq('ambiente', 'producao')
     .eq('ativo', true)
     .single()
 
   if (error || !webhookConfig) {
-    console.warn(`⚠️ Webhook config não encontrada para bar ${barId}, usando fallback`)
-    return 'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ'
+    console.warn(`⚠️ Webhook config não encontrada para bar ${barId}, erro:`, error)
+    // Usar webhook Meta como fallback
+    return 'https://discord.com/api/webhooks/1391538130737303674/V6WiwfJodQT3C7WqdJTpmyaOLJByuKR8KZwtxW9ATmEqo0N4Msh73pF7PmOEVc12hx75'
   }
 
-  const webhook = webhookConfig.configuracoes[webhookType]
+  const webhook = webhookConfig.configuracoes?.webhook_url
   
   if (!webhook || webhook.trim() === '') {
-    console.warn(`⚠️ Webhook ${webhookType} não configurado para bar ${barId}, usando sistema como fallback`)
-    return webhookConfig.configuracoes['sistema'] || 
-           'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ'
+    console.warn(`⚠️ Webhook ${webhookType} não configurado para bar ${barId}`)
+    // Usar webhook Meta como fallback
+    return 'https://discord.com/api/webhooks/1391538130737303674/V6WiwfJodQT3C7WqdJTpmyaOLJByuKR8KZwtxW9ATmEqo0N4Msh73pF7PmOEVc12hx75'
   }
 
   return webhook
@@ -38,7 +40,7 @@ async function getWebhookUrl(barId: number, webhookType: string = 'sistema') {
 // Função para enviar notificação Discord
 async function enviarNotificacaoDiscord(barId: number, message: string, isError: boolean = false) {
   try {
-    const webhookUrl = await getWebhookUrl(barId, 'sistema')
+    const webhookUrl = await getWebhookUrl(barId, 'meta')  // Corrigido: agora usa 'meta' em vez de 'sistema'
     
     const embed = {
       title: isError ? '❌ Erro na Coleta Meta' : '📊 Coleta Meta Automática',
@@ -95,7 +97,7 @@ export async function POST(request: NextRequest) {
     
     // 1. COLETA INSTAGRAM
     try {
-      const instagramResponse = await fetch('http://localhost:3001/api/meta/collect-instagram-posts', {
+      const instagramResponse = await fetch('https://sgbv2.vercel.app/api/meta/collect-instagram-posts', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
@@ -135,7 +137,7 @@ export async function POST(request: NextRequest) {
     
     // 2. COLETA FACEBOOK
     try {
-      const facebookResponse = await fetch('http://localhost:3001/api/meta/collect-facebook-full', {
+      const facebookResponse = await fetch('https://sgbv2.vercel.app/api/meta/collect-facebook-full', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'

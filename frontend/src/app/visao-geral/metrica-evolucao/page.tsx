@@ -98,10 +98,9 @@ export default function MetricaEvolucaoPage() {
     try {
       // Buscar metas do Supabase
       const { data: metasData, error: metasError } = await supabase
-        .from('metas_bar')
+        .from('metas_negocio')
         .select('*')
         .eq('bar_id', selectedBar.id)
-        .maybeSingle()
 
       if (metasError) {
         console.error('Erro ao buscar metas do Supabase:', metasError)

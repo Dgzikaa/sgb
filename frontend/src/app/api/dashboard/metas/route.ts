@@ -24,10 +24,9 @@ export async function GET(request: NextRequest) {
 
     // Buscar metas do bar no banco
     const { data: metasBar, error } = await supabase
-      .from('metas_bar')
+      .from('metas_negocio')
       .select('*')
       .eq('bar_id', parseInt(bar_id))
-      .single()
 
     if (error) {
       console.error('❌ Erro ao buscar metas:', error)
@@ -84,7 +83,7 @@ export async function POST(request: NextRequest) {
 
     // Tentar inserir ou atualizar metas
     const { data, error } = await supabase
-      .from('metas_bar')
+      .from('metas_negocio')
       .upsert([{
         bar_id: body.bar_id,
         ...body

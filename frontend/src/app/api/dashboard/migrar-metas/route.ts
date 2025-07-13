@@ -1,7 +1,7 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase';
 
-// POST - Migrar dados do localStorage para a tabela metas_bar
+// POST - Migrar dados do localStorage para a tabela metas_negocio
 export async function POST(request: NextRequest) {
   try {
     // Inicializar cliente Supabase
@@ -21,10 +21,9 @@ export async function POST(request: NextRequest) {
 
     // Verificar se jÃ¡ existe configuraÃ§Ã£o para este bar
     const { data: existingMetas, error: checkError } = await supabase
-      .from('metas_bar')
+      .from('metas_negocio')
       .select('*')
       .eq('bar_id', parseInt(bar_id))
-      .single()
 
     if (checkError && checkError.code !== 'PGRST116') {
       console.error('Erro ao verificar metas existentes:', checkError)
@@ -68,7 +67,7 @@ export async function POST(request: NextRequest) {
     if (existingMetas) {
       // Atualizar registro existente
       const { data, error } = await supabase
-        .from('metas_bar')
+        .from('metas_negocio')
         .update({
           ...metasData,
           updated_at: new Date().toISOString()
@@ -89,7 +88,7 @@ export async function POST(request: NextRequest) {
     } else {
       // Inserir novo registro
       const { data, error } = await supabase
-        .from('metas_bar')
+        .from('metas_negocio')
         .insert(metasData)
         .select()
         .single()
@@ -140,10 +139,9 @@ export async function GET(request: NextRequest) {
     }
 
     const { data: metas, error } = await supabase
-      .from('metas_bar')
+      .from('metas_negocio')
       .select('*')
       .eq('bar_id', parseInt(bar_id))
-      .single()
 
     if (error && error.code !== 'PGRST116') {
       console.error('Erro ao buscar metas:', error)

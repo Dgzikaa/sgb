@@ -69,7 +69,7 @@ export default function TabelaDesempenhoPage() {
     setPageTitle('📈 Tabela de Desempenho')
     
     return () => {
-      setPageTitle(null)
+      setPageTitle('')
     }
   }, [setPageTitle])
 
@@ -301,6 +301,7 @@ export default function TabelaDesempenhoPage() {
   }
 
   return (
+    <ProtectedRoute requiredModule="7" errorMessage="sem_permissao_desempenho">
       <div className="space-y-6 p-6">
       {/* Filtros Expandir/Minimizar */}
       <Card className="bg-white/80 backdrop-blur-sm border border-white/20 shadow-lg">
@@ -474,7 +475,7 @@ export default function TabelaDesempenhoPage() {
               </thead>
               <tbody>
                 {dadosFiltrados.map((item) => {
-                  const atingimento = item.meta_semanal > 0 ? (item.faturamento_semanal / item.meta_semanal) * 100 : 0
+                  const atingimento = item.meta_semanal > 0 ? (item.faturamento_total / item.meta_semanal) * 100 : 0
                   
                   return (
                     <tr key={item.id} className="border-b border-slate-100 hover:bg-gray-50">
@@ -494,14 +495,14 @@ export default function TabelaDesempenhoPage() {
                       </td>
                       <td className="py-3 px-2 sm:px-4 text-slate-800">
                         <div className="font-semibold text-sm sm:text-base">
-                          {formatarMoeda(item.faturamento_semanal)}
+                          {formatarMoeda(item.faturamento_total)}
                         </div>
                         <div className="text-xs text-gray-500 visible-mobile">
-                          {item.total_clientes} clientes
+                          {item.clientes_atendidos} clientes
                         </div>
                       </td>
                       <td className="py-3 px-2 sm:px-4 text-slate-800 hidden-mobile">
-                        {item.total_clientes}
+                        {item.clientes_atendidos}
                       </td>
                       <td className="py-3 px-2 sm:px-4 text-slate-800 hidden-mobile">
                         {formatarMoeda(item.ticket_medio)}

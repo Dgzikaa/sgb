@@ -58,8 +58,6 @@ export default function RelatorioProducoesPage() {
   const executarMigration = async () => {
     setExecutandoMigration(true)
     try {
-      console.log('🔧 Executando migration para campos de aderência à receita...')
-      
       const response = await fetch('/api/admin/adicionar-campos-producao', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
@@ -81,7 +79,6 @@ export default function RelatorioProducoesPage() {
         alert(`❌ Erro na migration: ${result.error}`)
       }
     } catch (error) {
-      console.error('Erro ao executar migration:', error)
       alert('❌ Erro ao executar migration de campos')
     } finally {
       setExecutandoMigration(false)
@@ -108,16 +105,13 @@ export default function RelatorioProducoesPage() {
       
       if (response.ok) {
         const data: EstatisticasResponse = await response.json()
-        console.log('📊 Dados recebidos:', data)
         setProducoes(data.producoes || [])
         setEstatisticas(data.estatisticas || {})
       } else {
-        console.error('❌ Erro na API:', response.status)
         setProducoes([])
         setEstatisticas({})
       }
     } catch (error) {
-      console.error('❌ Erro ao carregar produções:', error)
       setProducoes([])
       setEstatisticas({})
     } finally {

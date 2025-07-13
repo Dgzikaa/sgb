@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseClient } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,43 +27,51 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await getSupabaseClient()
-    if (!supabase) {
+    // Usar service role para bypass RLS
+
+    // Buscar webhook específico do sistema
+    const webhookMapping = {
+      sistema: 'sistema',
+      contaazul: 'contaazul',
+      meta: 'meta',
+      checklists: 'checklists',
+      contahub: 'contahub',
+      sympla: 'sympla',
+      yuzer: 'yuzer',
+      reservas: 'getin'
+    }
+
+    const webhookType = body.webhook_type || 'sistema'
+    const sistema = webhookMapping[webhookType as keyof typeof webhookMapping]
+
+    console.log('🎯 Buscando webhook:', { webhookType, sistema })
+
+    if (!sistema) {
+      console.error('❌ Tipo de webhook não mapeado:', webhookType)
       return NextResponse.json(
-        { success: false, error: 'Erro ao conectar com banco' },
-        { status: 500 }
+        { success: false, error: `Tipo de webhook não suportado: ${webhookType}` },
+        { status: 400 }
       )
     }
 
-    // Buscar configurações de webhook do banco
-    const { data: configData, error: configError } = await supabase
+    // Buscar webhook no sistema específico
+    const { data: webhookData, error: webhookError } = await supabaseAdmin
       .from('api_credentials')
       .select('configuracoes')
       .eq('bar_id', body.bar_id)
-      .eq('sistema', 'webhook')
-      .single()
+      .eq('sistema', sistema)
+      .eq('ambiente', 'producao')
+      .maybeSingle()
 
-    console.log('📊 Config do banco:', { configData, configError })
+    console.log('📊 Webhook do banco:', { webhookData, webhookError })
 
-    let webhookConfigs = {
-      sistema: 'https://discord.com/api/webhooks/1393646423748116602/3zUhIrSKFHmq0zNRLf5AzrkSZNzTj7oYk6f45Tpj2LZWChtmGTKKTHxhfaNZigyLXN4y',
-      contaazul: 'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ',
-      meta: '',
-      checklists: '',
-      contahub: '',
-      vendas: '',
-      reservas: ''
+    let webhookUrl = ''
+    if (!webhookError && webhookData && webhookData.configuracoes?.webhook_url) {
+      webhookUrl = webhookData.configuracoes.webhook_url
+      console.log(`✅ Webhook ${webhookType} encontrado no sistema ${sistema}`)
+    } else {
+      console.log(`⚠️ Webhook ${webhookType} não encontrado no sistema ${sistema}`)
     }
-
-    // Se encontrou configurações no banco, usar elas
-    if (!configError && configData?.configuracoes) {
-      webhookConfigs = { ...webhookConfigs, ...configData.configuracoes }
-      console.log('✅ Aplicando configurações do banco:', webhookConfigs)
-    }
-
-    // Determinar qual webhook usar
-    const webhookType = body.webhook_type || 'sistema'
-    const webhookUrl = webhookConfigs[webhookType as keyof typeof webhookConfigs]
 
     console.log('🎯 Webhook selecionado:', { 
       webhookType, 
@@ -67,7 +80,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!webhookUrl || webhookUrl === '') {
-      console.error('❌ Webhook não configurado:', { webhookType, webhookConfigs })
+      console.error('❌ Webhook não configurado:', { webhookType, sistema })
       return NextResponse.json(
         { success: false, error: `Webhook ${webhookType} não configurado` },
         { status: 400 }

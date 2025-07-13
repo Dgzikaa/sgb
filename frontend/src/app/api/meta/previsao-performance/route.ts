@@ -8,32 +8,40 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const barId = searchParams.get('barId') || request.headers.get('x-bar-id')
-    const tipo = searchParams.get('tipo') || 'geral' // 'post', 'campanha', 'geral'
+    console.log('🔮 Previsão de Performance - Analisando dados históricos...')
+
+    // Obter dados do usuário para pegar o bar_id
+    const userData = request.headers.get('x-user-data')
+    let barId = 3 // fallback para desenvolvimento
     
-    if (!barId) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Bar ID é obrigatório' 
-      }, { status: 400 })
+    if (userData) {
+      try {
+        const parsedUser = JSON.parse(decodeURIComponent(userData))
+        barId = parsedUser.bar_id || 3
+        console.log(`👤 Previsão de Performance - Usando bar_id: ${barId}`)
+      } catch (e) {
+        console.warn('⚠️ Erro ao parsear dados do usuário, usando bar_id padrão')
+      }
     }
 
-    console.log('🔮 Previsão de Performance - Analisando histórico para bar:', barId)
+    const { searchParams } = new URL(request.url)
+    const tipo = searchParams.get('tipo') || 'geral' // 'post', 'campanha', 'geral'
+    
+    console.log('🔮 Previsão de Performance - Analisando para bar:', barId, 'tipo:', tipo)
 
-    // 1. COLETAR DADOS HISTÓRICOS
+    // 1. COLETAR DADOS HISTÓRICOS - CORRIGIR NOMES DAS TABELAS
     const { data: instagramHistorico } = await supabase
-      .from('meta_instagram_insights')
+      .from('instagram_metrics')
       .select('*')
       .eq('bar_id', barId)
-      .order('updated_at', { ascending: false })
+      .order('data_referencia', { ascending: false })
       .limit(100)
 
     const { data: facebookHistorico } = await supabase
-      .from('meta_facebook_insights')
+      .from('facebook_metrics')
       .select('*')
       .eq('bar_id', barId)
-      .order('updated_at', { ascending: false })
+      .order('data_referencia', { ascending: false })
       .limit(100)
 
     // 2. ANÁLISE DE PADRÕES HISTÓRICOS
@@ -49,21 +57,33 @@ export async function GET(request: NextRequest) {
         fatores_sucesso: [] as string[]
       }
       
-      // Calcular médias
-      const totalEngajamento = dados.reduce((sum, item) => sum + (item.engagement || 0), 0)
-      const totalAlcance = dados.reduce((sum, item) => sum + (item.reach || item.impressions || 0), 0)
+      // Calcular médias - AJUSTAR CAMPOS PARA TABELA CORRETA
+      const totalEngajamento = dados.reduce((sum, item) => {
+        // Para Instagram: posts_likes + posts_comments
+        // Para Facebook: post_likes + post_comments
+        const engagement = (item.posts_likes || item.post_likes || 0) + 
+                          (item.posts_comments || item.post_comments || 0)
+        return sum + engagement
+      }, 0)
+      
+      const totalAlcance = dados.reduce((sum, item) => {
+        return sum + (item.reach || item.impressions || item.page_reach || 0)
+      }, 0)
       
       padroes.media_engajamento = dados.length > 0 ? totalEngajamento / dados.length : 0
       padroes.media_alcance = dados.length > 0 ? totalAlcance / dados.length : 0
       
-      // Analisar dias da semana
+      // Analisar dias da semana - USAR data_referencia
       const diasSemana = new Array(7).fill(0)
       const engajamentoPorDia = new Array(7).fill(0)
       
       dados.forEach(item => {
-        const dia = new Date(item.updated_at).getDay()
+        const dia = new Date(item.data_referencia).getDay()
         diasSemana[dia]++
-        engajamentoPorDia[dia] += (item.engagement || 0)
+        
+        const engagement = (item.posts_likes || item.post_likes || 0) + 
+                          (item.posts_comments || item.post_comments || 0)
+        engajamentoPorDia[dia] += engagement
       })
       
       let melhorDia = 0
@@ -80,14 +100,17 @@ export async function GET(request: NextRequest) {
       
       padroes.melhor_dia_semana = melhorDia
       
-      // Analisar horários
+      // Analisar horários - USAR data_referencia (assumindo que está no formato correto)
       const horarios = new Array(24).fill(0)
       const engajamentoPorHora = new Array(24).fill(0)
       
       dados.forEach(item => {
-        const hora = new Date(item.updated_at).getHours()
+        const hora = new Date(item.data_referencia).getHours()
         horarios[hora]++
-        engajamentoPorHora[hora] += (item.engagement || 0)
+        
+        const engagement = (item.posts_likes || item.post_likes || 0) + 
+                          (item.posts_comments || item.post_comments || 0)
+        engajamentoPorHora[hora] += engagement
       })
       
       let melhorHora = 0
@@ -108,22 +131,38 @@ export async function GET(request: NextRequest) {
       const recentes = dados.slice(0, 10)
       const antigos = dados.slice(-10)
       
-      const engajamentoRecente = recentes.reduce((sum, item) => sum + (item.engagement || 0), 0) / recentes.length
-      const engajamentoAntigo = antigos.reduce((sum, item) => sum + (item.engagement || 0), 0) / antigos.length
+      const calcularEngajamento = (items: any[]) => {
+        return items.reduce((sum, item) => {
+          const engagement = (item.posts_likes || item.post_likes || 0) + 
+                            (item.posts_comments || item.post_comments || 0)
+          return sum + engagement
+        }, 0) / items.length
+      }
+      
+      const engajamentoRecente = calcularEngajamento(recentes)
+      const engajamentoAntigo = calcularEngajamento(antigos)
       
       padroes.trending_up = engajamentoRecente > engajamentoAntigo
       
       // Identificar fatores de sucesso
-      const topPosts = dados.sort((a, b) => (b.engagement || 0) - (a.engagement || 0)).slice(0, 5)
+      const topPosts = dados.sort((a, b) => {
+        const engA = (a.posts_likes || a.post_likes || 0) + (a.posts_comments || a.post_comments || 0)
+        const engB = (b.posts_likes || b.post_likes || 0) + (b.posts_comments || b.post_comments || 0)
+        return engB - engA
+      }).slice(0, 5)
+      
       const fatores = new Set<string>()
       
       topPosts.forEach(post => {
-        const hora = new Date(post.updated_at).getHours()
-        const dia = new Date(post.updated_at).getDay()
+        const hora = new Date(post.data_referencia).getHours()
+        const dia = new Date(post.data_referencia).getDay()
         
         if (hora >= 18 && hora <= 22) fatores.add('Postar no horário nobre (18h-22h)')
         if (dia === 5 || dia === 6) fatores.add('Postar nos finais de semana')
-        if ((post.engagement || 0) > padroes.media_engajamento * 1.5) fatores.add('Conteúdo altamente engajante')
+        
+        const engagement = (post.posts_likes || post.post_likes || 0) + 
+                          (post.posts_comments || post.post_comments || 0)
+        if (engagement > padroes.media_engajamento * 1.5) fatores.add('Conteúdo altamente engajante')
       })
       
       padroes.fatores_sucesso = Array.from(fatores)

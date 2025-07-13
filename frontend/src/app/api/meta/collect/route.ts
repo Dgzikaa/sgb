@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     console.log('📊 Parâmetros da coleta:', { types, period, limit })
 
     // Chamar o endpoint de coleta automática que já funciona
-    const autoCollectResponse = await fetch('http://localhost:3001/api/meta/auto-collect', {
+    const autoCollectResponse = await fetch('https://sgbv2.vercel.app/api/meta/auto-collect', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

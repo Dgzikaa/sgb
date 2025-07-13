@@ -81,19 +81,14 @@ export default function TerminalProducao() {
   // Carregar insumos disponíveis
   const carregarInsumos = async () => {
     try {
-      console.log('🔍 Carregando insumos disponíveis...')
       const response = await fetch('/api/receitas/insumos?ativo=true')
       if (response.ok) {
         const data = await response.json()
         const insumos = data.data || []
         setInsumosDisponiveis(insumos)
-        console.log('✅ Insumos carregados:', insumos.length)
-        console.log('📋 Primeiros 5 insumos:', insumos.slice(0, 5))
-      } else {
-        console.error('❌ Erro ao carregar insumos:', response.status)
       }
     } catch (error) {
-      console.error('❌ Erro ao carregar insumos:', error)
+      // Error silently handled
     }
   }
 
@@ -110,12 +105,9 @@ export default function TerminalProducao() {
         if (response.ok) {
           const data = await response.json()
           setReceitas(data.receitas || [])
-          console.log('✅ Receitas carregadas:', data.receitas?.length || 0)
-        } else {
-          console.error('❌ Erro na API:', response.status, response.statusText)
         }
       } catch (error) {
-        console.error('❌ Erro ao carregar receitas:', error)
+        // Error silently handled
       } finally {
         setIsLoading(false)
       }

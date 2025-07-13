@@ -13,6 +13,13 @@ import { ProtectedRoute } from '@/components/ProtectedRoute'
 export default function Marketing360Page() {
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('overview')
+  const [loadingProgress, setLoadingProgress] = useState({
+    metaApi: false,
+    campanhas: false,
+    redes: false,
+    avancadas: false,
+    roi: false
+  })
   const [data, setData] = useState<any>({
     metrics: null,
     campaigns: null,
@@ -22,61 +29,60 @@ export default function Marketing360Page() {
     previsaoPerformance: null,
     customerJourney: null,
     otimizacaoTemporal: null,
-    funilConversao: null,
-    metas: null
+    funilConversao: null
   })
 
   // Carregar dados automaticamente quando a página abrir
   useEffect(() => {
-    console.log('🚀 Marketing 360° inicializando...')
     loadAllData()
   }, [])
-
-  // Dados do estado para debug
-  useEffect(() => {
-    console.log('📊 Estado atual dos dados:', {
-      hasMetrics: !!data.metrics,
-      hasCampaigns: !!data.campaigns,
-      hasCampaignsAdv: !!data.campaignsAdvanced,
-      hasContent: !!data.contentAnalysis,
-      hasDebug: !!data.debug,
-      totalFollowers: data.metrics?.overall?.total_followers,
-      facebookFollowers: data.metrics?.facebook?.followers,
-      instagramFollowers: data.metrics?.instagram?.followers
-    })
-  }, [data])
 
   const loadAllData = async () => {
     try {
       setIsLoading(true)
-      console.log('🔄 Carregando TODAS as funcionalidades avançadas...')
+      setLoadingProgress({ metaApi: false, campanhas: false, redes: false, avancadas: false, roi: false })
       
-      // Buscar TODAS as APIs que implementamos + METAS
+      // ETAPA 1: Meta API e métricas básicas
+      const metricsPromise = fetch('/api/meta/metrics?platform=all&period=week')
+      const campaignsPromise = fetch('/api/meta/campaigns')
+      const debugPromise = fetch('/api/meta/debug-data')
+      
+      // Marca primeira etapa quando métricas básicas respondem
+      const metricsResponse = await metricsPromise
+      setLoadingProgress(prev => ({ ...prev, metaApi: true }))
+      
+      // ETAPA 2: Campanhas
+      const [campaignsResponse, campaignsAdvResponse] = await Promise.all([
+        campaignsPromise,
+        fetch('/api/meta/campaigns-advanced')
+      ])
+      setLoadingProgress(prev => ({ ...prev, campanhas: true }))
+      
+      // ETAPA 3: Análise de redes sociais
+      const contentResponse = await fetch('/api/meta/content-analysis')
+      const debugResponse = await debugPromise
+      setLoadingProgress(prev => ({ ...prev, redes: true }))
+      
+      // ETAPA 4: Funcionalidades avançadas
       const [
-        metricsResponse, 
-        campaignsResponse, 
-        campaignsAdvResponse,
-        contentResponse,
-        debugResponse,
         radarResponse,
         previsaoResponse,
         journeyResponse,
-        otimizacaoResponse,
-        funilResponse,
-        metasResponse
-      ] = await Promise.allSettled([
-        fetch('/api/meta/metrics?platform=all&period=week'),
-        fetch('/api/meta/campaigns'),
-        fetch('/api/meta/campaigns-advanced'),
-        fetch('/api/meta/content-analysis'),
-        fetch('/api/meta/debug-data'),
+        otimizacaoResponse
+      ] = await Promise.all([
         fetch('/api/meta/radar-oportunidades'),
         fetch('/api/meta/previsao-performance'),
         fetch('/api/meta/customer-journey'),
-        fetch('/api/meta/otimizacao-temporal'),
-        fetch('/api/meta/funil-conversao'),
-        fetch('/api/metas')
+        fetch('/api/meta/otimizacao-temporal')
       ])
+      setLoadingProgress(prev => ({ ...prev, avancadas: true }))
+      
+      // ETAPA 5: ROI e oportunidades finais
+      const [funilResponse, metasResponse] = await Promise.all([
+        fetch('/api/meta/funil-conversao'),
+        fetch('/api/metas?categoria=marketing')
+      ])
+      setLoadingProgress(prev => ({ ...prev, roi: true }))
 
       let facebookData = { followers: 0, growth_7d: 0, reach: 0, engagement: 0, posts_today: 0, best_post_reach: 0 }
       let instagramData = { followers: 0, growth_7d: 0, reach: 0, engagement: 0, posts_today: 0, best_post_reach: 0 }
@@ -84,9 +90,8 @@ export default function Marketing360Page() {
       let campaignsData = { active_campaigns: 0, campaign_reach: 0, campaign_clicks: 0, cost_per_click: 0, conversion_rate: 0, roi: 0 }
 
       // 1. PROCESSAR MÉTRICAS BÁSICAS
-      if (metricsResponse.status === 'fulfilled') {
-        const metricsData = await metricsResponse.value.json()
-        console.log('📊 Métricas básicas COMPLETAS:', JSON.stringify(metricsData, null, 2))
+      if (metricsResponse.ok) {
+        const metricsData = await metricsResponse.json()
         
         if (metricsData.success && metricsData.data) {
           const instagramMetric = metricsData.data.find((m: any) => m.platform === 'instagram')
@@ -94,7 +99,6 @@ export default function Marketing360Page() {
           const consolidated = metricsData.consolidated
           
           if (instagramMetric) {
-            console.log('📱 DADOS RAW INSTAGRAM:', JSON.stringify(instagramMetric, null, 2))
             instagramData = {
               followers: instagramMetric.follower_count || 0,
               growth_7d: instagramMetric.growth_7d || 0,
@@ -103,11 +107,9 @@ export default function Marketing360Page() {
               posts_today: instagramMetric.media_count || 0,
               best_post_reach: instagramMetric.reach || instagramMetric.impressions || 0
             }
-            console.log('📱 INSTAGRAM PROCESSADO:', JSON.stringify(instagramData, null, 2))
           }
           
           if (facebookMetric) {
-            console.log('📘 DADOS RAW FACEBOOK:', JSON.stringify(facebookMetric, null, 2))
             facebookData = {
               followers: facebookMetric.page_fans || 0,
               growth_7d: facebookMetric.growth_7d || 0,
@@ -116,12 +118,10 @@ export default function Marketing360Page() {
               posts_today: facebookMetric.post_count || 0,
               best_post_reach: facebookMetric.page_reach || 0
             }
-            console.log('📘 FACEBOOK PROCESSADO:', JSON.stringify(facebookData, null, 2))
           }
           
           // Usar dados consolidados se disponíveis
           if (consolidated) {
-            console.log('🔄 DADOS CONSOLIDADOS:', JSON.stringify(consolidated, null, 2))
             overallData = {
               total_followers: consolidated.total_followers || (facebookData.followers + instagramData.followers),
               weekly_growth: (facebookData.growth_7d + instagramData.growth_7d) / 2,
@@ -149,25 +149,12 @@ export default function Marketing360Page() {
               roi_estimate: 0
             }
           }
-          
-          console.log('🔢 CÁLCULOS FINAIS:', {
-            totalFollowers: overallData.total_followers,
-            totalEngagement: facebookData.engagement + instagramData.engagement,
-            engagementRate: overallData.engagement_rate,
-            totalReach: facebookData.reach + instagramData.reach,
-            reachRate: overallData.reach_rate,
-            // DETALHES PARA DEBUG
-            facebook: { followers: facebookData.followers, engagement: facebookData.engagement, reach: facebookData.reach },
-            instagram: { followers: instagramData.followers, engagement: instagramData.engagement, reach: instagramData.reach },
-            overallCalculated: overallData
-          })
         }
       }
 
       // 2. PROCESSAR CAMPANHAS BÁSICAS
-      if (campaignsResponse.status === 'fulfilled') {
-        const campaignsResult = await campaignsResponse.value.json()
-        console.log('🎯 Campanhas básicas:', campaignsResult)
+      if (campaignsResponse.ok) {
+        const campaignsResult = await campaignsResponse.json()
         
         if (campaignsResult.success && campaignsResult.campaigns) {
           campaignsData = campaignsResult.campaigns
@@ -177,29 +164,18 @@ export default function Marketing360Page() {
 
       // 3. PROCESSAR CAMPANHAS AVANÇADAS
       let campaignsAdvanced = null
-      if (campaignsAdvResponse.status === 'fulfilled') {
-        const campaignsAdvData = await campaignsAdvResponse.value.json()
-        console.log('🚀 Campanhas avançadas RESPONSE:', campaignsAdvData)
+      if (campaignsAdvResponse.ok) {
+        const campaignsAdvData = await campaignsAdvResponse.json()
         
         if (campaignsAdvData.success) {
           campaignsAdvanced = campaignsAdvData
-          console.log('📊 CAMPANHAS PROCESSADAS:', {
-            total: campaignsAdvanced.campaigns?.length || 0,
-            primeiraCampanha: campaignsAdvanced.campaigns?.[0],
-            metrics: campaignsAdvanced.campaigns?.[0]?.metrics
-          })
-        } else {
-          console.warn('⚠️ Campanhas avançadas falharam:', campaignsAdvData.error)
         }
-      } else {
-        console.warn('⚠️ Erro na requisição de campanhas avançadas:', campaignsAdvResponse)
       }
 
       // 4. PROCESSAR ANÁLISE DE CONTEÚDO
       let contentAnalysis = null
-      if (contentResponse.status === 'fulfilled') {
-        const contentData = await contentResponse.value.json()
-        console.log('📱 Análise de conteúdo:', contentData)
+      if (contentResponse.ok) {
+        const contentData = await contentResponse.json()
         
         if (contentData.success) {
           contentAnalysis = contentData
@@ -208,9 +184,8 @@ export default function Marketing360Page() {
 
       // 5. PROCESSAR DEBUG
       let debugData = null
-      if (debugResponse.status === 'fulfilled') {
-        const debugResult = await debugResponse.value.json()
-        console.log('🔍 Debug data:', debugResult)
+      if (debugResponse.ok) {
+        const debugResult = await debugResponse.json()
         
         if (debugResult.success) {
           debugData = debugResult
@@ -251,95 +226,89 @@ export default function Marketing360Page() {
         reach_source: reachSource
       } as any
 
-      console.log('📊 ALCANCE INTELIGENTE CALCULADO:', {
-        smartReach,
-        reachSource,
-        campanhasAtivas: campaignsAdvanced?.campaigns?.filter((c: any) => c.status === 'ACTIVE').length || 0,
-        alcanceOrganico: (facebookData.reach || 0) + (instagramData.reach || 0)
-      })
-
       // 6. PROCESSAR RADAR DE OPORTUNIDADES
       let radarOportunidades = null
-      if (radarResponse.status === 'fulfilled') {
+      if (radarResponse.ok) {
         try {
-          const radarData = await radarResponse.value.json()
-          console.log('🎯 Radar de Oportunidades:', radarData)
+          const radarData = await radarResponse.json()
           if (radarData.success) {
             radarOportunidades = radarData
           }
         } catch (error) {
-          console.warn('⚠️ Erro ao processar Radar de Oportunidades:', error)
+          // Error silently handled
         }
       }
 
       // 7. PROCESSAR PREVISÃO DE PERFORMANCE
       let previsaoPerformance = null
-      if (previsaoResponse.status === 'fulfilled') {
+      if (previsaoResponse.ok) {
         try {
-          const previsaoData = await previsaoResponse.value.json()
-          console.log('🔮 Previsão de Performance:', previsaoData)
+          const previsaoData = await previsaoResponse.json()
           if (previsaoData.success) {
             previsaoPerformance = previsaoData
           }
         } catch (error) {
-          console.warn('⚠️ Erro ao processar Previsão de Performance:', error)
+          // Error silently handled
         }
       }
 
       // 8. PROCESSAR CUSTOMER JOURNEY
       let customerJourney = null
-      if (journeyResponse.status === 'fulfilled') {
+      if (journeyResponse.ok) {
         try {
-          const journeyData = await journeyResponse.value.json()
-          console.log('🗺️ Customer Journey:', journeyData)
+          const journeyData = await journeyResponse.json()
           if (journeyData.success) {
             customerJourney = journeyData
           }
         } catch (error) {
-          console.warn('⚠️ Erro ao processar Customer Journey:', error)
+          // Error silently handled
         }
       }
 
       // 9. PROCESSAR OTIMIZAÇÃO TEMPORAL
       let otimizacaoTemporal = null
-      if (otimizacaoResponse.status === 'fulfilled') {
+      if (otimizacaoResponse.ok) {
         try {
-          const otimizacaoData = await otimizacaoResponse.value.json()
-          console.log('⏰ Otimização Temporal:', otimizacaoData)
+          const otimizacaoData = await otimizacaoResponse.json()
           if (otimizacaoData.success) {
             otimizacaoTemporal = otimizacaoData
           }
         } catch (error) {
-          console.warn('⚠️ Erro ao processar Otimização Temporal:', error)
+          // Error silently handled
         }
       }
 
       // 10. PROCESSAR FUNIL DE CONVERSÃO
       let funilConversao = null
-      if (funilResponse.status === 'fulfilled') {
+      if (funilResponse.ok) {
         try {
-          const funilData = await funilResponse.value.json()
-          console.log('📊 Funil de Conversão:', funilData)
+          const funilData = await funilResponse.json()
           if (funilData.success) {
             funilConversao = funilData
           }
         } catch (error) {
-          console.warn('⚠️ Erro ao processar Funil de Conversão:', error)
+          // Error silently handled
         }
       }
 
-      // PROCESSAR METAS DA API
-      let metasData = null
-      if (metasResponse.status === 'fulfilled') {
+      // 11. PROCESSAR METAS DE MARKETING
+      let metasMarketing = null
+      if (metasResponse.ok) {
         try {
-          const metasResult = await metasResponse.value.json()
-          console.log('🎯 Metas carregadas:', metasResult)
-          if (metasResult.success) {
-            metasData = metasResult.data
+          const metasData = await metasResponse.json()
+          if (metasData.success) {
+            metasMarketing = metasData.data.marketing
           }
         } catch (error) {
-          console.warn('⚠️ Erro ao processar Metas:', error)
+          // Error silently handled
         }
+      }
+
+      // Helper para buscar metas
+      const getMetaValue = (nome: string, tipo: 'semanal' | 'mensal' = 'mensal') => {
+        if (!metasMarketing) return null
+        const meta = metasMarketing.find((m: any) => m.nome_meta === nome)
+        return tipo === 'semanal' ? meta?.valor_semanal : meta?.valor_mensal
       }
 
       // CONSOLIDAR TODOS OS DADOS
@@ -354,7 +323,6 @@ export default function Marketing360Page() {
         customerJourney,
         otimizacaoTemporal,
         funilConversao,
-        metas: metasData,
         insights: {
           market_position: overallData.engagement_rate > 5 ? 'Acima da Média' : overallData.engagement_rate > 2 ? 'Na Média' : 'Abaixo da Média',
           engagement_vs_market: overallData.engagement_rate,
@@ -380,40 +348,17 @@ export default function Marketing360Page() {
           ]
         },
         goals: {
-          // Buscar valores das metas da API ou usar valores padrão
-          followers_target: metasData?.marketing?.find((m: any) => m.nome === 'Meta de Seguidores')?.valor_meta || 10000,
-          engagement_target: metasData?.marketing?.find((m: any) => m.nome === 'Taxa de Engajamento')?.valor_meta || 6.0,
-          reach_target: metasData?.marketing?.find((m: any) => m.nome === 'Alcance Mensal')?.valor_meta || 50000,
-          monthly_posts_target: metasData?.marketing?.find((m: any) => m.nome === 'Posts Mensais')?.valor_meta || 60,
-          roi_target: metasData?.marketing?.find((m: any) => m.nome === 'ROI Marketing')?.valor_meta || 400
-        }
-      })
-
-      console.log('✅ TODOS os dados carregados:', {
-        hasMetrics: !!facebookData.followers || !!instagramData.followers,
-        hasCampaigns: !!campaignsData.active_campaigns,
-        hasCampaignsAdv: !!campaignsAdvanced,
-        hasContent: !!contentAnalysis,
-        hasDebug: !!debugData,
-        totalFollowers: overallData.total_followers,
-        facebookFollowers: facebookData.followers,
-        instagramFollowers: instagramData.followers,
-        facebookReach: facebookData.reach,
-        instagramReach: instagramData.reach,
-        facebookEngagement: facebookData.engagement,
-        instagramEngagement: instagramData.engagement,
-        // DADOS FINAIS PARA INTERFACE
-        finalData: {
-          metrics: { facebook: facebookData, instagram: instagramData, overall: overallData },
-          campaigns: campaignsData
+          followers_target: getMetaValue('Seguidores Total', 'mensal') || 10000,
+          engagement_target: getMetaValue('Taxa de Engajamento', 'mensal') || 6.0,
+          reach_target: getMetaValue('Alcance Semanal', 'semanal') || 50000,
+          monthly_posts_target: getMetaValue('Posts Mensais', 'mensal') || 60,
+          roi_target: getMetaValue('ROI Estimado', 'mensal') || 400
         }
       })
 
       setIsLoading(false)
 
     } catch (error) {
-      console.error('Erro ao carregar dados de marketing:', error)
-      
       // Em caso de erro, usar valores zerados
       setData((prev: any) => ({
         ...prev,
@@ -475,7 +420,6 @@ export default function Marketing360Page() {
      const handleCollectMetrics = async () => {
      try {
        setIsLoading(true)
-       console.log('🔄 Iniciando coleta forçada de dados...')
        
        // Usar a API correta para coleta forçada
        const collectResponse = await fetch('/api/meta/collect-real-data', {
@@ -487,20 +431,15 @@ export default function Marketing360Page() {
 
        if (collectResponse.ok) {
          const collectResult = await collectResponse.json()
-         console.log('✅ Coleta de dados reais executada:', collectResult)
-       } else {
-         console.warn('⚠️ Erro na coleta:', await collectResponse.text())
        }
        
        // Aguardar processamento dos dados
-       console.log('⏳ Aguardando processamento dos dados...')
        await new Promise(resolve => setTimeout(resolve, 5000))
        
        // Recarregar todos os dados
-       console.log('🔄 Recarregando dados da interface...')
        await loadAllData()
      } catch (error) {
-       console.error('❌ Erro ao coletar métricas:', error)
+       // Error silently handled
      } finally {
        setIsLoading(false)
      }
@@ -686,35 +625,129 @@ export default function Marketing360Page() {
               {/* Status Steps */}
               <div className="space-y-3 text-left">
                 <div className="flex items-center space-x-3 text-sm">
-                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs">✓</span>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    loadingProgress.metaApi 
+                      ? 'bg-green-500' 
+                      : 'border-2 border-blue-500 animate-pulse'
+                  }`}>
+                    {loadingProgress.metaApi ? (
+                      <span className="text-white text-xs">✓</span>
+                    ) : (
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
+                    )}
                   </div>
-                  <span className="text-gray-700 font-medium">Conectando com Meta API</span>
+                  <span className={`font-medium transition-colors duration-300 ${
+                    loadingProgress.metaApi ? 'text-green-700' : 'text-gray-700'
+                  }`}>
+                    Conectando com Meta API
+                  </span>
                 </div>
+                
                 <div className="flex items-center space-x-3 text-sm">
-                  <div className="w-6 h-6 border-2 border-blue-500 rounded-full animate-pulse"></div>
-                  <span className="text-gray-700 font-medium">Coletando métricas das campanhas</span>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    loadingProgress.campanhas 
+                      ? 'bg-green-500' 
+                      : loadingProgress.metaApi 
+                        ? 'border-2 border-blue-500 animate-pulse' 
+                        : 'border-2 border-gray-300'
+                  }`}>
+                    {loadingProgress.campanhas ? (
+                      <span className="text-white text-xs">✓</span>
+                    ) : loadingProgress.metaApi ? (
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
+                    ) : null}
+                  </div>
+                  <span className={`font-medium transition-colors duration-300 ${
+                    loadingProgress.campanhas ? 'text-green-700' : 'text-gray-700'
+                  }`}>
+                    Coletando métricas das campanhas
+                  </span>
                 </div>
+                
                 <div className="flex items-center space-x-3 text-sm">
-                  <div className="w-6 h-6 border-2 border-purple-500 rounded-full animate-pulse"></div>
-                  <span className="text-gray-700 font-medium">Analisando performance das redes sociais</span>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    loadingProgress.redes 
+                      ? 'bg-green-500' 
+                      : loadingProgress.campanhas 
+                        ? 'border-2 border-purple-500 animate-pulse' 
+                        : 'border-2 border-gray-300'
+                  }`}>
+                    {loadingProgress.redes ? (
+                      <span className="text-white text-xs">✓</span>
+                    ) : loadingProgress.campanhas ? (
+                      <div className="w-2 h-2 bg-purple-500 rounded-full animate-ping"></div>
+                    ) : null}
+                  </div>
+                  <span className={`font-medium transition-colors duration-300 ${
+                    loadingProgress.redes ? 'text-green-700' : 'text-gray-700'
+                  }`}>
+                    Analisando performance das redes sociais
+                  </span>
                 </div>
+                
                 <div className="flex items-center space-x-3 text-sm">
-                  <div className="w-6 h-6 border-2 border-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-gray-700 font-medium">Processando funcionalidades avançadas</span>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    loadingProgress.avancadas 
+                      ? 'bg-green-500' 
+                      : loadingProgress.redes 
+                        ? 'border-2 border-green-500 animate-pulse' 
+                        : 'border-2 border-gray-300'
+                  }`}>
+                    {loadingProgress.avancadas ? (
+                      <span className="text-white text-xs">✓</span>
+                    ) : loadingProgress.redes ? (
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
+                    ) : null}
+                  </div>
+                  <span className={`font-medium transition-colors duration-300 ${
+                    loadingProgress.avancadas ? 'text-green-700' : 'text-gray-700'
+                  }`}>
+                    Processando funcionalidades avançadas
+                  </span>
                 </div>
+                
                 <div className="flex items-center space-x-3 text-sm">
-                  <div className="w-6 h-6 border-2 border-yellow-500 rounded-full animate-pulse"></div>
-                  <span className="text-gray-700 font-medium">Calculando ROI e oportunidades</span>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    loadingProgress.roi 
+                      ? 'bg-green-500' 
+                      : loadingProgress.avancadas 
+                        ? 'border-2 border-yellow-500 animate-pulse' 
+                        : 'border-2 border-gray-300'
+                  }`}>
+                    {loadingProgress.roi ? (
+                      <span className="text-white text-xs">✓</span>
+                    ) : loadingProgress.avancadas ? (
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full animate-ping"></div>
+                    ) : null}
+                  </div>
+                  <span className={`font-medium transition-colors duration-300 ${
+                    loadingProgress.roi ? 'text-green-700' : 'text-gray-700'
+                  }`}>
+                    Calculando ROI e oportunidades
+                  </span>
                 </div>
               </div>
 
               {/* Barra de Progresso Animada */}
               <div className="w-full max-w-sm mx-auto">
                 <div className="bg-gray-200 rounded-full h-3 overflow-hidden">
-                  <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-full rounded-full animate-pulse w-full"></div>
+                  <div 
+                    className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-full rounded-full transition-all duration-500 ease-out"
+                    style={{ 
+                      width: `${((loadingProgress.metaApi ? 1 : 0) + 
+                               (loadingProgress.campanhas ? 1 : 0) + 
+                               (loadingProgress.redes ? 1 : 0) + 
+                               (loadingProgress.avancadas ? 1 : 0) + 
+                               (loadingProgress.roi ? 1 : 0)) * 20}%` 
+                    }}
+                  ></div>
                 </div>
-                <p className="text-xs text-gray-500 mt-2 text-center">Preparando insights em tempo real...</p>
+                <p className="text-xs text-gray-500 mt-2 text-center">
+                  {Object.values(loadingProgress).filter(Boolean).length === 5 
+                    ? 'Finalizando preparação...' 
+                    : 'Preparando insights em tempo real...'
+                  }
+                </p>
               </div>
 
               {/* Cards de Preview das Funcionalidades */}

@@ -8,14 +8,20 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const barId = searchParams.get('barId') || request.headers.get('x-bar-id')
+    console.log('🎯 Radar de Oportunidades - Analisando mercado...')
+
+    // Obter dados do usuário para pegar o bar_id
+    const userData = request.headers.get('x-user-data')
+    let barId = 3 // fallback para desenvolvimento
     
-    if (!barId) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Bar ID é obrigatório' 
-      }, { status: 400 })
+    if (userData) {
+      try {
+        const parsedUser = JSON.parse(decodeURIComponent(userData))
+        barId = parsedUser.bar_id || 3
+        console.log(`👤 Radar de Oportunidades - Usando bar_id: ${barId}`)
+      } catch (e) {
+        console.warn('⚠️ Erro ao parsear dados do usuário, usando bar_id padrão')
+      }
     }
 
     console.log('🎯 Radar de Oportunidades - Analisando mercado para bar:', barId)

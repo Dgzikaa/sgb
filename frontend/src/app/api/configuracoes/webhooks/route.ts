@@ -25,55 +25,45 @@ export async function GET(request: NextRequest) {
     const barIdInt = parseInt(barId, 10)
     console.log('🔍 Bar ID convertido para int:', barIdInt)
 
-    // Buscar configurações usando service role (bypass RLS)
-    console.log('🔍 Buscando configuração com service role...')
-    const { data: configs, error } = await supabaseAdmin
-      .from('api_credentials')
-      .select('id, bar_id, sistema, configuracoes')
-      .eq('bar_id', barIdInt)
-      .eq('sistema', 'webhook')
-      .maybeSingle()
-
-    console.log('📊 Resultado da query:', { configs, error })
-
-    if (error) {
-      console.error('❌ Erro ao buscar configurações:', error)
-      return NextResponse.json(
-        { success: false, error: 'Erro ao buscar configurações' },
-        { status: 500 }
-      )
+    // Buscar cada webhook no seu sistema específico
+    console.log('🔍 Buscando webhooks nos sistemas específicos...')
+    
+    const webhookMapping = {
+      sistema: 'sistema',
+      contaazul: 'contaazul',
+      meta: 'meta',
+      checklists: 'checklists',
+      contahub: 'contahub',
+      sympla: 'sympla',
+      yuzer: 'yuzer',
+      reservas: 'getin'
     }
 
-    // Se não encontrou nada, retornar configurações vazias
-    if (!configs) {
-      console.log('⚠️ Nenhuma configuração encontrada, retornando padrões vazios')
-      return NextResponse.json({
-        success: true,
-        configuracoes: {
-          sistema: '',
-          contaazul: '',
-          meta: '',
-          checklists: '',
-          contahub: '',
-          vendas: '',
-          reservas: ''
-        }
-      })
+    const finalConfiguracoes: { [key: string]: string } = {}
+    
+    for (const [webhookKey, sistema] of Object.entries(webhookMapping)) {
+      const { data: webhookData, error: webhookError } = await supabaseAdmin
+        .from('api_credentials')
+        .select('configuracoes')
+        .eq('bar_id', barIdInt)
+        .eq('sistema', sistema)
+        .eq('ambiente', 'producao')
+        .maybeSingle()
+
+      if (!webhookError && webhookData && webhookData.configuracoes?.webhook_url) {
+        finalConfiguracoes[webhookKey] = webhookData.configuracoes.webhook_url
+        console.log(`✅ Webhook ${webhookKey} encontrado no sistema ${sistema}`)
+      } else {
+        finalConfiguracoes[webhookKey] = ''
+        console.log(`⚠️ Webhook ${webhookKey} não encontrado no sistema ${sistema}`)
+      }
     }
 
-    console.log('✅ Configurações encontradas:', configs.configuracoes)
+    console.log('✅ Configurações finais:', finalConfiguracoes)
     
     return NextResponse.json({
       success: true,
-      configuracoes: configs.configuracoes || {
-        sistema: '',
-        contaazul: '',
-        meta: '',
-        checklists: '',
-        contahub: '',
-        vendas: '',
-        reservas: ''
-      }
+      configuracoes: finalConfiguracoes
     })
 
   } catch (error) {
@@ -89,37 +79,78 @@ export async function POST(request: NextRequest) {
   try {
     const { bar_id, configuracoes } = await request.json()
     
+    console.log('💾 POST /api/configuracoes/webhooks - Dados recebidos:', { bar_id, configuracoes })
+    
     if (!bar_id || !configuracoes) {
+      console.log('❌ Dados insuficientes:', { bar_id, configuracoes })
       return NextResponse.json(
         { success: false, error: 'Bar ID e configurações são obrigatórios' },
         { status: 400 }
       )
     }
 
-    // Salvar configurações no banco usando service role
-    const { data, error } = await supabaseAdmin
-      .from('api_credentials')
-      .upsert({
-        bar_id,
-        sistema: 'webhook',
-        configuracoes,
-        ativo: true
-      }, {
-        onConflict: 'bar_id,sistema'
-      })
-
-    if (error) {
-      console.error('❌ Erro ao salvar configurações:', error)
-      return NextResponse.json(
-        { success: false, error: 'Erro ao salvar configurações' },
-        { status: 500 }
-      )
+    // Salvar cada webhook no seu sistema específico
+    console.log('💾 Tentando salvar configurações...')
+    
+    // Mapear webhooks para seus respectivos sistemas
+    const webhookMapping = {
+      sistema: 'sistema',
+      contaazul: 'contaazul',
+      meta: 'meta',
+      checklists: 'checklists',
+      contahub: 'contahub',
+      sympla: 'sympla',
+      yuzer: 'yuzer',
+      reservas: 'getin'
     }
 
-    console.log('✅ Configurações de webhook salvas com sucesso:', { bar_id, configuracoes })
+    const results = []
+    
+    // Salvar cada webhook no seu sistema específico
+    for (const [webhookKey, sistema] of Object.entries(webhookMapping)) {
+      const webhookUrl = configuracoes[webhookKey]
+      
+      if (webhookUrl && webhookUrl.trim()) {
+        console.log(`💾 Salvando webhook ${webhookKey} no sistema ${sistema}`)
+        
+        const { data: specificData, error: specificError } = await supabaseAdmin
+          .from('api_credentials')
+          .upsert({
+            bar_id,
+            sistema,
+            ambiente: 'producao',
+            configuracoes: {
+              webhook_url: webhookUrl,
+              tipo: 'discord_webhook',
+              origem: 'configuracoes_integracoes'
+            },
+            ativo: true,
+            atualizado_em: new Date().toISOString()
+          }, {
+            onConflict: 'bar_id,sistema,ambiente'
+          })
+
+        if (specificError) {
+          console.error(`❌ Erro ao salvar webhook ${webhookKey}:`, specificError)
+          return NextResponse.json(
+            { success: false, error: `Erro ao salvar webhook ${webhookKey}`, details: specificError },
+            { status: 500 }
+          )
+        }
+
+        results.push({ webhook: webhookKey, sistema, saved: true })
+      } else {
+        console.log(`⚠️ Webhook ${webhookKey} está vazio, pulando...`)
+      }
+    }
+
+    console.log('✅ Configurações salvas com sucesso!')
+    console.log('✅ Resultados:', results)
+    
     return NextResponse.json({
       success: true,
-      message: 'Configurações salvas com sucesso'
+      message: 'Configurações salvas com sucesso',
+      results
     })
 
   } catch (error) {

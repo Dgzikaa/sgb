@@ -86,14 +86,6 @@ export function syncAuthData(userData: any) {
     }
     
     setAuthCookie(cookieData)
-    
-    console.log('✅ Dados de autenticação sincronizados:', {
-      id: cookieData.id,
-      nome: cookieData.nome,
-      role: cookieData.role,
-      modules: cookieData.modulos_permitidos.length,
-      ativo: cookieData.ativo
-    })
   } catch (error) {
     console.error('❌ Erro ao sincronizar dados de autenticação:', error)
   }

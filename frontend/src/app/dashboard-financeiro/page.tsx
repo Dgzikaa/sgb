@@ -150,7 +150,6 @@ export default function DashboardFinanceiroPage() {
       })
       
     } catch (error) {
-      console.error('Erro ao carregar dados:', error)
       toast({
         title: "Erro ao carregar dados",
         description: error instanceof Error ? error.message : "Erro desconhecido",
@@ -194,7 +193,6 @@ export default function DashboardFinanceiroPage() {
       })
       
     } catch (error) {
-      console.error('Erro ao carregar DRE:', error)
       toast({
         title: "Erro ao carregar DRE",
         description: error instanceof Error ? error.message : "Erro desconhecido",

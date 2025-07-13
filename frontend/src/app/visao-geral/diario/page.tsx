@@ -34,6 +34,9 @@ interface MetricasDiarias {
   ticket_meta: number
   horario_pico: string
   ultima_venda: string
+  mesa_mais_ativa?: string
+  forma_pagamento_principal?: string
+  previsao_dia?: number
   vendas_por_hora: { hora: string; valor: number; clientes: number }[]
   reservas_hoje: {
     total: number

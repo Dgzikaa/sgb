@@ -21,14 +21,15 @@ serve(async (req) => {
     console.log('🧪 Iniciando teste do webhook Discord de segurança...')
 
     // Buscar webhook da configuração
-          const { data: webhookConfig, error: configError } = await supabaseClient
-        .from('api_credentials')
-        .select('configuracoes')
-        .eq('bar_id', 3)
-        .eq('sistema', 'webhook')
-        .single()
+    const { data: webhookConfig, error: configError } = await supabaseClient
+      .from('api_credentials')
+      .select('configuracoes')
+      .eq('bar_id', 3)
+      .eq('sistema', 'sistema')
+      .eq('ambiente', 'producao')
+      .single()
 
-    if (configError || !webhookConfig?.configuracoes?.sistema) {
+    if (configError || !webhookConfig?.configuracoes?.webhook_url) {
       console.error('❌ Webhook não configurado:', configError)
       return new Response(
         JSON.stringify({ 
@@ -43,7 +44,7 @@ serve(async (req) => {
       )
     }
 
-    const webhookUrl = webhookConfig.configuracoes.sistema
+    const webhookUrl = webhookConfig.configuracoes.webhook_url
     console.log('🔗 Webhook encontrado:', webhookUrl.substring(0, 50) + '...')
 
     // Registrar evento de teste no banco

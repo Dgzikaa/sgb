@@ -52,11 +52,12 @@ class SecurityMonitor {
           .from('api_credentials')
           .select('configuracoes')
           .eq('bar_id', 3)
-          .eq('sistema', 'webhook')
+          .eq('sistema', 'sistema')
+          .eq('ambiente', 'producao')
           .single();
 
-        if (!error && data?.configuracoes?.sistema) {
-          this.webhookUrl = data.configuracoes.sistema;
+        if (!error && data?.configuracoes?.webhook_url) {
+          this.webhookUrl = data.configuracoes.webhook_url;
           console.log('🔗 Security webhook loaded from database');
         } else {
           console.warn('⚠️ Security webhook not configured in database');

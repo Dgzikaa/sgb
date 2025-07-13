@@ -29,26 +29,40 @@ async function getWebhookUrl(barId: string, webhookType: string = 'sistema') {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
   )
 
+  // Mapear webhook type para sistema
+  const webhookMapping = {
+    sistema: 'sistema',
+    contaazul: 'contaazul',
+    meta: 'meta',
+    checklists: 'checklists',
+    contahub: 'contahub',
+    sympla: 'sympla',
+    yuzer: 'yuzer',
+    reservas: 'getin'
+  }
+
+  const sistema = webhookMapping[webhookType as keyof typeof webhookMapping] || 'sistema'
+
   const { data: webhookConfig, error } = await supabaseClient
     .from('api_credentials')
     .select('configuracoes')
     .eq('bar_id', barId)
-    .eq('sistema', 'webhook')
+    .eq('sistema', sistema)
+    .eq('ambiente', 'producao')
     .single()
 
   if (error || !webhookConfig) {
-    console.warn(`⚠️ Webhook config não encontrada para bar ${barId}, usando fallback`)
+    console.warn(`⚠️ Webhook config não encontrada para bar ${barId} sistema ${sistema}, usando fallback`)
     // Fallback para webhook padrão se não encontrar configuração
     return 'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ'
   }
 
-  const webhook = webhookConfig.configuracoes[webhookType]
+  const webhook = webhookConfig.configuracoes?.webhook_url
   
   if (!webhook || webhook.trim() === '') {
     console.warn(`⚠️ Webhook ${webhookType} não configurado para bar ${barId}, usando fallback`)
-    // Fallback se o tipo específico não estiver configurado
-    return webhookConfig.configuracoes['sistema'] || 
-           'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ'
+    // Fallback para webhook padrão
+    return 'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ'
   }
 
   console.log(`✅ Webhook ${webhookType} encontrado para bar ${barId}`)

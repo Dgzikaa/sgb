@@ -87,8 +87,6 @@ export function BarProvider({ children }: { children: ReactNode }) {
         }
         
         if (userEmail) {
-          console.log('🔍 Buscando bares para usuário:', userEmail)
-          
           // Buscar IDs dos bares do usuário
           const { data: userBars, error: userError } = await supabase
             .from('usuarios_bar')
@@ -97,13 +95,10 @@ export function BarProvider({ children }: { children: ReactNode }) {
             .eq('ativo', true)
 
           if (!mounted) return
-
-          console.log('🔍 Entradas encontradas na usuarios_bar:', userBars?.length || 0)
           
           if (!userError && userBars?.length) {
             // Extrair IDs únicos
             const barIds = [...new Set(userBars.map((ub: any) => ub.bar_id))]
-            console.log('🔍 Bar IDs únicos encontrados:', barIds)
             
             // Buscar dados completos dos bares
             const { data: barsData, error: barsError } = await supabase
@@ -118,7 +113,6 @@ export function BarProvider({ children }: { children: ReactNode }) {
             }
             
             const finalBarsData = barsData || []
-            console.log('🔍 Dados dos bares encontrados:', finalBarsData.map((b: any) => `${b.id}: ${b.nome}`))
             
             if (finalBarsData.length > 0) {
               setAvailableBars(finalBarsData)
@@ -131,10 +125,8 @@ export function BarProvider({ children }: { children: ReactNode }) {
               
               if (ordinarioBar) {
                 setSelectedBar(ordinarioBar)
-                console.log('✅ Bar selecionado (prioritário):', ordinarioBar.nome)
               } else {
                 setSelectedBar(finalBarsData[0])
-                console.log('✅ Bar selecionado (primeiro):', finalBarsData[0].nome)
               }
               
               setIsLoading(false)

@@ -367,10 +367,7 @@ export default function ChecklistsFuncionario() {
     }
   }, [aba])
 
-  // Debug: Log quando modal de assinatura abre/fecha
-  useEffect(() => {
-    console.log('🏠 Estado do modal de assinatura mudou', { assinaturaPadAberto, itemAssinaturaAtual })
-  }, [assinaturaPadAberto, itemAssinaturaAtual])
+
 
   const carregarChecklists = async () => {
     setLoading(true)

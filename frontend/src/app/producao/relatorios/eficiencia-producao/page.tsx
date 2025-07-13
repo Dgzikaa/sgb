@@ -93,7 +93,7 @@ export default function RelatorioEficienciaProducao() {
         calcularEstatisticas(producoesFiltradas)
       }
     } catch (error) {
-      console.error('❌ Erro ao carregar dados:', error)
+      // Error silently handled
     } finally {
       setLoading(false)
     }

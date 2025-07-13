@@ -102,7 +102,7 @@ export default function ContaAzulCompetenciaPage() {
           setCategorias(data.categorias || [])
         }
       } catch (error) {
-        console.error('Erro ao buscar categorias:', error)
+        // Error silently handled
       }
     }
     buscarCategorias()
@@ -112,8 +112,6 @@ export default function ContaAzulCompetenciaPage() {
   const buscarEventos = async (page = 1, newSortField?: SortField, newSortDirection?: SortDirection) => {
     setLoading(true)
     try {
-      console.log('🔄 Carregando eventos financeiros...')
-      
       const params = new URLSearchParams({
         bar_id: '3',
         page: page.toString(),
@@ -149,7 +147,6 @@ export default function ContaAzulCompetenciaPage() {
       }
 
       const data = await response.json()
-      console.log('✅ Eventos carregados:', data.lancamentos?.length || 0)
       
       setEventos(data.lancamentos || [])
       setResumo(data.resumo || {
@@ -163,7 +160,7 @@ export default function ContaAzulCompetenciaPage() {
       setCurrentPage(page)
       
     } catch (error) {
-      console.error('❌ Erro ao carregar eventos:', error)
+      // Error silently handled
     } finally {
       setLoading(false)
     }
@@ -200,8 +197,6 @@ export default function ContaAzulCompetenciaPage() {
   // Ordenação - agora usa a API
   const handleSort = (field: SortField) => {
     const newDirection = sortField === field && sortDirection === 'asc' ? 'desc' : 'asc'
-    
-    console.log(`🔄 Ordenando por ${field} (${newDirection})`)
     
     setSortField(field)
     setSortDirection(newDirection)

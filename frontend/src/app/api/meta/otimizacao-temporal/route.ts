@@ -8,32 +8,40 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const barId = searchParams.get('barId') || request.headers.get('x-bar-id')
-    const plataforma = searchParams.get('plataforma') || 'all' // 'instagram', 'facebook', 'all'
+    console.log('⏰ Otimização Temporal - Analisando padrões temporais...')
+
+    // Obter dados do usuário para pegar o bar_id
+    const userData = request.headers.get('x-user-data')
+    let barId = 3 // fallback para desenvolvimento
     
-    if (!barId) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Bar ID é obrigatório' 
-      }, { status: 400 })
+    if (userData) {
+      try {
+        const parsedUser = JSON.parse(decodeURIComponent(userData))
+        barId = parsedUser.bar_id || 3
+        console.log(`👤 Otimização Temporal - Usando bar_id: ${barId}`)
+      } catch (e) {
+        console.warn('⚠️ Erro ao parsear dados do usuário, usando bar_id padrão')
+      }
     }
 
-    console.log('⏰ Otimização Temporal - Analisando padrões para bar:', barId)
+    const { searchParams } = new URL(request.url)
+    const plataforma = searchParams.get('plataforma') || 'all' // 'instagram', 'facebook', 'all'
+    
+    console.log('⏰ Otimização Temporal - Analisando para bar:', barId, 'plataforma:', plataforma)
 
-    // 1. COLETAR DADOS HISTÓRICOS
+    // 1. COLETAR DADOS HISTÓRICOS - CORRIGIR NOMES DAS TABELAS
     const { data: instagramData } = await supabase
-      .from('meta_instagram_insights')
+      .from('instagram_metrics')
       .select('*')
       .eq('bar_id', barId)
-      .order('updated_at', { ascending: false })
+      .order('data_referencia', { ascending: false })
       .limit(200)
 
     const { data: facebookData } = await supabase
-      .from('meta_facebook_insights')
+      .from('facebook_metrics')
       .select('*')
       .eq('bar_id', barId)
-      .order('updated_at', { ascending: false })
+      .order('data_referencia', { ascending: false })
       .limit(200)
 
     // 2. ANALISAR PADRÕES TEMPORAIS
@@ -59,11 +67,16 @@ export async function GET(request: NextRequest) {
       }
       
       dados.forEach(post => {
-        const data = new Date(post.updated_at)
+        const data = new Date(post.data_referencia)
         const hora = data.getHours()
         const dia = data.getDay()
-        const engajamento = post.engagement || 0
-        const alcance = post.reach || post.impressions || 0
+        
+        // Calcular engajamento baseado na plataforma
+        const engajamento = nomePlataforma === 'instagram' ? 
+          (post.posts_likes || 0) + (post.posts_comments || 0) :
+          (post.post_likes || 0) + (post.post_comments || 0)
+        
+        const alcance = post.reach || post.impressions || post.page_reach || 0
         
         // Por hora
         engajamentoPorHora[hora] += engajamento
@@ -155,7 +168,7 @@ export async function GET(request: NextRequest) {
           prioridade: 'alta',
           titulo: `Melhor horário: ${padroes.melhor_hora.hora}h`,
           descricao: `Posts às ${padroes.melhor_hora.hora}h têm ${padroes.melhor_hora.engajamento_medio.toFixed(0)} engajamentos em média`,
-                     impacto: `+${((padroes.melhor_hora.score_combinado / (padroes.por_hora.reduce((sum: number, h: any) => sum + h.score_combinado, 0) / padroes.por_hora.length) - 1) * 100).toFixed(0)}% performance`,
+          impacto: `+${((padroes.melhor_hora.score_combinado / (padroes.por_hora.reduce((sum: number, h: any) => sum + h.score_combinado, 0) / padroes.por_hora.length) - 1) * 100).toFixed(0)}% performance`,
           acao: `Programe posts para ${padroes.melhor_hora.hora}h`
         })
       }
@@ -166,7 +179,7 @@ export async function GET(request: NextRequest) {
           prioridade: 'alta',
           titulo: `Melhor dia: ${padroes.melhor_dia.nome}`,
           descricao: `Posts em ${padroes.melhor_dia.nome} têm ${padroes.melhor_dia.engajamento_medio.toFixed(0)} engajamentos em média`,
-                     impacto: `+${((padroes.melhor_dia.score_combinado / (padroes.por_dia.reduce((sum: number, d: any) => sum + d.score_combinado, 0) / padroes.por_dia.length) - 1) * 100).toFixed(0)}% performance`,
+          impacto: `+${((padroes.melhor_dia.score_combinado / (padroes.por_dia.reduce((sum: number, d: any) => sum + d.score_combinado, 0) / padroes.por_dia.length) - 1) * 100).toFixed(0)}% performance`,
           acao: `Priorize postagens em ${padroes.melhor_dia.nome}`
         })
       }
@@ -191,7 +204,7 @@ export async function GET(request: NextRequest) {
       const dadosPorMes = new Map()
       
       dados.forEach(post => {
-        const data = new Date(post.updated_at)
+        const data = new Date(post.data_referencia)
         const mes = data.getMonth()
         const chave = `${mes}`
         
@@ -205,8 +218,11 @@ export async function GET(request: NextRequest) {
         }
         
         const dadosMes = dadosPorMes.get(chave)
-        dadosMes.engajamento += post.engagement || 0
-        dadosMes.alcance += post.reach || post.impressions || 0
+        // Calcular engajamento baseado nos campos corretos
+        const engajamento = (post.posts_likes || post.post_likes || 0) + 
+                           (post.posts_comments || post.post_comments || 0)
+        dadosMes.engajamento += engajamento
+        dadosMes.alcance += post.reach || post.impressions || post.page_reach || 0
         dadosMes.posts += 1
       })
       

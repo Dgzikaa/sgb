@@ -8,18 +8,26 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const barId = searchParams.get('barId') || request.headers.get('x-bar-id')
-    const periodo = searchParams.get('periodo') || '30' // dias
+    console.log('📊 Funil de Conversão - Analisando performance de conversão...')
+
+    // Obter dados do usuário para pegar o bar_id
+    const userData = request.headers.get('x-user-data')
+    let barId = 3 // fallback para desenvolvimento
     
-    if (!barId) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Bar ID é obrigatório' 
-      }, { status: 400 })
+    if (userData) {
+      try {
+        const parsedUser = JSON.parse(decodeURIComponent(userData))
+        barId = parsedUser.bar_id || 3
+        console.log(`👤 Funil de Conversão - Usando bar_id: ${barId}`)
+      } catch (e) {
+        console.warn('⚠️ Erro ao parsear dados do usuário, usando bar_id padrão')
+      }
     }
 
-    console.log('📊 Funil de Conversão - Analisando ROI para bar:', barId)
+    const { searchParams } = new URL(request.url)
+    const periodo = searchParams.get('periodo') || '30' // dias
+    
+    console.log('📊 Funil de Conversão - Analisando para bar:', barId, 'período:', periodo, 'dias')
 
     // 1. DEFINIR ETAPAS DO FUNIL
     const etapasFunil = [

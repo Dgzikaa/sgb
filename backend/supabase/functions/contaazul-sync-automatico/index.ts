@@ -9,12 +9,13 @@ const corsHeaders = {
 
 // Função para buscar webhook da tabela
 async function getWebhookUrl(barId: string, webhookType: string = 'contaazul', supabaseClient: any) {
-      const { data: webhookConfig, error } = await supabaseClient
-      .from('api_credentials')
-      .select('configuracoes')
-      .eq('bar_id', barId)
-      .eq('sistema', 'webhook')
-      .single()
+  const { data: webhookConfig, error } = await supabaseClient
+    .from('api_credentials')
+    .select('configuracoes')
+    .eq('bar_id', barId)
+    .eq('sistema', 'contaazul')
+    .eq('ambiente', 'producao')
+    .single()
 
   if (error || !webhookConfig) {
     console.warn(`⚠️ Webhook config não encontrada para bar ${barId}, usando fallback`)
@@ -22,13 +23,12 @@ async function getWebhookUrl(barId: string, webhookType: string = 'contaazul', s
     return 'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ'
   }
 
-  const webhook = webhookConfig.configuracoes[webhookType]
+  const webhook = webhookConfig.configuracoes?.webhook_url
   
   if (!webhook || webhook.trim() === '') {
-    console.warn(`⚠️ Webhook ${webhookType} não configurado para bar ${barId}, usando sistema como fallback`)
-    // Fallback para webhook sistema se o ContaAzul não estiver configurado
-    return webhookConfig.configuracoes['sistema'] || 
-           'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ'
+    console.warn(`⚠️ Webhook ${webhookType} não configurado para bar ${barId}, usando fallback`)
+    // Fallback para webhook padrão
+    return 'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ'
   }
 
   console.log(`✅ Webhook ${webhookType} encontrado para bar ${barId}`)

@@ -37,17 +37,8 @@ export function ProtectedRoute({
 
   useEffect(() => {
     if (!loading && user) {
-      console.log('🔒 VERIFICANDO PROTEÇÃO DE ROTA:', {
-        user: user.nome,
-        role: user.role,
-        requiredModule,
-        requiredRole,
-        requiredModules
-      })
-
       // Verificar role específico
       if (requiredRole && !isRole(requiredRole)) {
-        console.log(`🚫 BLOQUEADO: Role ${user.role} não é ${requiredRole}`)
         setAccessDenied(true)
         setDenialReason({
           type: 'role',
@@ -63,7 +54,6 @@ export function ProtectedRoute({
 
       // Verificar módulo específico
       if (requiredModule && !hasPermission(requiredModule)) {
-        console.log(`🚫 BLOQUEADO: Usuário sem módulo ${requiredModule}`)
         setAccessDenied(true)
         setDenialReason({
           type: 'module',
@@ -78,7 +68,6 @@ export function ProtectedRoute({
 
       // Verificar múltiplos módulos
       if (requiredModules.length > 0 && !hasAnyPermission(requiredModules)) {
-        console.log(`🚫 BLOQUEADO: Usuário sem nenhum dos módulos: ${requiredModules.join(', ')}`)
         setAccessDenied(true)
         setDenialReason({
           type: 'modules',
@@ -91,7 +80,6 @@ export function ProtectedRoute({
         return
       }
 
-      console.log('✅ ACESSO LIBERADO: Usuário com permissões adequadas')
       setAccessDenied(false)
       setDenialReason(null)
     }

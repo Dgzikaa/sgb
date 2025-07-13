@@ -28,6 +28,15 @@ interface Insumo {
   is_chefe?: boolean
 }
 
+interface NovoInsumo {
+  codigo: string
+  nome: string
+  categoria: string
+  observacoes?: string
+  custo_unitario?: number
+  unidade_medida: string
+}
+
 interface ReceitaInsumo {
   insumo_id: number
   quantidade_necessaria: number
@@ -71,7 +80,7 @@ export default function ReceitasPage() {
   
   // Estados para Insumos
   const [insumos, setInsumos] = useState<Insumo[]>([])
-  const [novoInsumo, setNovoInsumo] = useState<Insumo>({
+  const [novoInsumo, setNovoInsumo] = useState<NovoInsumo>({
     codigo: '',
     nome: '',
     unidade_medida: 'g',
@@ -183,12 +192,9 @@ export default function ReceitasPage() {
       if (response.ok) {
         const data = await response.json()
         setReceitas(data.receitas || [])
-        console.log('✅ Receitas carregadas (todas):', data.receitas?.length || 0)
-      } else {
-        console.error('❌ Erro na API:', response.status, response.statusText)
       }
     } catch (error) {
-      console.error('❌ Erro ao carregar receitas:', error)
+      // Error silently handled
     }
   }, [selectedBar?.id])
 
@@ -501,7 +507,7 @@ export default function ReceitasPage() {
     const novoIndex = novaReceita.insumos.length
     setNovaReceita(prev => ({
       ...prev,
-      insumos: [...prev.insumos, {
+              insumos: [...(prev.insumos || []), {
         insumo_id: 0,
         quantidade_necessaria: 0,
         is_chefe: false
@@ -515,7 +521,7 @@ export default function ReceitasPage() {
   const removerInsumoReceita = (index: number) => {
     setNovaReceita(prev => ({
       ...prev,
-      insumos: prev.insumos.filter((_, i) => i !== index)
+              insumos: (prev.insumos || []).filter((_, i) => i !== index)
     }))
     // Limpar estados de busca do insumo removido
     setBuscaInsumos(prev => {
@@ -616,7 +622,7 @@ export default function ReceitasPage() {
     
     setReceitaEditando(prev => prev ? {
       ...prev,
-      insumos: [...prev.insumos, novoInsumo]
+      insumos: [...(prev.insumos || []), novoInsumo]
     } : null)
     
     // Limpar busca do novo insumo
@@ -629,7 +635,7 @@ export default function ReceitasPage() {
     
     setReceitaEditando(prev => prev ? {
       ...prev,
-      insumos: prev.insumos.filter((_, i) => i !== index)
+      insumos: (prev.insumos || []).filter((_, i) => i !== index)
     } : null)
     
     // Limpar estados de busca do insumo removido e reindexar
@@ -669,7 +675,7 @@ export default function ReceitasPage() {
     
     setReceitaEditando(prev => prev ? {
       ...prev,
-      insumos: prev.insumos.map((insumo, i) => 
+      insumos: (prev.insumos || []).map((insumo, i) => 
         i === index ? { ...insumo, [campo]: valor } : insumo
       )
     } : null)
@@ -680,7 +686,7 @@ export default function ReceitasPage() {
     
     setReceitaEditando(prev => prev ? {
       ...prev,
-      insumos: prev.insumos.map((insumo, i) => ({
+      insumos: (prev.insumos || []).map((insumo, i) => ({
         ...insumo,
         is_chefe: i === index
       }))
@@ -702,7 +708,7 @@ export default function ReceitasPage() {
     
     // Atualizar dados do insumo na receita
     const insumoAtualizado = {
-      ...receitaEditando.insumos[index],
+      ...(receitaEditando.insumos?.[index] || {}),
       id: insumo.id || 0,
       codigo: insumo.codigo,
       nome: insumo.nome,
@@ -716,7 +722,7 @@ export default function ReceitasPage() {
     
     setReceitaEditando(prev => prev ? {
       ...prev,
-      insumos: prev.insumos.map((ins, i) => i === index ? insumoAtualizado : ins)
+      insumos: (prev.insumos || []).map((ins, i) => i === index ? insumoAtualizado : ins)
     } : null)
     
     setBuscaInsumosEdicao(prev => ({ ...prev, [index]: `${insumo.codigo} - ${insumo.nome}` }))

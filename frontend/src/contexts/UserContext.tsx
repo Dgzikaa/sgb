@@ -54,8 +54,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       import('@/lib/cookies').then(({ syncAuthData }) => {
         syncAuthData(userData)
       }).catch(console.error)
-      
-      console.log('✅ Dados do usuário atualizados:', userData.nome)
     } catch (error) {
       console.error('❌ Erro ao atualizar usuário:', error)
     }
@@ -71,7 +69,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
     
     updateUser(updatedUser)
-    console.log('✅ Permissões atualizadas:', newPermissions)
   }
 
   const refreshUser = async (): Promise<void> => {
@@ -114,8 +111,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       
       // Redirecionar para login
       window.location.href = '/login'
-      
-      console.log('✅ Logout realizado com sucesso')
     } catch (error) {
       console.error('❌ Erro no logout:', error)
       // Mesmo com erro, redirecionar para login

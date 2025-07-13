@@ -183,7 +183,7 @@ export default function FinanceiroCompetenciaPage() {
       })
 
     } catch (error) {
-      console.error('Erro ao carregar dados:', error)
+      // Error silently handled
     } finally {
       setLoading(false)
     }
@@ -200,7 +200,7 @@ export default function FinanceiroCompetenciaPage() {
         setTiposCustos(result.tipos)
       }
     } catch (error) {
-      console.error('Erro ao carregar tipos de custos:', error)
+      // Error silently handled
     }
   }
 
@@ -239,8 +239,7 @@ export default function FinanceiroCompetenciaPage() {
         alert(`❌ Erro na sincronização: ${result.error}`)
       }
     } catch (error) {
-      console.error('Erro na sincronização:', error)
-      alert('❌ Erro na sincronização. Verifique o console.')
+      alert('❌ Erro na sincronização.')
     } finally {
       setSyncing(false)
     }
@@ -282,7 +281,6 @@ export default function FinanceiroCompetenciaPage() {
         alert(`❌ Erro: ${result.error}`)
       }
     } catch (error) {
-      console.error('Erro ao adicionar custo:', error)
       alert('❌ Erro ao adicionar custo extra')
     }
   }
