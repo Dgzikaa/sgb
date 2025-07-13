@@ -24,7 +24,11 @@ import {
   CheckCircle2,
   AlertCircle,
   ArrowLeft,
-  Loader2
+  Loader2,
+  Hash,
+  Eye,
+  Share2,
+  MessageSquare
 } from 'lucide-react';
 
 // Tipos
@@ -51,12 +55,13 @@ interface MetasOrganizadas {
   clientes: Meta[];
   avaliacoes: Meta[];
   cockpit_produtos: Meta[];
+  marketing: Meta[];
 }
 
 // Mapeamento de ícones
 const IconMap: { [key: string]: any } = {
   TrendingUp, Users, Star, Coffee, DollarSign, Target, Activity,
-  CheckCircle2, AlertCircle
+  CheckCircle2, AlertCircle, Hash, Eye, Share2, MessageSquare
 };
 
 // Função para formatar valores
@@ -274,7 +279,8 @@ export default function MetasPage() {
     financeiro: [],
     clientes: [],
     avaliacoes: [],
-    cockpit_produtos: []
+    cockpit_produtos: [],
+    marketing: []
   });
   const [loading, setLoading] = useState(true);
   const [editingMeta, setEditingMeta] = useState<number | null>(null);
@@ -287,15 +293,24 @@ export default function MetasPage() {
     try {
       setLoading(true);
       const response = await fetch('/api/metas');
-      if (!response.ok) throw new Error('Erro ao carregar metas');
-      
       const data = await response.json();
-      setMetas(data.data);
+      
+      if (data.success) {
+        const metasOrganizadas: MetasOrganizadas = {
+          financeiro: data.data.filter((meta: Meta) => meta.categoria === 'financeiro'),
+          clientes: data.data.filter((meta: Meta) => meta.categoria === 'clientes'),
+          avaliacoes: data.data.filter((meta: Meta) => meta.categoria === 'avaliacoes'),
+          cockpit_produtos: data.data.filter((meta: Meta) => meta.categoria === 'cockpit_produtos'),
+          marketing: data.data.filter((meta: Meta) => meta.categoria === 'marketing')
+        };
+        
+        setMetas(metasOrganizadas);
+      }
     } catch (error) {
       console.error('Erro ao carregar metas:', error);
       toast({
         title: "Erro",
-        description: "Erro ao carregar metas. Tente novamente.",
+        description: "Erro ao carregar metas",
         variant: "destructive",
       });
     } finally {
@@ -349,6 +364,7 @@ export default function MetasPage() {
     { key: 'clientes', label: 'Clientes', icon: Users },
     { key: 'avaliacoes', label: 'Avaliações', icon: Star },
     { key: 'cockpit_produtos', label: 'Produtos', icon: Coffee },
+    { key: 'marketing', label: 'Marketing', icon: Share2 },
   ];
 
   if (loading) {
@@ -393,7 +409,7 @@ export default function MetasPage() {
 
       {/* Tabs por categoria */}
       <Tabs defaultValue="financeiro" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-8 bg-gray-100 p-1 rounded-lg">
+        <TabsList className="grid w-full grid-cols-5 mb-8 bg-gray-100 p-1 rounded-lg">
           {categorias.map(({ key, label, icon: Icon }) => (
             <TabsTrigger 
               key={key}

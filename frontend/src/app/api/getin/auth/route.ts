@@ -11,11 +11,46 @@ const supabase = createClient(
 // ========================================
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, bar_id } = await request.json()
+    const { bar_id, force_refresh } = await request.json()
     
-    console.log('🔐 Iniciando autenticação getIn para email:', email)
+    console.log('🔐 Iniciando autenticação getIn para bar_id:', bar_id)
     
-    // Tentar login no getIn
+    // Buscar credenciais do banco
+    const { data: credentials, error: credError } = await supabase
+      .from('api_credentials')
+      .select('*')
+      .eq('bar_id', bar_id || 3)
+      .eq('sistema', 'getin')
+      .single()
+    
+    if (credError || !credentials) {
+      return NextResponse.json({
+        success: false,
+        error: 'Credenciais getIn não encontradas no banco'
+      }, { status: 404 })
+    }
+    
+    // Verificar se já temos token válido e não é refresh forçado
+    if (!force_refresh && credentials.access_token && credentials.expires_at) {
+      const expiresAt = new Date(credentials.expires_at)
+      const now = new Date()
+      
+      if (now < expiresAt) {
+        console.log('✅ Token ainda válido, usando token existente')
+        return NextResponse.json({
+          success: true,
+          message: 'Token válido encontrado',
+          data: {
+            token: credentials.access_token,
+            user: credentials.configuracoes?.user_name || 'Usuário',
+            units: credentials.configuracoes?.units || [],
+            expires_at: credentials.expires_at
+          }
+        })
+      }
+    }
+    
+    // Fazer login com credenciais do banco
     const loginResponse = await fetch('https://agent.getinapis.com/auth/v1/login', {
       method: 'POST',
       headers: {
@@ -24,8 +59,8 @@ export async function POST(request: NextRequest) {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       },
       body: JSON.stringify({
-        email,
-        password
+        email: credentials.username,
+        password: credentials.password
       })
     })
     
@@ -62,34 +97,31 @@ export async function POST(request: NextRequest) {
     const unitsData = await unitsResponse.json()
     console.log('🏢 Unidades encontradas:', unitsData)
     
-    // Salvar credenciais no banco
-    const credentials = {
-      bar_id,
-      sistema: 'getin',
-      access_token: token,
-      refresh_token: loginData.data?.refresh_token || null,
-      configuracoes: {
-        email,
-        user_id: userData?.id,
-        user_name: userData?.name,
-        units: unitsData.data || [],
-        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24h
-        created_at: new Date().toISOString()
-      },
-      ativo: true
-    }
-    
-    const { data: savedCredentials, error } = await supabase
+    // Atualizar credenciais no banco com novo token
+    const { error: updateError } = await supabase
       .from('api_credentials')
-      .upsert(credentials)
-      .select()
-      .single()
+      .update({
+        access_token: token,
+        refresh_token: loginData.data?.refresh_token || null,
+        token_type: 'Bearer',
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24h
+        configuracoes: {
+          ...credentials.configuracoes,
+          user_id: userData?.id,
+          user_name: userData?.name,
+          units: unitsData.data || [],
+          last_login: new Date().toISOString(),
+          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+        },
+        atualizado_em: new Date().toISOString()
+      })
+      .eq('id', credentials.id)
     
-    if (error) {
-      console.error('❌ Erro ao salvar credenciais:', error)
+    if (updateError) {
+      console.error('❌ Erro ao atualizar credenciais:', updateError)
       return NextResponse.json({
         success: false,
-        error: 'Erro ao salvar credenciais no banco'
+        error: 'Erro ao atualizar credenciais no banco'
       }, { status: 500 })
     }
     
@@ -100,7 +132,7 @@ export async function POST(request: NextRequest) {
         token,
         user: userData,
         units: unitsData.data || [],
-        expires_at: credentials.configuracoes.expires_at
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
       }
     })
     
@@ -145,7 +177,7 @@ export async function GET(request: NextRequest) {
     }
     
     // Verificar se token ainda é válido
-    const expiresAt = new Date(credentials.configuracoes.expires_at)
+    const expiresAt = new Date(credentials.expires_at || credentials.configuracoes?.expires_at)
     const now = new Date()
     
     if (now > expiresAt) {
@@ -176,9 +208,9 @@ export async function GET(request: NextRequest) {
       success: true,
       data: {
         authenticated: true,
-        user: credentials.configuracoes.user_name,
-        units: credentials.configuracoes.units,
-        expires_at: credentials.configuracoes.expires_at
+        user: credentials.configuracoes?.user_name || 'Usuário',
+        units: credentials.configuracoes?.units || [],
+        expires_at: credentials.expires_at || credentials.configuracoes?.expires_at
       }
     })
     

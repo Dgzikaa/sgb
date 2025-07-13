@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useToast } from '@/hooks/use-toast'
 import { useBar } from '@/contexts/BarContext'
 import { usePageTitle } from '@/contexts/PageTitleContext'
@@ -26,7 +27,12 @@ import {
   Star,
   TrendingUp,
   Users,
-  Settings
+  Settings,
+  Loader2,
+  RefreshCw,
+  AlertTriangle,
+  XCircle,
+  Clock
 } from 'lucide-react'
 
 export default function IntegracoesPage() {
@@ -49,6 +55,13 @@ export default function IntegracoesPage() {
   const [webhookLoading, setWebhookLoading] = useState(false)
   const [testingWebhook, setTestingWebhook] = useState<string | null>(null)
   const [loadingConfigs, setLoadingConfigs] = useState(true)
+  
+  // Estados para GetIn
+  const [getinAuthStatus, setGetinAuthStatus] = useState<'idle' | 'loading' | 'authenticated' | 'error'>('idle')
+  const [getinAuthData, setGetinAuthData] = useState<any>(null)
+  const [getinMessage, setGetinMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+  const [getinTestResults, setGetinTestResults] = useState<any>(null)
+  const [getinLoading, setGetinLoading] = useState(false)
 
   useEffect(() => {
     setPageTitle('Integrações')
@@ -58,6 +71,7 @@ export default function IntegracoesPage() {
   useEffect(() => {
     if (selectedBar) {
       loadWebhookConfigs()
+      checkGetinAuthStatus()
     }
   }, [selectedBar])
 
@@ -300,6 +314,119 @@ export default function IntegracoesPage() {
     return colors[webhookType as keyof typeof colors] || 0x5865F2
   }
 
+  // Funções para GetIn
+  const checkGetinAuthStatus = async () => {
+    if (!selectedBar) return
+    
+    setGetinAuthStatus('loading')
+    try {
+      const response = await fetch(`/api/getin/auth?bar_id=${selectedBar.id}`)
+      const data = await response.json()
+      
+      if (data.success) {
+        setGetinAuthStatus('authenticated')
+        setGetinAuthData(data.data)
+      } else {
+        setGetinAuthStatus('idle')
+        setGetinAuthData(null)
+      }
+    } catch (error) {
+      setGetinAuthStatus('error')
+      setGetinAuthData(null)
+    }
+  }
+
+  const handleGetinAuth = async () => {
+    if (!selectedBar) return
+    
+    setGetinLoading(true)
+    setGetinMessage(null)
+
+    try {
+      const response = await fetch('/api/getin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bar_id: selectedBar.id,
+          force_refresh: true
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setGetinAuthStatus('authenticated')
+        setGetinAuthData(data.data)
+        setGetinMessage({ type: 'success', text: 'Autenticação realizada com sucesso!' })
+      } else {
+        setGetinAuthStatus('error')
+        setGetinMessage({ type: 'error', text: data.error || 'Erro na autenticação' })
+      }
+    } catch (error) {
+      setGetinAuthStatus('error')
+      setGetinMessage({ type: 'error', text: 'Erro interno. Tente novamente.' })
+    } finally {
+      setGetinLoading(false)
+    }
+  }
+
+  const handleGetinTestConnection = async () => {
+    if (!selectedBar) return
+    
+    setGetinLoading(true)
+    setGetinTestResults(null)
+
+    try {
+      const response = await fetch(`/api/getin/reservas?bar_id=${selectedBar.id}&start_date=2025-01-10&end_date=2025-01-20`)
+      const data = await response.json()
+
+      if (data.success) {
+        setGetinTestResults({
+          success: true,
+          total: data.total,
+          reservas: data.data.slice(0, 3),
+          unit: data.unit
+        })
+        setGetinMessage({ type: 'success', text: `Conexão OK! Encontradas ${data.total} reservas` })
+      } else {
+        setGetinTestResults({
+          success: false,
+          error: data.error
+        })
+        setGetinMessage({ type: 'error', text: data.error || 'Erro ao testar conexão' })
+      }
+    } catch (error) {
+      setGetinTestResults({
+        success: false,
+        error: 'Erro interno'
+      })
+      setGetinMessage({ type: 'error', text: 'Erro ao testar conexão' })
+    } finally {
+      setGetinLoading(false)
+    }
+  }
+
+  const handleGetinLogout = async () => {
+    if (!selectedBar) return
+    
+    try {
+      await fetch('/api/credenciais', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bar_id: selectedBar.id,
+          sistema: 'getin'
+        })
+      })
+
+      setGetinAuthStatus('idle')
+      setGetinAuthData(null)
+      setGetinMessage({ type: 'success', text: 'Desconectado com sucesso' })
+    } catch (error) {
+      setGetinMessage({ type: 'error', text: 'Erro ao desconectar' })
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto p-6 max-w-7xl">
@@ -324,7 +451,7 @@ export default function IntegracoesPage() {
 
         {/* Tabs de Integrações */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7 mb-8">
+          <TabsList className="grid w-full grid-cols-8 mb-8">
             <TabsTrigger value="discord" className="flex items-center gap-2">
               <div className="w-4 h-4 bg-[#5865F2] rounded"></div>
               Discord
@@ -340,6 +467,10 @@ export default function IntegracoesPage() {
             <TabsTrigger value="meta" className="flex items-center gap-2">
               <div className="w-4 h-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded"></div>
               Meta
+            </TabsTrigger>
+            <TabsTrigger value="getin" className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-green-500 rounded"></div>
+              GetIn
             </TabsTrigger>
             <TabsTrigger value="email" className="flex items-center gap-2">
               <Mail className="w-4 h-4" />
@@ -673,6 +804,209 @@ export default function IntegracoesPage() {
                     </div>
                   )}
                 </>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* GetIn Tab */}
+          <TabsContent value="getin" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <div className="w-6 h-6 bg-green-500 rounded-lg flex items-center justify-center">
+                    <Calendar className="w-4 h-4 text-white" />
+                  </div>
+                  <CardTitle>GetIn - Sistema de Reservas</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Status de Autenticação */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Status da Conexão</h3>
+                    <div className="flex items-center space-x-2">
+                      {getinAuthStatus === 'loading' && (
+                        <div className="flex items-center space-x-2 text-blue-600">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span className="text-sm">Verificando...</span>
+                        </div>
+                      )}
+                      {getinAuthStatus === 'authenticated' && (
+                        <div className="flex items-center space-x-2 text-green-600">
+                          <CheckCircle className="w-4 h-4" />
+                          <span className="text-sm">Conectado</span>
+                        </div>
+                      )}
+                      {getinAuthStatus === 'error' && (
+                        <div className="flex items-center space-x-2 text-red-600">
+                          <XCircle className="w-4 h-4" />
+                          <span className="text-sm">Erro</span>
+                        </div>
+                      )}
+                      {getinAuthStatus === 'idle' && (
+                        <div className="flex items-center space-x-2 text-gray-600">
+                          <Clock className="w-4 h-4" />
+                          <span className="text-sm">Não conectado</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Mensagem de Status */}
+                  {getinMessage && (
+                    <div className={`p-4 rounded-lg ${
+                      getinMessage.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {getinMessage.text}
+                    </div>
+                  )}
+
+                  {/* Informações da Conexão */}
+                  {getinAuthStatus === 'authenticated' && getinAuthData && (
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <div className="flex items-start space-x-3">
+                        <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <h4 className="font-medium text-green-800 mb-2">Conexão Ativa</h4>
+                          <div className="space-y-2 text-sm text-green-700">
+                            <p><strong>Usuário:</strong> {getinAuthData.user?.name || getinAuthData.user || 'andressa.rocha0206@gmail.com'}</p>
+                            <p><strong>Unidades:</strong> {getinAuthData.units?.length || 0}</p>
+                            <p><strong>Expira em:</strong> {getinAuthData.expires_at ? new Date(getinAuthData.expires_at).toLocaleString('pt-BR') : 'N/A'}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {getinAuthData.units && getinAuthData.units.length > 0 && (
+                        <div className="mt-4 space-y-2">
+                          <Label>Unidades Disponíveis:</Label>
+                          <div className="space-y-2">
+                            {getinAuthData.units.map((unit: any) => (
+                              <div key={unit.id} className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                                <div>
+                                  <p className="font-medium">{unit.name}</p>
+                                  <p className="text-sm text-gray-600">ID: {unit.id}</p>
+                                </div>
+                                <Badge variant="outline" className="text-green-600 border-green-600">Ativo</Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Credenciais Configuradas */}
+                  {getinAuthStatus !== 'authenticated' && (
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <div className="flex items-start space-x-3">
+                        <AlertTriangle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <h4 className="font-medium text-blue-800 mb-2">Credenciais Configuradas</h4>
+                          <div className="space-y-2 text-sm text-blue-700">
+                            <p><strong>Email:</strong> andressa.rocha0206@gmail.com</p>
+                            <p>As credenciais estão salvas no banco de dados. Clique em "Conectar" para autenticar.</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Botões de Ação */}
+                  <div className="flex gap-3">
+                    {getinAuthStatus === 'authenticated' ? (
+                      <>
+                        <Button 
+                          onClick={handleGetinTestConnection} 
+                          disabled={getinLoading}
+                          className="flex-1"
+                        >
+                          {getinLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+                          Testar Conexão
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          onClick={handleGetinLogout}
+                          disabled={getinLoading}
+                        >
+                          Desconectar
+                        </Button>
+                      </>
+                    ) : (
+                      <Button 
+                        onClick={handleGetinAuth} 
+                        disabled={getinLoading}
+                        className="flex-1"
+                      >
+                        {getinLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Settings className="w-4 h-4 mr-2" />}
+                        Conectar com GetIn
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Resultados dos Testes */}
+                {getinTestResults && (
+                  <div className="space-y-4">
+                    <Separator />
+                    <div>
+                      <h4 className="font-medium mb-3">Resultados do Teste</h4>
+                      {getinTestResults.success ? (
+                        <div className="bg-green-50 p-4 rounded-lg">
+                          <div className="flex items-center space-x-2 mb-3">
+                            <CheckCircle className="w-5 h-5 text-green-600" />
+                            <span className="font-medium text-green-800">Conexão Bem-sucedida</span>
+                          </div>
+                          <div className="space-y-2 text-sm text-green-700">
+                            <p><strong>Total de Reservas:</strong> {getinTestResults.total}</p>
+                            <p><strong>Unidade:</strong> {getinTestResults.unit?.name} (ID: {getinTestResults.unit?.id})</p>
+                          </div>
+                          {getinTestResults.reservas && getinTestResults.reservas.length > 0 && (
+                            <div className="mt-4">
+                              <p className="font-medium mb-2">Últimas Reservas:</p>
+                              <div className="space-y-2">
+                                {getinTestResults.reservas.map((reserva: any, index: number) => (
+                                  <div key={index} className="bg-white p-3 rounded border">
+                                    <div className="flex justify-between items-start">
+                                      <div>
+                                        <p className="font-medium">{reserva.nome_cliente}</p>
+                                        <p className="text-sm text-gray-600">
+                                          {reserva.data_reserva} às {reserva.horario} - {reserva.pessoas} pessoas
+                                        </p>
+                                      </div>
+                                      <Badge variant="outline">{reserva.status}</Badge>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="bg-red-50 p-4 rounded-lg">
+                          <div className="flex items-center space-x-2">
+                            <XCircle className="w-5 h-5 text-red-600" />
+                            <span className="font-medium text-red-800">Erro na Conexão</span>
+                          </div>
+                          <p className="text-sm text-red-700 mt-2">{getinTestResults.error}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Informações da Integração */}
+                <div className="space-y-4">
+                  <Separator />
+                  <div>
+                    <h4 className="font-medium mb-3">Sobre a Integração GetIn</h4>
+                    <div className="space-y-3 text-sm text-gray-600">
+                      <p>• <strong>Sincronização automática</strong> de reservas do sistema GetIn</p>
+                      <p>• <strong>Dados em tempo real</strong> sobre ocupação e disponibilidade</p>
+                      <p>• <strong>Gestão centralizada</strong> de todas as reservas</p>
+                      <p>• <strong>Relatórios integrados</strong> com outros sistemas</p>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
