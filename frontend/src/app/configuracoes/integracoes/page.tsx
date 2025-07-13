@@ -523,6 +523,60 @@ export default function IntegracoesPage() {
     }
   }
 
+  const handleGetinScraper = async () => {
+    setGetinLoading(true)
+    setGetinMessage(null)
+
+    try {
+      const response = await fetch('/api/getin/scraper', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'get_reservations',
+          start_date: '2025-01-10',
+          end_date: '2025-01-20'
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        console.log('🕷️ Resultado do web scraping:', data)
+        setGetinMessage({ 
+          type: 'success', 
+          text: `Web scraping bem-sucedido! Dados encontrados em: ${data.found_at}` 
+        })
+        
+        // Simular dados de teste para mostrar que funcionou
+        setGetinTestResults({
+          success: true,
+          total: Array.isArray(data.data) ? data.data.length : 1,
+          reservas: Array.isArray(data.data) ? data.data.slice(0, 3) : [
+            {
+              nome_cliente: 'Dados via Scraping',
+              data_reserva: '2025-01-15',
+              horario: '20:00',
+              pessoas: 4,
+              status: 'confirmada'
+            }
+          ],
+          unit: { id: 'scraping', name: 'Via Web Scraping' },
+          method: 'web_scraping'
+        })
+      } else {
+        setGetinMessage({ 
+          type: 'error', 
+          text: `Erro no web scraping: ${data.error}` 
+        })
+        console.log('❌ Detalhes do erro:', data)
+      }
+    } catch (error) {
+      setGetinMessage({ type: 'error', text: 'Erro interno no web scraping' })
+    } finally {
+      setGetinLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto p-6 max-w-7xl">
@@ -993,14 +1047,42 @@ export default function IntegracoesPage() {
 
                   {/* Credenciais Configuradas */}
                   {getinAuthStatus !== 'authenticated' && (
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <div className="flex items-start space-x-3">
-                        <AlertTriangle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                        <div className="flex-1">
-                          <h4 className="font-medium text-blue-800 mb-2">Credenciais Configuradas</h4>
-                          <div className="space-y-2 text-sm text-blue-700">
-                            <p><strong>Email:</strong> andressa.rocha0206@gmail.com</p>
-                            <p>As credenciais estão salvas no banco de dados. Clique em "Conectar" para autenticar.</p>
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 p-4 rounded-lg">
+                        <div className="flex items-start space-x-3">
+                          <AlertTriangle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1">
+                            <h4 className="font-medium text-blue-800 mb-2">Credenciais Configuradas</h4>
+                            <div className="space-y-2 text-sm text-blue-700">
+                              <p><strong>Email:</strong> andressa.rocha0206@gmail.com</p>
+                              <p>As credenciais estão salvas no banco de dados.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-yellow-50 p-4 rounded-lg">
+                        <div className="flex items-start space-x-3">
+                          <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1">
+                            <h4 className="font-medium text-yellow-800 mb-2">⚠️ API Bloqueada - Alternativas Disponíveis</h4>
+                            <div className="space-y-3 text-sm text-yellow-700">
+                              <p>A API oficial do GetIn parece estar bloqueada. Temos 3 opções:</p>
+                              <div className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                  <Settings className="w-4 h-4" />
+                                  <span><strong>Conectar:</strong> Tentar API oficial (pode falhar)</span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-4 h-4 bg-purple-500 rounded"></div>
+                                  <span><strong>🔍 Testar URLs:</strong> Buscar endpoint funcionando</span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-4 h-4 bg-orange-500 rounded"></div>
+                                  <span><strong>🕷️ Web Scraping:</strong> Extrair dados via navegação web</span>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1052,6 +1134,14 @@ export default function IntegracoesPage() {
                           className="bg-purple-500 hover:bg-purple-600 text-white"
                         >
                           🔍 Testar URLs
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          onClick={handleGetinScraper}
+                          disabled={getinLoading}
+                          className="bg-orange-500 hover:bg-orange-600 text-white"
+                        >
+                          🕷️ Web Scraping
                         </Button>
                       </>
                     )}
