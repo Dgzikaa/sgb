@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     
     // Fazer login com credenciais do banco
     const loginPayload = {
-      email: credentials.username,
+      login: credentials.username,  // GetIn usa 'login' não 'email'
       password: credentials.password
     }
     

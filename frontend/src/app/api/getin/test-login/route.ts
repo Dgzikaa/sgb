@@ -46,11 +46,11 @@ export async function POST(request: NextRequest) {
       console.log(`\n🔄 Testando: ${variation.name}`)
       
       try {
-        const response = await fetch('https://agent.getinapis.com/auth/v1/login', {
+        const response = await fetch('https://painel-reserva.getinapp.com.br/login', {
           method: 'POST',
           headers: variation.headers as HeadersInit,
           body: JSON.stringify({
-            email: email,
+            login: email, // GetIn usa 'login' não 'email'
             password: password
           })
         })

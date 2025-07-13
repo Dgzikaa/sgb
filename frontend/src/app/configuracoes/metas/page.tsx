@@ -5,8 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 
 import { 
@@ -19,9 +17,6 @@ import {
   X,
   DollarSign,
   Target,
-  Activity,
-  CheckCircle2,
-  AlertCircle,
   Loader2,
   Hash,
   Eye,
@@ -57,8 +52,8 @@ interface MetasOrganizadas {
 
 // Mapeamento de ícones do Lucide React
 const IconMap: { [key: string]: any } = {
-  TrendingUp, Users, Star, Coffee, DollarSign, Target, Activity,
-  CheckCircle2, AlertCircle, Hash, Eye, Share2, MessageSquare
+  TrendingUp, Users, Star, Coffee, DollarSign, Target, 
+  Hash, Eye, Share2, MessageSquare
 };
 
 // Função para formatar valores conforme a unidade
@@ -86,13 +81,9 @@ const getMetaIcon = (icone: string) => {
   return IconComponent ? <IconComponent className="h-5 w-5" /> : <Target className="h-5 w-5" />;
 };
 
-// Função para calcular progresso da meta
-const calcularProgresso = (valorAtual: number, valorMeta: number): number => {
-  if (valorMeta === 0) return 0;
-  return Math.min((valorAtual / valorMeta) * 100, 100);
-};
+// Função removida: calcularProgresso (não necessária na página de configuração de metas)
 
-// Componente de Card de Meta
+// Componente de Card de Meta SIMPLIFICADO (só para definir metas)
 const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
   meta: Meta;
   isEditing: boolean;
@@ -102,27 +93,21 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
   isSaving: boolean;
 }) => {
   const [valores, setValores] = useState({
-    valor_atual: meta.valor_atual.toString(),
     valor_meta: meta.valor_meta.toString()
   });
 
   useEffect(() => {
     if (isEditing) {
       setValores({
-        valor_atual: meta.valor_atual.toString(),
         valor_meta: meta.valor_meta.toString()
       });
     }
   }, [isEditing, meta]);
 
-  const progresso = calcularProgresso(meta.valor_atual, meta.valor_meta);
-
   const handleSave = () => {
-    const novoValorAtual = parseFloat(valores.valor_atual) || 0;
     const novoValorMeta = parseFloat(valores.valor_meta) || 0;
     
     onSave({
-      valor_atual: novoValorAtual,
       valor_meta: novoValorMeta
     });
   };
@@ -181,61 +166,23 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
           {isEditing ? (
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium">Valor Atual</label>
-                <Input
-                  type="number"
-                  value={valores.valor_atual}
-                  onChange={(e) => setValores(prev => ({ ...prev, valor_atual: e.target.value }))}
-                  placeholder="Valor atual"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Meta</label>
+                <label className="text-sm font-medium">Valor da Meta</label>
                 <Input
                   type="number"
                   value={valores.valor_meta}
                   onChange={(e) => setValores(prev => ({ ...prev, valor_meta: e.target.value }))}
-                  placeholder="Valor da meta"
+                  placeholder="Defina o valor da meta"
                 />
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-2xl font-bold">
-                  {formatarValor(meta.valor_atual, meta.unidade)}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  de {formatarValor(meta.valor_meta, meta.unidade)}
-                </span>
+            <div className="text-center py-6">
+              <div className="text-3xl font-bold text-primary mb-2">
+                {formatarValor(meta.valor_meta, meta.unidade)}
               </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Progresso</span>
-                  <span>{progresso.toFixed(1)}%</span>
-                </div>
-                <Progress value={progresso} className="h-2" />
-              </div>
-
-              <div className="flex items-center gap-2">
-                {progresso >= 100 ? (
-                  <Badge variant="default" className="bg-green-500">
-                    <CheckCircle2 className="h-3 w-3 mr-1" />
-                    Meta Atingida
-                  </Badge>
-                ) : progresso >= 80 ? (
-                  <Badge variant="secondary" className="bg-yellow-500 text-white">
-                    <Activity className="h-3 w-3 mr-1" />
-                    Quase lá
-                  </Badge>
-                ) : (
-                  <Badge variant="outline">
-                    <AlertCircle className="h-3 w-3 mr-1" />
-                    Em progresso
-                  </Badge>
-                )}
-              </div>
+              <p className="text-sm text-muted-foreground">
+                Meta definida
+              </p>
             </div>
           )}
         </CardContent>
@@ -267,8 +214,36 @@ export default function MetasPage() {
       const data = await response.json();
       
       if (data.success) {
-        // A API já retorna as metas organizadas por categoria
-        setMetas(data.data);
+        // Converter strings para números nos valores das metas
+        const metasConvertidas = {
+          financeiro: data.data.financeiro?.map((meta: any) => ({
+            ...meta,
+            valor_atual: parseFloat(meta.valor_atual) || 0,
+            valor_meta: parseFloat(meta.valor_meta) || 0
+          })) || [],
+          clientes: data.data.clientes?.map((meta: any) => ({
+            ...meta,
+            valor_atual: parseFloat(meta.valor_atual) || 0,
+            valor_meta: parseFloat(meta.valor_meta) || 0
+          })) || [],
+          avaliacoes: data.data.avaliacoes?.map((meta: any) => ({
+            ...meta,
+            valor_atual: parseFloat(meta.valor_atual) || 0,
+            valor_meta: parseFloat(meta.valor_meta) || 0
+          })) || [],
+          cockpit_produtos: data.data.cockpit_produtos?.map((meta: any) => ({
+            ...meta,
+            valor_atual: parseFloat(meta.valor_atual) || 0,
+            valor_meta: parseFloat(meta.valor_meta) || 0
+          })) || [],
+          marketing: data.data.marketing?.map((meta: any) => ({
+            ...meta,
+            valor_atual: parseFloat(meta.valor_atual) || 0,
+            valor_meta: parseFloat(meta.valor_meta) || 0
+          })) || []
+        };
+        
+        setMetas(metasConvertidas);
       }
     } catch (error) {
       console.error('Erro ao carregar metas:', error);
@@ -358,9 +333,9 @@ export default function MetasPage() {
       <div className="flex items-center gap-3">
         <Target className="h-8 w-8 text-primary" />
         <div>
-          <h1 className="text-3xl font-bold">Metas e Objetivos</h1>
+          <h1 className="text-3xl font-bold">Configurar Metas</h1>
           <p className="text-muted-foreground">
-            Acompanhe e gerencie suas metas por categoria
+            Defina os valores das metas por categoria
           </p>
         </div>
       </div>

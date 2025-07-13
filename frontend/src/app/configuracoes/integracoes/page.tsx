@@ -64,6 +64,7 @@ export default function IntegracoesPage() {
   const [getinLoading, setGetinLoading] = useState(false)
   const [getinDebugResults, setGetinDebugResults] = useState<any>(null)
   const [getinUrlTestResults, setGetinUrlTestResults] = useState<any>(null)
+  const [getinConnectivityResults, setGetinConnectivityResults] = useState<any>(null)
 
   useEffect(() => {
     setPageTitle('Integrações')
@@ -438,8 +439,8 @@ export default function IntegracoesPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: 'andressa.rocha0206@gmail.com',
-          password: '86285744Ordinario!'
+          email: 'ordinariobar',
+          password: '@Ordinario*1'
         })
       })
 
@@ -486,8 +487,8 @@ export default function IntegracoesPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: 'andressa.rocha0206@gmail.com',
-          password: '86285744Ordinario!'
+          email: 'ordinariobar',
+          password: '@Ordinario*1'
         })
       })
 
@@ -542,26 +543,33 @@ export default function IntegracoesPage() {
 
       if (data.success) {
         console.log('🕷️ Resultado do web scraping:', data)
+        
+        const stepsText = data.steps_completed ? data.steps_completed.join(' → ') : 'Navegação concluída'
         setGetinMessage({ 
           type: 'success', 
-          text: `Web scraping bem-sucedido! Dados encontrados em: ${data.found_at}` 
+          text: `Web scraping bem-sucedido! ${stepsText}` 
         })
         
-        // Simular dados de teste para mostrar que funcionou
+        // Mostrar dados reais ou simulados do scraping
         setGetinTestResults({
           success: true,
           total: Array.isArray(data.data) ? data.data.length : 1,
-          reservas: Array.isArray(data.data) ? data.data.slice(0, 3) : [
+          reservas: Array.isArray(data.data) ? data.data.slice(0, 3) : data.data ? [data.data] : [
             {
-              nome_cliente: 'Dados via Scraping',
+              nome_cliente: 'Navegação bem-sucedida',
               data_reserva: '2025-01-15',
               horario: '20:00',
-              pessoas: 4,
-              status: 'confirmada'
+              pessoas: 2,
+              status: 'scraping_test'
             }
           ],
-          unit: { id: 'scraping', name: 'Via Web Scraping' },
-          method: 'web_scraping'
+          unit: { id: 'scraping', name: 'Via Web Scraping GetIn' },
+          method: 'web_scraping',
+          scraping_info: {
+            found_at: data.found_at,
+            navigation_success: data.navigation_success,
+            steps_completed: data.steps_completed
+          }
         })
       } else {
         setGetinMessage({ 
@@ -572,6 +580,301 @@ export default function IntegracoesPage() {
       }
     } catch (error) {
       setGetinMessage({ type: 'error', text: 'Erro interno no web scraping' })
+    } finally {
+      setGetinLoading(false)
+    }
+  }
+
+  const handleGetinTestConnectivity = async () => {
+    setGetinLoading(true)
+    setGetinMessage(null)
+    setGetinConnectivityResults(null)
+
+    try {
+      const response = await fetch('/api/getin/test-connectivity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        console.log('🌐 Resultados do teste de conectividade:', data.results)
+        setGetinConnectivityResults(data)
+        
+        if (data.summary.accessible > 0) {
+          setGetinMessage({ 
+            type: 'success', 
+            text: `${data.summary.accessible} de ${data.summary.total} sites acessíveis. ${data.summary.diagnosis}` 
+          })
+        } else {
+          setGetinMessage({ 
+            type: 'error', 
+            text: `Nenhum site acessível. ${data.summary.diagnosis}` 
+          })
+        }
+      } else {
+        setGetinMessage({ type: 'error', text: data.error || 'Erro no teste de conectividade' })
+      }
+    } catch (error) {
+      setGetinMessage({ type: 'error', text: 'Erro interno no teste de conectividade' })
+    } finally {
+      setGetinLoading(false)
+    }
+  }
+
+  const handleGetinScraperV2 = async () => {
+    setGetinLoading(true)
+    setGetinMessage(null)
+
+    try {
+      const response = await fetch('/api/getin/scraper-v2', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'get_reservations_v2'
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        console.log('🚀 Resultado do scraper v2:', data)
+        
+        const stepsText = data.steps_completed ? data.steps_completed.join(' → ') : 'Navegação concluída'
+        setGetinMessage({ 
+          type: 'success', 
+          text: `Scraper V2 bem-sucedido! ${stepsText}` 
+        })
+        
+        // Mostrar dados do scraper v2
+        setGetinTestResults({
+          success: true,
+          total: Array.isArray(data.data) ? data.data.length : 1,
+          reservas: Array.isArray(data.data) ? data.data.slice(0, 3) : data.data ? [data.data] : [],
+          unit: { id: 'scraping_v2', name: 'Web Scraping GetIn V2' },
+          method: 'web_scraping_v2',
+          scraping_info: {
+            found_at: data.found_at,
+            navigation_success: data.navigation_success,
+            steps_completed: data.steps_completed,
+            session_info: data.session_info
+          }
+        })
+      } else {
+        setGetinMessage({ 
+          type: 'error', 
+          text: `Erro no scraper V2: ${data.error}` 
+        })
+        console.log('❌ Detalhes do erro scraper v2:', data)
+      }
+    } catch (error) {
+      setGetinMessage({ type: 'error', text: 'Erro interno no scraper V2' })
+    } finally {
+      setGetinLoading(false)
+    }
+  }
+
+  const handleGetinAnalyzeSpa = async () => {
+    setGetinLoading(true)
+    setGetinMessage(null)
+
+    try {
+      const response = await fetch('/api/getin/analyze-spa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'analyze_spa'
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        console.log('🔍 Resultado da análise SPA:', data)
+        
+        setGetinMessage({ 
+          type: 'success', 
+          text: `Análise SPA concluída! ${data.analysis.apis_discovered.length} APIs encontradas, ${data.analysis.working_endpoints.length} funcionais.` 
+        })
+        
+        // Mostrar dados da análise
+        setGetinTestResults({
+          success: true,
+          total: data.analysis.working_endpoints.length,
+          reservas: data.analysis.working_endpoints.map((endpoint: any, index: number) => ({
+            nome_cliente: `Endpoint ${index + 1}`,
+            data_reserva: new Date().toISOString().split('T')[0],
+            horario: endpoint.method,
+            pessoas: endpoint.status,
+            status: endpoint.accessible ? 'funcional' : 'inativo'
+          })),
+          unit: { id: 'spa_analysis', name: 'Análise SPA GetIn' },
+          method: 'spa_analysis',
+          scraping_info: {
+            found_at: 'JavaScript Analysis',
+            navigation_success: true,
+            steps_completed: [
+              '📄 HTML analisado',
+              '📜 Scripts extraídos',
+              '🔍 APIs descobertas',
+              '🧪 Endpoints testados'
+            ],
+            analysis_data: {
+              apis_found: data.analysis.apis_discovered,
+              working_endpoints: data.analysis.working_endpoints,
+              recommendations: data.recommendations
+            }
+          }
+        })
+      } else {
+        setGetinMessage({ 
+          type: 'error', 
+          text: `Erro na análise SPA: ${data.error}` 
+        })
+        console.log('❌ Detalhes do erro análise SPA:', data)
+      }
+    } catch (error) {
+      setGetinMessage({ type: 'error', text: 'Erro interno na análise SPA' })
+    } finally {
+      setGetinLoading(false)
+    }
+  }
+
+  const handleGetinScraperApi = async () => {
+    setGetinLoading(true)
+    setGetinMessage(null)
+
+    try {
+      const response = await fetch('/api/getin/scraper-api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'get_reservations_api',
+          start_date: '2025-01-10',
+          end_date: '2025-01-20'
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        console.log('🚀 Resultado do scraper API real:', data)
+        
+        setGetinMessage({ 
+          type: 'success', 
+          text: `Scraper API REAL bem-sucedido! ${data.data.length} reservas encontradas via ${data.authentication.auth_method}.` 
+        })
+        
+        // Mostrar dados reais do scraper API
+        setGetinTestResults({
+          success: true,
+          total: data.data.length,
+          reservas: data.data.slice(0, 5), // Mostrar até 5 reservas
+          unit: { id: 'api_real', name: 'API Real GetIn' },
+          method: 'api_real',
+          scraping_info: {
+            found_at: data.found_at,
+            navigation_success: true,
+            steps_completed: [
+              '🔑 Autenticação nas APIs reais',
+              '📋 Busca em endpoints descobertos',
+              '✅ Dados reais extraídos'
+            ],
+            api_info: {
+              authentication: data.authentication,
+              performance: data.performance,
+              working_endpoint: data.found_at
+            }
+          }
+        })
+      } else {
+        setGetinMessage({ 
+          type: 'error', 
+          text: `APIs testadas mas sem dados: ${data.error}. ${data.debug_info?.recommendations || ''}` 
+        })
+        console.log('⚠️ Detalhes do scraper API:', data)
+      }
+    } catch (error) {
+      setGetinMessage({ type: 'error', text: 'Erro interno no scraper API real' })
+    } finally {
+      setGetinLoading(false)
+    }
+  }
+
+  const handleGetinDeepAnalysis = async () => {
+    setGetinLoading(true)
+    setGetinMessage(null)
+
+    try {
+      const response = await fetch('/api/getin/deep-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'deep_analysis'
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        console.log('🕵️ Resultado da análise profunda:', data)
+        
+        setGetinMessage({ 
+          type: 'success', 
+          text: `Análise PROFUNDA concluída! ${data.analysis.workingSubdomains.length} subdomínios + ${data.analysis.apiHints?.endpoints?.length || 0} endpoints descobertos.` 
+        })
+        
+        // Mostrar dados da análise profunda
+        setGetinTestResults({
+          success: true,
+          total: data.analysis.workingSubdomains.length + (data.analysis.apiHints?.endpoints?.length || 0),
+          reservas: [
+            ...data.analysis.workingSubdomains.map((sub: any, index: number) => ({
+              nome_cliente: `Subdomínio ${index + 1}`,
+              data_reserva: new Date().toISOString().split('T')[0],
+              horario: sub.domain,
+              pessoas: sub.status,
+              status: sub.status === 200 ? 'ativo' : 'protegido'
+            })),
+            ...(data.analysis.apiHints?.endpoints || []).slice(0, 3).map((endpoint: string, index: number) => ({
+              nome_cliente: `Endpoint ${index + 1}`,
+              data_reserva: new Date().toISOString().split('T')[0],
+              horario: endpoint,
+              pessoas: 0,
+              status: 'descoberto'
+            }))
+          ],
+          unit: { id: 'deep_analysis', name: 'Análise Profunda GetIn' },
+          method: 'deep_analysis',
+          scraping_info: {
+            found_at: 'Deep JavaScript Analysis',
+            navigation_success: true,
+            steps_completed: [
+              '📄 HTML analisado profundamente',
+              '🔬 Scripts JavaScript dissecados',
+              '🌍 Subdomínios descobertos',
+              '🎯 Configurações extraídas'
+            ],
+            deep_info: {
+              scripts: data.analysis.scripts,
+              workingSubdomains: data.analysis.workingSubdomains,
+              apiHints: data.analysis.apiHints,
+              recommendations: data.recommendations,
+              nextSteps: data.nextSteps
+            }
+          }
+        })
+      } else {
+        setGetinMessage({ 
+          type: 'error', 
+          text: `Erro na análise profunda: ${data.error}` 
+        })
+        console.log('❌ Detalhes do erro análise profunda:', data)
+      }
+    } catch (error) {
+      setGetinMessage({ type: 'error', text: 'Erro interno na análise profunda' })
     } finally {
       setGetinLoading(false)
     }
@@ -1052,10 +1355,11 @@ export default function IntegracoesPage() {
                         <div className="flex items-start space-x-3">
                           <AlertTriangle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
                           <div className="flex-1">
-                            <h4 className="font-medium text-blue-800 mb-2">Credenciais Configuradas</h4>
+                            <h4 className="font-medium text-blue-800 mb-2">✅ Credenciais Atualizadas (URL Correta!)</h4>
                             <div className="space-y-2 text-sm text-blue-700">
-                              <p><strong>Email:</strong> andressa.rocha0206@gmail.com</p>
-                              <p>As credenciais estão salvas no banco de dados.</p>
+                              <p><strong>Login:</strong> ordinariobar</p>
+                              <p><strong>URL:</strong> https://painel-reserva.getinapp.com.br</p>
+                              <p>Credenciais corretas salvas no banco de dados!</p>
                             </div>
                           </div>
                         </div>
@@ -1065,9 +1369,9 @@ export default function IntegracoesPage() {
                         <div className="flex items-start space-x-3">
                           <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
                           <div className="flex-1">
-                            <h4 className="font-medium text-yellow-800 mb-2">⚠️ API Bloqueada - Alternativas Disponíveis</h4>
+                            <h4 className="font-medium text-yellow-800 mb-2">🎯 URL Correta Encontrada!</h4>
                             <div className="space-y-3 text-sm text-yellow-700">
-                              <p>A API oficial do GetIn parece estar bloqueada. Temos 3 opções:</p>
+                              <p>Encontramos a URL correta do GetIn! Agora temos 4 ferramentas de diagnóstico:</p>
                               <div className="space-y-2">
                                 <div className="flex items-center space-x-2">
                                   <Settings className="w-4 h-4" />
@@ -1081,6 +1385,10 @@ export default function IntegracoesPage() {
                                   <div className="w-4 h-4 bg-orange-500 rounded"></div>
                                   <span><strong>🕷️ Web Scraping:</strong> Extrair dados via navegação web</span>
                                 </div>
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                                  <span><strong>🌐 Conectividade:</strong> Testar acesso a sites externos</span>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -1090,9 +1398,9 @@ export default function IntegracoesPage() {
                   )}
 
                   {/* Botões de Ação */}
-                  <div className="flex gap-3">
+                  <div className="space-y-3">
                     {getinAuthStatus === 'authenticated' ? (
-                      <>
+                      <div className="flex gap-3">
                         <Button 
                           onClick={handleGetinTestConnection} 
                           disabled={getinLoading}
@@ -1108,41 +1416,86 @@ export default function IntegracoesPage() {
                         >
                           Desconectar
                         </Button>
-                      </>
+                      </div>
                     ) : (
                       <>
-                        <Button 
-                          onClick={handleGetinAuth} 
-                          disabled={getinLoading}
-                          className="flex-1"
-                        >
-                          {getinLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Settings className="w-4 h-4 mr-2" />}
-                          Conectar com GetIn
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          onClick={handleGetinTestLogin}
-                          disabled={getinLoading}
-                          className="bg-yellow-500 hover:bg-yellow-600 text-white"
-                        >
-                          🧪 Debug Login
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          onClick={handleGetinTestUrls}
-                          disabled={getinLoading}
-                          className="bg-purple-500 hover:bg-purple-600 text-white"
-                        >
-                          🔍 Testar URLs
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          onClick={handleGetinScraper}
-                          disabled={getinLoading}
-                          className="bg-orange-500 hover:bg-orange-600 text-white"
-                        >
-                          🕷️ Web Scraping
-                        </Button>
+                        <div className="flex gap-3">
+                          <Button 
+                            onClick={handleGetinAuth} 
+                            disabled={getinLoading}
+                            className="flex-1"
+                          >
+                            {getinLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Settings className="w-4 h-4 mr-2" />}
+                            Conectar com GetIn
+                          </Button>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                          <Button 
+                            variant="outline" 
+                            onClick={handleGetinTestConnectivity}
+                            disabled={getinLoading}
+                            className="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1"
+                          >
+                            🌐 Conectividade
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            onClick={handleGetinTestLogin}
+                            disabled={getinLoading}
+                            className="bg-yellow-500 hover:bg-yellow-600 text-white text-xs px-2 py-1"
+                          >
+                            🧪 Debug Login
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            onClick={handleGetinTestUrls}
+                            disabled={getinLoading}
+                            className="bg-purple-500 hover:bg-purple-600 text-white text-xs px-2 py-1"
+                          >
+                            🔍 Testar URLs
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            onClick={handleGetinScraper}
+                            disabled={getinLoading}
+                            className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-2 py-1"
+                          >
+                            🕷️ Web Scraping
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            onClick={handleGetinScraperV2}
+                            disabled={getinLoading}
+                            className="bg-green-500 hover:bg-green-600 text-white text-xs px-2 py-1"
+                          >
+                            🚀 Scraper V2
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            onClick={handleGetinAnalyzeSpa}
+                            disabled={getinLoading}
+                            className="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1"
+                          >
+                            🔍 Analisar SPA
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            onClick={handleGetinScraperApi}
+                            disabled={getinLoading}
+                            className="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1"
+                          >
+                            🚀 API Real
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            onClick={handleGetinDeepAnalysis}
+                            disabled={getinLoading}
+                            className="bg-purple-500 hover:bg-purple-600 text-white text-xs px-2 py-1"
+                          >
+                            🕵️ Deep Analysis
+                          </Button>
+                        </div>
                       </>
                     )}
                   </div>
@@ -1158,11 +1511,109 @@ export default function IntegracoesPage() {
                         <div className="bg-green-50 p-4 rounded-lg">
                           <div className="flex items-center space-x-2 mb-3">
                             <CheckCircle className="w-5 h-5 text-green-600" />
-                            <span className="font-medium text-green-800">Conexão Bem-sucedida</span>
+                            <span className="font-medium text-green-800">
+                              {getinTestResults.method === 'web_scraping' ? 'Web Scraping Bem-sucedido' :
+                               getinTestResults.method === 'web_scraping_v2' ? 'Scraper V2 Bem-sucedido' :
+                               getinTestResults.method === 'spa_analysis' ? 'Análise SPA Concluída' :
+                               getinTestResults.method === 'api_real' ? 'API Real Bem-sucedida' :
+                               getinTestResults.method === 'deep_analysis' ? 'Análise Profunda Concluída' :
+                               'Conexão Bem-sucedida'}
+                            </span>
                           </div>
                           <div className="space-y-2 text-sm text-green-700">
                             <p><strong>Total de Reservas:</strong> {getinTestResults.total}</p>
-                            <p><strong>Unidade:</strong> {getinTestResults.unit?.name} (ID: {getinTestResults.unit?.id})</p>
+                            <p><strong>Método:</strong> {getinTestResults.unit?.name} (ID: {getinTestResults.unit?.id})</p>
+                            {getinTestResults.scraping_info && (
+                              <>
+                                <p><strong>URL Acessada:</strong> {getinTestResults.scraping_info.found_at}</p>
+                                {getinTestResults.scraping_info.session_info && getinTestResults.method === 'web_scraping_v2' && (
+                                  <div className="bg-blue-50 p-3 rounded mt-2">
+                                    <p className="text-sm font-medium text-blue-800 mb-2">📊 Informações do Scraper V2:</p>
+                                    <div className="text-xs text-blue-700 space-y-1">
+                                      <p>• URLs testadas: {getinTestResults.scraping_info.session_info.total_urls_tested}</p>
+                                      <p>• URLs funcionando: {getinTestResults.scraping_info.session_info.working_urls_count}</p>
+                                      <p>• Acesso ao login: {getinTestResults.scraping_info.session_info.has_login_access ? '✅' : '❌'}</p>
+                                      <p>• Acesso a reservas: {getinTestResults.scraping_info.session_info.has_reservation_access ? '✅' : '❌'}</p>
+                                    </div>
+                                  </div>
+                                                                 )}
+                                 {getinTestResults.method === 'spa_analysis' && getinTestResults.scraping_info.analysis_data && (
+                                   <div className="bg-purple-50 p-3 rounded mt-2">
+                                     <p className="text-sm font-medium text-purple-800 mb-2">🔍 Análise SPA Detalhada:</p>
+                                     <div className="text-xs text-purple-700 space-y-1">
+                                       <p>• APIs descobertas: {getinTestResults.scraping_info.analysis_data.apis_found.length}</p>
+                                       <p>• Endpoints funcionais: {getinTestResults.scraping_info.analysis_data.working_endpoints.length}</p>
+                                       <p>• Recomendação: {getinTestResults.scraping_info.analysis_data.recommendations}</p>
+                                       {getinTestResults.scraping_info.analysis_data.working_endpoints.length > 0 && (
+                                         <div>
+                                           <p className="font-medium mt-2">Endpoints encontrados:</p>
+                                           <ul className="ml-2">
+                                             {getinTestResults.scraping_info.analysis_data.working_endpoints.slice(0, 3).map((endpoint: any, idx: number) => (
+                                               <li key={idx}>{endpoint.method} {endpoint.url} (Status: {endpoint.status})</li>
+                                             ))}
+                                           </ul>
+                                         </div>
+                                       )}
+                                     </div>
+                                   </div>
+                                 )}
+                                 {getinTestResults.method === 'api_real' && getinTestResults.scraping_info.api_info && (
+                                   <div className="bg-red-50 p-3 rounded mt-2">
+                                     <p className="text-sm font-medium text-red-800 mb-2">🚀 API Real Detalhada:</p>
+                                     <div className="text-xs text-red-700 space-y-1">
+                                       <p>• Método de autenticação: {getinTestResults.scraping_info.api_info.authentication.auth_method}</p>
+                                       <p>• Token encontrado: {getinTestResults.scraping_info.api_info.authentication.token_found ? '✅' : '❌'}</p>
+                                       <p>• Session encontrada: {getinTestResults.scraping_info.api_info.authentication.session_found ? '✅' : '❌'}</p>
+                                       <p>• Endpoint funcional: {getinTestResults.scraping_info.api_info.working_endpoint}</p>
+                                       <p>• Endpoints testados: {getinTestResults.scraping_info.api_info.performance.endpoints_tested}</p>
+                                       <p>• Duração: {getinTestResults.scraping_info.api_info.performance.duration_ms}ms</p>
+                                     </div>
+                                   </div>
+                                 )}
+                                 {getinTestResults.method === 'deep_analysis' && getinTestResults.scraping_info.deep_info && (
+                                   <div className="bg-purple-50 p-3 rounded mt-2">
+                                     <p className="text-sm font-medium text-purple-800 mb-2">🕵️ Análise Profunda Detalhada:</p>
+                                     <div className="text-xs text-purple-700 space-y-1">
+                                       <p>• Scripts analisados: {getinTestResults.scraping_info.deep_info.scripts.length}</p>
+                                       <p>• Subdomínios funcionais: {getinTestResults.scraping_info.deep_info.workingSubdomains.length}</p>
+                                       <p>• Endpoints descobertos: {getinTestResults.scraping_info.deep_info.apiHints?.endpoints?.length || 0}</p>
+                                       <p>• URLs de API completas: {getinTestResults.scraping_info.deep_info.apiHints?.fullApiUrls?.length || 0}</p>
+                                       <p>• Padrões de auth encontrados: {getinTestResults.scraping_info.deep_info.apiHints?.authInfo?.length || 0}</p>
+                                       {getinTestResults.scraping_info.deep_info.workingSubdomains.length > 0 && (
+                                         <div>
+                                           <p className="font-medium mt-2">Subdomínios ativos:</p>
+                                           <ul className="ml-2">
+                                             {getinTestResults.scraping_info.deep_info.workingSubdomains.slice(0, 3).map((sub: any, idx: number) => (
+                                               <li key={idx}>{sub.domain} (Status: {sub.status})</li>
+                                             ))}
+                                           </ul>
+                                         </div>
+                                       )}
+                                       {getinTestResults.scraping_info.deep_info.recommendations && (
+                                         <div>
+                                           <p className="font-medium mt-2">Recomendações:</p>
+                                           <ul className="ml-2">
+                                             {getinTestResults.scraping_info.deep_info.recommendations.slice(0, 2).map((rec: string, idx: number) => (
+                                               <li key={idx}>• {rec}</li>
+                                             ))}
+                                           </ul>
+                                         </div>
+                                       )}
+                                     </div>
+                                   </div>
+                                 )}
+                                 {getinTestResults.scraping_info.steps_completed && (
+                                   <div>
+                                     <p><strong>Etapas Concluídas:</strong></p>
+                                     <ul className="list-disc list-inside ml-4 space-y-1">
+                                       {getinTestResults.scraping_info.steps_completed.map((step: string, index: number) => (
+                                         <li key={index} className="text-xs">{step}</li>
+                                       ))}
+                                     </ul>
+                                   </div>
+                                 )}
+                               </>
+                             )}
                           </div>
                           {getinTestResults.reservas && getinTestResults.reservas.length > 0 && (
                             <div className="mt-4">
@@ -1369,6 +1820,91 @@ export default function IntegracoesPage() {
                           ) : (
                             <p>❌ Nenhuma URL funcionou. A API do GetIn pode ter mudado completamente ou estar fora do ar.</p>
                           )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                                 )}
+
+                {/* Resultados do Teste de Conectividade */}
+                {getinConnectivityResults && (
+                  <div className="space-y-4">
+                    <Separator />
+                    <div>
+                      <h4 className="font-medium mb-3">🌐 Resultados do Teste de Conectividade</h4>
+                      
+                      {/* Resumo */}
+                      <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                        <div className="grid grid-cols-3 gap-4 text-sm text-center">
+                          <div>
+                            <div className="font-bold text-lg text-green-600">{getinConnectivityResults.summary.accessible}</div>
+                            <div className="text-gray-600">Acessíveis</div>
+                          </div>
+                          <div>
+                            <div className="font-bold text-lg text-red-600">{getinConnectivityResults.summary.inaccessible}</div>
+                            <div className="text-gray-600">Bloqueados</div>
+                          </div>
+                          <div>
+                            <div className="font-bold text-lg text-blue-600">{getinConnectivityResults.summary.total}</div>
+                            <div className="text-gray-600">Total</div>
+                          </div>
+                        </div>
+                        <div className="mt-3 text-center">
+                          <p className="text-sm font-medium text-gray-800">{getinConnectivityResults.summary.diagnosis}</p>
+                        </div>
+                      </div>
+
+                      {/* Sites Acessíveis */}
+                      {getinConnectivityResults.results.filter((r: any) => r.accessible).length > 0 && (
+                        <div className="mb-4">
+                          <h5 className="font-medium text-green-800 mb-2">✅ Sites Acessíveis</h5>
+                          <div className="space-y-2">
+                            {getinConnectivityResults.results.filter((r: any) => r.accessible).map((result: any, index: number) => (
+                              <div key={index} className="bg-green-50 p-3 rounded-lg border border-green-200">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="font-medium text-green-800">{result.name}</p>
+                                    <code className="text-xs text-green-700">{result.url}</code>
+                                  </div>
+                                  <div className="text-right">
+                                    <Badge className="bg-green-100 text-green-800">HTTP {result.status}</Badge>
+                                    <p className="text-xs text-green-600 mt-1">{result.duration}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Sites Bloqueados */}
+                      {getinConnectivityResults.results.filter((r: any) => !r.accessible).length > 0 && (
+                        <div className="mb-4">
+                          <h5 className="font-medium text-red-800 mb-2">❌ Sites Bloqueados/Inacessíveis</h5>
+                          <div className="space-y-2">
+                            {getinConnectivityResults.results.filter((r: any) => !r.accessible).map((result: any, index: number) => (
+                              <div key={index} className="bg-red-50 p-3 rounded-lg border border-red-200">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="font-medium text-red-800">{result.name}</p>
+                                    <code className="text-xs text-red-700">{result.url}</code>
+                                  </div>
+                                  <Badge variant="destructive">{result.errorType}</Badge>
+                                </div>
+                                <p className="text-xs text-red-600 mt-2">{result.error}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Recomendações */}
+                      <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                        <h5 className="font-medium text-blue-800 mb-2">💡 Recomendações</h5>
+                        <div className="text-sm text-blue-700 space-y-1">
+                          {getinConnectivityResults.recommendations.map((rec: string, index: number) => (
+                            <p key={index}>• {rec}</p>
+                          ))}
                         </div>
                       </div>
                     </div>

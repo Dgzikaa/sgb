@@ -11,31 +11,27 @@ export async function POST(request: NextRequest) {
     
     // Possíveis URLs da API GetIn
     const urlsToTest = [
-      // URLs atuais e variações
+      // URL CORRETA ENCONTRADA
+      'https://painel-reserva.getinapp.com.br/login',
+      'https://painel-reserva.getinapp.com.br/api/login',
+      'https://painel-reserva.getinapp.com.br/auth/login',
+      
+      // Variações do domínio correto
+      'https://painel-reserva.getinapp.com.br/api/auth/login',
+      'https://painel-reserva.getinapp.com.br/api/v1/login',
+      'https://painel-reserva.getinapp.com.br/auth/v1/login',
+      
+      // URLs antigas que testávamos (podem não funcionar)
       'https://agent.getinapis.com/auth/v1/login',
       'https://agent.getinapis.com/api/auth/v1/login',
-      'https://agent.getinapis.com/v1/auth/login',
       'https://agent.getinapis.com/login',
-      'https://agent.getinapis.com/api/login',
-      
-      // URLs com diferentes domínios
-      'https://api.getin.com.br/auth/v1/login',
-      'https://api.getin.com.br/v1/auth/login',
+      'https://agent.getin.com.br/login',
       'https://api.getin.com.br/login',
       
-      // URLs com agent no domínio
-      'https://agent.getin.com.br/api/auth/v1/login',
-      'https://agent.getin.com.br/auth/v1/login',
-      'https://agent.getin.com.br/api/login',
-      'https://agent.getin.com.br/login',
-      
-      // URLs sem versão
-      'https://agent.getinapis.com/auth/login',
-      'https://agent.getinapis.com/api/auth/login',
-      
-      // URLs com diferentes versões
-      'https://agent.getinapis.com/auth/v2/login',
-      'https://agent.getinapis.com/api/auth/v2/login',
+      // Outras variações possíveis
+      'https://getinapp.com.br/api/login',
+      'https://api.getinapp.com.br/login',
+      'https://app.getinapp.com.br/login',
     ]
     
     const results = []
@@ -52,7 +48,7 @@ export async function POST(request: NextRequest) {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
           },
           body: JSON.stringify({
-            email: email,
+            login: email, // GetIn usa 'login' não 'email'
             password: password
           })
         })

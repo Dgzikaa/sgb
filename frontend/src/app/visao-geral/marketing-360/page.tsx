@@ -22,7 +22,8 @@ export default function Marketing360Page() {
     previsaoPerformance: null,
     customerJourney: null,
     otimizacaoTemporal: null,
-    funilConversao: null
+    funilConversao: null,
+    metas: null
   })
 
   // Carregar dados automaticamente quando a página abrir
@@ -50,7 +51,7 @@ export default function Marketing360Page() {
       setIsLoading(true)
       console.log('🔄 Carregando TODAS as funcionalidades avançadas...')
       
-      // Buscar TODAS as APIs que implementamos
+      // Buscar TODAS as APIs que implementamos + METAS
       const [
         metricsResponse, 
         campaignsResponse, 
@@ -61,7 +62,8 @@ export default function Marketing360Page() {
         previsaoResponse,
         journeyResponse,
         otimizacaoResponse,
-        funilResponse
+        funilResponse,
+        metasResponse
       ] = await Promise.allSettled([
         fetch('/api/meta/metrics?platform=all&period=week'),
         fetch('/api/meta/campaigns'),
@@ -72,7 +74,8 @@ export default function Marketing360Page() {
         fetch('/api/meta/previsao-performance'),
         fetch('/api/meta/customer-journey'),
         fetch('/api/meta/otimizacao-temporal'),
-        fetch('/api/meta/funil-conversao')
+        fetch('/api/meta/funil-conversao'),
+        fetch('/api/metas')
       ])
 
       let facebookData = { followers: 0, growth_7d: 0, reach: 0, engagement: 0, posts_today: 0, best_post_reach: 0 }
@@ -325,6 +328,20 @@ export default function Marketing360Page() {
         }
       }
 
+      // PROCESSAR METAS DA API
+      let metasData = null
+      if (metasResponse.status === 'fulfilled') {
+        try {
+          const metasResult = await metasResponse.value.json()
+          console.log('🎯 Metas carregadas:', metasResult)
+          if (metasResult.success) {
+            metasData = metasResult.data
+          }
+        } catch (error) {
+          console.warn('⚠️ Erro ao processar Metas:', error)
+        }
+      }
+
       // CONSOLIDAR TODOS OS DADOS
       setData({
         metrics: { facebook: facebookData, instagram: instagramData, overall: overallData },
@@ -337,6 +354,7 @@ export default function Marketing360Page() {
         customerJourney,
         otimizacaoTemporal,
         funilConversao,
+        metas: metasData,
         insights: {
           market_position: overallData.engagement_rate > 5 ? 'Acima da Média' : overallData.engagement_rate > 2 ? 'Na Média' : 'Abaixo da Média',
           engagement_vs_market: overallData.engagement_rate,
@@ -362,11 +380,12 @@ export default function Marketing360Page() {
           ]
         },
         goals: {
-          followers_target: 10000,
-          engagement_target: 6.0,
-          reach_target: 50000,
-          monthly_posts_target: 60,
-          roi_target: 400
+          // Buscar valores das metas da API ou usar valores padrão
+          followers_target: metasData?.marketing?.find((m: any) => m.nome === 'Meta de Seguidores')?.valor_meta || 10000,
+          engagement_target: metasData?.marketing?.find((m: any) => m.nome === 'Taxa de Engajamento')?.valor_meta || 6.0,
+          reach_target: metasData?.marketing?.find((m: any) => m.nome === 'Alcance Mensal')?.valor_meta || 50000,
+          monthly_posts_target: metasData?.marketing?.find((m: any) => m.nome === 'Posts Mensais')?.valor_meta || 60,
+          roi_target: metasData?.marketing?.find((m: any) => m.nome === 'ROI Marketing')?.valor_meta || 400
         }
       })
 

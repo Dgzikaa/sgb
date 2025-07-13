@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
       const responseCompetencia = await fetch(urlCompetencia.toString(), {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${credenciais.access_token}`,
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json'
         }
       })
@@ -162,7 +162,7 @@ export async function GET(request: NextRequest) {
       const responseEventos = await fetch(urlEventos, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${credenciais.access_token}`,
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json'
         }
       })
