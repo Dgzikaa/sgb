@@ -17,7 +17,12 @@ export default function Marketing360Page() {
     metrics: null,
     campaigns: null,
     content: null,
-    debug: null
+    debug: null,
+    radarOportunidades: null,
+    previsaoPerformance: null,
+    customerJourney: null,
+    otimizacaoTemporal: null,
+    funilConversao: null
   })
 
   // Carregar dados automaticamente quando a página abrir
@@ -51,13 +56,23 @@ export default function Marketing360Page() {
         campaignsResponse, 
         campaignsAdvResponse,
         contentResponse,
-        debugResponse
+        debugResponse,
+        radarResponse,
+        previsaoResponse,
+        journeyResponse,
+        otimizacaoResponse,
+        funilResponse
       ] = await Promise.allSettled([
         fetch('/api/meta/metrics?platform=all&period=week'),
         fetch('/api/meta/campaigns'),
         fetch('/api/meta/campaigns-advanced'),
         fetch('/api/meta/content-analysis'),
-        fetch('/api/meta/debug-data')
+        fetch('/api/meta/debug-data'),
+        fetch('/api/meta/radar-oportunidades'),
+        fetch('/api/meta/previsao-performance'),
+        fetch('/api/meta/customer-journey'),
+        fetch('/api/meta/otimizacao-temporal'),
+        fetch('/api/meta/funil-conversao')
       ])
 
       let facebookData = { followers: 0, growth_7d: 0, reach: 0, engagement: 0, posts_today: 0, best_post_reach: 0 }
@@ -240,6 +255,76 @@ export default function Marketing360Page() {
         alcanceOrganico: (facebookData.reach || 0) + (instagramData.reach || 0)
       })
 
+      // 6. PROCESSAR RADAR DE OPORTUNIDADES
+      let radarOportunidades = null
+      if (radarResponse.status === 'fulfilled') {
+        try {
+          const radarData = await radarResponse.value.json()
+          console.log('🎯 Radar de Oportunidades:', radarData)
+          if (radarData.success) {
+            radarOportunidades = radarData
+          }
+        } catch (error) {
+          console.warn('⚠️ Erro ao processar Radar de Oportunidades:', error)
+        }
+      }
+
+      // 7. PROCESSAR PREVISÃO DE PERFORMANCE
+      let previsaoPerformance = null
+      if (previsaoResponse.status === 'fulfilled') {
+        try {
+          const previsaoData = await previsaoResponse.value.json()
+          console.log('🔮 Previsão de Performance:', previsaoData)
+          if (previsaoData.success) {
+            previsaoPerformance = previsaoData
+          }
+        } catch (error) {
+          console.warn('⚠️ Erro ao processar Previsão de Performance:', error)
+        }
+      }
+
+      // 8. PROCESSAR CUSTOMER JOURNEY
+      let customerJourney = null
+      if (journeyResponse.status === 'fulfilled') {
+        try {
+          const journeyData = await journeyResponse.value.json()
+          console.log('🗺️ Customer Journey:', journeyData)
+          if (journeyData.success) {
+            customerJourney = journeyData
+          }
+        } catch (error) {
+          console.warn('⚠️ Erro ao processar Customer Journey:', error)
+        }
+      }
+
+      // 9. PROCESSAR OTIMIZAÇÃO TEMPORAL
+      let otimizacaoTemporal = null
+      if (otimizacaoResponse.status === 'fulfilled') {
+        try {
+          const otimizacaoData = await otimizacaoResponse.value.json()
+          console.log('⏰ Otimização Temporal:', otimizacaoData)
+          if (otimizacaoData.success) {
+            otimizacaoTemporal = otimizacaoData
+          }
+        } catch (error) {
+          console.warn('⚠️ Erro ao processar Otimização Temporal:', error)
+        }
+      }
+
+      // 10. PROCESSAR FUNIL DE CONVERSÃO
+      let funilConversao = null
+      if (funilResponse.status === 'fulfilled') {
+        try {
+          const funilData = await funilResponse.value.json()
+          console.log('📊 Funil de Conversão:', funilData)
+          if (funilData.success) {
+            funilConversao = funilData
+          }
+        } catch (error) {
+          console.warn('⚠️ Erro ao processar Funil de Conversão:', error)
+        }
+      }
+
       // CONSOLIDAR TODOS OS DADOS
       setData({
         metrics: { facebook: facebookData, instagram: instagramData, overall: overallData },
@@ -247,6 +332,11 @@ export default function Marketing360Page() {
         campaignsAdvanced,
         contentAnalysis,
         debug: debugData,
+        radarOportunidades,
+        previsaoPerformance,
+        customerJourney,
+        otimizacaoTemporal,
+        funilConversao,
         insights: {
           market_position: overallData.engagement_rate > 5 ? 'Acima da Média' : overallData.engagement_rate > 2 ? 'Na Média' : 'Abaixo da Média',
           engagement_vs_market: overallData.engagement_rate,
@@ -718,12 +808,11 @@ export default function Marketing360Page() {
 
         {/* Tabs de Conteúdo */}
          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-           <TabsList className="grid grid-cols-6 w-full bg-white border border-gray-200 rounded-lg p-1">
+           <TabsList className="grid grid-cols-5 w-full bg-white border border-gray-200 rounded-lg p-1">
              <TabsTrigger value="overview" className="text-sm font-medium">Geral</TabsTrigger>
              <TabsTrigger value="platforms" className="text-sm font-medium">Plataformas</TabsTrigger>
              <TabsTrigger value="campaigns" className="text-sm font-medium">Campanhas</TabsTrigger>
-             <TabsTrigger value="campaignsadv" className="text-sm font-medium">Campanhas Avançadas</TabsTrigger>
-             <TabsTrigger value="content" className="text-sm font-medium">Análise Conteúdo</TabsTrigger>
+             <TabsTrigger value="advanced" className="text-sm font-medium">🚀 Funcionalidades Avançadas</TabsTrigger>
              <TabsTrigger value="insights" className="text-sm font-medium">Insights</TabsTrigger>
            </TabsList>
 
@@ -1320,6 +1409,337 @@ export default function Marketing360Page() {
                  </CardContent>
                </Card>
              )}
+           </TabsContent>
+
+           {/* NOVA ABA: FUNCIONALIDADES AVANÇADAS */}
+           <TabsContent value="advanced" className="space-y-6">
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+               
+               {/* Radar de Oportunidades */}
+               <Card className="minimal-card">
+                 <CardHeader>
+                   <CardTitle className="flex items-center gap-2 text-gray-900">
+                     <Target className="w-5 h-5 text-blue-600" />
+                     🎯 Radar de Oportunidades
+                   </CardTitle>
+                 </CardHeader>
+                 <CardContent>
+                   {data.radarOportunidades ? (
+                     <div className="space-y-4">
+                       <div className="text-center">
+                         <div className={`text-4xl font-bold ${data.radarOportunidades.radar.status === 'excelente' ? 'text-green-600' : 
+                           data.radarOportunidades.radar.status === 'bom' ? 'text-blue-600' : 'text-red-600'}`}>
+                           {data.radarOportunidades.radar.score_oportunidade}
+                         </div>
+                         <p className="text-sm text-gray-600">Score de Oportunidade</p>
+                         <Badge variant={data.radarOportunidades.radar.status === 'excelente' ? 'default' : 'secondary'}>
+                           {data.radarOportunidades.radar.status}
+                         </Badge>
+                       </div>
+
+                       <div className="grid grid-cols-3 gap-2 text-center">
+                         <div className="p-2 bg-red-50 rounded">
+                           <div className="font-bold text-red-600">{data.radarOportunidades.radar.oportunidades_alta}</div>
+                           <div className="text-xs text-red-600">Alta</div>
+                         </div>
+                         <div className="p-2 bg-yellow-50 rounded">
+                           <div className="font-bold text-yellow-600">{data.radarOportunidades.radar.oportunidades_media}</div>
+                           <div className="text-xs text-yellow-600">Média</div>
+                         </div>
+                         <div className="p-2 bg-green-50 rounded">
+                           <div className="font-bold text-green-600">{data.radarOportunidades.radar.oportunidades_baixa}</div>
+                           <div className="text-xs text-green-600">Baixa</div>
+                         </div>
+                       </div>
+
+                       {data.radarOportunidades.alertas_criticos.length > 0 && (
+                         <div className="space-y-2">
+                           <h4 className="font-semibold text-red-600">🚨 Alertas Críticos</h4>
+                           {data.radarOportunidades.alertas_criticos.map((alerta: any, index: number) => (
+                             <div key={index} className="p-2 bg-red-50 border border-red-200 rounded text-sm">
+                               <div className="font-medium">{alerta.titulo}</div>
+                               <div className="text-gray-600">{alerta.acao}</div>
+                             </div>
+                           ))}
+                         </div>
+                       )}
+                     </div>
+                   ) : (
+                     <div className="text-center py-8">
+                       <Target className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                       <p className="text-gray-500">Carregando radar de oportunidades...</p>
+                     </div>
+                   )}
+                 </CardContent>
+               </Card>
+
+               {/* Previsão de Performance */}
+               <Card className="minimal-card">
+                 <CardHeader>
+                   <CardTitle className="flex items-center gap-2 text-gray-900">
+                     <TrendingUp className="w-5 h-5 text-purple-600" />
+                     🔮 Previsão de Performance
+                   </CardTitle>
+                 </CardHeader>
+                 <CardContent>
+                   {data.previsaoPerformance ? (
+                     <div className="space-y-4">
+                       <div className="text-center">
+                         <div className={`text-4xl font-bold ${data.previsaoPerformance.previsoes.geral?.score_predicao > 70 ? 'text-green-600' : 
+                           data.previsaoPerformance.previsoes.geral?.score_predicao > 40 ? 'text-yellow-600' : 'text-red-600'}`}>
+                           {data.previsaoPerformance.previsoes.geral?.score_predicao || 0}
+                         </div>
+                         <p className="text-sm text-gray-600">Score de Previsão</p>
+                         <Badge variant={data.previsaoPerformance.previsoes.geral?.confianca === 'alta' ? 'default' : 'secondary'}>
+                           {data.previsaoPerformance.previsoes.geral?.confianca || 'baixa'}
+                         </Badge>
+                       </div>
+
+                       {data.previsaoPerformance.previsoes.geral?.melhor_momento && (
+                         <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                           <h4 className="font-semibold text-blue-800">📅 Melhor Momento</h4>
+                           <p className="text-sm text-blue-700">
+                             {data.previsaoPerformance.previsoes.geral.melhor_momento.dia_nome} às {data.previsaoPerformance.previsoes.geral.melhor_momento.horario}h
+                           </p>
+                         </div>
+                       )}
+
+                       <div className="grid grid-cols-2 gap-4 text-center">
+                         <div className="p-2 bg-green-50 rounded">
+                           <div className="font-bold text-green-600">{data.previsaoPerformance.previsoes.geral?.engajamento_esperado || 0}</div>
+                           <div className="text-xs text-green-600">Engajamento Esperado</div>
+                         </div>
+                         <div className="p-2 bg-purple-50 rounded">
+                           <div className="font-bold text-purple-600">{data.previsaoPerformance.previsoes.geral?.roi_estimado.toFixed(1) || 0}%</div>
+                           <div className="text-xs text-purple-600">ROI Estimado</div>
+                         </div>
+                       </div>
+                     </div>
+                   ) : (
+                     <div className="text-center py-8">
+                       <TrendingUp className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                       <p className="text-gray-500">Carregando previsão de performance...</p>
+                     </div>
+                   )}
+                 </CardContent>
+               </Card>
+
+               {/* Customer Journey Map */}
+               <Card className="minimal-card">
+                 <CardHeader>
+                   <CardTitle className="flex items-center gap-2 text-gray-900">
+                     <Users className="w-5 h-5 text-green-600" />
+                     🗺️ Customer Journey Map
+                   </CardTitle>
+                 </CardHeader>
+                 <CardContent>
+                   {data.customerJourney ? (
+                     <div className="space-y-4">
+                       <div className="text-center">
+                         <div className="text-2xl font-bold text-green-600">
+                           {data.customerJourney.jornada.metricas_chave.taxa_conversao_geral}%
+                         </div>
+                         <p className="text-sm text-gray-600">Taxa de Conversão Geral</p>
+                       </div>
+
+                       <div className="space-y-2">
+                         {data.customerJourney.jornada.etapas.slice(0, 4).map((etapa: any, index: number) => (
+                           <div key={index} className="flex items-center gap-3 p-2 bg-gray-50 rounded">
+                             <div className={`w-3 h-3 rounded-full ${etapa.status === 'saudavel' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                             <div className="flex-1">
+                               <div className="font-medium text-sm">{etapa.nome}</div>
+                               <div className="text-xs text-gray-600">{etapa.dados?.usuarios} usuários</div>
+                             </div>
+                             <div className="text-sm font-bold">{etapa.dados?.taxa_passagem.toFixed(1)}%</div>
+                           </div>
+                         ))}
+                       </div>
+
+                       <div className="p-3 bg-red-50 rounded-lg border border-red-200">
+                         <h4 className="font-semibold text-red-800">🔍 Ponto Crítico</h4>
+                         <p className="text-sm text-red-700">
+                           {data.customerJourney.insights.etapa_mais_critica || 'Nenhum ponto crítico detectado'}
+                         </p>
+                       </div>
+                     </div>
+                   ) : (
+                     <div className="text-center py-8">
+                       <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                       <p className="text-gray-500">Carregando jornada do cliente...</p>
+                     </div>
+                   )}
+                 </CardContent>
+               </Card>
+
+               {/* Otimização Temporal */}
+               <Card className="minimal-card">
+                 <CardHeader>
+                   <CardTitle className="flex items-center gap-2 text-gray-900">
+                     <Clock className="w-5 h-5 text-indigo-600" />
+                     ⏰ Otimização Temporal
+                   </CardTitle>
+                 </CardHeader>
+                 <CardContent>
+                   {data.otimizacaoTemporal ? (
+                     <div className="space-y-4">
+                       <div className="grid grid-cols-2 gap-4">
+                         <div className="text-center p-3 bg-blue-50 rounded">
+                           <div className="font-bold text-blue-600">{data.otimizacaoTemporal.otimizacao.melhor_horario.hora}h</div>
+                           <div className="text-xs text-blue-600">Melhor Horário</div>
+                         </div>
+                         <div className="text-center p-3 bg-green-50 rounded">
+                           <div className="font-bold text-green-600">{data.otimizacaoTemporal.otimizacao.melhor_dia.nome}</div>
+                           <div className="text-xs text-green-600">Melhor Dia</div>
+                         </div>
+                       </div>
+
+                       <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-200">
+                         <h4 className="font-semibold text-indigo-800">🌅 Melhor Período</h4>
+                         <p className="text-sm text-indigo-700 capitalize">
+                           {data.otimizacaoTemporal.otimizacao.melhor_periodo.periodo}
+                         </p>
+                       </div>
+
+                       <div className="space-y-2">
+                         <h4 className="font-semibold text-gray-700">📅 Cronograma Sugerido</h4>
+                         {data.otimizacaoTemporal.otimizacao.cronograma_sugerido.slice(0, 3).map((item: any, index: number) => (
+                           <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                             <div>
+                               <div className="font-medium text-sm">{item.dia_semana}</div>
+                               <div className="text-xs text-gray-600">{item.melhor_horario}h</div>
+                             </div>
+                             <Badge variant={item.performance_esperada === 'Alta' ? 'default' : 'secondary'}>
+                               {item.performance_esperada}
+                             </Badge>
+                           </div>
+                         ))}
+                       </div>
+                     </div>
+                   ) : (
+                     <div className="text-center py-8">
+                       <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                       <p className="text-gray-500">Carregando otimização temporal...</p>
+                     </div>
+                   )}
+                 </CardContent>
+               </Card>
+
+               {/* Funil de Conversão */}
+               <Card className="minimal-card">
+                 <CardHeader>
+                   <CardTitle className="flex items-center gap-2 text-gray-900">
+                     <BarChart3 className="w-5 h-5 text-emerald-600" />
+                     📊 Funil de Conversão
+                   </CardTitle>
+                 </CardHeader>
+                 <CardContent>
+                   {data.funilConversao ? (
+                     <div className="space-y-4">
+                       <div className="text-center">
+                         <div className={`text-3xl font-bold ${data.funilConversao.roi.roi_percentual > 100 ? 'text-green-600' : 
+                           data.funilConversao.roi.roi_percentual > 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                           {data.funilConversao.roi.roi_percentual.toFixed(1)}%
+                         </div>
+                         <p className="text-sm text-gray-600">ROI Atual</p>
+                         <Badge variant={data.funilConversao.roi.status === 'excelente' ? 'default' : 'secondary'}>
+                           {data.funilConversao.roi.status}
+                         </Badge>
+                       </div>
+
+                       <div className="grid grid-cols-2 gap-4 text-center">
+                         <div className="p-2 bg-green-50 rounded">
+                           <div className="font-bold text-green-600">{data.funilConversao.roi.conversoes}</div>
+                           <div className="text-xs text-green-600">Conversões</div>
+                         </div>
+                         <div className="p-2 bg-blue-50 rounded">
+                           <div className="font-bold text-blue-600">{formatCurrency(data.funilConversao.roi.receita_total)}</div>
+                           <div className="text-xs text-blue-600">Receita Total</div>
+                         </div>
+                       </div>
+
+                       <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                         <h4 className="font-semibold text-yellow-800">⚡ Maior Oportunidade</h4>
+                         <p className="text-sm text-yellow-700">
+                           {data.funilConversao.insights.proxima_acao}
+                         </p>
+                       </div>
+
+                       <div className="space-y-2">
+                         <h4 className="font-semibold text-gray-700">📈 Projeções</h4>
+                         {data.funilConversao.projecoes && (
+                           <div className="p-2 bg-emerald-50 rounded">
+                             <div className="font-medium text-emerald-800">
+                               +{data.funilConversao.projecoes.melhoria_percentual}% melhoria esperada
+                             </div>
+                             <div className="text-sm text-emerald-700">
+                               {formatCurrency(data.funilConversao.projecoes.receita_adicional)} receita adicional
+                             </div>
+                           </div>
+                         )}
+                       </div>
+                     </div>
+                   ) : (
+                     <div className="text-center py-8">
+                       <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                       <p className="text-gray-500">Carregando funil de conversão...</p>
+                     </div>
+                   )}
+                 </CardContent>
+               </Card>
+
+               {/* Painel de Controle Avançado */}
+               <Card className="minimal-card lg:col-span-2">
+                 <CardHeader>
+                   <CardTitle className="flex items-center gap-2 text-gray-900">
+                     <Lightbulb className="w-5 h-5 text-amber-600" />
+                     🎯 Painel de Controle Avançado
+                   </CardTitle>
+                 </CardHeader>
+                 <CardContent>
+                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                     <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                       <h4 className="font-semibold text-blue-800 mb-2">🚀 Próximas Ações</h4>
+                       <ul className="text-sm text-blue-700 space-y-1">
+                         {data.radarOportunidades?.proximas_acoes?.[0]?.acoes.slice(0, 3).map((acao: string, index: number) => (
+                           <li key={index} className="flex items-start gap-2">
+                             <span className="text-blue-500">•</span>
+                             <span>{acao}</span>
+                           </li>
+                         )) || <li>Carregando...</li>}
+                       </ul>
+                     </div>
+
+                     <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
+                       <h4 className="font-semibold text-green-800 mb-2">✅ Oportunidades</h4>
+                       <div className="text-sm text-green-700">
+                         {data.customerJourney?.jornada.oportunidades.length > 0 ? (
+                           <div>
+                             <p className="font-medium">{data.customerJourney.jornada.oportunidades[0].titulo}</p>
+                             <p className="text-green-600">{data.customerJourney.jornada.oportunidades[0].impacto}</p>
+                           </div>
+                         ) : (
+                           <p>Buscando oportunidades...</p>
+                         )}
+                       </div>
+                     </div>
+
+                     <div className="p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+                       <h4 className="font-semibold text-purple-800 mb-2">🎯 Metas</h4>
+                       <div className="text-sm text-purple-700">
+                         {data.funilConversao?.roi && (
+                           <div>
+                             <p className="font-medium">ROI: {data.funilConversao.roi.roi_percentual.toFixed(1)}%</p>
+                             <p className="text-purple-600">
+                               {data.funilConversao.roi.roi_percentual > 100 ? '🎉 Meta superada!' : '📈 Trabalhando para a meta'}
+                             </p>
+                           </div>
+                         )}
+                       </div>
+                     </div>
+                   </div>
+                 </CardContent>
+               </Card>
+             </div>
            </TabsContent>
         </Tabs>
       </StandardPageLayout>
