@@ -84,9 +84,11 @@ export default function ContaAzulPage() {
       if (!supabase || !selectedBar) return
 
       const { data, error } = await supabase
-        .from('contaazul_config')
+        .from('api_credentials')
         .select('*')
         .eq('bar_id', selectedBar.id)
+        .eq('sistema', 'contaazul')
+        .eq('ativo', true)
         .single()
 
       if (error && error.code !== 'PGRST116') {
@@ -95,10 +97,15 @@ export default function ContaAzulPage() {
       }
 
       if (data) {
-        const isConnected = !!data.access_token && new Date(data.expires_at) > new Date()
+        const isConnected = !!data.access_token && data.expires_at && new Date(data.expires_at) > new Date()
         setConfig({
-          ...data,
-          conectado: isConnected
+          id: data.id,
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+          expires_at: data.expires_at,
+          empresa_id: data.empresa_id,
+          conectado: isConnected,
+          ultima_sync: data.ultima_sync
         })
         setStatus(isConnected ? 'connected' : 'idle')
       }
@@ -122,15 +129,11 @@ export default function ContaAzulPage() {
     setStatus('connecting')
 
     try {
-      const response = await fetch('/api/contaazul/auth', {
-        method: 'POST',
+      const response = await fetch(`/api/contaazul/auth?action=authorize&barId=${selectedBar.id}`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          action: 'get_auth_url',
-          bar_id: selectedBar.id
-        })
+        }
       })
 
       const result = await response.json()
@@ -165,7 +168,7 @@ export default function ContaAzulPage() {
         },
         body: JSON.stringify({
           action: 'disconnect',
-          bar_id: selectedBar.id
+          barId: selectedBar.id
         })
       })
 

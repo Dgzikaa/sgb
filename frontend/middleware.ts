@@ -81,11 +81,13 @@ const ROUTE_PERMISSIONS: Record<string, { modules?: string[], roles?: string[], 
   '/configuracoes/contahub-automatico': { modules: ['relatorio_produtos'], roles: ['admin'] },
   '/configuracoes/desempenho': { modules: ['dashboard_diario'], roles: ['admin'] },
   '/configuracoes/metas': { modules: ['configuracoes'], roles: ['admin'] },
+  '/configuracoes/meta-configuracao': { modules: ['configuracoes'], roles: ['admin'] },
   '/configuracoes/discord': { modules: ['configuracoes'] },
   '/configuracoes/integracoes': { modules: ['configuracoes'] },
   '/configuracoes/whatsapp': { modules: ['configuracoes'] },
   
   // Teste e Debug
+  '/test-meta': { roles: ['admin'] },
   '/teste-debug': { roles: ['admin'] },
 }
 

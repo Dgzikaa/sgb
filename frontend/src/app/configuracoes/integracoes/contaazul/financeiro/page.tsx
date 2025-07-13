@@ -159,9 +159,11 @@ export default function ContaAzulFinanceiroPage() {
 
       // 5. Verificar última sincronização
       const { data: configData } = await supabase
-        .from('contaazul_config')
+        .from('api_credentials')
         .select('ultima_sync')
         .eq('bar_id', selectedBar!.id)
+        .eq('sistema', 'contaazul')
+        .eq('ativo', true)
         .single()
 
       if (configData?.ultima_sync) {

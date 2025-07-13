@@ -1,189 +1,134 @@
 'use client'
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export default function TestMetaPage() {
-  const [debugResult, setDebugResult] = useState<any>(null)
-  const [configResult, setConfigResult] = useState<any>(null)
+  const [userData, setUserData] = useState<any>(null)
+  const [apiResponse, setApiResponse] = useState<any>(null)
   const [loading, setLoading] = useState(false)
-  const [token, setToken] = useState('')
+  const [error, setError] = useState<string | null>(null)
 
-  const testDebug = async () => {
-    try {
-      setLoading(true)
-      
-      // Simular dados do usuário
-      const userData = {
-        id: 1,
-        bar_id: 3,
-        permissao: 'admin',
-        nome: 'Teste',
-        email: 'teste@exemplo.com'
+  useEffect(() => {
+    // Carregar dados do usuário do localStorage
+    const storedUser = localStorage.getItem('sgb_user')
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser)
+        setUserData(user)
+      } catch (e) {
+        setError('Erro ao carregar dados do usuário')
       }
-      
-      const response = await fetch('/api/meta/debug', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-data': encodeURIComponent(JSON.stringify(userData))
-        }
-      })
-      
-      const data = await response.json()
-      setDebugResult(data)
-      
-    } catch (error) {
-      console.error('Erro no teste de debug:', error)
-      setDebugResult({ error: 'Erro ao testar debug' })
-    } finally {
-      setLoading(false)
+    } else {
+      setError('Usuário não logado')
     }
-  }
+  }, [])
 
-  const testConfig = async () => {
-    try {
-      setLoading(true)
-      
-      // Simular dados do usuário
-      const userData = {
-        id: 1,
-        bar_id: 3,
-        permissao: 'admin',
-        nome: 'Teste',
-        email: 'teste@exemplo.com'
-      }
-      
-      const response = await fetch('/api/meta/config', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-data': encodeURIComponent(JSON.stringify(userData))
-        }
-      })
-      
-      const data = await response.json()
-      setConfigResult(data)
-      
-    } catch (error) {
-      console.error('Erro no teste de config:', error)
-      setConfigResult({ error: 'Erro ao testar config' })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const testSaveConfig = async () => {
-    if (!token) {
-      alert('Digite um token para testar')
-      return
-    }
+  const testMetaAPI = async () => {
+    if (!userData) return
+    
+    setLoading(true)
+    setError(null)
     
     try {
-      setLoading(true)
-      
-      // Simular dados do usuário
-      const userData = {
-        id: 1,
-        bar_id: 3,
-        permissao: 'admin',
-        nome: 'Teste',
-        email: 'teste@exemplo.com'
-      }
-      
       const response = await fetch('/api/meta/config', {
-        method: 'POST',
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
           'x-user-data': encodeURIComponent(JSON.stringify(userData))
-        },
-        body: JSON.stringify({
-          access_token: token,
-          app_id: 'test-app-id',
-          app_secret: 'test-app-secret'
-        })
+        }
       })
       
       const data = await response.json()
-      setConfigResult(data)
-      
-    } catch (error) {
-      console.error('Erro no teste de save config:', error)
-      setConfigResult({ error: 'Erro ao testar save config' })
+      setApiResponse({
+        status: response.status,
+        statusText: response.statusText,
+        data
+      })
+    } catch (err) {
+      setError('Erro na requisição: ' + (err instanceof Error ? err.message : 'Erro desconhecido'))
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Teste de Debug Meta API</CardTitle>
-            <CardDescription>
-              Teste para diagnosticar problemas com a API do Meta
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-4">
-              <Button onClick={testDebug} disabled={loading}>
-                Testar Debug
-              </Button>
-              <Button onClick={testConfig} disabled={loading}>
-                Testar GET Config
-              </Button>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="token">Token para teste de POST:</Label>
-              <Input
-                id="token"
-                value={token}
-                onChange={(e) => setToken(e.target.value)}
-                placeholder="Cole seu token Meta aqui..."
-              />
-              <Button onClick={testSaveConfig} disabled={loading || !token}>
-                Testar POST Config
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {debugResult && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Resultado do Debug</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                value={JSON.stringify(debugResult, null, 2)}
-                readOnly
-                className="min-h-[300px] font-mono text-sm"
-              />
-            </CardContent>
-          </Card>
-        )}
-
-        {configResult && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Resultado da Config</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                value={JSON.stringify(configResult, null, 2)}
-                readOnly
-                className="min-h-[300px] font-mono text-sm"
-              />
-            </CardContent>
-          </Card>
-        )}
+    <div className="container mx-auto p-6 max-w-4xl space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold">Teste Meta API - Debug</h1>
+        <p className="text-gray-600">Teste de permissões e dados do usuário</p>
       </div>
+
+      {error && (
+        <Alert className="border-red-200">
+          <AlertDescription className="text-red-800">
+            {error}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Dados do Usuário */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Dados do Usuário (localStorage)</CardTitle>
+          <CardDescription>Dados que estão sendo enviados via header x-user-data</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {userData ? (
+            <div className="space-y-2">
+              <div><strong>ID:</strong> {userData.id}</div>
+              <div><strong>Nome:</strong> {userData.nome}</div>
+              <div><strong>Email:</strong> {userData.email}</div>
+              <div><strong>Role:</strong> <Badge variant="outline">{userData.role}</Badge></div>
+              <div><strong>Permissao:</strong> <Badge variant="outline">{userData.permissao}</Badge></div>
+              <div><strong>Bar ID:</strong> {userData.bar_id}</div>
+              <div><strong>Ativo:</strong> {userData.ativo ? '✅' : '❌'}</div>
+              <div><strong>Módulos:</strong> {userData.modulos_permitidos?.join(', ') || 'Nenhum'}</div>
+              
+              <details className="mt-4">
+                <summary className="cursor-pointer text-sm text-gray-600">Ver dados completos (JSON)</summary>
+                <pre className="mt-2 text-xs bg-gray-100 p-2 rounded overflow-auto">
+                  {JSON.stringify(userData, null, 2)}
+                </pre>
+              </details>
+            </div>
+          ) : (
+            <p className="text-gray-500">Carregando dados do usuário...</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Teste da API */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Teste API Meta Config</CardTitle>
+          <CardDescription>Testar acesso à API /api/meta/config</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={testMetaAPI} disabled={loading || !userData}>
+            {loading ? 'Testando...' : 'Testar API Meta'}
+          </Button>
+          
+          {apiResponse && (
+            <div className="mt-4 space-y-2">
+              <div className="flex gap-2">
+                <Badge variant={apiResponse.status === 200 ? 'default' : 'destructive'}>
+                  {apiResponse.status} {apiResponse.statusText}
+                </Badge>
+              </div>
+              
+              <details>
+                <summary className="cursor-pointer text-sm text-gray-600">Ver resposta da API</summary>
+                <pre className="mt-2 text-xs bg-gray-100 p-2 rounded overflow-auto">
+                  {JSON.stringify(apiResponse.data, null, 2)}
+                </pre>
+              </details>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 } 

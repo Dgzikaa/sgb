@@ -78,7 +78,7 @@ export default function DarkHeader() {
               />
               
               {/* Menu */}
-              <div className="absolute top-12 right-0 w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-[60] py-2">
+              <div className="absolute top-12 right-0 w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-[200] py-2">
                 {/* User Info */}
                 <div className="px-4 py-3 border-b border-slate-700">
                   <div className="flex items-center space-x-3">

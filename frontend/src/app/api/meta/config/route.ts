@@ -60,9 +60,12 @@ export async function GET(request: NextRequest) {
 
     const { bar_id, permissao } = parsedUserData;
 
-    // Verificar permissões
-    if (!['admin', 'financeiro'].includes(permissao)) {
-      console.log('❌ Permissão insuficiente:', permissao)
+    // Verificar permissões - aceitar tanto 'role' quanto 'permissao'
+    const userRole = parsedUserData.role || parsedUserData.permissao || 'funcionario';
+    console.log('🔑 Verificando permissões:', { userRole, permissao: parsedUserData.permissao, role: parsedUserData.role })
+    
+    if (!['admin', 'financeiro'].includes(userRole)) {
+      console.log('❌ Permissão insuficiente:', userRole)
       return NextResponse.json({ error: 'Sem permissão para acessar configurações' }, { status: 403 });
     }
 
@@ -175,9 +178,12 @@ export async function POST(request: NextRequest) {
 
     const { bar_id, permissao } = parsedUserData;
 
-    // Verificar permissões
-    if (!['admin'].includes(permissao)) {
-      console.log('❌ Permissão insuficiente:', permissao)
+    // Verificar permissões - aceitar tanto 'role' quanto 'permissao'
+    const userRole = parsedUserData.role || parsedUserData.permissao || 'funcionario';
+    console.log('🔑 Verificando permissões:', { userRole, permissao: parsedUserData.permissao, role: parsedUserData.role })
+    
+    if (!['admin'].includes(userRole)) {
+      console.log('❌ Permissão insuficiente:', userRole)
       return NextResponse.json({ 
         error: 'Apenas administradores podem modificar configurações da Meta' 
       }, { status: 403 })
@@ -383,9 +389,12 @@ export async function PUT(request: NextRequest) {
 
     const { bar_id, permissao } = parsedUserData;
 
-    // Verificar permissões
-    if (!['admin', 'financeiro'].includes(permissao)) {
-      console.log('❌ Permissão insuficiente:', permissao)
+    // Verificar permissões - aceitar tanto 'role' quanto 'permissao'
+    const userRole = parsedUserData.role || parsedUserData.permissao || 'funcionario';
+    console.log('🔑 Verificando permissões:', { userRole, permissao: parsedUserData.permissao, role: parsedUserData.role })
+    
+    if (!['admin', 'financeiro'].includes(userRole)) {
+      console.log('❌ Permissão insuficiente:', userRole)
       return NextResponse.json({ 
         error: 'Sem permissão para testar configurações da Meta' 
       }, { status: 403 })

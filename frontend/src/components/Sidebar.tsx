@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useCallback, useMemo, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
+import { createPortal } from 'react-dom'
 import { useBar } from '@/contexts/BarContext'
 import { usePermissions } from '@/hooks/usePermissions'
 import { useSidebar } from '@/contexts/SidebarContext'
@@ -270,6 +271,20 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
     setHoveredSection(sectionId)
   }, [isSidebarCollapsed])
 
+  // Função para lidar com clique nas seções quando colapsada
+  const handleSectionClick = useCallback((section: MenuSection) => {
+    if (isSidebarCollapsed) {
+      // Se a seção tem apenas 1 item, navegar diretamente
+      if (section.items.length === 1) {
+        handleMenuClick(section.items[0].route)
+      }
+      // Se tem múltiplos itens, o tooltip já mostra as opções no hover
+    } else {
+      // Comportamento normal quando expandida
+      toggleSection(section.id)
+    }
+  }, [isSidebarCollapsed, handleMenuClick, toggleSection])
+
   // Memoizar o componente de botão para evitar re-renders
   const renderMenuButton = useCallback((item: MenuItem, isActive: boolean) => {
     return (
@@ -278,8 +293,8 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
         onClick={() => handleMenuClick(item.route)}
         disabled={isPending}
         className={`
-          group w-full flex items-center space-x-2 p-2 rounded-xl hover:bg-white/10 transition-colors disabled:opacity-50 text-sm font-medium
-          ${isSidebarCollapsed ? 'justify-center' : ''}
+          group w-full flex items-center rounded-xl hover:bg-white/10 transition-colors disabled:opacity-50 text-sm font-medium
+          ${isSidebarCollapsed ? 'justify-center p-1.5' : 'space-x-2 p-2'}
           ${isActive 
             ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm border border-white/30' 
             : 'text-slate-300 hover:text-white'
@@ -287,19 +302,21 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
         `}
         title={isSidebarCollapsed ? item.label : undefined}
       >
-        <div className="relative z-10 flex items-center w-full">
+        {isSidebarCollapsed ? (
           <span className={`text-lg transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
             {item.icon}
           </span>
-          {!isSidebarCollapsed && (
-            <>
-              <span className="flex-1 ml-3">{item.label}</span>
-              {isActive && (
-                <div className="w-2 h-2 bg-white rounded-full shadow-lg"></div>
-              )}
-            </>
-          )}
-        </div>
+        ) : (
+          <div className="relative z-10 flex items-center w-full">
+            <span className={`text-lg transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
+              {item.icon}
+            </span>
+            <span className="flex-1 ml-3">{item.label}</span>
+            {isActive && (
+              <div className="w-2 h-2 bg-white rounded-full shadow-lg"></div>
+            )}
+          </div>
+        )}
       </button>
     )
   }, [handleMenuClick, isPending, isSidebarCollapsed])
@@ -313,37 +330,46 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
       <div key={section.id} className="mb-2">
         {/* Header da seção */}
         <button
-          onClick={() => !isSidebarCollapsed && toggleSection(section.id)}
+          onClick={() => handleSectionClick(section)}
           onMouseEnter={(e) => handleSectionHover(section.id, e)}
           onMouseLeave={() => handleSectionHover(null)}
           className={`
-            group w-full flex items-center space-x-2 p-2 rounded-xl hover:bg-white/10 transition-colors
-            ${isSidebarCollapsed ? 'justify-center' : 'justify-between'} 
+            group w-full flex items-center rounded-xl hover:bg-white/10 transition-colors
+            ${isSidebarCollapsed ? 'justify-center p-1.5 cursor-pointer' : 'justify-between space-x-2 p-2 cursor-pointer'} 
             ${hasActiveItem 
               ? 'bg-white/20 text-white backdrop-blur-sm border border-white/30' 
               : 'text-slate-300 hover:text-white'
             }
-            ${isSidebarCollapsed ? 'cursor-default' : 'cursor-pointer'}
           `}
-          title={isSidebarCollapsed ? section.title : undefined}
+          title={isSidebarCollapsed ? (section.items.length === 1 ? `Ir para ${section.items[0].label}` : section.title) : undefined}
         >
-          <div className={`flex items-center z-10 ${isSidebarCollapsed ? 'justify-center' : 'space-x-3'}`}>
-            <span className={`text-lg transition-transform duration-300 ${hasActiveItem ? 'scale-110' : 'group-hover:scale-110'}`}>
-              {section.icon}
-            </span>
-            {!isSidebarCollapsed && (
-              <span className="font-semibold text-sm">{section.title}</span>
-            )}
-          </div>
-          {!isSidebarCollapsed && (
-            <svg 
-              className={`w-4 h-4 transition-all duration-300 ${isExpanded ? 'rotate-180 scale-110' : 'group-hover:scale-110'}`} 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
+          {isSidebarCollapsed ? (
+            <div className="relative">
+              <span className={`text-lg transition-transform duration-300 ${hasActiveItem ? 'scale-110' : 'group-hover:scale-110'}`}>
+                {section.icon}
+              </span>
+              {/* Indicador visual para seções com apenas 1 item (navegação direta) */}
+              {section.items.length === 1 && (
+                <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-400 rounded-full border border-slate-800"></div>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center space-x-3">
+                <span className={`text-lg transition-transform duration-300 ${hasActiveItem ? 'scale-110' : 'group-hover:scale-110'}`}>
+                  {section.icon}
+                </span>
+                <span className="font-semibold text-sm">{section.title}</span>
+              </div>
+              <svg 
+                className={`w-4 h-4 transition-all duration-300 ${isExpanded ? 'rotate-180 scale-110' : 'group-hover:scale-110'}`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </>
           )}
         </button>
 
@@ -353,7 +379,7 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
             overflow-hidden transition-all duration-500 ease-out
             ${isExpanded ? 'max-h-[500px] opacity-100 mt-2' : 'max-h-0 opacity-0'}
           `}>
-            <div className="space-y-1.5 pl-4 pr-2">
+            <div className={`space-y-1.5 ${isSidebarCollapsed ? 'px-1' : 'pl-4 pr-2'}`}>
               {section.items.map((item) => {
                 const isActive = pathname === item.route
                 return renderMenuButton(item, isActive)
@@ -363,7 +389,7 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
         )}
       </div>
     )
-  }, [expandedSections, pathname, toggleSection, renderMenuButton, isSidebarCollapsed, handleSectionHover])
+  }, [expandedSections, pathname, toggleSection, renderMenuButton, isSidebarCollapsed, handleSectionHover, handleSectionClick])
 
   return (
     <>
@@ -375,59 +401,65 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
         />
       )}
 
-      {/* Tooltip/Submenu para seções colapsadas */}
-      {isSidebarCollapsed && hoveredSection && (
-        <div 
-          className="fixed z-[60] bg-slate-800 border border-slate-700 rounded-xl shadow-2xl py-2 min-w-[200px] max-w-[250px]"
-          style={{
-            left: `${tooltipPosition.x}px`,
-            top: `${tooltipPosition.y}px`,
-          }}
-          onMouseEnter={() => setHoveredSection(hoveredSection)}
-          onMouseLeave={() => setHoveredSection(null)}
-        >
-          {(() => {
-            const section = visibleSections.find(s => s.id === hoveredSection)
-            if (!section) return null
-            
-            return (
-              <div>
-                <div className="px-3 py-2 border-b border-slate-700/50">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-lg">{section.icon}</span>
-                    <span className="text-sm font-semibold text-white">{section.title}</span>
+      {/* Tooltip/Submenu para seções colapsadas - RENDERIZADO VIA PORTAL */}
+      {isSidebarCollapsed && hoveredSection && typeof window !== 'undefined' &&
+        createPortal(
+          <div 
+            className="fixed bg-slate-800 border border-slate-700 rounded-xl shadow-2xl py-2 min-w-[200px] max-w-[250px]"
+            style={{
+              left: `${tooltipPosition.x}px`,
+              top: `${tooltipPosition.y}px`,
+              zIndex: 999999,
+              position: 'fixed',
+              pointerEvents: 'auto',
+            }}
+            onMouseEnter={() => setHoveredSection(hoveredSection)}
+            onMouseLeave={() => setHoveredSection(null)}
+          >
+            {(() => {
+              const section = visibleSections.find(s => s.id === hoveredSection)
+              if (!section) return null
+              
+              return (
+                <div>
+                  <div className="px-3 py-2 border-b border-slate-700/50">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-lg">{section.icon}</span>
+                      <span className="text-sm font-semibold text-white">{section.title}</span>
+                    </div>
+                  </div>
+                  <div className="py-1">
+                    {section.items.map((item) => {
+                      const isActive = pathname === item.route
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => handleMenuClick(item.route)}
+                          disabled={isPending}
+                          className={`
+                            w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-slate-700/50 transition-colors disabled:opacity-50 text-sm
+                            ${isActive 
+                              ? 'bg-slate-700/50 text-white' 
+                              : 'text-slate-300 hover:text-white'
+                            }
+                          `}
+                        >
+                          <span className="text-base">{item.icon}</span>
+                          <span className="flex-1">{item.label}</span>
+                          {isActive && (
+                            <div className="w-2 h-2 bg-white rounded-full shadow-lg"></div>
+                          )}
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
-                <div className="py-1">
-                  {section.items.map((item) => {
-                    const isActive = pathname === item.route
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => handleMenuClick(item.route)}
-                        disabled={isPending}
-                        className={`
-                          w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-slate-700/50 transition-colors disabled:opacity-50 text-sm
-                          ${isActive 
-                            ? 'bg-slate-700/50 text-white' 
-                            : 'text-slate-300 hover:text-white'
-                          }
-                        `}
-                      >
-                        <span className="text-base">{item.icon}</span>
-                        <span className="flex-1">{item.label}</span>
-                        {isActive && (
-                          <div className="w-2 h-2 bg-white rounded-full shadow-lg"></div>
-                        )}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            )
-          })()}
-        </div>
-      )}
+              )
+            })()}
+          </div>,
+          document.body
+        )
+      }
 
       {/* Sidebar */}
       <div className={`
@@ -441,19 +473,25 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
       `}>
         <div className="flex flex-col h-full">
           {/* Seletor de Bar integrado - agora no topo absoluto */}
-          <div className="p-3 border-b border-slate-700/50">
+          <div className={`border-b border-slate-700/50 ${isSidebarCollapsed ? 'px-2 py-3' : 'p-3'}`}>
             <div className="relative">
               <button
                 onClick={() => setShowBarMenu(!showBarMenu)}
-                className="w-full flex items-center space-x-2 p-2 rounded-xl hover:bg-white/10 transition-colors group"
+                className={`w-full flex items-center rounded-xl hover:bg-white/10 transition-colors group ${isSidebarCollapsed ? 'justify-center p-1.5' : 'space-x-2 p-2'}`}
               >
-                <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
-                  <span className="text-white text-sm font-bold">
-                    {selectedBar?.nome?.charAt(0)?.toUpperCase() || 'B'}
-                  </span>
-                </div>
-                {!isSidebarCollapsed && (
+                {isSidebarCollapsed ? (
+                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                    <span className="text-white text-sm font-bold">
+                      {selectedBar?.nome?.charAt(0)?.toUpperCase() || 'B'}
+                    </span>
+                  </div>
+                ) : (
                   <>
+                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                      <span className="text-white text-sm font-bold">
+                        {selectedBar?.nome?.charAt(0)?.toUpperCase() || 'B'}
+                      </span>
+                    </div>
                     <div className="flex-1 text-left">
                       <div className="text-sm font-semibold text-white">{selectedBar?.nome || 'Selecione'}</div>
                       <div className="text-xs text-slate-400">Estabelecimento</div>
@@ -475,7 +513,7 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
                   />
                   
                   {/* Menu */}
-                  <div className="absolute top-12 left-0 right-0 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 py-2 mx-2">
+                  <div className="absolute top-12 left-0 right-0 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-[200] py-2 mx-2">
                     <div className="py-2 max-h-60 overflow-y-auto">
                       {availableBars.map((bar: any) => (
                         <button
@@ -510,28 +548,36 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
           </div>
 
           {/* Botão fechar no mobile */}
-          <div className="lg:hidden p-3 border-b border-slate-700/50">
+          <div className={`lg:hidden border-b border-slate-700/50 ${isSidebarCollapsed ? 'px-2 py-3' : 'p-3'}`}>
             <button
               onClick={onToggle}
-              className="w-full flex items-center justify-center space-x-2 p-2 rounded-xl hover:bg-white/10 transition-colors group"
+              className={`w-full flex items-center rounded-xl hover:bg-white/10 transition-colors group ${isSidebarCollapsed ? 'justify-center p-1.5' : 'justify-center space-x-2 p-2'}`}
             >
-              <svg className="w-5 h-5 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              {!isSidebarCollapsed && <span className="ml-2 text-xs font-medium">Fechar</span>}
+              {isSidebarCollapsed ? (
+                <svg className="w-5 h-5 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <>
+                  <svg className="w-5 h-5 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <span className="ml-2 text-xs font-medium">Fechar</span>
+                </>
+              )}
             </button>
           </div>
 
           {/* Menu Items */}
-          <nav className="flex-1 p-3 space-y-1 overflow-y-auto sidebar-scroll">
+          <nav className={`flex-1 space-y-1 overflow-y-auto sidebar-scroll ${isSidebarCollapsed ? 'px-2 py-3' : 'p-3'}`}>
             {/* Botão Home - sempre visível no topo */}
             <div className="mb-2">
               <button
                 onClick={() => handleMenuClick('/home')}
                 disabled={isPending}
                 className={`
-                  group w-full flex items-center space-x-2 p-2 rounded-xl hover:bg-white/10 transition-colors disabled:opacity-50 font-medium
-                  ${isSidebarCollapsed ? 'justify-center' : ''}
+                  group w-full flex items-center rounded-xl hover:bg-white/10 transition-colors disabled:opacity-50 font-medium
+                  ${isSidebarCollapsed ? 'justify-center p-1.5' : 'space-x-2 p-2'}
                   ${pathname === '/home' 
                     ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm border border-white/30' 
                     : 'text-slate-300 hover:text-white'
@@ -539,19 +585,21 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
                 `}
                 title={isSidebarCollapsed ? "Home" : undefined}
               >
-                <div className="relative z-10 flex items-center w-full">
+                {isSidebarCollapsed ? (
                   <span className={`text-lg transition-transform duration-300 ${pathname === '/home' ? 'scale-110' : 'group-hover:scale-110'}`}>
                     🏠
                   </span>
-                  {!isSidebarCollapsed && (
-                    <>
-                      <span className="flex-1 ml-3">Home</span>
-                      {pathname === '/home' && (
-                        <div className="w-2 h-2 bg-white rounded-full shadow-lg"></div>
-                      )}
-                    </>
-                  )}
-                </div>
+                ) : (
+                  <div className="relative z-10 flex items-center w-full">
+                    <span className={`text-lg transition-transform duration-300 ${pathname === '/home' ? 'scale-110' : 'group-hover:scale-110'}`}>
+                      🏠
+                    </span>
+                    <span className="flex-1 ml-3">Home</span>
+                    {pathname === '/home' && (
+                      <div className="w-2 h-2 bg-white rounded-full shadow-lg"></div>
+                    )}
+                  </div>
+                )}
               </button>
             </div>
 
@@ -567,8 +615,8 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
                 onClick={() => handleMenuClick('/configuracoes')}
                 disabled={isPending}
                 className={`
-                  group w-full flex items-center space-x-2 p-2 rounded-xl hover:bg-white/10 transition-colors disabled:opacity-50 font-medium
-                  ${isSidebarCollapsed ? 'justify-center' : ''}
+                  group w-full flex items-center rounded-xl hover:bg-white/10 transition-colors disabled:opacity-50 font-medium
+                  ${isSidebarCollapsed ? 'justify-center p-1.5' : 'space-x-2 p-2'}
                   ${pathname === '/configuracoes' 
                     ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm border border-white/30' 
                     : 'text-slate-300 hover:text-white'
@@ -576,34 +624,42 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
                 `}
                 title={isSidebarCollapsed ? "Configurações" : undefined}
               >
-                <div className="relative z-10 flex items-center w-full">
+                {isSidebarCollapsed ? (
                   <span className={`text-lg transition-transform duration-300 ${pathname === '/configuracoes' ? 'scale-110' : 'group-hover:scale-110'}`}>
                     ⚙️
                   </span>
-                  {!isSidebarCollapsed && (
-                    <>
-                      <span className="flex-1 ml-3">Configurações</span>
-                      {pathname === '/configuracoes' && (
-                        <div className="w-2 h-2 bg-white rounded-full shadow-lg"></div>
-                      )}
-                    </>
-                  )}
-                </div>
+                ) : (
+                  <div className="relative z-10 flex items-center w-full">
+                    <span className={`text-lg transition-transform duration-300 ${pathname === '/configuracoes' ? 'scale-110' : 'group-hover:scale-110'}`}>
+                      ⚙️
+                    </span>
+                    <span className="flex-1 ml-3">Configurações</span>
+                    {pathname === '/configuracoes' && (
+                      <div className="w-2 h-2 bg-white rounded-full shadow-lg"></div>
+                    )}
+                  </div>
+                )}
               </button>
             )}
           </nav>
 
           {/* Footer */}
-          <div className="p-3 border-t border-slate-700/50">
+          <div className={`border-t border-slate-700/50 ${isSidebarCollapsed ? 'px-2 py-3' : 'p-3'}`}>
             {/* Botão de Logout */}
             <button
               onClick={handleLogout}
               disabled={isPending}
-              className={`group w-full flex items-center space-x-2 p-2 rounded-xl hover:bg-red-500/20 hover:text-red-300 transition-colors disabled:opacity-50 ${isSidebarCollapsed ? 'justify-center' : ''}`}
+              className={`group w-full flex items-center rounded-xl hover:bg-red-500/20 hover:text-red-300 transition-colors disabled:opacity-50 ${isSidebarCollapsed ? 'justify-center p-1.5' : 'space-x-2 p-2'}`}
               title={isSidebarCollapsed ? "Sair" : undefined}
             >
-              <span className="text-lg group-hover:scale-110 transition-transform duration-300">🚪</span>
-              {!isSidebarCollapsed && <span className="font-medium text-sm">Sair</span>}
+              {isSidebarCollapsed ? (
+                <span className="text-lg group-hover:scale-110 transition-transform duration-300">🚪</span>
+              ) : (
+                <>
+                  <span className="text-lg group-hover:scale-110 transition-transform duration-300">🚪</span>
+                  <span className="font-medium text-sm">Sair</span>
+                </>
+              )}
             </button>
           </div>
         </div>

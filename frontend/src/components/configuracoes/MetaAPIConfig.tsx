@@ -398,6 +398,16 @@ export default function MetaAPIConfig() {
   // ========================================
   return (
     <div className="space-y-6">
+      {/* Banner informativo */}
+      <Alert className="border-blue-200 bg-blue-50">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription className="text-blue-800">
+          <strong>Apenas administradores podem modificar configurações da Meta.</strong>
+          <br />
+          Para visualizar as configurações existentes, administradores e usuários financeiros têm acesso.
+        </AlertDescription>
+      </Alert>
+
       {/* Mensagens */}
       {message && (
         <Alert className={`${message.type === 'error' ? 'border-red-200' : 'border-green-200'}`}>

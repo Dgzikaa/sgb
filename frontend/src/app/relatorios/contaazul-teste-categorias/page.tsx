@@ -171,9 +171,11 @@ export default function TesteVisaoCompetenciaPage() {
 
       // Verificar última coleta
       const { data: configData } = await supabase
-        .from('contaazul_config')
+        .from('api_credentials')
         .select('ultima_sincronizacao')
         .eq('bar_id', selectedBar.id)
+        .eq('sistema', 'contaazul')
+        .eq('ativo', true)
         .single()
 
       if (configData?.ultima_sincronizacao) {

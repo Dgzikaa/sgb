@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseClient } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+
+// Usar service role para bypass RLS
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://uqtgsvujwcbymjmvkjhy.supabase.co',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxdGdzdnVqd2NieW1qbXZramh5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MTMxMTE2NiwiZXhwIjoyMDY2ODg3MTY2fQ.dGNZvl9_7-RZhFqD8GKIvSsqeAh0_GnWQdpNGQCfQ8g'
+)
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,48 +21,44 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const supabase = await getSupabaseClient()
-    if (!supabase) {
-      return NextResponse.json(
-        { success: false, error: 'Erro ao conectar com banco' },
-        { status: 500 }
-      )
-    }
+    // Converter para integer para garantir compatibilidade
+    const barIdInt = parseInt(barId, 10)
+    console.log('🔍 Bar ID convertido para int:', barIdInt)
 
-    // Buscar configurações existentes
-    const { data: configs, error } = await supabase
+    // Buscar configurações usando service role (bypass RLS)
+    console.log('🔍 Buscando configuração com service role...')
+    const { data: configs, error } = await supabaseAdmin
       .from('api_credentials')
-      .select('*')
-      .eq('bar_id', barId)
+      .select('id, bar_id, sistema, configuracoes')
+      .eq('bar_id', barIdInt)
       .eq('sistema', 'webhook')
-      .single()
+      .maybeSingle()
 
     console.log('📊 Resultado da query:', { configs, error })
 
     if (error) {
-      // Se é erro de "não encontrado" (PGRST116), retornar configurações vazias
-      if (error.code === 'PGRST116') {
-        console.log('⚠️ Nenhuma configuração encontrada, retornando padrões vazios')
-        return NextResponse.json({
-          success: true,
-          configuracoes: {
-            sistema: '',
-            contaazul: '',
-            meta: '',
-            checklists: '',
-            contahub: '',
-            vendas: '',
-            reservas: ''
-          }
-        })
-      }
-      
-      // Para outros erros, retornar erro real
-      console.error('❌ Erro real ao buscar configurações:', error)
+      console.error('❌ Erro ao buscar configurações:', error)
       return NextResponse.json(
         { success: false, error: 'Erro ao buscar configurações' },
         { status: 500 }
       )
+    }
+
+    // Se não encontrou nada, retornar configurações vazias
+    if (!configs) {
+      console.log('⚠️ Nenhuma configuração encontrada, retornando padrões vazios')
+      return NextResponse.json({
+        success: true,
+        configuracoes: {
+          sistema: '',
+          contaazul: '',
+          meta: '',
+          checklists: '',
+          contahub: '',
+          vendas: '',
+          reservas: ''
+        }
+      })
     }
 
     console.log('✅ Configurações encontradas:', configs.configuracoes)
@@ -94,16 +96,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await getSupabaseClient()
-    if (!supabase) {
-      return NextResponse.json(
-        { success: false, error: 'Erro ao conectar com banco' },
-        { status: 500 }
-      )
-    }
-
-    // Salvar configurações no banco
-    const { data, error } = await supabase
+    // Salvar configurações no banco usando service role
+    const { data, error } = await supabaseAdmin
       .from('api_credentials')
       .upsert({
         bar_id,

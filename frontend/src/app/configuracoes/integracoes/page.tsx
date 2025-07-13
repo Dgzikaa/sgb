@@ -36,10 +36,10 @@ export default function IntegracoesPage() {
   
   const [activeTab, setActiveTab] = useState('discord')
   
-  // Estados para webhooks Discord
+  // Estados para webhooks Discord - CORRIGIDO: inicializar vazio
   const [webhookConfigs, setWebhookConfigs] = useState({
-    sistema: 'https://discord.com/api/webhooks/1393646423748116602/3zUhIrSKFHmq0zNRLf5AzrkSZNzTj7oYk6f45Tpj2LZWChtmGTKKTHxhfaNZigyLXN4y',
-    contaazul: 'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ',
+    sistema: '',
+    contaazul: '',
     meta: '',
     checklists: '',
     contahub: '',
@@ -48,6 +48,7 @@ export default function IntegracoesPage() {
   })
   const [webhookLoading, setWebhookLoading] = useState(false)
   const [testingWebhook, setTestingWebhook] = useState<string | null>(null)
+  const [loadingConfigs, setLoadingConfigs] = useState(true)
 
   useEffect(() => {
     setPageTitle('Integrações')
@@ -63,10 +64,12 @@ export default function IntegracoesPage() {
   const loadWebhookConfigs = async () => {
     if (!selectedBar) {
       console.log('❌ Nenhum bar selecionado para carregar webhooks')
+      setLoadingConfigs(false)
       return
     }
     
     console.log('🔄 Carregando configurações de webhook para bar:', selectedBar.id)
+    setLoadingConfigs(true)
     
     try {
       const response = await fetch(`/api/configuracoes/webhooks?bar_id=${selectedBar.id}`)
@@ -78,15 +81,29 @@ export default function IntegracoesPage() {
         
         if (data.success && data.configuracoes) {
           console.log('✅ Aplicando configurações:', data.configuracoes)
-          setWebhookConfigs(data.configuracoes)
+          // Garantir que todas as propriedades existam
+          const configsCompletas = {
+            sistema: data.configuracoes.sistema || '',
+            contaazul: data.configuracoes.contaazul || '',
+            meta: data.configuracoes.meta || '',
+            checklists: data.configuracoes.checklists || '',
+            contahub: data.configuracoes.contahub || '',
+            vendas: data.configuracoes.vendas || '',
+            reservas: data.configuracoes.reservas || ''
+          }
+          setWebhookConfigs(configsCompletas)
+          console.log('📋 Configurações aplicadas no estado:', configsCompletas)
         } else {
-          console.log('⚠️ Dados não encontrados ou formato inesperado:', data)
+          console.log('⚠️ Dados não encontrados, mantendo configurações vazias')
+          // Manter o estado vazio se não encontrar dados
         }
       } else {
         console.error('❌ Erro na resposta da API:', response.status, response.statusText)
       }
     } catch (error) {
       console.error('❌ Erro ao carregar webhooks:', error)
+    } finally {
+      setLoadingConfigs(false)
     }
   }
 
@@ -350,8 +367,19 @@ export default function IntegracoesPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Webhook Sistema/Segurança */}
-                <div className="space-y-2">
+                <>
+                  {/* Loading State */}
+                  {loadingConfigs && (
+                    <div className="flex justify-center items-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                      <span className="ml-2 text-gray-600">Carregando configurações...</span>
+                    </div>
+                  )}
+                  
+                  {/* Webhook Sistema/Segurança */}
+                  {!loadingConfigs && (
+                    <div className="space-y-6">
+                      <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <Shield className="w-4 h-4 text-red-500" />
                     <Label htmlFor="webhook-sistema" className="font-medium">
@@ -642,6 +670,9 @@ export default function IntegracoesPage() {
                     {webhookLoading ? 'Salvando...' : 'Salvar Configurações'}
                   </Button>
                 </div>
+                    </div>
+                  )}
+                </>
               </CardContent>
             </Card>
           </TabsContent>

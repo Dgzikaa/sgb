@@ -9,6 +9,61 @@ const supabase = createClient(
 // Token de autenticação para pgcron
 const CRON_TOKEN = 'sgb-meta-cron-2025'
 
+// Função para buscar webhook da tabela api_credentials
+async function getWebhookUrl(barId: number, webhookType: string = 'sistema') {
+  const { data: webhookConfig, error } = await supabase
+    .from('api_credentials')
+    .select('configuracoes')
+    .eq('bar_id', barId)
+    .eq('sistema', 'webhook')
+    .eq('ativo', true)
+    .single()
+
+  if (error || !webhookConfig) {
+    console.warn(`⚠️ Webhook config não encontrada para bar ${barId}, usando fallback`)
+    return 'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ'
+  }
+
+  const webhook = webhookConfig.configuracoes[webhookType]
+  
+  if (!webhook || webhook.trim() === '') {
+    console.warn(`⚠️ Webhook ${webhookType} não configurado para bar ${barId}, usando sistema como fallback`)
+    return webhookConfig.configuracoes['sistema'] || 
+           'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ'
+  }
+
+  return webhook
+}
+
+// Função para enviar notificação Discord
+async function enviarNotificacaoDiscord(barId: number, message: string, isError: boolean = false) {
+  try {
+    const webhookUrl = await getWebhookUrl(barId, 'sistema')
+    
+    const embed = {
+      title: isError ? '❌ Erro na Coleta Meta' : '📊 Coleta Meta Automática',
+      description: message,
+      color: isError ? 0xff0000 : 0x00ff00,
+      timestamp: new Date().toISOString(),
+      footer: {
+        text: '🤖 Sistema de Gestão de Bares - Meta API'
+      }
+    }
+
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        embeds: [embed]
+      })
+    })
+
+    console.log('📱 Notificação Discord enviada')
+  } catch (error) {
+    console.error('❌ Erro ao enviar notificação Discord:', error)
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     console.log('🤖 Iniciando coleta automática Meta via pgcron...')
@@ -155,6 +210,25 @@ export async function POST(request: NextRequest) {
 
     console.log(`🎉 Coleta automática concluída: ${registrosProcessados}/2 plataformas`)
 
+    // 5. NOTIFICAR DISCORD
+    const discordMessage = results.success 
+      ? `🎯 **Coleta Meta Automática Concluída!**\n\n` +
+        `🏢 **Bar ID:** ${3}\n` +
+        `⏰ **Horário:** ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}\n` +
+        `📈 **Plataformas Coletadas:** ${registrosProcessados}/2\n` +
+        `📊 **API Calls:** ${results.summary.total_api_calls}\n` +
+        `⚡ **Duração:** ${Math.round(results.summary.total_duration_ms / 1000)}s\n\n` +
+        `✅ **Instagram:** ${results.summary.instagram_success ? 'Sucesso' : 'Erro'}\n` +
+        `✅ **Facebook:** ${results.summary.facebook_success ? 'Sucesso' : 'Erro'}\n\n` +
+        `🔄 **Próxima coleta:** ${getNextCollectionTime()}`
+      : `❌ **Erro na Coleta Meta!**\n\n` +
+        `🏢 **Bar ID:** ${3}\n` +
+        `⏰ **Horário:** ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}\n` +
+        `🚨 **Erros:** ${results.summary.errors.join(', ')}\n\n` +
+        `📊 **Tentativas:** ${registrosProcessados}/2 plataformas`
+    
+    await enviarNotificacaoDiscord(3, discordMessage, !results.success)
+
     return NextResponse.json({
       ...results,
       results: {
@@ -167,6 +241,9 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('💥 Erro crítico na coleta automática:', error)
+    
+    // Notificar Discord sobre erro crítico
+    await enviarNotificacaoDiscord(3, `💥 **Erro Crítico na Coleta Meta!**\n\n🚨 **Erro:** ${error.message}\n⏰ **Horário:** ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`, true)
     
     // Log de erro crítico
     await supabase
