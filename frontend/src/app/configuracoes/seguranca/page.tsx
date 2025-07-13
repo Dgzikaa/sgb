@@ -134,6 +134,20 @@ export default function SecurityPage() {
     }
   }
 
+  const getRiskScoreColor = (score: number) => {
+    if (score >= 80) return 'text-red-600 dark:text-red-400 font-bold'
+    if (score >= 50) return 'text-yellow-600 dark:text-yellow-400 font-semibold'
+    if (score >= 20) return 'text-blue-600 dark:text-blue-400 font-medium'
+    return 'text-green-600 dark:text-green-400 font-medium'
+  }
+
+  const getRiskScoreLabel = (score: number) => {
+    if (score >= 80) return 'ALTO'
+    if (score >= 50) return 'MÉDIO'
+    if (score >= 20) return 'BAIXO'
+    return 'MÍNIMO'
+  }
+
   const formatTimestamp = (timestamp: string) => {
     return new Date(timestamp).toLocaleString('pt-BR')
   }
@@ -337,7 +351,7 @@ export default function SecurityPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {events.length === 0 ? (
               <div className="text-center py-8">
                 <Shield className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -346,24 +360,66 @@ export default function SecurityPage() {
               </div>
             ) : (
               events.slice(0, 10).map((event) => (
-                <div key={event.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center gap-3">
-                    <Badge className={getLevelColor(event.level)} variant="outline">
-                      {event.level}
-                    </Badge>
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-gray-100">{event.event_type}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{event.message}</p>
-                      {event.ip_address && (
-                        <p className="text-xs text-gray-500 dark:text-gray-500">IP: {event.ip_address}</p>
-                      )}
+                <div key={event.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800 hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Badge className={getLevelColor(event.level)} variant="outline">
+                          {event.level.toUpperCase()}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {event.category.toUpperCase()}
+                        </Badge>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          Risco: <span className={getRiskScoreColor(event.details?.risk_score || 0)}>
+                            {event.details?.risk_score || 'N/A'}/100 ({getRiskScoreLabel(event.details?.risk_score || 0)})
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div>
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Evento:</span>
+                          <span className="ml-2 text-sm text-gray-900 dark:text-gray-100 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                            {event.event_type}
+                          </span>
+                        </div>
+                        
+                        <div>
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Descrição:</span>
+                          <span className="ml-2 text-sm text-gray-900 dark:text-gray-100">
+                            {event.message}
+                          </span>
+                        </div>
+                        
+                        {event.ip_address && (
+                          <div>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">IP:</span>
+                            <span className="ml-2 text-sm text-gray-900 dark:text-gray-100 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                              {event.ip_address}
+                            </span>
+                          </div>
+                        )}
+                        
+                        {event.details && Object.keys(event.details).length > 0 && (
+                          <div>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Detalhes:</span>
+                            <div className="ml-2 text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 p-2 rounded mt-1 font-mono">
+                              {JSON.stringify(event.details, null, 2)}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{formatTimestamp(event.timestamp)}</p>
-                    <Badge variant="outline" className="text-xs mt-1">
-                      {event.category}
-                    </Badge>
+                    
+                    <div className="text-right ml-4">
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+                        {formatTimestamp(event.timestamp)}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {new Date(event.timestamp).toLocaleDateString('pt-BR')}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))
@@ -381,7 +437,7 @@ export default function SecurityPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {auditLogs.length === 0 ? (
               <div className="text-center py-8">
                 <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -390,20 +446,53 @@ export default function SecurityPage() {
               </div>
             ) : (
               auditLogs.slice(0, 10).map((log) => (
-                <div key={log.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center gap-3">
-                    <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-gray-100">{log.action}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Recurso: {log.resource}</p>
-                      {log.ip_address && (
-                        <p className="text-xs text-gray-500 dark:text-gray-500">IP: {log.ip_address}</p>
-                      )}
+                <div key={log.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800 hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-3 flex-1">
+                      <Users className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                      <div className="flex-1">
+                        <div className="space-y-2">
+                          <div>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Ação:</span>
+                            <span className="ml-2 text-sm text-gray-900 dark:text-gray-100 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                              {log.action}
+                            </span>
+                          </div>
+                          
+                          <div>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Recurso:</span>
+                            <span className="ml-2 text-sm text-gray-900 dark:text-gray-100">
+                              {log.resource}
+                            </span>
+                          </div>
+                          
+                          <div>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Usuário:</span>
+                            <span className="ml-2 text-sm text-gray-900 dark:text-gray-100 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                              {log.user_id}
+                            </span>
+                          </div>
+                          
+                          {log.ip_address && (
+                            <div>
+                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">IP:</span>
+                              <span className="ml-2 text-sm text-gray-900 dark:text-gray-100 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                                {log.ip_address}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{formatTimestamp(log.timestamp)}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-500">User: {log.user_id}</p>
+                    
+                    <div className="text-right ml-4">
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+                        {formatTimestamp(log.timestamp)}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {new Date(log.timestamp).toLocaleDateString('pt-BR')}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))
