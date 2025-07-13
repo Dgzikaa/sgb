@@ -102,11 +102,21 @@ export default function ConfiguracaoPage() {
   // useEffect para carregar dados
   useEffect(() => {
     if (selectedBar?.id) {
+      console.log('🔄 Carregando dados para bar:', selectedBar.id)
       carregarUsuarios()
       carregarFuncoes()
       carregarStatsImportacao()
     }
   }, [selectedBar?.id])
+
+  // useEffect para monitorar mudanças nas funções
+  useEffect(() => {
+    console.log('🔄 Estado das funções alterado:', { 
+      quantidade: funcoes.length, 
+      carregando: carregandoFuncoes,
+      funcoes: funcoes 
+    })
+  }, [funcoes, carregandoFuncoes])
 
   // Carregar funções disponíveis
   const carregarFuncoes = async () => {
@@ -116,28 +126,35 @@ export default function ConfiguracaoPage() {
       const response = await fetch('/api/usuarios/funcoes')
       const data = await response.json()
       
-      if (data.success) {
+      console.log('📡 Resposta da API funcoes:', data)
+      
+      if (data.success && data.funcoes) {
         setFuncoes(data.funcoes)
-        console.log('✅ Funções carregadas:', data.funcoes)
+        console.log('✅ Funções carregadas com sucesso:', data.funcoes)
       } else {
         console.error('❌ Erro ao buscar funções:', data)
         // Usar funções padrão em caso de erro
-        setFuncoes([
+        const funcoesDefault = [
           { id: 'funcionario', nome: 'Funcionário', descricao: 'Acesso básico', nivel: 1, cor: 'bg-blue-100 text-blue-800 border-blue-200', icone: '👤' },
           { id: 'gerente', nome: 'Gerente', descricao: 'Acesso intermediário', nivel: 2, cor: 'bg-yellow-100 text-yellow-800 border-yellow-200', icone: '👨‍💼' },
           { id: 'admin', nome: 'Administrador', descricao: 'Acesso completo', nivel: 3, cor: 'bg-red-100 text-red-800 border-red-200', icone: '👑' }
-        ])
+        ]
+        setFuncoes(funcoesDefault)
+        console.log('✅ Usando funções padrão:', funcoesDefault)
       }
     } catch (error) {
       console.error('❌ Erro ao carregar funções:', error)
       // Usar funções padrão em caso de erro
-      setFuncoes([
+      const funcoesDefault = [
         { id: 'funcionario', nome: 'Funcionário', descricao: 'Acesso básico', nivel: 1, cor: 'bg-blue-100 text-blue-800 border-blue-200', icone: '👤' },
         { id: 'gerente', nome: 'Gerente', descricao: 'Acesso intermediário', nivel: 2, cor: 'bg-yellow-100 text-yellow-800 border-yellow-200', icone: '👨‍💼' },
         { id: 'admin', nome: 'Administrador', descricao: 'Acesso completo', nivel: 3, cor: 'bg-red-100 text-red-800 border-red-200', icone: '👑' }
-      ])
+      ]
+      setFuncoes(funcoesDefault)
+      console.log('✅ Usando funções padrão após erro:', funcoesDefault)
     } finally {
       setCarregandoFuncoes(false)
+      console.log('🔄 Estado carregandoFuncoes definido como false')
     }
   }
 
@@ -581,6 +598,8 @@ export default function ConfiguracaoPage() {
                               size="sm"
                               variant="outline"
                               onClick={() => {
+                                console.log('🔧 Editando usuário:', usuario)
+                                console.log('🔧 Funções disponíveis:', funcoes)
                                 setEditandoUsuario({ ...usuario })
                                 setModalEditarUsuario(true)
                               }}
@@ -1007,6 +1026,11 @@ export default function ConfiguracaoPage() {
           <div className="flex-1 overflow-y-auto p-6">
             {editandoUsuario && (
               <div className="space-y-6">
+                {/* DEBUG: Mostrar dados do usuário e funções */}
+                <div className="bg-gray-100 p-2 rounded text-xs">
+                  <p><strong>Debug:</strong> Usuário: {editandoUsuario.nome} | Role: {editandoUsuario.role}</p>
+                  <p><strong>Funções:</strong> {funcoes.length} carregadas | Carregando: {carregandoFuncoes ? 'Sim' : 'Não'}</p>
+                </div>
                 <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                     👤 Informações do Usuário
@@ -1043,19 +1067,32 @@ export default function ConfiguracaoPage() {
                         🏷️ Função
                       </Label>
                       <Select 
-                        value={editandoUsuario.role} 
-                        onValueChange={(value) => setEditandoUsuario((prev: any) => prev ? { ...prev, role: value } : null)}
+                        value={editandoUsuario?.role || ''} 
+                        onValueChange={(value) => {
+                          console.log('🔄 Alterando função para:', value)
+                          setEditandoUsuario((prev: any) => prev ? { ...prev, role: value } : null)
+                        }}
                         disabled={carregandoFuncoes}
                       >
                         <SelectTrigger className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 text-gray-900">
                           <SelectValue placeholder={carregandoFuncoes ? "Carregando funções..." : "Selecione uma função"} />
                         </SelectTrigger>
                         <SelectContent>
-                          {funcoes.map((funcao) => (
-                            <SelectItem key={funcao.id} value={funcao.id}>
-                              {funcao.icone} {funcao.nome}
-                            </SelectItem>
-                          ))}
+                          {!carregandoFuncoes && funcoes.length > 0 ? (
+                            funcoes.map((funcao) => (
+                              <SelectItem key={funcao.id} value={funcao.id}>
+                                {funcao.icone} {funcao.nome}
+                              </SelectItem>
+                            ))
+                          ) : !carregandoFuncoes ? (
+                            <>
+                              <SelectItem value="funcionario">👤 Funcionário</SelectItem>
+                              <SelectItem value="gerente">👨‍💼 Gerente</SelectItem>
+                              <SelectItem value="admin">👑 Administrador</SelectItem>
+                            </>
+                          ) : (
+                            <SelectItem value="" disabled>Carregando funções...</SelectItem>
+                          )}
                         </SelectContent>
                       </Select>
                     </div>

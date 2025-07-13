@@ -37,6 +37,7 @@ interface Meta {
   valor_semanal: number | null;
   valor_mensal: number | null;
   valor_unico: number | null;
+  valor_diario: number | null;
   unidade: string;
   meta_ativa: boolean;
   descricao: string;
@@ -108,19 +109,30 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
 
   const IconComponent = IconMap[meta.icone_categoria] || Target;
 
+  // Determinar se é uma meta única ou por períodos
+  const isMetaUnica = meta.valor_unico !== null && meta.valor_unico !== undefined;
+  const isMetaPeriodos = (meta.valor_semanal !== null && meta.valor_semanal !== undefined) || 
+                         (meta.valor_mensal !== null && meta.valor_mensal !== undefined);
+
   const handleSave = () => {
-    const valoresLimpos = {
-      valor_semanal: valores.valor_semanal ? parseFloat(valores.valor_semanal.replace(/[^\d.,]/g, '').replace(',', '.')) : null,
-      valor_mensal: valores.valor_mensal ? parseFloat(valores.valor_mensal.replace(/[^\d.,]/g, '').replace(',', '.')) : null,
-      valor_unico: valores.valor_unico ? parseFloat(valores.valor_unico.replace(/[^\d.,]/g, '').replace(',', '.')) : null
-    };
-    onSave(valoresLimpos);
+    if (isMetaUnica) {
+      const valoresLimpos = {
+        valor_unico: valores.valor_unico ? parseFloat(valores.valor_unico.replace(/[^\d.,]/g, '').replace(',', '.')) : null
+      };
+      onSave(valoresLimpos);
+    } else {
+      const valoresLimpos = {
+        valor_semanal: valores.valor_semanal ? parseFloat(valores.valor_semanal.replace(/[^\d.,]/g, '').replace(',', '.')) : null,
+        valor_mensal: valores.valor_mensal ? parseFloat(valores.valor_mensal.replace(/[^\d.,]/g, '').replace(',', '.')) : null
+      };
+      onSave(valoresLimpos);
+    }
   };
 
   return (
     <Card className="transition-all duration-200 hover:shadow-md bg-white border-l-4 shadow-sm"
-    style={{ borderLeftColor: meta.cor_categoria }}>
-      <CardHeader className="pb-4">
+          style={{ borderLeftColor: meta.cor_categoria }}>
+      <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-opacity-10"
@@ -139,127 +151,116 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
               )}
             </div>
           </div>
-          <div className="flex items-center gap-1">
-            {!isEditing ? (
+          
+          {!isEditing ? (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onEdit}
+              className="h-8 w-8 p-0 hover:bg-gray-100"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          ) : (
+            <div className="flex gap-1">
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={onEdit}
-                className="h-8 w-8 p-0 hover:bg-gray-100"
+                onClick={handleSave}
+                disabled={isSaving}
+                className="h-8 w-8 p-0 hover:bg-green-100 text-green-600"
               >
-                <Edit className="h-4 w-4" />
+                {isSaving ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
               </Button>
-            ) : (
-              <div className="flex gap-1">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="h-8 w-8 p-0 hover:bg-green-100 text-green-600"
-                >
-                  {isSaving ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Save className="h-4 w-4" />
-                  )}
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={onCancel}
-                  disabled={isSaving}
-                  className="h-8 w-8 p-0 hover:bg-red-100 text-red-600"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onCancel}
+                disabled={isSaving}
+                className="h-8 w-8 p-0 hover:bg-red-100 text-red-600"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </CardHeader>
       
-      <CardContent className="pt-0">
-        <div className="space-y-4">
-          {/* Valor Semanal */}
-          {(meta.valor_semanal !== null || isEditing) && (
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">
-                Meta Semanal
+      <CardContent>
+        <div className="space-y-3">
+          {/* Meta Única - para metas como Ticket Médio */}
+          {isMetaUnica && (
+            <div className="flex items-center gap-3">
+              <Label className="text-sm font-medium text-gray-700 w-20">
+                Meta
               </Label>
               {isEditing ? (
-                <Input
-                  type="text"
-                  value={valores.valor_semanal}
-                  onChange={(e) => setValores(prev => ({ ...prev, valor_semanal: e.target.value }))}
-                  placeholder="Digite a meta semanal"
-                  className="h-9 text-sm"
-                />
-              ) : (
-                <div className="bg-gray-50 border border-gray-200 rounded-md px-3 py-2">
-                  <span className="text-sm font-semibold text-gray-900">
-                    {formatarValor(meta.valor_semanal, meta.tipo_valor)}
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Valor Mensal */}
-          {(meta.valor_mensal !== null || isEditing) && (
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">
-                Meta Mensal
-              </Label>
-              {isEditing ? (
-                <Input
-                  type="text"
-                  value={valores.valor_mensal}
-                  onChange={(e) => setValores(prev => ({ ...prev, valor_mensal: e.target.value }))}
-                  placeholder="Digite a meta mensal"
-                  className="h-9 text-sm"
-                />
-              ) : (
-                <div className="bg-gray-50 border border-gray-200 rounded-md px-3 py-2">
-                  <span className="text-sm font-semibold text-gray-900">
-                    {formatarValor(meta.valor_mensal, meta.tipo_valor)}
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Valor Único */}
-          {(meta.valor_unico !== null || isEditing) && (
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">
-                Meta Única
-              </Label>
-              {isEditing ? (
-                <Input
+                <input
                   type="text"
                   value={valores.valor_unico}
                   onChange={(e) => setValores(prev => ({ ...prev, valor_unico: e.target.value }))}
-                  placeholder="Digite a meta única"
-                  className="h-9 text-sm"
+                  placeholder="0,00"
+                  className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               ) : (
-                <div className="bg-gray-50 border border-gray-200 rounded-md px-3 py-2">
-                  <span className="text-sm font-semibold text-gray-900">
-                    {formatarValor(meta.valor_unico, meta.tipo_valor)}
-                  </span>
+                <div className="flex-1 text-sm font-medium text-gray-900">
+                  {formatarValor(meta.valor_unico, meta.tipo_valor)}
                 </div>
               )}
             </div>
           )}
 
-          {/* Descrição */}
-          {meta.descricao && (
-            <div className="pt-2 border-t border-gray-100">
-              <p className="text-xs text-gray-500 leading-relaxed">
-                {meta.descricao}
-              </p>
-            </div>
+          {/* Metas por Períodos - para metas como Faturamento */}
+          {isMetaPeriodos && (
+            <>
+              {/* Valor Semanal */}
+              {(meta.valor_semanal !== null || isEditing) && (
+                <div className="flex items-center gap-3">
+                  <Label className="text-sm font-medium text-gray-700 w-20">
+                    Semanal
+                  </Label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={valores.valor_semanal}
+                      onChange={(e) => setValores(prev => ({ ...prev, valor_semanal: e.target.value }))}
+                      placeholder="0,00"
+                      className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  ) : (
+                    <div className="flex-1 text-sm font-medium text-gray-900">
+                      {formatarValor(meta.valor_semanal, meta.tipo_valor)}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Valor Mensal */}
+              {(meta.valor_mensal !== null || isEditing) && (
+                <div className="flex items-center gap-3">
+                  <Label className="text-sm font-medium text-gray-700 w-20">
+                    Mensal
+                  </Label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={valores.valor_mensal}
+                      onChange={(e) => setValores(prev => ({ ...prev, valor_mensal: e.target.value }))}
+                      placeholder="0,00"
+                      className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  ) : (
+                    <div className="flex-1 text-sm font-medium text-gray-900">
+                      {formatarValor(meta.valor_mensal, meta.tipo_valor)}
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
       </CardContent>

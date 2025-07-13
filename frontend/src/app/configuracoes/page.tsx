@@ -523,21 +523,31 @@ function ConfiguracoesContent() {
 
   // Função para formatar data
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    // Usar timezone de Brasília
-    return date.toLocaleDateString('pt-BR', {
-      timeZone: 'America/Sao_Paulo',
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
+    if (!dateString) return 'Data não disponível'
+    
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) return 'Data inválida'
+      
+      // Usar timezone de Brasília
+      return date.toLocaleDateString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    } catch (error) {
+      return 'Erro ao formatar data'
+    }
   }
 
   // Função para cor do nível de severidade
   const getLevelColor = (level: string) => {
-    switch (level) {
+    if (!level) return 'bg-gray-500 text-white'
+    
+    switch (level.toLowerCase()) {
       case 'critical': return 'bg-red-500 text-white'
       case 'warning': return 'bg-yellow-500 text-white'
       case 'info': return 'bg-blue-500 text-white'
@@ -547,6 +557,7 @@ function ConfiguracoesContent() {
 
   // Função para cor do risco
   const getRiskColor = (score: number) => {
+    if (typeof score !== 'number' || isNaN(score)) return 'text-gray-600'
     if (score >= 80) return 'text-red-600'
     if (score >= 50) return 'text-yellow-600'
     return 'text-green-600'
@@ -554,6 +565,8 @@ function ConfiguracoesContent() {
 
   // Função para mascarar dados sensíveis
   const maskSensitiveData = (data: string) => {
+    if (!data || typeof data !== 'string') return 'N/A'
+    
     if (!showSensitiveData) {
       if (data.includes('@')) {
         // Email
@@ -668,8 +681,8 @@ function ConfiguracoesContent() {
         body: JSON.stringify({
           bar_id: selectedBar.id,
           webhook_type: webhookType,
-          title: `🧪 Teste de Webhook - ${webhookType.toUpperCase()}`,
-          description: `Este é um teste do webhook **${webhookType}** configurado para o bar **${selectedBar.id}**.\n\n✅ Se você está vendo esta mensagem, o webhook está funcionando corretamente!`,
+          title: `🧪 Teste de Webhook - ${webhookType ? webhookType.toUpperCase() : 'UNKNOWN'}`,
+          description: `Este é um teste do webhook **${webhookType || 'unknown'}** configurado para o bar **${selectedBar.id}**.\n\n✅ Se você está vendo esta mensagem, o webhook está funcionando corretamente!`,
           color: getWebhookColor(webhookType),
           fields: [
             {
@@ -679,7 +692,7 @@ function ConfiguracoesContent() {
             },
             {
               name: '🔗 Tipo de Webhook',
-              value: webhookType.charAt(0).toUpperCase() + webhookType.slice(1),
+              value: webhookType ? (webhookType.charAt(0).toUpperCase() + webhookType.slice(1)) : 'Unknown',
               inline: true
             },
             {
@@ -721,6 +734,8 @@ function ConfiguracoesContent() {
 
   // Função para obter cor do webhook
   const getWebhookColor = (webhookType: string) => {
+    if (!webhookType) return 0x808080
+    
     const colors = {
       sistema: 0xff0000,     // Vermelho
       contaazul: 0x0066cc,   // Azul
@@ -1511,13 +1526,13 @@ function ConfiguracoesContent() {
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                   <Badge className={getLevelColor(event.level)}>
-                                    {event.level.toUpperCase()}
+                                    {event.level ? event.level.toUpperCase() : 'UNKNOWN'}
                                   </Badge>
-                                  <span className="font-medium">{event.event_type}</span>
+                                  <span className="font-medium">{event.event_type || 'Unknown Event'}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <span className={`text-sm font-medium ${getRiskColor(event.risk_score)}`}>
-                                    Risco: {event.risk_score}/100
+                                    Risco: {event.risk_score || 0}/100
                                   </span>
                                   <span className="text-xs text-gray-500">
                                     {formatDate(event.timestamp)}
@@ -1530,7 +1545,7 @@ function ConfiguracoesContent() {
                                   <strong>IP:</strong> {maskSensitiveData(event.ip_address || 'N/A')}
                                 </div>
                                 <div>
-                                  <strong>Categoria:</strong> {event.category}
+                                  <strong>Categoria:</strong> {event.category || 'N/A'}
                                 </div>
                                 <div>
                                   <strong>Endpoint:</strong> {event.endpoint || 'N/A'}
@@ -1559,16 +1574,16 @@ function ConfiguracoesContent() {
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                   <Badge className={getLevelColor(log.severity)}>
-                                    {log.severity.toUpperCase()}
+                                    {log.severity ? log.severity.toUpperCase() : 'UNKNOWN'}
                                   </Badge>
-                                  <span className="font-medium">{log.operation}</span>
+                                  <span className="font-medium">{log.operation || 'Unknown Operation'}</span>
                                 </div>
                                 <span className="text-xs text-gray-500">
                                   {formatDate(log.timestamp)}
                                 </span>
                               </div>
                               
-                              <p className="text-sm">{log.description}</p>
+                              <p className="text-sm">{log.description || 'No description available'}</p>
                               
                               <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-xs">
                                 <div>
