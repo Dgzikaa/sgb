@@ -2456,3 +2456,1237 @@ main .info-text,
 .card .info-text {
   color: #2563eb !important;
 }
+
+/* ============================================
+   RESPONSIVIDADE UNIVERSAL - MOBILE FIRST  
+   ============================================ */
+
+/* Containers responsivos */
+.container-responsive {
+  @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.content-padding {
+  @apply p-4 sm:p-6 lg:p-8;
+}
+
+/* TABELAS RESPONSIVAS */
+.table-responsive {
+  @apply w-full overflow-x-auto rounded-lg border border-gray-200 shadow-sm;
+}
+
+.table-mobile {
+  @apply w-full min-w-full divide-y divide-gray-200 bg-white;
+}
+
+.table-mobile thead {
+  @apply bg-gradient-to-r from-gray-50 to-gray-100;
+}
+
+.table-mobile th {
+  @apply px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+  @apply sm:px-4 sm:py-4 sm:text-sm;
+}
+
+.table-mobile td {
+  @apply px-3 py-3 text-sm text-gray-900 border-b border-gray-100;
+  @apply sm:px-4 sm:py-4;
+}
+
+.table-mobile tbody tr:hover {
+  @apply bg-gray-50;
+}
+
+/* Tabelas com scroll horizontal em mobile */
+.table-scroll-mobile {
+  @apply block overflow-x-auto whitespace-nowrap;
+  @apply md:table md:overflow-x-visible md:whitespace-normal;
+}
+
+/* CARDS RESPONSIVOS */
+.card-responsive {
+  @apply bg-white rounded-lg border border-gray-200 shadow-sm;
+  @apply p-4 sm:p-6;
+  @apply mb-4 sm:mb-6;
+}
+
+.card-grid {
+  @apply grid gap-4;
+  @apply grid-cols-1;
+  @apply sm:grid-cols-2;
+  @apply lg:grid-cols-3;
+  @apply xl:grid-cols-4;
+}
+
+.card-grid-2 {
+  @apply grid gap-4;
+  @apply grid-cols-1;
+  @apply md:grid-cols-2;
+}
+
+.card-grid-stats {
+  @apply grid gap-4;
+  @apply grid-cols-2;
+  @apply sm:grid-cols-3;
+  @apply lg:grid-cols-6;
+}
+
+/* BOTÕES TOUCH-FRIENDLY */
+.btn-touch {
+  @apply min-h-[44px] min-w-[44px];
+  @apply px-4 py-2;
+  @apply sm:min-h-[40px] sm:min-w-[40px];
+  @apply sm:px-3 sm:py-2;
+}
+
+.btn-icon-touch {
+  @apply w-11 h-11 p-2;
+  @apply sm:w-9 sm:h-9 sm:p-2;
+}
+
+.btn-group-mobile {
+  @apply flex flex-col gap-2;
+  @apply sm:flex-row sm:gap-3;
+}
+
+/* FORMULÁRIOS RESPONSIVOS */
+.form-grid {
+  @apply grid gap-4;
+  @apply grid-cols-1;
+  @apply sm:grid-cols-2;
+  @apply lg:grid-cols-3;
+}
+
+.form-group {
+  @apply space-y-2;
+  @apply mb-4 sm:mb-6;
+}
+
+.input-mobile {
+  @apply min-h-[44px];
+  @apply px-4 py-3;
+  @apply text-base;
+  @apply sm:min-h-[40px] sm:px-3 sm:py-2 sm:text-sm;
+}
+
+.select-mobile {
+  @apply min-h-[44px];
+  @apply sm:min-h-[40px];
+}
+
+/* MODAIS RESPONSIVOS */
+.modal-mobile {
+  @apply fixed inset-0 z-50;
+  @apply p-2 sm:p-4;
+  @apply overflow-y-auto;
+}
+
+.modal-content-mobile {
+  @apply relative w-full max-w-lg mx-auto;
+  @apply mt-8 mb-8;
+  @apply bg-white rounded-lg shadow-xl;
+  @apply sm:max-w-2xl;
+  @apply lg:max-w-4xl;
+}
+
+.modal-fullscreen-mobile {
+  @apply fixed inset-0 z-50 bg-white;
+  @apply p-4;
+  @apply overflow-y-auto;
+  @apply sm:relative sm:max-w-4xl sm:mx-auto sm:mt-8 sm:rounded-lg sm:shadow-xl;
+}
+
+/* NAVEGAÇÃO RESPONSIVA */
+.nav-mobile {
+  @apply flex flex-col gap-2;
+  @apply sm:flex-row sm:gap-4;
+}
+
+.breadcrumb-mobile {
+  @apply flex flex-wrap items-center gap-2 text-sm;
+  @apply sm:gap-3;
+}
+
+/* ESPAÇAMENTOS RESPONSIVOS */
+.space-y-mobile {
+  @apply space-y-4 sm:space-y-6 lg:space-y-8;
+}
+
+.gap-mobile {
+  @apply gap-4 sm:gap-6 lg:gap-8;
+}
+
+/* TIPOGRAFIA RESPONSIVA */
+.text-responsive-xs {
+  @apply text-sm sm:text-xs;
+}
+
+.text-responsive-sm {
+  @apply text-base sm:text-sm;
+}
+
+.text-responsive-lg {
+  @apply text-xl sm:text-lg;
+}
+
+.text-responsive-xl {
+  @apply text-2xl sm:text-xl;
+}
+
+.text-responsive-2xl {
+  @apply text-3xl sm:text-2xl;
+}
+
+/* UTILITÁRIOS MOBILE */
+.hidden-mobile {
+  @apply hidden sm:block;
+}
+
+.visible-mobile {
+  @apply block sm:hidden;
+}
+
+.stack-mobile {
+  @apply flex flex-col gap-2;
+  @apply sm:flex-row sm:gap-4 sm:items-center;
+}
+
+/* FILTROS E SEARCH RESPONSIVOS */
+.filter-section-mobile {
+  @apply bg-white rounded-lg p-4 border border-gray-200 shadow-sm;
+  @apply space-y-4;
+  @apply sm:p-6;
+}
+
+.search-input-mobile {
+  @apply w-full min-h-[44px] px-4 py-3;
+  @apply border border-gray-300 rounded-lg;
+  @apply focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+  @apply sm:min-h-[40px] sm:px-3 sm:py-2;
+}
+
+/* BADGES E TAGS RESPONSIVOS */
+.badge-mobile {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+  @apply sm:px-2 sm:py-0.5 sm:text-xs;
+}
+
+/* STATS E MÉTRICAS RESPONSIVOS */
+.stat-card {
+  @apply bg-white rounded-lg border border-gray-200 p-4 text-center;
+  @apply hover:shadow-md transition-shadow;
+  @apply sm:p-6;
+}
+
+.stat-value {
+  @apply text-2xl font-bold text-gray-900;
+  @apply sm:text-3xl;
+}
+
+.stat-label {
+  @apply text-sm text-gray-600 mt-1;
+  @apply sm:text-base;
+}
+
+/* AÇÕES DE TABELA RESPONSIVAS */
+.table-actions-mobile {
+  @apply flex flex-col gap-2;
+  @apply sm:flex-row sm:gap-1;
+}
+
+.action-btn-mobile {
+  @apply w-full min-h-[44px] px-4 py-2 text-sm;
+  @apply sm:w-auto sm:min-h-[36px] sm:px-3 sm:py-1.5;
+}
+
+/* LAYOUT RESPONSIVO PRINCIPAL */
+.main-layout-mobile {
+  @apply flex flex-col min-h-screen;
+}
+
+.sidebar-mobile-overlay {
+  @apply fixed inset-0 z-40 bg-black/50;
+  @apply lg:hidden;
+}
+
+.content-area-mobile {
+  @apply flex-1 overflow-y-auto;
+  @apply p-4 sm:p-6 lg:p-8;
+}
+
+/* BREAKPOINTS ESPECÍFICOS */
+@media (max-width: 640px) {
+  /* Small mobile - 320px to 640px */
+  .table-mobile th,
+  .table-mobile td {
+    @apply px-2 py-2 text-xs;
+  }
+  
+  .btn-group-mobile {
+    @apply gap-1;
+  }
+  
+  .card-responsive {
+    @apply p-3 mb-3;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  /* Tablet portrait - 641px to 768px */
+  .card-grid {
+    @apply grid-cols-2;
+  }
+  
+  .form-grid {
+    @apply grid-cols-2;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Tablet landscape - 769px to 1024px */
+  .card-grid {
+    @apply grid-cols-3;
+  }
+  
+  .form-grid {
+    @apply grid-cols-3;
+  }
+}
+
+/* SCROLL E OVERFLOW */
+.scroll-mobile {
+  @apply overflow-x-auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.scroll-mobile::-webkit-scrollbar {
+  height: 8px;
+}
+
+.scroll-mobile::-webkit-scrollbar-track {
+  background: rgba(243, 244, 246, 0.5);
+  border-radius: 4px;
+}
+
+.scroll-mobile::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+  border-radius: 4px;
+}
+
+.scroll-mobile::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.7);
+}
+
+/* ANIMAÇÕES SUAVES PARA MOBILE */
+.touch-animation {
+  @apply transition-all duration-200 ease-out;
+  @apply active:scale-95;
+}
+
+.hover-lift-mobile {
+  @apply transition-transform duration-200;
+  @apply hover:scale-[1.02] hover:shadow-lg;
+  @apply active:scale-[0.98];
+}
+
+/* ACESSIBILIDADE MOBILE */
+.focus-mobile {
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+}
+
+.tap-highlight-none {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Estados de loading responsivos */
+.loading-mobile {
+  @apply flex items-center justify-center p-8;
+  @apply sm:p-12;
+}
+
+.loading-spinner-mobile {
+  @apply w-8 h-8 animate-spin;
+  @apply sm:w-6 sm:h-6;
+}
+
+/* Empty states responsivos */
+.empty-state-mobile {
+  @apply text-center py-12 px-4;
+  @apply sm:py-16 sm:px-8;
+}
+
+.empty-icon-mobile {
+  @apply text-6xl mb-4;
+  @apply sm:text-4xl sm:mb-3;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .modern-dialog-content-fullscreen {
+    max-width: 100%;
+    max-height: 98vh;
+    margin: 4px;
+    border-radius: 16px;
+  }
+  
+  .modern-dialog-header-fullscreen,
+  .modern-dialog-footer-fullscreen {
+    padding: 16px 20px;
+  }
+  
+  .modern-dialog-title-fullscreen {
+    font-size: 24px;
+  }
+  
+  .modern-dialog-section {
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 16px;
+  }
+  
+  .modern-dialog-section-title {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+  
+  .modern-input-field,
+  .modern-textarea {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  
+  .modern-input-label {
+    font-size: 14px;
+  }
+  
+  .modern-input-group {
+    margin-bottom: 20px;
+  }
+  
+  .modern-input-grid {
+    gap: 16px;
+  }
+}
+
+/* Melhorar o z-index do modal */
+.modern-dialog-overlay {
+  z-index: 9999;
+}
+
+/* Tabela de Desempenho - Melhorada */
+.sortable-header {
+  @apply py-3 px-4 font-semibold text-gray-800 cursor-pointer select-none transition-all duration-200 hover:bg-gray-50 border-b-2 border-gray-200;
+  position: relative;
+}
+
+.sortable-header:hover {
+  @apply bg-gradient-to-r from-blue-50 to-indigo-50;
+}
+
+.sortable-header.active {
+  @apply bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800;
+}
+
+.sortable-header-content {
+  @apply flex items-center justify-between gap-2;
+}
+
+.sort-icons {
+  @apply flex flex-col items-center gap-0.5 ml-2;
+}
+
+.sort-icon {
+  @apply fill-gray-400 transition-all duration-200;
+  width: 10px;
+  height: 8px;
+}
+
+.sort-icon.active {
+  @apply fill-blue-600;
+}
+
+.sortable-header:hover .sort-icon {
+  @apply fill-gray-600;
+}
+
+.sortable-header.active:hover .sort-icon.active {
+  @apply fill-blue-700;
+}
+
+/* Melhorar células da tabela */
+.performance-table td {
+  @apply py-3 px-4 text-sm border-b border-gray-100 transition-colors duration-200;
+}
+
+.performance-table tr:hover {
+  @apply bg-gradient-to-r from-blue-50 to-indigo-50;
+}
+
+.performance-table tr:hover td {
+  @apply border-blue-200;
+}
+
+/* Badges de performance melhorados */
+.performance-badge {
+  @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ring-1 ring-inset transition-all duration-200;
+}
+
+.performance-badge.semana {
+  @apply bg-blue-50 text-blue-700 ring-blue-200 hover:bg-blue-100;
+}
+
+.performance-badge.excellent {
+  @apply bg-green-50 text-green-700 ring-green-200 hover:bg-green-100;
+}
+
+.performance-badge.good {
+  @apply bg-yellow-50 text-yellow-700 ring-yellow-200 hover:bg-yellow-100;
+}
+
+.performance-badge.poor {
+  @apply bg-red-50 text-red-700 ring-red-200 hover:bg-red-100;
+}
+
+/* Melhorar cards de resumo */
+.summary-card {
+  @apply bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-300;
+}
+
+.summary-card:hover {
+  @apply -translate-y-0.5 shadow-lg;
+}
+
+.summary-card .progress-bar {
+  @apply w-full bg-gray-200 rounded-full h-2.5 overflow-hidden;
+}
+
+.summary-card .progress-fill {
+  @apply h-full rounded-full transition-all duration-700 ease-out;
+}
+
+/* Melhorar tabela responsiva */
+.performance-table-container {
+  @apply overflow-x-auto rounded-lg border border-gray-200 shadow-sm;
+}
+
+.performance-table {
+  @apply w-full min-w-full divide-y divide-gray-200 bg-white;
+}
+
+.performance-table thead {
+  @apply bg-gradient-to-r from-gray-50 to-gray-100;
+}
+
+.performance-table tbody {
+  @apply divide-y divide-gray-100;
+}
+
+/* Melhorar botões de ação */
+.table-actions-container {
+  @apply flex items-center justify-center gap-2;
+}
+
+.table-action-button {
+  @apply inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-all duration-200;
+}
+
+.table-action-button:hover {
+  @apply shadow-md -translate-y-0.5 border-gray-300;
+}
+
+.table-action-button.delete:hover {
+  @apply bg-red-50 border-red-200 text-red-600;
+}
+
+.table-action-button svg {
+  @apply w-3.5 h-3.5;
+}
+
+/* Melhorar filtros */
+.filter-section {
+  @apply bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-6;
+}
+
+.button-group {
+  @apply flex flex-wrap items-center gap-3;
+}
+
+/* Responsividade aprimorada */
+@media (max-width: 768px) {
+  .sortable-header {
+    @apply py-2 px-2 text-sm;
+  }
+  
+  .sortable-header-content {
+    @apply flex-col items-start gap-1;
+  }
+  
+  .sort-icons {
+    @apply flex-row gap-1;
+  }
+  
+  .performance-table td {
+    @apply py-2 px-2 text-xs;
+  }
+  
+  .table-action-button {
+    @apply w-6 h-6;
+  }
+  
+  .table-action-button svg {
+    @apply w-3 h-3;
+  }
+}
+
+/* Animações suaves */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.performance-table tbody tr {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* Melhorar totais */
+.totals-section {
+  @apply bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-6 border-t-4 border-blue-500;
+}
+
+.total-card {
+  @apply bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300;
+}
+
+/* Categorias Expansíveis - ContaAzul */
+.categoria-card {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.categoria-card:hover {
+  @apply shadow-lg transform -translate-y-1;
+}
+
+.categoria-header {
+  @apply cursor-pointer transition-colors duration-200;
+}
+
+.categoria-header:hover {
+  @apply bg-gray-50;
+}
+
+.categoria-content {
+  @apply overflow-hidden transition-all duration-300 ease-in-out;
+}
+
+.categoria-progress-bar {
+  @apply w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner;
+}
+
+.categoria-progress-fill {
+  @apply h-full transition-all duration-700 ease-out;
+}
+
+.categoria-badge {
+  @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-colors duration-200;
+}
+
+.categoria-table-container {
+  @apply max-h-96 overflow-y-auto border border-gray-200 rounded-lg;
+}
+
+.categoria-table {
+  @apply w-full divide-y divide-gray-200;
+}
+
+.categoria-table thead {
+  @apply bg-gray-50 sticky top-0 z-10;
+}
+
+.categoria-table tbody tr:hover {
+  @apply bg-gray-50;
+}
+
+.categoria-summary-item {
+  @apply text-center p-4 rounded-lg border transition-all duration-200 hover:shadow-md;
+}
+
+.categoria-filter-section {
+  @apply bg-white rounded-lg p-4 border border-gray-200 mb-6 shadow-sm;
+}
+
+.categoria-action-button {
+  @apply inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-200;
+}
+
+.categoria-action-button:hover {
+  @apply shadow-md transform -translate-y-0.5;
+}
+
+/* Animações para expansão */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 1;
+    max-height: 1000px;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.categoria-expanded {
+  animation: slideDown 0.3s ease-out;
+}
+
+.categoria-collapsed {
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Indicadores visuais */
+.categoria-indicator-green {
+  @apply w-2 h-2 bg-green-500 rounded-full;
+}
+
+.categoria-indicator-red {
+  @apply w-2 h-2 bg-red-500 rounded-full;
+}
+
+.categoria-indicator-yellow {
+  @apply w-2 h-2 bg-yellow-500 rounded-full;
+}
+
+/* Melhorar scroll da tabela */
+.categoria-table-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.categoria-table-container::-webkit-scrollbar-track {
+  @apply bg-gray-100 rounded;
+}
+
+.categoria-table-container::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 rounded hover:bg-gray-500;
+}
+
+/* Dashboard Inteligente - ContaAzul */
+.dashboard-metric-card {
+  @apply transition-all duration-300 hover:shadow-lg hover:scale-105;
+}
+
+.dashboard-metric-card .metric-value {
+  @apply text-white font-bold text-2xl;
+}
+
+.dashboard-metric-card .metric-label {
+  @apply text-white/90 text-sm font-medium;
+}
+
+.dashboard-metric-card .metric-subtitle {
+  @apply text-white/80 text-xs;
+}
+
+.dashboard-alert-card {
+  @apply transition-all duration-200 hover:shadow-md;
+}
+
+.dashboard-alert-warning {
+  @apply bg-yellow-50 border-l-4 border-yellow-500;
+}
+
+.dashboard-alert-info {
+  @apply bg-blue-50 border-l-4 border-blue-500;
+}
+
+.dashboard-efficiency-item {
+  @apply p-3 bg-gray-50 rounded-lg transition-all duration-200 hover:bg-gray-100 hover:shadow-sm;
+}
+
+.dashboard-progress-bar {
+  @apply w-full bg-gray-200 rounded-full overflow-hidden;
+}
+
+.dashboard-progress-fill {
+  @apply h-full rounded-full transition-all duration-500 ease-out;
+}
+
+.dashboard-temporal-card {
+  @apply p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border transition-all duration-200 hover:shadow-md hover:scale-105;
+}
+
+.dashboard-comparison-bar {
+  @apply flex h-6 bg-gray-200 rounded-full overflow-hidden;
+}
+
+.dashboard-comparison-receita {
+  @apply bg-green-500 flex items-center justify-center text-xs text-white font-medium;
+}
+
+.dashboard-comparison-despesa {
+  @apply bg-red-500 flex items-center justify-center text-xs text-white font-medium;
+}
+
+/* Melhorar textos do dashboard */
+.dashboard-text-primary {
+  @apply text-gray-900 font-semibold;
+}
+
+.dashboard-text-secondary {
+  @apply text-gray-600;
+}
+
+.dashboard-text-success {
+  @apply text-green-600 font-semibold;
+}
+
+.dashboard-text-danger {
+  @apply text-red-600 font-semibold;
+}
+
+.dashboard-text-info {
+  @apply text-blue-600 font-semibold;
+}
+
+.dashboard-text-warning {
+  @apply text-yellow-600 font-semibold;
+}
+
+/* Cards com gradientes melhorados */
+.dashboard-gradient-green {
+  @apply bg-gradient-to-r from-green-500 to-green-600 text-white;
+}
+
+.dashboard-gradient-red {
+  @apply bg-gradient-to-r from-red-500 to-red-600 text-white;
+}
+
+.dashboard-gradient-blue {
+  @apply bg-gradient-to-r from-blue-500 to-blue-600 text-white;
+}
+
+.dashboard-gradient-purple {
+  @apply bg-gradient-to-r from-purple-500 to-purple-600 text-white;
+}
+
+/* Hover effects para cards do dashboard */
+.dashboard-card:hover {
+  @apply transform -translate-y-1 shadow-lg;
+}
+
+.dashboard-insight-card {
+  @apply bg-white rounded-lg border border-gray-200 shadow-sm transition-all duration-300 hover:shadow-md;
+}
+
+/* Responsividade do dashboard */
+@media (max-width: 768px) {
+  .dashboard-metric-card .metric-value {
+    @apply text-xl;
+  }
+  
+  .dashboard-temporal-card {
+    @apply p-3;
+  }
+  
+  .dashboard-efficiency-item {
+    @apply p-2;
+  }
+}
+
+/* Animações específicas do dashboard */
+@keyframes dashboardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard-animate-in {
+  animation: dashboardFadeIn 0.4s ease-out;
+}
+
+/* Melhorias específicas para a página ContaAzul */
+.contaazul-table-container {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    0 1px 4px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(248, 250, 252, 0.95) 100%
+  );
+}
+
+.contaazul-table {
+  background: transparent;
+}
+
+.contaazul-table thead {
+  background: linear-gradient(135deg, 
+    rgba(99, 102, 241, 0.08) 0%, 
+    rgba(139, 92, 246, 0.08) 100%
+  );
+  border-bottom: 2px solid rgba(99, 102, 241, 0.1);
+}
+
+.contaazul-table thead th {
+  font-weight: 600;
+  color: #374151;
+  padding: 16px 12px;
+  border-bottom: none;
+  white-space: nowrap;
+}
+
+.contaazul-table tbody tr {
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.contaazul-table tbody tr:hover {
+  background: linear-gradient(135deg, 
+    rgba(99, 102, 241, 0.03) 0%, 
+    rgba(139, 92, 246, 0.03) 100%
+  );
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+}
+
+.contaazul-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.contaazul-table tbody td {
+  padding: 14px 12px;
+  vertical-align: middle;
+}
+
+/* Badges elegantes para tipos */
+.contaazul-badge-receita {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  border: none;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.contaazul-badge-despesa {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  border: none;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Botões de paginação elegantes */
+.contaazul-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: between;
+  padding: 20px;
+  background: linear-gradient(135deg, 
+    rgba(248, 250, 252, 0.95) 0%, 
+    rgba(241, 245, 249, 0.95) 100%
+  );
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  margin-top: 16px;
+}
+
+.contaazul-pagination-info {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.contaazul-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.contaazul-pagination-button {
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.9) 0%, 
+    rgba(248, 250, 252, 0.9) 100%
+  );
+  color: #374151;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.contaazul-pagination-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  border-color: transparent;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.contaazul-pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(229, 231, 235, 0.5);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.contaazul-pagination-current {
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+/* Melhorar categorias expandidas */
+.categoria-card-enhanced {
+  border-radius: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(248, 250, 252, 0.95) 100%
+  );
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.categoria-card-enhanced:hover {
+  transform: translateY(-3px);
+  box-shadow: 
+    0 12px 35px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.08);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.categoria-header-enhanced {
+  padding: 20px 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, 
+    rgba(99, 102, 241, 0.05) 0%, 
+    rgba(139, 92, 246, 0.05) 100%
+  );
+}
+
+.categoria-header-enhanced:hover {
+  background: linear-gradient(135deg, 
+    rgba(99, 102, 241, 0.08) 0%, 
+    rgba(139, 92, 246, 0.08) 100%
+  );
+}
+
+.categoria-content-enhanced {
+  padding: 0 24px 24px 24px;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+    padding-top: 0;
+    padding-bottom: 24px;
+  }
+}
+
+/* Progress bar elegante para categorias */
+.categoria-progress-enhanced {
+  height: 8px;
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 16px 0;
+  position: relative;
+}
+
+.categoria-progress-enhanced::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.0) 0%, 
+    rgba(255, 255, 255, 0.3) 50%, 
+    rgba(255, 255, 255, 0.0) 100%
+  );
+  animation: shimmerProgress 2s infinite;
+}
+
+@keyframes shimmerProgress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.categoria-progress-fill-enhanced {
+  height: 100%;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Estilos para modal de detalhes */
+.contaazul-modal-content {
+  max-width: 800px;
+  border-radius: 24px;
+  border: none;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(248, 250, 252, 0.95) 100%
+  );
+  backdrop-filter: blur(20px);
+  box-shadow: 
+    0 25px 60px rgba(0, 0, 0, 0.15),
+    0 10px 30px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.contaazul-modal-header {
+  background: linear-gradient(135deg, 
+    rgba(99, 102, 241, 0.08) 0%, 
+    rgba(139, 92, 246, 0.08) 100%
+  );
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 24px 24px 0 0;
+  padding: 24px 32px;
+}
+
+.contaazul-modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  background: linear-gradient(135deg, #1e293b, #475569);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.contaazul-modal-body {
+  padding: 32px;
+}
+
+.contaazul-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.contaazul-modal-field {
+  padding: 16px;
+  background: linear-gradient(135deg, 
+    rgba(248, 250, 252, 0.8) 0%, 
+    rgba(241, 245, 249, 0.8) 100%
+  );
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.contaazul-modal-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.contaazul-modal-value {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1e293b;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  .contaazul-modal-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .contaazul-modal-content {
+    margin: 16px;
+    max-width: calc(100vw - 32px);
+  }
+  
+  .contaazul-modal-header,
+  .contaazul-modal-body {
+    padding: 20px;
+  }
+}
+
+/* Animação de carregamento elegante */
+.contaazul-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contaazul-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(99, 102, 241, 0.2);
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.contaazul-loading-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -78,7 +78,7 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
       title: 'Checklists',
       icon: '📋',
       items: [
-        { id: 'funcionario-checklists', label: 'Meus Checklists', icon: '📝', route: '/funcionario/checklists', requiredModule: null },
+        { id: 'funcionario-checklists', label: 'Meus Checklists', icon: '📝', route: '/funcionario/checklists', requiredModule: 'checklists' },
         { id: 'checklist-abertura', label: 'Checklist Abertura', icon: '✅', route: '/checklists/abertura', requiredModule: 'operacoes' },
         { id: 'checklists-admin', label: 'Admin Checklists', icon: '🔧', route: '/configuracoes/checklists', requiredModule: 'operacoes', requiredRole: 'admin' },
         { id: 'templates', label: 'Templates', icon: '📄', route: '/configuracoes/templates', requiredModule: 'operacoes', requiredRole: 'admin' },
@@ -191,9 +191,17 @@ export default function Sidebar({ isOpen, onToggle, barInfo }: SidebarProps) {
     return allMenuSections.map(section => ({
       ...section,
       items: section.items.filter(item => {
-        if (!item.requiredModule) return true // Item público
+        // Verificar role primeiro (mais restritivo)
         if (item.requiredRole && !isRole(item.requiredRole)) return false
-        return hasPermission(item.requiredModule)
+        
+        // Se requer módulo específico, verificar permissão
+        if (item.requiredModule) {
+          return hasPermission(item.requiredModule)
+        }
+        
+        // Se não tem requiredModule definido, negar acesso por segurança
+        // (todos os itens devem ter permissões explícitas)
+        return false
       })
     })).filter(section => section.items.length > 0) // Só mostrar seções que têm itens visíveis
   }, [allMenuSections, hasPermission, isRole])

@@ -18,7 +18,7 @@ import { useBar } from '@/contexts/BarContext'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Target, User, Settings, Smartphone, CheckCircle, Shield, AlertTriangle, Users, UserPlus, Edit, Trash2, Lock, Unlock, Save, X, Eye, EyeOff, Activity, Server, RefreshCw } from 'lucide-react'
-import PermissionGuard from '@/components/PermissionGuard'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 interface SecurityEvent {
@@ -978,29 +978,79 @@ function ConfiguracoesContent() {
                             </div>
                           </div>
                           <div>
-                            <Label htmlFor="role">Função *</Label>
-                            <Select value={novoUsuario.role} onValueChange={(value) => setNovoUsuario({...novoUsuario, role: value as any})}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecione a função" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {funcoesLoading ? (
-                                  <SelectItem value="" disabled>Carregando funções...</SelectItem>
-                                ) : funcoes.length > 0 ? (
-                                  funcoes.filter(funcao => funcao && funcao.id && funcao.nome).map(funcao => (
-                                    <SelectItem key={funcao.id} value={funcao.id}>
-                                      {funcao.icone || '👤'} {funcao.nome}
-                                    </SelectItem>
-                                  ))
-                                ) : (
+                            <Label>Função *</Label>
+                            {funcoesLoading ? (
+                              <div className="text-sm text-gray-500 mt-2">Carregando funções...</div>
+                            ) : (
+                              <div className="mt-2 space-y-2">
+                                {funcoes.length > 0 ? funcoes.filter(funcao => funcao && funcao.id && funcao.nome).map(funcao => (
+                                  <label key={funcao.id} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                    <input
+                                      type="radio"
+                                      name="role-new"
+                                      value={funcao.id}
+                                      checked={novoUsuario.role === funcao.id}
+                                      onChange={(e) => setNovoUsuario({...novoUsuario, role: e.target.value as any})}
+                                      className="rounded-full border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <span className="text-xl">{funcao.icone || '👤'}</span>
+                                    <div>
+                                      <div className="font-medium">{funcao.nome}</div>
+                                      <div className="text-sm text-gray-500">{funcao.descricao}</div>
+                                    </div>
+                                  </label>
+                                )) : (
+                                  // Fallback para as funções padrão
                                   <>
-                                    <SelectItem value="funcionario">👤 Funcionário</SelectItem>
-                                    <SelectItem value="gerente">👨‍💼 Gerente</SelectItem>
-                                    <SelectItem value="admin">👑 Administrador</SelectItem>
+                                    <label className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                      <input
+                                        type="radio"
+                                        name="role-new"
+                                        value="funcionario"
+                                        checked={novoUsuario.role === 'funcionario'}
+                                        onChange={(e) => setNovoUsuario({...novoUsuario, role: e.target.value as any})}
+                                        className="rounded-full border-gray-300 text-blue-600 focus:ring-blue-500"
+                                      />
+                                      <span className="text-xl">👤</span>
+                                      <div>
+                                        <div className="font-medium">Funcionário</div>
+                                        <div className="text-sm text-gray-500">Acesso básico às funcionalidades</div>
+                                      </div>
+                                    </label>
+                                    <label className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                      <input
+                                        type="radio"
+                                        name="role-new"
+                                        value="gerente"
+                                        checked={novoUsuario.role === 'gerente'}
+                                        onChange={(e) => setNovoUsuario({...novoUsuario, role: e.target.value as any})}
+                                        className="rounded-full border-gray-300 text-blue-600 focus:ring-blue-500"
+                                      />
+                                      <span className="text-xl">👨‍💼</span>
+                                      <div>
+                                        <div className="font-medium">Gerente</div>
+                                        <div className="text-sm text-gray-500">Acesso a relatórios e gestão</div>
+                                      </div>
+                                    </label>
+                                    <label className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                      <input
+                                        type="radio"
+                                        name="role-new"
+                                        value="admin"
+                                        checked={novoUsuario.role === 'admin'}
+                                        onChange={(e) => setNovoUsuario({...novoUsuario, role: e.target.value as any})}
+                                        className="rounded-full border-gray-300 text-blue-600 focus:ring-blue-500"
+                                      />
+                                      <span className="text-xl">👑</span>
+                                      <div>
+                                        <div className="font-medium">Administrador</div>
+                                        <div className="text-sm text-gray-500">Acesso completo ao sistema</div>
+                                      </div>
+                                    </label>
                                   </>
                                 )}
-                              </SelectContent>
-                            </Select>
+                              </div>
+                            )}
                           </div>
                         </div>
 
@@ -1126,29 +1176,79 @@ function ConfiguracoesContent() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="role-edit">Função *</Label>
-                      <Select value={usuarioEditando.role} onValueChange={(value) => setUsuarioEditando({...usuarioEditando, role: value as any})}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione a função" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {funcoesLoading ? (
-                            <SelectItem value="" disabled>Carregando funções...</SelectItem>
-                          ) : funcoes.length > 0 ? (
-                            funcoes.filter(funcao => funcao && funcao.id && funcao.nome).map(funcao => (
-                              <SelectItem key={funcao.id} value={funcao.id}>
-                                {funcao.icone || '👤'} {funcao.nome}
-                              </SelectItem>
-                            ))
-                          ) : (
+                      <Label>Função *</Label>
+                      {funcoesLoading ? (
+                        <div className="text-sm text-gray-500 mt-2">Carregando funções...</div>
+                      ) : (
+                        <div className="mt-2 space-y-2">
+                          {funcoes.length > 0 ? funcoes.filter(funcao => funcao && funcao.id && funcao.nome).map(funcao => (
+                            <label key={funcao.id} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="role-edit"
+                                value={funcao.id}
+                                checked={usuarioEditando.role === funcao.id}
+                                onChange={(e) => setUsuarioEditando({...usuarioEditando, role: e.target.value as any})}
+                                className="rounded-full border-gray-300 text-blue-600 focus:ring-blue-500"
+                              />
+                              <span className="text-xl">{funcao.icone || '👤'}</span>
+                              <div>
+                                <div className="font-medium">{funcao.nome}</div>
+                                <div className="text-sm text-gray-500">{funcao.descricao}</div>
+                              </div>
+                            </label>
+                          )) : (
+                            // Fallback para as funções padrão
                             <>
-                              <SelectItem value="funcionario">👤 Funcionário</SelectItem>
-                              <SelectItem value="gerente">👨‍💼 Gerente</SelectItem>
-                              <SelectItem value="admin">👑 Administrador</SelectItem>
+                              <label className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="role-edit"
+                                  value="funcionario"
+                                  checked={usuarioEditando.role === 'funcionario'}
+                                  onChange={(e) => setUsuarioEditando({...usuarioEditando, role: e.target.value as any})}
+                                  className="rounded-full border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="text-xl">👤</span>
+                                <div>
+                                  <div className="font-medium">Funcionário</div>
+                                  <div className="text-sm text-gray-500">Acesso básico às funcionalidades</div>
+                                </div>
+                              </label>
+                              <label className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="role-edit"
+                                  value="gerente"
+                                  checked={usuarioEditando.role === 'gerente'}
+                                  onChange={(e) => setUsuarioEditando({...usuarioEditando, role: e.target.value as any})}
+                                  className="rounded-full border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="text-xl">👨‍💼</span>
+                                <div>
+                                  <div className="font-medium">Gerente</div>
+                                  <div className="text-sm text-gray-500">Acesso a relatórios e gestão</div>
+                                </div>
+                              </label>
+                              <label className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="role-edit"
+                                  value="admin"
+                                  checked={usuarioEditando.role === 'admin'}
+                                  onChange={(e) => setUsuarioEditando({...usuarioEditando, role: e.target.value as any})}
+                                  className="rounded-full border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="text-xl">👑</span>
+                                <div>
+                                  <div className="font-medium">Administrador</div>
+                                  <div className="text-sm text-gray-500">Acesso completo ao sistema</div>
+                                </div>
+                              </label>
                             </>
                           )}
-                        </SelectContent>
-                      </Select>
+                        </div>
+                      )}
                     </div>
                     <div>
                       <Label htmlFor="ativo-edit">Status</Label>
@@ -1327,12 +1427,12 @@ function ConfiguracoesContent() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                           <div>
                             <div className="text-gray-600 mb-1">Informações:</div>
-                            <div>📅 Criado em: {new Date(usuario.criado_em).toLocaleDateString('pt-BR')}</div>
+                            <div className="text-gray-800">📅 Criado em: {new Date(usuario.criado_em).toLocaleDateString('pt-BR')}</div>
                             {usuario.ultimo_login && (
-                              <div>🕐 Último login: {new Date(usuario.ultimo_login).toLocaleDateString('pt-BR')}</div>
+                              <div className="text-gray-800">🕐 Último login: {new Date(usuario.ultimo_login).toLocaleDateString('pt-BR')}</div>
                             )}
                             {usuario.telefone && (
-                              <div>📞 Telefone: {usuario.telefone}</div>
+                              <div className="text-gray-800">📞 Telefone: {usuario.telefone}</div>
                             )}
                           </div>
                           <div>
@@ -1346,7 +1446,7 @@ function ConfiguracoesContent() {
                         {usuario.observacoes && (
                           <div className="mt-3 p-2 bg-gray-50 rounded text-sm">
                             <div className="text-gray-600 mb-1">Observações:</div>
-                            <div>{usuario.observacoes}</div>
+                            <div className="text-gray-800">{usuario.observacoes}</div>
                           </div>
                         )}
                       </div>
@@ -1845,11 +1945,11 @@ function ConfiguracoesContent() {
 
 export default function ConfiguracoesPage() {
   return (
-    <PermissionGuard 
-      requiredModules={['configuracoes']}
-      redirectTo="/home"
+    <ProtectedRoute 
+      requiredModule="configuracoes"
+      errorMessage="sem_permissao_configuracoes"
     >
       <ConfiguracoesContent />
-    </PermissionGuard>
+    </ProtectedRoute>
   )
 } 

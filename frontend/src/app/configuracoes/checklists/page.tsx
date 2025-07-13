@@ -323,7 +323,7 @@ export default function AdminChecklists() {
   }
 
   return (
-    <ProtectedRoute requiredModule="admin">
+    <ProtectedRoute requiredModule="operacoes" requiredRole="admin">
       <div className="min-h-screen bg-gray-50">
         <div className="p-6 max-w-7xl mx-auto">
         {/* Informações do Bar */}

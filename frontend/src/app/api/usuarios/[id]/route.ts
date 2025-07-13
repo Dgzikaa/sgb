@@ -75,8 +75,7 @@ export async function PUT(
       telefone: telefone || null,
       observacoes: observacoes || null,
       modulos_permitidos: modulos_permitidos || [],
-      ativo: ativo !== undefined ? ativo : true,
-      atualizado_em: new Date().toISOString()
+      ativo: ativo !== undefined ? ativo : true
     }
     
     logDebug('Dados para atualização:', updateData)

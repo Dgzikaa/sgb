@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FilterIcon, BarChart3Icon, RefreshCw, Upload, ChevronDownIcon, ChevronUpIcon, EditIcon, TrashIcon, PlusIcon } from 'lucide-react'
 import { useBar } from '@/contexts/BarContext'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 
 interface DadosDesempenho {
   id: number
@@ -456,52 +457,56 @@ export default function TabelaDesempenhoPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="table-responsive">
+            <table className="table-mobile">
               <thead>
                 <tr className="border-b border-slate-200">
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Semana</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Período</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Faturamento</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Clientes</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Ticket Médio</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Reservas</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Meta</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Atingimento</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Ações</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm">Semana</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm hidden-mobile">Período</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm">Faturamento</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm hidden-mobile">Clientes</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm hidden-mobile">Ticket Médio</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm hidden-mobile">Reservas</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm hidden-mobile">Meta</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm">Atingimento</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm">Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {dadosFiltrados.map((item) => {
-                  const atingimento = item.meta_semanal > 0 ? (item.faturamento_total / item.meta_semanal) * 100 : 0
+                  const atingimento = item.meta_semanal > 0 ? (item.faturamento_semanal / item.meta_semanal) * 100 : 0
                   
                   return (
-                    <tr key={item.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                      <td className="py-3 px-4 text-slate-800 font-medium">
-                        Semana {item.numero_semana}
-                      </td>
-                      <td className="py-3 px-4 text-slate-800">
-                        <div className="text-sm">
-                          <div>{formatarData(item.data_inicio)}</div>
-                          <div className="text-gray-500">até {formatarData(item.data_fim)}</div>
+                    <tr key={item.id} className="border-b border-slate-100 hover:bg-gray-50">
+                      <td className="py-3 px-2 sm:px-4 text-slate-800">
+                        <div className="font-medium text-sm sm:text-base">
+                          Semana {item.numero_semana}
+                        </div>
+                        <div className="text-xs text-gray-500 visible-mobile">
+                          {item.data_inicio} - {item.data_fim}
                         </div>
                       </td>
-                      <td className="py-3 px-4 text-slate-800 font-semibold">
-                        <div>{formatarMoeda(item.faturamento_total)}</div>
-                        {item.faturamento_entrada > 0 && (
-                          <div className="text-xs text-gray-500">
-                            Entrada: {formatarMoeda(item.faturamento_entrada)}
-                          </div>
-                        )}
+                      <td className="py-3 px-2 sm:px-4 text-slate-800 hidden-mobile">
+                        <div className="text-sm">
+                          <div>{item.data_inicio}</div>
+                          <div className="text-gray-500">até {item.data_fim}</div>
+                        </div>
                       </td>
-                      <td className="py-3 px-4 text-slate-800">{item.clientes_atendidos}</td>
-                      <td className="py-3 px-4 text-slate-800">
-                        {item.clientes_atendidos > 0 ? 
-                          formatarMoeda(item.faturamento_total / item.clientes_atendidos) : 
-                          '-'
-                        }
+                      <td className="py-3 px-2 sm:px-4 text-slate-800">
+                        <div className="font-semibold text-sm sm:text-base">
+                          {formatarMoeda(item.faturamento_semanal)}
+                        </div>
+                        <div className="text-xs text-gray-500 visible-mobile">
+                          {item.total_clientes} clientes
+                        </div>
                       </td>
-                      <td className="py-3 px-4 text-slate-800">
+                      <td className="py-3 px-2 sm:px-4 text-slate-800 hidden-mobile">
+                        {item.total_clientes}
+                      </td>
+                      <td className="py-3 px-2 sm:px-4 text-slate-800 hidden-mobile">
+                        {formatarMoeda(item.ticket_medio)}
+                      </td>
+                      <td className="py-3 px-2 sm:px-4 text-slate-800 hidden-mobile">
                         <div className="text-sm">
                           <div>{item.reservas_presentes}/{item.reservas_totais}</div>
                           <div className="text-gray-500">
@@ -512,31 +517,33 @@ export default function TabelaDesempenhoPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="py-3 px-4 text-slate-800">
+                      <td className="py-3 px-2 sm:px-4 text-slate-800 hidden-mobile">
                         {formatarMoeda(item.meta_semanal)}
                       </td>
-                      <td className="py-3 px-4">
-                        <Badge className={getAtingimentoColor(atingimento)}>
+                      <td className="py-3 px-2 sm:px-4">
+                        <Badge className={`${getAtingimentoColor(atingimento)} text-xs`}>
                           {atingimento.toFixed(1)}%
                         </Badge>
                       </td>
-                      <td className="py-3 px-4">
-                        <div className="flex gap-2">
+                      <td className="py-3 px-2 sm:px-4">
+                        <div className="flex flex-col gap-1 sm:flex-row sm:gap-2">
                           <Button
                             onClick={() => alert('🚧 Modal de edição em desenvolvimento')}
                             variant="outline"
                             size="sm"
-                            className="h-8 w-8 p-0"
+                            className="btn-icon-touch sm:h-8 sm:w-8 sm:p-0"
                           >
                             <EditIcon className="h-4 w-4" />
+                            <span className="visible-mobile ml-2">Editar</span>
                           </Button>
                           <Button
                             onClick={() => excluirSemana(item.id, item.numero_semana)}
                             variant="destructive"
                             size="sm"
-                            className="h-8 w-8 p-0"
+                            className="btn-icon-touch sm:h-8 sm:w-8 sm:p-0"
                           >
                             <TrashIcon className="h-4 w-4" />
+                            <span className="visible-mobile ml-2">Excluir</span>
                           </Button>
                         </div>
                       </td>
@@ -545,23 +552,10 @@ export default function TabelaDesempenhoPage() {
                 })}
               </tbody>
             </table>
-            
-            {dadosFiltrados.length === 0 && (
-              <div className="text-center py-8 text-slate-500">
-                <BarChart3Icon className="h-12 w-12 mx-auto mb-4 text-slate-300" />
-                <p>Nenhum dado encontrado com os filtros aplicados</p>
-                <Button 
-                  variant="outline" 
-                  onClick={limparFiltros}
-                  className="mt-4"
-                >
-                  Limpar Filtros
-                </Button>
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </ProtectedRoute>
   )
 } 

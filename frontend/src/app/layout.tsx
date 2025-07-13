@@ -3,6 +3,7 @@ import './globals.css'
 import '../styles/assistant.css'
 import { ToastProvider, GlobalToastListener } from '@/components/ui/toast'
 import { ConfirmDialogProvider, GlobalConfirmListener } from '@/components/ui/confirm-dialog'
+import AuthSync from '@/components/AuthSync'
 
 // Using system fonts instead of Google Fonts to avoid build connectivity issues
 
@@ -74,6 +75,7 @@ export default function RootLayout({
       <body className="font-sans">
         <ToastProvider>
           <ConfirmDialogProvider>
+            <AuthSync />
             <div className="min-h-screen">
               {children}
               <GlobalToastListener />

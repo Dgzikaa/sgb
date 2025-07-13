@@ -287,22 +287,34 @@ export default function MetaAPIConfig() {
         <CardContent>
           <div className="space-y-3">
             {testResults.pages.map((page: any, index: number) => (
-              <div key={index} className="p-3 border rounded-lg">
+              <div key={index} className="p-4 border border-blue-200 rounded-lg bg-blue-50">
                 <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="font-medium">{page.name}</h4>
-                    <p className="text-sm text-gray-600">ID: {page.id}</p>
-                    <p className="text-sm text-gray-600">Categoria: {page.category}</p>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-blue-900">{page.name}</h4>
+                    <p className="text-sm text-blue-700 mt-1">
+                      <span className="font-medium">ID:</span> {page.id}
+                    </p>
+                    {page.category && (
+                      <p className="text-sm text-blue-700">
+                        <span className="font-medium">Categoria:</span> {page.category}
+                      </p>
+                    )}
                   </div>
-                  <Badge variant={page.access_token ? 'default' : 'secondary'}>
-                    {page.access_token ? 'Acesso OK' : 'Sem Token'}
+                  <Badge 
+                    variant={page.access_token ? 'default' : 'secondary'}
+                    className="bg-blue-600 text-white"
+                  >
+                    {page.access_token ? 'Acesso OK' : 'Conectado'}
                   </Badge>
                 </div>
                 {page.instagram_business_account && (
-                  <div className="mt-2 p-2 bg-pink-50 rounded">
-                    <p className="text-sm text-pink-800">
-                      ✅ Instagram Business conectado
-                    </p>
+                  <div className="mt-3 p-3 bg-pink-100 rounded-lg border border-pink-200">
+                    <div className="flex items-center gap-2">
+                      <Instagram className="w-4 h-4 text-pink-600" />
+                      <p className="text-sm text-pink-800 font-medium">
+                        ✅ Instagram Business conectado
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -327,23 +339,49 @@ export default function MetaAPIConfig() {
         <CardContent>
           <div className="space-y-3">
             {testResults.instagram_accounts.map((ig: any, index: number) => (
-              <div key={index} className="p-3 border rounded-lg">
+              <div key={index} className="p-4 border border-pink-200 rounded-lg bg-pink-50">
                 <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="font-medium">@{ig.instagram_account.username}</h4>
-                    <p className="text-sm text-gray-600">{ig.instagram_account.name}</p>
-                    <p className="text-sm text-gray-600">
-                      👥 {ig.instagram_account.followers_count?.toLocaleString()} seguidores
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      📸 {ig.instagram_account.media_count} posts
-                    </p>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Instagram className="w-5 h-5 text-pink-600" />
+                      <h4 className="font-semibold text-pink-900">@{ig.instagram_account.username}</h4>
+                    </div>
+                    
+                    {ig.instagram_account.name && (
+                      <p className="text-sm text-pink-800 mb-2 font-medium">{ig.instagram_account.name}</p>
+                    )}
+                    
+                    <div className="grid grid-cols-2 gap-4 mt-3">
+                      {ig.instagram_account.followers_count && (
+                        <div className="p-2 bg-pink-100 rounded border border-pink-200">
+                          <p className="text-lg font-bold text-pink-900">
+                            {ig.instagram_account.followers_count.toLocaleString()}
+                          </p>
+                          <p className="text-xs text-pink-700 font-medium">👥 Seguidores</p>
+                        </div>
+                      )}
+                      
+                      {ig.instagram_account.media_count && (
+                        <div className="p-2 bg-pink-100 rounded border border-pink-200">
+                          <p className="text-lg font-bold text-pink-900">
+                            {ig.instagram_account.media_count}
+                          </p>
+                          <p className="text-xs text-pink-700 font-medium">📸 Posts</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <Badge variant="default">Conectado</Badge>
+                  
+                  <Badge variant="default" className="bg-pink-600 text-white">
+                    Conectado
+                  </Badge>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  Vinculado à página: {ig.page_name}
-                </p>
+                
+                <div className="mt-3 pt-3 border-t border-pink-200">
+                  <p className="text-xs text-pink-700">
+                    <span className="font-medium">Vinculado à página:</span> {ig.page_name}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -522,26 +560,46 @@ export default function MetaAPIConfig() {
                 </CardHeader>
                 <CardContent>
                   {testResults.access_token_valid ? (
-                    <div className="space-y-2">
-                      <p className="text-green-800">✅ Token válido e funcionando!</p>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg border border-green-200">
+                        <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                        <span className="text-green-800 font-medium">Token válido e funcionando!</span>
+                      </div>
+                      
                       {testResults.user_info && (
-                        <div className="p-3 bg-green-50 rounded">
-                          <p className="font-medium">{testResults.user_info.name}</p>
-                          <p className="text-sm text-gray-600">ID: {testResults.user_info.id}</p>
-                          {testResults.user_info.email && (
-                            <p className="text-sm text-gray-600">Email: {testResults.user_info.email}</p>
-                          )}
+                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <h4 className="font-semibold text-blue-900 mb-2">Informações da Conta</h4>
+                          <div className="space-y-1">
+                            <p className="text-sm text-blue-800">
+                              <span className="font-medium">Nome:</span> {testResults.user_info.name || 'Meta User'}
+                            </p>
+                            {testResults.user_info.id && (
+                              <p className="text-sm text-blue-700">
+                                <span className="font-medium">ID:</span> {testResults.user_info.id}
+                              </p>
+                            )}
+                            {testResults.user_info.email && (
+                              <p className="text-sm text-blue-700">
+                                <span className="font-medium">Email:</span> {testResults.user_info.email}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      <p className="text-red-800">❌ Token inválido ou com problemas</p>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 p-3 bg-red-50 rounded-lg border border-red-200">
+                        <XCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                        <span className="text-red-800 font-medium">Token inválido ou com problemas</span>
+                      </div>
+                      
                       {testResults.error_details && (
-                        <div className="p-3 bg-red-50 rounded">
-                          <p className="text-sm text-red-800">
+                        <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+                          <h4 className="font-semibold text-red-900 mb-2">Detalhes do Erro</h4>
+                          <pre className="text-sm text-red-800 whitespace-pre-wrap">
                             {JSON.stringify(testResults.error_details, null, 2)}
-                          </p>
+                          </pre>
                         </div>
                       )}
                     </div>

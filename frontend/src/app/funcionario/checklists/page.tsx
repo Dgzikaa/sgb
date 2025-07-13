@@ -30,6 +30,7 @@ import {
   Share2,
   Timer
 } from 'lucide-react'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 
 interface ChecklistFuncionario {
   id: string
@@ -940,224 +941,226 @@ export default function ChecklistsFuncionario() {
     )
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="p-4">
-          <p className="text-sm text-gray-600 mb-4">
-            Olá, <strong className="text-gray-800">{usuario.nome}</strong>
-          </p>
-          {/* Abas */}
-          <div className="flex border-b">
-            <button
-              onClick={() => setAba('pendentes')}
-              className={`px-6 py-3 text-base font-medium border-b-2 transition-colors touch-manipulation min-h-[48px] ${
-                aba === 'pendentes'
-                  ? 'border-blue-500 text-blue-600 bg-blue-50'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              📝 Pendentes ({checklists.length})
-            </button>
-            <button
-              onClick={() => setAba('realizados')}
-              className={`px-6 py-3 text-base font-medium border-b-2 transition-colors touch-manipulation min-h-[48px] ${
-                aba === 'realizados'
-                  ? 'border-green-500 text-green-600 bg-green-50'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              ✅ Realizados ({checklistsRealizados.length})
-            </button>
+      return (
+      <ProtectedRoute requiredModule="checklists">
+        <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white shadow-sm border-b">
+          <div className="p-4">
+            <p className="text-sm text-gray-600 mb-4">
+              Olá, <strong className="text-gray-800">{usuario.nome}</strong>
+            </p>
+            {/* Abas */}
+            <div className="flex border-b">
+              <button
+                onClick={() => setAba('pendentes')}
+                className={`px-6 py-3 text-base font-medium border-b-2 transition-colors touch-manipulation min-h-[48px] ${
+                  aba === 'pendentes'
+                    ? 'border-blue-500 text-blue-600 bg-blue-50'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                📝 Pendentes ({checklists.length})
+              </button>
+              <button
+                onClick={() => setAba('realizados')}
+                className={`px-6 py-3 text-base font-medium border-b-2 transition-colors touch-manipulation min-h-[48px] ${
+                  aba === 'realizados'
+                    ? 'border-green-500 text-green-600 bg-green-50'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                ✅ Realizados ({checklistsRealizados.length})
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Conteúdo das Abas */}
-      <div className="p-4 space-y-4">
-        {aba === 'pendentes' ? (
-          checklists.length === 0 ? (
-            <div className="text-center py-12">
-              <FileText className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Nenhum checklist pendente</h3>
-              <p className="text-gray-600">Você está em dia com suas verificações! 🎉</p>
-            </div>
-          ) : (
-            checklists.map((checklist) => {
-            const setor = setoresConfig.find(s => s.id === checklist.setor)
-            const SetorIcon = setor?.icon || FileText
+        {/* Conteúdo das Abas */}
+        <div className="p-4 space-y-4">
+          {aba === 'pendentes' ? (
+            checklists.length === 0 ? (
+              <div className="text-center py-12">
+                <FileText className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Nenhum checklist pendente</h3>
+                <p className="text-gray-600">Você está em dia com suas verificações! 🎉</p>
+              </div>
+            ) : (
+              checklists.map((checklist) => {
+              const setor = setoresConfig.find(s => s.id === checklist.setor)
+              const SetorIcon = setor?.icon || FileText
 
-            return (
-              <Card key={checklist.id} className="bg-white border border-gray-200 hover:shadow-lg transition-all duration-300 hover:border-gray-300">
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-4">
-                    {/* Ícone do Setor */}
-                    <div className={`p-3 rounded-lg ${setor?.cor} text-white flex-shrink-0`}>
-                      <SetorIcon className="w-6 h-6" />
-                    </div>
-
-                    {/* Informações */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-lg text-gray-900 truncate">{checklist.nome}</h3>
-                        
-                        {checklist.status === 'atrasado' && (
-                          <Badge className="bg-red-100 text-red-800 flex-shrink-0 border border-red-200">
-                            <AlertTriangle className="w-3 h-3 mr-1" />
-                            Atrasado
-                          </Badge>
-                        )}
-                        
-                        {checklist.prioridade === 'alta' && (
-                          <Badge className="bg-orange-100 text-orange-800 flex-shrink-0 border border-orange-200">
-                            Prioridade Alta
-                          </Badge>
-                        )}
+              return (
+                <Card key={checklist.id} className="bg-white border border-gray-200 hover:shadow-lg transition-all duration-300 hover:border-gray-300">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-4">
+                      {/* Ícone do Setor */}
+                      <div className={`p-3 rounded-lg ${setor?.cor} text-white flex-shrink-0`}>
+                        <SetorIcon className="w-6 h-6" />
                       </div>
 
-                      <p className="text-sm text-gray-700 mb-3 line-clamp-2">{checklist.descricao}</p>
-
-                      <div className="grid grid-cols-2 gap-4 text-xs text-gray-600 mb-4">
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-gray-500" />
-                          ~{checklist.tempo_estimado}min
+                      {/* Informações */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold text-lg text-gray-900 truncate">{checklist.nome}</h3>
+                          
+                          {checklist.status === 'atrasado' && (
+                            <Badge className="bg-red-100 text-red-800 flex-shrink-0 border border-red-200">
+                              <AlertTriangle className="w-3 h-3 mr-1" />
+                              Atrasado
+                            </Badge>
+                          )}
+                          
+                          {checklist.prioridade === 'alta' && (
+                            <Badge className="bg-orange-100 text-orange-800 flex-shrink-0 border border-orange-200">
+                              Prioridade Alta
+                            </Badge>
+                          )}
                         </div>
-                        {checklist.deadline && (
+
+                        <p className="text-sm text-gray-700 mb-3 line-clamp-2">{checklist.descricao}</p>
+
+                        <div className="grid grid-cols-2 gap-4 text-xs text-gray-600 mb-4">
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-gray-500" />
+                            ~{checklist.tempo_estimado}min
+                          </div>
+                          {checklist.deadline && (
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3 text-gray-500" />
+                              Até {checklist.deadline}
+                            </div>
+                          )}
+                        </div>
+
+                        <Button 
+                          onClick={() => iniciarChecklist(checklist)}
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-all hover:shadow-md min-h-[48px] touch-manipulation text-base"
+                        >
+                          {checklist.status === 'em_andamento' ? 'Continuar' : 'Iniciar'} Checklist
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })
+            )
+          ) : (
+            // Aba Realizados
+            loadingRealizados ? (
+              <div className="text-center py-12">
+                <Timer className="w-8 h-8 animate-spin mx-auto mb-4 text-green-600" />
+                <p className="text-gray-700 font-medium">Carregando checklists realizados...</p>
+              </div>
+            ) : checklistsRealizados.length === 0 ? (
+              <div className="text-center py-12">
+                <CheckCircle className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Nenhum checklist realizado</h3>
+                <p className="text-gray-600">Complete alguns checklists para vê-los aqui 📊</p>
+              </div>
+            ) : (
+              checklistsRealizados.map((execucao: any) => (
+                <Card key={execucao.id} className="bg-white border border-gray-200 hover:shadow-lg transition-all duration-300">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-4">
+                      {/* Status Icon */}
+                      <div className="p-3 rounded-lg bg-green-500 text-white flex-shrink-0">
+                        <CheckCircle className="w-6 h-6" />
+                      </div>
+
+                      {/* Informações */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold text-lg text-gray-900 truncate">
+                            {execucao.checklists?.nome || 'Checklist'}
+                          </h3>
+                          <Badge className="bg-green-100 text-green-800 flex-shrink-0 border border-green-200">
+                            ✅ Concluído
+                          </Badge>
+                        </div>
+
+                        <p className="text-sm text-gray-700 mb-3">
+                          {execucao.checklists?.descricao || 'Sem descrição'}
+                        </p>
+
+                        <div className="grid grid-cols-2 gap-4 text-xs text-gray-600 mb-3">
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-gray-500" />
+                            {execucao.tempo_execucao || 0} min
+                          </div>
                           <div className="flex items-center gap-1">
                             <Calendar className="w-3 h-3 text-gray-500" />
-                            Até {checklist.deadline}
+                            {new Date(execucao.concluido_em).toLocaleDateString('pt-BR')}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2 text-xs">
+                          <div className="bg-green-50 p-2 rounded text-center">
+                            <div className="font-medium text-green-700">{execucao.itens_ok || 0}</div>
+                            <div className="text-green-600">OK</div>
+                          </div>
+                          <div className="bg-red-50 p-2 rounded text-center">
+                            <div className="font-medium text-red-700">{execucao.itens_problema || 0}</div>
+                            <div className="text-red-600">Problemas</div>
+                          </div>
+                          <div className="bg-gray-50 p-2 rounded text-center">
+                            <div className="font-medium text-gray-700">{execucao.total_itens || 0}</div>
+                            <div className="text-gray-600">Total</div>
+                          </div>
+                        </div>
+
+                        {execucao.observacoes_gerais && (
+                          <div className="mt-3 p-2 bg-blue-50 rounded text-sm text-blue-700">
+                            <strong>Obs:</strong> {execucao.observacoes_gerais}
                           </div>
                         )}
                       </div>
-
-                      <Button 
-                        onClick={() => iniciarChecklist(checklist)}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-all hover:shadow-md min-h-[48px] touch-manipulation text-base"
-                      >
-                        {checklist.status === 'em_andamento' ? 'Continuar' : 'Iniciar'} Checklist
-                      </Button>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              ))
             )
-          })
-          )
-        ) : (
-          // Aba Realizados
-          loadingRealizados ? (
-            <div className="text-center py-12">
-              <Timer className="w-8 h-8 animate-spin mx-auto mb-4 text-green-600" />
-              <p className="text-gray-700 font-medium">Carregando checklists realizados...</p>
-            </div>
-          ) : checklistsRealizados.length === 0 ? (
-            <div className="text-center py-12">
-              <CheckCircle className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Nenhum checklist realizado</h3>
-              <p className="text-gray-600">Complete alguns checklists para vê-los aqui 📊</p>
-            </div>
-          ) : (
-            checklistsRealizados.map((execucao: any) => (
-              <Card key={execucao.id} className="bg-white border border-gray-200 hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-4">
-                    {/* Status Icon */}
-                    <div className="p-3 rounded-lg bg-green-500 text-white flex-shrink-0">
-                      <CheckCircle className="w-6 h-6" />
-                    </div>
+          )}
+        </div>
 
-                    {/* Informações */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-lg text-gray-900 truncate">
-                          {execucao.checklists?.nome || 'Checklist'}
-                        </h3>
-                        <Badge className="bg-green-100 text-green-800 flex-shrink-0 border border-green-200">
-                          ✅ Concluído
-                        </Badge>
-                      </div>
+        {/* Componente de Câmera */}
+        <CameraCapture
+          isOpen={cameraAberta}
+          onCapture={handleFotoCapturada}
+          onClose={() => {
+            setCameraAberta(false)
+            setItemFotoAtual(null)
+          }}
+          title="Capturar Foto para Checklist"
+        />
 
-                      <p className="text-sm text-gray-700 mb-3">
-                        {execucao.checklists?.descricao || 'Sem descrição'}
-                      </p>
-
-                      <div className="grid grid-cols-2 gap-4 text-xs text-gray-600 mb-3">
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-gray-500" />
-                          {execucao.tempo_execucao || 0} min
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3 text-gray-500" />
-                          {new Date(execucao.concluido_em).toLocaleDateString('pt-BR')}
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-2 text-xs">
-                        <div className="bg-green-50 p-2 rounded text-center">
-                          <div className="font-medium text-green-700">{execucao.itens_ok || 0}</div>
-                          <div className="text-green-600">OK</div>
-                        </div>
-                        <div className="bg-red-50 p-2 rounded text-center">
-                          <div className="font-medium text-red-700">{execucao.itens_problema || 0}</div>
-                          <div className="text-red-600">Problemas</div>
-                        </div>
-                        <div className="bg-gray-50 p-2 rounded text-center">
-                          <div className="font-medium text-gray-700">{execucao.total_itens || 0}</div>
-                          <div className="text-gray-600">Total</div>
-                        </div>
-                      </div>
-
-                      {execucao.observacoes_gerais && (
-                        <div className="mt-3 p-2 bg-blue-50 rounded text-sm text-blue-700">
-                          <strong>Obs:</strong> {execucao.observacoes_gerais}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          )
-        )}
-      </div>
-
-      {/* Componente de Câmera */}
-      <CameraCapture
-        isOpen={cameraAberta}
-        onCapture={handleFotoCapturada}
-        onClose={() => {
-          setCameraAberta(false)
-          setItemFotoAtual(null)
-        }}
-        title="Capturar Foto para Checklist"
-      />
-
-      {/* Modal de Assinatura */}
-      {assinaturaPadAberto && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-hidden">
-            <div className="bg-blue-600 text-white p-4">
-              <h2 className="text-lg font-semibold">✍️ Assinatura Digital</h2>
-              <p className="text-sm opacity-90">Assine no espaço abaixo para confirmar</p>
-            </div>
-            
-            <div className="p-4">
-              <SignaturePad
-                onSignatureComplete={handleAssinaturaCapturada}
-                onSignatureCancel={handleAssinaturaCancelada}
-                onError={(error) => {
-                  console.error('🚨 Erro na assinatura:', error)
-                  alert('❌ Erro na assinatura: ' + error)
-                }}
-                width={350}
-                height={200}
-                className="w-full"
-              />
+        {/* Modal de Assinatura */}
+        {assinaturaPadAberto && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-hidden">
+              <div className="bg-blue-600 text-white p-4">
+                <h2 className="text-lg font-semibold">✍️ Assinatura Digital</h2>
+                <p className="text-sm opacity-90">Assine no espaço abaixo para confirmar</p>
+              </div>
+              
+              <div className="p-4">
+                <SignaturePad
+                  onSignatureComplete={handleAssinaturaCapturada}
+                  onSignatureCancel={handleAssinaturaCancelada}
+                  onError={(error) => {
+                    console.error('🚨 Erro na assinatura:', error)
+                    alert('❌ Erro na assinatura: ' + error)
+                  }}
+                  width={350}
+                  height={200}
+                  className="w-full"
+                />
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </ProtectedRoute>
   )
 } 

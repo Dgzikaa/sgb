@@ -19,8 +19,10 @@ import {
   Music,
   AlertCircle,
   CheckCircle,
-  RefreshCw
+  RefreshCw,
+  Calendar
 } from 'lucide-react'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 
 interface MetricasDiarias {
   faturamento_atual: number
@@ -218,79 +220,82 @@ function DashboardDiarioContent() {
           </div>
         )}
 
-        {/* Métricas Principais */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Card className="minimal-card border border-blue-200 bg-blue-50">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-blue-700">Faturamento Hoje</p>
-                  <p className="text-2xl font-bold text-blue-900">{formatarMoeda(metricas.faturamento_atual)}</p>
-                  <div className="flex items-center mt-1">
-                    <span className={`text-sm ${
-                      Number(calcularVariacao(metricas.faturamento_atual, metricas.faturamento_ontem)) >= 0 
-                        ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {calcularVariacao(metricas.faturamento_atual, metricas.faturamento_ontem)}% vs ontem
-                    </span>
-                  </div>
+        {/* Cards de Métricas Principais */}
+        <div className="card-grid-stats mb-8">
+          <Card className="summary-card dashboard-gradient-green">
+            <CardContent className="stat-card text-white">
+              <div className="flex items-center">
+                <DollarSign className="w-8 h-8 text-white" />
+                <div className="ml-4">
+                  <p className="stat-label text-white/90">Faturamento Hoje</p>
+                  <p className="stat-value">{formatarMoeda(metricas.faturamento_atual)}</p>
                 </div>
-                <DollarSign className="w-8 h-8 text-blue-600" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="minimal-card border border-green-200 bg-green-50">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-green-700">Clientes Hoje</p>
-                  <p className="text-2xl font-bold text-green-900">{metricas.clientes_atual}</p>
-                  <div className="flex items-center mt-1">
-                    <span className={`text-sm ${
-                      Number(calcularVariacao(metricas.clientes_atual, metricas.clientes_ontem)) >= 0 
-                        ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {calcularVariacao(metricas.clientes_atual, metricas.clientes_ontem)}% vs ontem
-                    </span>
-                  </div>
+          <Card className="summary-card dashboard-gradient-blue">
+            <CardContent className="stat-card text-white">
+              <div className="flex items-center">
+                <Users className="w-8 h-8 text-white" />
+                <div className="ml-4">
+                  <p className="stat-label text-white/90">Clientes</p>
+                  <p className="stat-value">{metricas.clientes_atual}</p>
                 </div>
-                <Users className="w-8 h-8 text-green-600" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="minimal-card border border-purple-200 bg-purple-50">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-purple-700">Ticket Médio</p>
-                  <p className="text-2xl font-bold text-purple-900">{formatarMoeda(metricas.ticket_medio)}</p>
-                  <div className="flex items-center mt-1">
-                    <span className={`text-sm ${
-                      metricas.ticket_medio >= metricas.ticket_meta ? 'text-green-600' : 'text-orange-600'
-                    }`}>
-                      Meta: {formatarMoeda(metricas.ticket_meta)}
-                    </span>
-                  </div>
+          <Card className="summary-card dashboard-gradient-purple">
+            <CardContent className="stat-card text-white">
+              <div className="flex items-center">
+                <TrendingUp className="w-8 h-8 text-white" />
+                <div className="ml-4">
+                  <p className="stat-label text-white/90">Ticket Médio</p>
+                  <p className="stat-value">{formatarMoeda(metricas.ticket_medio)}</p>
                 </div>
-                <ShoppingCart className="w-8 h-8 text-purple-600" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="minimal-card border border-orange-200 bg-orange-50">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-orange-700">Horário Pico</p>
-                  <p className="text-2xl font-bold text-orange-900">{metricas.horario_pico}</p>
-                  <div className="flex items-center mt-1">
-                    <Clock className="w-4 h-4 mr-1 text-orange-600" />
-                    <span className="text-sm text-orange-700">Movimento intenso</span>
-                  </div>
+          <Card className="summary-card">
+            <CardContent className="stat-card">
+              <div className="flex items-center">
+                <Calendar className="w-8 h-8 text-blue-600" />
+                <div className="ml-4">
+                  <p className="stat-label">Meta do Dia</p>
+                  <p className="stat-value">{formatarMoeda(metricas.ticket_meta)}</p>
                 </div>
-                <BarChart3 className="w-8 h-8 text-orange-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="summary-card">
+            <CardContent className="stat-card">
+              <div className="flex items-center">
+                <Target className="w-8 h-8 text-orange-600" />
+                <div className="ml-4">
+                  <p className="stat-label">Atingimento</p>
+                  <p className={`stat-value ${
+                    metricas.ticket_medio >= metricas.ticket_meta ? 'text-green-600' : 'text-orange-600'
+                  }`}>
+                    {((metricas.ticket_medio / metricas.ticket_meta) * 100).toFixed(1)}%
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="summary-card">
+            <CardContent className="stat-card">
+              <div className="flex items-center">
+                <Clock className="w-8 h-8 text-gray-600" />
+                <div className="ml-4">
+                  <p className="stat-label">Última Atualização</p>
+                  <p className="text-sm text-gray-600">
+                    {metricas.ultima_venda}
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -367,22 +372,22 @@ function DashboardDiarioContent() {
         </div>
 
         {/* Evento e Produção */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="card-grid-2 gap-mobile mb-8">
           {metricas.evento_hoje && (
-            <Card className="minimal-card border border-yellow-200 bg-yellow-50">
+            <Card className="card-responsive border border-yellow-200 bg-yellow-50">
               <CardHeader>
-                <CardTitle className="text-yellow-900 flex items-center space-x-2">
+                <CardTitle className="text-yellow-900 stack-mobile">
                   <Music className="w-5 h-5" />
                   <span>Evento Hoje</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className="space-y-mobile">
                   <div>
-                    <h3 className="font-bold text-yellow-900">{metricas.evento_hoje.nome}</h3>
-                    <p className="text-yellow-800">{metricas.evento_hoje.artista}</p>
+                    <h3 className="text-responsive-lg font-bold text-yellow-900">{metricas.evento_hoje.nome}</h3>
+                    <p className="text-responsive-sm text-yellow-800">{metricas.evento_hoje.artista}</p>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="card-grid-2 gap-4 text-responsive-sm">
                     <div>
                       <span className="text-yellow-700">Horário:</span>
                       <div className="font-medium text-yellow-900">{metricas.evento_hoje.horario}</div>
@@ -393,9 +398,9 @@ function DashboardDiarioContent() {
                     </div>
                   </div>
                   <div className="bg-yellow-100 rounded-lg p-3">
-                    <div className="text-sm text-yellow-800">Público Esperado</div>
-                    <div className="text-lg font-bold text-yellow-900">{metricas.evento_hoje.publico_esperado} pessoas</div>
-                    <div className="text-xs text-yellow-700">
+                    <div className="text-responsive-sm text-yellow-800">Público Esperado</div>
+                    <div className="text-responsive-lg font-bold text-yellow-900">{metricas.evento_hoje.publico_esperado} pessoas</div>
+                    <div className="text-responsive-xs text-yellow-700">
                       {((metricas.evento_hoje.publico_esperado / metricas.evento_hoje.capacidade) * 100).toFixed(0)}% da capacidade
                     </div>
                   </div>
@@ -404,39 +409,43 @@ function DashboardDiarioContent() {
             </Card>
           )}
 
-          <Card className="minimal-card border border-orange-200 bg-orange-50">
+          {/* Análise do Movimento */}
+          <Card className="card-responsive">
             <CardHeader>
-              <CardTitle className="text-orange-900 flex items-center space-x-2">
-                <Utensils className="w-5 h-5" />
-                <span>Produção Hoje</span>
+              <CardTitle className="stack-mobile">
+                <BarChart3 className="w-5 h-5 text-blue-600" />
+                <span>Análise do Movimento</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-orange-700">Pratos Produzidos</div>
-                    <div className="text-2xl font-bold text-orange-900">{metricas.producao_hoje.pratos_produzidos}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-orange-700">Tempo Médio</div>
-                    <div className="text-2xl font-bold text-orange-900">{metricas.producao_hoje.tempo_medio_preparo}</div>
+              <div className="space-y-mobile">
+                <div className="stat-card">
+                  <div className="text-responsive-sm text-gray-600">Horário de Pico</div>
+                  <div className="text-responsive-lg font-bold text-blue-600">
+                    {metricas.horario_pico || '20:00 - 22:00'}
                   </div>
                 </div>
                 
-                {metricas.producao_hoje.estoque_critico.length > 0 && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <AlertCircle className="w-4 h-4 text-red-600" />
-                      <span className="text-sm font-medium text-red-800">Estoque Crítico</span>
-                    </div>
-                    <div className="space-y-1">
-                      {metricas.producao_hoje.estoque_critico.map((item, index) => (
-                        <div key={index} className="text-sm text-red-700">• {item}</div>
-                      ))}
-                    </div>
+                <div className="card-grid-2 gap-4 text-responsive-sm">
+                  <div>
+                    <span className="text-gray-600">Mesa Mais Ativa:</span>
+                    <div className="font-medium text-gray-900">{metricas.mesa_mais_ativa || 'Mesa 5'}</div>
                   </div>
-                )}
+                  <div>
+                    <span className="text-gray-600">Forma Pagamento:</span>
+                    <div className="font-medium text-gray-900">{metricas.forma_pagamento_principal || 'PIX'}</div>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 rounded-lg p-3">
+                  <div className="text-responsive-sm text-blue-800">Previsão para hoje</div>
+                  <div className="text-responsive-lg font-bold text-blue-900">
+                    {formatarMoeda(metricas.previsao_dia || 0)}
+                  </div>
+                  <div className="text-responsive-xs text-blue-700">
+                    Baseado no histórico
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -456,17 +465,17 @@ function DashboardDiarioContent() {
                 <h4 className="font-medium text-gray-900">Faturamento</h4>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span>Meta: R$ 5.000</span>
+                    <span>Meta: {formatarMoeda(metricas.ticket_meta)}</span>
                     <span>Atual: {formatarMoeda(metricas.faturamento_atual)}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                       className="bg-blue-600 h-2 rounded-full"
-                      style={{ width: `${Math.min((metricas.faturamento_atual / 5000) * 100, 100)}%` }}
+                      style={{ width: `${Math.min((metricas.faturamento_atual / metricas.ticket_meta) * 100, 100)}%` }}
                     ></div>
                   </div>
                   <div className="text-xs text-gray-600">
-                    {((metricas.faturamento_atual / 5000) * 100).toFixed(1)}% atingido
+                    {((metricas.faturamento_atual / metricas.ticket_meta) * 100).toFixed(1)}% atingido
                   </div>
                 </div>
               </div>
@@ -517,5 +526,5 @@ function DashboardDiarioContent() {
 }
 
 export default function DashboardDiarioPage() {
-  return <DashboardDiarioContent />
+  return <ProtectedRoute requiredModule="dashboard_diario"><DashboardDiarioContent /></ProtectedRoute>
 } 

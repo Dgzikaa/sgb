@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Search, Filter, Download, BookOpen, Settings, Trash2, Edit, Eye, Clock, Users } from 'lucide-react'
 import { api } from '@/lib/api-client'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 
 // =====================================================
 // TIPOS
@@ -237,18 +238,19 @@ export default function TemplatesPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <ProtectedRoute requiredModule="operacoes" requiredRole="admin">
+      <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+      <div className="stack-mobile gap-4 mb-6">
         <div>
-          <p className="text-gray-600 mt-1">
+          <p className="text-responsive-sm text-gray-600 mt-1">
             Gerencie modelos prontos e crie templates personalizados
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="btn-group-mobile">
           <Button
-                          onClick={() => router.push('/configuracoes/templates/editor/novo')}
-            className="bg-blue-600 hover:bg-blue-700"
+            onClick={() => router.push('/configuracoes/templates/editor/novo')}
+            className="btn-touch bg-blue-600 hover:bg-blue-700 touch-animation"
           >
             <Plus className="w-4 h-4 mr-2" />
             Criar Template
@@ -257,6 +259,7 @@ export default function TemplatesPage() {
             onClick={instalarTemplatesPredefinidos}
             disabled={instalandoPredefinidos}
             variant="outline"
+            className="btn-touch touch-animation"
           >
             <BookOpen className="w-4 h-4 mr-2" />
             {instalandoPredefinidos ? 'Instalando...' : 'Instalar Predefinidos'}
@@ -266,50 +269,50 @@ export default function TemplatesPage() {
 
       {/* Estatísticas */}
       {estatisticas && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="card-grid mb-6">
           <Card>
-            <CardContent className="p-4">
+            <CardContent className="stat-card">
               <div className="flex items-center">
                 <BookOpen className="w-8 h-8 text-blue-600" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total</p>
-                  <p className="text-2xl font-bold text-gray-900">{estatisticas.total}</p>
+                  <p className="stat-label">Total</p>
+                  <p className="stat-value">{estatisticas.total}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="p-4">
+            <CardContent className="stat-card">
               <div className="flex items-center">
                 <Users className="w-8 h-8 text-green-600" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Públicos</p>
-                  <p className="text-2xl font-bold text-gray-900">{estatisticas.publicos}</p>
+                  <p className="stat-label">Públicos</p>
+                  <p className="stat-value">{estatisticas.publicos}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="p-4">
+            <CardContent className="stat-card">
               <div className="flex items-center">
                 <Settings className="w-8 h-8 text-purple-600" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Predefinidos</p>
-                  <p className="text-2xl font-bold text-gray-900">{estatisticas.predefinidos}</p>
+                  <p className="stat-label">Predefinidos</p>
+                  <p className="stat-value">{estatisticas.predefinidos}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="p-4">
+            <CardContent className="stat-card">
               <div className="flex items-center">
                 <Filter className="w-8 h-8 text-orange-600" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Categorias</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="stat-label">Categorias</p>
+                  <p className="stat-value">
                     {Object.keys(estatisticas.por_categoria).length}
                   </p>
                 </div>
@@ -404,57 +407,59 @@ export default function TemplatesPage() {
       </Card>
 
       {/* Lista de Templates */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="card-grid">
         {templates.map((template) => (
-          <Card key={template.id} className="hover:shadow-lg transition-shadow">
+          <Card key={template.id} className="card-responsive hover-lift-mobile">
             <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">{getTipoIcon(template.tipo)}</span>
-                  <div>
-                    <CardTitle className="text-lg">{template.nome}</CardTitle>
-                    {template.descricao && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        {template.descricao}
-                      </p>
-                    )}
+              <div className="space-y-mobile">
+                <div className="stack-mobile">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">{getTipoIcon(template.tipo)}</span>
+                    <div className="flex-1">
+                      <CardTitle className="text-responsive-lg">{template.nome}</CardTitle>
+                      {template.descricao && (
+                        <p className="text-responsive-sm text-gray-600 mt-1">
+                          {template.descricao}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-              
-              <div className="flex flex-wrap gap-2 mt-2">
-                <Badge className={getCategoriaColor(template.categoria)}>
-                  {template.categoria}
-                </Badge>
-                <Badge variant="outline">{template.setor}</Badge>
-                {template.predefinido && (
-                  <Badge className="bg-purple-100 text-purple-800">
-                    Sistema
+                
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <Badge className={`${getCategoriaColor(template.categoria)} badge-mobile`}>
+                    {template.categoria}
                   </Badge>
-                )}
-                {template.publico && (
-                  <Badge className="bg-green-100 text-green-800">
-                    Público
-                  </Badge>
-                )}
+                  <Badge variant="outline" className="badge-mobile">{template.setor}</Badge>
+                  {template.predefinido && (
+                    <Badge className="bg-purple-100 text-purple-800 badge-mobile">
+                      Sistema
+                    </Badge>
+                  )}
+                  {template.publico && (
+                    <Badge className="bg-green-100 text-green-800 badge-mobile">
+                      Público
+                    </Badge>
+                  )}
+                </div>
               </div>
             </CardHeader>
 
             <CardContent className="pt-0">
-              <div className="space-y-2 text-sm text-gray-600">
-                <div className="flex items-center gap-2">
+              <div className="space-y-mobile text-responsive-sm text-gray-600">
+                <div className="stack-mobile gap-2">
                   <Clock className="w-4 h-4" />
                   <span>{template.tempo_estimado} min • {template.frequencia}</span>
                 </div>
                 
                 {template.estatisticas && (
-                  <div className="flex items-center gap-2">
+                  <div className="stack-mobile gap-2">
                     <Users className="w-4 h-4" />
                     <span>{template.estatisticas.total_usos} usos</span>
                   </div>
                 )}
 
-                <div className="text-xs text-gray-500">
+                <div className="text-responsive-xs text-gray-500">
                   Por: {template.criado_por.nome}
                 </div>
               </div>
@@ -466,7 +471,7 @@ export default function TemplatesPage() {
                     <Badge 
                       key={index} 
                       variant="outline" 
-                      className="text-xs"
+                      className="badge-mobile"
                     >
                       {tagRel.template_tags.nome}
                     </Badge>
@@ -475,11 +480,10 @@ export default function TemplatesPage() {
               )}
 
               {/* Ações */}
-              <div className="flex gap-2 mt-4">
+              <div className="btn-group-mobile mt-4">
                 <Button
                   onClick={() => criarChecklistAPartirDeTemplate(template)}
-                  size="sm"
-                  className="flex-1"
+                  className="btn-touch touch-animation"
                 >
                   <Plus className="w-4 h-4 mr-1" />
                   Usar
@@ -487,29 +491,31 @@ export default function TemplatesPage() {
                 
                 <Button
                   onClick={() => visualizarTemplate(template)}
-                  size="sm"
                   variant="outline"
+                  className="btn-icon-touch"
                 >
                   <Eye className="w-4 h-4" />
+                  <span className="visible-mobile ml-2">Ver</span>
                 </Button>
                 
                 {!template.predefinido && (
                   <>
                     <Button
                       onClick={() => editarTemplate(template)}
-                      size="sm"
                       variant="outline"
+                      className="btn-icon-touch"
                     >
                       <Edit className="w-4 h-4" />
+                      <span className="visible-mobile ml-2">Editar</span>
                     </Button>
                     
                     <Button
                       onClick={() => deletarTemplate(template)}
-                      size="sm"
                       variant="outline"
-                      className="text-red-600 hover:text-red-700"
+                      className="btn-icon-touch text-red-600 hover:text-red-700"
                     >
                       <Trash2 className="w-4 h-4" />
+                      <span className="visible-mobile ml-2">Excluir</span>
                     </Button>
                   </>
                 )}
@@ -544,6 +550,7 @@ export default function TemplatesPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </ProtectedRoute>
   )
 } 

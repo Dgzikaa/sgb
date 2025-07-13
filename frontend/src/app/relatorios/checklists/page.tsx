@@ -33,6 +33,7 @@ import {
   TrendingUp,
   TrendingDown
 } from 'lucide-react'
+import { Label } from '@/components/ui/label'
 
 interface ChecklistRelatorio {
   id: string
@@ -348,7 +349,7 @@ export default function RelatoriosChecklists() {
   }
 
   return (
-    <ProtectedRoute requiredModule="admin">
+    <ProtectedRoute requiredModule="operacoes" requiredRole="admin">
       <div className="p-6 max-w-7xl mx-auto">
         {/* Informações */}
         <div className="mb-6">
@@ -359,76 +360,85 @@ export default function RelatoriosChecklists() {
         </div>
 
         {/* Estatísticas Gerais */}
-        <div className="grid grid-cols-2 lg:grid-cols-7 gap-4 mb-6">
+        <div className="card-grid-stats mb-6">
           <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-black">{estatisticas.total}</div>
-              <div className="text-sm text-gray-600">Total</div>
+            <CardContent className="stat-card">
+              <div className="stat-value text-black">{estatisticas.total}</div>
+              <div className="stat-label">Total</div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-green-600">{estatisticas.excelente}</div>
-              <div className="text-sm text-gray-600">Excelente</div>
+            <CardContent className="stat-card">
+              <div className="stat-value text-green-600">{estatisticas.excelente}</div>
+              <div className="stat-label">Excelente</div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-600">{estatisticas.bom}</div>
-              <div className="text-sm text-gray-600">Bom</div>
+            <CardContent className="stat-card">
+              <div className="stat-value text-blue-600">{estatisticas.bom}</div>
+              <div className="stat-label">Bom</div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-yellow-600">{estatisticas.atencao}</div>
-              <div className="text-sm text-gray-600">Atenção</div>
+            <CardContent className="stat-card">
+              <div className="stat-value text-yellow-600">{estatisticas.atencao}</div>
+              <div className="stat-label">Atenção</div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-red-600">{estatisticas.critico}</div>
-              <div className="text-sm text-gray-600">Crítico</div>
+            <CardContent className="stat-card">
+              <div className="stat-value text-red-600">{estatisticas.critico}</div>
+              <div className="stat-label">Crítico</div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-orange-600">{estatisticas.comProblemas}</div>
-              <div className="text-sm text-gray-600">C/ Problemas</div>
+            <CardContent className="stat-card">
+              <div className="stat-value text-orange-600">{estatisticas.comProblemas}</div>
+              <div className="stat-label">C/ Problemas</div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-purple-600">{estatisticas.atrasados}</div>
-              <div className="text-sm text-gray-600">Atrasados</div>
+            <CardContent className="stat-card">
+              <div className="stat-value text-purple-600">{estatisticas.atrasados}</div>
+              <div className="stat-label">Atrasados</div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Filtros */}
-        <Card className="mb-6">
-          <CardContent className="p-4">
-            <div className="flex flex-col lg:flex-row gap-4">
-              <div className="flex-1">
-                <Input
-                  placeholder="🔍 Buscar por nome ou responsável..."
-                  value={busca}
-                  onChange={(e) => setBusca(e.target.value)}
-                />
+        {/* Filtros e busca */}
+        <Card className="filter-section-mobile mb-6">
+          <CardHeader>
+            <CardTitle className="text-responsive-lg">📋 Filtros de Relatórios</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="form-grid">
+              <div className="form-group">
+                <Label className="text-responsive-xs">Buscar</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                  <Input
+                    placeholder="Nome ou responsável..."
+                    value={busca}
+                    onChange={(e) => setBusca(e.target.value)}
+                    className="search-input-mobile pl-10"
+                  />
+                </div>
               </div>
-              
-              <div className="flex gap-3">
+
+              <div className="form-group">
+                <Label className="text-responsive-xs">Setor</Label>
                 <Select value={setorFiltro} onValueChange={setSetorFiltro}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Setor" />
+                  <SelectTrigger className="select-mobile">
+                    <SelectValue placeholder="Todos os setores" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="todos">Todos os setores</SelectItem>
+                    <SelectItem value="todos">Todos</SelectItem>
                     {setoresConfig.map((setor) => (
                       <SelectItem key={setor.id} value={setor.id}>
                         {setor.nome}
@@ -436,24 +446,42 @@ export default function RelatoriosChecklists() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
 
+              <div className="form-group">
+                <Label className="text-responsive-xs">Status</Label>
                 <Select value={statusFiltro} onValueChange={setStatusFiltro}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Status" />
+                  <SelectTrigger className="select-mobile">
+                    <SelectValue placeholder="Todos os status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="todos">Todos os status</SelectItem>
+                    <SelectItem value="todos">Todos</SelectItem>
                     <SelectItem value="excelente">Excelente</SelectItem>
                     <SelectItem value="bom">Bom</SelectItem>
                     <SelectItem value="atencao">Atenção</SelectItem>
                     <SelectItem value="critico">Crítico</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
 
-                <Button variant="outline">
-                  <Download className="w-4 h-4 mr-2" />
-                  Exportar
-                </Button>
+              <div className="form-group">
+                <Label className="text-responsive-xs">Data Início</Label>
+                <Input
+                  type="date"
+                  value={dataInicio}
+                  onChange={(e) => setDataInicio(e.target.value)}
+                  className="input-mobile"
+                />
+              </div>
+
+              <div className="form-group">
+                <Label className="text-responsive-xs">Data Fim</Label>
+                <Input
+                  type="date"
+                  value={dataFim}
+                  onChange={(e) => setDataFim(e.target.value)}
+                  className="input-mobile"
+                />
               </div>
             </div>
           </CardContent>
@@ -498,92 +526,90 @@ export default function RelatoriosChecklists() {
                   const SetorIcon = setor?.icon || FileText
 
                   return (
-                    <Card key={relatorio.id} className="hover:shadow-md transition-shadow">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4 flex-1">
+                    <Card key={relatorio.id} className="card-responsive hover-lift-mobile">
+                      <CardContent className="content-padding">
+                        <div className="space-y-mobile">
+                          <div className="stack-mobile">
                             {/* Ícone do Setor */}
-                            <div className={`p-3 rounded-lg ${setor?.cor} text-white`}>
+                            <div className={`p-3 rounded-lg ${setor?.cor} text-white w-fit`}>
                               <SetorIcon className="w-6 h-6" />
                             </div>
 
                             {/* Informações Principais */}
                             <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
-                                <h3 className="font-semibold text-lg text-black">{relatorio.nome}</h3>
+                              <div className="stack-mobile mb-2">
+                                <h3 className="text-responsive-lg font-semibold text-black">{relatorio.nome}</h3>
                                 
                                 {/* Status Visual */}
                                 <div className="flex items-center gap-1">
                                   {obterIconeStatus(relatorio.status)}
-                                  <Badge className={`text-white ${obterCorStatus(relatorio.status)}`}>
+                                  <Badge className={`text-white ${obterCorStatus(relatorio.status)} badge-mobile`}>
                                     {relatorio.status}
                                   </Badge>
                                 </div>
+                              </div>
 
-                                {/* Indicadores */}
+                              {/* Indicadores */}
+                              <div className="flex flex-wrap gap-2 mb-3">
                                 {relatorio.possui_problemas && (
-                                  <Badge className="bg-orange-100 text-orange-800">
+                                  <Badge className="bg-orange-100 text-orange-800 badge-mobile">
                                     <AlertTriangle className="w-3 h-3 mr-1" />
                                     Problemas
                                   </Badge>
                                 )}
                                 
                                 {relatorio.atrasado && (
-                                  <Badge className="bg-red-100 text-red-800">
+                                  <Badge className="bg-red-100 text-red-800 badge-mobile">
                                     <Clock className="w-3 h-3 mr-1" />
                                     Atrasado
                                   </Badge>
                                 )}
                               </div>
 
-                              <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 text-sm text-gray-600">
-                                <div className="flex items-center gap-1">
+                              <div className="card-grid-2 gap-4 text-responsive-sm text-gray-600">
+                                <div className="stack-mobile gap-1">
                                   <User className="w-4 h-4" />
-                                  {relatorio.responsavel}
+                                  <span>{relatorio.responsavel}</span>
                                 </div>
-                                <div className="flex items-center gap-1">
+                                <div className="stack-mobile gap-1">
                                   <Calendar className="w-4 h-4" />
-                                  {relatorio.data_preenchimento} {relatorio.hora_preenchimento}
+                                  <span>{relatorio.data_preenchimento} {relatorio.hora_preenchimento}</span>
                                 </div>
-                                <div className="flex items-center gap-1">
+                                <div className="stack-mobile gap-1">
                                   <Clock className="w-4 h-4" />
-                                  {relatorio.tempo_execucao}min
+                                  <span>{relatorio.tempo_execucao}min</span>
                                 </div>
-                                <div className="flex items-center gap-1">
+                                <div className="stack-mobile gap-1">
                                   <CheckCircle className="w-4 h-4" />
-                                  {relatorio.itens_ok}/{relatorio.total_itens} OK
+                                  <span>{relatorio.itens_ok}/{relatorio.total_itens} OK</span>
                                 </div>
-                                <div className="flex items-center gap-1">
-                                  {relatorio.score_detalhado ? (
-                                    <ScoreDisplay 
-                                      scoreResult={relatorio.score_detalhado} 
-                                      variant="compact" 
-                                      showProblems={false} 
-                                    />
-                                  ) : (
-                                    <>
-                                      <BarChart3 className="w-4 h-4" />
-                                      Nota: {relatorio.nota_geral.toFixed(1)}
-                                    </>
-                                  )}
+                                <div className="stack-mobile gap-1">
+                                  <XCircle className="w-4 h-4" />
+                                  <span>{relatorio.itens_problema} problemas</span>
                                 </div>
-                                <div className="flex items-center gap-1 font-medium">
-                                  <span className="text-blue-600">Last input: {relatorio.last_input}</span>
+                                <div className="stack-mobile gap-1">
+                                  <TrendingUp className="w-4 h-4" />
+                                  <span>Nota: {relatorio.nota_geral.toFixed(1)}</span>
                                 </div>
                               </div>
                             </div>
+
+                            {/* Ação */}
+                            <Button
+                              onClick={() => carregarDetalhes(relatorio.id)}
+                              variant="outline"
+                              size="sm"
+                              className="btn-touch touch-animation"
+                            >
+                              <Eye className="w-4 h-4 mr-2" />
+                              <span className="hidden-mobile">Ver Detalhes</span>
+                              <span className="visible-mobile">Detalhes</span>
+                            </Button>
                           </div>
 
-                          {/* Ações */}
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => carregarDetalhes(relatorio.id)}
-                            >
-                              <Eye className="w-4 h-4 mr-1" />
-                              Ver Detalhes
-                            </Button>
+                          {/* Score Display */}
+                          <div className="mt-4">
+                            <ScoreDisplay scoreResult={relatorio.score_detalhado} />
                           </div>
                         </div>
                       </CardContent>

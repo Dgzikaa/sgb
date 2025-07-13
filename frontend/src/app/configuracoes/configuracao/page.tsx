@@ -28,20 +28,34 @@ import {
   Download,
   Upload,
   RefreshCw,
-  Database
+  Database,
+  Edit,
+  CheckCircle,
+  XCircle
 } from 'lucide-react'
+
+interface Usuario {
+  id: number;
+  nome: string;
+  email: string;
+  role: string;
+  ativo: boolean;
+  modulos_permitidos: string[];
+}
 
 export default function ConfiguracaoPage() {
   const { selectedBar } = useBar()
   const { updateUserPermissions } = usePermissions()
   const [activeTab, setActiveTab] = useState('usuarios')
   
-  // Estados para usuários
-  const [usuarios, setUsuarios] = useState<any[]>([])
-  const [editandoUsuario, setEditandoUsuario] = useState<any | null>(null)
-  const [novoUsuario, setNovoUsuario] = useState<any>({})
-  const [carregandoUsuarios, setCarregandoUsuarios] = useState(true)
-  
+  // Estados
+  const [usuarios, setUsuarios] = useState<Usuario[]>([])
+  const [expandirModulos, setExpandirModulos] = useState<{[key: number]: boolean}>({})
+  const [editandoUsuario, setEditandoUsuario] = useState<Usuario | null>(null)
+  const [modalEditarUsuario, setModalEditarUsuario] = useState(false)
+  const [usuarioPermissoes, setUsuarioPermissoes] = useState<Usuario | null>(null)
+  const [modalPermissoesUsuario, setModalPermissoesUsuario] = useState(false)
+
   // Estados para funções
   const [funcoes, setFuncoes] = useState<any[]>([])
   const [carregandoFuncoes, setCarregandoFuncoes] = useState(true)
@@ -363,8 +377,17 @@ export default function ConfiguracaoPage() {
     }
   }
 
-  const excluirUsuario = (id: number) => {
-    setUsuarios((prev: any[]) => prev.filter(u => u.id !== id))
+  const excluirUsuario = async (usuarioId: number) => {
+    if (!confirm('Tem certeza que deseja excluir este usuário?')) return
+    
+    try {
+      // TODO: Implementar lógica de exclusão
+      console.log('🗑️ Excluindo usuário:', usuarioId)
+      // Remover da lista local por enquanto
+      setUsuarios(prev => prev.filter(u => u.id !== usuarioId))
+    } catch (error) {
+      console.error('Erro ao excluir usuário:', error)
+    }
   }
 
   // Funções para metas
@@ -573,132 +596,118 @@ export default function ConfiguracaoPage() {
                   <p className="text-gray-500">Nenhum usuário encontrado</p>
                 </div>
               ) : (
-                <div className="space-y-6">
-                  {usuarios.map((usuario) => (
-                    <div key={usuario.id} className="border border-gray-200 rounded-xl p-6 bg-gradient-to-r from-white to-blue-50 shadow-sm">
-                      {/* Header do Usuário */}
-                      <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
-                            <span className="text-white text-lg font-bold">
-                              {getRoleIcon(usuario.role)}
-                            </span>
-                          </div>
-                          <div>
-                            <h3 className="font-bold text-black text-lg">{usuario.nome}</h3>
-                            <p className="text-gray-600 font-medium">{usuario.email}</p>
-                            <Badge variant={usuario.role === 'admin' ? 'default' : 'secondary'} className="mt-1">
-                              {getRoleLabel(usuario.role)}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="flex gap-2 mb-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                console.log('🔧 Editando usuário:', usuario)
-                                console.log('🔧 Funções disponíveis:', funcoes)
-                                setEditandoUsuario({ ...usuario })
-                                setModalEditarUsuario(true)
-                              }}
-                              className="border-blue-300 text-blue-600 hover:bg-blue-50"
-                            >
-                              <Edit2 className="w-3 h-3 mr-1" />
-                              Editar
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setUsuarioPermissoes({ ...usuario })
-                                setModalPermissoesUsuario(true)
-                              }}
-                              className="border-green-300 text-green-600 hover:bg-green-50"
-                            >
-                              <Shield className="w-3 h-3 mr-1" />
-                              Permissões
-                            </Button>
-                          </div>
-                          <Badge variant={usuario.ativo ? 'default' : 'secondary'} className={usuario.ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
-                            {usuario.ativo ? (
-                              <>
-                                <Unlock className="w-3 h-3 mr-1" />
-                                Ativo
-                              </>
-                            ) : (
-                              <>
-                                <Lock className="w-3 h-3 mr-1" />
-                                Inativo
-                              </>
-                            )}
-                          </Badge>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {(usuario.modulos_permitidos || []).length} de {modulosDisponiveis.length} módulos ativos
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Grid de Módulos Agrupados por Categoria */}
-                      <div className="space-y-6">
-                        {Object.entries(agruparModulosPorCategoria()).map(([categoria, modulos]) => (
-                          <div key={categoria} className="space-y-3">
-                            <h4 className="font-bold text-lg text-gray-800 uppercase tracking-wide bg-gradient-to-r from-gray-100 to-blue-100 px-4 py-2 rounded-lg border-l-4 border-blue-500">
-                              {categoria === 'dashboards' ? '📊 Dashboards & Análises' :
-                               categoria === 'operacoes' ? '⚙️ Operações & Gestão' :
-                               categoria === 'producao' ? '🏭 Produção & Terminal' :
-                               categoria === 'relatorios' ? '📈 Relatórios & Análises' :
-                               categoria === 'configuracao' ? '🔧 Configurações' : categoria}
-                            </h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                              {modulos.map((modulo) => {
-                                const modulosUsuario = Array.isArray(usuario.modulos_permitidos) ? usuario.modulos_permitidos : []
-                                const temPermissao = modulosUsuario.includes(modulo.id)
-                                
-                                // Debug específico para cada módulo
-                                if (usuario.id === 1) { // Só para o primeiro usuário para não fazer spam
-                                  console.log(`🔍 Verificando módulo ${modulo.id}:`, {
-                                    moduloId: modulo.id,
-                                    moduloNome: modulo.nome,
-                                    modulosUsuario,
-                                    temPermissao,
-                                    usuarioNome: usuario.nome
-                                  })
-                                }
-                                
-                                return (
-                                  <div key={modulo.id} className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-all duration-200">
-                                    <div className="flex items-center justify-between mb-2">
-                                      <h5 className="font-semibold text-black text-sm">{modulo.nome}</h5>
-                                      <Switch
-                                        checked={temPermissao}
-                                        onCheckedChange={() => {
-                                          console.log(`🎯 Clique no switch: ${modulo.nome} (${modulo.id}) para usuário ${usuario.nome}`)
-                                          alternarPermissaoModulo(usuario.id, modulo.id)
-                                        }}
-                                        className="data-[state=checked]:bg-green-500"
-                                      />
-                                    </div>
-                                    <p className="text-xs text-gray-600 mb-2">{modulo.descricao}</p>
-                                    <div>
-                                      <Badge 
-                                        variant={temPermissao ? 'default' : 'secondary'} 
-                                        className={`text-xs ${temPermissao ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}
-                                      >
-                                        {temPermissao ? '✅ Ativo' : '❌ Inativo'}
-                                      </Badge>
-                                    </div>
-                                  </div>
-                                )
-                              })}
+                  <div className="card-grid-2 gap-mobile">
+                    {usuarios.map((usuario) => (
+                      <Card key={usuario.id} className="card-responsive hover-lift-mobile">
+                        <CardHeader>
+                          <div className="stack-mobile">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold">
+                                {usuario.nome.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="flex-1">
+                                <CardTitle className="text-responsive-lg text-black">{usuario.nome}</CardTitle>
+                                <p className="text-responsive-sm text-gray-600 mt-1">{usuario.email}</p>
+                              </div>
+                            </div>
+                            <div className="btn-group-mobile">
+                              <Button
+                                onClick={() => iniciarEdicaoUsuario(usuario)}
+                                variant="outline"
+                                className="btn-touch touch-animation"
+                              >
+                                <Edit className="w-4 h-4 mr-2" />
+                                Editar
+                              </Button>
+                              {usuario.id !== 1 && (
+                                <Button
+                                  onClick={() => excluirUsuario(usuario.id)}
+                                  variant="destructive"
+                                  className="btn-touch touch-animation"
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  Excluir
+                                </Button>
+                              )}
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                        </CardHeader>
+                        
+                        <CardContent>
+                          <div className="space-y-mobile">
+                            <div>
+                              <Label className="text-responsive-xs font-semibold text-gray-700">Função</Label>
+                              <p className="text-responsive-sm text-gray-900 capitalize">{usuario.role}</p>
+                            </div>
+                            
+                            <div>
+                              <Label className="text-responsive-xs font-semibold text-gray-700">Status</Label>
+                              <div className="mt-1">
+                                <Badge variant={usuario.ativo ? "default" : "destructive"} className="badge-mobile">
+                                  {usuario.ativo ? 'Ativo' : 'Inativo'}
+                                </Badge>
+                              </div>
+                            </div>
+
+                            <div>
+                              <Label className="text-responsive-xs font-semibold text-gray-700">Módulos Permitidos</Label>
+                              <div className="mt-2">
+                                <div className="text-responsive-sm text-gray-700 mb-3">
+                                  <strong>{(usuario.modulos_permitidos || []).length}</strong> de <strong>{modulosDisponiveis.length}</strong> módulos disponíveis
+                                </div>
+                                
+                                {/* Expansível para ver detalhes */}
+                                <div>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setExpandirModulos(prev => ({ ...prev, [usuario.id]: !prev[usuario.id] }))}
+                                    className="btn-touch p-2"
+                                  >
+                                    <Eye className="w-4 h-4 mr-2" />
+                                    {expandirModulos[usuario.id] ? 'Ocultar' : 'Ver'} detalhes
+                                  </Button>
+                                  
+                                  {expandirModulos[usuario.id] && (
+                                    <div className="mt-3 space-y-2">
+                                      {Object.entries(agruparModulosPorCategoria()).map(([categoria, modulos]) => (
+                                        <div key={categoria} className="bg-gray-50 rounded-lg p-3">
+                                          <h5 className="text-responsive-xs font-semibold text-gray-700 mb-2 capitalize">
+                                            {categoria.replace('_', ' ')}
+                                          </h5>
+                                          <div className="card-grid">
+                                            {modulos.map((modulo) => {
+                                              const modulosUsuario = Array.isArray(usuario.modulos_permitidos) ? usuario.modulos_permitidos : []
+                                              const temPermissao = modulosUsuario.includes(modulo.id)
+                                              
+                                              return (
+                                                <div key={modulo.id} className="flex items-center justify-between p-2 bg-white rounded border">
+                                                  <div className="flex-1">
+                                                    <p className="text-responsive-xs font-medium text-gray-900">{modulo.nome}</p>
+                                                  </div>
+                                                  <div className="ml-2">
+                                                    {temPermissao ? (
+                                                      <CheckCircle className="w-4 h-4 text-green-500" />
+                                                    ) : (
+                                                      <XCircle className="w-4 h-4 text-red-500" />
+                                                    )}
+                                                  </div>
+                                                </div>
+                                              )
+                                            })}
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
               )}
             </CardContent>
           </Card>
@@ -1231,18 +1240,18 @@ export default function ConfiguracaoPage() {
                 </div>
 
                 {/* Grid de Módulos */}
-                <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
+                <div className="card-responsive">
+                  <h3 className="text-responsive-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
                     🔧 Configurar Módulos
                   </h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="card-grid">
                     {modulosDisponiveis.map((modulo) => {
                       const temPermissao = (usuarioPermissoes.modulos_permitidos || []).includes(modulo.id)
                       return (
-                        <div key={modulo.id} className="border border-gray-200 rounded-lg p-5 shadow-sm hover:shadow-md transition-all duration-200">
-                          <div className="flex items-center justify-between mb-3">
-                            <h4 className="font-semibold text-black text-base">{modulo.nome}</h4>
+                        <div key={modulo.id} className="card-responsive hover-lift-mobile">
+                          <div className="stack-mobile">
+                            <h4 className="text-responsive-sm font-semibold text-black">{modulo.nome}</h4>
                             <Switch
                               checked={temPermissao}
                               onCheckedChange={() => {
@@ -1255,22 +1264,25 @@ export default function ConfiguracaoPage() {
                                 }
                                 setUsuarioPermissoes((prev: any) => prev ? { ...prev, modulos_permitidos: novosModulos } : null)
                               }}
-                              className="data-[state=checked]:bg-green-500"
+                              className="data-[state=checked]:bg-green-500 touch-animation"
                             />
                           </div>
-                          <p className="text-sm text-gray-600 mb-3">{modulo.descricao}</p>
-                          <div>
-                            <Badge 
-                              variant={temPermissao ? 'default' : 'secondary'} 
-                              className={`text-sm ${temPermissao ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}
-                            >
-                              {temPermissao ? '✅ Ativo' : '❌ Inativo'}
-                            </Badge>
+                          <p className="text-responsive-xs text-gray-600 mb-3">{modulo.descricao}</p>
+                          <div className="space-y-2">
+                            <div className="text-responsive-xs">
+                              <span className="font-medium text-gray-700">ID:</span>
+                              <span className="ml-2 font-mono text-gray-900">{modulo.id}</span>
+                            </div>
+                            <div className="text-responsive-xs">
+                              <span className="font-medium text-gray-700">Categoria:</span>
+                              <span className="ml-2 text-gray-900 capitalize">{modulo.categoria?.replace('_', ' ')}</span>
+                            </div>
                           </div>
                         </div>
                       )
                     })}
                   </div>
+                </div>
                   
                   <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
                     <div className="flex items-start gap-3">

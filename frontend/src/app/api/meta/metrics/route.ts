@@ -18,11 +18,25 @@ export async function GET(request: NextRequest) {
 
     console.log(`🎯 Parâmetros: platform=${platform}, period=${period}`)
 
+    // Obter dados do usuário para pegar o bar_id
+    const userData = request.headers.get('x-user-data')
+    let barId = 3 // fallback para desenvolvimento
+    
+    if (userData) {
+      try {
+        const parsedUser = JSON.parse(decodeURIComponent(userData))
+        barId = parsedUser.bar_id || 3
+        console.log(`👤 Usando bar_id: ${barId}`)
+      } catch (e) {
+        console.warn('⚠️ Erro ao parsear dados do usuário, usando bar_id padrão')
+      }
+    }
+
     // Buscar dados mais recentes do Instagram
     const { data: instagramData, error: instagramError } = await supabase
       .from('instagram_metrics')
       .select('*')
-      .eq('bar_id', 3)
+      .eq('bar_id', barId)
       .order('data_referencia', { ascending: false })
       .limit(7) // Última semana
 
@@ -30,7 +44,7 @@ export async function GET(request: NextRequest) {
     const { data: facebookData, error: facebookError } = await supabase
         .from('facebook_metrics')
       .select('*')
-      .eq('bar_id', 3)
+      .eq('bar_id', barId)
       .order('data_referencia', { ascending: false })
       .limit(7) // Última semana
 
@@ -38,7 +52,7 @@ export async function GET(request: NextRequest) {
     const { data: consolidatedData, error: consolidatedError } = await supabase
       .from('social_metrics_consolidated')
       .select('*')
-      .eq('bar_id', 3)
+      .eq('bar_id', barId)
       .order('data_referencia', { ascending: false })
       .limit(7) // Última semana
 
@@ -67,13 +81,13 @@ export async function GET(request: NextRequest) {
     // Processar dados do Facebook (estrutura que a página espera)
     const facebookMetrics = facebookData && facebookData.length > 0 ? [{
       platform: 'facebook',
-      page_fans: facebookData[0].fan_count || 0,
+      page_fans: facebookData[0].page_fans || facebookData[0].fan_count || 0,
       followers_count: facebookData[0].followers_count || 0,
-      page_reach: facebookData[0].reach || 0,
-      page_engaged_users: facebookData[0].engaged_users || 0,
+      page_reach: facebookData[0].page_reach || 0,
+      page_engaged_users: facebookData[0].page_engaged_users || 0,
       post_count: facebookData[0].raw_data?.posts_summary?.total_posts || 0,
       growth_7d: facebookData.length > 1 ? 
-        ((facebookData[0].fan_count - facebookData[facebookData.length - 1].fan_count) / facebookData[facebookData.length - 1].fan_count * 100) : 0,
+        ((facebookData[0].page_fans - facebookData[facebookData.length - 1].page_fans) / facebookData[facebookData.length - 1].page_fans * 100) : 0,
       data_referencia: facebookData[0].data_referencia
     }] : []
 
@@ -102,30 +116,10 @@ export async function GET(request: NextRequest) {
       responseData = responseData.concat(facebookMetrics)
     }
 
-    // Se não há dados, retornar estrutura vazia mas válida
+    // Se não há dados, retornar array vazio - SEM DADOS FALSOS
     if (responseData.length === 0) {
-      console.log('⚠️ Nenhum dado encontrado, retornando estrutura vazia')
-      responseData = [
-        {
-          platform: 'instagram',
-          follower_count: 0,
-          reach: 0,
-          impressions: 0,
-          posts_likes: 0,
-          posts_comments: 0,
-          media_count: 0,
-          engagement_rate: 0,
-          growth_7d: 0
-        },
-        {
-          platform: 'facebook',
-          page_fans: 0,
-          page_reach: 0,
-          page_engaged_users: 0,
-          post_count: 0,
-          growth_7d: 0
-        }
-      ]
+      console.log('⚠️ Nenhum dado REAL encontrado no banco. Retornando vazio.')
+      responseData = []
     }
 
     const results = {

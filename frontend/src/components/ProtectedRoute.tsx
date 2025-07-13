@@ -1,123 +1,170 @@
-import React from 'react'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { usePermissions } from '@/hooks/usePermissions'
+import { RefreshCw, Shield, AlertTriangle, Home, ArrowLeft } from 'lucide-react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
   requiredModule?: string
   requiredRole?: 'admin' | 'manager' | 'funcionario'
-  requiredCategory?: 'dashboards' | 'dados' | 'terminal' | 'configuracao'
-  fallback?: React.ReactNode
+  requiredModules?: string[]
+  fallbackUrl?: string
+  errorMessage?: string
+  showInlineError?: boolean // Nova prop para controlar se mostra erro inline ou redireciona
 }
 
-export function ProtectedRoute({
-  children,
+export function ProtectedRoute({ 
+  children, 
   requiredModule,
   requiredRole,
-  requiredCategory,
-  fallback
+  requiredModules = [],
+  fallbackUrl = '/home',
+  errorMessage = 'acesso_negado',
+  showInlineError = true // Por padrão mostra erro inline
 }: ProtectedRouteProps) {
-  const { hasPermission, isRole, canAccessModule, loading, user } = usePermissions()
+  const { user, hasPermission, hasAnyPermission, isRole, loading } = usePermissions()
+  const router = useRouter()
+  const [accessDenied, setAccessDenied] = useState(false)
+  const [denialReason, setDenialReason] = useState<{
+    type: 'role' | 'module' | 'modules'
+    required: string
+    current?: string
+  } | null>(null)
 
-  // Mostrar loading enquanto carrega permissões
+  useEffect(() => {
+    if (!loading && user) {
+      console.log('🔒 VERIFICANDO PROTEÇÃO DE ROTA:', {
+        user: user.nome,
+        role: user.role,
+        requiredModule,
+        requiredRole,
+        requiredModules
+      })
+
+      // Verificar role específico
+      if (requiredRole && !isRole(requiredRole)) {
+        console.log(`🚫 BLOQUEADO: Role ${user.role} não é ${requiredRole}`)
+        setAccessDenied(true)
+        setDenialReason({
+          type: 'role',
+          required: requiredRole,
+          current: user.role
+        })
+        
+        if (!showInlineError) {
+          router.push(`${fallbackUrl}?error=${errorMessage}&required_role=${requiredRole}`)
+        }
+        return
+      }
+
+      // Verificar módulo específico
+      if (requiredModule && !hasPermission(requiredModule)) {
+        console.log(`🚫 BLOQUEADO: Usuário sem módulo ${requiredModule}`)
+        setAccessDenied(true)
+        setDenialReason({
+          type: 'module',
+          required: requiredModule
+        })
+        
+        if (!showInlineError) {
+          router.push(`${fallbackUrl}?error=${errorMessage}&required_module=${requiredModule}`)
+        }
+        return
+      }
+
+      // Verificar múltiplos módulos
+      if (requiredModules.length > 0 && !hasAnyPermission(requiredModules)) {
+        console.log(`🚫 BLOQUEADO: Usuário sem nenhum dos módulos: ${requiredModules.join(', ')}`)
+        setAccessDenied(true)
+        setDenialReason({
+          type: 'modules',
+          required: requiredModules.join(', ')
+        })
+        
+        if (!showInlineError) {
+          router.push(`${fallbackUrl}?error=${errorMessage}&required_modules=${requiredModules.join(',')}`)
+        }
+        return
+      }
+
+      console.log('✅ ACESSO LIBERADO: Usuário com permissões adequadas')
+      setAccessDenied(false)
+      setDenialReason(null)
+    }
+  }, [user, loading, hasPermission, hasAnyPermission, isRole, router, requiredModule, requiredRole, requiredModules, fallbackUrl, errorMessage, showInlineError])
+
+  // Mostrar loading enquanto verifica permissões
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Verificando permissões...</p>
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>Verificando permissões...</p>
         </div>
       </div>
     )
   }
 
-  // Se não há usuário logado
+  // Se não tem usuário, não renderizar (será redirecionado)
   if (!user) {
-    return fallback || (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-red-600 font-medium">🔒 Acesso negado</p>
-          <p className="text-gray-600 mt-2">Você precisa estar logado para acessar esta página.</p>
-        </div>
+    return null
+  }
+
+  // Se acesso negado e deve mostrar erro inline
+  if (accessDenied && showInlineError) {
+    return (
+      <div className="fixed inset-0 bg-slate-50 flex items-start justify-center pt-32 p-4">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 text-center">
+            {/* Ícone */}
+            <div className="mx-auto flex items-center justify-center w-16 h-16 bg-slate-100 rounded-full mb-6">
+              <Shield className="w-8 h-8 text-slate-600" />
+            </div>
+
+            {/* Título */}
+            <h1 className="text-2xl font-bold text-slate-900 mb-3">
+              Acesso Negado
+            </h1>
+
+            {/* Mensagem */}
+            <p className="text-slate-600 mb-8 leading-relaxed">
+              Você não tem permissão para acessar esta página.
+            </p>
+
+            {/* Botões */}
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={() => router.back()}
+                variant="outline"
+                className="w-full border-slate-300 hover:bg-slate-50"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Voltar
+              </Button>
+              
+              <Button
+                onClick={() => router.push('/home')}
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white"
+              >
+                <Home className="w-4 h-4 mr-2" />
+                Ir para Home
+              </Button>
+            </div>
+                      </div>
+          </div>
       </div>
     )
   }
 
-  // Verificar se o usuário está ativo
-  if (!user.ativo) {
-    return fallback || (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-red-600 font-medium">⚠️ Conta desativada</p>
-          <p className="text-gray-600 mt-2">Sua conta foi desativada. Entre em contato com o administrador.</p>
-        </div>
-      </div>
-    )
+  // Se acesso negado mas não deve mostrar erro inline, não renderizar (foi redirecionado)
+  if (accessDenied && !showInlineError) {
+    return null
   }
 
-  // Verificar permissão por módulo específico
-  if (requiredModule && !hasPermission(requiredModule)) {
-    return fallback || (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-red-600 font-medium">🔒 Acesso negado</p>
-          <p className="text-gray-600 mt-2">Você não tem permissão para acessar este módulo.</p>
-          <p className="text-gray-500 text-sm mt-1">Módulo requerido: {requiredModule}</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Verificar permissão por role
-  if (requiredRole && !isRole(requiredRole)) {
-    return fallback || (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-red-600 font-medium">🔒 Acesso negado</p>
-          <p className="text-gray-600 mt-2">Você não tem o nível de acesso necessário.</p>
-          <p className="text-gray-500 text-sm mt-1">Role requerida: {requiredRole}</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Verificar permissão por categoria
-  if (requiredCategory && !canAccessModule(requiredCategory)) {
-    return fallback || (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-red-600 font-medium">🔒 Acesso negado</p>
-          <p className="text-gray-600 mt-2">Você não tem permissão para acessar esta categoria.</p>
-          <p className="text-gray-500 text-sm mt-1">Categoria requerida: {requiredCategory}</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Se chegou até aqui, o usuário tem permissão
-  return <>{children}</>
-}
-
-// Componente para ocultar/mostrar elementos baseado em permissões
-interface ConditionalRenderProps {
-  children: React.ReactNode
-  requiredModule?: string
-  requiredRole?: 'admin' | 'manager' | 'funcionario'
-  requiredCategory?: 'dashboards' | 'dados' | 'terminal' | 'configuracao'
-}
-
-export function ConditionalRender({
-  children,
-  requiredModule,
-  requiredRole,
-  requiredCategory
-}: ConditionalRenderProps) {
-  const { hasPermission, isRole, canAccessModule, user } = usePermissions()
-
-  if (!user || !user.ativo) return null
-
-  if (requiredModule && !hasPermission(requiredModule)) return null
-  if (requiredRole && !isRole(requiredRole)) return null
-  if (requiredCategory && !canAccessModule(requiredCategory)) return null
-
+  // Se chegou até aqui, tem permissão
   return <>{children}</>
 } 

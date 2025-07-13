@@ -5,13 +5,25 @@ export interface UserCookie {
   email: string
   nome: string
   role: string
+  modulos_permitidos: string[]
+  ativo: boolean
 }
 
 export const AUTH_COOKIE_NAME = 'sgb_user'
 
 export function setAuthCookie(userData: UserCookie) {
   try {
-    const value = JSON.stringify(userData)
+    // Garantir que todos os campos obrigatórios estão presentes
+    const cookieData: UserCookie = {
+      id: userData.id,
+      email: userData.email,
+      nome: userData.nome,
+      role: userData.role,
+      modulos_permitidos: userData.modulos_permitidos || [],
+      ativo: userData.ativo !== false
+    }
+    
+    const value = JSON.stringify(cookieData)
     const expires = new Date()
     expires.setDate(expires.getDate() + 7) // 7 dias
 
@@ -63,15 +75,25 @@ export function syncAuthData(userData: any) {
     // Salvar no localStorage (dados completos)
     localStorage.setItem('sgb_user', JSON.stringify(userData))
     
-    // Salvar no cookie (dados básicos para middleware)
+    // Salvar no cookie (dados necessários para middleware)
     const cookieData: UserCookie = {
       id: userData.id,
       email: userData.email,
       nome: userData.nome,
-      role: userData.role
+      role: userData.role,
+      modulos_permitidos: userData.modulos_permitidos || [],
+      ativo: userData.ativo !== false
     }
     
     setAuthCookie(cookieData)
+    
+    console.log('✅ Dados de autenticação sincronizados:', {
+      id: cookieData.id,
+      nome: cookieData.nome,
+      role: cookieData.role,
+      modules: cookieData.modulos_permitidos.length,
+      ativo: cookieData.ativo
+    })
   } catch (error) {
     console.error('❌ Erro ao sincronizar dados de autenticação:', error)
   }

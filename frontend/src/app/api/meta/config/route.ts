@@ -6,8 +6,8 @@ import { z } from 'zod'
 // Schema de validação para configuração
 const MetaConfigSchema = z.object({
   access_token: z.string().min(10, 'Access token é obrigatório'),
-  app_id: z.string().min(5, 'App ID é obrigatório'),
-  app_secret: z.string().min(10, 'App Secret é obrigatório'),
+  app_id: z.string().min(5, 'App ID deve ter pelo menos 5 caracteres').optional().or(z.literal(null)),
+  app_secret: z.string().min(10, 'App Secret deve ter pelo menos 10 caracteres').optional().or(z.literal(null)),
   facebook_page_id: z.string().optional(),
   instagram_account_id: z.string().optional(),
   api_version: z.string().optional().default('v18.0'),
@@ -256,8 +256,8 @@ export async function POST(request: NextRequest) {
       sistema: 'meta',
       ambiente: 'producao',
       access_token: enhancedConfig.access_token,
-      client_id: enhancedConfig.app_id,
-      client_secret: enhancedConfig.app_secret,
+      client_id: enhancedConfig.app_id || null,
+      client_secret: enhancedConfig.app_secret || null,
       redirect_uri: null,
       scopes: 'pages_read_engagement,pages_show_list,instagram_basic,instagram_manage_insights',
       base_url: 'https://graph.facebook.com',
@@ -405,7 +405,9 @@ export async function PUT(request: NextRequest) {
     console.log('📊 Dados recebidos no body:', {
       hasAccessToken: !!body.access_token,
       hasAppId: !!body.app_id,
-      hasAppSecret: !!body.app_secret
+      hasAppSecret: !!body.app_secret,
+      appId: body.app_id,
+      appSecret: body.app_secret
     })
     
     const testData = MetaConfigSchema.parse(body)

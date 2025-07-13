@@ -1,7 +1,12 @@
-'use client';
+'use client'
 
-import RelatorioProdutos from '@/components/relatorios/RelatorioProdutos';
+import { ProtectedRoute } from '@/components/ProtectedRoute'
+import RelatorioProdutos from '@/components/relatorios/RelatorioProdutos'
 
 export default function RelatorioProdutosPage() {
-  return <RelatorioProdutos />;
+  return (
+    <ProtectedRoute requiredModule="relatorio_produtos">
+      <RelatorioProdutos />
+    </ProtectedRoute>
+  )
 } 

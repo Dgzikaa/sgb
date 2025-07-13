@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useBarLogo } from '@/hooks/useBarLogo'
 import { usePageTitle } from '@/contexts/PageTitleContext'
+import { usePermissions } from '@/hooks/usePermissions'
 
 interface Bar {
   id: number
@@ -22,6 +23,7 @@ export default function Header({ onMenuToggle, selectedBar, availableBars, onBar
   const [showNotifications, setShowNotifications] = useState(false)
   const { logoUrl, shouldUseLogo } = useBarLogo({ barName: selectedBar?.nome, size: 'small' })
   const { pageTitle } = usePageTitle()
+  const { user } = usePermissions()
 
   // Mock notifications - em produção viria de uma API
   const notifications = [
@@ -150,11 +152,17 @@ export default function Header({ onMenuToggle, selectedBar, availableBars, onBar
           {/* User Profile */}
           <div className="flex items-center space-x-2 pl-2 border-l border-slate-700">
             <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-md">
-              <span className="text-white text-sm font-bold">RO</span>
+              <span className="text-white text-sm font-bold">
+                {user?.nome ? user.nome.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U'}
+              </span>
             </div>
             <div className="hidden sm:block">
-              <div className="text-sm font-semibold text-white">Rodrigo Oliveira</div>
-              <div className="text-xs text-slate-400">Administrador</div>
+              <div className="text-sm font-semibold text-white">{user?.nome || 'Usuário'}</div>
+              <div className="text-xs text-slate-400">
+                {user?.role === 'admin' ? 'Administrador' : 
+                 user?.role === 'manager' ? 'Gerente' : 
+                 user?.role === 'funcionario' ? 'Funcionário' : 'Usuário'}
+              </div>
             </div>
           </div>
         </div>

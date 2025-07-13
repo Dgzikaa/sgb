@@ -7,14 +7,16 @@ const supabase = createClient(
 )
 
 export async function GET(request: NextRequest) {
+  return await collectRealData(request)
+}
+
+export async function POST(request: NextRequest) {
+  return await collectRealData(request)
+}
+
+async function collectRealData(request: NextRequest) {
   try {
-    // Desabilitar durante build para evitar chamadas automáticas
-    return NextResponse.json({ 
-      error: 'API temporariamente desabilitada durante build',
-      message: 'Esta API está desabilitada para evitar chamadas durante a geração estática'
-    }, { status: 503 })
-    
-    // console.log('🔍 Iniciando coleta de dados REAIS da Meta API...')
+    console.log('🔍 Iniciando coleta de dados REAIS da Meta API...')
 
     // Buscar configuração da Meta
     const { data: config, error: configError } = await supabase

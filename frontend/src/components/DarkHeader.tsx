@@ -4,12 +4,14 @@ import { useState } from 'react'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 import { useRouter } from 'next/navigation'
 import { useSidebar } from '@/contexts/SidebarContext'
+import { usePermissions } from '@/hooks/usePermissions'
 
 export default function DarkHeader() {
   const { pageTitle } = usePageTitle()
   const [showUserMenu, setShowUserMenu] = useState(false)
   const router = useRouter()
   const { isSidebarCollapsed, toggleSidebarCollapse } = useSidebar()
+  const { user } = usePermissions()
 
   return (
     <header className="bg-gradient-to-r from-slate-800 via-slate-900 to-black border-b border-slate-700/50 shadow-2xl shadow-black/20 fixed top-0 right-0 z-30"
@@ -57,11 +59,17 @@ export default function DarkHeader() {
             className="flex items-center space-x-2 p-2 rounded-xl hover:bg-white/10 transition-colors group"
           >
             <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-md">
-              <span className="text-white text-sm font-bold">RO</span>
+              <span className="text-white text-sm font-bold">
+                {user?.nome ? user.nome.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U'}
+              </span>
             </div>
             <div className="hidden sm:block">
-              <div className="text-sm font-semibold text-white">Rodrigo Oliveira</div>
-              <div className="text-xs text-slate-400">Administrador</div>
+              <div className="text-sm font-semibold text-white">{user?.nome || 'Usuário'}</div>
+              <div className="text-xs text-slate-400">
+                {user?.role === 'admin' ? 'Administrador' : 
+                 user?.role === 'manager' ? 'Gerente' : 
+                 user?.role === 'funcionario' ? 'Funcionário' : 'Usuário'}
+              </div>
             </div>
             <svg className={`w-4 h-4 text-slate-400 group-hover:text-white transition-all duration-200 ${showUserMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -80,14 +88,20 @@ export default function DarkHeader() {
               {/* Menu */}
               <div className="absolute top-12 right-0 w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-[200] py-2">
                 {/* User Info */}
-                <div className="px-4 py-3 border-b border-slate-700">
+                                  <div className="px-4 py-3 border-b border-slate-700">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-md">
-                      <span className="text-white text-sm font-bold">RO</span>
+                      <span className="text-white text-sm font-bold">
+                        {user?.nome ? user.nome.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U'}
+                      </span>
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-white">Rodrigo Oliveira</div>
-                      <div className="text-xs text-slate-400">Administrador</div>
+                      <div className="text-sm font-semibold text-white">{user?.nome || 'Usuário'}</div>
+                                             <div className="text-xs text-slate-400">
+                         {user?.role === 'admin' ? 'Administrador' : 
+                          user?.role === 'manager' ? 'Gerente' : 
+                          user?.role === 'funcionario' ? 'Funcionário' : 'Usuário'}
+                       </div>
                     </div>
                   </div>
                 </div>

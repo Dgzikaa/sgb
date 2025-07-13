@@ -1,25 +1,17 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
+import EmConstrucao from '@/components/EmConstrucao'
 
-export default function RecorrenciaRedirect() {
-  const router = useRouter()
-
-  useEffect(() => {
-    // Redirecionar para a nova localização
-    router.replace('/reservas/recorrencia')
-  }, [router])
-
+export default function RecorrenciaOperacoesPage() {
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-        <p className="text-slate-600">Redirecionando para nova localização...</p>
-        <p className="text-sm text-slate-400 mt-2">
-          Esta página foi movida para <strong>/reservas/recorrencia</strong>
-        </p>
-      </div>
-    </div>
+    <ProtectedRoute requiredModule="recorrencia">
+      <EmConstrucao 
+        titulo="Análise de Recorrência Operacional"
+        descricao="Análise de padrões operacionais recorrentes e otimização de processos."
+        prioridade="media"
+        previsao="3-4 semanas"
+      />
+    </ProtectedRoute>
   )
 } 

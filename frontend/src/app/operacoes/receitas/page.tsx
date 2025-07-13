@@ -14,14 +14,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { toast } from '@/components/ui/toast'
 import { useGlobalConfirm } from '@/components/ui/confirm-dialog'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 
 interface Insumo {
-  id?: number
+  id: number
   codigo: string
   nome: string
-  unidade_medida: string
   categoria: string
   observacoes?: string
+  custo_unitario?: number
+  unidade_medida: string
+  quantidade_necessaria?: number
+  is_chefe?: boolean
 }
 
 interface ReceitaInsumo {
@@ -34,18 +38,13 @@ interface Receita {
   receita_codigo: string
   receita_nome: string
   receita_categoria: string
-  rendimento_esperado?: number
   tipo_local: string
+  rendimento_esperado?: number
+  unidade_rendimento?: string
+  custo_total?: number
+  observacoes?: string
   ativo?: boolean
-  insumos: {
-    id: number
-    codigo: string
-    nome: string
-    quantidade_necessaria: number
-    unidade_medida: string
-    categoria: string
-    is_chefe: boolean
-  }[]
+  insumos?: Insumo[]
 }
 
 interface NovaReceita {
@@ -407,15 +406,17 @@ export default function ReceitasPage() {
       rendimento_esperado: receita.rendimento_esperado,
       tipo_local: receita.tipo_local,
       ativo: receita.ativo,
-      insumos: receita.insumos.map(insumo => ({
+      insumos: receita.insumos?.map(insumo => ({
         id: insumo.id,
         codigo: insumo.codigo,
         nome: insumo.nome,
-        quantidade_necessaria: insumo.quantidade_necessaria,
-        unidade_medida: insumo.unidade_medida,
         categoria: insumo.categoria,
+        observacoes: insumo.observacoes,
+        custo_unitario: insumo.custo_unitario,
+        unidade_medida: insumo.unidade_medida,
+        quantidade_necessaria: insumo.quantidade_necessaria,
         is_chefe: insumo.is_chefe
-      }))
+      })) || []
     }
     
     // Definir estados de forma atômica
@@ -426,7 +427,7 @@ export default function ReceitasPage() {
     const buscaInicial: {[key: number]: string} = {}
     const dropdownInicial: {[key: number]: boolean} = {}
     
-    receita.insumos.forEach((insumo, index) => {
+    receita.insumos?.forEach((insumo, index) => {
       buscaInicial[index] = `${insumo.codigo} - ${insumo.nome}`
       dropdownInicial[index] = false
     })
@@ -443,12 +444,12 @@ export default function ReceitasPage() {
       return
     }
 
-    if (receitaEditando.insumos.length === 0) {
+    if (receitaEditando.insumos?.length === 0) {
       toast.warning('Insumos necessários', 'Adicione pelo menos um insumo à receita!')
       return
     }
 
-    const temChefe = receitaEditando.insumos.some(i => i.is_chefe)
+    const temChefe = receitaEditando.insumos?.some(i => i.is_chefe)
     if (!temChefe) {
       toast.warning('Insumo chefe', 'Selecione um insumo chefe para a receita!')
       return
@@ -600,14 +601,16 @@ export default function ReceitasPage() {
   const adicionarInsumoReceitaEdicao = () => {
     if (!receitaEditando) return
     
-    const novoIndex = receitaEditando.insumos.length
+    const novoIndex = receitaEditando.insumos?.length || 0
     const novoInsumo = {
       id: 0,
       codigo: '',
       nome: '',
-      quantidade_necessaria: 0,
-      unidade_medida: 'g',
       categoria: 'cozinha',
+      observacoes: '',
+      custo_unitario: 0,
+      unidade_medida: 'g',
+      quantidade_necessaria: 0,
       is_chefe: false
     }
     
@@ -703,8 +706,12 @@ export default function ReceitasPage() {
       id: insumo.id || 0,
       codigo: insumo.codigo,
       nome: insumo.nome,
+      categoria: insumo.categoria,
+      observacoes: insumo.observacoes,
+      custo_unitario: insumo.custo_unitario,
       unidade_medida: insumo.unidade_medida,
-      categoria: insumo.categoria
+      quantidade_necessaria: insumo.quantidade_necessaria,
+      is_chefe: insumo.is_chefe
     }
     
     setReceitaEditando(prev => prev ? {
@@ -726,6 +733,23 @@ export default function ReceitasPage() {
     }, 200)
   }
 
+  // Função para duplicar receita
+  const duplicarReceita = async (receita: Receita) => {
+    try {
+      const novaReceita = {
+        ...receita,
+        receita_codigo: `${receita.receita_codigo}_COPIA`,
+        receita_nome: `${receita.receita_nome} (Cópia)`
+      }
+      
+      // TODO: Implementar lógica de duplicação
+      console.log('📋 Duplicando receita:', novaReceita)
+      
+    } catch (error) {
+      console.error('Erro ao duplicar receita:', error)
+    }
+  }
+
   if (!selectedBar) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -738,7 +762,8 @@ export default function ReceitasPage() {
   }
 
   return (
-    <div className="p-3 sm:p-6 max-w-full">
+    <ProtectedRoute requiredModule="receitas_insumos">
+      <div className="p-3 sm:p-6 max-w-full">
       {/* Header mobile-first */}
       <div className="mb-4 sm:mb-6">
         <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">🧪 Gestão de Receitas</h1>
@@ -929,43 +954,58 @@ export default function ReceitasPage() {
                   )}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="card-grid">
                   {insumosFiltrados.map((insumo) => (
                     <div 
                       key={insumo.id}
-                      className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
+                      className="card-responsive hover-lift-mobile"
                     >
-                      <div className="flex justify-between items-start mb-3">
-                        <Badge variant="outline" className="text-xs font-medium">
+                      <div className="stack-mobile mb-3">
+                        <Badge variant="outline" className="badge-mobile">
                           {insumo.codigo}
                         </Badge>
                         <Button
                           onClick={() => abrirModalEditarInsumo(insumo)}
                           variant="ghost"
                           size="sm"
-                          className="h-8 w-8 p-0 hover:bg-blue-100 touch-manipulation"
+                          className="btn-icon-touch"
                         >
                           <span className="text-lg">✏️</span>
                         </Button>
                       </div>
                       
-                      <h3 className="font-semibold text-black text-base mb-2 leading-tight">
+                      <h3 className="text-responsive-sm font-semibold text-black mb-2 leading-tight">
                         {insumo.nome}
                       </h3>
                       
-                      <div className="flex justify-between items-center text-sm text-gray-600 mb-2">
-                        <span className="flex items-center gap-1">
-                          <span className="text-base">{insumo.categoria === 'bar' ? '🍺' : '🍽️'}</span>
-                          {insumo.categoria}
-                        </span>
-                        <span className="font-medium">{insumo.unidade_medida}</span>
+                      <div className="space-y-mobile">
+                        <div>
+                          <span className="text-responsive-xs font-medium text-gray-600">Categoria:</span>
+                          <p className="text-responsive-sm text-gray-900">{insumo.categoria}</p>
+                        </div>
+                        
+                        <div className="card-grid-2">
+                          <div>
+                            <span className="text-responsive-xs font-medium text-gray-600">Custo:</span>
+                            <p className="text-responsive-sm font-semibold text-green-600">
+                              R$ {insumo.custo_unitario?.toFixed(2) || 'N/A'}
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-responsive-xs font-medium text-gray-600">Unidade:</span>
+                            <p className="text-responsive-sm text-gray-900">{insumo.unidade_medida}</p>
+                          </div>
+                        </div>
+
+                        {insumo.observacoes && (
+                          <div>
+                            <span className="text-responsive-xs font-medium text-gray-600">Observações:</span>
+                            <p className="text-responsive-xs text-gray-700 mt-1 leading-relaxed">
+                              {insumo.observacoes}
+                            </p>
+                          </div>
+                        )}
                       </div>
-                      
-                      {insumo.observacoes && (
-                        <p className="text-xs text-gray-500 italic bg-gray-50 p-2 rounded mt-2">
-                          {insumo.observacoes}
-                        </p>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -1330,76 +1370,102 @@ export default function ReceitasPage() {
                   )}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="card-grid">
                   {receitasFiltradas.map((receita) => (
                     <div
                       key={receita.receita_codigo}
-                      className={`border-2 rounded-lg p-4 hover:shadow-md transition-shadow ${
-                        receita.ativo === false ? 'border-red-200 bg-red-50' : 'border-gray-200 bg-white'
+                      className={`card-responsive hover-lift-mobile ${
+                        receita.ativo === false ? 'border-red-200 bg-red-50' : ''
                       }`}
                     >
-                      <div className="flex justify-between items-start mb-3">
-                        <div className="flex flex-col gap-2">
-                          <Badge variant="outline" className="text-xs font-medium w-fit">
+                      <div className="stack-mobile mb-3">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="badge-mobile">
                             {receita.receita_codigo}
                           </Badge>
-                          <Badge 
-                            variant="outline" 
-                            className={`text-xs font-medium w-fit ${
-                              receita.ativo === false ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
-                            }`}
-                          >
-                            {receita.ativo === false ? '❌ Inativa' : '✅ Ativa'}
-                          </Badge>
+                          {receita.ativo === false && (
+                            <Badge variant="destructive" className="badge-mobile">
+                              Inativa
+                            </Badge>
+                          )}
                         </div>
-                        <Button
-                          onClick={() => abrirModalEditarReceita(receita)}
-                          variant="ghost"
-                          size="sm"
-                          className="h-10 w-10 p-0 hover:bg-blue-100 touch-manipulation"
-                        >
-                          <span className="text-lg">✏️</span>
-                        </Button>
+                        <div className="btn-group-mobile">
+                          <Button
+                            onClick={() => abrirModalEditarReceita(receita)}
+                            variant="ghost"
+                            size="sm"
+                            className="btn-touch touch-animation"
+                          >
+                            <span className="text-lg mr-2">✏️</span>
+                            <span className="visible-mobile">Editar</span>
+                          </Button>
+                          <Button
+                            onClick={() => duplicarReceita(receita)}
+                            variant="ghost"
+                            size="sm"
+                            className="btn-touch touch-animation"
+                          >
+                            <span className="text-lg mr-2">📋</span>
+                            <span className="visible-mobile">Duplicar</span>
+                          </Button>
+                        </div>
                       </div>
-                      
-                      <h3 className={`font-semibold text-base mb-2 leading-tight ${
-                        receita.ativo === false ? 'text-red-800' : 'text-black'
-                      }`}>
+
+                      <h3 className="text-responsive-sm font-semibold text-black mb-2 leading-tight">
                         {receita.receita_nome}
                       </h3>
-                      
-                      <div className="flex justify-between items-center text-sm text-gray-600 mb-3">
-                        <span className="flex items-center gap-1">
-                          <span className="text-base">{receita.tipo_local === 'bar' ? '🍺' : '🍽️'}</span>
-                          {receita.tipo_local}
-                        </span>
-                        <span className="font-medium">{receita.insumos?.length || 0} insumos</span>
-                      </div>
-                      
-                      <div className="text-sm text-gray-500 space-y-1">
-                        <p><strong>Categoria:</strong> {receita.receita_categoria}</p>
-                        {receita.rendimento_esperado && (
-                          <p><strong>Rendimento:</strong> {receita.rendimento_esperado}g</p>
-                        )}
-                        
-                        {/* Mostrar insumo chefe */}
-                        {receita.insumos && receita.insumos.length > 0 && (
-                          <div className="pt-2 border-t border-gray-200">
-                            {receita.insumos.filter(i => i.is_chefe).map((insumoChefe) => (
-                              <div key={insumoChefe.id} className="flex items-center gap-2 text-red-600 font-medium">
-                                <span className="text-base">👑</span>
-                                <span className="text-xs">{insumoChefe.nome}</span>
-                              </div>
-                            ))}
+
+                      <div className="space-y-mobile">
+                        <div className="card-grid-2">
+                          <div>
+                            <span className="text-responsive-xs font-medium text-gray-600">Categoria:</span>
+                            <p className="text-responsive-sm text-gray-900">{receita.receita_categoria}</p>
+                          </div>
+                          <div>
+                            <span className="text-responsive-xs font-medium text-gray-600">Rendimento:</span>
+                            <p className="text-responsive-sm text-gray-900">
+                              {receita.rendimento_esperado || '-'} {receita.unidade_rendimento || ''}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div>
+                          <span className="text-responsive-xs font-medium text-gray-600">Custo Total:</span>
+                          <p className="text-responsive-lg font-bold text-green-600">
+                            R$ {receita.custo_total?.toFixed(2) || '0.00'}
+                          </p>
+                        </div>
+
+                        <div>
+                          <span className="text-responsive-xs font-medium text-gray-600">
+                            Insumos ({receita.insumos?.length || 0}):
+                          </span>
+                          <div className="mt-2 max-h-32 overflow-y-auto scroll-mobile">
+                            <div className="space-y-1">
+                              {(receita.insumos || []).slice(0, 5).map((insumo: any, index: number) => (
+                                <div key={index} className="flex justify-between items-center text-responsive-xs bg-gray-50 rounded p-2">
+                                  <span className="text-gray-700 truncate flex-1">{insumo.nome}</span>
+                                  <span className="text-gray-600 ml-2">{insumo.quantidade_necessaria}</span>
+                                </div>
+                              ))}
+                              {(receita.insumos?.length || 0) > 5 && (
+                                <div className="text-responsive-xs text-gray-500 text-center py-1">
+                                  +{(receita.insumos?.length || 0) - 5} mais...
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {receita.observacoes && (
+                          <div>
+                            <span className="text-responsive-xs font-medium text-gray-600">Observações:</span>
+                            <p className="text-responsive-xs text-gray-700 mt-1 leading-relaxed">
+                              {receita.observacoes}
+                            </p>
                           </div>
                         )}
                       </div>
-                      
-                      {receita.ativo === false && (
-                        <div className="mt-3 p-2 bg-red-100 rounded text-xs text-red-700 font-medium">
-                          ⚠️ Esta receita não aparecerá no terminal de produção
-                        </div>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -1875,6 +1941,7 @@ export default function ReceitasPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </ProtectedRoute>
   )
 } 

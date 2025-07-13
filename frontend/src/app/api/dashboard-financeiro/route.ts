@@ -16,6 +16,50 @@ function createSupabaseClient() {
   )
 }
 
+// Função para buscar todos os dados com paginação
+async function buscarTodosEventosFinanceiros(supabase: any, barId: number) {
+  const todosEventos: any[] = []
+  let pagina = 0
+  const LIMITE_POR_PAGINA = 1000
+
+  while (true) {
+    console.log(`🔄 Buscando página ${pagina + 1} dos eventos financeiros...`)
+    
+    const { data: eventosPagina, error } = await supabase
+      .from('contaazul_eventos_financeiros')
+      .select('tipo, valor, categoria_id, evento_id, descricao, data_competencia, status')
+      .eq('bar_id', barId)
+      .gte('data_competencia', '2025-01-01')
+      .lte('data_competencia', '2025-12-31')
+      .not('categoria_id', 'is', null)
+      .order('data_competencia', { ascending: false })
+      .range(pagina * LIMITE_POR_PAGINA, (pagina + 1) * LIMITE_POR_PAGINA - 1)
+
+    if (error) {
+      console.error(`❌ Erro na página ${pagina + 1}:`, error)
+      throw error
+    }
+
+    if (!eventosPagina || eventosPagina.length === 0) {
+      console.log(`✅ Busca finalizada. Total de eventos: ${todosEventos.length}`)
+      break
+    }
+
+    todosEventos.push(...eventosPagina)
+    console.log(`📄 Página ${pagina + 1}: ${eventosPagina.length} eventos (Total acumulado: ${todosEventos.length})`)
+
+    // Se a página retornou menos que o limite, é a última página
+    if (eventosPagina.length < LIMITE_POR_PAGINA) {
+      console.log(`✅ Última página atingida. Total final: ${todosEventos.length} eventos`)
+      break
+    }
+
+    pagina++
+  }
+
+  return todosEventos
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -27,108 +71,66 @@ export async function GET(request: NextRequest) {
 
     const supabase = createSupabaseClient()
 
-    console.log(`💰 BUSCANDO DADOS FINANCEIROS PARA BAR ${barId}`)
+    console.log(`💰 BUSCANDO DADOS FINANCEIROS PARA BAR ${barId} - 2025 (COM PAGINAÇÃO)`)
 
-    // 1. RESUMO GERAL
-    const { data: resumoReceitas, error: errorResumoReceitas } = await supabase
-      .from('contaazul_receitas')
-      .select('valor')
+    // 1. BUSCAR TODOS OS EVENTOS COM PAGINAÇÃO
+    const todosEventos = await buscarTodosEventosFinanceiros(supabase, parseInt(barId))
+
+    // 2. BUSCAR CATEGORIAS
+    const { data: categorias, error: errorCategorias } = await supabase
+      .from('contaazul_categorias')
+      .select('id, nome, tipo')
       .eq('bar_id', parseInt(barId))
 
-    const { data: resumoDespesas, error: errorResumoDespesas } = await supabase
-      .from('contaazul_despesas')
-      .select('valor')
-      .eq('bar_id', parseInt(barId))
+    if (errorCategorias) {
+      console.error('❌ Erro ao buscar categorias:', errorCategorias)
+      return NextResponse.json({ error: 'Erro ao buscar categorias' }, { status: 500 })
+    }
 
-    // 2. RECEITAS POR CATEGORIA
-    const { data: receitasPorCategoria, error: errorReceitasCat } = await supabase
-      .from('contaazul_receitas')
-      .select(`
-        valor,
-        contaazul_categorias!inner(nome, tipo)
-      `)
-      .eq('bar_id', parseInt(barId))
-      .not('categoria_id', 'is', null)
-
-    // 3. DESPESAS POR CATEGORIA
-    const { data: despesasPorCategoria, error: errorDespesasCat } = await supabase
-      .from('contaazul_despesas')
-      .select(`
-        valor,
-        contaazul_categorias!inner(nome, tipo)
-      `)
-      .eq('bar_id', parseInt(barId))
-      .not('categoria_id', 'is', null)
-
-    // 4. TRANSAÇÕES RECENTES
-    const { data: receitasRecentes } = await supabase
-      .from('contaazul_receitas')
-      .select(`
-        receita_id,
-        descricao,
-        valor,
-        data_vencimento,
-        status,
-        contaazul_categorias!inner(nome)
-      `)
-      .eq('bar_id', parseInt(barId))
-      .not('categoria_id', 'is', null)
-      .order('data_vencimento', { ascending: false })
-      .limit(10)
-
-    const { data: despesasRecentes } = await supabase
-      .from('contaazul_despesas')
-      .select(`
-        despesa_id,
-        descricao,
-        valor,
-        data_vencimento,
-        status,
-        contaazul_categorias!inner(nome)
-      `)
-      .eq('bar_id', parseInt(barId))
-      .not('categoria_id', 'is', null)
-      .order('data_vencimento', { ascending: false })
-      .limit(10)
-
-    // 5. CALCULAR TOTAIS
-    const totalReceitas = resumoReceitas?.reduce((sum, r) => sum + (parseFloat(r.valor) || 0), 0) || 0
-    const totalDespesas = resumoDespesas?.reduce((sum, d) => sum + (parseFloat(d.valor) || 0), 0) || 0
+    // 3. CALCULAR TOTAIS
+    const totalReceitas = todosEventos.filter(e => e.tipo === 'receita').reduce((sum: number, e: any) => sum + (parseFloat(e.valor) || 0), 0)
+    const totalDespesas = todosEventos.filter(e => e.tipo === 'despesa').reduce((sum: number, e: any) => sum + (parseFloat(e.valor) || 0), 0)
     const saldoLiquido = totalReceitas - totalDespesas
 
-    // 6. AGRUPAR RECEITAS POR CATEGORIA
-    const receitasAgrupadas = receitasPorCategoria?.reduce((acc: any, receita: any) => {
-      const categoriaNome = receita.contaazul_categorias.nome
-      const valor = parseFloat(receita.valor) || 0
-      
-      if (!acc[categoriaNome]) {
-        acc[categoriaNome] = {
-          categoria: categoriaNome,
-          total: 0,
-          tipo: receita.contaazul_categorias.tipo
-        }
-      }
-      acc[categoriaNome].total += valor
+    // 4. MAPEAR CATEGORIAS
+    const mapaCategorias = categorias?.reduce((acc: any, categoria) => {
+      acc[categoria.id] = categoria
       return acc
     }, {}) || {}
 
-    // 7. AGRUPAR DESPESAS POR CATEGORIA
-    const despesasAgrupadas = despesasPorCategoria?.reduce((acc: any, despesa: any) => {
-      const categoriaNome = despesa.contaazul_categorias.nome
-      const valor = parseFloat(despesa.valor) || 0
-      
-      if (!acc[categoriaNome]) {
-        acc[categoriaNome] = {
-          categoria: categoriaNome,
-          total: 0,
-          tipo: despesa.contaazul_categorias.tipo
-        }
-      }
-      acc[categoriaNome].total += valor
-      return acc
-    }, {}) || {}
+    // 5. AGRUPAR EVENTOS POR CATEGORIA
+    const receitasAgrupadas: any = {}
+    const despesasAgrupadas: any = {}
 
-    // 8. TRANSFORMAR EM ARRAYS E ORDENAR
+    todosEventos.forEach((evento: any) => {
+      const categoria = mapaCategorias[evento.categoria_id]
+      if (!categoria) return
+
+      const valor = parseFloat(evento.valor) || 0
+      const categoriaNome = categoria.nome
+
+      if (evento.tipo === 'receita') {
+        if (!receitasAgrupadas[categoriaNome]) {
+          receitasAgrupadas[categoriaNome] = {
+            categoria: categoriaNome,
+            total: 0,
+            tipo: categoria.tipo
+          }
+        }
+        receitasAgrupadas[categoriaNome].total += valor
+      } else if (evento.tipo === 'despesa') {
+        if (!despesasAgrupadas[categoriaNome]) {
+          despesasAgrupadas[categoriaNome] = {
+            categoria: categoriaNome,
+            total: 0,
+            tipo: categoria.tipo
+          }
+        }
+        despesasAgrupadas[categoriaNome].total += valor
+      }
+    })
+
+    // 6. TRANSFORMAR EM ARRAYS E ORDENAR
     const topReceitas = Object.values(receitasAgrupadas)
       .sort((a: any, b: any) => b.total - a.total)
       .slice(0, 10)
@@ -137,27 +139,19 @@ export async function GET(request: NextRequest) {
       .sort((a: any, b: any) => b.total - a.total)
       .slice(0, 10)
 
-    // 9. TRANSAÇÕES RECENTES COMBINADAS
-    const transacoesRecentes = [
-      ...(receitasRecentes?.map((r: any) => ({
-        id: r.receita_id,
-        tipo: 'receita',
-        descricao: r.descricao,
-        valor: parseFloat(r.valor) || 0,
-        data: r.data_vencimento,
-        status: r.status,
-        categoria: r.contaazul_categorias.nome
-      })) || []),
-      ...(despesasRecentes?.map((d: any) => ({
-        id: d.despesa_id,
-        tipo: 'despesa',
-        descricao: d.descricao,
-        valor: parseFloat(d.valor) || 0,
-        data: d.data_vencimento,
-        status: d.status,
-        categoria: d.contaazul_categorias.nome
-      })) || [])
-    ].sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 20)
+    // 7. TRANSAÇÕES RECENTES (primeiras 20)
+    const transacoesRecentes = todosEventos.slice(0, 20).map((evento: any) => {
+      const categoria = mapaCategorias[evento.categoria_id]
+      return {
+        id: evento.evento_id,
+        tipo: evento.tipo,
+        descricao: evento.descricao || 'Sem descrição',
+        valor: parseFloat(evento.valor) || 0,
+        data: evento.data_competencia,
+        status: evento.status || 'N/A',
+        categoria: categoria?.nome || 'Sem categoria'
+      }
+    })
 
     const resultado = {
       timestamp: new Date().toISOString(),
@@ -166,7 +160,7 @@ export async function GET(request: NextRequest) {
         total_receitas: totalReceitas,
         total_despesas: totalDespesas,
         saldo_liquido: saldoLiquido,
-        total_transacoes: (resumoReceitas?.length || 0) + (resumoDespesas?.length || 0)
+        total_transacoes: todosEventos.length
       },
       receitas_por_categoria: topReceitas,
       despesas_por_categoria: topDespesas,
@@ -174,12 +168,13 @@ export async function GET(request: NextRequest) {
       estatisticas: {
         categorias_com_receitas: Object.keys(receitasAgrupadas).length,
         categorias_com_despesas: Object.keys(despesasAgrupadas).length,
-        receitas_categorizadas: receitasPorCategoria?.length || 0,
-        despesas_categorizadas: despesasPorCategoria?.length || 0
+        receitas_categorizadas: todosEventos.filter((e: any) => e.tipo === 'receita').length,
+        despesas_categorizadas: todosEventos.filter((e: any) => e.tipo === 'despesa').length
       }
     }
 
-    console.log(`💰 Dados financeiros carregados:`)
+    console.log(`💰 Dados financeiros carregados (TODOS OS DADOS):`)
+    console.log(`   📊 Total de eventos processados: ${todosEventos.length}`)
     console.log(`   📈 Receitas: R$ ${totalReceitas.toFixed(2)}`)
     console.log(`   📉 Despesas: R$ ${totalDespesas.toFixed(2)}`)
     console.log(`   💰 Saldo: R$ ${saldoLiquido.toFixed(2)}`)

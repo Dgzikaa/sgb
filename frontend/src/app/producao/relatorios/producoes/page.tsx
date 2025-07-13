@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 
 interface Producao {
   id: number
@@ -217,252 +218,254 @@ export default function RelatorioProducoesPage() {
     )
   }
 
-  return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <p className="text-gray-700">Análise de desempenho da produção por data</p>
-      </div>
+      return (
+      <ProtectedRoute requiredModule="relatorio_producoes">
+        <div className="p-6 max-w-7xl mx-auto">
+        <div className="mb-6">
+          <p className="text-gray-700">Análise de desempenho da produção por data</p>
+        </div>
 
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-black">📅 Selecionar Data</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4">
-            <Input
-              type="date"
-              value={dataInput}
-              onChange={(e) => setDataInput(e.target.value)}
-              className="w-auto max-w-48 text-black font-medium border-2 border-gray-300"
-            />
-            <Button 
-              onClick={carregarProducoes} 
-              disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {isLoading ? '⏳ Carregando...' : '🔄 Atualizar'}
-            </Button>
-            <Button 
-              onClick={executarMigration} 
-              disabled={executandoMigration}
-              className="bg-orange-600 hover:bg-orange-700 text-white"
-              title="Executar migration para habilitar análise de aderência à receita"
-            >
-              {executandoMigration ? '🔧 Executando...' : '📊 Migrar Campos'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {producoes.length > 0 && (
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-black">📈 Estatísticas do Dia</CardTitle>
+            <CardTitle className="text-black">📅 Selecionar Data</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center p-3 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">{estatisticas.total_producoes || producoes.length}</div>
-                <div className="text-sm text-blue-700">Total Produções</div>
-              </div>
-              
-              <div className="text-center p-3 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">{estatisticas.eficiencia_excelente || 0}</div>
-                <div className="text-sm text-green-700">Excelentes (≥95%)</div>
-              </div>
-              
-              <div className="text-center p-3 bg-yellow-50 rounded-lg">
-                <div className="text-2xl font-bold text-yellow-600">{estatisticas.eficiencia_boa || 0}</div>
-                <div className="text-sm text-yellow-700">Boas (85-94%)</div>
-              </div>
-              
-              <div className="text-center p-3 bg-red-50 rounded-lg">
-                <div className="text-2xl font-bold text-red-600">{estatisticas.eficiencia_ruim || 0}</div>
-                <div className="text-sm text-red-700">Ruins (&lt;75%)</div>
-              </div>
-              
-              {/* NOVA SEÇÃO: Estatísticas de Aderência */}
-              {producoes.some(p => p.percentual_aderencia_receita !== undefined) && (
-                <>
-                  <div className="text-center p-3 bg-purple-50 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600">
-                      {producoes.filter(p => p.percentual_aderencia_receita && p.percentual_aderencia_receita >= 95).length}
-                    </div>
-                    <div className="text-sm text-purple-700">Aderência Excelente</div>
-                  </div>
-                  
-                  <div className="text-center p-3 bg-indigo-50 rounded-lg">
-                    <div className="text-2xl font-bold text-indigo-600">
-                      {producoes.some(p => p.percentual_aderencia_receita) 
-                        ? Math.round(producoes.filter(p => p.percentual_aderencia_receita).reduce((acc, p) => acc + (p.percentual_aderencia_receita || 0), 0) / producoes.filter(p => p.percentual_aderencia_receita).length)
-                        : 0}%
-                    </div>
-                    <div className="text-sm text-indigo-700">Aderência Média</div>
-                  </div>
-                  
-                  <div className="text-center p-3 bg-pink-50 rounded-lg">
-                    <div className="text-2xl font-bold text-pink-600">
-                      {producoes.filter(p => p.percentual_aderencia_receita && p.percentual_aderencia_receita < 75).length}
-                    </div>
-                    <div className="text-sm text-pink-700">Aderência Ruim</div>
-                  </div>
-                  
-                  <div className="text-center p-3 bg-gray-50 rounded-lg">
-                    <div className="text-2xl font-bold text-gray-600">
-                      {producoes.filter(p => !p.percentual_aderencia_receita).length}
-                    </div>
-                    <div className="text-sm text-gray-700">Sem Dados</div>
-                  </div>
-                </>
-              )}
+            <div className="flex items-center gap-4">
+              <Input
+                type="date"
+                value={dataInput}
+                onChange={(e) => setDataInput(e.target.value)}
+                className="w-auto max-w-48 text-black font-medium border-2 border-gray-300"
+              />
+              <Button 
+                onClick={carregarProducoes} 
+                disabled={isLoading}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {isLoading ? '⏳ Carregando...' : '🔄 Atualizar'}
+              </Button>
+              <Button 
+                onClick={executarMigration} 
+                disabled={executandoMigration}
+                className="bg-orange-600 hover:bg-orange-700 text-white"
+                title="Executar migration para habilitar análise de aderência à receita"
+              >
+                {executandoMigration ? '�� Executando...' : '📊 Migrar Campos'}
+              </Button>
             </div>
           </CardContent>
         </Card>
-      )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-black">
-            <span className="text-orange-600">🏭</span> Produções
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="text-center py-8">
-              <div className="text-blue-600 text-lg">⏳ Carregando produções...</div>
-            </div>
-          ) : producoes.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="text-gray-500 text-lg">📭 Nenhuma produção encontrada</div>
-              <p className="text-gray-400 text-sm mt-2">
-                Data selecionada: {new Date(dataInput).toLocaleDateString('pt-BR')}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="text-gray-600 text-sm">
-                Total: <strong className="text-black">{producoes.length} produções</strong> em {new Date(dataInput).toLocaleDateString('pt-BR')}
-              </div>
-
-              {/* AVISO: Migration necessária */}
-              {producoes.length > 0 && !producoes.some(p => p.percentual_aderencia_receita !== undefined) && (
-                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-orange-600 text-xl">⚠️</span>
-                    <h3 className="font-bold text-orange-800">Dados de Aderência Não Disponíveis</h3>
-                  </div>
-                  <p className="text-orange-700 text-sm mb-3">
-                    Para ver as métricas de aderência à receita, desvio e fator de correção, 
-                    execute a migration clicando no botão <strong>"📊 Migrar Campos"</strong> acima.
-                  </p>
-                  <p className="text-orange-600 text-xs">
-                    💡 A migration adiciona campos no banco para análise avançada das produções.
-                  </p>
+        {producoes.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-black">📈 Estatísticas do Dia</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-3 bg-blue-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">{estatisticas.total_producoes || producoes.length}</div>
+                  <div className="text-sm text-blue-700">Total Produções</div>
                 </div>
-              )}
+                
+                <div className="text-center p-3 bg-green-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">{estatisticas.eficiencia_excelente || 0}</div>
+                  <div className="text-sm text-green-700">Excelentes (≥95%)</div>
+                </div>
+                
+                <div className="text-center p-3 bg-yellow-50 rounded-lg">
+                  <div className="text-2xl font-bold text-yellow-600">{estatisticas.eficiencia_boa || 0}</div>
+                  <div className="text-sm text-yellow-700">Boas (85-94%)</div>
+                </div>
+                
+                <div className="text-center p-3 bg-red-50 rounded-lg">
+                  <div className="text-2xl font-bold text-red-600">{estatisticas.eficiencia_ruim || 0}</div>
+                  <div className="text-sm text-red-700">Ruins (&lt;75%)</div>
+                </div>
+                
+                {/* NOVA SEÇÃO: Estatísticas de Aderência */}
+                {producoes.some(p => p.percentual_aderencia_receita !== undefined) && (
+                  <>
+                    <div className="text-center p-3 bg-purple-50 rounded-lg">
+                      <div className="text-2xl font-bold text-purple-600">
+                        {producoes.filter(p => p.percentual_aderencia_receita && p.percentual_aderencia_receita >= 95).length}
+                      </div>
+                      <div className="text-sm text-purple-700">Aderência Excelente</div>
+                    </div>
+                    
+                    <div className="text-center p-3 bg-indigo-50 rounded-lg">
+                      <div className="text-2xl font-bold text-indigo-600">
+                        {producoes.some(p => p.percentual_aderencia_receita) 
+                          ? Math.round(producoes.filter(p => p.percentual_aderencia_receita).reduce((acc, p) => acc + (p.percentual_aderencia_receita || 0), 0) / producoes.filter(p => p.percentual_aderencia_receita).length)
+                          : 0}%
+                      </div>
+                      <div className="text-sm text-indigo-700">Aderência Média</div>
+                    </div>
+                    
+                    <div className="text-center p-3 bg-pink-50 rounded-lg">
+                      <div className="text-2xl font-bold text-pink-600">
+                        {producoes.filter(p => p.percentual_aderencia_receita && p.percentual_aderencia_receita < 75).length}
+                      </div>
+                      <div className="text-sm text-pink-700">Aderência Ruim</div>
+                    </div>
+                    
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <div className="text-2xl font-bold text-gray-600">
+                        {producoes.filter(p => !p.percentual_aderencia_receita).length}
+                      </div>
+                      <div className="text-sm text-gray-700">Sem Dados</div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-              <div className="space-y-3">
-                {producoes.map((producao) => {
-                  const eficiencia = calcularEficiencia(producao.rendimento_real, producao.rendimento_esperado)
-                  const desvio = calcularDesvio(producao.rendimento_real, producao.rendimento_esperado)
-                  const fatorCorrecao = calcularFatorCorrecao(producao.rendimento_real, producao.rendimento_esperado)
-                  const aderencia = producao.percentual_aderencia_receita
-                  
-                  return (
-                    <div key={producao.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-bold text-black text-lg">
-                              {producao.receita_codigo} - {producao.receita_nome}
-                            </h3>
-                            <Badge className={getStatusColor(eficiencia)}>
-                              {getStatusText(eficiencia)} ({eficiencia}%)
-                            </Badge>
-                            {aderencia !== undefined && (
-                              <Badge className={getAdherenciaColor(aderencia)}>
-                                {getAdherenciaText(aderencia)} ({aderencia.toFixed(1)}%)
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-black">
+              <span className="text-orange-600">🏭</span> Produções
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="text-center py-8">
+                <div className="text-blue-600 text-lg">⏳ Carregando produções...</div>
+              </div>
+            ) : producoes.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="text-gray-500 text-lg">📭 Nenhuma produção encontrada</div>
+                <p className="text-gray-400 text-sm mt-2">
+                  Data selecionada: {new Date(dataInput).toLocaleDateString('pt-BR')}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="text-gray-600 text-sm">
+                  Total: <strong className="text-black">{producoes.length} produções</strong> em {new Date(dataInput).toLocaleDateString('pt-BR')}
+                </div>
+
+                {/* AVISO: Migration necessária */}
+                {producoes.length > 0 && !producoes.some(p => p.percentual_aderencia_receita !== undefined) && (
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-orange-600 text-xl">⚠️</span>
+                      <h3 className="font-bold text-orange-800">Dados de Aderência Não Disponíveis</h3>
+                    </div>
+                    <p className="text-orange-700 text-sm mb-3">
+                      Para ver as métricas de aderência à receita, desvio e fator de correção, 
+                      execute a migration clicando no botão <strong>"📊 Migrar Campos"</strong> acima.
+                    </p>
+                    <p className="text-orange-600 text-xs">
+                      💡 A migration adiciona campos no banco para análise avançada das produções.
+                    </p>
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  {producoes.map((producao) => {
+                    const eficiencia = calcularEficiencia(producao.rendimento_real, producao.rendimento_esperado)
+                    const desvio = calcularDesvio(producao.rendimento_real, producao.rendimento_esperado)
+                    const fatorCorrecao = calcularFatorCorrecao(producao.rendimento_real, producao.rendimento_esperado)
+                    const aderencia = producao.percentual_aderencia_receita
+                    
+                    return (
+                      <div key={producao.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="font-bold text-black text-lg">
+                                {producao.receita_codigo} - {producao.receita_nome}
+                              </h3>
+                              <Badge className={getStatusColor(eficiencia)}>
+                                {getStatusText(eficiencia)} ({eficiencia}%)
                               </Badge>
-                            )}
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-                            <div>
-                              <p className="text-gray-600">
-                                <strong className="text-black">Categoria:</strong> {producao.receita_categoria}
-                              </p>
-                              <p className="text-gray-600">
-                                <strong className="text-black">Operador:</strong> {producao.criado_por_nome}
-                              </p>
-                              <p className="text-gray-600">
-                                <strong className="text-black">Status:</strong> {producao.status}
-                              </p>
-                            </div>
-
-                            <div>
-                              <p className="text-gray-600">
-                                <strong className="text-black">Peso Bruto:</strong> {producao.peso_bruto_proteina}g
-                              </p>
-                              <p className="text-gray-600">
-                                <strong className="text-black">Peso Líquido:</strong> {producao.peso_limpo_proteina}g
-                              </p>
-                              <p className="text-gray-600">
-                                <strong className="text-black">Insumo Chefe:</strong> {producao.insumo_chefe_nome} ({producao.peso_insumo_chefe}g)
-                              </p>
-                            </div>
-
-                            <div>
-                              <p className="text-gray-600">
-                                <strong className="text-black">Rendimento Real:</strong> {producao.rendimento_real}g
-                              </p>
-                              <p className="text-gray-600">
-                                <strong className="text-black">Rendimento Esperado:</strong> {producao.rendimento_esperado}g
-                              </p>
-                              <p className="text-gray-600">
-                                <strong className="text-black">Tempo:</strong> {formatarTempo(producao.tempo_total_producao)}
-                              </p>
-                            </div>
-
-                            {/* NOVA COLUNA: Métricas de Análise */}
-                            <div className="bg-gray-50 p-3 rounded-lg">
-                              <p className="text-gray-600">
-                                <strong className="text-black">📊 Desvio:</strong> {desvio}%
-                              </p>
-                              <p className="text-gray-600">
-                                <strong className="text-black">⚖️ Fator Correção:</strong> {fatorCorrecao}x
-                              </p>
-                              {aderencia !== undefined ? (
-                                <p className="text-gray-600">
-                                  <strong className="text-black">🎯 Aderência:</strong> {aderencia.toFixed(1)}%
-                                </p>
-                              ) : (
-                                <p className="text-gray-400 text-xs">
-                                  Execute migration para ver aderência
-                                </p>
+                              {aderencia !== undefined && (
+                                <Badge className={getAdherenciaColor(aderencia)}>
+                                  {getAdherenciaText(aderencia)} ({aderencia.toFixed(1)}%)
+                                </Badge>
                               )}
                             </div>
-                          </div>
 
-                          {producao.observacoes && (
-                            <div className="mt-3 p-2 bg-gray-100 rounded text-sm">
-                              <strong className="text-black">Observações:</strong> {producao.observacoes}
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                              <div>
+                                <p className="text-gray-600">
+                                  <strong className="text-black">Categoria:</strong> {producao.receita_categoria}
+                                </p>
+                                <p className="text-gray-600">
+                                  <strong className="text-black">Operador:</strong> {producao.criado_por_nome}
+                                </p>
+                                <p className="text-gray-600">
+                                  <strong className="text-black">Status:</strong> {producao.status}
+                                </p>
+                              </div>
+
+                              <div>
+                                <p className="text-gray-600">
+                                  <strong className="text-black">Peso Bruto:</strong> {producao.peso_bruto_proteina}g
+                                </p>
+                                <p className="text-gray-600">
+                                  <strong className="text-black">Peso Líquido:</strong> {producao.peso_limpo_proteina}g
+                                </p>
+                                <p className="text-gray-600">
+                                  <strong className="text-black">Insumo Chefe:</strong> {producao.insumo_chefe_nome} ({producao.peso_insumo_chefe}g)
+                                </p>
+                              </div>
+
+                              <div>
+                                <p className="text-gray-600">
+                                  <strong className="text-black">Rendimento Real:</strong> {producao.rendimento_real}g
+                                </p>
+                                <p className="text-gray-600">
+                                  <strong className="text-black">Rendimento Esperado:</strong> {producao.rendimento_esperado}g
+                                </p>
+                                <p className="text-gray-600">
+                                  <strong className="text-black">Tempo:</strong> {formatarTempo(producao.tempo_total_producao)}
+                                </p>
+                              </div>
+
+                              {/* NOVA COLUNA: Métricas de Análise */}
+                              <div className="bg-gray-50 p-3 rounded-lg">
+                                <p className="text-gray-600">
+                                  <strong className="text-black">📊 Desvio:</strong> {desvio}%
+                                </p>
+                                <p className="text-gray-600">
+                                  <strong className="text-black">⚖️ Fator Correção:</strong> {fatorCorrecao}x
+                                </p>
+                                {aderencia !== undefined ? (
+                                  <p className="text-gray-600">
+                                    <strong className="text-black">🎯 Aderência:</strong> {aderencia.toFixed(1)}%
+                                  </p>
+                                ) : (
+                                  <p className="text-gray-400 text-xs">
+                                    Execute migration para ver aderência
+                                  </p>
+                                )}
+                              </div>
                             </div>
-                          )}
 
-                          <div className="mt-2 text-xs text-gray-500">
-                            Início: {formatarData(producao.inicio_producao)} | 
-                            Fim: {formatarData(producao.fim_producao)}
+                            {producao.observacoes && (
+                              <div className="mt-3 p-2 bg-gray-100 rounded text-sm">
+                                <strong className="text-black">Observações:</strong> {producao.observacoes}
+                              </div>
+                            )}
+
+                            <div className="mt-2 text-xs text-gray-500">
+                              Início: {formatarData(producao.inicio_producao)} | 
+                              Fim: {formatarData(producao.fim_producao)}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )
-                })}
+                    )
+                  })}
+                </div>
               </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </ProtectedRoute>
   )
 } 

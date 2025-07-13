@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { StandardPageLayout } from '@/components/layouts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -254,386 +255,395 @@ export default function ContaAzulCompetenciaPage() {
     return format(new Date(data), 'dd/MM/yyyy', { locale: ptBR })
   }
 
-  return (
-    <StandardPageLayout>
-      <div className="space-y-6">
-        {/* Cards de Resumo */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      return (
+      <ProtectedRoute requiredModule="relatorio_produtos">
+        <StandardPageLayout>
+        <div className="space-y-6">
+          {/* Cards de Resumo */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Receitas</CardTitle>
+                <TrendingUpIcon className="h-4 w-4 text-green-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  {formatarValor(resumo.total_receitas)}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Despesas</CardTitle>
+                <TrendingDownIcon className="h-4 w-4 text-red-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">
+                  {formatarValor(resumo.total_despesas)}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Saldo Líquido</CardTitle>
+                <DollarSignIcon className="h-4 w-4 text-blue-600" />
+              </CardHeader>
+              <CardContent>
+                <div className={`text-2xl font-bold ${resumo.saldo_liquido >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {formatarValor(resumo.saldo_liquido)}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Lançamentos</CardTitle>
+                <FileTextIcon className="h-4 w-4 text-blue-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">
+                  {resumo.total_lancamentos.toLocaleString('pt-BR')}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Filtros Colapsáveis com Título */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Receitas</CardTitle>
-              <TrendingUpIcon className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {formatarValor(resumo.total_receitas)}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Despesas</CardTitle>
-              <TrendingDownIcon className="h-4 w-4 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {formatarValor(resumo.total_despesas)}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Saldo Líquido</CardTitle>
-              <DollarSignIcon className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className={`text-2xl font-bold ${resumo.saldo_liquido >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {formatarValor(resumo.saldo_liquido)}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Lançamentos</CardTitle>
-              <FileTextIcon className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
-                {resumo.total_lancamentos.toLocaleString('pt-BR')}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Filtros Colapsáveis com Título */}
-        <Card>
-          <CardHeader className="cursor-pointer" onClick={() => setFiltrosExpandidos(!filtrosExpandidos)}>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <FilterIcon className="h-5 w-5" />
-                <div>
-                  <div className="text-lg font-semibold">ContaAzul - Eventos Financeiros por Competência</div>
-                  <div className="text-sm font-normal text-gray-600 mt-1">
-                    Visualize todos os eventos financeiros sincronizados - {totalRegistros.toLocaleString('pt-BR')} registros encontrados
-                  </div>
-                </div>
-                {(filtros.dataInicial || filtros.dataFinal || filtros.mes || filtros.ano || filtros.tipo || filtros.categoriasSelecionadas.length > 0) && (
-                  <Badge variant="secondary" className="ml-2">
-                    {[
-                      filtros.dataInicial && 'Data Inicial',
-                      filtros.dataFinal && 'Data Final', 
-                      filtros.mes && 'Mês',
-                      filtros.ano && 'Ano',
-                      filtros.tipo && 'Tipo',
-                      filtros.categoriasSelecionadas.length > 0 && `${filtros.categoriasSelecionadas.length} categorias`
-                    ].filter(Boolean).length} filtros ativos
-                  </Badge>
-                )}
-              </div>
-              {filtrosExpandidos ? <ChevronUpIcon className="h-5 w-5" /> : <ChevronDownIcon className="h-5 w-5" />}
-            </CardTitle>
-          </CardHeader>
-          
-          {filtrosExpandidos && (
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
-                {/* Filtro por Período - Campos Menores */}
-                <div className="space-y-2">
-                  <Label className="text-xs">Data Inicial</Label>
-                  <Input
-                    type="date"
-                    value={filtros.dataInicial}
-                    onChange={(e) => setFiltros(prev => ({ ...prev, dataInicial: e.target.value }))}
-                    className="text-xs h-8"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-xs">Data Final</Label>
-                  <Input
-                    type="date"
-                    value={filtros.dataFinal}
-                    onChange={(e) => setFiltros(prev => ({ ...prev, dataFinal: e.target.value }))}
-                    className="text-xs h-8"
-                  />
-                </div>
-
-                {/* Filtro por Mês */}
-                <div className="space-y-2">
-                  <Label className="text-xs">Mês</Label>
-                  <Select value={filtros.mes || 'all'} onValueChange={(value) => setFiltros(prev => ({ ...prev, mes: value === 'all' ? '' : value }))}>
-                    <SelectTrigger className="h-8 text-xs">
-                      <SelectValue placeholder="Mês" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="01">Janeiro</SelectItem>
-                      <SelectItem value="02">Fevereiro</SelectItem>
-                      <SelectItem value="03">Março</SelectItem>
-                      <SelectItem value="04">Abril</SelectItem>
-                      <SelectItem value="05">Maio</SelectItem>
-                      <SelectItem value="06">Junho</SelectItem>
-                      <SelectItem value="07">Julho</SelectItem>
-                      <SelectItem value="08">Agosto</SelectItem>
-                      <SelectItem value="09">Setembro</SelectItem>
-                      <SelectItem value="10">Outubro</SelectItem>
-                      <SelectItem value="11">Novembro</SelectItem>
-                      <SelectItem value="12">Dezembro</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Filtro por Ano */}
-                <div className="space-y-2">
-                  <Label className="text-xs">Ano</Label>
-                  <Select value={filtros.ano || 'all'} onValueChange={(value) => setFiltros(prev => ({ ...prev, ano: value === 'all' ? '' : value }))}>
-                    <SelectTrigger className="h-8 text-xs">
-                      <SelectValue placeholder="Ano" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="2024">2024</SelectItem>
-                      <SelectItem value="2025">2025</SelectItem>
-                      <SelectItem value="2026">2026</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Filtro por Tipo */}
-                <div className="space-y-2">
-                  <Label className="text-xs">Tipo</Label>
-                  <Select value={filtros.tipo || 'all'} onValueChange={(value) => setFiltros(prev => ({ ...prev, tipo: value === 'all' ? '' : value }))}>
-                    <SelectTrigger className="h-8 text-xs">
-                      <SelectValue placeholder="Tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="receita">Receitas</SelectItem>
-                      <SelectItem value="despesa">Despesas</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Filtro de Categorias - Dropdown Pesquisável Melhorado */}
-                <div className="space-y-2">
-                  <Label className="text-xs">Categorias</Label>
-                  <div className="relative">
-                    <div className="relative">
-                      <SearchIcon className="absolute left-2 top-2 h-4 w-4 text-gray-400" />
-                      <Input
-                        placeholder="Buscar categoria..."
-                        value={buscaCategoria}
-                        onChange={(e) => {
-                          setBuscaCategoria(e.target.value)
-                          setMostrarDropdownCategorias(true)
-                        }}
-                        onFocus={() => setMostrarDropdownCategorias(true)}
-                        onBlur={() => setTimeout(() => setMostrarDropdownCategorias(false), 200)}
-                        className="pl-8 text-xs h-8"
-                      />
+            <CardHeader className="cursor-pointer" onClick={() => setFiltrosExpandidos(!filtrosExpandidos)}>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FilterIcon className="h-5 w-5" />
+                  <div>
+                    <div className="text-lg font-semibold">ContaAzul - Eventos Financeiros por Competência</div>
+                    <div className="text-sm font-normal text-gray-600 mt-1">
+                      Visualize todos os eventos financeiros sincronizados - {totalRegistros.toLocaleString('pt-BR')} registros encontrados
                     </div>
-                    {mostrarDropdownCategorias && buscaCategoria && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                        {categoriasFiltradas.map((categoria) => (
-                          <div
-                            key={categoria.id}
-                            className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-xs text-gray-900 border-b border-gray-100 last:border-b-0"
-                            onClick={() => toggleCategoria(categoria.id)}
-                          >
-                            {categoria.nome}
-                          </div>
-                        ))}
-                        {categoriasFiltradas.length === 0 && (
-                          <div className="px-3 py-2 text-gray-500 text-xs">
-                            Nenhuma categoria encontrada
-                          </div>
-                        )}
+                  </div>
+                  {(filtros.dataInicial || filtros.dataFinal || filtros.mes || filtros.ano || filtros.tipo || filtros.categoriasSelecionadas.length > 0) && (
+                    <Badge variant="secondary" className="ml-2">
+                      {[
+                        filtros.dataInicial && 'Data Inicial',
+                        filtros.dataFinal && 'Data Final', 
+                        filtros.mes && 'Mês',
+                        filtros.ano && 'Ano',
+                        filtros.tipo && 'Tipo',
+                        filtros.categoriasSelecionadas.length > 0 && `${filtros.categoriasSelecionadas.length} categorias`
+                      ].filter(Boolean).length} filtros ativos
+                    </Badge>
+                  )}
+                </div>
+                {filtrosExpandidos ? <ChevronUpIcon className="h-5 w-5" /> : <ChevronDownIcon className="h-5 w-5" />}
+              </CardTitle>
+            </CardHeader>
+            
+            {filtrosExpandidos && (
+              <CardContent>
+                <div className="form-grid">
+                  {/* Filtro por Período - Campos Menores */}
+                  <div className="form-group">
+                    <Label className="text-xs">Data Inicial</Label>
+                    <Input
+                      type="date"
+                      value={filtros.dataInicial}
+                      onChange={(e) => setFiltros(prev => ({ ...prev, dataInicial: e.target.value }))}
+                      className="input-mobile"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <Label className="text-xs">Data Final</Label>
+                    <Input
+                      type="date"
+                      value={filtros.dataFinal}
+                      onChange={(e) => setFiltros(prev => ({ ...prev, dataFinal: e.target.value }))}
+                      className="input-mobile"
+                    />
+                  </div>
+
+                  {/* Filtro por Mês */}
+                  <div className="form-group">
+                    <Label className="text-xs">Mês</Label>
+                    <Select value={filtros.mes || 'all'} onValueChange={(value) => setFiltros(prev => ({ ...prev, mes: value === 'all' ? '' : value }))}>
+                      <SelectTrigger className="select-mobile">
+                        <SelectValue placeholder="Mês" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos</SelectItem>
+                        <SelectItem value="01">Janeiro</SelectItem>
+                        <SelectItem value="02">Fevereiro</SelectItem>
+                        <SelectItem value="03">Março</SelectItem>
+                        <SelectItem value="04">Abril</SelectItem>
+                        <SelectItem value="05">Maio</SelectItem>
+                        <SelectItem value="06">Junho</SelectItem>
+                        <SelectItem value="07">Julho</SelectItem>
+                        <SelectItem value="08">Agosto</SelectItem>
+                        <SelectItem value="09">Setembro</SelectItem>
+                        <SelectItem value="10">Outubro</SelectItem>
+                        <SelectItem value="11">Novembro</SelectItem>
+                        <SelectItem value="12">Dezembro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Filtro por Ano */}
+                  <div className="form-group">
+                    <Label className="text-xs">Ano</Label>
+                    <Select value={filtros.ano || 'all'} onValueChange={(value) => setFiltros(prev => ({ ...prev, ano: value === 'all' ? '' : value }))}>
+                      <SelectTrigger className="select-mobile">
+                        <SelectValue placeholder="Ano" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos</SelectItem>
+                        <SelectItem value="2024">2024</SelectItem>
+                        <SelectItem value="2025">2025</SelectItem>
+                        <SelectItem value="2026">2026</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Filtro por Tipo */}
+                  <div className="form-group">
+                    <Label className="text-xs">Tipo</Label>
+                    <Select value={filtros.tipo || 'all'} onValueChange={(value) => setFiltros(prev => ({ ...prev, tipo: value === 'all' ? '' : value }))}>
+                      <SelectTrigger className="select-mobile">
+                        <SelectValue placeholder="Tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos</SelectItem>
+                        <SelectItem value="receita">Receitas</SelectItem>
+                        <SelectItem value="despesa">Despesas</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Filtro de Categorias - Dropdown Pesquisável Melhorado */}
+                  <div className="form-group">
+                    <Label className="text-xs">Categorias</Label>
+                    <div className="relative">
+                      <div className="relative">
+                        <SearchIcon className="absolute left-2 top-2 h-4 w-4 text-gray-400" />
+                        <Input
+                          placeholder="Buscar categoria..."
+                          value={buscaCategoria}
+                          onChange={(e) => {
+                            setBuscaCategoria(e.target.value)
+                            setMostrarDropdownCategorias(true)
+                          }}
+                          onFocus={() => setMostrarDropdownCategorias(true)}
+                          onBlur={() => setTimeout(() => setMostrarDropdownCategorias(false), 200)}
+                          className="search-input-mobile pl-8"
+                        />
                       </div>
-                    )}
+                      {mostrarDropdownCategorias && buscaCategoria && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                          {categoriasFiltradas.map((categoria) => (
+                            <div
+                              key={categoria.id}
+                              className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-xs text-gray-900 border-b border-gray-100 last:border-b-0"
+                              onClick={() => toggleCategoria(categoria.id)}
+                            >
+                              {categoria.nome}
+                            </div>
+                          ))}
+                          {categoriasFiltradas.length === 0 && (
+                            <div className="px-3 py-2 text-gray-500 text-xs">
+                              Nenhuma categoria encontrada
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
+
+                {/* Categorias Selecionadas */}
+                {filtros.categoriasSelecionadas.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    <Label className="text-xs">Categorias Selecionadas:</Label>
+                    <div className="flex flex-wrap gap-1">
+                      {filtros.categoriasSelecionadas.map((categoriaId) => {
+                        const categoria = categorias.find(c => c.id === categoriaId)
+                        return (
+                          <Badge
+                            key={categoriaId}
+                            variant="default"
+                            className="badge-mobile cursor-pointer"
+                            onClick={() => removerCategoria(categoriaId)}
+                          >
+                            {categoria?.nome || categoriaId}
+                            <XIcon className="w-3 h-3 ml-1" />
+                          </Badge>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Botões de Ação */}
+                <div className="btn-group-mobile mt-4">
+                  <Button onClick={aplicarFiltros} disabled={loading} className="btn-touch">
+                    {loading ? 'Carregando...' : 'Aplicar Filtros'}
+                  </Button>
+                  <Button variant="outline" onClick={limparFiltros} className="btn-touch">
+                    <XIcon className="w-4 h-4 mr-2" />
+                    Limpar Filtros
+                  </Button>
+                </div>
+              </CardContent>
+            )}
+          </Card>
+
+          {/* Tabela de Eventos */}
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                Lançamentos
+                <span className="text-sm font-normal text-gray-500 ml-2">
+                  Página {currentPage} de {totalPages} • Mostrando {eventos.length} de {totalRegistros.toLocaleString('pt-BR')} registros
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="table-responsive">
+                <table className="table-mobile">
+                  <thead>
+                    <tr className="border-b">
+                      <th
+                        className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
+                        onClick={() => handleSort('data_competencia')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Data Competência
+                          {renderSortIcon('data_competencia')}
+                        </div>
+                      </th>
+                      <th
+                        className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm hidden-mobile"
+                        onClick={() => handleSort('descricao')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Descrição
+                          {renderSortIcon('descricao')}
+                        </div>
+                      </th>
+                      <th
+                        className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm hidden-mobile"
+                        onClick={() => handleSort('categoria')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Categoria
+                          {renderSortIcon('categoria')}
+                        </div>
+                      </th>
+                      <th
+                        className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
+                        onClick={() => handleSort('valor')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Valor
+                          {renderSortIcon('valor')}
+                        </div>
+                      </th>
+                      <th
+                        className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
+                        onClick={() => handleSort('tipo')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Tipo
+                          {renderSortIcon('tipo')}
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loading ? (
+                      <tr>
+                        <td colSpan={5} className="text-center p-8">
+                          <div className="loading-mobile">
+                            <div className="loading-spinner-mobile animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                            <span className="ml-2">Carregando...</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : eventos.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="empty-state-mobile text-gray-500">
+                          Nenhum evento encontrado
+                        </td>
+                      </tr>
+                    ) : (
+                      eventos.map((evento) => (
+                        <tr key={evento.id} className="border-b hover:bg-gray-50">
+                          <td className="p-2 sm:p-3">
+                            <div className="text-sm font-medium">
+                              {formatarData(evento.data_competencia)}
+                            </div>
+                          </td>
+                          <td className="p-2 sm:p-3 hidden-mobile">
+                            <div className="max-w-xs truncate" title={evento.descricao}>
+                              {evento.descricao}
+                            </div>
+                          </td>
+                          <td className="p-2 sm:p-3 hidden-mobile">
+                            <Badge variant="outline" className="badge-mobile">
+                              {evento.categoria}
+                            </Badge>
+                          </td>
+                          <td className="p-2 sm:p-3">
+                            <div className="text-sm">
+                              <span className={`font-medium ${evento.tipo === 'Receita' ? 'text-green-600' : 'text-red-600'}`}>
+                                {formatarValor(evento.valor)}
+                              </span>
+                              <div className="visible-mobile text-xs text-gray-500 mt-1">
+                                {evento.descricao}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-2 sm:p-3">
+                            <Badge variant={evento.tipo === 'Receita' ? 'default' : 'destructive'} className="badge-mobile">
+                              {evento.tipo}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
 
-              {/* Categorias Selecionadas */}
-              {filtros.categoriasSelecionadas.length > 0 && (
-                <div className="mt-4 space-y-2">
-                  <Label className="text-xs">Categorias Selecionadas:</Label>
-                  <div className="flex flex-wrap gap-1">
-                    {filtros.categoriasSelecionadas.map((categoriaId) => {
-                      const categoria = categorias.find(c => c.id === categoriaId)
-                      return (
-                        <Badge
-                          key={categoriaId}
-                          variant="default"
-                          className="text-xs px-2 py-1 cursor-pointer"
-                          onClick={() => removerCategoria(categoriaId)}
-                        >
-                          {categoria?.nome || categoriaId}
-                          <XIcon className="w-3 h-3 ml-1" />
-                        </Badge>
-                      )
-                    })}
+              {/* Paginação */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4">
+                  <div className="text-sm text-gray-500">
+                    Página {currentPage} de {totalPages} • {totalRegistros.toLocaleString('pt-BR')} registros
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => buscarEventos(currentPage - 1, sortField, sortDirection)}
+                      disabled={currentPage === 1 || loading}
+                    >
+                      Anterior
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => buscarEventos(currentPage + 1, sortField, sortDirection)}
+                      disabled={currentPage === totalPages || loading}
+                    >
+                      Próxima
+                    </Button>
                   </div>
                 </div>
               )}
-
-              {/* Botões de Ação */}
-              <div className="flex gap-2 mt-4">
-                <Button onClick={aplicarFiltros} disabled={loading} size="sm">
-                  {loading ? 'Carregando...' : 'Aplicar Filtros'}
-                </Button>
-                <Button variant="outline" onClick={limparFiltros} size="sm">
-                  <XIcon className="w-4 h-4 mr-2" />
-                  Limpar Filtros
-                </Button>
-              </div>
             </CardContent>
-          )}
-        </Card>
-
-        {/* Tabela de Eventos */}
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              Lançamentos
-              <span className="text-sm font-normal text-gray-500 ml-2">
-                Página {currentPage} de {totalPages} • Mostrando {eventos.length} de {totalRegistros.toLocaleString('pt-BR')} registros
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th
-                      className="text-left p-3 cursor-pointer hover:bg-gray-50 select-none"
-                      onClick={() => handleSort('data_competencia')}
-                    >
-                      <div className="flex items-center gap-2">
-                        Data Competência
-                        {renderSortIcon('data_competencia')}
-                      </div>
-                    </th>
-                    <th
-                      className="text-left p-3 cursor-pointer hover:bg-gray-50 select-none"
-                      onClick={() => handleSort('descricao')}
-                    >
-                      <div className="flex items-center gap-2">
-                        Descrição
-                        {renderSortIcon('descricao')}
-                      </div>
-                    </th>
-                    <th
-                      className="text-left p-3 cursor-pointer hover:bg-gray-50 select-none"
-                      onClick={() => handleSort('categoria')}
-                    >
-                      <div className="flex items-center gap-2">
-                        Categoria
-                        {renderSortIcon('categoria')}
-                      </div>
-                    </th>
-                    <th
-                      className="text-left p-3 cursor-pointer hover:bg-gray-50 select-none"
-                      onClick={() => handleSort('valor')}
-                    >
-                      <div className="flex items-center gap-2">
-                        Valor
-                        {renderSortIcon('valor')}
-                      </div>
-                    </th>
-                    <th
-                      className="text-left p-3 cursor-pointer hover:bg-gray-50 select-none"
-                      onClick={() => handleSort('tipo')}
-                    >
-                      <div className="flex items-center gap-2">
-                        Tipo
-                        {renderSortIcon('tipo')}
-                      </div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {loading ? (
-                    <tr>
-                      <td colSpan={5} className="text-center p-8">
-                        <div className="flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                          <span className="ml-2">Carregando...</span>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : eventos.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="text-center p-8 text-gray-500">
-                        Nenhum evento encontrado
-                      </td>
-                    </tr>
-                  ) : (
-                    eventos.map((evento) => (
-                      <tr key={evento.id} className="border-b hover:bg-gray-50">
-                        <td className="p-3">
-                          {formatarData(evento.data_competencia)}
-                        </td>
-                        <td className="p-3">
-                          <div className="max-w-xs truncate" title={evento.descricao}>
-                            {evento.descricao}
-                          </div>
-                        </td>
-                        <td className="p-3">
-                          <Badge variant="outline">
-                            {evento.categoria}
-                          </Badge>
-                        </td>
-                        <td className="p-3">
-                          <span className={`font-medium ${evento.tipo === 'Receita' ? 'text-green-600' : 'text-red-600'}`}>
-                            {formatarValor(evento.valor)}
-                          </span>
-                        </td>
-                        <td className="p-3">
-                          <Badge variant={evento.tipo === 'Receita' ? 'default' : 'destructive'}>
-                            {evento.tipo}
-                          </Badge>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Paginação */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-4">
-                <div className="text-sm text-gray-500">
-                  Página {currentPage} de {totalPages} • {totalRegistros.toLocaleString('pt-BR')} registros
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => buscarEventos(currentPage - 1, sortField, sortDirection)}
-                    disabled={currentPage === 1 || loading}
-                  >
-                    Anterior
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => buscarEventos(currentPage + 1, sortField, sortDirection)}
-                    disabled={currentPage === totalPages || loading}
-                  >
-                    Próxima
-                  </Button>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </StandardPageLayout>
+          </Card>
+        </div>
+      </StandardPageLayout>
+    </ProtectedRoute>
   )
 } 

@@ -129,6 +129,82 @@ export default function ContaAzulPage() {
     setStatus('connecting')
 
     try {
+      // 🔄 Tentar renovação automática do token primeiro
+      console.log('🔄 Tentando renovação automática do token...')
+      
+      const response = await fetch('/api/contaazul/refresh-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          barId: selectedBar.id
+        })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        console.log('✅ Token renovado com sucesso!')
+        
+        // Atualizar configuração local
+        setConfig(prev => ({
+          ...prev,
+          conectado: true,
+          expires_at: result.expires_at,
+          empresa_id: result.empresa_id,
+          ultima_sync: new Date().toISOString()
+        }))
+        
+        setStatus('connected')
+        
+        toast({
+          title: '✅ ContaAzul conectado!',
+          description: result.message || 'Token renovado e conexão estabelecida com sucesso!',
+        })
+        
+        // Recarregar configuração do banco
+        await carregarConfiguracao()
+      } else {
+        // Se a renovação falhar, mostrar erro e sugerir nova autorização
+        console.log('❌ Renovação automática falhou:', result.error)
+        
+        toast({
+          title: '❌ Renovação automática falhou',
+          description: result.error || 'É necessário fazer nova autorização. Clique em "Autorizar Nova Conexão" abaixo.',
+          variant: 'destructive'
+        })
+        
+        setStatus('error')
+      }
+    } catch (error) {
+      console.error('❌ Erro na renovação automática:', error)
+      setStatus('error')
+      toast({
+        title: '❌ Erro na conexão',
+        description: error instanceof Error ? error.message : 'Erro desconhecido',
+        variant: 'destructive'
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const autorizarNovaConexao = async () => {
+    if (!selectedBar) {
+      toast({
+        title: '❌ Erro',
+        description: 'Selecione um bar primeiro!',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    setLoading(true)
+    setStatus('connecting')
+
+    try {
+      // Usar a API original para fazer nova autorização OAuth
       const response = await fetch(`/api/contaazul/auth?action=authorize&barId=${selectedBar.id}`, {
         method: 'GET',
         headers: {
@@ -139,16 +215,16 @@ export default function ContaAzulPage() {
       const result = await response.json()
 
       if (result.success) {
-        console.log('🔗 Redirecionando para:', result.auth_url)
-        window.location.href = result.auth_url
+        console.log('🔗 Redirecionando para autorização OAuth:', result.authUrl)
+        window.location.href = result.authUrl
       } else {
-        throw new Error(result.error || 'Erro na conexão')
+        throw new Error(result.error || 'Erro na autorização')
       }
     } catch (error) {
-      console.error('Erro ao conectar:', error)
+      console.error('❌ Erro na autorização OAuth:', error)
       setStatus('error')
       toast({
-        title: '❌ Erro na conexão',
+        title: '❌ Erro na autorização',
         description: error instanceof Error ? error.message : 'Erro desconhecido',
         variant: 'destructive'
       })
@@ -358,23 +434,34 @@ export default function ContaAzulPage() {
                         </Button>
                       </>
                     ) : (
-                      <Button
-                        onClick={conectarContaAzul}
-                        disabled={loading || !selectedBar}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        {loading ? (
-                          <>
-                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                            Conectando...
-                          </>
-                        ) : (
-                          <>
-                            <Link2 className="w-4 h-4 mr-2" />
-                            Conectar ContaAzul
-                          </>
-                        )}
-                      </Button>
+                      <>
+                        <Button
+                          onClick={conectarContaAzul}
+                          disabled={loading || !selectedBar}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          {loading ? (
+                            <>
+                              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                              Conectando...
+                            </>
+                          ) : (
+                            <>
+                              <Link2 className="w-4 h-4 mr-2" />
+                              Conectar ContaAzul
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          onClick={autorizarNovaConexao}
+                          disabled={loading || !selectedBar}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <Link2 className="w-4 h-4 mr-2" />
+                          Autorizar Nova Conexão
+                        </Button>
+                      </>
                     )}
                   </div>
                 </div>

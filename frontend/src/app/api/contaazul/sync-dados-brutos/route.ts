@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ 
     status: 'API funcionando',
     timestamp: new Date().toISOString(),
-    message: 'API de processamento de dados brutos ativa'
+    message: 'API de coleta de dados brutos ativa - Trigger automático habilitado'
   })
 }
 
@@ -24,13 +24,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Token inválido' }, { status: 401 })
     }
 
-    const { barId, force = false } = await request.json()
+    const { barId, source = 'manual' } = await request.json()
     
     if (!barId) {
       return NextResponse.json({ error: 'Bar ID é obrigatório' }, { status: 400 })
     }
 
-    console.log('🗂️ PROCESSAMENTO DE DADOS BRUTOS - Bar:', barId)
+    console.log('🗂️ COLETA DE DADOS BRUTOS - Bar:', barId, 'Source:', source)
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -38,183 +38,268 @@ export async function POST(request: NextRequest) {
     )
 
     const stats = {
-      categorias_ja_processadas: 0,
-      receitas_processadas: 0,
-      despesas_processadas: 0,
-      eventos_inseridos: 0,
-      paginas_processadas: 0,
-      erros: 0
+      categorias_sincronizadas: 0,
+      receitas_lotes_coletados: 0,
+      despesas_lotes_coletados: 0,
+      total_registros_brutos: 0,
+      erros: 0,
+      tempo_inicio: new Date()
     }
 
-    // 1. Buscar dados brutos não processados
-    console.log('🔍 Buscando dados brutos não processados...')
-    
-    const { data: dadosBrutos, error: erroBusca } = await supabase
-      .from('contaazul_dados_brutos')
+    // 1. Buscar credenciais
+    console.log('🔍 Verificando credenciais ContaAzul...')
+    const { data: credentials, error: credError } = await supabase
+      .from('api_credentials')
       .select('*')
-      .eq('bar_id', barId)
-      .eq('processado', false)
-      .order('coletado_em', { ascending: true })
+      .eq('bar_id', parseInt(barId))
+      .eq('sistema', 'contaazul')
+      .eq('ativo', true)
+      .single()
 
-    if (erroBusca) {
-      console.error('❌ Erro ao buscar dados brutos:', erroBusca)
-      return NextResponse.json({ error: 'Erro ao buscar dados brutos' }, { status: 500 })
+    if (credError || !credentials) {
+      throw new Error('Credenciais ContaAzul não encontradas')
     }
 
-    if (!dadosBrutos || dadosBrutos.length === 0) {
-      console.log('ℹ️ Nenhum dado bruto pendente de processamento')
-      return NextResponse.json({
-        success: true,
-        message: 'Nenhum dado pendente para processar',
-        estatisticas: stats
-      })
+    // 2. Verificar token
+    const agora = new Date()
+    const expiraEm = new Date(credentials.expires_at)
+    
+    if (expiraEm <= agora) {
+      throw new Error('Token ContaAzul expirado. Renovação necessária.')
     }
 
-    console.log(`📊 Encontrados ${dadosBrutos.length} registros de dados brutos para processar`)
+    const headers = {
+      'Authorization': `Bearer ${credentials.access_token}`,
+      'Content-Type': 'application/json'
+    }
 
-    // 2. Buscar mapa de categorias existentes
-    const { data: categorias } = await supabase
+    const baseUrl = 'https://api-v2.contaazul.com'
+
+    // 3. Sync Categorias (processamento direto - pequeno volume)
+    console.log('📁 Sincronizando categorias...')
+    let paginaCategoria = 1
+    const tamanhoPagina = 500
+
+    while (true) {
+      const urlCategorias = `${baseUrl}/v1/categorias?pagina=${paginaCategoria}&tamanho_pagina=${tamanhoPagina}`
+      const respCategorias = await fetch(urlCategorias, { headers })
+      
+      if (!respCategorias.ok) {
+        console.error(`❌ Erro na API categorias: ${respCategorias.status}`)
+        break
+      }
+      
+      const categoriasData = await respCategorias.json()
+      const categorias = categoriasData.itens || categoriasData.dados || categoriasData
+      
+      if (!categorias || categorias.length === 0) break
+      
+      // Processar categorias diretamente (pequeno volume)
+      for (const categoria of categorias) {
+        await supabase
+          .from('contaazul_categorias')
+          .upsert({
+            bar_id: parseInt(barId),
+            id: categoria.id,
+            nome: categoria.nome,
+            descricao: categoria.descricao || null,
+            tipo: categoria.tipo,
+            codigo: categoria.codigo || null,
+            permite_filhos: categoria.permite_filhos || false,
+            categoria_pai_id: categoria.categoria_pai_id || null,
+            entrada_dre: categoria.entrada_dre || null,
+            ativo: true
+          })
+        
+        stats.categorias_sincronizadas++
+      }
+      
+      paginaCategoria++
+      if (categorias.length < tamanhoPagina) break
+    }
+
+    // 4. Buscar categorias para filtrar receitas/despesas
+    const { data: categoriasReceita } = await supabase
       .from('contaazul_categorias')
       .select('id')
-      .eq('bar_id', barId)
+      .eq('bar_id', parseInt(barId))
+      .eq('tipo', 'RECEITA')
 
-    const mapaCategorias: { [uuid: string]: string } = {}
-    categorias?.forEach(cat => {
-      mapaCategorias[cat.id] = cat.id
-    })
+    const { data: categoriasDespesa } = await supabase
+      .from('contaazul_categorias')
+      .select('id')
+      .eq('bar_id', parseInt(barId))
+      .eq('tipo', 'DESPESA')
 
-    // 3. Processar cada registro de dados brutos
-    for (const dadoBruto of dadosBrutos) {
-      try {
-        console.log(`\n🔄 Processando: ${dadoBruto.tipo} - Categoria: ${dadoBruto.categoria_id} - Página: ${dadoBruto.pagina}`)
+    // 5. Coletar RECEITAS como dados brutos (alto volume)
+    console.log('💰 Coletando receitas como dados brutos...')
+    if (categoriasReceita && categoriasReceita.length > 0) {
+      for (const categoria of categoriasReceita) {
+        let paginaReceita = 1
+        const maxPaginas = 50 // Aumentado para coleta completa
 
-        const dadosJson = dadoBruto.dados_json
-        if (!Array.isArray(dadosJson)) {
-          console.error('❌ Dados JSON inválidos')
-          stats.erros++
-          continue
-        }
-
-        // Processar cada item dos dados JSON
-        for (const item of dadosJson) {
+        while (paginaReceita <= maxPaginas) {
           try {
-            if (dadoBruto.tipo === 'receitas') {
-              // Processar receita - usando campos corretos dos dados coletados
-              const dadosEvento = {
-                bar_id: barId,
-                evento_id: item.id, // Campo correto
-                tipo: 'receita',
-                descricao: item.descricao || `Receita ${item.id}`,
-                valor: parseFloat(item.total || 0), // Campo correto
-                data_vencimento: item.data_vencimento,
-                data_competencia: item.data_competencia || item.data_vencimento,
-                data_pagamento: item.status === 'ACQUITTED' ? item.data_vencimento : null,
-                status: item.status_traduzido || item.status || 'pendente',
-                categoria_id: dadoBruto.categoria_id,
-                cliente_id: item.cliente?.id,
-                conta_financeira_id: item.conta_financeira?.id,
-                dados_originais: item
-              }
+            const urlReceitas = `${baseUrl}/v1/financeiro/eventos-financeiros/contas-a-receber/buscar?` +
+              `ids_categorias=${categoria.id}&` +
+              `data_vencimento_de=2024-01-01&` +
+              `data_vencimento_ate=2027-01-01&` +
+              `pagina=${paginaReceita}&` +
+              `tamanho_pagina=${tamanhoPagina}`
+            
+            const respReceitas = await fetch(urlReceitas, { headers })
+            
+            if (!respReceitas.ok) {
+              console.warn(`⚠️ Erro na API receitas - Cat: ${categoria.id}, Página: ${paginaReceita} - Status: ${respReceitas.status}`)
+              break
+            }
+            
+            const receitasData = await respReceitas.json()
+            const receitas = receitasData.itens || receitasData.dados || receitasData
+            
+            if (!receitas || receitas.length === 0) break
 
-              const { error: erroReceita } = await supabase
-                .from('contaazul_eventos_financeiros')
-                .upsert(dadosEvento, { 
-                  onConflict: 'bar_id,evento_id',
-                  ignoreDuplicates: false 
-                })
+            // 🔥 SALVAR DADOS BRUTOS - TRIGGER PROCESSARÁ AUTOMATICAMENTE
+            const { error: insertError } = await supabase
+              .from('contaazul_dados_brutos')
+              .upsert({
+                bar_id: parseInt(barId),
+                tipo: 'receitas',
+                categoria_id: categoria.id,
+                pagina: paginaReceita,
+                dados_json: receitas,
+                total_registros: receitas.length,
+                processado: false // Trigger irá processar
+              }, {
+                onConflict: 'bar_id,tipo,categoria_id,pagina'
+              })
 
-              if (erroReceita) {
-                console.error('❌ Erro ao inserir receita:', erroReceita)
-                stats.erros++
-              } else {
-                stats.receitas_processadas++
-                stats.eventos_inseridos++
-              }
-
-            } else if (dadoBruto.tipo === 'despesas') {
-              // Processar despesa - usando campos corretos dos dados coletados
-              const dadosEvento = {
-                bar_id: barId,
-                evento_id: item.id, // Campo correto
-                tipo: 'despesa',
-                descricao: item.descricao || `Despesa ${item.id}`,
-                valor: parseFloat(item.total || 0), // Campo correto
-                data_vencimento: item.data_vencimento,
-                data_competencia: item.data_competencia || item.data_vencimento,
-                data_pagamento: item.status === 'PAID' ? item.data_vencimento : null,
-                status: item.status_traduzido || item.status || 'pendente',
-                categoria_id: dadoBruto.categoria_id,
-                fornecedor_id: item.fornecedor?.id,
-                conta_financeira_id: item.conta_financeira?.id,
-                dados_originais: item
-              }
-
-              const { error: erroDespesa } = await supabase
-                .from('contaazul_eventos_financeiros')
-                .upsert(dadosEvento, { 
-                  onConflict: 'bar_id,evento_id',
-                  ignoreDuplicates: false 
-                })
-
-              if (erroDespesa) {
-                console.error('❌ Erro ao inserir despesa:', erroDespesa)
-                stats.erros++
-              } else {
-                stats.despesas_processadas++
-                stats.eventos_inseridos++
-              }
+            if (insertError) {
+              console.error('❌ Erro ao salvar dados brutos receitas:', insertError)
+              stats.erros++
+            } else {
+              stats.receitas_lotes_coletados++
+              stats.total_registros_brutos += receitas.length
+              console.log(`✅ Receitas Cat: ${categoria.id}, Página: ${paginaReceita} - ${receitas.length} registros salvos`)
             }
 
+            paginaReceita++
+            if (receitas.length < tamanhoPagina) break
+
           } catch (error) {
-            console.error('❌ Erro ao processar item:', error)
+            console.error(`❌ Erro ao coletar receitas - Cat: ${categoria.id}, Página: ${paginaReceita}:`, error)
             stats.erros++
+            break
           }
         }
-
-        // Marcar como processado
-        const { error: erroUpdate } = await supabase
-          .from('contaazul_dados_brutos')
-          .update({ 
-            processado: true,
-            processado_em: new Date().toISOString()
-          })
-          .eq('id', dadoBruto.id)
-
-        if (erroUpdate) {
-          console.error('❌ Erro ao marcar como processado:', erroUpdate)
-          stats.erros++
-        } else {
-          stats.paginas_processadas++
-          console.log(`✅ Página processada: ${dadosJson.length} itens`)
-        }
-
-      } catch (error) {
-        console.error('❌ Erro ao processar dado bruto:', error)
-        stats.erros++
       }
     }
 
+    // 6. Coletar DESPESAS como dados brutos (alto volume)
+    console.log('💸 Coletando despesas como dados brutos...')
+    if (categoriasDespesa && categoriasDespesa.length > 0) {
+      for (const categoria of categoriasDespesa) {
+        let paginaDespesa = 1
+        const maxPaginas = 50 // Aumentado para coleta completa
+
+        while (paginaDespesa <= maxPaginas) {
+          try {
+            const urlDespesas = `${baseUrl}/v1/financeiro/eventos-financeiros/contas-a-pagar/buscar?` +
+              `ids_categorias=${categoria.id}&` +
+              `data_vencimento_de=2024-01-01&` +
+              `data_vencimento_ate=2027-01-01&` +
+              `pagina=${paginaDespesa}&` +
+              `tamanho_pagina=${tamanhoPagina}`
+            
+            const respDespesas = await fetch(urlDespesas, { headers })
+            
+            if (!respDespesas.ok) {
+              console.warn(`⚠️ Erro na API despesas - Cat: ${categoria.id}, Página: ${paginaDespesa} - Status: ${respDespesas.status}`)
+              break
+            }
+            
+            const despesasData = await respDespesas.json()
+            const despesas = despesasData.itens || despesasData.dados || despesasData
+            
+            if (!despesas || despesas.length === 0) break
+
+            // 🔥 SALVAR DADOS BRUTOS - TRIGGER PROCESSARÁ AUTOMATICAMENTE
+            const { error: insertError } = await supabase
+              .from('contaazul_dados_brutos')
+              .upsert({
+                bar_id: parseInt(barId),
+                tipo: 'despesas',
+                categoria_id: categoria.id,
+                pagina: paginaDespesa,
+                dados_json: despesas,
+                total_registros: despesas.length,
+                processado: false // Trigger irá processar
+              }, {
+                onConflict: 'bar_id,tipo,categoria_id,pagina'
+              })
+
+            if (insertError) {
+              console.error('❌ Erro ao salvar dados brutos despesas:', insertError)
+              stats.erros++
+            } else {
+              stats.despesas_lotes_coletados++
+              stats.total_registros_brutos += despesas.length
+              console.log(`✅ Despesas Cat: ${categoria.id}, Página: ${paginaDespesa} - ${despesas.length} registros salvos`)
+            }
+
+            paginaDespesa++
+            if (despesas.length < tamanhoPagina) break
+
+          } catch (error) {
+            console.error(`❌ Erro ao coletar despesas - Cat: ${categoria.id}, Página: ${paginaDespesa}:`, error)
+            stats.erros++
+            break
+          }
+        }
+      }
+    }
+
+    // 7. Calcular estatísticas finais
+    const tempoExecucao = new Date().getTime() - stats.tempo_inicio.getTime()
+    const duracaoSegundos = Math.round(tempoExecucao / 1000)
+
     console.log('\n📊 ESTATÍSTICAS FINAIS:')
-    console.log(`   • Páginas processadas: ${stats.paginas_processadas}`)
-    console.log(`   • Receitas processadas: ${stats.receitas_processadas}`)
-    console.log(`   • Despesas processadas: ${stats.despesas_processadas}`)
-    console.log(`   • Total eventos inseridos: ${stats.eventos_inseridos}`)
+    console.log(`   • Categorias sincronizadas: ${stats.categorias_sincronizadas}`)
+    console.log(`   • Lotes de receitas coletados: ${stats.receitas_lotes_coletados}`)
+    console.log(`   • Lotes de despesas coletados: ${stats.despesas_lotes_coletados}`)
+    console.log(`   • Total de registros brutos: ${stats.total_registros_brutos}`)
     console.log(`   • Erros: ${stats.erros}`)
+    console.log(`   • Duração: ${duracaoSegundos}s`)
+    console.log(`   • Processamento: Trigger automático`)
 
     return NextResponse.json({
       success: true,
-      message: '✅ Processamento de dados brutos concluído!',
-      estatisticas: stats,
-      timestamp: new Date().toISOString()
+      message: 'Coleta de dados brutos concluída com sucesso',
+      stats: {
+        categorias_sincronizadas: stats.categorias_sincronizadas,
+        receitas_lotes_coletados: stats.receitas_lotes_coletados,
+        despesas_lotes_coletados: stats.despesas_lotes_coletados,
+        total_registros_brutos: stats.total_registros_brutos,
+        total_lotes: stats.receitas_lotes_coletados + stats.despesas_lotes_coletados,
+        erros: stats.erros,
+        duracao_segundos: duracaoSegundos,
+        processamento: 'trigger_automatico',
+        source
+      },
+      observacoes: [
+        'Dados salvos na tabela contaazul_dados_brutos',
+        'Trigger automático processará em background',
+        'Eventos financeiros serão inseridos automaticamente',
+        'Monitore tabela contaazul_eventos_financeiros para ver resultados'
+      ]
     })
 
   } catch (error) {
-    console.error('❌ Erro geral no processamento de dados brutos:', error)
-    
+    console.error('❌ Erro na coleta de dados brutos:', error)
     return NextResponse.json({
       success: false,
-      message: 'Erro no processamento de dados brutos',
-      erro: error instanceof Error ? error.message : 'Erro desconhecido'
+      error: error instanceof Error ? error.message : 'Erro desconhecido',
+      message: 'Erro na coleta de dados brutos'
     }, { status: 500 })
   }
 } 
