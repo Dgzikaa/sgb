@@ -454,28 +454,46 @@ export default function FaceAuthenticator({
       const video = videoRef.current
       const canvas = canvasRef.current
       
-      // Aguardar dimensões válidas do vídeo
-      if (video.videoWidth === 0 || video.videoHeight === 0) {
-        console.log('⏳ Aguardando dimensões do vídeo...')
+      // Aguardar vídeo estar pronto para captura
+      if (video.videoWidth === 0 || video.videoHeight === 0 || video.readyState < 2) {
+        console.log('⏳ Aguardando vídeo ficar pronto para captura...')
         await new Promise<void>((resolve, reject) => {
           const timeout = setTimeout(() => {
-            reject(new Error('Timeout aguardando dimensões do vídeo'))
-          }, 5000)
+            reject(new Error('Timeout aguardando vídeo ficar pronto. Tente reiniciar a câmera.'))
+          }, 8000)
           
-          const checkDimensions = () => {
-            if (video.videoWidth > 0 && video.videoHeight > 0) {
+          const onVideoReady = () => {
+            if (video.videoWidth > 0 && video.videoHeight > 0 && video.readyState >= 2) {
               clearTimeout(timeout)
-              console.log('✅ Dimensões do vídeo carregadas:', {
+              video.removeEventListener('loadedmetadata', onVideoReady)
+              video.removeEventListener('canplay', onVideoReady)
+              console.log('✅ Vídeo pronto para captura:', {
                 width: video.videoWidth,
-                height: video.videoHeight
+                height: video.videoHeight,
+                readyState: video.readyState
               })
               resolve()
-            } else {
-              setTimeout(checkDimensions, 100)
             }
           }
           
-          checkDimensions()
+          // Verificar se já está pronto
+          if (video.videoWidth > 0 && video.videoHeight > 0 && video.readyState >= 2) {
+            clearTimeout(timeout)
+            resolve()
+            return
+          }
+          
+          // Forçar play do vídeo se não estiver reproduzindo
+          if (video.paused) {
+            console.log('🎬 Forçando reprodução do vídeo...')
+            video.play().catch((playError) => {
+              console.log('⚠️ Aviso: Não foi possível forçar reprodução, continuando...')
+            })
+          }
+          
+          // Aguardar eventos do vídeo
+          video.addEventListener('loadedmetadata', onVideoReady)
+          video.addEventListener('canplay', onVideoReady)
         })
       }
       
