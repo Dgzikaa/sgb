@@ -549,12 +549,15 @@ export default function ChecklistExecutionPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-4">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Carregando checklist...</p>
-          </div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-6"></div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Carregando checklist...
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            Preparando execução do checklist
+          </p>
         </div>
       </div>
     )

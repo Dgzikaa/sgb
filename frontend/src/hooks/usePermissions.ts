@@ -107,20 +107,63 @@ export function usePermissions(): PermissionsHook {
     return user?.role === role
   }
 
-  const canAccessModule = (categoria: string): boolean => {
+  const canAccessModule = (modulo: string): boolean => {
     if (!user || !user.ativo) return false
     
-    // Mapear categorias para módulos (atualizado para nova estrutura)
-    const modulosPorCategoria: Record<string, string[]> = {
-      'dashboards': ['dashboard_diario', 'dashboard_semanal', 'dashboard_mensal', 'dashboard_financeiro_mensal', 'dashboard_metrica_evolucao', 'dashboard_metricas_barras', 'dashboard_comparativo', 'dashboard_garcons'],
-      'operacoes': ['produtos', 'recorrencia', 'planejamento', 'tempo', 'periodo'],
-      'producao': ['receitas_insumos', 'terminal_producao', 'relatorio_producoes'],
-      'relatorios': ['relatorio_produtos', 'analitico', 'fatporhora', 'nfs', 'pagamentos'],
-      'configuracao': ['configuracoes', 'integracoes']
+    // Mapeamento 1:1 - cada item da sidebar é um módulo individual
+    const modulosSidebar: Record<string, string> = {
+      // Navegação Principal
+      'home': 'home',
+      'checklists': 'checklists',
+      'checklists_abertura': 'checklists_abertura',
+      
+      // Operações
+      'operacoes_checklist_abertura': 'operacoes_checklist_abertura', 
+      'terminal_producao': 'terminal_producao',
+      
+      // Reservas
+      'reservas': 'reservas',
+      'reservas_recorrencia': 'reservas_recorrencia',
+      
+      // ContaAzul
+      'contaazul_competencia': 'contaazul_competencia',
+      
+      // ContaHub
+      'contahub_teste': 'contahub_teste',
+      'contahub_tempo': 'contahub_tempo',
+      'contahub_produtos': 'contahub_produtos', 
+      'contahub_receitas': 'contahub_receitas',
+      'contahub_periodo': 'contahub_periodo',
+      'contahub_analitico': 'contahub_analitico',
+      'contahub_pagamentos': 'contahub_pagamentos',
+      'contahub_faturamento_hora': 'contahub_faturamento_hora',
+      
+      // Marketing
+      'marketing_360': 'marketing_360',
+      
+      // Visão Geral  
+      'visao_geral_diario': 'visao_geral_diario',
+      'visao_geral_comparativo': 'visao_geral_comparativo',
+      'visao_geral_garcons': 'visao_geral_garcons',
+      'visao_geral_metricas': 'visao_geral_metricas',
+      'visao_geral_financeiro_mensal': 'visao_geral_financeiro_mensal',
+      
+      // Funcionário
+      'funcionario_checklists': 'funcionario_checklists',
+      
+      // Configurações
+      'configuracoes_checklists': 'configuracoes_checklists',
+      'configuracoes_metas': 'configuracoes_metas',
+      'configuracoes_integracoes': 'configuracoes_integracoes',
+      'configuracoes_seguranca': 'configuracoes_seguranca',
+      'configuracoes_whatsapp': 'configuracoes_whatsapp',
+      'configuracoes_contahub_auto': 'configuracoes_contahub_auto',
+      'configuracoes_meta_config': 'configuracoes_meta_config',
+      'configuracoes_templates': 'configuracoes_templates'
     }
     
-    const modulosCategoria = modulosPorCategoria[categoria] || []
-    return hasAnyPermission(modulosCategoria)
+    const moduloId = modulosSidebar[modulo] || modulo
+    return hasPermission(moduloId)
   }
 
   // Função para atualizar dados do usuário do servidor

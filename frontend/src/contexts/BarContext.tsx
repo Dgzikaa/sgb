@@ -30,12 +30,21 @@ export function BarProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') {
+      setIsLoading(false)
+      return
+    }
+
     let mounted = true
 
     async function loadUserBars() {
       try {
         const supabase = await getSupabaseClient();
-        if (!supabase) return;
+        if (!supabase) {
+          if (mounted) setIsLoading(false)
+          return
+        }
         
         // Primeiro verificar localStorage
         const storedUser = localStorage.getItem('sgb_user')
@@ -47,138 +56,101 @@ export function BarProvider({ children }: { children: ReactNode }) {
             userEmail = userData.email
             
             // Verificar se já temos os bares no localStorage
-            if (userData.bares_acesso && Array.isArray(userData.bares_acesso) && userData.bares_acesso.length > 0) {
-              const barsFromLocalStorage = userData.bares_acesso.map((bar: any) => ({
-                id: bar.id || bar.bar_id,
-                nome: bar.nome || `Bar ${bar.id || bar.bar_id}`
-              }))
-              
-              setAvailableBars(barsFromLocalStorage)
-              
-              // Priorizar "Ordinário Bar" como padrão
-              const ordinarioBar = barsFromLocalStorage.find((bar: Bar) => 
-                bar.nome.toLowerCase().includes('ordinário') || 
-                bar.nome.toLowerCase().includes('ordinario')
-              )
-              
-              if (ordinarioBar) {
-                setSelectedBar(ordinarioBar)
-              } else {
-                setSelectedBar(barsFromLocalStorage[0])
+            if (userData.availableBars && Array.isArray(userData.availableBars) && userData.availableBars.length > 0) {
+              if (mounted) {
+                setAvailableBars(userData.availableBars)
+                
+                // Verificar se há um bar selecionado no localStorage
+                const selectedBarId = localStorage.getItem('sgb_selected_bar_id')
+                if (selectedBarId) {
+                  const selectedBar = userData.availableBars.find((bar: Bar) => bar.id === parseInt(selectedBarId))
+                  if (selectedBar) {
+                    setSelectedBar(selectedBar)
+                  } else {
+                    setSelectedBar(userData.availableBars[0])
+                  }
+                } else {
+                  setSelectedBar(userData.availableBars[0])
+                }
+                
+                setIsLoading(false)
+                return
               }
-              
-              setIsLoading(false)
-              return
             }
-          } catch (error) {
-            localStorage.removeItem('sgb_user')
+          } catch (e) {
+            console.error('Erro ao parsear dados do usuário:', e)
           }
         }
+
+        // Se não conseguiu do localStorage, tentar buscar da sessão do Supabase
+        const { data: { session } } = await supabase.auth.getSession()
         
-        // Se não tem localStorage, tentar sessão do Supabase
+        if (session?.user?.email) {
+          userEmail = session.user.email
+        }
+
         if (!userEmail) {
-          const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-          
-          if (!mounted) return
-          
-          if (session && !sessionError) {
-            userEmail = session.user.email
-          }
+          console.log('Nenhum usuário logado encontrado')
+          if (mounted) setIsLoading(false)
+          return
         }
-        
-        if (userEmail) {
-          // Buscar IDs dos bares do usuário
-          const { data: userBars, error: userError } = await supabase
-            .from('usuarios_bar')
-            .select('bar_id, user_id, email')
-            .eq('email', userEmail)
-            .eq('ativo', true)
 
-          if (!mounted) return
-          
-          if (!userError && userBars?.length) {
-            // Extrair IDs únicos
-            const barIds = [...new Set(userBars.map((ub: any) => ub.bar_id))]
-            
-            // Buscar dados completos dos bares
-            const { data: barsData, error: barsError } = await supabase
-              .from('bars')
-              .select('id, nome')
-              .in('id', barIds)
-              .eq('ativo', true)
-              .order('nome')
+        // Buscar os bares do usuário no banco
+        const { data: userData, error: userError } = await supabase
+          .from('usuarios_bar')
+          .select('id, email, nome, role, bar_id')
+          .eq('email', userEmail)
+          .eq('ativo', true)
 
-            if (barsError) {
-              console.error('❌ Erro ao buscar dados dos bares:', barsError)
-            }
-            
-            const finalBarsData = barsData || []
-            
-            if (finalBarsData.length > 0) {
-              setAvailableBars(finalBarsData)
-              
-              // Priorizar "Ordinário Bar" como padrão
-              const ordinarioBar = finalBarsData.find((bar: Bar) => 
-                bar.nome.toLowerCase().includes('ordinário') || 
-                bar.nome.toLowerCase().includes('ordinario')
-              )
-              
-              if (ordinarioBar) {
-                setSelectedBar(ordinarioBar)
-              } else {
-                setSelectedBar(finalBarsData[0])
-              }
-              
-              setIsLoading(false)
-              return
-            }
-          } else if (userError) {
-            console.error('❌ Erro ao buscar IDs dos bares do usuário:', userError)
-          }
-        } else {
-          // Se não tem usuário, tentar carregar todos os bares mesmo assim
-          const { data: allBars, error: allBarsError } = await supabase
-            .from('bars')
-            .select('id, nome')
-            .eq('ativo', true)
-            .order('nome')
-
-          if (!mounted) return
-
-          if (!allBarsError && allBars && allBars.length > 0) {
-            setAvailableBars(allBars)
-            
-            // Priorizar Ordinário Bar
-            const ordinarioBar = allBars.find((bar: Bar) => 
-              bar.nome.toLowerCase().includes('ordinário') || 
-              bar.nome.toLowerCase().includes('ordinario')
-            )
-            
-            if (ordinarioBar) {
-              setSelectedBar(ordinarioBar)
-            } else {
-              setSelectedBar(allBars[0])
-            }
-            
-            setIsLoading(false)
-            return
-          } else {
-            if (allBarsError) {
-              console.error('❌ Erro ao carregar bares:', allBarsError)
-            }
-            setAvailableBars([])
-            setSelectedBar(null)
-          }
+        if (userError) {
+          console.error('Erro ao buscar dados do usuário:', userError)
+          if (mounted) setIsLoading(false)
+          return
         }
+
+        if (!userData || userData.length === 0) {
+          console.log('Usuário não tem acesso a nenhum bar')
+          if (mounted) setIsLoading(false)
+          return
+        }
+
+        // Extrair IDs únicos dos bares (caso usuário tenha acesso a múltiplos bares)
+        const barIds = [...new Set(userData.map((user: any) => user.bar_id))]
         
-      } catch (error) {
-        console.error('💥 Erro crítico no BarContext:', error)
-        setAvailableBars([])
-        setSelectedBar(null)
-      } finally {
+        // Buscar detalhes dos bares
+        const { data: barsData, error: barsError } = await supabase
+          .from('bars')
+          .select('id, nome')
+          .in('id', barIds)
+          .eq('ativo', true)
+
+        if (barsError) {
+          console.error('Erro ao buscar bares:', barsError)
+          if (mounted) setIsLoading(false)
+          return
+        }
+
         if (mounted) {
+          setAvailableBars(barsData || [])
+          
+                     // Verificar se há um bar selecionado no localStorage
+           const selectedBarId = localStorage.getItem('sgb_selected_bar_id')
+           if (selectedBarId && barsData) {
+             const selectedBar = barsData.find((bar: Bar) => bar.id === parseInt(selectedBarId))
+            if (selectedBar) {
+              setSelectedBar(selectedBar)
+            } else {
+              setSelectedBar(barsData[0] || null)
+            }
+          } else if (barsData && barsData.length > 0) {
+            setSelectedBar(barsData[0])
+          }
+          
           setIsLoading(false)
         }
+      } catch (error) {
+        console.error('Erro ao carregar bares do usuário:', error)
+        if (mounted) setIsLoading(false)
       }
     }
 
@@ -189,14 +161,25 @@ export function BarProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // Função para alterar o bar selecionado
+  const handleSetSelectedBar = (bar: Bar) => {
+    setSelectedBar(bar)
+    // Salvar no localStorage apenas se estamos no cliente
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sgb_selected_bar_id', bar.id.toString())
+    }
+  }
+
   return (
-    <BarContext.Provider value={{
-      selectedBar,
-      availableBars,
-      setSelectedBar,
-      isLoading,
-      resetBars
-    }}>
+    <BarContext.Provider
+      value={{
+        selectedBar,
+        availableBars,
+        setSelectedBar: handleSetSelectedBar,
+        isLoading,
+        resetBars,
+      }}
+    >
       {children}
     </BarContext.Provider>
   )

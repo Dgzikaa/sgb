@@ -297,7 +297,7 @@ export async function POST(request: NextRequest) {
       success: true,
       user: {
         ...usuarioPrincipal,
-        bares_acesso: baresComNome,
+        availableBars: baresComNome,
         credenciais_apis: credenciaisPorBar
       }
     }

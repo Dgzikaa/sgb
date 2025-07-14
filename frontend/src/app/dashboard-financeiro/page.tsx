@@ -509,7 +509,7 @@ export default function DashboardFinanceiroPage() {
                   </Card>
 
                   {/* Estrutura de Custos */}
-                  <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-purple-50/30">
+                  <Card className="">
                     <CardHeader className="pb-3">
                       <CardTitle className="flex items-center gap-2">
                         <BarChart3Icon className="w-5 h-5 text-purple-600" />

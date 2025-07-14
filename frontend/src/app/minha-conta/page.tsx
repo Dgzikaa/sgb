@@ -25,7 +25,14 @@ import {
   CheckCircle,
   Building,
   CreditCard,
-  FileText
+  FileText,
+  Activity,
+  Clock,
+  UserCheck,
+  Users,
+  Star,
+  Crown,
+  Edit3
 } from 'lucide-react'
 import { usePermissions } from '@/hooks/usePermissions'
 
@@ -199,10 +206,50 @@ export default function MinhaContaPage() {
     return cleaned
   }
 
+  const calcularDiasDesdeContratacao = () => {
+    if (!perfil?.data_contratacao) return 0
+    const hoje = new Date()
+    const contratacao = new Date(perfil.data_contratacao)
+    const diffTime = Math.abs(hoje.getTime() - contratacao.getTime())
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  }
+
+  const calcularDiasDesdeUltimaAtividade = () => {
+    if (!perfil?.ultima_atividade) return 0
+    const hoje = new Date()
+    const atividade = new Date(perfil.ultima_atividade)
+    const diffTime = Math.abs(hoje.getTime() - atividade.getTime())
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  }
+
+  const getRoleIcon = (role: string) => {
+    switch(role) {
+      case 'admin': return <Crown className="h-4 w-4" />
+      case 'manager': return <Star className="h-4 w-4" />
+      default: return <Users className="h-4 w-4" />
+    }
+  }
+
+  const getRoleColor = (role: string) => {
+    switch(role) {
+      case 'admin': return 'from-purple-500 to-purple-600'
+      case 'manager': return 'from-blue-500 to-blue-600'  
+      default: return 'from-green-500 to-green-600'
+    }
+  }
+
+  const getRoleLabel = (role: string) => {
+    switch(role) {
+      case 'admin': return 'Administrador'
+      case 'manager': return 'Gerente'
+      default: return 'Funcionário'
+    }
+  }
+
   if (carregando) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400"></div>
       </div>
     )
   }
@@ -211,66 +258,227 @@ export default function MinhaContaPage() {
     return (
       <div className="text-center py-8">
         <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Erro ao carregar perfil</h2>
-        <p className="text-gray-600 mb-4">Não foi possível carregar os dados do seu perfil.</p>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Erro ao carregar perfil</h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-4">Não foi possível carregar os dados do seu perfil.</p>
         <Button onClick={carregarPerfil}>Tentar novamente</Button>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header com gradiente */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 dark:from-blue-700 dark:via-blue-800 dark:to-blue-900">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="relative px-8 py-12">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-6">
+              {/* Foto de perfil grande */}
+              <div className="relative">
+                <div className="w-24 h-24 rounded-full border-4 border-white/30 overflow-hidden bg-white/10 backdrop-blur-sm">
+                  {perfil.foto_perfil ? (
+                    <img 
+                      src={perfil.foto_perfil} 
+                      alt={perfil.nome}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <User className="h-12 w-12 text-white/70" />
+                    </div>
+                  )}
+                </div>
+                <div className="absolute -bottom-1 -right-1">
+                  {perfil.conta_verificada ? (
+                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center border-2 border-white">
+                      <CheckCircle className="h-4 w-4 text-white" />
+                    </div>
+                  ) : (
+                    <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center border-2 border-white">
+                      <AlertCircle className="h-4 w-4 text-white" />
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="text-white">
+                <div className="flex items-center space-x-3 mb-2">
+                  <h1 className="text-3xl font-bold">{perfil.nome}</h1>
+                  <div className={`px-3 py-1 rounded-full bg-gradient-to-r ${getRoleColor(perfil.role)} flex items-center space-x-1 text-white text-sm font-medium`}>
+                    {getRoleIcon(perfil.role)}
+                    <span>{getRoleLabel(perfil.role)}</span>
+                  </div>
+                </div>
+                <p className="text-blue-100 text-lg mb-1">{perfil.email}</p>
+                <div className="flex items-center space-x-4 text-blue-200 text-sm">
+                  {perfil.cargo && (
+                    <div className="flex items-center space-x-1">
+                      <Briefcase className="h-4 w-4" />
+                      <span>{perfil.cargo}</span>
+                    </div>
+                  )}
+                  {perfil.bar && (
+                    <div className="flex items-center space-x-1">
+                      <Building className="h-4 w-4" />
+                      <span>{perfil.bar.nome}</span>
+                    </div>
+                  )}
+                  {perfil.data_contratacao && (
+                    <div className="flex items-center space-x-1">
+                      <Calendar className="h-4 w-4" />
+                      <span>Desde {new Date(perfil.data_contratacao).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-3">
+              {!editandoPerfil && (
+                <Button
+                  onClick={() => setEditandoPerfil(true)}
+                  variant="secondary"
+                  className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+                >
+                  <Edit3 className="h-4 w-4 mr-2" />
+                  Editar Perfil
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Mensagem de feedback */}
       {mensagem && (
-        <div className={`p-4 rounded-lg flex items-center space-x-2 ${
+        <div className={`p-4 rounded-xl flex items-center space-x-3 border ${
           mensagem.tipo === 'success' 
-            ? 'bg-green-50 text-green-800 border border-green-200' 
-            : 'bg-red-50 text-red-800 border border-red-200'
+            ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700' 
+            : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border-red-200 dark:border-red-700'
         }`}>
           {mensagem.tipo === 'success' ? (
-            <CheckCircle className="h-5 w-5" />
+            <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
           ) : (
-            <AlertCircle className="h-5 w-5" />
+            <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
           )}
-          <span>{mensagem.texto}</span>
+          <span className="font-medium">{mensagem.texto}</span>
         </div>
       )}
 
+      {/* Cards de estatísticas */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Status da Conta</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {perfil.conta_verificada ? 'Verificada' : 'Pendente'}
+                </p>
+              </div>
+              <div className={`p-3 rounded-full ${perfil.conta_verificada ? 'bg-green-100 dark:bg-green-900/20' : 'bg-yellow-100 dark:bg-yellow-900/20'}`}>
+                {perfil.conta_verificada ? (
+                  <UserCheck className="h-6 w-6 text-green-600 dark:text-green-400" />
+                ) : (
+                  <AlertCircle className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Tempo de Casa</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {calcularDiasDesdeContratacao()} dias
+                </p>
+              </div>
+              <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/20">
+                <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Última Atividade</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {calcularDiasDesdeUltimaAtividade() === 0 ? 'Hoje' : `${calcularDiasDesdeUltimaAtividade()} dias`}
+                </p>
+              </div>
+              <div className="p-3 rounded-full bg-purple-100 dark:bg-purple-900/20">
+                <Activity className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Perfil Completo</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {Math.round(([perfil.nome, perfil.email, perfil.celular, perfil.cargo, perfil.bio].filter(Boolean).length / 5) * 100)}%
+                </p>
+              </div>
+              <div className="p-3 rounded-full bg-green-100 dark:bg-green-900/20">
+                <User className="h-6 w-6 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <Tabs defaultValue="perfil" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="perfil">Perfil</TabsTrigger>
-          <TabsTrigger value="seguranca">Segurança</TabsTrigger>
+        <TabsList className="bg-gray-100 dark:bg-gray-800 w-full md:w-auto">
+          <TabsTrigger 
+            value="perfil" 
+            className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white dark:text-gray-300"
+          >
+            <User className="h-4 w-4 mr-2" />
+            Perfil
+          </TabsTrigger>
+          <TabsTrigger 
+            value="seguranca"
+            className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white dark:text-gray-300"
+          >
+            <Shield className="h-4 w-4 mr-2" />
+            Segurança
+          </TabsTrigger>
         </TabsList>
 
         {/* Tab do Perfil */}
         <TabsContent value="perfil" className="space-y-6">
-          <Card>
-            <CardHeader>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <CardHeader className="border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center space-x-2">
-                    <User className="h-5 w-5" />
+                  <CardTitle className="text-gray-900 dark:text-white flex items-center space-x-2">
+                    <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     <span>Informações Pessoais</span>
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-gray-600 dark:text-gray-400">
                     Gerencie suas informações pessoais e foto de perfil
                   </CardDescription>
                 </div>
                 <div className="flex items-center space-x-2">
                   {perfil.conta_verificada && (
-                    <Badge variant="outline" className="text-green-600 border-green-200">
+                    <Badge variant="outline" className="text-green-600 dark:text-green-400 border-green-200 dark:border-green-700">
                       <CheckCircle className="h-3 w-3 mr-1" />
                       Verificado
                     </Badge>
                   )}
-                  <Badge variant="secondary">
-                    {perfil.role === 'admin' ? 'Administrador' : 
-                     perfil.role === 'manager' ? 'Gerente' : 'Funcionário'}
-                  </Badge>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-8 p-8">
               {/* Foto de perfil */}
               <div className="flex flex-col items-center space-y-4">
                 <ProfilePhotoUpload
@@ -278,130 +486,149 @@ export default function MinhaContaPage() {
                   onPhotoChange={(foto) => setDadosEdicao(prev => ({ ...prev, foto_perfil: foto }))}
                   disabled={!editandoPerfil}
                 />
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+                  Recomendado: imagem quadrada, máximo 5MB<br />
+                  Formatos aceitos: JPG, PNG, GIF
+                </p>
               </div>
 
-              <Separator />
+              <Separator className="bg-gray-200 dark:bg-gray-700" />
 
               {/* Informações básicas */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="nome">Nome completo</Label>
-                  <Input
-                    id="nome"
-                    value={editandoPerfil ? dadosEdicao.nome || '' : perfil.nome}
-                    onChange={(e) => setDadosEdicao(prev => ({ ...prev, nome: e.target.value }))}
-                    disabled={!editandoPerfil}
-                    placeholder="Seu nome completo"
-                  />
-                </div>
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center space-x-2">
+                  <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <span>Dados Básicos</span>
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="nome" className="text-gray-700 dark:text-gray-300">Nome completo</Label>
+                    <Input
+                      id="nome"
+                      value={editandoPerfil ? dadosEdicao.nome || '' : perfil.nome}
+                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, nome: e.target.value }))}
+                      disabled={!editandoPerfil}
+                      placeholder="Seu nome completo"
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">E-mail</Label>
-                  <Input
-                    id="email"
-                    value={perfil.email}
-                    disabled
-                    className="bg-slate-50"
-                  />
-                  <p className="text-xs text-slate-500">O e-mail não pode ser alterado</p>
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">E-mail</Label>
+                    <Input
+                      id="email"
+                      value={perfil.email}
+                      disabled
+                      className="bg-gray-50 dark:bg-gray-600 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400">O e-mail não pode ser alterado</p>
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="celular">Celular</Label>
-                  <Input
-                    id="celular"
-                    value={editandoPerfil ? dadosEdicao.celular || '' : formatarTelefone(perfil.celular || '')}
-                    onChange={(e) => setDadosEdicao(prev => ({ ...prev, celular: e.target.value }))}
-                    disabled={!editandoPerfil}
-                    placeholder="(11) 99999-9999"
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="celular" className="text-gray-700 dark:text-gray-300">Celular</Label>
+                    <Input
+                      id="celular"
+                      value={editandoPerfil ? dadosEdicao.celular || '' : formatarTelefone(perfil.celular || '')}
+                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, celular: e.target.value }))}
+                      disabled={!editandoPerfil}
+                      placeholder="(11) 99999-9999"
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="telefone">Telefone fixo</Label>
-                  <Input
-                    id="telefone"
-                    value={editandoPerfil ? dadosEdicao.telefone || '' : formatarTelefone(perfil.telefone || '')}
-                    onChange={(e) => setDadosEdicao(prev => ({ ...prev, telefone: e.target.value }))}
-                    disabled={!editandoPerfil}
-                    placeholder="(11) 3333-4444"
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="telefone" className="text-gray-700 dark:text-gray-300">Telefone fixo</Label>
+                    <Input
+                      id="telefone"
+                      value={editandoPerfil ? dadosEdicao.telefone || '' : formatarTelefone(perfil.telefone || '')}
+                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, telefone: e.target.value }))}
+                      disabled={!editandoPerfil}
+                      placeholder="(11) 3333-4444"
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="cpf">CPF</Label>
-                  <Input
-                    id="cpf"
-                    value={editandoPerfil ? dadosEdicao.cpf || '' : formatarCPF(perfil.cpf || '')}
-                    onChange={(e) => setDadosEdicao(prev => ({ ...prev, cpf: e.target.value }))}
-                    disabled={!editandoPerfil}
-                    placeholder="000.000.000-00"
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="cpf" className="text-gray-700 dark:text-gray-300">CPF</Label>
+                    <Input
+                      id="cpf"
+                      value={editandoPerfil ? dadosEdicao.cpf || '' : formatarCPF(perfil.cpf || '')}
+                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, cpf: e.target.value }))}
+                      disabled={!editandoPerfil}
+                      placeholder="000.000.000-00"
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="data_nascimento">Data de nascimento</Label>
-                  <Input
-                    id="data_nascimento"
-                    type="date"
-                    value={editandoPerfil ? dadosEdicao.data_nascimento || '' : perfil.data_nascimento || ''}
-                    onChange={(e) => setDadosEdicao(prev => ({ ...prev, data_nascimento: e.target.value }))}
-                    disabled={!editandoPerfil}
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="data_nascimento" className="text-gray-700 dark:text-gray-300">Data de nascimento</Label>
+                    <Input
+                      id="data_nascimento"
+                      type="date"
+                      value={editandoPerfil ? dadosEdicao.data_nascimento || '' : perfil.data_nascimento || ''}
+                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, data_nascimento: e.target.value }))}
+                      disabled={!editandoPerfil}
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <Separator />
+              <Separator className="bg-gray-200 dark:bg-gray-700" />
 
               {/* Endereço */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium flex items-center space-x-2">
-                  <MapPin className="h-5 w-5" />
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center space-x-2">
+                  <MapPin className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   <span>Endereço</span>
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="md:col-span-2 space-y-2">
-                    <Label htmlFor="endereco">Endereço completo</Label>
+                    <Label htmlFor="endereco" className="text-gray-700 dark:text-gray-300">Endereço completo</Label>
                     <Input
                       id="endereco"
                       value={editandoPerfil ? dadosEdicao.endereco || '' : perfil.endereco || ''}
                       onChange={(e) => setDadosEdicao(prev => ({ ...prev, endereco: e.target.value }))}
                       disabled={!editandoPerfil}
                       placeholder="Rua, número, complemento"
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="cep">CEP</Label>
+                    <Label htmlFor="cep" className="text-gray-700 dark:text-gray-300">CEP</Label>
                     <Input
                       id="cep"
                       value={editandoPerfil ? dadosEdicao.cep || '' : formatarCEP(perfil.cep || '')}
                       onChange={(e) => setDadosEdicao(prev => ({ ...prev, cep: e.target.value }))}
                       disabled={!editandoPerfil}
                       placeholder="00000-000"
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="cidade">Cidade</Label>
+                    <Label htmlFor="cidade" className="text-gray-700 dark:text-gray-300">Cidade</Label>
                     <Input
                       id="cidade"
                       value={editandoPerfil ? dadosEdicao.cidade || '' : perfil.cidade || ''}
                       onChange={(e) => setDadosEdicao(prev => ({ ...prev, cidade: e.target.value }))}
                       disabled={!editandoPerfil}
                       placeholder="Sua cidade"
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="estado">Estado</Label>
+                    <Label htmlFor="estado" className="text-gray-700 dark:text-gray-300">Estado</Label>
                     <Select
                       value={editandoPerfil ? dadosEdicao.estado || '' : perfil.estado || ''}
                       onValueChange={(value) => setDadosEdicao(prev => ({ ...prev, estado: value }))}
                       disabled={!editandoPerfil}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                         <SelectValue placeholder="UF" />
                       </SelectTrigger>
                       <SelectContent>
@@ -416,62 +643,65 @@ export default function MinhaContaPage() {
                 </div>
               </div>
 
-              <Separator />
+              <Separator className="bg-gray-200 dark:bg-gray-700" />
 
               {/* Informações profissionais */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium flex items-center space-x-2">
-                  <Briefcase className="h-5 w-5" />
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center space-x-2">
+                  <Briefcase className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   <span>Informações Profissionais</span>
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="cargo">Cargo</Label>
+                    <Label htmlFor="cargo" className="text-gray-700 dark:text-gray-300">Cargo</Label>
                     <Input
                       id="cargo"
                       value={editandoPerfil ? dadosEdicao.cargo || '' : perfil.cargo || ''}
                       onChange={(e) => setDadosEdicao(prev => ({ ...prev, cargo: e.target.value }))}
                       disabled={!editandoPerfil}
                       placeholder="Seu cargo"
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="departamento">Departamento</Label>
+                    <Label htmlFor="departamento" className="text-gray-700 dark:text-gray-300">Departamento</Label>
                     <Input
                       id="departamento"
                       value={editandoPerfil ? dadosEdicao.departamento || '' : perfil.departamento || ''}
                       onChange={(e) => setDadosEdicao(prev => ({ ...prev, departamento: e.target.value }))}
                       disabled={!editandoPerfil}
                       placeholder="Seu departamento"
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="data_contratacao">Data de contratação</Label>
+                    <Label htmlFor="data_contratacao" className="text-gray-700 dark:text-gray-300">Data de contratação</Label>
                     <Input
                       id="data_contratacao"
                       type="date"
                       value={editandoPerfil ? dadosEdicao.data_contratacao || '' : perfil.data_contratacao || ''}
                       onChange={(e) => setDadosEdicao(prev => ({ ...prev, data_contratacao: e.target.value }))}
                       disabled={!editandoPerfil}
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="bar">Estabelecimento</Label>
+                    <Label htmlFor="bar" className="text-gray-700 dark:text-gray-300">Estabelecimento</Label>
                     <Input
                       id="bar"
                       value={perfil.bar?.nome || 'Não informado'}
                       disabled
-                      className="bg-slate-50"
+                      className="bg-gray-50 dark:bg-gray-600 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="bio">Biografia/Descrição</Label>
+                  <Label htmlFor="bio" className="text-gray-700 dark:text-gray-300">Biografia/Descrição</Label>
                   <Textarea
                     id="bio"
                     value={editandoPerfil ? dadosEdicao.bio || '' : perfil.bio || ''}
@@ -479,12 +709,13 @@ export default function MinhaContaPage() {
                     disabled={!editandoPerfil}
                     placeholder="Conte um pouco sobre você..."
                     rows={3}
+                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
                 </div>
               </div>
 
               {/* Botões de ação */}
-              <div className="flex justify-end space-x-3 pt-4">
+              <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
                 {editandoPerfil ? (
                   <>
                     <Button
@@ -494,13 +725,14 @@ export default function MinhaContaPage() {
                         setDadosEdicao(perfil)
                       }}
                       disabled={salvandoPerfil}
+                      className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
                       Cancelar
                     </Button>
                     <Button
                       onClick={salvarPerfil}
                       disabled={salvandoPerfil}
-                      className="flex items-center space-x-2"
+                      className="bg-blue-600 hover:bg-blue-700 text-white flex items-center space-x-2"
                     >
                       {salvandoPerfil ? (
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -511,7 +743,11 @@ export default function MinhaContaPage() {
                     </Button>
                   </>
                 ) : (
-                  <Button onClick={() => setEditandoPerfil(true)}>
+                  <Button 
+                    onClick={() => setEditandoPerfil(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Edit3 className="h-4 w-4 mr-2" />
                     Editar perfil
                   </Button>
                 )}
@@ -522,55 +758,58 @@ export default function MinhaContaPage() {
 
         {/* Tab de Segurança */}
         <TabsContent value="seguranca" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Shield className="h-5 w-5" />
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <CardHeader className="border-b border-gray-200 dark:border-gray-700">
+              <CardTitle className="text-gray-900 dark:text-white flex items-center space-x-2">
+                <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 <span>Segurança da Conta</span>
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-gray-600 dark:text-gray-400">
                 Gerencie sua senha e configurações de segurança
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-8 p-8">
               {/* Trocar senha */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium flex items-center space-x-2">
-                  <Key className="h-5 w-5" />
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center space-x-2">
+                  <Key className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   <span>Alterar senha</span>
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="senhaAtual">Senha atual</Label>
+                    <Label htmlFor="senhaAtual" className="text-gray-700 dark:text-gray-300">Senha atual</Label>
                     <Input
                       id="senhaAtual"
                       type="password"
                       value={senhaAtual}
                       onChange={(e) => setSenhaAtual(e.target.value)}
                       placeholder="Sua senha atual"
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="novaSenha">Nova senha</Label>
+                    <Label htmlFor="novaSenha" className="text-gray-700 dark:text-gray-300">Nova senha</Label>
                     <Input
                       id="novaSenha"
                       type="password"
                       value={novaSenha}
                       onChange={(e) => setNovaSenha(e.target.value)}
                       placeholder="Nova senha"
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="confirmarSenha">Confirmar nova senha</Label>
+                    <Label htmlFor="confirmarSenha" className="text-gray-700 dark:text-gray-300">Confirmar nova senha</Label>
                     <Input
                       id="confirmarSenha"
                       type="password"
                       value={confirmarSenha}
                       onChange={(e) => setConfirmarSenha(e.target.value)}
                       placeholder="Confirme a nova senha"
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
                   </div>
                 </div>
@@ -579,7 +818,7 @@ export default function MinhaContaPage() {
                   <Button
                     onClick={trocarSenha}
                     disabled={salvandoSenha || !senhaAtual || !novaSenha || !confirmarSenha}
-                    className="flex items-center space-x-2"
+                    className="bg-blue-600 hover:bg-blue-700 text-white flex items-center space-x-2"
                   >
                     {salvandoSenha ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -591,41 +830,49 @@ export default function MinhaContaPage() {
                 </div>
               </div>
 
-              <Separator />
+              <Separator className="bg-gray-200 dark:bg-gray-700" />
 
               {/* Informações da conta */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Informações da conta</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                    <span className="text-slate-600">Conta criada em:</span>
-                    <span className="font-medium">
-                      {new Date(perfil.criado_em).toLocaleDateString('pt-BR')}
-                    </span>
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Informações da conta</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600 dark:text-gray-400 font-medium">Conta criada em:</span>
+                      <span className="text-gray-900 dark:text-white font-semibold">
+                        {new Date(perfil.criado_em).toLocaleDateString('pt-BR')}
+                      </span>
+                    </div>
                   </div>
                   
                   {perfil.ultima_atividade && (
-                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                      <span className="text-slate-600">Última atividade:</span>
-                      <span className="font-medium">
-                        {new Date(perfil.ultima_atividade).toLocaleDateString('pt-BR')}
-                      </span>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">Última atividade:</span>
+                        <span className="text-gray-900 dark:text-white font-semibold">
+                          {new Date(perfil.ultima_atividade).toLocaleDateString('pt-BR')}
+                        </span>
+                      </div>
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                    <span className="text-slate-600">Status da conta:</span>
-                    <Badge variant={perfil.conta_verificada ? "default" : "secondary"}>
-                      {perfil.conta_verificada ? "Verificada" : "Não verificada"}
-                    </Badge>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600 dark:text-gray-400 font-medium">Status da conta:</span>
+                      <Badge variant={perfil.conta_verificada ? "default" : "secondary"} className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                        {perfil.conta_verificada ? "Verificada" : "Não verificada"}
+                      </Badge>
+                    </div>
                   </div>
 
-                  <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                    <span className="text-slate-600">Nível de acesso:</span>
-                    <Badge variant="outline">
-                      {perfil.role === 'admin' ? 'Administrador' : 
-                       perfil.role === 'manager' ? 'Gerente' : 'Funcionário'}
-                    </Badge>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600 dark:text-gray-400 font-medium">Nível de acesso:</span>
+                      <div className={`px-3 py-1 rounded-full bg-gradient-to-r ${getRoleColor(perfil.role)} flex items-center space-x-1 text-white text-sm font-medium`}>
+                        {getRoleIcon(perfil.role)}
+                        <span>{getRoleLabel(perfil.role)}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -73,12 +73,15 @@ export default function ChecklistAbertura() {
   // Renderização condicional para evitar erros durante SSR/SSG
   if (barLoading || !selectedBar) {
     return (
-      <div className="p-6 max-w-7xl mx-auto">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Carregando checklist...</p>
-          </div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-6"></div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Carregando checklist...
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            Aguarde enquanto preparamos seus dados
+          </p>
         </div>
       </div>
     )
@@ -367,35 +370,35 @@ export default function ChecklistAbertura() {
       <div className="p-6 max-w-7xl mx-auto">
         {/* Informações do Bar */}
         <div className="mb-6">
-          <p className="text-gray-700">Sistema de verificação pré-operacional por áreas</p>
-          <div className="text-sm text-gray-600 mt-1">
-            Bar: <strong>{selectedBar?.nome}</strong> • 
+          <p className="text-gray-700 dark:text-gray-300">Sistema de verificação pré-operacional por áreas</p>
+          <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Bar: <strong className="text-gray-900 dark:text-white">{selectedBar?.nome}</strong> • 
             {checklistIniciado && (
-              <span className="text-blue-600"> Iniciado às {horaInicio}</span>
+              <span className="text-blue-600 dark:text-blue-400"> Iniciado às {horaInicio}</span>
             )}
           </div>
         </div>
 
         {/* Status Geral e Ações */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Progresso Geral</p>
-                  <p className="text-2xl font-bold text-black">{progresso.toFixed(0)}%</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Progresso Geral</p>
+                  <p className="text-2xl font-bold text-black dark:text-white">{progresso.toFixed(0)}%</p>
                 </div>
                 <div className="w-16 h-16 relative">
                   <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
                     <path
-                      className="text-gray-300"
+                      className="text-gray-300 dark:text-gray-600"
                       stroke="currentColor"
                       strokeWidth="3"
                       fill="none"
                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                     />
                     <path
-                      className="text-blue-600"
+                      className="text-blue-600 dark:text-blue-400"
                       stroke="currentColor"
                       strokeWidth="3"
                       fill="none"
@@ -408,43 +411,43 @@ export default function ChecklistAbertura() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <CheckCircle className="w-8 h-8 text-green-600" />
+                <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
                 <div>
-                  <p className="text-sm text-gray-600">Concluídos</p>
-                  <p className="text-2xl font-bold text-green-600">{estatisticas.concluidos}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Concluídos</p>
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">{estatisticas.concluidos}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <XCircle className="w-8 h-8 text-red-600" />
+                <XCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
                 <div>
-                  <p className="text-sm text-gray-600">Problemas</p>
-                  <p className="text-2xl font-bold text-red-600">{estatisticas.problemas}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Problemas</p>
+                  <p className="text-2xl font-bold text-red-600 dark:text-red-400">{estatisticas.problemas}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardContent className="p-4">
               {!checklistIniciado ? (
                 <Button 
                   onClick={iniciarChecklist}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
                 >
                   ▶️ Iniciar Checklist
                 </Button>
               ) : (
                 <Button 
                   onClick={salvarChecklist}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
                   disabled={estatisticas.pendentes > 0 || estatisticas.fazendo > 0}
                 >
                   💾 Salvar Checklist
@@ -455,17 +458,20 @@ export default function ChecklistAbertura() {
         </div>
 
         {/* Filtros por Área */}
-        <Card className="mb-6">
+        <Card className="mb-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
               <Store className="w-5 h-5" />
               Áreas de Verificação
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Tabs value={areaSelecionada} onValueChange={setAreaSelecionada}>
-              <TabsList className="grid grid-cols-4 lg:grid-cols-7 gap-2">
-                <TabsTrigger value="todas" className="text-xs">
+              <TabsList className="grid grid-cols-4 lg:grid-cols-7 gap-2 bg-gray-100 dark:bg-gray-700">
+                <TabsTrigger 
+                  value="todas" 
+                  className="text-xs data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white dark:text-gray-300"
+                >
                   Todas ({checklistAtivo.length})
                 </TabsTrigger>
                 {areas.map((area) => {
@@ -474,7 +480,11 @@ export default function ChecklistAbertura() {
                   const concluidos = itensArea.filter(item => item.status === 'concluido').length
                   
                   return (
-                    <TabsTrigger key={area.id} value={area.id} className="text-xs">
+                    <TabsTrigger 
+                      key={area.id} 
+                      value={area.id} 
+                      className="text-xs data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white dark:text-gray-300"
+                    >
                       <AreaIcon className="w-4 h-4 mr-1" />
                       {area.nome} ({concluidos}/{itensArea.length})
                     </TabsTrigger>
@@ -488,10 +498,10 @@ export default function ChecklistAbertura() {
                   <div
                     key={item.id}
                     className={`p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                      item.status === 'concluido' ? 'border-green-300 bg-green-50' :
-                      item.status === 'problema' ? 'border-red-300 bg-red-50' :
-                      item.status === 'fazendo' ? 'border-blue-300 bg-blue-50' :
-                      'border-gray-200 bg-white hover:border-gray-300'
+                      item.status === 'concluido' ? 'border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20' :
+                      item.status === 'problema' ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20' :
+                      item.status === 'fazendo' ? 'border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20' :
+                      'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500'
                     }`}
                     onClick={() => {
                       setItemSelecionado(item)
@@ -503,16 +513,16 @@ export default function ChecklistAbertura() {
                         {obterIconeStatus(item.status)}
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-black">{item.titulo}</h3>
+                            <h3 className="font-semibold text-black dark:text-white">{item.titulo}</h3>
                             <Badge className={`text-xs text-white ${obterCorPrioridade(item.prioridade)}`}>
                               {item.prioridade}
                             </Badge>
-                            <Badge variant="outline" className="text-xs">
+                            <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">
                               {areas.find(a => a.id === item.area)?.nome}
                             </Badge>
                           </div>
-                          <p className="text-sm text-gray-600 mb-2">{item.descricao}</p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{item.descricao}</p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                             <span>⏱️ {item.tempo_estimado} min</span>
                             {item.horario_inicio && (
                               <span>🕐 Iniciado: {item.horario_inicio}</span>
@@ -534,7 +544,7 @@ export default function ChecklistAbertura() {
                                 e.stopPropagation()
                                 atualizarStatusItem(item.id, 'fazendo')
                               }}
-                              className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                              className="text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                             >
                               ▶️ Iniciar
                             </Button>
@@ -547,7 +557,7 @@ export default function ChecklistAbertura() {
                                   e.stopPropagation()
                                   atualizarStatusItem(item.id, 'concluido')
                                 }}
-                                className="bg-green-600 hover:bg-green-700 text-white"
+                                className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
                               >
                                 ✅ OK
                               </Button>
@@ -558,6 +568,7 @@ export default function ChecklistAbertura() {
                                   e.stopPropagation()
                                   atualizarStatusItem(item.id, 'problema')
                                 }}
+                                className="bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
                               >
                                 ❌ Problema
                               </Button>
@@ -571,7 +582,7 @@ export default function ChecklistAbertura() {
               </div>
 
               {itensFiltrados.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                   <Store className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <p>Nenhum item encontrado para esta área</p>
                 </div>
@@ -582,9 +593,9 @@ export default function ChecklistAbertura() {
 
         {/* Modal de Detalhes do Item */}
         <Dialog open={modalItemAberto} onOpenChange={setModalItemAberto}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
+              <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                 {itemSelecionado && obterIconeStatus(itemSelecionado.status)}
                 Detalhes do Item
               </DialogTitle>
@@ -593,35 +604,35 @@ export default function ChecklistAbertura() {
             {itemSelecionado && (
               <div className="space-y-4">
                 <div>
-                  <h3 className="font-semibold text-lg text-black">{itemSelecionado.titulo}</h3>
-                  <p className="text-gray-600">{itemSelecionado.descricao}</p>
+                  <h3 className="font-semibold text-lg text-black dark:text-white">{itemSelecionado.titulo}</h3>
+                  <p className="text-gray-600 dark:text-gray-400">{itemSelecionado.descricao}</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-600">Área:</span>
-                    <p className="font-medium">{areas.find(a => a.id === itemSelecionado.area)?.nome}</p>
+                    <span className="text-gray-600 dark:text-gray-400">Área:</span>
+                    <p className="font-medium text-gray-900 dark:text-white">{areas.find(a => a.id === itemSelecionado.area)?.nome}</p>
                   </div>
                   <div>
-                    <span className="text-gray-600">Prioridade:</span>
+                    <span className="text-gray-600 dark:text-gray-400">Prioridade:</span>
                     <Badge className={`text-xs text-white ${obterCorPrioridade(itemSelecionado.prioridade)}`}>
                       {itemSelecionado.prioridade}
                     </Badge>
                   </div>
                   <div>
-                    <span className="text-gray-600">Tempo estimado:</span>
-                    <p className="font-medium">{itemSelecionado.tempo_estimado} minutos</p>
+                    <span className="text-gray-600 dark:text-gray-400">Tempo estimado:</span>
+                    <p className="font-medium text-gray-900 dark:text-white">{itemSelecionado.tempo_estimado} minutos</p>
                   </div>
                   <div>
-                    <span className="text-gray-600">Status:</span>
-                    <p className="font-medium">{itemSelecionado.status}</p>
+                    <span className="text-gray-600 dark:text-gray-400">Status:</span>
+                    <p className="font-medium text-gray-900 dark:text-white">{itemSelecionado.status}</p>
                   </div>
                 </div>
                 
                 {itemSelecionado.observacoes && (
                   <div>
-                    <span className="text-gray-600">Observações:</span>
-                    <p className="text-sm bg-gray-50 p-2 rounded">{itemSelecionado.observacoes}</p>
+                    <span className="text-gray-600 dark:text-gray-400">Observações:</span>
+                    <p className="text-sm bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 p-2 rounded">{itemSelecionado.observacoes}</p>
                   </div>
                 )}
                 
@@ -639,6 +650,7 @@ export default function ChecklistAbertura() {
                         }
                       }}
                       rows={3}
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
                     
                     <div className="flex gap-2">
@@ -648,7 +660,7 @@ export default function ChecklistAbertura() {
                             atualizarStatusItem(itemSelecionado.id, 'fazendo', itemSelecionado.observacoes)
                             setModalItemAberto(false)
                           }}
-                          className="flex-1 text-blue-600 border-blue-300"
+                          className="flex-1 text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                           variant="outline"
                         >
                           ▶️ Iniciar
@@ -661,7 +673,7 @@ export default function ChecklistAbertura() {
                               atualizarStatusItem(itemSelecionado.id, 'concluido', itemSelecionado.observacoes)
                               setModalItemAberto(false)
                             }}
-                            className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                            className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
                           >
                             ✅ Concluir
                           </Button>
@@ -671,7 +683,7 @@ export default function ChecklistAbertura() {
                               setModalItemAberto(false)
                             }}
                             variant="destructive"
-                            className="flex-1"
+                            className="flex-1 bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
                           >
                             ❌ Problema
                           </Button>
@@ -684,7 +696,11 @@ export default function ChecklistAbertura() {
             )}
             
             <DialogFooter>
-              <Button variant="outline" onClick={() => setModalItemAberto(false)}>
+              <Button 
+                variant="outline" 
+                onClick={() => setModalItemAberto(false)}
+                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
                 Fechar
               </Button>
             </DialogFooter>

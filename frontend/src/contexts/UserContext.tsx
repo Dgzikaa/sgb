@@ -28,10 +28,22 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   // Carregar dados do usuário ao inicializar
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') {
+      setLoading(false)
+      return
+    }
+    
     loadUserData()
   }, [])
 
   const loadUserData = () => {
+    // Check if we're on the client side
+    if (typeof window === 'undefined') {
+      setLoading(false)
+      return
+    }
+
     try {
       const userData = localStorage.getItem('sgb_user')
       if (userData) {
@@ -48,85 +60,82 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const updateUser = (userData: Usuario) => {
     try {
       setUser(userData)
-      localStorage.setItem('sgb_user', JSON.stringify(userData))
-      
-      // Também atualizar cookie
-      import('@/lib/cookies').then(({ syncAuthData }) => {
-        syncAuthData(userData)
-      }).catch(console.error)
+      // Only update localStorage on client side
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('sgb_user', JSON.stringify(userData))
+      }
     } catch (error) {
-      console.error('❌ Erro ao atualizar usuário:', error)
+      console.error('Erro ao atualizar dados do usuário:', error)
     }
   }
 
   const updatePermissions = (newPermissions: string[]) => {
-    if (!user) return
-    
-    const updatedUser = {
-      ...user,
-      modulos_permitidos: newPermissions,
-      atualizado_em: new Date().toISOString()
+    if (user) {
+      const updatedUser = { ...user, modulos_permitidos: newPermissions }
+      setUser(updatedUser)
+      // Only update localStorage on client side
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('sgb_user', JSON.stringify(updatedUser))
+      }
     }
-    
-    updateUser(updatedUser)
   }
 
   const refreshUser = async (): Promise<void> => {
-    if (!user) return
-    
+    // Check if we're on the client side
+    if (typeof window === 'undefined') {
+      return
+    }
+
     try {
-      setLoading(true)
-      const response = await fetch(`/api/usuarios/${user.id}`)
-      if (response.ok) {
-        const userData = await response.json()
-        if (userData.success && userData.user) {
-          updateUser(userData.user)
-        }
+      const userData = localStorage.getItem('sgb_user')
+      if (userData) {
+        const parsedUser = JSON.parse(userData)
+        setUser(parsedUser)
+      } else {
+        setUser(null)
       }
     } catch (error) {
-      console.error('❌ Erro ao buscar dados atualizados:', error)
-    } finally {
-      setLoading(false)
+      console.error('Erro ao recarregar dados do usuário:', error)
+      setUser(null)
     }
   }
 
   const logout = async () => {
     try {
-      // Limpar dados locais
       setUser(null)
-      localStorage.removeItem('sgb_user')
-      localStorage.removeItem('sgb_bars')
-      localStorage.removeItem('selectedBarId')
+      // Only clear localStorage on client side
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('sgb_user')
+        localStorage.removeItem('sgb_selected_bar_id')
+        localStorage.removeItem('sgb_session')
+      }
       
-      // Limpar cookie do lado do cliente
-      import('@/lib/cookies').then(({ clearAuthCookie }) => {
-        clearAuthCookie()
-      }).catch(console.error)
-      
-      // Chamar API de logout para limpar cookies httpOnly
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include'
-      })
-      
-      // Redirecionar para login
-      window.location.href = '/login'
+      // Aguardar um pouco antes de recarregar para garantir limpeza
+      setTimeout(() => {
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login'
+        }
+      }, 100)
     } catch (error) {
-      console.error('❌ Erro no logout:', error)
-      // Mesmo com erro, redirecionar para login
-      window.location.href = '/login'
+      console.error('Erro no logout:', error)
+      // Em caso de erro, tentar recarregar mesmo assim
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login'
+      }
     }
   }
 
   return (
-    <UserContext.Provider value={{
-      user,
-      loading,
-      updateUser,
-      updatePermissions,
-      refreshUser,
-      logout
-    }}>
+    <UserContext.Provider
+      value={{
+        user,
+        loading,
+        updateUser,
+        updatePermissions,
+        refreshUser,
+        logout,
+      }}
+    >
       {children}
     </UserContext.Provider>
   )

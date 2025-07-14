@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { usePageTitle } from '@/contexts/PageTitleContext'
-import { useSidebar } from '@/contexts/SidebarContext'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -49,7 +49,7 @@ interface ResumoDesempenho {
 export default function TabelaDesempenhoPage() {
   const { selectedBar } = useBar()
   const { setPageTitle } = usePageTitle()
-  const { setSidebarCollapsed } = useSidebar()
+
   const [dados, setDados] = useState<DadosDesempenho[]>([])
   const [resumo, setResumo] = useState<ResumoDesempenho | null>(null)
   const [loading, setLoading] = useState(true)
@@ -73,18 +73,7 @@ export default function TabelaDesempenhoPage() {
     }
   }, [setPageTitle])
 
-  // Efeito separado para colapsar sidebar apenas uma vez quando tudo estiver carregado
-  useEffect(() => {
-    if (!hasInitialized && selectedBar?.id) {
-      // Colapsar sidebar depois que o bar estiver selecionado e componentes carregados
-             const timer = setTimeout(() => {
-         setSidebarCollapsed(true)
-         setHasInitialized(true)
-       }, 200)
-      
-      return () => clearTimeout(timer)
-    }
-  }, [setSidebarCollapsed, hasInitialized, selectedBar?.id])
+
 
   useEffect(() => {
     if (selectedBar?.id) {

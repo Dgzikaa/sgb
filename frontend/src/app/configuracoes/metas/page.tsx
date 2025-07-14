@@ -6,11 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { 
+  ArrowLeft,
+  Target, 
   TrendingUp, 
   Users, 
   Star, 
@@ -19,12 +20,13 @@ import {
   Save, 
   X,
   DollarSign,
-  Target,
   Activity,
   CheckCircle2,
   AlertCircle,
-  ArrowLeft,
-  Loader2
+  Loader2,
+  BarChart3,
+  Award,
+  Zap
 } from 'lucide-react';
 
 // Tipos
@@ -48,21 +50,13 @@ interface Meta {
 
 interface MetasOrganizadas {
   financeiro: Meta[];
-  clientes: Meta[];
   avaliacoes: Meta[];
   cockpit_produtos: Meta[];
   marketing: Meta[];
 }
 
-// Mapeamento de ícones
-const IconMap: { [key: string]: any } = {
-  TrendingUp, Users, Star, Coffee, DollarSign, Target, Activity,
-  CheckCircle2, AlertCircle
-};
-
-// Função para formatar valores
 const formatarValor = (valor: number | null, tipo: string): string => {
-  if (valor === null || valor === undefined || valor === 0) return '-';
+  if (valor === null) return '-';
   
   switch (tipo) {
     case 'moeda':
@@ -70,20 +64,14 @@ const formatarValor = (valor: number | null, tipo: string): string => {
         style: 'currency',
         currency: 'BRL'
       }).format(valor);
-    case 'percentual':
-      return `${valor.toFixed(1)}%`;
-    case 'tempo_minutos':
-      return `${valor.toFixed(0)} min`;
-    case 'nota':
-      return `${valor.toFixed(1)}★`;
+    case 'porcentagem':
+      return `${valor}%`;
     case 'numero':
-      return new Intl.NumberFormat('pt-BR').format(valor);
     default:
       return valor.toString();
   }
 };
 
-// Componente de Card de Meta
 const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
   meta: Meta;
   isEditing: boolean;
@@ -93,369 +81,414 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
   isSaving: boolean;
 }) => {
   const [valores, setValores] = useState({
-    valor_semanal: meta.valor_semanal?.toString() || '',
-    valor_mensal: meta.valor_mensal?.toString() || '',
-    valor_unico: meta.valor_unico?.toString() || ''
+    valor_diario: meta.valor_diario || '',
+    valor_semanal: meta.valor_semanal || '',
+    valor_mensal: meta.valor_mensal || '',
+    valor_unico: meta.valor_unico || ''
   });
 
-  useEffect(() => {
-    if (isEditing) {
-      setValores({
-        valor_semanal: meta.valor_semanal?.toString() || '',
-        valor_mensal: meta.valor_mensal?.toString() || '',
-        valor_unico: meta.valor_unico?.toString() || ''
-      });
-    }
-  }, [isEditing, meta]);
-
-  const IconComponent = IconMap[meta.icone_categoria] || Target;
-
-  // Determinar se é uma meta única ou por períodos
-  const isMetaUnica = meta.valor_unico !== null && meta.valor_unico !== undefined;
-  const isMetaPeriodos = (meta.valor_semanal !== null && meta.valor_semanal !== undefined) || 
-                         (meta.valor_mensal !== null && meta.valor_mensal !== undefined);
-
   const handleSave = () => {
-    if (isMetaUnica) {
-      const valoresLimpos = {
-        valor_unico: valores.valor_unico ? parseFloat(valores.valor_unico.replace(/[^\d.,]/g, '').replace(',', '.')) : null
-      };
-      onSave(valoresLimpos);
-    } else {
-      const valoresLimpos = {
-        valor_semanal: valores.valor_semanal ? parseFloat(valores.valor_semanal.replace(/[^\d.,]/g, '').replace(',', '.')) : null,
-        valor_mensal: valores.valor_mensal ? parseFloat(valores.valor_mensal.replace(/[^\d.,]/g, '').replace(',', '.')) : null
-      };
-      onSave(valoresLimpos);
+    const valoresParaSalvar = {
+      valor_diario: valores.valor_diario ? parseFloat(valores.valor_diario.toString()) : null,
+      valor_semanal: valores.valor_semanal ? parseFloat(valores.valor_semanal.toString()) : null,
+      valor_mensal: valores.valor_mensal ? parseFloat(valores.valor_mensal.toString()) : null,
+      valor_unico: valores.valor_unico ? parseFloat(valores.valor_unico.toString()) : null
+    };
+    onSave(valoresParaSalvar);
+  };
+
+  const getCategoryIcon = (categoria: string) => {
+    switch (categoria.toLowerCase()) {
+      case 'financeiro':
+        return <DollarSign className="w-5 h-5" />
+      case 'avaliacoes':
+        return <Star className="w-5 h-5" />
+      case 'cockpit_produtos':
+        return <Coffee className="w-5 h-5" />
+      case 'marketing':
+        return <TrendingUp className="w-5 h-5" />
+      default:
+        return <Target className="w-5 h-5" />
+    }
+  };
+
+  const getCategoryColor = (categoria: string) => {
+    switch (categoria.toLowerCase()) {
+      case 'financeiro':
+        return 'from-green-500 to-green-600'
+      case 'avaliacoes':
+        return 'from-yellow-500 to-yellow-600'
+      case 'cockpit_produtos':
+        return 'from-purple-500 to-purple-600'
+      case 'marketing':
+        return 'from-blue-500 to-blue-600'
+      default:
+        return 'from-gray-500 to-gray-600'
     }
   };
 
   return (
-    <Card className="transition-all duration-200 hover:shadow-md bg-white border-l-4 shadow-sm"
-          style={{ borderLeftColor: meta.cor_categoria }}>
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
+    <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+      <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-opacity-10"
-                 style={{ backgroundColor: `${meta.cor_categoria}20` }}>
-              <IconComponent 
-                className="h-5 w-5" 
-                style={{ color: meta.cor_categoria }} 
-              />
+            <div className={`p-2 rounded-lg bg-gradient-to-r ${getCategoryColor(meta.categoria)} text-white`}>
+              {getCategoryIcon(meta.categoria)}
             </div>
-            <div className="flex-1">
-              <CardTitle className="text-base font-semibold text-gray-900 leading-tight">
+            <div>
+              <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
                 {meta.nome_meta}
               </CardTitle>
-              {meta.subcategoria && (
-                <p className="text-sm text-gray-500 mt-1">{meta.subcategoria}</p>
-              )}
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {meta.subcategoria}
+              </p>
             </div>
           </div>
-          
-          {!isEditing ? (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={onEdit}
-              className="h-8 w-8 p-0 hover:bg-gray-100"
+          <div className="flex items-center gap-2">
+            <Badge 
+              variant={meta.meta_ativa ? "default" : "secondary"}
+              className={meta.meta_ativa ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" : ""}
             >
-              <Edit className="h-4 w-4" />
-            </Button>
-          ) : (
-            <div className="flex gap-1">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleSave}
-                disabled={isSaving}
-                className="h-8 w-8 p-0 hover:bg-green-100 text-green-600"
+              {meta.meta_ativa ? 'Ativa' : 'Inativa'}
+            </Badge>
+            {!isEditing ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onEdit}
+                className="flex items-center gap-2"
               >
-                {isSaving ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
+                <Edit className="w-4 h-4" />
+                Editar
               </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={onCancel}
-                disabled={isSaving}
-                className="h-8 w-8 p-0 hover:bg-red-100 text-red-600"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onCancel}
+                  disabled={isSaving}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="flex items-center gap-2"
+                >
+                  {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  Salvar
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </CardHeader>
       
-      <CardContent>
-        <div className="space-y-3">
-          {/* Meta Única - para metas como Ticket Médio */}
-          {isMetaUnica && (
-            <div className="flex items-center gap-3">
-              <Label className="text-sm font-medium text-gray-700 w-20">
-                Meta
-              </Label>
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={valores.valor_unico}
-                  onChange={(e) => setValores(prev => ({ ...prev, valor_unico: e.target.value }))}
-                  placeholder="0,00"
-                  className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-              ) : (
-                <div className="flex-1 text-sm font-medium text-gray-900">
-                  {formatarValor(meta.valor_unico, meta.tipo_valor)}
-                </div>
-              )}
-            </div>
-          )}
+      <CardContent className="p-6">
+        {meta.descricao && (
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+            {meta.descricao}
+          </p>
+        )}
 
-          {/* Metas por Períodos - para metas como Faturamento */}
-          {isMetaPeriodos && (
-            <>
-              {/* Valor Semanal */}
-              {(meta.valor_semanal !== null || isEditing) && (
-                <div className="flex items-center gap-3">
-                  <Label className="text-sm font-medium text-gray-700 w-20">
-                    Semanal
-                  </Label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={valores.valor_semanal}
-                      onChange={(e) => setValores(prev => ({ ...prev, valor_semanal: e.target.value }))}
-                      placeholder="0,00"
-                      className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                  ) : (
-                    <div className="flex-1 text-sm font-medium text-gray-900">
-                      {formatarValor(meta.valor_semanal, meta.tipo_valor)}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Valor Mensal */}
-              {(meta.valor_mensal !== null || isEditing) && (
-                <div className="flex items-center gap-3">
-                  <Label className="text-sm font-medium text-gray-700 w-20">
-                    Mensal
-                  </Label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={valores.valor_mensal}
-                      onChange={(e) => setValores(prev => ({ ...prev, valor_mensal: e.target.value }))}
-                      placeholder="0,00"
-                      className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                  ) : (
-                    <div className="flex-1 text-sm font-medium text-gray-900">
-                      {formatarValor(meta.valor_mensal, meta.tipo_valor)}
-                    </div>
-                  )}
-                </div>
-              )}
-            </>
-          )}
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+           {[
+             { key: 'diario', label: 'Diário', valor: meta.valor_diario },
+             { key: 'semanal', label: 'Semanal', valor: meta.valor_semanal },
+             { key: 'mensal', label: 'Mensal', valor: meta.valor_mensal },
+             { key: 'unico', label: 'Único', valor: meta.valor_unico }
+           ].map((periodo) => {
+             const chaveValor = `valor_${periodo.key}` as keyof typeof valores;
+             
+             return (
+               <div key={periodo.key} className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
+                 <Label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                   {periodo.label}
+                 </Label>
+                 {isEditing ? (
+                   <Input
+                     type="number"
+                     step="0.01"
+                     value={valores[chaveValor]}
+                     onChange={(e) => setValores(prev => ({
+                       ...prev,
+                       [chaveValor]: e.target.value
+                     }))}
+                     placeholder="0.00"
+                     className="mt-2 bg-white dark:bg-gray-800"
+                   />
+                 ) : (
+                   <div className="mt-2">
+                     <span className="text-xl font-bold text-gray-900 dark:text-white">
+                       {formatarValor(periodo.valor, meta.tipo_valor)}
+                     </span>
+                     <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
+                       {meta.unidade}
+                     </span>
+                   </div>
+                 )}
+               </div>
+             );
+           })}
         </div>
       </CardContent>
     </Card>
   );
 };
 
-// Componente principal
 export default function MetasPage() {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
   const [metas, setMetas] = useState<MetasOrganizadas>({
     financeiro: [],
-    clientes: [],
     avaliacoes: [],
     cockpit_produtos: [],
     marketing: []
   });
-  const [loading, setLoading] = useState(true);
-  const [editingMeta, setEditingMeta] = useState<number | null>(null);
-  const [savingMeta, setSavingMeta] = useState<number | null>(null);
-  const { toast } = useToast();
-  const router = useRouter();
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [savingId, setSavingId] = useState<number | null>(null);
 
-  // Carregar metas
+  useEffect(() => {
+    carregarMetas();
+  }, []);
+
   const carregarMetas = async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/metas');
-      if (!response.ok) throw new Error('Erro ao carregar metas');
-      
       const data = await response.json();
-      setMetas(data.data);
+      
+      if (data.success) {
+        setMetas(data.metas);
+      } else {
+        toast({
+          title: "❌ Erro",
+          description: "Erro ao carregar metas",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
       console.error('Erro ao carregar metas:', error);
       toast({
-        title: "Erro",
-        description: "Erro ao carregar metas. Tente novamente.",
-        variant: "destructive",
+        title: "❌ Erro",
+        description: "Erro ao carregar metas",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
 
-  // Salvar meta
   const salvarMeta = async (metaId: number, valores: any) => {
     try {
-      setSavingMeta(metaId);
-      const response = await fetch(`/api/metas/${metaId}`, {
+      setSavingId(metaId);
+      
+      const response = await fetch('/api/metas', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(valores)
+        body: JSON.stringify({ id: metaId, ...valores })
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Erro ao salvar meta');
+      const data = await response.json();
+      
+      if (data.success) {
+        await carregarMetas();
+        setEditingId(null);
+        toast({
+          title: "✅ Sucesso",
+          description: "Meta atualizada com sucesso!",
+        });
+      } else {
+        toast({
+          title: "❌ Erro",
+          description: data.error || "Erro ao atualizar meta",
+          variant: "destructive"
+        });
       }
-
-      toast({
-        title: "Sucesso",
-        description: "Meta atualizada com sucesso!",
-      });
-
-      await carregarMetas();
-      setEditingMeta(null);
     } catch (error) {
       console.error('Erro ao salvar meta:', error);
       toast({
-        title: "Erro",
-        description: error instanceof Error ? error.message : "Erro ao salvar meta",
-        variant: "destructive",
+        title: "❌ Erro",
+        description: "Erro ao salvar meta",
+        variant: "destructive"
       });
     } finally {
-      setSavingMeta(null);
+      setSavingId(null);
     }
   };
 
+  const getTabIcon = (categoria: string) => {
+    switch (categoria.toLowerCase()) {
+      case 'financeiro':
+        return <DollarSign className="w-4 h-4" />
+      case 'avaliacoes':
+        return <Star className="w-4 h-4" />
+      case 'cockpit_produtos':
+        return <Coffee className="w-4 h-4" />
+      case 'marketing':
+        return <TrendingUp className="w-4 h-4" />
+      default:
+        return <Target className="w-4 h-4" />
+    }
+  };
 
-
-  // Carregar dados ao montar
-  useEffect(() => {
-    carregarMetas();
-  }, []);
-
-  const categorias = [
-    { key: 'financeiro', label: 'Financeiro', icon: DollarSign },
-    { key: 'clientes', label: 'Clientes', icon: Users },
-    { key: 'avaliacoes', label: 'Avaliações', icon: Star },
-    { key: 'cockpit_produtos', label: 'Produtos', icon: Coffee },
-    { key: 'marketing', label: 'Marketing', icon: TrendingUp },
-  ];
+  const getCategoryStats = (categoria: keyof MetasOrganizadas) => {
+    const metasCategoria = metas[categoria];
+    const total = metasCategoria.length;
+    const ativas = metasCategoria.filter(m => m.meta_ativa).length;
+    return { total, ativas };
+  };
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex items-center gap-4">
-          <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
-          <div className="h-8 w-64 bg-gray-200 rounded animate-pulse"></div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-48 bg-gray-200 rounded-lg animate-pulse"></div>
-          ))}
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Carregando metas...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="space-y-4">
-        <Button 
-          variant="outline" 
-          onClick={() => router.push('/configuracoes')} 
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Voltar para Configurações
-        </Button>
-        
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <Target className="h-8 w-8 text-blue-600" />
-            Metas do Negócio
-          </h1>
-          <p className="text-gray-600 text-lg">
-            Gerencie as metas financeiras, operacionais e de performance do seu bar
-          </p>
-        </div>
-      </div>
-
-      {/* Tabs por categoria */}
-      <Tabs defaultValue="financeiro" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 mb-8 bg-gray-100 p-1 rounded-lg">
-          {categorias.map(({ key, label, icon: Icon }) => (
-            <TabsTrigger 
-              key={key}
-              value={key} 
-              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
-            >
-              <Icon className="h-4 w-4" />
-              <span className="hidden sm:inline">{label}</span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        {/* Conteúdo das abas */}
-        {categorias.map(({ key, label }) => {
-          const metasCategoria = metas[key as keyof MetasOrganizadas];
-          
-          return (
-            <TabsContent key={key} value={key} className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <h2 className="text-2xl font-semibold text-gray-900">{label}</h2>
-                  <p className="text-sm text-gray-600">
-                    {metasCategoria.length} metas configuradas
-                  </p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto p-6 space-y-8">
+        {/* Header Moderno */}
+        <div className="relative">
+          <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-600 rounded-2xl p-8 text-white shadow-xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-6">
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push('/configuracoes')}
+                  className="text-white hover:bg-white/10 flex items-center gap-2"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Voltar
+                </Button>
+                
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+                    <Target className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h1 className="text-3xl font-bold">Configuração de Metas</h1>
+                    <p className="text-orange-100 mt-1">Defina e acompanhe os KPIs do seu negócio</p>
+                  </div>
                 </div>
-                <Badge variant="secondary" className="text-sm">
-                  {metasCategoria.length} total
-                </Badge>
               </div>
+              
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <div className="text-sm text-orange-200">Total de Metas</div>
+                  <div className="text-2xl font-bold">
+                    {Object.values(metas).reduce((acc, curr) => acc + curr.length, 0)}
+                  </div>
+                </div>
+                <div className="p-3 bg-white/10 rounded-xl">
+                  <Award className="w-8 h-8" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-              {metasCategoria.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {metasCategoria.map((meta) => (
-                    <MetaCard
-                      key={meta.id}
-                      meta={meta}
-                      isEditing={editingMeta === meta.id}
-                      onEdit={() => setEditingMeta(meta.id)}
-                      onSave={(valores) => salvarMeta(meta.id, valores)}
-                      onCancel={() => setEditingMeta(null)}
-                      isSaving={savingMeta === meta.id}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <Target className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    Nenhuma meta encontrada
-                  </h3>
-                  <p className="text-gray-600">
-                    Não há metas configuradas para a categoria {label.toLowerCase()}.
-                  </p>
-                </div>
-              )}
-            </TabsContent>
-          );
-        })}
-      </Tabs>
+                 {/* Overview Cards */}
+         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+           {(Object.entries(metas) as [keyof MetasOrganizadas, Meta[]][]).map(([categoria, metasCategoria]) => {
+             const stats = getCategoryStats(categoria);
+             return (
+               <Card key={categoria} className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                 <CardContent className="p-6">
+                   <div className="flex items-center justify-between">
+                     <div>
+                       <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 capitalize">
+                         {categoria.replace('_', ' ')}
+                       </p>
+                       <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                         {stats.ativas}/{stats.total}
+                       </p>
+                       <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Metas ativas</p>
+                     </div>
+                     <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-xl">
+                       {getTabIcon(categoria)}
+                     </div>
+                   </div>
+                 </CardContent>
+               </Card>
+             );
+           })}
+        </div>
+
+        {/* Tabs de Categorias */}
+        <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+          <Tabs defaultValue="financeiro" className="w-full">
+            <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  Gerenciar Metas por Categoria
+                </CardTitle>
+              </div>
+              
+                             <TabsList className="grid w-full grid-cols-4 bg-gray-100 dark:bg-gray-700">
+                 {(Object.entries(metas) as [keyof MetasOrganizadas, Meta[]][]).map(([categoria, metasCategoria]) => (
+                   <TabsTrigger 
+                     key={categoria}
+                     value={categoria}
+                     className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600"
+                   >
+                     {getTabIcon(categoria)}
+                     <span className="capitalize">{categoria.replace('_', ' ')}</span>
+                     <Badge variant="secondary" className="ml-1 text-xs">
+                       {metasCategoria.length}
+                     </Badge>
+                   </TabsTrigger>
+                 ))}
+              </TabsList>
+            </CardHeader>
+
+                         <CardContent className="p-6">
+               {(Object.entries(metas) as [keyof MetasOrganizadas, Meta[]][]).map(([categoria, metasCategoria]) => (
+                 <TabsContent key={categoria} value={categoria} className="space-y-6 mt-0">
+                   {metasCategoria.length === 0 ? (
+                     <div className="text-center py-12">
+                       <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                         {getTabIcon(categoria)}
+                       </div>
+                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                         Nenhuma meta encontrada
+                       </h3>
+                       <p className="text-gray-600 dark:text-gray-400">
+                         Não há metas configuradas para a categoria {categoria.replace('_', ' ')}.
+                       </p>
+                     </div>
+                   ) : (
+                     <div className="space-y-6">
+                       {metasCategoria.map((meta: Meta) => (
+                         <MetaCard
+                           key={meta.id}
+                           meta={meta}
+                           isEditing={editingId === meta.id}
+                           onEdit={() => setEditingId(meta.id)}
+                           onSave={(valores) => salvarMeta(meta.id, valores)}
+                           onCancel={() => setEditingId(null)}
+                           isSaving={savingId === meta.id}
+                         />
+                       ))}
+                     </div>
+                   )}
+                 </TabsContent>
+               ))}
+            </CardContent>
+          </Tabs>
+        </Card>
+      </div>
     </div>
   );
 } 

@@ -1,9 +1,12 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
-import '../styles/assistant.css'
+
 import { ToastProvider, GlobalToastListener } from '@/components/ui/toast'
 import { ConfirmDialogProvider, GlobalConfirmListener } from '@/components/ui/confirm-dialog'
+import { BarProvider } from '@/contexts/BarContext'
+import { UserProvider } from '@/contexts/UserContext'
 import AuthSync from '@/components/AuthSync'
+import { ThemeProvider } from '@/contexts/ThemeContext'
 
 // Using system fonts instead of Google Fonts to avoid build connectivity issues
 
@@ -73,16 +76,22 @@ export default function RootLayout({
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
       <body className="font-sans">
-        <ToastProvider>
-          <ConfirmDialogProvider>
-            <AuthSync />
-            <div className="min-h-screen">
-              {children}
-              <GlobalToastListener />
-              <GlobalConfirmListener />
-            </div>
-          </ConfirmDialogProvider>
-        </ToastProvider>
+        <ThemeProvider>
+          <UserProvider>
+            <BarProvider>
+              <ToastProvider>
+                <ConfirmDialogProvider>
+                  <AuthSync />
+                  <div className="min-h-screen">
+                    {children}
+                    <GlobalToastListener />
+                    <GlobalConfirmListener />
+                  </div>
+                </ConfirmDialogProvider>
+              </ToastProvider>
+            </BarProvider>
+          </UserProvider>
+        </ThemeProvider>
 {/* Service Worker desabilitado temporariamente para testes */}
         {/*
         <script

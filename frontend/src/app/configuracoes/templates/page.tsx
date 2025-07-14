@@ -2,12 +2,35 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Search, Filter, Download, BookOpen, Settings, Trash2, Edit, Eye, Clock, Users } from 'lucide-react'
+import { 
+  ArrowLeft,
+  Plus, 
+  Search, 
+  Filter, 
+  Download, 
+  BookOpen, 
+  Settings, 
+  Trash2, 
+  Edit, 
+  Eye, 
+  Clock, 
+  Users,
+  FileText,
+  Grid3X3,
+  List,
+  Zap,
+  Star,
+  CheckSquare,
+  TrendingUp,
+  AlertTriangle,
+  RefreshCw
+} from 'lucide-react'
 import { api } from '@/lib/api-client'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 
@@ -51,18 +74,24 @@ interface Estatisticas {
   predefinidos: number
 }
 
-// =====================================================
-// COMPONENTE PRINCIPAL
-// =====================================================
-
 export default function TemplatesPage() {
   const router = useRouter()
+  const { toast } = useToast()
+  
+  // Estados
   const [templates, setTemplates] = useState<Template[]>([])
-  const [estatisticas, setEstatisticas] = useState<Estatisticas | null>(null)
+  const [estatisticas, setEstatisticas] = useState<Estatisticas>({
+    total: 0,
+    por_categoria: {},
+    publicos: 0,
+    predefinidos: 0
+  })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [instalandoPredefinidos, setInstalandoPredefinidos] = useState(false)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   
-  // Filtros e busca
+  // Filtros
   const [busca, setBusca] = useState('')
   const [categoriaFiltro, setCategoriaFiltro] = useState('')
   const [setorFiltro, setSetorFiltro] = useState('')
@@ -70,24 +99,14 @@ export default function TemplatesPage() {
   const [publicoFiltro, setPublicoFiltro] = useState('')
   const [predefinidoFiltro, setPredefinidoFiltro] = useState('')
 
-  // Estado de instalação
-  const [instalandoPredefinidos, setInstalandoPredefinidos] = useState(false)
-
-  // =====================================================
-  // EFEITOS
-  // =====================================================
-
   useEffect(() => {
     carregarTemplates()
   }, [busca, categoriaFiltro, setorFiltro, tipoFiltro, publicoFiltro, predefinidoFiltro])
 
-  // =====================================================
-  // FUNÇÕES
-  // =====================================================
-
   const carregarTemplates = async () => {
     try {
       setLoading(true)
+      setError(null)
       
       const params = new URLSearchParams()
       if (busca) params.append('busca', busca)
@@ -100,14 +119,24 @@ export default function TemplatesPage() {
       const response = await api.get(`/api/templates?${params.toString()}`)
       
       if (response.success) {
-        setTemplates(response.data)
-        setEstatisticas(response.estatisticas)
+        setTemplates(response.data || [])
+        setEstatisticas(response.estatisticas || {
+          total: 0,
+          por_categoria: {},
+          publicos: 0,
+          predefinidos: 0
+        })
       } else {
         setError(response.error || 'Erro ao carregar templates')
       }
     } catch (err: any) {
       console.error('Erro ao carregar templates:', err)
-      setError('Erro ao carregar templates')
+      setError('Erro ao conectar com o servidor')
+      toast({
+        title: "❌ Erro",
+        description: "Erro ao carregar templates",
+        variant: "destructive"
+      })
     } finally {
       setLoading(false)
     }
@@ -122,14 +151,25 @@ export default function TemplatesPage() {
       })
       
       if (response.success) {
-        await carregarTemplates() // Recarregar lista
-        alert(response.message)
+        await carregarTemplates()
+        toast({
+          title: "✅ Sucesso",
+          description: response.message || "Templates predefinidos instalados!",
+        })
       } else {
-        alert(response.error || 'Erro ao instalar templates')
+        toast({
+          title: "❌ Erro",
+          description: response.error || "Erro ao instalar templates",
+          variant: "destructive"
+        })
       }
     } catch (err: any) {
       console.error('Erro ao instalar templates:', err)
-      alert('Erro ao instalar templates predefinidos')
+      toast({
+        title: "❌ Erro",
+        description: "Erro ao instalar templates predefinidos",
+        variant: "destructive"
+      })
     } finally {
       setInstalandoPredefinidos(false)
     }
@@ -145,26 +185,37 @@ export default function TemplatesPage() {
       
       if (response.success) {
         await carregarTemplates()
-        alert('Template deletado com sucesso')
+        toast({
+          title: "✅ Sucesso",
+          description: "Template deletado com sucesso!",
+        })
       } else {
-        alert(response.error || 'Erro ao deletar template')
+        toast({
+          title: "❌ Erro",
+          description: response.error || "Erro ao deletar template",
+          variant: "destructive"
+        })
       }
     } catch (err: any) {
       console.error('Erro ao deletar template:', err)
-      alert('Erro ao deletar template')
+      toast({
+        title: "❌ Erro",
+        description: "Erro ao deletar template",
+        variant: "destructive"
+      })
     }
   }
 
   const criarChecklistAPartirDeTemplate = (template: Template) => {
-                router.push(`/configuracoes/checklists/builder/novo?template=${template.id}`)
+    router.push(`/checklists/novo?template=${template.id}`)
   }
 
   const editarTemplate = (template: Template) => {
-                router.push(`/configuracoes/templates/editor/${template.id}`)
+    router.push(`/configuracoes/templates/editor?id=${template.id}`)
   }
 
   const visualizarTemplate = (template: Template) => {
-                router.push(`/configuracoes/templates/preview/${template.id}`)
+    router.push(`/configuracoes/templates/visualizar?id=${template.id}`)
   }
 
   const limparFiltros = () => {
@@ -176,380 +227,422 @@ export default function TemplatesPage() {
     setPredefinidoFiltro('')
   }
 
-  // =====================================================
-  // UTILITÁRIOS DE RENDERIZAÇÃO
-  // =====================================================
-
   const getCategoriaColor = (categoria: string) => {
-    const colors: Record<string, string> = {
-      limpeza: 'bg-blue-100 text-blue-800',
-      seguranca: 'bg-red-100 text-red-800',
-      qualidade: 'bg-green-100 text-green-800',
-      manutencao: 'bg-yellow-100 text-yellow-800',
-      abertura: 'bg-purple-100 text-purple-800',
-      fechamento: 'bg-indigo-100 text-indigo-800',
-      auditoria: 'bg-gray-100 text-gray-800',
-      geral: 'bg-orange-100 text-orange-800'
+    const cores: Record<string, string> = {
+      'operacional': 'from-blue-500 to-blue-600',
+      'qualidade': 'from-green-500 to-green-600',
+      'seguranca': 'from-red-500 to-red-600',
+      'manutencao': 'from-yellow-500 to-yellow-600',
+      'atendimento': 'from-purple-500 to-purple-600',
+      'administrativo': 'from-gray-500 to-gray-600'
     }
-    return colors[categoria] || 'bg-gray-100 text-gray-800'
+    return cores[categoria?.toLowerCase()] || 'from-gray-500 to-gray-600'
   }
 
   const getTipoIcon = (tipo: string) => {
-    const icons: Record<string, any> = {
-      abertura: '🌅',
-      fechamento: '🌙',
-      manutencao: '🔧',
-      qualidade: '✅',
-      seguranca: '🛡️',
-      limpeza: '🧹',
-      auditoria: '📋'
+    switch (tipo?.toLowerCase()) {
+      case 'abertura': return <CheckSquare className="w-4 h-4" />
+      case 'fechamento': return <Clock className="w-4 h-4" />
+      case 'diario': return <Star className="w-4 h-4" />
+      case 'semanal': return <TrendingUp className="w-4 h-4" />
+      case 'mensal': return <BookOpen className="w-4 h-4" />
+      default: return <FileText className="w-4 h-4" />
     }
-    return icons[tipo] || '📋'
   }
-
-  // =====================================================
-  // RENDER
-  // =====================================================
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Carregando templates...</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="container mx-auto p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-600">{error}</p>
-          <Button onClick={carregarTemplates} className="mt-2">
-            Tentar Novamente
-          </Button>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Carregando templates...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <ProtectedRoute requiredModule="operacoes" requiredRole="admin">
-      <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="stack-mobile gap-4 mb-6">
-        <div>
-          <p className="text-responsive-sm text-gray-600 mt-1">
-            Gerencie modelos prontos e crie templates personalizados
-          </p>
-        </div>
-        <div className="btn-group-mobile">
-          <Button
-            onClick={() => router.push('/configuracoes/templates/editor/novo')}
-            className="btn-touch bg-blue-600 hover:bg-blue-700 touch-animation"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Criar Template
-          </Button>
-          <Button
-            onClick={instalarTemplatesPredefinidos}
-            disabled={instalandoPredefinidos}
-            variant="outline"
-            className="btn-touch touch-animation"
-          >
-            <BookOpen className="w-4 h-4 mr-2" />
-            {instalandoPredefinidos ? 'Instalando...' : 'Instalar Predefinidos'}
-          </Button>
-        </div>
-      </div>
-
-      {/* Estatísticas */}
-      {estatisticas && (
-        <div className="card-grid mb-6">
-          <Card>
-            <CardContent className="stat-card">
-              <div className="flex items-center">
-                <BookOpen className="w-8 h-8 text-blue-600" />
-                <div className="ml-4">
-                  <p className="stat-label">Total</p>
-                  <p className="stat-value">{estatisticas.total}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="stat-card">
-              <div className="flex items-center">
-                <Users className="w-8 h-8 text-green-600" />
-                <div className="ml-4">
-                  <p className="stat-label">Públicos</p>
-                  <p className="stat-value">{estatisticas.publicos}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="stat-card">
-              <div className="flex items-center">
-                <Settings className="w-8 h-8 text-purple-600" />
-                <div className="ml-4">
-                  <p className="stat-label">Predefinidos</p>
-                  <p className="stat-value">{estatisticas.predefinidos}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="stat-card">
-              <div className="flex items-center">
-                <Filter className="w-8 h-8 text-orange-600" />
-                <div className="ml-4">
-                  <p className="stat-label">Categorias</p>
-                  <p className="stat-value">
-                    {Object.keys(estatisticas.por_categoria).length}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Filtros */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="w-5 h-5" />
-            Filtros
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-              <Input
-                placeholder="Buscar templates..."
-                value={busca}
-                onChange={(e) => setBusca(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            <Select value={categoriaFiltro} onValueChange={setCategoriaFiltro}>
-              <SelectTrigger>
-                <SelectValue placeholder="Categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Todas</SelectItem>
-                <SelectItem value="limpeza">Limpeza</SelectItem>
-                <SelectItem value="seguranca">Segurança</SelectItem>
-                <SelectItem value="qualidade">Qualidade</SelectItem>
-                <SelectItem value="manutencao">Manutenção</SelectItem>
-                <SelectItem value="abertura">Abertura</SelectItem>
-                <SelectItem value="fechamento">Fechamento</SelectItem>
-                <SelectItem value="auditoria">Auditoria</SelectItem>
-                <SelectItem value="geral">Geral</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Input
-              placeholder="Setor"
-              value={setorFiltro}
-              onChange={(e) => setSetorFiltro(e.target.value)}
-            />
-
-            <Select value={tipoFiltro} onValueChange={setTipoFiltro}>
-              <SelectTrigger>
-                <SelectValue placeholder="Tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
-                <SelectItem value="abertura">Abertura</SelectItem>
-                <SelectItem value="fechamento">Fechamento</SelectItem>
-                <SelectItem value="manutencao">Manutenção</SelectItem>
-                <SelectItem value="qualidade">Qualidade</SelectItem>
-                <SelectItem value="seguranca">Segurança</SelectItem>
-                <SelectItem value="limpeza">Limpeza</SelectItem>
-                <SelectItem value="auditoria">Auditoria</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={publicoFiltro} onValueChange={setPublicoFiltro}>
-              <SelectTrigger>
-                <SelectValue placeholder="Público" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
-                <SelectItem value="true">Públicos</SelectItem>
-                <SelectItem value="false">Privados</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <div className="flex gap-2">
-              <Button 
-                onClick={limparFiltros} 
-                variant="outline" 
-                size="sm"
-                className="flex-1"
-              >
-                Limpar
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Lista de Templates */}
-      <div className="card-grid">
-        {templates.map((template) => (
-          <Card key={template.id} className="card-responsive hover-lift-mobile">
-            <CardHeader className="pb-3">
-              <div className="space-y-mobile">
-                <div className="stack-mobile">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">{getTipoIcon(template.tipo)}</span>
-                    <div className="flex-1">
-                      <CardTitle className="text-responsive-lg">{template.nome}</CardTitle>
-                      {template.descricao && (
-                        <p className="text-responsive-sm text-gray-600 mt-1">
-                          {template.descricao}
-                        </p>
-                      )}
+    <ProtectedRoute requiredRole="admin">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto p-6 space-y-8">
+          {/* Header Moderno */}
+          <div className="relative">
+            <div className="bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-700 rounded-2xl p-8 text-white shadow-xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-6">
+                  <Button
+                    variant="ghost"
+                    onClick={() => router.push('/configuracoes')}
+                    className="text-white hover:bg-white/10 flex items-center gap-2"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    Voltar
+                  </Button>
+                  
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+                      <FileText className="w-8 h-8" />
+                    </div>
+                    <div>
+                      <h1 className="text-3xl font-bold">Templates de Checklists</h1>
+                      <p className="text-indigo-100 mt-1">Gerencie e organize templates reutilizáveis</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="flex flex-wrap gap-2 mt-2">
-                  <Badge className={`${getCategoriaColor(template.categoria)} badge-mobile`}>
-                    {template.categoria}
-                  </Badge>
-                  <Badge variant="outline" className="badge-mobile">{template.setor}</Badge>
-                  {template.predefinido && (
-                    <Badge className="bg-purple-100 text-purple-800 badge-mobile">
-                      Sistema
-                    </Badge>
-                  )}
-                  {template.publico && (
-                    <Badge className="bg-green-100 text-green-800 badge-mobile">
-                      Público
-                    </Badge>
-                  )}
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <div className="text-sm text-indigo-200">Total de Templates</div>
+                    <div className="text-2xl font-bold">{estatisticas.total}</div>
+                  </div>
+                  <div className="p-3 bg-white/10 rounded-xl">
+                    <BookOpen className="w-8 h-8" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Status Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total</p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white">{estatisticas.total}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Templates</p>
+                  </div>
+                  <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
+                    <FileText className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Públicos</p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white">{estatisticas.publicos}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Compartilhados</p>
+                  </div>
+                  <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
+                    <Users className="w-8 h-8 text-green-600 dark:text-green-400" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Predefinidos</p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white">{estatisticas.predefinidos}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Sistema</p>
+                  </div>
+                  <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-xl">
+                    <Settings className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Categorias</p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                      {Object.keys(estatisticas.por_categoria || {}).length}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Diferentes</p>
+                  </div>
+                  <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-xl">
+                    <Grid3X3 className="w-8 h-8 text-orange-600 dark:text-orange-400" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Controles e Filtros */}
+          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+            <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <Search className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  Filtros e Busca
+                </CardTitle>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+                    <Button
+                      variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setViewMode('grid')}
+                      className="px-3"
+                    >
+                      <Grid3X3 className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant={viewMode === 'list' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setViewMode('list')}
+                      className="px-3"
+                    >
+                      <List className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <Button
+                    onClick={() => router.push('/configuracoes/templates/editor')}
+                    className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Novo Template
+                  </Button>
                 </div>
               </div>
             </CardHeader>
-
-            <CardContent className="pt-0">
-              <div className="space-y-mobile text-responsive-sm text-gray-600">
-                <div className="stack-mobile gap-2">
-                  <Clock className="w-4 h-4" />
-                  <span>{template.tempo_estimado} min • {template.frequencia}</span>
-                </div>
-                
-                {template.estatisticas && (
-                  <div className="stack-mobile gap-2">
-                    <Users className="w-4 h-4" />
-                    <span>{template.estatisticas.total_usos} usos</span>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-6">
+                <div className="col-span-1 md:col-span-2">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Input
+                      placeholder="Buscar templates..."
+                      value={busca}
+                      onChange={(e) => setBusca(e.target.value)}
+                      className="pl-10 bg-white dark:bg-gray-700"
+                    />
                   </div>
-                )}
+                </div>
 
-                <div className="text-responsive-xs text-gray-500">
-                  Por: {template.criado_por.nome}
+                <Select value={categoriaFiltro} onValueChange={setCategoriaFiltro}>
+                  <SelectTrigger className="bg-white dark:bg-gray-700">
+                    <SelectValue placeholder="Categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todas</SelectItem>
+                    <SelectItem value="operacional">Operacional</SelectItem>
+                    <SelectItem value="qualidade">Qualidade</SelectItem>
+                    <SelectItem value="seguranca">Segurança</SelectItem>
+                    <SelectItem value="manutencao">Manutenção</SelectItem>
+                    <SelectItem value="atendimento">Atendimento</SelectItem>
+                    <SelectItem value="administrativo">Administrativo</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={tipoFiltro} onValueChange={setTipoFiltro}>
+                  <SelectTrigger className="bg-white dark:bg-gray-700">
+                    <SelectValue placeholder="Tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todos</SelectItem>
+                    <SelectItem value="abertura">Abertura</SelectItem>
+                    <SelectItem value="fechamento">Fechamento</SelectItem>
+                    <SelectItem value="diario">Diário</SelectItem>
+                    <SelectItem value="semanal">Semanal</SelectItem>
+                    <SelectItem value="mensal">Mensal</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={publicoFiltro} onValueChange={setPublicoFiltro}>
+                  <SelectTrigger className="bg-white dark:bg-gray-700">
+                    <SelectValue placeholder="Visibilidade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todos</SelectItem>
+                    <SelectItem value="true">Públicos</SelectItem>
+                    <SelectItem value="false">Privados</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={limparFiltros}
+                    className="flex items-center gap-2"
+                  >
+                    <Filter className="w-4 h-4" />
+                    Limpar
+                  </Button>
                 </div>
               </div>
 
-              {/* Tags */}
-              {template.template_tags && template.template_tags.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-3">
-                  {template.template_tags.map((tagRel, index) => (
-                    <Badge 
-                      key={index} 
-                      variant="outline" 
-                      className="badge-mobile"
+              {estatisticas.predefinidos === 0 && (
+                <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Zap className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      <div>
+                        <h4 className="font-semibold text-blue-800 dark:text-blue-200">Templates Predefinidos</h4>
+                        <p className="text-sm text-blue-600 dark:text-blue-300 mt-1">
+                          Instale templates prontos para usar em seu estabelecimento
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={instalarTemplatesPredefinidos}
+                      disabled={instalandoPredefinidos}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
                     >
-                      {tagRel.template_tags.nome}
-                    </Badge>
-                  ))}
+                      {instalandoPredefinidos ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                          Instalando...
+                        </>
+                      ) : (
+                        <>
+                          <Download className="w-4 h-4 mr-2" />
+                          Instalar Templates
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               )}
-
-              {/* Ações */}
-              <div className="btn-group-mobile mt-4">
-                <Button
-                  onClick={() => criarChecklistAPartirDeTemplate(template)}
-                  className="btn-touch touch-animation"
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Usar
-                </Button>
-                
-                <Button
-                  onClick={() => visualizarTemplate(template)}
-                  variant="outline"
-                  className="btn-icon-touch"
-                >
-                  <Eye className="w-4 h-4" />
-                  <span className="visible-mobile ml-2">Ver</span>
-                </Button>
-                
-                {!template.predefinido && (
-                  <>
-                    <Button
-                      onClick={() => editarTemplate(template)}
-                      variant="outline"
-                      className="btn-icon-touch"
-                    >
-                      <Edit className="w-4 h-4" />
-                      <span className="visible-mobile ml-2">Editar</span>
-                    </Button>
-                    
-                    <Button
-                      onClick={() => deletarTemplate(template)}
-                      variant="outline"
-                      className="btn-icon-touch text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      <span className="visible-mobile ml-2">Excluir</span>
-                    </Button>
-                  </>
-                )}
-              </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
 
-      {/* Estado vazio */}
-      {templates.length === 0 && !loading && (
-        <div className="text-center py-12">
-          <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Nenhum template encontrado
-          </h3>
-          <p className="text-gray-600 mb-4">
-            {busca || categoriaFiltro || setorFiltro || tipoFiltro
-              ? 'Tente ajustar os filtros ou criar um novo template.'
-              : 'Comece criando seu primeiro template ou instalando os predefinidos.'
-            }
-          </p>
-          <div className="flex gap-2 justify-center">
-            <Button onClick={() => router.push('/configuracoes/templates/editor/novo')}>
-              <Plus className="w-4 h-4 mr-2" />
-              Criar Template
-            </Button>
-            <Button onClick={instalarTemplatesPredefinidos} variant="outline">
-              <BookOpen className="w-4 h-4 mr-2" />
-              Instalar Predefinidos
-            </Button>
-          </div>
+          {/* Lista de Templates */}
+          {error ? (
+            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+              <CardContent className="p-12 text-center">
+                <div className="p-4 bg-red-100 dark:bg-red-900/20 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                  <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Erro ao Carregar</h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+                <Button onClick={carregarTemplates} variant="outline">
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Tentar Novamente
+                </Button>
+              </CardContent>
+            </Card>
+          ) : templates.length === 0 ? (
+            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+              <CardContent className="p-12 text-center">
+                <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                  <FileText className="w-8 h-8 text-gray-600 dark:text-gray-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Nenhum Template Encontrado</h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Não há templates que correspondem aos filtros aplicados
+                </p>
+                <div className="flex items-center gap-3 justify-center">
+                  <Button onClick={limparFiltros} variant="outline">
+                    Limpar Filtros
+                  </Button>
+                  <Button onClick={() => router.push('/configuracoes/templates/editor')}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Criar Primeiro Template
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className={`grid gap-6 ${
+              viewMode === 'grid' 
+                ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
+                : 'grid-cols-1'
+            }`}>
+              {templates.map((template) => (
+                <Card key={template.id} className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+                  <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg bg-gradient-to-r ${getCategoriaColor(template.categoria)} text-white`}>
+                          {getTipoIcon(template.tipo)}
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                            {template.nome}
+                          </CardTitle>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="secondary" className="text-xs">
+                              {template.categoria}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {template.tipo}
+                            </Badge>
+                            {template.publico && (
+                              <Badge className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                                Público
+                              </Badge>
+                            )}
+                            {template.predefinido && (
+                              <Badge className="text-xs bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100">
+                                Sistema
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button size="sm" variant="ghost" onClick={() => visualizarTemplate(template)}>
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => editarTemplate(template)}>
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        {!template.predefinido && (
+                          <Button size="sm" variant="ghost" onClick={() => deletarTemplate(template)}>
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  
+                  <CardContent className="p-6">
+                    {template.descricao && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                        {template.descricao}
+                      </p>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <Clock className="w-4 h-4 text-gray-500 mx-auto mb-1" />
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                          {template.tempo_estimado}min
+                        </div>
+                        <div className="text-xs text-gray-500">Tempo</div>
+                      </div>
+                      
+                      <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <TrendingUp className="w-4 h-4 text-gray-500 mx-auto mb-1" />
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                          {template.estatisticas?.total_usos || 0}
+                        </div>
+                        <div className="text-xs text-gray-500">Usos</div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
+                      <div className="text-xs text-gray-500 dark:text-gray-500">
+                        por {template.criado_por?.nome || 'Sistema'}
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={() => criarChecklistAPartirDeTemplate(template)}
+                        className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white"
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Usar
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
-      )}
       </div>
     </ProtectedRoute>
   )

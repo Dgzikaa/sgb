@@ -32,7 +32,8 @@ import {
   RefreshCw,
   AlertTriangle,
   XCircle,
-  Clock
+  Clock,
+  Link2
 } from 'lucide-react'
 
 export default function IntegracoesPage() {
@@ -371,51 +372,131 @@ export default function IntegracoesPage() {
   }
   
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto p-6 max-w-7xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto p-6 max-w-7xl space-y-8">
+        {/* Header Profissional */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <Settings className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                  Central de Integrações
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400 text-lg">
+                  Configure todas as integrações do seu estabelecimento
+                </p>
+              </div>
+            </div>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => window.history.back()}
-              className="flex items-center"
+              className="modal-button-secondary flex items-center gap-2"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
+              <ArrowLeft className="w-4 h-4" />
               Voltar
             </Button>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Integrações</h1>
-              <p className="text-gray-600">Configure todas as integrações do seu estabelecimento</p>
+          </div>
+          
+          {/* Status Geral */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                  <CheckCircle className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-green-800 dark:text-green-300 font-semibold">Ativas</p>
+                  <p className="text-green-600 dark:text-green-400 text-sm">
+                    {Object.values(webhookConfigs).filter(config => config && config.trim() !== '').length} integrações
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <Link2 className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-blue-800 dark:text-blue-300 font-semibold">Conectadas</p>
+                  <p className="text-blue-600 dark:text-blue-400 text-sm">Discord, Meta</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center">
+                  <Clock className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-yellow-800 dark:text-yellow-300 font-semibold">Pendentes</p>
+                  <p className="text-yellow-600 dark:text-yellow-400 text-sm">2 configurações</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-xl p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                  <Shield className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-purple-800 dark:text-purple-300 font-semibold">Seguras</p>
+                  <p className="text-purple-600 dark:text-purple-400 text-sm">100% protegidas</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Tabs de Integrações */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-8">
-            <TabsTrigger value="discord" className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-[#5865F2] rounded"></div>
+          <TabsList className="grid w-full grid-cols-6 mb-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-2 shadow-sm">
+            <TabsTrigger 
+              value="discord" 
+              className="flex items-center gap-2 data-[state=active]:bg-[#5865F2] data-[state=active]:text-white rounded-lg transition-all duration-200"
+            >
+              <div className="w-4 h-4 bg-[#5865F2] data-[state=active]:bg-white/20 rounded"></div>
               Discord
             </TabsTrigger>
-            <TabsTrigger value="whatsapp" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="whatsapp" 
+              className="flex items-center gap-2 data-[state=active]:bg-green-500 data-[state=active]:text-white rounded-lg transition-all duration-200"
+            >
               <MessageSquare className="w-4 h-4" />
               WhatsApp
             </TabsTrigger>
-            <TabsTrigger value="contaazul" className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-blue-500 rounded"></div>
+            <TabsTrigger 
+              value="contaazul" 
+              className="flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-lg transition-all duration-200"
+            >
+              <div className="w-4 h-4 bg-blue-500 data-[state=active]:bg-white/20 rounded"></div>
               ContaAzul
             </TabsTrigger>
-            <TabsTrigger value="meta" className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded"></div>
+            <TabsTrigger 
+              value="meta" 
+              className="flex items-center gap-2 data-[state=active]:bg-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-200"
+            >
+              <div className="w-4 h-4 bg-gradient-to-r from-purple-500 to-pink-500 data-[state=active]:bg-white/20 rounded"></div>
               Meta
             </TabsTrigger>
-            <TabsTrigger value="getin" className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-green-500 rounded"></div>
+            <TabsTrigger 
+              value="getin" 
+              className="flex items-center gap-2 data-[state=active]:bg-green-500 data-[state=active]:text-white rounded-lg transition-all duration-200"
+            >
+              <div className="w-4 h-4 bg-green-500 data-[state=active]:bg-white/20 rounded"></div>
               GetIn
             </TabsTrigger>
-            <TabsTrigger value="eventos" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="eventos" 
+              className="flex items-center gap-2 data-[state=active]:bg-indigo-500 data-[state=active]:text-white rounded-lg transition-all duration-200"
+            >
               <Calendar className="w-4 h-4" />
               Eventos
             </TabsTrigger>
@@ -432,64 +513,105 @@ export default function IntegracoesPage() {
 
           {/* Discord Tab */}
           <TabsContent value="discord" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center space-x-2">
-                  <div className="w-6 h-6 bg-[#5865F2] rounded-lg flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">D</span>
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm">
+              <CardHeader className="pb-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-[#5865F2] rounded-xl flex items-center justify-center shadow-md">
+                      <span className="text-white text-xl font-bold">D</span>
+                    </div>
+                    <div>
+                      <CardTitle className="text-2xl text-gray-900 dark:text-white">Discord Webhooks</CardTitle>
+                      <p className="text-gray-600 dark:text-gray-400 mt-1">
+                        Configure notificações automáticas para o Discord
+                      </p>
+                    </div>
                   </div>
-                  <CardTitle>Discord Webhooks</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${Object.values(webhookConfigs).some(config => config && config.trim() !== '') ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                    <span className={`text-sm font-medium ${Object.values(webhookConfigs).some(config => config && config.trim() !== '') ? 'text-green-600 dark:text-green-400' : 'text-gray-500'}`}>
+                      {Object.values(webhookConfigs).some(config => config && config.trim() !== '') ? 'Configurado' : 'Não configurado'}
+                    </span>
+                  </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-8">
                 <>
                   {/* Loading State */}
                   {loadingConfigs && (
-                    <div className="flex justify-center items-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                      <span className="ml-2 text-gray-600">Carregando configurações...</span>
+                    <div className="flex justify-center items-center py-12">
+                      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#5865F2]"></div>
+                      <span className="ml-3 text-gray-600 dark:text-gray-400 font-medium">Carregando configurações...</span>
                     </div>
                   )}
                   
                   {/* Webhook Sistema/Segurança */}
                   {!loadingConfigs && (
-                    <div className="space-y-6">
-                      <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Shield className="w-4 h-4 text-red-500" />
-                    <Label htmlFor="webhook-sistema" className="font-medium">
-                      Webhook Sistema & Segurança
-                    </Label>
-                    <div className="flex items-center space-x-1 ml-2">
-                      <div className={`w-2 h-2 rounded-full ${webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                      <span className={`text-xs ${webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
-                        {webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'Conectado' : 'Não configurado'}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      id="webhook-sistema"
-                      placeholder="https://discord.com/api/webhooks/..."
-                      value={webhookConfigs.sistema}
-                      onChange={(e) => setWebhookConfigs({...webhookConfigs, sistema: e.target.value})}
-                      disabled={webhookLoading}
-                      className="flex-1"
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => testWebhook('sistema')}
-                      disabled={testingWebhook === 'sistema' || !webhookConfigs.sistema || webhookLoading}
-                      className="px-3"
-                    >
-                      {testingWebhook === 'sistema' ? 'Testando...' : '🧪 Testar'}
-                    </Button>
-                  </div>
-                  <p className="text-xs text-gray-500">
-                    Rate limiting, SQL injection, backups, eventos críticos de segurança
-                  </p>
-                </div>
+                    <div className="space-y-8">
+                      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
+                              <Shield className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <Label htmlFor="webhook-sistema" className="text-lg font-semibold text-red-800 dark:text-red-300">
+                                Sistema & Segurança
+                              </Label>
+                              <p className="text-sm text-red-600 dark:text-red-400">
+                                Eventos críticos e alertas de segurança
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className={`w-3 h-3 rounded-full ${webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                            <span className={`text-sm font-medium ${webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'text-green-600 dark:text-green-400' : 'text-gray-500'}`}>
+                              {webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'Conectado' : 'Não configurado'}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          <div className="flex gap-3">
+                            <Input
+                              id="webhook-sistema"
+                              placeholder="https://discord.com/api/webhooks/..."
+                              value={webhookConfigs.sistema}
+                              onChange={(e) => setWebhookConfigs({...webhookConfigs, sistema: e.target.value})}
+                              disabled={webhookLoading}
+                              className="modal-input flex-1"
+                            />
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => testWebhook('sistema')}
+                              disabled={testingWebhook === 'sistema' || !webhookConfigs.sistema || webhookLoading}
+                              className="modal-button-secondary px-4"
+                            >
+                              {testingWebhook === 'sistema' ? (
+                                <div className="flex items-center gap-2">
+                                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                                  Testando...
+                                </div>
+                              ) : (
+                                <>
+                                  🧪 Testar
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                          
+                          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-red-200 dark:border-red-800">
+                            <h4 className="font-medium text-red-800 dark:text-red-300 mb-2">📡 Notificações enviadas:</h4>
+                            <ul className="text-sm text-red-600 dark:text-red-400 space-y-1">
+                              <li>• Rate limiting e tentativas de ataque</li>
+                              <li>• SQL injection e vulnerabilidades</li>
+                              <li>• Backups automáticos e falhas</li>
+                              <li>• Eventos críticos de segurança</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
 
                 <Separator />
 
@@ -772,18 +894,39 @@ export default function IntegracoesPage() {
                 </div>
 
                 {/* Botão de Salvar */}
-                <div className="flex justify-between items-center pt-6 border-t border-gray-200 mt-6">
-                  <div className="text-sm text-gray-600">
-                    💡 Lembre-se de salvar as configurações após fazer alterações
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                        <Save className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          Configurações alteradas
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          Salve as alterações para aplicar as configurações
+                        </p>
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={handleSaveWebhooks} 
+                      disabled={webhookLoading}
+                      className="modal-button-primary px-6 py-3"
+                    >
+                      {webhookLoading ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                          Salvando...
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Save className="w-4 h-4" />
+                          Salvar Configurações
+                        </div>
+                      )}
+                    </Button>
                   </div>
-                  <Button 
-                    onClick={handleSaveWebhooks} 
-                    disabled={webhookLoading}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    {webhookLoading ? 'Salvando...' : 'Salvar Configurações'}
-                  </Button>
                 </div>
                     </div>
                   )}
@@ -794,13 +937,26 @@ export default function IntegracoesPage() {
 
           {/* GetIn Tab - SIMPLIFICADA */}
           <TabsContent value="getin" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center space-x-2">
-                  <div className="w-6 h-6 bg-green-500 rounded-lg flex items-center justify-center">
-                    <Calendar className="w-4 h-4 text-white" />
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm">
+              <CardHeader className="pb-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center shadow-md">
+                      <Calendar className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-2xl text-gray-900 dark:text-white">GetIn - Sistema de Reservas</CardTitle>
+                      <p className="text-gray-600 dark:text-gray-400 mt-1">
+                        Sincronização com plataforma de reservas
+                      </p>
+                    </div>
                   </div>
-                  <CardTitle>GetIn - Sistema de Reservas</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                      Em desenvolvimento
+                    </span>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">

@@ -31,6 +31,7 @@ import {
   Timer
 } from 'lucide-react'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { useForceDarkMode } from '@/hooks/useForceDarkMode'
 
 interface ChecklistFuncionario {
   id: string
@@ -81,6 +82,9 @@ const setoresConfig = [
 ]
 
 export default function ChecklistsFuncionario() {
+  // Force dark mode on all elements
+  useForceDarkMode()
+  
   const { setPageTitle } = usePageTitle()
   
   // Mock user data - em produção virá do contexto
@@ -827,10 +831,15 @@ export default function ChecklistsFuncionario() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <Timer className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-700 font-medium">Carregando checklists...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-6"></div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Carregando checklists...
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            Aguarde enquanto carregamos seus dados
+          </p>
         </div>
       </div>
     )
@@ -940,12 +949,12 @@ export default function ChecklistsFuncionario() {
 
       return (
       <ProtectedRoute requiredModule="checklists">
-        <div className="min-h-screen bg-gray-50">
+        <div className="main-content min-h-screen bg-gray-50 dark:bg-gray-900">
         {/* Header */}
-        <div className="bg-white shadow-sm border-b">
+        <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
           <div className="p-4">
-            <p className="text-sm text-gray-600 mb-4">
-              Olá, <strong className="text-gray-800">{usuario.nome}</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Olá, <strong className="text-gray-800 dark:text-gray-200">{usuario.nome}</strong>
             </p>
             {/* Abas */}
             <div className="flex border-b">

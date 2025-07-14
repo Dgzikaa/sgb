@@ -250,93 +250,87 @@ export default function ContaAzulCompetenciaPage() {
     return format(new Date(data), 'dd/MM/yyyy', { locale: ptBR })
   }
 
-      return (
-      <ProtectedRoute requiredModule="relatorio_produtos">
-        <StandardPageLayout>
-        <div className="space-y-6">
-          {/* Cards de Resumo */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Receitas</CardTitle>
-                <TrendingUpIcon className="h-4 w-4 text-green-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600">
-                  {formatarValor(resumo.total_receitas)}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Despesas</CardTitle>
-                <TrendingDownIcon className="h-4 w-4 text-red-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-red-600">
-                  {formatarValor(resumo.total_despesas)}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Saldo Líquido</CardTitle>
-                <DollarSignIcon className="h-4 w-4 text-blue-600" />
-              </CardHeader>
-              <CardContent>
-                <div className={`text-2xl font-bold ${resumo.saldo_liquido >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatarValor(resumo.saldo_liquido)}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Lançamentos</CardTitle>
-                <FileTextIcon className="h-4 w-4 text-blue-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-blue-600">
-                  {resumo.total_lancamentos.toLocaleString('pt-BR')}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Filtros Colapsáveis com Título */}
-          <Card>
-            <CardHeader className="cursor-pointer" onClick={() => setFiltrosExpandidos(!filtrosExpandidos)}>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <FilterIcon className="h-5 w-5" />
-                  <div>
-                    <div className="text-lg font-semibold">ContaAzul - Eventos Financeiros por Competência</div>
-                    <div className="text-sm font-normal text-gray-600 mt-1">
-                      Visualize todos os eventos financeiros sincronizados - {totalRegistros.toLocaleString('pt-BR')} registros encontrados
-                    </div>
-                  </div>
-                  {(filtros.dataInicial || filtros.dataFinal || filtros.mes || filtros.ano || filtros.tipo || filtros.categoriasSelecionadas.length > 0) && (
-                    <Badge variant="secondary" className="ml-2">
-                      {[
-                        filtros.dataInicial && 'Data Inicial',
-                        filtros.dataFinal && 'Data Final', 
-                        filtros.mes && 'Mês',
-                        filtros.ano && 'Ano',
-                        filtros.tipo && 'Tipo',
-                        filtros.categoriasSelecionadas.length > 0 && `${filtros.categoriasSelecionadas.length} categorias`
-                      ].filter(Boolean).length} filtros ativos
-                    </Badge>
-                  )}
-                </div>
-                {filtrosExpandidos ? <ChevronUpIcon className="h-5 w-5" /> : <ChevronDownIcon className="h-5 w-5" />}
-              </CardTitle>
+  return (
+    <ProtectedRoute requiredModule="relatorio_contaazul_competencia">
+      <div className="space-y-6">
+        {/* Cards de Resumo */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">Total Receitas</CardTitle>
+              <TrendingUpIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
             </CardHeader>
-            
-            {filtrosExpandidos && (
-              <CardContent>
-                <div className="form-grid">
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                {formatarValor(resumo.total_receitas)}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">Total Despesas</CardTitle>
+              <TrendingDownIcon className="h-4 w-4 text-red-600 dark:text-red-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                {formatarValor(resumo.total_despesas)}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">Saldo Líquido</CardTitle>
+              <DollarSignIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${resumo.saldo_liquido >= 0 
+                ? 'text-green-600 dark:text-green-400' 
+                : 'text-red-600 dark:text-red-400'}`}>
+                {formatarValor(resumo.saldo_liquido)}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">Total Lançamentos</CardTitle>
+              <FileTextIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                {resumo.total_lancamentos}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Seção de Filtros */}
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <CardHeader 
+            className="cursor-pointer select-none border-b border-gray-200 dark:border-gray-700"
+            onClick={() => setFiltrosExpandidos(!filtrosExpandidos)}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FilterIcon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                <CardTitle className="text-gray-900 dark:text-white">ContaAzul - Eventos Financeiros por Competência</CardTitle>
+              </div>
+              {filtrosExpandidos ? (
+                <ChevronUpIcon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+              ) : (
+                <ChevronDownIcon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+              )}
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              Visualize todos os eventos financeiros organizados por competência. {totalRegistros} registros encontrados
+            </p>
+          </CardHeader>
+
+          {filtrosExpandidos && (
+            <CardContent className="space-y-4">
+              <div className="form-grid">
                   {/* Filtro por Período - Campos Menores */}
                   <div className="form-group">
                     <Label className="text-xs">Data Inicial</Label>
@@ -487,158 +481,177 @@ export default function ContaAzulCompetenciaPage() {
                     Limpar Filtros
                   </Button>
                 </div>
-              </CardContent>
-            )}
-          </Card>
+            </CardContent>
+          )}
+        </Card>
 
-          {/* Tabela de Eventos */}
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                Lançamentos
-                <span className="text-sm font-normal text-gray-500 ml-2">
-                  Página {currentPage} de {totalPages} • Mostrando {eventos.length} de {totalRegistros.toLocaleString('pt-BR')} registros
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="table-responsive">
-                <table className="table-mobile">
-                  <thead>
-                    <tr className="border-b">
-                      <th
-                        className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
-                        onClick={() => handleSort('data_competencia')}
-                      >
-                        <div className="flex items-center gap-2">
-                          Data Competência
-                          {renderSortIcon('data_competencia')}
-                        </div>
-                      </th>
-                      <th
-                        className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm hidden-mobile"
-                        onClick={() => handleSort('descricao')}
-                      >
-                        <div className="flex items-center gap-2">
-                          Descrição
-                          {renderSortIcon('descricao')}
-                        </div>
-                      </th>
-                      <th
-                        className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm hidden-mobile"
-                        onClick={() => handleSort('categoria')}
-                      >
-                        <div className="flex items-center gap-2">
-                          Categoria
-                          {renderSortIcon('categoria')}
-                        </div>
-                      </th>
-                      <th
-                        className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
-                        onClick={() => handleSort('valor')}
-                      >
-                        <div className="flex items-center gap-2">
-                          Valor
-                          {renderSortIcon('valor')}
-                        </div>
-                      </th>
-                      <th
-                        className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
-                        onClick={() => handleSort('tipo')}
-                      >
-                        <div className="flex items-center gap-2">
-                          Tipo
-                          {renderSortIcon('tipo')}
-                        </div>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {loading ? (
-                      <tr>
-                        <td colSpan={5} className="text-center p-8">
-                          <div className="loading-mobile">
-                            <div className="loading-spinner-mobile animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                            <span className="ml-2">Carregando...</span>
+        {/* Tabela de Lançamentos */}
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <CardHeader>
+            <CardTitle className="text-gray-900 dark:text-white">
+              Lançamentos - Página {currentPage} de {totalPages}
+            </CardTitle>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Mostrando {Math.min(itemsPerPage, eventos.length)} de {totalRegistros} registros
+            </p>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400"></div>
+              </div>
+            ) : eventos.length > 0 ? (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b border-gray-200 dark:border-gray-700">
+                        <th 
+                          className="p-3 text-left text-sm font-medium text-gray-900 dark:text-white cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                          onClick={() => handleSort('data_competencia')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Data Competência
+                            {renderSortIcon('data_competencia')}
                           </div>
-                        </td>
+                        </th>
+                        <th 
+                          className="p-3 text-left text-sm font-medium text-gray-900 dark:text-white cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                          onClick={() => handleSort('descricao')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Descrição
+                            {renderSortIcon('descricao')}
+                          </div>
+                        </th>
+                        <th 
+                          className="p-3 text-left text-sm font-medium text-gray-900 dark:text-white cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                          onClick={() => handleSort('categoria')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Categoria
+                            {renderSortIcon('categoria')}
+                          </div>
+                        </th>
+                        <th 
+                          className="p-3 text-left text-sm font-medium text-gray-900 dark:text-white cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                          onClick={() => handleSort('valor')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Valor
+                            {renderSortIcon('valor')}
+                          </div>
+                        </th>
+                        <th 
+                          className="p-3 text-left text-sm font-medium text-gray-900 dark:text-white cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                          onClick={() => handleSort('tipo')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Tipo
+                            {renderSortIcon('tipo')}
+                          </div>
+                        </th>
                       </tr>
-                    ) : eventos.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="empty-state-mobile text-gray-500">
-                          Nenhum evento encontrado
-                        </td>
-                      </tr>
-                    ) : (
-                      eventos.map((evento) => (
-                        <tr key={evento.id} className="border-b hover:bg-gray-50">
-                          <td className="p-2 sm:p-3">
-                            <div className="text-sm font-medium">
-                              {formatarData(evento.data_competencia)}
-                            </div>
+                    </thead>
+                    <tbody>
+                      {eventos.map((evento, index) => (
+                        <tr 
+                          key={evento.id} 
+                          className={`border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                            index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'
+                          }`}
+                        >
+                          <td className="p-3 text-sm text-gray-900 dark:text-gray-100">
+                            {formatarData(evento.data_competencia)}
                           </td>
-                          <td className="p-2 sm:p-3 hidden-mobile">
-                            <div className="max-w-xs truncate" title={evento.descricao}>
-                              {evento.descricao}
-                            </div>
-                          </td>
-                          <td className="p-2 sm:p-3 hidden-mobile">
-                            <Badge variant="outline" className="badge-mobile">
-                              {evento.categoria}
-                            </Badge>
-                          </td>
-                          <td className="p-2 sm:p-3">
-                            <div className="text-sm">
-                              <span className={`font-medium ${evento.tipo === 'Receita' ? 'text-green-600' : 'text-red-600'}`}>
-                                {formatarValor(evento.valor)}
-                              </span>
-                              <div className="visible-mobile text-xs text-gray-500 mt-1">
-                                {evento.descricao}
+                          <td className="p-3 text-sm text-gray-900 dark:text-gray-100">
+                            <div>
+                              <div className="font-medium">{evento.descricao}</div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">
+                                {evento.cliente_fornecedor}
                               </div>
                             </div>
                           </td>
-                          <td className="p-2 sm:p-3">
-                            <Badge variant={evento.tipo === 'Receita' ? 'default' : 'destructive'} className="badge-mobile">
+                          <td className="p-3 text-sm">
+                            <Badge 
+                              variant="outline" 
+                              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+                            >
+                              {evento.categoria}
+                            </Badge>
+                          </td>
+                          <td className="p-3 text-sm">
+                            <div className={`font-medium ${
+                              evento.tipo === 'Receita' 
+                                ? 'text-green-600 dark:text-green-400' 
+                                : 'text-red-600 dark:text-red-400'
+                            }`}>
+                              {formatarValor(evento.valor)}
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              {evento.cliente_fornecedor}
+                            </div>
+                          </td>
+                          <td className="p-3 text-sm">
+                            <Badge 
+                              className={`${
+                                evento.tipo === 'Receita' 
+                                  ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200' 
+                                  : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200'
+                              }`}
+                            >
                               {evento.tipo}
                             </Badge>
                           </td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Paginação */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-4">
-                  <div className="text-sm text-gray-500">
-                    Página {currentPage} de {totalPages} • {totalRegistros.toLocaleString('pt-BR')} registros
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => buscarEventos(currentPage - 1, sortField, sortDirection)}
-                      disabled={currentPage === 1 || loading}
-                    >
-                      Anterior
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => buscarEventos(currentPage + 1, sortField, sortDirection)}
-                      disabled={currentPage === totalPages || loading}
-                    >
-                      Próxima
-                    </Button>
-                  </div>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </StandardPageLayout>
+
+                {/* Paginação */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Página {currentPage} de {totalPages} • {totalRegistros} registros
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                        disabled={currentPage === 1}
+                        className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        Anterior
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                        disabled={currentPage === totalPages}
+                        className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        Próxima
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <FileTextIcon className="h-12 w-12 mx-auto text-gray-400 dark:text-gray-600 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                  Nenhum evento encontrado
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Tente ajustar os filtros ou selecione um período diferente.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </ProtectedRoute>
   )
 } 

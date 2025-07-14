@@ -13,21 +13,20 @@ export interface ApiOptions {
  */
 export async function apiCall(endpoint: string, options: ApiOptions = {}) {
   try {
-    // Pegar dados do usuário do localStorage
-    const userData = localStorage.getItem('sgb_user')
-    
     // Headers padrão
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers || {})
     }
     
-    // Adicionar dados do usuário se disponível
+    // Pegar apenas dados essenciais do usuário
+    const userData = localStorage.getItem('sgb_user')
     if (userData) {
       try {
         const user = JSON.parse(userData)
-        // Enviar dados do usuário via header customizado
-        headers['x-user-data'] = encodeURIComponent(userData)
+        // Enviar apenas ID e email (dados pequenos)
+        if (user.id) headers['x-user-id'] = user.id
+        if (user.email) headers['x-user-email'] = user.email
       } catch (e) {
         console.warn('Erro ao parsear dados do usuário:', e)
       }

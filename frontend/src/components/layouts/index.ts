@@ -1,7 +1,9 @@
 // Layout Components
 export { default as StandardPageLayout } from './StandardPageLayout'
 export { default as StandardPageWrapper } from './StandardPageWrapper'
-export { default as DarkSidebarLayout } from './DarkSidebarLayout'
+export { DarkSidebarLayout } from './DarkSidebarLayout'
+export { DarkHeader } from './DarkHeader'
+export { ModernSidebar } from './ModernSidebar'
 
 // Re-export standard card components
 export {

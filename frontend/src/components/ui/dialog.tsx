@@ -66,7 +66,7 @@ const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) => {
     >
       {/* Backdrop que cobre TUDO */}
       <div 
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-all duration-300 cursor-pointer"
+        className="fixed inset-0 bg-black/70 dark:bg-black/80 backdrop-blur-md transition-all duration-300 cursor-pointer"
         onClick={() => onOpenChange(false)}
         data-modal-backdrop="true"
         aria-hidden="true"
@@ -101,11 +101,12 @@ const DialogContent: React.FC<DialogContentProps & { onClose?: () => void }> = (
   return (
     <div
       className={cn(
-        "bg-white rounded-2xl shadow-2xl border border-gray-200",
+        "bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700",
         "w-full max-w-6xl max-h-[90vh]",
         "flex flex-col",
         "animate-in fade-in-0 zoom-in-95 duration-300",
         "relative overflow-hidden",
+        "backdrop-blur-xl",
         className
       )}
       onClick={(e) => e.stopPropagation()}
@@ -114,15 +115,15 @@ const DialogContent: React.FC<DialogContentProps & { onClose?: () => void }> = (
       aria-labelledby="modal-title"
       {...props}
     >
-      {/* Close button igual ao de receitas */}
+      {/* Close button profissional */}
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all duration-200"
+        className="absolute top-6 right-6 w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-all duration-200 z-10 shadow-sm"
         title="Fechar"
         aria-label="Fechar modal"
         type="button"
       >
-        <X className="w-4 h-4 text-gray-600" />
+        <X className="w-5 h-5 text-gray-600 dark:text-gray-300" />
       </button>
       
       {/* Content com scroll adequado */}
@@ -147,7 +148,7 @@ const DialogContent: React.FC<DialogContentProps & { onClose?: () => void }> = (
             }
             // Content área com scroll
             return (
-              <div key={index} className="flex-1 overflow-y-auto px-6 py-4" style={{ maxHeight: 'calc(90vh - 200px)' }}>
+              <div key={index} className="flex-1 overflow-y-auto px-8 py-6 bg-white dark:bg-gray-800" style={{ maxHeight: 'calc(90vh - 200px)' }}>
                 {child}
               </div>
             )
@@ -167,9 +168,10 @@ const DialogHeader: React.FC<DialogHeaderProps> = ({
   return (
     <div
       className={cn(
-        "flex flex-col space-y-2 px-6 py-4",
-        "border-b border-gray-100",
-        "bg-white",
+        "flex flex-col space-y-3 px-8 py-6",
+        "border-b border-gray-200 dark:border-gray-700",
+        "bg-white dark:bg-gray-800",
+        "relative",
         className
       )}
       {...props}
@@ -188,8 +190,9 @@ const DialogTitle: React.FC<DialogTitleProps> = ({
     <h2
       id="modal-title"
       className={cn(
-        "text-xl font-semibold text-gray-900",
+        "text-2xl font-bold text-gray-900 dark:text-white",
         "flex items-center gap-3",
+        "leading-tight",
         className
       )}
       {...props}
@@ -207,7 +210,8 @@ const DialogDescription: React.FC<DialogDescriptionProps> = ({
   return (
     <p
       className={cn(
-        "text-sm text-gray-600",
+        "text-base text-gray-600 dark:text-gray-400",
+        "leading-relaxed",
         className
       )}
       {...props}
@@ -225,9 +229,10 @@ const DialogFooter: React.FC<DialogFooterProps> = ({
   return (
     <div
       className={cn(
-        "flex items-center justify-end gap-3 px-6 py-4",
-        "border-t border-gray-100",
-        "bg-gray-50",
+        "flex items-center justify-end gap-4 px-8 py-6",
+        "border-t border-gray-200 dark:border-gray-700",
+        "bg-gray-50 dark:bg-gray-800/50",
+        "backdrop-blur-sm",
         className
       )}
       {...props}
