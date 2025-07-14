@@ -336,40 +336,61 @@ export default function FaceAuthenticator({
       console.log('💾 Stream salvo no state')
       
       if (videoRef.current) {
+        // Configurar vídeo para exibir stream
         console.log('📷 Configurando vídeo element...')
         const video = videoRef.current
         
         // Configurar evento de carregamento ANTES de definir srcObject
         video.onloadedmetadata = async () => {
+          console.log('📺 Vídeo metadata carregado:', {
+            videoWidth: video.videoWidth,
+            videoHeight: video.videoHeight,
+            duration: video.duration,
+            readyState: video.readyState
+          })
+          
           try {
-            console.log('📺 Metadata carregada, iniciando reprodução...')
             await video.play()
-            console.log('✅ Vídeo reproduzindo com sucesso!')
-            console.log('📐 Dimensões do vídeo:', {
-              videoWidth: video.videoWidth,
-              videoHeight: video.videoHeight,
-              clientWidth: video.clientWidth,
-              clientHeight: video.clientHeight
-            })
-            
+            console.log('▶️ Vídeo reproduzindo com sucesso')
             // Só definir isRecording DEPOIS que o vídeo estiver reproduzindo
             setIsRecording(true)
           } catch (playError) {
             console.error('❌ Erro ao reproduzir vídeo:', playError)
-            setError('Erro ao inicializar vídeo da câmera. Tente novamente.')
+            setError('Erro ao reproduzir vídeo da câmera. Tente recarregar a página.')
             setIsRecording(false)
           }
         }
         
-        video.onerror = (error) => {
+        video.onerror = (error: any) => {
           console.error('❌ Erro no elemento de vídeo:', error)
           setError('Erro no player de vídeo. Tente recarregar a página.')
           setIsRecording(false)
+        }
+
+        video.onplaying = () => {
+          console.log('🎬 Vídeo: evento playing disparado')
+          setIsRecording(true)
+        }
+
+        video.onpause = () => {
+          console.log('⏸️ Vídeo: pausado')
+        }
+
+        video.oncanplay = () => {
+          console.log('🎯 Vídeo: pode ser reproduzido')
         }
         
         // Definir stream no vídeo
         video.srcObject = mediaStream
         console.log('📹 Stream definido no elemento de vídeo')
+        
+        // Forçar play imediatamente se o navegador permitir
+        try {
+          await video.play()
+          console.log('🚀 Play forçado com sucesso')
+        } catch (playError) {
+          console.warn('⚠️ Play automático bloqueado, aguardando interação do usuário:', playError)
+        }
         
         // Timeout de segurança para remover overlay se vídeo não carregar
         setTimeout(() => {
@@ -377,7 +398,7 @@ export default function FaceAuthenticator({
             console.log('⏰ Timeout: Forçando remoção do overlay')
             setIsRecording(true)
           }
-        }, 3000)
+        }, 2000) // Reduzido para 2 segundos
       }
       
     } catch (error: any) {
@@ -421,7 +442,7 @@ export default function FaceAuthenticator({
   }, [stream])
 
   // Capturar e processar face
-  const captureFace = useCallback(async () => {
+  const captureFace = async () => {
     console.log('📸 captureFace CHAMADO!')
     console.log('🔍 Estados para captura:', {
       hasVideo: !!videoRef.current,
@@ -454,106 +475,85 @@ export default function FaceAuthenticator({
       const video = videoRef.current
       const canvas = canvasRef.current
       
-      // Aguardar vídeo estar pronto para captura
-      if (video.videoWidth === 0 || video.videoHeight === 0 || video.readyState < 2) {
-        console.log('⏳ Aguardando vídeo ficar pronto para captura...')
-        await new Promise<void>((resolve, reject) => {
-          const timeout = setTimeout(() => {
-            reject(new Error('Timeout aguardando vídeo ficar pronto. Tente reiniciar a câmera.'))
-          }, 8000)
-          
-          const onVideoReady = () => {
-            if (video.videoWidth > 0 && video.videoHeight > 0 && video.readyState >= 2) {
-              clearTimeout(timeout)
-              video.removeEventListener('loadedmetadata', onVideoReady)
-              video.removeEventListener('canplay', onVideoReady)
-              console.log('✅ Vídeo pronto para captura:', {
-                width: video.videoWidth,
-                height: video.videoHeight,
-                readyState: video.readyState
-              })
-              resolve()
-            }
-          }
-          
-          // Verificar se já está pronto
-          if (video.videoWidth > 0 && video.videoHeight > 0 && video.readyState >= 2) {
-            clearTimeout(timeout)
-            resolve()
-            return
-          }
-          
-          // Forçar play do vídeo se não estiver reproduzindo
-          if (video.paused) {
-            console.log('🎬 Forçando reprodução do vídeo...')
-            video.play().catch((playError) => {
-              console.log('⚠️ Aviso: Não foi possível forçar reprodução, continuando...')
-            })
-          }
-          
-          // Aguardar eventos do vídeo
-          video.addEventListener('loadedmetadata', onVideoReady)
-          video.addEventListener('canplay', onVideoReady)
-        })
-      }
-      
-      // Configurar canvas
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
-      
-      console.log('📐 Canvas configurado:', {
-        canvasWidth: canvas.width,
-        canvasHeight: canvas.height,
+      // Verificação simplificada do vídeo
+      console.log('🔍 Estado atual do vídeo:', {
         videoWidth: video.videoWidth,
-        videoHeight: video.videoHeight
+        videoHeight: video.videoHeight,
+        readyState: video.readyState,
+        paused: video.paused,
+        currentTime: video.currentTime
       })
+
+      // Forçar play se pausado
+      if (video.paused) {
+        console.log('🎬 Forçando reprodução do vídeo...')
+        await video.play().catch(console.warn)
+      }
+
+      // Aguardar um pouco para o vídeo se estabilizar
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      // Se ainda não tem dimensões, usar dimensões padrão do canvas
+      let videoWidth = video.videoWidth || 640
+      let videoHeight = video.videoHeight || 480
       
-      console.log('🤖 Iniciando detecção de face...')
+      if (video.videoWidth === 0 || video.videoHeight === 0) {
+        console.log('⚠️ Vídeo sem dimensões detectadas, usando valores padrão:', { videoWidth, videoHeight })
+      } else {
+        console.log('✅ Dimensões do vídeo detectadas:', { videoWidth, videoHeight })
+      }
       
-      // Detectar face
-      const detection = await window.faceapi
-        .detectSingleFace(video, new window.faceapi.TinyFaceDetectorOptions())
+      // Configurar canvas com as dimensões
+      canvas.width = videoWidth
+      canvas.height = videoHeight
+      const ctx = canvas.getContext('2d')!
+      
+      console.log('🎨 Desenhando frame no canvas...')
+      ctx.drawImage(video, 0, 0, videoWidth, videoHeight)
+      
+      console.log('🤖 Detectando face no frame...')
+      const detections = await window.faceapi
+        .detectAllFaces(canvas, new window.faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.5 }))
         .withFaceLandmarks()
-        .withFaceDescriptor()
+        .withFaceDescriptors()
 
-      console.log('👁️ Resultado da detecção:', detection ? 'Face encontrada' : 'Nenhuma face')
+      console.log('🔍 Detecções encontradas:', detections?.length || 0)
       
-      if (!detection) {
+      if (!detections || detections.length === 0) {
         console.log('❌ Nenhuma face detectada')
-        throw new Error('Nenhuma face detectada. Posicione-se bem na frente da câmera.')
+        setError('Nenhuma face foi detectada. Certifique-se de que seu rosto está visível e bem iluminado.')
+        return
       }
 
-      console.log('📊 Score da detecção:', detection.detection.score)
-
-      // Verificar qualidade da detecção
-      if (detection.detection.score < 0.7) {
-        console.log('❌ Score baixo:', detection.detection.score)
-        throw new Error('Qualidade da detecção baixa. Melhore a iluminação e tente novamente.')
+      if (detections.length > 1) {
+        console.log('⚠️ Múltiplas faces detectadas')
+        setError('Múltiplas faces detectadas. Certifique-se de que apenas uma pessoa está visível.')
+        return
       }
 
+      const detection = detections[0]
       const descriptor = Array.from(detection.descriptor) as number[]
-      
-      console.log('✅ Face capturada com sucesso', {
-        score: detection.detection.score,
+      const confidence = detection.detection.score
+
+      console.log('✅ Face capturada com sucesso!', {
+        confidence: confidence.toFixed(3),
         descriptorLength: descriptor.length
       })
 
-      // Processar baseado no modo
       if (mode === 'register') {
-        await handleRegister(descriptor, detection.detection.score)
+        await handleRegister(descriptor, confidence)
       } else {
-        await handleLogin(descriptor, detection.detection.score)
+        await handleLogin(descriptor, confidence)
       }
-      
+
     } catch (error: any) {
       console.error('❌ Erro ao capturar face:', error)
-      setError(error.message || 'Erro ao processar reconhecimento facial')
-      onError(error.message || 'Erro ao processar reconhecimento facial')
+      setError(error.message || 'Erro ao processar reconhecimento facial. Tente novamente.')
     } finally {
       setIsLoading(false)
       stopLoading()
     }
-  }, [modelsLoaded, mode, startLoading, stopLoading, onError])
+  }
 
   // Registrar nova face
   const handleRegister = async (descriptor: number[], confidence: number) => {
