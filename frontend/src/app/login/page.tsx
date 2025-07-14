@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { LogIn, Eye, EyeOff, Camera, Fingerprint } from 'lucide-react'
-import FaceAuthenticator, { FaceDescriptor } from '@/components/auth/FaceAuthenticator'
+import { LogIn, Eye, EyeOff, Fingerprint } from 'lucide-react'
+import BiometricAuth from '@/components/auth/BiometricAuth'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -20,8 +20,8 @@ export default function LoginPage() {
   const [logoError, setLogoError] = useState(false)
   
   // Estado para controlar o método de login
-  const [loginMethod, setLoginMethod] = useState<'traditional' | 'facial'>('traditional')
-  const [showFaceRegistration, setShowFaceRegistration] = useState(false)
+  const [loginMethod, setLoginMethod] = useState<'traditional' | 'biometric'>('traditional')
+  const [showBiometricRegistration, setShowBiometricRegistration] = useState(false)
   const [lastLoginData, setLastLoginData] = useState<any>(null)
   
   const router = useRouter()
@@ -142,9 +142,9 @@ export default function LoginPage() {
       const { syncAuthData } = await import('@/lib/cookies')
       syncAuthData(result.user)
       
-      // Verificar se o usuário tem reconhecimento facial registrado
+      // Verificar se o usuário tem biometria registrada
       try {
-        const faceStatusResponse = await fetch('/api/auth/face/status', {
+        const biometricStatusResponse = await fetch('/api/auth/biometric/status', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -153,17 +153,17 @@ export default function LoginPage() {
           })
         })
         
-        const faceStatus = await faceStatusResponse.json()
+        const biometricStatus = await biometricStatusResponse.json()
         
-        if (faceStatus.success && !faceStatus.faceRegistered) {
-          // Usuário não tem face registrada - oferecer registro
+        if (biometricStatus.success && !biometricStatus.biometricRegistered) {
+          // Usuário não tem biometria registrada - oferecer registro
           setLastLoginData(result.user)
-          setShowFaceRegistration(true)
-          setSuccess(`✅ Login realizado! Quer configurar reconhecimento facial para próximos logins?`)
+          setShowBiometricRegistration(true)
+          setSuccess(`✅ Login realizado! Quer configurar biometria para próximos logins?`)
           return
         }
       } catch (error) {
-        console.warn('Erro ao verificar status facial:', error)
+        console.warn('Erro ao verificar status biométrico:', error)
       }
       
       // Redirecionar normalmente
@@ -180,36 +180,32 @@ export default function LoginPage() {
     }
   }
 
-  // Função para lidar com sucesso do login facial
-  const handleFaceLoginSuccess = async (descriptor?: FaceDescriptor, userData?: any) => {
+  // Função para lidar com sucesso do login biométrico
+  const handleBiometricLoginSuccess = async (userData?: any) => {
     if (userData) {
       // Salvar dados do usuário no localStorage e cookie
       const { syncAuthData } = await import('@/lib/cookies')
       syncAuthData(userData)
       
-      // Determinar para onde redirecionar
       const destination = returnUrl ? decodeURIComponent(returnUrl) : '/home'
-      
-      setSuccess(`🎉 Login facial realizado com sucesso! Bem-vindo(a), ${userData.nome}! Redirecionando...`)
-      
+      setSuccess(`🎉 Login biométrico realizado com sucesso! Bem-vindo(a), ${userData.nome}! Redirecionando...`)
       setTimeout(() => {
         router.push(destination)
-      }, 1500)
+      }, 2000)
     }
   }
 
-  // Função para lidar com erro do login facial
-  const handleFaceLoginError = (errorMessage: string) => {
+  // Função para lidar com erro do login biométrico
+  const handleBiometricLoginError = (errorMessage: string) => {
     setError(errorMessage)
   }
 
-  // Função para lidar com sucesso do registro facial após login
-  const handlePostLoginFaceRegister = async (descriptor?: FaceDescriptor, userData?: any) => {
+  // Função para lidar com sucesso do registro biométrico após login
+  const handlePostLoginBiometricRegister = async (userData?: any) => {
     if (lastLoginData) {
-      setShowFaceRegistration(false)
-      setSuccess(`🎉 Reconhecimento facial configurado! Agora você pode fazer login rapidamente com sua face!`)
+      setShowBiometricRegistration(false)
+      setSuccess(`🎉 Biometria configurada! Agora você pode fazer login rapidamente!`)
       
-      // Redirecionar após configurar
       const destination = returnUrl ? decodeURIComponent(returnUrl) : '/home'
       setTimeout(() => {
         router.push(destination)
@@ -217,9 +213,9 @@ export default function LoginPage() {
     }
   }
 
-  // Função para pular registro facial
-  const skipFaceRegistration = () => {
-    setShowFaceRegistration(false)
+  // Função para pular registro biométrico
+  const skipBiometricRegistration = () => {
+    setShowBiometricRegistration(false)
     const destination = returnUrl ? decodeURIComponent(returnUrl) : '/home'
     setSuccess(`✅ Login concluído! Redirecionando...`)
     setTimeout(() => {
@@ -232,18 +228,6 @@ export default function LoginPage() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-20 h-20 mb-6">
-              <img 
-                src="/logos/logo_640x640.png" 
-                alt="SGB Logo" 
-                className="w-20 h-20 rounded-2xl shadow-lg object-cover"
-              />
-            </div>
-            <h1 className="text-4xl font-bold text-slate-800 dark:text-white mb-3">SGB</h1>
-            <p className="text-slate-600 dark:text-gray-300 text-lg font-medium">Sistema de Gestão de Bares</p>
-            <p className="text-sm text-slate-400 dark:text-gray-500 mt-2">Grupo Menos é Mais</p>
-          </div>
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
             <div className="text-center py-8">
               <div className="animate-pulse">Carregando...</div>
@@ -259,44 +243,44 @@ export default function LoginPage() {
       <div className="w-full max-w-md" suppressHydrationWarning>
         {/* Logo e Header */}
         <div className="text-center mb-12" suppressHydrationWarning>
-          <div className="inline-flex items-center justify-center w-20 h-20 mb-6" suppressHydrationWarning>
+          <div className="inline-flex items-center justify-center w-24 h-24 lg:w-32 lg:h-32 mb-6" suppressHydrationWarning>
             {!logoError ? (
               <img 
                 src="/logos/logo_640x640.png" 
                 alt="SGB Logo" 
-                className="w-20 h-20 rounded-2xl shadow-lg object-cover"
+                className="w-24 h-24 lg:w-32 lg:h-32 rounded-2xl shadow-lg object-cover"
                 onError={() => setLogoError(true)}
               />
             ) : (
-              <div className="w-20 h-20 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg" suppressHydrationWarning>
-                <span className="text-3xl text-white">🏪</span>
+              <div className="w-24 h-24 lg:w-32 lg:h-32 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg" suppressHydrationWarning>
+                <span className="text-3xl lg:text-4xl text-white">🏪</span>
               </div>
             )}
           </div>
-          <h1 className="text-4xl font-bold text-slate-800 dark:text-white mb-3">SGB</h1>
-          <p className="text-slate-600 dark:text-gray-300 text-lg font-medium">Sistema de Gestão de Bares</p>
-          <p className="text-sm text-slate-400 dark:text-gray-500 mt-2">Grupo Menos é Mais</p>
+          <h1 className="text-4xl lg:text-5xl font-bold text-slate-800 dark:text-white mb-3">SGB</h1>
+          <p className="text-slate-600 dark:text-gray-300 text-lg lg:text-xl font-medium">Sistema de Gestão de Bares</p>
+          <p className="text-sm lg:text-base text-slate-400 dark:text-gray-500 mt-2">Grupo Menos é Mais</p>
         </div>
 
-        {/* Configuração de reconhecimento facial pós-login */}
-        {showFaceRegistration && lastLoginData && (
+        {/* Configuração de biometria pós-login */}
+        {showBiometricRegistration && lastLoginData && (
           <div className="mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-lg" suppressHydrationWarning>
             <div className="text-center mb-4" suppressHydrationWarning>
-              <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mx-auto mb-3" suppressHydrationWarning>
-                <span className="text-indigo-600 dark:text-indigo-400 text-xl">🎉</span>
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full mb-3" suppressHydrationWarning>
+                <Fingerprint className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                Bem-vindo(a), {lastLoginData.nome}!
+                Configurar Biometria
               </h3>
               <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-                Quer configurar reconhecimento facial para próximos logins?
+                Quer configurar biometria para próximos logins?
               </p>
             </div>
             
-            <FaceAuthenticator
+            <BiometricAuth
               mode="register"
-              onSuccess={handlePostLoginFaceRegister}
-              onError={handleFaceLoginError}
+              onSuccess={handlePostLoginBiometricRegister}
+              onError={handleBiometricLoginError}
               userEmail={lastLoginData.email}
               barId={lastLoginData.bar_id}
               className="mb-4"
@@ -304,7 +288,7 @@ export default function LoginPage() {
             
             <div className="flex gap-2">
               <button
-                onClick={skipFaceRegistration}
+                onClick={skipBiometricRegistration}
                 className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
               >
                 Agora Não
@@ -314,7 +298,7 @@ export default function LoginPage() {
         )}
 
         {/* Notificações */}
-        {returnUrl && !showFaceRegistration && (
+        {returnUrl && !showBiometricRegistration && (
           <div className="mb-6 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-xl p-4" suppressHydrationWarning>
             <div className="flex items-center space-x-3" suppressHydrationWarning>
               <div className="w-8 h-8 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center" suppressHydrationWarning>
@@ -351,7 +335,7 @@ export default function LoginPage() {
         )}
 
         {/* Seletor de Método de Login */}
-        {!showFaceRegistration && (
+        {!showBiometricRegistration && (
           <div className="mb-6">
             <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
               <button
@@ -366,22 +350,22 @@ export default function LoginPage() {
                 Email & Senha
               </button>
               <button
-                onClick={() => setLoginMethod('facial')}
+                onClick={() => setLoginMethod('biometric')}
                 className={`flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
-                  loginMethod === 'facial'
+                  loginMethod === 'biometric'
                     ? 'bg-white dark:bg-gray-700 text-slate-800 dark:text-white shadow-sm'
                     : 'text-slate-600 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-200'
                 }`}
               >
                 <Fingerprint className="w-4 h-4" />
-                Reconhecimento Facial
+                Biométrico
               </button>
             </div>
           </div>
         )}
 
         {/* Conteúdo baseado no método escolhido */}
-        {!showFaceRegistration && (
+        {!showBiometricRegistration && (
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
           {loginMethod === 'traditional' ? (
             /* Formulário de Login Tradicional */
@@ -456,31 +440,31 @@ export default function LoginPage() {
               </div>
             </>
           ) : (
-            /* Login por Reconhecimento Facial */
+            /* Login Biométrico */
             <div className="space-y-6">
               <div className="text-center">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 rounded-full mb-4">
-                  <Camera className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+                  <Fingerprint className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-2">
-                  Login Facial
+                  Login Biométrico
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-gray-400">
                   Use seu rosto para fazer login de forma rápida e segura
                 </p>
               </div>
 
-              <FaceAuthenticator
+              <BiometricAuth
                 mode="login"
-                onSuccess={handleFaceLoginSuccess}
-                onError={handleFaceLoginError}
-                barId={1} // Você pode pegar isso de algum contexto ou seleção
+                onSuccess={handleBiometricLoginSuccess}
+                onError={handleBiometricLoginError}
+                barId="1" // Você pode pegar isso de algum contexto ou seleção
                 className="border-0 shadow-none p-0 bg-transparent"
               />
 
               <div className="text-center">
-                <p className="text-xs text-slate-500 dark:text-gray-500 mb-2">
-                  Problemas com o reconhecimento facial?
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                  Problemas com a biometria?
                 </p>
                 <button
                   onClick={() => setLoginMethod('traditional')}

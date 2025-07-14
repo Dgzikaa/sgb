@@ -149,7 +149,6 @@ export default function ResponsavelWhatsAppSelector({
                           <div className="flex items-center gap-3">
                             <Checkbox
                               checked={isSelected}
-                              onChange={() => {}}
                               className="pointer-events-none"
                             />
                             
