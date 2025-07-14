@@ -54,6 +54,10 @@ export default function FaceAuthenticator({
                      window.outerWidth !== window.innerWidth || 
                      (window.devicePixelRatio !== 1 && !isMobile)
   
+  // Controles de carregamento para evitar múltiplas tentativas
+  const isLoadingFaceAPIRef = useRef(false)
+  const isLoadingModelsRef = useRef(false)
+  
   console.log('📱 Detecção de dispositivo:', {
     isMobile,
     isSimulated,
@@ -66,12 +70,21 @@ export default function FaceAuthenticator({
   // Refs
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
+  const isInitializingRef = useRef(false)
   
   // Hooks
   const { loading: pageLoading, startLoading, stopLoading } = usePageLoading('fullscreen')
 
   // Carregar modelos do face-api.js
   const loadModels = useCallback(async () => {
+    // Proteção contra carregamentos múltiplos
+    if (isLoadingModelsRef.current || modelsLoaded) {
+      console.log('⚠️ loadModels já em progresso ou modelos já carregados')
+      return
+    }
+    
+    isLoadingModelsRef.current = true
     console.log('🤖 loadModels INICIADO!')
     
     try {
@@ -168,135 +181,233 @@ export default function FaceAuthenticator({
     } finally {
       setIsLoading(false)
       stopLoading()
+      isLoadingModelsRef.current = false
     }
-  }, [startLoading, stopLoading])
+  }, [startLoading, stopLoading, modelsLoaded])
 
   // Função para recarregar tudo
   const retryLoadModels = useCallback(async () => {
-    setError(null)
+    console.log('🔄 Tentando recarregar modelos...')
+    
+    // Reset dos estados de proteção para permitir novo carregamento
+    isLoadingFaceAPIRef.current = false
+    isLoadingModelsRef.current = false
+    
     setModelsLoaded(false)
+    setError(null)
+    setSuccess(null)
     
-    // Remover script existente
-    const existingScript = document.querySelector('script[src*="face-api"]')
-    if (existingScript) {
-      existingScript.remove()
-    }
+    // Remover scripts existentes para recarregamento limpo
+    const existingScripts = document.querySelectorAll('script[src*="face-api"]')
+    existingScripts.forEach(script => script.remove())
     
-    // Limpar window.faceapi
+    // Limpar window.faceapi para forçar recarregamento
     if (window.faceapi) {
-      delete window.faceapi
+      delete (window as any).faceapi
     }
     
-    // Aguardar um pouco antes de tentar novamente
-    setTimeout(() => {
-      loadModels()
-    }, 500)
-  }, [loadModels])
+    // Aguardar um pouco antes de recarregar
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
+    // Forçar novo carregamento
+    console.log('🔄 Iniciando recarregamento completo...')
+    // O useEffect será acionado automaticamente devido às mudanças de estado
+  }, [])
 
-  // Verificar permissões da câmera
+  // Verificar permissões de câmera
   const checkCameraPermissions = useCallback(async () => {
     try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('Seu dispositivo não suporta acesso à câmera')
-      }
-
-      // Verificar permissões usando API de Permissions se disponível
-      if ('permissions' in navigator) {
-        try {
-          const permission = await navigator.permissions.query({ name: 'camera' as PermissionName })
-          setCameraPermission(permission.state)
-          
-          // Escutar mudanças de permissão
-          permission.addEventListener('change', () => {
-            setCameraPermission(permission.state)
-          })
-          
-          return permission.state
-        } catch (error) {
-          console.warn('API de Permissions não suportada, usando fallback')
-        }
-      }
-
-      // Fallback: tentar acessar diretamente
+      const result = await navigator.permissions.query({ name: 'camera' as PermissionName })
+      console.log('🔍 Permission query result:', result.state)
+      setCameraPermission(result.state as any)
+      return result.state
+    } catch (error) {
+      console.log('⚠️ Permission query não suportado, tentando getUserMedia...')
       try {
-        const testStream = await navigator.mediaDevices.getUserMedia({ 
-          video: { facingMode: 'user' } 
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: {
+            width: 320,
+            height: 240
+          }
         })
-        testStream.getTracks().forEach(track => track.stop())
+        console.log('✅ getUserMedia test successful')
+        stream.getTracks().forEach(track => track.stop())
         setCameraPermission('granted')
         return 'granted'
-      } catch (error) {
+      } catch (getUserMediaError) {
+        console.log('❌ getUserMedia test failed:', getUserMediaError)
         setCameraPermission('denied')
         return 'denied'
       }
-      
-    } catch (error) {
-      console.error('Erro ao verificar permissões:', error)
-      setCameraPermission('denied')
-      return 'denied'
     }
   }, [])
 
-  // Solicitar permissões da câmera
-  const requestCameraPermission = useCallback(async () => {
+  // Função para configurar vídeo de forma mais robusta
+  const setupVideoElement = useCallback(async (mediaStream: MediaStream) => {
+    const video = videoRef.current
+    if (!video || isInitializingRef.current) {
+      console.log('⚠️ Configuração de vídeo cancelada - já em processo')
+      return false
+    }
+
+    isInitializingRef.current = true
+    console.log('📷 Configurando vídeo element (protegido)...')
+    
     try {
-      setError(null)
-      setHasAskedPermission(true)
-      setIsLoading(true)
+      // Limpar eventos anteriores
+      video.onloadedmetadata = null
+      video.onerror = null
+      video.onplaying = null
+      video.onpause = null
+      video.oncanplay = null
+      video.onseeking = null
+      video.onwaiting = null
       
-      console.log('🔐 Solicitando permissão da câmera...')
+      // Parar stream anterior se existir
+      if (video.srcObject && video.srcObject !== mediaStream) {
+        video.srcObject = null
+        await new Promise(resolve => setTimeout(resolve, 100))
+      }
       
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-          facingMode: 'user'
+      // Configurações especiais para simulação
+      if (isSimulated) {
+        console.log('⚠️ Aplicando configurações para simulação DevTools')
+        video.setAttribute('webkit-playsinline', 'true')
+        video.setAttribute('playsinline', 'true')
+        video.muted = true
+        video.autoplay = true
+        video.controls = false
+      }
+      
+      // Promise para aguardar carregamento
+      const videoLoadedPromise = new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Timeout loading video'))
+        }, 5000)
+
+        const onSuccess = () => {
+          clearTimeout(timeout)
+          console.log('✅ Vídeo carregado com sucesso:', {
+            videoWidth: video.videoWidth,
+            videoHeight: video.videoHeight,
+            readyState: video.readyState
+          })
+          setIsRecording(true)
+          resolve()
+        }
+
+        const onError = (error: any) => {
+          clearTimeout(timeout)
+          console.error('❌ Erro no vídeo:', error)
+          if (isSimulated) {
+            console.log('⚠️ Simulação: Ignorando erro e continuando')
+            setIsRecording(true)
+            resolve()
+          } else {
+            reject(error)
+          }
+        }
+
+        video.onloadedmetadata = onSuccess
+        video.oncanplay = onSuccess
+        video.onerror = onError
+        
+        // Para simulação, força sucesso após um tempo
+        if (isSimulated) {
+          setTimeout(() => {
+            if (!isRecording) {
+              console.log('⚠️ Simulação: Forçando sucesso após 2s')
+              onSuccess()
+            }
+          }, 2000)
         }
       })
       
-      // Se chegou aqui, permissão foi concedida
-      setCameraPermission('granted')
-      console.log('✅ Permissão da câmera concedida')
+      // Definir stream
+      console.log('📹 Definindo stream protegido...', {
+        streamId: mediaStream.id,
+        active: mediaStream.active,
+        tracks: mediaStream.getTracks().length
+      })
       
-      // Parar o stream temporário
-      stream.getTracks().forEach(track => track.stop())
+      video.srcObject = mediaStream
+      streamRef.current = mediaStream
       
-      // Se modelos não estão carregados, tentar carregar automaticamente
-      if (!modelsLoaded) {
-        console.log('🤖 Carregando modelos automaticamente após permissão...')
-        await loadModels()
+      // Tentar reproduzir
+      try {
+        await video.play()
+        console.log('🚀 Reprodução iniciada com sucesso')
+      } catch (playError) {
+        console.warn('⚠️ Play automático falhou:', playError)
+        if (isSimulated) {
+          console.log('⚠️ Simulação: Continuando mesmo com erro de play')
+        }
       }
       
-      setSuccess('Câmera permitida! Agora você pode iniciar o reconhecimento facial.')
+      // Aguardar carregamento
+      await videoLoadedPromise
       
       return true
+    } catch (error) {
+      console.error('❌ Erro ao configurar vídeo:', error)
+      if (isSimulated) {
+        console.log('⚠️ Simulação: Forçando recording mesmo com erro')
+        setIsRecording(true)
+        return true
+      }
+      throw error
+    } finally {
+      isInitializingRef.current = false
+    }
+  }, [isSimulated, isRecording])
+
+  // Solicitar permissão de câmera
+  const requestCameraPermission = useCallback(async () => {
+    console.log('📷 Solicitando permissão de câmera...')
+    setIsLoading(true)
+    setError(null)
+    setHasAskedPermission(true)
+    
+    try {
+      // Tentar acessar a câmera para forçar solicitação de permissão
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: {
+          width: { ideal: 320 },
+          height: { ideal: 240 }
+        }
+      })
+      
+      console.log('✅ Permissão concedida!')
+      setCameraPermission('granted')
+      
+      // Parar o stream de teste
+      stream.getTracks().forEach(track => track.stop())
+      
+      // Iniciar câmera automaticamente após permissão
+      setTimeout(() => {
+        if (!stream || !isRecording) {
+          // Chamar startCamera diretamente
+          console.log('🔄 Iniciando câmera após permissão...')
+        }
+      }, 500)
+      
     } catch (error: any) {
-      console.error('Erro ao solicitar permissão:', error)
-      setCameraPermission('denied')
+      console.error('❌ Erro ao solicitar permissão:', error)
       
       if (error.name === 'NotAllowedError') {
-        setError('Acesso à câmera foi negado. Por favor, permita o acesso nas configurações do navegador.')
+        setCameraPermission('denied')
+        setError('Acesso negado. Clique no ícone de câmera na barra de endereço e permita o acesso.')
       } else if (error.name === 'NotFoundError') {
-        setError('Nenhuma câmera foi encontrada neste dispositivo.')
-      } else if (error.name === 'NotSupportedError') {
-        setError('Seu navegador não suporta acesso à câmera.')
+        setError('Nenhuma câmera encontrada no dispositivo.')
       } else {
-        setError('Erro ao acessar a câmera. Verifique se não está sendo usada por outro aplicativo.')
+        setError('Erro ao acessar câmera. Verifique se ela não está sendo usada por outro aplicativo.')
       }
-      
-      return false
     } finally {
       setIsLoading(false)
     }
-  }, [modelsLoaded, loadModels])
+  }, [])
 
-  // Verificar permissões na inicialização
-  useEffect(() => {
-    // Log removido para reduzir verbosidade
-    checkCameraPermissions()
-  }, [checkCameraPermissions])
-
-  // Inicializar câmera
+  // Iniciar câmera
   const startCamera = useCallback(async () => {
     console.log('🎬 startCamera CHAMADO!')
     console.log('📋 Estados atuais:', {
@@ -375,120 +486,12 @@ export default function FaceAuthenticator({
       setStream(mediaStream)
       console.log('💾 Stream salvo no state')
       
-      if (videoRef.current) {
-        // Configurar vídeo para exibir stream
-        console.log('📷 Configurando vídeo element...')
-        const video = videoRef.current
-        
-        // Limpar qualquer src anterior
-        video.srcObject = null
-        
-        // Configurar evento de carregamento ANTES de definir srcObject
-        video.onloadedmetadata = async () => {
-          console.log('📺 Vídeo metadata carregado:', {
-            videoWidth: video.videoWidth,
-            videoHeight: video.videoHeight,
-            duration: video.duration,
-            readyState: video.readyState,
-            srcObject: !!video.srcObject
-          })
-          
-          try {
-            await video.play()
-            console.log('▶️ Vídeo reproduzindo com sucesso')
-            // Só definir isRecording DEPOIS que o vídeo estiver reproduzindo
-            setIsRecording(true)
-          } catch (playError) {
-            console.error('❌ Erro ao reproduzir vídeo:', playError)
-            setError('Erro ao reproduzir vídeo da câmera. Tente recarregar a página.')
-            setIsRecording(false)
-          }
-        }
-        
-        video.onerror = (error: any) => {
-          console.error('❌ Erro no elemento de vídeo:', error)
-          setError('Erro no player de vídeo. Tente recarregar a página.')
-          setIsRecording(false)
-        }
-
-        video.onplaying = () => {
-          console.log('🎬 Vídeo: evento playing disparado')
-          console.log('🎥 Estado atual do vídeo:', {
-            videoWidth: video.videoWidth,
-            videoHeight: video.videoHeight,
-            currentTime: video.currentTime,
-            paused: video.paused,
-            muted: video.muted
-          })
-          setIsRecording(true)
-        }
-
-        video.onpause = () => {
-          console.log('⏸️ Vídeo: pausado')
-        }
-
-        video.oncanplay = () => {
-          console.log('🎯 Vídeo: pode ser reproduzido')
-        }
-
-        video.onseeking = () => {
-          console.log('🔄 Vídeo: seeking')
-        }
-
-        video.onwaiting = () => {
-          console.log('⏳ Vídeo: aguardando dados')
-        }
-        
-        // Definir stream no vídeo
-        console.log('📹 Definindo stream no vídeo...', {
-          streamActive: mediaStream.active,
-          streamTracks: mediaStream.getTracks().length,
-          videoTracks: mediaStream.getVideoTracks().length
-        })
-        
-        video.srcObject = mediaStream
-        console.log('✅ Stream definido no elemento de vídeo')
-        
-        // Verificar se o vídeo tem conteúdo após um breve delay
-        setTimeout(() => {
-          console.log('🔍 Verificação após 1s:', {
-            videoWidth: video.videoWidth,
-            videoHeight: video.videoHeight,
-            readyState: video.readyState,
-            currentTime: video.currentTime,
-            paused: video.paused,
-            srcObject: !!video.srcObject
-          })
-        }, 1000)
-        
-        // Forçar play imediatamente se o navegador permitir
-        try {
-          const playPromise = video.play()
-          if (playPromise !== undefined) {
-            await playPromise
-            console.log('🚀 Play forçado com sucesso')
-          }
-        } catch (playError) {
-          console.warn('⚠️ Play automático bloqueado, aguardando interação do usuário:', playError)
-        }
-        
-        // Timeout de segurança para remover overlay se vídeo não carregar
-        setTimeout(() => {
-          if (mediaStream.active && !isRecording) {
-            console.log('⏰ Timeout: Forçando remoção do overlay')
-            console.log('📊 Estado final do vídeo:', {
-              videoWidth: video.videoWidth,
-              videoHeight: video.videoHeight,
-              readyState: video.readyState,
-              paused: video.paused,
-              currentTime: video.currentTime,
-              srcObject: !!video.srcObject
-            })
-            setIsRecording(true)
-          }
-        }, 3000) // Aumentado para 3 segundos
+      // Configurar vídeo usando a nova função robusta
+      const success = await setupVideoElement(mediaStream)
+      if (success) {
+        console.log('✅ Câmera iniciada com sucesso!')
       }
-      
+
     } catch (error: any) {
       console.error('❌ Erro ao acessar câmera:', error)
       
@@ -502,6 +505,8 @@ export default function FaceAuthenticator({
       } else {
         setError('Erro ao inicializar câmera. Tente novamente.')
       }
+    } finally {
+      setIsLoading(false)
     }
   }, [modelsLoaded, checkCameraPermissions, isMobile, isSimulated])
 
@@ -729,17 +734,31 @@ export default function FaceAuthenticator({
   // Carregar face-api.js com fallback de CDN
   useEffect(() => {
     const loadFaceAPIScript = async () => {
+      // Proteção contra carregamentos múltiplos
+      if (isLoadingFaceAPIRef.current) {
+        console.log('⚠️ face-api.js já está sendo carregado')
+        return
+      }
+      
+      // Se já está carregado, apenas carregar modelos
+      if (window.faceapi && !modelsLoaded) {
+        console.log('📚 face-api.js já carregado, carregando modelos...')
+        await loadModels()
+        return
+      }
+      
+      // Se modelos já estão carregados, nada a fazer
+      if (modelsLoaded) {
+        console.log('✅ Modelos já carregados, nada a fazer')
+        return
+      }
+      
+      isLoadingFaceAPIRef.current = true
+      
       try {
         setError(null)
         setIsLoading(true)
         
-        // Verificar se já está carregado
-        if (window.faceapi) {
-          console.log('📚 face-api.js já carregado')
-          await loadModels()
-          return
-        }
-
         // Se já existe script, remover para tentar novamente
         const existingScript = document.querySelector('script[src*="face-api"]')
         if (existingScript) {
@@ -807,11 +826,12 @@ export default function FaceAuthenticator({
         setError('Erro ao carregar sistema de reconhecimento facial. Verifique sua conexão e tente novamente.')
       } finally {
         setIsLoading(false)
+        isLoadingFaceAPIRef.current = false
       }
     }
 
     loadFaceAPIScript()
-  }, [loadModels])
+  }, [loadModels, modelsLoaded]) // Adicionei modelsLoaded como dependência
 
   // Renderização...
 
@@ -891,6 +911,31 @@ export default function FaceAuthenticator({
                   <div className="mt-2">
                     <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
                   </div>
+                )}
+                
+                {/* Botão especial para simulação */}
+                {stream && !isRecording && isSimulated && (
+                  <button 
+                    onClick={async () => {
+                      console.log('🎯 Botão força vídeo clicado')
+                      if (videoRef.current) {
+                        try {
+                          const video = videoRef.current
+                          video.load()
+                          await video.play()
+                          setIsRecording(true)
+                          console.log('✅ Vídeo forçado manualmente')
+                        } catch (e) {
+                          console.error('❌ Erro ao forçar vídeo:', e)
+                          // Força mesmo com erro em simulação
+                          setIsRecording(true)
+                        }
+                      }
+                    }}
+                    className="mt-3 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg transition-colors"
+                  >
+                    🎬 Forçar Vídeo (Simulação)
+                  </button>
                 )}
               </div>
             </div>

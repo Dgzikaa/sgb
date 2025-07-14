@@ -125,34 +125,31 @@ async function handleNewMessage(event: EvolutionWebhookEvent) {
 
 async function checkChecklistResponse(phoneNumber: string, message: string) {
   try {
-    // Verificar se há algum checklist pendente para este número
-    const { data: agendamentos } = await supabase
-      .from('checklist_auto_executions')
-      .select(`
-        *,
-        checklist_schedules (
-          responsaveis_whatsapp,
-          titulo
-        )
-      `)
-      .eq('status', 'pendente')
-      .gte('data_limite', new Date().toISOString())
+    // 🆔 VERIFICAR SE HÁ CÓDIGO ESPECÍFICO NA MENSAGEM
+    const messageClean = message.toLowerCase().trim()
+    const codigoMatch = messageClean.match(/(?:ok|pronto|feito|concluido|concluído|finalizado)\s+([a-f0-9]{8})/i)
+    
+    if (codigoMatch) {
+      // 🎯 CONCLUSÃO COM CÓDIGO ESPECÍFICO
+      const codigo = codigoMatch[1].toUpperCase()
+      
+      const { data: agendamentos } = await supabase
+        .from('checklist_auto_executions')
+        .select(`
+          *,
+          checklist_schedules (
+            responsaveis_whatsapp,
+            titulo
+          )
+        `)
+        .eq('status', 'pendente')
+        .ilike('id', `%${codigo}`)
 
-    for (const agendamento of agendamentos || []) {
-      const responsaveis = agendamento.checklist_schedules?.responsaveis_whatsapp || []
-      const isResponsavel = responsaveis.some((resp: any) => 
-        resp.numero?.replace(/\D/g, '').includes(phoneNumber.replace(/\D/g, ''))
-      )
+      for (const agendamento of agendamentos || []) {
+        const responsaveis = agendamento.checklist_schedules?.responsaveis_whatsapp || []
+        const isResponsavel = responsaveis.includes(phoneNumber)
 
-      if (isResponsavel) {
-        // Verificar se a mensagem indica conclusão
-        const conclusionWords = ['concluído', 'concluido', 'feito', 'finalizado', 'pronto', 'ok', 'sim']
-        const isCompletion = conclusionWords.some(word => 
-          message.toLowerCase().includes(word)
-        )
-
-        if (isCompletion) {
-          // Marcar como concluído
+        if (isResponsavel) {
           await supabase
             .from('checklist_auto_executions')
             .update({ 
@@ -161,13 +158,140 @@ async function checkChecklistResponse(phoneNumber: string, message: string) {
             })
             .eq('id', agendamento.id)
 
-          console.log(`✅ Checklist marcado como concluído via WhatsApp: ${agendamento.checklist_schedules?.titulo}`)
+          console.log(`✅ Checklist específico concluído via código ${codigo}: ${agendamento.checklist_schedules?.titulo}`)
+          
+          // Enviar confirmação
+          await sendConfirmationMessage(phoneNumber, agendamento.checklist_schedules?.titulo || 'Checklist', codigo)
+          return
         }
+      }
+      
+      // Código não encontrado
+      await sendErrorMessage(phoneNumber, codigo)
+      return
+    }
+
+    // 📋 VERIFICAR CONCLUSÃO GERAL (SEM CÓDIGO) - APENAS 1 CHECKLIST PENDENTE
+    const conclusionWords = ['concluído', 'concluido', 'feito', 'finalizado', 'pronto', 'ok', 'sim']
+    const isCompletion = conclusionWords.some(word => messageClean.includes(word))
+    
+    if (isCompletion) {
+      const { data: agendamentos } = await supabase
+        .from('checklist_auto_executions')
+        .select(`
+          *,
+          checklist_schedules (
+            responsaveis_whatsapp,
+            titulo
+          )
+        `)
+        .eq('status', 'pendente')
+        .gte('data_limite', new Date().toISOString())
+
+      const meusAgendamentos = agendamentos?.filter(ag => 
+        ag.checklist_schedules?.responsaveis_whatsapp?.includes(phoneNumber)
+      ) || []
+
+      if (meusAgendamentos.length === 1) {
+        // ✅ APENAS 1 CHECKLIST - PODE CONCLUIR
+        const agendamento = meusAgendamentos[0]
+        await supabase
+          .from('checklist_auto_executions')
+          .update({ 
+            status: 'concluido',
+            notificacao_enviada: true 
+          })
+          .eq('id', agendamento.id)
+
+        console.log(`✅ Checklist único concluído: ${agendamento.checklist_schedules?.titulo}`)
+        await sendConfirmationMessage(phoneNumber, agendamento.checklist_schedules?.titulo || 'Checklist')
+        
+      } else if (meusAgendamentos.length > 1) {
+        // ⚠️ MÚLTIPLOS CHECKLISTS - SOLICITAR CÓDIGO
+        await sendMultipleChecklistsMessage(phoneNumber, meusAgendamentos)
       }
     }
 
   } catch (error) {
     console.error('❌ Erro ao verificar resposta de checklist:', error)
+  }
+}
+
+async function sendConfirmationMessage(phoneNumber: string, titulo: string, codigo?: string) {
+  const message = `✅ *Checklist Concluído!*
+
+📋 ${titulo}
+${codigo ? `🆔 Código: ${codigo}` : ''}
+⏰ ${new Date().toLocaleString('pt-BR')}
+
+Obrigado! 👍
+
+_Sistema SGB_`
+
+  await sendWhatsAppMessage(phoneNumber, message)
+}
+
+async function sendErrorMessage(phoneNumber: string, codigo: string) {
+  const message = `❌ *Código não encontrado*
+
+🆔 Código: ${codigo}
+
+Verifique se:
+• O código está correto
+• O checklist ainda está pendente
+• Você é o responsável
+
+_Sistema SGB_`
+
+  await sendWhatsAppMessage(phoneNumber, message)
+}
+
+async function sendMultipleChecklistsMessage(phoneNumber: string, agendamentos: any[]) {
+  const checklistsList = agendamentos.map(ag => {
+    const codigo = ag.id.slice(-8).toUpperCase()
+    const prazo = new Date(ag.data_limite).toLocaleDateString('pt-BR', { 
+      day: '2-digit', 
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+    return `📋 ${ag.checklist_schedules?.titulo}\n🆔 Código: *${codigo}*\n🕐 Prazo: ${prazo}`
+  }).join('\n\n')
+
+  const message = `⚠️ *Você tem ${agendamentos.length} checklists pendentes*
+
+${checklistsList}
+
+Para concluir um específico, responda:
+✅ "*ok CÓDIGO*" ou "*pronto CÓDIGO*"
+
+Exemplo: "*ok A1B2C3D4*"
+
+_Sistema SGB_`
+
+  await sendWhatsAppMessage(phoneNumber, message)
+}
+
+async function sendWhatsAppMessage(phoneNumber: string, text: string) {
+  try {
+    const response = await fetch(`${process.env.EVOLUTION_API_URL}/message/sendText/${process.env.EVOLUTION_INSTANCE_NAME}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': process.env.EVOLUTION_API_KEY!
+      },
+      body: JSON.stringify({
+        number: phoneNumber,
+        text: text
+      })
+    })
+
+    if (!response.ok) {
+      console.error('❌ Erro ao enviar mensagem WhatsApp:', await response.text())
+    }
+
+  } catch (error) {
+    console.error('❌ Erro ao enviar mensagem WhatsApp:', error)
   }
 }
 
