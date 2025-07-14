@@ -19,6 +19,8 @@ export default function LoginPage() {
   
   // Estado para controlar o método de login
   const [loginMethod, setLoginMethod] = useState<'traditional' | 'facial'>('traditional')
+  const [showFaceRegistration, setShowFaceRegistration] = useState(false)
+  const [lastLoginData, setLastLoginData] = useState<any>(null)
   
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -128,10 +130,33 @@ export default function LoginPage() {
       const { syncAuthData } = await import('@/lib/cookies')
       syncAuthData(result.user)
       
-      // Determinar para onde redirecionar
-      const destination = returnUrl ? decodeURIComponent(returnUrl) : '/home'
+      // Verificar se o usuário tem reconhecimento facial registrado
+      try {
+        const faceStatusResponse = await fetch('/api/auth/face/status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: result.user.email,
+            barId: result.user.bar_id
+          })
+        })
+        
+        const faceStatus = await faceStatusResponse.json()
+        
+        if (faceStatus.success && !faceStatus.faceRegistered) {
+          // Usuário não tem face registrada - oferecer registro
+          setLastLoginData(result.user)
+          setShowFaceRegistration(true)
+          setSuccess(`✅ Login realizado! Quer configurar reconhecimento facial para próximos logins?`)
+          return
+        }
+      } catch (error) {
+        console.warn('Erro ao verificar status facial:', error)
+      }
       
-      setSuccess(`Login realizado com sucesso! Redirecionando para ${destination.startsWith('/home') ? 'início' : 'página solicitada'}...`)
+      // Redirecionar normalmente
+      const destination = returnUrl ? decodeURIComponent(returnUrl) : '/home'
+      setSuccess(`✅ Login realizado com sucesso! Redirecionando...`)
       setTimeout(() => {
         router.push(destination)
       }, 1500)
@@ -153,7 +178,7 @@ export default function LoginPage() {
       // Determinar para onde redirecionar
       const destination = returnUrl ? decodeURIComponent(returnUrl) : '/home'
       
-      setSuccess(`Login facial realizado com sucesso! Redirecionando para ${destination.startsWith('/home') ? 'início' : 'página solicitada'}...`)
+      setSuccess(`🎉 Login facial realizado com sucesso! Bem-vindo(a), ${userData.nome}! Redirecionando...`)
       
       setTimeout(() => {
         router.push(destination)
@@ -164,6 +189,30 @@ export default function LoginPage() {
   // Função para lidar com erro do login facial
   const handleFaceLoginError = (errorMessage: string) => {
     setError(errorMessage)
+  }
+
+  // Função para lidar com sucesso do registro facial após login
+  const handlePostLoginFaceRegister = async (descriptor?: FaceDescriptor, userData?: any) => {
+    if (lastLoginData) {
+      setShowFaceRegistration(false)
+      setSuccess(`🎉 Reconhecimento facial configurado! Agora você pode fazer login rapidamente com sua face!`)
+      
+      // Redirecionar após configurar
+      const destination = returnUrl ? decodeURIComponent(returnUrl) : '/home'
+      setTimeout(() => {
+        router.push(destination)
+      }, 2000)
+    }
+  }
+
+  // Função para pular registro facial
+  const skipFaceRegistration = () => {
+    setShowFaceRegistration(false)
+    const destination = returnUrl ? decodeURIComponent(returnUrl) : '/home'
+    setSuccess(`✅ Login concluído! Redirecionando...`)
+    setTimeout(() => {
+      router.push(destination)
+    }, 1000)
   }
 
   return (
@@ -179,8 +228,43 @@ export default function LoginPage() {
           <p className="text-sm text-slate-400 dark:text-gray-500 mt-2">Grupo Menos é Mais</p>
         </div>
 
+        {/* Configuração de reconhecimento facial pós-login */}
+        {showFaceRegistration && lastLoginData && (
+          <div className="mb-6 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-xl p-6">
+            <div className="text-center mb-4">
+              <div className="w-12 h-12 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                <span className="text-green-600 dark:text-green-400 text-xl">🎉</span>
+              </div>
+              <h3 className="text-lg font-semibold text-green-700 dark:text-green-300 mb-2">
+                Bem-vindo(a), {lastLoginData.nome}!
+              </h3>
+              <p className="text-green-600 dark:text-green-400 text-sm mb-4">
+                Quer configurar reconhecimento facial para logins mais rápidos?
+              </p>
+            </div>
+            
+            <FaceAuthenticator
+              mode="register"
+              onSuccess={handlePostLoginFaceRegister}
+              onError={handleFaceLoginError}
+              userEmail={lastLoginData.email}
+              barId={lastLoginData.bar_id}
+              className="mb-4"
+            />
+            
+            <div className="flex gap-2">
+              <button
+                onClick={skipFaceRegistration}
+                className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+              >
+                Agora Não
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Notificações */}
-        {returnUrl && (
+        {returnUrl && !showFaceRegistration && (
           <div className="mb-6 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
@@ -217,35 +301,38 @@ export default function LoginPage() {
         )}
 
         {/* Seletor de Método de Login */}
-        <div className="mb-6">
-          <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
-            <button
-              onClick={() => setLoginMethod('traditional')}
-              className={`flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
-                loginMethod === 'traditional'
-                  ? 'bg-white dark:bg-gray-700 text-slate-800 dark:text-white shadow-sm'
-                  : 'text-slate-600 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-200'
-              }`}
-            >
-              <LogIn className="w-4 h-4" />
-              Email & Senha
-            </button>
-            <button
-              onClick={() => setLoginMethod('facial')}
-              className={`flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
-                loginMethod === 'facial'
-                  ? 'bg-white dark:bg-gray-700 text-slate-800 dark:text-white shadow-sm'
-                  : 'text-slate-600 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-200'
-              }`}
-            >
-              <Fingerprint className="w-4 h-4" />
-              Reconhecimento Facial
-            </button>
+        {!showFaceRegistration && (
+          <div className="mb-6">
+            <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
+              <button
+                onClick={() => setLoginMethod('traditional')}
+                className={`flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
+                  loginMethod === 'traditional'
+                    ? 'bg-white dark:bg-gray-700 text-slate-800 dark:text-white shadow-sm'
+                    : 'text-slate-600 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-200'
+                }`}
+              >
+                <LogIn className="w-4 h-4" />
+                Email & Senha
+              </button>
+              <button
+                onClick={() => setLoginMethod('facial')}
+                className={`flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
+                  loginMethod === 'facial'
+                    ? 'bg-white dark:bg-gray-700 text-slate-800 dark:text-white shadow-sm'
+                    : 'text-slate-600 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-200'
+                }`}
+              >
+                <Fingerprint className="w-4 h-4" />
+                Reconhecimento Facial
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Conteúdo baseado no método escolhido */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
+        {!showFaceRegistration && (
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
           {loginMethod === 'traditional' ? (
             /* Formulário de Login Tradicional */
             <>
@@ -355,6 +442,7 @@ export default function LoginPage() {
             </div>
           )}
         </div>
+        )}
 
         {/* Footer */}
         <div className="text-center mt-12 text-slate-400 dark:text-gray-500 text-sm">
