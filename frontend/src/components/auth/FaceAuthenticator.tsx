@@ -423,7 +423,26 @@ export default function FaceAuthenticator({
 
   // Capturar e processar face
   const captureFace = useCallback(async () => {
+    console.log('📸 captureFace CHAMADO!')
+    console.log('🔍 Estados para captura:', {
+      hasVideo: !!videoRef.current,
+      hasCanvas: !!canvasRef.current,
+      modelsLoaded,
+      stream: !!stream,
+      userEmail,
+      barId,
+      mode
+    })
+    
+    // Verificar se dados obrigatórios estão presentes
+    if (mode === 'register' && (!userEmail || !barId)) {
+      console.log('❌ Dados de usuário não fornecidos para registro')
+      setError('Erro: dados de usuário não fornecidos. Você precisa estar logado para registrar sua face.')
+      return
+    }
+    
     if (!videoRef.current || !canvasRef.current || !modelsLoaded) {
+      console.log('❌ Sistema não está pronto para captura')
       setError('Sistema não está pronto. Tente novamente.')
       return
     }
@@ -431,6 +450,7 @@ export default function FaceAuthenticator({
     try {
       setIsLoading(true)
       startLoading('fullscreen', 'Processando reconhecimento facial...')
+      console.log('🎬 Iniciando processo de captura...')
       
       const video = videoRef.current
       const canvas = canvasRef.current
@@ -439,18 +459,33 @@ export default function FaceAuthenticator({
       canvas.width = video.videoWidth
       canvas.height = video.videoHeight
       
+      console.log('📐 Canvas configurado:', {
+        canvasWidth: canvas.width,
+        canvasHeight: canvas.height,
+        videoWidth: video.videoWidth,
+        videoHeight: video.videoHeight
+      })
+      
+      console.log('🤖 Iniciando detecção de face...')
+      
       // Detectar face
       const detection = await window.faceapi
         .detectSingleFace(video, new window.faceapi.TinyFaceDetectorOptions())
         .withFaceLandmarks()
         .withFaceDescriptor()
 
+      console.log('👁️ Resultado da detecção:', detection ? 'Face encontrada' : 'Nenhuma face')
+      
       if (!detection) {
+        console.log('❌ Nenhuma face detectada')
         throw new Error('Nenhuma face detectada. Posicione-se bem na frente da câmera.')
       }
 
+      console.log('📊 Score da detecção:', detection.detection.score)
+
       // Verificar qualidade da detecção
       if (detection.detection.score < 0.7) {
+        console.log('❌ Score baixo:', detection.detection.score)
         throw new Error('Qualidade da detecção baixa. Melhore a iluminação e tente novamente.')
       }
 
@@ -480,7 +515,18 @@ export default function FaceAuthenticator({
 
   // Registrar nova face
   const handleRegister = async (descriptor: number[], confidence: number) => {
+    console.log('💾 handleRegister INICIADO!')
+    console.log('📊 Dados para registro:', {
+      descriptorLength: descriptor.length,
+      confidence,
+      userEmail,
+      barId,
+      hasDescriptor: !!descriptor
+    })
+    
     try {
+      console.log('📡 Enviando para API /api/auth/face/register...')
+      
       const response = await fetch('/api/auth/face/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -492,17 +538,26 @@ export default function FaceAuthenticator({
         })
       })
 
+      console.log('📨 Resposta da API:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      })
+
       const result = await response.json()
+      console.log('📋 Resultado da API:', result)
 
       if (!result.success) {
         throw new Error(result.error || 'Erro ao registrar face')
       }
 
+      console.log('✅ Face registrada com sucesso!')
       setSuccess('Face registrada com sucesso! 🎉')
       stopCamera()
       onSuccess({ descriptor, confidence })
       
     } catch (error: any) {
+      console.error('❌ Erro no handleRegister:', error)
       throw new Error(error.message || 'Erro ao registrar face no servidor')
     }
   }
@@ -637,13 +692,13 @@ export default function FaceAuthenticator({
   })
 
   return (
-    <Card className={`w-full max-w-md mx-auto card-dark ${className}`}>
+    <Card className={`w-full max-w-md mx-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm ${className}`}>
       <CardHeader className="text-center">
-        <CardTitle className="card-title-dark flex items-center justify-center gap-2">
-          <Camera className="w-5 h-5 icon-primary" />
+        <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center justify-center gap-2">
+          <Camera className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           {mode === 'register' ? 'Registrar Face' : 'Login Facial'}
         </CardTitle>
-        <CardDescription className="card-description-dark">
+        <CardDescription className="text-sm text-gray-600 dark:text-gray-400">
           {mode === 'register' 
             ? 'Posicione sua face na câmera para registrar seu reconhecimento facial'
             : 'Olhe para a câmera para fazer login com reconhecimento facial'
@@ -879,9 +934,14 @@ export default function FaceAuthenticator({
           ) : (
             <>
               <Button
-                onClick={captureFace}
+                onClick={() => {
+                  console.log('🔘 Botão Registrar/Entrar CLICADO!')
+                  console.log('📊 Modo atual:', mode)
+                  console.log('🔒 isLoading:', isLoading)
+                  captureFace()
+                }}
                 disabled={isLoading}
-                className="btn-success-dark flex-1"
+                className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white font-medium px-6 py-2 rounded-lg transition-colors flex-1"
               >
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />

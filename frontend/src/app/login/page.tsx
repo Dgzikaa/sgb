@@ -16,6 +16,7 @@ export default function LoginPage() {
   const [forgotEmail, setForgotEmail] = useState('')
   const [forgotLoading, setForgotLoading] = useState(false)
   const [forgotSuccess, setForgotSuccess] = useState(false)
+  const [isClient, setIsClient] = useState(false)
   
   // Estado para controlar o método de login
   const [loginMethod, setLoginMethod] = useState<'traditional' | 'facial'>('traditional')
@@ -28,9 +29,17 @@ export default function LoginPage() {
   // Capturar URL de retorno se houver
   const returnUrl = searchParams.get('returnUrl')
 
+  // Controlar hidratação
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
   // Verificar se usuário já está logado
   useEffect(() => {
     const checkAuthStatus = () => {
+      // Verificar se estamos no cliente antes de acessar localStorage
+      if (typeof window === 'undefined') return
+      
       try {
         const userData = localStorage.getItem('sgb_user')
         if (userData) {
@@ -220,8 +229,23 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Logo e Header */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-indigo-600 rounded-2xl mb-6 shadow-lg">
-            <span className="text-3xl text-white">🏪</span>
+          <div className="inline-flex items-center justify-center w-20 h-20 mb-6">
+            <img 
+              src="/logos/logo_640x640.png" 
+              alt="SGB Logo" 
+              className="w-20 h-20 rounded-2xl shadow-lg object-cover"
+              onError={(e) => {
+                // Fallback para emoji se logo não carregar
+                e.currentTarget.style.display = 'none'
+                const fallback = e.currentTarget.nextElementSibling as HTMLElement
+                if (fallback) {
+                  fallback.style.display = 'flex'
+                }
+              }}
+            />
+            <div className="hidden w-20 h-20 bg-indigo-600 rounded-2xl items-center justify-center shadow-lg">
+              <span className="text-3xl text-white">🏪</span>
+            </div>
           </div>
           <h1 className="text-4xl font-bold text-slate-800 dark:text-white mb-3">SGB</h1>
           <p className="text-slate-600 dark:text-gray-300 text-lg font-medium">Sistema de Gestão de Bares</p>
@@ -229,17 +253,17 @@ export default function LoginPage() {
         </div>
 
         {/* Configuração de reconhecimento facial pós-login */}
-        {showFaceRegistration && lastLoginData && (
-          <div className="mb-6 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-xl p-6">
+        {isClient && showFaceRegistration && lastLoginData && (
+          <div className="mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-lg">
             <div className="text-center mb-4">
-              <div className="w-12 h-12 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-green-600 dark:text-green-400 text-xl">🎉</span>
+              <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mx-auto mb-3">
+                <span className="text-indigo-600 dark:text-indigo-400 text-xl">🎉</span>
               </div>
-              <h3 className="text-lg font-semibold text-green-700 dark:text-green-300 mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                 Bem-vindo(a), {lastLoginData.nome}!
               </h3>
-              <p className="text-green-600 dark:text-green-400 text-sm mb-4">
-                Quer configurar reconhecimento facial para logins mais rápidos?
+              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                Quer configurar reconhecimento facial para próximos logins?
               </p>
             </div>
             
@@ -264,7 +288,7 @@ export default function LoginPage() {
         )}
 
         {/* Notificações */}
-        {returnUrl && !showFaceRegistration && (
+        {isClient && returnUrl && !showFaceRegistration && (
           <div className="mb-6 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
@@ -278,7 +302,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        {error && (
+        {isClient && error && (
           <div className="mb-6 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl p-4">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-red-100 dark:bg-red-800 rounded-full flex items-center justify-center">
@@ -289,7 +313,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        {success && (
+        {isClient && success && (
           <div className="mb-6 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-xl p-4">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center">
@@ -301,7 +325,7 @@ export default function LoginPage() {
         )}
 
         {/* Seletor de Método de Login */}
-        {!showFaceRegistration && (
+        {isClient && !showFaceRegistration && (
           <div className="mb-6">
             <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
               <button
@@ -331,7 +355,7 @@ export default function LoginPage() {
         )}
 
         {/* Conteúdo baseado no método escolhido */}
-        {!showFaceRegistration && (
+        {isClient && !showFaceRegistration && (
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
           {loginMethod === 'traditional' ? (
             /* Formulário de Login Tradicional */
@@ -451,7 +475,7 @@ export default function LoginPage() {
       </div>
 
       {/* Modal Esqueci Minha Senha */}
-      {showForgotPassword && (
+      {isClient && showForgotPassword && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 w-full max-w-md shadow-2xl">
             <div className="text-center mb-6">

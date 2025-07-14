@@ -27,6 +27,8 @@ export function BarProvider({ children }: { children: ReactNode }) {
     setSelectedBar(null)
     setAvailableBars([])
     setIsLoading(true)
+    // Resetar favicon para default
+    updateFavicon()
   }
 
   useEffect(() => {
@@ -139,11 +141,16 @@ export function BarProvider({ children }: { children: ReactNode }) {
              const selectedBar = barsData.find((bar: Bar) => bar.id === parseInt(selectedBarId))
             if (selectedBar) {
               setSelectedBar(selectedBar)
+              updateFavicon(selectedBar.nome)
             } else {
-              setSelectedBar(barsData[0] || null)
+              const defaultBar = barsData[0] || null
+              setSelectedBar(defaultBar)
+              updateFavicon(defaultBar?.nome)
             }
           } else if (barsData && barsData.length > 0) {
-            setSelectedBar(barsData[0])
+            const defaultBar = barsData[0]
+            setSelectedBar(defaultBar)
+            updateFavicon(defaultBar.nome)
           }
           
           setIsLoading(false)
@@ -161,12 +168,51 @@ export function BarProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // Função para atualizar favicon baseado no bar
+  const updateFavicon = (barName?: string) => {
+    if (typeof window === 'undefined') return
+    
+    const faviconPath = barName ? `/favicons/${barName.toLowerCase()}/favicon-32x32.png` : '/favicons/default/favicon-32x32.png'
+    const appleTouchPath = barName ? `/favicons/${barName.toLowerCase()}/apple-touch-icon.png` : '/favicons/default/apple-touch-icon.png'
+    
+    // Atualizar favicon principal
+    let favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement
+    if (!favicon) {
+      favicon = document.createElement('link')
+      favicon.rel = 'icon'
+      document.head.appendChild(favicon)
+    }
+    favicon.href = faviconPath
+    
+    // Atualizar favicon 32x32
+    let favicon32 = document.querySelector('link[rel="icon"][sizes="32x32"]') as HTMLLinkElement
+    if (!favicon32) {
+      favicon32 = document.createElement('link')
+      favicon32.rel = 'icon'
+      favicon32.sizes = '32x32'
+      favicon32.type = 'image/png'
+      document.head.appendChild(favicon32)
+    }
+    favicon32.href = faviconPath
+    
+    // Atualizar apple-touch-icon
+    let appleIcon = document.querySelector('link[rel="apple-touch-icon"]') as HTMLLinkElement
+    if (!appleIcon) {
+      appleIcon = document.createElement('link')
+      appleIcon.rel = 'apple-touch-icon'
+      document.head.appendChild(appleIcon)
+    }
+    appleIcon.href = appleTouchPath
+  }
+
   // Função para alterar o bar selecionado
   const handleSetSelectedBar = (bar: Bar) => {
     setSelectedBar(bar)
     // Salvar no localStorage apenas se estamos no cliente
     if (typeof window !== 'undefined') {
       localStorage.setItem('sgb_selected_bar_id', bar.id.toString())
+      // Atualizar favicon baseado no bar selecionado
+      updateFavicon(bar.nome)
     }
   }
 
