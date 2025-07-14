@@ -90,16 +90,21 @@ async function handleNewMessage(event: EvolutionWebhookEvent) {
     })
 
     // Salvar mensagem no banco (usando tabela existente)
+    // Para mensagens recebidas, to_number será o número da empresa (quem recebe)
+    // e from_number seria quem enviou (mas usamos to_number por compatibilidade)
+    const companyNumber = '+5561918444210' // Número da empresa SGB
+    
     await supabase
       .from('whatsapp_messages')
       .insert({
-        to_number: phoneNumber || '',
+        to_number: companyNumber, // Quem recebeu (empresa)
         message: messageText,
         type: 'received',
         provider: 'evolution-api',
         status: 'received',
         provider_response: {
           sender_name: data.pushName || 'Desconhecido',
+          sender_number: phoneNumber || 'Desconhecido',
           message_id: data.key?.id || '',
           instance: event.instance,
           timestamp: data.messageTimestamp
