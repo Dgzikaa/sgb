@@ -215,6 +215,9 @@ export default function FaceAuthenticator({
     try {
       setError(null)
       setHasAskedPermission(true)
+      setIsLoading(true)
+      
+      console.log('🔐 Solicitando permissão da câmera...')
       
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -226,9 +229,18 @@ export default function FaceAuthenticator({
       
       // Se chegou aqui, permissão foi concedida
       setCameraPermission('granted')
+      console.log('✅ Permissão da câmera concedida')
       
       // Parar o stream temporário
       stream.getTracks().forEach(track => track.stop())
+      
+      // Se modelos não estão carregados, tentar carregar automaticamente
+      if (!modelsLoaded) {
+        console.log('🤖 Carregando modelos automaticamente após permissão...')
+        await loadModels()
+      }
+      
+      setSuccess('Câmera permitida! Agora você pode iniciar o reconhecimento facial.')
       
       return true
     } catch (error: any) {
@@ -246,8 +258,10 @@ export default function FaceAuthenticator({
       }
       
       return false
+    } finally {
+      setIsLoading(false)
     }
-  }, [])
+  }, [modelsLoaded, loadModels])
 
   // Verificar permissões na inicialização
   useEffect(() => {
@@ -616,10 +630,30 @@ export default function FaceAuthenticator({
 
         {!modelsLoaded && !error && (
           <Alert className="border-blue-200 dark:border-blue-800">
-            <AlertTriangle className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            <AlertDescription className="text-blue-700 dark:text-blue-300">
-              Carregando modelos de IA... Aguarde.
-            </AlertDescription>
+            <div className="flex items-start gap-2">
+              <Loader2 className="w-4 h-4 text-blue-600 dark:text-blue-400 animate-spin flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <AlertDescription className="text-blue-700 dark:text-blue-300 mb-2">
+                  Carregando modelos de reconhecimento facial...
+                  <br />
+                  <span className="text-xs">Isso pode levar alguns segundos na primeira vez.</span>
+                </AlertDescription>
+                <Button
+                  onClick={retryLoadModels}
+                  disabled={isLoading}
+                  variant="outline"
+                  size="sm"
+                  className="border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                  ) : (
+                    '⚡'
+                  )}
+                  Acelerar Carregamento
+                </Button>
+              </div>
+            </div>
           </Alert>
         )}
 
@@ -659,15 +693,56 @@ export default function FaceAuthenticator({
               </AlertDescription>
               <Button
                 onClick={requestCameraPermission}
+                disabled={isLoading}
                 size="sm"
                 className="btn-primary-dark"
               >
-                <Camera className="w-3 h-3 mr-1" />
+                {isLoading ? (
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                ) : (
+                  <Camera className="w-3 h-3 mr-1" />
+                )}
                 Permitir Acesso à Câmera
               </Button>
             </div>
           </Alert>
         )}
+
+        {/* Status do Sistema */}
+        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg text-sm space-y-1">
+          <div className="flex items-center gap-2">
+            <span>🤖 Modelos de IA:</span>
+            {modelsLoaded ? (
+              <span className="text-green-600 dark:text-green-400 font-medium">✅ Carregados</span>
+            ) : isLoading ? (
+              <span className="text-blue-600 dark:text-blue-400 font-medium">🔄 Carregando...</span>
+            ) : (
+              <span className="text-red-600 dark:text-red-400 font-medium">❌ Não carregados</span>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <span>📷 Câmera:</span>
+            {cameraPermission === 'granted' ? (
+              <span className="text-green-600 dark:text-green-400 font-medium">✅ Permitida</span>
+            ) : cameraPermission === 'denied' ? (
+              <span className="text-red-600 dark:text-red-400 font-medium">❌ Negada</span>
+            ) : (
+              <span className="text-yellow-600 dark:text-yellow-400 font-medium">⏳ Pendente</span>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <span>🎯 Status:</span>
+            {isRecording ? (
+              <span className="text-green-600 dark:text-green-400 font-medium">🟢 Gravando</span>
+            ) : modelsLoaded && cameraPermission === 'granted' ? (
+              <span className="text-blue-600 dark:text-blue-400 font-medium">🔵 Pronto</span>
+            ) : (
+              <span className="text-gray-600 dark:text-gray-400 font-medium">⚪ Aguardando</span>
+            )}
+          </div>
+        </div>
 
         {/* Controles */}
         <div className="flex gap-2">
