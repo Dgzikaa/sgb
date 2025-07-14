@@ -43,6 +43,8 @@ export default function FaceAuthenticator({
   const [modelsLoaded, setModelsLoaded] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [cameraPermission, setCameraPermission] = useState<'prompt' | 'granted' | 'denied'>('prompt')
+  const [hasAskedPermission, setHasAskedPermission] = useState(false)
   
   // Refs
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -164,39 +166,151 @@ export default function FaceAuthenticator({
     }, 500)
   }, [loadModels])
 
-  // Inicializar câmera
-  const startCamera = useCallback(async () => {
+  // Verificar permissões da câmera
+  const checkCameraPermissions = useCallback(async () => {
     try {
-      setError(null)
-      setSuccess(null)
-      
-      if (!modelsLoaded) {
-        await loadModels()
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Seu dispositivo não suporta acesso à câmera')
       }
 
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
+      // Verificar permissões usando API de Permissions se disponível
+      if ('permissions' in navigator) {
+        try {
+          const permission = await navigator.permissions.query({ name: 'camera' as PermissionName })
+          setCameraPermission(permission.state)
+          
+          // Escutar mudanças de permissão
+          permission.addEventListener('change', () => {
+            setCameraPermission(permission.state)
+          })
+          
+          return permission.state
+        } catch (error) {
+          console.warn('API de Permissions não suportada, usando fallback')
+        }
+      }
+
+      // Fallback: tentar acessar diretamente
+      try {
+        const testStream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: 'user' } 
+        })
+        testStream.getTracks().forEach(track => track.stop())
+        setCameraPermission('granted')
+        return 'granted'
+      } catch (error) {
+        setCameraPermission('denied')
+        return 'denied'
+      }
+      
+    } catch (error) {
+      console.error('Erro ao verificar permissões:', error)
+      setCameraPermission('denied')
+      return 'denied'
+    }
+  }, [])
+
+  // Solicitar permissões da câmera
+  const requestCameraPermission = useCallback(async () => {
+    try {
+      setError(null)
+      setHasAskedPermission(true)
+      
+      const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           width: { ideal: 640 },
           height: { ideal: 480 },
           facingMode: 'user'
         }
       })
+      
+      // Se chegou aqui, permissão foi concedida
+      setCameraPermission('granted')
+      
+      // Parar o stream temporário
+      stream.getTracks().forEach(track => track.stop())
+      
+      return true
+    } catch (error: any) {
+      console.error('Erro ao solicitar permissão:', error)
+      setCameraPermission('denied')
+      
+      if (error.name === 'NotAllowedError') {
+        setError('Acesso à câmera foi negado. Por favor, permita o acesso nas configurações do navegador.')
+      } else if (error.name === 'NotFoundError') {
+        setError('Nenhuma câmera foi encontrada neste dispositivo.')
+      } else if (error.name === 'NotSupportedError') {
+        setError('Seu navegador não suporta acesso à câmera.')
+      } else {
+        setError('Erro ao acessar a câmera. Verifique se não está sendo usada por outro aplicativo.')
+      }
+      
+      return false
+    }
+  }, [])
+
+  // Verificar permissões na inicialização
+  useEffect(() => {
+    checkCameraPermissions()
+  }, [checkCameraPermissions])
+
+  // Inicializar câmera
+  const startCamera = useCallback(async () => {
+    try {
+      setError(null)
+      setSuccess(null)
+      
+      // Verificar se modelos estão carregados
+      if (!modelsLoaded) {
+        setError('Aguarde o carregamento dos modelos de IA.')
+        return
+      }
+
+      // Verificar permissões antes de tentar acessar
+      const permissionState = await checkCameraPermissions()
+      
+      if (permissionState === 'denied') {
+        setError('Acesso à câmera negado. Clique em "Permitir Câmera" para solicitar acesso.')
+        return
+      }
+
+      console.log('📷 Iniciando câmera...')
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 640, max: 1280 },
+          height: { ideal: 480, max: 720 },
+          facingMode: 'user'
+        }
+      })
 
       setStream(mediaStream)
+      setCameraPermission('granted')
       
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream
-        await videoRef.current.play()
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current?.play().then(() => {
+            setIsRecording(true)
+            console.log('✅ Câmera iniciada com sucesso')
+          })
+        }
       }
       
-      setIsRecording(true)
-      console.log('📷 Câmera iniciada')
-      
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Erro ao acessar câmera:', error)
-      setError('Erro ao acessar a câmera. Verifique as permissões.')
+      
+      if (error.name === 'NotAllowedError') {
+        setCameraPermission('denied')
+        setError('Acesso à câmera foi negado. Use o botão "Permitir Câmera" para tentar novamente.')
+      } else if (error.name === 'NotFoundError') {
+        setError('Nenhuma câmera encontrada. Verifique se seu dispositivo possui câmera.')
+      } else if (error.name === 'NotReadableError') {
+        setError('Câmera está sendo usada por outro aplicativo. Feche outros apps que usam câmera.')
+      } else {
+        setError('Erro ao inicializar câmera. Tente novamente.')
+      }
     }
-  }, [modelsLoaded, loadModels])
+  }, [modelsLoaded, checkCameraPermissions])
 
   // Parar câmera
   const stopCamera = useCallback(() => {
@@ -509,12 +623,58 @@ export default function FaceAuthenticator({
           </Alert>
         )}
 
+        {/* Sistema de Permissões */}
+        {cameraPermission === 'denied' && hasAskedPermission && (
+          <Alert className="border-orange-200 dark:border-orange-800">
+            <AlertTriangle className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+            <div className="flex-1">
+              <AlertDescription className="text-orange-700 dark:text-orange-300 mb-3">
+                <strong>Câmera Bloqueada</strong><br />
+                Para usar o reconhecimento facial, você precisa permitir acesso à câmera.
+              </AlertDescription>
+              <div className="text-xs text-orange-600 dark:text-orange-400 space-y-1 mb-3">
+                <p><strong>Como permitir no celular:</strong></p>
+                <p>• Toque no ícone 🔒 ou ⚙️ na barra de endereço</p>
+                <p>• Selecione "Permitir" para Câmera</p>
+                <p>• Recarregue a página se necessário</p>
+              </div>
+              <Button
+                onClick={requestCameraPermission}
+                size="sm"
+                className="btn-primary-dark"
+              >
+                <Camera className="w-3 h-3 mr-1" />
+                Permitir Câmera
+              </Button>
+            </div>
+          </Alert>
+        )}
+
+        {cameraPermission === 'prompt' && !hasAskedPermission && (
+          <Alert className="border-blue-200 dark:border-blue-800">
+            <Camera className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <div className="flex-1">
+              <AlertDescription className="text-blue-700 dark:text-blue-300 mb-2">
+                Para começar, precisamos acessar sua câmera para o reconhecimento facial.
+              </AlertDescription>
+              <Button
+                onClick={requestCameraPermission}
+                size="sm"
+                className="btn-primary-dark"
+              >
+                <Camera className="w-3 h-3 mr-1" />
+                Permitir Acesso à Câmera
+              </Button>
+            </div>
+          </Alert>
+        )}
+
         {/* Controles */}
         <div className="flex gap-2">
           {!isRecording ? (
             <Button
               onClick={startCamera}
-              disabled={isLoading || !modelsLoaded}
+              disabled={isLoading || !modelsLoaded || cameraPermission !== 'granted'}
               className="btn-primary-dark flex-1"
             >
               {isLoading ? (
@@ -553,14 +713,28 @@ export default function FaceAuthenticator({
         </div>
 
         {/* Instruções */}
-        <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-          <p className="font-medium">💡 Dicas para melhor reconhecimento:</p>
-          <ul className="list-disc list-inside space-y-0.5 text-xs">
-            <li>Mantenha boa iluminação no rosto</li>
-            <li>Olhe diretamente para a câmera</li>
-            <li>Mantenha uma expressão neutra</li>
-            <li>Evite óculos escuros ou máscaras</li>
-          </ul>
+        <div className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+          <div>
+            <p className="font-medium">💡 Dicas para melhor reconhecimento:</p>
+            <ul className="list-disc list-inside space-y-0.5 text-xs mt-1">
+              <li>Mantenha boa iluminação no rosto</li>
+              <li>Olhe diretamente para a câmera</li>
+              <li>Mantenha uma expressão neutra</li>
+              <li>Evite óculos escuros ou máscaras</li>
+            </ul>
+          </div>
+          
+          {cameraPermission !== 'granted' && (
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-2">
+              <p className="font-medium">📱 Sobre permissões:</p>
+              <ul className="list-disc list-inside space-y-0.5 text-xs mt-1">
+                <li>É seguro permitir acesso - não gravamos imagens</li>
+                <li>Processamos apenas no seu dispositivo</li>
+                <li>Você pode revogar a permissão a qualquer momento</li>
+                <li>Sem permissão, o reconhecimento facial não funciona</li>
+              </ul>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

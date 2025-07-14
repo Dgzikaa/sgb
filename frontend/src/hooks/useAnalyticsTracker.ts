@@ -39,6 +39,10 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
 
   // Detectar informações do dispositivo
   const getDeviceInfo = useCallback(() => {
+    if (typeof window === 'undefined' || !navigator) {
+      return { deviceType: 'desktop', browser: 'Unknown', userAgent: 'Server' }
+    }
+    
     const userAgent = navigator.userAgent
     let deviceType = 'desktop'
     let browser = 'Unknown'
@@ -93,7 +97,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
   // Flush na saída da página
   useEffect(() => {
     const handleBeforeUnload = () => {
-      if (eventQueue.current.length > 0) {
+      if (eventQueue.current.length > 0 && typeof window !== 'undefined' && navigator && navigator.sendBeacon) {
         // Usar sendBeacon para envio garantido na saída
         navigator.sendBeacon(
           '/api/analytics/eventos',

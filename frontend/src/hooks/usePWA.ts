@@ -51,41 +51,40 @@ export function usePWA(): PWAState & PWAActions {
 
   // Registrar Service Worker
   const registerServiceWorker = useCallback(async () => {
-    if ('serviceWorker' in navigator) {
-      try {
-        const registration = await navigator.serviceWorker.register('/sw.js', {
-          scope: '/'
-        })
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return null
+    
+    try {
+      const registration = await navigator.serviceWorker.register('/sw.js', {
+        scope: '/'
+      })
 
-        console.log('✅ PWA: Service Worker registrado:', registration.scope)
+      console.log('✅ PWA: Service Worker registrado:', registration.scope)
+      
+      setState(prev => ({ 
+        ...prev, 
+        serviceWorkerRegistration: registration 
+      }))
+
+      // Escutar atualizações do Service Worker
+      registration.addEventListener('updatefound', () => {
+        console.log('🔄 PWA: Nova versão do Service Worker encontrada')
         
-        setState(prev => ({ 
-          ...prev, 
-          serviceWorkerRegistration: registration 
-        }))
+        const newWorker = registration.installing
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && typeof window !== 'undefined' && navigator.serviceWorker.controller) {
+              console.log('✨ PWA: Nova versão disponível')
+              // Aqui você pode mostrar uma notificação para o usuário sobre a atualização
+            }
+          })
+        }
+      })
 
-        // Escutar atualizações do Service Worker
-        registration.addEventListener('updatefound', () => {
-          console.log('🔄 PWA: Nova versão do Service Worker encontrada')
-          
-          const newWorker = registration.installing
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('✨ PWA: Nova versão disponível')
-                // Aqui você pode mostrar uma notificação para o usuário sobre a atualização
-              }
-            })
-          }
-        })
-
-        return registration
-      } catch (error) {
-        console.error('❌ PWA: Erro ao registrar Service Worker:', error)
-        return null
-      }
+      return registration
+    } catch (error) {
+      console.error('❌ PWA: Erro ao registrar Service Worker:', error)
+      return null
     }
-    return null
   }, [])
 
   // Detectar conectividade
