@@ -36,8 +36,7 @@ export default function FaceAuthenticator({
   barId,
   className = ''
 }: FaceAuthenticatorProps) {
-  // DEBUG: Log inicial
-  console.log('🚀 FaceAuthenticator iniciado:', { mode, userEmail, barId })
+  // DEBUG: Log inicial reduzido
   
   // Estados
   const [isLoading, setIsLoading] = useState(false)
@@ -87,7 +86,7 @@ export default function FaceAuthenticator({
       const loadModelWithFallback = async (modelName: string, loadFunction: (url: string) => Promise<void>) => {
         for (const modelUrl of modelUrls) {
           try {
-            console.log(`📂 Tentando carregar ${modelName} de: ${modelUrl}`)
+            // Log removido para reduzir verbosidade
             
             const timeoutPromise = new Promise<never>((_, reject) => {
               setTimeout(() => reject(new Error(`Timeout ao carregar ${modelName}`)), 20000)
@@ -278,7 +277,7 @@ export default function FaceAuthenticator({
 
   // Verificar permissões na inicialização
   useEffect(() => {
-    console.log('🔐 useEffect: Verificando permissões na inicialização')
+    // Log removido para reduzir verbosidade
     checkCameraPermissions()
   }, [checkCameraPermissions])
 
@@ -454,6 +453,31 @@ export default function FaceAuthenticator({
       
       const video = videoRef.current
       const canvas = canvasRef.current
+      
+      // Aguardar dimensões válidas do vídeo
+      if (video.videoWidth === 0 || video.videoHeight === 0) {
+        console.log('⏳ Aguardando dimensões do vídeo...')
+        await new Promise<void>((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            reject(new Error('Timeout aguardando dimensões do vídeo'))
+          }, 5000)
+          
+          const checkDimensions = () => {
+            if (video.videoWidth > 0 && video.videoHeight > 0) {
+              clearTimeout(timeout)
+              console.log('✅ Dimensões do vídeo carregadas:', {
+                width: video.videoWidth,
+                height: video.videoHeight
+              })
+              resolve()
+            } else {
+              setTimeout(checkDimensions, 100)
+            }
+          }
+          
+          checkDimensions()
+        })
+      }
       
       // Configurar canvas
       canvas.width = video.videoWidth
@@ -683,13 +707,7 @@ export default function FaceAuthenticator({
     loadFaceAPIScript()
   }, [loadModels])
 
-  console.log('🎨 FaceAuthenticator RENDERIZANDO...', {
-    mode,
-    isRecording,
-    modelsLoaded,
-    cameraPermission,
-    stream: !!stream
-  })
+  // Renderização...
 
   return (
     <Card className={`w-full max-w-md mx-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm ${className}`}>

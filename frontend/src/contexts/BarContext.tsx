@@ -92,7 +92,6 @@ export function BarProvider({ children }: { children: ReactNode }) {
         }
 
         if (!userEmail) {
-          console.log('Nenhum usuário logado encontrado')
           if (mounted) setIsLoading(false)
           return
         }
