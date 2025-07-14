@@ -346,6 +346,12 @@ export default function FaceAuthenticator({
             console.log('📺 Metadata carregada, iniciando reprodução...')
             await video.play()
             console.log('✅ Vídeo reproduzindo com sucesso!')
+            console.log('📐 Dimensões do vídeo:', {
+              videoWidth: video.videoWidth,
+              videoHeight: video.videoHeight,
+              clientWidth: video.clientWidth,
+              clientHeight: video.clientHeight
+            })
             
             // Só definir isRecording DEPOIS que o vídeo estiver reproduzindo
             setIsRecording(true)
@@ -655,12 +661,16 @@ export default function FaceAuthenticator({
             muted
             playsInline
             style={{ 
-              display: isRecording && stream ? 'block' : 'none',
-              transform: 'scaleX(-1)' // Espelhar horizontalmente para parecer espelho
+              display: 'block', // Sempre visível para debug
+              transform: 'scaleX(-1)', // Espelhar horizontalmente para parecer espelho
+              minHeight: '256px',
+              backgroundColor: isRecording && stream ? 'transparent' : '#374151'
             }}
             onLoadedData={() => console.log('📺 Vídeo: dados carregados')}
             onPlay={() => console.log('▶️ Vídeo: reproduzindo')}
             onError={(e) => console.error('❌ Vídeo: erro', e)}
+            onCanPlay={() => console.log('🎬 Vídeo: pode reproduzir')}
+            onTimeUpdate={() => console.log('⏰ Vídeo: tempo atualizado')}
           />
           <canvas
             ref={canvasRef}
@@ -668,12 +678,12 @@ export default function FaceAuthenticator({
             style={{ display: 'none' }}
           />
           
-          {(!isRecording || !stream) && (
+          {!stream && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg z-10">
               <div className="text-center">
                 <Camera className="w-12 h-12 mx-auto mb-2 text-gray-400 dark:text-gray-500" />
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {stream ? 'Iniciando vídeo...' : 'Câmera desligada'}
+                  Câmera desligada
                 </p>
               </div>
             </div>
