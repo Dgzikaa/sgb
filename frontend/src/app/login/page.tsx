@@ -16,7 +16,7 @@ export default function LoginPage() {
   const [forgotEmail, setForgotEmail] = useState('')
   const [forgotLoading, setForgotLoading] = useState(false)
   const [forgotSuccess, setForgotSuccess] = useState(false)
-  const [isClient, setIsClient] = useState(false)
+  const [isHydrated, setIsHydrated] = useState(false)
   const [logoError, setLogoError] = useState(false)
   
   // Estado para controlar o método de login
@@ -27,12 +27,12 @@ export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   
-  // Capturar URL de retorno se houver
-  const returnUrl = searchParams.get('returnUrl')
+  // Capturar URL de retorno se houver (só no cliente)
+  const returnUrl = isHydrated ? searchParams.get('returnUrl') : null
 
-  // Controlar hidratação
+  // Controlar hidratação - só executa após componente montar
   useEffect(() => {
-    setIsClient(true)
+    setIsHydrated(true)
   }, [])
 
   // Verificar se usuário já está logado
@@ -227,6 +227,33 @@ export default function LoginPage() {
     }, 1000)
   }
 
+  // Não renderizar nada até hidratação completa para evitar mismatch
+  if (!isHydrated) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center justify-center w-20 h-20 mb-6">
+              <img 
+                src="/logos/logo_640x640.png" 
+                alt="SGB Logo" 
+                className="w-20 h-20 rounded-2xl shadow-lg object-cover"
+              />
+            </div>
+            <h1 className="text-4xl font-bold text-slate-800 dark:text-white mb-3">SGB</h1>
+            <p className="text-slate-600 dark:text-gray-300 text-lg font-medium">Sistema de Gestão de Bares</p>
+            <p className="text-sm text-slate-400 dark:text-gray-500 mt-2">Grupo Menos é Mais</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
+            <div className="text-center py-8">
+              <div className="animate-pulse">Carregando...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -252,7 +279,7 @@ export default function LoginPage() {
         </div>
 
         {/* Configuração de reconhecimento facial pós-login */}
-        {isClient && showFaceRegistration && lastLoginData && (
+        {showFaceRegistration && lastLoginData && (
           <div className="mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-lg">
             <div className="text-center mb-4">
               <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -287,7 +314,7 @@ export default function LoginPage() {
         )}
 
         {/* Notificações */}
-        {isClient && returnUrl && !showFaceRegistration && (
+        {returnUrl && !showFaceRegistration && (
           <div className="mb-6 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
@@ -301,7 +328,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        {isClient && error && (
+        {error && (
           <div className="mb-6 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl p-4">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-red-100 dark:bg-red-800 rounded-full flex items-center justify-center">
@@ -312,7 +339,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        {isClient && success && (
+        {success && (
           <div className="mb-6 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-xl p-4">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center">
@@ -324,7 +351,7 @@ export default function LoginPage() {
         )}
 
         {/* Seletor de Método de Login */}
-        {isClient && !showFaceRegistration && (
+        {!showFaceRegistration && (
           <div className="mb-6">
             <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
               <button
@@ -354,7 +381,7 @@ export default function LoginPage() {
         )}
 
         {/* Conteúdo baseado no método escolhido */}
-        {isClient && !showFaceRegistration && (
+        {!showFaceRegistration && (
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
           {loginMethod === 'traditional' ? (
             /* Formulário de Login Tradicional */
@@ -474,7 +501,7 @@ export default function LoginPage() {
       </div>
 
       {/* Modal Esqueci Minha Senha */}
-      {isClient && showForgotPassword && (
+      {showForgotPassword && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 w-full max-w-md shadow-2xl">
             <div className="text-center mb-6">
