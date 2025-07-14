@@ -650,12 +650,17 @@ export default function FaceAuthenticator({
         <div className="relative">
           <video
             ref={videoRef}
-            className={`w-full h-64 bg-gray-100 dark:bg-gray-700 rounded-lg object-cover transition-all duration-300 ${
-              isRecording ? 'opacity-100' : 'opacity-0'
-            }`}
+            className="w-full h-64 bg-gray-100 dark:bg-gray-700 rounded-lg object-cover"
             autoPlay
             muted
             playsInline
+            style={{ 
+              display: isRecording && stream ? 'block' : 'none',
+              transform: 'scaleX(-1)' // Espelhar horizontalmente para parecer espelho
+            }}
+            onLoadedData={() => console.log('📺 Vídeo: dados carregados')}
+            onPlay={() => console.log('▶️ Vídeo: reproduzindo')}
+            onError={(e) => console.error('❌ Vídeo: erro', e)}
           />
           <canvas
             ref={canvasRef}
