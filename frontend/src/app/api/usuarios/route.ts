@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 import { getAdminClient } from '@/lib/supabase-admin'
+import { withCache } from '@/middleware/cache-middleware'
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,32 +15,35 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Usar cliente administrativo para operações de usuários
-    let adminClient
-    try {
-      adminClient = await getAdminClient()
-    } catch (adminError) {
-      console.error('❌ Erro ao obter cliente administrativo:', adminError)
-      return NextResponse.json(
-        { success: false, error: 'Configuração administrativa não disponível' },
-        { status: 500 }
-      )
-    }
+    // Implementar cache para usuarios
+    const usuarios = await withCache(
+      '/api/usuarios',
+      `usuarios_bar_${bar_id}`,
+      async () => {
+        // Usar cliente administrativo para operações de usuários
+        let adminClient
+        try {
+          adminClient = await getAdminClient()
+        } catch (adminError) {
+          console.error('❌ Erro ao obter cliente administrativo:', adminError)
+          throw new Error('Configuração administrativa não disponível')
+        }
 
-    // Buscar usuários do bar
-    const { data: usuarios, error } = await adminClient
-      .from('usuarios_bar')
-      .select('*')
-      .eq('bar_id', parseInt(bar_id))
-      .order('criado_em', { ascending: false })
+        // Buscar usuários do bar
+        const { data: usuarios, error } = await adminClient
+          .from('usuarios_bar')
+          .select('*')
+          .eq('bar_id', parseInt(bar_id))
+          .order('criado_em', { ascending: false })
 
-    if (error) {
-      console.error('❌ Erro ao buscar usuários:', error)
-      return NextResponse.json(
-        { success: false, error: 'Erro ao buscar usuários' },
-        { status: 500 }
-      )
-    }
+        if (error) {
+          console.error('❌ Erro ao buscar usuários:', error)
+          throw new Error('Erro ao buscar usuários')
+        }
+
+        return usuarios || []
+      }
+    )
 
     return NextResponse.json({
       success: true,

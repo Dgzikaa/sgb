@@ -24,17 +24,16 @@ src/app/
 │   ├── desempenho/        ← APIs de desempenho
 │   └── meta/              ← APIs Meta
 │
-├── paginas/               ← 📄 TODAS AS PÁGINAS (page.tsx)
-│   ├── configuracoes/     ← Admin: checklists, templates, desempenho
-│   ├── relatorios/        ← Todos os relatórios
-│   ├── operacoes/         ← Funcionalidades operacionais
-│   ├── funcionario/       ← Área do funcionário
-│   ├── dashboard/         ← Dashboards
-│   ├── home/             ← Página inicial
-│   ├── login/            ← Login
-│   ├── auth/             ← Páginas de autenticação
-│   ├── minha-conta/      ← Conta do usuário
-│   └── visao-geral/      ← Visão geral e análises
+├── configuracoes/         ← 📄 Admin: checklists, templates, desempenho
+├── relatorios/            ← Todos os relatórios
+├── operacoes/             ← Funcionalidades operacionais
+├── funcionario/           ← Área do funcionário
+├── dashboard/             ← Dashboards
+├── home/                  ← Página inicial
+├── login/                 ← Login
+├── auth/                  ← Páginas de autenticação
+├── minha-conta/           ← Conta do usuário
+└── visao-geral/           ← Visão geral e análises
 │
 ├── layout.tsx            ← Layout raiz
 ├── page.tsx             ← Página raiz ("/")
@@ -84,19 +83,19 @@ backend/supabase/functions/
    - APIs duplicadas fora de /api/
 ```
 
-### �� PARA PÁGINAS (page.tsx):
+### 📄 PARA PÁGINAS (page.tsx):
 ```
-✅ SEMPRE: /paginas/[categoria]/page.tsx
+✅ SEMPRE: /[categoria]/page.tsx (direto em src/app)
 ✅ EXEMPLOS:
-   - frontend/src/app/paginas/configuracoes/page.tsx
-   - frontend/src/app/paginas/configuracoes/checklists/page.tsx
-   - frontend/src/app/paginas/relatorios/contahub-teste/page.tsx
-   - frontend/src/app/paginas/operacoes/receitas/page.tsx
+   - frontend/src/app/configuracoes/page.tsx
+   - frontend/src/app/configuracoes/checklists/page.tsx
+   - frontend/src/app/relatorios/contahub-teste/page.tsx
+   - frontend/src/app/operacoes/receitas/page.tsx
 
 ❌ NUNCA:
    - /admin/[qualquer-coisa] (ELIMINADO COMPLETAMENTE)
-   - /[categoria]/page.tsx (fora de paginas)
-   - Páginas duplicadas fora de /paginas/
+   - /paginas/[categoria]/page.tsx (NUNCA usar /paginas/)
+   - Páginas duplicadas ou estrutura confusa
 ```
 
 ### 🎯 CATEGORIAS DE PÁGINAS DEFINIDAS:
@@ -114,16 +113,16 @@ backend/supabase/functions/
 
 ### 🔄 ROTAS NO CÓDIGO:
 ```typescript
-// ✅ CORRETO - Nova estrutura
-{ route: '/paginas/configuracoes/checklists' }
-{ route: '/paginas/relatorios/contahub-teste' }
-{ route: '/paginas/operacoes/receitas' }
-{ route: '/paginas/funcionario/checklists' }
-
-// ❌ ERRADO - Estrutura antiga (eliminada)
-{ route: '/admin/checklists' }
+// ✅ CORRETO - Estrutura direta em src/app
 { route: '/configuracoes/checklists' }
 { route: '/relatorios/contahub-teste' }
+{ route: '/operacoes/receitas' }
+{ route: '/funcionario/checklists' }
+
+// ❌ ERRADO - Estruturas antigas (eliminadas)
+{ route: '/admin/checklists' }
+{ route: '/paginas/configuracoes/checklists' }
+{ route: '/paginas/relatorios/contahub-teste' }
 ```
 
 ### 📞 FETCH DE APIS:
@@ -146,7 +145,7 @@ await fetch('/admin/contahub-teste')
 Antes de criar qualquer arquivo, SEMPRE verificar:
 
 1. ✅ **É uma API?** → `/api/[funcionalidade]/route.ts`
-2. ✅ **É uma página?** → `/paginas/[categoria]/page.tsx`
+2. ✅ **É uma página?** → `/[categoria]/page.tsx` (direto em src/app)
 3. ✅ **É um componente?** → `/src/components/[categoria]/`
 4. ✅ **É um hook?** → `/src/hooks/`
 5. ✅ **É Edge Function?** → `/backend/supabase/functions/[nome]/index.ts`
@@ -157,9 +156,9 @@ Antes de criar qualquer arquivo, SEMPRE verificar:
 ### 🚫 ELIMINAÇÕES PERMANENTES:
 - ❌ `/admin/` - **COMPLETAMENTE ELIMINADA**
 - ❌ `/api/admin/` - **COMPLETAMENTE ELIMINADA**  
+- ❌ `/paginas/` - **NUNCA USAR**
 - ❌ APIs fora de `/api/`
-- ❌ Páginas fora de `/paginas/`
-- ❌ Qualquer duplicação de estruturas
+- ❌ Estruturas duplicadas ou confusas
 
 ### CONVENÇÕES DE NOMENCLATURA
 
@@ -180,8 +179,8 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 
-// Para páginas, sempre usar /paginas/ nas rotas
-router.push('/paginas/configuracoes/checklists')
+// Para páginas, rotas direto em src/app
+router.push('/configuracoes/checklists')
 ```
 
 #### Backend (Edge Functions):
@@ -203,14 +202,14 @@ docs: atualiza documentação da API
 ## 🎯 OBJETIVO PRINCIPAL:
 **ZERO CONFUSÃO NA ESTRUTURA**
 - **APIs** = `/api/`
-- **Páginas** = `/paginas/`  
+- **Páginas** = direto em `/src/app/` (SEM /paginas/)
 - **Estrutura sempre clara e lógica**
 - **Manutenção facilitada**
 - **Desenvolvimento profissional**
 
 ---
 
-**IMPORTANTE**: Sempre que houver dúvida sobre onde colocar um arquivo, seguir esta estrutura atualizada. A pasta `/admin/` foi COMPLETAMENTE ELIMINADA e suas funcionalidades movidas para `/paginas/configuracoes/`. 
+**IMPORTANTE**: Sempre que houver dúvida sobre onde colocar um arquivo, seguir esta estrutura atualizada. As pastas `/admin/` e `/paginas/` foram COMPLETAMENTE ELIMINADAS - páginas ficam direto em `/src/app/`. 
 
 ---
 

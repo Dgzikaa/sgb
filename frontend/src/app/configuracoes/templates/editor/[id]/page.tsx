@@ -383,9 +383,9 @@ export default function TemplateEditorPage() {
       <div className="container mx-auto p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-600">{error}</p>
-          <Button onClick={() => router.push('/admin/templates')} className="mt-2">
-            Voltar para Templates
-          </Button>
+                          <Button onClick={() => router.push('/configuracoes/templates')} className="mt-2">
+                  Voltar para Templates
+                </Button>
         </div>
       </div>
     )
@@ -397,7 +397,7 @@ export default function TemplateEditorPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
-            onClick={() => router.push('/admin/templates')}
+                            onClick={() => router.push('/configuracoes/templates')}
             variant="outline"
             size="sm"
           >

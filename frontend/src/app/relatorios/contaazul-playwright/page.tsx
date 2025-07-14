@@ -36,7 +36,7 @@ export default function ContaAzulPlaywrightPage() {
     setResultado(null);
 
     try {
-      const response = await fetch('/api/admin/contahub-playwright-collector', {
+              const response = await fetch('/api/contaazul/playwright-collector', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

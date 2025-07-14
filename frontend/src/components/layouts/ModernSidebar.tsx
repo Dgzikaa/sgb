@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { usePermissions } from '@/hooks/usePermissions'
+import { CommandPaletteTrigger } from '@/components/ui/command-palette-trigger'
 import { 
   Home, 
   CheckSquare, 
@@ -18,6 +19,8 @@ import {
   ChefHat,
   FileText,
   DollarSign,
+  Search,
+  Smartphone,
   Target,
   MessageSquare,
   ChevronDown,
@@ -147,6 +150,9 @@ const configuracoesItems: SidebarItem = {
     { icon: Zap, label: 'ContaHub Auto', href: '/configuracoes/contahub-automatico' },
     { icon: Clock, label: 'Meta Config', href: '/configuracoes/meta-configuracao' },
     { icon: FileText, label: 'Templates', href: '/configuracoes/templates' },
+            { icon: BarChart3, label: 'Analytics', href: '/configuracoes/analytics' },
+        { icon: Database, label: 'Cache', href: '/configuracoes/cache' },
+        { icon: Smartphone, label: 'PWA', href: '/configuracoes/pwa' },
   ]
 }
 
@@ -238,6 +244,14 @@ export function ModernSidebar() {
         {/* Navigation items */}
         <nav className="flex-1 px-2 overflow-y-auto custom-scrollbar">
           <div className="space-y-1">
+            {/* Command Palette Search Button */}
+            <div className="mb-4">
+              <CommandPaletteTrigger 
+                variant="sidebar" 
+                showShortcut={isHovered}
+              />
+            </div>
+            
             {allSidebarItems.map((item) => {
               const isItemActive = item.href ? isActive(item.href) : hasActiveSubItem(item.subItems)
               const itemExpanded = isExpanded(item.label)

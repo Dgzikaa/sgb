@@ -355,7 +355,7 @@ export default function AdminPage() {
   const migrateExistingConfigs = async (barId: number) => {
     setMigrating(true);
     try {
-      const response = await fetch('/api/admin/migrate-apis', {
+              const response = await fetch('/api/configuracoes/migrate-apis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -419,7 +419,7 @@ export default function AdminPage() {
   const runApiMonitoring = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/monitor-apis', {
+              const response = await fetch('/api/configuracoes/monitor-apis', {
         method: 'POST',
       });
       
@@ -454,7 +454,7 @@ export default function AdminPage() {
 
     setTestingConnection(true);
     try {
-      const response = await fetch('/api/admin/bar-systems?action=test-connection', {
+              const response = await fetch('/api/configuracoes/bar-systems?action=test-connection', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -523,7 +523,7 @@ export default function AdminPage() {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/bars', {
+              const response = await fetch('/api/bars', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newBar)
@@ -550,7 +550,7 @@ export default function AdminPage() {
     if (!confirm('Tem certeza que deseja excluir este bar?')) return;
     
     try {
-      const response = await fetch(`/api/admin/bars?id=${id}`, {
+              const response = await fetch(`/api/bars?id=${id}`, {
         method: 'DELETE'
       });
       
@@ -594,7 +594,7 @@ export default function AdminPage() {
     try {
       console.log(`🔍 Verificando receitas problemáticas para bar ${selectedBarId}...`);
       
-      const response = await fetch(`/api/admin/verificar-receitas-sem-nome?bar_id=${selectedBarId}`);
+              const response = await fetch(`/api/receitas/verificar-sem-nome?bar_id=${selectedBarId}`);
       const result = await response.json();
       
       if (result.success) {
@@ -646,7 +646,7 @@ export default function AdminPage() {
     try {
       console.log('🔧 Executando migration para campos de aderência à receita...');
       
-      const response = await fetch('/api/admin/adicionar-campos-producao', {
+              const response = await fetch('/api/producoes/adicionar-campos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });

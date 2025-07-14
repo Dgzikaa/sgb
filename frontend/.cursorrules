@@ -4,13 +4,13 @@
 
 ### Frontend (frontend/src/app/)
 - APIs: SEMPRE em `/api/[funcionalidade]/route.ts`
-- Páginas: SEMPRE em `/paginas/[categoria]/page.tsx`
+- Páginas: SEMPRE direto em `/[categoria]/page.tsx` (SEM /paginas/)
 
 ### NUNCA CRIAR:
 - /admin/ (ELIMINADA COMPLETAMENTE)
 - /api/admin/ (ELIMINADA COMPLETAMENTE)
+- /paginas/ (NUNCA USAR - ELIMINADA COMPLETAMENTE)
 - APIs fora de /api/
-- Páginas fora de /paginas/
 
 ### ESTRUTURA CORRETA:
 ```
@@ -21,24 +21,24 @@ src/app/
 │   ├── eventos/
 │   ├── contahub/
 │   └── [outras-apis]/
-└── paginas/               ← TODAS AS PÁGINAS (page.tsx)
-    ├── configuracoes/     ← Ex-admin
-    ├── relatorios/
-    ├── operacoes/
-    ├── funcionario/
-    └── [outras-páginas]/
+├── configuracoes/          ← Ex-admin (DIRETO EM APP)
+├── relatorios/             ← Relatórios (DIRETO EM APP)
+├── operacoes/              ← Operações (DIRETO EM APP)
+├── funcionario/            ← Funcionário (DIRETO EM APP)
+└── [outras-páginas]/       ← Todas direto em app
 ```
 
 ### ROTAS NO CÓDIGO:
-- Sidebar: `/paginas/[categoria]/[página]`
+- Sidebar: `/[categoria]/[página]` (SEM /paginas/)
 - Fetch: `/api/[funcionalidade]`
-- Router: `router.push('/paginas/[categoria]')`
+- Router: `router.push('/[categoria]')` (SEM /paginas/)
 
 ### CHECKLIST OBRIGATÓRIO:
 1. É API? → `/api/[nome]/route.ts`
-2. É página? → `/paginas/[categoria]/page.tsx`
+2. É página? → `/[categoria]/page.tsx` (DIRETO em src/app)
 3. Não duplica estrutura existente?
 4. Segue nomenclatura kebab-case?
+5. NUNCA usar /paginas/ ou /admin/
 
 ### BACKEND (backend/supabase/functions/)
 - Edge Functions: `[nome-function]/index.ts`

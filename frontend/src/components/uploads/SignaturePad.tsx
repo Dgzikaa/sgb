@@ -254,7 +254,7 @@ export default function SignaturePad({
       </div>
 
       {/* Canvas */}
-      <div className="border border-gray-300 rounded bg-white mb-4 overflow-hidden">
+              <div className="border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 mb-4 overflow-hidden">
         <canvas
           ref={canvasRef}
           width={width}

@@ -59,7 +59,7 @@ export default function ContaAzulExcelPage() {
       addLog('INFO', '🔐 Autenticação: Login + 2FA automático');
       addLog('INFO', '📊 Período: Todo o período disponível');
 
-      const response = await fetch('/api/admin/contahub-playwright-excel', {
+              const response = await fetch('/api/contaazul/playwright-excel', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

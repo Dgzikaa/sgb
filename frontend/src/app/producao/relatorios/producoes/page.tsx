@@ -58,7 +58,7 @@ export default function RelatorioProducoesPage() {
   const executarMigration = async () => {
     setExecutandoMigration(true)
     try {
-      const response = await fetch('/api/admin/adicionar-campos-producao', {
+              const response = await fetch('/api/producoes/adicionar-campos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       })

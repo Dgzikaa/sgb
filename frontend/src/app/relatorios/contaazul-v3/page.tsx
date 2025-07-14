@@ -58,7 +58,7 @@ export default function ContaAzulV3Page() {
     try {
       addLog('INFO', '🔍 Verificando status da API V3...');
       
-      const response = await fetch('/api/admin/contahub-playwright-v3', {
+      const response = await fetch('/api/contaazul/playwright-v3', {
         method: 'GET'
       });
 
@@ -89,7 +89,7 @@ export default function ContaAzulV3Page() {
       addLog('INFO', '⚡ Performance: ~1 minuto para coleta completa');
       addLog('INFO', '🛡️ Sistema: Anti-detecção e timeouts inteligentes');
 
-      const response = await fetch('/api/admin/contahub-playwright-v3', {
+      const response = await fetch('/api/contaazul/playwright-v3', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

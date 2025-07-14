@@ -207,7 +207,7 @@ export default function ContaHubTestePage() {
 
   const debugVariaveis = async () => {
     try {
-      const response = await fetch('/api/admin/debug-env')
+              const response = await fetch('/api/debug/env')
       const data = await response.json()
       setResult({
         success: true,
@@ -228,7 +228,7 @@ export default function ContaHubTestePage() {
     setResult(null)
 
     try {
-      const response = await fetch('/api/admin/contahub-debug-queries', {
+              const response = await fetch('/api/debug/contahub-queries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       })
@@ -251,7 +251,7 @@ export default function ContaHubTestePage() {
     setResult(null)
 
     try {
-      const response = await fetch('/api/admin/contahub-debug-dados', {
+              const response = await fetch('/api/debug/contahub-dados', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
       })
@@ -274,7 +274,7 @@ export default function ContaHubTestePage() {
     setResult(null)
 
     try {
-      const response = await fetch('/api/admin/contahub-debug-logs', {
+              const response = await fetch('/api/debug/contahub-logs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       })
@@ -297,7 +297,7 @@ export default function ContaHubTestePage() {
     setResult(null)
 
     try {
-      const response = await fetch('/api/admin/contahub-debug-schema', {
+              const response = await fetch('/api/debug/contahub-schema', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       })
@@ -320,7 +320,7 @@ export default function ContaHubTestePage() {
     setResult(null)
 
     try {
-      const response = await fetch('/api/admin/contahub-test-fields', {
+              const response = await fetch('/api/debug/contahub-test-fields', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       })
@@ -343,7 +343,7 @@ export default function ContaHubTestePage() {
     setResult(null)
 
     try {
-      const response = await fetch('/api/admin/contahub-discover-fields', {
+              const response = await fetch('/api/debug/contahub-discover-fields', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       })
@@ -366,7 +366,7 @@ export default function ContaHubTestePage() {
     setResult(null)
 
     try {
-      const response = await fetch('/api/admin/contahub-debug-raw-data', {
+              const response = await fetch('/api/debug/contahub-raw-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       })
@@ -389,7 +389,7 @@ export default function ContaHubTestePage() {
     setResult(null)
 
     try {
-      const response = await fetch('/api/admin/contahub-limpar-tabelas', {
+              const response = await fetch('/api/debug/contahub-limpar-tabelas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       })

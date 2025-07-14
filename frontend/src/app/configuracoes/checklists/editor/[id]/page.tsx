@@ -459,9 +459,9 @@ export default function ChecklistEditorPage() {
       <div className="container mx-auto p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-600">{error}</p>
-          <Button onClick={() => router.push('/admin/checklists')} className="mt-2">
-            Voltar para Checklists
-          </Button>
+                          <Button onClick={() => router.push('/configuracoes/checklists')} className="mt-2">
+                  Voltar para Checklists
+                </Button>
         </div>
       </div>
     )
@@ -477,7 +477,7 @@ export default function ChecklistEditorPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
-            onClick={() => router.push('/admin/checklists')}
+                            onClick={() => router.push('/configuracoes/checklists')}
             variant="outline"
             size="sm"
           >

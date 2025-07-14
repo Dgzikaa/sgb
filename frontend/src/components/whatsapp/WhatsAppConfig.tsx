@@ -379,7 +379,7 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
       <div className="text-center">
         <div className="flex items-center justify-center gap-3 mb-4">
           <MessageSquare className="w-8 h-8 text-green-600" />
-          <h1 className="text-2xl font-bold text-gray-900">Configuração WhatsApp</h1>
+                      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Configuração WhatsApp</h1>
         </div>
         <p className="text-gray-600">
           Configure a integração WhatsApp para enviar lembretes e notificações automáticas

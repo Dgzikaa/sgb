@@ -96,7 +96,7 @@ export default function RelatorioProdutos() {
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
           <div className="flex items-center gap-2 mb-4">
             <BarChart3 className="h-6 w-6 text-blue-600" />
             <h1 className="text-2xl font-bold text-gray-900">Relatório de Produção</h1>

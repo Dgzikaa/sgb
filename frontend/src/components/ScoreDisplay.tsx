@@ -98,13 +98,13 @@ export default function ScoreDisplay({
   // Versão em card para páginas de detalhes
   if (variant === 'card') {
     return (
-      <Card className="bg-white">
+      <Card className="bg-white dark:bg-gray-800">
         <CardContent className="p-6">
           <div className="space-y-6">
             {/* Header do Score */}
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Score do Checklist
                 </h3>
                 <p className="text-sm text-gray-600">

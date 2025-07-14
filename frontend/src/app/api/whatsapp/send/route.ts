@@ -1,346 +1,265 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
 
-// =====================================================
-// 📱 API PARA ENVIO DE MENSAGENS WHATSAPP
-// =====================================================
+const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || 'http://localhost:8080'
+const EVOLUTION_API_KEY = process.env.EVOLUTION_API_KEY || 'SGB-2024-WhatsApp-Evolution-API-Key'
+const EVOLUTION_INSTANCE_NAME = process.env.EVOLUTION_INSTANCE_NAME || 'sgb-principal'
+const WHATSAPP_SIMULATION_MODE = process.env.WHATSAPP_SIMULATION_MODE === 'true' || !process.env.EVOLUTION_API_URL
 
 interface WhatsAppMessage {
-  to: string
+  number: string
   message: string
-  type?: 'text' | 'template'
-  template_name?: string
-  template_params?: any[]
+  type: 'text' | 'image' | 'audio' | 'video' | 'document'
+  media?: {
+    url?: string
+    base64?: string
+    filename?: string
+    caption?: string
+  }
 }
 
-interface WhatsAppConfig {
-  provider: string
-  enabled: boolean
-  phone_number: string
-  api_url?: string
-  api_key?: string
-  instance_id?: string
-  session_name?: string
+interface ChecklistNotification {
+  checklist_id: string
+  checklist_nome: string
+  bar_nome: string
+  deadline: string
+  responsavel: string
+  status: 'agendado' | 'em_andamento' | 'vencido' | 'concluido'
+  prioridade: 'baixa' | 'normal' | 'alta' | 'critica'
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
+    const body = await req.json()
+    const { 
+      numbers, 
+      message, 
+      type = 'text', 
+      media,
+      checklist_data 
+    }: {
+      numbers: string[]
+      message?: string
+      type?: 'text' | 'template' | 'checklist_notification'
+      media?: any
+      checklist_data?: ChecklistNotification
+    } = body
+
+    // Validar dados obrigatórios
+    if (!numbers || numbers.length === 0) {
+      return NextResponse.json(
+        { error: 'Números de telefone são obrigatórios' },
+        { status: 400 }
+      )
+    }
+
+    // Preparar mensagem baseada no tipo
+    let finalMessage = message
     
-    // Verificar autenticação
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    if (type === 'checklist_notification' && checklist_data) {
+      finalMessage = formatChecklistMessage(checklist_data)
     }
 
-    const { to, message, type = 'text', template_name, template_params }: WhatsAppMessage = await req.json()
-
-    if (!to || !message) {
-      return NextResponse.json({ 
-        error: 'Destinatário e mensagem são obrigatórios' 
-      }, { status: 400 })
+    if (!finalMessage) {
+      return NextResponse.json(
+        { error: 'Mensagem é obrigatória' },
+        { status: 400 }
+      )
     }
 
-    // Buscar configuração do WhatsApp do usuário
-    const { data: config, error: configError } = await supabase
-      .from('whatsapp_configs')
-      .select('*')
-      .eq('user_id', user.id)
-      .single()
+    const results = []
+    const errors = []
 
-    if (configError || !config || !config.enabled) {
-      return NextResponse.json({ 
-        error: 'WhatsApp não configurado ou desabilitado' 
-      }, { status: 400 })
+    // Enviar para cada número
+    for (const number of numbers) {
+      try {
+        const cleanNumber = cleanPhoneNumber(number)
+        const messageData: WhatsAppMessage = {
+          number: cleanNumber,
+          message: finalMessage,
+          type: 'text',
+          ...(media && { media })
+        }
+
+        const response = await sendToEvolutionAPI(messageData)
+        
+        if (response.success) {
+          results.push({
+            number: cleanNumber,
+            status: 'sent',
+            message_id: response.key?.id,
+            timestamp: new Date().toISOString()
+          })
+        } else {
+          errors.push({
+            number: cleanNumber,
+            error: response.error || 'Erro desconhecido'
+          })
+        }
+
+      } catch (error) {
+        errors.push({
+          number,
+          error: `Erro ao enviar: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
+        })
+      }
     }
-
-    // Enviar mensagem baseado no provedor
-    const result = await sendMessage(config, { to, message, type, template_name, template_params })
-
-    // Log da mensagem enviada
-    await supabase
-      .from('whatsapp_messages')
-      .insert({
-        user_id: user.id,
-        to_number: to,
-        message,
-        type,
-        provider: config.provider,
-        status: result.success ? 'sent' : 'failed',
-        provider_response: result.response,
-        sent_at: new Date().toISOString()
-      })
 
     return NextResponse.json({
-      success: result.success,
-      message: result.success ? 'Mensagem enviada com sucesso' : 'Falha no envio',
-      provider_response: result.response
+      success: true,
+      total_sent: results.length,
+      total_errors: errors.length,
+      results,
+      errors
     })
 
   } catch (error) {
-    console.error('Erro ao enviar mensagem WhatsApp:', error)
-    return NextResponse.json({ 
-      error: 'Erro interno do servidor' 
-    }, { status: 500 })
+    console.error('Erro na API WhatsApp:', error)
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    )
   }
 }
 
-// =====================================================
-// 🚀 FUNÇÕES DE ENVIO POR PROVEDOR
-// =====================================================
+// Função auxiliar para enviar para Evolution API
+async function sendToEvolutionAPI(messageData: WhatsAppMessage) {
+  // 🧪 MODO SIMULAÇÃO - Para testes sem WhatsApp real
+  if (WHATSAPP_SIMULATION_MODE) {
+    console.log('🧪 MODO SIMULAÇÃO - WhatsApp:', {
+      to: messageData.number,
+      message: messageData.message.substring(0, 100) + '...',
+      timestamp: new Date().toISOString(),
+      simulated: true
+    })
 
-async function sendMessage(
-  config: WhatsAppConfig, 
-  message: WhatsAppMessage
-): Promise<{ success: boolean; response: any }> {
+    // Simular resposta bem-sucedida
+    return {
+      success: true,
+      key: {
+        id: `sim_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      },
+      message: 'Simulação: Mensagem enviada com sucesso',
+      simulated: true
+    }
+  }
+
+  // 📱 MODO PRODUÇÃO - Envio real para Evolution API
+  const url = `${EVOLUTION_API_URL}/message/sendText/${EVOLUTION_INSTANCE_NAME}`
   
-  switch (config.provider) {
-    case 'evolution':
-      return sendEvolutionAPI(config, message)
-    
-    case 'twilio':
-      return sendTwilio(config, message)
-    
-    case 'whatsapp_business':
-      return sendWhatsAppBusiness(config, message)
-    
-    case 'baileys':
-      return sendBaileys(config, message)
-    
-    default:
-      return { success: false, response: { error: 'Provedor não suportado' } }
+  const payload = {
+    number: messageData.number,
+    options: {
+      delay: 1200,
+      presence: 'composing'
+    },
+    textMessage: {
+      text: messageData.message
+    }
   }
-}
 
-// =====================================================
-// 🚀 EVOLUTION API
-// =====================================================
-async function sendEvolutionAPI(
-  config: WhatsAppConfig, 
-  message: WhatsAppMessage
-): Promise<{ success: boolean; response: any }> {
   try {
-    const url = `${config.api_url}/message/sendText/${config.instance_id}`
-    
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': config.api_key || ''
-      },
-      body: JSON.stringify({
-        number: message.to,
-        text: message.message
-      })
-    })
-
-    const data = await response.json()
-    
-    return {
-      success: response.ok && data.key,
-      response: data
-    }
-  } catch (error) {
-    return {
-      success: false,
-      response: { error: error instanceof Error ? error.message : 'Erro desconhecido' }
-    }
-  }
-}
-
-// =====================================================
-// 📞 TWILIO
-// =====================================================
-async function sendTwilio(
-  config: WhatsAppConfig, 
-  message: WhatsAppMessage
-): Promise<{ success: boolean; response: any }> {
-  try {
-    const accountSid = config.api_key
-    const authToken = config.session_name
-    const fromNumber = config.api_url // whatsapp:+5511999999999
-    
-    const auth = Buffer.from(`${accountSid}:${authToken}`).toString('base64')
-    
-    const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${auth}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: new URLSearchParams({
-        From: fromNumber || '',
-        To: `whatsapp:${message.to}`,
-        Body: message.message
-      })
-    })
-
-    const data = await response.json()
-    
-    return {
-      success: response.ok && data.sid,
-      response: data
-    }
-  } catch (error) {
-    return {
-      success: false,
-      response: { error: error instanceof Error ? error.message : 'Erro desconhecido' }
-    }
-  }
-}
-
-// =====================================================
-// ✅ WHATSAPP BUSINESS API
-// =====================================================
-async function sendWhatsAppBusiness(
-  config: WhatsAppConfig, 
-  message: WhatsAppMessage
-): Promise<{ success: boolean; response: any }> {
-  try {
-    const phoneNumberId = config.instance_id
-    const accessToken = config.session_name
-    
-    const url = `https://graph.facebook.com/v18.0/${phoneNumberId}/messages`
-    
-    const payload = {
-      messaging_product: 'whatsapp',
-      to: message.to,
-      type: 'text',
-      text: {
-        body: message.message
-      }
-    }
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
+        'apikey': EVOLUTION_API_KEY
       },
       body: JSON.stringify(payload)
     })
 
-    const data = await response.json()
-    
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`Evolution API error: ${response.status} - ${errorText}`)
+    }
+
+    const result = await response.json()
     return {
-      success: response.ok && data.messages,
-      response: data
+      success: true,
+      ...result
     }
   } catch (error) {
+    console.error('❌ Erro Evolution API:', error)
     return {
       success: false,
-      response: { error: error instanceof Error ? error.message : 'Erro desconhecido' }
+      error: error instanceof Error ? error.message : 'Erro desconhecido'
     }
   }
 }
 
-// =====================================================
-// 🔧 BAILEYS (SELF-HOSTED)
-// =====================================================
-async function sendBaileys(
-  config: WhatsAppConfig, 
-  message: WhatsAppMessage
-): Promise<{ success: boolean; response: any }> {
-  try {
-    const url = `${config.api_url}/send-message`
-    
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    }
-    
-    if (config.api_key) {
-      headers['Authorization'] = `Bearer ${config.api_key}`
-    }
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        session: config.session_name || 'default',
-        to: message.to,
-        text: message.message
-      })
-    })
-
-    const data = await response.json()
-    
-    return {
-      success: response.ok && data.success,
-      response: data
-    }
-  } catch (error) {
-    return {
-      success: false,
-      response: { error: error instanceof Error ? error.message : 'Erro desconhecido' }
-    }
+// Função para limpar número de telefone
+function cleanPhoneNumber(number: string): string {
+  // Remove todos os caracteres não numéricos
+  let cleaned = number.replace(/\D/g, '')
+  
+  // Adiciona código do país se não tiver
+  if (cleaned.length === 11 && cleaned.startsWith('11')) {
+    cleaned = '55' + cleaned
+  } else if (cleaned.length === 10) {
+    cleaned = '5511' + cleaned
+  } else if (cleaned.length === 11 && !cleaned.startsWith('55')) {
+    cleaned = '55' + cleaned
   }
+  
+  return cleaned
 }
 
-// =====================================================
-// 🧪 ENDPOINT DE TESTE
-// =====================================================
-export async function GET(req: NextRequest) {
-  try {
-    const supabase = createRouteHandlerClient({ cookies })
-    
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-    }
+// Função para formatar mensagem de checklist
+function formatChecklistMessage(data: ChecklistNotification): string {
+  const statusEmojis = {
+    agendado: '📅',
+    em_andamento: '⏳',
+    vencido: '🚨',
+    concluido: '✅'
+  }
 
-    const { searchParams } = new URL(req.url)
-    const to = searchParams.get('to')
+  const prioridadeEmojis = {
+    baixa: '🔵',
+    normal: '🟡',
+    alta: '🟠',
+    critica: '🔴'
+  }
 
-    if (!to) {
-      return NextResponse.json({ 
-        error: 'Parâmetro "to" é obrigatório' 
-      }, { status: 400 })
-    }
+  const deadline = new Date(data.deadline).toLocaleString('pt-BR')
 
-    // Buscar configuração
-    const { data: config, error: configError } = await supabase
-      .from('whatsapp_configs')
-      .select('*')
-      .eq('user_id', user.id)
-      .single()
+  return `${statusEmojis[data.status]} *SGB - Checklist ${data.status.toUpperCase()}*
 
-    if (configError || !config) {
-      return NextResponse.json({ 
-        error: 'Configuração WhatsApp não encontrada' 
-      }, { status: 400 })
-    }
+📋 *Checklist:* ${data.checklist_nome}
+🏢 *Bar:* ${data.bar_nome}
+👤 *Responsável:* ${data.responsavel}
+⏰ *Prazo:* ${deadline}
+${prioridadeEmojis[data.prioridade]} *Prioridade:* ${data.prioridade.toUpperCase()}
 
-    // Mensagem de teste
-    const testMessage = `🧪 *Teste de Conexão*
-
-Esta é uma mensagem de teste do Sistema SGB.
-
-✅ Provedor: ${config.provider}
-📱 Número: ${config.phone_number}
-⏰ Data/Hora: ${new Date().toLocaleString('pt-BR')}
-
-Se você recebeu esta mensagem, a integração está funcionando corretamente!
+${data.status === 'vencido' ? '⚠️ *ATENÇÃO: Checklist vencido!*' : ''}
+${data.status === 'agendado' ? '👆 *Acesse o sistema para executar*' : ''}
 
 _Sistema de Gestão de Bares_`
+}
 
-    const result = await sendMessage(config, {
-      to,
-      message: testMessage,
-      type: 'text'
+// GET - Verificar status da conexão
+export async function GET() {
+  try {
+    const response = await fetch(`${EVOLUTION_API_URL}/instance/connectionState/${EVOLUTION_INSTANCE_NAME}`, {
+      headers: {
+        'apikey': EVOLUTION_API_KEY
+      }
     })
 
+    if (!response.ok) {
+      throw new Error('Falha ao verificar status')
+    }
+
+    const data = await response.json()
+    
     return NextResponse.json({
-      success: result.success,
-      message: result.success ? 'Mensagem de teste enviada!' : 'Falha no teste',
-      provider: config.provider,
-      response: result.response
+      connected: data.instance?.state === 'open',
+      status: data.instance?.state || 'unknown',
+      instance: EVOLUTION_INSTANCE_NAME
     })
 
   } catch (error) {
-    console.error('Erro no teste WhatsApp:', error)
-    return NextResponse.json({ 
-      error: 'Erro interno do servidor' 
+    return NextResponse.json({
+      connected: false,
+      error: error instanceof Error ? error.message : 'Erro desconhecido'
     }, { status: 500 })
   }
 } 

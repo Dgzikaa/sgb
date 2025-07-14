@@ -1,0 +1,204 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
+interface EvolutionWebhookEvent {
+  event: string
+  instance: string
+  data: {
+    key?: {
+      remoteJid: string
+      fromMe: boolean
+      id: string
+    }
+    message?: {
+      conversation?: string
+      extendedTextMessage?: {
+        text: string
+      }
+    }
+    messageTimestamp?: number
+    pushName?: string
+    status?: string
+    participant?: string
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const body: EvolutionWebhookEvent = await req.json()
+    
+    console.log('📥 Webhook Evolution recebido:', {
+      event: body.event,
+      instance: body.instance,
+      timestamp: new Date().toISOString()
+    })
+
+    // Processar diferentes tipos de eventos
+    switch (body.event) {
+      case 'messages.upsert':
+        await handleNewMessage(body)
+        break
+        
+      case 'messages.update':
+        await handleMessageUpdate(body)
+        break
+        
+      case 'connection.update':
+        await handleConnectionUpdate(body)
+        break
+        
+      case 'qrcode.updated':
+        await handleQRCodeUpdate(body)
+        break
+        
+      default:
+        console.log(`📝 Evento não processado: ${body.event}`)
+    }
+
+    return NextResponse.json({ success: true })
+
+  } catch (error) {
+    console.error('❌ Erro no webhook Evolution:', error)
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    )
+  }
+}
+
+async function handleNewMessage(event: EvolutionWebhookEvent) {
+  try {
+    const { data } = event
+    const remoteJid = data.key?.remoteJid
+    const fromMe = data.key?.fromMe
+    const messageText = data.message?.conversation || data.message?.extendedTextMessage?.text
+    
+    // Apenas processar mensagens recebidas (não enviadas por nós)
+    if (fromMe || !messageText) return
+
+    const phoneNumber = remoteJid?.replace('@s.whatsapp.net', '')
+    
+    console.log('💬 Nova mensagem recebida:', {
+      from: phoneNumber,
+      message: messageText,
+      pushName: data.pushName
+    })
+
+    // Salvar mensagem no banco (usando tabela existente)
+    await supabase
+      .from('whatsapp_messages')
+      .insert({
+        to_number: phoneNumber || '',
+        message: messageText,
+        type: 'received',
+        provider: 'evolution-api',
+        status: 'received',
+        provider_response: {
+          sender_name: data.pushName || 'Desconhecido',
+          message_id: data.key?.id || '',
+          instance: event.instance,
+          timestamp: data.messageTimestamp
+        },
+        sent_at: new Date((data.messageTimestamp || 0) * 1000).toISOString()
+      })
+
+    // Verificar se é uma resposta a checklist
+    if (phoneNumber && messageText) {
+      await checkChecklistResponse(phoneNumber, messageText)
+    }
+
+  } catch (error) {
+    console.error('❌ Erro ao processar nova mensagem:', error)
+  }
+}
+
+async function checkChecklistResponse(phoneNumber: string, message: string) {
+  try {
+    // Verificar se há algum checklist pendente para este número
+    const { data: agendamentos } = await supabase
+      .from('checklist_auto_executions')
+      .select(`
+        *,
+        checklist_schedules (
+          responsaveis_whatsapp,
+          titulo
+        )
+      `)
+      .eq('status', 'pendente')
+      .gte('data_limite', new Date().toISOString())
+
+    for (const agendamento of agendamentos || []) {
+      const responsaveis = agendamento.checklist_schedules?.responsaveis_whatsapp || []
+      const isResponsavel = responsaveis.some((resp: any) => 
+        resp.numero?.replace(/\D/g, '').includes(phoneNumber.replace(/\D/g, ''))
+      )
+
+      if (isResponsavel) {
+        // Verificar se a mensagem indica conclusão
+        const conclusionWords = ['concluído', 'concluido', 'feito', 'finalizado', 'pronto', 'ok', 'sim']
+        const isCompletion = conclusionWords.some(word => 
+          message.toLowerCase().includes(word)
+        )
+
+        if (isCompletion) {
+          // Marcar como concluído
+          await supabase
+            .from('checklist_auto_executions')
+            .update({ 
+              status: 'concluido',
+              notificacao_enviada: true 
+            })
+            .eq('id', agendamento.id)
+
+          console.log(`✅ Checklist marcado como concluído via WhatsApp: ${agendamento.checklist_schedules?.titulo}`)
+        }
+      }
+    }
+
+  } catch (error) {
+    console.error('❌ Erro ao verificar resposta de checklist:', error)
+  }
+}
+
+async function handleMessageUpdate(event: EvolutionWebhookEvent) {
+  // Atualizar status de mensagem (lida, entregue, etc.)
+  console.log('📱 Status de mensagem atualizado:', event.data)
+}
+
+async function handleConnectionUpdate(event: EvolutionWebhookEvent) {
+  try {
+    const status = event.data.status
+    
+    console.log(`🔄 Status de conexão: ${status}`)
+    
+    // Salvar status no banco
+    await supabase
+      .from('whatsapp_connection_status')
+      .upsert({
+        instance: event.instance,
+        status: status,
+        updated_at: new Date().toISOString()
+      })
+
+  } catch (error) {
+    console.error('❌ Erro ao atualizar status de conexão:', error)
+  }
+}
+
+async function handleQRCodeUpdate(event: EvolutionWebhookEvent) {
+  console.log('📱 QR Code atualizado para instância:', event.instance)
+  // Aqui você pode notificar admins sobre novo QR Code disponível
+}
+
+// GET - Endpoint para testar webhook
+export async function GET() {
+  return NextResponse.json({
+    message: 'Webhook Evolution API está funcionando',
+    timestamp: new Date().toISOString()
+  })
+} 

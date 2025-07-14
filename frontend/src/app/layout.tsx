@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 import { ToastProvider, GlobalToastListener } from '@/components/ui/toast'
+import { CommandPaletteWrapper } from '@/components/CommandPaletteWrapper'
+import { PWAInstallBanner } from '@/components/PWAInstallBanner'
 import { ConfirmDialogProvider, GlobalConfirmListener } from '@/components/ui/confirm-dialog'
 import { BarProvider } from '@/contexts/BarContext'
 import { UserProvider } from '@/contexts/UserContext'
@@ -86,6 +88,8 @@ export default function RootLayout({
                     {children}
                     <GlobalToastListener />
                     <GlobalConfirmListener />
+                    <CommandPaletteWrapper />
+                    <PWAInstallBanner variant="floating" />
                   </div>
                 </ConfirmDialogProvider>
               </ToastProvider>
