@@ -99,15 +99,16 @@ async function handleNewMessage(event: EvolutionWebhookEvent) {
       .insert({
         to_number: companyNumber, // Quem recebeu (empresa)
         message: messageText,
-        type: 'received',
+        type: 'text', // Tipo de mensagem de texto
         provider: 'evolution-api',
-        status: 'received',
+        status: 'delivered', // Status: foi entregue para nós
         provider_response: {
           sender_name: data.pushName || 'Desconhecido',
           sender_number: phoneNumber || 'Desconhecido',
           message_id: data.key?.id || '',
           instance: event.instance,
-          timestamp: data.messageTimestamp
+          timestamp: data.messageTimestamp,
+          direction: 'received' // Indica que foi recebida
         },
         sent_at: new Date((data.messageTimestamp || 0) * 1000).toISOString()
       })
