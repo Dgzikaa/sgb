@@ -1,5 +1,5 @@
 // Service Worker para SGB_V2 PWA
-const CACHE_NAME = 'sgb-v2-cache-v1.0.0'
+const CACHE_NAME = 'sgb-v2-cache-v1.0.1'
 const OFFLINE_URL = '/offline'
 
 // Recursos críticos para cache
@@ -120,7 +120,7 @@ async function handleFetch(request) {
     
   } catch (error) {
     console.error('❌ SW: Erro no fetch:', error)
-    return handleOfflineFallback(request)
+    return await handleOfflineFallback(request)
   }
 }
 
@@ -226,7 +226,7 @@ async function handleStaticRequest(request) {
     return networkResponse
   } catch (error) {
     // Fallback para recursos críticos
-    return handleOfflineFallback(request)
+    return await handleOfflineFallback(request)
   }
 }
 
@@ -238,14 +238,43 @@ async function handleNetworkFirst(request) {
   } catch (error) {
     const cache = await caches.open(CACHE_NAME + '-core')
     const cachedResponse = await cache.match(request)
-    return cachedResponse || handleOfflineFallback(request)
+    return cachedResponse || await handleOfflineFallback(request)
   }
 }
 
 // Fallback offline
-function handleOfflineFallback(request) {
+async function handleOfflineFallback(request) {
   if (request.destination === 'document') {
-    return caches.match('/offline')
+    try {
+      const cachedOffline = await caches.match('/offline')
+      if (cachedOffline) {
+        return cachedOffline
+      }
+      
+      // Fallback para uma página offline básica
+      return new Response(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>SGB - Offline</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+        </head>
+        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+          <h1>🔌 Você está offline</h1>
+          <p>Reconecte-se à internet para continuar usando o SGB.</p>
+        </body>
+        </html>
+      `, {
+        status: 503,
+        headers: { 'Content-Type': 'text/html' }
+      })
+    } catch (error) {
+      console.error('❌ SW: Erro no fallback offline:', error)
+      return new Response('Offline', { 
+        status: 503,
+        headers: { 'Content-Type': 'text/plain' }
+      })
+    }
   }
   
   return new Response('Offline', { 
@@ -372,4 +401,4 @@ self.addEventListener('offline', () => {
 })
 
 // Log de instalação completa
-console.log('🚀 SGB_V2 Service Worker carregado - v1.0.0') 
+console.log('🚀 SGB_V2 Service Worker carregado - v1.0.1') 

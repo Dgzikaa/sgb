@@ -17,6 +17,7 @@ export default function LoginPage() {
   const [forgotLoading, setForgotLoading] = useState(false)
   const [forgotSuccess, setForgotSuccess] = useState(false)
   const [isClient, setIsClient] = useState(false)
+  const [logoError, setLogoError] = useState(false)
   
   // Estado para controlar o método de login
   const [loginMethod, setLoginMethod] = useState<'traditional' | 'facial'>('traditional')
@@ -126,7 +127,9 @@ export default function LoginPage() {
         if (result.requirePasswordReset && result.redirectUrl) {
           setSuccess(`Olá ${result.user?.nome}! Redirecionando para redefinição de senha...`)
           setTimeout(() => {
-            window.location.href = result.redirectUrl
+            if (typeof window !== 'undefined') {
+              router.push(result.redirectUrl)
+            }
           }, 2000)
           return
         }
@@ -230,22 +233,18 @@ export default function LoginPage() {
         {/* Logo e Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-20 h-20 mb-6">
-            <img 
-              src="/logos/logo_640x640.png" 
-              alt="SGB Logo" 
-              className="w-20 h-20 rounded-2xl shadow-lg object-cover"
-              onError={(e) => {
-                // Fallback para emoji se logo não carregar
-                e.currentTarget.style.display = 'none'
-                const fallback = e.currentTarget.nextElementSibling as HTMLElement
-                if (fallback) {
-                  fallback.style.display = 'flex'
-                }
-              }}
-            />
-            <div className="hidden w-20 h-20 bg-indigo-600 rounded-2xl items-center justify-center shadow-lg">
-              <span className="text-3xl text-white">🏪</span>
-            </div>
+            {!logoError ? (
+              <img 
+                src="/logos/logo_640x640.png" 
+                alt="SGB Logo" 
+                className="w-20 h-20 rounded-2xl shadow-lg object-cover"
+                onError={() => setLogoError(true)}
+              />
+            ) : (
+              <div className="w-20 h-20 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <span className="text-3xl text-white">🏪</span>
+              </div>
+            )}
           </div>
           <h1 className="text-4xl font-bold text-slate-800 dark:text-white mb-3">SGB</h1>
           <p className="text-slate-600 dark:text-gray-300 text-lg font-medium">Sistema de Gestão de Bares</p>
