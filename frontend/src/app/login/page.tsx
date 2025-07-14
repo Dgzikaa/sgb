@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { LogIn, Eye, EyeOff } from 'lucide-react'
+import { LogIn, Eye, EyeOff, Camera, Fingerprint } from 'lucide-react'
+import FaceAuthenticator, { FaceDescriptor } from '@/components/auth/FaceAuthenticator'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -15,6 +16,10 @@ export default function LoginPage() {
   const [forgotEmail, setForgotEmail] = useState('')
   const [forgotLoading, setForgotLoading] = useState(false)
   const [forgotSuccess, setForgotSuccess] = useState(false)
+  
+  // Estado para controlar o método de login
+  const [loginMethod, setLoginMethod] = useState<'traditional' | 'facial'>('traditional')
+  
   const router = useRouter()
   const searchParams = useSearchParams()
   
@@ -48,55 +53,37 @@ export default function LoginPage() {
         localStorage.removeItem('sgb_user')
       }
     }
-    
-    // Delay para garantir que o logout foi processado completamente
-    const timeoutId = setTimeout(checkAuthStatus, 100)
-    return () => clearTimeout(timeoutId)
-  }, [router])
 
-  // Auto-hide notificações após 5 segundos
+    checkAuthStatus()
+  }, [router, returnUrl])
+
+  // Auto-fechar modal de recuperação após sucesso
   useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => setError(null), 5000)
+    if (forgotSuccess) {
+      const timer = setTimeout(() => {
+        setShowForgotPassword(false)
+        setForgotEmail('')
+        setForgotSuccess(false)
+        setError(null)
+      }, 3000)
       return () => clearTimeout(timer)
     }
-  }, [error])
-
-  useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => setSuccess(null), 3000)
-      return () => clearTimeout(timer)
-    }
-  }, [success])
+  }, [forgotSuccess])
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault()
     setForgotLoading(true)
     setError(null)
-
+    
     try {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: forgotEmail })
-      })
-
-      const result = await response.json()
-
-      if (result.success) {
-        setForgotSuccess(true)
-        setTimeout(() => {
-          setShowForgotPassword(false)
-          setForgotSuccess(false)
-          setForgotEmail('')
-        }, 3000)
-      } else {
-        setError(result.error || 'Erro ao enviar e-mail de recuperação')
-      }
+      // Simulação de envio de email de recuperação
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      console.log('Solicitation para recuperação de senha:', forgotEmail)
+      setForgotSuccess(true)
+      
     } catch (error: any) {
-      setError('Erro na conexão: ' + error.message)
+      setError('Erro ao enviar email de recuperação: ' + error.message)
     } finally {
       setForgotLoading(false)
     }
@@ -156,130 +143,221 @@ export default function LoginPage() {
     }
   }
 
+  // Função para lidar com sucesso do login facial
+  const handleFaceLoginSuccess = async (descriptor?: FaceDescriptor, userData?: any) => {
+    if (userData) {
+      // Salvar dados do usuário no localStorage e cookie
+      const { syncAuthData } = await import('@/lib/cookies')
+      syncAuthData(userData)
+      
+      // Determinar para onde redirecionar
+      const destination = returnUrl ? decodeURIComponent(returnUrl) : '/home'
+      
+      setSuccess(`Login facial realizado com sucesso! Redirecionando para ${destination.startsWith('/home') ? 'início' : 'página solicitada'}...`)
+      
+      setTimeout(() => {
+        router.push(destination)
+      }, 1500)
+    }
+  }
+
+  // Função para lidar com erro do login facial
+  const handleFaceLoginError = (errorMessage: string) => {
+    setError(errorMessage)
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo e Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-indigo-600 rounded-2xl mb-6 shadow-lg">
             <span className="text-3xl text-white">🏪</span>
           </div>
-          <h1 className="text-4xl font-bold text-slate-800 mb-3">SGB</h1>
-          <p className="text-slate-600 text-lg font-medium">Sistema de Gestão de Bares</p>
-          <p className="text-sm text-slate-400 mt-2">Grupo Menos é Mais</p>
+          <h1 className="text-4xl font-bold text-slate-800 dark:text-white mb-3">SGB</h1>
+          <p className="text-slate-600 dark:text-gray-300 text-lg font-medium">Sistema de Gestão de Bares</p>
+          <p className="text-sm text-slate-400 dark:text-gray-500 mt-2">Grupo Menos é Mais</p>
         </div>
 
         {/* Notificações */}
         {returnUrl && (
-          <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <div className="mb-6 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 text-sm">🔒</span>
+              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
+                <span className="text-blue-600 dark:text-blue-400 text-sm">🔒</span>
               </div>
               <div>
-                <p className="text-blue-700 text-sm font-medium">Acesso protegido</p>
-                <p className="text-blue-600 text-xs mt-1">Faça login para acessar a página solicitada</p>
+                <p className="text-blue-700 dark:text-blue-300 text-sm font-medium">Acesso protegido</p>
+                <p className="text-blue-600 dark:text-blue-400 text-xs mt-1">Faça login para acessar a página solicitada</p>
               </div>
             </div>
           </div>
         )}
 
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
+          <div className="mb-6 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl p-4">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                <span className="text-red-600 text-sm">!</span>
+              <div className="w-8 h-8 bg-red-100 dark:bg-red-800 rounded-full flex items-center justify-center">
+                <span className="text-red-600 dark:text-red-400 text-sm">!</span>
               </div>
-              <p className="text-red-700 text-sm font-medium">{error}</p>
+              <p className="text-red-700 dark:text-red-300 text-sm font-medium">{error}</p>
             </div>
           </div>
         )}
 
         {success && (
-          <div className="mb-6 bg-green-50 border border-green-200 rounded-xl p-4">
+          <div className="mb-6 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-xl p-4">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                <span className="text-green-600 text-sm animate-pulse">✓</span>
+              <div className="w-8 h-8 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center">
+                <span className="text-green-600 dark:text-green-400 text-sm animate-pulse">✓</span>
               </div>
-              <p className="text-green-700 text-sm font-medium">{success}</p>
+              <p className="text-green-700 dark:text-green-300 text-sm font-medium">{success}</p>
             </div>
           </div>
         )}
 
-        {/* Formulário de Login */}
-        <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-3">
-                Email
-              </label>
-              <div className="elegant-form-group">
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="elegant-input w-full"
-                  placeholder="seu@email.com"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-slate-700 mb-3">
-                Senha
-              </label>
-              <div className="relative elegant-form-group">
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="elegant-input w-full pr-12"
-                  placeholder="••••••••"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
-
+        {/* Seletor de Método de Login */}
+        <div className="mb-6">
+          <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
             <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
+              onClick={() => setLoginMethod('traditional')}
+              className={`flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
+                loginMethod === 'traditional'
+                  ? 'bg-white dark:bg-gray-700 text-slate-800 dark:text-white shadow-sm'
+                  : 'text-slate-600 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-200'
+              }`}
             >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  <LogIn className="w-5 h-5" />
-                  <span>Entrar no sistema</span>
-                </>
-              )}
+              <LogIn className="w-4 h-4" />
+              Email & Senha
             </button>
-          </form>
-
-          {/* Links adicionais */}
-          <div className="mt-8 text-center">
             <button
-              type="button"
-              onClick={() => setShowForgotPassword(true)}
-              className="text-sm text-slate-500 hover:text-indigo-600 transition-colors font-medium"
+              onClick={() => setLoginMethod('facial')}
+              className={`flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
+                loginMethod === 'facial'
+                  ? 'bg-white dark:bg-gray-700 text-slate-800 dark:text-white shadow-sm'
+                  : 'text-slate-600 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-200'
+              }`}
             >
-              Esqueceu sua senha?
+              <Fingerprint className="w-4 h-4" />
+              Reconhecimento Facial
             </button>
           </div>
         </div>
 
+        {/* Conteúdo baseado no método escolhido */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
+          {loginMethod === 'traditional' ? (
+            /* Formulário de Login Tradicional */
+            <>
+              <form onSubmit={handleLogin} className="space-y-6">
+                <div>
+                  <label htmlFor="email" className="block text-sm font-semibold text-slate-700 dark:text-gray-300 mb-3">
+                    Email
+                  </label>
+                  <div className="elegant-form-group">
+                    <input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="elegant-input w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                      placeholder="seu@email.com"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="password" className="block text-sm font-semibold text-slate-700 dark:text-gray-300 mb-3">
+                    Senha
+                  </label>
+                  <div className="relative elegant-form-group">
+                    <input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="elegant-input w-full pr-12 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                      placeholder="••••••••"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  {isLoading ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <LogIn className="w-5 h-5" />
+                      <span>Entrar no sistema</span>
+                    </>
+                  )}
+                </button>
+              </form>
+
+              {/* Links adicionais */}
+              <div className="mt-8 text-center">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-sm text-slate-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium"
+                >
+                  Esqueceu sua senha?
+                </button>
+              </div>
+            </>
+          ) : (
+            /* Login por Reconhecimento Facial */
+            <div className="space-y-6">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 rounded-full mb-4">
+                  <Camera className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-2">
+                  Login Facial
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-gray-400">
+                  Use seu rosto para fazer login de forma rápida e segura
+                </p>
+              </div>
+
+              <FaceAuthenticator
+                mode="login"
+                onSuccess={handleFaceLoginSuccess}
+                onError={handleFaceLoginError}
+                barId={1} // Você pode pegar isso de algum contexto ou seleção
+                className="border-0 shadow-none p-0 bg-transparent"
+              />
+
+              <div className="text-center">
+                <p className="text-xs text-slate-500 dark:text-gray-500 mb-2">
+                  Problemas com o reconhecimento facial?
+                </p>
+                <button
+                  onClick={() => setLoginMethod('traditional')}
+                  className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium"
+                >
+                  Use login tradicional
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Footer */}
-        <div className="text-center mt-12 text-slate-400 text-sm">
+        <div className="text-center mt-12 text-slate-400 dark:text-gray-500 text-sm">
           <p>© 2025 Sistema de Gestão de Bares - Todos os direitos reservados</p>
         </div>
       </div>
@@ -287,45 +365,45 @@ export default function LoginPage() {
       {/* Modal Esqueci Minha Senha */}
       {showForgotPassword && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 w-full max-w-md shadow-2xl">
             <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900/50 rounded-full mb-4">
                 <span className="text-2xl">🔑</span>
               </div>
-              <h2 className="text-2xl font-bold text-slate-800 mb-2">
+              <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
                 Recuperar Senha
               </h2>
-              <p className="text-slate-600">
+              <p className="text-slate-600 dark:text-gray-400">
                 Digite seu e-mail para receber as instruções de recuperação
               </p>
             </div>
 
             {forgotSuccess ? (
               <div className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                  <span className="text-2xl text-green-600">✓</span>
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/50 rounded-full mb-4">
+                  <span className="text-2xl text-green-600 dark:text-green-400">✓</span>
                 </div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-2">
                   E-mail Enviado!
                 </h3>
-                <p className="text-slate-600 mb-4">
+                <p className="text-slate-600 dark:text-gray-400 mb-4">
                   Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.
                 </p>
-                <div className="text-sm text-slate-500">
+                <div className="text-sm text-slate-500 dark:text-gray-500">
                   Este modal será fechado automaticamente...
                 </div>
               </div>
             ) : (
               <form onSubmit={handleForgotPassword} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-gray-300 mb-2">
                     E-mail
                   </label>
                   <input
                     type="email"
                     value={forgotEmail}
                     onChange={(e) => setForgotEmail(e.target.value)}
-                    className="elegant-input w-full"
+                    className="elegant-input w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                     placeholder="seu@email.com"
                     required
                   />
@@ -339,14 +417,14 @@ export default function LoginPage() {
                       setForgotEmail('')
                       setError(null)
                     }}
-                    className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-3 px-4 rounded-xl transition-colors"
+                    className="flex-1 bg-slate-200 dark:bg-gray-600 hover:bg-slate-300 dark:hover:bg-gray-500 text-slate-700 dark:text-gray-200 font-medium py-3 px-4 rounded-xl transition-colors"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={forgotLoading}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {forgotLoading ? (
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto" />

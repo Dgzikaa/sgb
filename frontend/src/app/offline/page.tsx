@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import { safeNavigator, isClient } from '@/lib/client-utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { 
@@ -21,6 +22,8 @@ export default function OfflinePage() {
   const [lastUpdate, setLastUpdate] = useState<string>('')
 
   useEffect(() => {
+    if (!isClient) return
+
     // Detectar mudanças de conectividade
     const handleOnline = () => {
       setIsOnline(true)
@@ -35,7 +38,7 @@ export default function OfflinePage() {
     window.addEventListener('offline', handleOffline)
     
     // Verificar estado inicial
-    setIsOnline(navigator.onLine)
+    setIsOnline(safeNavigator.isOnline())
     
     // Simular última atualização
     setLastUpdate(new Date().toLocaleString('pt-BR'))
@@ -50,7 +53,7 @@ export default function OfflinePage() {
     setRetryCount(prev => prev + 1)
     
     // Tentar recarregar a página
-    if (navigator.onLine) {
+    if (safeNavigator.isOnline()) {
       window.location.href = '/'
     } else {
       // Feedback visual de tentativa

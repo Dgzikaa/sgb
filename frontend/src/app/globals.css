@@ -639,3 +639,226 @@ p, span, div {
 .dark ::-webkit-scrollbar-thumb:hover {
   background-color: rgb(156, 163, 175);
 } 
+
+/* =====================================================
+   DRAG & DROP STYLES
+   ===================================================== */
+
+/* Drag handle styles */
+.drag-handle {
+  @apply opacity-40 group-hover:opacity-100 transition-opacity duration-200;
+  touch-action: none;
+}
+
+.drag-handle:hover {
+  @apply opacity-100 scale-110;
+}
+
+.drag-handle:active {
+  @apply scale-95;
+}
+
+/* Draggable item states */
+.draggable-item {
+  @apply transition-all duration-200 ease-out;
+  touch-action: none;
+}
+
+.draggable-item:hover {
+  @apply shadow-lg transform -translate-y-1;
+}
+
+.draggable-item.dragging {
+  @apply opacity-50 scale-95 rotate-2 z-50;
+  pointer-events: none;
+}
+
+.draggable-item.drag-over {
+  @apply ring-2 ring-blue-400 dark:ring-blue-500 ring-offset-2;
+  @apply bg-blue-50 dark:bg-blue-900/20;
+}
+
+/* Drop zone styles */
+.drop-zone {
+  @apply transition-all duration-200 ease-out;
+}
+
+.drop-zone.drag-over {
+  @apply border-blue-400 dark:border-blue-500;
+  @apply bg-blue-50 dark:bg-blue-900/20;
+  @apply ring-2 ring-blue-400/50 dark:ring-blue-500/50;
+  @apply scale-105;
+}
+
+.drop-zone.disabled {
+  @apply opacity-50 cursor-not-allowed;
+  @apply border-gray-200 dark:border-gray-700;
+  @apply bg-gray-100 dark:bg-gray-800;
+}
+
+/* Sortable list styles */
+.sortable-list {
+  @apply relative;
+}
+
+.sortable-list.dragging {
+  @apply select-none;
+}
+
+.sortable-item {
+  @apply transition-all duration-200 ease-out;
+}
+
+.sortable-item:hover:not(.dragging) {
+  @apply shadow-md;
+}
+
+/* Drag indicators */
+.drag-indicator {
+  @apply absolute left-0 right-0 h-0.5 bg-blue-400 dark:bg-blue-500;
+  @apply rounded-full animate-pulse;
+}
+
+.drag-indicator.top {
+  @apply -top-1;
+}
+
+.drag-indicator.bottom {
+  @apply -bottom-1;
+}
+
+/* Drag overlay */
+.drag-overlay {
+  @apply fixed inset-0 bg-black/5 dark:bg-white/5 pointer-events-none z-40;
+}
+
+/* Auto-scroll zones */
+.auto-scroll-zone {
+  @apply fixed w-full h-24 pointer-events-none z-50;
+}
+
+.auto-scroll-zone.top {
+  @apply top-0 bg-gradient-to-b from-blue-100/50 to-transparent;
+}
+
+.auto-scroll-zone.bottom {
+  @apply bottom-0 bg-gradient-to-t from-blue-100/50 to-transparent;
+}
+
+/* Mobile touch feedback */
+@media (hover: none) and (pointer: coarse) {
+  .draggable-item {
+    @apply active:scale-95 active:opacity-75;
+  }
+  
+  .drag-handle {
+    @apply opacity-70;
+    @apply p-2; /* Larger touch target */
+  }
+  
+  .sortable-item {
+    @apply mb-2; /* More space between items on mobile */
+  }
+}
+
+/* Drag animations */
+@keyframes drag-start {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95) rotate(2deg);
+    opacity: 0.5;
+  }
+}
+
+@keyframes drag-end {
+  0% {
+    transform: scale(0.95) rotate(2deg);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes drop-zone-activate {
+  0% {
+    transform: scale(1);
+    border-color: theme('colors.gray.300');
+  }
+  100% {
+    transform: scale(1.05);
+    border-color: theme('colors.blue.400');
+  }
+}
+
+@keyframes drop-zone-deactivate {
+  0% {
+    transform: scale(1.05);
+    border-color: theme('colors.blue.400');
+  }
+  100% {
+    transform: scale(1);
+    border-color: theme('colors.gray.300');
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .draggable-item.dragging {
+    @apply ring-4 ring-black dark:ring-white;
+  }
+  
+  .drop-zone.drag-over {
+    @apply ring-4 ring-black dark:ring-white;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .draggable-item,
+  .drop-zone,
+  .sortable-item,
+  .drag-handle {
+    @apply transition-none;
+  }
+  
+  .draggable-item.dragging {
+    @apply scale-100 rotate-0;
+  }
+  
+  .drop-zone.drag-over {
+    @apply scale-100;
+  }
+}
+
+/* Focus management for accessibility */
+.draggable-item:focus-visible {
+  @apply ring-2 ring-blue-500 ring-offset-2;
+  @apply outline-none;
+}
+
+.drop-zone:focus-visible {
+  @apply ring-2 ring-purple-500 ring-offset-2;
+  @apply outline-none;
+}
+
+/* Screen reader enhancements */
+.sr-drag-instructions {
+  @apply sr-only;
+}
+
+/* Print styles */
+@media print {
+  .drag-handle,
+  .drop-zone {
+    @apply hidden;
+  }
+  
+  .draggable-item {
+    @apply transform-none opacity-100;
+  }
+} 

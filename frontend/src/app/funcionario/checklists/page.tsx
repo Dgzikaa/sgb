@@ -12,6 +12,7 @@ import PhotoUpload from '@/components/uploads/PhotoUpload'
 import CameraCapture from '@/components/uploads/CameraCapture'
 import SignaturePad from '@/components/uploads/SignaturePad'
 import { useFileUpload } from '@/hooks/useFileUpload'
+import { safeNavigator } from '@/lib/client-utils'
 import { 
   Clock,
   CheckCircle,
@@ -529,22 +530,26 @@ export default function ChecklistsFuncionario() {
     }
   }
 
-  const compartilharChecklist = () => {
+  const compartilharChecklist = async () => {
     if (!checklistAtivo) return
     
     // TODO: Implementar compartilhamento (WhatsApp, etc.)
     const url = `${window.location.origin}/checklist/${checklistAtivo.id}`
     
-    if (navigator.share) {
-      navigator.share({
-        title: `Checklist: ${checklistAtivo.nome}`,
-        text: `Checklist ${checklistAtivo.nome} foi preenchido por ${usuario.nome}`,
-        url: url
-      })
-    } else {
+    const shared = await safeNavigator.share({
+      title: `Checklist: ${checklistAtivo.nome}`,
+      text: `Checklist ${checklistAtivo.nome} foi preenchido por ${usuario.nome}`,
+      url: url
+    })
+
+    if (!shared) {
       // Fallback - copiar para clipboard
-      navigator.clipboard.writeText(url)
-      alert('📋 Link copiado para a área de transferência!')
+      const copied = await safeNavigator.clipboard.writeText(url)
+      if (copied) {
+        alert('📋 Link copiado para a área de transferência!')
+      } else {
+        alert('❌ Erro ao compartilhar ou copiar link')
+      }
     }
   }
 

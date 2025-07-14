@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { safeLocalStorage, isClient } from '@/lib/client-utils'
 
 interface Usuario {
   id: number
@@ -28,8 +29,13 @@ export function usePermissions(): PermissionsHook {
   useEffect(() => {
     // Carregar dados do usuário do localStorage
     const loadUserData = () => {
+      if (!isClient) {
+        setLoading(false)
+        return
+      }
+      
       try {
-        const userData = localStorage.getItem('sgb_user')
+        const userData = safeLocalStorage.getItem('sgb_user')
         if (userData) {
           const parsedUser = JSON.parse(userData)
           setUser(parsedUser)
@@ -57,12 +63,16 @@ export function usePermissions(): PermissionsHook {
       loadUserData()
     }
 
-    window.addEventListener('storage', handleStorageChange)
-    window.addEventListener('userDataUpdated', handleCustomStorageChange)
+    if (isClient) {
+      window.addEventListener('storage', handleStorageChange)
+      window.addEventListener('userDataUpdated', handleCustomStorageChange)
+    }
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange)
-      window.removeEventListener('userDataUpdated', handleCustomStorageChange)
+      if (isClient) {
+        window.removeEventListener('storage', handleStorageChange)
+        window.removeEventListener('userDataUpdated', handleCustomStorageChange)
+      }
     }
   }, [])
 
@@ -177,7 +187,7 @@ export function usePermissions(): PermissionsHook {
         const userData = await response.json()
         if (userData.success && userData.user) {
           // Atualizar localStorage
-          localStorage.setItem('sgb_user', JSON.stringify(userData.user))
+          safeLocalStorage.setItem('sgb_user', JSON.stringify(userData.user))
           setUser(userData.user)
           console.log('✅ Dados do usuário atualizados:', userData.user.nome)
         }
@@ -202,10 +212,12 @@ export function usePermissions(): PermissionsHook {
     setUser(updatedUser)
     
     // Atualizar localStorage
-    localStorage.setItem('sgb_user', JSON.stringify(updatedUser))
+    safeLocalStorage.setItem('sgb_user', JSON.stringify(updatedUser))
     
     // Disparar evento personalizado para notificar outros componentes
-    window.dispatchEvent(new CustomEvent('userDataUpdated'))
+    if (isClient) {
+      window.dispatchEvent(new CustomEvent('userDataUpdated'))
+    }
   }
 
   // Função para detectar se admin está usando permissões específicas

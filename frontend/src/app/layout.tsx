@@ -9,6 +9,7 @@ import { BarProvider } from '@/contexts/BarContext'
 import { UserProvider } from '@/contexts/UserContext'
 import AuthSync from '@/components/AuthSync'
 import { ThemeProvider } from '@/contexts/ThemeContext'
+import { LGPDProvider } from '@/hooks/useLGPD'
 
 // Using system fonts instead of Google Fonts to avoid build connectivity issues
 
@@ -66,7 +67,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/site.webmanifest" />
         <meta name="theme-color" content="#6366f1" />
@@ -78,26 +79,27 @@ export default function RootLayout({
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
       <body className="font-sans">
-        <ThemeProvider>
-          <UserProvider>
-            <BarProvider>
-              <ToastProvider>
-                <ConfirmDialogProvider>
-                  <AuthSync />
-                  <div className="min-h-screen">
-                    {children}
-                    <GlobalToastListener />
-                    <GlobalConfirmListener />
-                    <CommandPaletteWrapper />
-                    <PWAInstallBanner variant="floating" />
-                  </div>
-                </ConfirmDialogProvider>
-              </ToastProvider>
-            </BarProvider>
-          </UserProvider>
-        </ThemeProvider>
+        <LGPDProvider>
+          <ThemeProvider>
+            <UserProvider>
+              <BarProvider>
+                <ToastProvider>
+                  <ConfirmDialogProvider>
+                    <AuthSync />
+                    <div className="min-h-screen">
+                      {children}
+                      <GlobalToastListener />
+                      <GlobalConfirmListener />
+                      <CommandPaletteWrapper />
+                      <PWAInstallBanner variant="floating" />
+                    </div>
+                  </ConfirmDialogProvider>
+                </ToastProvider>
+              </BarProvider>
+            </UserProvider>
+          </ThemeProvider>
 {/* Service Worker desabilitado temporariamente para testes */}
-        {/*
+          {/*
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -116,6 +118,7 @@ export default function RootLayout({
           }}
         />
         */}
+        </LGPDProvider>
       </body>
     </html>
   )

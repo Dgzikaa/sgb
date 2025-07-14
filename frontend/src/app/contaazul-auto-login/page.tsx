@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Copy, CheckCircle, ExternalLink, Zap, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { safeNavigator } from '@/lib/client-utils';
 
 export default function ContaAzulAutoLogin() {
   const [autoLoginData, setAutoLoginData] = useState<any>(null);
@@ -105,12 +106,16 @@ export default function ContaAzulAutoLogin() {
 })();`;
 
     try {
-      await navigator.clipboard.writeText(script);
-      setScriptCopied(true);
-      toast({
-        title: "Script Copiado! 📋",
-        description: "Agora abra o ContaAzul, pressione F12, cole no Console e pressione Enter",
-      });
+      const copied = await safeNavigator.clipboard.writeText(script);
+      if (copied) {
+        setScriptCopied(true);
+        toast({
+          title: "Script Copiado! 📋",
+          description: "Agora abra o ContaAzul, pressione F12, cole no Console e pressione Enter",
+        });
+      } else {
+        throw new Error('Falha ao copiar para clipboard');
+      }
       
       // Abrir ContaAzul na mesma aba após pequeno delay
       setTimeout(() => {
@@ -135,11 +140,15 @@ export default function ContaAzulAutoLogin() {
 
   const copyField = async (text: string, fieldName: string) => {
     try {
-      await navigator.clipboard.writeText(text);
-      toast({
-        title: `${fieldName} copiado!`,
-        description: "Cole no campo correspondente",
-      });
+      const copied = await safeNavigator.clipboard.writeText(text);
+      if (copied) {
+          toast({
+            title: `${fieldName} copiado!`,
+          description: "Cole no campo correspondente",
+        });
+      } else {
+        throw new Error('Falha ao copiar para clipboard');
+      }
     } catch (err) {
       toast({
         title: "Erro ao copiar",
