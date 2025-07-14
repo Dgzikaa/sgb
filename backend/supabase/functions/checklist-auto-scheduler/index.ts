@@ -112,7 +112,38 @@ serve(async (req) => {
           console.error(`❌ Erro ao atualizar agendamento:`, errorUpdate)
         }
 
-        // 4. Log de sucesso
+        // 4. Enviar notificação WhatsApp
+        if (agendamento.responsaveis_whatsapp && agendamento.responsaveis_whatsapp.length > 0) {
+          try {
+            const whatsappResponse = await fetch('https://sgbv2.vercel.app/api/whatsapp/send', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                numbers: agendamento.responsaveis_whatsapp,
+                type: 'checklist_notification',
+                checklist_data: {
+                  checklist_id: agendamento.checklist_id,
+                  checklist_nome: agendamento.checklists?.nome || agendamento.titulo,
+                  bar_nome: 'Bar Principal', // TODO: buscar nome do bar
+                  deadline: deadline.toISOString(),
+                  responsavel: 'Equipe',
+                  status: 'agendado',
+                  prioridade: agendamento.prioridade
+                }
+              })
+            })
+
+            if (whatsappResponse.ok) {
+              console.log(`📱 WhatsApp enviado para: ${agendamento.responsaveis_whatsapp.join(', ')}`)
+            }
+          } catch (whatsappError) {
+            console.error('❌ Erro ao enviar WhatsApp:', whatsappError)
+          }
+        }
+
+        // 5. Log de sucesso
         await supabase
           .from('checklist_automation_logs')
           .insert({
@@ -121,7 +152,8 @@ serve(async (req) => {
             dados: {
               checklist_agendamento_id: novoAgendamento.id,
               deadline: deadline.toISOString(),
-              agendamento_titulo: agendamento.titulo
+              agendamento_titulo: agendamento.titulo,
+              whatsapp_enviado: !!(agendamento.responsaveis_whatsapp && agendamento.responsaveis_whatsapp.length > 0)
             },
             mensagem: `Agendamento automático criado com sucesso para ${agendamento.titulo}`,
             nivel: 'info'
