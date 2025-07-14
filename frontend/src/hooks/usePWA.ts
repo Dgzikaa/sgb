@@ -30,7 +30,7 @@ export function usePWA(): PWAState & PWAActions {
     isInstalled: false,
     isInstallable: false,
     isOffline: false,
-    isOnline: navigator.onLine,
+    isOnline: typeof window !== 'undefined' && navigator ? navigator.onLine : true,
     isLoading: true,
     installPrompt: null,
     notificationPermission: 'default',
@@ -39,6 +39,8 @@ export function usePWA(): PWAState & PWAActions {
 
   // Detectar se PWA está instalada
   const detectInstallation = useCallback(() => {
+    if (typeof window === 'undefined') return
+    
     const isInstalled = 
       window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as any).standalone === true ||

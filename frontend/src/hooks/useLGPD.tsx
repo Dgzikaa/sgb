@@ -3,6 +3,14 @@
 import { useState, useEffect, useCallback, createContext, useContext } from 'react'
 import { ReactNode } from 'react'
 
+// Função utilitária para acessar navigator com segurança
+const getSafeUserAgent = (): string => {
+  if (typeof window === 'undefined' || !navigator) {
+    return 'Server'
+  }
+  return navigator.userAgent
+}
+
 // Tipos de consentimento LGPD
 export type ConsentType = 
   | 'essential'      // Cookies essenciais (sempre ativo)
@@ -201,7 +209,7 @@ export function useLGPDImplementation() {
           details: newSettings.consents,
           timestamp: new Date(),
           ip: await getClientIP(),
-          userAgent: navigator.userAgent
+          userAgent: getSafeUserAgent()
         })
       })
 
@@ -225,7 +233,7 @@ export function useLGPDImplementation() {
       timestamp: new Date(),
       version: DEFAULT_SETTINGS.version,
       ip: clientIP,
-      userAgent: navigator.userAgent
+      userAgent: getSafeUserAgent()
     }
 
     const newSettings = {
@@ -254,7 +262,7 @@ export function useLGPDImplementation() {
       timestamp: new Date(),
       version: DEFAULT_SETTINGS.version,
       ip: clientIP,
-      userAgent: navigator.userAgent
+      userAgent: getSafeUserAgent()
     }
 
     const newSettings = {
@@ -287,7 +295,7 @@ export function useLGPDImplementation() {
         timestamp: new Date(),
         version: DEFAULT_SETTINGS.version,
         ip: clientIP,
-        userAgent: navigator.userAgent
+        userAgent: getSafeUserAgent()
       }
     })
 

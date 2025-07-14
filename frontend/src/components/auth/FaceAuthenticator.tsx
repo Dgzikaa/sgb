@@ -58,61 +58,83 @@ export default function FaceAuthenticator({
       startLoading('fullscreen', 'Carregando modelos de IA...')
       
       // Verificar se face-api está disponível
-      if (typeof window === 'undefined' || !window.faceapi) {
-        throw new Error('face-api.js não está carregado')
+      if (typeof window === 'undefined' || !window.faceapi || !window.faceapi.nets) {
+        throw new Error('face-api.js não está disponível ou não foi carregado corretamente')
       }
 
-      // Usar URL absoluta para produção
-      const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-      const MODEL_URL = `${baseUrl}/models`
-      
-      console.log('📂 Carregando modelos de:', MODEL_URL)
+      // URLs de modelos com fallback para CDN
+      const modelUrls = [
+        '/models', // Local primeiro
+        'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights', // CDN fallback
+      ]
       
       // Carregar modelos com timeout e retry
-      const loadWithTimeout = async (loadPromise: Promise<void>, modelName: string) => {
-        const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error(`Timeout ao carregar ${modelName}`)), 30000)
-        })
-        
-        try {
-          await Promise.race([loadPromise, timeoutPromise])
-          console.log(`✅ ${modelName} carregado`)
-        } catch (error) {
-          console.error(`❌ Erro ao carregar ${modelName}:`, error)
-          throw error
+      const loadModelWithFallback = async (modelName: string, loadFunction: (url: string) => Promise<void>) => {
+        for (const modelUrl of modelUrls) {
+          try {
+            console.log(`📂 Tentando carregar ${modelName} de: ${modelUrl}`)
+            
+            const timeoutPromise = new Promise<never>((_, reject) => {
+              setTimeout(() => reject(new Error(`Timeout ao carregar ${modelName}`)), 20000)
+            })
+            
+            await Promise.race([loadFunction(modelUrl), timeoutPromise])
+            console.log(`✅ ${modelName} carregado com sucesso de: ${modelUrl}`)
+            return
+            
+          } catch (error) {
+            console.warn(`⚠️ Erro ao carregar ${modelName} de ${modelUrl}:`, error)
+            if (modelUrl === modelUrls[modelUrls.length - 1]) {
+              throw new Error(`Falha ao carregar ${modelName} de todas as fontes`)
+            }
+            continue
+          }
         }
       }
       
-      // Carregar apenas os modelos essenciais para melhor performance
+      // Carregar apenas os modelos essenciais
+      console.log('📂 Iniciando carregamento dos modelos essenciais...')
+      
       await Promise.all([
-        loadWithTimeout(
-          window.faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-          'TinyFaceDetector'
+        loadModelWithFallback(
+          'TinyFaceDetector',
+          (url) => window.faceapi.nets.tinyFaceDetector.loadFromUri(url)
         ),
-        loadWithTimeout(
-          window.faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-          'FaceLandmark68Net'
+        loadModelWithFallback(
+          'FaceLandmark68Net',
+          (url) => window.faceapi.nets.faceLandmark68Net.loadFromUri(url)
         ),
-        loadWithTimeout(
-          window.faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
-          'FaceRecognitionNet'
+        loadModelWithFallback(
+          'FaceRecognitionNet',
+          (url) => window.faceapi.nets.faceRecognitionNet.loadFromUri(url)
         )
       ])
 
+      // Verificar se os modelos foram realmente carregados
+      const isLoaded = window.faceapi.nets.tinyFaceDetector.isLoaded &&
+                      window.faceapi.nets.faceLandmark68Net.isLoaded &&
+                      window.faceapi.nets.faceRecognitionNet.isLoaded
+
+      if (!isLoaded) {
+        throw new Error('Modelos não foram carregados corretamente')
+      }
+
       setModelsLoaded(true)
       setError(null)
-      console.log('✅ Todos os modelos de IA carregados com sucesso')
+      console.log('✅ Todos os modelos de IA carregados e validados com sucesso')
       
     } catch (error) {
       console.error('❌ Erro detalhado ao carregar modelos:', error)
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
       
       if (errorMessage.includes('Timeout')) {
-        setError('Conexão lenta. Tente novamente com melhor internet.')
-      } else if (errorMessage.includes('NetworkError') || errorMessage.includes('fetch')) {
-        setError('Erro de rede. Verifique sua conexão e tente novamente.')
+        setError('Conexão lenta detectada. Tente com melhor sinal de internet.')
+      } else if (errorMessage.includes('NetworkError') || errorMessage.includes('fetch') || errorMessage.includes('404')) {
+        setError('Problema de conectividade. Verifique sua internet e tente novamente.')
+      } else if (errorMessage.includes('face-api.js não está')) {
+        setError('Sistema de IA não carregado. Recarregue a página.')
       } else {
-        setError('Erro ao carregar modelos de IA. Tente recarregar a página.')
+        setError('Erro ao inicializar reconhecimento facial. Tente novamente.')
       }
     } finally {
       setIsLoading(false)
@@ -314,68 +336,85 @@ export default function FaceAuthenticator({
   // Carregar face-api.js com fallback de CDN
   useEffect(() => {
     const loadFaceAPIScript = async () => {
-      // Verificar se já está carregado
-      if (window.faceapi) {
-        console.log('📚 face-api.js já carregado')
-        loadModels()
-        return
-      }
-
-      // Se já existe script, remover para tentar novamente
-      const existingScript = document.querySelector('script[src*="face-api"]')
-      if (existingScript) {
-        existingScript.remove()
-      }
-
-      // Lista de URLs para tentar (local primeiro, depois CDN)
-      const scriptUrls = [
-        '/face-api.min.js', // Local primeiro
-        'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js', // CDN fallback
-        'https://unpkg.com/face-api.js@0.22.2/dist/face-api.min.js' // CDN alternativo
-      ]
-
-      for (const url of scriptUrls) {
-        try {
-          console.log(`📚 Tentando carregar face-api.js de: ${url}`)
-          
-          await new Promise<void>((resolve, reject) => {
-            const script = document.createElement('script')
-            script.src = url
-            script.async = true
-            
-            script.onload = () => {
-              console.log(`✅ face-api.js carregado de: ${url}`)
-              resolve()
-            }
-            
-            script.onerror = () => {
-              console.warn(`❌ Falha ao carregar de: ${url}`)
-              script.remove()
-              reject(new Error(`Falha ao carregar ${url}`))
-            }
-            
-            // Timeout de 15 segundos
-            setTimeout(() => {
-              script.remove()
-              reject(new Error(`Timeout ao carregar ${url}`))
-            }, 15000)
-            
-            document.head.appendChild(script)
-          })
-
-          // Se chegou aqui, carregou com sucesso
-          if (window.faceapi) {
-            loadModels()
-            return
-          }
-        } catch (error) {
-          console.warn(`Erro ao carregar de ${url}:`, error)
-          continue // Tenta próxima URL
+      try {
+        setError(null)
+        setIsLoading(true)
+        
+        // Verificar se já está carregado
+        if (window.faceapi) {
+          console.log('📚 face-api.js já carregado')
+          await loadModels()
+          return
         }
-      }
 
-      // Se chegou aqui, falhou em todas as tentativas
-      setError('Erro ao carregar biblioteca de reconhecimento facial. Verifique sua conexão.')
+        // Se já existe script, remover para tentar novamente
+        const existingScript = document.querySelector('script[src*="face-api"]')
+        if (existingScript) {
+          existingScript.remove()
+        }
+
+        // Lista de URLs para tentar (CDN primeiro para melhor confiabilidade)
+        const scriptUrls = [
+          'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js', // CDN principal
+          'https://unpkg.com/face-api.js@0.22.2/dist/face-api.min.js', // CDN alternativo
+          '/face-api.min.js' // Local por último
+        ]
+
+        for (const url of scriptUrls) {
+          try {
+            console.log(`📚 Tentando carregar face-api.js de: ${url}`)
+            
+            await new Promise<void>((resolve, reject) => {
+              const script = document.createElement('script')
+              script.src = url
+              script.async = true
+              script.crossOrigin = 'anonymous' // Para evitar problemas de CORS
+              
+              script.onload = () => {
+                console.log(`✅ face-api.js carregado de: ${url}`)
+                // Aguardar um pouco para garantir que está disponível
+                setTimeout(resolve, 100)
+              }
+              
+              script.onerror = () => {
+                console.warn(`❌ Falha ao carregar de: ${url}`)
+                script.remove()
+                reject(new Error(`Falha ao carregar ${url}`))
+              }
+              
+              // Timeout de 10 segundos (mais rápido)
+              setTimeout(() => {
+                script.remove()
+                reject(new Error(`Timeout ao carregar ${url}`))
+              }, 10000)
+              
+              document.head.appendChild(script)
+            })
+
+            // Verificar se realmente carregou
+            if (window.faceapi && typeof window.faceapi.nets !== 'undefined') {
+              console.log('✅ face-api.js validado e pronto')
+              await loadModels()
+              return
+            } else {
+              console.warn('⚠️ face-api.js carregou mas não está funcional')
+              continue
+            }
+          } catch (error) {
+            console.warn(`Erro ao carregar de ${url}:`, error)
+            continue // Tenta próxima URL
+          }
+        }
+
+        // Se chegou aqui, falhou em todas as tentativas
+        throw new Error('Falha em carregar face-api.js de todas as fontes')
+        
+      } catch (error) {
+        console.error('❌ Erro fatal ao carregar face-api.js:', error)
+        setError('Erro ao carregar sistema de reconhecimento facial. Verifique sua conexão e tente novamente.')
+      } finally {
+        setIsLoading(false)
+      }
     }
 
     loadFaceAPIScript()
@@ -438,7 +477,7 @@ export default function FaceAuthenticator({
                   disabled={isLoading}
                   variant="outline"
                   size="sm"
-                  className="border-red-300 dark:border-red-600 text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   {isLoading ? (
                     <Loader2 className="w-3 h-3 mr-1 animate-spin" />
