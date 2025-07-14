@@ -36,6 +36,9 @@ export default function FaceAuthenticator({
   barId,
   className = ''
 }: FaceAuthenticatorProps) {
+  // DEBUG: Log inicial
+  console.log('🚀 FaceAuthenticator iniciado:', { mode, userEmail, barId })
+  
   // Estados
   const [isLoading, setIsLoading] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
@@ -55,14 +58,24 @@ export default function FaceAuthenticator({
 
   // Carregar modelos do face-api.js
   const loadModels = useCallback(async () => {
+    console.log('🤖 loadModels INICIADO!')
+    
     try {
       setIsLoading(true)
       startLoading('fullscreen', 'Carregando modelos de IA...')
+      
+      console.log('🔍 Verificando face-api...', {
+        windowExists: typeof window !== 'undefined',
+        faceapiExists: !!window.faceapi,
+        netsExists: !!(window.faceapi && window.faceapi.nets)
+      })
       
       // Verificar se face-api está disponível
       if (typeof window === 'undefined' || !window.faceapi || !window.faceapi.nets) {
         throw new Error('face-api.js não está disponível ou não foi carregado corretamente')
       }
+
+      console.log('✅ face-api.js disponível!')
 
       // URLs de modelos com fallback para CDN
       const modelUrls = [
@@ -265,25 +278,40 @@ export default function FaceAuthenticator({
 
   // Verificar permissões na inicialização
   useEffect(() => {
+    console.log('🔐 useEffect: Verificando permissões na inicialização')
     checkCameraPermissions()
   }, [checkCameraPermissions])
 
   // Inicializar câmera
   const startCamera = useCallback(async () => {
+    console.log('🎬 startCamera CHAMADO!')
+    
     try {
+      console.log('📋 Estados atuais:', { 
+        modelsLoaded, 
+        cameraPermission, 
+        isLoading,
+        hasAskedPermission 
+      })
+      
       setError(null)
       setSuccess(null)
       
       // Verificar se modelos estão carregados
       if (!modelsLoaded) {
+        console.log('❌ Modelos não carregados')
         setError('Aguarde o carregamento dos modelos de IA.')
         return
       }
 
+      console.log('✅ Modelos carregados, verificando permissões...')
+
       // Verificar permissões antes de tentar acessar
       const permissionState = await checkCameraPermissions()
+      console.log('🔐 Permission state:', permissionState)
       
       if (permissionState === 'denied') {
+        console.log('❌ Permissão negada')
         setError('Acesso à câmera negado. Clique em "Permitir Câmera" para solicitar acesso.')
         return
       }
@@ -594,6 +622,14 @@ export default function FaceAuthenticator({
     loadFaceAPIScript()
   }, [loadModels])
 
+  console.log('🎨 FaceAuthenticator RENDERIZANDO...', {
+    mode,
+    isRecording,
+    modelsLoaded,
+    cameraPermission,
+    stream: !!stream
+  })
+
   return (
     <Card className={`w-full max-w-md mx-auto card-dark ${className}`}>
       <CardHeader className="text-center">
@@ -805,7 +841,16 @@ export default function FaceAuthenticator({
         <div className="flex gap-2">
           {!isRecording ? (
             <Button
-              onClick={startCamera}
+              onClick={() => {
+                console.log('🖱️ Botão Iniciar Câmera CLICADO!')
+                console.log('📊 Estado do botão:', {
+                  disabled: isLoading || !modelsLoaded || cameraPermission !== 'granted',
+                  isLoading,
+                  modelsLoaded,
+                  cameraPermission
+                })
+                startCamera()
+              }}
               disabled={isLoading || !modelsLoaded || cameraPermission !== 'granted'}
               className="btn-primary-dark flex-1"
             >
