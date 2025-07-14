@@ -302,11 +302,32 @@ export default function FaceAuthenticator({
       
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current?.play().then(() => {
-            setIsRecording(true)
-            console.log('✅ Câmera iniciada com sucesso')
-          })
+        
+        // Definir isRecording imediatamente para remover overlay
+        setIsRecording(true)
+        
+        // Configurar e iniciar o vídeo
+        const playVideo = async () => {
+          try {
+            if (videoRef.current) {
+              await videoRef.current.play()
+              console.log('✅ Câmera iniciada e vídeo reproduzindo')
+            }
+          } catch (playError) {
+            console.warn('Erro ao reproduzir vídeo:', playError)
+            // Tentar novamente após um delay
+            setTimeout(() => {
+              videoRef.current?.play().catch(console.warn)
+            }, 500)
+          }
+        }
+        
+        if (videoRef.current.readyState >= 2) {
+          // Se metadata já carregada, tocar imediatamente
+          playVideo()
+        } else {
+          // Aguardar metadata
+          videoRef.current.onloadedmetadata = playVideo
         }
       }
       
@@ -328,17 +349,26 @@ export default function FaceAuthenticator({
 
   // Parar câmera
   const stopCamera = useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop())
-      setStream(null)
+    try {
+      if (stream) {
+        stream.getTracks().forEach(track => {
+          track.stop()
+          console.log(`📷 Track parado: ${track.kind}`)
+        })
+        setStream(null)
+      }
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = null
+        videoRef.current.onloadedmetadata = null
+      }
+      
+      setIsRecording(false)
+      setError(null)
+      console.log('📷 Câmera parada completamente')
+    } catch (error) {
+      console.error('Erro ao parar câmera:', error)
     }
-    
-    if (videoRef.current) {
-      videoRef.current.srcObject = null
-    }
-    
-    setIsRecording(false)
-    console.log('📷 Câmera parada')
   }, [stream])
 
   // Capturar e processar face
@@ -568,7 +598,9 @@ export default function FaceAuthenticator({
         <div className="relative">
           <video
             ref={videoRef}
-            className="w-full h-64 bg-gray-100 dark:bg-gray-700 rounded-lg object-cover"
+            className={`w-full h-64 bg-gray-100 dark:bg-gray-700 rounded-lg object-cover transition-all duration-300 ${
+              isRecording ? 'opacity-100' : 'opacity-0'
+            }`}
             autoPlay
             muted
             playsInline
@@ -587,6 +619,13 @@ export default function FaceAuthenticator({
                   Câmera desligada
                 </p>
               </div>
+            </div>
+          )}
+          
+          {isRecording && stream && (
+            <div className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+              AO VIVO
             </div>
           )}
         </div>
@@ -734,8 +773,10 @@ export default function FaceAuthenticator({
           
           <div className="flex items-center gap-2">
             <span>🎯 Status:</span>
-            {isRecording ? (
-              <span className="text-green-600 dark:text-green-400 font-medium">🟢 Gravando</span>
+            {isRecording && stream ? (
+              <span className="text-green-600 dark:text-green-400 font-medium">🟢 Gravando ({stream.getTracks().length} tracks)</span>
+            ) : isRecording && !stream ? (
+              <span className="text-yellow-600 dark:text-yellow-400 font-medium">🟡 Iniciando...</span>
             ) : modelsLoaded && cameraPermission === 'granted' ? (
               <span className="text-blue-600 dark:text-blue-400 font-medium">🔵 Pronto</span>
             ) : (
