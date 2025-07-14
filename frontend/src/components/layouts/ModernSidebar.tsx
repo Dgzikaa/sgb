@@ -153,6 +153,7 @@ const configuracoesItems: SidebarItem = {
             { icon: BarChart3, label: 'Analytics', href: '/configuracoes/analytics' },
         { icon: Database, label: 'Cache', href: '/configuracoes/cache' },
         { icon: Smartphone, label: 'PWA', href: '/configuracoes/pwa' },
+        { icon: CheckSquare, label: 'Bulk Actions', href: '/configuracoes/bulk-actions' },
   ]
 }
 

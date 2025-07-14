@@ -12,6 +12,9 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Checkbox } from '@/components/ui/checkbox'
+import { BulkActionsToolbar, commonBulkActions, type BulkAction } from '@/components/ui/bulk-actions-toolbar'
+import { useBulkSelection } from '@/hooks/useBulkSelection'
 import { 
   Plus, 
   Edit, 
@@ -224,6 +227,113 @@ export default function AdminChecklists() {
     
     return matchSetor && matchTipo && matchBusca
   })
+
+  // Bulk selection
+  const bulkSelection = useBulkSelection(checklistsFiltrados, {
+    onSelectionChange: (selectedItems) => {
+      console.log('Seleção alterada:', selectedItems)
+    }
+  })
+
+  // Bulk actions
+  const handleBulkDelete = async (selectedItems: ChecklistTemplate[]) => {
+    try {
+      const response = await fetch('/api/checklists/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          checklistIds: selectedItems.map(item => item.id)
+        })
+      })
+
+      if (response.ok) {
+        bulkSelection.clearSelection()
+        carregarChecklists()
+      }
+    } catch (error) {
+      console.error('Erro ao deletar checklists:', error)
+    }
+  }
+
+  const handleBulkActivate = async (selectedItems: ChecklistTemplate[]) => {
+    try {
+      const response = await fetch('/api/checklists/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'activate',
+          checklistIds: selectedItems.map(item => item.id)
+        })
+      })
+
+      if (response.ok) {
+        bulkSelection.clearSelection()
+        carregarChecklists()
+      }
+    } catch (error) {
+      console.error('Erro ao ativar checklists:', error)
+    }
+  }
+
+  const handleBulkDeactivate = async (selectedItems: ChecklistTemplate[]) => {
+    try {
+      const response = await fetch('/api/checklists/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'deactivate',
+          checklistIds: selectedItems.map(item => item.id)
+        })
+      })
+
+      if (response.ok) {
+        bulkSelection.clearSelection()
+        carregarChecklists()
+      }
+    } catch (error) {
+      console.error('Erro ao desativar checklists:', error)
+    }
+  }
+
+  const handleBulkDuplicate = async (selectedItems: ChecklistTemplate[]) => {
+    try {
+      const response = await fetch('/api/checklists/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'duplicate',
+          checklistIds: selectedItems.map(item => item.id)
+        })
+      })
+
+      if (response.ok) {
+        bulkSelection.clearSelection()
+        carregarChecklists()
+      }
+    } catch (error) {
+      console.error('Erro ao duplicar checklists:', error)
+    }
+  }
+
+  const bulkActions: BulkAction[] = [
+    commonBulkActions.delete(handleBulkDelete),
+    {
+      id: 'activate',
+      label: 'Ativar',
+      icon: Eye,
+      variant: 'outline',
+      onClick: handleBulkActivate
+    },
+    {
+      id: 'deactivate',
+      label: 'Desativar',
+      icon: X,
+      variant: 'outline',
+      onClick: handleBulkDeactivate
+    },
+    commonBulkActions.duplicate(handleBulkDuplicate),
+  ]
 
   const obterCorTipo = (tipo: string) => {
     switch (tipo) {
@@ -446,6 +556,35 @@ export default function AdminChecklists() {
             </div>
           </div>
 
+          {/* Bulk Actions Toolbar */}
+          <BulkActionsToolbar
+            selectedCount={bulkSelection.selectionCount}
+            totalCount={checklistsFiltrados.length}
+            selectedItems={bulkSelection.selectedItems}
+            actions={bulkActions}
+            onClearSelection={bulkSelection.clearSelection}
+            className="mb-4"
+          />
+
+          {/* Header da Lista com Seleção */}
+          {checklistsFiltrados.length > 0 && (
+            <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <Checkbox
+                checked={bulkSelection.isAllSelected}
+                onCheckedChange={bulkSelection.selectAll}
+                className="border-gray-400 dark:border-gray-500"
+              />
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {bulkSelection.isAllSelected 
+                  ? 'Desmarcar todos' 
+                  : bulkSelection.isIndeterminate 
+                    ? `${bulkSelection.selectionCount} selecionados`
+                    : 'Selecionar todos'
+                }
+              </span>
+            </div>
+          )}
+
           {/* Lista de Checklists */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {checklistsFiltrados.map((checklist) => {
@@ -457,6 +596,11 @@ export default function AdminChecklists() {
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
+                        <Checkbox
+                          checked={bulkSelection.isSelected(checklist.id)}
+                          onCheckedChange={() => bulkSelection.toggleItem(checklist.id)}
+                          className="border-gray-400 dark:border-gray-500"
+                        />
                         <div className={`p-2 rounded-lg ${setor?.cor || 'bg-gray-500'} text-white`}>
                           <SetorIcon className="w-5 h-5" />
                         </div>
