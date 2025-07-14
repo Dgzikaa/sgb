@@ -255,11 +255,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4" suppressHydrationWarning>
+      <div className="w-full max-w-md" suppressHydrationWarning>
         {/* Logo e Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-20 h-20 mb-6">
+        <div className="text-center mb-12" suppressHydrationWarning>
+          <div className="inline-flex items-center justify-center w-20 h-20 mb-6" suppressHydrationWarning>
             {!logoError ? (
               <img 
                 src="/logos/logo_640x640.png" 
@@ -268,7 +268,7 @@ export default function LoginPage() {
                 onError={() => setLogoError(true)}
               />
             ) : (
-              <div className="w-20 h-20 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <div className="w-20 h-20 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg" suppressHydrationWarning>
                 <span className="text-3xl text-white">🏪</span>
               </div>
             )}
@@ -280,9 +280,9 @@ export default function LoginPage() {
 
         {/* Configuração de reconhecimento facial pós-login */}
         {showFaceRegistration && lastLoginData && (
-          <div className="mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-lg">
-            <div className="text-center mb-4">
-              <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mx-auto mb-3">
+          <div className="mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-lg" suppressHydrationWarning>
+            <div className="text-center mb-4" suppressHydrationWarning>
+              <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mx-auto mb-3" suppressHydrationWarning>
                 <span className="text-indigo-600 dark:text-indigo-400 text-xl">🎉</span>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
@@ -315,9 +315,9 @@ export default function LoginPage() {
 
         {/* Notificações */}
         {returnUrl && !showFaceRegistration && (
-          <div className="mb-6 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
+          <div className="mb-6 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-xl p-4" suppressHydrationWarning>
+            <div className="flex items-center space-x-3" suppressHydrationWarning>
+              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center" suppressHydrationWarning>
                 <span className="text-blue-600 dark:text-blue-400 text-sm">🔒</span>
               </div>
               <div>
@@ -329,9 +329,9 @@ export default function LoginPage() {
         )}
 
         {error && (
-          <div className="mb-6 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl p-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-red-100 dark:bg-red-800 rounded-full flex items-center justify-center">
+          <div className="mb-6 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl p-4" suppressHydrationWarning>
+            <div className="flex items-center space-x-3" suppressHydrationWarning>
+              <div className="w-8 h-8 bg-red-100 dark:bg-red-800 rounded-full flex items-center justify-center" suppressHydrationWarning>
                 <span className="text-red-600 dark:text-red-400 text-sm">!</span>
               </div>
               <p className="text-red-700 dark:text-red-300 text-sm font-medium">{error}</p>
@@ -340,9 +340,9 @@ export default function LoginPage() {
         )}
 
         {success && (
-          <div className="mb-6 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-xl p-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center">
+          <div className="mb-6 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-xl p-4" suppressHydrationWarning>
+            <div className="flex items-center space-x-3" suppressHydrationWarning>
+              <div className="w-8 h-8 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center" suppressHydrationWarning>
                 <span className="text-green-600 dark:text-green-400 text-sm animate-pulse">✓</span>
               </div>
               <p className="text-green-700 dark:text-green-300 text-sm font-medium">{success}</p>
@@ -502,10 +502,10 @@ export default function LoginPage() {
 
       {/* Modal Esqueci Minha Senha */}
       {showForgotPassword && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 w-full max-w-md shadow-2xl">
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900/50 rounded-full mb-4">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50" suppressHydrationWarning>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 w-full max-w-md shadow-2xl" suppressHydrationWarning>
+            <div className="text-center mb-6" suppressHydrationWarning>
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900/50 rounded-full mb-4" suppressHydrationWarning>
                 <span className="text-2xl">🔑</span>
               </div>
               <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
@@ -517,8 +517,8 @@ export default function LoginPage() {
             </div>
 
             {forgotSuccess ? (
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/50 rounded-full mb-4">
+              <div className="text-center" suppressHydrationWarning>
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/50 rounded-full mb-4" suppressHydrationWarning>
                   <span className="text-2xl text-green-600 dark:text-green-400">✓</span>
                 </div>
                 <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-2">
