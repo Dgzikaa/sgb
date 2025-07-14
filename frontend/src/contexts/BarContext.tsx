@@ -189,7 +189,7 @@ export function BarProvider({ children }: { children: ReactNode }) {
     if (!favicon32) {
       favicon32 = document.createElement('link')
       favicon32.rel = 'icon'
-      favicon32.sizes = '32x32'
+      favicon32.setAttribute('sizes', '32x32')
       favicon32.type = 'image/png'
       document.head.appendChild(favicon32)
     }

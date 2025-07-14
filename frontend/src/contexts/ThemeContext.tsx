@@ -13,7 +13,7 @@ export interface ThemeContextType {
 export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme>('dark'); // Default para dark
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -21,15 +21,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (typeof window === 'undefined') return;
 
     const savedTheme = localStorage.getItem('theme') as Theme | null;
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
     if (savedTheme) {
       setTheme(savedTheme);
       document.documentElement.classList.toggle('dark', savedTheme === 'dark');
     } else {
-      const initialTheme = prefersDark ? 'dark' : 'light';
+      // Default para dark mode sempre
+      const initialTheme = 'dark';
       setTheme(initialTheme);
-      document.documentElement.classList.toggle('dark', prefersDark);
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark'); // Salvar dark como padrão
     }
 
     setIsLoading(false);
