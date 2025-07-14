@@ -297,38 +297,54 @@ export default function FaceAuthenticator({
         }
       })
 
+      console.log('🎥 Stream obtido:', {
+        id: mediaStream.id,
+        tracks: mediaStream.getTracks().length,
+        videoTracks: mediaStream.getVideoTracks().length,
+        active: mediaStream.active
+      })
+
       setStream(mediaStream)
       setCameraPermission('granted')
+      console.log('💾 Stream salvo no state')
       
       if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream
+        console.log('📷 Configurando vídeo element...')
+        const video = videoRef.current
         
-        // Definir isRecording imediatamente para remover overlay
-        setIsRecording(true)
-        
-        // Configurar e iniciar o vídeo
-        const playVideo = async () => {
+        // Configurar evento de carregamento ANTES de definir srcObject
+        video.onloadedmetadata = async () => {
           try {
-            if (videoRef.current) {
-              await videoRef.current.play()
-              console.log('✅ Câmera iniciada e vídeo reproduzindo')
-            }
+            console.log('📺 Metadata carregada, iniciando reprodução...')
+            await video.play()
+            console.log('✅ Vídeo reproduzindo com sucesso!')
+            
+            // Só definir isRecording DEPOIS que o vídeo estiver reproduzindo
+            setIsRecording(true)
           } catch (playError) {
-            console.warn('Erro ao reproduzir vídeo:', playError)
-            // Tentar novamente após um delay
-            setTimeout(() => {
-              videoRef.current?.play().catch(console.warn)
-            }, 500)
+            console.error('❌ Erro ao reproduzir vídeo:', playError)
+            setError('Erro ao inicializar vídeo da câmera. Tente novamente.')
+            setIsRecording(false)
           }
         }
         
-        if (videoRef.current.readyState >= 2) {
-          // Se metadata já carregada, tocar imediatamente
-          playVideo()
-        } else {
-          // Aguardar metadata
-          videoRef.current.onloadedmetadata = playVideo
+        video.onerror = (error) => {
+          console.error('❌ Erro no elemento de vídeo:', error)
+          setError('Erro no player de vídeo. Tente recarregar a página.')
+          setIsRecording(false)
         }
+        
+        // Definir stream no vídeo
+        video.srcObject = mediaStream
+        console.log('📹 Stream definido no elemento de vídeo')
+        
+        // Timeout de segurança para remover overlay se vídeo não carregar
+        setTimeout(() => {
+          if (mediaStream.active && !isRecording) {
+            console.log('⏰ Timeout: Forçando remoção do overlay')
+            setIsRecording(true)
+          }
+        }, 3000)
       }
       
     } catch (error: any) {
@@ -611,12 +627,12 @@ export default function FaceAuthenticator({
             style={{ display: 'none' }}
           />
           
-          {!isRecording && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg">
+          {(!isRecording || !stream) && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg z-10">
               <div className="text-center">
                 <Camera className="w-12 h-12 mx-auto mb-2 text-gray-400 dark:text-gray-500" />
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Câmera desligada
+                  {stream ? 'Iniciando vídeo...' : 'Câmera desligada'}
                 </p>
               </div>
             </div>
