@@ -340,13 +340,17 @@ export default function FaceAuthenticator({
         console.log('📷 Configurando vídeo element...')
         const video = videoRef.current
         
+        // Limpar qualquer src anterior
+        video.srcObject = null
+        
         // Configurar evento de carregamento ANTES de definir srcObject
         video.onloadedmetadata = async () => {
           console.log('📺 Vídeo metadata carregado:', {
             videoWidth: video.videoWidth,
             videoHeight: video.videoHeight,
             duration: video.duration,
-            readyState: video.readyState
+            readyState: video.readyState,
+            srcObject: !!video.srcObject
           })
           
           try {
@@ -369,6 +373,13 @@ export default function FaceAuthenticator({
 
         video.onplaying = () => {
           console.log('🎬 Vídeo: evento playing disparado')
+          console.log('🎥 Estado atual do vídeo:', {
+            videoWidth: video.videoWidth,
+            videoHeight: video.videoHeight,
+            currentTime: video.currentTime,
+            paused: video.paused,
+            muted: video.muted
+          })
           setIsRecording(true)
         }
 
@@ -379,15 +390,44 @@ export default function FaceAuthenticator({
         video.oncanplay = () => {
           console.log('🎯 Vídeo: pode ser reproduzido')
         }
+
+        video.onseeking = () => {
+          console.log('🔄 Vídeo: seeking')
+        }
+
+        video.onwaiting = () => {
+          console.log('⏳ Vídeo: aguardando dados')
+        }
         
         // Definir stream no vídeo
+        console.log('📹 Definindo stream no vídeo...', {
+          streamActive: mediaStream.active,
+          streamTracks: mediaStream.getTracks().length,
+          videoTracks: mediaStream.getVideoTracks().length
+        })
+        
         video.srcObject = mediaStream
-        console.log('📹 Stream definido no elemento de vídeo')
+        console.log('✅ Stream definido no elemento de vídeo')
+        
+        // Verificar se o vídeo tem conteúdo após um breve delay
+        setTimeout(() => {
+          console.log('🔍 Verificação após 1s:', {
+            videoWidth: video.videoWidth,
+            videoHeight: video.videoHeight,
+            readyState: video.readyState,
+            currentTime: video.currentTime,
+            paused: video.paused,
+            srcObject: !!video.srcObject
+          })
+        }, 1000)
         
         // Forçar play imediatamente se o navegador permitir
         try {
-          await video.play()
-          console.log('🚀 Play forçado com sucesso')
+          const playPromise = video.play()
+          if (playPromise !== undefined) {
+            await playPromise
+            console.log('🚀 Play forçado com sucesso')
+          }
         } catch (playError) {
           console.warn('⚠️ Play automático bloqueado, aguardando interação do usuário:', playError)
         }
@@ -396,9 +436,17 @@ export default function FaceAuthenticator({
         setTimeout(() => {
           if (mediaStream.active && !isRecording) {
             console.log('⏰ Timeout: Forçando remoção do overlay')
+            console.log('📊 Estado final do vídeo:', {
+              videoWidth: video.videoWidth,
+              videoHeight: video.videoHeight,
+              readyState: video.readyState,
+              paused: video.paused,
+              currentTime: video.currentTime,
+              srcObject: !!video.srcObject
+            })
             setIsRecording(true)
           }
-        }, 2000) // Reduzido para 2 segundos
+        }, 3000) // Aumentado para 3 segundos
       }
       
     } catch (error: any) {
@@ -744,46 +792,101 @@ export default function FaceAuthenticator({
 
       <CardContent className="space-y-4">
         {/* Área de vídeo */}
-        <div className="relative">
+        <div className="relative overflow-hidden rounded-lg">
           <video
             ref={videoRef}
-            className="w-full h-64 bg-gray-100 dark:bg-gray-700 rounded-lg object-cover"
+            className="w-full h-64 rounded-lg object-cover"
             autoPlay
             muted
             playsInline
             style={{ 
-              display: 'block', // Sempre visível para debug
-              transform: 'scaleX(-1)', // Espelhar horizontalmente para parecer espelho
+              display: 'block',
+              transform: 'scaleX(-1)', // Espelhar horizontalmente
               minHeight: '256px',
-              backgroundColor: isRecording && stream ? 'transparent' : '#374151'
+              maxHeight: '256px',
+              width: '100%',
+              backgroundColor: '#1f2937', // Fundo escuro sempre
+              zIndex: 1
             }}
-            onLoadedData={() => console.log('📺 Vídeo: dados carregados')}
-            onPlay={() => console.log('▶️ Vídeo: reproduzindo')}
+            onLoadedData={() => {
+              console.log('📺 Vídeo: dados carregados')
+              console.log('📐 Dimensões do vídeo:', {
+                videoWidth: videoRef.current?.videoWidth,
+                videoHeight: videoRef.current?.videoHeight,
+                clientWidth: videoRef.current?.clientWidth,
+                clientHeight: videoRef.current?.clientHeight
+              })
+            }}
+            onPlay={() => {
+              console.log('▶️ Vídeo: reproduzindo')
+              setIsRecording(true)
+            }}
             onError={(e) => console.error('❌ Vídeo: erro', e)}
             onCanPlay={() => console.log('🎬 Vídeo: pode reproduzir')}
-            onTimeUpdate={() => console.log('⏰ Vídeo: tempo atualizado')}
+            onLoadedMetadata={() => {
+              console.log('📊 Vídeo: metadata carregado')
+              console.log('🎥 Estado do vídeo:', {
+                srcObject: !!videoRef.current?.srcObject,
+                videoWidth: videoRef.current?.videoWidth,
+                videoHeight: videoRef.current?.videoHeight,
+                readyState: videoRef.current?.readyState
+              })
+            }}
           />
           <canvas
             ref={canvasRef}
             className="absolute top-0 left-0 w-full h-full"
-            style={{ display: 'none' }}
+            style={{ display: 'none', zIndex: 0 }}
           />
           
-          {!stream && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg z-10">
+          {/* Overlay quando câmera não está ativa */}
+          {(!stream || !isRecording) && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-800/90 dark:bg-gray-900/90 rounded-lg z-20">
               <div className="text-center">
-                <Camera className="w-12 h-12 mx-auto mb-2 text-gray-400 dark:text-gray-500" />
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Câmera desligada
+                <Camera className="w-12 h-12 mx-auto mb-2 text-gray-300 dark:text-gray-400" />
+                <p className="text-sm text-gray-200 dark:text-gray-300">
+                  {stream && !isRecording ? 'Iniciando câmera...' : 'Câmera desligada'}
                 </p>
+                {stream && !isRecording && (
+                  <div className="mt-2">
+                    <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                  </div>
+                )}
               </div>
             </div>
           )}
           
+          {/* Indicador AO VIVO */}
           {isRecording && stream && (
-            <div className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+            <div className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded text-xs font-medium flex items-center gap-1 z-30">
               <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
               AO VIVO
+            </div>
+          )}
+
+          {/* Debug info - remover em produção */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs p-2 rounded z-30">
+              <div>Stream: {stream ? '✅' : '❌'}</div>
+              <div>Recording: {isRecording ? '✅' : '❌'}</div>
+              <div>Video: {videoRef.current?.videoWidth || 0}x{videoRef.current?.videoHeight || 0}</div>
+              {stream && !isRecording && (
+                <button 
+                  onClick={async () => {
+                    if (videoRef.current) {
+                      try {
+                        await videoRef.current.play()
+                        console.log('🎯 Vídeo ativado manualmente')
+                      } catch (e) {
+                        console.error('❌ Erro ao ativar vídeo:', e)
+                      }
+                    }
+                  }}
+                  className="mt-1 px-2 py-1 bg-blue-500 text-white text-xs rounded"
+                >
+                  ▶️ Ativar
+                </button>
+              )}
             </div>
           )}
         </div>
