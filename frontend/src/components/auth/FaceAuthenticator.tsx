@@ -38,15 +38,30 @@ export default function FaceAuthenticator({
 }: FaceAuthenticatorProps) {
   // DEBUG: Log inicial reduzido
   
-  // Estados
-  const [isLoading, setIsLoading] = useState(false)
-  const [isRecording, setIsRecording] = useState(false)
-  const [stream, setStream] = useState<MediaStream | null>(null)
+  // Estados do componente
   const [modelsLoaded, setModelsLoaded] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [stream, setStream] = useState<MediaStream | null>(null)
   const [cameraPermission, setCameraPermission] = useState<'prompt' | 'granted' | 'denied'>('prompt')
   const [hasAskedPermission, setHasAskedPermission] = useState(false)
+  const [isRecording, setIsRecording] = useState(false)
+  
+  // Detectar tipo de dispositivo
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  const isSimulated = window.navigator.userAgent.includes('DevTools') || 
+                     window.outerWidth !== window.innerWidth || 
+                     (window.devicePixelRatio !== 1 && !isMobile)
+  
+  console.log('📱 Detecção de dispositivo:', {
+    isMobile,
+    isSimulated,
+    userAgent: navigator.userAgent,
+    innerWidth: window.innerWidth,
+    outerWidth: window.outerWidth,
+    devicePixelRatio: window.devicePixelRatio
+  })
   
   // Refs
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -284,44 +299,57 @@ export default function FaceAuthenticator({
   // Inicializar câmera
   const startCamera = useCallback(async () => {
     console.log('🎬 startCamera CHAMADO!')
-    
+    console.log('📋 Estados atuais:', {
+      modelsLoaded,
+      cameraPermission,
+      isLoading,
+      hasAskedPermission,
+      isMobile,
+      isSimulated
+    })
+
+    if (!modelsLoaded) {
+      console.log('❌ Modelos não carregados')
+      setError('Modelos de IA ainda não foram carregados. Aguarde.')
+      return
+    }
+
+    console.log('✅ Modelos carregados, verificando permissões...')
+    await checkCameraPermissions()
+
+    console.log('🔐 Permission state:', cameraPermission)
+    if (cameraPermission !== 'granted') {
+      console.log('❌ Permissão não concedida')
+      setError('Permissão de câmera necessária. Use o botão "Permitir Câmera".')
+      return
+    }
+
     try {
-      console.log('📋 Estados atuais:', { 
-        modelsLoaded, 
-        cameraPermission, 
-        isLoading,
-        hasAskedPermission 
-      })
-      
-      setError(null)
-      setSuccess(null)
-      
-      // Verificar se modelos estão carregados
-      if (!modelsLoaded) {
-        console.log('❌ Modelos não carregados')
-        setError('Aguarde o carregamento dos modelos de IA.')
-        return
-      }
-
-      console.log('✅ Modelos carregados, verificando permissões...')
-
-      // Verificar permissões antes de tentar acessar
-      const permissionState = await checkCameraPermissions()
-      console.log('🔐 Permission state:', permissionState)
-      
-      if (permissionState === 'denied') {
-        console.log('❌ Permissão negada')
-        setError('Acesso à câmera negado. Clique em "Permitir Câmera" para solicitar acesso.')
-        return
-      }
-
       console.log('📷 Iniciando câmera...')
+      setIsLoading(true)
+      setError(null)
+
+      // Configurações otimizadas baseadas no dispositivo
+      const videoConstraints = isMobile ? {
+        facingMode: 'user', // Câmera frontal no mobile
+        width: { ideal: 640, max: 1280 },
+        height: { ideal: 480, max: 720 },
+        frameRate: { ideal: 30, max: 30 }
+      } : {
+        width: { ideal: 640, min: 320, max: 1920 },
+        height: { ideal: 480, min: 240, max: 1080 },
+        frameRate: { ideal: 30, max: 60 }
+      }
+
+      console.log('🎥 Configurações da câmera:', {
+        isMobile,
+        isSimulated,
+        videoConstraints
+      })
+
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 640, max: 1280 },
-          height: { ideal: 480, max: 720 },
-          facingMode: 'user'
-        }
+        video: videoConstraints,
+        audio: false
       })
 
       console.log('🎥 Stream obtido:', {
@@ -331,8 +359,20 @@ export default function FaceAuthenticator({
         active: mediaStream.active
       })
 
+      // Log das configurações reais da track de vídeo
+      const videoTrack = mediaStream.getVideoTracks()[0]
+      if (videoTrack) {
+        const settings = videoTrack.getSettings()
+        console.log('📐 Configurações reais da câmera:', {
+          width: settings.width,
+          height: settings.height,
+          frameRate: settings.frameRate,
+          facingMode: settings.facingMode,
+          deviceId: settings.deviceId
+        })
+      }
+
       setStream(mediaStream)
-      setCameraPermission('granted')
       console.log('💾 Stream salvo no state')
       
       if (videoRef.current) {
@@ -463,7 +503,7 @@ export default function FaceAuthenticator({
         setError('Erro ao inicializar câmera. Tente novamente.')
       }
     }
-  }, [modelsLoaded, checkCameraPermissions])
+  }, [modelsLoaded, checkCameraPermissions, isMobile, isSimulated])
 
   // Parar câmera
   const stopCamera = useCallback(() => {
@@ -957,6 +997,25 @@ export default function FaceAuthenticator({
           </Alert>
         )}
 
+        {/* Alerta para simulação DevTools */}
+        {isSimulated && (
+          <Alert className="border-yellow-200 dark:border-yellow-800">
+            <AlertTriangle className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+            <div className="flex-1">
+              <AlertDescription className="text-yellow-700 dark:text-yellow-300 mb-2">
+                <strong>⚠️ Simulação Mobile Detectada</strong><br />
+                Você está testando no DevTools (F12) simulando celular. Isso pode causar problemas com a webcam.
+              </AlertDescription>
+              <div className="text-xs text-yellow-600 dark:text-yellow-400 space-y-1 mb-3">
+                <p><strong>Para testar adequadamente:</strong></p>
+                <p>• <strong>Desktop:</strong> Feche o DevTools e teste direto no navegador</p>
+                <p>• <strong>Mobile:</strong> Acesse http://192.168.2.17:3001/login no celular</p>
+                <p>• A simulação pode não ativar a webcam corretamente</p>
+              </div>
+            </div>
+          </Alert>
+        )}
+
         {/* Sistema de Permissões */}
         {cameraPermission === 'denied' && hasAskedPermission && (
           <Alert className="border-orange-200 dark:border-orange-800">
@@ -1028,7 +1087,7 @@ export default function FaceAuthenticator({
             ) : cameraPermission === 'denied' ? (
               <span className="text-red-600 dark:text-red-400 font-medium">❌ Negada</span>
             ) : (
-              <span className="text-yellow-600 dark:text-yellow-400 font-medium">⏳ Pendente</span>
+              <span className="text-yellow-600 dark:text-yellow-400 font-medium">⏳ Aguardando</span>
             )}
           </div>
           
@@ -1043,6 +1102,14 @@ export default function FaceAuthenticator({
             ) : (
               <span className="text-gray-600 dark:text-gray-400 font-medium">⚪ Aguardando</span>
             )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span>📱 Dispositivo:</span>
+            <span className="text-gray-600 dark:text-gray-400 font-medium">
+              {isMobile ? '📱 Mobile' : '🖥️ Desktop'}
+              {isSimulated && ' (⚠️ Simulado)'}
+            </span>
           </div>
         </div>
 
