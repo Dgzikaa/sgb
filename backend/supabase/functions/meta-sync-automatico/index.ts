@@ -166,10 +166,10 @@ serve(async (req) => {
 
 async function coletarDadosFacebook(config: MetaCredentials) {
   try {
-    console.log('📊 Buscando dados da página Facebook...')
+    console.log('📊 Buscando dados COMPLETOS da página Facebook...')
     
-    // Dados básicos da página
-    const pageUrl = `https://graph.facebook.com/v18.0/${config.page_id}?fields=followers_count,fan_count,name,about&access_token=${config.access_token}`
+    // Dados básicos da página EXPANDIDOS
+    const pageUrl = `https://graph.facebook.com/v18.0/${config.page_id}?fields=followers_count,fan_count,name,about,website,phone,category_list,checkins,talking_about_count,were_here_count,new_like_count,overall_star_rating,rating_count,cover,picture&access_token=${config.access_token}`
     const pageResponse = await fetch(pageUrl)
     
     if (!pageResponse.ok) {
@@ -178,30 +178,86 @@ async function coletarDadosFacebook(config: MetaCredentials) {
     
     const pageData = await pageResponse.json()
     
-    // Insights da página (últimos 30 dias)
-    const insightsUrl = `https://graph.facebook.com/v18.0/${config.page_id}/insights?metric=page_post_engagements,page_posts_impressions,page_video_views&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
-    const insightsResponse = await fetch(insightsUrl)
+    // INSIGHTS COMPLETOS DA PÁGINA (TODOS os dados como no Meta Business Manager)
+    console.log('📈 Coletando insights COMPLETOS do Facebook...')
     
-    let insights = {}
-    if (insightsResponse.ok) {
-      insights = await insightsResponse.json()
+    // 1. Métricas de Alcance e Impressões
+    const reachInsightsUrl = `https://graph.facebook.com/v18.0/${config.page_id}/insights?metric=page_impressions,page_impressions_unique,page_reach,page_reach_unique,page_posts_impressions,page_posts_impressions_unique&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
+    
+    // 2. Métricas de Engajamento
+    const engagementInsightsUrl = `https://graph.facebook.com/v18.0/${config.page_id}/insights?metric=page_post_engagements,page_engaged_users,page_actions_post_reactions_total,page_actions_post_reactions_like_total,page_actions_post_reactions_love_total,page_actions_post_reactions_wow_total,page_actions_post_reactions_haha_total,page_actions_post_reactions_sorry_total,page_actions_post_reactions_anger_total&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
+    
+    // 3. Métricas de Crescimento de Fãs
+    const fansInsightsUrl = `https://graph.facebook.com/v18.0/${config.page_id}/insights?metric=page_fans,page_fan_adds,page_fan_removes,page_fans_online,page_fans_by_like_source&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
+    
+    // 4. Métricas de Visualizações e Interações
+    const viewsInsightsUrl = `https://graph.facebook.com/v18.0/${config.page_id}/insights?metric=page_views_total,page_views_unique,page_video_views,page_video_views_unique,page_video_complete_views_30s,page_places_checkin_total&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
+    
+    // COLETAR TODAS AS MÉTRICAS EM PARALELO
+    const [reachResponse, engagementResponse, fansResponse, viewsResponse] = await Promise.all([
+      fetch(reachInsightsUrl),
+      fetch(engagementInsightsUrl),
+      fetch(fansInsightsUrl),
+      fetch(viewsInsightsUrl)
+    ])
+    
+    let insights = {
+      reach: {},
+      engagement: {},
+      fans: {},
+      views: {}
     }
     
-    // Posts recentes (últimos 10)
-    const postsUrl = `https://graph.facebook.com/v18.0/${config.page_id}/posts?fields=id,message,created_time,reactions.summary(true),comments.summary(true),shares&limit=10&access_token=${config.access_token}`
-    const postsResponse = await fetch(postsUrl)
+    if (reachResponse.ok) {
+      insights.reach = await reachResponse.json()
+    }
+    if (engagementResponse.ok) {
+      insights.engagement = await engagementResponse.json()
+    }
+    if (fansResponse.ok) {
+      insights.fans = await fansResponse.json()
+    }
+    if (viewsResponse.ok) {
+      insights.views = await viewsResponse.json()
+    }
+    
+    // DEMOGRAPHICS DA AUDIÊNCIA FACEBOOK
+    console.log('👥 Coletando dados demográficos da audiência Facebook...')
+    const demographicsUrl = `https://graph.facebook.com/v18.0/${config.page_id}/insights?metric=page_fans_city,page_fans_country,page_fans_gender_age,page_fans_locale&period=lifetime&access_token=${config.access_token}`
+    
+    let demographics = {}
+    const demographicsResponse = await fetch(demographicsUrl)
+    if (demographicsResponse.ok) {
+      demographics = await demographicsResponse.json()
+    }
+    
+    // POSTS RECENTES COM INSIGHTS DETALHADOS
+    console.log('📝 Coletando posts recentes com insights completos...')
+    const postsUrl = `https://graph.facebook.com/v18.0/${config.page_id}/posts?fields=id,message,story,created_time,type,link,picture,full_picture,reactions.summary(true),comments.summary(true),shares,insights.metric(post_impressions,post_reach,post_engaged_users,post_video_views,post_clicks)&limit=20&access_token=${config.access_token}`
     
     let posts = []
+    const postsResponse = await fetch(postsUrl)
     if (postsResponse.ok) {
       const postsData = await postsResponse.json()
       posts = postsData.data || []
     }
     
+    console.log(`✅ Facebook coletado: ${posts.length} posts, demographics completos`)
+    
     return {
       page_info: pageData,
-      insights,
+      insights: {
+        ...insights,
+        demographics
+      },
       posts,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      collected_metrics: [
+        'page_impressions', 'page_reach', 'page_post_engagements',
+        'page_engaged_users', 'page_fans', 'page_fan_adds',
+        'page_views_total', 'page_video_views', 
+        'page_demographics_complete'
+      ]
     }
     
   } catch (error) {
@@ -212,10 +268,10 @@ async function coletarDadosFacebook(config: MetaCredentials) {
 
 async function coletarDadosInstagram(config: MetaCredentials) {
   try {
-    console.log('📸 Buscando dados da conta Instagram...')
+    console.log('📸 Buscando dados COMPLETOS da conta Instagram...')
     
     // Dados básicos da conta
-    const accountUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}?fields=followers_count,follows_count,media_count,username,name,biography&access_token=${config.access_token}`
+    const accountUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}?fields=followers_count,follows_count,media_count,username,name,biography,website,profile_picture_url&access_token=${config.access_token}`
     const accountResponse = await fetch(accountUrl)
     
     if (!accountResponse.ok) {
@@ -224,30 +280,99 @@ async function coletarDadosInstagram(config: MetaCredentials) {
     
     const accountData = await accountResponse.json()
     
-    // Insights da conta (últimos 30 dias)
-    const insightsUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=follower_count,impressions,reach,profile_views&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
-    const insightsResponse = await fetch(insightsUrl)
+    // INSIGHTS COMPLETOS DA CONTA (TODOS os dados do Meta Business Manager)
+    console.log('📊 Coletando insights COMPLETOS do Instagram...')
     
-    let insights = {}
-    if (insightsResponse.ok) {
-      insights = await insightsResponse.json()
+    // 1. Métricas de Audiência e Alcance
+    const audienceInsightsUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=impressions,reach,profile_views,website_clicks,emails_contacts,phone_call_clicks,text_message_clicks,get_directions_clicks&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
+    
+    // 2. Métricas de Engajamento e Interações
+    const engagementInsightsUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=accounts_engaged,likes,comments,saves,shares,replies,profile_links_taps&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
+    
+    // 3. Métricas de Conteúdo e Stories
+    const contentInsightsUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=video_views,story_impressions,story_reach,story_taps_forward,story_taps_back,story_exits,story_replies&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
+    
+    // 4. Métricas de Crescimento
+    const growthInsightsUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=follower_count,follows,unfollows&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
+    
+    // COLETAR TODAS AS MÉTRICAS EM PARALELO
+    const [audienceResponse, engagementResponse, contentResponse, growthResponse] = await Promise.all([
+      fetch(audienceInsightsUrl),
+      fetch(engagementInsightsUrl),
+      fetch(contentInsightsUrl),
+      fetch(growthInsightsUrl)
+    ])
+    
+    let insights = {
+      audience: {},
+      engagement: {},
+      content: {},
+      growth: {}
     }
     
-    // Mídia recente (últimos 10 posts)
-    const mediaUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/media?fields=id,media_type,media_url,thumbnail_url,permalink,caption,timestamp,like_count,comments_count&limit=10&access_token=${config.access_token}`
-    const mediaResponse = await fetch(mediaUrl)
+    if (audienceResponse.ok) {
+      insights.audience = await audienceResponse.json()
+    }
+    if (engagementResponse.ok) {
+      insights.engagement = await engagementResponse.json()
+    }
+    if (contentResponse.ok) {
+      insights.content = await contentResponse.json()
+    }
+    if (growthResponse.ok) {
+      insights.growth = await growthResponse.json()
+    }
+    
+    // DEMOGRAPHICS DA AUDIÊNCIA (dados demográficos como no Meta Business Manager)
+    console.log('👥 Coletando dados demográficos da audiência...')
+    const demographicsUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=audience_city,audience_country,audience_gender_age&period=lifetime&access_token=${config.access_token}`
+    
+    let demographics = {}
+    const demographicsResponse = await fetch(demographicsUrl)
+    if (demographicsResponse.ok) {
+      demographics = await demographicsResponse.json()
+    }
+    
+    // MÍDIA RECENTE COM INSIGHTS DETALHADOS
+    console.log('📱 Coletando posts recentes com insights...')
+    const mediaUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/media?fields=id,media_type,media_url,thumbnail_url,permalink,caption,timestamp,like_count,comments_count,shares_count,saved_count,video_play_count,insights.metric(impressions,reach,saves,video_views,likes,comments,shares)&limit=20&access_token=${config.access_token}`
     
     let media = []
+    const mediaResponse = await fetch(mediaUrl)
     if (mediaResponse.ok) {
       const mediaData = await mediaResponse.json()
       media = mediaData.data || []
     }
     
+    // STORIES INSIGHTS
+    console.log('📖 Coletando insights de Stories...')
+    const storiesUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/stories?fields=id,media_type,media_url,timestamp,insights.metric(impressions,reach,taps_forward,taps_back,exits,replies)&access_token=${config.access_token}`
+    
+    let stories = []
+    const storiesResponse = await fetch(storiesUrl)
+    if (storiesResponse.ok) {
+      const storiesData = await storiesResponse.json()
+      stories = storiesData.data || []
+    }
+    
+    console.log(`✅ Instagram coletado: ${media.length} posts, ${stories.length} stories, demographics completos`)
+    
     return {
       account_info: accountData,
-      insights,
+      insights: {
+        ...insights,
+        demographics
+      },
       media,
-      timestamp: new Date().toISOString()
+      stories,
+      timestamp: new Date().toISOString(),
+      collected_metrics: [
+        'impressions', 'reach', 'profile_views', 'website_clicks',
+        'accounts_engaged', 'likes', 'comments', 'saves', 'shares',
+        'video_views', 'story_impressions', 'story_reach',
+        'follower_count', 'follows', 'unfollows',
+        'audience_demographics'
+      ]
     }
     
   } catch (error) {
@@ -258,7 +383,7 @@ async function coletarDadosInstagram(config: MetaCredentials) {
 
 async function coletarCampanhas(config: MetaCredentials, barId: number, supabase: any) {
   try {
-    console.log('🎯 Buscando campanhas ativas Meta...')
+    console.log('🎯 Buscando campanhas COMPLETAS Meta Ads Manager...')
     
     // Buscar configurações de ad account
     const { data: credenciais } = await supabase
@@ -270,20 +395,20 @@ async function coletarCampanhas(config: MetaCredentials, barId: number, supabase
     
     if (!credenciais?.configuracoes?.business_id) {
       console.log('⚠️ Business ID não configurado, saltando campanhas')
-      return { campaigns: [], ad_accounts: [], message: 'Business ID não configurado' }
+      return { campaigns: [], ad_accounts: [], ads: [], message: 'Business ID não configurado' }
     }
     
     const businessId = credenciais.configuracoes.business_id
     console.log(`🏢 Usando Business ID: ${businessId}`)
     
-    // Buscar ad accounts do business
-    const adAccountsUrl = `https://graph.facebook.com/v18.0/${businessId}/owned_ad_accounts?fields=id,name,account_status,currency,timezone_name&access_token=${config.access_token}`
+    // Buscar ad accounts do business COM DADOS FINANCEIROS COMPLETOS
+    const adAccountsUrl = `https://graph.facebook.com/v18.0/${businessId}/owned_ad_accounts?fields=id,name,account_status,currency,timezone_name,balance,amount_spent,spend_cap,insights.metric(impressions,reach,clicks,spend,ctr,cpc,cpp,frequency).date_preset(last_30d)&access_token=${config.access_token}`
     const adAccountsResponse = await fetch(adAccountsUrl)
     
-        if (!adAccountsResponse.ok) {
+    if (!adAccountsResponse.ok) {
       const error: any = await adAccountsResponse.json()
       console.log('⚠️ Erro ao buscar ad accounts:', error)
-      return { campaigns: [], ad_accounts: [], error: error.error }
+      return { campaigns: [], ad_accounts: [], ads: [], error: error.error }
     }
     
     const adAccountsData = await adAccountsResponse.json()
@@ -291,83 +416,120 @@ async function coletarCampanhas(config: MetaCredentials, barId: number, supabase
     console.log(`📊 Encontradas ${adAccounts.length} ad accounts`)
     
     if (adAccounts.length === 0) {
-      return { campaigns: [], ad_accounts: [], message: 'Nenhuma ad account encontrada' }
+      return { campaigns: [], ad_accounts: [], ads: [], message: 'Nenhuma ad account encontrada' }
     }
     
-    // Coletar campanhas de todas as ad accounts
+    // Coletar DADOS COMPLETOS de todas as ad accounts
     const allCampaigns = []
+    const allAds = []
     
     for (const adAccount of adAccounts) {
       try {
-        console.log(`🎯 Coletando campanhas da conta: ${adAccount.id}`)
+        console.log(`💰 Coletando dados COMPLETOS da conta: ${adAccount.id}`)
         
-        const campaignsUrl = `https://graph.facebook.com/v18.0/${adAccount.id}/campaigns?fields=id,name,status,effective_status,objective,start_time,stop_time,daily_budget,lifetime_budget,created_time,updated_time&access_token=${config.access_token}`
+        // 1. CAMPANHAS COM INSIGHTS COMPLETOS
+        const campaignsUrl = `https://graph.facebook.com/v18.0/${adAccount.id}/campaigns?fields=id,name,status,effective_status,objective,start_time,stop_time,daily_budget,lifetime_budget,created_time,updated_time,insights.metric(impressions,reach,clicks,ctr,cpc,cpp,cpm,spend,frequency,actions,conversions,cost_per_conversion,video_play_actions,video_p25_watched_actions,video_p50_watched_actions,video_p75_watched_actions,video_p100_watched_actions).date_preset(last_30d)&access_token=${config.access_token}`
         const campaignsResponse = await fetch(campaignsUrl)
         
         if (campaignsResponse.ok) {
           const campaignsData = await campaignsResponse.json()
           const campaigns = campaignsData.data || []
           
-          // Para cada campanha, buscar insights se estiver ativa
+          // Enriquecer cada campanha com dados da conta
           for (const campaign of campaigns) {
             campaign.ad_account_id = adAccount.id
             campaign.ad_account_name = adAccount.name
-            
-            if (campaign.effective_status === 'ACTIVE') {
-              try {
-                // Buscar insights da campanha (últimos 7 dias)
-                const insightsUrl = `https://graph.facebook.com/v18.0/${campaign.id}/insights?fields=impressions,reach,clicks,ctr,cpc,spend,actions,conversions&date_preset=last_7d&access_token=${config.access_token}`
-                const insightsResponse = await fetch(insightsUrl)
-                
-                if (insightsResponse.ok) {
-                  const insightsData = await insightsResponse.json()
-                  campaign.insights = insightsData.data?.[0] || {}
-                  console.log(`📈 Insights coletados para campanha: ${campaign.name}`)
-                } else {
-                  console.log(`⚠️ Insights não disponíveis para campanha: ${campaign.name}`)
-                  campaign.insights = {}
-                }
-              } catch (insightError) {
-                console.log(`⚠️ Erro ao buscar insights da campanha ${campaign.name}:`, insightError)
-                campaign.insights = {}
-              }
-            }
+            campaign.account_currency = adAccount.currency
+            campaign.account_timezone = adAccount.timezone_name
           }
           
           allCampaigns.push(...campaigns)
           console.log(`✅ ${campaigns.length} campanhas coletadas da conta ${adAccount.name}`)
-        } else {
-          console.log(`⚠️ Erro ao buscar campanhas da conta ${adAccount.id}:`, await campaignsResponse.text())
         }
+        
+        // 2. ANÚNCIOS INDIVIDUAIS COM MÉTRICAS DETALHADAS
+        console.log(`📢 Coletando anúncios individuais da conta: ${adAccount.id}`)
+        const adsUrl = `https://graph.facebook.com/v18.0/${adAccount.id}/ads?fields=id,name,status,effective_status,created_time,updated_time,creative.fields(title,body,image_url,video_id,thumbnail_url),targeting,insights.metric(impressions,reach,clicks,ctr,cpc,cpp,cpm,spend,frequency,actions,conversions,cost_per_conversion,video_play_actions,link_clicks,post_engagement,page_engagement,likes,comments,shares,video_view).date_preset(last_30d)&limit=50&access_token=${config.access_token}`
+        const adsResponse = await fetch(adsUrl)
+        
+        if (adsResponse.ok) {
+          const adsData = await adsResponse.json()
+          const ads = adsData.data || []
+          
+          // Enriquecer cada anúncio com dados da conta
+          for (const ad of ads) {
+            ad.ad_account_id = adAccount.id
+            ad.ad_account_name = adAccount.name
+            ad.account_currency = adAccount.currency
+          }
+          
+          allAds.push(...ads)
+          console.log(`📢 ${ads.length} anúncios coletados da conta ${adAccount.name}`)
+        }
+        
       } catch (accountError) {
         console.log(`❌ Erro ao processar account ${adAccount.id}:`, accountError)
       }
     }
     
-    console.log(`🎯 Total de campanhas coletadas: ${allCampaigns.length}`)
+    // CALCULAR TOTAIS E MÉTRICAS AGREGADAS
+    let totalSpend = 0
+    let totalImpressions = 0
+    let totalReach = 0
+    let totalClicks = 0
+    let activeCampaigns = 0
+    
+    for (const campaign of allCampaigns) {
+      if (campaign.insights?.data?.[0]) {
+        const insights = campaign.insights.data[0]
+        totalSpend += parseFloat(insights.spend || 0)
+        totalImpressions += parseInt(insights.impressions || 0)
+        totalReach += parseInt(insights.reach || 0)
+        totalClicks += parseInt(insights.clicks || 0)
+      }
+      if (campaign.effective_status === 'ACTIVE') {
+        activeCampaigns++
+      }
+    }
+    
+    console.log(`💰 TOTAIS: R$${totalSpend.toFixed(2)} gastos, ${totalImpressions.toLocaleString()} impressões, ${activeCampaigns} campanhas ativas`)
     
     return {
       campaigns: allCampaigns,
+      ads: allAds,
       ad_accounts: adAccounts,
-      timestamp: new Date().toISOString(),
-      summary: {
+      totals: {
+        total_spend: totalSpend,
+        total_impressions: totalImpressions,
+        total_reach: totalReach,
+        total_clicks: totalClicks,
+        active_campaigns: activeCampaigns,
         total_campaigns: allCampaigns.length,
-        active_campaigns: allCampaigns.filter(c => c.effective_status === 'ACTIVE').length,
-        paused_campaigns: allCampaigns.filter(c => c.effective_status === 'PAUSED').length
-      }
+        total_ads: allAds.length
+      },
+      timestamp: new Date().toISOString(),
+      collected_metrics: [
+        'impressions', 'reach', 'clicks', 'spend', 'ctr', 'cpc', 'cpm',
+        'conversions', 'video_views', 'link_clicks', 'post_engagement',
+        'cost_per_conversion', 'frequency'
+      ]
     }
     
   } catch (error: any) {
     console.error('❌ Erro ao coletar campanhas:', error)
-    return { campaigns: [], ad_accounts: [], error: error.message }
+    return { campaigns: [], ads: [], ad_accounts: [], error: error.message }
   }
 }
 
 async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramData: any, campaignsData: any, barId: number) {
   try {
     const hoje = new Date().toISOString().split('T')[0]
+    console.log('💾 Processando e salvando dados COMPLETOS do Meta...')
     
-    // Calcular dados do Facebook
+    // === PROCESSAR DADOS FACEBOOK COMPLETOS ===
+    console.log('📘 Processando insights Facebook...')
+    
+    // Extrair métricas dos posts
     let fbLikes = 0, fbComments = 0, fbShares = 0
     if (facebookData.posts && Array.isArray(facebookData.posts)) {
       for (const post of facebookData.posts) {
@@ -377,18 +539,58 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
       }
     }
     
-    // Calcular dados do Instagram
-    let igLikes = 0, igComments = 0
+    // Extrair insights de alcance e impressões
+    let pageReach = 0, pageImpressions = 0, postEngagements = 0, videoViews = 0
+    if (facebookData.insights) {
+      // Somar dados dos últimos dias
+      if (facebookData.insights.reach?.data) {
+        pageReach = facebookData.insights.reach.data.reduce((sum: number, item: any) => sum + (parseInt(item.value) || 0), 0)
+      }
+      if (facebookData.insights.views?.data) {
+        pageImpressions = facebookData.insights.views.data.reduce((sum: number, item: any) => sum + (parseInt(item.value) || 0), 0)
+      }
+      if (facebookData.insights.engagement?.data) {
+        postEngagements = facebookData.insights.engagement.data.reduce((sum: number, item: any) => sum + (parseInt(item.value) || 0), 0)
+      }
+    }
+    
+    // === PROCESSAR DADOS INSTAGRAM COMPLETOS ===
+    console.log('📸 Processando insights Instagram...')
+    
+    // Extrair métricas dos posts
+    let igLikes = 0, igComments = 0, igShares = 0, igSaves = 0
     if (instagramData.media && Array.isArray(instagramData.media)) {
       for (const item of instagramData.media) {
         igLikes += item.like_count || 0
         igComments += item.comments_count || 0
+        igShares += item.shares_count || 0
+        igSaves += item.saved_count || 0
       }
     }
     
-    console.log('💾 Salvando com DELETE + INSERT...')
+    // Extrair insights de alcance, impressões e engajamento
+    let igReach = 0, igImpressions = 0, igVideoViews = 0, profileViews = 0, websiteClicks = 0
+    if (instagramData.insights) {
+      // Processar insights de audiência
+      if (instagramData.insights.audience?.data) {
+        const audienceData = instagramData.insights.audience.data
+        igReach = audienceData.find((m: any) => m.name === 'reach')?.values?.reduce((sum: number, item: any) => sum + (parseInt(item.value) || 0), 0) || 0
+        igImpressions = audienceData.find((m: any) => m.name === 'impressions')?.values?.reduce((sum: number, item: any) => sum + (parseInt(item.value) || 0), 0) || 0
+        profileViews = audienceData.find((m: any) => m.name === 'profile_views')?.values?.reduce((sum: number, item: any) => sum + (parseInt(item.value) || 0), 0) || 0
+        websiteClicks = audienceData.find((m: any) => m.name === 'website_clicks')?.values?.reduce((sum: number, item: any) => sum + (parseInt(item.value) || 0), 0) || 0
+      }
+      
+      // Processar insights de conteúdo
+      if (instagramData.insights.content?.data) {
+        const contentData = instagramData.insights.content.data
+        igVideoViews = contentData.find((m: any) => m.name === 'video_views')?.values?.reduce((sum: number, item: any) => sum + (parseInt(item.value) || 0), 0) || 0
+      }
+    }
     
-    // FACEBOOK: Delete existente + Insert novo
+    console.log(`📊 Facebook processado: Reach ${pageReach}, Impressions ${pageImpressions}, ${fbLikes} likes`)
+    console.log(`📸 Instagram processado: Reach ${igReach}, Impressions ${igImpressions}, ${igLikes} likes`)
+    
+    // === SALVAR FACEBOOK ===
     await supabase
       .from('facebook_metrics')
       .delete()
@@ -406,13 +608,17 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
         post_likes: fbLikes,
         post_comments: fbComments,
         post_shares: fbShares,
-        page_reach: 0,
-        page_impressions: 0,
+        page_reach: pageReach,
+        page_impressions: pageImpressions,
+        post_engagements: postEngagements,
+        video_views: videoViews,
+        talking_about_count: facebookData.page_info?.talking_about_count || 0,
+        checkins: facebookData.page_info?.checkins || 0,
         raw_data: facebookData
       })
       .select()
     
-    // INSTAGRAM: Delete existente + Insert novo
+    // === SALVAR INSTAGRAM ===
     await supabase
       .from('instagram_metrics')
       .delete()
@@ -430,8 +636,14 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
         following_count: instagramData.account_info?.follows_count || 0,
         posts_likes: igLikes,
         posts_comments: igComments,
-        reach: 0,
-        impressions: 0,
+        posts_shares: igShares,
+        posts_saves: igSaves,
+        reach: igReach,
+        impressions: igImpressions,
+        video_views: igVideoViews,
+        profile_views: profileViews,
+        website_clicks: websiteClicks,
+        media_count: instagramData.account_info?.media_count || 0,
         raw_data: instagramData
       })
       .select()

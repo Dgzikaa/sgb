@@ -1143,7 +1143,8 @@ export default function TerminalProducao() {
                                 </div>
                               </div>
                             )}
-                          </div>
+                            </CardContent>
+                          </Card>
 
                           {/* Botão Salvar */}
                           <Button
