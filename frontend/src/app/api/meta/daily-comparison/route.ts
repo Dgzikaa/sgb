@@ -216,37 +216,12 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('❌ Erro na API Daily Comparison:', error)
     
-    // Retornar dados simulados em caso de erro
-    const fallbackData = {
-      success: true,
-      data: {
-        days: [
-          { date: '2025-01-15', fb_followers: 102, ig_followers: 36421, total_reach: 2500, engajamento: 156 },
-          { date: '2025-01-14', fb_followers: 102, ig_followers: 36390, total_reach: 2200, engajamento: 142 },
-          { date: '2025-01-13', fb_followers: 101, ig_followers: 36358, total_reach: 1980, engajamento: 138 },
-          { date: '2025-01-12', fb_followers: 101, ig_followers: 36330, total_reach: 2100, engajamento: 151 },
-          { date: '2025-01-11', fb_followers: 100, ig_followers: 36285, total_reach: 1850, engajamento: 129 },
-          { date: '2025-01-10', fb_followers: 100, ig_followers: 36260, total_reach: 2300, engajamento: 167 },
-          { date: '2025-01-09', fb_followers: 99, ig_followers: 36220, total_reach: 1950, engajamento: 143 }
-        ],
-        comparisons: [
-          { period: 'Hoje vs Ontem', followers_change: 31, followers_percent: 0.08, reach_change: 300, engagement_change: 14 },
-          { period: 'Ontem vs Anteontem', followers_change: 32, followers_percent: 0.09, reach_change: 220, engagement_change: 4 },
-          { period: 'Últimos 7 dias', followers_change: 201, followers_percent: 0.55, reach_change: 1850, engagement_change: 87 }
-        ],
-        trends: {
-          followers_trend: 'growing',
-          engagement_trend: 'growing',
-          reach_trend: 'stable'
-        },
-        total_days: 7
-      },
-      meta: {
-        source: 'fallback',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      }
-    }
-
-    return NextResponse.json(fallbackData)
+    // Retornar erro real, SEM dados simulados
+    return NextResponse.json({
+      success: false,
+      error: 'Erro ao carregar dados de comparação diária',
+      details: error instanceof Error ? error.message : 'Erro desconhecido',
+      data_source: 'error'
+    }, { status: 500 })
   }
 } 

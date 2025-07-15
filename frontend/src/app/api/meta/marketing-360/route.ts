@@ -84,10 +84,9 @@ export async function GET(request: NextRequest) {
 
     totalFollowers = facebookFollowers + instagramFollowers
 
-    // Calcular taxa de engajamento
+    // Calcular taxa de engajamento REAL (se não há impressões, mostrar 0)
     const engagementRate = totalImpressions > 0 ? 
-      (totalEngagement / totalImpressions * 100) : 
-      4.5 // valor padrão realístico
+      (totalEngagement / totalImpressions * 100) : 0
 
     // Calcular variações (comparar com dados de ontem)
     const ontem = new Date(hoje.getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]
@@ -98,39 +97,63 @@ export async function GET(request: NextRequest) {
     const followersYesterday = (yesterdayFb?.page_fans || 0) + (yesterdayIg?.follower_count || 0)
     const followersChange = totalFollowers - followersYesterday
 
-    // ROI estimado baseado no alcance e engajamento
-    const roiEstimate = Math.min(Math.round(totalReach / 100 + engagementRate * 10), 500)
+    // ROI baseado apenas em dados reais (se não há alcance, mostrar 0)
+    const roiEstimate = totalReach > 0 ? Math.min(Math.round(totalReach / 100 + engagementRate * 10), 500) : 0
 
-    // 4. ESTRUTURAR RESPOSTA
+    // Buscar dados de campanhas REAIS da tabela meta_campaigns_history
+    const { data: campaignsData } = await supabase
+      .from('meta_campaigns_history')
+      .select('*')
+      .eq('bar_id', barId)
+      .gte('data_coleta', diasAtras.toISOString().split('T')[0])
+      .order('data_coleta', { ascending: false })
+
+    console.log(`💰 Campanhas encontradas: ${campaignsData?.length || 0}`)
+
+    // Processar campanhas REAIS
+    let campaignMetrics = {
+      active_campaigns: 0,
+      total_spend: 0,
+      total_clicks: 0,
+      conversion_rate: 0
+    }
+
+    if (campaignsData && campaignsData.length > 0) {
+      // Usar dados reais de campanhas
+      const latestCampaign = campaignsData[0]
+      campaignMetrics = {
+        active_campaigns: campaignsData.filter(c => c.status === 'ACTIVE').length,
+        total_spend: campaignsData.reduce((sum, c) => sum + (parseFloat(c.spend) || 0), 0),
+        total_clicks: campaignsData.reduce((sum, c) => sum + (parseInt(c.clicks) || 0), 0),
+        conversion_rate: 0 // Calcular se tiver dados de conversão
+      }
+    }
+
+    // 4. ESTRUTURAR RESPOSTA COM DADOS REAIS APENAS
     const responseData = {
       success: true,
       data: {
         metrics: {
           total_followers: totalFollowers,
           engagement_rate: Math.round(engagementRate * 10) / 10,
-          weekly_reach: totalReach,
-          roi_estimate: roiEstimate,
+          weekly_reach: totalReach, // Será 0 se não houver dados
+          roi_estimate: roiEstimate, // Será 0 se não houver dados
           facebook: {
             followers: facebookFollowers,
-            engagement: Math.round(engagementRate * 0.6 * 10) / 10,
+            engagement: totalImpressions > 0 ? Math.round(engagementRate * 0.6 * 10) / 10 : 0,
             reach: Math.round(totalReach * 0.45),
             posts: facebookData?.filter(d => d.post_impressions > 0).length || 0
           },
           instagram: {
             followers: instagramFollowers,
-            engagement: Math.round(engagementRate * 1.4 * 10) / 10,
+            engagement: totalImpressions > 0 ? Math.round(engagementRate * 1.4 * 10) / 10 : 0,
             reach: Math.round(totalReach * 0.55),
             posts: instagramData?.filter(d => d.posts_impressions > 0).length || 0
           }
         },
-        campaigns: {
-          active_campaigns: 1,
-          total_spend: 45.30, // Pode vir de tabela de campanhas se existir
-          total_clicks: Math.round(totalReach * 0.02), // 2% CTR estimado
-          conversion_rate: 4.2
-        },
+        campaigns: campaignMetrics, // Dados reais ou zeros
         goals: {
-          followers_target: Math.max(totalFollowers * 1.5, 50000),
+          followers_target: Math.max(totalFollowers * 1.2, 50000), // Meta baseada no atual
           engagement_target: 6.0,
           reach_target: Math.max(totalReach * 2, 100000),
           roi_target: 400
@@ -140,22 +163,30 @@ export async function GET(request: NextRequest) {
           followers_change_percent: followersYesterday > 0 ? 
             Math.round((followersChange / followersYesterday) * 100 * 100) / 100 : 0,
           engagement_change: Math.round((totalEngagement - (yesterdayFb?.page_engaged_users || 0) - (yesterdayIg?.profile_views || 0))),
-          reach_change: Math.round(totalReach * 0.1), // Estimativa de crescimento
+          reach_change: 0, // Será calculado quando houver dados históricos
           trend_direction: followersChange > 0 ? 'growing' : followersChange < 0 ? 'declining' : 'stable'
         },
         last_updated: new Date().toISOString(),
-        data_source: 'direct_tables'
+        data_source: 'real_data_only', // Indicar que são apenas dados reais
+        data_availability: {
+          followers: totalFollowers > 0,
+          reach: totalReach > 0,
+          engagement: totalEngagement > 0,
+          campaigns: campaignsData && campaignsData.length > 0
+        }
       },
       meta: {
         source: 'marketing-360',
         records_processed: {
           facebook: facebookData?.length || 0,
-          instagram: instagramData?.length || 0
+          instagram: instagramData?.length || 0,
+          campaigns: campaignsData?.length || 0
         },
         period: `${diasAtras.toISOString().split('T')[0]} to ${hoje.toISOString().split('T')[0]}`,
         raw_data: {
           latest_facebook: latestFacebook,
-          latest_instagram: latestInstagram
+          latest_instagram: latestInstagram,
+          campaigns_sample: campaignsData?.slice(0, 2) || []
         }
       }
     }
@@ -171,46 +202,12 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('❌ Erro na API Marketing 360°:', error)
     
-    // Retornar dados simulados em caso de erro
-    const fallbackData = {
-      success: true,
-      data: {
-        metrics: {
-          total_followers: 36421,
-          engagement_rate: 4.8,
-          weekly_reach: 28500,
-          roi_estimate: 320,
-          facebook: { followers: 102, engagement: 3.2, reach: 8500, posts: 8 },
-          instagram: { followers: 36319, engagement: 4.9, reach: 20000, posts: 15 }
-        },
-        campaigns: {
-          active_campaigns: 1,
-          total_spend: 45.30,
-          total_clicks: 850,
-          conversion_rate: 4.2
-        },
-        goals: {
-          followers_target: 50000,
-          engagement_target: 6.0,
-          reach_target: 100000,
-          roi_target: 400
-        },
-        variations: {
-          followers_change: 31,
-          followers_change_percent: 0.08,
-          engagement_change: 125,
-          reach_change: 0,
-          trend_direction: 'growing'
-        },
-        last_updated: new Date().toISOString(),
-        data_source: 'simulated'
-      },
-      meta: {
-        source: 'fallback',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      }
-    }
-
-    return NextResponse.json(fallbackData)
+    // Retornar erro real, SEM dados simulados
+    return NextResponse.json({
+      success: false,
+      error: 'Erro ao carregar dados do Marketing 360°',
+      details: error instanceof Error ? error.message : 'Erro desconhecido',
+      data_source: 'error'
+    }, { status: 500 })
   }
 } 

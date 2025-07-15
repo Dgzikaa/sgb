@@ -166,22 +166,24 @@ export default function Marketing360Page() {
         console.error('❌ Fallback também falhou:', fallbackError)
       }
       
-      // Último recurso: dados simulados
-      console.log('⚠️ Usando dados simulados como último recurso')
-      const simulatedData = {
+      // Sem dados mockados - mostrar erro real
+      console.log('❌ Erro completo: não foi possível carregar dados reais')
+      
+      // Manter dados iniciais vazios (estrutura mínima para não quebrar a UI)
+      const emptyData = {
         metrics: {
-          total_followers: 36421,
-          engagement_rate: 4.8,
-          weekly_reach: 28500,
-          roi_estimate: 320,
-          facebook: { followers: 102, engagement: 3.2, reach: 8500, posts: 8 },
-          instagram: { followers: 36319, engagement: 4.9, reach: 20000, posts: 15 }
+          total_followers: 0,
+          engagement_rate: 0,
+          weekly_reach: 0,
+          roi_estimate: 0,
+          facebook: { followers: 0, engagement: 0, reach: 0, posts: 0 },
+          instagram: { followers: 0, engagement: 0, reach: 0, posts: 0 }
         },
         campaigns: {
-          active_campaigns: 1,
-          total_spend: 45.30,
-          total_clicks: 850,
-          conversion_rate: 4.2
+          active_campaigns: 0,
+          total_spend: 0,
+          total_clicks: 0,
+          conversion_rate: 0
         },
         goals: {
           followers_target: 50000,
@@ -190,17 +192,17 @@ export default function Marketing360Page() {
           roi_target: 400
         },
         variations: {
-          followers_change: 31,
-          followers_change_percent: 0.08,
-          engagement_change: 125,
+          followers_change: 0,
+          followers_change_percent: 0,
+          engagement_change: 0,
           reach_change: 0,
-          trend_direction: 'growing'
+          trend_direction: 'stable'
         },
         last_updated: new Date().toISOString(),
-        data_source: 'simulated'
+        data_source: 'error'
       }
       
-      setData(simulatedData)
+      setData(emptyData)
     } finally {
       setLoading(false)
     }
@@ -229,30 +231,18 @@ export default function Marketing360Page() {
     } catch (error) {
       console.error('❌ Erro ao carregar dados diários:', error)
       
-      // Fallback com dados simulados de exemplo
-      const simulatedDailyData = {
-        days: [
-          { date: '2025-01-15', fb_followers: 102, ig_followers: 36421, total_reach: 2500, engajamento: 156 },
-          { date: '2025-01-14', fb_followers: 102, ig_followers: 36390, total_reach: 2200, engajamento: 142 },
-          { date: '2025-01-13', fb_followers: 101, ig_followers: 36358, total_reach: 1980, engajamento: 138 },
-          { date: '2025-01-12', fb_followers: 101, ig_followers: 36330, total_reach: 2100, engajamento: 151 },
-          { date: '2025-01-11', fb_followers: 100, ig_followers: 36285, total_reach: 1850, engajamento: 129 },
-          { date: '2025-01-10', fb_followers: 100, ig_followers: 36260, total_reach: 2300, engajamento: 167 },
-          { date: '2025-01-09', fb_followers: 99, ig_followers: 36220, total_reach: 1950, engajamento: 143 }
-        ],
-        comparisons: [
-          { period: 'Hoje vs Ontem', followers_change: 31, followers_percent: 0.08, reach_change: 300, engagement_change: 14 },
-          { period: 'Ontem vs Anteontem', followers_change: 32, followers_percent: 0.09, reach_change: 220, engagement_change: 4 },
-          { period: 'Últimos 7 dias', followers_change: 201, followers_percent: 0.55, reach_change: 1850, engagement_change: 87 }
-        ],
+      // Manter estrutura vazia, SEM dados simulados
+      const emptyDailyData = {
+        days: [],
+        comparisons: [],
         trends: {
-          followers_trend: 'growing',
-          engagement_trend: 'growing',
+          followers_trend: 'stable',
+          engagement_trend: 'stable',
           reach_trend: 'stable'
         }
       }
       
-      setDailyData(simulatedDailyData)
+      setDailyData(emptyDailyData)
     } finally {
       setDailyLoading(false)
     }
