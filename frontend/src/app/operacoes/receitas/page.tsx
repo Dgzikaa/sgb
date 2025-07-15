@@ -42,6 +42,7 @@ interface Insumo {
   codigo: string
   nome: string
   categoria: string
+  tipo_local: 'bar' | 'cozinha'
   observacoes?: string
   custo_unitario?: number
   unidade_medida: string
@@ -53,6 +54,7 @@ interface NovoInsumo {
   codigo: string
   nome: string
   categoria: string
+  tipo_local: 'bar' | 'cozinha'
   observacoes?: string
   custo_unitario?: number
   unidade_medida: string
@@ -102,6 +104,8 @@ export default function ReceitasPage() {
   const { setPageTitle } = usePageTitle()
   const { confirmDelete, confirmAction } = useGlobalConfirm()
   const [activeTab, setActiveTab] = useState('insumos')
+  const [tipoLocalReceitas, setTipoLocalReceitas] = useState<'bar' | 'cozinha'>('cozinha')
+  const [tipoLocalInsumos, setTipoLocalInsumos] = useState<'bar' | 'cozinha'>('cozinha')
   
   // Estados para Insumos
   const [insumos, setInsumos] = useState<Insumo[]>([])
@@ -110,6 +114,7 @@ export default function ReceitasPage() {
     nome: '',
     unidade_medida: 'g',
     categoria: 'cozinha',
+    tipo_local: 'cozinha',
     observacoes: ''
   })
   const [buscaInsumos, setBuscaInsumos] = useState('')
@@ -256,20 +261,30 @@ export default function ReceitasPage() {
   }, [selectedBar, carregarInsumos, carregarReceitas])
 
   const insumosFiltrados = useMemo(() => {
-    return insumos.filter(insumo =>
+    // Filtrar por tipo_local primeiro
+    const insumosPorTipo = insumos.filter(insumo => 
+      insumo.tipo_local === tipoLocalInsumos
+    )
+    
+    return insumosPorTipo.filter(insumo =>
       insumo.nome.toLowerCase().includes(buscaInsumos.toLowerCase()) ||
       insumo.codigo.toLowerCase().includes(buscaInsumos.toLowerCase()) ||
       insumo.categoria.toLowerCase().includes(buscaInsumos.toLowerCase())
     )
-  }, [insumos, buscaInsumos])
+  }, [insumos, buscaInsumos, tipoLocalInsumos])
 
   const receitasFiltradas = useMemo(() => {
-    return receitas.filter(receita =>
+    // Filtrar por tipo_local primeiro
+    const receitasPorTipo = receitas.filter(receita => 
+      receita.tipo_local === tipoLocalReceitas
+    )
+    
+    return receitasPorTipo.filter(receita =>
       receita.receita_nome.toLowerCase().includes(buscaReceitas.toLowerCase()) ||
       receita.receita_codigo.toLowerCase().includes(buscaReceitas.toLowerCase()) ||
       receita.receita_categoria.toLowerCase().includes(buscaReceitas.toLowerCase())
     )
-  }, [receitas, buscaReceitas])
+  }, [receitas, buscaReceitas, tipoLocalReceitas])
 
   // Otimização: calcular insumos chefes uma vez
   const insumosChefes = useMemo(() => {
@@ -352,9 +367,12 @@ export default function ReceitasPage() {
         body: JSON.stringify({
           codigo: novoInsumo.codigo,
           nome: novoInsumo.nome,
+          categoria: novoInsumo.categoria,
+          tipo_local: novoInsumo.tipo_local,
           custo_unitario: novoInsumo.custo_unitario || 0,
-          unidade: novoInsumo.unidade_medida,
-          observacoes: novoInsumo.observacoes || ''
+          unidade_medida: novoInsumo.unidade_medida,
+          observacoes: novoInsumo.observacoes || '',
+          bar_id: selectedBar?.id
         })
       })
       
@@ -369,6 +387,7 @@ export default function ReceitasPage() {
           nome: '',
           unidade_medida: 'g',
           categoria: 'cozinha',
+          tipo_local: tipoLocalInsumos,
           observacoes: ''
         })
         
@@ -408,11 +427,13 @@ export default function ReceitasPage() {
           id: insumoEditando.id,
           codigo: insumoEditando.codigo,
           nome: insumoEditando.nome.trim(),
-          custo_unitario: insumoEditando.custo_unitario,
-          unidade: insumoEditando.unidade_medida,
-          peso_volume_unidade: 1,
+          categoria: insumoEditando.categoria,
+          tipo_local: insumoEditando.tipo_local,
+          custo_unitario: insumoEditando.custo_unitario || 0,
+          unidade_medida: insumoEditando.unidade_medida,
           observacoes: insumoEditando.observacoes?.trim() || null,
-          ativo: true
+          ativo: true,
+          bar_id: selectedBar?.id
         })
       })
 
@@ -790,12 +811,26 @@ export default function ReceitasPage() {
           </TabsList>
 
           <TabsContent value="insumos" className="space-y-6">
+            {/* Abas para Bar vs Cozinha - Insumos */}
+            <div className="mb-6">
+              <Tabs value={tipoLocalInsumos} onValueChange={(value) => setTipoLocalInsumos(value as 'bar' | 'cozinha')}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="cozinha" className="flex items-center gap-2">
+                    👨‍🍳 Cozinha ({insumos.filter(i => i.tipo_local === 'cozinha').length})
+                  </TabsTrigger>
+                  <TabsTrigger value="bar" className="flex items-center gap-2">
+                    🍺 Bar ({insumos.filter(i => i.tipo_local === 'bar').length})
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+            
             {/* Formulário de Novo Insumo */}
             <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                   <Plus className="w-5 h-5" />
-                  Novo Insumo
+                  Novo Insumo ({tipoLocalInsumos === 'bar' ? '🍺 Bar' : '👨‍🍳 Cozinha'})
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -848,6 +883,22 @@ export default function ReceitasPage() {
                       <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                         <SelectItem value="cozinha">Cozinha</SelectItem>
                         <SelectItem value="bar">Bar</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-gray-700 dark:text-gray-300">Tipo Local</Label>
+                    <Select 
+                      value={novoInsumo.tipo_local} 
+                      onValueChange={(value) => setNovoInsumo(prev => ({ ...prev, tipo_local: value as 'bar' | 'cozinha' }))}
+                    >
+                      <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                        <SelectItem value="cozinha">👨‍🍳 Cozinha</SelectItem>
+                        <SelectItem value="bar">🍺 Bar</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1078,13 +1129,27 @@ export default function ReceitasPage() {
           </TabsContent>
 
           <TabsContent value="receitas" className="space-y-6">
+            {/* Abas para Bar vs Cozinha - Receitas */}
+            <div className="mb-6">
+              <Tabs value={tipoLocalReceitas} onValueChange={(value) => setTipoLocalReceitas(value as 'bar' | 'cozinha')}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="cozinha" className="flex items-center gap-2">
+                    👨‍🍳 Cozinha ({receitas.filter(r => r.tipo_local === 'cozinha').length})
+                  </TabsTrigger>
+                  <TabsTrigger value="bar" className="flex items-center gap-2">
+                    🍺 Bar ({receitas.filter(r => r.tipo_local === 'bar').length})
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+            
             {/* Botão para criar nova receita */}
             <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                     <ChefHat className="w-5 h-5" />
-                    Receitas
+                    Receitas ({tipoLocalReceitas === 'bar' ? '🍺 Bar' : '👨‍🍳 Cozinha'})
                   </CardTitle>
                   <Button
                     onClick={abrirModalCriarReceita}
@@ -1627,6 +1692,24 @@ export default function ReceitasPage() {
                         <SelectItem value="descartaveis">Descartáveis</SelectItem>
                         <SelectItem value="limpeza">Limpeza</SelectItem>
                         <SelectItem value="outros">Outros</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-tipo-local" className="text-gray-700 dark:text-gray-300">
+                      Tipo Local
+                    </Label>
+                    <Select 
+                      value={insumoEditando.tipo_local} 
+                      onValueChange={(value) => setInsumoEditando({...insumoEditando, tipo_local: value as 'bar' | 'cozinha'})}
+                    >
+                      <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                        <SelectValue placeholder="Selecione o tipo local" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                        <SelectItem value="cozinha">👨‍🍳 Cozinha</SelectItem>
+                        <SelectItem value="bar">🍺 Bar</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

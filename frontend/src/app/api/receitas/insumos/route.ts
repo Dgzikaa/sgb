@@ -88,24 +88,26 @@ export async function POST(request: NextRequest) {
     const {
       codigo,
       nome,
-      custo_unitario,
-      unidade,
-      peso_volume_unidade = 1,
-      observacoes = ''
+      categoria = 'cozinha',
+      tipo_local = 'cozinha',
+      custo_unitario = 0,
+      unidade_medida = 'g',
+      observacoes = '',
+      bar_id = 3
     } = body
 
-    console.log(`📦 Cadastrando insumo:`, { codigo, nome, custo_unitario, unidade })
+    console.log(`📦 Cadastrando insumo:`, { codigo, nome, categoria, tipo_local, unidade_medida })
 
     // Validações
-    if (!codigo || !nome || !custo_unitario || !unidade) {
+    if (!codigo || !nome) {
       return NextResponse.json({
         success: false,
-        error: 'Campos obrigatórios: codigo, nome, custo_unitario, unidade'
+        error: 'Campos obrigatórios: codigo, nome'
       }, { status: 400 })
     }
 
     const unidadesValidas = ['g', 'kg', 'ml', 'l', 'unid', 'pct']
-    if (!unidadesValidas.includes(unidade)) {
+    if (!unidadesValidas.includes(unidade_medida)) {
       return NextResponse.json({
         success: false,
         error: `Unidade deve ser uma das: ${unidadesValidas.join(', ')}`
@@ -140,10 +142,13 @@ export async function POST(request: NextRequest) {
       .insert([{
         codigo,
         nome,
-        custo_unitario: parseFloat(custo_unitario),
-        unidade,
-        peso_volume_unidade: parseFloat(peso_volume_unidade),
-        observacoes
+        categoria,
+        tipo_local,
+        unidade_medida,
+        custo_unitario: parseFloat(custo_unitario) || 0,
+        observacoes,
+        bar_id: parseInt(bar_id),
+        ativo: true
       }])
       .select()
 
@@ -180,11 +185,13 @@ export async function PUT(request: NextRequest) {
       id,
       codigo,
       nome,
-      custo_unitario,
-      unidade,
-      peso_volume_unidade,
+      categoria,
+      tipo_local,
+      custo_unitario = 0,
+      unidade_medida,
       observacoes,
-      ativo
+      ativo = true,
+      bar_id
     } = body
 
     if (!id) {
@@ -204,9 +211,10 @@ export async function PUT(request: NextRequest) {
       .update({
         codigo,
         nome,
-        custo_unitario: parseFloat(custo_unitario),
-        unidade,
-        peso_volume_unidade: parseFloat(peso_volume_unidade),
+        categoria,
+        tipo_local,
+        unidade_medida,
+        custo_unitario: parseFloat(custo_unitario) || 0,
         observacoes,
         ativo,
         updated_at: new Date().toISOString()

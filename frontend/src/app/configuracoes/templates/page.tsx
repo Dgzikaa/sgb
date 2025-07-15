@@ -94,14 +94,13 @@ export default function TemplatesPage() {
   // Filtros
   const [busca, setBusca] = useState('')
   const [categoriaFiltro, setCategoriaFiltro] = useState('all')
-  const [setorFiltro, setSetorFiltro] = useState('all')
   const [tipoFiltro, setTipoFiltro] = useState('all')
   const [publicoFiltro, setPublicoFiltro] = useState('all')
   const [predefinidoFiltro, setPredefinidoFiltro] = useState('all')
 
   useEffect(() => {
     carregarTemplates()
-  }, [busca, categoriaFiltro, setorFiltro, tipoFiltro, publicoFiltro, predefinidoFiltro])
+  }, [busca, categoriaFiltro, tipoFiltro, publicoFiltro, predefinidoFiltro])
 
   const carregarTemplates = async () => {
     try {

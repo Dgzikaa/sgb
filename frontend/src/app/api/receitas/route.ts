@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
         receita_codigo,
         receita_nome,
         receita_categoria,
+        tipo_local,
         insumo_chefe_id,
         rendimento_esperado,
         insumo_id,
