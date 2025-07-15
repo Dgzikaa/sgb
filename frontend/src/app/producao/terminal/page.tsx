@@ -830,55 +830,57 @@ export default function TerminalProducao() {
                               </CardContent>
                             </Card>
 
-                          {/* Controles de Produção - Simplificado */}
-                          <div className="bg-gray-50 p-4 rounded-lg">
-                            <h4 className="font-bold text-gray-900 mb-4">⚖️ Controles de Produção</h4>
+                            {/* Controles de Produção */}
+                            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                              <CardHeader>
+                                <CardTitle className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                                  ⚖️ Controles de Produção
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="space-y-6">
+                                  {/* Etapa 1: Peso Bruto (Sempre visível) */}
+                                  <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                                    <Label htmlFor={`peso-bruto-${producao.id}`} className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2 mb-2">
+                                      1️⃣ Peso Bruto (g) *
+                                      {producao.pesoBruto && parseFloat(producao.pesoBruto) > 0 && <span className="text-green-600 dark:text-green-400 text-xs">✅</span>}
+                                    </Label>
+                                    <Input
+                                      id={`peso-bruto-${producao.id}`}
+                                      type="number"
+                                      inputMode="decimal"
+                                      value={producao.pesoBruto}
+                                      onChange={(e) => {
+                                        const value = e.target.value.replace(/[^0-9.]/g, '')
+                                        atualizarProducao(producao.id, { pesoBruto: value })
+                                      }}
+                                      placeholder="Digite o peso bruto inicial..."
+                                      className="h-12 text-base bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                                      required
+                                    />
+                                  </div>
 
-                            <div className="space-y-4">
-                              {/* Etapa 1: Peso Bruto (Sempre visível) */}
-                              <div className="bg-white p-3 rounded border border-red-200">
-                                <Label htmlFor={`peso-bruto-${producao.id}`} className="text-black font-semibold flex items-center gap-2">
-                                  1️⃣ Peso Bruto (g) *
-                                  {producao.pesoBruto && parseFloat(producao.pesoBruto) > 0 && <span className="text-green-600 text-xs">✅</span>}
-                                </Label>
-                                <Input
-                                  id={`peso-bruto-${producao.id}`}
-                                  type="number"
-                                  inputMode="numeric"
-                                  pattern="[0-9]*"
-                                  value={producao.pesoBruto}
-                                  onChange={(e) => {
-                                    const value = e.target.value.replace(/[^0-9.]/g, '')
-                                    atualizarProducao(producao.id, { pesoBruto: value })
-                                  }}
-                                  placeholder="Digite o peso bruto inicial..."
-                                  className="text-black font-medium border-red-300 mt-1"
-                                  required
-                                />
-                              </div>
-
-                              {/* Etapa 2: Peso Líquido (Só após timer iniciar) */}
-                              {producao.timerAtivo && (
-                                <div className="bg-white p-3 rounded border border-blue-200">
-                                  <Label htmlFor={`peso-liquido-${producao.id}`} className="text-black font-semibold flex items-center gap-2">
-                                    2️⃣ Peso Líquido (g)
-                                    {producao.insumoChefe && <span className="text-blue-600 text-xs">🔗 Ajusta {producao.insumoChefe.nome}</span>}
-                                  </Label>
-                                  <Input
-                                    id={`peso-liquido-${producao.id}`}
-                                    type="number"
-                                    inputMode="numeric"
-                                    pattern="[0-9]*"
-                                    value={producao.pesoLiquido}
-                                    onChange={(e) => {
-                                      const value = e.target.value.replace(/[^0-9.]/g, '')
-                                      atualizarPesoLiquido(producao.id, value)
-                                    }}
-                                    placeholder="Digite o peso após limpeza..."
-                                    className="text-black font-medium border-blue-300 mt-1"
-                                  />
-                                </div>
-                              )}
+                                  {/* Etapa 2: Peso Líquido (Só após timer iniciar) */}
+                                  {producao.timerAtivo && (
+                                    <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                                      <Label htmlFor={`peso-liquido-${producao.id}`} className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2 mb-2">
+                                        2️⃣ Peso Líquido (g)
+                                        {producao.insumoChefe && <span className="text-blue-600 dark:text-blue-400 text-xs">🔗 Ajusta {producao.insumoChefe.nome}</span>}
+                                      </Label>
+                                      <Input
+                                        id={`peso-liquido-${producao.id}`}
+                                        type="number"
+                                        inputMode="decimal"
+                                        value={producao.pesoLiquido}
+                                        onChange={(e) => {
+                                          const value = e.target.value.replace(/[^0-9.]/g, '')
+                                          atualizarPesoLiquido(producao.id, value)
+                                        }}
+                                        placeholder="Digite o peso após limpeza..."
+                                        className="h-12 text-base bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                                      />
+                                    </div>
+                                  )}
 
                               {/* Etapa 3: Resultado Final (Só após timer iniciar) */}
                               {producao.timerAtivo && (
@@ -945,25 +947,30 @@ export default function TerminalProducao() {
                                     rows={2}
                                   />
                                 </div>
-                              )}
-                            </div>
+                                  )}
+                                </div>
+                              </CardContent>
+                            </Card>
                           </div>
-                        </div>
 
-                        {/* Coluna 2: Insumos */}
-                        <div className="space-y-4">
-                          <div className="bg-orange-50 p-4 rounded-lg">
-                            <div className="flex items-center justify-between mb-3">
-                              <h4 className="font-bold text-orange-900">🥘 Insumos da Receita</h4>
-                              <Button
-                                onClick={() => alternarInsumosExpandidos(producao.id)}
-                                variant="ghost"
-                                size="sm"
-                                className="text-orange-700 hover:bg-orange-100"
-                              >
-                                {producao.insumosExpandidos ? '🔽 Recolher' : '🔼 Expandir'}
-                              </Button>
-                            </div>
+                          {/* Insumos da Receita */}
+                          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                            <CardHeader>
+                              <div className="flex items-center justify-between">
+                                <CardTitle className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                                  🥘 Insumos da Receita
+                                </CardTitle>
+                                <Button
+                                  onClick={() => alternarInsumosExpandidos(producao.id)}
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 h-10 w-10 touch-manipulation"
+                                >
+                                  {producao.insumosExpandidos ? '🔽' : '🔼'}
+                                </Button>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
 
                             {producao.insumosExpandidos && (
                               <div className="space-y-3">
@@ -1141,33 +1148,32 @@ export default function TerminalProducao() {
                           {/* Botão Salvar */}
                           <Button
                             onClick={() => salvarProducao(producao.id)}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3"
+                            className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-bold py-3 h-12 text-base touch-manipulation"
                             disabled={!producao.rendimentoProduzido.trim()}
                           >
                             💾 Salvar Produção
                           </Button>
                         </div>
-                      </div>
-                    </TabsContent>
-                  ))}
-                </Tabs>
-              </CardContent>
-            </Card>
-          )}
+                      </TabsContent>
+                    ))}
+                  </Tabs>
+                </CardContent>
+              </Card>
+            )}
 
-          {producoesAtivas.length === 0 && (
-            <Card>
-              <CardContent className="py-12">
-                <div className="text-center text-gray-500">
-                  <p className="text-lg font-medium">🍽️ Nenhuma produção ativa</p>
-                  <p className="text-sm">Selecione uma receita acima para começar</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+            {producoesAtivas.length === 0 && (
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
+                <CardContent className="py-12">
+                  <div className="text-center text-gray-500 dark:text-gray-400">
+                    <p className="text-lg font-medium">🍽️ Nenhuma produção ativa</p>
+                    <p className="text-sm">Selecione uma receita acima para começar</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       </div>
-    </div>
     </ProtectedRoute>
   )
 } 

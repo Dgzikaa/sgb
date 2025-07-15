@@ -52,7 +52,7 @@ const visaoGeralItems: VisaoGeralItem[] = [
     id: 'comparativo',
     title: 'Análise Comparativa',
     description: 'Compare períodos e identifique tendências de crescimento',
-    icon: BarChart3,
+    icon: PieChart,
     href: '/visao-geral/comparativo',
     status: 'active',
     color: 'blue'
@@ -79,7 +79,7 @@ const visaoGeralItems: VisaoGeralItem[] = [
     id: 'semanal',
     title: 'Relatório Semanal',
     description: 'Consolidado semanal com insights e recomendações',
-    icon: Activity,
+    icon: PieChart,
     href: '/visao-geral/semanal',
     status: 'active',
     color: 'red'
@@ -97,7 +97,7 @@ const visaoGeralItems: VisaoGeralItem[] = [
     id: 'metricas-barras',
     title: 'Métricas em Barras',
     description: 'Visualização em gráficos de barras das principais métricas',
-    icon: PieChart,
+    icon: Activity,
     href: '/visao-geral/metricas-barras',
     status: 'active',
     color: 'pink'
