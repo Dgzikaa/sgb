@@ -55,10 +55,8 @@ export default function NotificationsPage() {
     marcarComoLida,
     marcarTodasComoLidas,
     excluirNotificacao,
-    limparAntigas,
-    solicitarPermissaoBrowser,
-    permissaoBrowser,
-    recarregar
+    recarregar,
+    limparErro
   } = useNotifications()
 
   // Estados
@@ -83,63 +81,54 @@ export default function NotificationsPage() {
     }
   }, [autoRefresh, recarregar])
 
+  // Handlers
   const handleMarcarComoLida = async (id: string) => {
     const sucesso = await marcarComoLida(id)
     if (sucesso) {
-      toast({
-        title: "✅ Sucesso",
-        description: "Notificação marcada como lida",
-      })
+      setSelecionadas(prev => prev.filter(item => item !== id))
     }
   }
 
   const handleMarcarTodasComoLidas = async () => {
     const sucesso = await marcarTodasComoLidas()
     if (sucesso) {
-      toast({
-        title: "✅ Sucesso",
-        description: "Todas as notificações foram marcadas como lidas",
-      })
+      setSelecionadas([])
     }
   }
 
   const handleExcluirNotificacao = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir esta notificação?')) return
-    
     const sucesso = await excluirNotificacao(id)
     if (sucesso) {
-      toast({
-        title: "✅ Sucesso",
-        description: "Notificação excluída com sucesso",
-      })
+      setSelecionadas(prev => prev.filter(item => item !== id))
     }
   }
 
-  const handleLimparAntigas = async () => {
-    if (!confirm('Tem certeza que deseja limpar notificações antigas (30+ dias)?')) return
-    
-    const sucesso = await limparAntigas(30)
-    if (sucesso) {
-      toast({
-        title: "✅ Sucesso",
-        description: "Notificações antigas removidas",
-      })
+  const handleExcluirSelecionadas = async () => {
+    for (const id of selecionadas) {
+      await excluirNotificacao(id)
     }
+    setSelecionadas([])
   }
 
-  const handleSolicitarPermissao = async () => {
-    const sucesso = await solicitarPermissaoBrowser()
-    if (sucesso) {
-      toast({
-        title: "✅ Sucesso",
-        description: "Permissão para notificações concedida",
-      })
+  const handleBusca = (termo: string) => {
+    setBusca(termo)
+    carregarNotificacoes({ ...filtros })
+  }
+
+  const handleFiltros = (novosFiltros: FiltrosNotificacao) => {
+    setFiltros(novosFiltros)
+    carregarNotificacoes(novosFiltros)
+  }
+
+  const handleRefresh = () => {
+    recarregar()
+  }
+
+  const handleSelecionarTodos = () => {
+    if (selecionadas.length === notificacoes.length) {
+      setSelecionadas([])
     } else {
-      toast({
-        title: "❌ Erro",
-        description: "Permissão negada ou não suportada",
-        variant: "destructive"
-      })
+      setSelecionadas(notificacoes.map(n => n.id))
     }
   }
 
@@ -294,10 +283,10 @@ export default function NotificationsPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Notificações Browser</p>
                   <p className="text-lg font-bold text-gray-900 dark:text-white">
-                    {permissaoBrowser === 'granted' ? 'Ativas' : 'Inativas'}
+                    Ativas
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                    {permissaoBrowser === 'granted' ? 'Funcionando' : 'Clique para ativar'}
+                    Funcionando
                   </p>
                 </div>
                 <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
@@ -346,12 +335,12 @@ export default function NotificationsPage() {
                 <Input
                   placeholder="Buscar notificações..."
                   value={busca}
-                  onChange={(e) => setBusca(e.target.value)}
+                  onChange={(e) => handleBusca(e.target.value)}
                   className="pl-10 bg-white dark:bg-gray-700"
                 />
               </div>
 
-              <Select value={filtros.status || ''} onValueChange={(value) => setFiltros(prev => ({ ...prev, status: value as any || undefined }))}>
+              <Select value={filtros.status || ''} onValueChange={(value) => handleFiltros({ ...filtros, status: value as any || undefined })}>
                 <SelectTrigger className="bg-white dark:bg-gray-700">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
@@ -363,7 +352,7 @@ export default function NotificationsPage() {
                 </SelectContent>
               </Select>
 
-              <Select value={filtros.modulo || ''} onValueChange={(value) => setFiltros(prev => ({ ...prev, modulo: value || undefined }))}>
+              <Select value={filtros.modulo || ''} onValueChange={(value) => handleFiltros({ ...filtros, modulo: value || undefined })}>
                 <SelectTrigger className="bg-white dark:bg-gray-700">
                   <SelectValue placeholder="Módulo" />
                 </SelectTrigger>
@@ -378,7 +367,7 @@ export default function NotificationsPage() {
                 </SelectContent>
               </Select>
 
-              <Select value={filtros.prioridade || ''} onValueChange={(value) => setFiltros(prev => ({ ...prev, prioridade: value || undefined }))}>
+              <Select value={filtros.prioridade || ''} onValueChange={(value) => handleFiltros({ ...filtros, prioridade: value || undefined })}>
                 <SelectTrigger className="bg-white dark:bg-gray-700">
                   <SelectValue placeholder="Prioridade" />
                 </SelectTrigger>
@@ -399,12 +388,7 @@ export default function NotificationsPage() {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                {permissaoBrowser !== 'granted' && (
-                  <Button onClick={handleSolicitarPermissao} variant="outline" size="sm">
-                    <Bell className="w-4 h-4 mr-2" />
-                    Ativar Notificações Browser
-                  </Button>
-                )}
+                
               </div>
               
               <div className="flex items-center gap-3">
@@ -412,9 +396,9 @@ export default function NotificationsPage() {
                   <CheckCheck className="w-4 h-4 mr-2" />
                   Marcar Todas como Lidas
                 </Button>
-                <Button onClick={handleLimparAntigas} variant="outline" size="sm">
+                <Button onClick={handleExcluirSelecionadas} variant="outline" size="sm">
                   <Trash2 className="w-4 h-4 mr-2" />
-                  Limpar Antigas
+                  Excluir Selecionadas
                 </Button>
               </div>
             </div>
@@ -509,12 +493,7 @@ export default function NotificationsPage() {
                                 locale: ptBR 
                               })}
                             </div>
-                            {notificacao.criada_por_usuario && (
-                              <div className="flex items-center gap-1">
-                                <Users className="w-3 h-3" />
-                                {notificacao.criada_por_usuario.nome}
-                              </div>
-                            )}
+                            
                           </div>
 
                           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
