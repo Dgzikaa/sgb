@@ -10,6 +10,7 @@ import { UserProvider } from '@/contexts/UserContext'
 import AuthSync from '@/components/AuthSync'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { LGPDProvider } from '@/hooks/useLGPD'
+import { CommandPaletteProvider } from '@/contexts/CommandPaletteContext'
 
 // Using system fonts instead of Google Fonts to avoid build connectivity issues
 
@@ -83,18 +84,20 @@ export default function RootLayout({
           <ThemeProvider>
             <UserProvider>
               <BarProvider>
-                <ToastProvider>
-                  <ConfirmDialogProvider>
-                    <AuthSync />
-                    <div className="min-h-screen">
-                      {children}
-                      <GlobalToastListener />
-                      <GlobalConfirmListener />
-                      <CommandPaletteWrapper />
-                      <PWAInstallBanner variant="floating" />
-                    </div>
-                  </ConfirmDialogProvider>
-                </ToastProvider>
+                <CommandPaletteProvider>
+                  <ToastProvider>
+                    <ConfirmDialogProvider>
+                      <AuthSync />
+                      <div className="min-h-screen">
+                        {children}
+                        <GlobalToastListener />
+                        <GlobalConfirmListener />
+                        <CommandPaletteWrapper />
+                        <PWAInstallBanner variant="floating" />
+                      </div>
+                    </ConfirmDialogProvider>
+                  </ToastProvider>
+                </CommandPaletteProvider>
               </BarProvider>
             </UserProvider>
           </ThemeProvider>
