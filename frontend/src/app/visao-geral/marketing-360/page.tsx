@@ -62,6 +62,22 @@ export default function Marketing360Page() {
     }
   })
 
+  const [campaignsLoading, setCampaignsLoading] = useState(false)
+  const [campaignsDetailedData, setCampaignsDetailedData] = useState({
+    campaigns: [] as any[],
+    ad_accounts: [] as any[],
+    ads: [] as any[],
+    totals: {
+      total_spend: 0,
+      total_impressions: 0,
+      total_reach: 0,
+      total_clicks: 0,
+      active_campaigns: 0,
+      total_campaigns: 0,
+      total_ads: 0
+    }
+  })
+
   useEffect(() => {
     loadData()
   }, [])
@@ -245,6 +261,79 @@ export default function Marketing360Page() {
       setDailyData(emptyDailyData)
     } finally {
       setDailyLoading(false)
+    }
+  }
+
+  const loadCampaignsData = async () => {
+    setCampaignsLoading(true)
+    try {
+      console.log('🎯 Carregando dados detalhados de campanhas...')
+      
+      const response = await fetch('/api/meta/test-campaigns-collection')
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const result = await response.json()
+      
+      if (result.success && result.data) {
+        console.log('✅ Dados de campanhas carregados:', result.data.total_campaigns, 'campanhas')
+        setCampaignsDetailedData({
+          campaigns: result.data.campaigns || [],
+          ad_accounts: result.data.ad_accounts || [],
+          ads: result.data.ads || [],
+          totals: {
+            total_spend: result.data.campaigns?.reduce((sum: number, camp: any) => 
+              sum + (parseFloat(camp.insights?.data?.[0]?.spend) || 0), 0) || 0,
+            total_impressions: result.data.campaigns?.reduce((sum: number, camp: any) => 
+              sum + (parseInt(camp.insights?.data?.[0]?.impressions) || 0), 0) || 0,
+            total_reach: result.data.campaigns?.reduce((sum: number, camp: any) => 
+              sum + (parseInt(camp.insights?.data?.[0]?.reach) || 0), 0) || 0,
+            total_clicks: result.data.campaigns?.reduce((sum: number, camp: any) => 
+              sum + (parseInt(camp.insights?.data?.[0]?.clicks) || 0), 0) || 0,
+            active_campaigns: result.data.campaigns?.filter((camp: any) => 
+              camp.effective_status === 'ACTIVE').length || 0,
+            total_campaigns: result.data.total_campaigns || 0,
+            total_ads: result.data.total_ads || 0
+          }
+        })
+      } else {
+        console.log('⚠️ Sem dados de campanhas:', result.error)
+        setCampaignsDetailedData({
+          campaigns: [],
+          ad_accounts: [],
+          ads: [],
+          totals: {
+            total_spend: 0,
+            total_impressions: 0,
+            total_reach: 0,
+            total_clicks: 0,
+            active_campaigns: 0,
+            total_campaigns: 0,
+            total_ads: 0
+          }
+        })
+      }
+      
+    } catch (error) {
+      console.error('❌ Erro ao carregar campanhas:', error)
+      setCampaignsDetailedData({
+        campaigns: [],
+        ad_accounts: [],
+        ads: [],
+        totals: {
+          total_spend: 0,
+          total_impressions: 0,
+          total_reach: 0,
+          total_clicks: 0,
+          active_campaigns: 0,
+          total_campaigns: 0,
+          total_ads: 0
+        }
+      })
+    } finally {
+      setCampaignsLoading(false)
     }
   }
 
@@ -472,6 +561,7 @@ export default function Marketing360Page() {
           <TabsTrigger 
             value="campaigns"
             className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white dark:text-gray-300"
+            onClick={() => !campaignsLoading && campaignsDetailedData.campaigns.length === 0 && loadCampaignsData()}
           >
             🎯 Campanhas
           </TabsTrigger>
@@ -636,73 +726,307 @@ export default function Marketing360Page() {
 
         {/* Campanhas */}
         <TabsContent value="campaigns" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-                <CardTitle className="text-gray-900 dark:text-white flex items-center space-x-2">
-                  <Target className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  <span>Campanhas Ativas</span>
-                </CardTitle>
-                <CardDescription className="text-gray-600 dark:text-gray-400">
-                  Performance das campanhas publicitárias
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                    <p className="text-3xl font-bold text-green-600 dark:text-green-400">{data.campaigns.active_campaigns}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Campanhas Ativas</p>
-                  </div>
-                  <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                    <p className="text-3xl font-bold text-red-600 dark:text-red-400">{formatCurrency(data.campaigns.total_spend)}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Gasto Total</p>
-                  </div>
-                  <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{data.campaigns.total_clicks}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Cliques</p>
-                  </div>
-                  <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                    <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{data.campaigns.conversion_rate.toFixed(1)}%</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Taxa Conversão</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          {campaignsLoading && (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-600 dark:text-gray-400">Carregando campanhas publicitárias...</p>
+              </div>
+            </div>
+          )}
 
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-                <CardTitle className="text-gray-900 dark:text-white flex items-center space-x-2">
-                  <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  <span>Métricas de Performance</span>
-                </CardTitle>
-                <CardDescription className="text-gray-600 dark:text-gray-400">
-                  Indicadores de eficiência das campanhas
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">CPC Médio</span>
-                    <span className="text-lg font-bold text-gray-900 dark:text-white">
-                      {formatCurrency(data.campaigns.total_spend / data.campaigns.total_clicks || 0)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">ROI Campanhas</span>
-                    <span className="text-lg font-bold text-green-600 dark:text-green-400">
-                      {data.metrics.roi_estimate.toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">CTR Médio</span>
-                    <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                      {((data.campaigns.total_clicks / (data.metrics.weekly_reach || 1)) * 100).toFixed(2)}%
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          {!campaignsLoading && (
+            <>
+              {/* Header com totais */}
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-700">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {campaignsDetailedData.totals.active_campaigns}
+                    </div>
+                    <div className="text-sm text-green-700 dark:text-green-300">Campanhas Ativas</div>
+                    <div className="text-xs text-green-600 dark:text-green-400 mt-1">
+                      de {campaignsDetailedData.totals.total_campaigns} total
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border-red-200 dark:border-red-700">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                      {formatCurrency(campaignsDetailedData.totals.total_spend)}
+                    </div>
+                    <div className="text-sm text-red-700 dark:text-red-300">Gasto Total</div>
+                    <div className="text-xs text-red-600 dark:text-red-400 mt-1">últimos 7 dias</div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                      {formatNumber(campaignsDetailedData.totals.total_impressions)}
+                    </div>
+                    <div className="text-sm text-blue-700 dark:text-blue-300">Impressões</div>
+                    <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">visualizações</div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                      {formatNumber(campaignsDetailedData.totals.total_reach)}
+                    </div>
+                    <div className="text-sm text-purple-700 dark:text-purple-300">Alcance</div>
+                    <div className="text-xs text-purple-600 dark:text-purple-400 mt-1">pessoas únicas</div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-700">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                      {formatNumber(campaignsDetailedData.totals.total_clicks)}
+                    </div>
+                    <div className="text-sm text-orange-700 dark:text-orange-300">Cliques</div>
+                    <div className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                      CTR: {campaignsDetailedData.totals.total_impressions > 0 
+                        ? ((campaignsDetailedData.totals.total_clicks / campaignsDetailedData.totals.total_impressions) * 100).toFixed(2)
+                        : 0}%
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Lista de Campanhas Detalhada */}
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <CardHeader className="border-b border-gray-200 dark:border-gray-700">
+                  <CardTitle className="text-gray-900 dark:text-white flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Target className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                      <span>Campanhas Publicitárias</span>
+                    </div>
+                    <Button
+                      onClick={loadCampaignsData}
+                      disabled={campaignsLoading}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <RefreshCw className={`h-4 w-4 mr-2 ${campaignsLoading ? 'animate-spin' : ''}`} />
+                      Atualizar
+                    </Button>
+                  </CardTitle>
+                  <CardDescription className="text-gray-600 dark:text-gray-400">
+                    Performance detalhada de cada campanha • Dados em tempo real do Meta Ads Manager
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {campaignsDetailedData.campaigns.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-50 dark:bg-gray-700/50">
+                          <tr>
+                            <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">
+                              Campanha
+                            </th>
+                            <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">
+                              Status
+                            </th>
+                            <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">
+                              Objetivo
+                            </th>
+                            <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">
+                              Orçamento
+                            </th>
+                            <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">
+                              Gasto
+                            </th>
+                            <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">
+                              Impressões
+                            </th>
+                            <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">
+                              Alcance
+                            </th>
+                            <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">
+                              Cliques
+                            </th>
+                            <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">
+                              CPC
+                            </th>
+                            <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">
+                              CTR
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                          {campaignsDetailedData.campaigns.map((campaign: any, index: number) => {
+                            const insights = campaign.insights?.data?.[0] || {}
+                            const spend = parseFloat(insights.spend) || 0
+                            const impressions = parseInt(insights.impressions) || 0
+                            const reach = parseInt(insights.reach) || 0
+                            const clicks = parseInt(insights.clicks) || 0
+                            const cpc = parseFloat(insights.cpc) || 0
+                            const ctr = parseFloat(insights.ctr) || 0
+                            const dailyBudget = parseFloat(campaign.daily_budget) || 0
+                            const lifetimeBudget = parseFloat(campaign.lifetime_budget) || 0
+
+                            return (
+                              <tr key={campaign.id || index} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <td className="py-3 px-4">
+                                  <div>
+                                    <div className="font-medium text-gray-900 dark:text-white truncate max-w-[200px]">
+                                      {campaign.name || `Campanha ${index + 1}`}
+                                    </div>
+                                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                                      {campaign.ad_account_name || 'Meta Ads'}
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="py-3 px-4 text-center">
+                                  <Badge className={
+                                    campaign.effective_status === 'ACTIVE' 
+                                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                      : campaign.effective_status === 'PAUSED'
+                                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                      : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                                  }>
+                                    {campaign.effective_status === 'ACTIVE' ? 'Ativa' :
+                                     campaign.effective_status === 'PAUSED' ? 'Pausada' : 'Inativa'}
+                                  </Badge>
+                                </td>
+                                <td className="py-3 px-4 text-center">
+                                  <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 rounded">
+                                    {campaign.objective || 'TRAFFIC'}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-4 text-center">
+                                  <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                    {dailyBudget > 0 
+                                      ? `R$ ${dailyBudget.toFixed(2)}/dia`
+                                      : lifetimeBudget > 0 
+                                      ? `R$ ${lifetimeBudget.toFixed(2)} total`
+                                      : '--'
+                                    }
+                                  </div>
+                                </td>
+                                <td className="py-3 px-4 text-center">
+                                  <div className="text-sm font-bold text-red-600 dark:text-red-400">
+                                    R$ {spend.toFixed(2)}
+                                  </div>
+                                </td>
+                                <td className="py-3 px-4 text-center">
+                                  <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                    {impressions.toLocaleString()}
+                                  </div>
+                                </td>
+                                <td className="py-3 px-4 text-center">
+                                  <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                    {reach.toLocaleString()}
+                                  </div>
+                                </td>
+                                <td className="py-3 px-4 text-center">
+                                  <div className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                                    {clicks.toLocaleString()}
+                                  </div>
+                                </td>
+                                <td className="py-3 px-4 text-center">
+                                  <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                    R$ {cpc.toFixed(2)}
+                                  </div>
+                                </td>
+                                <td className="py-3 px-4 text-center">
+                                  <div className="text-sm font-medium text-green-600 dark:text-green-400">
+                                    {ctr.toFixed(2)}%
+                                  </div>
+                                </td>
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="w-20 h-20 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                        <Target className="w-10 h-10 text-gray-400" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                        Nenhuma campanha encontrada
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        Configure o Business ID nas configurações Meta para ver campanhas publicitárias
+                      </p>
+                      <Button onClick={loadCampaignsData} variant="outline">
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Tentar Novamente
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Ad Accounts */}
+              {campaignsDetailedData.ad_accounts.length > 0 && (
+                <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                  <CardHeader className="border-b border-gray-200 dark:border-gray-700">
+                    <CardTitle className="text-gray-900 dark:text-white flex items-center space-x-2">
+                      <BarChart3 className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                      <span>Contas Publicitárias</span>
+                    </CardTitle>
+                    <CardDescription className="text-gray-600 dark:text-gray-400">
+                      Informações das contas vinculadas ao Business Manager
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {campaignsDetailedData.ad_accounts.map((account: any, index: number) => (
+                        <div key={account.id || index} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-medium text-gray-900 dark:text-white truncate">
+                              {account.name || `Conta ${index + 1}`}
+                            </h4>
+                            <Badge className={
+                              account.account_status === 'ACTIVE'
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                            }>
+                              {account.account_status === 'ACTIVE' ? 'Ativa' : 'Inativa'}
+                            </Badge>
+                          </div>
+                          <div className="space-y-1 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-gray-600 dark:text-gray-400">ID:</span>
+                              <span className="text-gray-900 dark:text-white font-mono text-xs">
+                                {account.id?.replace('act_', '') || '--'}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600 dark:text-gray-400">Moeda:</span>
+                              <span className="text-gray-900 dark:text-white">
+                                {account.currency || 'BRL'}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600 dark:text-gray-400">Gasto:</span>
+                              <span className="text-red-600 dark:text-red-400 font-medium">
+                                {account.amount_spent ? `${account.currency || 'R$'} ${parseFloat(account.amount_spent).toFixed(2)}` : 'R$ 0,00'}
+                              </span>
+                            </div>
+                            {account.balance && (
+                              <div className="flex justify-between">
+                                <span className="text-gray-600 dark:text-gray-400">Saldo:</span>
+                                <span className="text-green-600 dark:text-green-400 font-medium">
+                                  {account.currency || 'R$'} {parseFloat(account.balance).toFixed(2)}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          )}
         </TabsContent>
 
         {/* Insights */}

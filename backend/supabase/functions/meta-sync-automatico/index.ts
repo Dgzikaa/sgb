@@ -283,41 +283,41 @@ async function coletarDadosInstagram(config: MetaCredentials) {
     // INSIGHTS COMPLETOS DA CONTA (TODOS os dados do Meta Business Manager)
     console.log('📊 Coletando insights COMPLETOS do Instagram...')
     
-    // 1. Métricas de Audiência e Alcance
-    const audienceInsightsUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=impressions,reach,profile_views,website_clicks,emails_contacts,phone_call_clicks,text_message_clicks,get_directions_clicks&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
+    // 1. Métricas de Alcance (FUNCIONANDO 100%)
+    const reachUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=reach&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
     
-    // 2. Métricas de Engajamento e Interações
-    const engagementInsightsUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=accounts_engaged,likes,comments,saves,shares,replies,profile_links_taps&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
+    // 2. Profile Views (CORRIGIDO - FUNCIONANDO)
+    const profileViewsUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=profile_views&metric_type=total_value&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
     
-    // 3. Métricas de Conteúdo e Stories
-    const contentInsightsUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=video_views,story_impressions,story_reach,story_taps_forward,story_taps_back,story_exits,story_replies&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
+    // 3. Website Clicks (CORRIGIDO - FUNCIONANDO)
+    const websiteClicksUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=website_clicks&metric_type=total_value&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
     
-    // 4. Métricas de Crescimento
-    const growthInsightsUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=follower_count,follows,unfollows&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
+    // 4. Métricas de Crescimento (Follower Count funciona)
+    const growthInsightsUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=follower_count&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
     
-    // COLETAR TODAS AS MÉTRICAS EM PARALELO
-    const [audienceResponse, engagementResponse, contentResponse, growthResponse] = await Promise.all([
-      fetch(audienceInsightsUrl),
-      fetch(engagementInsightsUrl),
-      fetch(contentInsightsUrl),
+    // COLETAR MÉTRICAS QUE FUNCIONAM
+    const [reachResponse, profileViewsResponse, websiteClicksResponse, growthResponse] = await Promise.all([
+      fetch(reachUrl),
+      fetch(profileViewsUrl),
+      fetch(websiteClicksUrl),
       fetch(growthInsightsUrl)
     ])
     
     let insights = {
-      audience: {},
-      engagement: {},
-      content: {},
+      reach: {},
+      profile_views: {},
+      website_clicks: {},
       growth: {}
     }
     
-    if (audienceResponse.ok) {
-      insights.audience = await audienceResponse.json()
+    if (reachResponse.ok) {
+      insights.reach = await reachResponse.json()
     }
-    if (engagementResponse.ok) {
-      insights.engagement = await engagementResponse.json()
+    if (profileViewsResponse.ok) {
+      insights.profile_views = await profileViewsResponse.json()
     }
-    if (contentResponse.ok) {
-      insights.content = await contentResponse.json()
+    if (websiteClicksResponse.ok) {
+      insights.website_clicks = await websiteClicksResponse.json()
     }
     if (growthResponse.ok) {
       insights.growth = await growthResponse.json()
@@ -367,11 +367,9 @@ async function coletarDadosInstagram(config: MetaCredentials) {
       stories,
       timestamp: new Date().toISOString(),
       collected_metrics: [
-        'impressions', 'reach', 'profile_views', 'website_clicks',
-        'accounts_engaged', 'likes', 'comments', 'saves', 'shares',
-        'video_views', 'story_impressions', 'story_reach',
-        'follower_count', 'follows', 'unfollows',
-        'audience_demographics'
+        'reach', 'profile_views', 'website_clicks',
+        'follower_count', 'likes', 'comments', 'saves', 'shares',
+        'media_content'
       ]
     }
     
@@ -568,23 +566,26 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
       }
     }
     
-    // Extrair insights de alcance, impressões e engajamento
+    // Extrair insights de alcance, profile views e website clicks (CORRIGIDOS - FUNCIONANDO)
     let igReach = 0, igImpressions = 0, igVideoViews = 0, profileViews = 0, websiteClicks = 0
     if (instagramData.insights) {
-      // Processar insights de audiência
-      if (instagramData.insights.audience?.data) {
-        const audienceData = instagramData.insights.audience.data
-        igReach = audienceData.find((m: any) => m.name === 'reach')?.values?.reduce((sum: number, item: any) => sum + (parseInt(item.value) || 0), 0) || 0
-        igImpressions = audienceData.find((m: any) => m.name === 'impressions')?.values?.reduce((sum: number, item: any) => sum + (parseInt(item.value) || 0), 0) || 0
-        profileViews = audienceData.find((m: any) => m.name === 'profile_views')?.values?.reduce((sum: number, item: any) => sum + (parseInt(item.value) || 0), 0) || 0
-        websiteClicks = audienceData.find((m: any) => m.name === 'website_clicks')?.values?.reduce((sum: number, item: any) => sum + (parseInt(item.value) || 0), 0) || 0
+      // Processar reach (funcionando perfeitamente)
+      if (instagramData.insights.reach?.data?.[0]?.values) {
+        igReach = instagramData.insights.reach.data[0].values.reduce((sum: number, item: any) => sum + (parseInt(item.value) || 0), 0)
       }
       
-      // Processar insights de conteúdo
-      if (instagramData.insights.content?.data) {
-        const contentData = instagramData.insights.content.data
-        igVideoViews = contentData.find((m: any) => m.name === 'video_views')?.values?.reduce((sum: number, item: any) => sum + (parseInt(item.value) || 0), 0) || 0
+      // Processar profile views (corrigido com metric_type=total_value)
+      if (instagramData.insights.profile_views?.data?.[0]?.total_value) {
+        profileViews = parseInt(instagramData.insights.profile_views.data[0].total_value.value) || 0
       }
+      
+      // Processar website clicks (corrigido com metric_type=total_value)
+      if (instagramData.insights.website_clicks?.data?.[0]?.total_value) {
+        websiteClicks = parseInt(instagramData.insights.website_clicks.data[0].total_value.value) || 0
+      }
+      
+      // Impressions não está disponível na API v22+ (usar reach como substituto)
+      igImpressions = igReach // Meta removeu impressions, usar reach como proxy
     }
     
     console.log(`📊 Facebook processado: Reach ${pageReach}, Impressions ${pageImpressions}, ${fbLikes} likes`)
