@@ -627,173 +627,208 @@ export default function TerminalProducao() {
 
   return (
     <ProtectedRoute requiredModule="terminal_producao">
-      <div className="p-6 max-w-7xl mx-auto">
-        <div className="mb-6">
-          <p className="text-gray-700">Sistema multi-receitas com insumo chefe</p>
-          <p className="text-gray-600 text-sm">
-            Bar: <strong>{selectedBar.nome}</strong> • 
-            Bar: {receitasBar} receitas • 
-            Cozinha: {receitasCozinha} receitas
-          </p>
-        </div>
-
-      <div className="grid grid-cols-1 gap-6">
-        
-        {/* Coluna Principal */}
-        <div className="w-full space-y-6">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4 py-6">
+          <div className="space-y-6">
           
-          {/* Seletor de Tipo e Receita */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-black font-semibold">🍽️ Selecionar Receita</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              
-              {/* Seletor Bar vs Cozinha */}
-              <div>
-                <Label className="text-black font-semibold">Local de Produção</Label>
-                <Tabs value={tipoLocalSelecionado} onValueChange={(value) => setTipoLocalSelecionado(value as 'bar' | 'cozinha')}>
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="bar">🍺 Bar ({receitasBar})</TabsTrigger>
-                    <TabsTrigger value="cozinha">👨‍🍳 Cozinha ({receitasCozinha})</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
-
-              {/* Busca de Receita */}
-              <div className="relative">
-                <Input
-                  type="text"
-                  value={buscaReceita}
-                  onChange={(e) => {
-                    setBuscaReceita(e.target.value)
-                    setMostrarDropdown(true)
-                  }}
-                  placeholder={`Buscar receita de ${tipoLocalSelecionado}...`}
-                  className="text-black font-medium border-2 border-gray-300 placeholder:text-gray-600"
-                  onFocus={handleInputFocus}
-                  onBlur={handleInputBlur}
-                />
+            {/* Seletor de Tipo e Receita */}
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">🏭 Terminal de Produção</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
                 
-                {buscaReceita && (
-                  <Button
-                    onClick={() => setBuscaReceita('')}
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                  >
-                    ❌
-                  </Button>
-                )}
-              </div>
-
-              {mostrarDropdown && (
-                <div className="mt-2 bg-white rounded-lg border-2 border-gray-300 shadow-lg max-h-60 overflow-y-auto">
-                  {receitasFiltradas.length > 0 ? (
-                    receitasFiltradas.map((receita) => (
-                      <div
-                        key={receita.receita_codigo}
-                        className="p-3 cursor-pointer hover:bg-blue-50 border-b border-gray-100 transition-colors"
-                        onClick={() => criarNovaProducao(receita)}
-                      >
-                        <div className="font-semibold text-black">{receita.receita_nome}</div>
-                        <div className="text-sm text-gray-600">
-                          {receita.tipo_local === 'bar' ? '🍺' : '👨‍🍳'} {receita.tipo_local} • {receita.insumos?.length || 0} insumos
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="p-4 text-center text-gray-500">
-                      🔍 Nenhuma receita de {tipoLocalSelecionado} encontrada para "{buscaReceita}"
-                    </div>
-                  )}
+                {/* Seletor Bar vs Cozinha */}
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">Local de Produção</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant={tipoLocalSelecionado === 'cozinha' ? 'default' : 'outline'}
+                      onClick={() => setTipoLocalSelecionado('cozinha')}
+                      className="flex items-center justify-center gap-2 h-12 text-sm sm:text-base touch-manipulation"
+                    >
+                      👨‍🍳 Cozinha ({receitasCozinha})
+                    </Button>
+                    <Button
+                      variant={tipoLocalSelecionado === 'bar' ? 'default' : 'outline'}
+                      onClick={() => setTipoLocalSelecionado('bar')}
+                      className="flex items-center justify-center gap-2 h-12 text-sm sm:text-base touch-manipulation"
+                    >
+                      🍺 Bar ({receitasBar})
+                    </Button>
+                  </div>
                 </div>
-              )}
+
+                {/* Busca de Receita */}
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">Buscar Receita</Label>
+                  <div className="relative">
+                    <Input
+                      type="text"
+                      value={buscaReceita}
+                      onChange={(e) => {
+                        setBuscaReceita(e.target.value)
+                        setMostrarDropdown(true)
+                      }}
+                      placeholder={`Buscar receita de ${tipoLocalSelecionado}...`}
+                      className="h-12 text-base bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                      onFocus={handleInputFocus}
+                      onBlur={handleInputBlur}
+                    />
+                    
+                    {buscaReceita && (
+                      <Button
+                        onClick={() => setBuscaReceita('')}
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 h-8 w-8"
+                      >
+                        ×
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {mostrarDropdown && (
+                  <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg max-h-60 overflow-y-auto">
+                    {receitasFiltradas.length > 0 ? (
+                      receitasFiltradas.map((receita) => (
+                        <div
+                          key={receita.receita_codigo}
+                          className="p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-600 last:border-b-0 transition-colors touch-manipulation"
+                          onClick={() => criarNovaProducao(receita)}
+                        >
+                          <div className="font-semibold text-gray-900 dark:text-white">{receita.receita_nome}</div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            {receita.tipo_local === 'bar' ? '🍺' : '👨‍🍳'} {receita.tipo_local} • {receita.insumos?.length || 0} insumos
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                        🔍 Nenhuma receita de {tipoLocalSelecionado} encontrada para "{buscaReceita}"
+                      </div>
+                    )}
+                  </div>
+                )}
             </CardContent>
           </Card>
 
-          {/* Abas das Produções Ativas */}
-          {producoesAtivas.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-black font-semibold">🔄 Produções Ativas ({producoesAtivas.length})</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Tabs value={producaoAtivaSelecionada || ''} onValueChange={setProducaoAtivaSelecionada}>
-                  <TabsList className="grid w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                    {producoesAtivas.map((producao) => (
-                      <TabsTrigger 
-                        key={producao.id} 
-                        value={producao.id}
-                        className="text-xs font-medium"
-                      >
-                        {producao.receita.receita_nome} • {formatarTempo(producao.segundosDecorridos)}
-                        {producao.timerAtivo && ' ⏱️'}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
+            {/* Abas das Produções Ativas */}
+            {producoesAtivas.length > 0 && (
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">🔄 Produções Ativas ({producoesAtivas.length})</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Tabs value={producaoAtivaSelecionada || ''} onValueChange={setProducaoAtivaSelecionada}>
+                    <TabsList className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-2 h-auto bg-gray-100 dark:bg-gray-700">
+                      {producoesAtivas.map((producao) => (
+                        <TabsTrigger 
+                          key={producao.id} 
+                          value={producao.id}
+                          className="text-xs sm:text-sm font-medium h-auto p-3 text-left justify-start data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white touch-manipulation"
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-medium">{producao.receita.receita_nome}</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {formatarTempo(producao.segundosDecorridos)} {producao.timerAtivo && '⏱️'}
+                            </span>
+                          </div>
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
 
                   {producoesAtivas.map((producao) => (
                     <TabsContent key={producao.id} value={producao.id} className="mt-6">
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        
-                        {/* Coluna 1: Dados da Produção */}
-                        <div className="space-y-4">
-                          <div className="bg-blue-50 p-4 rounded-lg">
-                            <h3 className="font-bold text-blue-900 mb-2">
-                              📋 {producao.receita.receita_nome}
-                            </h3>
-                            <p className="text-sm text-blue-700 mb-2">
-                              <strong>Código:</strong> {producao.receita.receita_codigo}
-                            </p>
-                            <div className="text-sm text-blue-700">
-                              <p><strong>Categoria:</strong> {producao.receita.receita_categoria}</p>
-                              <p><strong>Local:</strong> {producao.tipo_local === 'bar' ? '🍺 Bar' : '👨‍🍳 Cozinha'}</p>
-                              <p><strong>Rendimento Esperado:</strong> {producao.rendimentoReceita ? `${producao.rendimentoReceita}g` : 'Não definido'}</p>
-                              <p><strong>Insumos:</strong> {producao.insumos.length}</p>
-                              {producao.insumoChefe && (
-                                <p><strong>Insumo Chefe:</strong> {producao.insumoChefe.nome}</p>
-                              )}
-                            </div>
-                          </div>
+                        <div className="flex flex-col space-y-6">
+                          
+                          {/* Dados da Produção */}
+                          <div className="space-y-6">
+                            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                              <CardHeader>
+                                <CardTitle className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                                  📋 {producao.receita.receita_nome}
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent className="space-y-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                                  <div>
+                                    <span className="text-gray-600 dark:text-gray-400">Código:</span>
+                                    <span className="ml-2 font-medium text-gray-900 dark:text-white">{producao.receita.receita_codigo}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-gray-600 dark:text-gray-400">Categoria:</span>
+                                    <span className="ml-2 font-medium text-gray-900 dark:text-white">{producao.receita.receita_categoria}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-gray-600 dark:text-gray-400">Local:</span>
+                                    <span className="ml-2 font-medium text-gray-900 dark:text-white">
+                                      {producao.tipo_local === 'bar' ? '🍺 Bar' : '👨‍🍳 Cozinha'}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className="text-gray-600 dark:text-gray-400">Meta:</span>
+                                    <span className="ml-2 font-medium text-gray-900 dark:text-white">
+                                      {producao.rendimentoReceita ? `${producao.rendimentoReceita}g` : 'Não definido'}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className="text-gray-600 dark:text-gray-400">Insumos:</span>
+                                    <span className="ml-2 font-medium text-gray-900 dark:text-white">{producao.insumos.length}</span>
+                                  </div>
+                                  {producao.insumoChefe && (
+                                    <div>
+                                      <span className="text-gray-600 dark:text-gray-400">Chefe:</span>
+                                      <span className="ml-2 font-medium text-gray-900 dark:text-white">{producao.insumoChefe.nome}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </CardContent>
+                            </Card>
 
-                          {/* Timer e Controles */}
-                          <div className="bg-gray-50 p-4 rounded-lg">
-                            <div className="flex items-center justify-between mb-4">
-                              <h4 className="font-bold text-gray-900">⏱️ Timer de Produção</h4>
-                              <div className="text-2xl font-mono font-bold text-blue-600">
-                                {formatarTempo(producao.segundosDecorridos)}
-                              </div>
-                            </div>
-                            
-                            <div className="flex gap-2">
-                              <Button
-                                onClick={() => iniciarTimer(producao.id)}
-                                disabled={producao.timerAtivo || !producao.pesoBruto || parseFloat(producao.pesoBruto) <= 0}
-                                className={`${
-                                  !producao.pesoBruto || parseFloat(producao.pesoBruto) <= 0
-                                    ? 'bg-gray-400 cursor-not-allowed'
-                                    : 'bg-green-600 hover:bg-green-700'
-                                } text-white`}
-                              >
-                                ▶️ Iniciar
-                              </Button>
-                              <Button
-                                onClick={() => resetarTimer(producao.id)}
-                                variant="outline"
-                                className="border-red-300 text-red-600 hover:bg-red-50"
-                              >
-                                🔄 Reset
-                              </Button>
-                              <Button
-                                onClick={() => removerProducao(producao.id)}
-                                variant="outline"
-                                className="border-red-300 text-red-600 hover:bg-red-50"
-                              >
-                                🗑️ Remover
-                              </Button>
-                            </div>
-                          </div>
+                            {/* Timer e Controles */}
+                            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                              <CardHeader>
+                                <div className="flex items-center justify-between">
+                                  <CardTitle className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                                    ⏱️ Timer de Produção
+                                  </CardTitle>
+                                  <div className="text-2xl font-mono font-bold text-blue-600 dark:text-blue-400">
+                                    {formatarTempo(producao.segundosDecorridos)}
+                                  </div>
+                                </div>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                  <Button
+                                    onClick={() => iniciarTimer(producao.id)}
+                                    disabled={producao.timerAtivo || !producao.pesoBruto || parseFloat(producao.pesoBruto) <= 0}
+                                    className={`flex-1 h-12 text-base touch-manipulation ${
+                                      !producao.pesoBruto || parseFloat(producao.pesoBruto) <= 0
+                                        ? 'bg-gray-400 cursor-not-allowed'
+                                        : 'bg-green-600 hover:bg-green-700'
+                                    } text-white`}
+                                  >
+                                    ▶️ Iniciar
+                                  </Button>
+                                  <Button
+                                    onClick={() => resetarTimer(producao.id)}
+                                    variant="outline"
+                                    className="flex-1 h-12 text-base border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 touch-manipulation"
+                                  >
+                                    🔄 Reset
+                                  </Button>
+                                  <Button
+                                    onClick={() => removerProducao(producao.id)}
+                                    variant="outline"
+                                    className="flex-1 h-12 text-base border-red-300 dark:border-red-600 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 touch-manipulation"
+                                  >
+                                    🗑️ Remover
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
 
                           {/* Controles de Produção - Simplificado */}
                           <div className="bg-gray-50 p-4 rounded-lg">

@@ -5,17 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 import { 
-  BarChart3,
-  TrendingUp,
   Calendar,
   Users,
   DollarSign,
-  Target,
   Activity,
   ArrowRight,
   Eye,
   PieChart,
-  LineChart
+  TrendingUp,
+  Target
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -169,48 +167,7 @@ export default function VisaoGeralPage() {
             </p>
           </div>
 
-          {/* Stats Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="card-dark">
-              <div className="p-4 text-center">
-                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
-                  <BarChart3 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                </div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">9</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Relatórios</p>
-              </div>
-            </div>
-            
-            <div className="card-dark">
-              <div className="p-4 text-center">
-                <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
-                  <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" />
-                </div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">100%</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Funcionais</p>
-              </div>
-            </div>
-            
-            <div className="card-dark">
-              <div className="p-4 text-center">
-                <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
-                  <Target className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                </div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">Real-time</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Dados</p>
-              </div>
-            </div>
-            
-            <div className="card-dark">
-              <div className="p-4 text-center">
-                <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
-                  <LineChart className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                </div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">24/7</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Monitoramento</p>
-              </div>
-            </div>
-          </div>
+
 
           {/* Relatórios Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
