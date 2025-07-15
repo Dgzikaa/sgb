@@ -23,6 +23,7 @@ export default function LoginPage() {
   const [loginMethod, setLoginMethod] = useState<'traditional' | 'biometric'>('traditional')
   const [showBiometricRegistration, setShowBiometricRegistration] = useState(false)
   const [lastLoginData, setLastLoginData] = useState<any>(null)
+  const [isMobileDevice, setIsMobileDevice] = useState(false)
   
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -33,6 +34,17 @@ export default function LoginPage() {
   // Controlar hidratação - só executa após componente montar
   useEffect(() => {
     setIsHydrated(true)
+    
+    // Detectar dispositivo móvel
+    const checkMobileDevice = () => {
+      const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera
+      const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
+      const isMobile = mobileRegex.test(userAgent)
+      const isTablet = /iPad|Android(?!.*Mobile)/i.test(userAgent)
+      setIsMobileDevice(isMobile || isTablet)
+    }
+    
+    checkMobileDevice()
   }, [])
 
   // Verificar se usuário já está logado
@@ -242,18 +254,18 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4" suppressHydrationWarning>
       <div className="w-full max-w-md" suppressHydrationWarning>
         {/* Logo e Header */}
-        <div className="text-center mb-12" suppressHydrationWarning>
-          <div className="inline-flex items-center justify-center w-40 h-40 lg:w-56 lg:h-56 mb-6" suppressHydrationWarning>
+        <div className="text-center mb-8" suppressHydrationWarning>
+          <div className="inline-flex items-center justify-center w-52 h-52 lg:w-72 lg:h-72 mb-4" suppressHydrationWarning>
             {!logoError ? (
               <img 
                 src="/logos/logo_640x640.png" 
                 alt="SGB Logo" 
-                className="w-40 h-40 lg:w-56 lg:h-56 rounded-2xl shadow-lg object-cover"
+                className="w-52 h-52 lg:w-72 lg:h-72 object-cover"
                 onError={() => setLogoError(true)}
               />
             ) : (
-              <div className="w-40 h-40 lg:w-56 lg:h-56 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg" suppressHydrationWarning>
-                <span className="text-6xl lg:text-7xl text-white">🏪</span>
+              <div className="w-52 h-52 lg:w-72 lg:h-72 bg-indigo-600 flex items-center justify-center" suppressHydrationWarning>
+                <span className="text-8xl lg:text-9xl text-white">🏪</span>
               </div>
             )}
           </div>
@@ -334,30 +346,39 @@ export default function LoginPage() {
         {/* Seletor de Método de Login */}
         {!showBiometricRegistration && (
           <div className="mb-6">
-            <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
-              <button
-                onClick={() => setLoginMethod('traditional')}
-                className={`flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
-                  loginMethod === 'traditional'
-                    ? 'bg-white dark:bg-gray-700 text-slate-800 dark:text-white shadow-sm'
-                    : 'text-slate-600 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-200'
-                }`}
-              >
-                <LogIn className="w-4 h-4" />
-                Email & Senha
-              </button>
-              <button
-                onClick={() => setLoginMethod('biometric')}
-                className={`flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
-                  loginMethod === 'biometric'
-                    ? 'bg-white dark:bg-gray-700 text-slate-800 dark:text-white shadow-sm'
-                    : 'text-slate-600 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-200'
-                }`}
-              >
-                <Fingerprint className="w-4 h-4" />
-                Biométrico
-              </button>
-            </div>
+            {isMobileDevice ? (
+              <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
+                <button
+                  onClick={() => setLoginMethod('traditional')}
+                  className={`flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
+                    loginMethod === 'traditional'
+                      ? 'bg-white dark:bg-gray-700 text-slate-800 dark:text-white shadow-sm'
+                      : 'text-slate-600 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-200'
+                  }`}
+                >
+                  <LogIn className="w-4 h-4" />
+                  Email & Senha
+                </button>
+                <button
+                  onClick={() => setLoginMethod('biometric')}
+                  className={`flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
+                    loginMethod === 'biometric'
+                      ? 'bg-white dark:bg-gray-700 text-slate-800 dark:text-white shadow-sm'
+                      : 'text-slate-600 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-200'
+                  }`}
+                >
+                  <Fingerprint className="w-4 h-4" />
+                  Biométrico
+                </button>
+              </div>
+            ) : (
+              <div className="p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
+                <div className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium text-sm bg-white dark:bg-gray-700 text-slate-800 dark:text-white shadow-sm">
+                  <LogIn className="w-4 h-4" />
+                  Email & Senha
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -369,7 +390,7 @@ export default function LoginPage() {
             <>
               <form onSubmit={handleLogin} className="space-y-6">
                 <div>
-                  <label htmlFor="email" className="block text-sm font-semibold text-slate-700 dark:text-gray-300 mb-3">
+                  <label htmlFor="email" className="block text-sm font-semibold text-slate-700 dark:text-gray-300 mb-2">
                     Email
                   </label>
                   <div className="elegant-form-group">
