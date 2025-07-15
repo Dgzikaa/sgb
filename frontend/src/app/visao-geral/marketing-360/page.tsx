@@ -62,6 +62,30 @@ interface MetaAnalytics {
   last_update: string
 }
 
+interface DailySummary {
+  summary: {
+    total_followers: number
+    total_engagement: number
+    total_reach: number
+    facebook_followers: number
+    instagram_followers: number
+    campaigns_active: number
+    last_updated: string
+  }
+  variations: {
+    followers_change_today: number
+    engagement_change_today: number
+    reach_change_today: number
+    followers_change_percent: number
+  }
+  daily_data: any[]
+  campaigns_summary: {
+    total_campaigns: number
+    active_campaigns: number
+    total_spend: number
+  }
+}
+
 interface AdvancedAnalytics {
   funil_conversao: any
   radar_oportunidades: any
@@ -75,6 +99,7 @@ export default function Marketing360Page() {
   const { setPageTitle } = usePageTitle()
   
   const [data, setData] = useState<MetaAnalytics | null>(null)
+  const [dailySummary, setDailySummary] = useState<DailySummary | null>(null)
   const [advancedData, setAdvancedData] = useState<AdvancedAnalytics | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -89,14 +114,31 @@ export default function Marketing360Page() {
   const loadAnalytics = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/meta/analytics')
-      const result = await response.json()
       
-      if (result.success) {
-        setData(result.data)
+      // Carregar analytics principais e daily summary em paralelo
+      const [analyticsResponse, dailyResponse] = await Promise.all([
+        fetch('/api/meta/analytics'),
+        fetch('/api/meta/daily-summary?days=7')
+      ])
+      
+      const [analyticsResult, dailyResult] = await Promise.all([
+        analyticsResponse.json(),
+        dailyResponse.json()
+      ])
+      
+      if (analyticsResult.success) {
+        setData(analyticsResult.data)
       } else {
-        throw new Error(result.error)
+        throw new Error(analyticsResult.error)
       }
+
+      if (dailyResult.success) {
+        setDailySummary(dailyResult.data)
+        console.log('📊 Daily Summary carregado:', dailyResult.data)
+      } else {
+        console.warn('⚠️ Daily Summary não disponível:', dailyResult.error)
+      }
+      
     } catch (error) {
       console.error('Erro ao carregar analytics:', error)
       toast({
@@ -477,47 +519,82 @@ export default function Marketing360Page() {
                 </CardContent>
               </Card>
 
-              {/* Análise Diária */}
-              <Card className="bg-white dark:bg-gray-800 shadow-lg border-0">
-                <CardHeader className="bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-t-lg">
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5" />
-                    Análise Diária - Evolução
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                      <span className="text-sm font-medium">Alcance (hoje vs ontem)</span>
-                      <div className="flex items-center gap-2">
-                        <TrendingUpIcon className="w-4 h-4 text-green-600" />
-                        <span className="font-bold text-green-600">+12.5%</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                      <span className="text-sm font-medium">Impressões (hoje vs ontem)</span>
-                      <div className="flex items-center gap-2">
-                        <TrendingUpIcon className="w-4 h-4 text-green-600" />
-                        <span className="font-bold text-green-600">+8.3%</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
-                      <span className="text-sm font-medium">Engajamento (hoje vs ontem)</span>
-                      <div className="flex items-center gap-2">
-                        <TrendingUpIcon className="w-4 h-4 text-green-600" />
-                        <span className="font-bold text-green-600">+5.7%</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                      <span className="text-sm font-medium">Seguidores (hoje vs ontem)</span>
-                      <div className="flex items-center gap-2">
-                        <TrendingUpIcon className="w-4 h-4 text-green-600" />
-                        <span className="font-bold text-green-600">+127</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                             {/* Análise Diária - DADOS REAIS */}
+               <Card className="bg-white dark:bg-gray-800 shadow-lg border-0">
+                 <CardHeader className="bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-t-lg">
+                   <CardTitle className="flex items-center gap-2">
+                     <Calendar className="w-5 h-5" />
+                     Análise Diária - Evolução Real
+                   </CardTitle>
+                 </CardHeader>
+                 <CardContent className="p-6">
+                   {dailySummary ? (
+                     <div className="space-y-4">
+                       <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                         <span className="text-sm font-medium">Alcance (hoje vs ontem)</span>
+                         <div className="flex items-center gap-2">
+                           {dailySummary.variations.reach_change_today >= 0 ? (
+                             <TrendingUpIcon className="w-4 h-4 text-green-600" />
+                           ) : (
+                             <TrendingDown className="w-4 h-4 text-red-600" />
+                           )}
+                           <span className={`font-bold ${dailySummary.variations.reach_change_today >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                             {dailySummary.variations.reach_change_today >= 0 ? '+' : ''}{formatNumber(dailySummary.variations.reach_change_today)}
+                           </span>
+                         </div>
+                       </div>
+                       
+                       <div className="flex items-center justify-between p-3 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
+                         <span className="text-sm font-medium">Engajamento (hoje vs ontem)</span>
+                         <div className="flex items-center gap-2">
+                           {dailySummary.variations.engagement_change_today >= 0 ? (
+                             <TrendingUpIcon className="w-4 h-4 text-green-600" />
+                           ) : (
+                             <TrendingDown className="w-4 h-4 text-red-600" />
+                           )}
+                           <span className={`font-bold ${dailySummary.variations.engagement_change_today >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                             {dailySummary.variations.engagement_change_today >= 0 ? '+' : ''}{formatNumber(dailySummary.variations.engagement_change_today)}
+                           </span>
+                         </div>
+                       </div>
+                       
+                       <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                         <span className="text-sm font-medium">Seguidores (hoje vs ontem)</span>
+                         <div className="flex items-center gap-2">
+                           {dailySummary.variations.followers_change_today >= 0 ? (
+                             <TrendingUpIcon className="w-4 h-4 text-green-600" />
+                           ) : (
+                             <TrendingDown className="w-4 h-4 text-red-600" />
+                           )}
+                           <span className={`font-bold ${dailySummary.variations.followers_change_today >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                             {dailySummary.variations.followers_change_today >= 0 ? '+' : ''}{dailySummary.variations.followers_change_today}
+                           </span>
+                         </div>
+                       </div>
+                       
+                       <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                         <span className="text-sm font-medium">Variação % Seguidores</span>
+                         <div className="flex items-center gap-2">
+                           {dailySummary.variations.followers_change_percent >= 0 ? (
+                             <TrendingUpIcon className="w-4 h-4 text-green-600" />
+                           ) : (
+                             <TrendingDown className="w-4 h-4 text-red-600" />
+                           )}
+                           <span className={`font-bold ${dailySummary.variations.followers_change_percent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                             {dailySummary.variations.followers_change_percent >= 0 ? '+' : ''}{dailySummary.variations.followers_change_percent.toFixed(2)}%
+                           </span>
+                         </div>
+                       </div>
+                     </div>
+                   ) : (
+                     <div className="text-center py-8">
+                       <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                       <p className="text-gray-500">Dados de comparação diária não disponíveis</p>
+                       <p className="text-xs text-gray-400 mt-1">Execute o sync automático para gerar histórico</p>
+                     </div>
+                   )}
+                 </CardContent>
+               </Card>
             </div>
           </TabsContent>
 

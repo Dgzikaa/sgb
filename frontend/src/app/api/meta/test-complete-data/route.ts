@@ -235,7 +235,7 @@ async function testarCampanhasCompletas(config: MetaCredentials) {
 
   } catch (error) {
     console.error('❌ Erro nas campanhas:', error)
-    return { error: error.message }
+    return { error: error instanceof Error ? error.message : 'Erro desconhecido' }
   }
 }
 
