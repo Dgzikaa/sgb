@@ -194,13 +194,22 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
           </p>
         )}
 
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
            {[
              { key: 'diario', label: 'Diário', valor: meta.valor_diario },
              { key: 'semanal', label: 'Semanal', valor: meta.valor_semanal },
              { key: 'mensal', label: 'Mensal', valor: meta.valor_mensal },
              { key: 'unico', label: 'Único', valor: meta.valor_unico }
-           ].map((periodo) => {
+           ]
+           .filter(periodo => {
+             // Filtro inteligente baseado no tipo_valor
+             if (meta.tipo_valor === 'unico') {
+               return periodo.key === 'unico';
+             } else {
+               return periodo.key !== 'unico'; // Mostra diário, semanal e mensal
+             }
+           })
+           .map((periodo) => {
              const chaveValor = `valor_${periodo.key}` as keyof typeof valores;
              
              return (
@@ -226,7 +235,7 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
                        {formatarValor(periodo.valor, meta.tipo_valor)}
                      </span>
                      <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
-                       {meta.unidade}
+                       {meta.unidade === 'porcentagem' ? '%' : meta.unidade}
                      </span>
                    </div>
                  )}
@@ -449,7 +458,7 @@ export default function MetasPage() {
                    >
                      {getTabIcon(categoria)}
                      <span className="capitalize">{categoria.replace('_', ' ')}</span>
-                     <Badge variant="secondary" className="ml-1 text-xs">
+                     <Badge variant="outline" className="ml-1 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700">
                        {metasCategoria.length}
                      </Badge>
                    </TabsTrigger>
