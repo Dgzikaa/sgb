@@ -63,7 +63,7 @@ async function getWebhookUrl(supabase: any, barId: number, webhookType: string =
 // === CONSTANTES E CONFIGURAÇÕES ===
 const CONFIG = {
   BAR_ID: 3,
-  DEBOCHE_ACCOUNT_ID: 'act_943600147532423',
+  TARGET_ACCOUNT_ID: 'act_943600147532423', // Conta publicitária do Ordinário
   FALLBACK_WEBHOOK: 'https://discord.com/api/webhooks/1391538130737303674/V6WiwfJodQT3C7WqdJTpmyaOLJByuKR8KZwtxW9ATmEqo0N4Msh73pF7PmOEVc12hx75',
   FACEBOOK_API_VERSION: 'v18.0',
   INSIGHTS_DAYS: 30
@@ -419,13 +419,14 @@ async function coletarCampanhas(config: MetaCredentials, barId: number, supabase
     const allAdAccounts = adAccountsData.data || []
     console.log(`📊 Encontradas ${allAdAccounts.length} ad accounts totais`)
     
-    // Filtrar apenas a conta específica do Deboche Bar
+    // Filtrar apenas a conta específica do Ordinário
     const adAccounts = allAdAccounts.filter((account: any) => {
-      return account.id === CONFIG.DEBOCHE_ACCOUNT_ID || 
-             account.name?.toLowerCase().includes('deboche')
+      return account.id === CONFIG.TARGET_ACCOUNT_ID || 
+             account.name?.toLowerCase().includes('ordinário') ||
+             account.name?.toLowerCase().includes('ordinario')
     })
     
-    console.log(`🎯 Contas filtradas para o Deboche Bar: ${adAccounts.length}`)
+    console.log(`🎯 Contas filtradas para o Ordinário: ${adAccounts.length}`)
     adAccounts.forEach((acc: any) => console.log(`   - ${acc.id}: ${acc.name}`))
     
     if (adAccounts.length === 0) {
@@ -433,7 +434,7 @@ async function coletarCampanhas(config: MetaCredentials, barId: number, supabase
         campaigns: [], 
         ad_accounts: [], 
         ads: [], 
-        message: 'Nenhuma ad account do Ordinário/Deboche encontrada',
+        message: 'Nenhuma ad account do Ordinário encontrada',
         all_accounts_found: allAdAccounts.length,
         available_accounts: allAdAccounts.map((acc: any) => `${acc.id}: ${acc.name}`)
       }
