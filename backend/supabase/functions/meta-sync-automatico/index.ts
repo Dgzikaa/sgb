@@ -40,7 +40,7 @@ async function getWebhookUrl(supabase: any, barId: number, webhookType: string =
     if (error || !webhookConfig) {
       console.warn(`⚠️ Webhook config Discord não encontrada para bar ${barId}, erro:`, error)
       // Webhook Meta como fallback
-      return 'https://discord.com/api/webhooks/1391538130737303674/V6WiwfJodQT3C7WqdJTpmyaOLJByuKR8KZwtxW9ATmEqo0N4Msh73pF7PmOEVc12hx75'
+      return CONFIG.FALLBACK_WEBHOOK
     }
 
     const webhook = webhookConfig.configuracoes?.[webhookType]
@@ -48,7 +48,7 @@ async function getWebhookUrl(supabase: any, barId: number, webhookType: string =
     if (!webhook || webhook.trim() === '') {
       console.warn(`⚠️ Webhook ${webhookType} não configurado para bar ${barId}`)
       // Webhook Meta como fallback
-      return 'https://discord.com/api/webhooks/1391538130737303674/V6WiwfJodQT3C7WqdJTpmyaOLJByuKR8KZwtxW9ATmEqo0N4Msh73pF7PmOEVc12hx75'
+      return CONFIG.FALLBACK_WEBHOOK
     }
 
     console.log(`✅ Webhook ${webhookType} encontrado para bar ${barId}`)
@@ -56,8 +56,17 @@ async function getWebhookUrl(supabase: any, barId: number, webhookType: string =
   } catch (error) {
     console.error(`❌ Erro ao buscar webhook para bar ${barId}:`, error)
     // Webhook Meta como fallback
-    return 'https://discord.com/api/webhooks/1391538130737303674/V6WiwfJodQT3C7WqdJTpmyaOLJByuKR8KZwtxW9ATmEqo0N4Msh73pF7PmOEVc12hx75'
+    return CONFIG.FALLBACK_WEBHOOK
   }
+}
+
+// === CONSTANTES E CONFIGURAÇÕES ===
+const CONFIG = {
+  BAR_ID: 3,
+  DEBOCHE_ACCOUNT_ID: 'act_943600147532423',
+  FALLBACK_WEBHOOK: 'https://discord.com/api/webhooks/1391538130737303674/V6WiwfJodQT3C7WqdJTpmyaOLJByuKR8KZwtxW9ATmEqo0N4Msh73pF7PmOEVc12hx75',
+  FACEBOOK_API_VERSION: 'v18.0',
+  INSIGHTS_DAYS: 30
 }
 
 serve(async (req) => {
@@ -83,7 +92,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     // Bar ID padrão (pode vir do request body se necessário)
-    const BAR_ID = 3
+    const BAR_ID = CONFIG.BAR_ID
 
     // Obter credenciais do Meta
     const { data: credenciais } = await supabase
@@ -169,7 +178,7 @@ async function coletarDadosFacebook(config: MetaCredentials) {
     console.log('📊 Buscando dados COMPLETOS da página Facebook...')
     
     // Dados básicos da página EXPANDIDOS
-    const pageUrl = `https://graph.facebook.com/v18.0/${config.page_id}?fields=followers_count,fan_count,name,about,website,phone,category_list,checkins,talking_about_count,were_here_count,new_like_count,overall_star_rating,rating_count,cover,picture&access_token=${config.access_token}`
+    const pageUrl = `https://graph.facebook.com/${CONFIG.FACEBOOK_API_VERSION}/${config.page_id}?fields=followers_count,fan_count,name,about,website,phone,category_list,checkins,talking_about_count,were_here_count,new_like_count,overall_star_rating,rating_count,cover,picture&access_token=${config.access_token}`
     const pageResponse = await fetch(pageUrl)
     
     if (!pageResponse.ok) {
@@ -182,7 +191,7 @@ async function coletarDadosFacebook(config: MetaCredentials) {
     console.log('📈 Coletando insights COMPLETOS do Facebook...')
     
     // 1. Métricas de Alcance e Impressões
-    const reachInsightsUrl = `https://graph.facebook.com/v18.0/${config.page_id}/insights?metric=page_impressions,page_impressions_unique,page_reach,page_reach_unique,page_posts_impressions,page_posts_impressions_unique&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
+    const reachInsightsUrl = `https://graph.facebook.com/${CONFIG.FACEBOOK_API_VERSION}/${config.page_id}/insights?metric=page_impressions,page_impressions_unique,page_reach,page_reach_unique,page_posts_impressions,page_posts_impressions_unique&period=day&since=${getDateDaysAgo(CONFIG.INSIGHTS_DAYS)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
     
     // 2. Métricas de Engajamento
     const engagementInsightsUrl = `https://graph.facebook.com/v18.0/${config.page_id}/insights?metric=page_post_engagements,page_engaged_users,page_actions_post_reactions_total,page_actions_post_reactions_like_total,page_actions_post_reactions_love_total,page_actions_post_reactions_wow_total,page_actions_post_reactions_haha_total,page_actions_post_reactions_sorry_total,page_actions_post_reactions_anger_total&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
@@ -410,10 +419,9 @@ async function coletarCampanhas(config: MetaCredentials, barId: number, supabase
     const allAdAccounts = adAccountsData.data || []
     console.log(`📊 Encontradas ${allAdAccounts.length} ad accounts totais`)
     
-    // Filtrar apenas a conta específica do Deboche Bar (act_943600147532423)
-    const DEBOCHE_ACCOUNT_ID = 'act_943600147532423'
+    // Filtrar apenas a conta específica do Deboche Bar
     const adAccounts = allAdAccounts.filter((account: any) => {
-      return account.id === DEBOCHE_ACCOUNT_ID || 
+      return account.id === CONFIG.DEBOCHE_ACCOUNT_ID || 
              account.name?.toLowerCase().includes('deboche')
     })
     
@@ -810,6 +818,22 @@ async function enviarNotificacaoDiscord(supabase: any, resultado: any, facebookD
     const igLikes = resultado.instagram_metrics?.posts_likes || 0
     const igComments = resultado.instagram_metrics?.posts_comments || 0
 
+    // ✅ CORRIGIR CAMPANHAS - usar a estrutura correta
+    console.log('🎯 Debug campanhas data:', JSON.stringify({
+      exists: !!campaignsData,
+      totals: campaignsData?.totals,
+      campaigns_length: campaignsData?.campaigns?.length,
+      campaigns_saved: resultado.campaigns_metrics?.campaigns_saved
+    }))
+
+    // Dados de campanhas corrigidos
+    const totalCampanhas = campaignsData?.campaigns?.length || campaignsData?.totals?.total_campaigns || 0
+    const campanhasAtivas = campaignsData?.totals?.active_campaigns || 
+                           campaignsData?.campaigns?.filter((c: any) => c.effective_status === 'ACTIVE')?.length || 0
+    const gastoTotal = campaignsData?.totals?.total_spend || 0
+
+    console.log(`🎯 Campanhas para Discord: ${totalCampanhas} total, ${campanhasAtivas} ativas, R$ ${gastoTotal}`)
+
     const message: DiscordMessage = {
       embeds: [{
         title: '📊 Meta Analytics - Coleta Automática',
@@ -828,7 +852,7 @@ async function enviarNotificacaoDiscord(supabase: any, resultado: any, facebookD
           },
           {
             name: '🎯 Campanhas',
-            value: `**${campaignsData?.totals?.total_campaigns || 0}** campanhas\n**${campaignsData?.totals?.active_campaigns || 0}** ativas\n**R$ ${campaignsData?.totals?.total_spend?.toFixed(2) || '0.00'}** gasto`,
+            value: `**${totalCampanhas}** campanhas\n**${campanhasAtivas}** ativas\n**R$ ${gastoTotal.toFixed(2)}** gasto`,
             inline: true
           },
           {
@@ -911,4 +935,11 @@ function getDateDaysAgo(days: number): string {
   const date = new Date()
   date.setDate(date.getDate() - days)
   return date.toISOString().split('T')[0]
+}
+
+// Helper para construir URLs da API Facebook - ELIMINA REPETIÇÃO
+function buildFacebookApiUrl(endpoint: string, params: Record<string, string>): string {
+  const baseUrl = `https://graph.facebook.com/${CONFIG.FACEBOOK_API_VERSION}/${endpoint}`
+  const searchParams = new URLSearchParams(params)
+  return `${baseUrl}?${searchParams.toString()}`
 } 
