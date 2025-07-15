@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useNotifications, getColorByType, getColorByPriority, formatarTempo } from '@/hooks/useNotifications'
 import { Button } from '@/components/ui/button'
@@ -48,11 +48,15 @@ export default function NotificationCenter({
   className = '', 
   showUnreadCount = true,
   autoRefresh = true,
-  refreshInterval = 30000 
+  refreshInterval = 60000 // Aumentado para 60 segundos
 }: NotificationCenterProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('todas')
   const [filtroTipo, setFiltroTipo] = useState<string>('')
+  
+  // Refs para evitar dependências circulares
+  const hasInitializedRef = useRef(false)
+  const pollingConfiguredRef = useRef(false)
 
   const {
     notificacoes,
@@ -74,34 +78,45 @@ export default function NotificationCenter({
   const router = useRouter()
 
   // =====================================================
-  // EFEITOS
+  // INICIALIZAÇÃO (APENAS UMA VEZ)
   // =====================================================
 
   useEffect(() => {
-    console.log('🔄 NotificationCenter: Iniciando carregamento inicial...')
-    // Carregar notificações iniciais
-    carregarNotificacoes({ apenas_nao_lidas: false, limit: 20 })
+    if (!hasInitializedRef.current) {
+      console.log('🔄 NotificationCenter: Inicializando...')
+      
+      // Carregar notificações iniciais
+      carregarNotificacoes({ apenas_nao_lidas: false, limit: 20 })
+      
+      hasInitializedRef.current = true
+    }
+  }, [carregarNotificacoes])
 
-    // Configurar auto-refresh se habilitado
-    if (autoRefresh) {
-      console.log('🔄 NotificationCenter: Configurando auto-refresh...')
+  // =====================================================
+  // CONFIGURAR POLLING (SEPARADO DA INICIALIZAÇÃO)
+  // =====================================================
+
+  useEffect(() => {
+    if (autoRefresh && !pollingConfiguredRef.current) {
+      console.log('🔄 NotificationCenter: Configurando polling...')
       configurarPolling(refreshInterval)
+      pollingConfiguredRef.current = true
     }
 
     return () => {
-      if (autoRefresh) {
-        console.log('🔄 NotificationCenter: Parando auto-refresh...')
+      if (pollingConfiguredRef.current) {
+        console.log('🔄 NotificationCenter: Parando polling...')
         pararPolling()
+        pollingConfiguredRef.current = false
       }
     }
-  }, [autoRefresh, refreshInterval, carregarNotificacoes, configurarPolling, pararPolling])
+  }, [autoRefresh, refreshInterval, configurarPolling, pararPolling])
+
+  // =====================================================
+  // SOLICITAR PERMISSÃO DE BROWSER (QUANDO ABRIR)
+  // =====================================================
 
   useEffect(() => {
-    console.log('📊 NotificationCenter: Estado atual - notificacoes:', notificacoes.length, 'loading:', loading, 'error:', error)
-  }, [notificacoes, loading, error])
-
-  useEffect(() => {
-    // Solicitar permissão para browser notifications quando abrir pela primeira vez
     if (isOpen && suportaBrowser && permissaoBrowser === 'default') {
       solicitarPermissaoBrowser()
     }
@@ -149,6 +164,10 @@ export default function NotificationCenter({
     if (sucesso) {
       console.log('📱 Todas as notificações marcadas como lidas')
     }
+  }
+
+  const handleRefresh = async () => {
+    await carregarNotificacoes({ apenas_nao_lidas: false, limit: 20 })
   }
 
   const filtrarNotificacoes = (notificacoes: any[]) => {
@@ -240,34 +259,23 @@ export default function NotificationCenter({
             
             <div className="flex items-center justify-between mt-2">
               <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-500">
-                <Badge variant="secondary" className="text-xs">
-                  {notificacao.dados?.modulo || 'sistema'}
-                </Badge>
-                <span>•</span>
+                <Clock className="w-3 h-3" />
                 <span>{formatarTempo(notificacao.criada_em)}</span>
+                {notificacao.dados?.modulo && (
+                  <>
+                    <span>•</span>
+                    <span className="capitalize">{notificacao.dados.modulo}</span>
+                  </>
+                )}
               </div>
               
               {temAcoes && (
-                <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
-                  <MousePointer className="w-3 h-3" />
-                  <span>Clique para acessar</span>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <MousePointer className="w-3 h-3 text-blue-500" />
+                  <span className="text-xs text-blue-500">Clique para ação</span>
                 </div>
               )}
             </div>
-          </div>
-          
-          <div className="flex-shrink-0">
-            <Button
-              size="sm"
-              variant="ghost"
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={(e) => {
-                e.stopPropagation()
-                excluirNotificacao(notificacao.id)
-              }}
-            >
-              <X className="w-3 h-3" />
-            </Button>
           </div>
         </div>
       </div>
@@ -276,48 +284,19 @@ export default function NotificationCenter({
 
   const EmptyState = () => (
     <div className="text-center py-8">
-      <Bell className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-      <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-        Nenhuma notificação
-      </h3>
-      <p className="text-xs text-gray-500 dark:text-gray-400">
-        Você está em dia com tudo!
+      <Bell className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+      <p className="text-sm text-gray-600 dark:text-gray-400">
+        Nenhuma notificação encontrada
       </p>
     </div>
   )
 
-  const FilterBar = () => (
-    <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-      <div className="flex items-center gap-2">
-        <Filter className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-        <select 
-          value={filtroTipo} 
-          onChange={(e) => setFiltroTipo(e.target.value)}
-          className="text-sm border-none bg-transparent focus:outline-none text-gray-700 dark:text-gray-300"
-        >
-          <option value="">Todos os tipos</option>
-          <option value="lembrete">Lembrete</option>
-          <option value="sistema">Sistema</option>
-          <option value="problema">Problema</option>
-          <option value="conclusao">Conclusão</option>
-        </select>
-      </div>
-      
-      <div className="flex items-center gap-2">
-        <Button size="sm" variant="ghost" onClick={handleMarkAllRead}>
-          <CheckCheck className="w-4 h-4 mr-1" />
-          Marcar todas
-        </Button>
-      </div>
-    </div>
-  )
-
   // =====================================================
-  // RENDER PRINCIPAL
+  // RENDER
   // =====================================================
 
-  const naoLidas = estatisticas?.nao_lidas || 0
   const notificacoesFiltradas = filtrarNotificacoes(notificacoes)
+  const naoLidas = estatisticas?.nao_lidas || 0
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -328,87 +307,80 @@ export default function NotificationCenter({
           className={`relative ${className}`}
         >
           {naoLidas > 0 ? (
-            <BellRing className="w-5 h-5" />
+            <BellRing className="w-5 h-5 text-blue-600" />
           ) : (
-            <Bell className="w-5 h-5" />
+            <Bell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           )}
           
           {showUnreadCount && naoLidas > 0 && (
-            <Badge 
-              className="absolute -top-1 -right-1 px-1.5 py-0.5 text-xs bg-red-500 text-white min-w-[20px] h-5 flex items-center justify-center"
-            >
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
               {naoLidas > 99 ? '99+' : naoLidas}
-            </Badge>
+            </span>
           )}
         </Button>
       </PopoverTrigger>
       
-      <PopoverContent 
-        className="w-96 p-0 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700" 
-        align="end"
-        side="bottom"
-      >
-        <Card className="border-0 shadow-none">
-          <CardHeader className="p-4 pb-0">
+      <PopoverContent className="w-96 p-0" align="end">
+        <Card className="border-0 shadow-lg">
+          <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
-                Notificações
-              </CardTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => carregarNotificacoes()}
-                disabled={loading}
-              >
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              </Button>
+              <CardTitle className="text-lg">Notificações</CardTitle>
+              
+              <div className="flex items-center gap-2">
+                {error && (
+                  <Button 
+                    size="sm" 
+                    variant="ghost"
+                    onClick={limparErro}
+                    className="text-red-500"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                )}
+                
+                <Button 
+                  size="sm" 
+                  variant="ghost"
+                  onClick={handleRefresh}
+                  disabled={loading}
+                >
+                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                </Button>
+                
+                {naoLidas > 0 && (
+                  <Button 
+                    size="sm" 
+                    variant="ghost"
+                    onClick={handleMarkAllRead}
+                  >
+                    <CheckCheck className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
             </div>
+            
+            {estatisticas && (
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                {naoLidas} não lidas • {estatisticas.total_semana} esta semana
+              </div>
+            )}
           </CardHeader>
           
           <CardContent className="p-0">
-            {error && (
-              <div className="p-3 bg-red-50 dark:bg-red-900/20 border-b border-gray-200 dark:border-gray-700">
-                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-                <Button size="sm" variant="ghost" onClick={limparErro}>
-                  Tentar novamente
-                </Button>
-              </div>
-            )}
-            
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-4 rounded-none bg-gray-100 dark:bg-gray-700">
-                <TabsTrigger 
-                  value="todas" 
-                  className="text-xs data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-800 dark:data-[state=active]:text-white"
-                >
-                  Todas
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="nao_lidas" 
-                  className="text-xs data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-800 dark:data-[state=active]:text-white"
-                >
+              <TabsList className="grid w-full grid-cols-4 mb-0">
+                <TabsTrigger value="todas">Todas</TabsTrigger>
+                <TabsTrigger value="nao_lidas">
                   Não lidas
                   {naoLidas > 0 && (
-                    <Badge className="ml-1 px-1 py-0 text-xs h-4 bg-red-500 text-white">
+                    <span className="ml-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
                       {naoLidas}
-                    </Badge>
+                    </span>
                   )}
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="checklists" 
-                  className="text-xs data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-800 dark:data-[state=active]:text-white"
-                >
-                  Checklists
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="sistema" 
-                  className="text-xs data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-800 dark:data-[state=active]:text-white"
-                >
-                  Sistema
-                </TabsTrigger>
+                <TabsTrigger value="checklists">Checklists</TabsTrigger>
+                <TabsTrigger value="sistema">Sistema</TabsTrigger>
               </TabsList>
-              
-              <FilterBar />
               
               <TabsContent value={activeTab} className="m-0">
                 <ScrollArea className="h-96">
@@ -438,7 +410,7 @@ export default function NotificationCenter({
                 <Button 
                   size="sm" 
                   variant="ghost"
-                  onClick={() => carregarNotificacoes()}
+                  onClick={handleRefresh}
                   disabled={loading}
                 >
                   <RefreshCw className={`w-4 h-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
@@ -469,20 +441,22 @@ export default function NotificationCenter({
 // =====================================================
 
 export function NotificationBell({ className = '' }: { className?: string }) {
-  const { estatisticas, carregarNotificacoes } = useNotifications()
+  const hasInitializedRef = useRef(false)
+  const { carregarNotificacoes } = useNotifications()
   
   useEffect(() => {
-    carregarNotificacoes({ apenas_nao_lidas: true, limit: 5 })
+    if (!hasInitializedRef.current) {
+      carregarNotificacoes({ apenas_nao_lidas: true, limit: 5 })
+      hasInitializedRef.current = true
+    }
   }, [carregarNotificacoes])
-  
-  const naoLidas = estatisticas?.nao_lidas || 0
   
   return (
     <NotificationCenter 
       className={className}
       showUnreadCount={true}
       autoRefresh={true}
-      refreshInterval={60000} // 1 minuto
+      refreshInterval={120000} // 2 minutos para o bell
     />
   )
 }

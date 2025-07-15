@@ -34,6 +34,19 @@ interface Notificacao {
   }
 }
 
+interface FiltrosNotificacao {
+  status?: 'pendente' | 'enviada' | 'lida' | 'descartada'
+  modulo?: string
+  tipo?: string
+  prioridade?: string
+  data_inicio?: string
+  data_fim?: string
+  usuario_id?: string
+  apenas_nao_lidas?: boolean
+  page?: number
+  limit?: number
+}
+
 interface NovaNotificacao {
   modulo: 'checklists' | 'metas' | 'contaazul' | 'relatorios' | 'dashboard' | 'sistema'
   tipo: 'info' | 'alerta' | 'erro' | 'sucesso'
@@ -50,7 +63,7 @@ interface NovaNotificacao {
   }>
   canais?: string[]
   usuario_id?: string
-  role_alvo?: 'admin' | 'financeiro' | 'funcionario'
+  role_alvo?: string
   enviar_em?: string
   referencia_tipo?: string
   referencia_id?: string
@@ -63,21 +76,8 @@ interface NotificacaoTemplate {
   template_categoria: string
   variaveis: Record<string, any>
   usuario_id?: string
-  role_alvo?: 'admin' | 'financeiro' | 'funcionario'
+  role_alvo?: string
   enviar_em?: string
-}
-
-interface FiltrosNotificacao {
-  status?: 'pendente' | 'enviada' | 'lida' | 'descartada'
-  modulo?: string
-  tipo?: string
-  prioridade?: string
-  data_inicio?: string
-  data_fim?: string
-  usuario_id?: string
-  apenas_nao_lidas?: boolean
-  page?: number
-  limit?: number
 }
 
 interface EstatisticasNotificacao {
@@ -139,14 +139,16 @@ export function useNotifications(): UseNotificationsResult {
   const [error, setError] = useState<string | null>(null)
   const [estatisticas, setEstatisticas] = useState<EstatisticasNotificacao | null>(null)
   const [paginacao, setPaginacao] = useState(null)
-  const [filtrosAtuais, setFiltrosAtuais] = useState<FiltrosNotificacao>({})
 
   // Browser notifications
   const [permissaoBrowser, setPermissaoBrowser] = useState<NotificationPermission | null>(null)
   const [suportaBrowser, setSuportaBrowser] = useState(false)
   
-  // Polling
+  // Refs para evitar dependências circulares
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const filtrosRef = useRef<FiltrosNotificacao>({})
+  const isPollingRef = useRef(false)
+  const lastLoadRef = useRef<number>(0)
 
   // =====================================================
   // INICIALIZAÇÃO
@@ -163,19 +165,31 @@ export function useNotifications(): UseNotificationsResult {
       // Cleanup polling ao desmontar
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
+        intervalRef.current = null
+        isPollingRef.current = false
       }
     }
   }, [])
 
   // =====================================================
-  // AÇÕES CRUD
+  // FUNÇÃO PRINCIPAL DE CARREGAMENTO (SEM DEPENDÊNCIAS)
   // =====================================================
 
   const carregarNotificacoes = useCallback(async (filtros: FiltrosNotificacao = {}) => {
+    const now = Date.now()
+    
+    // Debouncing: evitar múltiplas chamadas muito próximas
+    if (now - lastLoadRef.current < 1000) {
+      return
+    }
+    lastLoadRef.current = now
+
     try {
       setLoading(true)
       setError(null)
-      setFiltrosAtuais(filtros)
+      
+      // Atualizar filtros atuais
+      filtrosRef.current = filtros
 
       const params = new URLSearchParams()
       Object.entries(filtros).forEach(([key, value]) => {
@@ -200,6 +214,10 @@ export function useNotifications(): UseNotificationsResult {
       setLoading(false)
     }
   }, [])
+
+  // =====================================================
+  // OUTRAS AÇÕES CRUD
+  // =====================================================
 
   const carregarNotificacao = useCallback(async (id: string) => {
     try {
@@ -241,8 +259,8 @@ export function useNotifications(): UseNotificationsResult {
           })
         }
         
-        // Recarregar lista
-        await carregarNotificacoes(filtrosAtuais)
+        // Recarregar lista com filtros atuais
+        await carregarNotificacoes(filtrosRef.current)
         return true
       } else {
         setError(response.error || 'Erro ao criar notificação')
@@ -255,7 +273,7 @@ export function useNotifications(): UseNotificationsResult {
     } finally {
       setCreating(false)
     }
-  }, [carregarNotificacoes, filtrosAtuais, permissaoBrowser])
+  }, [carregarNotificacoes, permissaoBrowser])
 
   const criarNotificacaoTemplate = useCallback(async (dados: NotificacaoTemplate): Promise<boolean> => {
     try {
@@ -266,7 +284,7 @@ export function useNotifications(): UseNotificationsResult {
 
       if (response.success) {
         console.log('📢 Notificação criada via template!')
-        await carregarNotificacoes(filtrosAtuais)
+        await carregarNotificacoes(filtrosRef.current)
         return true
       } else {
         setError(response.error || 'Erro ao criar notificação via template')
@@ -279,7 +297,7 @@ export function useNotifications(): UseNotificationsResult {
     } finally {
       setCreating(false)
     }
-  }, [carregarNotificacoes, filtrosAtuais])
+  }, [carregarNotificacoes])
 
   const marcarComoLida = useCallback(async (id: string): Promise<boolean> => {
     try {
@@ -325,7 +343,7 @@ export function useNotifications(): UseNotificationsResult {
 
       if (response.success) {
         console.log(`📱 ${response.count} notificações marcadas como lidas`)
-        await carregarNotificacoes(filtrosAtuais)
+        await carregarNotificacoes(filtrosRef.current)
         return true
       } else {
         setError(response.error || 'Erro ao marcar todas como lidas')
@@ -338,7 +356,7 @@ export function useNotifications(): UseNotificationsResult {
     } finally {
       setUpdating(false)
     }
-  }, [carregarNotificacoes, filtrosAtuais])
+  }, [carregarNotificacoes])
 
   const excluirNotificacao = useCallback(async (id: string): Promise<boolean> => {
     try {
@@ -379,7 +397,7 @@ export function useNotifications(): UseNotificationsResult {
 
       if (response.success) {
         console.log(`🧹 ${response.count} notificações antigas removidas`)
-        await carregarNotificacoes(filtrosAtuais)
+        await carregarNotificacoes(filtrosRef.current)
         return true
       } else {
         setError(response.error || 'Erro ao limpar notificações antigas')
@@ -392,7 +410,7 @@ export function useNotifications(): UseNotificationsResult {
     } finally {
       setUpdating(false)
     }
-  }, [carregarNotificacoes, filtrosAtuais])
+  }, [carregarNotificacoes])
 
   // =====================================================
   // BROWSER NOTIFICATIONS
@@ -458,10 +476,15 @@ export function useNotifications(): UseNotificationsResult {
   }, [suportaBrowser, permissaoBrowser, marcarComoLida])
 
   // =====================================================
-  // POLLING E UTILITÁRIOS
+  // POLLING OTIMIZADO
   // =====================================================
 
   const configurarPolling = useCallback((intervalo: number = 30000) => {
+    // Evitar múltiplas configurações
+    if (isPollingRef.current) {
+      return
+    }
+
     // Parar polling anterior se existir
     if (intervalRef.current) {
       clearInterval(intervalRef.current)
@@ -469,23 +492,28 @@ export function useNotifications(): UseNotificationsResult {
 
     // Configurar novo polling
     intervalRef.current = setInterval(() => {
-      carregarNotificacoes({ ...filtrosAtuais, apenas_nao_lidas: true })
+      // Só fazer polling se não estiver carregando
+      if (!loading) {
+        carregarNotificacoes({ ...filtrosRef.current, apenas_nao_lidas: true })
+      }
     }, intervalo)
 
+    isPollingRef.current = true
     console.log(`🔄 Polling de notificações configurado: ${intervalo}ms`)
-  }, [carregarNotificacoes, filtrosAtuais])
+  }, [carregarNotificacoes, loading])
 
   const pararPolling = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current)
       intervalRef.current = null
+      isPollingRef.current = false
       console.log('⏹️ Polling de notificações parado')
     }
   }, [])
 
   const recarregar = useCallback(async () => {
-    await carregarNotificacoes(filtrosAtuais)
-  }, [carregarNotificacoes, filtrosAtuais])
+    await carregarNotificacoes(filtrosRef.current)
+  }, [carregarNotificacoes])
 
   const limparErro = useCallback(() => {
     setError(null)
@@ -531,6 +559,59 @@ export function useNotifications(): UseNotificationsResult {
 }
 
 // =====================================================
+// FUNÇÕES UTILITÁRIAS
+// =====================================================
+
+export function getColorByType(tipo: string): string {
+  const colors = {
+    'info': 'blue',
+    'alerta': 'yellow',
+    'erro': 'red',
+    'sucesso': 'green'
+  }
+  return colors[tipo as keyof typeof colors] || 'gray'
+}
+
+export function getColorByPriority(prioridade: string): string {
+  const colors = {
+    'baixa': 'gray',
+    'media': 'blue',
+    'alta': 'yellow',
+    'critica': 'red'
+  }
+  return colors[prioridade as keyof typeof colors] || 'gray'
+}
+
+export function getIconByType(tipo: string): string {
+  const icons = {
+    'info': '/favicon.ico',
+    'alerta': '/favicon.ico',
+    'erro': '/favicon.ico',
+    'sucesso': '/favicon.ico'
+  }
+  return icons[tipo as keyof typeof icons] || '/favicon.ico'
+}
+
+export function formatarTempo(data: string): string {
+  const now = new Date()
+  const notificationDate = new Date(data)
+  const diffInSeconds = Math.floor((now.getTime() - notificationDate.getTime()) / 1000)
+
+  if (diffInSeconds < 60) {
+    return 'agora'
+  } else if (diffInSeconds < 3600) {
+    const minutes = Math.floor(diffInSeconds / 60)
+    return `${minutes}m atrás`
+  } else if (diffInSeconds < 86400) {
+    const hours = Math.floor(diffInSeconds / 3600)
+    return `${hours}h atrás`
+  } else {
+    const days = Math.floor(diffInSeconds / 86400)
+    return `${days}d atrás`
+  }
+}
+
+// =====================================================
 // HOOKS AUXILIARES
 // =====================================================
 
@@ -564,98 +645,4 @@ export function useNotificationSettings() {
     atualizarConfiguracao,
     salvarConfiguracoes
   }
-}
-
-// =====================================================
-// UTILITÁRIOS
-// =====================================================
-
-export function getIconByType(tipo: string): string {
-  const icons: Record<string, string> = {
-    'info': '/icons/info.png',
-    'alerta': '/icons/warning.png',
-    'erro': '/icons/error.png',
-    'sucesso': '/icons/success.png'
-  }
-  return icons[tipo] || '/favicon.ico'
-}
-
-export function getColorByType(tipo: string): string {
-  const colors: Record<string, string> = {
-    'info': 'blue',
-    'alerta': 'yellow',
-    'erro': 'red',
-    'sucesso': 'green'
-  }
-  return colors[tipo] || 'gray'
-}
-
-export function getColorByPriority(prioridade: string): string {
-  const colors: Record<string, string> = {
-    'baixa': 'gray',
-    'media': 'blue',
-    'alta': 'orange',
-    'critica': 'red'
-  }
-  return colors[prioridade] || 'gray'
-}
-
-export function formatarTempo(dataString: string): string {
-  const data = new Date(dataString)
-  const agora = new Date()
-  const diff = agora.getTime() - data.getTime()
-  
-  const minutos = Math.floor(diff / (1000 * 60))
-  const horas = Math.floor(diff / (1000 * 60 * 60))
-  const dias = Math.floor(diff / (1000 * 60 * 60 * 24))
-  
-  if (minutos < 1) return 'agora'
-  if (minutos < 60) return `${minutos}min`
-  if (horas < 24) return `${horas}h`
-  if (dias < 7) return `${dias}d`
-  
-  return data.toLocaleDateString('pt-BR')
-}
-
-// =====================================================
-// FUNÇÕES ESPECÍFICAS PARA CHECKLISTS
-// =====================================================
-
-export async function criarNotificacaoChecklist(
-  categoria: 'lembrete' | 'atraso' | 'conclusao' | 'performance',
-  variaveis: Record<string, any>,
-  usuarioId?: string,
-  roleAlvo?: string
-) {
-  try {
-    const response = await api.post('/api/notifications?modo=template', {
-      template_nome: getTemplateNameByCategory(categoria),
-      template_modulo: 'checklists',
-      template_categoria: categoria,
-      variaveis,
-      usuario_id: usuarioId,
-      role_alvo: roleAlvo
-    })
-
-    if (response.success) {
-      console.log(`📋 Notificação de checklist criada: ${categoria}`)
-      return response.notificacao_id
-    }
-
-    return null
-  } catch (error) {
-    console.error('Erro ao criar notificação de checklist:', error)
-    return null
-  }
-}
-
-function getTemplateNameByCategory(categoria: string): string {
-  const templates: Record<string, string> = {
-    'lembrete': 'lembrete_agendamento',
-    'atraso': 'checklist_atrasado',
-    'conclusao': 'checklist_concluido',
-    'performance': 'baixa_performance'
-  }
-  
-  return templates[categoria] || 'lembrete_agendamento'
 } 
