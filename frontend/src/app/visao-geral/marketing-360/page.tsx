@@ -1,346 +1,129 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Users, 
-  Heart, 
-  Eye, 
-  DollarSign, 
-  TrendingUp, 
-  Target, 
-  RefreshCw, 
-  Instagram, 
-  Facebook, 
-  Share2,
-  MessageSquare,
+import { useToast } from '@/hooks/use-toast'
+import { usePageTitle } from '@/contexts/PageTitleContext'
+import {
+  TrendingUp,
+  TrendingDown,
+  Users,
+  Eye,
+  Heart,
+  MessageCircle,
+  Share,
+  Target,
+  DollarSign,
   BarChart3,
-  Award,
-  Lightbulb,
-  AlertTriangle,
-  CheckCircle,
-  Calendar
+  RefreshCw,
+  Instagram,
+  Facebook,
+  Clock,
+  Zap,
+  ArrowUp,
+  ArrowDown,
+  Loader2
 } from 'lucide-react'
 
-export default function Marketing360Page() {
-  const [loading, setLoading] = useState(true)
-  const [dailyLoading, setDailyLoading] = useState(false)
-  const [data, setData] = useState({
-    metrics: {
-      total_followers: 0,
-      engagement_rate: 0,
-      weekly_reach: 0,
-      roi_estimate: 0,
-      facebook: { followers: 0, engagement: 0, reach: 0, posts: 0 },
-      instagram: { followers: 0, engagement: 0, reach: 0, posts: 0 }
-    },
-    campaigns: {
-      active_campaigns: 0,
-      total_spend: 0,
-      total_clicks: 0,
-      conversion_rate: 0
-    },
-    goals: {
-      followers_target: 10000,
-      engagement_target: 6.0,
-      reach_target: 50000,
-      roi_target: 400
-    }
-  })
-  
-  const [dailyData, setDailyData] = useState({
-    days: [] as any[],
-    comparisons: [] as any[],
-    trends: {
-      followers_trend: 'stable',
-      engagement_trend: 'stable',
-      reach_trend: 'stable'
-    }
-  })
+interface MetaAnalytics {
+  facebook: {
+    current: any
+    history: any[]
+    error: any
+  }
+  instagram: {
+    current: any
+    history: any[]
+    error: any
+  }
+  campaigns: {
+    list: any[]
+    stats: any
+    error: any
+  }
+  last_update: string
+}
 
-  const [campaignsLoading, setCampaignsLoading] = useState(false)
-  const [campaignsDetailedData, setCampaignsDetailedData] = useState({
-    campaigns: [] as any[],
-    ad_accounts: [] as any[],
-    ads: [] as any[],
-    totals: {
-      total_spend: 0,
-      total_impressions: 0,
-      total_reach: 0,
-      total_clicks: 0,
-      active_campaigns: 0,
-      total_campaigns: 0,
-      total_ads: 0
-    }
-  })
+export default function Marketing360Page() {
+  const { toast } = useToast()
+  const { setPageTitle } = usePageTitle()
+  
+  const [data, setData] = useState<MetaAnalytics | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
-    loadData()
-  }, [])
+    setPageTitle('Marketing 360° - Visão Geral')
+    loadAnalytics()
+    return () => setPageTitle('')
+  }, [setPageTitle])
 
-  const loadData = async () => {
-    setLoading(true)
+  const loadAnalytics = async () => {
     try {
-      console.log('🚀 Carregando dados do Marketing 360°...')
-      
-      // Usar diretamente a API marketing-360 que é mais confiável
-      const response = await fetch('/api/meta/marketing-360')
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      
+      setLoading(true)
+      const response = await fetch('/api/meta/analytics')
       const result = await response.json()
       
-      if (result.success && result.data) {
-        console.log('✅ Dados carregados:', result.data.data_source)
+      if (result.success) {
         setData(result.data)
-        return
       } else {
-        throw new Error(result.error || 'Erro ao carregar dados')
+        throw new Error(result.error)
       }
-      
     } catch (error) {
-      console.error('❌ Erro ao carregar dados:', error)
-      
-      // Fallback para daily-summary se marketing-360 falhar
-      console.log('⚠️ Tentando fallback para daily-summary...')
-      try {
-        const fallbackResponse = await fetch('/api/meta/daily-summary?days=30')
-        if (fallbackResponse.ok) {
-          const fallbackResult = await fallbackResponse.json()
-          if (fallbackResult.success && fallbackResult.data) {
-            console.log('✅ Fallback daily-summary bem-sucedido')
-            
-            // Converter dados da daily-summary para formato do Marketing 360°
-            const summaryData = fallbackResult.data.summary
-            const variations = fallbackResult.data.variations
-            const trends = fallbackResult.data.trends
-            const campaigns = fallbackResult.data.campaigns_summary
-            
-            // Calcular ROI baseado no engagement e alcance
-            const roiEstimate = Math.min(Math.round((summaryData.total_reach || 0) / 100 + (trends.growth_rate_7d || 0) * 10), 500)
-            
-            // Calcular engagement rate consolidado
-            const totalImpressions = summaryData.facebook_impressions + summaryData.instagram_impressions || 1
-            const engagementRate = totalImpressions > 0 ? 
-              (summaryData.total_engagement / totalImpressions * 100) : 
-              Math.max(trends.avg_daily_engagement_change || 0, 2.5)
-            
-            const transformedData = {
-              metrics: {
-                total_followers: summaryData.total_followers || 0,
-                engagement_rate: Math.round(engagementRate * 10) / 10,
-                weekly_reach: summaryData.total_reach || 0,
-                roi_estimate: roiEstimate,
-                facebook: {
-                  followers: summaryData.facebook_followers || 0,
-                  engagement: Math.round(engagementRate * 0.6 * 10) / 10,
-                  reach: Math.round((summaryData.total_reach || 0) * 0.45),
-                  posts: fallbackResult.data.daily_data?.[0]?.facebook_posts_count || 0
-                },
-                instagram: {
-                  followers: summaryData.instagram_followers || 0,
-                  engagement: Math.round(engagementRate * 1.4 * 10) / 10,
-                  reach: Math.round((summaryData.total_reach || 0) * 0.55),
-                  posts: fallbackResult.data.daily_data?.[0]?.instagram_posts_count || 0
-                }
-              },
-              campaigns: {
-                active_campaigns: campaigns.active_campaigns || 0,
-                total_spend: campaigns.total_spend || 0,
-                total_clicks: campaigns.total_clicks || Math.round((campaigns.total_impressions || 0) * 0.02),
-                conversion_rate: campaigns.total_clicks > 0 ? 
-                  Math.round((campaigns.total_conversions || 0) / campaigns.total_clicks * 100 * 100) / 100 : 0
-              },
-              goals: {
-                followers_target: 50000,
-                engagement_target: 6.0,
-                reach_target: Math.max((summaryData.total_reach || 0) * 1.5, 100000),
-                roi_target: 400
-              },
-              variations: {
-                followers_change: variations.followers_change_today || 0,
-                followers_change_percent: Math.round((variations.followers_change_percent || 0) * 100) / 100,
-                engagement_change: variations.engagement_change_today || 0,
-                reach_change: variations.reach_change_today || 0,
-                trend_direction: trends.trend_direction || 'stable'
-              },
-              last_updated: summaryData.last_updated || new Date().toISOString(),
-              data_source: 'daily_summary_fallback'
-            }
-            
-            setData(transformedData)
-            return
-          }
-        }
-      } catch (fallbackError) {
-        console.error('❌ Fallback também falhou:', fallbackError)
-      }
-      
-      // Sem dados mockados - mostrar erro real
-      console.log('❌ Erro completo: não foi possível carregar dados reais')
-      
-      // Manter dados iniciais vazios (estrutura mínima para não quebrar a UI)
-      const emptyData = {
-        metrics: {
-          total_followers: 0,
-          engagement_rate: 0,
-          weekly_reach: 0,
-          roi_estimate: 0,
-          facebook: { followers: 0, engagement: 0, reach: 0, posts: 0 },
-          instagram: { followers: 0, engagement: 0, reach: 0, posts: 0 }
-        },
-        campaigns: {
-          active_campaigns: 0,
-          total_spend: 0,
-          total_clicks: 0,
-          conversion_rate: 0
-        },
-        goals: {
-          followers_target: 50000,
-          engagement_target: 6.0,
-          reach_target: 100000,
-          roi_target: 400
-        },
-        variations: {
-          followers_change: 0,
-          followers_change_percent: 0,
-          engagement_change: 0,
-          reach_change: 0,
-          trend_direction: 'stable'
-        },
-        last_updated: new Date().toISOString(),
-        data_source: 'error'
-      }
-      
-      setData(emptyData)
+      console.error('Erro ao carregar analytics:', error)
+      toast({
+        title: '❌ Erro',
+        description: 'Falha ao carregar dados do Meta',
+        variant: 'destructive'
+      })
     } finally {
       setLoading(false)
     }
   }
 
-  const loadDailyData = async () => {
-    setDailyLoading(true)
+  const forceRefresh = async () => {
     try {
-      console.log('📅 Carregando dados de análise diária...')
+      setRefreshing(true)
       
-      const response = await fetch('/api/meta/daily-comparison?days=7')
+      toast({
+        title: '🔄 Atualizando...',
+        description: 'Coletando dados mais recentes do Meta'
+      })
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      
+      const response = await fetch('/api/meta/force-sync', { method: 'POST' })
       const result = await response.json()
       
-      if (result.success && result.data) {
-        console.log('✅ Dados diários carregados:', result.data.days?.length || 0, 'dias')
-        setDailyData(result.data)
-      } else {
-        throw new Error(result.error || 'Erro ao carregar dados diários')
-      }
-      
-    } catch (error) {
-      console.error('❌ Erro ao carregar dados diários:', error)
-      
-      // Manter estrutura vazia, SEM dados simulados
-      const emptyDailyData = {
-        days: [],
-        comparisons: [],
-        trends: {
-          followers_trend: 'stable',
-          engagement_trend: 'stable',
-          reach_trend: 'stable'
-        }
-      }
-      
-      setDailyData(emptyDailyData)
-    } finally {
-      setDailyLoading(false)
-    }
-  }
-
-  const loadCampaignsData = async () => {
-    setCampaignsLoading(true)
-    try {
-      console.log('🎯 Carregando dados detalhados de campanhas...')
-      
-      const response = await fetch('/api/meta/test-campaigns-collection')
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      
-      const result = await response.json()
-      
-      if (result.success && result.data) {
-        console.log('✅ Dados de campanhas carregados:', result.data.total_campaigns, 'campanhas')
-        setCampaignsDetailedData({
-          campaigns: result.data.campaigns || [],
-          ad_accounts: result.data.ad_accounts || [],
-          ads: result.data.ads || [],
-          totals: {
-            total_spend: result.data.campaigns?.reduce((sum: number, camp: any) => 
-              sum + (parseFloat(camp.insights?.data?.[0]?.spend) || 0), 0) || 0,
-            total_impressions: result.data.campaigns?.reduce((sum: number, camp: any) => 
-              sum + (parseInt(camp.insights?.data?.[0]?.impressions) || 0), 0) || 0,
-            total_reach: result.data.campaigns?.reduce((sum: number, camp: any) => 
-              sum + (parseInt(camp.insights?.data?.[0]?.reach) || 0), 0) || 0,
-            total_clicks: result.data.campaigns?.reduce((sum: number, camp: any) => 
-              sum + (parseInt(camp.insights?.data?.[0]?.clicks) || 0), 0) || 0,
-            active_campaigns: result.data.campaigns?.filter((camp: any) => 
-              camp.effective_status === 'ACTIVE').length || 0,
-            total_campaigns: result.data.total_campaigns || 0,
-            total_ads: result.data.total_ads || 0
-          }
+      if (result.success) {
+        toast({
+          title: '✅ Atualizado!',
+          description: result.message
         })
+        
+        // Aguardar um pouco e recarregar dados
+        setTimeout(() => {
+          loadAnalytics()
+        }, 2000)
       } else {
-        console.log('⚠️ Sem dados de campanhas:', result.error)
-        setCampaignsDetailedData({
-          campaigns: [],
-          ad_accounts: [],
-          ads: [],
-          totals: {
-            total_spend: 0,
-            total_impressions: 0,
-            total_reach: 0,
-            total_clicks: 0,
-            active_campaigns: 0,
-            total_campaigns: 0,
-            total_ads: 0
-          }
-        })
+        throw new Error(result.error)
       }
-      
     } catch (error) {
-      console.error('❌ Erro ao carregar campanhas:', error)
-      setCampaignsDetailedData({
-        campaigns: [],
-        ad_accounts: [],
-        ads: [],
-        totals: {
-          total_spend: 0,
-          total_impressions: 0,
-          total_reach: 0,
-          total_clicks: 0,
-          active_campaigns: 0,
-          total_campaigns: 0,
-          total_ads: 0
-        }
+      toast({
+        title: '❌ Erro',
+        description: 'Falha ao atualizar dados',
+        variant: 'destructive'
       })
     } finally {
-      setCampaignsLoading(false)
+      setRefreshing(false)
     }
   }
 
   const formatNumber = (num: number) => {
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M'
-    if (num >= 1000) return (num / 1000).toFixed(1) + 'K'
-    return num.toString()
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
+    return num.toLocaleString('pt-BR')
   }
 
   const formatCurrency = (num: number) => {
@@ -350,968 +133,470 @@ export default function Marketing360Page() {
     }).format(num)
   }
 
-  const calculateProgress = (current: number, target: number) => {
-    return Math.min((current / target) * 100, 100)
+  const getPercentageChange = (current: number, previous: number) => {
+    if (previous === 0) return 0
+    return ((current - previous) / previous) * 100
   }
 
   if (loading) {
     return (
-      <div className="p-8 max-w-7xl mx-auto space-y-8">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-pink-600 via-purple-700 to-blue-800 dark:from-pink-700 dark:via-purple-800 dark:to-blue-900">
-          <div className="absolute inset-0 bg-black/20"></div>
-          <div className="relative px-8 py-12">
-            <div className="text-center text-white space-y-6">
-              <div className="flex items-center justify-center space-x-4 mb-6">
-                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center animate-bounce">
-                  <Instagram className="h-6 w-6 text-white" />
-                </div>
-                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center animate-bounce delay-150">
-                  <Facebook className="h-6 w-6 text-white" />
-                </div>
-                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center animate-bounce delay-300">
-                  <Share2 className="h-6 w-6 text-white" />
-                </div>
-              </div>
-              <h1 className="text-4xl font-bold">📊 Marketing 360</h1>
-              <p className="text-xl text-pink-100">Carregando dados das redes sociais...</p>
-              <div className="w-64 mx-auto">
-                <div className="bg-white/20 rounded-full h-2 overflow-hidden">
-                  <div className="bg-white h-full rounded-full animate-pulse" style={{ width: '60%' }}></div>
-                </div>
-              </div>
-            </div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            <span className="ml-3 text-gray-600 dark:text-gray-400">Carregando analytics...</span>
           </div>
         </div>
       </div>
     )
   }
 
+  const fb = data?.facebook.current
+  const ig = data?.instagram.current
+  const campaigns = data?.campaigns
+
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
-      {/* Header com gradiente */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-pink-600 via-purple-700 to-blue-800 dark:from-pink-700 dark:via-purple-800 dark:to-blue-900">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative px-8 py-12">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold text-white mb-3">📊 Marketing 360</h1>
-              <p className="text-pink-100 text-lg mb-4">
-                Visão completa da performance em redes sociais e campanhas
-              </p>
-              <div className="flex items-center space-x-6 text-pink-200 text-sm">
-                <div className="flex items-center space-x-2">
-                  <Instagram className="h-4 w-4" />
-                  <span>Instagram Analytics</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Facebook className="h-4 w-4" />
-                  <span>Facebook Insights</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <BarChart3 className="h-4 w-4" />
-                  <span>Campanhas Meta</span>
-                </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 py-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Marketing 360°</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Análise completa das suas redes sociais e campanhas publicitárias
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            {data?.last_update && (
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <Clock className="w-4 h-4" />
+                <span>Atualizado: {new Date(data.last_update).toLocaleString('pt-BR')}</span>
               </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Button
-                onClick={loadData}
-                disabled={loading}
-                variant="secondary"
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                {loading ? 'Atualizando...' : 'Atualizar Dados'}
-              </Button>
-            </div>
+            )}
+            <Button 
+              onClick={forceRefresh}
+              disabled={refreshing}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {refreshing ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              ) : (
+                <RefreshCw className="w-4 h-4 mr-2" />
+              )}
+              {refreshing ? 'Atualizando...' : 'Forçar Atualização'}
+            </Button>
           </div>
         </div>
-      </div>
 
-      {/* Cards de estatísticas principais */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Seguidores</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                  {formatNumber(data.metrics.total_followers)}
-                </p>
-                <div className="flex items-center space-x-2 mt-2">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    Meta: {formatNumber(data.goals.followers_target)}
-                  </span>
-                  <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
-                    {calculateProgress(data.metrics.total_followers, data.goals.followers_target).toFixed(0)}%
-                  </span>
-                </div>
-                <Progress 
-                  value={calculateProgress(data.metrics.total_followers, data.goals.followers_target)} 
-                  className="h-2 mt-2"
-                />
+        {/* Cards de Resumo */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Facebook */}
+          <Card className="card-dark">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Facebook</CardTitle>
+              <Facebook className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formatNumber(fb?.page_fans || 0)}</div>
+              <p className="text-xs text-muted-foreground">Seguidores</p>
+              <div className="flex items-center text-xs mt-2">
+                <TrendingUp className="w-3 h-3 text-green-500 mr-1" />
+                <span className="text-green-500">+{fb?.talking_about_count || 0} falando sobre</span>
               </div>
-              <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/20">
-                <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+            </CardContent>
+          </Card>
+
+          {/* Instagram */}
+          <Card className="card-dark">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Instagram</CardTitle>
+              <Instagram className="h-4 w-4 text-pink-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formatNumber(ig?.follower_count || 0)}</div>
+              <p className="text-xs text-muted-foreground">Seguidores</p>
+              <div className="flex items-center text-xs mt-2">
+                <Eye className="w-3 h-3 text-blue-500 mr-1" />
+                <span className="text-blue-500">{formatNumber(ig?.profile_views || 0)} visualizações</span>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Taxa Engajamento</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                  {data.metrics.engagement_rate.toFixed(1)}%
-                </p>
-                <div className="flex items-center space-x-2 mt-2">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    Meta: {data.goals.engagement_target}%
-                  </span>
-                  <span className="text-xs font-medium text-pink-600 dark:text-pink-400">
-                    {calculateProgress(data.metrics.engagement_rate, data.goals.engagement_target).toFixed(0)}%
-                  </span>
-                </div>
-                <Progress 
-                  value={calculateProgress(data.metrics.engagement_rate, data.goals.engagement_target)} 
-                  className="h-2 mt-2"
-                />
+          {/* Campanhas */}
+          <Card className="card-dark">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Campanhas</CardTitle>
+              <Target className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{campaigns?.stats?.total_campaigns || 0}</div>
+              <p className="text-xs text-muted-foreground">Campanhas ativas</p>
+              <div className="flex items-center text-xs mt-2">
+                <Zap className="w-3 h-3 text-green-500 mr-1" />
+                <span className="text-green-500">{campaigns?.stats?.active_campaigns || 0} rodando</span>
               </div>
-              <div className="p-3 rounded-full bg-pink-100 dark:bg-pink-900/20">
-                <Heart className="h-6 w-6 text-pink-600 dark:text-pink-400" />
+            </CardContent>
+          </Card>
+
+          {/* Investimento */}
+          <Card className="card-dark">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Investimento</CardTitle>
+              <DollarSign className="h-4 w-4 text-yellow-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formatCurrency(campaigns?.stats?.total_spend || 0)}</div>
+              <p className="text-xs text-muted-foreground">Gasto total (mês)</p>
+              <div className="flex items-center text-xs mt-2">
+                <BarChart3 className="w-3 h-3 text-yellow-500 mr-1" />
+                <span className="text-yellow-500">{formatNumber(campaigns?.stats?.total_impressions || 0)} impressões</span>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Alcance Semanal</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                  {formatNumber(data.metrics.weekly_reach)}
-                </p>
-                <div className="flex items-center space-x-2 mt-2">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    Meta: {formatNumber(data.goals.reach_target)}
-                  </span>
-                  <span className="text-xs font-medium text-green-600 dark:text-green-400">
-                    {calculateProgress(data.metrics.weekly_reach, data.goals.reach_target).toFixed(0)}%
-                  </span>
-                </div>
-                <Progress 
-                  value={calculateProgress(data.metrics.weekly_reach, data.goals.reach_target)} 
-                  className="h-2 mt-2"
-                />
-              </div>
-              <div className="p-3 rounded-full bg-green-100 dark:bg-green-900/20">
-                <Eye className="h-6 w-6 text-green-600 dark:text-green-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Tabs */}
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="tabs-list-dark">
+            <TabsTrigger value="overview" className="tabs-trigger-dark">Visão Geral</TabsTrigger>
+            <TabsTrigger value="campaigns" className="tabs-trigger-dark">Campanhas</TabsTrigger>
+            <TabsTrigger value="social" className="tabs-trigger-dark">Redes Sociais</TabsTrigger>
+            <TabsTrigger value="analytics" className="tabs-trigger-dark">Analytics</TabsTrigger>
+          </TabsList>
 
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">ROI Estimado</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                  {data.metrics.roi_estimate.toFixed(0)}%
-                </p>
-                <div className="flex items-center space-x-2 mt-2">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    Meta: {data.goals.roi_target}%
-                  </span>
-                  <span className="text-xs font-medium text-orange-600 dark:text-orange-400">
-                    {calculateProgress(data.metrics.roi_estimate, data.goals.roi_target).toFixed(0)}%
-                  </span>
-                </div>
-                <Progress 
-                  value={calculateProgress(data.metrics.roi_estimate, data.goals.roi_target)} 
-                  className="h-2 mt-2"
-                />
-              </div>
-              <div className="p-3 rounded-full bg-orange-100 dark:bg-orange-900/20">
-                <DollarSign className="h-6 w-6 text-orange-600 dark:text-orange-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Tabs de conteúdo */}
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="bg-gray-100 dark:bg-gray-800 w-full md:w-auto">
-          <TabsTrigger 
-            value="overview" 
-            className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white dark:text-gray-300"
-          >
-            📊 Visão Geral
-          </TabsTrigger>
-          <TabsTrigger 
-            value="platforms"
-            className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white dark:text-gray-300"
-          >
-            📱 Plataformas
-          </TabsTrigger>
-          <TabsTrigger 
-            value="campaigns"
-            className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white dark:text-gray-300"
-            onClick={() => !campaignsLoading && campaignsDetailedData.campaigns.length === 0 && loadCampaignsData()}
-          >
-            🎯 Campanhas
-          </TabsTrigger>
-          <TabsTrigger 
-            value="insights"
-            className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white dark:text-gray-300"
-          >
-            💡 Insights
-          </TabsTrigger>
-          <TabsTrigger 
-            value="daily"
-            className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white dark:text-gray-300"
-            onClick={() => !dailyLoading && dailyData.days.length === 0 && loadDailyData()}
-          >
-            📅 Análise Diária
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Visão Geral */}
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-                <CardTitle className="text-gray-900 dark:text-white flex items-center space-x-2">
-                  <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  <span>Performance Geral</span>
-                </CardTitle>
-                <CardDescription className="text-gray-600 dark:text-gray-400">
-                  Resumo das principais métricas
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{data.metrics.total_followers}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Seguidores</p>
-                  </div>
-                  <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">{data.metrics.engagement_rate.toFixed(1)}%</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Engajamento</p>
-                  </div>
-                  <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                    <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{formatNumber(data.metrics.weekly_reach)}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Alcance Semanal</p>
-                  </div>
-                  <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                    <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{data.metrics.roi_estimate}%</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">ROI Estimado</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-                <CardTitle className="text-gray-900 dark:text-white flex items-center space-x-2">
-                  <Target className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  <span>Progresso das Metas</span>
-                </CardTitle>
-                <CardDescription className="text-gray-600 dark:text-gray-400">
-                  Acompanhamento dos objetivos mensais
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between text-sm font-medium mb-2">
-                      <span className="text-gray-700 dark:text-gray-300">Seguidores</span>
-                      <span className="text-gray-900 dark:text-white">{data.metrics.total_followers} / {data.goals.followers_target}</span>
-                    </div>
-                    <Progress value={calculateProgress(data.metrics.total_followers, data.goals.followers_target)} className="h-3" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm font-medium mb-2">
-                      <span className="text-gray-700 dark:text-gray-300">Engajamento</span>
-                      <span className="text-gray-900 dark:text-white">{data.metrics.engagement_rate.toFixed(1)}% / {data.goals.engagement_target}%</span>
-                    </div>
-                    <Progress value={calculateProgress(data.metrics.engagement_rate, data.goals.engagement_target)} className="h-3" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm font-medium mb-2">
-                      <span className="text-gray-700 dark:text-gray-300">Alcance</span>
-                      <span className="text-gray-900 dark:text-white">{formatNumber(data.metrics.weekly_reach)} / {formatNumber(data.goals.reach_target)}</span>
-                    </div>
-                    <Progress value={calculateProgress(data.metrics.weekly_reach, data.goals.reach_target)} className="h-3" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm font-medium mb-2">
-                      <span className="text-gray-700 dark:text-gray-300">ROI</span>
-                      <span className="text-gray-900 dark:text-white">{data.metrics.roi_estimate}% / {data.goals.roi_target}%</span>
-                    </div>
-                    <Progress value={calculateProgress(data.metrics.roi_estimate, data.goals.roi_target)} className="h-3" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* Plataformas */}
-        <TabsContent value="platforms" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-                <CardTitle className="text-gray-900 dark:text-white flex items-center space-x-2">
-                  <Instagram className="h-5 w-5 text-pink-600 dark:text-pink-400" />
-                  <span>Instagram Analytics</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/20 dark:to-pink-800/20 rounded-lg">
-                    <p className="text-2xl font-bold text-pink-600 dark:text-pink-400">{formatNumber(data.metrics.instagram.followers)}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Seguidores</p>
-                  </div>
-                  <div className="text-center p-4 bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/20 dark:to-pink-800/20 rounded-lg">
-                    <p className="text-2xl font-bold text-pink-600 dark:text-pink-400">{data.metrics.instagram.engagement}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Engajamento</p>
-                  </div>
-                  <div className="text-center p-4 bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/20 dark:to-pink-800/20 rounded-lg">
-                    <p className="text-2xl font-bold text-pink-600 dark:text-pink-400">{formatNumber(data.metrics.instagram.reach)}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Alcance</p>
-                  </div>
-                  <div className="text-center p-4 bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/20 dark:to-pink-800/20 rounded-lg">
-                    <p className="text-2xl font-bold text-pink-600 dark:text-pink-400">{data.metrics.instagram.posts}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Posts</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-                <CardTitle className="text-gray-900 dark:text-white flex items-center space-x-2">
-                  <Facebook className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  <span>Facebook Analytics</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg">
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{formatNumber(data.metrics.facebook.followers)}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Seguidores</p>
-                  </div>
-                  <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg">
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{data.metrics.facebook.engagement}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Engajamento</p>
-                  </div>
-                  <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg">
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{formatNumber(data.metrics.facebook.reach)}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Alcance</p>
-                  </div>
-                  <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg">
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{data.metrics.facebook.posts}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Posts</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* Campanhas */}
-        <TabsContent value="campaigns" className="space-y-6">
-          {campaignsLoading && (
-            <div className="flex items-center justify-center py-8">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600 dark:text-gray-400">Carregando campanhas publicitárias...</p>
-              </div>
-            </div>
-          )}
-
-          {!campaignsLoading && (
-            <>
-              {/* Header com totais */}
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-700">
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                      {campaignsDetailedData.totals.active_campaigns}
-                    </div>
-                    <div className="text-sm text-green-700 dark:text-green-300">Campanhas Ativas</div>
-                    <div className="text-xs text-green-600 dark:text-green-400 mt-1">
-                      de {campaignsDetailedData.totals.total_campaigns} total
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border-red-200 dark:border-red-700">
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-                      {formatCurrency(campaignsDetailedData.totals.total_spend)}
-                    </div>
-                    <div className="text-sm text-red-700 dark:text-red-300">Gasto Total</div>
-                    <div className="text-xs text-red-600 dark:text-red-400 mt-1">últimos 7 dias</div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700">
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {formatNumber(campaignsDetailedData.totals.total_impressions)}
-                    </div>
-                    <div className="text-sm text-blue-700 dark:text-blue-300">Impressões</div>
-                    <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">visualizações</div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700">
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                      {formatNumber(campaignsDetailedData.totals.total_reach)}
-                    </div>
-                    <div className="text-sm text-purple-700 dark:text-purple-300">Alcance</div>
-                    <div className="text-xs text-purple-600 dark:text-purple-400 mt-1">pessoas únicas</div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-700">
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                      {formatNumber(campaignsDetailedData.totals.total_clicks)}
-                    </div>
-                    <div className="text-sm text-orange-700 dark:text-orange-300">Cliques</div>
-                    <div className="text-xs text-orange-600 dark:text-orange-400 mt-1">
-                      CTR: {campaignsDetailedData.totals.total_impressions > 0 
-                        ? ((campaignsDetailedData.totals.total_clicks / campaignsDetailedData.totals.total_impressions) * 100).toFixed(2)
-                        : 0}%
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Lista de Campanhas Detalhada */}
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-                  <CardTitle className="text-gray-900 dark:text-white flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Target className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                      <span>Campanhas Publicitárias</span>
-                    </div>
-                    <Button
-                      onClick={loadCampaignsData}
-                      disabled={campaignsLoading}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <RefreshCw className={`h-4 w-4 mr-2 ${campaignsLoading ? 'animate-spin' : ''}`} />
-                      Atualizar
-                    </Button>
-                  </CardTitle>
-                  <CardDescription className="text-gray-600 dark:text-gray-400">
-                    Performance detalhada de cada campanha • Dados em tempo real do Meta Ads Manager
-                  </CardDescription>
+          {/* Overview */}
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Performance Geral */}
+              <Card className="card-dark">
+                <CardHeader>
+                  <CardTitle className="card-title-dark">Performance Geral</CardTitle>
                 </CardHeader>
-                <CardContent className="p-0">
-                  {campaignsDetailedData.campaigns.length > 0 ? (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead className="bg-gray-50 dark:bg-gray-700/50">
-                          <tr>
-                            <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">
-                              Campanha
-                            </th>
-                            <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">
-                              Status
-                            </th>
-                            <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">
-                              Objetivo
-                            </th>
-                            <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">
-                              Orçamento
-                            </th>
-                            <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">
-                              Gasto
-                            </th>
-                            <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">
-                              Impressões
-                            </th>
-                            <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">
-                              Alcance
-                            </th>
-                            <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">
-                              Cliques
-                            </th>
-                            <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">
-                              CPC
-                            </th>
-                            <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">
-                              CTR
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                          {campaignsDetailedData.campaigns.map((campaign: any, index: number) => {
-                            const insights = campaign.insights?.data?.[0] || {}
-                            const spend = parseFloat(insights.spend) || 0
-                            const impressions = parseInt(insights.impressions) || 0
-                            const reach = parseInt(insights.reach) || 0
-                            const clicks = parseInt(insights.clicks) || 0
-                            const cpc = parseFloat(insights.cpc) || 0
-                            const ctr = parseFloat(insights.ctr) || 0
-                            const dailyBudget = parseFloat(campaign.daily_budget) || 0
-                            const lifetimeBudget = parseFloat(campaign.lifetime_budget) || 0
-
-                            return (
-                              <tr key={campaign.id || index} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                <td className="py-3 px-4">
-                                  <div>
-                                    <div className="font-medium text-gray-900 dark:text-white truncate max-w-[200px]">
-                                      {campaign.name || `Campanha ${index + 1}`}
-                                    </div>
-                                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                                      {campaign.ad_account_name || 'Meta Ads'}
-                                    </div>
-                                  </div>
-                                </td>
-                                <td className="py-3 px-4 text-center">
-                                  <Badge className={
-                                    campaign.effective_status === 'ACTIVE' 
-                                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                      : campaign.effective_status === 'PAUSED'
-                                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
-                                      : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                                  }>
-                                    {campaign.effective_status === 'ACTIVE' ? 'Ativa' :
-                                     campaign.effective_status === 'PAUSED' ? 'Pausada' : 'Inativa'}
-                                  </Badge>
-                                </td>
-                                <td className="py-3 px-4 text-center">
-                                  <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 rounded">
-                                    {campaign.objective || 'TRAFFIC'}
-                                  </span>
-                                </td>
-                                <td className="py-3 px-4 text-center">
-                                  <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                    {dailyBudget > 0 
-                                      ? `R$ ${dailyBudget.toFixed(2)}/dia`
-                                      : lifetimeBudget > 0 
-                                      ? `R$ ${lifetimeBudget.toFixed(2)} total`
-                                      : '--'
-                                    }
-                                  </div>
-                                </td>
-                                <td className="py-3 px-4 text-center">
-                                  <div className="text-sm font-bold text-red-600 dark:text-red-400">
-                                    R$ {spend.toFixed(2)}
-                                  </div>
-                                </td>
-                                <td className="py-3 px-4 text-center">
-                                  <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                    {impressions.toLocaleString()}
-                                  </div>
-                                </td>
-                                <td className="py-3 px-4 text-center">
-                                  <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                    {reach.toLocaleString()}
-                                  </div>
-                                </td>
-                                <td className="py-3 px-4 text-center">
-                                  <div className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                                    {clicks.toLocaleString()}
-                                  </div>
-                                </td>
-                                <td className="py-3 px-4 text-center">
-                                  <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                    R$ {cpc.toFixed(2)}
-                                  </div>
-                                </td>
-                                <td className="py-3 px-4 text-center">
-                                  <div className="text-sm font-medium text-green-600 dark:text-green-400">
-                                    {ctr.toFixed(2)}%
-                                  </div>
-                                </td>
-                              </tr>
-                            )
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <div className="w-20 h-20 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                        <Target className="w-10 h-10 text-gray-400" />
-                      </div>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                        Nenhuma campanha encontrada
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-400 mb-4">
-                        Configure o Business ID nas configurações Meta para ver campanhas publicitárias
-                      </p>
-                      <Button onClick={loadCampaignsData} variant="outline">
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        Tentar Novamente
-                      </Button>
-                    </div>
-                  )}
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Alcance Total</span>
+                    <span className="font-medium">{formatNumber((ig?.reach || 0) + (fb?.page_reach || 0))}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Impressões</span>
+                    <span className="font-medium">{formatNumber((ig?.impressions || 0) + (fb?.page_impressions || 0))}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Engajamento</span>
+                    <span className="font-medium">{formatNumber((ig?.posts_likes || 0) + (fb?.post_likes || 0))}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Cliques no Site</span>
+                    <span className="font-medium">{formatNumber(ig?.website_clicks || 0)}</span>
+                  </div>
                 </CardContent>
               </Card>
 
-              {/* Ad Accounts */}
-              {campaignsDetailedData.ad_accounts.length > 0 && (
-                <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                  <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-                    <CardTitle className="text-gray-900 dark:text-white flex items-center space-x-2">
-                      <BarChart3 className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                      <span>Contas Publicitárias</span>
-                    </CardTitle>
-                    <CardDescription className="text-gray-600 dark:text-gray-400">
-                      Informações das contas vinculadas ao Business Manager
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {campaignsDetailedData.ad_accounts.map((account: any, index: number) => (
-                        <div key={account.id || index} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-medium text-gray-900 dark:text-white truncate">
-                              {account.name || `Conta ${index + 1}`}
-                            </h4>
-                            <Badge className={
-                              account.account_status === 'ACTIVE'
-                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                            }>
-                              {account.account_status === 'ACTIVE' ? 'Ativa' : 'Inativa'}
-                            </Badge>
-                          </div>
-                          <div className="space-y-1 text-sm">
-                            <div className="flex justify-between">
-                              <span className="text-gray-600 dark:text-gray-400">ID:</span>
-                              <span className="text-gray-900 dark:text-white font-mono text-xs">
-                                {account.id?.replace('act_', '') || '--'}
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-600 dark:text-gray-400">Moeda:</span>
-                              <span className="text-gray-900 dark:text-white">
-                                {account.currency || 'BRL'}
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-600 dark:text-gray-400">Gasto:</span>
-                              <span className="text-red-600 dark:text-red-400 font-medium">
-                                {account.amount_spent ? `${account.currency || 'R$'} ${parseFloat(account.amount_spent).toFixed(2)}` : 'R$ 0,00'}
-                              </span>
-                            </div>
-                            {account.balance && (
-                              <div className="flex justify-between">
-                                <span className="text-gray-600 dark:text-gray-400">Saldo:</span>
-                                <span className="text-green-600 dark:text-green-400 font-medium">
-                                  {account.currency || 'R$'} {parseFloat(account.balance).toFixed(2)}
-                                </span>
-                              </div>
+              {/* Top Campanhas */}
+              <Card className="card-dark">
+                <CardHeader>
+                  <CardTitle className="card-title-dark">Top 5 Campanhas</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {campaigns?.stats?.top_campaigns?.map((campaign: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <div className="flex-1">
+                          <p className="font-medium text-sm truncate">{campaign.name}</p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
+                            <span>{formatNumber(campaign.impressions)} impressões</span>
+                            <span>{campaign.clicks} cliques</span>
+                            {campaign.status === 'ACTIVE' ? (
+                              <Badge className="badge-success">Ativa</Badge>
+                            ) : (
+                              <Badge variant="secondary">Pausada</Badge>
                             )}
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </>
-          )}
-        </TabsContent>
-
-        {/* Insights */}
-        <TabsContent value="insights" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-                <CardTitle className="text-gray-900 dark:text-white flex items-center space-x-2">
-                  <Lightbulb className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
-                  <span>Oportunidades de Melhoria</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
-                  <div className="flex items-start space-x-3">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-yellow-800 dark:text-yellow-300">Aumente a frequência de posts</p>
-                      <p className="text-sm text-yellow-700 dark:text-yellow-400">Postar mais conteúdo pode melhorar o engajamento em 15-25%</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
-                  <div className="flex items-start space-x-3">
-                    <Target className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-blue-800 dark:text-blue-300">Otimize horários de publicação</p>
-                      <p className="text-sm text-blue-700 dark:text-blue-400">Posts entre 18h-21h têm 40% mais engajamento</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
-                  <div className="flex items-start space-x-3">
-                    <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-green-800 dark:text-green-300">Use mais vídeos</p>
-                      <p className="text-sm text-green-700 dark:text-green-400">Conteúdo em vídeo gera 3x mais engajamento</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-                <CardTitle className="text-gray-900 dark:text-white flex items-center space-x-2">
-                  <Award className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                  <span>Próximas Ações</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                <div className="p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg">
-                  <div className="flex items-start space-x-3">
-                    <Share2 className="h-5 w-5 text-purple-600 dark:text-purple-400 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-purple-800 dark:text-purple-300">Crie campanhas para Stories</p>
-                      <p className="text-sm text-purple-700 dark:text-purple-400">Stories têm 30% mais visualizações que posts do feed</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg">
-                  <div className="flex items-start space-x-3">
-                    <MessageSquare className="h-5 w-5 text-orange-600 dark:text-orange-400 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-orange-800 dark:text-orange-300">Responda mais comentários</p>
-                      <p className="text-sm text-orange-700 dark:text-orange-400">Interação direta aumenta o alcance orgânico</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 rounded-lg">
-                  <div className="flex items-start space-x-3">
-                    <Users className="h-5 w-5 text-indigo-600 dark:text-indigo-400 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-indigo-800 dark:text-indigo-300">Faça parcerias com influencers</p>
-                      <p className="text-sm text-indigo-700 dark:text-indigo-400">Micro-influencers têm até 60% mais engajamento</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* Análise Diária */}
-        <TabsContent value="daily" className="space-y-6">
-          {dailyLoading && (
-            <div className="flex items-center justify-center py-8">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600 dark:text-gray-400">Carregando análise diária...</p>
-              </div>
-            </div>
-          )}
-
-          {!dailyLoading && (
-            <>
-              {/* Comparações Principais */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {dailyData.comparisons.map((comparison, index) => (
-                  <Card key={index} className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">{comparison.period}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Seguidores</span>
-                        <div className="flex items-center space-x-2">
-                          <span className={`text-lg font-bold ${
-                            comparison.followers_change > 0 ? 'text-green-600 dark:text-green-400' :
-                            comparison.followers_change < 0 ? 'text-red-600 dark:text-red-400' :
-                            'text-gray-600 dark:text-gray-400'
-                          }`}>
-                            {comparison.followers_change > 0 ? '+' : ''}{comparison.followers_change}
-                          </span>
-                          <span className={`text-sm ${
-                            comparison.followers_percent > 0 ? 'text-green-600 dark:text-green-400' :
-                            comparison.followers_percent < 0 ? 'text-red-600 dark:text-red-400' :
-                            'text-gray-600 dark:text-gray-400'
-                          }`}>
-                            ({comparison.followers_percent > 0 ? '+' : ''}{comparison.followers_percent.toFixed(2)}%)
-                          </span>
+                        <div className="text-right">
+                          <p className="font-bold text-sm">{formatCurrency(campaign.spend)}</p>
+                          {campaign.cpc > 0 && (
+                            <p className="text-xs text-gray-500">CPC: {formatCurrency(campaign.cpc)}</p>
+                          )}
                         </div>
                       </div>
-                      
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Alcance</span>
-                        <span className={`text-lg font-bold ${
-                          comparison.reach_change > 0 ? 'text-green-600 dark:text-green-400' :
-                          comparison.reach_change < 0 ? 'text-red-600 dark:text-red-400' :
-                          'text-gray-600 dark:text-gray-400'
-                        }`}>
-                          {comparison.reach_change > 0 ? '+' : ''}{formatNumber(comparison.reach_change)}
-                        </span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Engajamento</span>
-                        <span className={`text-lg font-bold ${
-                          comparison.engagement_change > 0 ? 'text-green-600 dark:text-green-400' :
-                          comparison.engagement_change < 0 ? 'text-red-600 dark:text-red-400' :
-                          'text-gray-600 dark:text-gray-400'
-                        }`}>
-                          {comparison.engagement_change > 0 ? '+' : ''}{comparison.engagement_change}
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                    )) || (
+                      <p className="text-gray-500 text-center py-4">Nenhuma campanha encontrada</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
-              {/* Histórico dos Últimos Dias */}
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-                  <CardTitle className="text-gray-900 dark:text-white flex items-center space-x-2">
-                    <Calendar className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                    <span>Histórico dos Últimos Dias</span>
-                  </CardTitle>
-                  <CardDescription className="text-gray-600 dark:text-gray-400">
-                    Evolução diária dos principais indicadores
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b border-gray-200 dark:border-gray-700">
-                          <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Data</th>
-                          <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">Facebook</th>
-                          <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">Instagram</th>
-                          <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">Total</th>
-                          <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">Alcance</th>
-                          <th className="text-center py-3 px-4 font-medium text-gray-900 dark:text-white">Engajamento</th>
+          {/* Campanhas */}
+          <TabsContent value="campaigns" className="space-y-6">
+            <Card className="card-dark">
+              <CardHeader>
+                <CardTitle className="card-title-dark">Todas as Campanhas ({campaigns?.list?.length || 0})</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200 dark:border-gray-700">
+                        <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Nome</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Status</th>
+                        <th className="text-right py-3 px-4 font-medium text-gray-900 dark:text-white">Gasto</th>
+                        <th className="text-right py-3 px-4 font-medium text-gray-900 dark:text-white">Impressões</th>
+                        <th className="text-right py-3 px-4 font-medium text-gray-900 dark:text-white">Alcance</th>
+                        <th className="text-right py-3 px-4 font-medium text-gray-900 dark:text-white">Cliques</th>
+                        <th className="text-right py-3 px-4 font-medium text-gray-900 dark:text-white">CTR</th>
+                        <th className="text-right py-3 px-4 font-medium text-gray-900 dark:text-white">CPC</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {campaigns?.list?.map((campaign: any, index: number) => (
+                        <tr key={index} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                          <td className="py-3 px-4">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white text-sm">{campaign.campaign_name}</p>
+                              <p className="text-xs text-gray-500">{campaign.objective}</p>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            {campaign.effective_status === 'ACTIVE' ? (
+                              <Badge className="badge-success">Ativa</Badge>
+                            ) : campaign.effective_status === 'PAUSED' ? (
+                              <Badge className="badge-warning">Pausada</Badge>
+                            ) : (
+                              <Badge variant="secondary">{campaign.effective_status}</Badge>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 text-right font-medium">{formatCurrency(parseFloat(campaign.spend || 0))}</td>
+                          <td className="py-3 px-4 text-right">{formatNumber(parseInt(campaign.impressions || 0))}</td>
+                          <td className="py-3 px-4 text-right">{formatNumber(parseInt(campaign.reach || 0))}</td>
+                          <td className="py-3 px-4 text-right">{formatNumber(parseInt(campaign.clicks || 0))}</td>
+                          <td className="py-3 px-4 text-right">{(parseFloat(campaign.ctr || 0)).toFixed(2)}%</td>
+                          <td className="py-3 px-4 text-right">{formatCurrency(parseFloat(campaign.cpc || 0))}</td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {dailyData.days.slice(0, 7).map((day, index) => (
-                          <tr key={day.date} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                            <td className="py-3 px-4 text-gray-900 dark:text-white font-medium">
-                              {new Date(day.date).toLocaleDateString('pt-BR', { 
-                                day: '2-digit', 
-                                month: 'short' 
-                              })}
-                            </td>
-                            <td className="py-3 px-4 text-center text-gray-700 dark:text-gray-300">
-                              {formatNumber(day.fb_followers)}
-                            </td>
-                            <td className="py-3 px-4 text-center text-gray-700 dark:text-gray-300">
-                              {formatNumber(day.ig_followers)}
-                            </td>
-                            <td className="py-3 px-4 text-center font-medium text-gray-900 dark:text-white">
-                              {formatNumber(day.fb_followers + day.ig_followers)}
-                            </td>
-                            <td className="py-3 px-4 text-center text-gray-700 dark:text-gray-300">
-                              {formatNumber(day.total_reach)}
-                            </td>
-                            <td className="py-3 px-4 text-center text-gray-700 dark:text-gray-300">
-                              {day.engajamento}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                      )) || (
+                        <tr>
+                          <td colSpan={8} className="py-8 text-center text-gray-500">
+                            Nenhuma campanha encontrada
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Redes Sociais */}
+          <TabsContent value="social" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Facebook */}
+              <Card className="card-dark">
+                <CardHeader>
+                  <CardTitle className="card-title-dark flex items-center gap-2">
+                    <Facebook className="w-5 h-5 text-blue-600" />
+                    Facebook
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Seguidores</p>
+                      <p className="text-2xl font-bold">{formatNumber(fb?.page_fans || 0)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Falando sobre</p>
+                      <p className="text-2xl font-bold">{formatNumber(fb?.talking_about_count || 0)}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm">Alcance da página</span>
+                      <span className="font-medium">{formatNumber(fb?.page_reach || 0)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Impressões</span>
+                      <span className="font-medium">{formatNumber(fb?.page_impressions || 0)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Likes nos posts</span>
+                      <span className="font-medium">{formatNumber(fb?.post_likes || 0)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Comentários</span>
+                      <span className="font-medium">{formatNumber(fb?.post_comments || 0)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Check-ins</span>
+                      <span className="font-medium">{formatNumber(fb?.checkins || 0)}</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Tendências e Insights */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                  <CardHeader className="text-center">
-                    <CardTitle className="text-gray-900 dark:text-white flex items-center justify-center space-x-2">
-                      <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                      <span>Seguidores</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-center">
-                    <div className={`text-4xl font-bold mb-2 ${
-                      dailyData.trends.followers_trend === 'growing' ? 'text-green-600 dark:text-green-400' :
-                      dailyData.trends.followers_trend === 'falling' ? 'text-red-600 dark:text-red-400' :
-                      'text-gray-600 dark:text-gray-400'
-                    }`}>
-                      {dailyData.trends.followers_trend === 'growing' ? '📈' : 
-                       dailyData.trends.followers_trend === 'falling' ? '📉' : '➡️'}
+              {/* Instagram */}
+              <Card className="card-dark">
+                <CardHeader>
+                  <CardTitle className="card-title-dark flex items-center gap-2">
+                    <Instagram className="w-5 h-5 text-pink-600" />
+                    Instagram
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Seguidores</p>
+                      <p className="text-2xl font-bold">{formatNumber(ig?.follower_count || 0)}</p>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {dailyData.trends.followers_trend === 'growing' ? 'Crescimento' : 
-                       dailyData.trends.followers_trend === 'falling' ? 'Declínio' : 'Estável'}
-                    </p>
-                  </CardContent>
-                </Card>
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Posts</p>
+                      <p className="text-2xl font-bold">{formatNumber(ig?.media_count || 0)}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm">Alcance</span>
+                      <span className="font-medium">{formatNumber(ig?.reach || 0)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Impressões</span>
+                      <span className="font-medium">{formatNumber(ig?.impressions || 0)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Visualizações do perfil</span>
+                      <span className="font-medium">{formatNumber(ig?.profile_views || 0)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Cliques no site</span>
+                      <span className="font-medium">{formatNumber(ig?.website_clicks || 0)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Likes nos posts</span>
+                      <span className="font-medium">{formatNumber(ig?.posts_likes || 0)}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
-                <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                  <CardHeader className="text-center">
-                    <CardTitle className="text-gray-900 dark:text-white flex items-center justify-center space-x-2">
-                      <Heart className="h-5 w-5 text-pink-600 dark:text-pink-400" />
-                      <span>Engajamento</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-center">
-                    <div className={`text-4xl font-bold mb-2 ${
-                      dailyData.trends.engagement_trend === 'growing' ? 'text-green-600 dark:text-green-400' :
-                      dailyData.trends.engagement_trend === 'falling' ? 'text-red-600 dark:text-red-400' :
-                      'text-gray-600 dark:text-gray-400'
-                    }`}>
-                      {dailyData.trends.engagement_trend === 'growing' ? '💚' : 
-                       dailyData.trends.engagement_trend === 'falling' ? '💔' : '💛'}
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {dailyData.trends.engagement_trend === 'growing' ? 'Aumentando' : 
-                       dailyData.trends.engagement_trend === 'falling' ? 'Diminuindo' : 'Estável'}
-                    </p>
-                  </CardContent>
-                </Card>
+          {/* Analytics */}
+          <TabsContent value="analytics" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Métricas de Campanhas */}
+              <Card className="card-dark">
+                <CardHeader>
+                  <CardTitle className="card-title-dark">Métricas de Campanhas</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-sm">Total de campanhas</span>
+                    <span className="font-bold">{campaigns?.stats?.total_campaigns || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Campanhas ativas</span>
+                    <span className="font-bold text-green-600">{campaigns?.stats?.active_campaigns || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Gasto total</span>
+                    <span className="font-bold">{formatCurrency(campaigns?.stats?.total_spend || 0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Impressões totais</span>
+                    <span className="font-bold">{formatNumber(campaigns?.stats?.total_impressions || 0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Cliques totais</span>
+                    <span className="font-bold">{formatNumber(campaigns?.stats?.total_clicks || 0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">CPM médio</span>
+                    <span className="font-bold">
+                      {campaigns?.stats?.total_impressions > 0 
+                        ? formatCurrency((campaigns.stats.total_spend / campaigns.stats.total_impressions) * 1000)
+                        : 'R$ 0,00'
+                      }
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
 
-                <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                  <CardHeader className="text-center">
-                    <CardTitle className="text-gray-900 dark:text-white flex items-center justify-center space-x-2">
-                      <Eye className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                      <span>Alcance</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-center">
-                    <div className={`text-4xl font-bold mb-2 ${
-                      dailyData.trends.reach_trend === 'growing' ? 'text-green-600 dark:text-green-400' :
-                      dailyData.trends.reach_trend === 'falling' ? 'text-red-600 dark:text-red-400' :
-                      'text-gray-600 dark:text-gray-400'
-                    }`}>
-                      {dailyData.trends.reach_trend === 'growing' ? '🚀' : 
-                       dailyData.trends.reach_trend === 'falling' ? '📉' : '🔄'}
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {dailyData.trends.reach_trend === 'growing' ? 'Expandindo' : 
-                       dailyData.trends.reach_trend === 'falling' ? 'Contraindo' : 'Estável'}
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-            </>
-          )}
-        </TabsContent>
-      </Tabs>
+              {/* Engajamento */}
+              <Card className="card-dark">
+                <CardHeader>
+                  <CardTitle className="card-title-dark">Engajamento</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-sm">Likes (FB + IG)</span>
+                    <span className="font-bold">{formatNumber((fb?.post_likes || 0) + (ig?.posts_likes || 0))}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Comentários (FB + IG)</span>
+                    <span className="font-bold">{formatNumber((fb?.post_comments || 0) + (ig?.posts_comments || 0))}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Compartilhamentos (FB)</span>
+                    <span className="font-bold">{formatNumber(fb?.post_shares || 0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Saves (IG)</span>
+                    <span className="font-bold">{formatNumber(ig?.posts_saves || 0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Taxa de engajamento</span>
+                    <span className="font-bold">
+                      {((fb?.post_likes || 0) + (ig?.posts_likes || 0) + (fb?.post_comments || 0) + (ig?.posts_comments || 0)) > 0 &&
+                       ((fb?.page_fans || 0) + (ig?.follower_count || 0)) > 0
+                        ? (((fb?.post_likes || 0) + (ig?.posts_likes || 0) + (fb?.post_comments || 0) + (ig?.posts_comments || 0)) / 
+                           ((fb?.page_fans || 0) + (ig?.follower_count || 0)) * 100).toFixed(2) + '%'
+                        : '0%'
+                      }
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Alcance e Impressões */}
+              <Card className="card-dark">
+                <CardHeader>
+                  <CardTitle className="card-title-dark">Alcance & Impressões</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-sm">Alcance Facebook</span>
+                    <span className="font-bold">{formatNumber(fb?.page_reach || 0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Alcance Instagram</span>
+                    <span className="font-bold">{formatNumber(ig?.reach || 0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Impressões Facebook</span>
+                    <span className="font-bold">{formatNumber(fb?.page_impressions || 0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Impressões Instagram</span>
+                    <span className="font-bold">{formatNumber(ig?.impressions || 0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Alcance das Campanhas</span>
+                    <span className="font-bold">{formatNumber(campaigns?.stats?.total_reach || 0)}</span>
+                  </div>
+                  <div className="flex justify-between border-t pt-2">
+                    <span className="text-sm font-medium">Alcance Total</span>
+                    <span className="font-bold text-blue-600">
+                      {formatNumber((fb?.page_reach || 0) + (ig?.reach || 0) + (campaigns?.stats?.total_reach || 0))}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   )
 } 

@@ -828,7 +828,7 @@ async function enviarNotificacaoDiscord(supabase: any, resultado: any, facebookD
           },
           {
             name: '🎯 Campanhas',
-            value: `**${campaignsData?.summary?.total_campaigns || 0}** campanhas\n**${campaignsData?.summary?.active_campaigns || 0}** ativas\n**R$ ${campaignsData?.campaigns?.reduce((sum: number, c: any) => sum + (parseFloat(c.insights?.spend || 0)), 0).toFixed(2) || '0.00'}** gasto`,
+            value: `**${campaignsData?.totals?.total_campaigns || 0}** campanhas\n**${campaignsData?.totals?.active_campaigns || 0}** ativas\n**R$ ${campaignsData?.totals?.total_spend?.toFixed(2) || '0.00'}** gasto`,
             inline: true
           },
           {
