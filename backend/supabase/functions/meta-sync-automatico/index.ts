@@ -114,6 +114,25 @@ serve(async (req) => {
 
     console.log('🔑 Credenciais Meta encontradas - Page ID:', metaConfig.page_id)
 
+    // 0. VERIFICAR ACESSO ÀS PÁGINAS PRIMEIRO
+    console.log('🔍 Verificando páginas acessíveis...')
+    try {
+      const pagesUrl = `https://graph.facebook.com/v18.0/me/accounts?access_token=${metaConfig.access_token}`
+      const pagesResponse = await fetch(pagesUrl)
+      if (pagesResponse.ok) {
+        const pagesData = await pagesResponse.json()
+        console.log('📄 Páginas acessíveis:', pagesData.data?.map((p: any) => `${p.id}: ${p.name}`))
+        const hasAccess = pagesData.data?.some((p: any) => p.id === metaConfig.page_id)
+        console.log(`🎯 Acesso à página ${metaConfig.page_id}: ${hasAccess ? '✅' : '❌'}`)
+        
+        if (!hasAccess) {
+          console.warn(`⚠️ Token não tem acesso à página ${metaConfig.page_id}`)
+        }
+      }
+    } catch (e) {
+      console.warn('⚠️ Erro ao verificar páginas acessíveis:', e)
+    }
+
     // 1. COLETAR DADOS DO FACEBOOK
     console.log('📘 Coletando dados do Facebook...')
     const facebookData = await coletarDadosFacebook(metaConfig)
@@ -176,13 +195,20 @@ serve(async (req) => {
 async function coletarDadosFacebook(config: MetaCredentials) {
   try {
     console.log('📊 Buscando dados COMPLETOS da página Facebook...')
+    console.log(`🎯 Page ID: ${config.page_id}`)
+    console.log(`🔑 Token length: ${config.access_token.length}`)
     
     // Dados básicos da página EXPANDIDOS
     const pageUrl = `https://graph.facebook.com/${CONFIG.FACEBOOK_API_VERSION}/${config.page_id}?fields=followers_count,fan_count,name,about,website,phone,category_list,checkins,talking_about_count,were_here_count,new_like_count,overall_star_rating,rating_count,cover,picture&access_token=${config.access_token}`
+    console.log(`📡 Request URL: ${pageUrl.replace(config.access_token, 'TOKEN_HIDDEN')}`)
+    
     const pageResponse = await fetch(pageUrl)
+    console.log(`📊 Response status: ${pageResponse.status}`)
     
     if (!pageResponse.ok) {
-      throw new Error(`Erro ao buscar dados da página: ${pageResponse.status}`)
+      const errorText = await pageResponse.text()
+      console.log(`❌ Error response: ${errorText}`)
+      throw new Error(`Erro ao buscar dados da página: ${pageResponse.status} - ${errorText}`)
     }
     
     const pageData = await pageResponse.json()
