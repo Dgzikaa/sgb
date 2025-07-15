@@ -14,6 +14,7 @@ interface Usuario {
 interface UserContextData {
   user: Usuario | null
   loading: boolean
+  isInitialized: boolean
   updateUser: (userData: Usuario) => void
   updatePermissions: (newPermissions: string[]) => void
   refreshUser: () => Promise<void>
@@ -25,6 +26,7 @@ const UserContext = createContext<UserContextData>({} as UserContextData)
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<Usuario | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isInitialized, setIsInitialized] = useState(false)
 
   // Carregar dados do usuário ao inicializar
   useEffect(() => {
@@ -41,6 +43,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     // Check if we're on the client side
     if (typeof window === 'undefined') {
       setLoading(false)
+      setIsInitialized(true)
       return
     }
 
@@ -48,12 +51,28 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       const userData = localStorage.getItem('sgb_user')
       if (userData) {
         const parsedUser = JSON.parse(userData)
-        setUser(parsedUser)
+        
+        // Validar se os dados do usuário são válidos
+        if (parsedUser && parsedUser.id && parsedUser.email && parsedUser.nome) {
+          setUser(parsedUser)
+          console.log('✅ Dados do usuário carregados:', parsedUser.nome)
+        } else {
+          console.log('⚠️ Dados do usuário inválidos, limpando localStorage')
+          localStorage.removeItem('sgb_user')
+          setUser(null)
+        }
+      } else {
+        console.log('🔍 Nenhum usuário encontrado no localStorage')
+        setUser(null)
       }
     } catch (error) {
-      console.error('Erro ao carregar dados do usuário:', error)
+      console.error('❌ Erro ao carregar dados do usuário:', error)
+      // Limpar dados corrompidos
+      localStorage.removeItem('sgb_user')
+      setUser(null)
     } finally {
       setLoading(false)
+      setIsInitialized(true)
     }
   }
 

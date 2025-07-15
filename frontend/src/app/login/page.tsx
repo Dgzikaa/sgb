@@ -243,23 +243,22 @@ export default function LoginPage() {
       <div className="w-full max-w-md" suppressHydrationWarning>
         {/* Logo e Header */}
         <div className="text-center mb-12" suppressHydrationWarning>
-          <div className="inline-flex items-center justify-center w-24 h-24 lg:w-32 lg:h-32 mb-6" suppressHydrationWarning>
+          <div className="inline-flex items-center justify-center w-32 h-32 lg:w-48 lg:h-48 mb-6" suppressHydrationWarning>
             {!logoError ? (
               <img 
                 src="/logos/logo_640x640.png" 
                 alt="SGB Logo" 
-                className="w-24 h-24 lg:w-32 lg:h-32 rounded-2xl shadow-lg object-cover"
+                className="w-32 h-32 lg:w-48 lg:h-48 rounded-2xl shadow-lg object-cover"
                 onError={() => setLogoError(true)}
               />
             ) : (
-              <div className="w-24 h-24 lg:w-32 lg:h-32 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg" suppressHydrationWarning>
-                <span className="text-3xl lg:text-4xl text-white">🏪</span>
+              <div className="w-32 h-32 lg:w-48 lg:h-48 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg" suppressHydrationWarning>
+                <span className="text-5xl lg:text-6xl text-white">🏪</span>
               </div>
             )}
           </div>
           <h1 className="text-4xl lg:text-5xl font-bold text-slate-800 dark:text-white mb-3">SGB</h1>
           <p className="text-slate-600 dark:text-gray-300 text-lg lg:text-xl font-medium">Sistema de Gestão de Bares</p>
-          <p className="text-sm lg:text-base text-slate-400 dark:text-gray-500 mt-2">Grupo Menos é Mais</p>
         </div>
 
         {/* Configuração de biometria pós-login */}
