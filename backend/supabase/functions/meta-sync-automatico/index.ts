@@ -113,13 +113,17 @@ serve(async (req) => {
     console.log('📸 Coletando dados do Instagram...')
     const instagramData = await coletarDadosInstagram(metaConfig)
     
-    // 3. SALVAR NO BANCO
-    console.log('💾 Salvando dados no banco...')
-    const resultadoSalvamento = await salvarDadosNoBanco(supabase, facebookData, instagramData, BAR_ID)
+    // 3. COLETAR CAMPANHAS
+    console.log('🎯 Coletando campanhas Meta...')
+    const campaignsData = await coletarCampanhas(metaConfig, BAR_ID, supabase)
     
-    // 4. ENVIAR NOTIFICAÇÃO DISCORD
+    // 4. SALVAR NO BANCO
+    console.log('💾 Salvando dados no banco...')
+    const resultadoSalvamento = await salvarDadosNoBanco(supabase, facebookData, instagramData, campaignsData, BAR_ID)
+    
+    // 5. ENVIAR NOTIFICAÇÃO DISCORD
     console.log('📤 Enviando notificação para Discord...')
-    await enviarNotificacaoDiscord(supabase, resultadoSalvamento, facebookData, instagramData, BAR_ID)
+    await enviarNotificacaoDiscord(supabase, resultadoSalvamento, facebookData, instagramData, campaignsData, BAR_ID)
 
     return new Response(JSON.stringify({
       success: true,
@@ -127,6 +131,7 @@ serve(async (req) => {
       bar_id: BAR_ID,
       facebook_data: facebookData,
       instagram_data: instagramData,
+      campaigns_data: campaignsData,
       resultado_salvamento: resultadoSalvamento,
       message: '✅ Sync Meta executado com sucesso!'
     }), {
@@ -251,7 +256,114 @@ async function coletarDadosInstagram(config: MetaCredentials) {
   }
 }
 
-async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramData: any, barId: number) {
+async function coletarCampanhas(config: MetaCredentials, barId: number, supabase: any) {
+  try {
+    console.log('🎯 Buscando campanhas ativas Meta...')
+    
+    // Buscar configurações de ad account
+    const { data: credenciais } = await supabase
+      .from('api_credentials')
+      .select('configuracoes')
+      .eq('sistema', 'meta')
+      .eq('bar_id', barId)
+      .single()
+    
+    if (!credenciais?.configuracoes?.business_id) {
+      console.log('⚠️ Business ID não configurado, saltando campanhas')
+      return { campaigns: [], ad_accounts: [], message: 'Business ID não configurado' }
+    }
+    
+    const businessId = credenciais.configuracoes.business_id
+    console.log(`🏢 Usando Business ID: ${businessId}`)
+    
+    // Buscar ad accounts do business
+    const adAccountsUrl = `https://graph.facebook.com/v18.0/${businessId}/owned_ad_accounts?fields=id,name,account_status,currency,timezone_name&access_token=${config.access_token}`
+    const adAccountsResponse = await fetch(adAccountsUrl)
+    
+        if (!adAccountsResponse.ok) {
+      const error: any = await adAccountsResponse.json()
+      console.log('⚠️ Erro ao buscar ad accounts:', error)
+      return { campaigns: [], ad_accounts: [], error: error.error }
+    }
+    
+    const adAccountsData = await adAccountsResponse.json()
+    const adAccounts = adAccountsData.data || []
+    console.log(`📊 Encontradas ${adAccounts.length} ad accounts`)
+    
+    if (adAccounts.length === 0) {
+      return { campaigns: [], ad_accounts: [], message: 'Nenhuma ad account encontrada' }
+    }
+    
+    // Coletar campanhas de todas as ad accounts
+    const allCampaigns = []
+    
+    for (const adAccount of adAccounts) {
+      try {
+        console.log(`🎯 Coletando campanhas da conta: ${adAccount.id}`)
+        
+        const campaignsUrl = `https://graph.facebook.com/v18.0/${adAccount.id}/campaigns?fields=id,name,status,effective_status,objective,start_time,stop_time,daily_budget,lifetime_budget,created_time,updated_time&access_token=${config.access_token}`
+        const campaignsResponse = await fetch(campaignsUrl)
+        
+        if (campaignsResponse.ok) {
+          const campaignsData = await campaignsResponse.json()
+          const campaigns = campaignsData.data || []
+          
+          // Para cada campanha, buscar insights se estiver ativa
+          for (const campaign of campaigns) {
+            campaign.ad_account_id = adAccount.id
+            campaign.ad_account_name = adAccount.name
+            
+            if (campaign.effective_status === 'ACTIVE') {
+              try {
+                // Buscar insights da campanha (últimos 7 dias)
+                const insightsUrl = `https://graph.facebook.com/v18.0/${campaign.id}/insights?fields=impressions,reach,clicks,ctr,cpc,spend,actions,conversions&date_preset=last_7d&access_token=${config.access_token}`
+                const insightsResponse = await fetch(insightsUrl)
+                
+                if (insightsResponse.ok) {
+                  const insightsData = await insightsResponse.json()
+                  campaign.insights = insightsData.data?.[0] || {}
+                  console.log(`📈 Insights coletados para campanha: ${campaign.name}`)
+                } else {
+                  console.log(`⚠️ Insights não disponíveis para campanha: ${campaign.name}`)
+                  campaign.insights = {}
+                }
+              } catch (insightError) {
+                console.log(`⚠️ Erro ao buscar insights da campanha ${campaign.name}:`, insightError)
+                campaign.insights = {}
+              }
+            }
+          }
+          
+          allCampaigns.push(...campaigns)
+          console.log(`✅ ${campaigns.length} campanhas coletadas da conta ${adAccount.name}`)
+        } else {
+          console.log(`⚠️ Erro ao buscar campanhas da conta ${adAccount.id}:`, await campaignsResponse.text())
+        }
+      } catch (accountError) {
+        console.log(`❌ Erro ao processar account ${adAccount.id}:`, accountError)
+      }
+    }
+    
+    console.log(`🎯 Total de campanhas coletadas: ${allCampaigns.length}`)
+    
+    return {
+      campaigns: allCampaigns,
+      ad_accounts: adAccounts,
+      timestamp: new Date().toISOString(),
+      summary: {
+        total_campaigns: allCampaigns.length,
+        active_campaigns: allCampaigns.filter(c => c.effective_status === 'ACTIVE').length,
+        paused_campaigns: allCampaigns.filter(c => c.effective_status === 'PAUSED').length
+      }
+    }
+    
+  } catch (error: any) {
+    console.error('❌ Erro ao coletar campanhas:', error)
+    return { campaigns: [], ad_accounts: [], error: error.message }
+  }
+}
+
+async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramData: any, campaignsData: any, barId: number) {
   try {
     const hoje = new Date().toISOString().split('T')[0]
     
@@ -324,6 +436,64 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
       })
       .select()
     
+    // CAMPANHAS: Salvar dados de campanhas se existirem
+    let campaignsSuccess = false
+    let campaignsError = null
+    let campaignsSaved = 0
+    
+    if (campaignsData && campaignsData.campaigns && campaignsData.campaigns.length > 0) {
+      console.log(`🎯 Salvando ${campaignsData.campaigns.length} campanhas...`)
+      
+      // Preparar dados para inserção
+      const campaignsToInsert = campaignsData.campaigns.map((campaign: any) => ({
+        bar_id: barId,
+        campaign_id: campaign.id,
+        campaign_name: campaign.name,
+        ad_account_id: campaign.ad_account_id,
+        status: campaign.status,
+        effective_status: campaign.effective_status,
+        objective: campaign.objective,
+        start_time: campaign.start_time || null,
+        stop_time: campaign.stop_time || null,
+        daily_budget: campaign.daily_budget ? parseFloat(campaign.daily_budget) : null,
+        lifetime_budget: campaign.lifetime_budget ? parseFloat(campaign.lifetime_budget) : null,
+        impressions: campaign.insights?.impressions ? parseInt(campaign.insights.impressions) : 0,
+        reach: campaign.insights?.reach ? parseInt(campaign.insights.reach) : 0,
+        clicks: campaign.insights?.clicks ? parseInt(campaign.insights.clicks) : 0,
+        ctr: campaign.insights?.ctr ? parseFloat(campaign.insights.ctr) : null,
+        cpc: campaign.insights?.cpc ? parseFloat(campaign.insights.cpc) : null,
+        spend: campaign.insights?.spend ? parseFloat(campaign.insights.spend) : 0,
+        actions_count: campaign.insights?.actions?.length || 0,
+        conversions: campaign.insights?.conversions ? parseInt(campaign.insights.conversions) : 0,
+        data_coleta: hoje,
+        raw_data: campaign
+      }))
+      
+      // Delete existente + Insert novo para campanhas
+      await supabase
+        .from('meta_campaigns_history')
+        .delete()
+        .eq('bar_id', barId)
+        .eq('data_coleta', hoje)
+      
+      const { data: campaignsData_result, error: campaignsError_result } = await supabase
+        .from('meta_campaigns_history')
+        .insert(campaignsToInsert)
+        .select()
+      
+      campaignsSuccess = !campaignsError_result && campaignsData_result && campaignsData_result.length > 0
+      campaignsError = campaignsError_result
+      campaignsSaved = campaignsData_result?.length || 0
+      
+      if (campaignsError_result) {
+        console.error('❌ Erro ao salvar campanhas:', campaignsError_result)
+      } else {
+        console.log(`✅ ${campaignsSaved} campanhas salvas com sucesso`)
+      }
+    } else {
+      console.log('⚠️ Nenhuma campanha para salvar')
+    }
+    
     // Verificar resultados
     const fbSuccess = !fbError && fbData && fbData.length > 0
     const igSuccess = !igError && igData && igData.length > 0
@@ -340,11 +510,12 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
       console.log('✅ Dados Instagram salvos com sucesso:', igData)
     }
     
-    console.log(`📊 Resultado final: Facebook=${fbSuccess}, Instagram=${igSuccess}`)
+    console.log(`📊 Resultado final: Facebook=${fbSuccess}, Instagram=${igSuccess}, Campanhas=${campaignsSuccess}`)
     
     return {
       facebook_saved: fbSuccess,
       instagram_saved: igSuccess,
+      campaigns_saved: campaignsSuccess,
       facebook_metrics: {
         page_fans: facebookData.page_info?.fan_count || 0,
         post_likes: fbLikes,
@@ -357,8 +528,14 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
         posts_likes: igLikes,
         posts_comments: igComments
       },
+      campaigns_metrics: {
+        total_campaigns: campaignsData?.summary?.total_campaigns || 0,
+        active_campaigns: campaignsData?.summary?.active_campaigns || 0,
+        campaigns_saved: campaignsSaved
+      },
       facebook_error: fbError?.message || null,
       instagram_error: igError?.message || null,
+      campaigns_error: campaignsError?.message || null,
       facebook_data: fbData,
       instagram_data: igData
     }
@@ -369,7 +546,7 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
   }
 }
 
-async function enviarNotificacaoDiscord(supabase: any, resultado: any, facebookData: any, instagramData: any, barId: number) {
+async function enviarNotificacaoDiscord(supabase: any, resultado: any, facebookData: any, instagramData: any, campaignsData: any, barId: number) {
   try {
     // Obter webhook correto do Discord para Meta
     const webhookUrl = await getWebhookUrl(supabase, barId, 'meta')
@@ -407,8 +584,13 @@ async function enviarNotificacaoDiscord(supabase: any, resultado: any, facebookD
             inline: true
           },
           {
+            name: '🎯 Campanhas',
+            value: `**${campaignsData?.summary?.total_campaigns || 0}** campanhas\n**${campaignsData?.summary?.active_campaigns || 0}** ativas\n**R$ ${campaignsData?.campaigns?.reduce((sum: number, c: any) => sum + (parseFloat(c.insights?.spend || 0)), 0).toFixed(2) || '0.00'}** gasto`,
+            inline: true
+          },
+          {
             name: '💾 Status Salvamento',
-            value: `Facebook: ${resultado.facebook_saved ? '✅' : '❌'}\nInstagram: ${resultado.instagram_saved ? '✅' : '❌'}`,
+            value: `Facebook: ${resultado.facebook_saved ? '✅' : '❌'}\nInstagram: ${resultado.instagram_saved ? '✅' : '❌'}\nCampanhas: ${resultado.campaigns_saved ? '✅' : '❌'}`,
             inline: true
           }
         ],

@@ -1,533 +1,428 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useBar } from '@/contexts/BarContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { PageText } from '@/components/ui/page-base'
-import { 
-  CalendarDays, 
-  TrendingUp, 
-  DollarSign, 
-  Users, 
-  Clock, 
-  ShoppingCart, 
-  BarChart3, 
-  Target,
-  Utensils,
-  Music,
-  AlertCircle,
-  CheckCircle,
+import { Progress } from '@/components/ui/progress'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { usePageTitle } from '@/contexts/PageTitleContext'
+import {
+  TrendingUp,
+  TrendingDown,
+  Calendar,
+  Users,
+  Heart,
+  MessageSquare,
+  Eye,
+  ArrowUp,
+  ArrowDown,
   RefreshCw,
-  Calendar
+  Instagram,
+  Facebook,
+  Target,
+  Zap,
+  Award,
+  AlertTriangle,
+  CheckCircle,
+  Activity
 } from 'lucide-react'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
 
-interface MetricasDiarias {
-  faturamento_atual: number
-  faturamento_ontem: number
-  faturamento_semana_passada: number
-  clientes_atual: number
-  clientes_ontem: number
-  ticket_medio: number
-  ticket_meta: number
-  horario_pico: string
-  ultima_venda: string
-  mesa_mais_ativa?: string
-  forma_pagamento_principal?: string
-  previsao_dia?: number
-  vendas_por_hora: { hora: string; valor: number; clientes: number }[]
-  reservas_hoje: {
-    total: number
-    confirmadas: number
-    canceladas: number
-    checkin: number
+interface DailyAnalysisData {
+  period: {
+    start_date: string
+    end_date: string
+    days_analyzed: number
   }
-  evento_hoje: {
-    nome: string
-    artista: string
-    horario: string
-    capacidade: number
-    publico_esperado: number
-  } | null
-  producao_hoje: {
-    pratos_produzidos: number
-    tempo_medio_preparo: string
-    estoque_critico: string[]
+  daily_variations: {
+    daily_changes: Record<string, any>
+    avg_daily_engagement: number
+    follower_growth_total: number
+    best_day: string | null
+    worst_day: string | null
   }
-  alertas: {
-    tipo: 'info' | 'warning' | 'error'
-    mensagem: string
-    timestamp: string
-  }[]
+  platform_analysis: {
+    instagram: any
+    facebook: any
+    insights: any
+  }
+  trends_and_insights: Array<{
+    type: string
+    category: string
+    title: string
+    description: string
+    value: number
+    recommendation: string
+  }>
+  summary: {
+    total_posts_period: number
+    avg_daily_engagement: number
+    follower_growth: number
+    best_performing_day: string | null
+    worst_performing_day: string | null
+  }
 }
 
-function DashboardDiarioContent() {
-  const { selectedBar } = useBar()
+export default function DiarioPage() {
+  const { setPageTitle } = usePageTitle()
+  const [data, setData] = useState<DailyAnalysisData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [metricas, setMetricas] = useState<MetricasDiarias>({
-    faturamento_atual: 0,
-    faturamento_ontem: 0,
-    faturamento_semana_passada: 0,
-    clientes_atual: 0,
-    clientes_ontem: 0,
-    ticket_medio: 0,
-    ticket_meta: 45,
-    horario_pico: '21:00',
-    ultima_venda: 'Há 2 minutos',
-    vendas_por_hora: [],
-    reservas_hoje: { total: 0, confirmadas: 0, canceladas: 0, checkin: 0 },
-    evento_hoje: null,
-    producao_hoje: { pratos_produzidos: 0, tempo_medio_preparo: '15min', estoque_critico: [] },
-    alertas: []
-  })
+  const [refreshing, setRefreshing] = useState(false)
+  const [selectedDays, setSelectedDays] = useState('7')
+  const [selectedPlatform, setSelectedPlatform] = useState('all')
 
-  const carregarMetricas = async () => {
-    if (!selectedBar?.id) return
-    
-    setLoading(true)
+  useEffect(() => {
+    setPageTitle('Análise Diária - Meta')
+    return () => setPageTitle('')
+  }, [setPageTitle])
+
+  useEffect(() => {
+    loadDailyAnalysis()
+  }, [selectedDays, selectedPlatform])
+
+  const loadDailyAnalysis = async () => {
     try {
-      // Simular dados para desenvolvimento
-      // TODO: Implementar API real de métricas diárias
-      const mockMetricas: MetricasDiarias = {
-        faturamento_atual: 3420.50,
-        faturamento_ontem: 4150.30,
-        faturamento_semana_passada: 3890.20,
-        clientes_atual: 78,
-        clientes_ontem: 92,
-        ticket_medio: 43.85,
-        ticket_meta: 45,
-        horario_pico: '21:30',
-        ultima_venda: 'Há 1 minuto',
-        vendas_por_hora: [
-          { hora: '18:00', valor: 250, clientes: 8 },
-          { hora: '19:00', valor: 420, clientes: 12 },
-          { hora: '20:00', valor: 680, clientes: 18 },
-          { hora: '21:00', valor: 890, clientes: 24 },
-          { hora: '22:00', valor: 1200, clientes: 28 },
-          { hora: '23:00', valor: 980, clientes: 22 }
-        ],
-        reservas_hoje: {
-          total: 45,
-          confirmadas: 38,
-          canceladas: 3,
-          checkin: 25
-        },
-        evento_hoje: {
-          nome: 'Samba das Dez',
-          artista: 'Grupo Samba Raiz',
-          horario: '22:00',
-          capacidade: 200,
-          publico_esperado: 180
-        },
-        producao_hoje: {
-          pratos_produzidos: 156,
-          tempo_medio_preparo: '12min',
-          estoque_critico: ['Cerveja Pilsen', 'Frango']
-        },
-        alertas: [
-          { tipo: 'warning', mensagem: 'Estoque de Cerveja Pilsen baixo', timestamp: 'há 15min' },
-          { tipo: 'info', mensagem: 'Pico de movimento detectado', timestamp: 'há 30min' }
-        ]
+      setLoading(true)
+      console.log('📊 Carregando análise diária Meta...')
+      
+      const response = await fetch(`/api/meta/daily-analysis?days=${selectedDays}&platform=${selectedPlatform}`)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
       
-      setMetricas(mockMetricas)
+      const result = await response.json()
+      
+      if (result.success && result.data) {
+        console.log('✅ Análise diária carregada:', result.debug)
+        setData(result.data)
+      } else {
+        throw new Error(result.error || 'Erro ao carregar dados')
+      }
+      
     } catch (error) {
-      console.error('Erro ao carregar métricas:', error)
+      console.error('❌ Erro ao carregar análise diária:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => {
-    carregarMetricas()
-    
-    // Atualizar a cada 30 segundos
-    const interval = setInterval(carregarMetricas, 30000)
-    return () => clearInterval(interval)
-  }, [selectedBar?.id])
-
-  const formatarMoeda = (valor: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(valor)
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    await loadDailyAnalysis()
+    setRefreshing(false)
   }
 
-  const calcularVariacao = (atual: number, anterior: number) => {
-    const variacao = ((atual - anterior) / anterior) * 100
-    return variacao.toFixed(1)
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR', {
+      weekday: 'short',
+      day: '2-digit',
+      month: '2-digit'
+    })
   }
 
-  const dataAtual = new Date().toLocaleDateString('pt-BR', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
+  const getTrendIcon = (type: string) => {
+    switch (type) {
+      case 'positive':
+        return <TrendingUp className="w-4 h-4 text-green-600" />
+      case 'negative':
+        return <TrendingDown className="w-4 h-4 text-red-600" />
+      case 'warning':
+        return <AlertTriangle className="w-4 h-4 text-yellow-600" />
+      default:
+        return <Activity className="w-4 h-4 text-blue-600" />
+    }
+  }
+
+  const getTrendColor = (type: string) => {
+    switch (type) {
+      case 'positive':
+        return 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20'
+      case 'negative':
+        return 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20'
+      case 'warning':
+        return 'border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20'
+      default:
+        return 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20'
+    }
+  }
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        
-        
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
-              <PageText className="text-gray-600">Carregando métricas diárias...</PageText>
-            </div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex justify-center items-center py-8">
+            <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
+            <span className="ml-3 text-gray-600 dark:text-gray-400">Analisando dados diários...</span>
           </div>
-        
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <PageText className="text-gray-600 capitalize">{dataAtual}</PageText>
-          <div className="flex items-center gap-2 mt-1">
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-              {selectedBar?.nome || 'Bar Selecionado'}
-            </Badge>
-            <span className="text-sm text-gray-500">• Última atualização: {metricas.ultima_venda}</span>
-          </div>
-        </div>
-        <Button onClick={carregarMetricas} variant="outline" size="sm" className="minimal-button-secondary">
-          <RefreshCw className="w-4 h-4 mr-2" />
-          Atualizar
-        </Button>
-      </div>
-      
-      
-        {/* Alertas */}
-        {metricas.alertas.length > 0 && (
-          <div className="mb-6 space-y-2">
-            {metricas.alertas.map((alerta, index) => (
-              <div 
-                key={index}
-                className={`p-3 rounded-lg border flex items-center space-x-3 ${
-                  alerta.tipo === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
-                  alerta.tipo === 'warning' ? 'bg-yellow-50 border-yellow-200 text-yellow-800' :
-                  'bg-blue-50 border-blue-200 text-blue-800'
-                }`}
-              >
-                <AlertCircle className="w-5 h-5" />
-                <span className="flex-1">{alerta.mensagem}</span>
-                <span className="text-sm opacity-75">{alerta.timestamp}</span>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 py-6">
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Calendar className="w-6 h-6 text-white" />
               </div>
-            ))}
-          </div>
-        )}
-
-        {/* Cards de Métricas Principais */}
-        <div className="card-grid-stats mb-8">
-          <Card className="summary-card dashboard-gradient-green">
-            <CardContent className="stat-card text-white">
-              <div className="flex items-center">
-                <DollarSign className="w-8 h-8 text-white" />
-                <div className="ml-4">
-                  <p className="stat-label text-white/90">Faturamento Hoje</p>
-                  <p className="stat-value">{formatarMoeda(metricas.faturamento_atual)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="summary-card dashboard-gradient-blue">
-            <CardContent className="stat-card text-white">
-              <div className="flex items-center">
-                <Users className="w-8 h-8 text-white" />
-                <div className="ml-4">
-                  <p className="stat-label text-white/90">Clientes</p>
-                  <p className="stat-value">{metricas.clientes_atual}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="summary-card dashboard-gradient-purple">
-            <CardContent className="stat-card text-white">
-              <div className="flex items-center">
-                <TrendingUp className="w-8 h-8 text-white" />
-                <div className="ml-4">
-                  <p className="stat-label text-white/90">Ticket Médio</p>
-                  <p className="stat-value">{formatarMoeda(metricas.ticket_medio)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="summary-card">
-            <CardContent className="stat-card">
-              <div className="flex items-center">
-                <Calendar className="w-8 h-8 text-blue-600" />
-                <div className="ml-4">
-                  <p className="stat-label">Meta do Dia</p>
-                  <p className="stat-value">{formatarMoeda(metricas.ticket_meta)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="summary-card">
-            <CardContent className="stat-card">
-              <div className="flex items-center">
-                <Target className="w-8 h-8 text-orange-600" />
-                <div className="ml-4">
-                  <p className="stat-label">Atingimento</p>
-                  <p className={`stat-value ${
-                    metricas.ticket_medio >= metricas.ticket_meta ? 'text-green-600' : 'text-orange-600'
-                  }`}>
-                    {((metricas.ticket_medio / metricas.ticket_meta) * 100).toFixed(1)}%
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="summary-card">
-            <CardContent className="stat-card">
-              <div className="flex items-center">
-                <Clock className="w-8 h-8 text-gray-600" />
-                <div className="ml-4">
-                  <p className="stat-label">Última Atualização</p>
-                  <p className="text-sm text-gray-600">
-                    {metricas.ultima_venda}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Gráfico de Vendas por Hora */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <Card className="minimal-card">
-            <CardHeader>
-              <CardTitle className="text-gray-900 flex items-center space-x-2">
-                <TrendingUp className="w-5 h-5 text-blue-600" />
-                <span>Vendas por Hora</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-48 flex items-end space-x-2">
-                {metricas.vendas_por_hora.map((venda, index) => (
-                  <div key={index} className="flex-1 flex flex-col items-center">
-                    <div 
-                      className="w-full bg-blue-600 rounded-t transition-all duration-500 min-h-1"
-                      style={{ 
-                        height: `${(venda.valor / Math.max(...metricas.vendas_por_hora.map(v => v.valor))) * 120}px` 
-                      }}
-                    ></div>
-                    <div className="text-xs text-gray-600 mt-2 font-medium">{venda.hora}</div>
-                    <div className="text-xs text-gray-500">{formatarMoeda(venda.valor)}</div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="minimal-card">
-            <CardHeader>
-              <CardTitle className="text-gray-900 flex items-center space-x-2">
-                <Users className="w-5 h-5 text-green-600" />
-                <span>Reservas Hoje</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-700">Total de Reservas</span>
-                  <span className="font-bold text-gray-900">{metricas.reservas_hoje.total}</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div 
-                    className="bg-green-600 h-3 rounded-full relative"
-                    style={{ width: `${(metricas.reservas_hoje.confirmadas / metricas.reservas_hoje.total) * 100}%` }}
-                  >
-                    <div 
-                      className="bg-blue-600 h-3 rounded-r-full absolute right-0"
-                      style={{ width: `${(metricas.reservas_hoje.checkin / metricas.reservas_hoje.confirmadas) * 100}%` }}
-                    ></div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div>
-                    <div className="text-sm text-green-700">Confirmadas</div>
-                    <div className="font-bold text-green-900">{metricas.reservas_hoje.confirmadas}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-blue-700">Check-in</div>
-                    <div className="font-bold text-blue-900">{metricas.reservas_hoje.checkin}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-red-700">Canceladas</div>
-                    <div className="font-bold text-red-900">{metricas.reservas_hoje.canceladas}</div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Evento e Produção */}
-        <div className="card-grid-2 gap-mobile mb-8">
-          {metricas.evento_hoje && (
-            <Card className="card-responsive border border-yellow-200 bg-yellow-50">
-              <CardHeader>
-                <CardTitle className="text-yellow-900 stack-mobile">
-                  <Music className="w-5 h-5" />
-                  <span>Evento Hoje</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-mobile">
-                  <div>
-                    <h3 className="text-responsive-lg font-bold text-yellow-900">{metricas.evento_hoje.nome}</h3>
-                    <p className="text-responsive-sm text-yellow-800">{metricas.evento_hoje.artista}</p>
-                  </div>
-                  <div className="card-grid-2 gap-4 text-responsive-sm">
-                    <div>
-                      <span className="text-yellow-700">Horário:</span>
-                      <div className="font-medium text-yellow-900">{metricas.evento_hoje.horario}</div>
-                    </div>
-                    <div>
-                      <span className="text-yellow-700">Capacidade:</span>
-                      <div className="font-medium text-yellow-900">{metricas.evento_hoje.capacidade}</div>
-                    </div>
-                  </div>
-                  <div className="bg-yellow-100 rounded-lg p-3">
-                    <div className="text-responsive-sm text-yellow-800">Público Esperado</div>
-                    <div className="text-responsive-lg font-bold text-yellow-900">{metricas.evento_hoje.publico_esperado} pessoas</div>
-                    <div className="text-responsive-xs text-yellow-700">
-                      {((metricas.evento_hoje.publico_esperado / metricas.evento_hoje.capacidade) * 100).toFixed(0)}% da capacidade
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Análise do Movimento */}
-          <Card className="card-responsive">
-            <CardHeader>
-              <CardTitle className="stack-mobile">
-                <BarChart3 className="w-5 h-5 text-blue-600" />
-                <span>Análise do Movimento</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-mobile">
-                <div className="stat-card">
-                  <div className="text-responsive-sm text-gray-600">Horário de Pico</div>
-                  <div className="text-responsive-lg font-bold text-blue-600">
-                    {metricas.horario_pico || '20:00 - 22:00'}
-                  </div>
-                </div>
-                
-                <div className="card-grid-2 gap-4 text-responsive-sm">
-                  <div>
-                    <span className="text-gray-600">Mesa Mais Ativa:</span>
-                    <div className="font-medium text-gray-900">{metricas.mesa_mais_ativa || 'Mesa 5'}</div>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Forma Pagamento:</span>
-                    <div className="font-medium text-gray-900">{metricas.forma_pagamento_principal || 'PIX'}</div>
-                  </div>
-                </div>
-
-                <div className="bg-blue-50 rounded-lg p-3">
-                  <div className="text-responsive-sm text-blue-800">Previsão para hoje</div>
-                  <div className="text-responsive-lg font-bold text-blue-900">
-                    {formatarMoeda(metricas.previsao_dia || 0)}
-                  </div>
-                  <div className="text-responsive-xs text-blue-700">
-                    Baseado no histórico
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Objetivos do Dia */}
-        <Card className="minimal-card">
-          <CardHeader>
-            <CardTitle className="text-gray-900 flex items-center space-x-2">
-              <Target className="w-5 h-5 text-indigo-600" />
-              <span>Objetivos do Dia</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-3">
-                <h4 className="font-medium text-gray-900">Faturamento</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Meta: {formatarMoeda(metricas.ticket_meta)}</span>
-                    <span>Atual: {formatarMoeda(metricas.faturamento_atual)}</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full"
-                      style={{ width: `${Math.min((metricas.faturamento_atual / metricas.ticket_meta) * 100, 100)}%` }}
-                    ></div>
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    {((metricas.faturamento_atual / metricas.ticket_meta) * 100).toFixed(1)}% atingido
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <h4 className="font-medium text-gray-900">Clientes</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Meta: 120</span>
-                    <span>Atual: {metricas.clientes_atual}</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-green-600 h-2 rounded-full"
-                      style={{ width: `${Math.min((metricas.clientes_atual / 120) * 100, 100)}%` }}
-                    ></div>
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    {((metricas.clientes_atual / 120) * 100).toFixed(1)}% atingido
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <h4 className="font-medium text-gray-900">Ticket Médio</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Meta: {formatarMoeda(metricas.ticket_meta)}</span>
-                    <span>Atual: {formatarMoeda(metricas.ticket_medio)}</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-purple-600 h-2 rounded-full"
-                      style={{ width: `${Math.min((metricas.ticket_medio / metricas.ticket_meta) * 100, 100)}%` }}
-                    ></div>
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    {((metricas.ticket_medio / metricas.ticket_meta) * 100).toFixed(1)}% atingido
-                  </div>
-                </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Análise Diária Meta
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Variações diárias e tendências de Instagram e Facebook
+                </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      
+            
+            <div className="flex items-center gap-3">
+              <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Plataforma" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas</SelectItem>
+                  <SelectItem value="instagram">Instagram</SelectItem>
+                  <SelectItem value="facebook">Facebook</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={selectedDays} onValueChange={setSelectedDays}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Período" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">7 dias</SelectItem>
+                  <SelectItem value="15">15 dias</SelectItem>
+                  <SelectItem value="30">30 dias</SelectItem>
+                  <SelectItem value="60">60 dias</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                variant="outline"
+                size="sm"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                Atualizar
+              </Button>
+            </div>
+          </div>
+
+          {data && (
+            <>
+              {/* Resumo Principal */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Crescimento Seguidores</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {data.summary.follower_growth > 0 ? '+' : ''}{data.summary.follower_growth}
+                        </p>
+                      </div>
+                      <div className={`p-2 rounded-lg ${data.summary.follower_growth >= 0 ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
+                        <Users className={`w-5 h-5 ${data.summary.follower_growth >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`} />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Engagement Médio</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {data.summary.avg_daily_engagement.toFixed(1)}%
+                        </p>
+                      </div>
+                      <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                        <Heart className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Posts Publicados</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {data.summary.total_posts_period}
+                        </p>
+                      </div>
+                      <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                        <MessageSquare className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Período Analisado</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {data.period.days_analyzed} dias
+                        </p>
+                      </div>
+                      <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/30">
+                        <Calendar className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Tendências e Insights */}
+              {data.trends_and_insights && data.trends_and_insights.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Target className="w-5 h-5" />
+                      Tendências e Insights
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {data.trends_and_insights.map((trend, index) => (
+                        <div 
+                          key={index} 
+                          className={`p-4 border rounded-lg ${getTrendColor(trend.type)}`}
+                        >
+                          <div className="flex items-start gap-3">
+                            {getTrendIcon(trend.type)}
+                            <div className="flex-1">
+                              <h4 className="font-medium text-gray-900 dark:text-white mb-1">
+                                {trend.title}
+                              </h4>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                {trend.description}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-500 italic">
+                                💡 {trend.recommendation}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Variações Diárias */}
+              {data.daily_variations.daily_changes && Object.keys(data.daily_variations.daily_changes).length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Activity className="w-5 h-5" />
+                      Variações Diárias
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {Object.entries(data.daily_variations.daily_changes)
+                        .slice(-10) // Mostrar últimos 10 dias
+                        .reverse()
+                        .map(([date, changes]: [string, any]) => (
+                        <div key={date} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">
+                              {formatDate(date)}
+                            </div>
+                            <div className="flex items-center gap-4 text-sm">
+                              <div className="flex items-center gap-1">
+                                <Users className="w-3 h-3" />
+                                <span className={changes.total_follower_change >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                  {changes.total_follower_change > 0 ? '+' : ''}{changes.total_follower_change}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Heart className="w-3 h-3" />
+                                <span className="text-gray-600 dark:text-gray-400">
+                                  {changes.engagement_rate.toFixed(1)}%
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <MessageSquare className="w-3 h-3" />
+                                <span className="text-gray-600 dark:text-gray-400">
+                                  {changes.posts_published} posts
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              {changes.total_interactions} interações
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Melhor e Pior Dia */}
+              {(data.summary.best_performing_day || data.summary.worst_performing_day) && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {data.summary.best_performing_day && (
+                    <Card className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                            <Award className="w-5 h-5 text-green-600 dark:text-green-400" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-green-900 dark:text-green-100">
+                              Melhor Dia
+                            </p>
+                            <p className="text-sm text-green-700 dark:text-green-300">
+                              {formatDate(data.summary.best_performing_day)}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {data.summary.worst_performing_day && (
+                    <Card className="border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-900/20">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                            <AlertTriangle className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-orange-900 dark:text-orange-100">
+                              Dia Menos Eficaz
+                            </p>
+                            <p className="text-sm text-orange-700 dark:text-orange-300">
+                              {formatDate(data.summary.worst_performing_day)}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
     </div>
   )
-}
-
-export default function DashboardDiarioPage() {
-  return <ProtectedRoute requiredModule="dashboard_diario"><DashboardDiarioContent /></ProtectedRoute>
 } 

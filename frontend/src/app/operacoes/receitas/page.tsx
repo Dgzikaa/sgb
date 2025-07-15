@@ -390,6 +390,117 @@ export default function ReceitasPage() {
     setModalEditarInsumo(true)
   }
 
+  const salvarEdicaoInsumo = async () => {
+    if (!insumoEditando || !insumoEditando.nome.trim()) {
+      toast.error('Nome do insumo é obrigatório')
+      return
+    }
+
+    try {
+      setIsLoading(true)
+      
+      const response = await fetch('/api/receitas/insumos', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: insumoEditando.id,
+          codigo: insumoEditando.codigo,
+          nome: insumoEditando.nome.trim(),
+          custo_unitario: insumoEditando.custo_unitario,
+          unidade: insumoEditando.unidade_medida,
+          peso_volume_unidade: 1,
+          observacoes: insumoEditando.observacoes?.trim() || null,
+          ativo: true
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao atualizar insumo')
+      }
+
+      // Atualizar na lista local
+      setInsumos(prev => prev.map(insumo => 
+        insumo.id === insumoEditando.id 
+          ? { ...insumoEditando }
+          : insumo
+      ))
+
+      toast.success('Insumo atualizado com sucesso!')
+      setModalEditarInsumo(false)
+      setInsumoEditando(null)
+      
+    } catch (error) {
+      console.error('Erro ao salvar edição do insumo:', error)
+      toast.error('Erro ao atualizar insumo. Tente novamente.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const editarReceita = (receita: Receita) => {
+    setReceitaEditando(receita)
+    setModalVisualizarReceita(false)
+    setModalEditarReceita(true)
+  }
+
+  const salvarEdicaoReceita = async () => {
+    if (!receitaEditando || !receitaEditando.receita_nome.trim()) {
+      toast.error('Nome da receita é obrigatório')
+      return
+    }
+
+    try {
+      setIsLoading(true)
+      
+      // Mapear insumos para o formato correto da API
+      const insumosParaAPI = (receitaEditando.insumos || []).map(insumo => ({
+        id: insumo.id,
+        quantidade_necessaria: insumo.quantidade_necessaria || 0,
+        is_chefe: insumo.is_chefe || false
+      }))
+
+      const response = await fetch('/api/receitas/editar', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          receita_codigo: receitaEditando.receita_codigo,
+          receita_nome: receitaEditando.receita_nome.trim(),
+          receita_categoria: receitaEditando.receita_categoria,
+          tipo_local: receitaEditando.tipo_local,
+          rendimento_esperado: receitaEditando.rendimento_esperado,
+          insumos: insumosParaAPI,
+          ativo: receitaEditando.ativo,
+          bar_id: selectedBar?.id
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao atualizar receita')
+      }
+
+      // Atualizar na lista local
+      setReceitas(prev => prev.map(receita => 
+        receita.receita_codigo === receitaEditando.receita_codigo 
+          ? { ...receitaEditando }
+          : receita
+      ))
+
+      toast.success('Receita atualizada com sucesso!')
+      setModalEditarReceita(false)
+      setReceitaEditando(null)
+      
+    } catch (error) {
+      console.error('Erro ao salvar edição da receita:', error)
+      toast.error('Erro ao atualizar receita. Tente novamente.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const excluirInsumo = async (insumo: Insumo) => {
     const confirmed = await confirmDelete(
       insumo.nome,
@@ -548,18 +659,7 @@ export default function ReceitasPage() {
     setModalVisualizarReceita(true)
   }
 
-  const editarReceita = (receita: Receita) => {
-    setReceitaEditando(receita)
-    // Mapear insumos da receita para o formato de edição
-    if (receita.insumos) {
-      setInsumosReceita(receita.insumos.map(insumo => ({
-        insumo_id: insumo.id,
-        quantidade_necessaria: insumo.quantidade_necessaria || 0,
-        is_chefe: insumo.is_chefe || false
-      })))
-    }
-    setModalEditarReceita(true)
-  }
+
 
   const excluirReceita = async (receita: Receita) => {
     const confirmed = await confirmDelete(
@@ -698,7 +798,8 @@ export default function ReceitasPage() {
                         value={novoInsumo.codigo}
                         onChange={(e) => setNovoInsumo(prev => ({ ...prev, codigo: e.target.value }))}
                         placeholder="Ex: i0001"
-                        className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                        disabled={true}
+                        className="bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-300 cursor-not-allowed"
                       />
                       <Button
                         type="button"
@@ -1140,7 +1241,8 @@ export default function ReceitasPage() {
                       value={novaReceita.receita_codigo}
                       onChange={(e) => setNovaReceita(prev => ({ ...prev, receita_codigo: e.target.value }))}
                       placeholder="Ex: r0001"
-                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                      disabled={true}
+                      className="bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-300 cursor-not-allowed"
                     />
                     <Button
                       type="button"
@@ -1448,6 +1550,489 @@ export default function ReceitasPage() {
                   Editar
                 </Button>
               )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal de Edição de Insumo */}
+        <Dialog open={modalEditarInsumo} onOpenChange={setModalEditarInsumo}>
+          <DialogContent className="max-w-2xl bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                <Edit3 className="w-5 h-5" />
+                Editar Insumo
+              </DialogTitle>
+              <DialogDescription className="text-gray-600 dark:text-gray-400">
+                Modifique as informações do insumo selecionado.
+              </DialogDescription>
+            </DialogHeader>
+
+            {insumoEditando && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-codigo" className="text-gray-700 dark:text-gray-300">
+                      Código
+                    </Label>
+                    <Input
+                      id="edit-codigo"
+                      value={insumoEditando.codigo}
+                      onChange={(e) => setInsumoEditando({...insumoEditando, codigo: e.target.value})}
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                      placeholder="Ex: i0001"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-nome" className="text-gray-700 dark:text-gray-300">
+                      Nome do Insumo *
+                    </Label>
+                    <Input
+                      id="edit-nome"
+                      value={insumoEditando.nome}
+                      onChange={(e) => setInsumoEditando({...insumoEditando, nome: e.target.value})}
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                      placeholder="Nome do insumo"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-categoria" className="text-gray-700 dark:text-gray-300">
+                      Categoria
+                    </Label>
+                    <Select 
+                      value={insumoEditando.categoria} 
+                      onValueChange={(value) => setInsumoEditando({...insumoEditando, categoria: value})}
+                    >
+                      <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                        <SelectValue placeholder="Selecione a categoria" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                        <SelectItem value="cozinha">Cozinha</SelectItem>
+                        <SelectItem value="bar">Bar</SelectItem>
+                        <SelectItem value="bebidas">Bebidas</SelectItem>
+                        <SelectItem value="descartaveis">Descartáveis</SelectItem>
+                        <SelectItem value="limpeza">Limpeza</SelectItem>
+                        <SelectItem value="outros">Outros</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-unidade" className="text-gray-700 dark:text-gray-300">
+                      Unidade de Medida
+                    </Label>
+                    <Select 
+                      value={insumoEditando.unidade_medida} 
+                      onValueChange={(value) => setInsumoEditando({...insumoEditando, unidade_medida: value})}
+                    >
+                      <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                        <SelectValue placeholder="Selecione a unidade" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                        <SelectItem value="g">Gramas (g)</SelectItem>
+                        <SelectItem value="kg">Quilogramas (kg)</SelectItem>
+                        <SelectItem value="ml">Mililitros (ml)</SelectItem>
+                        <SelectItem value="l">Litros (l)</SelectItem>
+                        <SelectItem value="un">Unidades (un)</SelectItem>
+                        <SelectItem value="cx">Caixas (cx)</SelectItem>
+                        <SelectItem value="pct">Pacotes (pct)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="md:col-span-1">
+                    <Label htmlFor="edit-custo" className="text-gray-700 dark:text-gray-300">
+                      Custo Unitário (R$)
+                    </Label>
+                    <Input
+                      id="edit-custo"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={insumoEditando.custo_unitario || ''}
+                      onChange={(e) => setInsumoEditando({
+                        ...insumoEditando, 
+                        custo_unitario: e.target.value ? parseFloat(e.target.value) : undefined
+                      })}
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-observacoes" className="text-gray-700 dark:text-gray-300">
+                    Observações
+                  </Label>
+                  <Textarea
+                    id="edit-observacoes"
+                    value={insumoEditando.observacoes || ''}
+                    onChange={(e) => setInsumoEditando({...insumoEditando, observacoes: e.target.value})}
+                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                    placeholder="Observações adicionais sobre o insumo..."
+                    rows={3}
+                  />
+                </div>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button
+                onClick={() => {
+                  setModalEditarInsumo(false)
+                  setInsumoEditando(null)
+                }}
+                variant="outline"
+                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={salvarEdicaoInsumo}
+                disabled={!insumoEditando?.nome.trim()}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                Salvar Alterações
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal de Edição de Receita */}
+        <Dialog open={modalEditarReceita} onOpenChange={setModalEditarReceita}>
+          <DialogContent className="max-w-4xl bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                <Edit3 className="w-5 h-5" />
+                Editar Receita
+              </DialogTitle>
+              <DialogDescription className="text-gray-600 dark:text-gray-400">
+                Modifique as informações da receita selecionada.
+              </DialogDescription>
+            </DialogHeader>
+
+            {receitaEditando && (
+              <div className="space-y-6">
+                {/* Informações básicas */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-receita-codigo" className="text-gray-700 dark:text-gray-300">
+                      Código
+                    </Label>
+                    <Input
+                      id="edit-receita-codigo"
+                      value={receitaEditando.receita_codigo}
+                      onChange={(e) => setReceitaEditando({...receitaEditando, receita_codigo: e.target.value})}
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                      placeholder="Ex: r0001"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-receita-nome" className="text-gray-700 dark:text-gray-300">
+                      Nome da Receita *
+                    </Label>
+                    <Input
+                      id="edit-receita-nome"
+                      value={receitaEditando.receita_nome}
+                      onChange={(e) => setReceitaEditando({...receitaEditando, receita_nome: e.target.value})}
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                      placeholder="Nome da receita"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-receita-categoria" className="text-gray-700 dark:text-gray-300">
+                      Categoria
+                    </Label>
+                    <Input
+                      id="edit-receita-categoria"
+                      value={receitaEditando.receita_categoria}
+                      onChange={(e) => setReceitaEditando({...receitaEditando, receita_categoria: e.target.value})}
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                      placeholder="Ex: Pratos principais, Bebidas, Sobremesas"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-tipo-local" className="text-gray-700 dark:text-gray-300">
+                      Local de Preparo
+                    </Label>
+                    <Select 
+                      value={receitaEditando.tipo_local} 
+                      onValueChange={(value: 'bar' | 'cozinha') => setReceitaEditando({...receitaEditando, tipo_local: value})}
+                    >
+                      <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                        <SelectValue placeholder="Selecione o local" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                        <SelectItem value="cozinha">Cozinha</SelectItem>
+                        <SelectItem value="bar">Bar</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-rendimento" className="text-gray-700 dark:text-gray-300">
+                      Rendimento Esperado (g)
+                    </Label>
+                    <Input
+                      id="edit-rendimento"
+                      type="number"
+                      min="0"
+                      value={receitaEditando.rendimento_esperado || ''}
+                      onChange={(e) => setReceitaEditando({
+                        ...receitaEditando, 
+                        rendimento_esperado: e.target.value ? parseInt(e.target.value) : undefined
+                      })}
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                      placeholder="Ex: 500"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-gray-700 dark:text-gray-300">
+                      Status
+                    </Label>
+                    <Select 
+                      value={receitaEditando.ativo !== false ? 'true' : 'false'} 
+                      onValueChange={(value) => setReceitaEditando({...receitaEditando, ativo: value === 'true'})}
+                    >
+                      <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                        <SelectItem value="true">Ativa</SelectItem>
+                        <SelectItem value="false">Inativa</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-observacoes-receita" className="text-gray-700 dark:text-gray-300">
+                    Observações
+                  </Label>
+                  <Textarea
+                    id="edit-observacoes-receita"
+                    value={receitaEditando.observacoes || ''}
+                    onChange={(e) => setReceitaEditando({...receitaEditando, observacoes: e.target.value})}
+                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                    placeholder="Observações adicionais sobre a receita..."
+                    rows={3}
+                  />
+                </div>
+
+                {/* Edição de insumos da receita */}
+                {receitaEditando.insumos && receitaEditando.insumos.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Utensils className="w-5 h-5 text-blue-600" />
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Insumos da Receita</h3>
+                      </div>
+                      <Badge variant="outline" className="text-gray-600 dark:text-gray-400">
+                        {receitaEditando.insumos.length} {receitaEditando.insumos.length === 1 ? 'item' : 'itens'}
+                      </Badge>
+                    </div>
+                    
+                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 max-h-80 overflow-y-auto">
+                      <div className="space-y-3">
+                        {receitaEditando.insumos.map((insumo, index) => (
+                          <div 
+                            key={insumo.id}
+                            className={`p-4 rounded-lg border-2 transition-all ${
+                              insumo.is_chefe 
+                                ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-300 dark:border-yellow-700'
+                                : 'bg-white dark:bg-gray-600 border-gray-200 dark:border-gray-500'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-4">
+                              {/* Info do insumo */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-2">
+                                  {insumo.is_chefe && (
+                                    <Crown className="w-4 h-4 text-yellow-500 flex-shrink-0" />
+                                  )}
+                                  <span className="font-medium text-gray-900 dark:text-white truncate">
+                                    {insumo.nome}
+                                  </span>
+                                  <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
+                                    ({insumo.codigo})
+                                  </span>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                  {/* Quantidade */}
+                                  <div>
+                                    <Label className="text-xs text-gray-600 dark:text-gray-400">
+                                      Quantidade ({insumo.unidade_medida})
+                                    </Label>
+                                    <Input
+                                      type="number"
+                                      step="0.1"
+                                      min="0"
+                                      value={insumo.quantidade_necessaria || ''}
+                                      onChange={(e) => {
+                                        const newInsumos = [...receitaEditando.insumos!]
+                                        newInsumos[index] = {
+                                          ...newInsumos[index],
+                                          quantidade_necessaria: parseFloat(e.target.value) || 0
+                                        }
+                                        setReceitaEditando({
+                                          ...receitaEditando,
+                                          insumos: newInsumos
+                                        })
+                                      }}
+                                      className="h-8 text-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                                      placeholder="0.0"
+                                    />
+                                  </div>
+
+                                  {/* Checkbox insumo chefe */}
+                                  <div className="flex items-center space-x-2 pt-4">
+                                    <Checkbox
+                                      checked={insumo.is_chefe || false}
+                                      onCheckedChange={(checked) => {
+                                        const newInsumos = [...receitaEditando.insumos!]
+                                        // Se marcando como chefe, desmarcar todos os outros
+                                        if (checked) {
+                                          newInsumos.forEach((item, i) => {
+                                            item.is_chefe = i === index
+                                          })
+                                        } else {
+                                          // Se desmarcando, apenas desmarcar este
+                                          newInsumos[index].is_chefe = false
+                                        }
+                                        setReceitaEditando({
+                                          ...receitaEditando,
+                                          insumos: newInsumos
+                                        })
+                                      }}
+                                      className="border-gray-300 dark:border-gray-600"
+                                    />
+                                    <Label 
+                                      className="text-xs font-medium text-gray-700 dark:text-gray-300 cursor-pointer"
+                                    >
+                                      Insumo Chefe
+                                    </Label>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Botão remover */}
+                              <Button
+                                onClick={() => {
+                                  const newInsumos = receitaEditando.insumos!.filter((_, i) => i !== index)
+                                  setReceitaEditando({
+                                    ...receitaEditando,
+                                    insumos: newInsumos
+                                  })
+                                }}
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 flex-shrink-0"
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+
+                            {/* Badge do status */}
+                            {insumo.is_chefe && (
+                              <div className="mt-2 flex items-center gap-1">
+                                <Badge variant="secondary" className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300">
+                                  <Crown className="w-3 h-3 mr-1" />
+                                  Ingrediente Principal
+                                </Badge>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+
+                        {/* Mensagem se não tem insumo chefe */}
+                        {receitaEditando.insumos.length > 0 && !receitaEditando.insumos.some(i => i.is_chefe) && (
+                          <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                            <Crown className="w-4 h-4 text-amber-600" />
+                            <span className="text-sm text-amber-700 dark:text-amber-300">
+                              Selecione pelo menos um insumo como principal (chefe)
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <DialogFooter className="flex-col items-stretch gap-3">
+              {/* Mensagem de requisitos */}
+              {receitaEditando && (
+                <div className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                  <div className="font-medium mb-1">Requisitos para salvar:</div>
+                  <ul className="space-y-1">
+                    <li className={`flex items-center gap-1 ${
+                      receitaEditando.receita_nome.trim() 
+                        ? 'text-green-600 dark:text-green-400' 
+                        : 'text-red-600 dark:text-red-400'
+                    }`}>
+                      <div className={`w-1 h-1 rounded-full ${
+                        receitaEditando.receita_nome.trim() ? 'bg-green-500' : 'bg-red-500'
+                      }`} />
+                      Nome da receita preenchido
+                    </li>
+                    <li className={`flex items-center gap-1 ${
+                      receitaEditando.insumos?.length 
+                        ? 'text-green-600 dark:text-green-400' 
+                        : 'text-red-600 dark:text-red-400'
+                    }`}>
+                      <div className={`w-1 h-1 rounded-full ${
+                        receitaEditando.insumos?.length ? 'bg-green-500' : 'bg-red-500'
+                      }`} />
+                      Pelo menos um insumo na receita
+                    </li>
+                    <li className={`flex items-center gap-1 ${
+                      receitaEditando.insumos?.some(i => i.is_chefe) 
+                        ? 'text-green-600 dark:text-green-400' 
+                        : 'text-red-600 dark:text-red-400'
+                    }`}>
+                      <div className={`w-1 h-1 rounded-full ${
+                        receitaEditando.insumos?.some(i => i.is_chefe) ? 'bg-green-500' : 'bg-red-500'
+                      }`} />
+                      Um insumo marcado como chefe
+                    </li>
+                  </ul>
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => {
+                    setModalEditarReceita(false)
+                    setReceitaEditando(null)
+                  }}
+                  variant="outline"
+                  className="flex-1 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={salvarEdicaoReceita}
+                  disabled={
+                    !receitaEditando?.receita_nome.trim() || 
+                    !receitaEditando?.insumos?.length ||
+                    !receitaEditando?.insumos?.some(i => i.is_chefe)
+                  }
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar Alterações
+                </Button>
+              </div>
             </DialogFooter>
           </DialogContent>
         </Dialog>
