@@ -57,10 +57,10 @@ export default function Marketing360Page() {
   const loadData = async () => {
     setLoading(true)
     try {
-      console.log('🚀 Carregando dados reais do Marketing 360° com Daily Summary...')
+      console.log('🚀 Carregando dados do Marketing 360°...')
       
-      // Buscar dados da nova API Daily Summary (dados consolidados reais)
-      const response = await fetch('/api/meta/daily-summary?days=30')
+      // Usar diretamente a API marketing-360 que é mais confiável
+      const response = await fetch('/api/meta/marketing-360')
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -69,89 +69,84 @@ export default function Marketing360Page() {
       const result = await response.json()
       
       if (result.success && result.data) {
-        console.log('✅ Dados reais carregados do Daily Summary:', result.meta)
-        
-        // Converter dados da daily-summary para formato do Marketing 360°
-        const summaryData = result.data.summary
-        const variations = result.data.variations
-        const trends = result.data.trends
-        const campaigns = result.data.campaigns_summary
-        
-        // Calcular ROI baseado no engagement e alcance
-        const roiEstimate = Math.min(Math.round((summaryData.total_reach || 0) / 100 + (trends.growth_rate_7d || 0) * 10), 500)
-        
-        // Calcular engagement rate consolidado
-        const totalImpressions = summaryData.facebook_impressions + summaryData.instagram_impressions || 1
-        const engagementRate = totalImpressions > 0 ? 
-          (summaryData.total_engagement / totalImpressions * 100) : 
-          Math.max(trends.avg_daily_engagement_change || 0, 2.5)
-        
-        const transformedData = {
-          metrics: {
-            total_followers: summaryData.total_followers || 0,
-            engagement_rate: Math.round(engagementRate * 10) / 10,
-            weekly_reach: summaryData.total_reach || 0,
-            roi_estimate: roiEstimate,
-            facebook: {
-              followers: summaryData.facebook_followers || 0,
-              engagement: Math.round(engagementRate * 0.6 * 10) / 10, // Estimativa FB
-              reach: Math.round((summaryData.total_reach || 0) * 0.45), // ~45% do total
-              posts: result.data.daily_data?.[0]?.facebook_posts_count || 0
-            },
-            instagram: {
-              followers: summaryData.instagram_followers || 0,
-              engagement: Math.round(engagementRate * 1.4 * 10) / 10, // Estimativa IG
-              reach: Math.round((summaryData.total_reach || 0) * 0.55), // ~55% do total
-              posts: result.data.daily_data?.[0]?.instagram_posts_count || 0
-            }
-          },
-          campaigns: {
-            active_campaigns: campaigns.active_campaigns || 0,
-            total_spend: campaigns.total_spend || 0,
-            total_clicks: campaigns.total_clicks || Math.round((campaigns.total_impressions || 0) * 0.02),
-            conversion_rate: campaigns.total_clicks > 0 ? 
-              Math.round((campaigns.total_conversions || 0) / campaigns.total_clicks * 100 * 100) / 100 : 0
-          },
-          goals: {
-            followers_target: 50000, // Meta baseada no crescimento atual
-            engagement_target: 6.0,
-            reach_target: Math.max((summaryData.total_reach || 0) * 1.5, 100000),
-            roi_target: 400
-          },
-          variations: {
-            followers_change: variations.followers_change_today || 0,
-            followers_change_percent: Math.round((variations.followers_change_percent || 0) * 100) / 100,
-            engagement_change: variations.engagement_change_today || 0,
-            reach_change: variations.reach_change_today || 0,
-            trend_direction: trends.trend_direction || 'stable'
-          },
-          last_updated: summaryData.last_updated || new Date().toISOString(),
-          data_source: result.meta.source || 'daily_summary'
-        }
-        
-        console.log('📊 Dados transformados:', {
-          total_followers: transformedData.metrics.total_followers,
-          followers_change: transformedData.variations.followers_change,
-          source: transformedData.data_source
-        })
-        
-        setData(transformedData)
+        console.log('✅ Dados carregados:', result.data.data_source)
+        setData(result.data)
+        return
       } else {
         throw new Error(result.error || 'Erro ao carregar dados')
       }
       
     } catch (error) {
-      console.error('❌ Erro ao carregar dados reais:', error)
+      console.error('❌ Erro ao carregar dados:', error)
       
-      // Fallback para API anterior se daily-summary falhar
-      console.log('⚠️ Tentando fallback para API marketing-360...')
+      // Fallback para daily-summary se marketing-360 falhar
+      console.log('⚠️ Tentando fallback para daily-summary...')
       try {
-        const fallbackResponse = await fetch('/api/meta/marketing-360')
+        const fallbackResponse = await fetch('/api/meta/daily-summary?days=30')
         if (fallbackResponse.ok) {
           const fallbackResult = await fallbackResponse.json()
-          if (fallbackResult.success) {
-            console.log('✅ Fallback bem-sucedido')
-            setData(fallbackResult.data)
+          if (fallbackResult.success && fallbackResult.data) {
+            console.log('✅ Fallback daily-summary bem-sucedido')
+            
+            // Converter dados da daily-summary para formato do Marketing 360°
+            const summaryData = fallbackResult.data.summary
+            const variations = fallbackResult.data.variations
+            const trends = fallbackResult.data.trends
+            const campaigns = fallbackResult.data.campaigns_summary
+            
+            // Calcular ROI baseado no engagement e alcance
+            const roiEstimate = Math.min(Math.round((summaryData.total_reach || 0) / 100 + (trends.growth_rate_7d || 0) * 10), 500)
+            
+            // Calcular engagement rate consolidado
+            const totalImpressions = summaryData.facebook_impressions + summaryData.instagram_impressions || 1
+            const engagementRate = totalImpressions > 0 ? 
+              (summaryData.total_engagement / totalImpressions * 100) : 
+              Math.max(trends.avg_daily_engagement_change || 0, 2.5)
+            
+            const transformedData = {
+              metrics: {
+                total_followers: summaryData.total_followers || 0,
+                engagement_rate: Math.round(engagementRate * 10) / 10,
+                weekly_reach: summaryData.total_reach || 0,
+                roi_estimate: roiEstimate,
+                facebook: {
+                  followers: summaryData.facebook_followers || 0,
+                  engagement: Math.round(engagementRate * 0.6 * 10) / 10,
+                  reach: Math.round((summaryData.total_reach || 0) * 0.45),
+                  posts: fallbackResult.data.daily_data?.[0]?.facebook_posts_count || 0
+                },
+                instagram: {
+                  followers: summaryData.instagram_followers || 0,
+                  engagement: Math.round(engagementRate * 1.4 * 10) / 10,
+                  reach: Math.round((summaryData.total_reach || 0) * 0.55),
+                  posts: fallbackResult.data.daily_data?.[0]?.instagram_posts_count || 0
+                }
+              },
+              campaigns: {
+                active_campaigns: campaigns.active_campaigns || 0,
+                total_spend: campaigns.total_spend || 0,
+                total_clicks: campaigns.total_clicks || Math.round((campaigns.total_impressions || 0) * 0.02),
+                conversion_rate: campaigns.total_clicks > 0 ? 
+                  Math.round((campaigns.total_conversions || 0) / campaigns.total_clicks * 100 * 100) / 100 : 0
+              },
+              goals: {
+                followers_target: 50000,
+                engagement_target: 6.0,
+                reach_target: Math.max((summaryData.total_reach || 0) * 1.5, 100000),
+                roi_target: 400
+              },
+              variations: {
+                followers_change: variations.followers_change_today || 0,
+                followers_change_percent: Math.round((variations.followers_change_percent || 0) * 100) / 100,
+                engagement_change: variations.engagement_change_today || 0,
+                reach_change: variations.reach_change_today || 0,
+                trend_direction: trends.trend_direction || 'stable'
+              },
+              last_updated: summaryData.last_updated || new Date().toISOString(),
+              data_source: 'daily_summary_fallback'
+            }
+            
+            setData(transformedData)
             return
           }
         }
@@ -163,7 +158,7 @@ export default function Marketing360Page() {
       console.log('⚠️ Usando dados simulados como último recurso')
       const simulatedData = {
         metrics: {
-          total_followers: 36421, // Baseado nos dados que você mostrou
+          total_followers: 36421,
           engagement_rate: 4.8,
           weekly_reach: 28500,
           roi_estimate: 320,
@@ -172,7 +167,7 @@ export default function Marketing360Page() {
         },
         campaigns: {
           active_campaigns: 1,
-          total_spend: 45.30, // Baseado no exemplo do Discord
+          total_spend: 45.30,
           total_clicks: 850,
           conversion_rate: 4.2
         },
@@ -183,7 +178,7 @@ export default function Marketing360Page() {
           roi_target: 400
         },
         variations: {
-          followers_change: 31, // 36421 - 36390 = +31
+          followers_change: 31,
           followers_change_percent: 0.08,
           engagement_change: 125,
           reach_change: 0,
