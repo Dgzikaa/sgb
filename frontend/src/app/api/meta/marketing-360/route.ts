@@ -69,17 +69,17 @@ export async function GET(request: NextRequest) {
     const latestInstagram = instagramData?.[0]
 
     if (latestFacebook) {
-      facebookFollowers = latestFacebook.seguidores || 0
-      totalReach += latestFacebook.alcance || 0
-      totalImpressions += latestFacebook.impressoes || 0
-      totalEngagement += latestFacebook.engajamento || 0
+      facebookFollowers = latestFacebook.page_fans || 0
+      totalReach += latestFacebook.page_reach || 0
+      totalImpressions += latestFacebook.page_impressions || 0
+      totalEngagement += latestFacebook.page_engaged_users || 0
     }
 
     if (latestInstagram) {
-      instagramFollowers = latestInstagram.seguidores || 0
-      totalReach += latestInstagram.alcance || 0
-      totalImpressions += latestInstagram.impressoes || 0
-      totalEngagement += latestInstagram.engajamento || 0
+      instagramFollowers = latestInstagram.follower_count || 0
+      totalReach += latestInstagram.reach || 0
+      totalImpressions += latestInstagram.impressions || 0
+      totalEngagement += latestInstagram.profile_views || 0 // Usar profile_views como proxy para engagement
     }
 
     totalFollowers = facebookFollowers + instagramFollowers
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
     const yesterdayFb = facebookData?.find(d => d.data_referencia === ontem)
     const yesterdayIg = instagramData?.find(d => d.data_referencia === ontem)
     
-    const followersYesterday = (yesterdayFb?.seguidores || 0) + (yesterdayIg?.seguidores || 0)
+    const followersYesterday = (yesterdayFb?.page_fans || 0) + (yesterdayIg?.follower_count || 0)
     const followersChange = totalFollowers - followersYesterday
 
     // ROI estimado baseado no alcance e engajamento
@@ -114,13 +114,13 @@ export async function GET(request: NextRequest) {
             followers: facebookFollowers,
             engagement: Math.round(engagementRate * 0.6 * 10) / 10,
             reach: Math.round(totalReach * 0.45),
-            posts: facebookData?.filter(d => d.posts_count > 0).length || 0
+            posts: facebookData?.filter(d => d.post_impressions > 0).length || 0
           },
           instagram: {
             followers: instagramFollowers,
             engagement: Math.round(engagementRate * 1.4 * 10) / 10,
             reach: Math.round(totalReach * 0.55),
-            posts: instagramData?.filter(d => d.posts_count > 0).length || 0
+            posts: instagramData?.filter(d => d.posts_impressions > 0).length || 0
           }
         },
         campaigns: {
@@ -139,7 +139,7 @@ export async function GET(request: NextRequest) {
           followers_change: followersChange,
           followers_change_percent: followersYesterday > 0 ? 
             Math.round((followersChange / followersYesterday) * 100 * 100) / 100 : 0,
-          engagement_change: Math.round((totalEngagement - (yesterdayFb?.engajamento || 0) - (yesterdayIg?.engajamento || 0))),
+          engagement_change: Math.round((totalEngagement - (yesterdayFb?.page_engaged_users || 0) - (yesterdayIg?.profile_views || 0))),
           reach_change: Math.round(totalReach * 0.1), // Estimativa de crescimento
           trend_direction: followersChange > 0 ? 'growing' : followersChange < 0 ? 'declining' : 'stable'
         },
@@ -152,7 +152,11 @@ export async function GET(request: NextRequest) {
           facebook: facebookData?.length || 0,
           instagram: instagramData?.length || 0
         },
-        period: `${diasAtras.toISOString().split('T')[0]} to ${hoje.toISOString().split('T')[0]}`
+        period: `${diasAtras.toISOString().split('T')[0]} to ${hoje.toISOString().split('T')[0]}`,
+        raw_data: {
+          latest_facebook: latestFacebook,
+          latest_instagram: latestInstagram
+        }
       }
     }
 
