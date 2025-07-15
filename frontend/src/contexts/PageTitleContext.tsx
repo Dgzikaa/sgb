@@ -37,7 +37,14 @@ export function PageTitleProvider({ children }: { children: ReactNode }) {
 export function usePageTitle() {
   const context = useContext(PageTitleContext)
   if (context === undefined) {
-    throw new Error('usePageTitle must be used within a PageTitleProvider')
+    // Durante SSG/pre-rendering, retornar funções vazias em vez de lançar erro
+    return {
+      pageTitle: null,
+      pageDescription: null,
+      setPageTitle: () => {},
+      setPageDescription: () => {},
+      setPageInfo: () => {}
+    }
   }
   return context
 } 
