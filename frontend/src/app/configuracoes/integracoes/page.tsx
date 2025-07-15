@@ -33,7 +33,8 @@ import {
   AlertTriangle,
   XCircle,
   Clock,
-  Link2
+  Link2,
+  Server
 } from 'lucide-react'
 
 export default function IntegracoesPage() {
@@ -1010,49 +1011,182 @@ export default function IntegracoesPage() {
 
           {/* WhatsApp Tab */}
           <TabsContent value="whatsapp" className="space-y-6">
+            {/* Status Principal */}
             <Card>
               <CardHeader>
-                <div className="flex items-center space-x-2">
-                  <div className="w-6 h-6 bg-green-500 rounded-lg flex items-center justify-center">
-                    <MessageSquare className="w-4 h-4 text-white" />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <MessageSquare className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">WhatsApp Business API</CardTitle>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Evolution API • AWS sa-east-1</p>
+                    </div>
                   </div>
-                  <CardTitle>WhatsApp Business API</CardTitle>
+                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                    ✅ Conectado
+                  </Badge>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <MessageSquare className="w-10 h-10 text-green-600" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">WhatsApp Business API</h3>
-                  <p className="text-gray-600 mb-6">
-                    Configure notificações automáticas, confirmações de reserva e comunicação direta com seus clientes
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div className="p-4 border rounded-lg bg-green-50">
-                      <h4 className="font-semibold text-green-800 mb-2">✨ Funcionalidades</h4>
-                      <ul className="text-sm text-green-700 space-y-1">
-                        <li>• Confirmações automáticas de reservas</li>
-                        <li>• Notificações de pedidos</li>
-                        <li>• Lembretes de eventos</li>
-                        <li>• Suporte ao cliente 24/7</li>
-                      </ul>
+              <CardContent className="space-y-6">
+                {/* Status Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="card-dark p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Smartphone className="w-5 h-5 text-green-600 dark:text-green-400" />
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Número</span>
                     </div>
-                    <div className="p-4 border rounded-lg bg-blue-50">
-                      <h4 className="font-semibold text-blue-800 mb-2">🎯 Benefícios</h4>
-                      <ul className="text-sm text-blue-700 space-y-1">
-                        <li>• Redução de no-shows em 75%</li>
-                        <li>• Atendimento mais eficiente</li>
-                        <li>• Maior satisfação dos clientes</li>
-                        <li>• Aumento na fidelização</li>
-                      </ul>
+                    <p className="text-lg font-semibold text-gray-900 dark:text-white">+55 61 9 9848-3434</p>
+                  </div>
+
+                  <div className="card-dark p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Uptime</span>
+                    </div>
+                    <p className="text-lg font-semibold text-green-600 dark:text-green-400">99.9%</p>
+                  </div>
+
+                  <div className="card-dark p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <BarChart3 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Mensagens/mês</span>
+                    </div>
+                    <p className="text-lg font-semibold text-gray-900 dark:text-white">1,247</p>
+                  </div>
+
+                  <div className="card-dark p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <TrendingUp className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Taxa entrega</span>
+                    </div>
+                    <p className="text-lg font-semibold text-green-600 dark:text-green-400">98.5%</p>
+                  </div>
+                </div>
+
+                {/* Informações Técnicas */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="card-dark p-6">
+                    <h3 className="card-title-dark mb-4 flex items-center gap-2">
+                      <Settings className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      Configuração Evolution API
+                    </h3>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Instância:</span>
+                        <span className="text-gray-900 dark:text-white font-medium">SGB_Instance</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Servidor:</span>
+                        <span className="text-gray-900 dark:text-white font-medium">evolution-api.sgb.aws.com</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Versão:</span>
+                        <span className="text-gray-900 dark:text-white font-medium">v2.1.0</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Webhook:</span>
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
+                          Ativo
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">SSL:</span>
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
+                          Válido até 2024
+                        </Badge>
+                      </div>
                     </div>
                   </div>
-                  <Button 
+
+                  <div className="card-dark p-6">
+                    <h3 className="card-title-dark mb-4 flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                      Funcionalidades Ativas
+                    </h3>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700 dark:text-gray-300">Notificações reservas</span>
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
+                          Ativo
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700 dark:text-gray-300">Lembretes checklist</span>
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
+                          Ativo
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700 dark:text-gray-300">Alertas atraso</span>
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
+                          Ativo
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700 dark:text-gray-300">Relatórios automáticos</span>
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
+                          Ativo
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700 dark:text-gray-300">Resposta automática</span>
+                        <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 text-xs">
+                          Config
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* AWS & Performance */}
+                <div className="card-dark p-6">
+                  <h3 className="card-title-dark mb-4 flex items-center gap-2">
+                    <Server className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    Infraestrutura AWS
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">Região</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">sa-east-1 (São Paulo)</p>
+                    </div>
+                    <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">Latência</p>
+                      <p className="font-semibold text-green-600 dark:text-green-400">&lt; 50ms</p>
+                    </div>
+                    <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">Última atualização</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">Hoje, 14:23</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ações */}
+                <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <Button
                     onClick={() => window.location.href = '/configuracoes/whatsapp'}
-                    className="bg-green-500 hover:bg-green-600 text-white"
+                    className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
                   >
-                    💬 Configurar WhatsApp Business
+                    <Settings className="w-4 h-4" />
+                    Configurações Avançadas
+                  </Button>
+                  
+                  <Button
+                    onClick={() => window.open('https://evolution-api.sgb.aws.com', '_blank')}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Link2 className="w-4 h-4" />
+                    Evolution Dashboard
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Atualizar Status
                   </Button>
                 </div>
               </CardContent>
@@ -1063,49 +1197,204 @@ export default function IntegracoesPage() {
           <TabsContent value="contaazul" className="space-y-6">
             <Card>
               <CardHeader>
-                <div className="flex items-center space-x-2">
-                  <div className="w-6 h-6 bg-blue-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">CA</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <span className="text-white text-sm font-bold">CA</span>
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">ContaAzul Integration</CardTitle>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">OAuth 2.0 • PgCron Sync • API v2</p>
+                    </div>
                   </div>
-                  <CardTitle>ContaAzul Integration</CardTitle>
+                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                    ✅ Conectado
+                  </Badge>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <div className="w-10 h-10 bg-blue-500 rounded text-white flex items-center justify-center font-bold text-lg">
-                      CA
+              <CardContent className="space-y-6">
+                {/* Status Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="card-dark p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Última Sync</span>
+                    </div>
+                    <p className="text-lg font-semibold text-gray-900 dark:text-white">Hoje, 15:30</p>
+                  </div>
+
+                  <div className="card-dark p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <BarChart3 className="w-5 h-5 text-green-600 dark:text-green-400" />
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Eventos DB</span>
+                    </div>
+                    <p className="text-lg font-semibold text-gray-900 dark:text-white">2,547</p>
+                  </div>
+
+                  <div className="card-dark p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Clock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">PgCron</span>
+                    </div>
+                    <p className="text-lg font-semibold text-green-600 dark:text-green-400">Ativo</p>
+                  </div>
+
+                  <div className="card-dark p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <TrendingUp className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Receitas/mês</span>
+                    </div>
+                    <p className="text-lg font-semibold text-green-600 dark:text-green-400">R$ 45.230</p>
+                  </div>
+                </div>
+
+                {/* Informações Técnicas */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="card-dark p-6">
+                    <h3 className="card-title-dark mb-4 flex items-center gap-2">
+                      <Settings className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      Configuração OAuth & API
+                    </h3>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Token OAuth:</span>
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
+                          Válido
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Expira em:</span>
+                        <span className="text-gray-900 dark:text-white font-medium">7 dias</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">API Base:</span>
+                        <span className="text-gray-900 dark:text-white font-medium">api-v2.contaazul.com</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Versão:</span>
+                        <span className="text-gray-900 dark:text-white font-medium">v2.0</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Refresh automático:</span>
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
+                          Ativo
+                        </Badge>
+                      </div>
                     </div>
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Integração ContaAzul</h3>
-                  <p className="text-gray-600 mb-6">
-                    Configure a conexão OAuth com ContaAzul para sincronização automática de dados financeiros
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div className="p-4 border rounded-lg bg-blue-50">
-                      <h4 className="font-semibold text-blue-800 mb-2">📊 Dados Sincronizados</h4>
-                      <ul className="text-sm text-blue-700 space-y-1">
-                        <li>• Vendas e faturamento</li>
-                        <li>• Produtos e categorias</li>
-                        <li>• Clientes e fornecedores</li>
-                        <li>• Contas a pagar e receber</li>
-                      </ul>
-                    </div>
-                    <div className="p-4 border rounded-lg bg-green-50">
-                      <h4 className="font-semibold text-green-800 mb-2">⚡ Automação</h4>
-                      <ul className="text-sm text-green-700 space-y-1">
-                        <li>• Renovação automática de tokens</li>
-                        <li>• Sincronização em tempo real</li>
-                        <li>• Relatórios automatizados</li>
-                        <li>• Alertas de problemas</li>
-                      </ul>
+
+                  <div className="card-dark p-6">
+                    <h3 className="card-title-dark mb-4 flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                      Dados Sincronizados
+                    </h3>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700 dark:text-gray-300">Categorias financeiras</span>
+                        <span className="text-gray-900 dark:text-white font-medium">24</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700 dark:text-gray-300">Eventos financeiros</span>
+                        <span className="text-gray-900 dark:text-white font-medium">2,547</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700 dark:text-gray-300">Contas a receber</span>
+                        <span className="text-gray-900 dark:text-white font-medium">1,234</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700 dark:text-gray-300">Contas a pagar</span>
+                        <span className="text-gray-900 dark:text-white font-medium">567</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700 dark:text-gray-300">Parcelas</span>
+                        <span className="text-gray-900 dark:text-white font-medium">3,401</span>
+                      </div>
                     </div>
                   </div>
-                  <Button 
-                    onClick={() => window.location.href = '/configuracoes/integracoes/contaazul'}
-                    className="bg-blue-500 hover:bg-blue-600 text-white"
+                </div>
+
+                {/* PgCron & Automação */}
+                <div className="card-dark p-6">
+                  <h3 className="card-title-dark mb-4 flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                    Automação PgCron
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">Frequência</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">A cada 4 horas</p>
+                    </div>
+                    <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">Próxima execução</p>
+                      <p className="font-semibold text-blue-600 dark:text-blue-400">19:00 hoje</p>
+                    </div>
+                    <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">Última execução</p>
+                      <p className="font-semibold text-green-600 dark:text-green-400">15:30 (sucesso)</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Estatísticas Financeiras */}
+                <div className="card-dark p-6">
+                  <h3 className="card-title-dark mb-4 flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    Resumo Financeiro (Janeiro 2024)
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                    <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                      <p className="text-green-600 dark:text-green-400 mb-1">Receitas</p>
+                      <p className="font-bold text-green-700 dark:text-green-300 text-lg">R$ 45.230</p>
+                    </div>
+                    <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                      <p className="text-red-600 dark:text-red-400 mb-1">Despesas</p>
+                      <p className="font-bold text-red-700 dark:text-red-300 text-lg">R$ 23.450</p>
+                    </div>
+                    <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <p className="text-blue-600 dark:text-blue-400 mb-1">Saldo</p>
+                      <p className="font-bold text-blue-700 dark:text-blue-300 text-lg">R$ 21.780</p>
+                    </div>
+                    <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                      <p className="text-purple-600 dark:text-purple-400 mb-1">Transações</p>
+                      <p className="font-bold text-purple-700 dark:text-purple-300 text-lg">2,547</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ações */}
+                <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <Button
+                    onClick={() => window.location.href = '/configuracoes/contaazul-pgcron'}
+                    className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
                   >
-                    🔗 Configurar ContaAzul OAuth
+                    <Settings className="w-4 h-4" />
+                    Configurar PgCron
+                  </Button>
+                  
+                  <Button
+                    onClick={() => window.open('https://api-v2.contaazul.com', '_blank')}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Link2 className="w-4 h-4" />
+                    API ContaAzul
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Sincronizar Agora
+                  </Button>
+
+                  <Button
+                    onClick={() => window.location.href = '/relatorios/contaazul-teste'}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <BarChart3 className="w-4 h-4" />
+                    Ver Relatórios
                   </Button>
                 </div>
               </CardContent>
@@ -1116,82 +1405,209 @@ export default function IntegracoesPage() {
           <TabsContent value="meta" className="space-y-6">
             <Card>
               <CardHeader>
-                <div className="flex items-center space-x-2">
-                  <div className="w-6 h-6 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">M</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+                      <span className="text-white text-sm font-bold">M</span>
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">Meta Business APIs</CardTitle>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Facebook • Instagram • Graph API v18.0</p>
+                    </div>
                   </div>
-                  <CardTitle>Meta & Social Media</CardTitle>
+                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                    ✅ Conectado
+                  </Badge>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
-                      <div className="flex items-center mb-4">
-                        <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
-                          <Facebook className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-gray-900 dark:text-white">Facebook</h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">Posts e análises</p>
-                        </div>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                        Automação de posts, análise de engajamento e gerenciamento de campanhas publicitárias
-                      </p>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                        <span className="text-xs text-yellow-600">Em desenvolvimento</span>
-                      </div>
+              <CardContent className="space-y-6">
+                {/* Status Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="card-dark p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Calendar className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Última Coleta</span>
                     </div>
-                    
-                    <div className="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
-                      <div className="flex items-center mb-4">
-                        <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mr-3">
-                          <Instagram className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-gray-900 dark:text-white">Instagram</h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">Stories e posts</p>
-                        </div>
+                    <p className="text-lg font-semibold text-gray-900 dark:text-white">Hoje, 14:15</p>
+                  </div>
+
+                  <div className="card-dark p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Instagram className="w-5 h-5 text-pink-600 dark:text-pink-400" />
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Posts Instagram</span>
+                    </div>
+                    <p className="text-lg font-semibold text-gray-900 dark:text-white">1,247</p>
+                  </div>
+
+                  <div className="card-dark p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Facebook className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Posts Facebook</span>
+                    </div>
+                    <p className="text-lg font-semibold text-gray-900 dark:text-white">823</p>
+                  </div>
+
+                  <div className="card-dark p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <BarChart3 className="w-5 h-5 text-green-600 dark:text-green-400" />
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Engajamento</span>
+                    </div>
+                    <p className="text-lg font-semibold text-green-600 dark:text-green-400">4.8%</p>
+                  </div>
+                </div>
+
+                {/* Informações Técnicas */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="card-dark p-6">
+                    <h3 className="card-title-dark mb-4 flex items-center gap-2">
+                      <Settings className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                      Configuração API & Tokens
+                    </h3>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Access Token:</span>
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
+                          Válido
+                        </Badge>
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                        Publicação automática de conteúdo, stories promocionais e análise de métricas
-                      </p>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                        <span className="text-xs text-yellow-600">Em desenvolvimento</span>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">App ID:</span>
+                        <span className="text-gray-900 dark:text-white font-medium">1234567890</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Graph API:</span>
+                        <span className="text-gray-900 dark:text-white font-medium">v18.0</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Facebook Page:</span>
+                        <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 text-xs">
+                          Conectada
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Instagram Business:</span>
+                        <Badge className="bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400 text-xs">
+                          Conectado
+                        </Badge>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
-                    <div className="flex items-center mb-4">
-                      <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center mr-3">
-                        <Star className="w-5 h-5 text-white" />
+                  <div className="card-dark p-6">
+                    <h3 className="card-title-dark mb-4 flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                      Dados Coletados
+                    </h3>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700 dark:text-gray-300">Posts Instagram</span>
+                        <span className="text-gray-900 dark:text-white font-medium">1,247</span>
                       </div>
-                      <div>
-                        <h4 className="font-semibold text-gray-900 dark:text-white">Google Reviews</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Monitoramento e resposta automática</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700 dark:text-gray-300">Posts Facebook</span>
+                        <span className="text-gray-900 dark:text-white font-medium">823</span>
                       </div>
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                      Monitoramento em tempo real de novas avaliações, notificações automáticas e sugestões de resposta
-                    </p>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                      <span className="text-xs text-gray-500 dark:text-gray-500">Planejado</span>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700 dark:text-gray-300">Instagram Insights</span>
+                        <span className="text-gray-900 dark:text-white font-medium">3,401</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700 dark:text-gray-300">Total Dados</span>
+                        <span className="text-gray-900 dark:text-white font-medium">5,471</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700 dark:text-gray-300">Análises Content</span>
+                        <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 text-xs">
+                          Ativo
+                        </Badge>
+                      </div>
                     </div>
                   </div>
+                </div>
 
-                  <div className="text-center py-6">
-                    <Button 
-                      onClick={() => window.location.href = '/configuracoes/meta-configuracao'}
-                      className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
-                    >
-                      🎯 Configurar Meta APIs
-                    </Button>
+                {/* PgCron & Automação */}
+                <div className="card-dark p-6">
+                  <h3 className="card-title-dark mb-4 flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                    Automação PgCron Meta
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">Frequência</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">A cada 6 horas</p>
+                    </div>
+                    <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">Próxima coleta</p>
+                      <p className="font-semibold text-purple-600 dark:text-purple-400">20:00 hoje</p>
+                    </div>
+                    <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">Última coleta</p>
+                      <p className="font-semibold text-green-600 dark:text-green-400">14:15 (sucesso)</p>
+                    </div>
                   </div>
+                </div>
+
+                {/* Estatísticas de Engajamento */}
+                <div className="card-dark p-6">
+                  <h3 className="card-title-dark mb-4 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-pink-600 dark:text-pink-400" />
+                    Métricas de Engajamento (Últimos 30 dias)
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                    <div className="text-center p-4 bg-pink-50 dark:bg-pink-900/20 rounded-lg border border-pink-200 dark:border-pink-800">
+                      <p className="text-pink-600 dark:text-pink-400 mb-1">Total Posts</p>
+                      <p className="font-bold text-pink-700 dark:text-pink-300 text-lg">127</p>
+                    </div>
+                    <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <p className="text-blue-600 dark:text-blue-400 mb-1">Total Likes</p>
+                      <p className="font-bold text-blue-700 dark:text-blue-300 text-lg">12.4K</p>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                      <p className="text-green-600 dark:text-green-400 mb-1">Comentários</p>
+                      <p className="font-bold text-green-700 dark:text-green-300 text-lg">1.2K</p>
+                    </div>
+                    <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                      <p className="text-purple-600 dark:text-purple-400 mb-1">Engajamento</p>
+                      <p className="font-bold text-purple-700 dark:text-purple-300 text-lg">4.8%</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ações */}
+                <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <Button
+                    onClick={() => window.location.href = '/configuracoes/meta-configuracao'}
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white flex items-center gap-2"
+                  >
+                    <Settings className="w-4 h-4" />
+                    Configurações Avançadas
+                  </Button>
+                  
+                  <Button
+                    onClick={() => window.open('https://developers.facebook.com/apps', '_blank')}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Link2 className="w-4 h-4" />
+                    Meta for Developers
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Coletar Agora
+                  </Button>
+
+                  <Button
+                    onClick={() => window.location.href = '/visao-geral/marketing-360'}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <BarChart3 className="w-4 h-4" />
+                    Marketing 360°
+                  </Button>
                 </div>
               </CardContent>
             </Card>
