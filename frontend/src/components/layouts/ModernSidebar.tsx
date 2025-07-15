@@ -174,29 +174,9 @@ export function ModernSidebar() {
         href: '/configuracoes/seguranca'
       },
       { 
-        icon: MessageSquare, 
-        label: 'WhatsApp', 
-        href: '/configuracoes/whatsapp'
-      },
-      { 
-        icon: Zap, 
-        label: 'ContaHub Auto', 
-        href: '/configuracoes/contahub-automatico'
-      },
-      { 
-        icon: Clock, 
-        label: 'Meta Config', 
-        href: '/configuracoes/meta-configuracao'
-      },
-      { 
         icon: FileText, 
         label: 'Templates', 
         href: '/configuracoes/templates'
-      },
-      { 
-        icon: BarChart3, 
-        label: 'Analytics', 
-        href: '/configuracoes/analytics'
       },
       { 
         icon: Database, 
