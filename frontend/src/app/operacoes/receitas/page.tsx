@@ -1328,11 +1328,10 @@ export default function ReceitasPage() {
               </div>
 
               {/* Seção de insumos */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Utensils className="w-5 h-5 text-blue-600" />
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Insumos da Receita</h3>
-                </div>
+              <div className="flex items-center gap-2">
+                <Utensils className="w-5 h-5 text-blue-600" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Insumos da Receita</h3>
+              </div>
 
                 {/* Adicionar insumo */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
@@ -1461,7 +1460,6 @@ export default function ReceitasPage() {
                     </div>
                   </div>
                 )}
-              </div>
             </div>
 
             <DialogFooter>
@@ -1899,7 +1897,7 @@ export default function ReceitasPage() {
 
                 {/* Edição de insumos da receita */}
                 {receitaEditando.insumos && receitaEditando.insumos.length > 0 && (
-                  <div className="space-y-4">
+                  <>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Utensils className="w-5 h-5 text-blue-600" />
@@ -2034,7 +2032,7 @@ export default function ReceitasPage() {
                         )}
                       </div>
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
             )}
