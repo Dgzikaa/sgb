@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
       .select(`
         id, bar_id, user_id, email, nome, role, modulos_permitidos, ativo,
         foto_perfil, celular, telefone, cpf, data_nascimento, endereco, 
-        cep, cidade, estado, bio, cargo, departamento, data_contratacao,
+        cep, cidade, estado, bio,
         preferencias, ultima_atividade, conta_verificada,
         criado_em, atualizado_em
       `)
@@ -91,7 +91,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json()
     const {
       nome, celular, telefone, cpf, data_nascimento, endereco,
-      cep, cidade, estado, bio, cargo, departamento, data_contratacao,
+      cep, cidade, estado, bio,
       foto_perfil, preferencias
     } = body
 
@@ -117,9 +117,6 @@ export async function PUT(request: NextRequest) {
     if (cidade !== undefined) updateData.cidade = cidade
     if (estado !== undefined) updateData.estado = estado
     if (bio !== undefined) updateData.bio = bio
-    if (cargo !== undefined) updateData.cargo = cargo
-    if (departamento !== undefined) updateData.departamento = departamento
-    if (data_contratacao !== undefined) updateData.data_contratacao = data_contratacao
     if (foto_perfil !== undefined) updateData.foto_perfil = foto_perfil
     if (preferencias !== undefined) updateData.preferencias = preferencias
 
