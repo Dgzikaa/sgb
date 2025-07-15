@@ -385,7 +385,7 @@ export default function MetasPage() {
                 <div className="text-right">
                   <div className="text-sm text-orange-200">Total de Metas</div>
                   <div className="text-2xl font-bold">
-                    {Object.values(metas).reduce((acc, curr) => acc + curr.length, 0)}
+                    {metas && typeof metas === 'object' ? Object.values(metas).reduce((acc, curr) => acc + curr.length, 0) : 0}
                   </div>
                 </div>
                 <div className="p-3 bg-white/10 rounded-xl">
@@ -398,7 +398,7 @@ export default function MetasPage() {
 
                  {/* Overview Cards */}
          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-           {(Object.entries(metas) as [keyof MetasOrganizadas, Meta[]][]).map(([categoria, metasCategoria]) => {
+           {metas && typeof metas === 'object' ? (Object.entries(metas) as [keyof MetasOrganizadas, Meta[]][]).map(([categoria, metasCategoria]) => {
              const stats = getCategoryStats(categoria);
              return (
                <Card key={categoria} className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
@@ -420,7 +420,7 @@ export default function MetasPage() {
                  </CardContent>
                </Card>
              );
-           })}
+           }) : null}
         </div>
 
         {/* Tabs de Categorias */}
@@ -437,7 +437,7 @@ export default function MetasPage() {
               </div>
               
                              <TabsList className="grid w-full grid-cols-4 bg-gray-100 dark:bg-gray-700">
-                 {(Object.entries(metas) as [keyof MetasOrganizadas, Meta[]][]).map(([categoria, metasCategoria]) => (
+                 {metas && typeof metas === 'object' ? (Object.entries(metas) as [keyof MetasOrganizadas, Meta[]][]).map(([categoria, metasCategoria]) => (
                    <TabsTrigger 
                      key={categoria}
                      value={categoria}
@@ -449,12 +449,12 @@ export default function MetasPage() {
                        {metasCategoria.length}
                      </Badge>
                    </TabsTrigger>
-                 ))}
+                 )) : null}
               </TabsList>
             </CardHeader>
 
                          <CardContent className="p-6">
-               {(Object.entries(metas) as [keyof MetasOrganizadas, Meta[]][]).map(([categoria, metasCategoria]) => (
+               {metas && typeof metas === 'object' ? (Object.entries(metas) as [keyof MetasOrganizadas, Meta[]][]).map(([categoria, metasCategoria]) => (
                  <TabsContent key={categoria} value={categoria} className="space-y-6 mt-0">
                    {metasCategoria.length === 0 ? (
                      <div className="text-center py-12">
@@ -484,7 +484,7 @@ export default function MetasPage() {
                      </div>
                    )}
                  </TabsContent>
-               ))}
+               )) : null}
             </CardContent>
           </Tabs>
         </Card>
