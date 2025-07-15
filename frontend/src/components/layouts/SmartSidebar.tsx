@@ -133,6 +133,37 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
       keywords: ['visão', 'geral', 'overview', 'métricas']
     },
     
+    // Checklists
+    {
+      id: 'checklists',
+      title: 'Checklists',
+      icon: CheckCircle,
+      href: '/checklists',
+      category: 'main',
+      importance: 'high',
+      keywords: ['checklists', 'verificação', 'templates'],
+      subItems: [
+        {
+          id: 'checklist-abertura-main',
+          title: 'Checklist de Abertura',
+          icon: CheckCircle,
+          href: '/checklists/abertura',
+          category: 'main',
+          importance: 'high',
+          keywords: ['checklist', 'abertura', 'verificação']
+        },
+        {
+          id: 'templates-main',
+          title: 'Templates',
+          icon: FileText,
+          href: '/configuracoes/templates',
+          category: 'main',
+          importance: 'medium',
+          keywords: ['templates', 'modelos', 'documentos']
+        }
+      ]
+    },
+    
     // Operations
     {
       id: 'operacoes',
@@ -248,32 +279,12 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
       subItems: [
         {
           id: 'checklists-config',
-          title: 'Checklists',
+          title: 'Gerenciar Checklists',
           icon: CheckCircle,
           href: '/configuracoes/checklists',
           category: 'config',
           importance: 'medium',
-          keywords: ['checklists', 'configurar', 'templates'],
-          subItems: [
-            {
-              id: 'checklists-manage',
-              title: 'Gerenciar Checklists',
-              icon: CheckCircle,
-              href: '/configuracoes/checklists',
-              category: 'config',
-              importance: 'medium',
-              keywords: ['checklists', 'gerenciar']
-            },
-            {
-              id: 'templates',
-              title: 'Templates',
-              icon: FileText,
-              href: '/configuracoes/templates',
-              category: 'config',
-              importance: 'medium',
-              keywords: ['templates', 'modelos', 'documentos']
-            }
-          ]
+          keywords: ['checklists', 'configurar', 'gerenciar']
         },
         {
           id: 'integracoes',
@@ -283,6 +294,24 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
           category: 'config',
           importance: 'medium',
           keywords: ['integrações', 'apis', 'conexões']
+        },
+        {
+          id: 'analytics',
+          title: 'Analytics',
+          icon: BarChart3,
+          href: '/configuracoes/analytics',
+          category: 'config',
+          importance: 'medium',
+          keywords: ['analytics', 'métricas', 'dashboard', 'performance']
+        },
+        {
+          id: 'cache',
+          title: 'Cache',
+          icon: Database,
+          href: '/configuracoes/cache',
+          category: 'config',
+          importance: 'medium',
+          keywords: ['cache', 'redis', 'performance', 'memória']
         },
         {
           id: 'seguranca',

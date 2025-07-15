@@ -110,7 +110,6 @@ export default function TemplatesPage() {
       const params = new URLSearchParams()
       if (busca) params.append('busca', busca)
       if (categoriaFiltro && categoriaFiltro !== 'all') params.append('categoria', categoriaFiltro)
-      if (setorFiltro && setorFiltro !== 'all') params.append('setor', setorFiltro)
       if (tipoFiltro && tipoFiltro !== 'all') params.append('tipo', tipoFiltro)
       if (publicoFiltro && publicoFiltro !== 'all') params.append('publico', publicoFiltro)
       if (predefinidoFiltro && predefinidoFiltro !== 'all') params.append('predefinido', predefinidoFiltro)
@@ -220,7 +219,6 @@ export default function TemplatesPage() {
   const limparFiltros = () => {
     setBusca('')
     setCategoriaFiltro('all')
-    setSetorFiltro('all')
     setTipoFiltro('all')
     setPublicoFiltro('all')
     setPredefinidoFiltro('all')

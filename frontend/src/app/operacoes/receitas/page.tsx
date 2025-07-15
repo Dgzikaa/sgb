@@ -151,6 +151,15 @@ export default function ReceitasPage() {
   const [insumoSelecionado, setInsumoSelecionado] = useState('')
   const [quantidadeInsumo, setQuantidadeInsumo] = useState('')
 
+  // Sincronizar tipo_local dos formulários com o tipo selecionado
+  useEffect(() => {
+    setNovoInsumo(prev => ({ ...prev, tipo_local: tipoLocalInsumos }))
+  }, [tipoLocalInsumos])
+
+  useEffect(() => {
+    setNovaReceita(prev => ({ ...prev, tipo_local: tipoLocalReceitas }))
+  }, [tipoLocalReceitas])
+
   useEffect(() => {
     setPageTitle('📋 Receitas e Insumos')
     return () => setPageTitle('')
@@ -811,18 +820,27 @@ export default function ReceitasPage() {
           </TabsList>
 
           <TabsContent value="insumos" className="space-y-6">
-            {/* Abas para Bar vs Cozinha - Insumos */}
+            {/* Seletor Bar vs Cozinha - Insumos */}
             <div className="mb-6">
-              <Tabs value={tipoLocalInsumos} onValueChange={(value) => setTipoLocalInsumos(value as 'bar' | 'cozinha')}>
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="cozinha" className="flex items-center gap-2">
+              <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <Label className="text-gray-700 dark:text-gray-300 font-medium">Tipo Local:</Label>
+                <div className="flex gap-2">
+                  <Button
+                    variant={tipoLocalInsumos === 'cozinha' ? 'default' : 'outline'}
+                    onClick={() => setTipoLocalInsumos('cozinha')}
+                    className="flex items-center gap-2"
+                  >
                     👨‍🍳 Cozinha ({insumos.filter(i => i.tipo_local === 'cozinha').length})
-                  </TabsTrigger>
-                  <TabsTrigger value="bar" className="flex items-center gap-2">
+                  </Button>
+                  <Button
+                    variant={tipoLocalInsumos === 'bar' ? 'default' : 'outline'}
+                    onClick={() => setTipoLocalInsumos('bar')}
+                    className="flex items-center gap-2"
+                  >
                     🍺 Bar ({insumos.filter(i => i.tipo_local === 'bar').length})
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
+                  </Button>
+                </div>
+              </div>
             </div>
             
             {/* Formulário de Novo Insumo */}
@@ -1129,18 +1147,27 @@ export default function ReceitasPage() {
           </TabsContent>
 
           <TabsContent value="receitas" className="space-y-6">
-            {/* Abas para Bar vs Cozinha - Receitas */}
+            {/* Seletor Bar vs Cozinha - Receitas */}
             <div className="mb-6">
-              <Tabs value={tipoLocalReceitas} onValueChange={(value) => setTipoLocalReceitas(value as 'bar' | 'cozinha')}>
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="cozinha" className="flex items-center gap-2">
+              <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <Label className="text-gray-700 dark:text-gray-300 font-medium">Tipo Local:</Label>
+                <div className="flex gap-2">
+                  <Button
+                    variant={tipoLocalReceitas === 'cozinha' ? 'default' : 'outline'}
+                    onClick={() => setTipoLocalReceitas('cozinha')}
+                    className="flex items-center gap-2"
+                  >
                     👨‍🍳 Cozinha ({receitas.filter(r => r.tipo_local === 'cozinha').length})
-                  </TabsTrigger>
-                  <TabsTrigger value="bar" className="flex items-center gap-2">
+                  </Button>
+                  <Button
+                    variant={tipoLocalReceitas === 'bar' ? 'default' : 'outline'}
+                    onClick={() => setTipoLocalReceitas('bar')}
+                    className="flex items-center gap-2"
+                  >
                     🍺 Bar ({receitas.filter(r => r.tipo_local === 'bar').length})
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
+                  </Button>
+                </div>
+              </div>
             </div>
             
             {/* Botão para criar nova receita */}
