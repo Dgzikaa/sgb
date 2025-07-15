@@ -107,11 +107,14 @@ export function NotificationCenter() {
   // =====================================================
 
   const notificacoesFiltradas = notificacoes.filter(notificacao => {
+    // Verificar se a notificação tem dados válidos
+    if (!notificacao || !notificacao.id) return false
+    
     if (filtroTab === 'nao_lidas') {
-      return ['pendente', 'enviada'].includes(notificacao.status)
+      return ['pendente', 'enviada'].includes(notificacao.status || '')
     }
     if (filtroTab === 'importantes') {
-      return ['alta', 'critica'].includes(notificacao.prioridade)
+      return ['alta', 'critica'].includes(notificacao.prioridade || '')
     }
     return true // todas
   })
@@ -122,6 +125,11 @@ export function NotificationCenter() {
 
   const handleMarcarComoLida = async (notificacaoId: string) => {
     try {
+      if (!notificacaoId) {
+        console.error('❌ ID da notificação não fornecido')
+        return
+      }
+      
       await marcarComoLida(notificacaoId)
       console.log('✅ Notificação marcada como lida')
     } catch (error) {
@@ -140,6 +148,11 @@ export function NotificationCenter() {
 
   const handleExcluirNotificacao = async (notificacaoId: string) => {
     try {
+      if (!notificacaoId) {
+        console.error('❌ ID da notificação não fornecido')
+        return
+      }
+      
       await excluirNotificacao(notificacaoId)
       console.log('✅ Notificação excluída')
     } catch (error) {
@@ -148,11 +161,20 @@ export function NotificationCenter() {
   }
 
   const handleAcaoNotificacao = (acao: any) => {
-    if (acao.action === 'redirect' && acao.url) {
-      router.push(acao.url)
-      setIsOpen(false)
-    } else if (acao.action === 'download' && acao.url) {
-      window.open(acao.url, '_blank')
+    try {
+      if (!acao) {
+        console.error('❌ Ação não fornecida')
+        return
+      }
+      
+      if (acao.action === 'redirect' && acao.url) {
+        router.push(acao.url)
+        setIsOpen(false)
+      } else if (acao.action === 'download' && acao.url) {
+        window.open(acao.url, '_blank')
+      }
+    } catch (error) {
+      console.error('❌ Erro ao executar ação da notificação:', error)
     }
   }
 
@@ -276,20 +298,20 @@ export function NotificationCenter() {
                           <div className="flex items-center gap-2">
                             <Badge 
                               variant="outline" 
-                              className={`${getColorByType(notificacao.tipo)} text-xs`}
+                              className={`${getColorByType(notificacao.tipo || 'info')} text-xs`}
                             >
-                              {notificacao.tipo.toUpperCase()}
+                              {(notificacao.tipo || 'INFO').toUpperCase()}
                             </Badge>
                             <Badge 
                               variant="outline" 
-                              className={`${getColorByPriority(notificacao.prioridade)} text-xs`}
+                              className={`${getColorByPriority(notificacao.prioridade || 'media')} text-xs`}
                             >
-                              {notificacao.prioridade.toUpperCase()}
+                              {(notificacao.prioridade || 'MEDIA').toUpperCase()}
                             </Badge>
                           </div>
 
                           <div className="flex items-center gap-1">
-                            {['pendente', 'enviada'].includes(notificacao.status) && (
+                            {['pendente', 'enviada'].includes(notificacao.status || '') && (
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -314,18 +336,18 @@ export function NotificationCenter() {
                         {/* Conteúdo da Notificação */}
                         <div className="space-y-1">
                           <h4 className="font-medium text-sm text-gray-900 dark:text-white">
-                            {notificacao.titulo}
+                            {notificacao.titulo || 'Notificação sem título'}
                           </h4>
                           <p className="text-xs text-gray-600 dark:text-gray-400">
-                            {notificacao.mensagem}
+                            {notificacao.mensagem || 'Sem mensagem'}
                           </p>
                           <p className="text-xs text-gray-500 dark:text-gray-500">
-                            {formatarTempo(notificacao.criada_em)}
+                            {notificacao.criada_em ? formatarTempo(notificacao.criada_em) : 'Sem data'}
                           </p>
                         </div>
 
                         {/* Ações da Notificação */}
-                        {notificacao.acoes && notificacao.acoes.length > 0 && (
+                        {notificacao.acoes && Array.isArray(notificacao.acoes) && notificacao.acoes.length > 0 && (
                           <div className="flex flex-wrap gap-1 pt-2">
                             {notificacao.acoes.map((acao, index) => (
                               <Button
@@ -337,7 +359,7 @@ export function NotificationCenter() {
                               >
                                 {acao.action === 'redirect' && <ExternalLink className="h-3 w-3 mr-1" />}
                                 {acao.action === 'download' && <Download className="h-3 w-3 mr-1" />}
-                                {acao.label}
+                                {acao.label || 'Ação'}
                               </Button>
                             ))}
                           </div>
