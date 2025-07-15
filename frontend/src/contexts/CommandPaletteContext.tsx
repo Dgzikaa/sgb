@@ -15,17 +15,14 @@ export function CommandPaletteProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)
 
   const openPalette = useCallback(() => {
-    console.log('🔍 openPalette called - setting isOpen to true')
     setIsOpen(true)
   }, [])
 
   const closePalette = useCallback(() => {
-    console.log('🔍 closePalette called - setting isOpen to false')
     setIsOpen(false)
   }, [])
 
   const togglePalette = useCallback(() => {
-    console.log('🔍 togglePalette called - current isOpen:', isOpen)
     setIsOpen(prev => !prev)
   }, [isOpen])
 

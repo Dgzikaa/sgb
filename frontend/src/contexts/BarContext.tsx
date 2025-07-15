@@ -46,7 +46,6 @@ export function BarProvider({ children }: { children: ReactNode }) {
       try {
         // Aguardar que o UserContext seja inicializado
         if (!userInitialized) {
-          console.log('🔄 BarContext: Aguardando UserContext ser inicializado...')
           return
         }
 
@@ -58,7 +57,6 @@ export function BarProvider({ children }: { children: ReactNode }) {
         
         // Se há usuário no contexto, buscar os bares do localStorage
         if (user && user.email) {
-          console.log('✅ BarContext: Usuário encontrado no contexto:', user.email)
           
           // Buscar dados completos do localStorage que podem conter availableBars
           const storedUserData = localStorage.getItem('sgb_user')
@@ -66,7 +64,6 @@ export function BarProvider({ children }: { children: ReactNode }) {
             try {
               const userData = JSON.parse(storedUserData)
               if (userData.availableBars && Array.isArray(userData.availableBars) && userData.availableBars.length > 0) {
-                console.log('✅ BarContext: Carregando bares do localStorage:', userData.availableBars)
                 
                 if (mounted) {
                   setAvailableBars(userData.availableBars)
@@ -102,7 +99,6 @@ export function BarProvider({ children }: { children: ReactNode }) {
           try {
             const userData = JSON.parse(storedUser)
             userEmail = userData.email
-            console.log('🔄 BarContext: Fallback para localStorage:', userData.email)
             
             // Verificar se já temos os bares no localStorage
             if (userData.availableBars && Array.isArray(userData.availableBars) && userData.availableBars.length > 0) {
@@ -219,7 +215,6 @@ export function BarProvider({ children }: { children: ReactNode }) {
     if (typeof window === 'undefined') return
 
     const handleUserDataUpdated = () => {
-      console.log('🔄 BarContext: Evento userDataUpdated recebido, recarregando bares...')
       setIsLoading(true)
       // O useEffect principal vai recarregar com as novas dependências
     }

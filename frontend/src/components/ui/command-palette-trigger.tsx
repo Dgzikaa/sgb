@@ -97,7 +97,6 @@ export function CommandPaletteIconTrigger({
   const { openPalette } = useCommandPalette()
 
   const handleClick = () => {
-    console.log('🔍 CommandPaletteIconTrigger clicked (mobile)')
     openPalette()
   }
 
@@ -125,7 +124,6 @@ export function CommandPaletteSearchPlaceholder({
   const { openPalette } = useCommandPalette()
 
   const handleClick = () => {
-    console.log('🔍 CommandPaletteSearchPlaceholder clicked')
     openPalette()
   }
 
@@ -150,4 +148,4 @@ export function CommandPaletteSearchPlaceholder({
       </div>
     </div>
   )
-} 
+}

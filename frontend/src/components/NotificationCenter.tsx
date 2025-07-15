@@ -64,8 +64,6 @@ export function NotificationCenter() {
 
   useEffect(() => {
     if (!hasInitializedRef.current) {
-      console.log('🔄 NotificationCenter: Carregando notificações iniciais...')
-      
       // Carregar notificações iniciais
       carregarNotificacoes({ apenas_nao_lidas: false, limit: 20 })
       
@@ -131,7 +129,6 @@ export function NotificationCenter() {
       }
       
       await marcarComoLida(notificacaoId)
-      console.log('✅ Notificação marcada como lida')
     } catch (error) {
       console.error('❌ Erro ao marcar notificação como lida:', error)
     }
@@ -140,7 +137,6 @@ export function NotificationCenter() {
   const handleMarcarTodasComoLidas = async () => {
     try {
       await marcarTodasComoLidas()
-      console.log('✅ Todas as notificações marcadas como lidas')
     } catch (error) {
       console.error('❌ Erro ao marcar todas como lidas:', error)
     }
@@ -154,7 +150,6 @@ export function NotificationCenter() {
       }
       
       await excluirNotificacao(notificacaoId)
-      console.log('✅ Notificação excluída')
     } catch (error) {
       console.error('❌ Erro ao excluir notificação:', error)
     }

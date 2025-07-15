@@ -6,8 +6,6 @@ import { useCommandPalette } from '@/contexts/CommandPaletteContext'
 export function CommandPaletteWrapper() {
   const { isOpen, closePalette } = useCommandPalette()
 
-  console.log('🔍 CommandPaletteWrapper render - isOpen:', isOpen)
-
   return (
     <CommandPalette 
       isOpen={isOpen} 

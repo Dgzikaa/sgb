@@ -45,18 +45,15 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'sgb_user') {
-        console.log('🔄 UserContext: Storage change detectado')
         loadUserData()
       }
     }
 
     const handleUserDataUpdated = () => {
-      console.log('🔄 UserContext: Evento userDataUpdated recebido')
       loadUserData()
     }
 
     const handleRefreshContext = () => {
-      console.log('🔄 UserContext: Refresh forçado recebido')
       loadUserData()
     }
 
@@ -83,23 +80,18 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     
     try {
       const userData = localStorage.getItem('sgb_user')
-      console.log('🔍 UserContext: Verificando localStorage...', userData ? 'Dados encontrados' : 'Nenhum dado')
       
       if (userData) {
         const parsedUser = JSON.parse(userData)
-        console.log('🔍 UserContext: Dados parseados:', parsedUser)
         
         // Validar se os dados do usuário são válidos
         if (parsedUser && parsedUser.id && parsedUser.email && parsedUser.nome) {
           setUser(parsedUser)
-          console.log('✅ Dados do usuário carregados:', parsedUser.nome)
         } else {
-          console.log('⚠️ Dados do usuário inválidos, limpando localStorage')
           localStorage.removeItem('sgb_user')
           setUser(null)
         }
       } else {
-        console.log('🔍 Nenhum usuário encontrado no localStorage')
         setUser(null)
       }
     } catch (error) {
@@ -122,7 +114,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         // Disparar evento customizado para notificar outros componentes
         window.dispatchEvent(new CustomEvent('userDataUpdated'))
       }
-      console.log('✅ Dados do usuário atualizados:', userData.nome)
     } catch (error) {
       console.error('❌ Erro ao atualizar dados do usuário:', error)
     }

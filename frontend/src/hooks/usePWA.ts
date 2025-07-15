@@ -50,15 +50,13 @@ export function usePWA(): PWAState & PWAActions {
   }, [])
 
   // Registrar Service Worker
-  const registerServiceWorker = useCallback(async () => {
+  const registerServiceWorker = useCallback(async (): Promise<ServiceWorkerRegistration | null> => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return null
     
     try {
       const registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/'
       })
-
-      console.log('✅ PWA: Service Worker registrado:', registration.scope)
       
       setState(prev => ({ 
         ...prev, 
@@ -67,13 +65,10 @@ export function usePWA(): PWAState & PWAActions {
 
       // Escutar atualizações do Service Worker
       registration.addEventListener('updatefound', () => {
-        console.log('🔄 PWA: Nova versão do Service Worker encontrada')
-        
         const newWorker = registration.installing
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && typeof window !== 'undefined' && navigator.serviceWorker.controller) {
-              console.log('✨ PWA: Nova versão disponível')
               // Aqui você pode mostrar uma notificação para o usuário sobre a atualização
             }
           })
@@ -90,12 +85,10 @@ export function usePWA(): PWAState & PWAActions {
   // Detectar conectividade
   const handleOnline = useCallback(() => {
     setState(prev => ({ ...prev, isOnline: true, isOffline: false }))
-    console.log('🌐 PWA: Conexão online detectada')
   }, [])
 
   const handleOffline = useCallback(() => {
     setState(prev => ({ ...prev, isOnline: false, isOffline: true }))
-    console.log('📱 PWA: Modo offline detectado')
   }, [])
 
   // Detectar prompt de instalação
@@ -107,13 +100,11 @@ export function usePWA(): PWAState & PWAActions {
       installPrompt: installEvent,
       isInstallable: true 
     }))
-    console.log('📲 PWA: Prompt de instalação disponível')
   }, [])
 
   // Função para instalar PWA
   const install = useCallback(async (): Promise<boolean> => {
     if (!state.installPrompt) {
-      console.log('❌ PWA: Prompt de instalação não disponível')
       return false
     }
 
@@ -122,7 +113,6 @@ export function usePWA(): PWAState & PWAActions {
       const choiceResult = await state.installPrompt.userChoice
       
       if (choiceResult.outcome === 'accepted') {
-        console.log('✅ PWA: Usuário aceitou instalação')
         setState(prev => ({ 
           ...prev, 
           installPrompt: null,
@@ -131,7 +121,6 @@ export function usePWA(): PWAState & PWAActions {
         }))
         return true
       } else {
-        console.log('❌ PWA: Usuário rejeitou instalação')
         return false
       }
     } catch (error) {
@@ -143,7 +132,6 @@ export function usePWA(): PWAState & PWAActions {
   // Habilitar notificações
   const enableNotifications = useCallback(async (): Promise<boolean> => {
     if (!('Notification' in window)) {
-      console.log('❌ PWA: Notificações não suportadas')
       return false
     }
 
@@ -152,10 +140,8 @@ export function usePWA(): PWAState & PWAActions {
       setState(prev => ({ ...prev, notificationPermission: permission }))
       
       if (permission === 'granted') {
-        console.log('✅ PWA: Permissão de notificação concedida')
         return true
       } else {
-        console.log('❌ PWA: Permissão de notificação negada')
         return false
       }
     } catch (error) {
@@ -167,7 +153,6 @@ export function usePWA(): PWAState & PWAActions {
   // Mostrar notificação
   const showNotification = useCallback(async (title: string, options?: NotificationOptions) => {
     if (state.notificationPermission !== 'granted') {
-      console.log('❌ PWA: Sem permissão para notificações')
       return
     }
 
@@ -193,7 +178,6 @@ export function usePWA(): PWAState & PWAActions {
     if (state.serviceWorkerRegistration) {
       try {
         await state.serviceWorkerRegistration.update()
-        console.log('🔄 PWA: Service Worker atualizado')
       } catch (error) {
         console.error('❌ PWA: Erro ao atualizar Service Worker:', error)
       }
@@ -206,7 +190,6 @@ export function usePWA(): PWAState & PWAActions {
       try {
         const cacheNames = await caches.keys()
         await Promise.all(cacheNames.map(name => caches.delete(name)))
-        console.log('🗑️ PWA: Cache limpo')
       } catch (error) {
         console.error('❌ PWA: Erro ao limpar cache:', error)
       }
