@@ -811,17 +811,17 @@ export default function ReceitasPage() {
   return (
     <ProtectedRoute requiredModule="receitas_insumos">
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Receitas e Insumos</h1>
-            <p className="text-gray-600 dark:text-gray-400">Gerencie insumos e receitas do estabelecimento</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Receitas e Insumos</h1>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Gerencie insumos e receitas do estabelecimento</p>
           </div>
           
           <Button
             onClick={recarregarDados}
             disabled={loadingData}
             variant="outline"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 h-10 w-full sm:w-auto touch-manipulation"
           >
             {loadingData ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -844,10 +844,10 @@ export default function ReceitasPage() {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 bg-gray-100 dark:bg-gray-700">
+          <TabsList className="grid w-full grid-cols-2 bg-gray-100 dark:bg-gray-700 h-14 sm:h-12">
             <TabsTrigger 
               value="insumos" 
-              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white dark:text-gray-300"
+              className="flex items-center gap-1 sm:gap-2 text-sm sm:text-base data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white dark:text-gray-300 touch-manipulation"
             >
               <Package className="w-4 h-4" />
               Insumos ({insumos.length})
@@ -862,7 +862,7 @@ export default function ReceitasPage() {
             </TabsTrigger>
             <TabsTrigger 
               value="receitas" 
-              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white dark:text-gray-300"
+              className="flex items-center gap-1 sm:gap-2 text-sm sm:text-base data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white dark:text-gray-300 touch-manipulation"
             >
               <ChefHat className="w-4 h-4" />
               Receitas ({receitas.length})
@@ -872,20 +872,20 @@ export default function ReceitasPage() {
           <TabsContent value="insumos" className="space-y-6">
             {/* Seletor Bar vs Cozinha - Insumos */}
             <div className="mb-6">
-              <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <Label className="text-gray-700 dark:text-gray-300 font-medium">Tipo Local:</Label>
-                <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <Label className="text-gray-700 dark:text-gray-300 font-medium text-sm sm:text-base">Tipo Local:</Label>
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2">
                   <Button
                     variant={tipoLocalInsumos === 'cozinha' ? 'default' : 'outline'}
                     onClick={() => setTipoLocalInsumos('cozinha')}
-                    className="flex items-center gap-2"
+                    className="flex items-center justify-center gap-1 sm:gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
                     👨‍🍳 Cozinha ({insumos.filter(i => i.tipo_local === 'cozinha').length})
                   </Button>
                   <Button
                     variant={tipoLocalInsumos === 'bar' ? 'default' : 'outline'}
                     onClick={() => setTipoLocalInsumos('bar')}
-                    className="flex items-center gap-2"
+                    className="flex items-center justify-center gap-1 sm:gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
                     🍺 Bar ({insumos.filter(i => i.tipo_local === 'bar').length})
                   </Button>
@@ -911,20 +911,21 @@ export default function ReceitasPage() {
                   </CardTitle>
                   <Button
                     onClick={abrirModalCriarInsumo}
-                    className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+                    className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
-                    <Plus className="w-4 h-4" />
-                    Novo Insumo
+                    <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">Novo Insumo</span>
+                    <span className="sm:hidden">Novo</span>
                   </Button>
                 </div>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
                   <Input
                     type="text"
                     value={buscaInsumos}
                     onChange={(e) => setBuscaInsumos(e.target.value)}
                     placeholder="Buscar insumo..."
-                    className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                    className="pl-10 sm:pl-12 h-12 text-base bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
                 </div>
               </CardHeader>
@@ -940,7 +941,7 @@ export default function ReceitasPage() {
                     </p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                     {insumosFiltrados.map((insumo) => {
                       const ehChefe = isInsumoChefe(insumo.id)
                       const receitasChefe = getReceitasOndeEChefe(insumo.id)
@@ -979,17 +980,17 @@ export default function ReceitasPage() {
                                 onClick={() => abrirModalEditarInsumo(insumo)}
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 w-8 p-0 hover:bg-blue-100 dark:hover:bg-blue-900/30"
+                                className="h-10 w-10 p-0 hover:bg-blue-100 dark:hover:bg-blue-900/30 touch-manipulation"
                               >
-                                <Edit3 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                <Edit3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                               </Button>
                               <Button
                                 onClick={() => excluirInsumo(insumo)}
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/30"
+                                className="h-10 w-10 p-0 hover:bg-red-100 dark:hover:bg-red-900/30 touch-manipulation"
                               >
-                                <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
+                                <Trash2 className="w-5 h-5 text-red-600 dark:text-red-400" />
                               </Button>
                             </div>
                           </div>
@@ -1064,20 +1065,20 @@ export default function ReceitasPage() {
           <TabsContent value="receitas" className="space-y-6">
             {/* Seletor Bar vs Cozinha - Receitas */}
             <div className="mb-6">
-              <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <Label className="text-gray-700 dark:text-gray-300 font-medium">Tipo Local:</Label>
-                <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <Label className="text-gray-700 dark:text-gray-300 font-medium text-sm sm:text-base">Tipo Local:</Label>
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2">
                   <Button
                     variant={tipoLocalReceitas === 'cozinha' ? 'default' : 'outline'}
                     onClick={() => setTipoLocalReceitas('cozinha')}
-                    className="flex items-center gap-2"
+                    className="flex items-center justify-center gap-1 sm:gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
                     👨‍🍳 Cozinha ({receitas.filter(r => r.tipo_local === 'cozinha').length})
                   </Button>
                   <Button
                     variant={tipoLocalReceitas === 'bar' ? 'default' : 'outline'}
                     onClick={() => setTipoLocalReceitas('bar')}
-                    className="flex items-center gap-2"
+                    className="flex items-center justify-center gap-1 sm:gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
                     🍺 Bar ({receitas.filter(r => r.tipo_local === 'bar').length})
                   </Button>
@@ -1095,20 +1096,21 @@ export default function ReceitasPage() {
                   </CardTitle>
                   <Button
                     onClick={abrirModalCriarReceita}
-                    className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+                    className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
-                    <Plus className="w-4 h-4" />
-                    Nova Receita
+                    <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">Nova Receita</span>
+                    <span className="sm:hidden">Nova</span>
                   </Button>
                 </div>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
                   <Input
                     type="text"
                     value={buscaReceitas}
                     onChange={(e) => setBuscaReceitas(e.target.value)}
                     placeholder="Buscar receita..."
-                    className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                    className="pl-10 sm:pl-12 h-12 text-base bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
                 </div>
               </CardHeader>
@@ -1124,7 +1126,7 @@ export default function ReceitasPage() {
                     </p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                     {receitasFiltradas.map((receita) => {
                       const insumoChefe = obterInsumoChefe(receita)
                       
@@ -1150,28 +1152,28 @@ export default function ReceitasPage() {
                                 onClick={() => visualizarReceita(receita)}
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 w-8 p-0 hover:bg-green-100 dark:hover:bg-green-900/30"
+                                className="h-10 w-10 p-0 hover:bg-green-100 dark:hover:bg-green-900/30 touch-manipulation"
                                 title="Visualizar receita"
                               >
-                                <Eye className="w-4 h-4 text-green-600 dark:text-green-400" />
+                                <Eye className="w-5 h-5 text-green-600 dark:text-green-400" />
                               </Button>
                               <Button
                                 onClick={() => editarReceita(receita)}
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 w-8 p-0 hover:bg-blue-100 dark:hover:bg-blue-900/30"
+                                className="h-10 w-10 p-0 hover:bg-blue-100 dark:hover:bg-blue-900/30 touch-manipulation"
                                 title="Editar receita"
                               >
-                                <Edit3 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                <Edit3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                               </Button>
                               <Button
                                 onClick={() => excluirReceita(receita)}
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/30"
+                                className="h-10 w-10 p-0 hover:bg-red-100 dark:hover:bg-red-900/30 touch-manipulation"
                                 title="Excluir receita"
                               >
-                                <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
+                                <Trash2 className="w-5 h-5 text-red-600 dark:text-red-400" />
                               </Button>
                             </div>
                           </div>
@@ -1236,7 +1238,7 @@ export default function ReceitasPage() {
 
         {/* Modal Criar Receita */}
         <Dialog open={modalCriarReceita} onOpenChange={setModalCriarReceita}>
-          <DialogContent className="max-w-4xl bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                 <Plus className="w-5 h-5" />
@@ -1249,7 +1251,7 @@ export default function ReceitasPage() {
 
             <div className="space-y-6 max-h-[70vh] overflow-y-auto">
               {/* Dados básicos da receita */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:gap-6">
                 <div>
                   <Label className="text-gray-700 dark:text-gray-300">
                     Código <span className="text-red-500">*</span>
@@ -1334,7 +1336,7 @@ export default function ReceitasPage() {
               </div>
 
                 {/* Adicionar insumo */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div className="grid grid-cols-1 gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg sm:p-6">
                   <div className="relative">
                     <Label className="text-gray-700 dark:text-gray-300">Insumo</Label>
                     <div className="relative">
@@ -1346,7 +1348,7 @@ export default function ReceitasPage() {
                           setInsumoSelecionado('') // Limpar seleção ao digitar
                         }}
                         placeholder="Digite para buscar insumo..."
-                        className="bg-white dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-900 dark:text-white"
+                        className="bg-white dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-900 dark:text-white h-12 text-base"
                       />
                       <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                     </div>
@@ -1385,21 +1387,22 @@ export default function ReceitasPage() {
                     <Label className="text-gray-700 dark:text-gray-300">Quantidade</Label>
                     <Input
                       type="number"
+                      inputMode="decimal"
                       step="0.1"
                       value={quantidadeInsumo}
                       onChange={(e) => setQuantidadeInsumo(e.target.value)}
                       placeholder="100"
-                      className="bg-white dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-900 dark:text-white"
+                      className="bg-white dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-900 dark:text-white h-12 text-base"
                     />
                   </div>
 
-                  <div className="flex items-end">
+                  <div className="col-span-full">
                     <Button
                       onClick={adicionarInsumoReceita}
-                      className="bg-green-600 hover:bg-green-700 text-white"
+                      className="w-full bg-green-600 hover:bg-green-700 text-white h-12 text-base touch-manipulation"
                     >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Adicionar
+                      <Plus className="w-5 h-5 mr-2" />
+                      Adicionar Insumo
                     </Button>
                   </div>
                 </div>
@@ -1493,7 +1496,7 @@ export default function ReceitasPage() {
 
         {/* Modal Visualizar Receita */}
         <Dialog open={modalVisualizarReceita} onOpenChange={setModalVisualizarReceita}>
-          <DialogContent className="max-w-3xl bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <DialogContent className="max-w-3xl w-[95vw] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                 <Eye className="w-5 h-5" />
@@ -1606,7 +1609,7 @@ export default function ReceitasPage() {
 
         {/* Modal de Edição de Insumo */}
         <Dialog open={modalEditarInsumo} onOpenChange={setModalEditarInsumo}>
-          <DialogContent className="max-w-2xl bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                 <Edit3 className="w-5 h-5" />
@@ -1771,7 +1774,7 @@ export default function ReceitasPage() {
 
         {/* Modal de Edição de Receita */}
         <Dialog open={modalEditarReceita} onOpenChange={setModalEditarReceita}>
-          <DialogContent className="max-w-4xl bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                 <Edit3 className="w-5 h-5" />
@@ -2069,7 +2072,7 @@ export default function ReceitasPage() {
 
         {/* Modal de Criação de Insumo */}
         <Dialog open={modalCriarInsumo} onOpenChange={setModalCriarInsumo}>
-          <DialogContent className="max-w-2xl bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                 <Plus className="w-5 h-5" />
