@@ -133,17 +133,17 @@ export function CommandPaletteSearchPlaceholder({
     <div 
       onClick={handleClick}
       className={`
-        flex items-center gap-3 px-3 py-2 bg-gray-100 dark:bg-gray-800 
+        flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-1.5 sm:py-2 bg-gray-100 dark:bg-gray-800 
         border border-gray-200 dark:border-gray-700 rounded-lg 
         cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50
         transition-colors ${className}
       `}
     >
-      <Search className="w-4 h-4 text-gray-400" />
-      <span className="text-gray-500 dark:text-gray-400 text-sm flex-1">
+      <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
+      <span className="text-gray-500 dark:text-gray-400 text-sm flex-1 truncate">
         {placeholder}
       </span>
-      <div className="flex items-center gap-1 text-xs text-gray-400">
+      <div className="hidden lg:flex items-center gap-1 text-xs text-gray-400">
         <kbd className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-600 rounded text-xs">
           ⌘K
         </kbd>

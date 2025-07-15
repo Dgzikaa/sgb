@@ -163,7 +163,7 @@ export function DarkHeader() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 dark:bg-gray-900/80 dark:border-gray-800">
-      <div className="flex items-center justify-between h-12 px-4">
+      <div className="flex items-center justify-between h-12 px-2 sm:px-4">
         {/* Breadcrumb Navigation - estilo Notion */}
         <div className="flex items-center gap-1 flex-1 min-w-0">
           {breadcrumbs.map((crumb, index) => (
@@ -176,11 +176,11 @@ export function DarkHeader() {
               {/* Link do breadcrumb */}
               <Link
                 href={crumb.href}
-                className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-sm transition-colors ${
+                className={`flex items-center gap-1.5 px-1 sm:px-2 py-1 rounded-md text-sm transition-colors ${
                   crumb.isLast
                     ? 'text-gray-900 dark:text-white font-medium'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800'
-                } truncate max-w-40`}
+                } truncate max-w-32 sm:max-w-40`}
               >
                 {crumb.icon && (
                   <crumb.icon className="w-4 h-4 flex-shrink-0" />
@@ -192,7 +192,7 @@ export function DarkHeader() {
         </div>
 
         {/* Centro - Busca */}
-        <div className="flex-1 max-w-md mx-4 hidden md:block">
+        <div className="flex-1 max-w-xs lg:max-w-md mx-2 lg:mx-4 hidden md:block">
           <CommandPaletteSearchPlaceholder 
             placeholder="Buscar..." 
             className="w-full"
@@ -200,10 +200,10 @@ export function DarkHeader() {
         </div>
 
         {/* Direita - User info e controles */}
-        <div className="flex items-center gap-2 ml-4">
+        <div className="flex items-center gap-1 sm:gap-2 ml-2 sm:ml-4">
           {/* Busca mobile */}
           <div className="md:hidden">
-            <CommandPaletteIconTrigger />
+            <CommandPaletteIconTrigger className="mr-1" />
           </div>
           
           {/* Notificações */}
