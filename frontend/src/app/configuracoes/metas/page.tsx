@@ -50,6 +50,7 @@ interface Meta {
 
 interface MetasOrganizadas {
   financeiro: Meta[];
+  clientes: Meta[];
   avaliacoes: Meta[];
   cockpit_produtos: Meta[];
   marketing: Meta[];
@@ -244,6 +245,7 @@ export default function MetasPage() {
   const [loading, setLoading] = useState(true);
   const [metas, setMetas] = useState<MetasOrganizadas>({
     financeiro: [],
+    clientes: [],
     avaliacoes: [],
     cockpit_produtos: [],
     marketing: []
@@ -262,7 +264,7 @@ export default function MetasPage() {
       const data = await response.json();
       
       if (data.success) {
-        setMetas(data.metas);
+        setMetas(data.data);
       } else {
         toast({
           title: "❌ Erro",
@@ -324,6 +326,8 @@ export default function MetasPage() {
     switch (categoria.toLowerCase()) {
       case 'financeiro':
         return <DollarSign className="w-4 h-4" />
+      case 'clientes':
+        return <Users className="w-4 h-4" />
       case 'avaliacoes':
         return <Star className="w-4 h-4" />
       case 'cockpit_produtos':
@@ -397,7 +401,7 @@ export default function MetasPage() {
         </div>
 
                  {/* Overview Cards */}
-         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
            {metas && typeof metas === 'object' ? (Object.entries(metas) as [keyof MetasOrganizadas, Meta[]][]).map(([categoria, metasCategoria]) => {
              const stats = getCategoryStats(categoria);
              return (
@@ -436,7 +440,7 @@ export default function MetasPage() {
                 </CardTitle>
               </div>
               
-                             <TabsList className="grid w-full grid-cols-4 bg-gray-100 dark:bg-gray-700">
+                             <TabsList className="grid w-full grid-cols-5 bg-gray-100 dark:bg-gray-700">
                  {metas && typeof metas === 'object' ? (Object.entries(metas) as [keyof MetasOrganizadas, Meta[]][]).map(([categoria, metasCategoria]) => (
                    <TabsTrigger 
                      key={categoria}
