@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { usePermissions } from '@/hooks/usePermissions'
+import { useMenuBadgesMock as useMenuBadges } from '@/hooks/useMenuBadgesMock'
 import { 
   Home, 
   CheckSquare, 
@@ -53,107 +54,7 @@ interface SidebarItem {
   subItems?: SubMenuItem[]
 }
 
-const sidebarItems: SidebarItem[] = [
-  { 
-    icon: Home, 
-    label: 'Home', 
-    href: '/home', 
-    color: 'text-blue-600 dark:text-blue-400' 
-  },
-  { 
-    icon: CheckSquare, 
-    label: 'Checklist', 
-    color: 'text-green-600 dark:text-green-400',
-    badge: 3,
-    subItems: [
-      { icon: CheckSquare, label: 'Checklists', href: '/checklists/abertura', description: 'Checklist de abertura diária' },
-      { icon: Users, label: 'Meus Checklists', href: '/funcionario/checklists', description: 'Meus checklists pessoais' },
-    ]
-  },
-  { 
-    icon: ChefHat, 
-    label: 'Produção', 
-    color: 'text-orange-600 dark:text-orange-400',
-    subItems: [
-      { icon: Utensils, label: 'Receitas e Insumos', href: '/producao/receitas' },
-      { icon: Zap, label: 'Terminal de Produção', href: '/producao/terminal' },
-    ]
-  },
-  { 
-    icon: Calculator, 
-    label: 'ContaAzul', 
-    color: 'text-blue-500 dark:text-blue-400',
-    subItems: [
-      { icon: FileText, label: 'Competência', href: '/relatorios/financeiro-competencia' },
-    ]
-  },
-  // SEÇÕES EM DESENVOLVIMENTO - OCULTAS TEMPORARIAMENTE
-  // { 
-  //   icon: Calendar, 
-  //   label: 'Reservas', 
-  //   href: '/reservas', 
-  //   color: 'text-purple-600 dark:text-purple-400',
-  //   subItems: [
-  //     { icon: Calendar, label: 'Recorrência', href: '/reservas/recorrencia' },
-  //   ]
-  // },
-  // { 
-  //   icon: PieChart, 
-  //   label: 'ContaHub', 
-  //   color: 'text-indigo-600 dark:text-indigo-400',
-  //   subItems: [
-  //     { icon: PieChart, label: 'ContaHub Teste', href: '/relatorios/contahub-teste' },
-  //     { icon: Target, label: 'Tempo', href: '/operacoes/tempo' },
-  //     { icon: Package, label: 'Produtos', href: '/operacoes/produtos' },
-  //     { icon: Utensils, label: 'Receitas', href: '/operacoes/receitas' },
-  //     { icon: Clock, label: 'Período', href: '/operacoes/periodo' },
-  //     { icon: BarChart3, label: 'Analítico', href: '/relatorios/analitico' },
-  //     { icon: CreditCard, label: 'Pagamentos', href: '/relatorios/pagamentos' },
-  //     { icon: Calculator, label: 'Faturamento/Hora', href: '/relatorios/fatporhora' },
-  //   ]
-  // },
-  { 
-    icon: TrendingUp, 
-    label: 'Marketing', 
-    color: 'text-pink-600 dark:text-pink-400',
-    subItems: [
-      { icon: Instagram, label: 'Marketing 360', href: '/visao-geral/marketing-360' },
-    ]
-  },
-  // { 
-  //   icon: Target, 
-  //   label: 'Visão Geral', 
-  //   color: 'text-cyan-600 dark:text-cyan-400',
-  //   subItems: [
-  //     { icon: BarChart3, label: 'Diário', href: '/visao-geral/diario' },
-  //     { icon: TrendingUp, label: 'Comparativo', href: '/visao-geral/comparativo' },
-  //     { icon: Users, label: 'Garçons', href: '/visao-geral/garcons' },
-  //     { icon: PieChart, label: 'Métricas', href: '/visao-geral/metrica-evolucao' },
-  //     { icon: DollarSign, label: 'Financeiro Mensal', href: '/visao-geral/financeiro-mensal' },
-  //   ]
-  // },
-]
 
-// Configurações separadas para controle de acesso (apenas admin)
-const configuracoesItems: SidebarItem = { 
-  icon: Settings, 
-  label: 'Configurações', 
-  color: 'text-gray-600 dark:text-gray-400',
-  subItems: [
-    { icon: CheckSquare, label: 'Checklists', href: '/configuracoes/checklists' },
-    { icon: Target, label: 'Metas', href: '/configuracoes/metas' },
-    { icon: Database, label: 'Integrações', href: '/configuracoes/integracoes' },
-    { icon: Shield, label: 'Segurança', href: '/configuracoes/seguranca' },
-    { icon: MessageSquare, label: 'WhatsApp', href: '/configuracoes/whatsapp' },
-    { icon: Zap, label: 'ContaHub Auto', href: '/configuracoes/contahub-automatico' },
-    { icon: Clock, label: 'Meta Config', href: '/configuracoes/meta-configuracao' },
-    { icon: FileText, label: 'Templates', href: '/configuracoes/templates' },
-            { icon: BarChart3, label: 'Analytics', href: '/configuracoes/analytics' },
-        { icon: Database, label: 'Cache', href: '/configuracoes/cache' },
-        { icon: Smartphone, label: 'PWA', href: '/configuracoes/pwa' },
-        { icon: CheckSquare, label: 'Bulk Actions', href: '/configuracoes/bulk-actions' },
-  ]
-}
 
 export function ModernSidebar() {
   const [isHovered, setIsHovered] = useState(false)
@@ -161,11 +62,178 @@ export function ModernSidebar() {
   const [manuallyToggledItems, setManuallyToggledItems] = useState<string[]>([])
   const pathname = usePathname()
   const { isRole } = usePermissions()
+  const { badges } = useMenuBadges()
+  
+  // Função para obter itens da sidebar com badges dinâmicos
+  const getSidebarItems = (): SidebarItem[] => [
+    { 
+      icon: Home, 
+      label: 'Home', 
+      href: '/home', 
+      color: 'text-blue-600 dark:text-blue-400',
+      badge: badges.home > 0 ? badges.home : undefined
+    },
+    { 
+      icon: CheckSquare, 
+      label: 'Checklist', 
+      color: 'text-green-600 dark:text-green-400',
+      badge: badges.checklist > 0 ? badges.checklist : undefined,
+      subItems: [
+        { 
+          icon: CheckSquare, 
+          label: 'Checklists', 
+          href: '/checklists/abertura', 
+          description: 'Checklist de abertura diária',
+          badge: badges.checklistAbertura > 0 ? badges.checklistAbertura : undefined
+        },
+        { 
+          icon: Users, 
+          label: 'Meus Checklists', 
+          href: '/funcionario/checklists', 
+          description: 'Meus checklists pessoais',
+          badge: badges.checklistFuncionario > 0 ? badges.checklistFuncionario : undefined
+        },
+      ]
+    },
+    { 
+      icon: ChefHat, 
+      label: 'Produção', 
+      color: 'text-orange-600 dark:text-orange-400',
+      badge: badges.producao > 0 ? badges.producao : undefined,
+      subItems: [
+        { 
+          icon: Utensils, 
+          label: 'Receitas e Insumos', 
+          href: '/producao/receitas',
+          badge: badges.producaoReceitas > 0 ? badges.producaoReceitas : undefined
+        },
+        { 
+          icon: Zap, 
+          label: 'Terminal de Produção', 
+          href: '/producao/terminal',
+          badge: badges.producaoTerminal > 0 ? badges.producaoTerminal : undefined
+        },
+      ]
+    },
+    { 
+      icon: Calculator, 
+      label: 'ContaAzul', 
+      color: 'text-blue-500 dark:text-blue-400',
+      badge: badges.contaazul > 0 ? badges.contaazul : undefined,
+      subItems: [
+        { 
+          icon: FileText, 
+          label: 'Competência', 
+          href: '/relatorios/financeiro-competencia',
+          badge: badges.contaazulCompetencia > 0 ? badges.contaazulCompetencia : undefined
+        },
+      ]
+    },
+    { 
+      icon: TrendingUp, 
+      label: 'Marketing', 
+      color: 'text-pink-600 dark:text-pink-400',
+      badge: badges.marketing > 0 ? badges.marketing : undefined,
+      subItems: [
+        { 
+          icon: Instagram, 
+          label: 'Marketing 360', 
+          href: '/visao-geral/marketing-360',
+          badge: badges.marketingInstagram > 0 ? badges.marketingInstagram : undefined
+        },
+      ]
+    },
+  ]
+
+  // Função para obter configurações com badges
+  const getConfiguracoesItems = (): SidebarItem => ({ 
+    icon: Settings, 
+    label: 'Configurações', 
+    color: 'text-gray-600 dark:text-gray-400',
+    badge: badges.configuracoes > 0 ? badges.configuracoes : undefined,
+    subItems: [
+      { 
+        icon: CheckSquare, 
+        label: 'Checklists', 
+        href: '/configuracoes/checklists',
+        badge: badges.configChecklists > 0 ? badges.configChecklists : undefined
+      },
+      { 
+        icon: Target, 
+        label: 'Metas', 
+        href: '/configuracoes/metas',
+        badge: badges.configMetas > 0 ? badges.configMetas : undefined
+      },
+      { 
+        icon: Database, 
+        label: 'Integrações', 
+        href: '/configuracoes/integracoes',
+        badge: badges.configIntegracoes > 0 ? badges.configIntegracoes : undefined
+      },
+      { 
+        icon: Shield, 
+        label: 'Segurança', 
+        href: '/configuracoes/seguranca',
+        badge: badges.configSeguranca > 0 ? badges.configSeguranca : undefined
+      },
+      { 
+        icon: MessageSquare, 
+        label: 'WhatsApp', 
+        href: '/configuracoes/whatsapp',
+        badge: badges.configWhatsapp > 0 ? badges.configWhatsapp : undefined
+      },
+      { 
+        icon: Zap, 
+        label: 'ContaHub Auto', 
+        href: '/configuracoes/contahub-automatico',
+        badge: badges.configContahub > 0 ? badges.configContahub : undefined
+      },
+      { 
+        icon: Clock, 
+        label: 'Meta Config', 
+        href: '/configuracoes/meta-configuracao',
+        badge: badges.configMeta > 0 ? badges.configMeta : undefined
+      },
+      { 
+        icon: FileText, 
+        label: 'Templates', 
+        href: '/configuracoes/templates',
+        badge: badges.configTemplates > 0 ? badges.configTemplates : undefined
+      },
+      { 
+        icon: BarChart3, 
+        label: 'Analytics', 
+        href: '/configuracoes/analytics',
+        badge: badges.configAnalytics > 0 ? badges.configAnalytics : undefined
+      },
+      { 
+        icon: Database, 
+        label: 'Cache', 
+        href: '/configuracoes/cache',
+        badge: badges.configCache > 0 ? badges.configCache : undefined
+      },
+      { 
+        icon: Smartphone, 
+        label: 'PWA', 
+        href: '/configuracoes/pwa',
+        badge: badges.configPwa > 0 ? badges.configPwa : undefined
+      },
+      { 
+        icon: CheckSquare, 
+        label: 'Bulk Actions', 
+        href: '/configuracoes/bulk-actions',
+        badge: badges.configBulkActions > 0 ? badges.configBulkActions : undefined
+      },
+    ]
+  })
+
+  // Obter itens da sidebar com badges
+  const sidebarItems = getSidebarItems()
   
   // Combinar itens da sidebar com configurações se for admin
   const allSidebarItems = [...sidebarItems]
   if (isRole('admin')) {
-    allSidebarItems.push(configuracoesItems)
+    allSidebarItems.push(getConfiguracoesItems())
   }
 
   const isActive = (href: string) => {

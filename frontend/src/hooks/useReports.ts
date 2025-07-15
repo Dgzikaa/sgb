@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
 import { api } from '@/lib/api-client'
-import { criarNotificacaoChecklist } from '@/hooks/useNotifications'
 
 // =====================================================
 // TIPOS
