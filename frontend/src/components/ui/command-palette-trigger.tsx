@@ -119,9 +119,14 @@ export function CommandPaletteSearchPlaceholder({
 }) {
   const { openPalette } = useCommandPalette()
 
+  const handleClick = () => {
+    console.log('🔍 CommandPaletteSearchPlaceholder clicked')
+    openPalette()
+  }
+
   return (
     <div 
-      onClick={openPalette}
+      onClick={handleClick}
       className={`
         flex items-center gap-3 px-3 py-2 bg-gray-100 dark:bg-gray-800 
         border border-gray-200 dark:border-gray-700 rounded-lg 

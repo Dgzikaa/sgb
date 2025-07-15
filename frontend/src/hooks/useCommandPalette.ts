@@ -11,6 +11,7 @@ export function useCommandPalette(): UseCommandPaletteReturn {
   const [isOpen, setIsOpen] = useState(false)
 
   const openPalette = useCallback(() => {
+    console.log('🔍 openPalette called')
     setIsOpen(true)
   }, [])
 
