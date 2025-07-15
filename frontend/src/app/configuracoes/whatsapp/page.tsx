@@ -192,7 +192,7 @@ export default function WhatsAppConfigPage() {
       default:
         return 'text-gray-600 dark:text-gray-400'
     }
-  }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -207,7 +207,7 @@ export default function WhatsAppConfigPage() {
       default:
         return <Badge variant="secondary">🔍 Verificando</Badge>
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -397,7 +397,7 @@ export default function WhatsAppConfigPage() {
                     <span className="text-sm font-medium text-gray-900 dark:text-white">1,247</span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div className="bg-green-600 h-2 rounded-full" style={{width: '78%'}}></div>
+                    <div className="bg-green-600 h-2 rounded-full w-3/4"></div>
                   </div>
                 </div>
                 
@@ -407,17 +407,17 @@ export default function WhatsAppConfigPage() {
                     <span className="text-sm font-medium text-green-600 dark:text-green-400">98.5%</span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div className="bg-green-600 h-2 rounded-full" style={{width: '98.5%'}}></div>
+                    <div className="bg-green-600 h-2 rounded-full w-full"></div>
                   </div>
                 </div>
                 
                 <div>
                   <div className="flex justify-between items-center mb-1">
                     <span className="text-sm text-gray-600 dark:text-gray-400">Tempo de resposta</span>
-                    <span className="text-sm font-medium text-blue-600 dark:text-blue-400">< 2min</span>
+                    <span className="text-sm font-medium text-blue-600 dark:text-blue-400">&lt; 2min</span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div className="bg-blue-600 h-2 rounded-full" style={{width: '92%'}}></div>
+                    <div className="bg-blue-600 h-2 rounded-full w-11/12"></div>
                   </div>
                 </div>
               </div>

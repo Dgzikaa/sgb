@@ -934,19 +934,19 @@ export default function IntegracoesPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Status em Desenvolvimento */}
-                <div className="bg-amber-50 border border-amber-200 p-6 rounded-lg">
+                <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 p-6 rounded-lg">
                   <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center mt-0.5">
+                    <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center mt-0.5">
                       <span className="text-white text-sm">🚧</span>
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-amber-800 mb-3">🚧 Integração em Desenvolvimento</h4>
-                      <div className="space-y-3 text-sm text-amber-700">
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-3">🚧 Integração em Desenvolvimento</h4>
+                      <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
                         <p><strong>Status atual:</strong> Análise técnica concluída</p>
                         <p><strong>Sistema GetIn:</strong> Identificado como Single Page Application (SPA) complexo</p>
                         
-                        <div className="bg-white p-4 rounded-lg border border-amber-200 mt-4">
-                          <h5 className="font-medium text-amber-800 mb-3">Opções Disponíveis:</h5>
+                        <div className="bg-white dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 mt-4">
+                          <h5 className="font-medium text-gray-900 dark:text-white mb-3">Opções Disponíveis:</h5>
                           <div className="space-y-3">
                             <div className="flex items-start space-x-3">
                               <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
@@ -1126,17 +1126,17 @@ export default function IntegracoesPage() {
               <CardContent>
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="p-6 border rounded-lg bg-gradient-to-br from-blue-50 to-purple-50">
+                    <div className="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
                       <div className="flex items-center mb-4">
                         <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
                           <Facebook className="w-5 h-5 text-white" />
                         </div>
                         <div>
-                          <h4 className="font-semibold text-gray-800">Facebook</h4>
-                          <p className="text-sm text-gray-600">Posts e análises</p>
+                          <h4 className="font-semibold text-gray-900 dark:text-white">Facebook</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Posts e análises</p>
                         </div>
                       </div>
-                      <p className="text-sm text-gray-600 mb-4">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                         Automação de posts, análise de engajamento e gerenciamento de campanhas publicitárias
                       </p>
                       <div className="flex items-center space-x-2">
@@ -1145,17 +1145,17 @@ export default function IntegracoesPage() {
                       </div>
                     </div>
                     
-                    <div className="p-6 border rounded-lg bg-gradient-to-br from-pink-50 to-purple-50">
+                    <div className="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
                       <div className="flex items-center mb-4">
                         <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mr-3">
                           <Instagram className="w-5 h-5 text-white" />
                         </div>
                         <div>
-                          <h4 className="font-semibold text-gray-800">Instagram</h4>
-                          <p className="text-sm text-gray-600">Stories e posts</p>
+                          <h4 className="font-semibold text-gray-900 dark:text-white">Instagram</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Stories e posts</p>
                         </div>
                       </div>
-                      <p className="text-sm text-gray-600 mb-4">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                         Publicação automática de conteúdo, stories promocionais e análise de métricas
                       </p>
                       <div className="flex items-center space-x-2">
@@ -1165,22 +1165,22 @@ export default function IntegracoesPage() {
                     </div>
                   </div>
 
-                  <div className="p-6 border rounded-lg bg-gradient-to-br from-red-50 to-orange-50">
+                  <div className="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
                     <div className="flex items-center mb-4">
                       <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center mr-3">
                         <Star className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-gray-800">Google Reviews</h4>
-                        <p className="text-sm text-gray-600">Monitoramento e resposta automática</p>
+                        <h4 className="font-semibold text-gray-900 dark:text-white">Google Reviews</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Monitoramento e resposta automática</p>
                       </div>
                     </div>
-                    <p className="text-sm text-gray-600 mb-4">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                       Monitoramento em tempo real de novas avaliações, notificações automáticas e sugestões de resposta
                     </p>
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                      <span className="text-xs text-gray-500">Planejado</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-500">Planejado</span>
                     </div>
                   </div>
 
