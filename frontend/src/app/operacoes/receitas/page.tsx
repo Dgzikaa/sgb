@@ -151,6 +151,7 @@ export default function ReceitasPage() {
   }[]>([])
   const [insumoSelecionado, setInsumoSelecionado] = useState('')
   const [quantidadeInsumo, setQuantidadeInsumo] = useState('')
+  const [buscaInsumoReceita, setBuscaInsumoReceita] = useState('')
 
   // Sincronizar tipo_local dos formulários com o tipo selecionado
   useEffect(() => {
@@ -305,6 +306,14 @@ export default function ReceitasPage() {
   const insumosChefes = useMemo(() => {
     return insumos.filter(insumo => isInsumoChefe(insumo.id))
   }, [insumos, isInsumoChefe])
+
+  // Filtrar insumos para adicionar na receita (baseado na busca)
+  const insumosParaReceita = useMemo(() => {
+    return insumos.filter(insumo =>
+      insumo.nome.toLowerCase().includes(buscaInsumoReceita.toLowerCase()) ||
+      insumo.codigo.toLowerCase().includes(buscaInsumoReceita.toLowerCase())
+    )
+  }, [insumos, buscaInsumoReceita])
 
   // Função para gerar próximo código de insumo
   const gerarProximoCodigoInsumo = useCallback(() => {
@@ -610,6 +619,9 @@ export default function ReceitasPage() {
       insumos: []
     })
     setInsumosReceita([])
+    setBuscaInsumoReceita('')
+    setInsumoSelecionado('')
+    setQuantidadeInsumo('')
     setModalCriarReceita(true)
   }
 
@@ -637,6 +649,7 @@ export default function ReceitasPage() {
     setInsumosReceita(prev => [...prev, novoInsumoReceita])
     setInsumoSelecionado('')
     setQuantidadeInsumo('')
+    setBuscaInsumoReceita('')
   }
 
   const removerInsumoReceita = (insumoId: number) => {
@@ -1239,7 +1252,7 @@ export default function ReceitasPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-gray-700 dark:text-gray-300">
-                    Código *
+                    Código <span className="text-red-500">*</span>
                     <span className="text-xs text-blue-600 dark:text-blue-400 ml-1">(auto)</span>
                   </Label>
                   <div className="flex gap-2">
@@ -1267,7 +1280,7 @@ export default function ReceitasPage() {
                 </div>
 
                 <div>
-                  <Label className="text-gray-700 dark:text-gray-300">Nome *</Label>
+                  <Label className="text-gray-700 dark:text-gray-300">Nome <span className="text-red-500">*</span></Label>
                   <Input
                     value={novaReceita.receita_nome}
                     onChange={(e) => setNovaReceita(prev => ({ ...prev, receita_nome: e.target.value }))}
@@ -1323,20 +1336,50 @@ export default function ReceitasPage() {
 
                 {/* Adicionar insumo */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div>
+                  <div className="relative">
                     <Label className="text-gray-700 dark:text-gray-300">Insumo</Label>
-                    <Select value={insumoSelecionado} onValueChange={setInsumoSelecionado}>
-                      <SelectTrigger className="bg-white dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-900 dark:text-white">
-                        <SelectValue placeholder="Selecionar insumo" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                        {insumos.map((insumo) => (
-                          <SelectItem key={insumo.id} value={insumo.id.toString()}>
-                            {insumo.nome} ({insumo.codigo})
-                          </SelectItem>
+                    <div className="relative">
+                      <Input
+                        type="text"
+                        value={buscaInsumoReceita}
+                        onChange={(e) => {
+                          setBuscaInsumoReceita(e.target.value)
+                          setInsumoSelecionado('') // Limpar seleção ao digitar
+                        }}
+                        placeholder="Digite para buscar insumo..."
+                        className="bg-white dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-900 dark:text-white"
+                      />
+                      <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    </div>
+                    
+                    {/* Dropdown de resultados */}
+                    {buscaInsumoReceita && insumosParaReceita.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                        {insumosParaReceita.slice(0, 10).map((insumo) => (
+                          <button
+                            key={insumo.id}
+                            type="button"
+                            onClick={() => {
+                              setInsumoSelecionado(insumo.id.toString())
+                              setBuscaInsumoReceita(insumo.nome)
+                            }}
+                            className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-700 last:border-b-0"
+                          >
+                            <div className="font-medium">{insumo.nome}</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              {insumo.codigo} • {insumo.categoria}
+                            </div>
+                          </button>
                         ))}
-                      </SelectContent>
-                    </Select>
+                      </div>
+                    )}
+                    
+                    {/* Mostrar se nenhum resultado */}
+                    {buscaInsumoReceita && insumosParaReceita.length === 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg p-3">
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">Nenhum insumo encontrado</p>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -1760,7 +1803,7 @@ export default function ReceitasPage() {
 
                   <div>
                     <Label htmlFor="edit-receita-nome" className="text-gray-700 dark:text-gray-300">
-                      Nome da Receita *
+                      Nome da Receita <span className="text-red-500">*</span>
                     </Label>
                     <Input
                       id="edit-receita-nome"
@@ -1996,45 +2039,7 @@ export default function ReceitasPage() {
               </div>
             )}
 
-            <DialogFooter className="flex-col items-stretch gap-3">
-              {/* Mensagem de requisitos */}
-              {receitaEditando && (
-                <div className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-                  <div className="font-medium mb-1">Requisitos para salvar:</div>
-                  <ul className="space-y-1">
-                    <li className={`flex items-center gap-1 ${
-                      receitaEditando.receita_nome.trim() 
-                        ? 'text-green-600 dark:text-green-400' 
-                        : 'text-red-600 dark:text-red-400'
-                    }`}>
-                      <div className={`w-1 h-1 rounded-full ${
-                        receitaEditando.receita_nome.trim() ? 'bg-green-500' : 'bg-red-500'
-                      }`} />
-                      Nome da receita preenchido
-                    </li>
-                    <li className={`flex items-center gap-1 ${
-                      receitaEditando.insumos?.length 
-                        ? 'text-green-600 dark:text-green-400' 
-                        : 'text-red-600 dark:text-red-400'
-                    }`}>
-                      <div className={`w-1 h-1 rounded-full ${
-                        receitaEditando.insumos?.length ? 'bg-green-500' : 'bg-red-500'
-                      }`} />
-                      Pelo menos um insumo na receita
-                    </li>
-                    <li className={`flex items-center gap-1 ${
-                      receitaEditando.insumos?.some(i => i.is_chefe) 
-                        ? 'text-green-600 dark:text-green-400' 
-                        : 'text-red-600 dark:text-red-400'
-                    }`}>
-                      <div className={`w-1 h-1 rounded-full ${
-                        receitaEditando.insumos?.some(i => i.is_chefe) ? 'bg-green-500' : 'bg-red-500'
-                      }`} />
-                      Um insumo marcado como chefe
-                    </li>
-                  </ul>
-                </div>
-              )}
+            <DialogFooter>
 
               <div className="flex gap-2">
                 <Button
@@ -2081,7 +2086,7 @@ export default function ReceitasPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-gray-700 dark:text-gray-300">
-                    Código * 
+                    Código <span className="text-red-500">*</span>
                     <span className="text-xs text-blue-600 dark:text-blue-400 ml-1">(auto)</span>
                   </Label>
                   <div className="flex gap-2">
@@ -2105,7 +2110,7 @@ export default function ReceitasPage() {
                 </div>
 
                 <div>
-                  <Label className="text-gray-700 dark:text-gray-300">Nome *</Label>
+                  <Label className="text-gray-700 dark:text-gray-300">Nome <span className="text-red-500">*</span></Label>
                   <Input
                     value={novoInsumo.nome}
                     onChange={(e) => setNovoInsumo(prev => ({ ...prev, nome: e.target.value }))}
