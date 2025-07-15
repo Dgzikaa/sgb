@@ -325,23 +325,26 @@ export default function ReceitasPage() {
     return `i${proximoNumero.toString().padStart(4, '0')}`
   }, [insumos])
 
-  // Função para gerar próximo código de receita
-  const gerarProximoCodigoReceita = useCallback(() => {
-    if (receitas.length === 0) return 'r0001'
+  // Função para gerar próximo código de receita baseado no tipo local
+  const gerarProximoCodigoReceita = useCallback((tipoLocal: 'cozinha' | 'bar') => {
+    const prefixo = tipoLocal === 'cozinha' ? 'pc' : 'pd'
     
-    // Buscar códigos que seguem o padrão r0000
+    if (receitas.length === 0) return `${prefixo}001`
+    
+    // Buscar códigos que seguem o padrão pc000 ou pd000
     const codigosNumericos = receitas
+      .filter(receita => receita.tipo_local === tipoLocal)
       .map(receita => receita.receita_codigo)
-      .filter(codigo => /^r\d+$/.test(codigo))
-      .map(codigo => parseInt(codigo.substring(1)))
+      .filter(codigo => new RegExp(`^${prefixo}\\d+$`).test(codigo))
+      .map(codigo => parseInt(codigo.substring(2)))
       .filter(numero => !isNaN(numero))
     
-    if (codigosNumericos.length === 0) return 'r0001'
+    if (codigosNumericos.length === 0) return `${prefixo}001`
     
     const maiorNumero = Math.max(...codigosNumericos)
     const proximoNumero = maiorNumero + 1
     
-    return `r${proximoNumero.toString().padStart(4, '0')}`
+    return `${prefixo}${proximoNumero.toString().padStart(3, '0')}`
   }, [receitas])
 
   // Atualizar código do insumo quando os dados carregarem
@@ -355,16 +358,18 @@ export default function ReceitasPage() {
     }
   }, [insumos, gerarProximoCodigoInsumo])
 
-  // Atualizar código da receita quando os dados carregarem
+  // Gerar código automaticamente quando tipo_local da receita mudar
   useEffect(() => {
-    if (receitas.length >= 0) { // Sempre atualizar quando os dados carregarem
-      const novoCodigo = gerarProximoCodigoReceita()
+    if (novaReceita.tipo_local && modalCriarReceita) {
+      const novoCodigo = gerarProximoCodigoReceita(novaReceita.tipo_local)
       setNovaReceita(prev => ({
         ...prev,
         receita_codigo: novoCodigo
       }))
     }
-  }, [receitas, gerarProximoCodigoReceita])
+  }, [novaReceita.tipo_local, modalCriarReceita, gerarProximoCodigoReceita])
+
+
 
 
 
@@ -592,11 +597,12 @@ export default function ReceitasPage() {
   // FUNÇÕES PARA RECEITAS
 
   const abrirModalCriarReceita = () => {
+    const tipoLocalPadrao: 'cozinha' | 'bar' = 'cozinha'
     setNovaReceita({
-      receita_codigo: gerarProximoCodigoReceita(), // Gerar próximo código automaticamente
+      receita_codigo: gerarProximoCodigoReceita(tipoLocalPadrao), // Gerar código baseado no tipo padrão
       receita_nome: '',
       receita_categoria: '',
-      tipo_local: 'cozinha',
+      tipo_local: tipoLocalPadrao,
       rendimento_esperado: 0,
       tempo_preparo_min: 0,
       instrucoes: '',
@@ -700,12 +706,13 @@ export default function ReceitasPage() {
         toast.success('Sucesso!', 'Receita criada com sucesso')
         setModalCriarReceita(false)
         
-        // Resetar form com próximo código
+        // Resetar form com código baseado no tipo padrão
+        const tipoLocalPadrao: 'cozinha' | 'bar' = 'cozinha'
         setNovaReceita({
-          receita_codigo: gerarProximoCodigoReceita(),
+          receita_codigo: gerarProximoCodigoReceita(tipoLocalPadrao),
           receita_nome: '',
           receita_categoria: '',
-          tipo_local: 'cozinha',
+          tipo_local: tipoLocalPadrao,
           rendimento_esperado: 0,
           tempo_preparo_min: 0,
           instrucoes: '',
@@ -1247,7 +1254,10 @@ export default function ReceitasPage() {
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => setNovaReceita(prev => ({ ...prev, receita_codigo: gerarProximoCodigoReceita() }))}
+                      onClick={() => setNovaReceita(prev => ({ 
+                        ...prev, 
+                        receita_codigo: prev.tipo_local ? gerarProximoCodigoReceita(prev.tipo_local) : ''
+                      }))}
                       className="px-3 shrink-0"
                       title="Gerar próximo código"
                     >
