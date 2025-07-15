@@ -75,9 +75,7 @@ const customJestConfig = {
   
   coverageDirectory: 'coverage',
   
-  // Global setup and teardown
-  globalSetup: '<rootDir>/tests/setup/global-setup.js',
-  globalTeardown: '<rootDir>/tests/setup/global-teardown.js',
+  // Global setup and teardown (removed - files don't exist)
   
   // Module file extensions
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],

@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { usePermissions } from '@/hooks/usePermissions'
-import { CommandPaletteTrigger } from '@/components/ui/command-palette-trigger'
 import { 
   Home, 
   CheckSquare, 
@@ -19,7 +18,6 @@ import {
   ChefHat,
   FileText,
   DollarSign,
-  Search,
   Smartphone,
   Target,
   MessageSquare,
@@ -245,13 +243,7 @@ export function ModernSidebar() {
         {/* Navigation items */}
         <nav className="flex-1 px-2 overflow-y-auto custom-scrollbar">
           <div className="space-y-1">
-            {/* Command Palette Search Button */}
-            <div className="mb-4">
-              <CommandPaletteTrigger 
-                variant="sidebar" 
-                showShortcut={isHovered}
-              />
-            </div>
+            {/* Command Palette Search Button removido da sidebar */}
             
             {allSidebarItems.map((item) => {
               const isItemActive = item.href ? isActive(item.href) : hasActiveSubItem(item.subItems)

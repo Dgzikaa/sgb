@@ -8,6 +8,7 @@ import { ChevronDown, User, Settings, LogOut, Moon, Sun, Bell, Check, Building2,
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTheme } from '@/contexts/ThemeContext'
+import { CommandPaletteSearchPlaceholder, CommandPaletteIconTrigger } from '@/components/ui/command-palette-trigger'
 
 // Mapeamento de rotas para breadcrumbs
 const routeMapping: Record<string, { name: string; icon?: React.ComponentType<{ className?: string }> }> = {
@@ -193,8 +194,21 @@ export function DarkHeader() {
           ))}
         </div>
 
+        {/* Centro - Busca */}
+        <div className="flex-1 max-w-md mx-4 hidden md:block">
+          <CommandPaletteSearchPlaceholder 
+            placeholder="Buscar..." 
+            className="w-full"
+          />
+        </div>
+
         {/* Direita - User info e controles */}
         <div className="flex items-center gap-2 ml-4">
+          {/* Busca mobile */}
+          <div className="md:hidden">
+            <CommandPaletteIconTrigger />
+          </div>
+          
           {/* Notificações */}
           <div className="relative" ref={notificationRef}>
             <button
