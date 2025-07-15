@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { getSupabaseClient } from '@/lib/supabase'
+import { useUser } from '@/contexts/UserContext'
 
 interface Bar {
   id: number
@@ -19,6 +20,7 @@ interface BarContextType {
 const BarContext = createContext<BarContextType | undefined>(undefined)
 
 export function BarProvider({ children }: { children: ReactNode }) {
+  const { user, isInitialized: userInitialized } = useUser()
   const [selectedBar, setSelectedBar] = useState<Bar | null>(null)
   const [availableBars, setAvailableBars] = useState<Bar[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -42,13 +44,57 @@ export function BarProvider({ children }: { children: ReactNode }) {
 
     async function loadUserBars() {
       try {
+        // Aguardar que o UserContext seja inicializado
+        if (!userInitialized) {
+          console.log('🔄 BarContext: Aguardando UserContext ser inicializado...')
+          return
+        }
+
         const supabase = await getSupabaseClient();
         if (!supabase) {
           if (mounted) setIsLoading(false)
           return
         }
         
-        // Primeiro verificar localStorage
+        // Se há usuário no contexto, buscar os bares do localStorage
+        if (user && user.email) {
+          console.log('✅ BarContext: Usuário encontrado no contexto:', user.email)
+          
+          // Buscar dados completos do localStorage que podem conter availableBars
+          const storedUserData = localStorage.getItem('sgb_user')
+          if (storedUserData) {
+            try {
+              const userData = JSON.parse(storedUserData)
+              if (userData.availableBars && Array.isArray(userData.availableBars) && userData.availableBars.length > 0) {
+                console.log('✅ BarContext: Carregando bares do localStorage:', userData.availableBars)
+                
+                if (mounted) {
+                  setAvailableBars(userData.availableBars)
+                  
+                  // Verificar se há um bar selecionado no localStorage
+                  const selectedBarId = localStorage.getItem('sgb_selected_bar_id')
+                  if (selectedBarId) {
+                    const selectedBar = userData.availableBars.find((bar: Bar) => bar.id === parseInt(selectedBarId))
+                    if (selectedBar) {
+                      setSelectedBar(selectedBar)
+                    } else {
+                      setSelectedBar(userData.availableBars[0])
+                    }
+                  } else {
+                    setSelectedBar(userData.availableBars[0])
+                  }
+                  
+                  setIsLoading(false)
+                  return
+                }
+              }
+            } catch (e) {
+              console.error('❌ BarContext: Erro ao parsear dados do localStorage:', e)
+            }
+          }
+        }
+        
+        // Se não há usuário, verificar localStorage como fallback
         const storedUser = localStorage.getItem('sgb_user')
         let userEmail = null
         
@@ -56,6 +102,7 @@ export function BarProvider({ children }: { children: ReactNode }) {
           try {
             const userData = JSON.parse(storedUser)
             userEmail = userData.email
+            console.log('🔄 BarContext: Fallback para localStorage:', userData.email)
             
             // Verificar se já temos os bares no localStorage
             if (userData.availableBars && Array.isArray(userData.availableBars) && userData.availableBars.length > 0) {
@@ -80,7 +127,7 @@ export function BarProvider({ children }: { children: ReactNode }) {
               }
             }
           } catch (e) {
-            console.error('Erro ao parsear dados do usuário:', e)
+            console.error('❌ BarContext: Erro ao parsear dados do usuário:', e)
           }
         }
 
@@ -164,6 +211,23 @@ export function BarProvider({ children }: { children: ReactNode }) {
 
     return () => {
       mounted = false
+    }
+  }, [user, userInitialized])
+
+  // Listener para mudanças no usuário
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const handleUserDataUpdated = () => {
+      console.log('🔄 BarContext: Evento userDataUpdated recebido, recarregando bares...')
+      setIsLoading(true)
+      // O useEffect principal vai recarregar com as novas dependências
+    }
+
+    window.addEventListener('userDataUpdated', handleUserDataUpdated)
+    
+    return () => {
+      window.removeEventListener('userDataUpdated', handleUserDataUpdated)
     }
   }, [])
 
