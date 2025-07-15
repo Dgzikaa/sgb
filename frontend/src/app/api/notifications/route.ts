@@ -226,22 +226,18 @@ export async function GET(request: NextRequest) {
     
     const supabase = await getAdminClient()
     
-    // Construir query base - CORRIGIDO: usar usuarios_bar ao invés de usuarios_sistema
+    // Construir query base - CORRIGIDO: usar apenas colunas existentes
     let query = supabase
       .from('notificacoes')
       .select(`
         id,
         usuario_id,
-        modulo,
         tipo,
-        prioridade,
-        categoria,
         titulo,
         mensagem,
-        dados_extras,
-        acoes,
-        canais,
+        dados,
         status,
+        canais,
         agendada_para,
         enviada_em,
         lida_em,
@@ -264,7 +260,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (data.modulo) {
-      query = query.eq('modulo', data.modulo)
+      query = query.eq('dados->modulo', data.modulo)
     }
 
     if (data.tipo) {
@@ -272,7 +268,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (data.prioridade) {
-      query = query.eq('prioridade', data.prioridade)
+      query = query.eq('dados->prioridade', data.prioridade)
     }
 
     if (data.data_inicio) {
@@ -303,13 +299,38 @@ export async function GET(request: NextRequest) {
       }, { status: 500 })
     }
 
+    // Transformar dados para formato esperado pelo frontend
+    const notificacoesTransformadas = (notificacoes || []).map((notificacao: any) => {
+      const dados = notificacao.dados || {}
+      
+      return {
+        id: notificacao.id,
+        usuario_id: notificacao.usuario_id,
+        modulo: dados.modulo || 'sistema',
+        tipo: notificacao.tipo || 'info',
+        prioridade: dados.prioridade || 'media',
+        categoria: dados.categoria || '',
+        titulo: notificacao.titulo || 'Notificação',
+        mensagem: notificacao.mensagem || '',
+        dados_extras: dados.dados_extras || {},
+        acoes: dados.acoes || [],
+        canais: notificacao.canais || ['browser'],
+        status: notificacao.status || 'pendente',
+        agendada_para: notificacao.agendada_para,
+        enviada_em: notificacao.enviada_em,
+        lida_em: notificacao.lida_em,
+        criada_em: notificacao.criada_em,
+        bar_id: notificacao.bar_id
+      }
+    })
+
     // Calcular estatísticas rápidas
     const estatisticas = await calcularEstatisticasRapidas(supabase, user.bar_id.toString(), user.user_id, user.role)
 
     return NextResponse.json({
       success: true,
       data: {
-        notificacoes: notificacoes || [],
+        notificacoes: notificacoesTransformadas,
         estatisticas,
         paginacao: {
           page: data.page,
@@ -396,9 +417,9 @@ async function calcularEstatisticasRapidas(supabase: any, barId: string, userId:
   // Estatísticas para o usuário logado
   const { data: minhasStats } = await supabase
     .from('notificacoes')
-    .select('status, tipo, prioridade')
+    .select('status, tipo, dados')
     .eq('bar_id', barId)
-    .or(`usuario_id.eq.${userId},role_alvo.eq.${userRole}`)
+    .or(`usuario_id.eq.${userId},dados->role_alvo.eq.${userRole}`)
     .gte('criada_em', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()) // últimos 7 dias
 
   if (!minhasStats) {
@@ -412,10 +433,19 @@ async function calcularEstatisticasRapidas(supabase: any, barId: string, userId:
   }
 
   const naoLidas = minhasStats.filter((n: any) => ['pendente', 'enviada'].includes(n.status)).length
-  const altaPrioridade = minhasStats.filter((n: any) => ['alta', 'critica'].includes(n.prioridade)).length
+  const altaPrioridade = minhasStats.filter((n: any) => {
+    const prioridade = n.dados?.prioridade || 'media'
+    return ['alta', 'critica'].includes(prioridade)
+  }).length
 
   const porTipo = minhasStats.reduce((acc: any, n: any) => {
     acc[n.tipo] = (acc[n.tipo] || 0) + 1
+    return acc
+  }, {})
+
+  const porModulo = minhasStats.reduce((acc: any, n: any) => {
+    const modulo = n.dados?.modulo || 'sistema'
+    acc[modulo] = (acc[modulo] || 0) + 1
     return acc
   }, {})
 
@@ -424,7 +454,7 @@ async function calcularEstatisticasRapidas(supabase: any, barId: string, userId:
     nao_lidas: naoLidas,
     alta_prioridade: altaPrioridade,
     por_tipo: porTipo,
-    por_modulo: {} // será calculado se necessário
+    por_modulo: porModulo
   }
 }
 
