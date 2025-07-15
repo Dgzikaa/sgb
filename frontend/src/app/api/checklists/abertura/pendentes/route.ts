@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseClient } from '@/lib/supabase'
+import { getAdminClient } from '@/lib/supabase-admin'
+import { authenticateUser, authErrorResponse } from '@/middleware/auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await authenticateUser(request)
+    if (!user) {
+      return authErrorResponse('Usuário não autenticado')
+    }
+
     const body = await request.json()
     const { bar_id, user_id } = body
 
@@ -15,44 +21,42 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await getSupabaseClient()
+    const supabase = await getAdminClient()
     
-    // Buscar checklists de abertura pendentes de hoje
-    const hoje = new Date().toISOString().split('T')[0]
-    
-    const { data: checklists, error } = await supabase
+    // Buscar checklists de abertura pendentes
+    const { data: checklistsAbertura, error: aberturaError } = await supabase
       .from('checklist_abertura')
-      .select('id, area, item, status, created_at')
+      .select('id, status')
       .eq('bar_id', bar_id)
-      .gte('data_checklist', hoje)
-      .in('status', ['pending', 'doing'])
-      .order('created_at', { ascending: false })
+      .in('status', ['pendente', 'em_andamento'])
 
-    if (error) {
-      console.error('Erro ao buscar checklists de abertura:', error)
-      return NextResponse.json({ pendentes: 0 })
+    if (aberturaError) {
+      console.error('Erro ao buscar checklists abertura:', aberturaError)
+      return NextResponse.json({ 
+        success: true,
+        pendentes: 0 
+      })
     }
 
-    const pendentes = checklists?.length || 0
+    const totalPendentes = checklistsAbertura?.length || 0
 
     return NextResponse.json({
-      pendentes: pendentes,
+      success: true,
+      pendentes: totalPendentes,
       detalhes: {
-        pending: checklists?.filter((c: any) => c.status === 'pending').length || 0,
-        doing: checklists?.filter((c: any) => c.status === 'doing').length || 0,
-        areas: {
-          cozinha: checklists?.filter((c: any) => c.area === 'cozinha').length || 0,
-          bar: checklists?.filter((c: any) => c.area === 'bar').length || 0,
-          salao: checklists?.filter((c: any) => c.area === 'salao').length || 0,
-          recebimento: checklists?.filter((c: any) => c.area === 'recebimento').length || 0,
-          seguranca: checklists?.filter((c: any) => c.area === 'seguranca').length || 0,
-          administrativo: checklists?.filter((c: any) => c.area === 'administrativo').length || 0
-        }
+        total: totalPendentes
       }
     })
 
   } catch (error) {
-    console.error('Erro ao buscar checklists de abertura pendentes:', error)
-    return NextResponse.json({ pendentes: 0 })
+    console.error('Erro na API checklists/abertura/pendentes:', error)
+    return NextResponse.json({ 
+      success: true,
+      pendentes: 0 
+    })
   }
+}
+
+export async function GET(request: NextRequest) {
+  return POST(request)
 } 

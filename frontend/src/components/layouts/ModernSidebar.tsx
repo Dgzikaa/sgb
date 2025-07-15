@@ -83,15 +83,13 @@ export function ModernSidebar() {
           icon: CheckSquare, 
           label: 'Checklists', 
           href: '/checklists/abertura', 
-          description: 'Checklist de abertura diária',
-          badge: badges.checklistAbertura > 0 ? badges.checklistAbertura : undefined
+          description: 'Checklist de abertura diária'
         },
         { 
           icon: Users, 
           label: 'Meus Checklists', 
           href: '/funcionario/checklists', 
-          description: 'Meus checklists pessoais',
-          badge: badges.checklistFuncionario > 0 ? badges.checklistFuncionario : undefined
+          description: 'Meus checklists pessoais'
         },
       ]
     },
@@ -104,14 +102,12 @@ export function ModernSidebar() {
         { 
           icon: Utensils, 
           label: 'Receitas e Insumos', 
-          href: '/producao/receitas',
-          badge: badges.producaoReceitas > 0 ? badges.producaoReceitas : undefined
+          href: '/producao/receitas'
         },
         { 
           icon: Zap, 
           label: 'Terminal de Produção', 
-          href: '/producao/terminal',
-          badge: badges.producaoTerminal > 0 ? badges.producaoTerminal : undefined
+          href: '/producao/terminal'
         },
       ]
     },
@@ -124,8 +120,7 @@ export function ModernSidebar() {
         { 
           icon: FileText, 
           label: 'Competência', 
-          href: '/relatorios/financeiro-competencia',
-          badge: badges.contaazulCompetencia > 0 ? badges.contaazulCompetencia : undefined
+          href: '/relatorios/financeiro-competencia'
         },
       ]
     },
@@ -138,10 +133,16 @@ export function ModernSidebar() {
         { 
           icon: Instagram, 
           label: 'Marketing 360', 
-          href: '/visao-geral/marketing-360',
-          badge: badges.marketingInstagram > 0 ? badges.marketingInstagram : undefined
+          href: '/visao-geral/marketing-360'
         },
       ]
+    },
+    { 
+      icon: BarChart3, 
+      label: 'Visão Geral', 
+      href: '/visao-geral', 
+      color: 'text-purple-600 dark:text-purple-400',
+      badge: badges.visaoGeral > 0 ? badges.visaoGeral : undefined
     },
   ]
 
@@ -155,74 +156,62 @@ export function ModernSidebar() {
       { 
         icon: CheckSquare, 
         label: 'Checklists', 
-        href: '/configuracoes/checklists',
-        badge: badges.configChecklists > 0 ? badges.configChecklists : undefined
+        href: '/configuracoes/checklists'
       },
       { 
         icon: Target, 
         label: 'Metas', 
-        href: '/configuracoes/metas',
-        badge: badges.configMetas > 0 ? badges.configMetas : undefined
+        href: '/configuracoes/metas'
       },
       { 
         icon: Database, 
         label: 'Integrações', 
-        href: '/configuracoes/integracoes',
-        badge: badges.configIntegracoes > 0 ? badges.configIntegracoes : undefined
+        href: '/configuracoes/integracoes'
       },
       { 
         icon: Shield, 
         label: 'Segurança', 
-        href: '/configuracoes/seguranca',
-        badge: badges.configSeguranca > 0 ? badges.configSeguranca : undefined
+        href: '/configuracoes/seguranca'
       },
       { 
         icon: MessageSquare, 
         label: 'WhatsApp', 
-        href: '/configuracoes/whatsapp',
-        badge: badges.configWhatsapp > 0 ? badges.configWhatsapp : undefined
+        href: '/configuracoes/whatsapp'
       },
       { 
         icon: Zap, 
         label: 'ContaHub Auto', 
-        href: '/configuracoes/contahub-automatico',
-        badge: badges.configContahub > 0 ? badges.configContahub : undefined
+        href: '/configuracoes/contahub-automatico'
       },
       { 
         icon: Clock, 
         label: 'Meta Config', 
-        href: '/configuracoes/meta-configuracao',
-        badge: badges.configMeta > 0 ? badges.configMeta : undefined
+        href: '/configuracoes/meta-configuracao'
       },
       { 
         icon: FileText, 
         label: 'Templates', 
-        href: '/configuracoes/templates',
-        badge: badges.configTemplates > 0 ? badges.configTemplates : undefined
+        href: '/configuracoes/templates'
       },
       { 
         icon: BarChart3, 
         label: 'Analytics', 
-        href: '/configuracoes/analytics',
-        badge: badges.configAnalytics > 0 ? badges.configAnalytics : undefined
+        href: '/configuracoes/analytics'
       },
       { 
         icon: Database, 
         label: 'Cache', 
-        href: '/configuracoes/cache',
-        badge: badges.configCache > 0 ? badges.configCache : undefined
+        href: '/configuracoes/cache'
       },
       { 
         icon: Smartphone, 
         label: 'PWA', 
-        href: '/configuracoes/pwa',
-        badge: badges.configPwa > 0 ? badges.configPwa : undefined
+        href: '/configuracoes/pwa'
       },
       { 
         icon: CheckSquare, 
         label: 'Bulk Actions', 
-        href: '/configuracoes/bulk-actions',
-        badge: badges.configBulkActions > 0 ? badges.configBulkActions : undefined
+        href: '/configuracoes/bulk-actions'
       },
     ]
   })

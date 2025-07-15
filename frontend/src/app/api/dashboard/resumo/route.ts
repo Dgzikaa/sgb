@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseClient } from '@/lib/supabase'
+import { getAdminClient } from '@/lib/supabase-admin'
+import { authenticateUser, authErrorResponse } from '@/middleware/auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await authenticateUser(request)
+    if (!user) {
+      return authErrorResponse('Usuário não autenticado')
+    }
+
     const body = await request.json()
     const { bar_id, user_id } = body
 
@@ -15,70 +21,58 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await getSupabaseClient()
+    const supabase = await getAdminClient()
     
-    // Buscar pendências gerais do sistema
     let pendenciasGerais = 0
 
-    // 1. Notificações não lidas
-    const { data: notificacoes, error: notifError } = await supabase
-      .from('notifications')
+    // Somar várias pendências para um resumo geral
+    // 1. Checklists pendentes
+    const { data: checklists } = await supabase
+      .from('checklist_execucoes')
       .select('id')
       .eq('bar_id', bar_id)
-      .eq('user_id', user_id)
+      .is('concluido_em', null)
+
+    pendenciasGerais += checklists?.length || 0
+
+    // 2. Alertas ativos
+    const { data: alertas } = await supabase
+      .from('sistema_alertas')
+      .select('id')
+      .eq('bar_id', bar_id)
+      .is('resolvido_em', null)
+
+    pendenciasGerais += alertas?.length || 0
+
+    // 3. Notificações não lidas
+    const { data: notificacoes } = await supabase
+      .from('notificacoes')
+      .select('id')
+      .eq('bar_id', bar_id)
       .eq('lida', false)
 
-    if (!notifError && notificacoes) {
-      pendenciasGerais += notificacoes.length
-    }
-
-    // 2. Backups atrasados (se último backup > 7 dias)
-    const { data: ultimoBackup, error: backupError } = await supabase
-      .from('system_backups')
-      .select('created_at')
-      .eq('bar_id', bar_id)
-      .eq('status', 'completed')
-      .order('created_at', { ascending: false })
-      .limit(1)
-
-    if (!backupError && ultimoBackup && ultimoBackup.length > 0) {
-      const ultimaData = new Date(ultimoBackup[0].created_at)
-      const agora = new Date()
-      const diasSemBackup = Math.floor((agora.getTime() - ultimaData.getTime()) / (1000 * 60 * 60 * 24))
-      
-      if (diasSemBackup > 7) {
-        pendenciasGerais += 1
-      }
-    }
-
-    // 3. Eventos de segurança críticos não resolvidos
-    const { data: eventosSeguranca, error: secError } = await supabase
-      .from('security_events')
-      .select('id')
-      .eq('bar_id', bar_id)
-      .eq('resolved', false)
-      .gte('risk_score', 80)
-
-    if (!secError && eventosSeguranca) {
-      pendenciasGerais += eventosSeguranca.length
-    }
+    pendenciasGerais += notificacoes?.length || 0
 
     return NextResponse.json({
+      success: true,
       pendencias_gerais: pendenciasGerais,
       detalhes: {
-        notificacoes_nao_lidas: notificacoes?.length || 0,
-        backup_atrasado: ultimoBackup?.length === 0 || 
-          (ultimoBackup && ultimoBackup.length > 0 && 
-           Math.floor((new Date().getTime() - new Date(ultimoBackup[0].created_at).getTime()) / (1000 * 60 * 60 * 24)) > 7),
-        eventos_seguranca_criticos: eventosSeguranca?.length || 0
+        checklists: checklists?.length || 0,
+        alertas: alertas?.length || 0,
+        notificacoes: notificacoes?.length || 0,
+        total: pendenciasGerais
       }
     })
 
   } catch (error) {
-    console.error('Erro ao buscar resumo dashboard:', error)
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
+    console.error('Erro na API dashboard/resumo:', error)
+    return NextResponse.json({ 
+      success: true,
+      pendencias_gerais: 0 
+    })
   }
+}
+
+export async function GET(request: NextRequest) {
+  return POST(request)
 } 

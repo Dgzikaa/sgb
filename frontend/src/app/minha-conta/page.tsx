@@ -137,6 +137,32 @@ export default function MinhaContaPage() {
     }
   }
 
+  const salvarFotoPerfil = async (foto: string) => {
+    try {
+      const response = await fetch('/api/usuario/perfil', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ foto_perfil: foto })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setPerfil(prev => prev ? { ...prev, foto_perfil: foto } : prev)
+        setMensagem({ tipo: 'success', texto: 'Foto de perfil atualizada com sucesso!' })
+      } else {
+        setMensagem({ tipo: 'error', texto: data.error || 'Erro ao salvar foto de perfil' })
+        // Reverter a foto em caso de erro
+        setDadosEdicao(prev => ({ ...prev, foto_perfil: perfil?.foto_perfil }))
+      }
+    } catch (error) {
+      console.error('Erro ao salvar foto de perfil:', error)
+      setMensagem({ tipo: 'error', texto: 'Erro ao salvar foto de perfil' })
+      // Reverter a foto em caso de erro
+      setDadosEdicao(prev => ({ ...prev, foto_perfil: perfil?.foto_perfil }))
+    }
+  }
+
   const trocarSenha = async () => {
     try {
       setSalvandoSenha(true)
@@ -189,10 +215,10 @@ export default function MinhaContaPage() {
     const cleaned = value.replace(/\D/g, '')
     if (cleaned.length === 11) {
       const match = cleaned.match(/^(\d{2})(\d{5})(\d{4})$/)
-      if (match) return `(${match[1]}) ${match[2]}-${match[3]}`
+      if (match) return `(${match[1]})${match[2]}-${match[3]}`
     } else if (cleaned.length === 10) {
       const match = cleaned.match(/^(\d{2})(\d{4})(\d{4})$/)
-      if (match) return `(${match[1]}) ${match[2]}-${match[3]}`
+      if (match) return `(${match[1]})${match[2]}-${match[3]}`
     }
     return cleaned
   }
@@ -204,6 +230,96 @@ export default function MinhaContaPage() {
       return `${match[1]}-${match[2]}`
     }
     return cleaned
+  }
+
+  // Nova função para buscar CEP automaticamente
+  const buscarCEP = async (cep: string) => {
+    const cepLimpo = cep.replace(/\D/g, '')
+    
+    if (cepLimpo.length === 8) {
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`)
+        const data = await response.json()
+        
+        if (!data.erro) {
+          setDadosEdicao(prev => ({
+            ...prev,
+            cep: formatarCEP(cepLimpo),
+            endereco: data.logradouro || prev.endereco,
+            cidade: data.localidade || prev.cidade,
+            estado: data.uf || prev.estado
+          }))
+          
+          setMensagem({ 
+            tipo: 'success', 
+            texto: `Endereço encontrado: ${data.localidade}/${data.uf}` 
+          })
+          
+          // Limpar mensagem após 3 segundos
+          setTimeout(() => setMensagem(null), 3000)
+        }
+      } catch (error) {
+        console.warn('Erro ao buscar CEP:', error)
+      }
+    }
+  }
+
+  // Função para formatar CPF enquanto digita
+  const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    const cleaned = value.replace(/\D/g, '').slice(0, 11) // Limitar a 11 dígitos
+    let formatted = cleaned
+    
+    if (cleaned.length >= 4) {
+      formatted = cleaned.slice(0, 3) + '.' + cleaned.slice(3)
+    }
+    if (cleaned.length >= 7) {
+      formatted = formatted.slice(0, 7) + '.' + formatted.slice(7)
+    }
+    if (cleaned.length >= 10) {
+      formatted = formatted.slice(0, 11) + '-' + formatted.slice(11)
+    }
+    
+    setDadosEdicao(prev => ({ ...prev, cpf: formatted }))
+  }
+
+  // Função para formatar telefone enquanto digita
+  const handleTelefoneChange = (value: string, tipo: 'celular' | 'telefone') => {
+    const cleaned = value.replace(/\D/g, '').slice(0, 11) // Limitar a 11 dígitos
+    let formatted = cleaned
+    
+    if (cleaned.length >= 3) {
+      formatted = '(' + cleaned.slice(0, 2) + ')' + cleaned.slice(2)
+    }
+    if (cleaned.length >= 7) {
+      if (cleaned.length === 11) {
+        // Celular: (61)99848-3434
+        formatted = formatted.slice(0, 4) + formatted.slice(4, 9) + '-' + formatted.slice(9)
+      } else {
+        // Fixo: (61)3848-3434
+        formatted = formatted.slice(0, 4) + formatted.slice(4, 8) + '-' + formatted.slice(8)
+      }
+    }
+    
+    setDadosEdicao(prev => ({ ...prev, [tipo]: formatted }))
+  }
+
+  // Função para formatar CEP e buscar endereço
+  const handleCEPChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    const cleaned = value.replace(/\D/g, '').slice(0, 8) // Limitar a 8 dígitos
+    let formatted = cleaned
+    
+    if (cleaned.length >= 6) {
+      formatted = cleaned.slice(0, 5) + '-' + cleaned.slice(5)
+    }
+    
+    setDadosEdicao(prev => ({ ...prev, cep: formatted }))
+    
+    // Buscar CEP automaticamente quando tiver 8 dígitos
+    if (cleaned.length === 8) {
+      buscarCEP(cleaned)
+    }
   }
 
   const calcularDiasDesdeContratacao = () => {
@@ -483,8 +599,14 @@ export default function MinhaContaPage() {
               <div className="flex flex-col items-center space-y-4">
                 <ProfilePhotoUpload
                   currentPhoto={editandoPerfil ? dadosEdicao.foto_perfil : perfil.foto_perfil}
-                  onPhotoChange={(foto) => setDadosEdicao(prev => ({ ...prev, foto_perfil: foto }))}
-                  disabled={!editandoPerfil}
+                  onPhotoChange={(foto) => {
+                    setDadosEdicao(prev => ({ ...prev, foto_perfil: foto }))
+                    // Se não está em modo de edição, salvar a foto imediatamente
+                    if (!editandoPerfil) {
+                      salvarFotoPerfil(foto)
+                    }
+                  }}
+                  disabled={false} // Sempre permitir alteração da foto
                 />
                 <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
                   Recomendado: imagem quadrada, máximo 5MB<br />
@@ -530,9 +652,9 @@ export default function MinhaContaPage() {
                     <Input
                       id="celular"
                       value={editandoPerfil ? dadosEdicao.celular || '' : formatarTelefone(perfil.celular || '')}
-                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, celular: e.target.value }))}
+                      onChange={(e) => handleTelefoneChange(e.target.value, 'celular')}
                       disabled={!editandoPerfil}
-                      placeholder="(11) 99999-9999"
+                      placeholder="(61)99999-9999"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
                   </div>
@@ -542,9 +664,9 @@ export default function MinhaContaPage() {
                     <Input
                       id="telefone"
                       value={editandoPerfil ? dadosEdicao.telefone || '' : formatarTelefone(perfil.telefone || '')}
-                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, telefone: e.target.value }))}
+                      onChange={(e) => handleTelefoneChange(e.target.value, 'telefone')}
                       disabled={!editandoPerfil}
-                      placeholder="(11) 3333-4444"
+                      placeholder="(61)3333-4444"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
                   </div>
@@ -554,7 +676,7 @@ export default function MinhaContaPage() {
                     <Input
                       id="cpf"
                       value={editandoPerfil ? dadosEdicao.cpf || '' : formatarCPF(perfil.cpf || '')}
-                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, cpf: e.target.value }))}
+                      onChange={handleCPFChange}
                       disabled={!editandoPerfil}
                       placeholder="000.000.000-00"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
@@ -602,7 +724,7 @@ export default function MinhaContaPage() {
                     <Input
                       id="cep"
                       value={editandoPerfil ? dadosEdicao.cep || '' : formatarCEP(perfil.cep || '')}
-                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, cep: e.target.value }))}
+                      onChange={handleCEPChange}
                       disabled={!editandoPerfil}
                       placeholder="00000-000"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
@@ -640,77 +762,6 @@ export default function MinhaContaPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-              </div>
-
-              <Separator className="bg-gray-200 dark:bg-gray-700" />
-
-              {/* Informações profissionais */}
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center space-x-2">
-                  <Briefcase className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  <span>Informações Profissionais</span>
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="cargo" className="text-gray-700 dark:text-gray-300">Cargo</Label>
-                    <Input
-                      id="cargo"
-                      value={editandoPerfil ? dadosEdicao.cargo || '' : perfil.cargo || ''}
-                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, cargo: e.target.value }))}
-                      disabled={!editandoPerfil}
-                      placeholder="Seu cargo"
-                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="departamento" className="text-gray-700 dark:text-gray-300">Departamento</Label>
-                    <Input
-                      id="departamento"
-                      value={editandoPerfil ? dadosEdicao.departamento || '' : perfil.departamento || ''}
-                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, departamento: e.target.value }))}
-                      disabled={!editandoPerfil}
-                      placeholder="Seu departamento"
-                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="data_contratacao" className="text-gray-700 dark:text-gray-300">Data de contratação</Label>
-                    <Input
-                      id="data_contratacao"
-                      type="date"
-                      value={editandoPerfil ? dadosEdicao.data_contratacao || '' : perfil.data_contratacao || ''}
-                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, data_contratacao: e.target.value }))}
-                      disabled={!editandoPerfil}
-                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="bar" className="text-gray-700 dark:text-gray-300">Estabelecimento</Label>
-                    <Input
-                      id="bar"
-                      value={perfil.bar?.nome || 'Não informado'}
-                      disabled
-                      className="bg-gray-50 dark:bg-gray-600 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="bio" className="text-gray-700 dark:text-gray-300">Biografia/Descrição</Label>
-                  <Textarea
-                    id="bio"
-                    value={editandoPerfil ? dadosEdicao.bio || '' : perfil.bio || ''}
-                    onChange={(e) => setDadosEdicao(prev => ({ ...prev, bio: e.target.value }))}
-                    disabled={!editandoPerfil}
-                    placeholder="Conte um pouco sobre você..."
-                    rows={3}
-                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                  />
                 </div>
               </div>
 
