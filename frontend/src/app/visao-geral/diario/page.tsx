@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 import {
   TrendingUp,
@@ -70,6 +71,18 @@ export default function DiarioPage() {
   const [refreshing, setRefreshing] = useState(false)
   const [selectedDays, setSelectedDays] = useState('7')
   const [selectedPlatform, setSelectedPlatform] = useState('all')
+  const [filterType, setFilterType] = useState<'preset' | 'custom'>('preset')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+
+  // Inicializar datas padrão
+  useEffect(() => {
+    const today = new Date()
+    const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
+    
+    setEndDate(today.toISOString().split('T')[0])
+    setStartDate(sevenDaysAgo.toISOString().split('T')[0])
+  }, [])
 
   useEffect(() => {
     setPageTitle('Análise Diária - Meta')
@@ -78,14 +91,21 @@ export default function DiarioPage() {
 
   useEffect(() => {
     loadDailyAnalysis()
-  }, [selectedDays, selectedPlatform])
+  }, [selectedDays, selectedPlatform, startDate, endDate, filterType])
 
   const loadDailyAnalysis = async () => {
     try {
       setLoading(true)
       console.log('📊 Carregando análise diária Meta...')
       
-      const response = await fetch(`/api/meta/daily-analysis?days=${selectedDays}&platform=${selectedPlatform}`)
+      let apiUrl = ''
+      if (filterType === 'custom' && startDate && endDate) {
+        apiUrl = `/api/meta/daily-analysis?start_date=${startDate}&end_date=${endDate}&platform=${selectedPlatform}`
+      } else {
+        apiUrl = `/api/meta/daily-analysis?days=${selectedDays}&platform=${selectedPlatform}`
+      }
+      
+      const response = await fetch(apiUrl)
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -111,6 +131,22 @@ export default function DiarioPage() {
     setRefreshing(true)
     await loadDailyAnalysis()
     setRefreshing(false)
+  }
+
+  const setQuickRange = (days: number) => {
+    const today = new Date()
+    const pastDate = new Date(today.getTime() - days * 24 * 60 * 60 * 1000)
+    
+    setStartDate(pastDate.toISOString().split('T')[0])
+    setEndDate(today.toISOString().split('T')[0])
+    setFilterType('custom')
+  }
+
+  const calculateDaysDifference = (start: string, end: string) => {
+    if (!start || !end) return 0
+    const startTime = new Date(start).getTime()
+    const endTime = new Date(end).getTime()
+    return Math.ceil((endTime - startTime) / (1000 * 60 * 60 * 24)) + 1
   }
 
   const formatDate = (dateString: string) => {
@@ -180,7 +216,7 @@ export default function DiarioPage() {
               </div>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
                 <SelectTrigger className="w-40">
                   <SelectValue placeholder="Plataforma" />
@@ -192,17 +228,80 @@ export default function DiarioPage() {
                 </SelectContent>
               </Select>
               
-              <Select value={selectedDays} onValueChange={setSelectedDays}>
-                <SelectTrigger className="w-32">
-                  <SelectValue placeholder="Período" />
+              <Select value={filterType} onValueChange={(value: 'preset' | 'custom') => setFilterType(value)}>
+                <SelectTrigger className="w-36">
+                  <SelectValue placeholder="Tipo" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="7">7 dias</SelectItem>
-                  <SelectItem value="15">15 dias</SelectItem>
-                  <SelectItem value="30">30 dias</SelectItem>
-                  <SelectItem value="60">60 dias</SelectItem>
+                  <SelectItem value="preset">Presets</SelectItem>
+                  <SelectItem value="custom">Customizado</SelectItem>
                 </SelectContent>
               </Select>
+              
+              {filterType === 'preset' ? (
+                <Select value={selectedDays} onValueChange={setSelectedDays}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Período" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7">7 dias</SelectItem>
+                    <SelectItem value="15">15 dias</SelectItem>
+                    <SelectItem value="30">30 dias</SelectItem>
+                    <SelectItem value="60">60 dias</SelectItem>
+                    <SelectItem value="90">90 dias</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-36"
+                    placeholder="Data inicial"
+                  />
+                  <span className="text-gray-400">até</span>
+                  <Input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="w-36"
+                    placeholder="Data final"
+                  />
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    ({calculateDaysDifference(startDate, endDate)} dias)
+                  </span>
+                </div>
+              )}
+              
+              {filterType === 'custom' && (
+                <div className="flex items-center gap-1">
+                  <Button
+                    onClick={() => setQuickRange(7)}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs px-2 py-1 h-8"
+                  >
+                    7d
+                  </Button>
+                  <Button
+                    onClick={() => setQuickRange(30)}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs px-2 py-1 h-8"
+                  >
+                    30d
+                  </Button>
+                  <Button
+                    onClick={() => setQuickRange(90)}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs px-2 py-1 h-8"
+                  >
+                    90d
+                  </Button>
+                </div>
+              )}
               
               <Button
                 onClick={handleRefresh}

@@ -261,12 +261,12 @@ export default function PWAPage() {
             </CardContent>
           </Card>
 
-            {/* Informações técnicas */}
-            <div className="card-dark">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Funcionalidades PWA
-              </h2>
-              
+          {/* Funcionalidades PWA */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Funcionalidades PWA</CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                   <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
@@ -304,14 +304,15 @@ export default function PWAPage() {
                   </p>
                 </div>
               </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            {/* Guia de instalação */}
-            <div className="card-dark">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Como Instalar
-              </h2>
-              
+          {/* Guia de instalação */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Como Instalar</CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="space-y-4">
                 <div>
                   <h3 className="font-medium text-gray-900 dark:text-white mb-2">
@@ -337,8 +338,8 @@ export default function PWAPage() {
                   </ol>
                 </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
