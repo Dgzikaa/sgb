@@ -4,6 +4,7 @@ export { default as StandardPageWrapper } from './StandardPageWrapper'
 export { DarkSidebarLayout } from './DarkSidebarLayout'
 export { DarkHeader } from './DarkHeader'
 export { ModernSidebar } from './ModernSidebar'
+export { BottomNavigation } from './BottomNavigation'
 
 // Re-export standard card components
 export {

@@ -246,7 +246,7 @@ export function ModernSidebar() {
 
   return (
     <div 
-      className={`fixed left-0 top-0 bottom-0 z-40 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 ease-out ${
+      className={`hidden md:block fixed left-0 top-0 bottom-0 z-40 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 ease-out ${
         isHovered ? 'w-64' : 'w-16'
       }`}
       onMouseEnter={() => setIsHovered(true)}

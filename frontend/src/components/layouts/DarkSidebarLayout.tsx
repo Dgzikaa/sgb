@@ -3,6 +3,7 @@
 import { ReactNode, useEffect, useState } from 'react'
 import { DarkHeader } from './DarkHeader'
 import { ModernSidebar } from './ModernSidebar'
+import { BottomNavigation } from './BottomNavigation'
 import { PageTitleProvider } from '@/contexts/PageTitleContext'
 import AuthGuard from '@/components/auth/AuthGuard'
 
@@ -136,14 +137,15 @@ export function DarkSidebarLayout({ children }: DarkSidebarLayoutProps) {
           <DarkHeader />
           <div className="flex">
             <ModernSidebar />
-            <main className="flex-1 transition-all duration-300 ease-in-out ml-16 lg:ml-64">
-              <div className="p-6">
+            <main className="flex-1 transition-all duration-300 ease-in-out md:ml-16 lg:ml-64">
+              <div className="p-4 md:p-6 pb-24 md:pb-6">
                 <GlobalPageWrapper>
                   {children}
                 </GlobalPageWrapper>
               </div>
             </main>
           </div>
+          <BottomNavigation />
         </div>
       </PageTitleProvider>
     </AuthGuard>
