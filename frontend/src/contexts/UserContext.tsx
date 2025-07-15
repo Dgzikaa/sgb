@@ -149,6 +149,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         loading,
+        isInitialized,
         updateUser,
         updatePermissions,
         refreshUser,

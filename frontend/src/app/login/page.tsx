@@ -243,22 +243,20 @@ export default function LoginPage() {
       <div className="w-full max-w-md" suppressHydrationWarning>
         {/* Logo e Header */}
         <div className="text-center mb-12" suppressHydrationWarning>
-          <div className="inline-flex items-center justify-center w-32 h-32 lg:w-48 lg:h-48 mb-6" suppressHydrationWarning>
+          <div className="inline-flex items-center justify-center w-40 h-40 lg:w-56 lg:h-56 mb-6" suppressHydrationWarning>
             {!logoError ? (
               <img 
                 src="/logos/logo_640x640.png" 
                 alt="SGB Logo" 
-                className="w-32 h-32 lg:w-48 lg:h-48 rounded-2xl shadow-lg object-cover"
+                className="w-40 h-40 lg:w-56 lg:h-56 rounded-2xl shadow-lg object-cover"
                 onError={() => setLogoError(true)}
               />
             ) : (
-              <div className="w-32 h-32 lg:w-48 lg:h-48 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg" suppressHydrationWarning>
-                <span className="text-5xl lg:text-6xl text-white">🏪</span>
+              <div className="w-40 h-40 lg:w-56 lg:h-56 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg" suppressHydrationWarning>
+                <span className="text-6xl lg:text-7xl text-white">🏪</span>
               </div>
             )}
           </div>
-          <h1 className="text-4xl lg:text-5xl font-bold text-slate-800 dark:text-white mb-3">SGB</h1>
-          <p className="text-slate-600 dark:text-gray-300 text-lg lg:text-xl font-medium">Sistema de Gestão de Bares</p>
         </div>
 
         {/* Configuração de biometria pós-login */}

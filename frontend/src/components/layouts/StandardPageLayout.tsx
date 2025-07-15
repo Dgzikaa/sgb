@@ -2,6 +2,7 @@
 
 import { ReactNode, useEffect } from 'react'
 import { cn } from '@/lib/utils'
+import AuthGuard from '@/components/auth/AuthGuard'
 
 interface StandardPageLayoutProps {
   children: ReactNode
@@ -124,13 +125,15 @@ export function StandardPageLayout({
   }, [])
 
   return (
-    <div className={cn(
-      'transition-colors duration-300',
-      spacingClasses[spacing],
-      className
-    )}>
-      {children}
-    </div>
+    <AuthGuard>
+      <div className={cn(
+        'transition-colors duration-300',
+        spacingClasses[spacing],
+        className
+      )}>
+        {children}
+      </div>
+    </AuthGuard>
   )
 }
 

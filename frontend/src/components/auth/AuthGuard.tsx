@@ -16,15 +16,15 @@ export default function AuthGuard({
   redirectTo = '/login',
   requiredPermissions = []
 }: AuthGuardProps) {
-  const { user, loading: userLoading } = useUser()
+  const { user, loading: userLoading, isInitialized } = useUser()
   const { selectedBar, isLoading: barLoading } = useBar()
   const [isAuthenticating, setIsAuthenticating] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
     const checkAuth = async () => {
-      // Aguardar até que os dados do usuário e bar sejam carregados
-      if (userLoading || barLoading) {
+      // Aguardar até que os dados do usuário sejam inicializados
+      if (!isInitialized || userLoading || barLoading) {
         return
       }
 
