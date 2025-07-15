@@ -70,6 +70,19 @@ export function CommandPaletteProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, openPalette, closePalette, togglePalette])
 
+  // Prevent body scroll when palette is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isOpen])
+
   return (
     <CommandPaletteContext.Provider value={{ isOpen, openPalette, closePalette, togglePalette }}>
       {children}
