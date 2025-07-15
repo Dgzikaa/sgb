@@ -19,19 +19,43 @@ export default function AuthGuard({
   const { user, loading: userLoading, isInitialized } = useUser()
   const { selectedBar, isLoading: barLoading } = useBar()
   const [isAuthenticating, setIsAuthenticating] = useState(true)
+  const [shouldRedirect, setShouldRedirect] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
     const checkAuth = async () => {
       // Aguardar até que os dados do usuário sejam inicializados
-      if (!isInitialized || userLoading || barLoading) {
+      if (!isInitialized || userLoading) {
         return
       }
 
-      // Se não há usuário, redirecionar para login
+      // Se não há usuário, verificar localStorage diretamente antes de redirecionar
       if (!user) {
-        console.log('🔒 Usuário não autenticado, redirecionando para login')
-        router.push(redirectTo)
+        // Verificação dupla para evitar loop infinito
+        try {
+          const userData = localStorage.getItem('sgb_user')
+          if (userData) {
+            const parsedUser = JSON.parse(userData)
+            if (parsedUser && parsedUser.id && parsedUser.email && parsedUser.nome) {
+              // Usuário existe no localStorage, aguardar o contexto se atualizar
+              console.log('🔄 Usuário encontrado no localStorage, aguardando contexto...')
+              return
+            }
+          }
+        } catch (error) {
+          console.error('Erro ao verificar localStorage:', error)
+        }
+        
+        // Se realmente não há usuário, definir para redirecionar
+        if (!shouldRedirect) {
+          console.log('🔒 Usuário não autenticado, agendando redirecionamento...')
+          setShouldRedirect(true)
+          // Aguardar um pouco antes de redirecionar para evitar loop
+          setTimeout(() => {
+            router.push(redirectTo)
+          }, 100)
+          return
+        }
         return
       }
 
@@ -56,14 +80,15 @@ export default function AuthGuard({
       }
 
       // Tudo ok, permitir acesso
+      setShouldRedirect(false)
       setIsAuthenticating(false)
     }
 
     checkAuth()
-  }, [user, userLoading, barLoading, selectedBar, router, redirectTo, requiredPermissions])
+  }, [user, userLoading, isInitialized, shouldRedirect, router, redirectTo, requiredPermissions])
 
   // Mostrar loading enquanto autentica
-  if (isAuthenticating || userLoading || barLoading) {
+  if (isAuthenticating || userLoading || !isInitialized) {
     return <AuthLoadingScreen />
   }
 

@@ -47,6 +47,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       return
     }
 
+    setLoading(true)
+    
     try {
       const userData = localStorage.getItem('sgb_user')
       if (userData) {
@@ -82,9 +84,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       // Only update localStorage on client side
       if (typeof window !== 'undefined') {
         localStorage.setItem('sgb_user', JSON.stringify(userData))
+        // Disparar evento customizado para notificar outros componentes
+        window.dispatchEvent(new CustomEvent('userDataUpdated'))
       }
+      console.log('✅ Dados do usuário atualizados:', userData.nome)
     } catch (error) {
-      console.error('Erro ao atualizar dados do usuário:', error)
+      console.error('❌ Erro ao atualizar dados do usuário:', error)
     }
   }
 
