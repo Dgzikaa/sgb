@@ -391,16 +391,13 @@ async function coletarCampanhas(config: MetaCredentials, barId: number, supabase
       .eq('bar_id', barId)
       .single()
     
-    if (!credenciais?.configuracoes?.business_id) {
-      console.log('⚠️ Business ID não configurado, saltando campanhas')
-      return { campaigns: [], ad_accounts: [], ads: [], message: 'Business ID não configurado' }
-    }
+    // Business ID não é obrigatório para buscar campanhas via me/adaccounts
+    const businessId = credenciais.configuracoes.business_id || 'N/A'
+    console.log(`🏢 Business ID configurado: ${businessId} (usando me/adaccounts para maior compatibilidade)`)
     
-    const businessId = credenciais.configuracoes.business_id
-    console.log(`🏢 Usando Business ID: ${businessId}`)
-    
-    // Buscar ad accounts do business COM DADOS FINANCEIROS COMPLETOS
-    const adAccountsUrl = `https://graph.facebook.com/v18.0/${businessId}/owned_ad_accounts?fields=id,name,account_status,currency,timezone_name,balance,amount_spent,spend_cap,insights.metric(impressions,reach,clicks,spend,ctr,cpc,cpp,frequency).date_preset(last_30d)&access_token=${config.access_token}`
+    // Buscar ad accounts diretas do usuário (mais confiável que business/owned_ad_accounts)
+    console.log('🔍 Buscando ad accounts via me/adaccounts...')
+    const adAccountsUrl = `https://graph.facebook.com/v18.0/me/adaccounts?fields=id,name,account_status,currency,timezone_name,balance,amount_spent,spend_cap&access_token=${config.access_token}`
     const adAccountsResponse = await fetch(adAccountsUrl)
     
     if (!adAccountsResponse.ok) {
@@ -410,11 +407,28 @@ async function coletarCampanhas(config: MetaCredentials, barId: number, supabase
     }
     
     const adAccountsData = await adAccountsResponse.json()
-    const adAccounts = adAccountsData.data || []
-    console.log(`📊 Encontradas ${adAccounts.length} ad accounts`)
+    const allAdAccounts = adAccountsData.data || []
+    console.log(`📊 Encontradas ${allAdAccounts.length} ad accounts totais`)
+    
+    // Filtrar apenas a conta específica do Deboche Bar (act_943600147532423)
+    const DEBOCHE_ACCOUNT_ID = 'act_943600147532423'
+    const adAccounts = allAdAccounts.filter((account: any) => {
+      return account.id === DEBOCHE_ACCOUNT_ID || 
+             account.name?.toLowerCase().includes('deboche')
+    })
+    
+    console.log(`🎯 Contas filtradas para o Deboche Bar: ${adAccounts.length}`)
+    adAccounts.forEach((acc: any) => console.log(`   - ${acc.id}: ${acc.name}`))
     
     if (adAccounts.length === 0) {
-      return { campaigns: [], ad_accounts: [], ads: [], message: 'Nenhuma ad account encontrada' }
+      return { 
+        campaigns: [], 
+        ad_accounts: [], 
+        ads: [], 
+        message: 'Nenhuma ad account do Ordinário/Deboche encontrada',
+        all_accounts_found: allAdAccounts.length,
+        available_accounts: allAdAccounts.map((acc: any) => `${acc.id}: ${acc.name}`)
+      }
     }
     
     // Coletar DADOS COMPLETOS de todas as ad accounts
@@ -507,9 +521,11 @@ async function coletarCampanhas(config: MetaCredentials, barId: number, supabase
       },
       timestamp: new Date().toISOString(),
       collected_metrics: [
-        'impressions', 'reach', 'clicks', 'spend', 'ctr', 'cpc', 'cpm',
+        'impressions', 'reach', 'clicks', 'spend', 'ctr', 'cpc', 'cpp', 'cpm',
         'conversions', 'video_views', 'link_clicks', 'post_engagement',
-        'cost_per_conversion', 'frequency'
+        'cost_per_conversion', 'frequency', 'video_play_actions',
+        'video_p25_watched_actions', 'video_p50_watched_actions', 
+        'video_p75_watched_actions', 'video_p100_watched_actions'
       ]
     }
     
@@ -658,29 +674,44 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
       console.log(`🎯 Salvando ${campaignsData.campaigns.length} campanhas...`)
       
       // Preparar dados para inserção
-      const campaignsToInsert = campaignsData.campaigns.map((campaign: any) => ({
-        bar_id: barId,
-        campaign_id: campaign.id,
-        campaign_name: campaign.name,
-        ad_account_id: campaign.ad_account_id,
-        status: campaign.status,
-        effective_status: campaign.effective_status,
-        objective: campaign.objective,
-        start_time: campaign.start_time || null,
-        stop_time: campaign.stop_time || null,
-        daily_budget: campaign.daily_budget ? parseFloat(campaign.daily_budget) : null,
-        lifetime_budget: campaign.lifetime_budget ? parseFloat(campaign.lifetime_budget) : null,
-        impressions: campaign.insights?.impressions ? parseInt(campaign.insights.impressions) : 0,
-        reach: campaign.insights?.reach ? parseInt(campaign.insights.reach) : 0,
-        clicks: campaign.insights?.clicks ? parseInt(campaign.insights.clicks) : 0,
-        ctr: campaign.insights?.ctr ? parseFloat(campaign.insights.ctr) : null,
-        cpc: campaign.insights?.cpc ? parseFloat(campaign.insights.cpc) : null,
-        spend: campaign.insights?.spend ? parseFloat(campaign.insights.spend) : 0,
-        actions_count: campaign.insights?.actions?.length || 0,
-        conversions: campaign.insights?.conversions ? parseInt(campaign.insights.conversions) : 0,
-        data_coleta: hoje,
-        raw_data: campaign
-      }))
+      const campaignsToInsert = campaignsData.campaigns.map((campaign: any) => {
+        const insights = campaign.insights?.data?.[0] || {}
+        
+        return {
+          bar_id: barId,
+          campaign_id: campaign.id,
+          campaign_name: campaign.name,
+          ad_account_id: campaign.ad_account_id,
+          status: campaign.status,
+          effective_status: campaign.effective_status,
+          objective: campaign.objective,
+          start_time: campaign.start_time || null,
+          stop_time: campaign.stop_time || null,
+          daily_budget: campaign.daily_budget ? parseFloat(campaign.daily_budget) : null,
+          lifetime_budget: campaign.lifetime_budget ? parseFloat(campaign.lifetime_budget) : null,
+          impressions: insights.impressions ? parseInt(insights.impressions) : 0,
+          reach: insights.reach ? parseInt(insights.reach) : 0,
+          clicks: insights.clicks ? parseInt(insights.clicks) : 0,
+          ctr: insights.ctr ? parseFloat(insights.ctr) : null,
+          cpc: insights.cpc ? parseFloat(insights.cpc) : null,
+          cpp: insights.cpp ? parseFloat(insights.cpp) : null,
+          cpm: insights.cpm ? parseFloat(insights.cpm) : null,
+          frequency: insights.frequency ? parseFloat(insights.frequency) : null,
+          spend: insights.spend ? parseFloat(insights.spend) : 0,
+          actions_count: insights.actions?.length || 0,
+          conversions: insights.conversions ? parseInt(insights.conversions) : 0,
+          cost_per_conversion: insights.cost_per_conversion ? parseFloat(insights.cost_per_conversion) : null,
+          video_play_actions: insights.video_play_actions ? parseInt(insights.video_play_actions) : null,
+          video_p25_watched_actions: insights.video_p25_watched_actions ? parseInt(insights.video_p25_watched_actions) : null,
+          video_p50_watched_actions: insights.video_p50_watched_actions ? parseInt(insights.video_p50_watched_actions) : null,
+          video_p75_watched_actions: insights.video_p75_watched_actions ? parseInt(insights.video_p75_watched_actions) : null,
+          video_p100_watched_actions: insights.video_p100_watched_actions ? parseInt(insights.video_p100_watched_actions) : null,
+          link_clicks: insights.link_clicks ? parseInt(insights.link_clicks) : null,
+          video_views: insights.video_views ? parseInt(insights.video_views) : null,
+          data_coleta: hoje,
+          raw_data: campaign
+        }
+      })
       
       // Delete existente + Insert novo para campanhas
       await supabase
