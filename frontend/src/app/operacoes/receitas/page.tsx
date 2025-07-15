@@ -186,13 +186,18 @@ export default function ReceitasPage() {
           codigo: insumo.codigo,
           nome: insumo.nome,
           categoria: insumo.categoria || 'cozinha', // Default para compatibilidade
+          tipo_local: insumo.tipo_local || 'cozinha', // Campo essencial para filtros
           custo_unitario: insumo.custo_unitario,
           unidade_medida: insumo.unidade || insumo.unidade_medida || 'g',
           observacoes: insumo.observacoes
         }))
         
         setInsumos(insumosFormatados)
-        console.log(`✅ ${insumosFormatados.length} insumos carregados`)
+        
+        // Debug: verificar distribuição por tipo_local
+        const cozinhaCount = insumosFormatados.filter((i: any) => i.tipo_local === 'cozinha').length
+        const barCount = insumosFormatados.filter((i: any) => i.tipo_local === 'bar').length
+        console.log(`✅ ${insumosFormatados.length} insumos carregados - Cozinha: ${cozinhaCount}, Bar: ${barCount}`)
       } else {
         console.error('❌ Erro na resposta da API insumos:', data)
         setInsumos([])
