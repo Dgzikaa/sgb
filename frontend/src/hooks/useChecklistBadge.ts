@@ -25,7 +25,7 @@ export function useChecklistBadge() {
     try {
       setLoading(true)
       
-      const response = await api.get(`/api/checklists/badge-data?bar_id=${selectedBar.id}&user_id=${user.user_id}`)
+      const response = await api.get(`/api/checklists/badge-data?bar_id=${selectedBar.id}&user_id=${user.id}`)
       
       if (response.success) {
         setBadgeData(response.data)

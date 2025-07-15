@@ -1,17 +1,18 @@
 'use client'
 
-import { ReactNode, useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { DarkHeader } from './DarkHeader'
 import { ModernSidebar } from './ModernSidebar'
-import { PageTitleProvider } from '@/contexts/PageTitleContext'
 import AuthGuard from '@/components/auth/AuthGuard'
+import { PageTitleProvider } from '@/contexts/PageTitleContext'
+import { UnifiedSearch, useUnifiedSearch } from '@/components/ui/unified-search'
 
 interface DarkSidebarLayoutProps {
-  children: ReactNode
+  children: React.ReactNode
 }
 
 // Componente wrapper que aplica estilos globais automaticamente
-function GlobalPageWrapper({ children }: { children: ReactNode }) {
+function GlobalPageWrapper({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Aplicar classes de dark mode automaticamente em elementos sem elas
     const applyDarkModeClasses = () => {
@@ -105,6 +106,7 @@ function GlobalPageWrapper({ children }: { children: ReactNode }) {
 
 export function DarkSidebarLayout({ children }: DarkSidebarLayoutProps) {
   const [isClient, setIsClient] = useState(false)
+  const search = useUnifiedSearch()
 
   useEffect(() => {
     setIsClient(true)
@@ -144,6 +146,12 @@ export function DarkSidebarLayout({ children }: DarkSidebarLayoutProps) {
               </div>
             </main>
           </div>
+          
+          {/* Unified Search Modal */}
+          <UnifiedSearch
+            isOpen={search.isOpen}
+            onClose={search.close}
+          />
         </div>
       </PageTitleProvider>
     </AuthGuard>
