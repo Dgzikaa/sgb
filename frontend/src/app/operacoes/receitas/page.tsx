@@ -1238,8 +1238,8 @@ export default function ReceitasPage() {
 
         {/* Modal Criar Receita */}
         <Dialog open={modalCriarReceita} onOpenChange={setModalCriarReceita}>
-          <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-            <DialogHeader>
+          <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 flex flex-col">
+            <DialogHeader className="flex-shrink-0">
               <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                 <Plus className="w-5 h-5" />
                 Nova Receita
@@ -1249,7 +1249,7 @@ export default function ReceitasPage() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-6 max-h-[70vh] overflow-y-auto">
+            <div className="space-y-6 flex-1 overflow-y-auto">
               {/* Dados básicos da receita */}
               <div className="grid grid-cols-1 gap-4 sm:gap-6">
                 <div>
@@ -1465,7 +1465,7 @@ export default function ReceitasPage() {
                 )}
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="flex-shrink-0 mt-6">
               <Button
                 onClick={() => setModalCriarReceita(false)}
                 variant="outline"
@@ -1496,8 +1496,8 @@ export default function ReceitasPage() {
 
         {/* Modal Visualizar Receita */}
         <Dialog open={modalVisualizarReceita} onOpenChange={setModalVisualizarReceita}>
-          <DialogContent className="max-w-3xl w-[95vw] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-            <DialogHeader>
+          <DialogContent className="max-w-3xl w-[95vw] max-h-[90vh] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 flex flex-col">
+            <DialogHeader className="flex-shrink-0">
               <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                 <Eye className="w-5 h-5" />
                 Visualizar Receita
@@ -1505,7 +1505,7 @@ export default function ReceitasPage() {
             </DialogHeader>
 
             {receitaEditando && (
-              <div className="space-y-6">
+              <div className="space-y-6 flex-1 overflow-y-auto">
                 {/* Informações básicas */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -1609,8 +1609,8 @@ export default function ReceitasPage() {
 
         {/* Modal de Edição de Insumo */}
         <Dialog open={modalEditarInsumo} onOpenChange={setModalEditarInsumo}>
-          <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-            <DialogHeader>
+          <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 flex flex-col">
+            <DialogHeader className="flex-shrink-0">
               <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                 <Edit3 className="w-5 h-5" />
                 Editar Insumo
@@ -1621,7 +1621,7 @@ export default function ReceitasPage() {
             </DialogHeader>
 
             {insumoEditando && (
-              <div className="space-y-4">
+              <div className="space-y-4 flex-1 overflow-y-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="edit-codigo" className="text-gray-700 dark:text-gray-300">
@@ -1749,7 +1749,7 @@ export default function ReceitasPage() {
               </div>
             )}
 
-            <DialogFooter>
+            <DialogFooter className="flex-shrink-0 mt-6">
               <Button
                 onClick={() => {
                   setModalEditarInsumo(false)
@@ -1774,8 +1774,8 @@ export default function ReceitasPage() {
 
         {/* Modal de Edição de Receita */}
         <Dialog open={modalEditarReceita} onOpenChange={setModalEditarReceita}>
-          <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-            <DialogHeader>
+          <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 flex flex-col">
+            <DialogHeader className="flex-shrink-0">
               <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                 <Edit3 className="w-5 h-5" />
                 Editar Receita
@@ -1786,7 +1786,7 @@ export default function ReceitasPage() {
             </DialogHeader>
 
             {receitaEditando && (
-              <div className="space-y-6">
+              <div className="space-y-6 flex-1 overflow-y-auto">
                 {/* Informações básicas */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -2040,8 +2040,7 @@ export default function ReceitasPage() {
               </div>
             )}
 
-            <DialogFooter>
-
+            <DialogFooter className="flex-shrink-0 mt-6">
               <div className="flex gap-2">
                 <Button
                   onClick={() => {
@@ -2072,8 +2071,8 @@ export default function ReceitasPage() {
 
         {/* Modal de Criação de Insumo */}
         <Dialog open={modalCriarInsumo} onOpenChange={setModalCriarInsumo}>
-          <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-            <DialogHeader>
+          <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 flex flex-col">
+            <DialogHeader className="flex-shrink-0">
               <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                 <Plus className="w-5 h-5" />
                 Novo Insumo
@@ -2083,7 +2082,7 @@ export default function ReceitasPage() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4">
+            <div className="space-y-4 flex-1 overflow-y-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-gray-700 dark:text-gray-300">
@@ -2197,7 +2196,7 @@ export default function ReceitasPage() {
               </div>
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="flex-shrink-0 mt-6">
               <Button
                 onClick={() => {
                   setModalCriarInsumo(false)
