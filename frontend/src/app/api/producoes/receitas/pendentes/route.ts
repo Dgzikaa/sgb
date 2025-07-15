@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser, authErrorResponse } from '@/middleware/auth'
 
-export const dynamic = 'force-dynamic'
-
 export async function POST(request: NextRequest) {
   try {
     const user = await authenticateUser(request)
@@ -23,12 +21,12 @@ export async function POST(request: NextRequest) {
 
     const supabase = await getAdminClient()
     
-    // Buscar receitas em produção (status pendente/em andamento)
+    // Buscar receitas pendentes específicas
     const { data: receitasPendentes, error: receitasError } = await supabase
-      .from('producoes')
-      .select('id, nome_receita, status_producao, tempo_estimado, iniciado_em')
+      .from('receitas')
+      .select('id, nome, status, tempo_preparo, dificuldade, ingredientes_faltando')
       .eq('bar_id', bar_id)
-      .in('status_producao', ['pendente', 'em_andamento', 'preparando'])
+      .in('status', ['pendente', 'preparando', 'ingredientes_faltando'])
 
     if (receitasError) {
       console.error('Erro ao buscar receitas pendentes:', receitasError)
@@ -39,18 +37,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Separar por status
-    const pendentes = receitasPendentes?.filter((r: any) => r.status_producao === 'pendente') || []
-    const emAndamento = receitasPendentes?.filter((r: any) => r.status_producao === 'em_andamento') || []
-    const preparando = receitasPendentes?.filter((r: any) => r.status_producao === 'preparando') || []
+    const pendentes = receitasPendentes?.filter((r: any) => r.status === 'pendente') || []
+    const preparando = receitasPendentes?.filter((r: any) => r.status === 'preparando') || []
+    const ingredientesFaltando = receitasPendentes?.filter((r: any) => r.status === 'ingredientes_faltando') || []
 
-    // Calcular receitas atrasadas (tempo estimado ultrapassado)
-    const agora = new Date()
-    const atrasadas = emAndamento.filter((r: any) => {
-      if (!r.iniciado_em || !r.tempo_estimado) return false
-      const iniciadoEm = new Date(r.iniciado_em)
-      const tempoDecorrido = Math.floor((agora.getTime() - iniciadoEm.getTime()) / (1000 * 60)) // em minutos
-      return tempoDecorrido > r.tempo_estimado
-    })
+    // Buscar pedidos aguardando receitas
+    const { data: pedidosAguardando, error: pedidosError } = await supabase
+      .from('pedidos')
+      .select('id, receita_id')
+      .eq('bar_id', bar_id)
+      .eq('status', 'aguardando_producao')
 
     const totalPendentes = receitasPendentes?.length || 0
 
@@ -59,15 +55,15 @@ export async function POST(request: NextRequest) {
       receitas_pendentes: totalPendentes,
       detalhes: {
         pendentes: pendentes.length,
-        em_andamento: emAndamento.length,
         preparando: preparando.length,
-        atrasadas: atrasadas.length,
+        ingredientes_faltando: ingredientesFaltando.length,
+        pedidos_aguardando: pedidosAguardando?.length || 0,
         total: totalPendentes
       }
     })
 
   } catch (error) {
-    console.error('Erro na API producoes/pendentes:', error)
+    console.error('Erro na API producoes/receitas/pendentes:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
       receitas_pendentes: 0 

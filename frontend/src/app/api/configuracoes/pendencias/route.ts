@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseClient } from '@/lib/supabase'
+import { getAdminClient } from '@/lib/supabase-admin'
+import { authenticateUser, authErrorResponse } from '@/middleware/auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await authenticateUser(request)
+    if (!user) {
+      return authErrorResponse('Usuário não autenticado')
+    }
+
     const body = await request.json()
     const { bar_id, user_id } = body
 
@@ -15,81 +21,109 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await getSupabaseClient()
+    const supabase = await getAdminClient()
     
-    let totalPendencias = 0
+    let totalConfiguracoesPendentes = 0
 
-    // 1. Verificar se há backups falhando
-    const { data: backupsFalhando, error: backupError } = await supabase
-      .from('system_backups')
-      .select('id')
-      .eq('bar_id', bar_id)
-      .eq('status', 'failed')
-      .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
-
-    if (!backupError && backupsFalhando) {
-      totalPendencias += backupsFalhando.length
-    }
-
-    // 2. Verificar eventos de segurança não resolvidos
-    const { data: eventosSeguranca, error: secError } = await supabase
-      .from('security_events')
-      .select('id')
-      .eq('bar_id', bar_id)
-      .eq('resolved', false)
-      .gte('risk_score', 50)
-
-    if (!secError && eventosSeguranca) {
-      totalPendencias += eventosSeguranca.length
-    }
-
-    // 3. Verificar credenciais expirando (próximos 7 dias)
-    const { data: credenciais, error: credError } = await supabase
+    // 1. Integrações inativas ou com erro
+    const { data: integracoes, error: integracoesError } = await supabase
       .from('api_credentials')
-      .select('id, service, expires_at')
+      .select('id, sistema, status_conexao')
       .eq('bar_id', bar_id)
-      .eq('active', true)
-      .lte('expires_at', new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString())
+      .eq('ativo', true)
+      .neq('status_conexao', 'ativo')
 
-    if (!credError && credenciais) {
-      totalPendencias += credenciais.length
+    if (!integracoesError && integracoes) {
+      totalConfiguracoesPendentes += integracoes.length
     }
 
-    // 4. Verificar configurações de templates não aplicadas
-    const { data: templates, error: templateError } = await supabase
-      .from('checklist_templates')
+    // 2. Checklists sem configuração ou inativos
+    const { data: checklistsInativos, error: checklistsError } = await supabase
+      .from('checklists')
       .select('id')
       .eq('bar_id', bar_id)
-      .eq('status', 'draft')
+      .eq('ativo', false)
 
-    if (!templateError && templates) {
-      totalPendencias += templates.length
+    if (!checklistsError && checklistsInativos) {
+      totalConfiguracoesPendentes += checklistsInativos.length
     }
 
-    // 5. Verificar integrações desconectadas
-    const { data: integracoes, error: integError } = await supabase
-      .from('api_credentials')
-      .select('id, service')
+    // 3. Metas sem configuração ou não ativas
+    const { data: metasInativas, error: metasError } = await supabase
+      .from('metas_negocio')
+      .select('id')
       .eq('bar_id', bar_id)
-      .eq('active', false)
+      .eq('meta_ativa', false)
 
-    if (!integError && integracoes) {
-      totalPendencias += integracoes.length
+    if (!metasError && metasInativas) {
+      totalConfiguracoesPendentes += metasInativas.length
+    }
+
+    // 4. Webhooks não configurados
+    const { data: webhooksNaoConfig, error: webhooksError } = await supabase
+      .from('api_credentials')
+      .select('id, sistema')
+      .eq('bar_id', bar_id)
+      .is('webhook_url', null)
+
+    if (!webhooksError && webhooksNaoConfig) {
+      totalConfiguracoesPendentes += webhooksNaoConfig.length
+    }
+
+    // 5. Usuários sem permissões definidas
+    const { data: usuariosSemPermissao, error: usuariosError } = await supabase
+      .from('usuarios')
+      .select('id')
+      .eq('bar_id', bar_id)
+      .eq('ativo', true)
+      .or('modulos_permitidos.is.null,modulos_permitidos.eq.{}')
+
+    if (!usuariosError && usuariosSemPermissao) {
+      totalConfiguracoesPendentes += usuariosSemPermissao.length
+    }
+
+    // 6. Templates não configurados
+    const { data: templatesNaoConfig, error: templatesError } = await supabase
+      .from('templates')
+      .select('id')
+      .eq('bar_id', bar_id)
+      .eq('ativo', false)
+
+    if (!templatesError && templatesNaoConfig) {
+      totalConfiguracoesPendentes += templatesNaoConfig.length
+    }
+
+    // 7. Configurações de segurança pendentes
+    const { data: configSeguranca, error: segurancaError } = await supabase
+      .from('security_settings')
+      .select('id')
+      .eq('bar_id', bar_id)
+      .eq('configurado', false)
+
+    if (!segurancaError && configSeguranca) {
+      totalConfiguracoesPendentes += configSeguranca.length
     }
 
     return NextResponse.json({
-      total_configuracoes_pendentes: totalPendencias,
+      success: true,
+      total_configuracoes_pendentes: totalConfiguracoesPendentes,
       detalhes: {
-        backups_falhando: backupsFalhando?.length || 0,
-        eventos_seguranca: eventosSeguranca?.length || 0,
-        credenciais_expirando: credenciais?.length || 0,
-        templates_draft: templates?.length || 0,
-        integracoes_desconectadas: integracoes?.length || 0
+        integracoes_inativas: integracoes?.length || 0,
+        checklists_inativos: checklistsInativos?.length || 0,
+        metas_inativas: metasInativas?.length || 0,
+        webhooks_nao_configurados: webhooksNaoConfig?.length || 0,
+        usuarios_sem_permissao: usuariosSemPermissao?.length || 0,
+        templates_nao_configurados: templatesNaoConfig?.length || 0,
+        config_seguranca_pendente: configSeguranca?.length || 0,
+        total: totalConfiguracoesPendentes
       }
     })
 
   } catch (error) {
-    console.error('Erro ao buscar configurações pendentes:', error)
-    return NextResponse.json({ total_configuracoes_pendentes: 0 })
+    console.error('Erro na API configuracoes/pendencias:', error)
+    return NextResponse.json({ 
+      error: 'Erro interno do servidor',
+      total_configuracoes_pendentes: 0 
+    }, { status: 500 })
   }
 } 

@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseClient } from '@/lib/supabase'
+import { getAdminClient } from '@/lib/supabase-admin'
+import { authenticateUser, authErrorResponse } from '@/middleware/auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await authenticateUser(request)
+    if (!user) {
+      return authErrorResponse('Usuário não autenticado')
+    }
+
     const body = await request.json()
     const { bar_id, user_id } = body
 
@@ -15,39 +21,61 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await getSupabaseClient()
+    const supabase = await getAdminClient()
     
-    // Buscar checklists pendentes de hoje
-    const hoje = new Date().toISOString().split('T')[0]
-    
-    const { data: checklists, error } = await supabase
-      .from('checklist_abertura')
-      .select('id, area, item, status')
+    // Buscar checklists pendentes
+    const { data: checklistsPendentes, error: pendentesError } = await supabase
+      .from('checklist_execucoes')
+      .select('id, data_limite, status_execucao')
       .eq('bar_id', bar_id)
-      .gte('data_checklist', hoje)
-      .in('status', ['pending', 'doing'])
+      .eq('status_execucao', 'pendente')
 
-    if (error) {
-      console.error('Erro ao buscar checklists:', error)
-      return NextResponse.json({ total_pendentes: 0 })
+    if (pendentesError) {
+      console.error('Erro ao buscar checklists pendentes:', pendentesError)
+      return NextResponse.json({ 
+        error: 'Erro ao buscar checklists pendentes',
+        total_pendentes: 0 
+      }, { status: 500 })
     }
 
-    const totalPendentes = checklists?.length || 0
+    // Separar entre pendentes normais e atrasados
+    const agora = new Date()
+    const pendentesNormais = checklistsPendentes?.filter((c: any) => 
+      new Date(c.data_limite) > agora
+    ) || []
+    
+    const atrasados = checklistsPendentes?.filter((c: any) => 
+      new Date(c.data_limite) <= agora
+    ) || []
+
+    // Buscar checklists agendados para hoje
+    const hoje = new Date().toISOString().split('T')[0]
+    const { data: agendadosHoje, error: agendadosError } = await supabase
+      .from('checklist_schedules')
+      .select('id')
+      .eq('bar_id', bar_id)
+      .eq('ativo', true)
+      .gte('proxima_execucao', hoje)
+      .lt('proxima_execucao', `${hoje}T23:59:59`)
+
+    const totalPendentes = (checklistsPendentes?.length || 0)
 
     return NextResponse.json({
+      success: true,
       total_pendentes: totalPendentes,
       detalhes: {
-        pending: checklists?.filter((c: any) => c.status === 'pending').length || 0,
-        doing: checklists?.filter((c: any) => c.status === 'doing').length || 0,
-        por_area: checklists?.reduce((acc: any, item: any) => {
-          acc[item.area] = (acc[item.area] || 0) + 1
-          return acc
-        }, {} as Record<string, number>) || {}
+        pendentes_normais: pendentesNormais.length,
+        atrasados: atrasados.length,
+        agendados_hoje: agendadosHoje?.length || 0,
+        total: totalPendentes
       }
     })
 
   } catch (error) {
-    console.error('Erro ao buscar checklists pendentes:', error)
-    return NextResponse.json({ total_pendentes: 0 })
+    console.error('Erro na API checklists/pendentes:', error)
+    return NextResponse.json({ 
+      error: 'Erro interno do servidor',
+      total_pendentes: 0 
+    }, { status: 500 })
   }
 } 

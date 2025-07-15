@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseClient } from '@/lib/supabase'
+import { getAdminClient } from '@/lib/supabase-admin'
+import { authenticateUser, authErrorResponse } from '@/middleware/auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await authenticateUser(request)
+    if (!user) {
+      return authErrorResponse('Usuário não autenticado')
+    }
+
     const body = await request.json()
     const { bar_id, user_id } = body
 
@@ -15,67 +21,94 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await getSupabaseClient()
+    const supabase = await getAdminClient()
     
-    // Verificar último sync ContaAzul
-    const { data: ultimoSync, error: syncError } = await supabase
-      .from('contaazul_eventos_financeiros')
-      .select('sincronizado_em')
-      .eq('bar_id', bar_id)
-      .order('sincronizado_em', { ascending: false })
-      .limit(1)
-
     let syncPendentes = 0
-    
-    if (!syncError && ultimoSync && ultimoSync.length > 0) {
-      const ultimaData = new Date(ultimoSync[0].sincronizado_em)
-      const agora = new Date()
-      const horasSemSync = Math.floor((agora.getTime() - ultimaData.getTime()) / (1000 * 60 * 60))
-      
-      // Se último sync foi há mais de 6 horas, considerar pendente
-      if (horasSemSync > 6) {
-        syncPendentes = 1
-      }
-    } else {
-      // Nunca sincronizou
-      syncPendentes = 1
-    }
 
-    // Verificar credenciais ContaAzul
-    const { data: credenciais, error: credError } = await supabase
+    // 1. Verificar status da conexão ContaAzul
+    const { data: contaazulConfig, error: configError } = await supabase
       .from('api_credentials')
-      .select('expires_at, active')
+      .select('status_conexao, ultima_sincronizacao')
       .eq('bar_id', bar_id)
-      .eq('service', 'contaazul')
-      .eq('active', true)
+      .eq('sistema', 'contaazul')
+      .eq('ambiente', 'producao')
+      .single()
 
-    let credenciaisExpiradas = 0
-    
-    if (!credError && credenciais && credenciais.length > 0) {
-      const expiresAt = new Date(credenciais[0].expires_at)
-      const agora = new Date()
-      
-      if (expiresAt <= agora) {
-        credenciaisExpiradas = 1
-      }
+    if (configError || !contaazulConfig) {
+      // Se não há configuração, conta como pendência
+      syncPendentes += 1
     } else {
-      credenciaisExpiradas = 1
+      // Verificar se conexão está inativa
+      if (contaazulConfig.status_conexao !== 'ativo') {
+        syncPendentes += 1
+      }
+
+      // Verificar se última sincronização foi há mais de 1 hora
+      if (contaazulConfig.ultima_sincronizacao) {
+        const ultimaSync = new Date(contaazulConfig.ultima_sincronizacao)
+        const agora = new Date()
+        const horasSemSync = Math.floor((agora.getTime() - ultimaSync.getTime()) / (1000 * 60 * 60))
+        
+        if (horasSemSync > 1) {
+          syncPendentes += 1
+        }
+      }
     }
 
-    const totalPendentes = syncPendentes + credenciaisExpiradas
+    // 2. Verificar transações pendentes de sincronização
+    const { data: transacoesPendentes, error: transacoesError } = await supabase
+      .from('contaazul_transacoes')
+      .select('id')
+      .eq('bar_id', bar_id)
+      .eq('status_sync', 'pendente')
+
+    if (!transacoesError && transacoesPendentes) {
+      syncPendentes += transacoesPendentes.length
+    }
+
+    // 3. Verificar erros de sincronização não resolvidos
+    const { data: errosSync, error: errosError } = await supabase
+      .from('contaazul_sync_logs')
+      .select('id')
+      .eq('bar_id', bar_id)
+      .eq('status', 'erro')
+      .eq('resolvido', false)
+
+    if (!errosError && errosSync) {
+      syncPendentes += errosSync.length
+    }
+
+    // 4. Verificar produtos não sincronizados
+    const { data: produtosNaoSync, error: produtosError } = await supabase
+      .from('produtos')
+      .select('id')
+      .eq('bar_id', bar_id)
+      .eq('ativo', true)
+      .is('contaazul_id', null)
+
+    if (!produtosError && produtosNaoSync) {
+      syncPendentes += produtosNaoSync.length
+    }
 
     return NextResponse.json({
-      sync_pendentes: totalPendentes,
+      success: true,
+      sync_pendentes: syncPendentes,
       detalhes: {
-        sync_atrasado: syncPendentes > 0,
-        credenciais_expiradas: credenciaisExpiradas > 0,
-        ultimo_sync: ultimoSync?.[0]?.sincronizado_em || null,
-        status_credenciais: credenciais?.[0]?.active || false
+        conexao_inativa: contaazulConfig?.status_conexao !== 'ativo' ? 1 : 0,
+        sync_atrasada: contaazulConfig?.ultima_sincronizacao ? 
+          Math.floor((new Date().getTime() - new Date(contaazulConfig.ultima_sincronizacao).getTime()) / (1000 * 60 * 60)) > 1 ? 1 : 0 : 1,
+        transacoes_pendentes: transacoesPendentes?.length || 0,
+        erros_nao_resolvidos: errosSync?.length || 0,
+        produtos_nao_sincronizados: produtosNaoSync?.length || 0,
+        total: syncPendentes
       }
     })
 
   } catch (error) {
-    console.error('Erro ao buscar status ContaAzul:', error)
-    return NextResponse.json({ sync_pendentes: 0 })
+    console.error('Erro na API contaazul/status:', error)
+    return NextResponse.json({ 
+      error: 'Erro interno do servidor',
+      sync_pendentes: 0 
+    }, { status: 500 })
   }
 } 
