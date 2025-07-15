@@ -657,7 +657,6 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
         posts_saves: igSaves,
         reach: igReach,
         impressions: igImpressions,
-        video_views: igVideoViews,
         profile_views: profileViews,
         website_clicks: websiteClicks,
         media_count: instagramData.account_info?.media_count || 0,
