@@ -20,6 +20,7 @@ export default function AuthGuard({
   const { selectedBar, isLoading: barLoading } = useBar()
   const [isAuthenticating, setIsAuthenticating] = useState(true)
   const [shouldRedirect, setShouldRedirect] = useState(false)
+  const [contextWaitCount, setContextWaitCount] = useState(0)
   const router = useRouter()
 
   useEffect(() => {
@@ -34,16 +35,39 @@ export default function AuthGuard({
         // Verificação dupla para evitar loop infinito
         try {
           const userData = localStorage.getItem('sgb_user')
+          console.log('🔍 AuthGuard: Verificando localStorage...', userData ? 'Dados encontrados' : 'Nenhum dado')
+          
           if (userData) {
             const parsedUser = JSON.parse(userData)
+            console.log('🔍 AuthGuard: Dados parseados:', parsedUser)
+            
             if (parsedUser && parsedUser.id && parsedUser.email && parsedUser.nome) {
               // Usuário existe no localStorage, aguardar o contexto se atualizar
-              console.log('🔄 Usuário encontrado no localStorage, aguardando contexto...')
+              console.log('🔄 Usuário encontrado no localStorage, aguardando contexto... (tentativa:', contextWaitCount + 1, ')')
+              
+              // Tentar forçar o contexto a recarregar os dados
+              const contextRefresh = new CustomEvent('refreshUserContext')
+              window.dispatchEvent(contextRefresh)
+              
+              // Incrementar contador de espera
+              setContextWaitCount(prev => prev + 1)
+              
+              // Se já aguardou muito tempo, permitir acesso direto
+              if (contextWaitCount > 5) {
+                console.log('⚠️ AuthGuard: Timeout aguardando contexto, permitindo acesso direto')
+                setIsAuthenticating(false)
+                return
+              }
+              
               return
+            } else {
+              console.log('⚠️ AuthGuard: Dados inválidos no localStorage')
             }
+          } else {
+            console.log('🔍 AuthGuard: Nenhum dado no localStorage')
           }
         } catch (error) {
-          console.error('Erro ao verificar localStorage:', error)
+          console.error('❌ AuthGuard: Erro ao verificar localStorage:', error)
         }
         
         // Se realmente não há usuário, definir para redirecionar
@@ -81,11 +105,12 @@ export default function AuthGuard({
 
       // Tudo ok, permitir acesso
       setShouldRedirect(false)
+      setContextWaitCount(0)
       setIsAuthenticating(false)
     }
 
     checkAuth()
-  }, [user, userLoading, isInitialized, shouldRedirect, router, redirectTo, requiredPermissions])
+  }, [user, userLoading, isInitialized, shouldRedirect, contextWaitCount, router, redirectTo, requiredPermissions])
 
   // Mostrar loading enquanto autentica
   if (isAuthenticating || userLoading || !isInitialized) {

@@ -39,6 +39,38 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     loadUserData()
   }, [])
 
+  // Configurar listeners para atualizações
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'sgb_user') {
+        console.log('🔄 UserContext: Storage change detectado')
+        loadUserData()
+      }
+    }
+
+    const handleUserDataUpdated = () => {
+      console.log('🔄 UserContext: Evento userDataUpdated recebido')
+      loadUserData()
+    }
+
+    const handleRefreshContext = () => {
+      console.log('🔄 UserContext: Refresh forçado recebido')
+      loadUserData()
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('userDataUpdated', handleUserDataUpdated)
+    window.addEventListener('refreshUserContext', handleRefreshContext)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('userDataUpdated', handleUserDataUpdated)
+      window.removeEventListener('refreshUserContext', handleRefreshContext)
+    }
+  }, [])
+
   const loadUserData = () => {
     // Check if we're on the client side
     if (typeof window === 'undefined') {
@@ -51,8 +83,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     
     try {
       const userData = localStorage.getItem('sgb_user')
+      console.log('🔍 UserContext: Verificando localStorage...', userData ? 'Dados encontrados' : 'Nenhum dado')
+      
       if (userData) {
         const parsedUser = JSON.parse(userData)
+        console.log('🔍 UserContext: Dados parseados:', parsedUser)
         
         // Validar se os dados do usuário são válidos
         if (parsedUser && parsedUser.id && parsedUser.email && parsedUser.nome) {
