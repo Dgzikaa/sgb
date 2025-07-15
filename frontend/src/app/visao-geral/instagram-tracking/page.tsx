@@ -130,7 +130,7 @@ export default function InstagramTrackingPage() {
             followers_change_percent: variations.follower_growth_total > 0 ? 
               Math.round((variations.follower_growth_total / 36390) * 100 * 100) / 100 : 0,
             engagement_change: variations.daily_changes ? 
-              Object.values(variations.daily_changes).slice(0, 1)[0]?.total_interactions || 125 : 125,
+              (Object.values(variations.daily_changes).slice(0, 1)[0] as any)?.total_interactions || 125 : 125,
             reach_change: 0,
             trend_direction: variations.follower_growth_total > 0 ? 'growing' : 
                             variations.follower_growth_total < 0 ? 'declining' : 'stable'
