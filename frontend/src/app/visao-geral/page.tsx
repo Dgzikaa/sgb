@@ -160,10 +160,10 @@ export default function VisaoGeralPage() {
             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg mb-4">
               <Eye className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            <h1 className="card-title-dark text-3xl mb-2">
               Visão Geral
             </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            <p className="card-description-dark text-lg max-w-2xl mx-auto">
               Acesse relatórios detalhados, análises comparativas e insights estratégicos 
               para tomada de decisões baseada em dados
             </p>
@@ -171,45 +171,45 @@ export default function VisaoGeralPage() {
 
           {/* Stats Overview */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="p-4 text-center">
+            <div className="card-dark">
+              <div className="p-4 text-center">
                 <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
                   <BarChart3 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">9</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Relatórios</p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
             
-            <Card>
-              <CardContent className="p-4 text-center">
+            <div className="card-dark">
+              <div className="p-4 text-center">
                 <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
                   <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" />
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">100%</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Funcionais</p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
             
-            <Card>
-              <CardContent className="p-4 text-center">
+            <div className="card-dark">
+              <div className="p-4 text-center">
                 <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
                   <Target className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">Real-time</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Dados</p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
             
-            <Card>
-              <CardContent className="p-4 text-center">
+            <div className="card-dark">
+              <div className="p-4 text-center">
                 <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
                   <LineChart className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">24/7</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Monitoramento</p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
           {/* Relatórios Grid */}
@@ -217,8 +217,8 @@ export default function VisaoGeralPage() {
             {visaoGeralItems.map((item) => {
               const IconComponent = item.icon
               return (
-                <Card key={item.id} className="hover:shadow-lg transition-shadow duration-300 group">
-                  <CardHeader className="pb-3">
+                <div key={item.id} className="card-dark hover:shadow-lg transition-shadow duration-300 group">
+                  <div className="p-6 pb-3">
                     <div className="flex items-start justify-between mb-3">
                       <div className={`w-10 h-10 bg-gradient-to-r ${getColorClasses(item.color)} rounded-xl flex items-center justify-center shadow-md`}>
                         <IconComponent className="w-5 h-5 text-white" />
@@ -233,16 +233,16 @@ export default function VisaoGeralPage() {
                       </div>
                     </div>
                     
-                    <CardTitle className="text-lg">{item.title}</CardTitle>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <h3 className="card-title-dark text-lg mb-2">{item.title}</h3>
+                    <p className="card-description-dark text-sm">
                       {item.description}
                     </p>
-                  </CardHeader>
+                  </div>
                   
-                  <CardContent className="pt-0">
+                  <div className="px-6 pb-6">
                     <Link href={item.href}>
                       <Button 
-                        className="w-full group-hover:translate-x-1 transition-transform duration-200"
+                        className="w-full group-hover:translate-x-1 transition-transform duration-200 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600"
                         variant="outline"
                         disabled={item.status === 'coming_soon'}
                       >
@@ -250,27 +250,25 @@ export default function VisaoGeralPage() {
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </Link>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               )
             })}
           </div>
 
           {/* Footer Info */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  📊 Análises Inteligentes
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                  Todos os relatórios são atualizados em tempo real e conectados 
-                  às suas integrações ativas (ContaAzul, Meta, WhatsApp). 
-                  Use os filtros de período para análises customizadas.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="card-dark p-6">
+            <div className="text-center">
+              <h3 className="card-title-dark text-lg mb-2">
+                📊 Análises Inteligentes
+              </h3>
+              <p className="card-description-dark max-w-2xl mx-auto">
+                Todos os relatórios são atualizados em tempo real e conectados 
+                às suas integrações ativas (ContaAzul, Meta, WhatsApp). 
+                Use os filtros de período para análises customizadas.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
