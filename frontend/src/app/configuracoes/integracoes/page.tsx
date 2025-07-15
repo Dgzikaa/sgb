@@ -548,70 +548,43 @@ export default function IntegracoesPage() {
                   {/* Webhook Sistema/Segurança */}
                   {!loadingConfigs && (
                     <div className="space-y-8">
-                      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
-                              <Shield className="w-5 h-5 text-white" />
-                            </div>
-                            <div>
-                              <Label htmlFor="webhook-sistema" className="text-lg font-semibold text-red-800 dark:text-red-300">
-                                Sistema & Segurança
-                              </Label>
-                              <p className="text-sm text-red-600 dark:text-red-400">
-                                Eventos críticos e alertas de segurança
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className={`w-3 h-3 rounded-full ${webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                            <span className={`text-sm font-medium ${webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'text-green-600 dark:text-green-400' : 'text-gray-500'}`}>
-                              {webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'Conectado' : 'Não configurado'}
-                            </span>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-4">
-                          <div className="flex gap-3">
-                            <Input
-                              id="webhook-sistema"
-                              placeholder="https://discord.com/api/webhooks/..."
-                              value={webhookConfigs.sistema}
-                              onChange={(e) => setWebhookConfigs({...webhookConfigs, sistema: e.target.value})}
-                              disabled={webhookLoading}
-                              className="modal-input flex-1"
-                            />
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => testWebhook('sistema')}
-                              disabled={testingWebhook === 'sistema' || !webhookConfigs.sistema || webhookLoading}
-                              className="modal-button-secondary px-4"
-                            >
-                              {testingWebhook === 'sistema' ? (
-                                <div className="flex items-center gap-2">
-                                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                                  Testando...
-                                </div>
-                              ) : (
-                                <>
-                                  🧪 Testar
-                                </>
-                              )}
-                            </Button>
-                          </div>
-                          
-                          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-red-200 dark:border-red-800">
-                            <h4 className="font-medium text-red-800 dark:text-red-300 mb-2">📡 Notificações enviadas:</h4>
-                            <ul className="text-sm text-red-600 dark:text-red-400 space-y-1">
-                              <li>• Rate limiting e tentativas de ataque</li>
-                              <li>• SQL injection e vulnerabilidades</li>
-                              <li>• Backups automáticos e falhas</li>
-                              <li>• Eventos críticos de segurança</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
+                {/* Webhook Sistema/Segurança */}
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 bg-red-500 rounded" />
+                    <Label htmlFor="webhook-sistema" className="font-medium">
+                      Webhook Sistema & Segurança
+                    </Label>
+                    <div className="flex items-center space-x-1 ml-2">
+                      <div className={`w-2 h-2 rounded-full ${webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                      <span className={`text-xs ${webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
+                        {webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'Conectado' : 'Não configurado'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      id="webhook-sistema"
+                      placeholder="https://discord.com/api/webhooks/..."
+                      value={webhookConfigs.sistema}
+                      onChange={(e) => setWebhookConfigs({...webhookConfigs, sistema: e.target.value})}
+                      disabled={webhookLoading}
+                      className="flex-1"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => testWebhook('sistema')}
+                      disabled={testingWebhook === 'sistema' || !webhookConfigs.sistema || webhookLoading}
+                      className="px-3"
+                    >
+                      {testingWebhook === 'sistema' ? 'Testando...' : '🧪 Testar'}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Eventos críticos, alertas de segurança, rate limiting, SQL injection
+                  </p>
+                </div>
 
                 <Separator />
 
