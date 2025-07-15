@@ -707,18 +707,6 @@ export default function MinhaContaPage() {
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="md:col-span-2 space-y-2">
-                    <Label htmlFor="endereco" className="text-gray-700 dark:text-gray-300">Endereço completo</Label>
-                    <Input
-                      id="endereco"
-                      value={editandoPerfil ? dadosEdicao.endereco || '' : perfil.endereco || ''}
-                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, endereco: e.target.value }))}
-                      disabled={!editandoPerfil}
-                      placeholder="Rua, número, complemento"
-                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                    />
-                  </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="cep" className="text-gray-700 dark:text-gray-300">CEP</Label>
                     <Input
@@ -727,6 +715,19 @@ export default function MinhaContaPage() {
                       onChange={handleCEPChange}
                       disabled={!editandoPerfil}
                       placeholder="00000-000"
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Digite o CEP para buscar automaticamente</p>
+                  </div>
+
+                  <div className="md:col-span-2 space-y-2">
+                    <Label htmlFor="endereco" className="text-gray-700 dark:text-gray-300">Endereço completo</Label>
+                    <Input
+                      id="endereco"
+                      value={editandoPerfil ? dadosEdicao.endereco || '' : perfil.endereco || ''}
+                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, endereco: e.target.value }))}
+                      disabled={!editandoPerfil}
+                      placeholder="Rua, número, complemento"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
                   </div>
