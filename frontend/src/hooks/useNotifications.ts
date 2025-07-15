@@ -24,14 +24,20 @@ interface Notificacao {
   status: 'pendente' | 'enviada' | 'lida' | 'descartada'
   usuario_id?: string
   role_alvo?: string
-  referencia_tipo?: string
-  referencia_id?: string
   criada_em: string
+  enviada_em?: string
   lida_em?: string
-  criada_por_usuario?: {
-    nome: string
-    email: string
-  }
+  agendada_para?: string
+}
+
+interface NotificacaoTemplate {
+  template_nome: string
+  template_modulo: string
+  template_categoria: string
+  variaveis: Record<string, any>
+  usuario_id?: string
+  role_alvo?: string
+  enviar_em?: string
 }
 
 interface FiltrosNotificacao {
@@ -47,39 +53,6 @@ interface FiltrosNotificacao {
   limit?: number
 }
 
-interface NovaNotificacao {
-  modulo: 'checklists' | 'metas' | 'contaazul' | 'relatorios' | 'dashboard' | 'sistema'
-  tipo: 'info' | 'alerta' | 'erro' | 'sucesso'
-  prioridade?: 'baixa' | 'media' | 'alta' | 'critica'
-  categoria?: string
-  titulo: string
-  mensagem: string
-  dados_extras?: Record<string, any>
-  acoes?: Array<{
-    label: string
-    action: 'redirect' | 'callback' | 'download'
-    url?: string
-    callback?: string
-  }>
-  canais?: string[]
-  usuario_id?: string
-  role_alvo?: string
-  enviar_em?: string
-  referencia_tipo?: string
-  referencia_id?: string
-  chave_duplicacao?: string
-}
-
-interface NotificacaoTemplate {
-  template_nome: string
-  template_modulo: string
-  template_categoria: string
-  variaveis: Record<string, any>
-  usuario_id?: string
-  role_alvo?: string
-  enviar_em?: string
-}
-
 interface EstatisticasNotificacao {
   total_semana: number
   nao_lidas: number
@@ -88,42 +61,32 @@ interface EstatisticasNotificacao {
   por_modulo: Record<string, number>
 }
 
+interface PaginacaoNotificacao {
+  page: number
+  limit: number
+  total: number
+  total_pages: number
+}
+
 interface UseNotificationsResult {
   // Estados
   notificacoes: Notificacao[]
-  notificacao: Notificacao | null
   loading: boolean
-  creating: boolean
-  updating: boolean
   error: string | null
   
   // Dados auxiliares
   estatisticas: EstatisticasNotificacao | null
-  paginacao: any
-  
-  // Browser notifications
-  permissaoBrowser: NotificationPermission | null
-  suportaBrowser: boolean
+  paginacao: PaginacaoNotificacao | null
   
   // Ações CRUD
   carregarNotificacoes: (filtros?: FiltrosNotificacao) => Promise<void>
-  carregarNotificacao: (id: string) => Promise<void>
-  criarNotificacao: (dados: NovaNotificacao) => Promise<boolean>
-  criarNotificacaoTemplate: (dados: NotificacaoTemplate) => Promise<boolean>
   marcarComoLida: (id: string) => Promise<boolean>
-  marcarTodasComoLidas: (modulo?: string) => Promise<boolean>
+  marcarTodasComoLidas: () => Promise<boolean>
   excluirNotificacao: (id: string) => Promise<boolean>
-  limparAntigas: (dias?: number) => Promise<boolean>
-  
-  // Browser notifications
-  solicitarPermissaoBrowser: () => Promise<boolean>
-  enviarBrowserNotification: (titulo: string, opcoes?: NotificationOptions) => void
   
   // Utilitários
   recarregar: () => Promise<void>
   limparErro: () => void
-  configurarPolling: (intervalo?: number) => void
-  pararPolling: () => void
 }
 
 // =====================================================
@@ -131,79 +94,52 @@ interface UseNotificationsResult {
 // =====================================================
 
 export function useNotifications(): UseNotificationsResult {
+  
+  // =====================================================
+  // ESTADOS
+  // =====================================================
+  
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([])
-  const [notificacao, setNotificacao] = useState<Notificacao | null>(null)
   const [loading, setLoading] = useState(false)
-  const [creating, setCreating] = useState(false)
-  const [updating, setUpdating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [estatisticas, setEstatisticas] = useState<EstatisticasNotificacao | null>(null)
-  const [paginacao, setPaginacao] = useState(null)
-
-  // Browser notifications
-  const [permissaoBrowser, setPermissaoBrowser] = useState<NotificationPermission | null>(null)
-  const [suportaBrowser, setSuportaBrowser] = useState(false)
+  const [paginacao, setPaginacao] = useState<PaginacaoNotificacao | null>(null)
   
-  // Refs para evitar dependências circulares
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
-  const filtrosRef = useRef<FiltrosNotificacao>({})
-  const isPollingRef = useRef(false)
-  const lastLoadRef = useRef<number>(0)
-
+  // Ref para armazenar últimos filtros usados
+  const ultimosFiltrosRef = useRef<FiltrosNotificacao>({})
+  
   // =====================================================
-  // INICIALIZAÇÃO
+  // CARREGAR NOTIFICAÇÕES
   // =====================================================
-
-  useEffect(() => {
-    // Verificar suporte a browser notifications
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      setSuportaBrowser(true)
-      setPermissaoBrowser(Notification.permission)
-    }
-
-    return () => {
-      // Cleanup polling ao desmontar
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-        intervalRef.current = null
-        isPollingRef.current = false
-      }
-    }
-  }, [])
-
-  // =====================================================
-  // FUNÇÃO PRINCIPAL DE CARREGAMENTO (SEM DEPENDÊNCIAS)
-  // =====================================================
-
+  
   const carregarNotificacoes = useCallback(async (filtros: FiltrosNotificacao = {}) => {
-    const now = Date.now()
-    
-    // Debouncing: evitar múltiplas chamadas muito próximas
-    if (now - lastLoadRef.current < 1000) {
-      return
-    }
-    lastLoadRef.current = now
-
     try {
       setLoading(true)
       setError(null)
       
-      // Atualizar filtros atuais
-      filtrosRef.current = filtros
-
+      // Salvar filtros para recarregar
+      ultimosFiltrosRef.current = filtros
+      
       const params = new URLSearchParams()
-      Object.entries(filtros).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          params.append(key, value.toString())
-        }
-      })
-
+      
+      // Adicionar filtros como parâmetros
+      if (filtros.status) params.append('status', filtros.status)
+      if (filtros.modulo) params.append('modulo', filtros.modulo)
+      if (filtros.tipo) params.append('tipo', filtros.tipo)
+      if (filtros.prioridade) params.append('prioridade', filtros.prioridade)
+      if (filtros.data_inicio) params.append('data_inicio', filtros.data_inicio)
+      if (filtros.data_fim) params.append('data_fim', filtros.data_fim)
+      if (filtros.usuario_id) params.append('usuario_id', filtros.usuario_id)
+      if (filtros.apenas_nao_lidas !== undefined) params.append('apenas_nao_lidas', filtros.apenas_nao_lidas.toString())
+      if (filtros.page) params.append('page', filtros.page.toString())
+      if (filtros.limit) params.append('limit', filtros.limit.toString())
+      
       const response = await api.get(`/api/notifications?${params.toString()}`)
-
+      
       if (response.success) {
         setNotificacoes(response.data.notificacoes || [])
-        setEstatisticas(response.data.estatisticas)
-        setPaginacao(response.data.paginacao)
+        setEstatisticas(response.data.estatisticas || null)
+        setPaginacao(response.data.paginacao || null)
       } else {
         setError(response.error || 'Erro ao carregar notificações')
       }
@@ -214,110 +150,30 @@ export function useNotifications(): UseNotificationsResult {
       setLoading(false)
     }
   }, [])
-
+  
   // =====================================================
-  // OUTRAS AÇÕES CRUD
+  // MARCAR COMO LIDA
   // =====================================================
-
-  const carregarNotificacao = useCallback(async (id: string) => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      const response = await api.get(`/api/notifications/${id}`)
-
-      if (response.success) {
-        setNotificacao(response.data)
-      } else {
-        setError(response.error || 'Erro ao carregar notificação')
-      }
-    } catch (err: any) {
-      console.error('Erro ao carregar notificação:', err)
-      setError('Erro ao carregar notificação')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  const criarNotificacao = useCallback(async (dados: NovaNotificacao): Promise<boolean> => {
-    try {
-      setCreating(true)
-      setError(null)
-
-      const response = await api.post('/api/notifications', dados)
-
-      if (response.success) {
-        console.log('📢 Notificação criada com sucesso!')
-        
-        // Enviar browser notification se permitido
-        if (dados.canais?.includes('browser') && permissaoBrowser === 'granted') {
-          enviarBrowserNotification(dados.titulo, {
-            body: dados.mensagem,
-            icon: getIconByType(dados.tipo),
-            tag: response.data?.id,
-            requireInteraction: dados.prioridade === 'critica'
-          })
-        }
-        
-        // Recarregar lista com filtros atuais
-        await carregarNotificacoes(filtrosRef.current)
-        return true
-      } else {
-        setError(response.error || 'Erro ao criar notificação')
-        return false
-      }
-    } catch (err: any) {
-      console.error('Erro ao criar notificação:', err)
-      setError('Erro ao criar notificação')
-      return false
-    } finally {
-      setCreating(false)
-    }
-  }, [carregarNotificacoes, permissaoBrowser])
-
-  const criarNotificacaoTemplate = useCallback(async (dados: NotificacaoTemplate): Promise<boolean> => {
-    try {
-      setCreating(true)
-      setError(null)
-
-      const response = await api.post('/api/notifications?modo=template', dados)
-
-      if (response.success) {
-        console.log('📢 Notificação criada via template!')
-        await carregarNotificacoes(filtrosRef.current)
-        return true
-      } else {
-        setError(response.error || 'Erro ao criar notificação via template')
-        return false
-      }
-    } catch (err: any) {
-      console.error('Erro ao criar notificação via template:', err)
-      setError('Erro ao criar notificação via template')
-      return false
-    } finally {
-      setCreating(false)
-    }
-  }, [carregarNotificacoes])
-
+  
   const marcarComoLida = useCallback(async (id: string): Promise<boolean> => {
     try {
-      setUpdating(true)
-      setError(null)
-
-      const response = await api.put(`/api/notifications/${id}`, {
-        status: 'lida'
-      })
-
+      const response = await api.put(`/api/notifications/${id}`, { status: 'lida' })
+      
       if (response.success) {
-        // Atualizar na lista local
-        setNotificacoes(prev => prev.map(n => 
-          n.id === id ? { ...n, status: 'lida', lida_em: new Date().toISOString() } : n
-        ))
+        // Atualizar estado local
+        setNotificacoes(prev => 
+          prev.map(notif => 
+            notif.id === id 
+              ? { ...notif, status: 'lida' as const, lida_em: new Date().toISOString() }
+              : notif
+          )
+        )
         
-        // Atualizar notificação individual se carregada
-        if (notificacao?.id === id) {
-          setNotificacao(prev => prev ? { ...prev, status: 'lida', lida_em: new Date().toISOString() } : null)
-        }
+        // Atualizar estatísticas
+        setEstatisticas(prev => prev ? {
+          ...prev,
+          nao_lidas: Math.max(0, prev.nao_lidas - 1)
+        } : null)
         
         return true
       } else {
@@ -328,22 +184,33 @@ export function useNotifications(): UseNotificationsResult {
       console.error('Erro ao marcar como lida:', err)
       setError('Erro ao marcar como lida')
       return false
-    } finally {
-      setUpdating(false)
     }
-  }, [notificacao])
-
-  const marcarTodasComoLidas = useCallback(async (modulo?: string): Promise<boolean> => {
+  }, [])
+  
+  // =====================================================
+  // MARCAR TODAS COMO LIDAS
+  // =====================================================
+  
+  const marcarTodasComoLidas = useCallback(async (): Promise<boolean> => {
     try {
-      setUpdating(true)
-      setError(null)
-
-      const params = modulo ? `?action=mark_all_read&modulo=${modulo}` : '?action=mark_all_read'
-      const response = await api.put(`/api/notifications/bulk${params}`)
-
+      const response = await api.put('/api/notifications/read-all')
+      
       if (response.success) {
-        console.log(`📱 ${response.count} notificações marcadas como lidas`)
-        await carregarNotificacoes(filtrosRef.current)
+        // Atualizar estado local
+        setNotificacoes(prev => 
+          prev.map(notif => 
+            notif.status !== 'lida' 
+              ? { ...notif, status: 'lida' as const, lida_em: new Date().toISOString() }
+              : notif
+          )
+        )
+        
+        // Atualizar estatísticas
+        setEstatisticas(prev => prev ? {
+          ...prev,
+          nao_lidas: 0
+        } : null)
+        
         return true
       } else {
         setError(response.error || 'Erro ao marcar todas como lidas')
@@ -353,25 +220,28 @@ export function useNotifications(): UseNotificationsResult {
       console.error('Erro ao marcar todas como lidas:', err)
       setError('Erro ao marcar todas como lidas')
       return false
-    } finally {
-      setUpdating(false)
     }
-  }, [carregarNotificacoes])
-
+  }, [])
+  
+  // =====================================================
+  // EXCLUIR NOTIFICAÇÃO
+  // =====================================================
+  
   const excluirNotificacao = useCallback(async (id: string): Promise<boolean> => {
     try {
-      setUpdating(true)
-      setError(null)
-
       const response = await api.delete(`/api/notifications/${id}`)
-
+      
       if (response.success) {
-        // Remover da lista local
-        setNotificacoes(prev => prev.filter(n => n.id !== id))
+        // Atualizar estado local
+        setNotificacoes(prev => prev.filter(notif => notif.id !== id))
         
-        // Limpar notificação individual se era a atual
-        if (notificacao?.id === id) {
-          setNotificacao(null)
+        // Atualizar estatísticas se era não lida
+        const notificacao = notificacoes.find(n => n.id === id)
+        if (notificacao && ['pendente', 'enviada'].includes(notificacao.status)) {
+          setEstatisticas(prev => prev ? {
+            ...prev,
+            nao_lidas: Math.max(0, prev.nao_lidas - 1)
+          } : null)
         }
         
         return true
@@ -383,178 +253,48 @@ export function useNotifications(): UseNotificationsResult {
       console.error('Erro ao excluir notificação:', err)
       setError('Erro ao excluir notificação')
       return false
-    } finally {
-      setUpdating(false)
     }
-  }, [notificacao])
-
-  const limparAntigas = useCallback(async (dias: number = 7): Promise<boolean> => {
-    try {
-      setUpdating(true)
-      setError(null)
-
-      const response = await api.put(`/api/notifications/bulk?action=clear_old&dias=${dias}`)
-
-      if (response.success) {
-        console.log(`🧹 ${response.count} notificações antigas removidas`)
-        await carregarNotificacoes(filtrosRef.current)
-        return true
-      } else {
-        setError(response.error || 'Erro ao limpar notificações antigas')
-        return false
-      }
-    } catch (err: any) {
-      console.error('Erro ao limpar notificações antigas:', err)
-      setError('Erro ao limpar notificações antigas')
-      return false
-    } finally {
-      setUpdating(false)
-    }
-  }, [carregarNotificacoes])
-
+  }, [notificacoes])
+  
   // =====================================================
-  // BROWSER NOTIFICATIONS
+  // RECARREGAR
   // =====================================================
-
-  const solicitarPermissaoBrowser = useCallback(async (): Promise<boolean> => {
-    if (!suportaBrowser) {
-      console.warn('Browser não suporta notificações')
-      return false
-    }
-
-    try {
-      const permission = await Notification.requestPermission()
-      setPermissaoBrowser(permission)
-      
-      if (permission === 'granted') {
-        console.log('✅ Permissão para notificações concedida')
-        return true
-      } else {
-        console.log('❌ Permissão para notificações negada')
-        return false
-      }
-    } catch (error) {
-      console.error('Erro ao solicitar permissão:', error)
-      return false
-    }
-  }, [suportaBrowser])
-
-  const enviarBrowserNotification = useCallback((titulo: string, opcoes?: NotificationOptions) => {
-    if (!suportaBrowser || permissaoBrowser !== 'granted') {
-      console.warn('Não é possível enviar notificação browser')
-      return
-    }
-
-    try {
-      const notification = new Notification(titulo, {
-        icon: '/favicon.ico',
-        badge: '/favicon.ico',
-        ...opcoes
-      })
-
-      // Auto-close após 5 segundos se não for crítica
-      if (!opcoes?.requireInteraction) {
-        setTimeout(() => {
-          notification.close()
-        }, 5000)
-      }
-
-      // Eventos
-      notification.onclick = () => {
-        window.focus()
-        notification.close()
-        
-        // Se tem tag (ID da notificação), marcar como lida
-        if (opcoes?.tag) {
-          marcarComoLida(opcoes.tag)
-        }
-      }
-
-    } catch (error) {
-      console.error('Erro ao enviar notificação browser:', error)
-    }
-  }, [suportaBrowser, permissaoBrowser, marcarComoLida])
-
-  // =====================================================
-  // POLLING OTIMIZADO
-  // =====================================================
-
-  const configurarPolling = useCallback((intervalo: number = 30000) => {
-    // Evitar múltiplas configurações
-    if (isPollingRef.current) {
-      return
-    }
-
-    // Parar polling anterior se existir
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-    }
-
-    // Configurar novo polling
-    intervalRef.current = setInterval(() => {
-      // Só fazer polling se não estiver carregando
-      if (!loading) {
-        carregarNotificacoes({ ...filtrosRef.current, apenas_nao_lidas: true })
-      }
-    }, intervalo)
-
-    isPollingRef.current = true
-    console.log(`🔄 Polling de notificações configurado: ${intervalo}ms`)
-  }, [carregarNotificacoes, loading])
-
-  const pararPolling = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-      intervalRef.current = null
-      isPollingRef.current = false
-      console.log('⏹️ Polling de notificações parado')
-    }
-  }, [])
-
+  
   const recarregar = useCallback(async () => {
-    await carregarNotificacoes(filtrosRef.current)
+    await carregarNotificacoes(ultimosFiltrosRef.current)
   }, [carregarNotificacoes])
-
+  
+  // =====================================================
+  // LIMPAR ERRO
+  // =====================================================
+  
   const limparErro = useCallback(() => {
     setError(null)
   }, [])
-
+  
+  // =====================================================
+  // RETORNO
+  // =====================================================
+  
   return {
     // Estados
     notificacoes,
-    notificacao,
     loading,
-    creating,
-    updating,
     error,
     
     // Dados auxiliares
     estatisticas,
     paginacao,
     
-    // Browser notifications
-    permissaoBrowser,
-    suportaBrowser,
-    
     // Ações CRUD
     carregarNotificacoes,
-    carregarNotificacao,
-    criarNotificacao,
-    criarNotificacaoTemplate,
     marcarComoLida,
     marcarTodasComoLidas,
     excluirNotificacao,
-    limparAntigas,
-    
-    // Browser notifications
-    solicitarPermissaoBrowser,
-    enviarBrowserNotification,
     
     // Utilitários
     recarregar,
-    limparErro,
-    configurarPolling,
-    pararPolling
+    limparErro
   }
 }
 
@@ -564,39 +304,29 @@ export function useNotifications(): UseNotificationsResult {
 
 export function getColorByType(tipo: string): string {
   const colors = {
-    'info': 'blue',
-    'alerta': 'yellow',
-    'erro': 'red',
-    'sucesso': 'green'
+    'info': 'text-blue-600 dark:text-blue-400',
+    'alerta': 'text-yellow-600 dark:text-yellow-400',
+    'erro': 'text-red-600 dark:text-red-400',
+    'sucesso': 'text-green-600 dark:text-green-400'
   }
-  return colors[tipo as keyof typeof colors] || 'gray'
+  return colors[tipo as keyof typeof colors] || colors.info
 }
 
 export function getColorByPriority(prioridade: string): string {
   const colors = {
-    'baixa': 'gray',
-    'media': 'blue',
-    'alta': 'yellow',
-    'critica': 'red'
+    'baixa': 'text-gray-600 dark:text-gray-400',
+    'media': 'text-blue-600 dark:text-blue-400',
+    'alta': 'text-orange-600 dark:text-orange-400',
+    'critica': 'text-red-600 dark:text-red-400'
   }
-  return colors[prioridade as keyof typeof colors] || 'gray'
+  return colors[prioridade as keyof typeof colors] || colors.media
 }
 
-export function getIconByType(tipo: string): string {
-  const icons = {
-    'info': '/favicon.ico',
-    'alerta': '/favicon.ico',
-    'erro': '/favicon.ico',
-    'sucesso': '/favicon.ico'
-  }
-  return icons[tipo as keyof typeof icons] || '/favicon.ico'
-}
-
-export function formatarTempo(data: string): string {
+export function formatarTempo(timestamp: string): string {
   const now = new Date()
-  const notificationDate = new Date(data)
-  const diffInSeconds = Math.floor((now.getTime() - notificationDate.getTime()) / 1000)
-
+  const date = new Date(timestamp)
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+  
   if (diffInSeconds < 60) {
     return 'agora'
   } else if (diffInSeconds < 3600) {
@@ -608,41 +338,5 @@ export function formatarTempo(data: string): string {
   } else {
     const days = Math.floor(diffInSeconds / 86400)
     return `${days}d atrás`
-  }
-}
-
-// =====================================================
-// HOOKS AUXILIARES
-// =====================================================
-
-export function useNotificationSettings() {
-  const [configuracoes, setConfiguracoes] = useState({
-    ativo: true,
-    browser: true,
-    whatsapp: false,
-    email: false,
-    horario_inicio: '08:00',
-    horario_fim: '22:00',
-    por_modulo: {
-      checklists: { ativo: true, tipos: ['alerta', 'info'] },
-      metas: { ativo: true, tipos: ['info'] },
-      contaazul: { ativo: true, tipos: ['erro'] }
-    }
-  })
-
-  const atualizarConfiguracao = useCallback((campo: string, valor: any) => {
-    setConfiguracoes(prev => ({ ...prev, [campo]: valor }))
-  }, [])
-
-  const salvarConfiguracoes = useCallback(async () => {
-    // TODO: Implementar API para salvar preferências
-    console.log('💾 Configurações salvas:', configuracoes)
-    return true
-  }, [configuracoes])
-
-  return {
-    configuracoes,
-    atualizarConfiguracao,
-    salvarConfiguracoes
   }
 } 
