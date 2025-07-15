@@ -121,6 +121,7 @@ export default function ReceitasPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [loadingData, setLoadingData] = useState(true)
   const [insumoEditando, setInsumoEditando] = useState<Insumo | null>(null)
+  const [modalCriarInsumo, setModalCriarInsumo] = useState(false)
   const [modalEditarInsumo, setModalEditarInsumo] = useState(false)
 
   // Estados para Receitas
@@ -564,6 +565,20 @@ export default function ReceitasPage() {
     )
   }
 
+  // FUNÇÕES PARA INSUMOS
+
+  const abrirModalCriarInsumo = () => {
+    setNovoInsumo({
+      codigo: gerarProximoCodigoInsumo(), // Gerar próximo código automaticamente
+      nome: '',
+      unidade_medida: 'g',
+      categoria: 'cozinha',
+      tipo_local: tipoLocalInsumos,
+      observacoes: ''
+    })
+    setModalCriarInsumo(true)
+  }
+
   // FUNÇÕES PARA RECEITAS
 
   const abrirModalCriarReceita = () => {
@@ -995,18 +1010,27 @@ export default function ReceitasPage() {
             {/* Lista de Insumos */}
             <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-                  <Package className="w-5 h-5" />
-                  Lista de Insumos
-                  {insumosChefes.length > 0 && (
-                    <div className="flex items-center gap-2 ml-4">
-                      <Crown className="w-4 h-4 text-yellow-500" />
-                      <Badge variant="outline" className="border-yellow-400 text-yellow-700 dark:text-yellow-300">
-                        {insumosChefes.length} Insumo{insumosChefes.length !== 1 ? 's' : ''} Chefe{insumosChefes.length !== 1 ? 's' : ''}
-                      </Badge>
-                    </div>
-                  )}
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                    <Package className="w-5 h-5" />
+                    Lista de Insumos
+                    {insumosChefes.length > 0 && (
+                      <div className="flex items-center gap-2 ml-4">
+                        <Crown className="w-4 h-4 text-yellow-500" />
+                        <Badge variant="outline" className="border-yellow-400 text-yellow-700 dark:text-yellow-300">
+                          {insumosChefes.length} Insumo{insumosChefes.length !== 1 ? 's' : ''} Chefe{insumosChefes.length !== 1 ? 's' : ''}
+                        </Badge>
+                      </div>
+                    )}
+                  </CardTitle>
+                  <Button
+                    onClick={abrirModalCriarInsumo}
+                    className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Novo Insumo
+                  </Button>
+                </div>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <Input
@@ -2160,6 +2184,175 @@ export default function ReceitasPage() {
                   Salvar Alterações
                 </Button>
               </div>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal de Criação de Insumo */}
+        <Dialog open={modalCriarInsumo} onOpenChange={setModalCriarInsumo}>
+          <DialogContent className="max-w-2xl bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                <Plus className="w-5 h-5" />
+                Novo Insumo
+              </DialogTitle>
+              <DialogDescription className="text-gray-600 dark:text-gray-400">
+                Adicione um novo insumo ao sistema.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-gray-700 dark:text-gray-300">
+                    Código * 
+                    <span className="text-xs text-blue-600 dark:text-blue-400 ml-1">(auto)</span>
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={novoInsumo.codigo}
+                      onChange={(e) => setNovoInsumo(prev => ({ ...prev, codigo: e.target.value }))}
+                      placeholder="Ex: i0001"
+                      disabled={true}
+                      className="bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-300 cursor-not-allowed"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setNovoInsumo(prev => ({ ...prev, codigo: gerarProximoCodigoInsumo() }))}
+                      className="shrink-0 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-gray-700 dark:text-gray-300">Nome *</Label>
+                  <Input
+                    value={novoInsumo.nome}
+                    onChange={(e) => setNovoInsumo(prev => ({ ...prev, nome: e.target.value }))}
+                    placeholder="Ex: Frango à passarinho"
+                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-gray-700 dark:text-gray-300">Categoria</Label>
+                  <Select 
+                    value={novoInsumo.categoria} 
+                    onValueChange={(value) => setNovoInsumo(prev => ({ ...prev, categoria: value }))}
+                  >
+                    <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                      <SelectItem value="cozinha">Cozinha</SelectItem>
+                      <SelectItem value="bar">Bar</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-gray-700 dark:text-gray-300">Tipo Local</Label>
+                  <Select 
+                    value={novoInsumo.tipo_local} 
+                    onValueChange={(value) => setNovoInsumo(prev => ({ ...prev, tipo_local: value as 'bar' | 'cozinha' }))}
+                  >
+                    <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                      <SelectItem value="cozinha">👨‍🍳 Cozinha</SelectItem>
+                      <SelectItem value="bar">🍺 Bar</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-gray-700 dark:text-gray-300">Unidade de Medida</Label>
+                  <Select 
+                    value={novoInsumo.unidade_medida} 
+                    onValueChange={(value) => setNovoInsumo(prev => ({ ...prev, unidade_medida: value }))}
+                  >
+                    <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                      <SelectItem value="g">Gramas (g)</SelectItem>
+                      <SelectItem value="kg">Quilogramas (kg)</SelectItem>
+                      <SelectItem value="ml">Mililitros (ml)</SelectItem>
+                      <SelectItem value="l">Litros (l)</SelectItem>
+                      <SelectItem value="unid">Unidades</SelectItem>
+                      <SelectItem value="pct">Pacotes</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-gray-700 dark:text-gray-300">Custo Unitário (R$)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={novoInsumo.custo_unitario || ''}
+                    onChange={(e) => setNovoInsumo(prev => ({ ...prev, custo_unitario: parseFloat(e.target.value) || 0 }))}
+                    placeholder="0,00"
+                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-gray-700 dark:text-gray-300">Observações</Label>
+                <Textarea
+                  value={novoInsumo.observacoes}
+                  onChange={(e) => setNovoInsumo(prev => ({ ...prev, observacoes: e.target.value }))}
+                  placeholder="Observações adicionais..."
+                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                onClick={() => {
+                  setModalCriarInsumo(false)
+                  setNovoInsumo({
+                    codigo: 'i0001',
+                    nome: '',
+                    unidade_medida: 'g',
+                    categoria: 'cozinha',
+                    tipo_local: 'cozinha',
+                    observacoes: ''
+                  })
+                }}
+                variant="outline"
+                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={async () => {
+                  await salvarInsumo()
+                  setModalCriarInsumo(false)
+                }}
+                disabled={!novoInsumo.nome || isLoading}
+                className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    Salvando...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Salvar Insumo
+                  </>
+                )}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
