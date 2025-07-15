@@ -401,26 +401,26 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl p-0 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+      <DialogContent className="max-w-2xl sm:max-w-lg md:max-w-2xl p-0 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mx-4 sm:mx-0">
         <div className="command-palette">
           {/* Header com busca */}
           <div className="flex items-center gap-3 p-4 border-b border-gray-200 dark:border-gray-700">
-            <Search className="w-5 h-5 text-gray-400" />
+            <Search className="w-5 h-5 text-gray-400 flex-shrink-0" />
             <Input
               placeholder="Digite um comando ou navegue..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="border-0 bg-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-0 text-lg"
+              className="border-0 bg-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-0 text-lg flex-1"
               autoFocus
             />
-            <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+            <div className="hidden sm:flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
               <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">↵</kbd>
               <span>selecionar</span>
             </div>
           </div>
 
           {/* Lista de comandos */}
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-96 sm:max-h-80 md:max-h-96 overflow-y-auto">
             {groupedCommands.length === 0 ? (
               <div className="p-8 text-center text-gray-500 dark:text-gray-400">
                 <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
@@ -450,10 +450,10 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                       <div
                         key={command.id}
                         className={`
-                          flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors
+                          flex items-center gap-3 px-4 py-3 sm:py-2 cursor-pointer transition-colors touch-manipulation
                           ${isSelected 
                             ? 'bg-blue-50 dark:bg-blue-900/20 border-r-2 border-blue-500' 
-                            : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                            : 'hover:bg-gray-50 dark:hover:bg-gray-700/50 active:bg-gray-100 dark:active:bg-gray-600'
                           }
                           ${isExecuting ? 'opacity-50 cursor-not-allowed' : ''}
                         `}
@@ -489,7 +489,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           </div>
 
           {/* Footer com shortcuts */}
-          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+          <div className="hidden sm:flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
             <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
               <div className="flex items-center gap-1">
                 <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs">↑↓</kbd>

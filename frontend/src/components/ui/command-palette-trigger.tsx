@@ -86,25 +86,30 @@ export function CommandPaletteTrigger({
   )
 }
 
-// Versão compacta apenas com ícone
+// Versão compacta apenas com ícone - otimizada para mobile
 export function CommandPaletteIconTrigger({ 
   className = '',
-  title = "Buscar (Cmd+K)"
+  title = "Buscar"
 }: { 
   className?: string
   title?: string 
 }) {
   const { openPalette } = useCommandPalette()
 
+  const handleClick = () => {
+    console.log('🔍 CommandPaletteIconTrigger clicked (mobile)')
+    openPalette()
+  }
+
   return (
     <Button
       variant="ghost"
       size="sm"
-      onClick={openPalette}
-      className={`w-8 h-8 p-0 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white ${className}`}
+      onClick={handleClick}
+      className={`w-10 h-10 p-0 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors rounded-lg ${className}`}
       title={title}
     >
-      <Search className="w-4 h-4" />
+      <Search className="w-5 h-5" />
     </Button>
   )
 }

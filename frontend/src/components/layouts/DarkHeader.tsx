@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTheme } from '@/contexts/ThemeContext'
 import { CommandPaletteSearchPlaceholder, CommandPaletteIconTrigger } from '@/components/ui/command-palette-trigger'
+import NotificationCenter from '@/components/NotificationCenter'
 
 // Mapeamento de rotas para breadcrumbs
 const routeMapping: Record<string, { name: string; icon?: React.ComponentType<{ className?: string }> }> = {
@@ -93,11 +94,9 @@ export function DarkHeader() {
   
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showBarMenu, setShowBarMenu] = useState(false)
-  const [showNotifications, setShowNotifications] = useState(false)
   
   const userMenuRef = useRef<HTMLDivElement>(null)
   const barMenuRef = useRef<HTMLDivElement>(null)
-  const notificationRef = useRef<HTMLDivElement>(null)
 
   const breadcrumbs = generateBreadcrumbs(pathname)
 
@@ -112,9 +111,7 @@ export function DarkHeader() {
       if (barMenuRef.current && !barMenuRef.current.contains(event.target as Node)) {
         setShowBarMenu(false)
       }
-      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
-        setShowNotifications(false)
-      }
+
     }
 
     document.addEventListener('mousedown', handleClickOutside)
@@ -137,32 +134,32 @@ export function DarkHeader() {
     setShowBarMenu(false)
   }
 
-  // Mock notifications
-  const notifications = [
-    {
-      id: 1,
-      title: 'Checklist de Abertura',
-      message: 'Aguardando preenchimento por João Silva',
-      time: '5 min atrás',
-      unread: true
-    },
-    {
-      id: 2,
-      title: 'Sincronização ContaAzul',
-      message: 'Dados atualizados com sucesso',
-      time: '1 hora atrás',
-      unread: false
-    },
-    {
-      id: 3,
-      title: 'Nova Reserva',
-      message: 'Mesa para 4 pessoas às 20:00',
-      time: '2 horas atrás',
-      unread: true
-    }
-  ]
+  // Mock notifications - REMOVIDO
+  // const notifications = [
+  //   {
+  //     id: 1,
+  //     title: 'Checklist de Abertura',
+  //     message: 'Aguardando preenchimento por João Silva',
+  //     time: '5 min atrás',
+  //     unread: true
+  //   },
+  //   {
+  //     id: 2,
+  //     title: 'Sincronização ContaAzul',
+  //     message: 'Dados atualizados com sucesso',
+  //     time: '1 hora atrás',
+  //     unread: false
+  //   },
+  //   {
+  //     id: 3,
+  //     title: 'Nova Reserva',
+  //     message: 'Mesa para 4 pessoas às 20:00',
+  //     time: '2 horas atrás',
+  //     unread: true
+  //   }
+  // ]
 
-  const unreadCount = notifications.filter(n => n.unread).length
+  // const unreadCount = notifications.filter(n => n.unread).length
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 dark:bg-gray-900/80 dark:border-gray-800">
@@ -210,63 +207,13 @@ export function DarkHeader() {
           </div>
           
           {/* Notificações */}
-          <div className="relative" ref={notificationRef}>
-            <button
-              onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-            >
-              <Bell className="w-4 h-4" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
-
-            {/* Dropdown de Notificações */}
-            {showNotifications && (
-              <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 animate-slide-in-from-top">
-                <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
-                  <h3 className="font-medium text-gray-900 dark:text-white">Notificações</h3>
-                </div>
-                <div className="max-h-64 overflow-y-auto">
-                  {notifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-l-4 ${
-                        notification.unread ? 'border-l-blue-500 bg-blue-50/50 dark:bg-blue-900/20' : 'border-l-transparent'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                            {notification.title}
-                          </h4>
-                          <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
-                            {notification.message}
-                          </p>
-                          <span className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                            {notification.time}
-                          </span>
-                        </div>
-                        {notification.unread && (
-                          <div className="w-2 h-2 bg-blue-500 rounded-full mt-1"></div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-700">
-                  <Link
-                    href="/notifications"
-                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-                    onClick={() => setShowNotifications(false)}
-                  >
-                    Ver todas as notificações
-                  </Link>
-                </div>
-              </div>
-            )}
+          <div className="relative">
+            <NotificationCenter 
+              className="flex items-center gap-2 px-2 py-1 rounded-md text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              showUnreadCount={true}
+              autoRefresh={true}
+              refreshInterval={30000}
+            />
           </div>
 
           {/* Seletor de Bar */}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useNotifications, getColorByType, getColorByPriority, formatarTempo } from '@/hooks/useNotifications'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -27,7 +28,8 @@ import {
   ExternalLink,
   Trash2,
   Eye,
-  MoreVertical
+  MoreVertical,
+  MousePointer
 } from 'lucide-react'
 
 // =====================================================
@@ -68,6 +70,8 @@ export default function NotificationCenter({
     limparErro
   } = useNotifications()
 
+  const router = useRouter()
+
   // =====================================================
   // EFEITOS
   // =====================================================
@@ -105,15 +109,27 @@ export default function NotificationCenter({
       await marcarComoLida(notificacao.id)
     }
 
-    // Executar ação se tiver
-    if (notificacao.acoes && notificacao.acoes.length > 0) {
-      const acao = notificacao.acoes[0] // Primeira ação por padrão
+    // Executar ação se tiver - verificar tanto no campo acoes quanto no campo dados
+    let acoes = notificacao.acoes || []
+    
+    // Se não há ações diretas, verificar no campo dados
+    if ((!acoes || acoes.length === 0) && notificacao.dados) {
+      acoes = notificacao.dados.acoes || []
+    }
+
+    if (acoes && acoes.length > 0) {
+      const acao = acoes[0] // Primeira ação por padrão
       
       if (acao.action === 'redirect' && acao.url) {
-        window.location.href = acao.url
+        // Usar router do Next.js para redirecionamento
+        router.push(acao.url)
       } else if (acao.action === 'callback' && acao.callback) {
         // Executar callback personalizado
-        eval(acao.callback)
+        try {
+          eval(acao.callback)
+        } catch (error) {
+          console.error('Erro ao executar callback da notificação:', error)
+        }
       }
     }
   }
@@ -157,78 +173,102 @@ export default function NotificationCenter({
     const iconProps = { className: "w-4 h-4" }
     
     switch (tipo) {
-      case 'info': return <Info {...iconProps} className="w-4 h-4 text-blue-500" />
-      case 'alerta': return <AlertTriangle {...iconProps} className="w-4 h-4 text-yellow-500" />
-      case 'erro': return <XCircle {...iconProps} className="w-4 h-4 text-red-500" />
-      case 'sucesso': return <CheckCircle {...iconProps} className="w-4 h-4 text-green-500" />
+      case 'info': 
+      case 'sistema': 
+        return <Info {...iconProps} className="w-4 h-4 text-blue-500" />
+      case 'alerta': 
+      case 'lembrete': 
+        return <AlertTriangle {...iconProps} className="w-4 h-4 text-yellow-500" />
+      case 'erro': 
+      case 'problema': 
+        return <XCircle {...iconProps} className="w-4 h-4 text-red-500" />
+      case 'sucesso': 
+      case 'conclusao': 
+        return <CheckCircle {...iconProps} className="w-4 h-4 text-green-500" />
       default: return <Info {...iconProps} />
     }
   }
 
-  const NotificationItem = ({ notificacao }: { notificacao: any }) => (
-    <div 
-      className={`p-3 border-b hover:bg-gray-50 cursor-pointer transition-colors ${
-        notificacao.status === 'lida' ? 'opacity-60' : ''
-      }`}
-      onClick={() => handleNotificationClick(notificacao)}
-    >
-      <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 mt-0.5">
-          <IconeNotificacao tipo={notificacao.tipo} />
-        </div>
-        
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <h4 className="text-sm font-medium text-gray-900 truncate">
-              {notificacao.titulo}
-            </h4>
-            <div className="flex items-center gap-1 flex-shrink-0">
-              <Badge 
-                variant="outline" 
-                className={`text-xs ${getColorByPriority(notificacao.prioridade)}`}
-              >
-                {notificacao.prioridade}
-              </Badge>
-              {notificacao.status !== 'lida' && (
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              )}
-            </div>
+  const NotificationItem = ({ notificacao }: { notificacao: any }) => {
+    // Verificar se há ações disponíveis
+    const acoes = notificacao.acoes || notificacao.dados?.acoes || []
+    const temAcoes = acoes.length > 0
+    
+    return (
+      <div 
+        className={`p-3 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors group relative ${
+          notificacao.status === 'lida' ? 'opacity-60' : ''
+        }`}
+        onClick={() => handleNotificationClick(notificacao)}
+      >
+        <div className="flex items-start gap-3">
+          <div className="flex-shrink-0 mt-0.5">
+            <IconeNotificacao tipo={notificacao.tipo} />
           </div>
           
-          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-            {notificacao.mensagem}
-          </p>
-          
-          <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              <Badge variant="secondary" className="text-xs">
-                {notificacao.modulo}
-              </Badge>
-              <span>•</span>
-              <span>{formatarTempo(notificacao.criada_em)}</span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                {notificacao.titulo}
+              </h4>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <Badge 
+                  variant="outline" 
+                  className={`text-xs ${getColorByPriority(notificacao.dados?.prioridade || 'media')}`}
+                >
+                  {notificacao.dados?.prioridade || 'media'}
+                </Badge>
+                {notificacao.status !== 'lida' && (
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                )}
+              </div>
             </div>
             
-            {notificacao.acoes && notificacao.acoes.length > 0 && (
-              <ExternalLink className="w-3 h-3 text-gray-400" />
-            )}
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+              {notificacao.mensagem}
+            </p>
+            
+            <div className="flex items-center justify-between mt-2">
+              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-500">
+                <Badge variant="secondary" className="text-xs">
+                  {notificacao.dados?.modulo || 'sistema'}
+                </Badge>
+                <span>•</span>
+                <span>{formatarTempo(notificacao.criada_em)}</span>
+              </div>
+              
+              <div className="flex items-center gap-1">
+                {temAcoes && (
+                  <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
+                    <MousePointer className="w-3 h-3" />
+                    <span>Clique para acessar</span>
+                  </div>
+                )}
+                
+                {temAcoes && (
+                  <ExternalLink className="w-3 h-3 text-gray-400 dark:text-gray-500" />
+                )}
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex-shrink-0">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={(e) => {
+                e.stopPropagation()
+                excluirNotificacao(notificacao.id)
+              }}
+            >
+              <X className="w-3 h-3" />
+            </Button>
           </div>
         </div>
-        
-        <div className="flex-shrink-0">
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={(e) => {
-              e.stopPropagation()
-              excluirNotificacao(notificacao.id)
-            }}
-          >
-            <X className="w-3 h-3" />
-          </Button>
-        </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   const EmptyState = () => (
     <div className="text-center py-8">
