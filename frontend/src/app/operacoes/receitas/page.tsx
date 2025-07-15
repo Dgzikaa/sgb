@@ -366,58 +366,7 @@ export default function ReceitasPage() {
     }
   }, [receitas, gerarProximoCodigoReceita])
 
-  const salvarInsumo = async () => {
-    if (!novoInsumo.codigo || !novoInsumo.nome) {
-      toast.error('Erro', 'Código e nome são obrigatórios')
-      return
-    }
 
-    setIsLoading(true)
-    try {
-      const response = await fetch('/api/receitas/insumos', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          codigo: novoInsumo.codigo,
-          nome: novoInsumo.nome,
-          categoria: novoInsumo.categoria,
-          tipo_local: novoInsumo.tipo_local,
-          custo_unitario: novoInsumo.custo_unitario || 0,
-          unidade_medida: novoInsumo.unidade_medida,
-          observacoes: novoInsumo.observacoes || '',
-          bar_id: selectedBar?.id
-        })
-      })
-      
-      const data = await response.json()
-      
-      if (data.success) {
-        toast.success('Sucesso!', 'Insumo cadastrado com sucesso')
-        
-        // Reset form
-        setNovoInsumo({
-          codigo: gerarProximoCodigoInsumo(), // Gerar próximo código automaticamente
-          nome: '',
-          unidade_medida: 'g',
-          categoria: 'cozinha',
-          tipo_local: tipoLocalInsumos,
-          observacoes: ''
-        })
-        
-        // Recarregar insumos
-        await carregarInsumos()
-      } else {
-        toast.error('Erro', data.error || 'Falha ao salvar insumo')
-      }
-    } catch (error) {
-      console.error('❌ Erro ao salvar insumo:', error)
-      toast.error('Erro', 'Falha ao salvar insumo')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const abrirModalEditarInsumo = (insumo: Insumo) => {
     setInsumoEditando(insumo)
@@ -470,6 +419,67 @@ export default function ReceitasPage() {
     } catch (error) {
       console.error('Erro ao salvar edição do insumo:', error)
       toast.error('Erro ao atualizar insumo. Tente novamente.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const salvarCriacaoInsumo = async () => {
+    if (!novoInsumo.codigo || !novoInsumo.nome.trim()) {
+      toast.error('Código e nome são obrigatórios')
+      return
+    }
+
+    try {
+      setIsLoading(true)
+      
+      const response = await fetch('/api/receitas/insumos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          codigo: novoInsumo.codigo,
+          nome: novoInsumo.nome.trim(),
+          categoria: novoInsumo.categoria,
+          tipo_local: novoInsumo.tipo_local,
+          custo_unitario: novoInsumo.custo_unitario || 0,
+          unidade_medida: novoInsumo.unidade_medida,
+          observacoes: novoInsumo.observacoes?.trim() || null,
+          bar_id: selectedBar?.id
+        })
+      })
+      
+      if (!response.ok) {
+        throw new Error('Erro ao criar insumo')
+      }
+
+      const data = await response.json()
+      
+      if (data.success) {
+        toast.success('Insumo criado com sucesso!')
+        
+        // Recarregar insumos
+        await carregarInsumos()
+        
+        // Fechar modal
+        setModalCriarInsumo(false)
+        
+        // Reset form para próximo uso
+        setNovoInsumo({
+          codigo: gerarProximoCodigoInsumo(),
+          nome: '',
+          unidade_medida: 'g',
+          categoria: 'cozinha',
+          tipo_local: tipoLocalInsumos,
+          observacoes: ''
+        })
+      } else {
+        toast.error(data.error || 'Falha ao criar insumo')
+      }
+    } catch (error) {
+      console.error('Erro ao criar insumo:', error)
+      toast.error('Erro ao criar insumo. Tente novamente.')
     } finally {
       setIsLoading(false)
     }
@@ -863,150 +873,6 @@ export default function ReceitasPage() {
               </div>
             </div>
             
-            {/* Formulário de Novo Insumo */}
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-                  <Plus className="w-5 h-5" />
-                  Novo Insumo ({tipoLocalInsumos === 'bar' ? '🍺 Bar' : '👨‍🍳 Cozinha'})
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-gray-700 dark:text-gray-300">
-                      Código * 
-                      <span className="text-xs text-blue-600 dark:text-blue-400 ml-1">(auto)</span>
-                    </Label>
-                    <div className="flex gap-2">
-                      <Input
-                        value={novoInsumo.codigo}
-                        onChange={(e) => setNovoInsumo(prev => ({ ...prev, codigo: e.target.value }))}
-                        placeholder="Ex: i0001"
-                        disabled={true}
-                        className="bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-300 cursor-not-allowed"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setNovoInsumo(prev => ({ ...prev, codigo: gerarProximoCodigoInsumo() }))}
-                        className="px-3 shrink-0"
-                        title="Gerar próximo código"
-                      >
-                        <RefreshCw className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label className="text-gray-700 dark:text-gray-300">Nome *</Label>
-                    <Input
-                      value={novoInsumo.nome}
-                      onChange={(e) => setNovoInsumo(prev => ({ ...prev, nome: e.target.value }))}
-                      placeholder="Ex: Frango a passarinho"
-                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="text-gray-700 dark:text-gray-300">Categoria</Label>
-                    <Select 
-                      value={novoInsumo.categoria} 
-                      onValueChange={(value) => setNovoInsumo(prev => ({ ...prev, categoria: value }))}
-                    >
-                      <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                        <SelectItem value="cozinha">Cozinha</SelectItem>
-                        <SelectItem value="bar">Bar</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-gray-700 dark:text-gray-300">Tipo Local</Label>
-                    <Select 
-                      value={novoInsumo.tipo_local} 
-                      onValueChange={(value) => setNovoInsumo(prev => ({ ...prev, tipo_local: value as 'bar' | 'cozinha' }))}
-                    >
-                      <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                        <SelectItem value="cozinha">👨‍🍳 Cozinha</SelectItem>
-                        <SelectItem value="bar">🍺 Bar</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-gray-700 dark:text-gray-300">Unidade de Medida</Label>
-                    <Select 
-                      value={novoInsumo.unidade_medida} 
-                      onValueChange={(value) => setNovoInsumo(prev => ({ ...prev, unidade_medida: value }))}
-                    >
-                      <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                        <SelectItem value="g">Gramas (g)</SelectItem>
-                        <SelectItem value="kg">Quilogramas (kg)</SelectItem>
-                        <SelectItem value="ml">Mililitros (ml)</SelectItem>
-                        <SelectItem value="l">Litros (l)</SelectItem>
-                        <SelectItem value="unid">Unidades (unid)</SelectItem>
-                        <SelectItem value="pct">Pacotes (pct)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-gray-700 dark:text-gray-300">Custo Unitário (R$)</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={novoInsumo.custo_unitario || ''}
-                      onChange={(e) => setNovoInsumo(prev => ({ ...prev, custo_unitario: parseFloat(e.target.value) || 0 }))}
-                      placeholder="0,00"
-                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-gray-700 dark:text-gray-300">Observações</Label>
-                  <Textarea
-                    value={novoInsumo.observacoes || ''}
-                    onChange={(e) => setNovoInsumo(prev => ({ ...prev, observacoes: e.target.value }))}
-                    placeholder="Observações adicionais..."
-                    rows={2}
-                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                  />
-                </div>
-
-                <div className="flex justify-end">
-                  <Button
-                    onClick={salvarInsumo}
-                    disabled={isLoading}
-                    className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                        Salvando...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4 mr-2" />
-                        Salvar Insumo
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Lista de Insumos */}
             <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardHeader>
@@ -2334,10 +2200,7 @@ export default function ReceitasPage() {
                 Cancelar
               </Button>
               <Button
-                onClick={async () => {
-                  await salvarInsumo()
-                  setModalCriarInsumo(false)
-                }}
+                onClick={salvarCriacaoInsumo}
                 disabled={!novoInsumo.nome || isLoading}
                 className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
               >
