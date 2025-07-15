@@ -322,7 +322,7 @@ async function coletarDadosInstagram(config: MetaCredentials) {
     const reachUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=reach&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
     
     // 2. Profile Views (CORRIGIDO - FUNCIONANDO)
-    const profileViewsUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=profile_views&metric_type=total_value&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
+    const profileVisitsUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=profile_visits&metric_type=total_value&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
     
     // 3. Website Clicks (CORRIGIDO - FUNCIONANDO)
     const websiteClicksUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=website_clicks&metric_type=total_value&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
@@ -331,16 +331,16 @@ async function coletarDadosInstagram(config: MetaCredentials) {
     const growthInsightsUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=follower_count&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
     
     // COLETAR MÉTRICAS QUE FUNCIONAM
-    const [reachResponse, profileViewsResponse, websiteClicksResponse, growthResponse] = await Promise.all([
+    const [reachResponse, profileVisitsResponse, websiteClicksResponse, growthResponse] = await Promise.all([
       fetch(reachUrl),
-      fetch(profileViewsUrl),
+      fetch(profileVisitsUrl),
       fetch(websiteClicksUrl),
       fetch(growthInsightsUrl)
     ])
     
     let insights = {
       reach: {},
-      profile_views: {},
+      profile_visits: {},
       website_clicks: {},
       growth: {}
     }
@@ -348,8 +348,8 @@ async function coletarDadosInstagram(config: MetaCredentials) {
     if (reachResponse.ok) {
       insights.reach = await reachResponse.json()
     }
-    if (profileViewsResponse.ok) {
-      insights.profile_views = await profileViewsResponse.json()
+    if (profileVisitsResponse.ok) {
+      insights.profile_visits = await profileVisitsResponse.json()
     }
     if (websiteClicksResponse.ok) {
       insights.website_clicks = await websiteClicksResponse.json()
@@ -402,7 +402,7 @@ async function coletarDadosInstagram(config: MetaCredentials) {
       stories,
       timestamp: new Date().toISOString(),
       collected_metrics: [
-        'reach', 'profile_views', 'website_clicks',
+        'reach', 'profile_visits', 'website_clicks',
         'follower_count', 'likes', 'comments', 'saves', 'shares',
         'media_content'
       ]
@@ -477,16 +477,87 @@ async function coletarCampanhas(config: MetaCredentials, barId: number, supabase
       try {
         console.log(`💰 Coletando dados COMPLETOS da conta: ${adAccount.id}`)
         
-        // 1. CAMPANHAS COM INSIGHTS COMPLETOS
-        const campaignsUrl = `https://graph.facebook.com/v18.0/${adAccount.id}/campaigns?fields=id,name,status,effective_status,objective,start_time,stop_time,daily_budget,lifetime_budget,created_time,updated_time,insights.metric(impressions,reach,clicks,ctr,cpc,cpp,cpm,spend,frequency,actions,conversions,cost_per_conversion,video_play_actions,video_p25_watched_actions,video_p50_watched_actions,video_p75_watched_actions,video_p100_watched_actions).date_preset(last_30d)&access_token=${config.access_token}`
+        // 1. BUSCAR CAMPANHAS BÁSICAS PRIMEIRO
+        console.log(`🎯 Buscando campanhas básicas da conta: ${adAccount.id}`)
+        const campaignsUrl = `https://graph.facebook.com/v18.0/${adAccount.id}/campaigns?fields=id,name,status,effective_status,objective,start_time,stop_time,daily_budget,lifetime_budget,created_time,updated_time&limit=100&access_token=${config.access_token}`
         const campaignsResponse = await fetch(campaignsUrl)
         
         if (campaignsResponse.ok) {
           const campaignsData = await campaignsResponse.json()
           const campaigns = campaignsData.data || []
+          console.log(`📊 Encontradas ${campaigns.length} campanhas para processar`)
           
-          // Enriquecer cada campanha com dados da conta
-          for (const campaign of campaigns) {
+          // 2. BUSCAR INSIGHTS DE CADA CAMPANHA INDIVIDUALMENTE
+          console.log(`📈 Coletando insights detalhados de cada campanha...`)
+          for (let i = 0; i < campaigns.length; i++) {
+            const campaign = campaigns[i]
+            console.log(`   ${i + 1}/${campaigns.length}: ${campaign.name}`)
+            
+            try {
+              // Buscar insights da campanha específica
+              // Insights da campanha (CAMPOS CORRIGIDOS - DO ADS MANAGER + DATAS)
+              const adsManagerFields = [
+                'campaign_name',           // Campaign
+                'impressions',             // Impressions  
+                'reach',                   // Reach
+                'spend',                   // Amount spent
+                'actions',                 // Results (conversions, clicks, etc)
+                'conversions',             // Results específicos
+                'cost_per_action_type',    // Cost per result
+                'cost_per_conversion',     // Cost per result específico
+                'clicks',                  // Para calcular CTR
+                'ctr',                     // Click-through rate
+                'cpc',                     // Cost per click
+                'cpm',                     // Cost per mille
+                'cpp',                     // Cost per point
+                'frequency',               // Frequência
+                'date_start',              // Data início dos insights
+                'date_stop'                // Data fim dos insights
+              ].join(',')
+              const insightsUrl = `https://graph.facebook.com/v18.0/${campaign.id}/insights?fields=${adsManagerFields}&date_preset=last_30d&access_token=${config.access_token}`
+              const insightsResponse = await fetch(insightsUrl)
+              
+              if (insightsResponse.ok) {
+                const insightsData = await insightsResponse.json()
+                campaign.insights = insightsData
+                console.log(`      ✅ Insights coletados: ${insightsData.data?.length || 0} registros`)
+              } else {
+                console.log(`      ⚠️ Erro nos insights: ${insightsResponse.status}`)
+                campaign.insights = { data: [] }
+              }
+              
+              // Buscar ad sets da campanha
+              const adSetsUrl = `https://graph.facebook.com/v18.0/${campaign.id}/adsets?fields=id,name,status,effective_status,daily_budget,lifetime_budget,targeting&access_token=${config.access_token}`
+              const adSetsResponse = await fetch(adSetsUrl)
+              
+              if (adSetsResponse.ok) {
+                const adSetsData = await adSetsResponse.json()
+                campaign.adsets = adSetsData.data || []
+                console.log(`      📢 Ad sets: ${campaign.adsets.length}`)
+              } else {
+                campaign.adsets = []
+              }
+              
+              // Buscar anúncios da campanha
+              const campaignAdsUrl = `https://graph.facebook.com/v18.0/${campaign.id}/ads?fields=id,name,status,effective_status,creative&limit=50&access_token=${config.access_token}`
+              const campaignAdsResponse = await fetch(campaignAdsUrl)
+              
+              if (campaignAdsResponse.ok) {
+                const campaignAdsData = await campaignAdsResponse.json()
+                campaign.ads = campaignAdsData.data || []
+                console.log(`      🎨 Anúncios: ${campaign.ads.length}`)
+              } else {
+                campaign.ads = []
+              }
+              
+            } catch (campaignError) {
+              console.log(`      ❌ Erro ao processar campanha ${campaign.name}:`, campaignError)
+              campaign.insights = { data: [] }
+              campaign.adsets = []
+              campaign.ads = []
+            }
+            
+            // Enriquecer com dados da conta
             campaign.ad_account_id = adAccount.id
             campaign.ad_account_name = adAccount.name
             campaign.account_currency = adAccount.currency
@@ -494,7 +565,9 @@ async function coletarCampanhas(config: MetaCredentials, barId: number, supabase
           }
           
           allCampaigns.push(...campaigns)
-          console.log(`✅ ${campaigns.length} campanhas coletadas da conta ${adAccount.name}`)
+          console.log(`✅ ${campaigns.length} campanhas processadas completamente da conta ${adAccount.name}`)
+        } else {
+          console.log(`❌ Erro ao buscar campanhas: ${campaignsResponse.status}`)
         }
         
         // 2. ANÚNCIOS INDIVIDUAIS COM MÉTRICAS DETALHADAS
@@ -522,27 +595,59 @@ async function coletarCampanhas(config: MetaCredentials, barId: number, supabase
       }
     }
     
-    // CALCULAR TOTAIS E MÉTRICAS AGREGADAS
+    // CALCULAR TOTAIS E MÉTRICAS AGREGADAS DETALHADAS
+    console.log(`📊 Calculando totais de ${allCampaigns.length} campanhas...`)
     let totalSpend = 0
     let totalImpressions = 0
     let totalReach = 0
     let totalClicks = 0
+    let totalConversions = 0
+    let totalVideoViews = 0
     let activeCampaigns = 0
+    let campaignsWithData = 0
     
     for (const campaign of allCampaigns) {
-      if (campaign.insights?.data?.[0]) {
-        const insights = campaign.insights.data[0]
-        totalSpend += parseFloat(insights.spend || 0)
-        totalImpressions += parseInt(insights.impressions || 0)
-        totalReach += parseInt(insights.reach || 0)
-        totalClicks += parseInt(insights.clicks || 0)
-      }
+      // Contar campanhas ativas
       if (campaign.effective_status === 'ACTIVE') {
         activeCampaigns++
       }
+      
+      // Processar insights detalhados
+      if (campaign.insights?.data?.[0]) {
+        const insights = campaign.insights.data[0]
+        const spend = parseFloat(insights.spend || 0)
+        const impressions = parseInt(insights.impressions || 0)
+        const reach = parseInt(insights.reach || 0)
+        const clicks = parseInt(insights.clicks || 0)
+        const conversions = parseInt(insights.conversions || 0)
+        const videoViews = parseInt(insights.video_views || 0)
+        
+        totalSpend += spend
+        totalImpressions += impressions
+        totalReach += reach
+        totalClicks += clicks
+        totalConversions += conversions
+        totalVideoViews += videoViews
+        
+        if (spend > 0 || impressions > 0) {
+          campaignsWithData++
+        }
+        
+        console.log(`   ${campaign.name}: R$${spend.toFixed(2)}, ${impressions.toLocaleString()} imp, ${clicks} clicks`)
+      } else {
+        console.log(`   ${campaign.name}: sem dados de insights`)
+      }
     }
     
-    console.log(`💰 TOTAIS: R$${totalSpend.toFixed(2)} gastos, ${totalImpressions.toLocaleString()} impressões, ${activeCampaigns} campanhas ativas`)
+    console.log(`💰 TOTAIS FINAIS:`)
+    console.log(`   💵 Gasto: R$${totalSpend.toFixed(2)}`)
+    console.log(`   👁️ Impressões: ${totalImpressions.toLocaleString()}`)
+    console.log(`   🎯 Alcance: ${totalReach.toLocaleString()}`)
+    console.log(`   🖱️ Cliques: ${totalClicks.toLocaleString()}`)
+    console.log(`   ✅ Conversões: ${totalConversions}`)
+    console.log(`   📹 Visualizações de vídeo: ${totalVideoViews.toLocaleString()}`)
+    console.log(`   📊 Campanhas ativas: ${activeCampaigns}/${allCampaigns.length}`)
+    console.log(`   📈 Campanhas com dados: ${campaignsWithData}/${allCampaigns.length}`)
     
     return {
       campaigns: allCampaigns,
@@ -553,8 +658,11 @@ async function coletarCampanhas(config: MetaCredentials, barId: number, supabase
         total_impressions: totalImpressions,
         total_reach: totalReach,
         total_clicks: totalClicks,
+        total_conversions: totalConversions,
+        total_video_views: totalVideoViews,
         active_campaigns: activeCampaigns,
         total_campaigns: allCampaigns.length,
+        campaigns_with_data: campaignsWithData,
         total_ads: allAds.length
       },
       timestamp: new Date().toISOString(),
@@ -628,9 +736,9 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
         igReach = instagramData.insights.reach.data[0].values.reduce((sum: number, item: any) => sum + (parseInt(item.value) || 0), 0)
       }
       
-      // Processar profile views (corrigido com metric_type=total_value)
-      if (instagramData.insights.profile_views?.data?.[0]?.total_value) {
-        profileViews = parseInt(instagramData.insights.profile_views.data[0].total_value.value) || 0
+      // Processar profile visits (corrigido - métrica válida da API)
+      if (instagramData.insights.profile_visits?.data?.[0]?.total_value) {
+        profileViews = parseInt(instagramData.insights.profile_visits.data[0].total_value.value) || 0
       }
       
       // Processar website clicks (corrigido com metric_type=total_value)
@@ -695,7 +803,7 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
         posts_saves: igSaves,
         reach: igReach,
         impressions: igImpressions,
-        profile_views: profileViews,
+        profile_visits: profileViews,
         website_clicks: websiteClicks,
         media_count: instagramData.account_info?.media_count || 0,
         raw_data: instagramData
@@ -710,9 +818,11 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
     if (campaignsData && campaignsData.campaigns && campaignsData.campaigns.length > 0) {
       console.log(`🎯 Salvando ${campaignsData.campaigns.length} campanhas...`)
       
-      // Preparar dados para inserção
+      // Preparar dados para inserção com dados detalhados
       const campaignsToInsert = campaignsData.campaigns.map((campaign: any) => {
         const insights = campaign.insights?.data?.[0] || {}
+        
+        console.log(`💾 Preparando salvamento: ${campaign.name} - R$${insights.spend || 0}`)
         
         return {
           bar_id: barId,
@@ -745,6 +855,13 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
           video_p100_watched_actions: insights.video_p100_watched_actions ? parseInt(insights.video_p100_watched_actions) : null,
           link_clicks: insights.link_clicks ? parseInt(insights.link_clicks) : null,
           video_views: insights.video_views ? parseInt(insights.video_views) : null,
+          post_engagement: insights.post_engagement ? parseInt(insights.post_engagement) : null,
+          page_engagement: insights.page_engagement ? parseInt(insights.page_engagement) : null,
+          likes: insights.likes ? parseInt(insights.likes) : null,
+          comments: insights.comments ? parseInt(insights.comments) : null,
+          shares: insights.shares ? parseInt(insights.shares) : null,
+          adsets_count: campaign.adsets?.length || 0,
+          ads_count: campaign.ads?.length || 0,
           data_coleta: hoje,
           raw_data: campaign
         }
@@ -881,8 +998,8 @@ async function enviarNotificacaoDiscord(supabase: any, resultado: any, facebookD
             inline: true
           },
           {
-            name: '🎯 Campanhas',
-            value: `**${totalCampanhas}** campanhas\n**${campanhasAtivas}** ativas\n**R$ ${gastoTotal.toFixed(2)}** gasto`,
+            name: '🎯 Campanhas (Meta Ads)',
+            value: `**${totalCampanhas}** total\n**${campanhasAtivas}** ativas\n**${campaignsData?.totals?.campaigns_with_data || 0}** com dados\n**R$ ${gastoTotal.toFixed(2)}** gasto\n**${campaignsData?.totals?.total_impressions?.toLocaleString() || 0}** impressões\n**${campaignsData?.totals?.total_clicks?.toLocaleString() || 0}** cliques`,
             inline: true
           },
           {
