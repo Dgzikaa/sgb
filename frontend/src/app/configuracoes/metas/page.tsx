@@ -57,7 +57,7 @@ interface MetasOrganizadas {
 }
 
 const formatarValor = (valor: number | null, tipo: string): string => {
-  if (valor === null) return '-';
+  if (valor === null || valor === undefined) return '-';
   
   switch (tipo) {
     case 'moeda':
