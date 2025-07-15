@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { usePermissions } from '@/hooks/usePermissions'
-import { useMenuBadgesMock as useMenuBadges } from '@/hooks/useMenuBadgesMock'
+import { useMenuBadges } from '@/hooks/useMenuBadges'
 import { 
   Home, 
   CheckSquare, 
