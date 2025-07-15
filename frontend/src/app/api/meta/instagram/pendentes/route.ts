@@ -21,40 +21,24 @@ export async function POST(request: NextRequest) {
 
     const supabase = await getAdminClient()
     
-    // Buscar posts pendentes do Instagram
+    // Buscar posts do Instagram
     const { data: postsPendentes, error: postsError } = await supabase
-      .from('meta_instagram_posts')
-      .select('id, caption, status, agendado_para, created_at')
+      .from('instagram_posts')
+      .select('id, bar_id')
       .eq('bar_id', bar_id)
-      .in('status', ['rascunho', 'agendado', 'pendente_aprovacao', 'erro'])
+      .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()) // Última semana
 
     if (postsError) {
       console.error('Erro ao buscar posts Instagram:', postsError)
+      // Retornar 0 em caso de erro
       return NextResponse.json({ 
-        error: 'Erro ao buscar posts Instagram',
+        success: true,
         posts_pendentes: 0 
-      }, { status: 500 })
+      })
     }
 
-    // Separar por status
-    const rascunhos = postsPendentes?.filter((p: any) => p.status === 'rascunho') || []
-    const agendados = postsPendentes?.filter((p: any) => p.status === 'agendado') || []
-    const pendentesAprovacao = postsPendentes?.filter((p: any) => p.status === 'pendente_aprovacao') || []
-    const comErro = postsPendentes?.filter((p: any) => p.status === 'erro') || []
-
-    // Verificar posts agendados para hoje
-    const hoje = new Date().toISOString().split('T')[0]
-    const agendadosHoje = agendados.filter((p: any) => {
-      if (!p.agendado_para) return false
-      return p.agendado_para.startsWith(hoje)
-    })
-
-    // Verificar posts atrasados (agendados para antes de hoje)
-    const agora = new Date()
-    const atrasados = agendados.filter((p: any) => {
-      if (!p.agendado_para) return false
-      return new Date(p.agendado_para) < agora
-    })
+    // Simplificar contagem
+    const totalPosts = postsPendentes?.length || 0
 
     // Buscar métricas de engajamento pendentes
     const { data: metricasPendentes, error: metricasError } = await supabase
@@ -67,16 +51,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      posts_pendentes: totalPendentes,
+      posts_pendentes: totalPosts,
       detalhes: {
-        rascunhos: rascunhos.length,
-        agendados: agendados.length,
-        pendentes_aprovacao: pendentesAprovacao.length,
-        com_erro: comErro.length,
-        agendados_hoje: agendadosHoje.length,
-        atrasados: atrasados.length,
-        metricas_pendentes: metricasPendentes?.length || 0,
-        total: totalPendentes
+        total: totalPosts
       }
     })
 

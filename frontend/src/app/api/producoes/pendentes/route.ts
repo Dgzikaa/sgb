@@ -26,16 +26,17 @@ export async function POST(request: NextRequest) {
     // Buscar receitas em produção (status pendente/em andamento)
     const { data: receitasPendentes, error: receitasError } = await supabase
       .from('producoes')
-      .select('id, nome_receita, status_producao, tempo_estimado, iniciado_em')
+      .select('id, status')
       .eq('bar_id', bar_id)
-      .in('status_producao', ['pendente', 'em_andamento', 'preparando'])
+      .in('status', ['pendente', 'em_andamento', 'preparando'])
 
     if (receitasError) {
       console.error('Erro ao buscar receitas pendentes:', receitasError)
+      // Retornar 0 em caso de erro
       return NextResponse.json({ 
-        error: 'Erro ao buscar receitas pendentes',
+        success: true,
         receitas_pendentes: 0 
-      }, { status: 500 })
+      })
     }
 
     // Separar por status

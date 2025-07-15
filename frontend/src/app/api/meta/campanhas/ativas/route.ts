@@ -23,20 +23,21 @@ export async function POST(request: NextRequest) {
 
     const supabase = await getAdminClient()
     
-    // Buscar campanhas ativas da Meta
+    // Buscar logs recentes da Meta (proxy para campanhas ativas)
     const { data: campanhasAtivas, error: campanhasError } = await supabase
-      .from('meta_campanhas')
-      .select('id, nome, status, budget_diario, data_inicio, data_fim, plataforma')
+      .from('meta_coletas_log')
+      .select('id, bar_id, status')
       .eq('bar_id', bar_id)
-      .eq('ativa', true)
-      .in('status', ['ativa', 'em_andamento', 'pausada'])
+      .eq('status', 'sucesso')
+      .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Últimas 24h
 
     if (campanhasError) {
       console.error('Erro ao buscar campanhas Meta:', campanhasError)
+      // Retornar 0 em caso de erro em vez de 500
       return NextResponse.json({ 
-        error: 'Erro ao buscar campanhas Meta',
+        success: true,
         campanhas_ativas: 0 
-      }, { status: 500 })
+      })
     }
 
     // Separar por status

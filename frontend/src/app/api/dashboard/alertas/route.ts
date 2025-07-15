@@ -26,10 +26,9 @@ export async function POST(request: NextRequest) {
     // 1. Alertas de sistema ativos
     const { data: alertasSistema, error: alertasError } = await supabase
       .from('sistema_alertas')
-      .select('id')
+      .select('id, status_alerta')
       .eq('bar_id', bar_id)
-      .eq('status_alerta', 'ativo')
-      .in('severidade', ['high', 'critical'])
+      .is('resolvido_em', null)
 
     if (!alertasError && alertasSistema) {
       alertasPendentes += alertasSistema.length
