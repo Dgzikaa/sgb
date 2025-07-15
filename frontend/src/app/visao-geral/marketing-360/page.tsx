@@ -47,13 +47,23 @@ interface MetaAnalytics {
   last_update: string
 }
 
+interface AdvancedAnalytics {
+  funil_conversao: any
+  radar_oportunidades: any
+  otimizacao_temporal: any
+  customer_journey: any
+  previsao_performance: any
+}
+
 export default function Marketing360Page() {
   const { toast } = useToast()
   const { setPageTitle } = usePageTitle()
   
   const [data, setData] = useState<MetaAnalytics | null>(null)
+  const [advancedData, setAdvancedData] = useState<AdvancedAnalytics | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [advancedLoading, setAdvancedLoading] = useState(false)
 
   useEffect(() => {
     setPageTitle('Marketing 360° - Visão Geral')
@@ -84,6 +94,41 @@ export default function Marketing360Page() {
     }
   }
 
+  const loadAdvancedAnalytics = async () => {
+    try {
+      setAdvancedLoading(true)
+      
+      const [funnelRes, opportunitiesRes, temporalRes, journeyRes, predictionRes] = await Promise.all([
+        fetch('/api/meta/funil-conversao'),
+        fetch('/api/meta/radar-oportunidades'),
+        fetch('/api/meta/otimizacao-temporal'),
+        fetch('/api/meta/customer-journey'),
+        fetch('/api/meta/previsao-performance')
+      ])
+      
+      const [funnelData, opportunitiesData, temporalData, journeyData, predictionData] = await Promise.all([
+        funnelRes.json(),
+        opportunitiesRes.json(), 
+        temporalRes.json(),
+        journeyRes.json(),
+        predictionRes.json()
+      ])
+      
+      setAdvancedData({
+        funil_conversao: funnelData.success ? funnelData.data : null,
+        radar_oportunidades: opportunitiesData.success ? opportunitiesData.data : null,
+        otimizacao_temporal: temporalData.success ? temporalData.data : null,
+        customer_journey: journeyData.success ? journeyData.data : null,
+        previsao_performance: predictionData.success ? predictionData.data : null
+      })
+      
+    } catch (error) {
+      console.error('Erro ao carregar análises avançadas:', error)
+    } finally {
+      setAdvancedLoading(false)
+    }
+  }
+
   const forceRefresh = async () => {
     try {
       setRefreshing(true)
@@ -105,6 +150,7 @@ export default function Marketing360Page() {
         // Aguardar um pouco e recarregar dados
         setTimeout(() => {
           loadAnalytics()
+          loadAdvancedAnalytics()
         }, 2000)
       } else {
         throw new Error(result.error)
@@ -257,12 +303,17 @@ export default function Marketing360Page() {
 
         {/* Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="tabs-list-dark">
-            <TabsTrigger value="overview" className="tabs-trigger-dark">Visão Geral</TabsTrigger>
-            <TabsTrigger value="campaigns" className="tabs-trigger-dark">Campanhas</TabsTrigger>
-            <TabsTrigger value="social" className="tabs-trigger-dark">Redes Sociais</TabsTrigger>
-            <TabsTrigger value="analytics" className="tabs-trigger-dark">Analytics</TabsTrigger>
-          </TabsList>
+                     <TabsList className="tabs-list-dark">
+             <TabsTrigger value="overview" className="tabs-trigger-dark">Visão Geral</TabsTrigger>
+             <TabsTrigger value="campaigns" className="tabs-trigger-dark">Campanhas</TabsTrigger>
+             <TabsTrigger value="social" className="tabs-trigger-dark">Redes Sociais</TabsTrigger>
+             <TabsTrigger value="analytics" className="tabs-trigger-dark">Analytics</TabsTrigger>
+             <TabsTrigger value="funnel" className="tabs-trigger-dark" onClick={() => !advancedLoading && !advancedData && loadAdvancedAnalytics()}>🎯 Funil Conversão</TabsTrigger>
+             <TabsTrigger value="opportunities" className="tabs-trigger-dark" onClick={() => !advancedLoading && !advancedData && loadAdvancedAnalytics()}>📡 Radar Oportunidades</TabsTrigger>
+             <TabsTrigger value="temporal" className="tabs-trigger-dark" onClick={() => !advancedLoading && !advancedData && loadAdvancedAnalytics()}>⏰ Otimização Temporal</TabsTrigger>
+             <TabsTrigger value="journey" className="tabs-trigger-dark" onClick={() => !advancedLoading && !advancedData && loadAdvancedAnalytics()}>🗺️ Customer Journey</TabsTrigger>
+             <TabsTrigger value="prediction" className="tabs-trigger-dark" onClick={() => !advancedLoading && !advancedData && loadAdvancedAnalytics()}>🔮 Previsões</TabsTrigger>
+           </TabsList>
 
           {/* Overview */}
           <TabsContent value="overview" className="space-y-6">
@@ -594,9 +645,392 @@ export default function Marketing360Page() {
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
-  )
-} 
+                     </TabsContent>
+
+           {/* Funil de Conversão */}
+           <TabsContent value="funnel" className="space-y-6">
+             {advancedLoading ? (
+               <div className="flex justify-center items-center py-12">
+                 <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                 <span className="ml-3">Carregando funil de conversão...</span>
+               </div>
+             ) : (
+               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                 <Card className="card-dark">
+                   <CardHeader>
+                     <CardTitle className="card-title-dark">🎯 Funil de Conversão</CardTitle>
+                   </CardHeader>
+                   <CardContent>
+                     {advancedData?.funil_conversao?.etapas ? (
+                       <div className="space-y-4">
+                         {advancedData.funil_conversao.etapas.map((etapa: any, index: number) => (
+                           <div key={index} className="p-4 border rounded-lg">
+                             <div className="flex justify-between items-center mb-2">
+                               <h4 className="font-medium">{etapa.nome}</h4>
+                               <span className="text-2xl font-bold">{formatNumber(etapa.valor || 0)}</span>
+                             </div>
+                             <p className="text-sm text-gray-500 mb-2">{etapa.descricao}</p>
+                             <div className="w-full bg-gray-200 rounded-full h-2">
+                               <div 
+                                 className="bg-blue-600 h-2 rounded-full" 
+                                 style={{ width: `${(etapa.taxa_conversao || 0)}%` }}
+                               ></div>
+                             </div>
+                             <div className="flex justify-between text-xs mt-1">
+                               <span>Taxa: {(etapa.taxa_conversao || 0).toFixed(1)}%</span>
+                               <span>Meta: {(etapa.meta_ideal || 0)}%</span>
+                             </div>
+                           </div>
+                         ))}
+                       </div>
+                     ) : (
+                       <p className="text-center py-8 text-gray-500">Dados do funil não disponíveis</p>
+                     )}
+                   </CardContent>
+                 </Card>
+                 
+                 <Card className="card-dark">
+                   <CardHeader>
+                     <CardTitle className="card-title-dark">📊 Insights do Funil</CardTitle>
+                   </CardHeader>
+                   <CardContent>
+                     {advancedData?.funil_conversao?.insights ? (
+                       <div className="space-y-3">
+                         {advancedData.funil_conversao.insights.map((insight: any, index: number) => (
+                           <div key={index} className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                             <p className="font-medium text-blue-900 dark:text-blue-100">{insight.titulo}</p>
+                             <p className="text-sm text-blue-700 dark:text-blue-300">{insight.descricao}</p>
+                           </div>
+                         ))}
+                       </div>
+                     ) : (
+                       <p className="text-center py-8 text-gray-500">Insights não disponíveis</p>
+                     )}
+                   </CardContent>
+                 </Card>
+               </div>
+             )}
+           </TabsContent>
+
+           {/* Radar de Oportunidades */}
+           <TabsContent value="opportunities" className="space-y-6">
+             {advancedLoading ? (
+               <div className="flex justify-center items-center py-12">
+                 <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                 <span className="ml-3">Analisando oportunidades...</span>
+               </div>
+             ) : (
+               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                 <Card className="card-dark">
+                   <CardHeader>
+                     <CardTitle className="card-title-dark">🎯 Oportunidades Detectadas</CardTitle>
+                   </CardHeader>
+                   <CardContent>
+                     {advancedData?.radar_oportunidades?.oportunidades ? (
+                       <div className="space-y-3">
+                         {advancedData.radar_oportunidades.oportunidades.map((oportunidade: any, index: number) => (
+                           <div key={index} className="p-3 border rounded-lg">
+                             <div className="flex items-center justify-between mb-2">
+                               <h4 className="font-medium">{oportunidade.titulo}</h4>
+                               <Badge className={
+                                 oportunidade.prioridade === 'alta' ? 'bg-red-100 text-red-800' :
+                                 oportunidade.prioridade === 'media' ? 'bg-yellow-100 text-yellow-800' :
+                                 'bg-green-100 text-green-800'
+                               }>
+                                 {oportunidade.prioridade}
+                               </Badge>
+                             </div>
+                             <p className="text-sm text-gray-600">{oportunidade.descricao}</p>
+                             <p className="text-xs text-blue-600 mt-1">Impacto: +{oportunidade.impacto_estimado}%</p>
+                           </div>
+                         ))}
+                       </div>
+                     ) : (
+                       <p className="text-center py-8 text-gray-500">Nenhuma oportunidade detectada</p>
+                     )}
+                   </CardContent>
+                 </Card>
+
+                 <Card className="card-dark">
+                   <CardHeader>
+                     <CardTitle className="card-title-dark">📈 Gaps de Atividade</CardTitle>
+                   </CardHeader>
+                   <CardContent>
+                     {advancedData?.radar_oportunidades?.gaps ? (
+                       <div className="space-y-3">
+                         {advancedData.radar_oportunidades.gaps.map((gap: any, index: number) => (
+                           <div key={index} className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                             <h4 className="font-medium text-orange-900 dark:text-orange-100">{gap.tipo}</h4>
+                             <p className="text-sm text-orange-700 dark:text-orange-300">{gap.descricao}</p>
+                             <p className="text-xs text-orange-600 mt-1">Última atividade: {gap.ultima_atividade}</p>
+                           </div>
+                         ))}
+                       </div>
+                     ) : (
+                       <p className="text-center py-8 text-gray-500">Nenhum gap detectado</p>
+                     )}
+                   </CardContent>
+                 </Card>
+
+                 <Card className="card-dark">
+                   <CardHeader>
+                     <CardTitle className="card-title-dark">🚀 Recomendações</CardTitle>
+                   </CardHeader>
+                   <CardContent>
+                     {advancedData?.radar_oportunidades?.recomendacoes ? (
+                       <div className="space-y-3">
+                         {advancedData.radar_oportunidades.recomendacoes.map((rec: any, index: number) => (
+                           <div key={index} className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                             <h4 className="font-medium text-green-900 dark:text-green-100">{rec.acao}</h4>
+                             <p className="text-sm text-green-700 dark:text-green-300">{rec.justificativa}</p>
+                             <p className="text-xs text-green-600 mt-1">ROI estimado: +{rec.roi_estimado}%</p>
+                           </div>
+                         ))}
+                       </div>
+                     ) : (
+                       <p className="text-center py-8 text-gray-500">Nenhuma recomendação disponível</p>
+                     )}
+                   </CardContent>
+                 </Card>
+               </div>
+             )}
+           </TabsContent>
+
+           {/* Otimização Temporal */}
+           <TabsContent value="temporal" className="space-y-6">
+             {advancedLoading ? (
+               <div className="flex justify-center items-center py-12">
+                 <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                 <span className="ml-3">Analisando padrões temporais...</span>
+               </div>
+             ) : (
+               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                 <Card className="card-dark">
+                   <CardHeader>
+                     <CardTitle className="card-title-dark">⏰ Melhores Horários</CardTitle>
+                   </CardHeader>
+                   <CardContent>
+                     {advancedData?.otimizacao_temporal?.melhores_horarios ? (
+                       <div className="space-y-4">
+                         {advancedData.otimizacao_temporal.melhores_horarios.map((horario: any, index: number) => (
+                           <div key={index} className="p-4 border rounded-lg">
+                             <div className="flex justify-between items-center mb-2">
+                               <h4 className="font-medium">{horario.dia_semana}</h4>
+                               <span className="text-sm font-bold text-blue-600">{horario.melhor_horario}</span>
+                             </div>
+                             <div className="text-sm text-gray-600">
+                               <p>Engajamento médio: {horario.engajamento_medio}%</p>
+                               <p>Alcance médio: {formatNumber(horario.alcance_medio)}</p>
+                             </div>
+                           </div>
+                         ))}
+                       </div>
+                     ) : (
+                       <p className="text-center py-8 text-gray-500">Dados temporais não disponíveis</p>
+                     )}
+                   </CardContent>
+                 </Card>
+
+                 <Card className="card-dark">
+                   <CardHeader>
+                     <CardTitle className="card-title-dark">📊 Padrões de Engajamento</CardTitle>
+                   </CardHeader>
+                   <CardContent>
+                     {advancedData?.otimizacao_temporal?.padroes ? (
+                       <div className="space-y-3">
+                         {advancedData.otimizacao_temporal.padroes.map((padrao: any, index: number) => (
+                           <div key={index} className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                             <h4 className="font-medium text-purple-900 dark:text-purple-100">{padrao.tipo}</h4>
+                             <p className="text-sm text-purple-700 dark:text-purple-300">{padrao.descricao}</p>
+                             <p className="text-xs text-purple-600 mt-1">Confiança: {padrao.confianca}%</p>
+                           </div>
+                         ))}
+                       </div>
+                     ) : (
+                       <p className="text-center py-8 text-gray-500">Padrões não identificados</p>
+                     )}
+                   </CardContent>
+                 </Card>
+               </div>
+             )}
+           </TabsContent>
+
+           {/* Customer Journey */}
+           <TabsContent value="journey" className="space-y-6">
+             {advancedLoading ? (
+               <div className="flex justify-center items-center py-12">
+                 <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                 <span className="ml-3">Mapeando jornada do cliente...</span>
+               </div>
+             ) : (
+               <div className="space-y-6">
+                 <Card className="card-dark">
+                   <CardHeader>
+                     <CardTitle className="card-title-dark">🗺️ Jornada do Cliente</CardTitle>
+                   </CardHeader>
+                   <CardContent>
+                     {advancedData?.customer_journey?.etapas ? (
+                       <div className="flex overflow-x-auto space-x-4 pb-4">
+                         {advancedData.customer_journey.etapas.map((etapa: any, index: number) => (
+                           <div key={index} className="min-w-[250px] p-4 border rounded-lg">
+                             <div className="text-center mb-3">
+                               <div className="w-12 h-12 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-2">
+                                 <span className="text-2xl">{etapa.icone || '🎯'}</span>
+                               </div>
+                               <h4 className="font-bold">{etapa.nome}</h4>
+                               <p className="text-xs text-gray-500">{etapa.descricao}</p>
+                             </div>
+                             <div className="space-y-2 text-sm">
+                               <div className="flex justify-between">
+                                 <span>Conversão:</span>
+                                 <span className="font-medium">{etapa.taxa_conversao}%</span>
+                               </div>
+                               <div className="flex justify-between">
+                                 <span>Tempo médio:</span>
+                                 <span className="font-medium">{etapa.tempo_medio}</span>
+                               </div>
+                               <div className="flex justify-between">
+                                 <span>Usuários:</span>
+                                 <span className="font-medium">{formatNumber(etapa.usuarios)}</span>
+                               </div>
+                             </div>
+                           </div>
+                         ))}
+                       </div>
+                     ) : (
+                       <p className="text-center py-8 text-gray-500">Jornada não mapeada</p>
+                     )}
+                   </CardContent>
+                 </Card>
+
+                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                   <Card className="card-dark">
+                     <CardHeader>
+                       <CardTitle className="card-title-dark">📍 Pontos de Abandono</CardTitle>
+                     </CardHeader>
+                     <CardContent>
+                       {advancedData?.customer_journey?.pontos_abandono ? (
+                         <div className="space-y-3">
+                           {advancedData.customer_journey.pontos_abandono.map((ponto: any, index: number) => (
+                             <div key={index} className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                               <h4 className="font-medium text-red-900 dark:text-red-100">{ponto.etapa}</h4>
+                               <p className="text-sm text-red-700 dark:text-red-300">Taxa de abandono: {ponto.taxa}%</p>
+                               <p className="text-xs text-red-600 mt-1">{ponto.razao}</p>
+                             </div>
+                           ))}
+                         </div>
+                       ) : (
+                         <p className="text-center py-8 text-gray-500">Sem pontos críticos</p>
+                       )}
+                     </CardContent>
+                   </Card>
+
+                   <Card className="card-dark">
+                     <CardHeader>
+                       <CardTitle className="card-title-dark">💡 Otimizações</CardTitle>
+                     </CardHeader>
+                     <CardContent>
+                       {advancedData?.customer_journey?.otimizacoes ? (
+                         <div className="space-y-3">
+                           {advancedData.customer_journey.otimizacoes.map((opt: any, index: number) => (
+                             <div key={index} className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                               <h4 className="font-medium text-blue-900 dark:text-blue-100">{opt.acao}</h4>
+                               <p className="text-sm text-blue-700 dark:text-blue-300">{opt.beneficio}</p>
+                               <p className="text-xs text-blue-600 mt-1">Impacto: +{opt.impacto}%</p>
+                             </div>
+                           ))}
+                         </div>
+                       ) : (
+                         <p className="text-center py-8 text-gray-500">Nenhuma otimização sugerida</p>
+                       )}
+                     </CardContent>
+                   </Card>
+                 </div>
+               </div>
+             )}
+           </TabsContent>
+
+           {/* Previsões */}
+           <TabsContent value="prediction" className="space-y-6">
+             {advancedLoading ? (
+               <div className="flex justify-center items-center py-12">
+                 <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                 <span className="ml-3">Gerando previsões...</span>
+               </div>
+             ) : (
+               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                 <Card className="card-dark">
+                   <CardHeader>
+                     <CardTitle className="card-title-dark">🔮 Previsões de Performance</CardTitle>
+                   </CardHeader>
+                   <CardContent>
+                     {advancedData?.previsao_performance?.previsoes ? (
+                       <div className="space-y-4">
+                         {advancedData.previsao_performance.previsoes.map((previsao: any, index: number) => (
+                           <div key={index} className="p-4 border rounded-lg">
+                             <div className="flex justify-between items-center mb-2">
+                               <h4 className="font-medium">{previsao.metrica}</h4>
+                               <span className="text-2xl font-bold text-blue-600">{formatNumber(previsao.valor_previsto)}</span>
+                             </div>
+                             <div className="text-sm text-gray-600 space-y-1">
+                               <div className="flex justify-between">
+                                 <span>Atual:</span>
+                                 <span>{formatNumber(previsao.valor_atual)}</span>
+                               </div>
+                               <div className="flex justify-between">
+                                 <span>Variação:</span>
+                                 <span className={previsao.variacao > 0 ? 'text-green-600' : 'text-red-600'}>
+                                   {previsao.variacao > 0 ? '+' : ''}{previsao.variacao.toFixed(1)}%
+                                 </span>
+                               </div>
+                               <div className="flex justify-between">
+                                 <span>Confiança:</span>
+                                 <span>{previsao.confianca}%</span>
+                               </div>
+                             </div>
+                           </div>
+                         ))}
+                       </div>
+                     ) : (
+                       <p className="text-center py-8 text-gray-500">Previsões não disponíveis</p>
+                     )}
+                   </CardContent>
+                 </Card>
+
+                 <Card className="card-dark">
+                   <CardHeader>
+                     <CardTitle className="card-title-dark">📈 Tendências Identificadas</CardTitle>
+                   </CardHeader>
+                   <CardContent>
+                     {advancedData?.previsao_performance?.tendencias ? (
+                       <div className="space-y-3">
+                         {advancedData.previsao_performance.tendencias.map((tendencia: any, index: number) => (
+                           <div key={index} className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                             <div className="flex items-center justify-between mb-2">
+                               <h4 className="font-medium text-purple-900 dark:text-purple-100">{tendencia.nome}</h4>
+                               <Badge className={
+                                 tendencia.tipo === 'crescimento' ? 'bg-green-100 text-green-800' :
+                                 tendencia.tipo === 'declinio' ? 'bg-red-100 text-red-800' :
+                                 'bg-gray-100 text-gray-800'
+                               }>
+                                 {tendencia.tipo}
+                               </Badge>
+                             </div>
+                             <p className="text-sm text-purple-700 dark:text-purple-300">{tendencia.descricao}</p>
+                             <p className="text-xs text-purple-600 mt-1">Força: {tendencia.forca}/10</p>
+                           </div>
+                         ))}
+                       </div>
+                     ) : (
+                       <p className="text-center py-8 text-gray-500">Nenhuma tendência identificada</p>
+                     )}
+                   </CardContent>
+                 </Card>
+               </div>
+             )}
+           </TabsContent>
+         </Tabs>
+       </div>
+     </div>
+   )
+ } 
