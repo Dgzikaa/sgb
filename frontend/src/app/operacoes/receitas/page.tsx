@@ -461,6 +461,17 @@ export default function ReceitasPage() {
         is_chefe: insumo.is_chefe || false
       }))
 
+      console.log('📤 Dados enviados para API:', {
+        receita_codigo: receitaEditando.receita_codigo,
+        receita_nome: receitaEditando.receita_nome.trim(),
+        receita_categoria: receitaEditando.receita_categoria,
+        tipo_local: receitaEditando.tipo_local,
+        rendimento_esperado: receitaEditando.rendimento_esperado,
+        insumos: insumosParaAPI,
+        ativo: receitaEditando.ativo,
+        bar_id: selectedBar?.id
+      })
+
       const response = await fetch('/api/receitas/editar', {
         method: 'PUT',
         headers: {
@@ -479,23 +490,24 @@ export default function ReceitasPage() {
       })
 
       if (!response.ok) {
-        throw new Error('Erro ao atualizar receita')
+        const errorData = await response.text()
+        console.error('❌ Erro HTTP:', response.status, errorData)
+        throw new Error(`Erro ${response.status}: ${errorData}`)
       }
 
-      // Atualizar na lista local
-      setReceitas(prev => prev.map(receita => 
-        receita.receita_codigo === receitaEditando.receita_codigo 
-          ? { ...receitaEditando }
-          : receita
-      ))
+      const result = await response.json()
+      console.log('✅ Resposta da API:', result)
+
+      // Recarregar as receitas do servidor para garantir consistência
+      await carregarReceitas()
 
       toast.success('Receita atualizada com sucesso!')
       setModalEditarReceita(false)
       setReceitaEditando(null)
       
     } catch (error) {
-      console.error('Erro ao salvar edição da receita:', error)
-      toast.error('Erro ao atualizar receita. Tente novamente.')
+      console.error('❌ Erro ao salvar edição da receita:', error)
+      toast.error(`Erro ao atualizar receita: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
     } finally {
       setIsLoading(false)
     }

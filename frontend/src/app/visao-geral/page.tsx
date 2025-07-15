@@ -103,6 +103,16 @@ const visaoGeralItems: VisaoGeralItem[] = [
     href: '/visao-geral/metricas-barras',
     status: 'active',
     color: 'pink'
+  },
+  {
+    id: 'instagram-tracking',
+    title: 'Instagram Tracking',
+    description: 'Análise detalhada e variações diárias do Instagram',
+    icon: Users,
+    href: '/visao-geral/instagram-tracking',
+    status: 'active',
+    badge: 'Novo',
+    color: 'purple'
   }
 ]
 
@@ -166,7 +176,7 @@ export default function VisaoGeralPage() {
                 <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
                   <BarChart3 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 </div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">8</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">9</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Relatórios</p>
               </CardContent>
             </Card>

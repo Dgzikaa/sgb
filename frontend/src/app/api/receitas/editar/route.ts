@@ -58,11 +58,15 @@ export async function PUT(request: NextRequest) {
 
     // Inserir novas receitas com os insumos atualizados
     const insumoChefe = insumos.find((i: any) => i.is_chefe)
+    console.log('🔄 Insumo chefe encontrado:', insumoChefe)
+    console.log('🔄 Dados recebidos:', { receita_codigo, bar_id, insumos })
+    
     const receitasData = insumos.map((insumo: any) => ({
       bar_id: bar_id,
       receita_codigo: receita_codigo.trim(),
       receita_nome: receita_nome.trim(),
       receita_categoria: receita_categoria?.trim() || '',
+      tipo_local: tipo_local || 'cozinha',
       insumo_id: insumo.id,
       quantidade_necessaria: insumo.quantidade_necessaria || 0,
       insumo_chefe_id: insumoChefe?.id,
@@ -70,6 +74,8 @@ export async function PUT(request: NextRequest) {
       ativo: ativo !== undefined ? ativo : true,
       updated_at: new Date().toISOString()
     }))
+    
+    console.log('📦 Dados que serão inseridos:', receitasData)
 
     const { data: novasReceitas, error: receitasError } = await supabase
       .from('receitas')
@@ -78,9 +84,11 @@ export async function PUT(request: NextRequest) {
 
     if (receitasError) {
       console.error('❌ Erro ao inserir receitas:', receitasError)
+      console.error('❌ Dados que causaram erro:', receitasData)
       return NextResponse.json({ 
         success: false, 
-        error: 'Erro ao atualizar receitas: ' + receitasError.message 
+        error: 'Erro ao atualizar receitas: ' + receitasError.message,
+        details: receitasError
       }, { status: 500 })
     }
 
@@ -98,9 +106,11 @@ export async function PUT(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ Erro interno:', error)
+    console.error('❌ Stack trace:', error instanceof Error ? error.stack : 'Sem stack trace')
     return NextResponse.json({ 
       success: false, 
-      error: 'Erro interno do servidor: ' + String(error) 
+      error: 'Erro interno do servidor: ' + (error instanceof Error ? error.message : String(error)),
+      stack: error instanceof Error ? error.stack : undefined
     }, { status: 500 })
   }
 } 
