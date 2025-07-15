@@ -411,127 +411,125 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
   }
 
   return (
-    <TooltipProvider>
-      <div className={cn(
-        'flex flex-col h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 transition-all duration-300',
-        isCollapsed ? 'w-16' : 'w-64'
-      )}>
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          {!isCollapsed && (
-            <div className="flex items-center gap-2">
-              <Navigation className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              <span className="font-semibold text-gray-900 dark:text-white">
-                Navegação
-              </span>
-            </div>
-          )}
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggle}
-            className="p-2"
-          >
-            {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </Button>
-        </div>
-
-        {/* Search */}
+    <div className={cn(
+      'flex flex-col h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 transition-all duration-300',
+      isCollapsed ? 'w-16' : 'w-64'
+    )}>
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
         {!isCollapsed && (
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Buscar..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+          <div className="flex items-center gap-2">
+            <Navigation className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <span className="font-semibold text-gray-900 dark:text-white">
+              Navegação
+            </span>
           </div>
         )}
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onToggle}
+          className="p-2"
+        >
+          {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </Button>
+      </div>
 
-        {/* Workflow Status */}
-        {!isCollapsed && (
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-2">
-              <div className={cn(
-                'w-2 h-2 rounded-full',
-                context.workflowState === 'opening' && 'bg-yellow-500',
-                context.workflowState === 'production' && 'bg-green-500',
-                context.workflowState === 'closing' && 'bg-orange-500',
-                context.workflowState === 'reports' && 'bg-blue-500',
-                context.workflowState === 'normal' && 'bg-gray-500'
-              )} />
-              <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                {context.workflowState === 'opening' && 'Abertura'}
-                {context.workflowState === 'production' && 'Produção'}
-                {context.workflowState === 'closing' && 'Fechamento'}
-                {context.workflowState === 'reports' && 'Relatórios'}
-                {context.workflowState === 'normal' && 'Normal'}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Navigation Items */}
-        <div className="flex-1 overflow-y-auto p-2">
-          <div className="space-y-1">
-            {Object.entries(groupedItems).map(([category, items]) => (
-              <div key={category}>
-                {/* Category Header */}
-                {!isCollapsed && (
-                  <button
-                    onClick={() => toggleCategory(category)}
-                    className="w-full flex items-center gap-2 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
-                  >
-                    {React.createElement(categoryIcons[category as keyof typeof categoryIcons], { className: 'h-3 w-3' })}
-                    {categoryLabels[category as keyof typeof categoryLabels]}
-                    <ChevronRight className={cn(
-                      'h-3 w-3 transition-transform',
-                      expandedCategories.includes(category) && 'rotate-90'
-                    )} />
-                  </button>
-                )}
-
-                {/* Category Items */}
-                {(isCollapsed || expandedCategories.includes(category)) && (
-                  <div className="space-y-1">
-                    {items.map((item) => (
-                      <NavItem
-                        key={item.id}
-                        item={item}
-                        isCollapsed={isCollapsed}
-                        isActive={isCurrentPage(item.href)}
-                        isFavorite={favorites.includes(item.id)}
-                        onToggleFavorite={toggleFavorite}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+      {/* Search */}
+      {!isCollapsed && (
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
         </div>
+      )}
 
-        {/* Footer */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-          {!isCollapsed && (
-            <div className="text-xs text-gray-500 dark:text-gray-400">
-              <div className="flex items-center gap-1">
-                <Compass className="h-3 w-3" />
-                <span>Navegação Inteligente</span>
-              </div>
-              <div className="mt-1">
-                {selectedBar?.nome || 'Nenhum bar selecionado'}
-              </div>
+      {/* Workflow Status */}
+      {!isCollapsed && (
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-2">
+            <div className={cn(
+              'w-2 h-2 rounded-full',
+              context.workflowState === 'opening' && 'bg-yellow-500',
+              context.workflowState === 'production' && 'bg-green-500',
+              context.workflowState === 'closing' && 'bg-orange-500',
+              context.workflowState === 'reports' && 'bg-blue-500',
+              context.workflowState === 'normal' && 'bg-gray-500'
+            )} />
+            <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+              {context.workflowState === 'opening' && 'Abertura'}
+              {context.workflowState === 'production' && 'Produção'}
+              {context.workflowState === 'closing' && 'Fechamento'}
+              {context.workflowState === 'reports' && 'Relatórios'}
+              {context.workflowState === 'normal' && 'Normal'}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Navigation Items */}
+      <div className="flex-1 overflow-y-auto p-2">
+        <div className="space-y-1">
+          {Object.entries(groupedItems).map(([category, items]) => (
+            <div key={category}>
+              {/* Category Header */}
+              {!isCollapsed && (
+                <button
+                  onClick={() => toggleCategory(category)}
+                  className="w-full flex items-center gap-2 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+                >
+                  {React.createElement(categoryIcons[category as keyof typeof categoryIcons], { className: 'h-3 w-3' })}
+                  {categoryLabels[category as keyof typeof categoryLabels]}
+                  <ChevronRight className={cn(
+                    'h-3 w-3 transition-transform',
+                    expandedCategories.includes(category) && 'rotate-90'
+                  )} />
+                </button>
+              )}
+
+              {/* Category Items */}
+              {(isCollapsed || expandedCategories.includes(category)) && (
+                <div className="space-y-1">
+                  {items.map((item) => (
+                    <NavItem
+                      key={item.id}
+                      item={item}
+                      isCollapsed={isCollapsed}
+                      isActive={isCurrentPage(item.href)}
+                      isFavorite={favorites.includes(item.id)}
+                      onToggleFavorite={toggleFavorite}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-          )}
+          ))}
         </div>
       </div>
-    </TooltipProvider>
+
+      {/* Footer */}
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+        {!isCollapsed && (
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            <div className="flex items-center gap-1">
+              <Compass className="h-3 w-3" />
+              <span>Navegação Inteligente</span>
+            </div>
+            <div className="mt-1">
+              {selectedBar?.nome || 'Nenhum bar selecionado'}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 
@@ -600,30 +598,8 @@ function NavItem({
     </div>
   )
 
-  if (isCollapsed) {
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <a href={item.href} className="block">
-            {content}
-          </a>
-        </TooltipTrigger>
-        <TooltipContent side="right">
-          <div className="space-y-1">
-            <p className="font-medium">{item.title}</p>
-            {item.description && (
-              <p className="text-xs text-gray-600 dark:text-gray-400">
-                {item.description}
-              </p>
-            )}
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    )
-  }
-
   return (
-    <a href={item.href} className="block">
+    <a href={item.href} className="block" title={isCollapsed ? item.title : undefined}>
       {content}
     </a>
   )
