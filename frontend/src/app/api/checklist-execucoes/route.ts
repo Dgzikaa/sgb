@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
         .single()
 
       const { data: userData } = await supabase
-        .from('usuarios_sistema')
+        .from('usuarios_bar')
         .select('nome')
         .eq('id', responsavel_id)
         .single()
@@ -200,7 +200,7 @@ export async function GET(request: NextRequest) {
           setor,
           tipo
         ),
-        usuarios_sistema:responsavel_id (
+        usuarios_bar:responsavel_id (
           nome,
           email
         )

@@ -226,21 +226,32 @@ export async function GET(request: NextRequest) {
     
     const supabase = await getAdminClient()
     
-    // Construir query base
+    // Construir query base - CORRIGIDO: usar usuarios_bar ao invés de usuarios_sistema
     let query = supabase
       .from('notificacoes')
       .select(`
-        *,
-        criada_por_usuario:usuarios_sistema!criada_por (nome, email)
+        id,
+        usuario_id,
+        tipo,
+        titulo,
+        mensagem,
+        dados,
+        status,
+        canais,
+        agendada_para,
+        enviada_em,
+        lida_em,
+        criada_em,
+        bar_id
       `)
       .eq('bar_id', user.bar_id.toString())
 
-    // Filtrar por usuário específico ou role
+    // Filtrar por usuário específico
     if (data.usuario_id) {
       query = query.eq('usuario_id', data.usuario_id)
     } else {
-      // Mostrar notificações para o usuário logado ou sua role
-      query = query.or(`usuario_id.eq.${user.user_id},role_alvo.eq.${user.role}`)
+      // Mostrar todas as notificações do bar (temporariamente)
+      // query = query.eq('usuario_id', user.user_id)
     }
 
     // Aplicar filtros

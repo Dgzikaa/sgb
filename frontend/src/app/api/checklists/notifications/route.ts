@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
             titulo, responsaveis_whatsapp, notificacoes_ativas
           )
         ),
-        funcionario:usuarios_sistema!funcionario_id (
+        funcionario:usuarios_bar!funcionario_id (
           nome, email, telefone
         ),
         agendamento:checklist_schedules (
@@ -162,7 +162,7 @@ export async function GET(request: NextRequest) {
         checklist_execucao:checklist_execucoes (
           checklist:checklists (nome, setor)
         ),
-        enviado_por_usuario:usuarios_sistema!enviado_por (nome, email)
+        enviado_por_usuario:usuarios_bar!enviado_por (nome, email)
       `)
       .eq('bar_id', user.bar_id)
       .order('created_at', { ascending: false })
@@ -227,7 +227,7 @@ async function determinarDestinatarios(supabase: any, execucao: any, customizado
   // 3. Destinatários padrão do sistema (administradores)
   if (destinatarios.length === 0 && barId) {
     const { data: admins } = await supabase
-      .from('usuarios_sistema')
+              .from('usuarios_bar')
       .select('nome, telefone')
       .eq('bar_id', barId)
       .eq('role', 'admin')

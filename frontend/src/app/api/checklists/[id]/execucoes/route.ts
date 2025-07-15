@@ -51,7 +51,7 @@ export async function POST(
     // Verificar se funcionário existe (se especificado)
     const funcionarioId = data.funcionario_responsavel || user.user_id
     const { data: funcionario, error: funcionarioError } = await supabase
-      .from('usuarios_sistema')
+              .from('usuarios_bar')
       .select('id, nome, role')
       .eq('id', funcionarioId)
       .eq('bar_id', user.bar_id)
@@ -108,8 +108,8 @@ export async function POST(
       .select(`
         *,
         checklist:checklists!checklist_id (nome, setor, tipo),
-        funcionario:usuarios_sistema!funcionario_id (nome, email),
-        iniciado_por_usuario:usuarios_sistema!iniciado_por (nome, email)
+        funcionario:usuarios_bar!funcionario_id (nome, email),
+        iniciado_por_usuario:usuarios_bar!iniciado_por (nome, email)
       `)
       .single()
 
@@ -192,8 +192,8 @@ export async function GET(
       .select(`
         *,
         checklist:checklists!checklist_id (nome, setor, tipo),
-        funcionario:usuarios_sistema!funcionario_id (nome, email),
-        iniciado_por_usuario:usuarios_sistema!iniciado_por (nome, email)
+        funcionario:usuarios_bar!funcionario_id (nome, email),
+        iniciado_por_usuario:usuarios_bar!iniciado_por (nome, email)
       `)
       .eq('checklist_id', checklistId)
 

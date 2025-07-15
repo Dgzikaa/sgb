@@ -65,8 +65,8 @@ export async function GET(
       .from('checklists')
       .select(`
         *,
-        criado_por:usuarios_sistema!criado_por (nome, email),
-        atualizado_por:usuarios_sistema!atualizado_por (nome, email),
+        criado_por:usuarios_bar!criado_por (nome, email),
+        atualizado_por:usuarios_bar!atualizado_por (nome, email),
         template_origem:checklist_templates!template_origem (nome, categoria)
       `)
       .eq('id', id)
@@ -86,7 +86,7 @@ export async function GET(
         .from('checklist_historico')
         .select(`
           *,
-          usuario:usuarios_sistema!usuario_id (nome, email)
+          usuario:usuarios_bar!usuario_id (nome, email)
         `)
         .eq('checklist_id', id)
         .order('criado_em', { ascending: false })
@@ -234,8 +234,8 @@ export async function PUT(
       .eq('bar_id', user.bar_id) // Filtro de segurança
       .select(`
         *,
-        criado_por:usuarios_sistema!criado_por (nome, email),
-        atualizado_por:usuarios_sistema!atualizado_por (nome, email)
+        criado_por:usuarios_bar!criado_por (nome, email),
+        atualizado_por:usuarios_bar!atualizado_por (nome, email)
       `)
       .single()
 

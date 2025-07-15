@@ -119,8 +119,8 @@ export async function POST(
       .eq('bar_id', user.bar_id)
       .select(`
         *,
-        criado_por:usuarios_sistema!criado_por (nome, email),
-        atualizado_por:usuarios_sistema!atualizado_por (nome, email)
+        criado_por:usuarios_bar!criado_por (nome, email),
+        atualizado_por:usuarios_bar!atualizado_por (nome, email)
       `)
       .single()
 
@@ -199,7 +199,7 @@ export async function GET(
         comentario,
         criado_em,
         tipo_mudanca,
-        usuario:usuarios_sistema!usuario_id (nome, email)
+        usuario:usuarios_bar!usuario_id (nome, email)
       `)
       .eq('checklist_id', id)
       .neq('versao', 0) // Excluir marcadores especiais

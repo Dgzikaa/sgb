@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
 
     // Buscar usuário admin
     const { data: adminUser } = await supabase
-      .from('usuarios_sistema')
+              .from('usuarios_bar')
       .select('id')
       .eq('email', 'admin@ordinario.com')
       .single()

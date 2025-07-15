@@ -62,8 +62,8 @@ export async function GET(
         checklist:checklists!checklist_id (
           id, nome, setor, tipo, tempo_estimado, estrutura
         ),
-        funcionario:usuarios_sistema!funcionario_id (id, nome, email),
-        iniciado_por_usuario:usuarios_sistema!iniciado_por (nome, email)
+        funcionario:usuarios_bar!funcionario_id (id, nome, email),
+        iniciado_por_usuario:usuarios_bar!iniciado_por (nome, email)
       `)
       .eq('id', execucaoId)
       .single()
@@ -183,7 +183,7 @@ export async function PUT(
       .select(`
         *,
         checklist:checklists!checklist_id (nome, setor, tipo),
-        funcionario:usuarios_sistema!funcionario_id (nome, email)
+        funcionario:usuarios_bar!funcionario_id (nome, email)
       `)
       .single()
 

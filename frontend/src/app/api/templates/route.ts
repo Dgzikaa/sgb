@@ -274,7 +274,7 @@ export async function GET(request: NextRequest) {
       .from('checklist_templates')
       .select(`
         *,
-        criado_por:usuarios_sistema!criado_por (nome, email),
+        criado_por:usuarios_bar!criado_por (nome, email),
         template_tags (
           template_tags (nome, cor)
         )

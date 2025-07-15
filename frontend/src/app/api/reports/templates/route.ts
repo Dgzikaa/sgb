@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
       .from('relatorios_templates')
       .select(`
         *,
-        criado_por_usuario:usuarios_sistema!criado_por (nome, email)
+        criado_por_usuario:usuarios_bar!criado_por (nome, email)
       `)
       .eq('ativo', true)
 

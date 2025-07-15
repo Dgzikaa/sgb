@@ -171,7 +171,7 @@ export async function POST(request: NextRequest) {
       .select(`
         *,
         checklist:checklists (nome, setor),
-        criado_por_usuario:usuarios_sistema!criado_por (nome, email)
+        criado_por_usuario:usuarios_bar!criado_por (nome, email)
       `)
       .single()
 

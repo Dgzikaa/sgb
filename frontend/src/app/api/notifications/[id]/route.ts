@@ -34,7 +34,7 @@ export async function GET(
       .from('notificacoes')
       .select(`
         *,
-        criada_por_usuario:usuarios_sistema!criada_por (nome, email),
+        usuario:usuarios_bar!usuario_id (nome, email, role),
         logs:notificacoes_logs (
           canal, status, tentativa, tentado_em, erro_detalhes
         )

@@ -115,8 +115,8 @@ export async function POST(request: NextRequest) {
       .select(`
         *,
         checklist:checklists!checklist_id (nome, setor, tipo),
-        funcionario:usuarios_sistema!funcionario_id (nome, email, cargo),
-        criado_por_usuario:usuarios_sistema!criado_por (nome)
+        funcionario:usuarios_bar!funcionario_id (nome, email, cargo),
+        criado_por_usuario:usuarios_bar!criado_por (nome)
       `)
       .single()
 
@@ -186,8 +186,8 @@ export async function GET(request: NextRequest) {
       .select(`
         *,
         checklist:checklists!checklist_id (nome, setor, tipo, tempo_estimado),
-        funcionario:usuarios_sistema!funcionario_id (nome, email, cargo),
-        criado_por_usuario:usuarios_sistema!criado_por (nome)
+        funcionario:usuarios_bar!funcionario_id (nome, email, cargo),
+        criado_por_usuario:usuarios_bar!criado_por (nome)
       `)
       .eq('bar_id', user.bar_id)
 

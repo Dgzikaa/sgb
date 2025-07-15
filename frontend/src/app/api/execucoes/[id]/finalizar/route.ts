@@ -43,7 +43,7 @@ export async function POST(
       .select(`
         *,
         checklist:checklists!checklist_id (nome, setor, tipo, estrutura),
-        funcionario:usuarios_sistema!funcionario_id (nome, email)
+        funcionario:usuarios_bar!funcionario_id (nome, email)
       `)
       .eq('id', execucaoId)
       .single()
@@ -116,8 +116,8 @@ export async function POST(
       .select(`
         *,
         checklist:checklists!checklist_id (nome, setor, tipo),
-        funcionario:usuarios_sistema!funcionario_id (nome, email),
-        finalizado_por_usuario:usuarios_sistema!finalizado_por (nome, email)
+        funcionario:usuarios_bar!funcionario_id (nome, email),
+        finalizado_por_usuario:usuarios_bar!finalizado_por (nome, email)
       `)
       .single()
 

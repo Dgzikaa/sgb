@@ -98,7 +98,7 @@ async function calcularMetricasGerais(supabase: any, barId: string, dataInicio: 
     .select(`
       *,
       checklist:checklists!checklist_id (nome, setor, tipo),
-      funcionario:usuarios_sistema!funcionario_id (nome, cargo)
+              funcionario:usuarios_bar!funcionario_id (nome, cargo)
     `)
     .gte('iniciado_em', dataInicio.toISOString())
     .lte('iniciado_em', dataFim.toISOString())
@@ -158,7 +158,7 @@ async function calcularRankingFuncionarios(
       tempo_total_minutos,
       iniciado_em,
       finalizado_em,
-      funcionario:usuarios_sistema!funcionario_id (nome, email, cargo, setor)
+              funcionario:usuarios_bar!funcionario_id (nome, email, cargo, setor)
     `)
     .gte('iniciado_em', dataInicio.toISOString())
     .lte('iniciado_em', dataFim.toISOString())
@@ -322,7 +322,7 @@ async function buscarAlertas(supabase: any, barId: string) {
     .select(`
       *,
       checklist:checklists!checklist_id (nome),
-      funcionario:usuarios_sistema!funcionario_id (nome)
+      funcionario:usuarios_bar!funcionario_id (nome)
     `)
     .eq('bar_id', barId)
     .eq('status', 'agendado')
@@ -351,7 +351,7 @@ async function buscarAlertas(supabase: any, barId: string) {
       funcionario_id,
       status,
       score_final,
-      funcionario:usuarios_sistema!funcionario_id (nome)
+      funcionario:usuarios_bar!funcionario_id (nome)
     `)
     .eq('bar_id', barId)
     .gte('iniciado_em', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
@@ -463,7 +463,7 @@ async function calcularEstatisticasPorCargo(supabase: any, barId: string, dataIn
     .select(`
       status,
       score_final,
-      funcionario:usuarios_sistema!funcionario_id (cargo)
+              funcionario:usuarios_bar!funcionario_id (cargo)
     `)
     .gte('iniciado_em', dataInicio.toISOString())
     .lte('iniciado_em', dataFim.toISOString())

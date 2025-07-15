@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       .from('usuario_eventos')
       .select(`
         *,
-        usuarios_sistema(nome, email),
+        usuarios_bar(nome, email),
         bars(nome)
       `)
       .eq('bar_id', parseInt(barId))

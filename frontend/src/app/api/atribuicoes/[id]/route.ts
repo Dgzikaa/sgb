@@ -52,8 +52,8 @@ export async function GET(
         checklist:checklists!checklist_id (
           id, nome, setor, tipo, tempo_estimado, estrutura
         ),
-        funcionario:usuarios_sistema!funcionario_id (id, nome, email, cargo),
-        criado_por_usuario:usuarios_sistema!criado_por (nome, email)
+        funcionario:usuarios_bar!funcionario_id (id, nome, email, cargo),
+        criado_por_usuario:usuarios_bar!criado_por (nome, email)
       `)
       .eq('id', atribuicaoId)
       .eq('bar_id', user.bar_id)
@@ -170,8 +170,8 @@ export async function PUT(
       .select(`
         *,
         checklist:checklists!checklist_id (nome, setor, tipo),
-        funcionario:usuarios_sistema!funcionario_id (nome, email, cargo),
-        atualizado_por_usuario:usuarios_sistema!atualizado_por (nome)
+        funcionario:usuarios_bar!funcionario_id (nome, email, cargo),
+        atualizado_por_usuario:usuarios_bar!atualizado_por (nome)
       `)
       .single()
 
@@ -413,7 +413,7 @@ async function buscarFuncionariosElegiveis(
   setor?: string
 ) {
   let query = supabase
-    .from('usuarios_sistema')
+            .from('usuarios_bar')
     .select('id, nome, email, cargo')
     .eq('bar_id', barId)
     .eq('ativo', true)
