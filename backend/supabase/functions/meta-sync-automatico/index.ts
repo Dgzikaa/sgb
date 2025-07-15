@@ -63,7 +63,7 @@ async function getWebhookUrl(supabase: any, barId: number, webhookType: string =
 // === CONSTANTES E CONFIGURAÇÕES ===
 const CONFIG = {
   BAR_ID: 3,
-  TARGET_ACCOUNT_ID: 'act_943600147532423', // Conta publicitária do Ordinário
+  TARGET_ACCOUNT_ID: 'act_1153081576486761', // Conta publicitária correta do Ads Manager
   FALLBACK_WEBHOOK: 'https://discord.com/api/webhooks/1391538130737303674/V6WiwfJodQT3C7WqdJTpmyaOLJByuKR8KZwtxW9ATmEqo0N4Msh73pF7PmOEVc12hx75',
   FACEBOOK_API_VERSION: 'v18.0',
   INSIGHTS_DAYS: 30
@@ -426,45 +426,48 @@ async function coletarCampanhas(config: MetaCredentials, barId: number, supabase
       .eq('bar_id', barId)
       .single()
     
-    // Business ID não é obrigatório para buscar campanhas via me/adaccounts
+    // Usar ad_account_id direto da configuração
+    const adAccountId = credenciais.configuracoes.ad_account_id || CONFIG.TARGET_ACCOUNT_ID
     const businessId = credenciais.configuracoes.business_id || 'N/A'
-    console.log(`🏢 Business ID configurado: ${businessId} (usando me/adaccounts para maior compatibilidade)`)
+    console.log(`🎯 Ad Account ID configurado: ${adAccountId}`)
+    console.log(`🏢 Business ID configurado: ${businessId}`)
     
-    // Buscar ad accounts diretas do usuário (mais confiável que business/owned_ad_accounts)
-    console.log('🔍 Buscando ad accounts via me/adaccounts...')
-    const adAccountsUrl = `https://graph.facebook.com/v18.0/me/adaccounts?fields=id,name,account_status,currency,timezone_name,balance,amount_spent,spend_cap&access_token=${config.access_token}`
-    const adAccountsResponse = await fetch(adAccountsUrl)
+    // Verificar se a ad account existe e está acessível
+    console.log('🔍 Verificando acesso à ad account...')
+    const accountInfoUrl = `https://graph.facebook.com/v18.0/${adAccountId}?fields=id,name,account_status,currency,timezone_name,balance,amount_spent,spend_cap&access_token=${config.access_token}`
+    const accountInfoResponse = await fetch(accountInfoUrl)
     
-    if (!adAccountsResponse.ok) {
-      const error: any = await adAccountsResponse.json()
-      console.log('⚠️ Erro ao buscar ad accounts:', error)
+    if (!accountInfoResponse.ok) {
+      const error: any = await accountInfoResponse.json()
+      console.log('⚠️ Erro ao acessar ad account:', error)
+      
+      // Buscar todas as ad accounts como fallback
+      console.log('🔍 Buscando todas as ad accounts como fallback...')
+      const allAccountsUrl = `https://graph.facebook.com/v18.0/me/adaccounts?fields=id,name,account_status&access_token=${config.access_token}`
+      const allAccountsResponse = await fetch(allAccountsUrl)
+      
+      if (allAccountsResponse.ok) {
+        const allAccountsData = await allAccountsResponse.json()
+        const allAdAccounts = allAccountsData.data || []
+        console.log(`📊 Ad accounts disponíveis:`)
+        allAdAccounts.forEach((acc: any) => console.log(`   - ${acc.id}: ${acc.name}`))
+        
+        return { 
+          campaigns: [], 
+          ad_accounts: [], 
+          ads: [], 
+          error: `Ad account ${adAccountId} não acessível`,
+          available_accounts: allAdAccounts.map((acc: any) => `${acc.id}: ${acc.name}`)
+        }
+      }
+      
       return { campaigns: [], ad_accounts: [], ads: [], error: error.error }
     }
     
-    const adAccountsData = await adAccountsResponse.json()
-    const allAdAccounts = adAccountsData.data || []
-    console.log(`📊 Encontradas ${allAdAccounts.length} ad accounts totais`)
+    const accountInfo = await accountInfoResponse.json()
+    console.log(`✅ Ad account acessível: ${accountInfo.id} - ${accountInfo.name}`)
     
-    // Filtrar apenas a conta específica do Ordinário
-    const adAccounts = allAdAccounts.filter((account: any) => {
-      return account.id === CONFIG.TARGET_ACCOUNT_ID || 
-             account.name?.toLowerCase().includes('ordinário') ||
-             account.name?.toLowerCase().includes('ordinario')
-    })
-    
-    console.log(`🎯 Contas filtradas para o Ordinário: ${adAccounts.length}`)
-    adAccounts.forEach((acc: any) => console.log(`   - ${acc.id}: ${acc.name}`))
-    
-    if (adAccounts.length === 0) {
-      return { 
-        campaigns: [], 
-        ad_accounts: [], 
-        ads: [], 
-        message: 'Nenhuma ad account do Ordinário encontrada',
-        all_accounts_found: allAdAccounts.length,
-        available_accounts: allAdAccounts.map((acc: any) => `${acc.id}: ${acc.name}`)
-      }
-    }
+    const adAccounts = [accountInfo] // Usar apenas a account configurada
     
     // Coletar DADOS COMPLETOS de todas as ad accounts
     const allCampaigns = []
