@@ -9,7 +9,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTheme } from '@/contexts/ThemeContext'
 import { CommandPaletteSearchPlaceholder, CommandPaletteIconTrigger } from '@/components/ui/command-palette-trigger'
-import NotificationCenter from '@/components/NotificationCenter'
+import { NotificationCenter } from '@/components/NotificationCenter'
 
 // Mapeamento de rotas para breadcrumbs
 const routeMapping: Record<string, { name: string; icon?: React.ComponentType<{ className?: string }> }> = {
@@ -208,12 +208,7 @@ export function DarkHeader() {
           
           {/* Notificações */}
           <div className="relative">
-            <NotificationCenter 
-              className="flex items-center gap-2 px-2 py-1 rounded-md text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-              showUnreadCount={true}
-              autoRefresh={true}
-              refreshInterval={30000}
-            />
+            <NotificationCenter />
           </div>
 
           {/* Seletor de Bar */}
