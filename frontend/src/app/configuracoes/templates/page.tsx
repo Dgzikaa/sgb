@@ -93,11 +93,11 @@ export default function TemplatesPage() {
   
   // Filtros
   const [busca, setBusca] = useState('')
-  const [categoriaFiltro, setCategoriaFiltro] = useState('')
-  const [setorFiltro, setSetorFiltro] = useState('')
-  const [tipoFiltro, setTipoFiltro] = useState('')
-  const [publicoFiltro, setPublicoFiltro] = useState('')
-  const [predefinidoFiltro, setPredefinidoFiltro] = useState('')
+  const [categoriaFiltro, setCategoriaFiltro] = useState('all')
+  const [setorFiltro, setSetorFiltro] = useState('all')
+  const [tipoFiltro, setTipoFiltro] = useState('all')
+  const [publicoFiltro, setPublicoFiltro] = useState('all')
+  const [predefinidoFiltro, setPredefinidoFiltro] = useState('all')
 
   useEffect(() => {
     carregarTemplates()
@@ -110,11 +110,11 @@ export default function TemplatesPage() {
       
       const params = new URLSearchParams()
       if (busca) params.append('busca', busca)
-      if (categoriaFiltro) params.append('categoria', categoriaFiltro)
-      if (setorFiltro) params.append('setor', setorFiltro)
-      if (tipoFiltro) params.append('tipo', tipoFiltro)
-      if (publicoFiltro) params.append('publico', publicoFiltro)
-      if (predefinidoFiltro) params.append('predefinido', predefinidoFiltro)
+      if (categoriaFiltro && categoriaFiltro !== 'all') params.append('categoria', categoriaFiltro)
+      if (setorFiltro && setorFiltro !== 'all') params.append('setor', setorFiltro)
+      if (tipoFiltro && tipoFiltro !== 'all') params.append('tipo', tipoFiltro)
+      if (publicoFiltro && publicoFiltro !== 'all') params.append('publico', publicoFiltro)
+      if (predefinidoFiltro && predefinidoFiltro !== 'all') params.append('predefinido', predefinidoFiltro)
 
       const response = await api.get(`/api/templates?${params.toString()}`)
       
@@ -220,11 +220,11 @@ export default function TemplatesPage() {
 
   const limparFiltros = () => {
     setBusca('')
-    setCategoriaFiltro('')
-    setSetorFiltro('')
-    setTipoFiltro('')
-    setPublicoFiltro('')
-    setPredefinidoFiltro('')
+    setCategoriaFiltro('all')
+    setSetorFiltro('all')
+    setTipoFiltro('all')
+    setPublicoFiltro('all')
+    setPredefinidoFiltro('all')
   }
 
   const getCategoriaColor = (categoria: string) => {
@@ -426,7 +426,7 @@ export default function TemplatesPage() {
                     <SelectValue placeholder="Categoria" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todas</SelectItem>
+                    <SelectItem value="all">Todas</SelectItem>
                     <SelectItem value="operacional">Operacional</SelectItem>
                     <SelectItem value="qualidade">Qualidade</SelectItem>
                     <SelectItem value="seguranca">Segurança</SelectItem>
@@ -441,7 +441,7 @@ export default function TemplatesPage() {
                     <SelectValue placeholder="Tipo" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos</SelectItem>
+                    <SelectItem value="all">Todos</SelectItem>
                     <SelectItem value="abertura">Abertura</SelectItem>
                     <SelectItem value="fechamento">Fechamento</SelectItem>
                     <SelectItem value="diario">Diário</SelectItem>
@@ -455,7 +455,7 @@ export default function TemplatesPage() {
                     <SelectValue placeholder="Visibilidade" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos</SelectItem>
+                    <SelectItem value="all">Todos</SelectItem>
                     <SelectItem value="true">Públicos</SelectItem>
                     <SelectItem value="false">Privados</SelectItem>
                   </SelectContent>

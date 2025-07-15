@@ -253,7 +253,27 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
           href: '/configuracoes/checklists',
           category: 'config',
           importance: 'medium',
-          keywords: ['checklists', 'configurar', 'templates']
+          keywords: ['checklists', 'configurar', 'templates'],
+          subItems: [
+            {
+              id: 'checklists-manage',
+              title: 'Gerenciar Checklists',
+              icon: CheckCircle,
+              href: '/configuracoes/checklists',
+              category: 'config',
+              importance: 'medium',
+              keywords: ['checklists', 'gerenciar']
+            },
+            {
+              id: 'templates',
+              title: 'Templates',
+              icon: FileText,
+              href: '/configuracoes/templates',
+              category: 'config',
+              importance: 'medium',
+              keywords: ['templates', 'modelos', 'documentos']
+            }
+          ]
         },
         {
           id: 'integracoes',

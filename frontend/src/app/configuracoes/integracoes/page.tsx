@@ -1576,8 +1576,8 @@ export default function IntegracoesPage() {
                 {/* Ações */}
                 <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <Button
-                    onClick={() => window.location.href = '/configuracoes/meta-configuracao'}
-                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white flex items-center gap-2"
+                    variant="outline"
+                    className="flex items-center gap-2"
                   >
                     <Settings className="w-4 h-4" />
                     Configurações Avançadas

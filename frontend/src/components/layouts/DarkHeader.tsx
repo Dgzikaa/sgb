@@ -42,7 +42,7 @@ const routeMapping: Record<string, { name: string; icon?: React.ComponentType<{ 
   '/configuracoes/seguranca': { name: 'Segurança' },
   '/configuracoes/whatsapp': { name: 'WhatsApp' },
   '/configuracoes/contahub-automatico': { name: 'ContaHub Auto' },
-  '/configuracoes/meta-configuracao': { name: 'Meta Config' },
+  
   '/configuracoes/templates': { name: 'Templates' },
   
   // Outras páginas

@@ -57,36 +57,53 @@ export default function Marketing360Page() {
   const loadData = async () => {
     setLoading(true)
     try {
-      // Simular carregamento de dados
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      console.log('🚀 Carregando dados reais do Marketing 360°...')
       
-      // Em produção, aqui você faria as chamadas reais para as APIs
-      const mockData = {
+      // Buscar dados reais da API Meta Marketing 360°
+      const response = await fetch('/api/meta/marketing-360')
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const result = await response.json()
+      
+      if (result.success && result.data) {
+        console.log('✅ Dados reais carregados:', result.debug)
+        setData(result.data)
+      } else {
+        throw new Error(result.error || 'Erro ao carregar dados')
+      }
+      
+    } catch (error) {
+      console.error('❌ Erro ao carregar dados reais:', error)
+      
+      // Fallback para dados simulados em caso de erro
+      console.log('⚠️ Usando fallback para dados simulados')
+      const fallbackData = {
         metrics: {
           total_followers: 8750,
           engagement_rate: 4.2,
           weekly_reach: 28500,
           roi_estimate: 320,
-          facebook: { followers: 4200, engagement: 180, reach: 15000, posts: 12 },
-          instagram: { followers: 4550, engagement: 220, reach: 13500, posts: 18 }
+          facebook: { followers: 4200, engagement: 4.8, reach: 15000, posts: 12 },
+          instagram: { followers: 4550, engagement: 3.8, reach: 13500, posts: 18 }
         },
         campaigns: {
-          active_campaigns: 3,
-          total_spend: 2400,
+          active_campaigns: 2,
+          total_spend: 850,
           total_clicks: 1850,
           conversion_rate: 3.8
         },
         goals: {
-          followers_target: 10000,
-          engagement_target: 6.0,
-          reach_target: 50000,
+          followers_target: 15000,
+          engagement_target: 5.5,
+          reach_target: 100000,
           roi_target: 400
         }
       }
       
-      setData(mockData)
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error)
+      setData(fallbackData)
     } finally {
       setLoading(false)
     }

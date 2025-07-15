@@ -123,16 +123,6 @@ export default function ConfiguracoesPage() {
       color: 'orange'
     },
     {
-      id: 'templates',
-      title: 'Templates',
-      description: 'Gerencie templates de documentos e relatórios',
-      icon: <FileText className="w-6 h-6" />,
-      route: '/configuracoes/templates',
-      status: 'active',
-      badge: 'Disponível',
-      color: 'indigo'
-    },
-    {
       id: 'contahub',
       title: 'ContaHub Automático',
       description: 'Configure coleta automática de dados financeiros',
@@ -141,16 +131,6 @@ export default function ConfiguracoesPage() {
       status: 'active',
       badge: 'Automático',
       color: 'cyan'
-    },
-    {
-      id: 'meta-config',
-      title: 'Meta Configuração',
-      description: 'Configure integração e automação com Meta/Facebook',
-      icon: <Globe className="w-6 h-6" />,
-      route: '/configuracoes/meta-configuracao',
-      status: 'active',
-      badge: 'Integrado',
-      color: 'blue'
     }
   ]
 
