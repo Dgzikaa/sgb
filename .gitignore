@@ -1,3 +1,7 @@
+# Nunca subir segredos!
+backend/supabase/functions/sync-recipes-insumos/credentials.json
+frontend/src/lib/googleAuth.ts
+
 # Dependencies
 node_modules/
 /.pnp
