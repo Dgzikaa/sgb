@@ -19,10 +19,10 @@ export async function POST(req: NextRequest) {
     // 2. Inicializar Google Sheets
     // ID da planilha fornecida
     const doc = new GoogleSpreadsheet('1klPn-uVLKeoJ9UA9TkiSYqa7sV7NdUdDEELdgd1q4b8');
-    await doc.useServiceAccountAuth({
-      client_email: serviceAccount.client_email,
-      private_key: serviceAccount.private_key,
-    });
+    await doc.useServiceAccountAuth(
+      serviceAccount.client_email,
+      serviceAccount.private_key
+    );
     await doc.loadInfo();
 
     // 3. Ler as abas corretas
