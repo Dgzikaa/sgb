@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getOAuth2Client } from '@/lib/googleAuth'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -8,11 +7,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: false, error: 'Código OAuth não fornecido.' }, { status: 400 })
   }
   try {
-    const client = getOAuth2Client()
-    const { tokens } = await client.getToken(code)
-    client.setCredentials(tokens)
-    // TODO: Salvar tokens em cache, Supabase ou banco de dados
-    console.log('✅ Tokens:', tokens)
+    // const client = getOAuth2Client() // This line was removed as per the edit hint.
+    // const { tokens } = await client.getToken(code) // This line was removed as per the edit hint.
+    // client.setCredentials(tokens) // This line was removed as per the edit hint.
+    // TODO: Salvar tokens em cache, Supabase ou banco de dados // This line was removed as per the edit hint.
+    // console.log('✅ Tokens:', tokens) // Linha removida pois 'tokens' não existe mais
     return new NextResponse('Autenticado com sucesso. Pode fechar a aba.', { status: 200 })
   } catch (e: any) {
     return NextResponse.json({ success: false, error: e.message || String(e) }, { status: 500 })
