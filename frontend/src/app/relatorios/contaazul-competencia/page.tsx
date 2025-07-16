@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { StandardPageLayout } from '@/components/layouts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ChevronDownIcon, ChevronRightIcon } from 'lucide-react'
+import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useRef } from 'react'
 import { AdvancedDataTable } from '@/components/ui/advanced-datatable'
 
@@ -108,68 +108,59 @@ export default function DREOrdinarioPage() {
     setGruposAbertos(prev => prev.includes(nome) ? prev.filter(g => g !== nome) : [...prev, nome])
   }
 
-  // Mapeamento de cálculo para cada indicador/linha
-  const MAPA_INDICADORES: Record<string, (mes: any) => number | string> = {
-    // Indicadores Estratégicos
-    'Faturamento Total': (mes) => {
-      const receitas = [
-        'Stone Crédito', 'Stone Débito', 'Stone Pix', 'Pix Direto na Conta', 'Dinheiro', 'Receita de Eventos', 'Outras Receitas'
-      ];
-      return receitas.reduce((acc, cat) => acc + (mes.categorias[cat] || 0), 0);
-    },
-    'Faturamento Couvert': (mes) => mes.categorias['Receita de Eventos'] || 0,
-    'Faturamento Bar': (mes) => {
-      const bar = ['Stone Crédito', 'Stone Débito', 'Stone Pix', 'Pix Direto na Conta', 'Dinheiro'];
-      return bar.reduce((acc, cat) => acc + (mes.categorias[cat] || 0), 0);
-    },
-    'Faturamento CMvível': (mes) => mes.categorias['Outras Receitas'] || 0,
-    'CMV R$': (mes) => {
-      const cmv = ['Custo Drinks', 'Custo Bebidas', 'Custo Comida', 'Custo Outros'];
-      return cmv.reduce((acc, cat) => acc + (mes.categorias[cat] || 0), 0);
-    },
-    // Exemplo de percentual: CMV Global Real = CMV R$ / Faturamento Total
-    'CMV Global Real': (mes) => {
-      const cmv = MAPA_INDICADORES['CMV R$'](mes) as number;
-      const fat = MAPA_INDICADORES['Faturamento Total'](mes) as number;
-      if (!fat) return '-';
-      return ((cmv / fat) * 100).toFixed(1) + '%';
-    },
-    // Cockpit Financeiro
-    'Imposto': (mes) => mes.categorias['IMPOSTO'] || 0,
-    'Comissão': (mes) => mes.categorias['COMISSÃO 10%'] || 0,
-    'CMV': (mes) => MAPA_INDICADORES['CMV R$'](mes),
-    'CMO': (mes) => mes.categorias['CMO'] || 0,
-    'PRO LABORE': (mes) => mes.categorias['PRO LABORE'] || 0,
-    'Ocupação': (mes) => {
-      const ocup = ['ALUGUEL/CONDOMÍNIO/IPTU', 'ÁGUA', 'MANUTENÇÃO', 'INTERNET', 'GÁS', 'LUZ'];
-      return ocup.reduce((acc, cat) => acc + (mes.categorias[cat] || 0), 0);
-    },
-    'Adm Fixo': (mes) => mes.categorias['Administrativo Ordinário'] || 0,
-    'Marketing Fixo': (mes) => mes.categorias['Marketing'] || 0,
-    'Escritório Central': (mes) => mes.categorias['Escritório Central'] || 0,
-    'Adm e Mkt da Semana': (mes) => mes.categorias['Atrações Programação'] || 0,
-    'RH+Estorno+Outros Operação': (mes) => {
-      const rh = ['Recursos Humanos', 'Estorno', 'Outros Operação'];
-      return rh.reduce((acc, cat) => acc + (mes.categorias[cat] || 0), 0);
-    },
-    'Materiais': (mes) => {
-      const mats = ['Materiais Operação', 'Materiais de Limpeza e Descartáveis'];
-      return mats.reduce((acc, cat) => acc + (mes.categorias[cat] || 0), 0);
-    },
-    'Manutenção': (mes) => mes.categorias['MANUTENÇÃO'] || 0,
-    'Atrações/Eventos': (mes) => mes.categorias['Produção Eventos'] || 0,
-    'Utensílios': (mes) => mes.categorias['Utensílios'] || 0,
-    'Consumação (sem sócio)': (mes) => 0, // Placeholder
-    'Lucro (R$)': (mes) => mes.resultado || 0,
-    // Outros indicadores: retornar '-' até integração de dados/metas
-  };
-
   return (
     <StandardPageLayout>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 py-6">
           <h1 className="card-title-dark mb-6">DRE Ordinário</h1>
-          {/* DataTable premium e grupos expansíveis serão implementados aqui */}
+          <div ref={scrollRef} className="w-full overflow-x-auto">
+            <table className="table-dark w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className="table-header-dark sticky left-0 bg-gray-50 dark:bg-gray-900 z-10">Indicador</th>
+                  {dadosMensais.map((mes: any) => (
+                    <th key={mes.ano + '-' + mes.mes} className="table-header-dark text-center">
+                      {new Date(mes.ano, mes.mes - 1).toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {GRUPOS_DRE.map(grupo => (
+                  <>
+                    {/* Linha macro do grupo (expand/recolher) */}
+                    <tr key={grupo.nome + '-total'} className="group cursor-pointer select-none" onClick={() => toggleGrupo(grupo.nome)}>
+                      <td className={`table-cell-dark sticky left-0 bg-gray-50 dark:bg-gray-900 z-10 font-bold uppercase flex items-center gap-2`} style={{ minWidth: 220 }}>
+                        {gruposAbertos.includes(grupo.nome)
+                          ? <ChevronDown className="w-4 h-4 transition-transform duration-200" />
+                          : <ChevronRight className="w-4 h-4 transition-transform duration-200" />}
+                        {grupo.nome} TOTAL
+                      </td>
+                      {dadosMensais.map((mes: any) => (
+                        <td key={mes.ano + '-' + mes.mes} className={`table-cell-dark text-right font-mono font-bold ${grupo.cor}`}>{formatarValor(totalGrupo(mes, grupo))}</td>
+                      ))}
+                    </tr>
+                    {/* Linhas detalhadas do grupo */}
+                    {gruposAbertos.includes(grupo.nome) && grupo.categorias.map(cat => (
+                      <tr key={grupo.nome + '-' + cat} className="transition-all">
+                        <td className="table-cell-dark sticky left-0 bg-gray-50 dark:bg-gray-900 z-10 pl-8">{cat}</td>
+                        {dadosMensais.map((mes: any) => (
+                          <td key={mes.ano + '-' + mes.mes} className={`table-cell-dark text-right font-mono ${grupo.cor}`}>{formatarValor(mes.categorias[cat] || 0)}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </>
+                ))}
+                {/* EBITDA */}
+                <tr>
+                  <td className="table-cell-dark sticky left-0 bg-gray-50 dark:bg-gray-900 z-10 font-bold uppercase bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-200">EBITDA</td>
+                  {dadosMensais.map((mes: any) => (
+                    <td key={mes.ano + '-' + mes.mes} className="table-cell-dark text-right font-mono font-bold bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-200">{formatarValor(totalReceitas(mes) - totalCustos(mes))}</td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </StandardPageLayout>
