@@ -23,27 +23,61 @@ export interface RegraCategoria {
 const REGRAS_MAPEAMENTO: RegraCategoria[] = [
   // RECEITAS - VENDAS
   {
+    pattern: /crédito domicílio cartão.*stone.*d[eé]bito/i,
+    categoria: 'Stone Débito',
+    tipo: 'RECEITA',
+    confianca: 98,
+    descricao: 'Vendas com cartão de débito via Stone'
+  },
+  {
     pattern: /crédito domicílio cartão.*stone/i,
-    categoria: 'VENDAS_CARTAO',
+    categoria: 'Stone Crédito',
+    tipo: 'RECEITA',
+    confianca: 98,
+    descricao: 'Vendas com cartão de crédito via Stone'
+  },
+  {
+    pattern: /pix recebido|pix \| maquininha|pix recebido -/i,
+    categoria: 'Stone Pix',
+    tipo: 'RECEITA',
+    confianca: 98,
+    descricao: 'Recebimentos via Pix (Stone ou Maquininha)'
+  },
+  {
+    pattern: /dinheiro/i,
+    categoria: 'Dinheiro',
     tipo: 'RECEITA',
     confianca: 95,
-    descricao: 'Vendas com cartão via Stone'
+    descricao: 'Recebimentos em dinheiro'
   },
   {
-    pattern: /pix recebido/i,
-    categoria: 'VENDAS_PIX',
+    pattern: /transfer[êe]ncia recebida/i,
+    categoria: 'Pix Direto na Conta',
+    tipo: 'RECEITA',
+    confianca: 95,
+    descricao: 'Transferências recebidas direto na conta'
+  },
+  {
+    pattern: /bilheteria|evento/i,
+    categoria: 'Receita de Eventos',
     tipo: 'RECEITA',
     confianca: 90,
-    descricao: 'Vendas via PIX'
+    descricao: 'Receita de eventos/bilheteria'
   },
   {
-    pattern: /transferência recebida/i,
-    categoria: 'RECEITAS_TRANSFERENCIA',
+    pattern: /patroc[ií]nio|ambev/i,
+    categoria: 'Outras Receitas',
     tipo: 'RECEITA',
-    confianca: 85,
-    descricao: 'Receitas por transferência'
+    confianca: 90,
+    descricao: 'Receitas de patrocínio'
   },
-
+  {
+    pattern: /receita/i,
+    categoria: 'Outras Receitas',
+    tipo: 'RECEITA',
+    confianca: 80,
+    descricao: 'Receitas diversas'
+  },
   // RECEITAS - ESPECIAIS
   {
     pattern: /patrocínio/i,

@@ -20,8 +20,9 @@ const Calendar: React.FC<CalendarProps> = ({
   const [currentMonth, setCurrentMonth] = React.useState(new Date())
   
   const today = new Date()
-  const selectedDate = selected as Date
-  
+  // Suporte a todos os modos de seleção
+  const selectedDate = Array.isArray(selected) ? selected[0] : selected
+
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear()
     const month = date.getMonth()
@@ -66,7 +67,7 @@ const Calendar: React.FC<CalendarProps> = ({
   }
   
   const isSelected = (date: Date) => {
-    if (!selectedDate) return false
+    if (!selectedDate || !(selectedDate instanceof Date) || isNaN(selectedDate.getTime())) return false
     return date.toDateString() === selectedDate.toDateString()
   }
   

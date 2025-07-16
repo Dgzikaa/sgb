@@ -123,15 +123,15 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
       description: 'Centro de comando completo do sistema',
       keywords: ['dashboard', 'unificado', 'centro', 'comando', 'widgets']
     },
-    {
-      id: 'visao-geral',
-      title: 'Visão Geral',
-      icon: BarChart3,
-      href: '/visao-geral',
-      category: 'main',
-      importance: 'high',
-      keywords: ['visão', 'geral', 'overview', 'métricas']
-    },
+    // {
+    //   id: 'visao-geral',
+    //   title: 'Visão Geral',
+    //   icon: BarChart3,
+    //   href: '/visao-geral',
+    //   category: 'main',
+    //   importance: 'high',
+    //   keywords: ['visão', 'geral', 'overview', 'métricas']
+    // },
     
     // Checklists
     {

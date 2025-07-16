@@ -600,3 +600,14 @@ const SUPABASE_PROJECT_ID = "uqtgsvujwcbymjmvkjhy"
 ---
 
 **IMPORTANTE**: Essas regras são OBRIGATÓRIAS e devem ser seguidas em 100% do desenvolvimento. Qualquer desvio deve ser discutido e aprovado antes da implementação. 
+
+---
+
+# REGRAS DE FLUXO DO ASSISTENTE
+
+- O assistente deve executar todas as etapas de uma tarefa composta ou sequência de ações até a conclusão, sem aguardar comandos intermediários do usuário ("bora", "vai", "continua"), exceto se:
+  - Houver ambiguidade ou múltiplos caminhos possíveis.
+  - For necessário confirmar uma decisão crítica com o usuário.
+  - O usuário pedir explicitamente para pausar ou aguardar.
+- O assistente deve sempre priorizar a conclusão autônoma das tarefas, seguindo as regras e padrões do projeto.
+- Ao finalizar qualquer tarefa, o assistente deve checar e listar o checklist de tarefas pendentes, e já iniciar a próxima tarefa automaticamente. 

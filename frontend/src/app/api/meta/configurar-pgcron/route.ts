@@ -202,7 +202,7 @@ async function testarColetaMeta(barId: string) {
     console.log(`🧪 Testando coleta META para bar ${barId}`)
 
     // Chamar a API de coleta manualmente
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'}/api/meta/auto-collect`, {
+    const response = await fetch('https://sgbv2.vercel.app/api/meta/auto-collect', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

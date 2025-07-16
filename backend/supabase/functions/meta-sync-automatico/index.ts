@@ -86,101 +86,53 @@ serve(async (req) => {
     console.log('🔍 === META SYNC AUTOMÁTICO INICIADO ===')
     console.log(`⏰ Timestamp: ${new Date().toISOString()}`)
 
-    // Inicializar Supabase
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseKey)
-
     // Bar ID padrão (pode vir do request body se necessário)
     const BAR_ID = CONFIG.BAR_ID
 
-    // Obter credenciais do Meta
-    const { data: credenciais } = await supabase
-      .from('api_credentials')
-      .select('*')
-      .eq('sistema', 'meta')
-      .eq('bar_id', BAR_ID)
-      .single()
+    // URL do endpoint centralizado de coleta
+    const collectUrl = `${Deno.env.get('NEXT_PUBLIC_SITE_URL') || 'http://localhost:3001'}/api/meta/collect`
+    console.log('🌐 Disparando coleta centralizada via:', collectUrl)
 
-    if (!credenciais || !credenciais.configuracoes) {
-      throw new Error('❌ Credenciais do Meta não encontradas')
-    }
-
-    const metaConfig: MetaCredentials = {
-      access_token: credenciais.access_token,
-      page_id: credenciais.configuracoes.page_id,
-      instagram_account_id: credenciais.configuracoes.instagram_account_id
-    }
-
-    console.log('🔑 Credenciais Meta encontradas - Page ID:', metaConfig.page_id)
-
-    // 0. VERIFICAR ACESSO ÀS PÁGINAS PRIMEIRO
-    console.log('🔍 Verificando páginas acessíveis...')
-    try {
-      const pagesUrl = `https://graph.facebook.com/v18.0/me/accounts?access_token=${metaConfig.access_token}`
-      const pagesResponse = await fetch(pagesUrl)
-      if (pagesResponse.ok) {
-        const pagesData = await pagesResponse.json()
-        console.log('📄 Páginas acessíveis:', pagesData.data?.map((p: any) => `${p.id}: ${p.name}`))
-        const hasAccess = pagesData.data?.some((p: any) => p.id === metaConfig.page_id)
-        console.log(`🎯 Acesso à página ${metaConfig.page_id}: ${hasAccess ? '✅' : '❌'}`)
-        
-        if (!hasAccess) {
-          console.warn(`⚠️ Token não tem acesso à página ${metaConfig.page_id}`)
-        }
-      }
-    } catch (e) {
-      console.warn('⚠️ Erro ao verificar páginas acessíveis:', e)
-    }
-
-    // 1. COLETAR DADOS DO FACEBOOK
-    console.log('📘 Coletando dados do Facebook...')
-    const facebookData = await coletarDadosFacebook(metaConfig)
-    
-    // 2. COLETAR DADOS DO INSTAGRAM
-    console.log('📸 Coletando dados do Instagram...')
-    const instagramData = await coletarDadosInstagram(metaConfig)
-    
-    // 3. COLETAR CAMPANHAS
-    console.log('🎯 Coletando campanhas Meta...')
-    const campaignsData = await coletarCampanhas(metaConfig, BAR_ID, supabase)
-    
-    // 4. SALVAR NO BANCO
-    console.log('💾 Salvando dados no banco...')
-    const resultadoSalvamento = await salvarDadosNoBanco(supabase, facebookData, instagramData, campaignsData, BAR_ID)
-    
-    // 5. ENVIAR NOTIFICAÇÃO DISCORD
-    console.log('📤 Enviando notificação para Discord...')
-    await enviarNotificacaoDiscord(supabase, resultadoSalvamento, facebookData, instagramData, campaignsData, BAR_ID)
-
-    return new Response(JSON.stringify({
-      success: true,
-      timestamp: new Date().toISOString(),
-      bar_id: BAR_ID,
-      facebook_data: facebookData,
-      instagram_data: instagramData,
-      campaigns_data: campaignsData,
-      resultado_salvamento: resultadoSalvamento,
-      message: '✅ Sync Meta executado com sucesso!'
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200
+    // Disparar PATCH para o endpoint de coleta
+    const response = await fetch(collectUrl, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer sgb-meta-cron-2025'
+      },
+      body: JSON.stringify({ bar_id: BAR_ID })
     })
 
-  } catch (error) {
-    console.error('❌ Erro no sync Meta:', error)
-    
-    // Tentar enviar erro para Discord
+    const result = await response.json()
+    console.log('✅ Resultado da coleta centralizada:', result)
+
+    // === CHAMAR EDGE FUNCTION DE PROCESSAMENTO ===
     try {
-      const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-      const supabase = createClient(supabaseUrl, supabaseKey)
-      
-      await enviarErroDiscord(supabase, error, 3)
-    } catch (discordError) {
-      console.error('❌ Erro ao enviar erro para Discord:', discordError)
+      const processUrl = `${Deno.env.get('SUPABASE_URL') || 'https://uqtgsvujwcbymjmvkjhy.supabase.co'}/functions/v1/meta-process`;
+      const processResponse = await fetch(processUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
+        },
+        body: JSON.stringify({ bar_id: BAR_ID, data_coleta: result?.result?.data_coleta || new Date().toISOString().split('T')[0] })
+      });
+      const processResult = await processResponse.json();
+      console.log('✅ Resultado do processamento automático:', processResult);
+    } catch (procError) {
+      console.error('❌ Erro ao chamar processamento automático:', procError);
     }
 
+    return new Response(JSON.stringify({
+      success: response.ok,
+      status: response.status,
+      result
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: response.ok ? 200 : 500
+    })
+  } catch (error) {
+    console.error('❌ Erro no sync Meta:', error)
     return new Response(JSON.stringify({
       success: false,
       error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -414,8 +366,10 @@ async function coletarDadosInstagram(config: MetaCredentials) {
   }
 }
 
-async function coletarCampanhas(config: MetaCredentials, barId: number, supabase: any) {
+async function coletarCampanhas(config: MetaCredentials & { ad_account_id?: string }, barId: number, supabase: any) {
   try {
+    const adAccountId = config.ad_account_id
+    if (!adAccountId) throw new Error('Ad Account ID não encontrado nas credenciais')
     console.log('🎯 Buscando campanhas COMPLETAS Meta Ads Manager...')
     
     // Buscar configurações de ad account
@@ -427,7 +381,6 @@ async function coletarCampanhas(config: MetaCredentials, barId: number, supabase
       .single()
     
     // Usar ad_account_id direto da configuração
-    const adAccountId = credenciais.configuracoes.ad_account_id || CONFIG.TARGET_ACCOUNT_ID
     const businessId = credenciais.configuracoes.business_id || 'N/A'
     console.log(`🎯 Ad Account ID configurado: ${adAccountId}`)
     console.log(`🏢 Business ID configurado: ${businessId}`)
@@ -479,7 +432,7 @@ async function coletarCampanhas(config: MetaCredentials, barId: number, supabase
         
         // 1. BUSCAR CAMPANHAS BÁSICAS PRIMEIRO
         console.log(`🎯 Buscando campanhas básicas da conta: ${adAccount.id}`)
-        const campaignsUrl = `https://graph.facebook.com/v18.0/${adAccount.id}/campaigns?fields=id,name,status,effective_status,objective,start_time,stop_time,daily_budget,lifetime_budget,created_time,updated_time&limit=100&access_token=${config.access_token}`
+        const campaignsUrl = `https://graph.facebook.com/${CONFIG.FACEBOOK_API_VERSION}/${adAccount.id}/campaigns?fields=id,name,status,effective_status,objective,start_time,stop_time,daily_budget,lifetime_budget,created_time,updated_time&limit=100&access_token=${config.access_token}`
         const campaignsResponse = await fetch(campaignsUrl)
         
         if (campaignsResponse.ok) {
@@ -495,7 +448,7 @@ async function coletarCampanhas(config: MetaCredentials, barId: number, supabase
             
             try {
               // Buscar insights da campanha específica
-              // Insights da campanha (CAMPOS CORRIGIDOS - DO ADS MANAGER + DATAS)
+              // Insights da campanha (CAMPOS CORRIGIDOS - EXATO DA API TEST QUE FUNCIONA)
               const adsManagerFields = [
                 'campaign_name',           // Campaign
                 'impressions',             // Impressions  
@@ -509,8 +462,6 @@ async function coletarCampanhas(config: MetaCredentials, barId: number, supabase
                 'ctr',                     // Click-through rate
                 'cpc',                     // Cost per click
                 'cpm',                     // Cost per mille
-                'cpp',                     // Cost per point
-                'frequency',               // Frequência
                 'date_start',              // Data início dos insights
                 'date_stop'                // Data fim dos insights
               ].join(',')

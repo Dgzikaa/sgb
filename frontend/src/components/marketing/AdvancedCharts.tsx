@@ -44,8 +44,13 @@ import {
   Eye,
   Target,
   Zap,
-  BarChart3
+  BarChart3,
+  Instagram,
+  Facebook,
+  MessageCircle
 } from 'lucide-react'
+import Image from 'next/image'
+import React from 'react'
 
 // ========================================
 // 🎨 CORES E TEMAS
@@ -116,15 +121,17 @@ const generatePerformanceRadar = () => [
 // 📊 COMPONENTES DE GRÁFICOS
 // ========================================
 interface AdvancedChartsProps {
-  data?: any
+  trendData?: any[] // [{ data_coleta, instagram_followers, facebook_fans, total_impressions, total_spend, total_clicks }]
+  campaignData?: any[] // [{ status, objective, spend, impressions, clicks }]
   timeRange?: 'week' | 'month' | 'quarter' | 'year'
 }
 
-export default function AdvancedCharts({ data, timeRange = 'month' }: AdvancedChartsProps) {
+export default function AdvancedCharts({ trendData, campaignData, timeRange = 'month' }: AdvancedChartsProps) {
   const [activeTab, setActiveTab] = useState('trends')
-  
+
   // Dados processados
-  const trendData = useMemo(() => generateTrendData(), [])
+  const trends = useMemo(() => trendData && trendData.length > 0 ? trendData : generateTrendData(), [trendData])
+  const campaigns = useMemo(() => campaignData && campaignData.length > 0 ? campaignData : [], [campaignData])
   const weeklyData = useMemo(() => generateWeeklyData(), [])
   const engagementData = useMemo(() => generateEngagementBreakdown(), [])
   const radarData = useMemo(() => generatePerformanceRadar(), [])
@@ -133,66 +140,39 @@ export default function AdvancedCharts({ data, timeRange = 'month' }: AdvancedCh
   // 📈 GRÁFICO DE TENDÊNCIAS
   // ========================================
   const TrendsChart = () => (
-    <Card>
+    <Card className="card-dark bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="card-title-dark flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-blue-600" />
-          Tendências de Crescimento
+          Evolução de Seguidores e Métricas
         </CardTitle>
-        <CardDescription>
-          Evolução dos seguidores nas principais plataformas
+        <CardDescription className="card-description-dark">
+          Evolução diária de seguidores, impressões, gasto e cliques
         </CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={350}>
-          <AreaChart data={trendData}>
+          <AreaChart data={trends} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <defs>
-              <linearGradient id="instagramGradient" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="igGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={CHART_COLORS.instagram} stopOpacity={0.8}/>
                 <stop offset="95%" stopColor={CHART_COLORS.instagram} stopOpacity={0.1}/>
               </linearGradient>
-              <linearGradient id="facebookGradient" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="fbGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={CHART_COLORS.facebook} stopOpacity={0.8}/>
                 <stop offset="95%" stopColor={CHART_COLORS.facebook} stopOpacity={0.1}/>
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis 
-              dataKey="mes" 
-              tick={{ fontSize: 12 }}
-              stroke="#888"
-            />
-            <YAxis 
-              tick={{ fontSize: 12 }}
-              stroke="#888"
-            />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: '#fff', 
-                border: '1px solid #e0e0e0',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-              }}
-            />
+            <CartesianGrid strokeDasharray="3 3" stroke="#2226" />
+            <XAxis dataKey="data_coleta" tick={{ fontSize: 12 }} stroke="#888" />
+            <YAxis tick={{ fontSize: 12 }} stroke="#888" />
+            <Tooltip contentStyle={{ backgroundColor: '#18181b', color: '#fff', border: '1px solid #333', borderRadius: '8px', boxShadow: '0 4px 6px -1px #0002' }} labelStyle={{ color: '#fff' }} />
             <Legend />
-            <Area
-              type="monotone"
-              dataKey="instagram_seguidores"
-              stroke={CHART_COLORS.instagram}
-              fillOpacity={1}
-              fill="url(#instagramGradient)"
-              name="Instagram"
-              strokeWidth={2}
-            />
-            <Area
-              type="monotone"
-              dataKey="facebook_seguidores"
-              stroke={CHART_COLORS.facebook}
-              fillOpacity={1}
-              fill="url(#facebookGradient)"
-              name="Facebook"
-              strokeWidth={2}
-            />
+            <Area type="monotone" dataKey="instagram_followers" stroke={CHART_COLORS.instagram} fillOpacity={1} fill="url(#igGradient)" name="Instagram" strokeWidth={2} />
+            <Area type="monotone" dataKey="facebook_fans" stroke={CHART_COLORS.facebook} fillOpacity={1} fill="url(#fbGradient)" name="Facebook" strokeWidth={2} />
+            <Area type="monotone" dataKey="total_impressions" stroke={CHART_COLORS.info} fillOpacity={0.2} fill={CHART_COLORS.info} name="Impressões" strokeDasharray="5 5" />
+            <Area type="monotone" dataKey="total_spend" stroke={CHART_COLORS.warning} fillOpacity={0.2} fill={CHART_COLORS.warning} name="Gasto" strokeDasharray="2 2" />
+            <Area type="monotone" dataKey="total_clicks" stroke={CHART_COLORS.success} fillOpacity={0.2} fill={CHART_COLORS.success} name="Cliques" strokeDasharray="2 2" />
           </AreaChart>
         </ResponsiveContainer>
       </CardContent>
@@ -203,7 +183,7 @@ export default function AdvancedCharts({ data, timeRange = 'month' }: AdvancedCh
   // 📊 GRÁFICO DE ENGAJAMENTO
   // ========================================
   const EngagementChart = () => (
-    <Card>
+    <Card className="card-dark bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Heart className="h-5 w-5 text-red-500" />
@@ -215,7 +195,7 @@ export default function AdvancedCharts({ data, timeRange = 'month' }: AdvancedCh
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={350}>
-          <ComposedChart data={trendData}>
+          <ComposedChart data={trends}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis 
               dataKey="mes" 
@@ -279,7 +259,7 @@ export default function AdvancedCharts({ data, timeRange = 'month' }: AdvancedCh
   // 🥧 BREAKDOWN DE ENGAJAMENTO
   // ========================================
   const EngagementBreakdown = () => (
-    <Card>
+    <Card className="card-dark bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Share2 className="h-5 w-5 text-purple-600" />
@@ -335,7 +315,7 @@ export default function AdvancedCharts({ data, timeRange = 'month' }: AdvancedCh
   // 🎯 RADAR DE PERFORMANCE
   // ========================================
   const PerformanceRadar = () => (
-    <Card>
+    <Card className="card-dark bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Target className="h-5 w-5 text-green-600" />
@@ -388,7 +368,7 @@ export default function AdvancedCharts({ data, timeRange = 'month' }: AdvancedCh
   // 📅 ATIVIDADE SEMANAL
   // ========================================
   const WeeklyActivity = () => (
-    <Card>
+    <Card className="card-dark bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Calendar className="h-5 w-5 text-indigo-600" />
@@ -468,7 +448,7 @@ export default function AdvancedCharts({ data, timeRange = 'month' }: AdvancedCh
 
       {/* Tabs para diferentes análises */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 border border-gray-200 dark:border-gray-700 grid w-full grid-cols-4">
           <TabsTrigger value="trends">📈 Tendências</TabsTrigger>
           <TabsTrigger value="engagement">❤️ Engajamento</TabsTrigger>
           <TabsTrigger value="breakdown">🥧 Distribuição</TabsTrigger>
@@ -540,6 +520,102 @@ export default function AdvancedCharts({ data, timeRange = 'month' }: AdvancedCh
           </div>
         </CardContent>
       </Card>
+    </div>
+  )
+} 
+
+// NOVO COMPONENTE: PostHighlightsCard
+export interface PostHighlight {
+  id: string
+  platform: 'instagram' | 'facebook'
+  media_type?: string
+  media_url?: string
+  thumbnail_url?: string
+  permalink?: string
+  caption?: string
+  message?: string
+  created_time?: string
+  timestamp?: string
+  metrics: {
+    likes: number
+    comments: number
+    impressions?: number
+    reach?: number
+    engagement?: number
+    engagement_rate?: number
+  }
+}
+
+interface PostHighlightsCardProps {
+  posts: PostHighlight[]
+  loading?: boolean
+  max?: number
+}
+
+export const PostHighlightsCard: React.FC<PostHighlightsCardProps> = ({ posts, loading, max = 5 }) => {
+  if (loading) {
+    return (
+      <Card className="card-dark p-6 flex flex-col items-center justify-center min-h-[200px]">
+        <BarChart3 className="w-8 h-8 animate-spin text-blue-600 mb-2" />
+        <span className="text-gray-600 dark:text-gray-400">Carregando destaques...</span>
+      </Card>
+    )
+  }
+  if (!posts || posts.length === 0) {
+    return (
+      <Card className="card-dark bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg p-6 flex flex-col items-center justify-center min-h-[200px]">
+        <span className="text-gray-600 dark:text-gray-400">Nenhum post de destaque encontrado</span>
+      </Card>
+    )
+  }
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {posts.slice(0, max).map((post, idx) => (
+        <Card key={post.id} className="card-dark p-0 overflow-hidden shadow-lg hover:scale-[1.02] transition-transform">
+          {post.media_url && (
+            <div className="relative w-full h-48 bg-gray-200 dark:bg-gray-700">
+              <a href={post.permalink} target="_blank" rel="noopener noreferrer">
+                <Image src={post.media_url} alt={post.caption || post.message || 'Post'} fill className="object-cover w-full h-full" />
+              </a>
+              <div className="absolute top-2 left-2 flex gap-2">
+                <Badge className="bg-pink-600 text-white flex items-center gap-1">
+                  {post.platform === 'instagram' ? <Instagram className="w-4 h-4" /> : <Facebook className="w-4 h-4" />}
+                  {post.platform.charAt(0).toUpperCase() + post.platform.slice(1)}
+                </Badge>
+                {post.media_type && (
+                  <Badge className="bg-gray-900/80 text-white capitalize">{post.media_type}</Badge>
+                )}
+              </div>
+            </div>
+          )}
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(post.created_time || post.timestamp || '').toLocaleDateString('pt-BR')}</span>
+            </div>
+            <div className="font-semibold card-title-dark text-base mb-2 line-clamp-2">
+              {post.caption || post.message || 'Post sem descrição'}
+            </div>
+            <div className="flex items-center gap-4 mt-2">
+              <span className="flex items-center gap-1 text-pink-600 dark:text-pink-400 font-medium">
+                <Heart className="w-4 h-4" /> {post.metrics.likes}
+              </span>
+              <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400 font-medium">
+                <MessageCircle className="w-4 h-4" /> {post.metrics.comments}
+              </span>
+              {typeof post.metrics.impressions === 'number' && (
+                <span className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-medium">
+                  <Eye className="w-4 h-4" /> {post.metrics.impressions}
+                </span>
+              )}
+              {typeof post.metrics.engagement_rate === 'number' && (
+                <span className="flex items-center gap-1 text-green-600 dark:text-green-400 font-medium">
+                  <BarChart3 className="w-4 h-4" /> {post.metrics.engagement_rate.toFixed(1)}%
+                </span>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   )
 } 

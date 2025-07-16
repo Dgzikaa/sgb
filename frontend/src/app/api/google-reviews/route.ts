@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
 interface GooglePlaceReview {
   author_name: string
@@ -142,9 +143,14 @@ class GooglePlacesAPIBackend {
   }
 }
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
 export async function POST(request: NextRequest) {
   try {
-    const { businessName, address, placeId } = await request.json()
+    const { businessName, address, placeId, bar_id } = await request.json()
 
     console.log('🌟 Requisição para buscar reviews:', { businessName, address, placeId })
 
@@ -175,6 +181,26 @@ export async function POST(request: NextRequest) {
       const photoUrls = details.photos ? details.photos.slice(0, 10).map(photo => 
         googlePlaces.getPhotoUrl(photo.photo_reference, 600)
       ) : []
+
+      // Normalizar e salvar reviews na tabela avaliacoes_google
+      if (details && details.reviews && Array.isArray(details.reviews)) {
+        const reviewsToInsert = details.reviews.map((review: any) => ({
+          bar_id: bar_id || 1, // fallback para 1 se não enviado
+          reviewer_name: review.author_name,
+          reviewer_profile_url: review.author_url,
+          comment: review.text,
+          star_rating: review.rating,
+          create_time: new Date(review.time * 1000).toISOString(),
+          review_id: `${details.place_id}_${review.time}`,
+          raw_json: review
+        }))
+        if (reviewsToInsert.length > 0) {
+          const { error: insertError } = await supabase.from('avaliacoes_google').insert(reviewsToInsert)
+          if (insertError) {
+            console.error('Erro ao inserir reviews normalizados:', insertError)
+          }
+        }
+      }
 
       return NextResponse.json({
         success: true,
@@ -231,6 +257,26 @@ export async function POST(request: NextRequest) {
     const photoUrls = details.photos ? details.photos.slice(0, 10).map(photo => 
       googlePlaces.getPhotoUrl(photo.photo_reference, 600)
     ) : []
+
+    // Normalizar e salvar reviews na tabela avaliacoes_google
+    if (details && details.reviews && Array.isArray(details.reviews)) {
+      const reviewsToInsert = details.reviews.map((review: any) => ({
+        bar_id: bar_id || 1, // fallback para 1 se não enviado
+        reviewer_name: review.author_name,
+        reviewer_profile_url: review.author_url,
+        comment: review.text,
+        star_rating: review.rating,
+        create_time: new Date(review.time * 1000).toISOString(),
+        review_id: `${details.place_id}_${review.time}`,
+        raw_json: review
+      }))
+      if (reviewsToInsert.length > 0) {
+        const { error: insertError } = await supabase.from('avaliacoes_google').insert(reviewsToInsert)
+        if (insertError) {
+          console.error('Erro ao inserir reviews normalizados:', insertError)
+        }
+      }
+    }
 
     console.log('✅ Reviews obtidos com sucesso!')
 

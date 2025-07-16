@@ -34,7 +34,8 @@ import {
   Crown,
   X,
   Eye,
-  Utensils
+  Utensils,
+  LucideDownload
 } from 'lucide-react'
 
 interface Insumo {
@@ -152,6 +153,9 @@ export default function ReceitasPage() {
   const [insumoSelecionado, setInsumoSelecionado] = useState('')
   const [quantidadeInsumo, setQuantidadeInsumo] = useState('')
   const [buscaInsumoReceita, setBuscaInsumoReceita] = useState('')
+
+  const [syncLoading, setSyncLoading] = useState(false)
+  const [syncLog, setSyncLog] = useState<string | null>(null)
 
   // Sincronizar tipo_local dos formulários com o tipo selecionado
   useEffect(() => {
@@ -797,6 +801,29 @@ export default function ReceitasPage() {
     return receita.insumos.find(i => i.is_chefe)
   }
 
+  // Função para sincronizar receitas/insumos do Google Sheets
+  const syncReceitasFromSheets = async () => {
+    setSyncLoading(true)
+    setSyncLog(null)
+    try {
+      const res = await fetch('/api/receitas/sync')
+      const data = await res.json()
+      if (data.success) {
+        setSyncLog('Sincronização concluída!')
+        toast.success('Receitas e insumos atualizados do Google Sheets!')
+        await recarregarDados()
+      } else {
+        setSyncLog(data.error || 'Erro desconhecido na sincronização')
+        toast.error('Erro ao sincronizar do Google Sheets')
+      }
+    } catch (e) {
+      setSyncLog(String(e))
+      toast.error('Erro ao sincronizar do Google Sheets')
+    } finally {
+      setSyncLoading(false)
+    }
+  }
+
   if (!selectedBar) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -818,17 +845,17 @@ export default function ReceitasPage() {
           </div>
           
           <Button
-            onClick={recarregarDados}
-            disabled={loadingData}
+            onClick={syncReceitasFromSheets}
+            disabled={syncLoading || loadingData}
             variant="outline"
             className="flex items-center gap-2 h-10 w-full sm:w-auto touch-manipulation"
           >
-            {loadingData ? (
+            {syncLoading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <RefreshCw className="w-4 h-4" />
+              <LucideDownload className="w-4 h-4" />
             )}
-            Atualizar
+            Atualizar do Google Sheets
           </Button>
         </div>
 
@@ -841,6 +868,12 @@ export default function ReceitasPage() {
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {syncLog && (
+          <div className="mt-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded p-2">
+            {syncLog}
+          </div>
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

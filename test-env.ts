@@ -1,0 +1,1 @@
+console.log(Deno.env.get('GOOGLE_SERVICE_ACCOUNT_JSON')); 

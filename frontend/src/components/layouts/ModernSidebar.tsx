@@ -34,7 +34,8 @@ import {
   MessageCircle as WhatsApp,
   Bell,
   Shield,
-  Palette
+  Palette,
+  BookOpen
 } from 'lucide-react'
 
 interface SubMenuItem {
@@ -122,6 +123,11 @@ export function ModernSidebar() {
           label: 'Competência', 
           href: '/relatorios/financeiro-competencia'
         },
+        { 
+          icon: FileText, 
+          label: 'DRE Ordinário', 
+          href: '/relatorios/contaazul-competencia'
+        },
       ]
     },
     { 
@@ -137,13 +143,13 @@ export function ModernSidebar() {
         },
       ]
     },
-    { 
-      icon: BarChart3, 
-      label: 'Visão Geral', 
-      href: '/visao-geral', 
-      color: 'text-purple-600 dark:text-purple-400',
-      badge: badges.visaoGeral > 0 ? badges.visaoGeral : undefined
-    },
+    // { 
+    //   icon: BarChart3, 
+    //   label: 'Visão Geral', 
+    //   href: '/visao-geral', 
+    //   color: 'text-purple-600 dark:text-purple-400',
+    //   badge: badges.visaoGeral > 0 ? badges.visaoGeral : undefined
+    // },
   ]
 
   // Função para obter configurações com badges
@@ -193,6 +199,12 @@ export function ModernSidebar() {
         label: 'Bulk Actions', 
         href: '/configuracoes/bulk-actions'
       },
+      // Apenas o item Sincronizar
+      {
+        icon: FileText,
+        label: 'Sincronizar',
+        href: '/configuracoes/receitas/sync'
+      }
     ]
   })
 

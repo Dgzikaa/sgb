@@ -58,6 +58,8 @@ export default function IntegracoesPage() {
   const [webhookLoading, setWebhookLoading] = useState(false)
   const [testingWebhook, setTestingWebhook] = useState<string | null>(null)
   const [loadingConfigs, setLoadingConfigs] = useState(true)
+  const [googleLoading, setGoogleLoading] = useState(false)
+  const [googleResult, setGoogleResult] = useState<string | null>(null)
   
   useEffect(() => {
     setPageTitle('Integrações')
@@ -370,6 +372,38 @@ export default function IntegracoesPage() {
       reservas: 0x6600cc      // Roxo para reservas
     }
     return colors[webhookType as keyof typeof colors] || 0x5865F2
+  }
+  
+  // Função para rodar Google Avaliações
+  const handleRunGoogleReviews = async () => {
+    setGoogleLoading(true)
+    setGoogleResult(null)
+    try {
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+      const res = await fetch('/api/google-reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bar_id: selectedBar?.id || 1,
+          automatic: true,
+          date: yesterday,
+          businessName: 'Ordinário Bar e Música',
+          address: 'SBS Q. 2 BL Q Lojas 5/6 - Asa Sul, Brasília - DF, 70070-120',
+          days: 30,
+          placeId: 'ChIJgTeXKY8aWpMR1hyW_mEEu2k'
+        })
+      })
+      const data = await res.json()
+      if (data.success) {
+        setGoogleResult('✅ Coleta de avaliações do Google realizada com sucesso!')
+      } else {
+        setGoogleResult('❌ Erro: ' + (data.error || 'Erro desconhecido'))
+      }
+    } catch (e: any) {
+      setGoogleResult('❌ Erro: ' + e.message)
+    } finally {
+      setGoogleLoading(false)
+    }
   }
   
   return (
@@ -1608,7 +1642,21 @@ export default function IntegracoesPage() {
                     <BarChart3 className="w-4 h-4" />
                     Marketing 360°
                   </Button>
+
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    onClick={handleRunGoogleReviews}
+                    disabled={googleLoading}
+                  >
+                    <Star className="w-4 h-4 text-yellow-500" />
+                    {googleLoading ? 'Coletando Google...' : 'Coletar Google Avaliações (ontem)'}
+                  </Button>
                 </div>
+
+                {googleResult && (
+                  <div className="w-full mt-2 card-description-dark">{googleResult}</div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
