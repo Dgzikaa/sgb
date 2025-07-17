@@ -112,19 +112,19 @@ export async function GET(request: NextRequest) {
 
     const estatisticas = {
       execucoes_ultima_semana: execStats?.length || 0,
-      execucoes_sucesso: execStats?.filter(e => e.status === 'concluido').length || 0,
-      execucoes_erro: execStats?.filter(e => e.status === 'erro').length || 0,
+      execucoes_sucesso: execStats?.filter((e: any) => e.status === 'concluido').length || 0,
+      execucoes_erro: execStats?.filter((e: any) => e.status === 'erro').length || 0,
       tempo_medio_execucao: execStats?.length ? 
-        execStats.filter(e => e.duracao_segundos).reduce((acc, e) => acc + e.duracao_segundos, 0) / execStats.filter(e => e.duracao_segundos).length : 0,
+        execStats.filter((e: any) => e.duracao_segundos).reduce((acc: number, e: any) => acc + e.duracao_segundos, 0) / execStats.filter((e: any) => e.duracao_segundos).length : 0,
       ultima_execucao: logs?.[0]?.data_inicio || null,
       uptime_percentual: execStats?.length ? 
-        ((execStats.filter(e => e.status === 'concluido').length / execStats.length) * 100) : 0
+        ((execStats.filter((e: any) => e.status === 'concluido').length / execStats.length) * 100) : 0
     };
 
     // Próxima execução estimada
     let proximaExecucao = null;
     if (config && config.agente_ativo && agentRunning) {
-      const ultimaExec = logs?.find(l => l.status === 'concluido');
+      const ultimaExec = logs?.find((l: any) => l.status === 'concluido');
       if (ultimaExec) {
         const ultima = new Date(ultimaExec.data_inicio);
         proximaExecucao = new Date(ultima.getTime() + config.frequencia_analise_minutos * 60 * 1000);
