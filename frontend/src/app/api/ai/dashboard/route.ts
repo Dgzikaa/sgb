@@ -168,11 +168,13 @@ export async function GET(request: NextRequest) {
       insightsResumo = {
         total: totalInsights.data?.length || 0,
         criticos_pendentes: insightsCriticos.data?.length || 0,
-        por_status: totalInsights.data?.reduce((acc, i) => {
-          acc[i.status] = (acc[i.status] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>) || {},
-        por_impacto: totalInsights.data?.reduce((acc, i) => {
+        por_status: totalInsights.data
+          ? totalInsights.data.reduce((acc: Record<string, number>, i: any) => {
+              acc[i.status] = (acc[i.status] || 0) + 1;
+              return acc;
+            }, {} as Record<string, number>) || {}
+          : {},
+        por_impacto: totalInsights.data?.reduce((acc: Record<string, number>, i: any) => {
           acc[i.impacto] = (acc[i.impacto] || 0) + 1;
           return acc;
         }, {} as Record<string, number>) || {},
@@ -213,13 +215,13 @@ export async function GET(request: NextRequest) {
 
       anomaliasResumo = {
         total: totalAnomalias.data?.length || 0,
-        ativas: totalAnomalias.data?.filter(a => a.ainda_ativa).length || 0,
+        ativas: totalAnomalias.data?.filter((a: any) => a.ainda_ativa).length || 0,
         criticas_ativas: anomaliasAtivas.data?.length || 0,
-        por_severidade: totalAnomalias.data?.reduce((acc, a) => {
+        por_severidade: totalAnomalias.data?.reduce((acc: Record<string, number>, a: any) => {
           acc[a.severidade] = (acc[a.severidade] || 0) + 1;
           return acc;
         }, {} as Record<string, number>) || {},
-        por_status: totalAnomalias.data?.reduce((acc, a) => {
+        por_status: totalAnomalias.data?.reduce((acc: Record<string, number>, a: any) => {
           acc[a.status] = (acc[a.status] || 0) + 1;
           return acc;
         }, {} as Record<string, number>) || {},
@@ -298,13 +300,13 @@ export async function GET(request: NextRequest) {
           .limit(5)
       ]);
 
-      const roiPotencial = totalRecomendacoes.data?.reduce((acc, r) => acc + (r.roi_estimado || 0), 0) || 0;
+      const roiPotencial = totalRecomendacoes.data?.reduce((acc: number, r: any) => acc + (r.roi_estimado || 0), 0) || 0;
 
       recomendacoesResumo = {
         total: totalRecomendacoes.data?.length || 0,
         alta_prioridade: recomendacoesAlta.data?.length || 0,
         roi_potencial_total: roiPotencial,
-        por_status: totalRecomendacoes.data?.reduce((acc, r) => {
+        por_status: totalRecomendacoes.data?.reduce((acc: Record<string, number>, r: any) => {
           acc[r.status] = (acc[r.status] || 0) + 1;
           return acc;
         }, {} as Record<string, number>) || {},
@@ -333,8 +335,8 @@ export async function GET(request: NextRequest) {
         .gte('data_predicao', dataInicioStr)
         .order('data_predicao', { ascending: false });
 
-      const predicoesCriticas = predicoes?.filter(p => p.gerar_alerta) || [];
-      const proximasSemana = predicoes?.filter(p => {
+      const predicoesCriticas = predicoes?.filter((p: any) => p.gerar_alerta) || [];
+      const proximasSemana = predicoes?.filter((p: any) => {
         const dataAlvo = new Date(p.data_alvo);
         const umaSemana = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
         return dataAlvo <= umaSemana;
@@ -344,12 +346,12 @@ export async function GET(request: NextRequest) {
         total: predicoes?.length || 0,
         criticas: predicoesCriticas.length,
         proximas_semana: proximasSemana.length,
-        por_tipo: predicoes?.reduce((acc, p) => {
+        por_tipo: predicoes?.reduce((acc: Record<string, number>, p: any) => {
           acc[p.tipo_predicao] = (acc[p.tipo_predicao] || 0) + 1;
           return acc;
         }, {} as Record<string, number>) || {},
         confianca_media: predicoes?.length ? 
-          predicoes.reduce((acc, p) => acc + p.confianca, 0) / predicoes.length : 0,
+          predicoes.reduce((acc: number, p: any) => acc + p.confianca, 0) / predicoes.length : 0,
         criticas_detalhes: predicoesCriticas.slice(0, 3),
         proximas_detalhes: proximasSemana.slice(0, 3)
       };
@@ -382,8 +384,8 @@ export async function GET(request: NextRequest) {
       sucesso_rate: logsRecentes.data?.length ? 
         (logsRecentes.data?.filter((l: any) => l.status === 'concluido').length || 0) / (logsRecentes.data?.length || 1) * 100 : 0,
       tempo_medio_execucao: logsRecentes.data?.length ?
-        logsRecentes.data.filter(l => l.duracao_segundos).reduce((acc, l) => acc + l.duracao_segundos, 0) / 
-        logsRecentes.data.filter(l => l.duracao_segundos).length : 0
+        logsRecentes.data.filter((l: any) => l.duracao_segundos).reduce((acc: number, l: any) => acc + l.duracao_segundos, 0) / 
+        logsRecentes.data.filter((l: any) => l.duracao_segundos).length : 0
     };
 
     // ========================================
@@ -412,7 +414,7 @@ export async function GET(request: NextRequest) {
     scoresSaude.push(scoreAgente);
 
     const scoreSaudeGeral = scoresSaude.length ? 
-      Math.round(scoresSaude.reduce((a, b) => a + b, 0) / scoresSaude.length) : 70;
+      Math.round(scoresSaude.reduce((a: number, b: number) => a + b, 0) / scoresSaude.length) : 70;
 
     // ========================================
     // 📋 RESUMO EXECUTIVO
