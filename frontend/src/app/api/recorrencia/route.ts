@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic'
@@ -12,18 +12,18 @@ interface ClienteRanking {
   ticket_medio: number;
 }
 
-// Função para normalizar telefone
+// FunÃ§Ã£o para normalizar telefone
 function normalizarTelefone(telefone: string): string {
   if (!telefone) return '';
   
   let numeros = telefone.replace(/\D/g, '');
   
-  // Remover código do país (55)
+  // Remover cÃ³digo do paÃ­s (55)
   if (numeros.startsWith('55') && numeros.length > 11) {
     numeros = numeros.substring(2);
   }
   
-  // Remover códigos de área duplicados (5511, 5561)
+  // Remover cÃ³digos de Ã¡rea duplicados (5511, 5561)
   if (numeros.startsWith('55') && numeros.length === 13) {
     numeros = numeros.substring(2);
   }
@@ -31,7 +31,7 @@ function normalizarTelefone(telefone: string): string {
   return numeros;
 }
 
-// Função para formatar telefone
+// FunÃ§Ã£o para formatar telefone
 function formatarTelefone(telefone: string): string {
   if (!telefone) return '';
   
@@ -53,15 +53,15 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '500');
     const offset = (page - 1) * limit;
 
-    console.log(`📊 Recebendo requisição - Página ${page}, Limite ${limit}, Offset ${offset}`);
+    console.log(`ðŸ“Š Recebendo requisiÃ§Ã£o - PÃ¡gina ${page}, Limite ${limit}, Offset ${offset}`);
 
     const supabase = await getSupabaseClient();
     if (!supabase) {
-      console.error('❌ Erro ao conectar com banco');
+      console.error('âŒ Erro ao conectar com banco');
       return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 });
     }
 
-    console.log(`📊 Buscando dados de recorrência (APENAS COM TELEFONE) - Página ${page}, Limite ${limit}...`);
+    console.log(`ðŸ“Š Buscando dados de recorrÃªncia (APENAS COM TELEFONE) - PÃ¡gina ${page}, Limite ${limit}...`);
     
     // Processar dados para ranking
     const clientesMap = new Map();
@@ -73,7 +73,7 @@ export async function GET(request: Request) {
     let contahub_count = 0;
     
     try {
-      console.log(`🔍 Buscando ContaHub PERIODO (valores reais) - offset: ${offset}, limit: ${limit}`);
+      console.log(`ðŸ” Buscando ContaHub PERIODO (valores reais) - offset: ${offset}, limit: ${limit}`);
       const contahubResult = await supabase
         .from('periodo')
         .select(`
@@ -91,14 +91,14 @@ export async function GET(request: Request) {
         .range(offset, offset + limit - 1);
 
       if (contahubResult.error) {
-        console.error('❌ Erro ContaHub:', contahubResult.error);
+        console.error('âŒ Erro ContaHub:', contahubResult.error);
       } else {
         contahub_data = contahubResult.data;
         contahub_count = contahubResult.count || 0;
         totalContahub = contahub_data?.length || 0;
         hasMoreContahub = contahub_count > offset + limit;
         
-        console.log(`📊 ContaHub PERIODO: ${totalContahub} registros, total: ${contahub_count}, hasMore: ${hasMoreContahub}`);
+        console.log(`ðŸ“Š ContaHub PERIODO: ${totalContahub} registros, total: ${contahub_count}, hasMore: ${hasMoreContahub}`);
 
         // Processar dados do ContaHub PERIODO (valores reais)
         contahub_data?.forEach((periodo: any) => {
@@ -107,7 +107,7 @@ export async function GET(request: Request) {
           if (telefone) {
             const telefoneNormalizado = normalizarTelefone(telefone);
             
-            // Só processar se o telefone normalizado for válido
+            // SÃ³ processar se o telefone normalizado for vÃ¡lido
             if (telefoneNormalizado && telefoneNormalizado.length >= 10) {
               const key = telefoneNormalizado;
               
@@ -129,7 +129,7 @@ export async function GET(request: Request) {
         });
       }
     } catch (error) {
-      console.error('❌ Erro ao buscar ContaHub PERIODO:', error);
+      console.error('âŒ Erro ao buscar ContaHub PERIODO:', error);
     }
 
     // 2. Buscar dados do Yuzer APENAS com telefone
@@ -137,7 +137,7 @@ export async function GET(request: Request) {
     let yuzer_count = 0;
     
     try {
-      console.log(`🔍 Buscando Yuzer (apenas com telefone) - offset: ${offset}, limit: ${limit}`);
+      console.log(`ðŸ” Buscando Yuzer (apenas com telefone) - offset: ${offset}, limit: ${limit}`);
       const yuzerResult = await supabase
         .from('getin_reservas')
         .select(`
@@ -155,14 +155,14 @@ export async function GET(request: Request) {
         .range(offset, offset + limit - 1);
 
       if (yuzerResult.error) {
-        console.error('❌ Erro Yuzer:', yuzerResult.error);
+        console.error('âŒ Erro Yuzer:', yuzerResult.error);
       } else {
         yuzer_data = yuzerResult.data;
         yuzer_count = yuzerResult.count || 0;
         totalYuzer = yuzer_data?.length || 0;
         hasMoreYuzer = yuzer_count > offset + limit;
         
-        console.log(`📊 Yuzer: ${totalYuzer} registros, total: ${yuzer_count}, hasMore: ${hasMoreYuzer}`);
+        console.log(`ðŸ“Š Yuzer: ${totalYuzer} registros, total: ${yuzer_count}, hasMore: ${hasMoreYuzer}`);
 
         // Processar dados do Yuzer (apenas com telefone)
         yuzer_data?.forEach((reserva: any) => {
@@ -171,7 +171,7 @@ export async function GET(request: Request) {
           if (telefone) {
             const telefoneNormalizado = normalizarTelefone(telefone);
             
-            // Só processar se o telefone normalizado for válido
+            // SÃ³ processar se o telefone normalizado for vÃ¡lido
             if (telefoneNormalizado && telefoneNormalizado.length >= 10) {
               const key = telefoneNormalizado;
               
@@ -188,26 +188,26 @@ export async function GET(request: Request) {
               const clienteData = clientesMap.get(key);
               clienteData.total_visitas += 1;
               
-              // Yuzer: Não temos dados de valor real, apenas contamos as visitas
-              // O valor fica 0 para não distorcer os cálculos
+              // Yuzer: NÃ£o temos dados de valor real, apenas contamos as visitas
+              // O valor fica 0 para nÃ£o distorcer os cÃ¡lculos
             }
           }
         });
       }
     } catch (error) {
-      console.error('❌ Erro ao buscar Yuzer:', error);
+      console.error('âŒ Erro ao buscar Yuzer:', error);
     }
 
-    // 3. Pular dados do Sympla pois não têm telefone
-    console.log(`⚠️ Pulando Sympla - eventos não têm telefone dos clientes`);
+    // 3. Pular dados do Sympla pois nÃ£o tÃªm telefone
+    console.log(`âš ï¸ Pulando Sympla - eventos nÃ£o tÃªm telefone dos clientes`);
 
-    // Converter Map para Array e calcular ticket médio (todos já têm telefone)
+    // Converter Map para Array e calcular ticket mÃ©dio (todos jÃ¡ tÃªm telefone)
     const clientes: ClienteRanking[] = Array.from(clientesMap.values()).map((cliente: any) => ({
       ...cliente,
       ticket_medio: cliente.total_visitas > 0 ? cliente.valor_total_gasto / cliente.total_visitas : 0
     }));
 
-    // Criar rankings (todos já têm telefone)
+    // Criar rankings (todos jÃ¡ tÃªm telefone)
     const top_visitas: ClienteRanking[] = [...clientes]
       .sort((a, b) => b.total_visitas - a.total_visitas)
       .slice(0, 10);
@@ -221,12 +221,12 @@ export async function GET(request: Request) {
       .sort((a, b) => b.valor_total_gasto - a.valor_total_gasto)
       .slice(0, 10);
 
-    console.log(`📊 Dados processados (APENAS COM TELEFONE) - Página ${page}:`, {
+    console.log(`ðŸ“Š Dados processados (APENAS COM TELEFONE) - PÃ¡gina ${page}:`, {
       total_clientes: clientes.length,
-      telefones_processados: clientes.length, // Todos têm telefone
+      telefones_processados: clientes.length, // Todos tÃªm telefone
       contahub: totalContahub,
       yuzer: totalYuzer,
-      sympla: 0 // Não incluímos Sympla
+      sympla: 0 // NÃ£o incluÃ­mos Sympla
     });
 
     return NextResponse.json({
@@ -234,29 +234,29 @@ export async function GET(request: Request) {
       page,
       limit,
       total_clientes: clientes.length,
-      telefones_processados: clientes.length, // Todos têm telefone
+      telefones_processados: clientes.length, // Todos tÃªm telefone
       top_visitas,
       top_ticket,
       top_faturamento,
       fontes: {
         contahub: totalContahub,
         yuzer: totalYuzer,
-        sympla: 0 // Não incluímos Sympla
+        sympla: 0 // NÃ£o incluÃ­mos Sympla
       },
       totais: {
         contahub_total: contahub_count,
         yuzer_total: yuzer_count,
-        sympla_total: 0 // Não incluímos Sympla
+        sympla_total: 0 // NÃ£o incluÃ­mos Sympla
       },
       has_more: {
         contahub: hasMoreContahub,
         yuzer: hasMoreYuzer,
-        sympla: false // Não incluímos Sympla
+        sympla: false // NÃ£o incluÃ­mos Sympla
       }
     });
 
   } catch (error) {
-    console.error('❌ Erro no endpoint de recorrência:', error);
+    console.error('âŒ Erro no endpoint de recorrÃªncia:', error);
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
       details: error instanceof Error ? error.message : 'Erro desconhecido'

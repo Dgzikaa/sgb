@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic'
@@ -16,12 +16,12 @@ export async function GET(request: NextRequest) {
     const barId = parseInt(searchParams.get('bar_id') || '1');
 
     if (!dataInicio || !dataFim) {
-      return NextResponse.json({ error: 'Datas de início e fim são obrigatórias' }, { status: 400 });
+      return NextResponse.json({ error: 'Datas de inÃ­cio e fim sÃ£o obrigatÃ³rias' }, { status: 400 });
     }
 
-    console.log(`👨‍🍳 Analisando garçons de ${dataInicio} até ${dataFim} para bar ${barId}`);
+    console.log(`ðŸ‘¨â€ðŸ³ Analisando garÃ§ons de ${dataInicio} atÃ© ${dataFim} para bar ${barId}`);
 
-    // Buscar dados de vendas por garçom da tabela analítico
+    // Buscar dados de vendas por garÃ§om da tabela analÃ­tico
     const { data: vendasData, error: vendasError } = await supabase
       .from('analitico')
       .select(`
@@ -60,16 +60,16 @@ export async function GET(request: NextRequest) {
       .not('usr_lancou', 'is', null)
       .not('t1_t2', 'is', null)
       .gt('t1_t2', 0)
-      .lt('t1_t2', 3600); // Filtrar tempos válidos
+      .lt('t1_t2', 3600); // Filtrar tempos vÃ¡lidos
 
     if (temposError) {
       console.error('Erro ao buscar dados de tempo:', temposError);
       return NextResponse.json({ error: 'Erro ao buscar dados de tempo' }, { status: 500 });
     }
 
-    console.log(`📊 Dados encontrados - Vendas: ${vendasData?.length || 0}, Tempos: ${temposData?.length || 0}`);
+    console.log(`ðŸ“Š Dados encontrados - Vendas: ${vendasData?.length || 0}, Tempos: ${temposData?.length || 0}`);
 
-    // Processar dados por garçom
+    // Processar dados por garÃ§om
     const garconsMap = new Map();
 
     // Processar vendas
@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // Calcular estatísticas finais
+    // Calcular estatÃ­sticas finais
     const garcons = Array.from(garconsMap.values()).map((garcom: any, index: number) => {
       const clientes_atendidos = garcom.mesas_atendidas.size;
       const dias_trabalhados = garcom.dias_trabalhados.size;
@@ -145,12 +145,12 @@ export async function GET(request: NextRequest) {
     // Ordenar por vendas (maior para menor)
     garcons.sort((a, b) => b.vendas_periodo - a.vendas_periodo);
 
-    // Atualizar posições do ranking
+    // Atualizar posiÃ§Ãµes do ranking
     garcons.forEach((garcom, index) => {
       garcom.ranking_posicao = index + 1;
     });
 
-    console.log(`👨‍🍳 Análise concluída: ${garcons.length} garçons encontrados`);
+    console.log(`ðŸ‘¨â€ðŸ³ AnÃ¡lise concluÃ­da: ${garcons.length} garÃ§ons encontrados`);
 
     return NextResponse.json({
       success: true,
@@ -165,7 +165,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Erro interno na API de garçons:', error);
+    console.error('Erro interno na API de garÃ§ons:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 } 

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
@@ -108,7 +108,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
       href: '/home',
       category: 'main',
       importance: 'high',
-      keywords: ['início', 'principal', 'dashboard']
+      keywords: ['inÃ­cio', 'principal', 'dashboard']
     },
     {
       id: 'dashboard-unificado',
@@ -125,12 +125,12 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
     },
     // {
     //   id: 'visao-geral',
-    //   title: 'Visão Geral',
+    //   title: 'VisÃ£o Geral',
     //   icon: BarChart3,
     //   href: '/visao-geral',
     //   category: 'main',
     //   importance: 'high',
-    //   keywords: ['visão', 'geral', 'overview', 'métricas']
+    //   keywords: ['visÃ£o', 'geral', 'overview', 'mÃ©tricas']
     // },
     
     // Checklists
@@ -141,7 +141,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
       href: '/checklists',
       category: 'main',
       importance: 'high',
-      keywords: ['checklists', 'verificação', 'templates'],
+      keywords: ['checklists', 'verificaÃ§Ã£o', 'templates'],
       subItems: [
         {
           id: 'checklist-abertura-main',
@@ -150,7 +150,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
           href: '/checklists/abertura',
           category: 'main',
           importance: 'high',
-          keywords: ['checklist', 'abertura', 'verificação']
+          keywords: ['checklist', 'abertura', 'verificaÃ§Ã£o']
         },
         {
           id: 'templates-main',
@@ -167,12 +167,12 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
     // Operations
     {
       id: 'operacoes',
-      title: 'Operações',
+      title: 'OperaÃ§Ãµes',
       icon: Zap,
       href: '/operacoes',
       category: 'operations',
       importance: 'high',
-      keywords: ['operações', 'operacional', 'gestão'],
+      keywords: ['operaÃ§Ãµes', 'operacional', 'gestÃ£o'],
       subItems: [
         {
           id: 'checklist-abertura',
@@ -181,7 +181,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
           href: '/operacoes/checklist-abertura',
           category: 'operations',
           importance: 'high',
-          keywords: ['checklist', 'abertura', 'verificação']
+          keywords: ['checklist', 'abertura', 'verificaÃ§Ã£o']
         },
         {
           id: 'receitas',
@@ -190,16 +190,16 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
           href: '/operacoes/receitas',
           category: 'operations',
           importance: 'medium',
-          keywords: ['receitas', 'produtos', 'cardápio']
+          keywords: ['receitas', 'produtos', 'cardÃ¡pio']
         },
         {
           id: 'tempo',
-          title: 'Gestão de Tempo',
+          title: 'GestÃ£o de Tempo',
           icon: Clock,
           href: '/operacoes/tempo',
           category: 'operations',
           importance: 'medium',
-          keywords: ['tempo', 'cronômetro', 'produtividade']
+          keywords: ['tempo', 'cronÃ´metro', 'produtividade']
         }
       ]
     },
@@ -207,21 +207,21 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
     // Production
     {
       id: 'producao',
-      title: 'Produção',
+      title: 'ProduÃ§Ã£o',
       icon: Cpu,
       href: '/producao',
       category: 'operations',
       importance: 'high',
-      keywords: ['produção', 'terminal', 'cozinha'],
+      keywords: ['produÃ§Ã£o', 'terminal', 'cozinha'],
       subItems: [
         {
           id: 'terminal',
-          title: 'Terminal de Produção',
+          title: 'Terminal de ProduÃ§Ã£o',
           icon: Gauge,
           href: '/producao/terminal',
           category: 'operations',
           importance: 'high',
-          keywords: ['terminal', 'produção', 'cozinha']
+          keywords: ['terminal', 'produÃ§Ã£o', 'cozinha']
         },
         {
           id: 'receitas-producao',
@@ -238,12 +238,12 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
     // Reports
     {
       id: 'relatorios',
-      title: 'Relatórios',
+      title: 'RelatÃ³rios',
       icon: FileText,
       href: '/relatorios',
       category: 'reports',
       importance: 'high',
-      keywords: ['relatórios', 'reports', 'análise'],
+      keywords: ['relatÃ³rios', 'reports', 'anÃ¡lise'],
       subItems: [
         {
           id: 'dashboard-financeiro',
@@ -256,12 +256,12 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
         },
         {
           id: 'analitico',
-          title: 'Analítico',
+          title: 'AnalÃ­tico',
           icon: TrendingUp,
           href: '/relatorios/analitico',
           category: 'reports',
           importance: 'medium',
-          keywords: ['analítico', 'análise', 'detalhado']
+          keywords: ['analÃ­tico', 'anÃ¡lise', 'detalhado']
         }
       ]
     },
@@ -269,13 +269,13 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
     // Configuration
     {
       id: 'configuracoes',
-      title: 'Configurações',
+      title: 'ConfiguraÃ§Ãµes',
       icon: Settings,
       href: '/configuracoes',
       category: 'config',
       importance: 'medium',
       requiredRole: 'admin',
-      keywords: ['configurações', 'config', 'admin'],
+      keywords: ['configuraÃ§Ãµes', 'config', 'admin'],
       subItems: [
         {
           id: 'checklists-config',
@@ -288,12 +288,12 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
         },
         {
           id: 'integracoes',
-          title: 'Integrações',
+          title: 'IntegraÃ§Ãµes',
           icon: Layers,
           href: '/configuracoes/integracoes',
           category: 'config',
           importance: 'medium',
-          keywords: ['integrações', 'apis', 'conexões']
+          keywords: ['integraÃ§Ãµes', 'apis', 'conexÃµes']
         },
         {
           id: 'analytics',
@@ -302,7 +302,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
           href: '/configuracoes/analytics',
           category: 'config',
           importance: 'medium',
-          keywords: ['analytics', 'métricas', 'dashboard', 'performance']
+          keywords: ['analytics', 'mÃ©tricas', 'dashboard', 'performance']
         },
         {
           id: 'cache',
@@ -311,22 +311,22 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
           href: '/configuracoes/cache',
           category: 'config',
           importance: 'medium',
-          keywords: ['cache', 'redis', 'performance', 'memória']
+          keywords: ['cache', 'redis', 'performance', 'memÃ³ria']
         },
         {
           id: 'seguranca',
-          title: 'Segurança',
+          title: 'SeguranÃ§a',
           icon: Shield,
           href: '/configuracoes/seguranca',
           category: 'config',
           importance: 'high',
-          keywords: ['segurança', 'proteção', 'acesso']
+          keywords: ['seguranÃ§a', 'proteÃ§Ã£o', 'acesso']
         }
       ]
     }
   ]
 
-  // Detectar contexto de navegação
+  // Detectar contexto de navegaÃ§Ã£o
   const getNavigationContext = (): NavigationContext => {
     const currentHour = new Date().getHours()
     let detectedWorkflow: 'opening' | 'production' | 'closing' | 'reports' | 'normal' = 'normal'
@@ -401,7 +401,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
       
       if (scoreA !== scoreB) return scoreB - scoreA
       
-      // Ordenar por importância
+      // Ordenar por importÃ¢ncia
       const importanceOrder = { high: 3, medium: 2, low: 1 }
       return importanceOrder[b.importance || 'medium'] - importanceOrder[a.importance || 'medium']
     })
@@ -409,7 +409,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
     return filtered
   }
 
-  // Adicionar à lista de favoritos
+  // Adicionar Ã  lista de favoritos
   const toggleFavorite = (itemId: string) => {
     setFavorites(prev => 
       prev.includes(itemId) 
@@ -427,7 +427,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
     )
   }
 
-  // Detectar página atual
+  // Detectar pÃ¡gina atual
   const isCurrentPage = (href: string) => {
     return pathname === href || pathname.startsWith(href + '/')
   }
@@ -445,10 +445,10 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
 
   const categoryLabels = {
     main: 'Principal',
-    operations: 'Operações',
-    reports: 'Relatórios',
-    config: 'Configurações',
-    admin: 'Administração'
+    operations: 'OperaÃ§Ãµes',
+    reports: 'RelatÃ³rios',
+    config: 'ConfiguraÃ§Ãµes',
+    admin: 'AdministraÃ§Ã£o'
   }
 
   const categoryIcons = {
@@ -470,7 +470,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
           <div className="flex items-center gap-2">
             <Navigation className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             <span className="font-semibold text-gray-900 dark:text-white">
-              Navegação
+              NavegaÃ§Ã£o
             </span>
           </div>
         )}
@@ -515,9 +515,9 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
             )} />
             <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
               {context.workflowState === 'opening' && 'Abertura'}
-              {context.workflowState === 'production' && 'Produção'}
+              {context.workflowState === 'production' && 'ProduÃ§Ã£o'}
               {context.workflowState === 'closing' && 'Fechamento'}
-              {context.workflowState === 'reports' && 'Relatórios'}
+              {context.workflowState === 'reports' && 'RelatÃ³rios'}
               {context.workflowState === 'normal' && 'Normal'}
             </span>
           </div>
@@ -570,7 +570,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
           <div className="text-xs text-gray-500 dark:text-gray-400">
             <div className="flex items-center gap-1">
               <Compass className="h-3 w-3" />
-              <span>Navegação Inteligente</span>
+              <span>NavegaÃ§Ã£o Inteligente</span>
             </div>
             <div className="mt-1">
               {selectedBar?.nome || 'Nenhum bar selecionado'}
@@ -582,7 +582,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
   )
 }
 
-// Componente para item de navegação
+// Componente para item de navegaÃ§Ã£o
 function NavItem({ 
   item, 
   isCollapsed, 

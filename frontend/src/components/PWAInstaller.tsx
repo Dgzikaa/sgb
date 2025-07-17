@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 
@@ -22,7 +22,7 @@ export function PWAInstaller({
   onDismiss,
   className = '',
   buttonText = 'Instalar App',
-  buttonIcon = '📱'
+  buttonIcon = 'ðŸ“±'
 }: PWAInstallerProps) {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [canInstall, setCanInstall] = useState(false)
@@ -50,7 +50,7 @@ export function PWAInstaller({
       setIsInstalled(true)
       setCanInstall(false)
       setDeferredPrompt(null)
-      console.log('✅ PWA: App installed successfully')
+      console.log('âœ… PWA: App installed successfully')
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
@@ -70,17 +70,17 @@ export function PWAInstaller({
       const { outcome } = await deferredPrompt.userChoice
       
       if (outcome === 'accepted') {
-        console.log('✅ PWA: User accepted installation')
+        console.log('âœ… PWA: User accepted installation')
         onInstall?.()
       } else {
-        console.log('❌ PWA: User dismissed installation')
+        console.log('âŒ PWA: User dismissed installation')
         onDismiss?.()
       }
       
       setDeferredPrompt(null)
       setCanInstall(false)
     } catch (error) {
-      console.error('❌ PWA: Installation error:', error)
+      console.error('âŒ PWA: Installation error:', error)
     }
   }
 
@@ -140,7 +140,7 @@ export function usePWAInstaller() {
       setIsInstalled(true)
       setCanInstall(false)
       setDeferredPrompt(null)
-      console.log('✅ PWA: App installed successfully')
+      console.log('âœ… PWA: App installed successfully')
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
@@ -160,16 +160,16 @@ export function usePWAInstaller() {
       const { outcome } = await deferredPrompt.userChoice
       
       if (outcome === 'accepted') {
-        console.log('✅ PWA: User accepted installation')
+        console.log('âœ… PWA: User accepted installation')
         setDeferredPrompt(null)
         setCanInstall(false)
         return true
       } else {
-        console.log('❌ PWA: User dismissed installation')
+        console.log('âŒ PWA: User dismissed installation')
         return false
       }
     } catch (error) {
-      console.error('❌ PWA: Installation error:', error)
+      console.error('âŒ PWA: Installation error:', error)
       return false
     }
   }

@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+﻿import { ReactNode } from 'react'
 import { SkeletonType } from '@/hooks/usePageLoading'
 import {
   DashboardSkeleton,
@@ -59,7 +59,7 @@ export function PageLoadingWrapper({
 
   // Renderizar skeleton se estiver carregando
   if (loading) {
-    // Se há um fallback customizado, usar ele
+    // Se hÃ¡ um fallback customizado, usar ele
     if (fallbackSkeleton) {
       return <>{fallbackSkeleton}</>
     }
@@ -88,11 +88,11 @@ export function PageLoadingWrapper({
     }
   }
 
-  // Renderizar conteúdo normal
+  // Renderizar conteÃºdo normal
   return <>{children}</>
 }
 
-// Componente HOC (Higher Order Component) para páginas
+// Componente HOC (Higher Order Component) para pÃ¡ginas
 export function withPageLoading<T extends object>(
   Component: React.ComponentType<T>,
   skeletonType: SkeletonType = 'fullscreen'
@@ -117,7 +117,7 @@ export function withPageLoading<T extends object>(
   }
 }
 
-// Hook para usar com páginas
+// Hook para usar com pÃ¡ginas
 export function usePageWrapper(
   skeletonType: SkeletonType = 'fullscreen'
 ) {

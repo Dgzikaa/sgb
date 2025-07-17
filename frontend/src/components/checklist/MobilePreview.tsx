@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,9 +17,9 @@ import {
 } from 'lucide-react'
 
 // =====================================================
-// 📱 PREVIEW MOBILE PARA CHECKLIST
+// ðŸ“± PREVIEW MOBILE PARA CHECKLIST
 // =====================================================
-// Mostra como o checklist ficará no celular durante a criação
+// Mostra como o checklist ficarÃ¡ no celular durante a criaÃ§Ã£o
 
 interface PreviewItem {
   id: string
@@ -87,14 +87,14 @@ export default function MobilePreview({
               className="flex-1 touch-manipulation h-12"
               disabled
             >
-              ✅ Sim
+              âœ… Sim
             </Button>
             <Button 
               variant="outline" 
               className="flex-1 touch-manipulation h-12"
               disabled
             >
-              ❌ Não
+              âŒ NÃ£o
             </Button>
           </div>
         )
@@ -135,7 +135,7 @@ export default function MobilePreview({
             className="w-full h-24 touch-manipulation"
             disabled
           >
-            📷 Tirar Foto
+            ðŸ“· Tirar Foto
           </Button>
         )
       
@@ -146,7 +146,7 @@ export default function MobilePreview({
             className="w-full h-24 touch-manipulation"
             disabled
           >
-            🖼️ Enviar Imagem
+            ðŸ–¼ï¸ Enviar Imagem
           </Button>
         )
       
@@ -159,7 +159,7 @@ export default function MobilePreview({
                 className="text-2xl touch-manipulation p-2"
                 disabled
               >
-                ⭐
+                â­
               </button>
             ))}
           </div>
@@ -168,7 +168,7 @@ export default function MobilePreview({
       case 'assinatura':
         return (
           <div className="border-2 border-dashed border-gray-300 rounded-lg h-32 flex items-center justify-center">
-            <span className="text-gray-500">✍️ Área de Assinatura</span>
+            <span className="text-gray-500">âœï¸ Ãrea de Assinatura</span>
           </div>
         )
       
@@ -176,7 +176,7 @@ export default function MobilePreview({
         return (
           <input
             type="text"
-            placeholder="Campo genérico"
+            placeholder="Campo genÃ©rico"
             className={fieldClass}
             disabled
           />
@@ -295,7 +295,7 @@ export default function MobilePreview({
               transformOrigin: 'top center'
             }}
           >
-            {/* Simulação da Tela */}
+            {/* SimulaÃ§Ã£o da Tela */}
             <div 
               className={`h-full overflow-auto ${
                 darkMode ? 'bg-gray-900' : 'bg-gray-50'
@@ -313,18 +313,18 @@ export default function MobilePreview({
                 )}
               </div>
 
-              {/* Conteúdo */}
+              {/* ConteÃºdo */}
               <div className="p-4 space-y-4">
                 {Object.entries(groupedItems).map(([secao, items]) => (
                   <div key={secao}>
-                    {/* Título da Seção */}
+                    {/* TÃ­tulo da SeÃ§Ã£o */}
                     <h2 className={`text-base font-semibold mb-3 ${
                       darkMode ? 'text-white' : 'text-gray-900'
                     }`}>
                       {secao}
                     </h2>
 
-                    {/* Itens da Seção */}
+                    {/* Itens da SeÃ§Ã£o */}
                     <div className="space-y-3">
                       {items.map((item) => (
                         <Card key={item.id} className={darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
@@ -357,7 +357,7 @@ export default function MobilePreview({
                   </div>
                 ))}
 
-                {/* Botão de Envio */}
+                {/* BotÃ£o de Envio */}
                 <div className="pt-4">
                   <Button 
                     className="w-full bg-blue-600 hover:bg-blue-700 touch-manipulation"
@@ -372,10 +372,10 @@ export default function MobilePreview({
           </div>
         </div>
 
-        {/* Footer com Informações */}
+        {/* Footer com InformaÃ§Ãµes */}
         <div className="p-4 border-t bg-gray-50 text-center">
           <p className="text-sm text-gray-600">
-            📱 Preview: {deviceType} • {itens.length} itens • Zoom: {Math.round(zoom * 100)}%
+            ðŸ“± Preview: {deviceType} â€¢ {itens.length} itens â€¢ Zoom: {Math.round(zoom * 100)}%
           </p>
         </div>
       </div>
@@ -384,7 +384,7 @@ export default function MobilePreview({
 }
 
 // =====================================================
-// 🎯 HOOK PARA GERENCIAR PREVIEW
+// ðŸŽ¯ HOOK PARA GERENCIAR PREVIEW
 // =====================================================
 
 export function useMobilePreview() {

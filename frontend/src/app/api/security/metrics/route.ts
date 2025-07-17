@@ -1,17 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase-admin'
 import { securityMonitor } from '@/lib/security-monitor'
 
 export async function GET(request: NextRequest) {
   try {
-    // Buscar métricas das últimas 24 horas
+    // Buscar mÃ©tricas das Ãºltimas 24 horas
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
     const today = new Date()
     
     // Criar cliente Supabase
     const supabase = createServiceRoleClient()
     
-    // Buscar eventos de segurança das últimas 24 horas
+    // Buscar eventos de seguranÃ§a das Ãºltimas 24 horas
     const { data: events, error: eventsError } = await supabase
       .from('security_events')
       .select('*')
@@ -21,12 +21,12 @@ export async function GET(request: NextRequest) {
     if (eventsError) {
       console.error('Erro ao buscar eventos:', eventsError)
       return NextResponse.json(
-        { success: false, error: 'Erro ao buscar eventos de segurança' },
+        { success: false, error: 'Erro ao buscar eventos de seguranÃ§a' },
         { status: 500 }
       )
     }
 
-    // Buscar métricas do dia atual
+    // Buscar mÃ©tricas do dia atual
     const { data: todayMetrics, error: metricsError } = await supabase
       .from('security_metrics')
       .select('*')
@@ -34,14 +34,14 @@ export async function GET(request: NextRequest) {
       .single()
 
     if (metricsError && metricsError.code !== 'PGRST116') {
-      console.error('Erro ao buscar métricas:', metricsError)
+      console.error('Erro ao buscar mÃ©tricas:', metricsError)
       return NextResponse.json(
-        { success: false, error: 'Erro ao buscar métricas de segurança' },
+        { success: false, error: 'Erro ao buscar mÃ©tricas de seguranÃ§a' },
         { status: 500 }
       )
     }
 
-    // Calcular métricas em tempo real dos eventos
+    // Calcular mÃ©tricas em tempo real dos eventos
     const totalEvents = events?.length || 0
     const criticalEvents = events?.filter((e: any) => e.level === 'critical').length || 0
     const warningEvents = events?.filter((e: any) => e.level === 'warning').length || 0
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     const uniqueIps = new Set(events?.map((e: any) => e.ip_address).filter(Boolean)).size
     const failedLogins = events?.filter((e: any) => e.event_type === 'failed_login').length || 0
     
-    // Usar métricas do banco se disponíveis, caso contrário usar calculadas
+    // Usar mÃ©tricas do banco se disponÃ­veis, caso contrÃ¡rio usar calculadas
     const metrics = {
       total_events: todayMetrics?.total_events || totalEvents,
       critical_events: todayMetrics?.critical_events || criticalEvents,
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
       blocked_ips: todayMetrics?.blocked_ips || 0
     }
 
-    // Buscar últimos eventos para o timeline
+    // Buscar Ãºltimos eventos para o timeline
     const { data: recentEvents, error: recentEventsError } = await supabase
       .from('security_events')
       .select('*')
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
       console.error('Erro ao buscar eventos recentes:', recentEventsError)
     }
 
-    // Registrar evento de consulta de métricas
+    // Registrar evento de consulta de mÃ©tricas
     await securityMonitor.logEvent({
       level: 'info',
       category: 'access',
@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Erro interno na API:', error)
     
-    // Registrar erro como evento de segurança
+    // Registrar erro como evento de seguranÃ§a
     await securityMonitor.logEvent({
       level: 'warning',
       category: 'api_abuse',
@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Endpoint para registrar um evento de segurança
+// Endpoint para registrar um evento de seguranÃ§a
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
     // Validar dados de entrada
     if (!body.level || !body.category || !body.event_type) {
       return NextResponse.json(
-        { success: false, error: 'Dados obrigatórios ausentes: level, category, event_type' },
+        { success: false, error: 'Dados obrigatÃ³rios ausentes: level, category, event_type' },
         { status: 400 }
       )
     }
@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Evento de segurança registrado com sucesso'
+      message: 'Evento de seguranÃ§a registrado com sucesso'
     })
 
   } catch (error) {

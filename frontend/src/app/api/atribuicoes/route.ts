@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser, authErrorResponse } from '@/middleware/auth'
 import { z } from 'zod'
 
 // =====================================================
-// SCHEMAS DE VALIDAÇÃO
+// SCHEMAS DE VALIDAÃ‡ÃƒO
 // =====================================================
 
 const CriarAtribuicaoSchema = z.object({
@@ -15,14 +15,14 @@ const CriarAtribuicaoSchema = z.object({
   setor: z.string().optional(),
   frequencia: z.enum(['diaria', 'semanal', 'mensal', 'personalizada']),
   configuracao_frequencia: z.object({
-    // Para frequência diária
+    // Para frequÃªncia diÃ¡ria
     horarios: z.array(z.string()).optional(), // ['09:00', '15:00', '21:00']
     dias_semana: z.array(z.number()).optional(), // [1,2,3,4,5] (segunda-sexta)
     
-    // Para frequência personalizada  
+    // Para frequÃªncia personalizada  
     recorrencia_personalizada: z.string().optional(), // Cron expression
     
-    // Configurações gerais
+    // ConfiguraÃ§Ãµes gerais
     tolerancia_minutos: z.number().min(0).max(1440).default(30),
     lembrete_antecipado_minutos: z.number().min(0).max(1440).default(15),
     auto_cancelar_apos_horas: z.number().min(1).max(168).default(24)
@@ -36,20 +36,20 @@ const CriarAtribuicaoSchema = z.object({
 const AtualizarAtribuicaoSchema = CriarAtribuicaoSchema.partial()
 
 // =====================================================
-// POST - CRIAR NOVA ATRIBUIÇÃO
+// POST - CRIAR NOVA ATRIBUIÃ‡ÃƒO
 // =====================================================
 export async function POST(request: NextRequest) {
   try {
-    // 🔐 AUTENTICAÇÃO
+    // ðŸ” AUTENTICAÃ‡ÃƒO
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usuário não autenticado')
+      return authErrorResponse('UsuÃ¡rio nÃ£o autenticado')
     }
 
-    // Apenas admin e financeiro podem criar atribuições
+    // Apenas admin e financeiro podem criar atribuiÃ§Ãµes
     if (!['admin', 'financeiro'].includes(user.role)) {
       return NextResponse.json({ 
-        error: 'Sem permissão para criar atribuições' 
+        error: 'Sem permissÃ£o para criar atribuiÃ§Ãµes' 
       }, { status: 403 })
     }
 
@@ -69,29 +69,29 @@ export async function POST(request: NextRequest) {
 
     if (checklistError || !checklist) {
       return NextResponse.json({ 
-        error: 'Checklist não encontrado ou inativo' 
+        error: 'Checklist nÃ£o encontrado ou inativo' 
       }, { status: 404 })
     }
 
-    // Validar dados específicos por tipo de atribuição
+    // Validar dados especÃ­ficos por tipo de atribuiÃ§Ã£o
     const validacao = validarDadosAtribuicao(data)
     if (!validacao.valido) {
       return NextResponse.json({ 
-        error: 'Dados de atribuição inválidos',
+        error: 'Dados de atribuiÃ§Ã£o invÃ¡lidos',
         detalhes: validacao.erros 
       }, { status: 400 })
     }
 
-    // Verificar conflitos de atribuição
+    // Verificar conflitos de atribuiÃ§Ã£o
     const conflitos = await verificarConflitosAtribuicao(supabase, data, user.bar_id.toString())
     if (conflitos.length > 0) {
       return NextResponse.json({ 
-        error: 'Conflito com atribuições existentes',
+        error: 'Conflito com atribuiÃ§Ãµes existentes',
         conflitos 
       }, { status: 409 })
     }
 
-    // Criar nova atribuição
+    // Criar nova atribuiÃ§Ã£o
     const novaAtribuicao = {
       checklist_id: data.checklist_id,
       bar_id: user.bar_id,
@@ -121,29 +121,29 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (createError) {
-      console.error('Erro ao criar atribuição:', createError)
+      console.error('Erro ao criar atribuiÃ§Ã£o:', createError)
       return NextResponse.json({ 
-        error: 'Erro ao criar atribuição' 
+        error: 'Erro ao criar atribuiÃ§Ã£o' 
       }, { status: 500 })
     }
 
-    // Criar agendamentos automáticos para esta atribuição
+    // Criar agendamentos automÃ¡ticos para esta atribuiÃ§Ã£o
     await criarAgendamentosAutomaticos(supabase, atribuicao)
 
-    console.log(`✅ Atribuição criada: ${checklist.nome} -> ${data.tipo_atribuicao}`)
+    console.log(`âœ… AtribuiÃ§Ã£o criada: ${checklist.nome} -> ${data.tipo_atribuicao}`)
 
     return NextResponse.json({
       success: true,
-      message: 'Atribuição criada com sucesso',
+      message: 'AtribuiÃ§Ã£o criada com sucesso',
       data: atribuicao
     })
 
   } catch (error: any) {
-    console.error('Erro na API de criar atribuição:', error)
+    console.error('Erro na API de criar atribuiÃ§Ã£o:', error)
     
     if (error instanceof z.ZodError) {
       return NextResponse.json({ 
-        error: 'Dados inválidos',
+        error: 'Dados invÃ¡lidos',
         details: error.errors 
       }, { status: 400 })
     }
@@ -156,14 +156,14 @@ export async function POST(request: NextRequest) {
 }
 
 // =====================================================
-// GET - LISTAR ATRIBUIÇÕES
+// GET - LISTAR ATRIBUIÃ‡Ã•ES
 // =====================================================
 export async function GET(request: NextRequest) {
   try {
-    // 🔐 AUTENTICAÇÃO
+    // ðŸ” AUTENTICAÃ‡ÃƒO
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usuário não autenticado')
+      return authErrorResponse('UsuÃ¡rio nÃ£o autenticado')
     }
 
     const { searchParams } = new URL(request.url)
@@ -216,22 +216,22 @@ export async function GET(request: NextRequest) {
       query = query.eq('cargo', cargo)
     }
 
-    // Buscar total para paginação
+    // Buscar total para paginaÃ§Ã£o
     const { count } = await query
 
-    // Buscar atribuições com paginação
+    // Buscar atribuiÃ§Ãµes com paginaÃ§Ã£o
     const { data: atribuicoes, error } = await query
       .order('criado_em', { ascending: false })
       .range(offset, offset + limit - 1)
 
     if (error) {
-      console.error('Erro ao buscar atribuições:', error)
+      console.error('Erro ao buscar atribuiÃ§Ãµes:', error)
       return NextResponse.json({ 
-        error: 'Erro ao buscar atribuições' 
+        error: 'Erro ao buscar atribuiÃ§Ãµes' 
       }, { status: 500 })
     }
 
-    // Enriquecer atribuições com estatísticas
+    // Enriquecer atribuiÃ§Ãµes com estatÃ­sticas
     const atribuicoesEnriquecidas = await Promise.all(
       (atribuicoes || []).map(async (atribuicao: any) => {
         const stats = await calcularEstatisticasAtribuicao(supabase, atribuicao.id)
@@ -242,7 +242,7 @@ export async function GET(request: NextRequest) {
       })
     )
 
-    // Calcular estatísticas gerais
+    // Calcular estatÃ­sticas gerais
     const estatisticasGerais = calcularEstatisticasGerais(atribuicoesEnriquecidas)
 
     return NextResponse.json({
@@ -260,7 +260,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('Erro na API de listar atribuições:', error)
+    console.error('Erro na API de listar atribuiÃ§Ãµes:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
       details: error.message 
@@ -269,61 +269,61 @@ export async function GET(request: NextRequest) {
 }
 
 // =====================================================
-// FUNÇÕES UTILITÁRIAS
+// FUNÃ‡Ã•ES UTILITÃRIAS
 // =====================================================
 
 function validarDadosAtribuicao(data: any) {
   const erros: string[] = []
 
-  // Validar tipo específico
+  // Validar tipo especÃ­fico
   switch (data.tipo_atribuicao) {
     case 'funcionario_especifico':
       if (!data.funcionario_id) {
-        erros.push('ID do funcionário é obrigatório para atribuição específica')
+        erros.push('ID do funcionÃ¡rio Ã© obrigatÃ³rio para atribuiÃ§Ã£o especÃ­fica')
       }
       break
 
     case 'cargo':
       if (!data.cargo) {
-        erros.push('Cargo é obrigatório para atribuição por cargo')
+        erros.push('Cargo Ã© obrigatÃ³rio para atribuiÃ§Ã£o por cargo')
       }
       break
 
     case 'setor':
       if (!data.setor) {
-        erros.push('Setor é obrigatório para atribuição por setor')
+        erros.push('Setor Ã© obrigatÃ³rio para atribuiÃ§Ã£o por setor')
       }
       break
   }
 
-  // Validar frequência
+  // Validar frequÃªncia
   const config = data.configuracao_frequencia
   switch (data.frequencia) {
     case 'diaria':
       if (!config.horarios || config.horarios.length === 0) {
-        erros.push('Horários são obrigatórios para frequência diária')
+        erros.push('HorÃ¡rios sÃ£o obrigatÃ³rios para frequÃªncia diÃ¡ria')
       }
       break
 
     case 'semanal':
       if (!config.dias_semana || config.dias_semana.length === 0) {
-        erros.push('Dias da semana são obrigatórios para frequência semanal')
+        erros.push('Dias da semana sÃ£o obrigatÃ³rios para frequÃªncia semanal')
       }
       if (!config.horarios || config.horarios.length === 0) {
-        erros.push('Horários são obrigatórios para frequência semanal')
+        erros.push('HorÃ¡rios sÃ£o obrigatÃ³rios para frequÃªncia semanal')
       }
       break
 
     case 'personalizada':
       if (!config.recorrencia_personalizada) {
-        erros.push('Expressão de recorrência é obrigatória para frequência personalizada')
+        erros.push('ExpressÃ£o de recorrÃªncia Ã© obrigatÃ³ria para frequÃªncia personalizada')
       }
       break
   }
 
   // Validar datas
   if (data.data_fim && new Date(data.data_fim) <= new Date(data.data_inicio)) {
-    erros.push('Data de fim deve ser posterior à data de início')
+    erros.push('Data de fim deve ser posterior Ã  data de inÃ­cio')
   }
 
   return {
@@ -335,7 +335,7 @@ function validarDadosAtribuicao(data: any) {
 async function verificarConflitosAtribuicao(supabase: any, data: any, barId: string) {
   const conflitos: any[] = []
 
-  // Buscar atribuições existentes que possam conflitar
+  // Buscar atribuiÃ§Ãµes existentes que possam conflitar
   const { data: atribuicoesExistentes } = await supabase
     .from('checklist_atribuicoes')
     .select('*')
@@ -355,27 +355,27 @@ async function verificarConflitosAtribuicao(supabase: any, data: any, barId: str
         case 'funcionario_especifico':
           if (existente.funcionario_id === data.funcionario_id) {
             temConflito = true
-            motivo = 'Funcionário já possui atribuição para este checklist'
+            motivo = 'FuncionÃ¡rio jÃ¡ possui atribuiÃ§Ã£o para este checklist'
           }
           break
 
         case 'cargo':
           if (existente.cargo === data.cargo) {
             temConflito = true
-            motivo = 'Cargo já possui atribuição para este checklist'
+            motivo = 'Cargo jÃ¡ possui atribuiÃ§Ã£o para este checklist'
           }
           break
 
         case 'setor':
           if (existente.setor === data.setor) {
             temConflito = true
-            motivo = 'Setor já possui atribuição para este checklist'
+            motivo = 'Setor jÃ¡ possui atribuiÃ§Ã£o para este checklist'
           }
           break
 
         case 'todos':
           temConflito = true
-          motivo = 'Já existe atribuição geral para este checklist'
+          motivo = 'JÃ¡ existe atribuiÃ§Ã£o geral para este checklist'
           break
       }
     }
@@ -394,7 +394,7 @@ async function verificarConflitosAtribuicao(supabase: any, data: any, barId: str
 
 async function criarAgendamentosAutomaticos(supabase: any, atribuicao: any) {
   try {
-    const agendamentos = gerarAgendamentos(atribuicao, 30) // Próximos 30 dias
+    const agendamentos = gerarAgendamentos(atribuicao, 30) // PrÃ³ximos 30 dias
 
     if (agendamentos.length > 0) {
       const { error } = await supabase
@@ -402,13 +402,13 @@ async function criarAgendamentosAutomaticos(supabase: any, atribuicao: any) {
         .insert(agendamentos)
 
       if (error) {
-        console.error('Erro ao criar agendamentos automáticos:', error)
+        console.error('Erro ao criar agendamentos automÃ¡ticos:', error)
       } else {
-        console.log(`📅 ${agendamentos.length} agendamentos criados para atribuição ${atribuicao.id}`)
+        console.log(`ðŸ“… ${agendamentos.length} agendamentos criados para atribuiÃ§Ã£o ${atribuicao.id}`)
       }
     }
   } catch (error) {
-    console.error('Erro na criação de agendamentos automáticos:', error)
+    console.error('Erro na criaÃ§Ã£o de agendamentos automÃ¡ticos:', error)
   }
 }
 
@@ -422,7 +422,7 @@ function gerarAgendamentos(atribuicao: any, dias: number) {
     case 'diaria':
       for (let data = new Date(dataInicio); data <= dataFim; data.setDate(data.getDate() + 1)) {
         if (config.dias_semana && !config.dias_semana.includes(data.getDay())) {
-          continue // Pular dias não configurados
+          continue // Pular dias nÃ£o configurados
         }
 
         config.horarios?.forEach((horario: string) => {
@@ -430,7 +430,7 @@ function gerarAgendamentos(atribuicao: any, dias: number) {
           const dataAgendamento = new Date(data)
           dataAgendamento.setHours(hora, minuto, 0, 0)
 
-          if (dataAgendamento > new Date()) { // Só agendar para o futuro
+          if (dataAgendamento > new Date()) { // SÃ³ agendar para o futuro
             agendamentos.push(criarAgendamento(atribuicao, dataAgendamento))
           }
         })
@@ -460,7 +460,7 @@ function gerarAgendamentos(atribuicao: any, dias: number) {
       break
 
     case 'mensal':
-      // Implementação mensal (primeiro dia útil do mês, etc.)
+      // ImplementaÃ§Ã£o mensal (primeiro dia Ãºtil do mÃªs, etc.)
       for (let data = new Date(dataInicio); data <= dataFim; data.setMonth(data.getMonth() + 1)) {
         config.horarios?.forEach((horario: string) => {
           const [hora, minuto] = horario.split(':').map(Number)
@@ -498,7 +498,7 @@ function criarAgendamento(atribuicao: any, dataAgendamento: Date) {
 }
 
 async function calcularEstatisticasAtribuicao(supabase: any, atribuicaoId: string) {
-  // Buscar agendamentos desta atribuição
+  // Buscar agendamentos desta atribuiÃ§Ã£o
   const { data: agendamentos } = await supabase
     .from('checklist_agendamentos')
     .select('status, data_agendada, execucao_id')

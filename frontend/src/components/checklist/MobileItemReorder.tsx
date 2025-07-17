@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -15,10 +15,10 @@ import {
 } from 'lucide-react'
 
 // =====================================================
-// 📱 REORDENAÇÃO MOBILE-FRIENDLY
+// ðŸ“± REORDENAÃ‡ÃƒO MOBILE-FRIENDLY
 // =====================================================
-// Interface otimizada para touch com botões grandes
-// ao invés de drag & drop complexo
+// Interface otimizada para touch com botÃµes grandes
+// ao invÃ©s de drag & drop complexo
 
 interface ReorderableItem {
   id: string
@@ -74,13 +74,13 @@ export default function MobileItemReorder({
       (direction === 'up' && currentIndex === 0) ||
       (direction === 'down' && currentIndex === localItens.length - 1)
     ) {
-      return // Não pode mover
+      return // NÃ£o pode mover
     }
 
     const newItens = [...localItens]
     const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
     
-    // Trocar posições
+    // Trocar posiÃ§Ãµes
     const temp = newItens[currentIndex]
     newItens[currentIndex] = newItens[targetIndex]
     newItens[targetIndex] = temp
@@ -105,15 +105,15 @@ export default function MobileItemReorder({
 
   const getItemTypeIcon = (tipo: string) => {
     switch (tipo) {
-      case 'sim_nao': return '✅'
-      case 'texto': return '📝'
-      case 'numero': return '🔢'
-      case 'data': return '📅'
-      case 'foto_camera': return '📷'
-      case 'foto_upload': return '🖼️'
-      case 'avaliacao': return '⭐'
-      case 'assinatura': return '✍️'
-      default: return '📋'
+      case 'sim_nao': return 'âœ…'
+      case 'texto': return 'ðŸ“'
+      case 'numero': return 'ðŸ”¢'
+      case 'data': return 'ðŸ“…'
+      case 'foto_camera': return 'ðŸ“·'
+      case 'foto_upload': return 'ðŸ–¼ï¸'
+      case 'avaliacao': return 'â­'
+      case 'assinatura': return 'âœï¸'
+      default: return 'ðŸ“‹'
     }
   }
 
@@ -134,7 +134,7 @@ export default function MobileItemReorder({
                   <span className="font-medium">{item.titulo}</span>
                   {item.obrigatorio && (
                     <Badge className="ml-2 bg-red-100 text-red-800 text-xs">
-                      Obrigatório
+                      ObrigatÃ³rio
                     </Badge>
                   )}
                 </div>
@@ -200,17 +200,17 @@ export default function MobileItemReorder({
           >
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                {/* Número da Ordem */}
+                {/* NÃºmero da Ordem */}
                 <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full font-bold text-gray-700">
                   {index + 1}
                 </div>
 
-                {/* Ícone do Tipo */}
+                {/* Ãcone do Tipo */}
                 <div className="text-2xl">
                   {getItemTypeIcon(item.tipo)}
                 </div>
 
-                {/* Informações do Item */}
+                {/* InformaÃ§Ãµes do Item */}
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-gray-900 truncate">
                     {item.titulo}
@@ -221,13 +221,13 @@ export default function MobileItemReorder({
                     </Badge>
                     {item.obrigatorio && (
                       <Badge className="bg-red-100 text-red-800 text-xs">
-                        Obrigatório
+                        ObrigatÃ³rio
                       </Badge>
                     )}
                   </div>
                 </div>
 
-                {/* Botões de Reordenação */}
+                {/* BotÃµes de ReordenaÃ§Ã£o */}
                 {isReordering && (
                   <div className="flex flex-col gap-1">
                     <Button
@@ -251,7 +251,7 @@ export default function MobileItemReorder({
                   </div>
                 )}
 
-                {/* Indicador de Modo de Reordenação */}
+                {/* Indicador de Modo de ReordenaÃ§Ã£o */}
                 {isReordering && (
                   <div className="text-blue-500">
                     <GripVertical className="w-5 h-5" />
@@ -267,20 +267,20 @@ export default function MobileItemReorder({
       {isReordering && (
         <div className="p-4 bg-blue-50 rounded-lg">
           <div className="flex items-start gap-2">
-            <div className="text-blue-600 mt-1">💡</div>
+            <div className="text-blue-600 mt-1">ðŸ’¡</div>
             <div className="text-sm text-blue-800">
               <strong>Dicas:</strong>
               <ul className="mt-1 space-y-1">
-                <li>• Use os botões ⬆️⬇️ para mover os itens</li>
-                <li>• A numeração atualiza automaticamente</li>
-                <li>• Toque em "Salvar" para confirmar as mudanças</li>
+                <li>â€¢ Use os botÃµes â¬†ï¸â¬‡ï¸ para mover os itens</li>
+                <li>â€¢ A numeraÃ§Ã£o atualiza automaticamente</li>
+                <li>â€¢ Toque em "Salvar" para confirmar as mudanÃ§as</li>
               </ul>
             </div>
           </div>
         </div>
       )}
 
-      {/* Botão de Reset (apenas durante reordenação) */}
+      {/* BotÃ£o de Reset (apenas durante reordenaÃ§Ã£o) */}
       {isReordering && (
         <Button 
           onClick={() => setLocalItens([...originalItens])}
@@ -297,7 +297,7 @@ export default function MobileItemReorder({
 }
 
 // =====================================================
-// 🎯 HOOK PARA GERENCIAR REORDENAÇÃO
+// ðŸŽ¯ HOOK PARA GERENCIAR REORDENAÃ‡ÃƒO
 // =====================================================
 
 export function useItemReorder(initialItems: ReorderableItem[]) {
@@ -322,7 +322,7 @@ export function useItemReorder(initialItems: ReorderableItem[]) {
       setHasChanges(false)
       return true
     } catch (error) {
-      console.error('Erro ao salvar reordenação:', error)
+      console.error('Erro ao salvar reordenaÃ§Ã£o:', error)
       return false
     }
   }

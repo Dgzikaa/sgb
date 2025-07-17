@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -23,10 +23,10 @@ export async function POST(request: NextRequest) {
     const { barId } = await request.json()
 
     if (!barId) {
-      return NextResponse.json({ error: 'barId é obrigatório' }, { status: 400 })
+      return NextResponse.json({ error: 'barId Ã© obrigatÃ³rio' }, { status: 400 })
     }
 
-    console.log(`🔄 RENOVAÇÃO TOKEN - Iniciando para bar ${barId}`)
+    console.log(`ðŸ”„ RENOVAÃ‡ÃƒO TOKEN - Iniciando para bar ${barId}`)
 
     const supabase = createSupabaseClient()
 
@@ -40,39 +40,39 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (dbError || !credentials) {
-      console.error('❌ Credenciais não encontradas:', dbError)
+      console.error('âŒ Credenciais nÃ£o encontradas:', dbError)
       return NextResponse.json({ 
         success: false, 
-        error: 'Credenciais não encontradas' 
+        error: 'Credenciais nÃ£o encontradas' 
       }, { status: 404 })
     }
 
     // 2. Verificar se temos refresh token
     if (!credentials.refresh_token) {
-      console.error('❌ Refresh token não disponível')
+      console.error('âŒ Refresh token nÃ£o disponÃ­vel')
       return NextResponse.json({ 
         success: false, 
-        error: 'Refresh token não disponível. É necessário fazer nova autorização.' 
+        error: 'Refresh token nÃ£o disponÃ­vel. Ã‰ necessÃ¡rio fazer nova autorizaÃ§Ã£o.' 
       }, { status: 400 })
     }
 
-    // 3. Verificar se já temos um token válido
+    // 3. Verificar se jÃ¡ temos um token vÃ¡lido
     const agora = new Date()
     const expiraEm = new Date(credentials.expires_at)
     const tokenValido = expiraEm > agora
 
     if (tokenValido) {
-      console.log('✅ Token ainda válido, retornando sucesso')
+      console.log('âœ… Token ainda vÃ¡lido, retornando sucesso')
       return NextResponse.json({
         success: true,
-        message: 'Token já está válido',
+        message: 'Token jÃ¡ estÃ¡ vÃ¡lido',
         conectado: true,
         expires_at: credentials.expires_at,
         empresa_id: credentials.empresa_id
       })
     }
 
-    console.log('🔄 Token expirado, renovando...')
+    console.log('ðŸ”„ Token expirado, renovando...')
 
     // 4. Renovar token usando refresh token
     const basicAuth = Buffer.from(`${credentials.client_id}:${credentials.client_secret}`).toString('base64')
@@ -92,10 +92,10 @@ export async function POST(request: NextRequest) {
     const data = await response.json()
     
     if (!response.ok) {
-      console.error('❌ Erro na renovação:', data)
+      console.error('âŒ Erro na renovaÃ§Ã£o:', data)
       return NextResponse.json({ 
         success: false, 
-        error: data.error || 'Erro ao renovar token. Pode ser necessário fazer nova autorização.' 
+        error: data.error || 'Erro ao renovar token. Pode ser necessÃ¡rio fazer nova autorizaÃ§Ã£o.' 
       }, { status: 400 })
     }
 
@@ -115,14 +115,14 @@ export async function POST(request: NextRequest) {
       .eq('id', credentials.id)
 
     if (updateError) {
-      console.error('❌ Erro ao salvar token renovado:', updateError)
+      console.error('âŒ Erro ao salvar token renovado:', updateError)
       return NextResponse.json({ 
         success: false, 
         error: 'Erro ao salvar token renovado' 
       }, { status: 500 })
     }
 
-    console.log('✅ Token renovado com sucesso!')
+    console.log('âœ… Token renovado com sucesso!')
 
     return NextResponse.json({
       success: true,
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Erro interno na renovação:', error)
+    console.error('âŒ Erro interno na renovaÃ§Ã£o:', error)
     return NextResponse.json({ 
       success: false,
       error: 'Erro interno do servidor',

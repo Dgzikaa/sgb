@@ -1,4 +1,4 @@
-import { 
+﻿import { 
   SkeletonCard, 
   SkeletonTable, 
   SkeletonStats, 
@@ -127,7 +127,7 @@ export function RelatorioSkeleton() {
 }
 
 // =====================================================
-// CONFIGURAÇÕES SKELETONS
+// CONFIGURAÃ‡Ã•ES SKELETONS
 // =====================================================
 
 export function ConfiguracoesSkeleton() {
@@ -151,7 +151,7 @@ export function ConfiguracoesSkeleton() {
 }
 
 // =====================================================
-// OPERAÇÕES SKELETONS
+// OPERAÃ‡Ã•ES SKELETONS
 // =====================================================
 
 export function OperacoesSkeleton() {
@@ -160,7 +160,7 @@ export function OperacoesSkeleton() {
       <div className="container mx-auto px-4 py-6 space-y-6">
         <SkeletonPageHeader />
         
-        {/* Cards de operações */}
+        {/* Cards de operaÃ§Ãµes */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="card-dark p-6">
@@ -184,14 +184,14 @@ export function OperacoesSkeleton() {
 }
 
 // =====================================================
-// VISÃO GERAL SKELETONS
+// VISÃƒO GERAL SKELETONS
 // =====================================================
 
 export function VisaoGeralSkeleton() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6 space-y-6">
-        {/* Header especial para visão geral */}
+        {/* Header especial para visÃ£o geral */}
         <div className="card-dark p-8">
           <div className="animate-pulse">
             <div className="flex items-center justify-between">
@@ -273,7 +273,7 @@ export function Marketing360Skeleton() {
 }
 
 // =====================================================
-// FUNCIONÁRIO SKELETON
+// FUNCIONÃRIO SKELETON
 // =====================================================
 
 export function FuncionarioSkeleton() {

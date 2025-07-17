@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react'
+﻿import { ReactNode, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { DragHandlers } from '@/hooks/useDragAndDrop'
 
@@ -136,7 +136,7 @@ export function DropZone({
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl pointer-events-none">
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg font-medium flex items-center gap-2">
-              {icon || <span className="text-xl">📦</span>}
+              {icon || <span className="text-xl">ðŸ“¦</span>}
               Soltar aqui
             </div>
           </div>
@@ -190,14 +190,14 @@ export function DropZone({
   )
 }
 
-// Variantes específicas
+// Variantes especÃ­ficas
 export function ChecklistDropZone({ onDrop, className, ...props }: Omit<DropZoneProps, 'zone' | 'accepts'>) {
   return (
     <DropZone
       {...props}
       zone="checklist"
       accepts={['checklist-item', 'task']}
-      icon={<span>✓</span>}
+      icon={<span>âœ“</span>}
       title="Checklist"
       description="Solte itens de checklist aqui"
       onDrop={onDrop}
@@ -218,7 +218,7 @@ export function CategoryDropZone({
       zone={`category-${category}`}
       title={category}
       description={`Mover para categoria ${category}`}
-      icon={<span>📂</span>}
+      icon={<span>ðŸ“‚</span>}
       onDrop={onDrop}
       className={cn('border-purple-300 dark:border-purple-600', className)}
     />
@@ -232,7 +232,7 @@ export function TrashDropZone({ onDrop, className, ...props }: Omit<DropZoneProp
       zone="trash"
       title="Lixeira"
       description="Solte aqui para remover"
-      icon={<span>🗑️</span>}
+      icon={<span>ðŸ—‘ï¸</span>}
       onDrop={onDrop}
       className={cn('border-red-300 dark:border-red-600 hover:border-red-400', className)}
     />

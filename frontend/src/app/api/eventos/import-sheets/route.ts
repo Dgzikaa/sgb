@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getUserAuth, isAdmin } from '@/lib/auth-helper'
 
@@ -6,13 +6,13 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 // ========================================
-// 📅 IMPORTAR EVENTOS DO GOOGLE SHEETS
+// ðŸ“… IMPORTAR EVENTOS DO GOOGLE SHEETS
 // ========================================
 export async function POST(request: NextRequest) {
   try {
     const user = await getUserAuth(request)
 
-    // Verificar permissões
+    // Verificar permissÃµes
     if (!user || !isAdmin(user)) {
       return NextResponse.json({ 
         error: 'Apenas administradores podem importar eventos' 
@@ -26,13 +26,13 @@ export async function POST(request: NextRequest) {
 
     if (!dados || !Array.isArray(dados)) {
       return NextResponse.json({ 
-        error: 'Dados inválidos. Esperado array de eventos' 
+        error: 'Dados invÃ¡lidos. Esperado array de eventos' 
       }, { status: 400 })
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    console.log('📅 Importando eventos:', { 
+    console.log('ðŸ“… Importando eventos:', { 
       bar_id, 
       total_eventos: dados.length,
       substituir_existentes 
@@ -44,9 +44,9 @@ export async function POST(request: NextRequest) {
 
     for (const evento of dados) {
       try {
-        // Validar campos obrigatórios
+        // Validar campos obrigatÃ³rios
         if (!evento.data_evento || !evento.nome) {
-          erros.push(`Evento ${evento.nome || 'sem nome'}: campos obrigatórios faltando`)
+          erros.push(`Evento ${evento.nome || 'sem nome'}: campos obrigatÃ³rios faltando`)
           continue
         }
 
@@ -78,11 +78,11 @@ export async function POST(request: NextRequest) {
           status: evento.status || 'confirmado',
           divulgacao_ativa: evento.divulgacao_ativa !== false,
           observacoes: evento.observacoes || null,
-          // Métricas do Sympla
+          // MÃ©tricas do Sympla
           sympla_total_ingressos: parseInt(evento.sympla_total_ingressos) || 0,
           sympla_total_checkins: parseInt(evento.sympla_total_checkins) || 0,
           sympla_faturamento_liquido: parseFloat(evento.sympla_faturamento_liquido) || 0,
-          // Métricas do Yuzer
+          // MÃ©tricas do Yuzer
           yuzer_faturamento_bilheteria: parseFloat(evento.yuzer_faturamento_bilheteria) || 0,
           yuzer_faturamento_bar: parseFloat(evento.yuzer_faturamento_bar) || 0,
           yuzer_total_ingressos: parseInt(evento.yuzer_total_ingressos) || 0,
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
           dados_yuzer: evento.dados_yuzer || {}
         }
 
-        // Verificar se já existe
+        // Verificar se jÃ¡ existe
         const { data: existente } = await supabase
           .from('eventos')
           .select('id')
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
           .single()
 
         if (existente && !substituir_existentes) {
-          console.log(`⚠️ Evento ${evento.nome} em ${evento.data_evento} já existe, pulando`)
+          console.log(`âš ï¸ Evento ${evento.nome} em ${evento.data_evento} jÃ¡ existe, pulando`)
           continue
         }
 
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Importação de eventos concluída',
+      message: 'ImportaÃ§Ã£o de eventos concluÃ­da',
       resultados: {
         eventos_importados: eventosImportados,
         eventos_atualizados: eventosAtualizados,
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('❌ Erro na importação de eventos:', error)
+    console.error('âŒ Erro na importaÃ§Ã£o de eventos:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
       details: error.message 
@@ -158,22 +158,22 @@ export async function POST(request: NextRequest) {
 }
 
 // ========================================
-// 📋 TEMPLATE DE DADOS PARA IMPORTAÇÃO
+// ðŸ“‹ TEMPLATE DE DADOS PARA IMPORTAÃ‡ÃƒO
 // ========================================
 export async function GET() {
   const template = {
-    exemplo: "Estrutura de dados para importação de eventos",
+    exemplo: "Estrutura de dados para importaÃ§Ã£o de eventos",
     formato: [
       {
         data_evento: "2025-06-01",
-        nome: "Samba da tia Zélia",
+        nome: "Samba da tia ZÃ©lia",
         descricao: "Evento especial de samba",
         tipo_evento: "musica_ao_vivo",
         categoria: "brasileira",
         genero_musical: "samba",
         sub_genero: null,
-        nome_artista: "Tia Zélia",
-        nome_banda: "Grupo da Tia Zélia",
+        nome_artista: "Tia ZÃ©lia",
+        nome_banda: "Grupo da Tia ZÃ©lia",
         tipo_artista: "banda_local",
         origem: "local",
         popularidade: "conhecido",
@@ -201,7 +201,7 @@ export async function GET() {
       campos_opcionais: ["descricao", "tipo_evento", "categoria", "genero_musical", "nome_artista", "horario_inicio", "horario_fim", "capacidade_maxima", "observacoes"],
       formato_datas: "YYYY-MM-DD",
       formato_horarios: "HH:MM",
-      substituir_existentes: "false por padrão, true para sobrescrever eventos existentes",
+      substituir_existentes: "false por padrÃ£o, true para sobrescrever eventos existentes",
       tipos_evento: ["musica_ao_vivo", "show", "festa", "promocao", "especial"],
       categorias: ["brasileira", "eletronica", "internacional", "outros"],
       generos_musicais: ["samba", "pagode", "funk", "sertanejo", "rock", "jazz", "dj_set", "outros"],

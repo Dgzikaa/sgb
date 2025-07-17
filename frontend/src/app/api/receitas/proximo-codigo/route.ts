@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const barId = parseInt(searchParams.get('bar_id') || '3')
     
-    console.log(`🔢 Gerando próximo código para bar_id: ${barId}`)
+    console.log(`ðŸ”¢ Gerando prÃ³ximo cÃ³digo para bar_id: ${barId}`)
 
     const supabase = await getSupabaseClient()
     if (!supabase) {
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
       }, { status: 500 })
     }
 
-    // Buscar o último código de receita do bar
+    // Buscar o Ãºltimo cÃ³digo de receita do bar
     const { data: ultimaReceita, error } = await supabase
       .from('receitas')
       .select('receita_codigo')
@@ -28,10 +28,10 @@ export async function GET(request: NextRequest) {
       .limit(1)
 
     if (error) {
-      console.error('❌ Erro ao buscar último código:', error)
+      console.error('âŒ Erro ao buscar Ãºltimo cÃ³digo:', error)
       return NextResponse.json({
         success: false,
-        error: 'Erro ao buscar último código: ' + error.message
+        error: 'Erro ao buscar Ãºltimo cÃ³digo: ' + error.message
       }, { status: 500 })
     }
 
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       proximoCodigo = `pc${numero.toString().padStart(4, '0')}`
     }
 
-    console.log(`✅ Próximo código gerado: ${proximoCodigo}`)
+    console.log(`âœ… PrÃ³ximo cÃ³digo gerado: ${proximoCodigo}`)
 
     return NextResponse.json({
       success: true,
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Erro interno ao gerar código:', error)
+    console.error('âŒ Erro interno ao gerar cÃ³digo:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro interno do servidor: ' + (error as Error).message

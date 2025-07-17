@@ -1,8 +1,8 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Login - SGB',
-  description: 'Sistema de Gestão de Bares - Grupo Menos é Mais',
+  description: 'Sistema de GestÃ£o de Bares - Grupo Menos Ã© Mais',
 }
 
 export default function LoginLayout({

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 
 export async function GET(request: NextRequest) {
@@ -8,13 +8,13 @@ export async function GET(request: NextRequest) {
     const data = searchParams.get('data')
 
     if (!bar_id) {
-      return NextResponse.json({ error: 'bar_id é obrigatório' }, { status: 400 })
+      return NextResponse.json({ error: 'bar_id Ã© obrigatÃ³rio' }, { status: 400 })
     }
 
     const supabase = await getAdminClient()
 
     if (data) {
-      // Buscar checklist específico de uma data
+      // Buscar checklist especÃ­fico de uma data
       const { data: checklist, error } = await supabase
         .from('checklist_abertura')
         .select(`
@@ -73,13 +73,13 @@ export async function POST(request: NextRequest) {
 
     if (!bar_id || !data || !itens) {
       return NextResponse.json({ 
-        error: 'bar_id, data e itens são obrigatórios' 
+        error: 'bar_id, data e itens sÃ£o obrigatÃ³rios' 
       }, { status: 400 })
     }
 
     const supabase = await getAdminClient()
 
-    // Calcular estatísticas
+    // Calcular estatÃ­sticas
     const total_itens = itens.length
     const itens_concluidos = itens.filter((item: any) => item.status === 'concluido').length
     const itens_problemas = itens.filter((item: any) => item.status === 'problema').length
@@ -167,7 +167,7 @@ export async function PUT(request: NextRequest) {
 
     if (!checklist_id || !item_id || !status) {
       return NextResponse.json({ 
-        error: 'checklist_id, item_id e status são obrigatórios' 
+        error: 'checklist_id, item_id e status sÃ£o obrigatÃ³rios' 
       }, { status: 400 })
     }
 
@@ -175,7 +175,7 @@ export async function PUT(request: NextRequest) {
 
     const agora = new Date().toISOString()
 
-    // Atualizar item específico
+    // Atualizar item especÃ­fico
     const { error } = await supabase
       .from('checklist_abertura_itens')
       .update({
@@ -193,7 +193,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao atualizar item' }, { status: 500 })
     }
 
-    // Recalcular estatísticas do checklist
+    // Recalcular estatÃ­sticas do checklist
     const { data: itens, error: itensError } = await supabase
       .from('checklist_abertura_itens')
       .select('status')

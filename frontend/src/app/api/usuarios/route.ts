@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { withCache } from '@/middleware/cache-middleware'
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
 
     if (!bar_id) {
       return NextResponse.json(
-        { success: false, error: 'bar_id é obrigatório' },
+        { success: false, error: 'bar_id Ã© obrigatÃ³rio' },
         { status: 400 }
       )
     }
@@ -20,16 +20,16 @@ export async function GET(request: NextRequest) {
       '/api/usuarios',
       `usuarios_bar_${bar_id}`,
       async () => {
-        // Usar cliente administrativo para operações de usuários
+        // Usar cliente administrativo para operaÃ§Ãµes de usuÃ¡rios
         let adminClient
         try {
           adminClient = await getAdminClient()
         } catch (adminError) {
-          console.error('❌ Erro ao obter cliente administrativo:', adminError)
-          throw new Error('Configuração administrativa não disponível')
+          console.error('âŒ Erro ao obter cliente administrativo:', adminError)
+          throw new Error('ConfiguraÃ§Ã£o administrativa nÃ£o disponÃ­vel')
         }
 
-        // Buscar usuários do bar
+        // Buscar usuÃ¡rios do bar
         const { data: usuarios, error } = await adminClient
           .from('usuarios_bar')
           .select('*')
@@ -37,8 +37,8 @@ export async function GET(request: NextRequest) {
           .order('criado_em', { ascending: false })
 
         if (error) {
-          console.error('❌ Erro ao buscar usuários:', error)
-          throw new Error('Erro ao buscar usuários')
+          console.error('âŒ Erro ao buscar usuÃ¡rios:', error)
+          throw new Error('Erro ao buscar usuÃ¡rios')
         }
 
         return usuarios || []
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Erro na API de usuários:', error)
+    console.error('âŒ Erro na API de usuÃ¡rios:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },
       { status: 500 }
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
 
     if (!bar_id || !email || !nome || !password) {
       return NextResponse.json(
-        { success: false, error: 'Dados obrigatórios não fornecidos' },
+        { success: false, error: 'Dados obrigatÃ³rios nÃ£o fornecidos' },
         { status: 400 }
       )
     }
@@ -76,14 +76,14 @@ export async function POST(request: NextRequest) {
     try {
       adminClient = await getAdminClient()
     } catch (adminError) {
-      console.error('❌ Erro ao obter cliente administrativo:', adminError)
+      console.error('âŒ Erro ao obter cliente administrativo:', adminError)
       return NextResponse.json(
-        { success: false, error: 'Configuração administrativa não disponível - verifique secrets' },
+        { success: false, error: 'ConfiguraÃ§Ã£o administrativa nÃ£o disponÃ­vel - verifique secrets' },
         { status: 500 }
       )
     }
 
-    // Verificar se usuário já existe no bar
+    // Verificar se usuÃ¡rio jÃ¡ existe no bar
     const { data: usuarioExistente } = await adminClient
       .from('usuarios_bar')
       .select('id')
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
 
     if (usuarioExistente) {
       return NextResponse.json(
-        { success: false, error: 'Usuário já existe neste bar' },
+        { success: false, error: 'UsuÃ¡rio jÃ¡ existe neste bar' },
         { status: 400 }
       )
     }
@@ -110,26 +110,26 @@ export async function POST(request: NextRequest) {
     })
 
     if (authError) {
-      console.error('❌ Erro ao criar usuário no Auth:', authError)
+      console.error('âŒ Erro ao criar usuÃ¡rio no Auth:', authError)
       return NextResponse.json(
-        { success: false, error: `Erro de autenticação: ${authError.message}` },
+        { success: false, error: `Erro de autenticaÃ§Ã£o: ${authError.message}` },
         { status: 400 }
       )
     }
 
     if (!authUser.user) {
       return NextResponse.json(
-        { success: false, error: 'Falha ao criar usuário de autenticação' },
+        { success: false, error: 'Falha ao criar usuÃ¡rio de autenticaÃ§Ã£o' },
         { status: 500 }
       )
     }
 
-    // PASSO 2: Criar usuário na tabela usuarios_bar
+    // PASSO 2: Criar usuÃ¡rio na tabela usuarios_bar
     const { data: novoUsuario, error } = await adminClient
       .from('usuarios_bar')
       .insert([{
         bar_id: parseInt(bar_id),
-        user_id: authUser.user.id, // Usar o ID do usuário criado no Auth
+        user_id: authUser.user.id, // Usar o ID do usuÃ¡rio criado no Auth
         email,
         nome,
         role: role || 'funcionario',
@@ -141,13 +141,13 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('❌ Erro ao criar usuário na tabela:', error)
+      console.error('âŒ Erro ao criar usuÃ¡rio na tabela:', error)
       
-      // Se falhou ao criar na tabela, remover do Auth também
+      // Se falhou ao criar na tabela, remover do Auth tambÃ©m
       await adminClient.auth.admin.deleteUser(authUser.user.id)
       
       return NextResponse.json(
-        { success: false, error: 'Erro ao criar usuário no sistema' },
+        { success: false, error: 'Erro ao criar usuÃ¡rio no sistema' },
         { status: 500 }
       )
     }
@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Erro na API de criação de usuário:', error)
+    console.error('âŒ Erro na API de criaÃ§Ã£o de usuÃ¡rio:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },
       { status: 500 }

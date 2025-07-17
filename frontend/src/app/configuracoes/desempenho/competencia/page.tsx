@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { usePageTitle } from '@/contexts/PageTitleContext';
@@ -68,7 +68,7 @@ export default function CompetenciaPage() {
 
   const barId = 1; // TODO: Pegar do contexto
   const anosDisponiveis = Array.from(new Set(competencias.map((c: any) => c.ano))).sort((a, b) => b - a);
-  const mesesDisponiveis = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  const mesesDisponiveis = ['Janeiro', 'Fevereiro', 'MarÃ§o', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
   const carregarCompetencias = async () => {
     try {
@@ -89,7 +89,7 @@ export default function CompetenciaPage() {
 
       setCompetencias(data.competencias || []);
     } catch (error) {
-      alert("Erro ao carregar competências");
+      alert("Erro ao carregar competÃªncias");
     } finally {
       setLoading(false);
     }
@@ -115,10 +115,10 @@ export default function CompetenciaPage() {
         return;
       }
 
-      alert("Competência recalculada com sucesso");
+      alert("CompetÃªncia recalculada com sucesso");
       carregarCompetencias();
     } catch (error) {
-      alert("Erro ao recalcular competência");
+      alert("Erro ao recalcular competÃªncia");
     } finally {
       setRecalculando(false);
     }
@@ -145,10 +145,10 @@ export default function CompetenciaPage() {
         return;
       }
 
-      alert("Todas as competências foram recalculadas");
+      alert("Todas as competÃªncias foram recalculadas");
       carregarCompetencias();
     } catch (error) {
-      alert("Erro ao recalcular todas as competências");
+      alert("Erro ao recalcular todas as competÃªncias");
     } finally {
       setRecalculando(false);
     }
@@ -178,7 +178,7 @@ export default function CompetenciaPage() {
   };
 
   useEffect(() => {
-    setPageTitle('Competência Mensal');
+    setPageTitle('CompetÃªncia Mensal');
     return () => setPageTitle('');
   }, [setPageTitle]);
 
@@ -200,11 +200,11 @@ export default function CompetenciaPage() {
 
   return (
     <div className="space-y-6">
-      {/* Informações e Ações */}
+      {/* InformaÃ§Ãµes e AÃ§Ãµes */}
       <div className="flex justify-between items-center">
         <div>
           <p className="text-muted-foreground">
-            Análise agregada dos dados semanais por mês
+            AnÃ¡lise agregada dos dados semanais por mÃªs
           </p>
         </div>
         <div className="flex gap-2">
@@ -251,7 +251,7 @@ export default function CompetenciaPage() {
               </Select>
             </div>
             <div>
-              <Label htmlFor="mes">Mês</Label>
+              <Label htmlFor="mes">MÃªs</Label>
               <Select value={filtroMes} onValueChange={setFiltroMes}>
                 <SelectTrigger>
                   <SelectValue placeholder="Todos os meses" />
@@ -287,7 +287,7 @@ export default function CompetenciaPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Melhor Mês</CardTitle>
+            <CardTitle className="text-sm font-medium">Melhor MÃªs</CardTitle>
             <Award className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -302,7 +302,7 @@ export default function CompetenciaPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Mês Atual</CardTitle>
+            <CardTitle className="text-sm font-medium">MÃªs Atual</CardTitle>
             <CalendarDays className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -316,9 +316,9 @@ export default function CompetenciaPage() {
         </Card>
       </div>
 
-      {/* Competências */}
+      {/* CompetÃªncias */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Competências Mensais</h2>
+        <h2 className="text-xl font-semibold">CompetÃªncias Mensais</h2>
         
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -392,7 +392,7 @@ export default function CompetenciaPage() {
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span>Ticket Médio</span>
+                      <span>Ticket MÃ©dio</span>
                       <span>{formatarMoeda(competencia.ticket_medio_mes)}</span>
                     </div>
                   </div>
@@ -408,7 +408,7 @@ export default function CompetenciaPage() {
                       <span>#{competencia.pior_semana}</span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
-                      <span>Variação</span>
+                      <span>VariaÃ§Ã£o</span>
                       <div className="flex items-center gap-1">
                         {getVariacaoIcon(competencia.variacao_semanal)}
                         <span>{formatarPercentual(competencia.variacao_semanal)}</span>
@@ -416,7 +416,7 @@ export default function CompetenciaPage() {
                     </div>
                   </div>
 
-                  {/* Ações */}
+                  {/* AÃ§Ãµes */}
                   <div className="flex justify-end">
                     <Button
                       onClick={() => recalcularCompetencia(competencia.ano, competencia.mes)}
@@ -438,13 +438,13 @@ export default function CompetenciaPage() {
           <Card>
             <CardContent className="text-center py-8">
               <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Nenhuma competência encontrada</h3>
+              <h3 className="text-lg font-semibold mb-2">Nenhuma competÃªncia encontrada</h3>
               <p className="text-muted-foreground mb-4">
-                Não há dados de competência para os filtros selecionados
+                NÃ£o hÃ¡ dados de competÃªncia para os filtros selecionados
               </p>
               <Button onClick={recalcularTodas} disabled={recalculando}>
                 <RefreshCw className={`h-4 w-4 mr-2 ${recalculando ? 'animate-spin' : ''}`} />
-                Calcular Competências
+                Calcular CompetÃªncias
               </Button>
             </CardContent>
           </Card>

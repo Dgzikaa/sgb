@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { BulkActionsToolbar, commonBulkActions } from '../bulk-actions-toolbar'
 import { Trash2, Edit, Copy } from 'lucide-react'
@@ -112,7 +112,7 @@ describe('BulkActionsToolbar', () => {
 
     fireEvent.click(screen.getByText('Excluir'))
     expect(window.confirm).toHaveBeenCalledWith(
-      'Confirma a ação "Excluir" em 2 item(s)?'
+      'Confirma a aÃ§Ã£o "Excluir" em 2 item(s)?'
     )
     expect(mockActions[0].onClick).toHaveBeenCalledWith(mockSelectedItems)
 

@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { securityMonitor } from '@/lib/security-monitor'
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🧪 Iniciando teste do webhook Discord...')
+    console.log('ðŸ§ª Iniciando teste do webhook Discord...')
 
-    // Registrar evento crítico que deve disparar o webhook
+    // Registrar evento crÃ­tico que deve disparar o webhook
     await securityMonitor.logEvent({
       level: 'critical',
       category: 'injection',
@@ -15,15 +15,15 @@ export async function POST(request: NextRequest) {
       endpoint: '/api/security/test-webhook',
       details: {
         test_type: 'manual_webhook_test',
-        message: '🧪 TESTE MANUAL DO WEBHOOK - Se você está vendo esta mensagem no Discord, o sistema está funcionando!',
+        message: 'ðŸ§ª TESTE MANUAL DO WEBHOOK - Se vocÃª estÃ¡ vendo esta mensagem no Discord, o sistema estÃ¡ funcionando!',
         triggered_by: 'user_request',
         timestamp: new Date().toISOString(),
-        purpose: 'Verificar se o webhook do Discord está funcionando corretamente'
+        purpose: 'Verificar se o webhook do Discord estÃ¡ funcionando corretamente'
       },
       risk_score: 100
     })
 
-    console.log('✅ Evento crítico registrado, webhook deve ter sido disparado')
+    console.log('âœ… Evento crÃ­tico registrado, webhook deve ter sido disparado')
 
     return NextResponse.json({
       success: true,
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Erro no teste do webhook:', error)
+    console.error('âŒ Erro no teste do webhook:', error)
     return NextResponse.json(
       { 
         success: false, 

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -29,20 +29,20 @@ export async function POST(request: NextRequest) {
 
     if (error || !credentials) {
       return NextResponse.json({ 
-        error: 'Credenciais não encontradas',
+        error: 'Credenciais nÃ£o encontradas',
         details: error?.message 
       }, { status: 404 })
     }
 
     if (!credentials.refresh_token) {
       return NextResponse.json({ 
-        error: 'Refresh token não disponível' 
+        error: 'Refresh token nÃ£o disponÃ­vel' 
       }, { status: 400 })
     }
 
-    console.log('🔄 Forçando renovação do token...')
+    console.log('ðŸ”„ ForÃ§ando renovaÃ§Ã£o do token...')
 
-    // Forçar renovação do token
+    // ForÃ§ar renovaÃ§Ã£o do token
     const basicAuth = Buffer.from(`${credentials.client_id}:${credentials.client_secret}`).toString('base64')
     
     const response = await fetch(CONTAAZUL_TOKEN_URL, {
@@ -60,15 +60,15 @@ export async function POST(request: NextRequest) {
     const data = await response.json()
     
     if (!response.ok) {
-      console.error('❌ Erro na renovação:', data)
+      console.error('âŒ Erro na renovaÃ§Ã£o:', data)
       return NextResponse.json({
-        error: 'Falha na renovação do token',
+        error: 'Falha na renovaÃ§Ã£o do token',
         details: data.error || `HTTP ${response.status}: ${response.statusText}`,
         response_data: data
       }, { status: 400 })
     }
 
-    // Calcular nova data de expiração
+    // Calcular nova data de expiraÃ§Ã£o
     const expiresAt = new Date(Date.now() + (data.expires_in * 1000))
     
     // Salvar novo token no banco
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       .eq('id', credentials.id)
 
     if (updateError) {
-      console.error('❌ Erro ao salvar novo token:', updateError)
+      console.error('âŒ Erro ao salvar novo token:', updateError)
       return NextResponse.json({
         error: 'Erro ao salvar novo token',
         details: updateError.message
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Erro ao renovar token:', error)
+    console.error('âŒ Erro ao renovar token:', error)
     return NextResponse.json({ 
       error: 'Erro interno',
       details: error instanceof Error ? error.message : 'Erro desconhecido'

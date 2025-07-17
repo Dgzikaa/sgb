@@ -1,26 +1,26 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔍 Testando configuração do Supabase...')
+    console.log('ðŸ” Testando configuraÃ§Ã£o do Supabase...')
     
-    // Verificar variáveis de ambiente
+    // Verificar variÃ¡veis de ambiente
     const envCheck = {
-      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Configurada' : 'Não configurada',
-      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Configurada' : 'Não configurada',
-      SERVICE_ROLE_KEY: process.env.SERVICE_ROLE_KEY ? 'Configurada' : 'Não configurada'
+      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Configurada' : 'NÃ£o configurada',
+      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Configurada' : 'NÃ£o configurada',
+      SERVICE_ROLE_KEY: process.env.SERVICE_ROLE_KEY ? 'Configurada' : 'NÃ£o configurada'
     }
     
-    console.log('🔍 Variáveis de ambiente:', envCheck)
+    console.log('ðŸ” VariÃ¡veis de ambiente:', envCheck)
     
     // Testar cliente administrativo
     let adminClient
     try {
       adminClient = await getAdminClient()
-      console.log('✅ Cliente administrativo criado com sucesso')
+      console.log('âœ… Cliente administrativo criado com sucesso')
     } catch (adminError) {
-      console.error('❌ Erro ao criar cliente administrativo:', adminError)
+      console.error('âŒ Erro ao criar cliente administrativo:', adminError)
       return NextResponse.json({
         success: false,
         error: 'Erro ao criar cliente administrativo',
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       }, { status: 500 })
     }
     
-    // Testar conexão com banco
+    // Testar conexÃ£o com banco
     try {
       const { data, error } = await adminClient
         .from('usuarios_bar')
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
         .limit(1)
       
       if (error) {
-        console.error('❌ Erro ao conectar com banco:', error)
+        console.error('âŒ Erro ao conectar com banco:', error)
         return NextResponse.json({
           success: false,
           error: 'Erro ao conectar com banco',
@@ -46,11 +46,11 @@ export async function GET(request: NextRequest) {
         }, { status: 500 })
       }
       
-      console.log('✅ Conexão com banco funcionando')
+      console.log('âœ… ConexÃ£o com banco funcionando')
       
       return NextResponse.json({
         success: true,
-        message: 'Configuração do Supabase está funcionando corretamente',
+        message: 'ConfiguraÃ§Ã£o do Supabase estÃ¡ funcionando corretamente',
         envCheck,
         testQuery: {
           success: true,
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
       })
       
     } catch (dbError) {
-      console.error('❌ Erro na query de teste:', dbError)
+      console.error('âŒ Erro na query de teste:', dbError)
       return NextResponse.json({
         success: false,
         error: 'Erro na query de teste',
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
     }
     
   } catch (error) {
-    console.error('❌ Erro geral no teste:', error)
+    console.error('âŒ Erro geral no teste:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro geral no teste',

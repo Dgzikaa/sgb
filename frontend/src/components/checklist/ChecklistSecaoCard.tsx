@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -21,12 +21,12 @@ import {
 } from 'lucide-react'
 
 // =====================================================
-// 🎨 COMPONENTE DE SEÇÃO VISUAL MELHORADA (MOBILE-FIRST)
+// ðŸŽ¨ COMPONENTE DE SEÃ‡ÃƒO VISUAL MELHORADA (MOBILE-FIRST)
 // =====================================================
-// Implementa clusterização visual conforme documento:
-// "A lógica se separar por áreas da segunda ref é muito boa"
-// "Clusterizar as perguntas por área/seção"
-// + Otimização completa para mobile
+// Implementa clusterizaÃ§Ã£o visual conforme documento:
+// "A lÃ³gica se separar por Ã¡reas da segunda ref Ã© muito boa"
+// "Clusterizar as perguntas por Ã¡rea/seÃ§Ã£o"
+// + OtimizaÃ§Ã£o completa para mobile
 
 interface ChecklistItem {
   id: string
@@ -84,7 +84,7 @@ export default function ChecklistSecaoCard({
   
   const [isHovered, setIsHovered] = useState(false)
 
-  // Calcular estatísticas da seção
+  // Calcular estatÃ­sticas da seÃ§Ã£o
   const stats = {
     total: secao.itens.length,
     preenchidos: secao.itens.filter((item: any) => item.status === 'preenchido' || item.status === 'ok').length,
@@ -104,7 +104,7 @@ export default function ChecklistSecaoCard({
     return 'border-gray-300 bg-gray-50'
   }
 
-  // Determinar ícone do status
+  // Determinar Ã­cone do status
   const getIconeStatus = () => {
     switch (secao.status) {
       case 'completado': return <CheckCircle className="w-5 h-5 text-green-600" />
@@ -132,7 +132,7 @@ export default function ChecklistSecaoCard({
     if (progresso === 100) {
       return (
         <Badge className="bg-green-100 text-green-800 border-green-300">
-          ✅ Completo
+          âœ… Completo
         </Badge>
       )
     }
@@ -164,10 +164,10 @@ export default function ChecklistSecaoCard({
     }
     
     const icones = {
-      baixa: '⬇️',
-      media: '➡️',
-      alta: '⬆️',
-      critica: '🚨'
+      baixa: 'â¬‡ï¸',
+      media: 'âž¡ï¸',
+      alta: 'â¬†ï¸',
+      critica: 'ðŸš¨'
     }
     
     return (
@@ -188,7 +188,7 @@ export default function ChecklistSecaoCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Header da Seção - MOBILE OTIMIZADO */}
+      {/* Header da SeÃ§Ã£o - MOBILE OTIMIZADO */}
       <CardHeader 
         className={`${getHeaderColor()} cursor-pointer touch-manipulation min-h-[60px] p-4`} 
         onClick={onToggleExpand}
@@ -196,7 +196,7 @@ export default function ChecklistSecaoCard({
         <div className="flex items-center justify-between">
           {/* Lado Esquerdo */}
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            {/* Ícone de Expansão - MAIOR PARA MOBILE */}
+            {/* Ãcone de ExpansÃ£o - MAIOR PARA MOBILE */}
             <div className="flex items-center gap-2 touch-manipulation">
               {expanded ? (
                 <ChevronDown className="w-6 h-6" />
@@ -204,13 +204,13 @@ export default function ChecklistSecaoCard({
                 <ChevronRight className="w-6 h-6" />
               )}
               
-              {/* Ícone da Seção */}
+              {/* Ãcone da SeÃ§Ã£o */}
               {secao.icone && (
                 <span className="text-2xl">{secao.icone}</span>
               )}
             </div>
 
-            {/* Informações Principais */}
+            {/* InformaÃ§Ãµes Principais */}
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-lg truncate">{secao.nome}</h3>
               {secao.descricao && (
@@ -227,7 +227,7 @@ export default function ChecklistSecaoCard({
               {renderProgressoBadge()}
             </div>
             
-            {/* Informações Secundárias */}
+            {/* InformaÃ§Ãµes SecundÃ¡rias */}
             <div className="flex items-center gap-2 text-xs">
               {renderEstimativaTempo()}
               {renderPrioridade()}
@@ -252,7 +252,7 @@ export default function ChecklistSecaoCard({
             {stats.obrigatorios > 0 && (
               <>
                 <div className="flex items-center justify-between text-xs">
-                  <span>Itens Obrigatórios</span>
+                  <span>Itens ObrigatÃ³rios</span>
                   <span className="font-semibold">{progressoObrigatorios}%</span>
                 </div>
                 <Progress value={progressoObrigatorios} className="h-2 bg-white/30 touch-manipulation">
@@ -267,14 +267,14 @@ export default function ChecklistSecaoCard({
         )}
       </CardHeader>
 
-      {/* Conteúdo Expandido */}
+      {/* ConteÃºdo Expandido */}
       {expanded && (
         <CardContent className="p-0">
-          {/* Barra de Ações - MOBILE OTIMIZADA */}
+          {/* Barra de AÃ§Ãµes - MOBILE OTIMIZADA */}
           {!readonly && variant === 'execution' && (
             <div className="p-4 bg-gray-50 border-b">
               <div className="flex flex-col gap-3">
-                {/* Botões de Ação */}
+                {/* BotÃµes de AÃ§Ã£o */}
                 <div className="flex gap-2">
                   {secao.status === 'pendente' && onStartSection && (
                     <Button 
@@ -282,7 +282,7 @@ export default function ChecklistSecaoCard({
                       onClick={onStartSection} 
                       className="flex-1 bg-blue-500 hover:bg-blue-600 touch-manipulation min-h-[48px]"
                     >
-                      ▶️ Iniciar Seção
+                      â–¶ï¸ Iniciar SeÃ§Ã£o
                     </Button>
                   )}
                   {secao.status === 'em_andamento' && onCompleteSection && (
@@ -291,21 +291,21 @@ export default function ChecklistSecaoCard({
                       onClick={onCompleteSection} 
                       className="flex-1 bg-green-500 hover:bg-green-600 touch-manipulation min-h-[48px]"
                     >
-                      ✅ Finalizar Seção
+                      âœ… Finalizar SeÃ§Ã£o
                     </Button>
                   )}
                 </div>
                 
-                {/* Informações da Seção */}
+                {/* InformaÃ§Ãµes da SeÃ§Ã£o */}
                 <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600">
                   {secao.responsavel && (
                     <Badge variant="outline" className="bg-white">
-                      👤 {secao.responsavel}
+                      ðŸ‘¤ {secao.responsavel}
                     </Badge>
                   )}
                   {secao.iniciadoEm && (
                     <Badge variant="outline" className="bg-white">
-                      🕐 {new Date(secao.iniciadoEm).toLocaleTimeString()}
+                      ðŸ• {new Date(secao.iniciadoEm).toLocaleTimeString()}
                     </Badge>
                   )}
                 </div>
@@ -338,7 +338,7 @@ export default function ChecklistSecaoCard({
                         </span>
                         {item.obrigatorio && (
                           <Badge className="bg-red-100 text-red-800 text-xs">
-                            Obrigatório
+                            ObrigatÃ³rio
                           </Badge>
                         )}
                       </div>
@@ -361,18 +361,18 @@ export default function ChecklistSecaoCard({
                     {renderCampoItem(item, onItemChange, readonly)}
                   </div>
                   
-                  {/* Observações */}
+                  {/* ObservaÃ§Ãµes */}
                   {item.observacoes && (
                     <div className="p-3 bg-white rounded border">
-                      <p className="text-xs text-gray-600 font-medium mb-1">Observações:</p>
+                      <p className="text-xs text-gray-600 font-medium mb-1">ObservaÃ§Ãµes:</p>
                       <p className="text-sm text-gray-700">{item.observacoes}</p>
                     </div>
                   )}
                   
-                  {/* Validação */}
+                  {/* ValidaÃ§Ã£o */}
                   {item.validacao && !item.validacao.valido && (
                     <div className="p-3 bg-red-50 rounded border border-red-200">
-                      <p className="text-xs text-red-600 font-medium">⚠️ {item.validacao.erro}</p>
+                      <p className="text-xs text-red-600 font-medium">âš ï¸ {item.validacao.erro}</p>
                     </div>
                   )}
                 </div>
@@ -386,7 +386,7 @@ export default function ChecklistSecaoCard({
 }
 
 // =====================================================
-// 🔧 FUNÇÃO PARA RENDERIZAR CAMPOS POR TIPO (MOBILE-FIRST)
+// ðŸ”§ FUNÃ‡ÃƒO PARA RENDERIZAR CAMPOS POR TIPO (MOBILE-FIRST)
 // =====================================================
 
 function renderCampoItem(
@@ -412,7 +412,7 @@ function renderCampoItem(
             disabled={readonly}
             className="flex-1 min-h-[48px] touch-manipulation text-base"
           >
-            ✅ Sim
+            âœ… Sim
           </Button>
           <Button
             size="lg"
@@ -421,7 +421,7 @@ function renderCampoItem(
             disabled={readonly}
             className="flex-1 min-h-[48px] touch-manipulation text-base"
           >
-            ❌ Não
+            âŒ NÃ£o
           </Button>
         </div>
       )
@@ -479,7 +479,7 @@ function renderCampoItem(
           onChange={(e) => handleChange(parseFloat(e.target.value))}
           disabled={readonly}
           className="w-full p-3 border rounded-lg text-base touch-manipulation"
-          placeholder="Digite um número"
+          placeholder="Digite um nÃºmero"
         />
       )
     
@@ -511,12 +511,12 @@ function renderCampoItem(
               {item.tipo === 'foto_camera' ? (
                 <>
                   <Camera className="w-5 h-5 mr-2" />
-                  📷 Tirar Foto
+                  ðŸ“· Tirar Foto
                 </>
               ) : (
                 <>
                   <Upload className="w-5 h-5 mr-2" />
-                  📁 Escolher Foto
+                  ðŸ“ Escolher Foto
                 </>
               )}
             </Button>
@@ -545,12 +545,12 @@ function renderCampoItem(
                 console.log('Assinatura digital')
               }}
             >
-              ✏️ Assinar Digitalmente
+              âœï¸ Assinar Digitalmente
             </Button>
           )}
           {item.valor && (
             <div className="w-full h-24 bg-gray-200 rounded-lg border flex items-center justify-center">
-              <span className="text-sm text-gray-600">✓ Assinado</span>
+              <span className="text-sm text-gray-600">âœ“ Assinado</span>
             </div>
           )}
         </div>

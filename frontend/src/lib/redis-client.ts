@@ -1,8 +1,8 @@
-import Redis, { Cluster } from 'ioredis';
+﻿import Redis, { Cluster } from 'ioredis';
 
-// Configuração do Redis
+// ConfiguraÃ§Ã£o do Redis
 const REDIS_CONFIG = {
-  // Configuração para desenvolvimento local
+  // ConfiguraÃ§Ã£o para desenvolvimento local
   development: {
     host: 'localhost',
     port: 6379,
@@ -14,7 +14,7 @@ const REDIS_CONFIG = {
     commandTimeout: 5000,
   },
   
-  // Configuração para produção com clustering
+  // ConfiguraÃ§Ã£o para produÃ§Ã£o com clustering
   production: {
     enableAutoPipelining: true,
     maxRetriesPerRequest: 3,
@@ -23,7 +23,7 @@ const REDIS_CONFIG = {
     keyPrefix: 'sgb_v2:',
     connectTimeout: 10000,
     commandTimeout: 5000,
-    // Configuração para Redis Cluster (se usando)
+    // ConfiguraÃ§Ã£o para Redis Cluster (se usando)
     enableReadyCheck: true,
     enableOfflineQueue: false,
   }
@@ -80,27 +80,27 @@ class RedisClient {
 
   private setupEventListeners() {
     this.client.on('connect', () => {
-      console.log('✅ Redis conectado');
+      console.log('âœ… Redis conectado');
       this.isConnected = true;
     });
 
     this.client.on('error', (error) => {
-      console.error('❌ Redis erro:', error);
+      console.error('âŒ Redis erro:', error);
       this.isConnected = false;
     });
 
     this.client.on('close', () => {
-      console.log('🔌 Redis desconectado');
+      console.log('ðŸ”Œ Redis desconectado');
       this.isConnected = false;
     });
 
     this.client.on('reconnecting', () => {
-      console.log('🔄 Redis reconectando...');
+      console.log('ðŸ”„ Redis reconectando...');
     });
 
     if (this.useCluster && this.cluster) {
       this.cluster.on('node error', (error, node) => {
-        console.error(`❌ Redis cluster node erro (${node.options.host}:${node.options.port}):`, error);
+        console.error(`âŒ Redis cluster node erro (${node.options.host}:${node.options.port}):`, error);
       });
     }
   }
@@ -110,9 +110,9 @@ class RedisClient {
 
     try {
       await this.client.connect();
-      console.log('✅ Redis client conectado com sucesso');
+      console.log('âœ… Redis client conectado com sucesso');
     } catch (error) {
-      console.error('❌ Erro ao conectar Redis:', error);
+      console.error('âŒ Erro ao conectar Redis:', error);
       throw error;
     }
   }
@@ -122,9 +122,9 @@ class RedisClient {
 
     try {
       await this.client.disconnect();
-      console.log('✅ Redis client desconectado');
+      console.log('âœ… Redis client desconectado');
     } catch (error) {
-      console.error('❌ Erro ao desconectar Redis:', error);
+      console.error('âŒ Erro ao desconectar Redis:', error);
     }
   }
 
@@ -137,12 +137,12 @@ class RedisClient {
       const result = await this.client.ping();
       return result === 'PONG';
     } catch (error) {
-      console.error('❌ Redis health check falhou:', error);
+      console.error('âŒ Redis health check falhou:', error);
       return false;
     }
   }
 
-  // Métodos específicos para rate limiting
+  // MÃ©todos especÃ­ficos para rate limiting
   public async rateLimit(key: string, limit: number, windowMs: number): Promise<{
     success: boolean;
     count: number;
@@ -155,7 +155,7 @@ class RedisClient {
     const rateLimitKey = `rate_limit:${key}:${window}`;
 
     try {
-      // Usar pipeline para operações atômicas
+      // Usar pipeline para operaÃ§Ãµes atÃ´micas
       pipeline.incr(rateLimitKey);
       pipeline.expire(rateLimitKey, Math.ceil(windowMs / 1000));
       
@@ -168,7 +168,7 @@ class RedisClient {
       const [incrResult, expireResult] = results;
       
       if (incrResult[0] || expireResult[0]) {
-        throw new Error('Erro nas operações Redis');
+        throw new Error('Erro nas operaÃ§Ãµes Redis');
       }
 
       const count = incrResult[1] as number;
@@ -182,7 +182,7 @@ class RedisClient {
         resetTime
       };
     } catch (error) {
-      console.error('❌ Erro no rate limiting:', error);
+      console.error('âŒ Erro no rate limiting:', error);
       // Fallback: permitir em caso de erro Redis
       return {
         success: true,
@@ -193,7 +193,7 @@ class RedisClient {
     }
   }
 
-  // Métodos para cache geral
+  // MÃ©todos para cache geral
   public async set(key: string, value: string, ttlSeconds?: number): Promise<boolean> {
     try {
       if (ttlSeconds) {
@@ -203,7 +203,7 @@ class RedisClient {
       }
       return true;
     } catch (error) {
-      console.error('❌ Erro ao definir cache:', error);
+      console.error('âŒ Erro ao definir cache:', error);
       return false;
     }
   }
@@ -212,7 +212,7 @@ class RedisClient {
     try {
       return await this.client.get(key);
     } catch (error) {
-      console.error('❌ Erro ao obter cache:', error);
+      console.error('âŒ Erro ao obter cache:', error);
       return null;
     }
   }
@@ -222,7 +222,7 @@ class RedisClient {
       const result = await this.client.del(key);
       return result > 0;
     } catch (error) {
-      console.error('❌ Erro ao deletar cache:', error);
+      console.error('âŒ Erro ao deletar cache:', error);
       return false;
     }
   }
@@ -232,12 +232,12 @@ class RedisClient {
       const result = await this.client.exists(key);
       return result === 1;
     } catch (error) {
-      console.error('❌ Erro ao verificar existência:', error);
+      console.error('âŒ Erro ao verificar existÃªncia:', error);
       return false;
     }
   }
 
-  // Método para limpeza de chaves expiradas
+  // MÃ©todo para limpeza de chaves expiradas
   public async cleanup(): Promise<void> {
     try {
       const keys = await this.client.keys('rate_limit:*');
@@ -245,10 +245,10 @@ class RedisClient {
         const pipeline = this.client.pipeline();
         keys.forEach(key => pipeline.del(key));
         await pipeline.exec();
-        console.log(`🧹 Limpeza Redis: ${keys.length} chaves removidas`);
+        console.log(`ðŸ§¹ Limpeza Redis: ${keys.length} chaves removidas`);
       }
     } catch (error) {
-      console.error('❌ Erro na limpeza Redis:', error);
+      console.error('âŒ Erro na limpeza Redis:', error);
     }
   }
 }

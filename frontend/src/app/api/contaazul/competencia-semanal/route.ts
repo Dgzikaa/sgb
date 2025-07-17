@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { mapearCategoria } from '@/lib/contaazul-categoria-mapper';
 
@@ -9,29 +9,29 @@ const supabase = createClient(
 
 // Adiciona index signature para evitar erro TS
 const MAPEAMENTO_CATEGORIAS: Record<string, string> = {
-  'Stone Crédito': 'Stone Crédito',
-  'Stone Débito': 'Stone Débito',
+  'Stone CrÃ©dito': 'Stone CrÃ©dito',
+  'Stone DÃ©bito': 'Stone DÃ©bito',
   'Stone Pix': 'Stone Pix',
   'Pix Direto na Conta': 'Pix Direto na Conta',
   'Dinheiro': 'Dinheiro',
   'Receita de Eventos': 'Receita de Eventos',
   'Outras Receitas': 'Outras Receitas',
   'Ifood': 'Outras Receitas',
-  'Receitas de Serviços': 'Outras Receitas',
+  'Receitas de ServiÃ§os': 'Outras Receitas',
   'Fretes recebidos': 'Outras Receitas',
   'PERSE': 'Outras Receitas',
   'Descontos incondicionais obtidos': 'Outras Receitas',
   'Descontos financeiros obtidos': 'Outras Receitas',
-  'Empréstimos de Sócios': 'Outras Receitas',
-  'Outros Sócios': 'Outras Receitas',
+  'EmprÃ©stimos de SÃ³cios': 'Outras Receitas',
+  'Outros SÃ³cios': 'Outras Receitas',
   'Dividendos': 'Outras Receitas',
   'Outros Investimentos': 'Outras Receitas',
   'Consultoria': 'Outras Receitas',
-  'Produção Eventos': 'Produção Eventos',
+  'ProduÃ§Ã£o Eventos': 'ProduÃ§Ã£o Eventos',
   'Marketing': 'Marketing',
-  'Atrações Programação': 'Atrações Programação',
+  'AtraÃ§Ãµes ProgramaÃ§Ã£o': 'AtraÃ§Ãµes ProgramaÃ§Ã£o',
   'IMPOSTO': 'IMPOSTO',
-  'COMISSÃO 10%': 'COMISSÃO 10%',
+  'COMISSÃƒO 10%': 'COMISSÃƒO 10%',
   'TAXA MAQUININHA': 'TAXA MAQUININHA',
   'Custo Drinks': 'Custo Drinks',
   'Custo Bebidas': 'Custo Bebidas',
@@ -39,28 +39,28 @@ const MAPEAMENTO_CATEGORIAS: Record<string, string> = {
   'Custo Outros': 'Custo Outros',
   'SALARIO FUNCIONARIOS': 'SALARIO FUNCIONARIOS',
   'VALE TRANSPORTE': 'VALE TRANSPORTE',
-  'ALIMENTAÇÃO': 'ALIMENTAÇÃO',
+  'ALIMENTAÃ‡ÃƒO': 'ALIMENTAÃ‡ÃƒO',
   'ADICIONAIS': 'ADICIONAIS',
   'FREELA ATENDIMENTO': 'FREELA ATENDIMENTO',
   'FREELA BAR': 'FREELA BAR',
   'FREELA COZINHA': 'FREELA COZINHA',
   'FREELA LIMPEZA': 'FREELA LIMPEZA',
-  'FREELA SEGURANÇA': 'FREELA SEGURANÇA',
+  'FREELA SEGURANÃ‡A': 'FREELA SEGURANÃ‡A',
   'PRO LABORE': 'PRO LABORE',
-  'PROVISÃO TRABALHISTA': 'PROVISÃO TRABALHISTA',
-  'Administrativo Ordinário': 'Administrativo Ordinário',
-  'Escritório Central': 'Escritório Central',
+  'PROVISÃƒO TRABALHISTA': 'PROVISÃƒO TRABALHISTA',
+  'Administrativo OrdinÃ¡rio': 'Administrativo OrdinÃ¡rio',
+  'EscritÃ³rio Central': 'EscritÃ³rio Central',
   'Recursos Humanos': 'Recursos Humanos',
-  'Materiais Operação': 'Materiais Operação',
-  'Materiais de Limpeza e Descartáveis': 'Materiais de Limpeza e Descartáveis',
-  'Utensílios': 'Utensílios',
+  'Materiais OperaÃ§Ã£o': 'Materiais OperaÃ§Ã£o',
+  'Materiais de Limpeza e DescartÃ¡veis': 'Materiais de Limpeza e DescartÃ¡veis',
+  'UtensÃ­lios': 'UtensÃ­lios',
   'Estorno': 'Estorno',
-  'Outros Operação': 'Outros Operação',
-  'ALUGUEL/CONDOMÍNIO/IPTU': 'ALUGUEL/CONDOMÍNIO/IPTU',
-  'ÁGUA': 'ÁGUA',
-  'MANUTENÇÃO': 'MANUTENÇÃO',
+  'Outros OperaÃ§Ã£o': 'Outros OperaÃ§Ã£o',
+  'ALUGUEL/CONDOMÃNIO/IPTU': 'ALUGUEL/CONDOMÃNIO/IPTU',
+  'ÃGUA': 'ÃGUA',
+  'MANUTENÃ‡ÃƒO': 'MANUTENÃ‡ÃƒO',
   'INTERNET': 'INTERNET',
-  'GÁS': 'GÁS',
+  'GÃS': 'GÃS',
   'LUZ': 'LUZ',
   'Contratos': 'Contratos',
 };
@@ -95,7 +95,7 @@ export async function GET(req: NextRequest) {
     for (const cat of categorias || []) {
       categoriasDict[cat.id] = cat.nome;
     }
-    // Agrupar por mês e categoria
+    // Agrupar por mÃªs e categoria
     const meses: Record<string, any> = {};
     for (const evento of eventos || []) {
       if (!evento.data_competencia) continue;
@@ -117,11 +117,11 @@ export async function GET(req: NextRequest) {
       if (nomeCategoria) {
         categoriaMapeada = MAPEAMENTO_CATEGORIAS[nomeCategoria];
         if (!categoriaMapeada) {
-          categoriaMapeada = evento.tipo === 'receita' ? 'Outras Receitas' : 'Outros Operação';
+          categoriaMapeada = evento.tipo === 'receita' ? 'Outras Receitas' : 'Outros OperaÃ§Ã£o';
         }
       } else {
         const mapeado = mapearCategoria(evento.descricao, evento.tipo === 'receita' ? 'RECEITA' : 'DESPESA', evento.valor);
-        categoriaMapeada = MAPEAMENTO_CATEGORIAS[mapeado.categoria_sugerida] || (evento.tipo === 'receita' ? 'Outras Receitas' : 'Outros Operação');
+        categoriaMapeada = MAPEAMENTO_CATEGORIAS[mapeado.categoria_sugerida] || (evento.tipo === 'receita' ? 'Outras Receitas' : 'Outros OperaÃ§Ã£o');
       }
       if (!meses[key].categorias[categoriaMapeada]) {
         meses[key].categorias[categoriaMapeada] = 0;
@@ -134,7 +134,7 @@ export async function GET(req: NextRequest) {
       }
       meses[key].resultado = meses[key].total_receitas - meses[key].total_despesas;
     }
-    // Converter para array e ordenar por ano/mês
+    // Converter para array e ordenar por ano/mÃªs
     const resultado = Object.values(meses).sort((a: any, b: any) => {
       if (a.ano !== b.ano) return a.ano - b.ano;
       return a.mes - b.mes;

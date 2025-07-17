@@ -1,18 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('⏰ CRON JOB: Coleta diária ContaHub iniciada')
+    console.log('â° CRON JOB: Coleta diÃ¡ria ContaHub iniciada')
     
-    // Verificar se é um cron autorizado (opcional - adicionar header de segurança)
+    // Verificar se Ã© um cron autorizado (opcional - adicionar header de seguranÃ§a)
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET || 'sgb-cron-2024'
     
     if (authHeader !== `Bearer ${cronSecret}`) {
-      console.log('❌ Cron não autorizado')
+      console.log('âŒ Cron nÃ£o autorizado')
       return NextResponse.json({
         success: false,
-        error: 'Não autorizado'
+        error: 'NÃ£o autorizado'
       }, { status: 401 })
     }
     
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
     const edgeFunctionUrl = `${supabaseUrl}/functions/v1/contahub-collector`
     
-    console.log(`📡 Executando edge function: ${edgeFunctionUrl}`)
+    console.log(`ðŸ“¡ Executando edge function: ${edgeFunctionUrl}`)
     
     const response = await fetch(edgeFunctionUrl, {
       method: 'POST',
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       throw new Error(`Edge function falhou: ${response.status} - ${data.error || responseText}`)
     }
     
-    console.log('✅ Cron job concluído com sucesso')
+    console.log('âœ… Cron job concluÃ­do com sucesso')
     
     return NextResponse.json({
       success: true,
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
     })
     
   } catch (error) {
-    console.error('💥 Erro no cron job:', error)
+    console.error('ðŸ’¥ Erro no cron job:', error)
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Erro desconhecido',

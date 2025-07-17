@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useBar } from '@/contexts/BarContext'
@@ -70,7 +70,7 @@ export default function ChecklistAbertura() {
   const { selectedBar, isLoading: barLoading } = useBar()
   const { setPageTitle } = usePageTitle()
   
-  // Renderização condicional para evitar erros durante SSR/SSG
+  // RenderizaÃ§Ã£o condicional para evitar erros durante SSR/SSG
   if (barLoading || !selectedBar) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -106,7 +106,7 @@ export default function ChecklistAbertura() {
     tempo_estimado: 5
   })
 
-  // Configuração das áreas
+  // ConfiguraÃ§Ã£o das Ã¡reas
   const areas: Area[] = [
     {
       id: 'cozinha',
@@ -128,10 +128,10 @@ export default function ChecklistAbertura() {
     },
     {
       id: 'salao',
-      nome: 'Salão',
+      nome: 'SalÃ£o',
       icon: Utensils,
       cor: 'bg-green-500',
-      responsavel_padrao: 'Gerente de Salão',
+      responsavel_padrao: 'Gerente de SalÃ£o',
       itens_obrigatorios: 0,
       itens_concluidos: 0
     },
@@ -140,13 +140,13 @@ export default function ChecklistAbertura() {
       nome: 'Recebimento',
       icon: Truck,
       cor: 'bg-purple-500',
-      responsavel_padrao: 'Responsável Estoque',
+      responsavel_padrao: 'ResponsÃ¡vel Estoque',
       itens_obrigatorios: 0,
       itens_concluidos: 0
     },
     {
       id: 'seguranca',
-      nome: 'Segurança',
+      nome: 'SeguranÃ§a',
       icon: Shield,
       cor: 'bg-red-500',
       responsavel_padrao: 'Gerente Geral',
@@ -164,40 +164,40 @@ export default function ChecklistAbertura() {
     }
   ]
 
-  // Checklist padrão por área
+  // Checklist padrÃ£o por Ã¡rea
   const checklistPadrao: Omit<ChecklistItem, 'id' | 'status' | 'horario_inicio' | 'horario_conclusao'>[] = [
     // Cozinha
-    { titulo: 'Verificar temperatura dos freezers', descricao: 'Conferir se todos os freezers estão na temperatura adequada (-18°C)', area: 'cozinha', prioridade: 'critica', tempo_estimado: 5 },
-    { titulo: 'Verificar temperatura das geladeiras', descricao: 'Conferir se todas as geladeiras estão entre 2-8°C', area: 'cozinha', prioridade: 'critica', tempo_estimado: 3 },
-    { titulo: 'Limpeza e sanitização das bancadas', descricao: 'Limpar e sanitizar todas as superfícies de trabalho', area: 'cozinha', prioridade: 'alta', tempo_estimado: 15 },
-    { titulo: 'Verificar validade dos alimentos', descricao: 'Conferir datas de validade dos produtos na linha de produção', area: 'cozinha', prioridade: 'alta', tempo_estimado: 10 },
-    { titulo: 'Testar equipamentos da cozinha', descricao: 'Ligar e testar fogão, forno, chapa, fritadeira', area: 'cozinha', prioridade: 'media', tempo_estimado: 8 },
+    { titulo: 'Verificar temperatura dos freezers', descricao: 'Conferir se todos os freezers estÃ£o na temperatura adequada (-18Â°C)', area: 'cozinha', prioridade: 'critica', tempo_estimado: 5 },
+    { titulo: 'Verificar temperatura das geladeiras', descricao: 'Conferir se todas as geladeiras estÃ£o entre 2-8Â°C', area: 'cozinha', prioridade: 'critica', tempo_estimado: 3 },
+    { titulo: 'Limpeza e sanitizaÃ§Ã£o das bancadas', descricao: 'Limpar e sanitizar todas as superfÃ­cies de trabalho', area: 'cozinha', prioridade: 'alta', tempo_estimado: 15 },
+    { titulo: 'Verificar validade dos alimentos', descricao: 'Conferir datas de validade dos produtos na linha de produÃ§Ã£o', area: 'cozinha', prioridade: 'alta', tempo_estimado: 10 },
+    { titulo: 'Testar equipamentos da cozinha', descricao: 'Ligar e testar fogÃ£o, forno, chapa, fritadeira', area: 'cozinha', prioridade: 'media', tempo_estimado: 8 },
     
     // Bar
-    { titulo: 'Verificar estoque de bebidas', descricao: 'Conferir níveis de cerveja, refrigerantes, águas', area: 'bar', prioridade: 'alta', tempo_estimado: 10 },
-    { titulo: 'Limpeza dos equipamentos do bar', descricao: 'Limpar chopeira, máquina de refrigerante, máquina de café', area: 'bar', prioridade: 'alta', tempo_estimado: 15 },
+    { titulo: 'Verificar estoque de bebidas', descricao: 'Conferir nÃ­veis de cerveja, refrigerantes, Ã¡guas', area: 'bar', prioridade: 'alta', tempo_estimado: 10 },
+    { titulo: 'Limpeza dos equipamentos do bar', descricao: 'Limpar chopeira, mÃ¡quina de refrigerante, mÃ¡quina de cafÃ©', area: 'bar', prioridade: 'alta', tempo_estimado: 15 },
     { titulo: 'Organizar insumos do bar', descricao: 'Repor gelo, guardanapos, canudos, copos limpos', area: 'bar', prioridade: 'media', tempo_estimado: 8 },
-    { titulo: 'Testar sistemas de pagamento', descricao: 'Verificar se POS e máquinas de cartão estão funcionando', area: 'bar', prioridade: 'alta', tempo_estimado: 5 },
+    { titulo: 'Testar sistemas de pagamento', descricao: 'Verificar se POS e mÃ¡quinas de cartÃ£o estÃ£o funcionando', area: 'bar', prioridade: 'alta', tempo_estimado: 5 },
     
-    // Salão
+    // SalÃ£o
     { titulo: 'Limpeza das mesas e cadeiras', descricao: 'Limpar e organizar todas as mesas e cadeiras', area: 'salao', prioridade: 'alta', tempo_estimado: 20 },
-    { titulo: 'Verificar banheiros', descricao: 'Conferir limpeza, papel higiênico, sabonete, toalhas', area: 'salao', prioridade: 'alta', tempo_estimado: 10 },
-    { titulo: 'Organizar cardápios e materiais', descricao: 'Distribuir cardápios limpos e organizados nas mesas', area: 'salao', prioridade: 'media', tempo_estimado: 10 },
-    { titulo: 'Testar som e iluminação', descricao: 'Verificar se sistema de som e luzes estão funcionando', area: 'salao', prioridade: 'media', tempo_estimado: 5 },
+    { titulo: 'Verificar banheiros', descricao: 'Conferir limpeza, papel higiÃªnico, sabonete, toalhas', area: 'salao', prioridade: 'alta', tempo_estimado: 10 },
+    { titulo: 'Organizar cardÃ¡pios e materiais', descricao: 'Distribuir cardÃ¡pios limpos e organizados nas mesas', area: 'salao', prioridade: 'media', tempo_estimado: 10 },
+    { titulo: 'Testar som e iluminaÃ§Ã£o', descricao: 'Verificar se sistema de som e luzes estÃ£o funcionando', area: 'salao', prioridade: 'media', tempo_estimado: 5 },
     
     // Recebimento
     { titulo: 'Conferir entregas agendadas', descricao: 'Verificar agenda de fornecedores para o dia', area: 'recebimento', prioridade: 'alta', tempo_estimado: 5 },
-    { titulo: 'Organizar área de recebimento', descricao: 'Deixar área livre para recebimento de mercadorias', area: 'recebimento', prioridade: 'media', tempo_estimado: 10 },
-    { titulo: 'Verificar balança e documentos', descricao: 'Testar balança e preparar documentos de conferência', area: 'recebimento', prioridade: 'media', tempo_estimado: 5 },
+    { titulo: 'Organizar Ã¡rea de recebimento', descricao: 'Deixar Ã¡rea livre para recebimento de mercadorias', area: 'recebimento', prioridade: 'media', tempo_estimado: 10 },
+    { titulo: 'Verificar balanÃ§a e documentos', descricao: 'Testar balanÃ§a e preparar documentos de conferÃªncia', area: 'recebimento', prioridade: 'media', tempo_estimado: 5 },
     
-    // Segurança
-    { titulo: 'Verificar saídas de emergência', descricao: 'Conferir se todas as saídas estão desobstruídas', area: 'seguranca', prioridade: 'critica', tempo_estimado: 8 },
-    { titulo: 'Testar alarmes e câmeras', descricao: 'Verificar funcionamento dos sistemas de segurança', area: 'seguranca', prioridade: 'alta', tempo_estimado: 10 },
-    { titulo: 'Conferir extintores', descricao: 'Verificar se extintores estão no lugar e com carga', area: 'seguranca', prioridade: 'critica', tempo_estimado: 5 },
+    // SeguranÃ§a
+    { titulo: 'Verificar saÃ­das de emergÃªncia', descricao: 'Conferir se todas as saÃ­das estÃ£o desobstruÃ­das', area: 'seguranca', prioridade: 'critica', tempo_estimado: 8 },
+    { titulo: 'Testar alarmes e cÃ¢meras', descricao: 'Verificar funcionamento dos sistemas de seguranÃ§a', area: 'seguranca', prioridade: 'alta', tempo_estimado: 10 },
+    { titulo: 'Conferir extintores', descricao: 'Verificar se extintores estÃ£o no lugar e com carga', area: 'seguranca', prioridade: 'critica', tempo_estimado: 5 },
     
     // Administrativo
     { titulo: 'Verificar caixa inicial', descricao: 'Conferir e registrar valor do troco inicial', area: 'administrativo', prioridade: 'alta', tempo_estimado: 10 },
-    { titulo: 'Revisar agenda do dia', descricao: 'Conferir reservas, eventos especiais, funcionários escalados', area: 'administrativo', prioridade: 'alta', tempo_estimado: 15 },
+    { titulo: 'Revisar agenda do dia', descricao: 'Conferir reservas, eventos especiais, funcionÃ¡rios escalados', area: 'administrativo', prioridade: 'alta', tempo_estimado: 15 },
     { titulo: 'Verificar sistemas', descricao: 'Testar sistema de vendas, internet, telefone', area: 'administrativo', prioridade: 'alta', tempo_estimado: 10 }
   ]
 
@@ -210,7 +210,7 @@ export default function ChecklistAbertura() {
   }, [selectedBar?.id, barLoading])
 
   useEffect(() => {
-    setPageTitle('✅ Checklist de Abertura')
+    setPageTitle('âœ… Checklist de Abertura')
     return () => setPageTitle('')
   }, [setPageTitle])
 
@@ -220,7 +220,7 @@ export default function ChecklistAbertura() {
     try {
       const hoje = new Date().toISOString().split('T')[0]
       
-      // Verificar se já existe checklist para hoje
+      // Verificar se jÃ¡ existe checklist para hoje
       const response = await fetch(`/api/operacoes/checklist-abertura?bar_id=${selectedBar.id}&data=${hoje}`)
       
       if (response.ok) {
@@ -230,7 +230,7 @@ export default function ChecklistAbertura() {
           setChecklistIniciado(true)
           setHoraInicio(data.hora_inicio || '')
         } else {
-          // Criar novo checklist baseado no padrão
+          // Criar novo checklist baseado no padrÃ£o
           const novoChecklist = checklistPadrao.map((item, index) => ({
             ...item,
             id: `item_${index + 1}`,
@@ -241,7 +241,7 @@ export default function ChecklistAbertura() {
       }
     } catch (error) {
       console.error('Erro ao carregar checklist:', error)
-      // Em caso de erro, usar checklist padrão
+      // Em caso de erro, usar checklist padrÃ£o
       const novoChecklist = checklistPadrao.map((item, index) => ({
         ...item,
         id: `item_${index + 1}`,
@@ -261,7 +261,7 @@ export default function ChecklistAbertura() {
         setHistorico(data.historico || [])
       }
     } catch (error) {
-      console.error('Erro ao carregar histórico:', error)
+      console.error('Erro ao carregar histÃ³rico:', error)
     }
   }
 
@@ -288,7 +288,7 @@ export default function ChecklistAbertura() {
           observacoes,
           horario_inicio: item.horario_inicio || (novoStatus === 'fazendo' ? agora : undefined),
           horario_conclusao: novoStatus === 'concluido' ? agora : undefined,
-          verificado_por: novoStatus === 'concluido' ? 'Usuário Logado' : item.verificado_por // TODO: pegar do contexto de usuário
+          verificado_por: novoStatus === 'concluido' ? 'UsuÃ¡rio Logado' : item.verificado_por // TODO: pegar do contexto de usuÃ¡rio
         }
       }
       return item
@@ -308,7 +308,7 @@ export default function ChecklistAbertura() {
           minute: '2-digit' 
         }),
         itens: checklistAtivo,
-        responsavel_geral: 'Usuário Logado', // TODO: pegar do contexto
+        responsavel_geral: 'UsuÃ¡rio Logado', // TODO: pegar do contexto
         observacoes_gerais: ''
       }
 
@@ -319,18 +319,18 @@ export default function ChecklistAbertura() {
       })
 
       if (response.ok) {
-        alert('✅ Checklist salvo com sucesso!')
+        alert('âœ… Checklist salvo com sucesso!')
         carregarHistorico()
       } else {
         throw new Error('Erro ao salvar checklist')
       }
     } catch (error) {
       console.error('Erro ao salvar:', error)
-      alert('❌ Erro ao salvar checklist')
+      alert('âŒ Erro ao salvar checklist')
     }
   }
 
-  // Calcular estatísticas
+  // Calcular estatÃ­sticas
   const estatisticas = {
     total: checklistAtivo.length,
     concluidos: checklistAtivo.filter((item: any) => item.status === 'concluido').length,
@@ -341,7 +341,7 @@ export default function ChecklistAbertura() {
 
   const progresso = estatisticas.total > 0 ? (estatisticas.concluidos / estatisticas.total * 100) : 0
 
-  // Filtrar itens por área
+  // Filtrar itens por Ã¡rea
   const itensFiltrados = areaSelecionada === 'todas' 
     ? checklistAtivo 
     : checklistAtivo.filter((item: any) => item.area === areaSelecionada)
@@ -368,18 +368,18 @@ export default function ChecklistAbertura() {
   return (
     <ProtectedRoute requiredModule="operacoes">
       <div className="p-6 max-w-7xl mx-auto">
-        {/* Informações do Bar */}
+        {/* InformaÃ§Ãµes do Bar */}
         <div className="mb-6">
-          <p className="text-gray-700 dark:text-gray-300">Sistema de verificação pré-operacional por áreas</p>
+          <p className="text-gray-700 dark:text-gray-300">Sistema de verificaÃ§Ã£o prÃ©-operacional por Ã¡reas</p>
           <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Bar: <strong className="text-gray-900 dark:text-white">{selectedBar?.nome}</strong> • 
+            Bar: <strong className="text-gray-900 dark:text-white">{selectedBar?.nome}</strong> â€¢ 
             {checklistIniciado && (
-              <span className="text-blue-600 dark:text-blue-400"> Iniciado às {horaInicio}</span>
+              <span className="text-blue-600 dark:text-blue-400"> Iniciado Ã s {horaInicio}</span>
             )}
           </div>
         </div>
 
-        {/* Status Geral e Ações */}
+        {/* Status Geral e AÃ§Ãµes */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
           <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardContent className="p-4">
@@ -416,7 +416,7 @@ export default function ChecklistAbertura() {
               <div className="flex items-center gap-3">
                 <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Concluídos</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">ConcluÃ­dos</p>
                   <p className="text-2xl font-bold text-green-600 dark:text-green-400">{estatisticas.concluidos}</p>
                 </div>
               </div>
@@ -442,7 +442,7 @@ export default function ChecklistAbertura() {
                   onClick={iniciarChecklist}
                   className="w-full h-12 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white text-base touch-manipulation"
                 >
-                  ▶️ Iniciar Checklist
+                  â–¶ï¸ Iniciar Checklist
                 </Button>
               ) : (
                 <Button 
@@ -450,19 +450,19 @@ export default function ChecklistAbertura() {
                   className="w-full h-12 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white text-base touch-manipulation"
                   disabled={estatisticas.pendentes > 0 || estatisticas.fazendo > 0}
                 >
-                  💾 Salvar Checklist
+                  ðŸ’¾ Salvar Checklist
                 </Button>
               )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Filtros por Área */}
+        {/* Filtros por Ãrea */}
         <Card className="mb-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
               <Store className="w-5 h-5" />
-              Áreas de Verificação
+              Ãreas de VerificaÃ§Ã£o
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -523,12 +523,12 @@ export default function ChecklistAbertura() {
                           </div>
                           <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{item.descricao}</p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>⏱️ {item.tempo_estimado} min</span>
+                            <span>â±ï¸ {item.tempo_estimado} min</span>
                             {item.horario_inicio && (
-                              <span>🕐 Iniciado: {item.horario_inicio}</span>
+                              <span>ðŸ• Iniciado: {item.horario_inicio}</span>
                             )}
                             {item.horario_conclusao && (
-                              <span>✅ Concluído: {item.horario_conclusao}</span>
+                              <span>âœ… ConcluÃ­do: {item.horario_conclusao}</span>
                             )}
                           </div>
                         </div>
@@ -546,7 +546,7 @@ export default function ChecklistAbertura() {
                               }}
                               className="h-10 px-4 text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 touch-manipulation"
                             >
-                              ▶️ Iniciar
+                              â–¶ï¸ Iniciar
                             </Button>
                           )}
                           {item.status === 'fazendo' && (
@@ -559,7 +559,7 @@ export default function ChecklistAbertura() {
                                 }}
                                 className="h-10 px-4 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white touch-manipulation"
                               >
-                                ✅ OK
+                                âœ… OK
                               </Button>
                               <Button
                                 size="sm"
@@ -570,7 +570,7 @@ export default function ChecklistAbertura() {
                                 }}
                                 className="h-10 px-4 bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white touch-manipulation"
                               >
-                                ❌ Problema
+                                âŒ Problema
                               </Button>
                             </>
                           )}
@@ -584,7 +584,7 @@ export default function ChecklistAbertura() {
               {itensFiltrados.length === 0 && (
                 <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                   <Store className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Nenhum item encontrado para esta área</p>
+                  <p>Nenhum item encontrado para esta Ã¡rea</p>
                 </div>
               )}
             </Tabs>
@@ -610,7 +610,7 @@ export default function ChecklistAbertura() {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
                   <div>
-                    <span className="text-gray-600 dark:text-gray-400">Área:</span>
+                    <span className="text-gray-600 dark:text-gray-400">Ãrea:</span>
                     <p className="font-medium text-gray-900 dark:text-white">{areas.find((a: any) => a.id === itemSelecionado.area)?.nome}</p>
                   </div>
                   <div>
@@ -631,7 +631,7 @@ export default function ChecklistAbertura() {
                 
                 {itemSelecionado.observacoes && (
                   <div>
-                    <span className="text-gray-600 dark:text-gray-400">Observações:</span>
+                    <span className="text-gray-600 dark:text-gray-400">ObservaÃ§Ãµes:</span>
                     <p className="text-sm bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 p-2 rounded">{itemSelecionado.observacoes}</p>
                   </div>
                 )}
@@ -639,7 +639,7 @@ export default function ChecklistAbertura() {
                 {checklistIniciado && itemSelecionado.status !== 'concluido' && (
                   <div className="space-y-3">
                     <Textarea
-                      placeholder="Adicionar observações..."
+                      placeholder="Adicionar observaÃ§Ãµes..."
                       value={itemSelecionado.observacoes || ''}
                       onChange={(e) => {
                         if (itemSelecionado) {
@@ -663,7 +663,7 @@ export default function ChecklistAbertura() {
                           className="flex-1 h-12 text-base text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 touch-manipulation"
                           variant="outline"
                         >
-                          ▶️ Iniciar
+                          â–¶ï¸ Iniciar
                         </Button>
                       )}
                       {itemSelecionado.status === 'fazendo' && (
@@ -675,7 +675,7 @@ export default function ChecklistAbertura() {
                             }}
                             className="flex-1 h-12 text-base bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white touch-manipulation"
                           >
-                            ✅ Concluir
+                            âœ… Concluir
                           </Button>
                           <Button
                             onClick={() => {
@@ -685,7 +685,7 @@ export default function ChecklistAbertura() {
                             variant="destructive"
                             className="flex-1 h-12 text-base bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white touch-manipulation"
                           >
-                            ❌ Problema
+                            âŒ Problema
                           </Button>
                         </>
                       )}

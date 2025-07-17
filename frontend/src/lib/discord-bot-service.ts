@@ -1,4 +1,4 @@
-import { sgbDiscordService, DiscordEmbed } from './discord-service';
+﻿import { sgbDiscordService, DiscordEmbed } from './discord-service';
 import { 
   getScoreSaudeGeral,
   getDashboardExecutivo,
@@ -10,7 +10,7 @@ import {
 } from './analytics-service';
 
 // ========================================
-// 🤖 DISCORD BOT INTELIGENTE - SGB
+// ðŸ¤– DISCORD BOT INTELIGENTE - SGB
 // ========================================
 
 export interface BotCommand {
@@ -28,7 +28,7 @@ export interface BotResponse {
 }
 
 // ========================================
-// 🧠 PROCESSADOR DE COMANDOS INTELIGENTE
+// ðŸ§  PROCESSADOR DE COMANDOS INTELIGENTE
 // ========================================
 export class DiscordBotService {
   private readonly API_BASE = '/api/ai/query';
@@ -38,7 +38,7 @@ export class DiscordBotService {
    */
   async processCommand(command: BotCommand): Promise<BotResponse> {
     try {
-      console.log(`🤖 Bot processando: "${command.message}" do usuário ${command.user}`);
+      console.log(`ðŸ¤– Bot processando: "${command.message}" do usuÃ¡rio ${command.user}`);
 
       // Detectar tipo de consulta baseado na mensagem
       const queryType = this.detectQueryType(command.message);
@@ -47,12 +47,12 @@ export class DiscordBotService {
         return this.createHelpResponse();
       }
 
-      // Extrair parâmetros da mensagem
+      // Extrair parÃ¢metros da mensagem
       const params = this.extractParameters(command.message, queryType);
 
-      console.log(`🤖 Processando query: ${queryType} para bar ${command.bar_id}`);
+      console.log(`ðŸ¤– Processando query: ${queryType} para bar ${command.bar_id}`);
 
-      // Chamar função diretamente baseado no tipo
+      // Chamar funÃ§Ã£o diretamente baseado no tipo
       let data;
       
       switch (queryType) {
@@ -127,7 +127,7 @@ export class DiscordBotService {
       return {
         success: false,
         error: errorMessage,
-        text: `❌ Erro ao processar seu comando: ${errorMessage}`
+        text: `âŒ Erro ao processar seu comando: ${errorMessage}`
       };
     }
   }
@@ -138,14 +138,14 @@ export class DiscordBotService {
   private detectQueryType(message: string): string | null {
     const msg = message.toLowerCase();
 
-    // 💰 Financeiro & Faturamento
+    // ðŸ’° Financeiro & Faturamento
     if (msg.includes('maior faturamento') || msg.includes('maior venda')) {
       return 'maior_faturamento';
     }
-    if (msg.includes('faturamento') && (msg.includes('período') || msg.includes('periodo'))) {
+    if (msg.includes('faturamento') && (msg.includes('perÃ­odo') || msg.includes('periodo'))) {
       return 'faturamento_periodo';
     }
-    if (msg.includes('comparativo') && msg.includes('mês')) {
+    if (msg.includes('comparativo') && msg.includes('mÃªs')) {
       return 'comparativo_mensal';
     }
     if (msg.includes('top') && msg.includes('clientes')) {
@@ -157,52 +157,52 @@ export class DiscordBotService {
     if (msg.includes('resumo') && msg.includes('dia')) {
       return 'resumo_dia';
     }
-    if (msg.includes('resumo') && msg.includes('mês')) {
+    if (msg.includes('resumo') && msg.includes('mÃªs')) {
       return 'resumo_mes';
     }
 
-    // ✅ Checklists & Operacional
+    // âœ… Checklists & Operacional
     if (msg.includes('checklist') || msg.includes('checklists')) {
       return 'status_checklists';
     }
-    if (msg.includes('performance') && msg.includes('funcionários')) {
+    if (msg.includes('performance') && msg.includes('funcionÃ¡rios')) {
       return 'performance_funcionarios';
     }
     if (msg.includes('qualidade')) {
       return 'qualidade_execucoes';
     }
 
-    // 📱 WhatsApp
+    // ðŸ“± WhatsApp
     if (msg.includes('whatsapp') || msg.includes('mensagens')) {
       return 'whatsapp_stats';
     }
 
-    // 🍕 Produção
-    if (msg.includes('tempo') && (msg.includes('produção') || msg.includes('producao'))) {
+    // ðŸ• ProduÃ§Ã£o
+    if (msg.includes('tempo') && (msg.includes('produÃ§Ã£o') || msg.includes('producao'))) {
       return 'tempo_producao';
     }
 
-    // 🤖 IA & Analytics
+    // ðŸ¤– IA & Analytics
     if (msg.includes('anomalias')) {
       return 'anomalias_recentes';
     }
     if (msg.includes('insights')) {
       return 'insights_importantes';
     }
-    if (msg.includes('saúde') || msg.includes('score')) {
+    if (msg.includes('saÃºde') || msg.includes('score')) {
       return 'score_saude_geral';
     }
 
-    // 📊 Dashboards
+    // ðŸ“Š Dashboards
     if (msg.includes('dashboard') || msg.includes('executivo')) {
       return 'dashboard_executivo';
     }
-    if (msg.includes('visão') || msg.includes('360')) {
+    if (msg.includes('visÃ£o') || msg.includes('360')) {
       return 'visao_360';
     }
 
     // Comandos gerais
-    if (msg.includes('como vai') || msg.includes('status') || msg.includes('situação')) {
+    if (msg.includes('como vai') || msg.includes('status') || msg.includes('situaÃ§Ã£o')) {
       return 'dashboard_executivo';
     }
 
@@ -210,7 +210,7 @@ export class DiscordBotService {
   }
 
   /**
-   * Extrai parâmetros da mensagem
+   * Extrai parÃ¢metros da mensagem
    */
   private extractParameters(message: string, queryType: string): any {
     const params: any = {};
@@ -224,8 +224,8 @@ export class DiscordBotService {
       if (dates.length >= 2) params.periodo_fim = dates[1];
     }
 
-    // Extrair números (limite)
-    const numberRegex = /top\s+(\d+)|(\d+)\s+(?:primeiros|melhores|últimos)/gi;
+    // Extrair nÃºmeros (limite)
+    const numberRegex = /top\s+(\d+)|(\d+)\s+(?:primeiros|melhores|Ãºltimos)/gi;
     const numberMatch = message.match(numberRegex);
     if (numberMatch) {
       const num = parseInt(numberMatch[0].replace(/\D/g, ''));
@@ -234,20 +234,20 @@ export class DiscordBotService {
       }
     }
 
-    // Períodos relativos
+    // PerÃ­odos relativos
     if (message.includes('ontem')) {
       const ontem = new Date();
       ontem.setDate(ontem.getDate() - 1);
       params.periodo_inicio = ontem.toISOString().split('T')[0];
     }
     
-    if (message.includes('última semana')) {
+    if (message.includes('Ãºltima semana')) {
       const semanaAtras = new Date();
       semanaAtras.setDate(semanaAtras.getDate() - 7);
       params.periodo_inicio = semanaAtras.toISOString().split('T')[0];
     }
 
-    if (message.includes('último mês')) {
+    if (message.includes('Ãºltimo mÃªs')) {
       const mesAtras = new Date();
       mesAtras.setMonth(mesAtras.getMonth() - 1);
       params.periodo_inicio = mesAtras.toISOString().split('T')[0];
@@ -265,22 +265,22 @@ export class DiscordBotService {
     switch (queryType) {
       case 'maior_faturamento':
         return {
-          title: '💰 Maior Faturamento',
+          title: 'ðŸ’° Maior Faturamento',
           description: data.mensagem,
           color: 0x00D084,
           fields: [
             {
-              name: '🏆 Maior Venda Individual',
+              name: 'ðŸ† Maior Venda Individual',
               value: `**R$ ${data.maior_venda?.valor?.toFixed(2)}**\nData: ${new Date(data.maior_venda?.data).toLocaleDateString('pt-BR')}\nMeio: ${data.maior_venda?.meio_pagamento || 'N/A'}`,
               inline: true
             },
             {
-              name: '📊 Faturamento Total do Dia',
+              name: 'ðŸ“Š Faturamento Total do Dia',
               value: `**R$ ${data.faturamento_total_dia?.toFixed(2)}**`,
               inline: true
             }
           ],
-          footer: { text: 'SGB Analytics • Consulta de faturamento' },
+          footer: { text: 'SGB Analytics â€¢ Consulta de faturamento' },
           timestamp
         };
 
@@ -288,113 +288,113 @@ export class DiscordBotService {
         const kpis = data.kpis_principais;
         const saude = data.score_saude;
         return {
-          title: '📊 Dashboard Executivo',
+          title: 'ðŸ“Š Dashboard Executivo',
           description: data.mensagem,
           color: saude.score_saude >= 80 ? 0x00D084 : saude.score_saude >= 60 ? 0xF59E0B : 0xEF4444,
           fields: [
             {
-              name: '💰 Financeiro',
-              value: `**Faturamento:** R$ ${kpis.faturamento_total?.toFixed(2)}\n**Transações:** ${kpis.total_transacoes}\n**Ticket Médio:** R$ ${kpis.ticket_medio?.toFixed(2)}`,
+              name: 'ðŸ’° Financeiro',
+              value: `**Faturamento:** R$ ${kpis.faturamento_total?.toFixed(2)}\n**TransaÃ§Ãµes:** ${kpis.total_transacoes}\n**Ticket MÃ©dio:** R$ ${kpis.ticket_medio?.toFixed(2)}`,
               inline: true
             },
             {
-              name: '✅ Operacional',
-              value: `**Checklists:** ${kpis.taxa_conclusao_checklists?.toFixed(1)}%\n**WhatsApp:** ${kpis.engagement_whatsapp?.toFixed(1)}%\n**Produção:** ${kpis.tempo_medio_producao?.toFixed(1)}min`,
+              name: 'âœ… Operacional',
+              value: `**Checklists:** ${kpis.taxa_conclusao_checklists?.toFixed(1)}%\n**WhatsApp:** ${kpis.engagement_whatsapp?.toFixed(1)}%\n**ProduÃ§Ã£o:** ${kpis.tempo_medio_producao?.toFixed(1)}min`,
               inline: true
             },
             {
-              name: '🎯 Score de Saúde',
+              name: 'ðŸŽ¯ Score de SaÃºde',
               value: `**${saude.score_saude}%** - ${saude.status.toUpperCase()}\n${this.getHealthEmoji(saude.score_saude)} ${saude.mensagem}`,
               inline: false
             }
           ],
-          footer: { text: 'SGB Analytics • Dashboard Executivo' },
+          footer: { text: 'SGB Analytics â€¢ Dashboard Executivo' },
           timestamp
         };
 
       case 'status_checklists':
         const resumo = data.resumo;
         return {
-          title: '✅ Status dos Checklists',
+          title: 'âœ… Status dos Checklists',
           description: data.mensagem,
           color: resumo.taxa_conclusao >= 80 ? 0x00D084 : resumo.taxa_conclusao >= 60 ? 0xF59E0B : 0xEF4444,
           fields: [
             {
-              name: '📊 Resumo Geral',
-              value: `**Total:** ${resumo.total_execucoes}\n**Concluídos:** ${resumo.concluidos}\n**Pendentes:** ${resumo.pendentes}\n**Atrasados:** ${resumo.atrasados}`,
+              name: 'ðŸ“Š Resumo Geral',
+              value: `**Total:** ${resumo.total_execucoes}\n**ConcluÃ­dos:** ${resumo.concluidos}\n**Pendentes:** ${resumo.pendentes}\n**Atrasados:** ${resumo.atrasados}`,
               inline: true
             },
             {
-              name: '📈 Performance',
-              value: `**Taxa Conclusão:** ${resumo.taxa_conclusao?.toFixed(1)}%\n**Score Médio:** ${resumo.score_medio?.toFixed(1)}%`,
+              name: 'ðŸ“ˆ Performance',
+              value: `**Taxa ConclusÃ£o:** ${resumo.taxa_conclusao?.toFixed(1)}%\n**Score MÃ©dio:** ${resumo.score_medio?.toFixed(1)}%`,
               inline: true
             }
           ],
-          footer: { text: 'SGB Analytics • Gestão de Checklists' },
+          footer: { text: 'SGB Analytics â€¢ GestÃ£o de Checklists' },
           timestamp
         };
 
       case 'whatsapp_stats':
         const stats = data.estatisticas;
         return {
-          title: '📱 Estatísticas WhatsApp',
+          title: 'ðŸ“± EstatÃ­sticas WhatsApp',
           description: data.mensagem,
           color: 0x25D366,
           fields: [
             {
-              name: '📊 Métricas',
+              name: 'ðŸ“Š MÃ©tricas',
               value: `**Total Mensagens:** ${stats.total_mensagens}\n**Taxa Entrega:** ${stats.taxa_entrega?.toFixed(1)}%\n**Taxa Leitura:** ${stats.taxa_leitura?.toFixed(1)}%`,
               inline: true
             },
             {
-              name: '🎯 Engagement',
+              name: 'ðŸŽ¯ Engagement',
               value: `**Score:** ${stats.engagement?.toFixed(1)}%\n**Falhas:** ${stats.taxa_falha?.toFixed(1)}%`,
               inline: true
             }
           ],
-          footer: { text: 'SGB Analytics • WhatsApp Business' },
+          footer: { text: 'SGB Analytics â€¢ WhatsApp Business' },
           timestamp
         };
 
       case 'visao_360':
         return {
-          title: '🎯 Visão 360° Completa',
-          description: 'Análise completa do estabelecimento',
+          title: 'ðŸŽ¯ VisÃ£o 360Â° Completa',
+          description: 'AnÃ¡lise completa do estabelecimento',
           color: 0x8B5CF6,
           fields: [
             {
-              name: '💰 Financeiro',
-              value: `R$ ${data.visao_geral.kpis_principais.faturamento_total?.toFixed(2)} em ${data.visao_geral.kpis_principais.total_transacoes} transações`,
+              name: 'ðŸ’° Financeiro',
+              value: `R$ ${data.visao_geral.kpis_principais.faturamento_total?.toFixed(2)} em ${data.visao_geral.kpis_principais.total_transacoes} transaÃ§Ãµes`,
               inline: false
             },
             {
-              name: '🚨 Alertas Ativos',
-              value: `**Anomalias:** ${data.resumo_inteligencia.total_anomalias_ativas}\n**Insights Críticos:** ${data.resumo_inteligencia.insights_criticos}\n**Recomendações Altas:** ${data.resumo_inteligencia.recomendacoes_altas}`,
+              name: 'ðŸš¨ Alertas Ativos',
+              value: `**Anomalias:** ${data.resumo_inteligencia.total_anomalias_ativas}\n**Insights CrÃ­ticos:** ${data.resumo_inteligencia.insights_criticos}\n**RecomendaÃ§Ãµes Altas:** ${data.resumo_inteligencia.recomendacoes_altas}`,
               inline: true
             },
             {
-              name: '👥 Equipe',
-              value: `**Melhor Funcionário:** ${data.equipe.ranking_funcionarios[0]?.nome || 'N/A'}\n**Total Funcionários:** ${data.equipe.estatisticas.total_funcionarios}`,
+              name: 'ðŸ‘¥ Equipe',
+              value: `**Melhor FuncionÃ¡rio:** ${data.equipe.ranking_funcionarios[0]?.nome || 'N/A'}\n**Total FuncionÃ¡rios:** ${data.equipe.estatisticas.total_funcionarios}`,
               inline: true
             }
           ],
-          footer: { text: 'SGB Analytics • Inteligência Artificial' },
+          footer: { text: 'SGB Analytics â€¢ InteligÃªncia Artificial' },
           timestamp
         };
 
       default:
         return {
-          title: '📋 Resultado da Consulta',
+          title: 'ðŸ“‹ Resultado da Consulta',
           description: data.mensagem || 'Consulta realizada com sucesso',
           color: 0x3B82F6,
           fields: [
             {
-              name: '📊 Dados',
+              name: 'ðŸ“Š Dados',
               value: JSON.stringify(data).substring(0, 1000) + (JSON.stringify(data).length > 1000 ? '...' : ''),
               inline: false
             }
           ],
-          footer: { text: 'SGB Analytics • Consulta Geral' },
+          footer: { text: 'SGB Analytics â€¢ Consulta Geral' },
           timestamp
         };
     }
@@ -407,56 +407,56 @@ export class DiscordBotService {
     return {
       success: true,
       embed: {
-        title: '🤖 SGB Bot - Comandos Disponíveis',
+        title: 'ðŸ¤– SGB Bot - Comandos DisponÃ­veis',
         description: 'Use linguagem natural para consultar dados do seu estabelecimento!',
         color: 0x5865F2,
         fields: [
           {
-            name: '💰 Financeiro',
-            value: '• "Qual o maior faturamento?"\n• "Faturamento do último mês"\n• "Top 5 clientes"\n• "Resumo do dia"',
+            name: 'ðŸ’° Financeiro',
+            value: 'â€¢ "Qual o maior faturamento?"\nâ€¢ "Faturamento do Ãºltimo mÃªs"\nâ€¢ "Top 5 clientes"\nâ€¢ "Resumo do dia"',
             inline: true
           },
           {
-            name: '✅ Operacional',
-            value: '• "Status dos checklists"\n• "Performance dos funcionários"\n• "Como está a qualidade?"',
+            name: 'âœ… Operacional',
+            value: 'â€¢ "Status dos checklists"\nâ€¢ "Performance dos funcionÃ¡rios"\nâ€¢ "Como estÃ¡ a qualidade?"',
             inline: true
           },
           {
-            name: '📱 Comunicação',
-            value: '• "Stats do WhatsApp"\n• "Mensagens pendentes"',
+            name: 'ðŸ“± ComunicaÃ§Ã£o',
+            value: 'â€¢ "Stats do WhatsApp"\nâ€¢ "Mensagens pendentes"',
             inline: true
           },
           {
-            name: '🤖 IA & Analytics',
-            value: '• "Score de saúde"\n• "Anomalias recentes"\n• "Dashboard executivo"\n• "Visão 360"',
+            name: 'ðŸ¤– IA & Analytics',
+            value: 'â€¢ "Score de saÃºde"\nâ€¢ "Anomalias recentes"\nâ€¢ "Dashboard executivo"\nâ€¢ "VisÃ£o 360"',
             inline: true
           },
           {
-            name: '🍕 Produção',
-            value: '• "Tempo de produção"\n• "Produtos mais demorados"',
+            name: 'ðŸ• ProduÃ§Ã£o',
+            value: 'â€¢ "Tempo de produÃ§Ã£o"\nâ€¢ "Produtos mais demorados"',
             inline: true
           },
           {
-            name: '💡 Dicas',
-            value: '• Use datas: "2024-01-15"\n• Especifique períodos: "última semana"\n• Defina limites: "top 10"',
+            name: 'ðŸ’¡ Dicas',
+            value: 'â€¢ Use datas: "2024-01-15"\nâ€¢ Especifique perÃ­odos: "Ãºltima semana"\nâ€¢ Defina limites: "top 10"',
             inline: true
           }
         ],
-        footer: { text: 'SGB Analytics • Seu assistente inteligente' },
+        footer: { text: 'SGB Analytics â€¢ Seu assistente inteligente' },
         timestamp: new Date().toISOString()
       }
     };
   }
 
   /**
-   * Emoji baseado no score de saúde
+   * Emoji baseado no score de saÃºde
    */
   private getHealthEmoji(score: number): string {
-    if (score >= 90) return '🟢';
-    if (score >= 75) return '🔵';
-    if (score >= 60) return '🟡';
-    if (score >= 40) return '🟠';
-    return '🔴';
+    if (score >= 90) return 'ðŸŸ¢';
+    if (score >= 75) return 'ðŸ”µ';
+    if (score >= 60) return 'ðŸŸ¡';
+    if (score >= 40) return 'ðŸŸ ';
+    return 'ðŸ”´';
   }
 
   /**
@@ -478,12 +478,12 @@ export class DiscordBotService {
 }
 
 // ========================================
-// 🏭 INSTÂNCIA GLOBAL DO BOT
+// ðŸ­ INSTÃ‚NCIA GLOBAL DO BOT
 // ========================================
 export const sgbBot = new DiscordBotService();
 
 // ========================================
-// 🎯 FUNÇÃO PRINCIPAL - PROCESSAR COMANDO
+// ðŸŽ¯ FUNÃ‡ÃƒO PRINCIPAL - PROCESSAR COMANDO
 // ========================================
 export async function processDiscordCommand(message: string, user: string, bar_id: number): Promise<boolean> {
   try {
@@ -494,7 +494,7 @@ export async function processDiscordCommand(message: string, user: string, bar_i
       timestamp: new Date()
     };
 
-    console.log(`🤖 Processando comando Discord de ${user}: "${message}"`);
+    console.log(`ðŸ¤– Processando comando Discord de ${user}: "${message}"`);
 
     const response = await sgbBot.processCommand(command);
     
@@ -515,7 +515,7 @@ export async function processDiscordCommand(message: string, user: string, bar_i
     // Enviar mensagem de erro
     await sgbBot.sendResponse({
       success: false,
-      text: `❌ Erro interno: ${errorMessage}`
+      text: `âŒ Erro interno: ${errorMessage}`
     });
     
     return false;

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -49,7 +49,7 @@ export default function ConfiguracoesPage() {
   })
 
   useEffect(() => {
-    setPageTitle('⚙️ Configurações')
+    setPageTitle('âš™ï¸ ConfiguraÃ§Ãµes')
     loadSystemStats()
     return () => setPageTitle('')
   }, [setPageTitle])
@@ -57,7 +57,7 @@ export default function ConfiguracoesPage() {
   const loadSystemStats = async () => {
     try {
       setLoading(true)
-      // Simular carregamento de estatísticas
+      // Simular carregamento de estatÃ­sticas
       await new Promise(resolve => setTimeout(resolve, 1000))
       setStats({
         totalUsers: 12,
@@ -65,7 +65,7 @@ export default function ConfiguracoesPage() {
         systemHealth: 'good'
       })
     } catch (error) {
-      console.error('Erro ao carregar estatísticas:', error)
+      console.error('Erro ao carregar estatÃ­sticas:', error)
     } finally {
       setLoading(false)
     }
@@ -74,18 +74,18 @@ export default function ConfiguracoesPage() {
   const configSections: ConfigSection[] = [
     {
       id: 'users',
-      title: 'Gerenciamento de Usuários',
-      description: 'Gerencie usuários, permissões e controle de acesso',
+      title: 'Gerenciamento de UsuÃ¡rios',
+      description: 'Gerencie usuÃ¡rios, permissÃµes e controle de acesso',
       icon: <Users className="w-6 h-6" />,
       route: '/configuracoes/usuarios',
       status: 'active',
-      badge: `${stats.totalUsers} usuários`,
+      badge: `${stats.totalUsers} usuÃ¡rios`,
       color: 'blue'
     },
     {
       id: 'security', 
-      title: 'Segurança',
-      description: 'Monitor de segurança, logs e auditoria do sistema',
+      title: 'SeguranÃ§a',
+      description: 'Monitor de seguranÃ§a, logs e auditoria do sistema',
       icon: <Shield className="w-6 h-6" />,
       route: '/configuracoes/seguranca',
       status: 'active',
@@ -94,8 +94,8 @@ export default function ConfiguracoesPage() {
     },
     {
       id: 'integrations',
-      title: 'Integrações',
-      description: 'Configure Discord, WhatsApp, Meta e outras integrações',
+      title: 'IntegraÃ§Ãµes',
+      description: 'Configure Discord, WhatsApp, Meta e outras integraÃ§Ãµes',
       icon: <Zap className="w-6 h-6" />,
       route: '/configuracoes/integracoes',
       status: 'active',
@@ -105,7 +105,7 @@ export default function ConfiguracoesPage() {
     {
       id: 'checklists',
       title: 'Checklists',
-      description: 'Configure templates, itens e automações de checklists',
+      description: 'Configure templates, itens e automaÃ§Ãµes de checklists',
       icon: <CheckSquare className="w-6 h-6" />,
       route: '/configuracoes/checklists',
       status: 'active',
@@ -124,12 +124,12 @@ export default function ConfiguracoesPage() {
     },
     {
       id: 'contahub',
-      title: 'ContaHub Automático',
-      description: 'Configure coleta automática de dados financeiros',
+      title: 'ContaHub AutomÃ¡tico',
+      description: 'Configure coleta automÃ¡tica de dados financeiros',
       icon: <BarChart3 className="w-6 h-6" />,
       route: '/configuracoes/contahub-automatico',
       status: 'active',
-      badge: 'Automático',
+      badge: 'AutomÃ¡tico',
       color: 'cyan'
     }
   ]
@@ -165,7 +165,7 @@ export default function ConfiguracoesPage() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Carregando configurações...</p>
+          <p className="text-gray-600 dark:text-gray-400">Carregando configuraÃ§Ãµes...</p>
         </div>
       </div>
     )
@@ -183,8 +183,8 @@ export default function ConfiguracoesPage() {
                   <Settings className="w-8 h-8" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold">Central de Configurações</h1>
-                  <p className="text-blue-100 mt-1">Gerencie todas as configurações do seu sistema</p>
+                  <h1 className="text-3xl font-bold">Central de ConfiguraÃ§Ãµes</h1>
+                  <p className="text-blue-100 mt-1">Gerencie todas as configuraÃ§Ãµes do seu sistema</p>
                 </div>
               </div>
               
@@ -205,7 +205,7 @@ export default function ConfiguracoesPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Usuários Ativos</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">UsuÃ¡rios Ativos</p>
                   <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalUsers}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Contas registradas</p>
                 </div>
@@ -220,9 +220,9 @@ export default function ConfiguracoesPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Integrações</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">IntegraÃ§Ãµes</p>
                   <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.activeIntegrations}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Serviços conectados</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">ServiÃ§os conectados</p>
                 </div>
                 <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
                   <Zap className="w-8 h-8 text-green-600 dark:text-green-400" />
@@ -236,8 +236,8 @@ export default function ConfiguracoesPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Status Sistema</p>
-                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">Saudável</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Todos os serviços</p>
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">SaudÃ¡vel</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Todos os serviÃ§os</p>
                 </div>
                 <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
                   <Shield className="w-8 h-8 text-green-600 dark:text-green-400" />
@@ -247,7 +247,7 @@ export default function ConfiguracoesPage() {
           </Card>
         </div>
 
-        {/* Grid de Configurações */}
+        {/* Grid de ConfiguraÃ§Ãµes */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {configSections.map((section) => (
             <Card 
@@ -292,14 +292,14 @@ export default function ConfiguracoesPage() {
           ))}
         </div>
 
-        {/* Seção de Informações Adicionais */}
+        {/* SeÃ§Ã£o de InformaÃ§Ãµes Adicionais */}
         <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
           <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
             <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
               <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                 <Activity className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
-              Informações do Sistema
+              InformaÃ§Ãµes do Sistema
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -314,11 +314,11 @@ export default function ConfiguracoesPage() {
               </div>
               <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">Seg</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Backup Diário</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Backup DiÃ¡rio</div>
               </div>
               <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">v2.0</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Versão SGB</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">VersÃ£o SGB</div>
               </div>
             </div>
           </CardContent>

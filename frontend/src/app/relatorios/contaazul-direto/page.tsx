@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 
@@ -20,7 +20,7 @@ export default function ContaAzulDiretoPage() {
       const data = await response.json();
       setResultado(data);
     } catch (error) {
-      setResultado({ erro: 'Falha na conexão' });
+      setResultado({ erro: 'Falha na conexÃ£o' });
     } finally {
       setTestando(false);
     }
@@ -29,12 +29,12 @@ export default function ContaAzulDiretoPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full text-center">
-        <h1 className="text-2xl font-bold mb-6">🎯 ContaAzul - Teste Direto</h1>
+        <h1 className="text-2xl font-bold mb-6">ðŸŽ¯ ContaAzul - Teste Direto</h1>
         
         <p className="text-gray-600 mb-8">
           Vamos testar <strong>diretamente</strong> o que funciona no ContaAzul.
           <br />
-          <strong>Sem enrolação, sem diagnósticos complexos.</strong>
+          <strong>Sem enrolaÃ§Ã£o, sem diagnÃ³sticos complexos.</strong>
         </p>
 
         <button
@@ -42,7 +42,7 @@ export default function ContaAzulDiretoPage() {
           disabled={testando}
           className="bg-green-500 text-white px-8 py-4 rounded-lg text-xl font-bold hover:bg-green-600 disabled:opacity-50 w-full mb-6"
         >
-          {testando ? '🔄 Testando...' : '🚀 TESTAR AGORA!'}
+          {testando ? 'ðŸ”„ Testando...' : 'ðŸš€ TESTAR AGORA!'}
         </button>
 
         {resultado && (
@@ -51,7 +51,7 @@ export default function ContaAzulDiretoPage() {
           }`}>
             {resultado.funciona ? (
               <div>
-                <h3 className="font-bold text-green-800 mb-2">✅ FUNCIONOU!</h3>
+                <h3 className="font-bold text-green-800 mb-2">âœ… FUNCIONOU!</h3>
                 <p className="text-green-700 mb-3">{resultado.metodo}</p>
                 {resultado.dados && (
                   <div className="bg-white p-3 rounded border">
@@ -64,21 +64,21 @@ export default function ContaAzulDiretoPage() {
               </div>
             ) : (
               <div>
-                <h3 className="font-bold text-red-800 mb-2">❌ Não funcionou ainda</h3>
+                <h3 className="font-bold text-red-800 mb-2">âŒ NÃ£o funcionou ainda</h3>
                 <p className="text-red-700 mb-3">{resultado.problema}</p>
                 {resultado.status && (
                   <div className="text-sm text-gray-600">
                     <strong>Status das APIs:</strong>
                     {resultado.status.map((s: any, i: number) => (
                       <div key={i} className="mt-1">
-                        {s.url}: {s.status} {s.acessivel ? '✅' : '❌'}
+                        {s.url}: {s.status} {s.acessivel ? 'âœ…' : 'âŒ'}
                       </div>
                     ))}
                   </div>
                 )}
-                {resultado.próximo && (
+                {resultado.prÃ³ximo && (
                   <div className="mt-3 p-2 bg-blue-100 rounded">
-                    <strong>Próximo passo:</strong> {resultado.próximo}
+                    <strong>PrÃ³ximo passo:</strong> {resultado.prÃ³ximo}
                   </div>
                 )}
               </div>

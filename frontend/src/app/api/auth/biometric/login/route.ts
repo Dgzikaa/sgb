@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -12,28 +12,28 @@ export async function POST(request: NextRequest) {
 
     if (!credentialId || !signature || !authenticatorData || !clientDataJSON) {
       return NextResponse.json(
-        { error: 'Dados de autenticação não fornecidos' },
+        { error: 'Dados de autenticaÃ§Ã£o nÃ£o fornecidos' },
         { status: 400 }
       )
     }
 
-    console.log('🔍 Verificando autenticação biométrica para credencial:', credentialId)
+    console.log('ðŸ” Verificando autenticaÃ§Ã£o biomÃ©trica para credencial:', credentialId)
 
-    // Buscar usuário que possui esta credencial
+    // Buscar usuÃ¡rio que possui esta credencial
     const { data: usuarios, error: searchError } = await supabase
       .from('usuarios_bar')
       .select('id, email, nome, bar_id, biometric_credentials, ativo')
       .not('biometric_credentials', 'is', null)
 
     if (searchError) {
-      console.error('❌ Erro ao buscar usuários:', searchError)
+      console.error('âŒ Erro ao buscar usuÃ¡rios:', searchError)
       return NextResponse.json(
         { error: 'Erro ao verificar credenciais' },
         { status: 500 }
       )
     }
 
-    // Encontrar usuário com a credencial específica
+    // Encontrar usuÃ¡rio com a credencial especÃ­fica
     let usuarioEncontrado = null
     let credentialData = null
 
@@ -53,26 +53,26 @@ export async function POST(request: NextRequest) {
     }
 
     if (!usuarioEncontrado || !credentialData) {
-      console.log('❌ Credencial não encontrada')
+      console.log('âŒ Credencial nÃ£o encontrada')
       return NextResponse.json(
-        { error: 'Credencial biométrica não encontrada' },
+        { error: 'Credencial biomÃ©trica nÃ£o encontrada' },
         { status: 404 }
       )
     }
 
     if (!usuarioEncontrado.ativo) {
-      console.log('❌ Usuário inativo')
+      console.log('âŒ UsuÃ¡rio inativo')
       return NextResponse.json(
-        { error: 'Usuário inativo' },
+        { error: 'UsuÃ¡rio inativo' },
         { status: 403 }
       )
     }
 
-    // TODO: Aqui deveria haver verificação criptográfica da assinatura
-    // Por simplicidade, assumimos que a credencial é válida se foi encontrada
-    // Em produção, você implementaria a verificação da assinatura WebAuthn
+    // TODO: Aqui deveria haver verificaÃ§Ã£o criptogrÃ¡fica da assinatura
+    // Por simplicidade, assumimos que a credencial Ã© vÃ¡lida se foi encontrada
+    // Em produÃ§Ã£o, vocÃª implementaria a verificaÃ§Ã£o da assinatura WebAuthn
 
-    console.log('✅ Autenticação biométrica bem-sucedida para:', usuarioEncontrado.email)
+    console.log('âœ… AutenticaÃ§Ã£o biomÃ©trica bem-sucedida para:', usuarioEncontrado.email)
 
     // Atualizar last_used da credencial
     const updatedCredentials = usuarioEncontrado.biometric_credentials.map((cred: any) => 
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Erro na API de login biométrico:', error)
+    console.error('âŒ Erro na API de login biomÃ©trico:', error)
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

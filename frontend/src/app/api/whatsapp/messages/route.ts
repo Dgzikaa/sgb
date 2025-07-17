@@ -1,21 +1,21 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 
-// Configuração do Supabase
+// ConfiguraÃ§Ã£o do Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Schema de validação para enviar mensagem
+// Schema de validaÃ§Ã£o para enviar mensagem
 const SendMessageSchema = z.object({
-  destinatario: z.string().min(1, 'Destinatário é obrigatório'),
+  destinatario: z.string().min(1, 'DestinatÃ¡rio Ã© obrigatÃ³rio'),
   tipo_mensagem: z.enum(['text', 'template'], { 
-    required_error: 'Tipo de mensagem é obrigatório' 
+    required_error: 'Tipo de mensagem Ã© obrigatÃ³rio' 
   }),
-  conteudo: z.string().min(1, 'Conteúdo é obrigatório'),
+  conteudo: z.string().min(1, 'ConteÃºdo Ã© obrigatÃ³rio'),
   template_name: z.string().optional(),
   template_parameters: z.array(z.string()).optional(),
   modulo: z.string().optional(),
@@ -37,7 +37,7 @@ const FilterSchema = z.object({
 });
 
 // ========================================
-// 📱 GET /api/whatsapp/messages
+// ðŸ“± GET /api/whatsapp/messages
 // ========================================
 export async function GET(request: NextRequest) {
   try {
@@ -45,21 +45,21 @@ export async function GET(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'UsuÃ¡rio nÃ£o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
-    // Verificar permissões
+    // Verificar permissÃµes
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissão para acessar mensagens' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permissÃ£o para acessar mensagens' }, { status: 403 });
     }
 
-    // Parse dos parâmetros de query
+    // Parse dos parÃ¢metros de query
     const url = new URL(request.url);
     const rawParams = Object.fromEntries(url.searchParams.entries());
     
-    // Converter tipos numéricos
+    // Converter tipos numÃ©ricos
     const processedParams: any = { ...rawParams };
     if (processedParams.page) processedParams.page = parseInt(processedParams.page);
     if (processedParams.limit) processedParams.limit = parseInt(processedParams.limit);
@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
       query = query.ilike('whatsapp_contatos.numero_whatsapp', `%${params.destinatario}%`);
     }
 
-    // Paginação
+    // PaginaÃ§Ã£o
     const offset = (params.page - 1) * params.limit;
     query = query.range(offset, offset + params.limit - 1);
 
@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao buscar mensagens' }, { status: 500 });
     }
 
-    // Buscar estatísticas
+    // Buscar estatÃ­sticas
     const { data: stats } = await supabase
       .from('whatsapp_mensagens')
       .select('status')
@@ -155,7 +155,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({
-        error: 'Parâmetros inválidos',
+        error: 'ParÃ¢metros invÃ¡lidos',
         details: error.errors
       }, { status: 400 });
     }
@@ -166,7 +166,7 @@ export async function GET(request: NextRequest) {
 }
 
 // ========================================
-// 📱 POST /api/whatsapp/messages
+// ðŸ“± POST /api/whatsapp/messages
 // ========================================
 export async function POST(request: NextRequest) {
   try {
@@ -174,20 +174,20 @@ export async function POST(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'UsuÃ¡rio nÃ£o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao, usuario_id } = JSON.parse(userData);
 
-    // Verificar permissões
+    // Verificar permissÃµes
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissão para enviar mensagens' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permissÃ£o para enviar mensagens' }, { status: 403 });
     }
 
     const body = await request.json();
     const validatedData = SendMessageSchema.parse(body);
 
-    // Verificar se WhatsApp está configurado
+    // Verificar se WhatsApp estÃ¡ configurado
     const { data: config, error: configError } = await supabase
       .from('whatsapp_configuracoes')
       .select('*')
@@ -197,7 +197,7 @@ export async function POST(request: NextRequest) {
 
     if (configError || !config) {
       return NextResponse.json({ 
-        error: 'WhatsApp não configurado ou inativo' 
+        error: 'WhatsApp nÃ£o configurado ou inativo' 
       }, { status: 409 });
     }
 
@@ -206,21 +206,21 @@ export async function POST(request: NextRequest) {
     
     if (!contato) {
       return NextResponse.json({ 
-        error: 'Não foi possível identificar o contato' 
+        error: 'NÃ£o foi possÃ­vel identificar o contato' 
       }, { status: 400 });
     }
 
-    // Verificar se contato aceita notificações
+    // Verificar se contato aceita notificaÃ§Ãµes
     if (!contato.aceita_notificacoes) {
       return NextResponse.json({ 
-        error: 'Contato não aceita notificações WhatsApp' 
+        error: 'Contato nÃ£o aceita notificaÃ§Ãµes WhatsApp' 
       }, { status: 409 });
     }
 
-    // Verificar horário permitido
+    // Verificar horÃ¡rio permitido
     if (!isWithinAllowedHours(contato)) {
       return NextResponse.json({ 
-        error: 'Fora do horário permitido para envio' 
+        error: 'Fora do horÃ¡rio permitido para envio' 
       }, { status: 409 });
     }
 
@@ -268,7 +268,7 @@ export async function POST(request: NextRequest) {
       .update(updateData)
       .eq('id', mensagem.id);
 
-    // Atualizar estatísticas do contato
+    // Atualizar estatÃ­sticas do contato
     if (sendResult.success) {
       await supabase
         .from('whatsapp_contatos')
@@ -289,7 +289,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({
-        error: 'Dados inválidos',
+        error: 'Dados invÃ¡lidos',
         details: error.errors
       }, { status: 400 });
     }
@@ -300,7 +300,7 @@ export async function POST(request: NextRequest) {
 }
 
 // ========================================
-// 🔧 FUNÇÕES AUXILIARES
+// ðŸ”§ FUNÃ‡Ã•ES AUXILIARES
 // ========================================
 
 /**
@@ -319,9 +319,9 @@ async function getOrCreateContact(barId: number, numeroWhatsapp: string, usuario
     return contato;
   }
 
-  // Se não encontrou e tem usuarioId, criar novo contato
+  // Se nÃ£o encontrou e tem usuarioId, criar novo contato
   if (usuarioId) {
-    // Buscar dados do usuário
+    // Buscar dados do usuÃ¡rio
     const { data: usuario } = await supabase
       .from('usuarios_bar')
       .select('nome')
@@ -349,7 +349,7 @@ async function getOrCreateContact(barId: number, numeroWhatsapp: string, usuario
 }
 
 /**
- * Verifica se está dentro do horário permitido
+ * Verifica se estÃ¡ dentro do horÃ¡rio permitido
  */
 function isWithinAllowedHours(contato: any): boolean {
   const now = new Date();
@@ -361,7 +361,7 @@ function isWithinAllowedHours(contato: any): boolean {
     return false;
   }
 
-  // Verificar horário
+  // Verificar horÃ¡rio
   return currentTime >= contato.horario_inicio && currentTime <= contato.horario_fim;
 }
 
@@ -390,7 +390,7 @@ async function sendWhatsAppMessage(config: any, contato: any, mensagem: any): Pr
         components: []
       };
 
-      // Adicionar parâmetros se existirem
+      // Adicionar parÃ¢metros se existirem
       if (mensagem.template_parameters && mensagem.template_parameters.length > 0) {
         payload.template.components.push({
           type: 'body',
@@ -434,7 +434,7 @@ async function sendWhatsAppMessage(config: any, contato: any, mensagem: any): Pr
     return {
       success: false,
       errorCode: 'NETWORK_ERROR',
-      errorMessage: 'Erro de conexão com WhatsApp API'
+      errorMessage: 'Erro de conexÃ£o com WhatsApp API'
     };
   }
 } 

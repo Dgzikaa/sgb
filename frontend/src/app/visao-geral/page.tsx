@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -31,8 +31,8 @@ interface VisaoGeralItem {
 const visaoGeralItems: VisaoGeralItem[] = [
   {
     id: 'marketing-360',
-    title: 'Marketing 360°',
-    description: 'Visão completa das campanhas e métricas de marketing digital',
+    title: 'Marketing 360Â°',
+    description: 'VisÃ£o completa das campanhas e mÃ©tricas de marketing digital',
     icon: Target,
     href: '/visao-geral/marketing-360',
     status: 'active',
@@ -42,7 +42,7 @@ const visaoGeralItems: VisaoGeralItem[] = [
   {
     id: 'financeiro-mensal',
     title: 'Financeiro Mensal',
-    description: 'Análise detalhada do desempenho financeiro mensal',
+    description: 'AnÃ¡lise detalhada do desempenho financeiro mensal',
     icon: DollarSign,
     href: '/visao-geral/financeiro-mensal',
     status: 'active',
@@ -50,8 +50,8 @@ const visaoGeralItems: VisaoGeralItem[] = [
   },
   {
     id: 'comparativo',
-    title: 'Análise Comparativa',
-    description: 'Compare períodos e identifique tendências de crescimento',
+    title: 'AnÃ¡lise Comparativa',
+    description: 'Compare perÃ­odos e identifique tendÃªncias de crescimento',
     icon: PieChart,
     href: '/visao-geral/comparativo',
     status: 'active',
@@ -59,8 +59,8 @@ const visaoGeralItems: VisaoGeralItem[] = [
   },
   {
     id: 'metrica-evolucao',
-    title: 'Evolução de Métricas',
-    description: 'Acompanhe a evolução das principais métricas ao longo do tempo',
+    title: 'EvoluÃ§Ã£o de MÃ©tricas',
+    description: 'Acompanhe a evoluÃ§Ã£o das principais mÃ©tricas ao longo do tempo',
     icon: TrendingUp,
     href: '/visao-geral/metrica-evolucao',
     status: 'active',
@@ -68,8 +68,8 @@ const visaoGeralItems: VisaoGeralItem[] = [
   },
   {
     id: 'diario',
-    title: 'Visão Diária',
-    description: 'Análise detalhada do desempenho diário do negócio',
+    title: 'VisÃ£o DiÃ¡ria',
+    description: 'AnÃ¡lise detalhada do desempenho diÃ¡rio do negÃ³cio',
     icon: Calendar,
     href: '/visao-geral/diario',
     status: 'active',
@@ -77,8 +77,8 @@ const visaoGeralItems: VisaoGeralItem[] = [
   },
   {
     id: 'semanal',
-    title: 'Relatório Semanal',
-    description: 'Consolidado semanal com insights e recomendações',
+    title: 'RelatÃ³rio Semanal',
+    description: 'Consolidado semanal com insights e recomendaÃ§Ãµes',
     icon: PieChart,
     href: '/visao-geral/semanal',
     status: 'active',
@@ -86,8 +86,8 @@ const visaoGeralItems: VisaoGeralItem[] = [
   },
   {
     id: 'garcons',
-    title: 'Performance Garçons',
-    description: 'Análise de desempenho e produtividade dos garçons',
+    title: 'Performance GarÃ§ons',
+    description: 'AnÃ¡lise de desempenho e produtividade dos garÃ§ons',
     icon: Users,
     href: '/visao-geral/garcons',
     status: 'active',
@@ -95,8 +95,8 @@ const visaoGeralItems: VisaoGeralItem[] = [
   },
   {
     id: 'metricas-barras',
-    title: 'Métricas em Barras',
-    description: 'Visualização em gráficos de barras das principais métricas',
+    title: 'MÃ©tricas em Barras',
+    description: 'VisualizaÃ§Ã£o em grÃ¡ficos de barras das principais mÃ©tricas',
     icon: Activity,
     href: '/visao-geral/metricas-barras',
     status: 'active',
@@ -105,7 +105,7 @@ const visaoGeralItems: VisaoGeralItem[] = [
   {
     id: 'instagram-tracking',
     title: 'Instagram Tracking',
-    description: 'Análise detalhada e variações diárias do Instagram',
+    description: 'AnÃ¡lise detalhada e variaÃ§Ãµes diÃ¡rias do Instagram',
     icon: Users,
     href: '/visao-geral/instagram-tracking',
     status: 'active',
@@ -118,7 +118,7 @@ export default function VisaoGeralPage() {
   const { setPageTitle } = usePageTitle()
 
   useEffect(() => {
-    setPageTitle('Visão Geral')
+    setPageTitle('VisÃ£o Geral')
     return () => setPageTitle('')
   }, [setPageTitle])
 
@@ -159,17 +159,17 @@ export default function VisaoGeralPage() {
               <Eye className="w-8 h-8 text-white" />
             </div>
             <h1 className="card-title-dark text-3xl mb-2">
-              Visão Geral
+              VisÃ£o Geral
             </h1>
             <p className="card-description-dark text-lg max-w-2xl mx-auto">
-              Acesse relatórios detalhados, análises comparativas e insights estratégicos 
-              para tomada de decisões baseada em dados
+              Acesse relatÃ³rios detalhados, anÃ¡lises comparativas e insights estratÃ©gicos 
+              para tomada de decisÃµes baseada em dados
             </p>
           </div>
 
 
 
-          {/* Relatórios Grid */}
+          {/* RelatÃ³rios Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {visaoGeralItems.map((item) => {
               const IconComponent = item.icon
@@ -203,7 +203,7 @@ export default function VisaoGeralPage() {
                         variant="outline"
                         disabled={item.status === 'coming_soon'}
                       >
-                        <span>Acessar Relatório</span>
+                        <span>Acessar RelatÃ³rio</span>
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </Link>
@@ -217,12 +217,12 @@ export default function VisaoGeralPage() {
           <div className="card-dark p-6">
             <div className="text-center">
               <h3 className="card-title-dark text-lg mb-2">
-                📊 Análises Inteligentes
+                ðŸ“Š AnÃ¡lises Inteligentes
               </h3>
               <p className="card-description-dark max-w-2xl mx-auto">
-                Todos os relatórios são atualizados em tempo real e conectados 
-                às suas integrações ativas (ContaAzul, Meta, WhatsApp). 
-                Use os filtros de período para análises customizadas.
+                Todos os relatÃ³rios sÃ£o atualizados em tempo real e conectados 
+                Ã s suas integraÃ§Ãµes ativas (ContaAzul, Meta, WhatsApp). 
+                Use os filtros de perÃ­odo para anÃ¡lises customizadas.
               </p>
             </div>
           </div>

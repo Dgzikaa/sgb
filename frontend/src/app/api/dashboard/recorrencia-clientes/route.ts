@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic'
@@ -17,11 +17,11 @@ export async function GET(request: NextRequest) {
 
     if (!data1 || !data2 || !barId) {
       return NextResponse.json({ 
-        error: 'Parâmetros obrigatórios: data1, data2, bar_id' 
+        error: 'ParÃ¢metros obrigatÃ³rios: data1, data2, bar_id' 
       }, { status: 400 });
     }
 
-    console.log(`🔍 Analisando recorrência entre ${data1} e ${data2} para bar ${barId}`);
+    console.log(`ðŸ” Analisando recorrÃªncia entre ${data1} e ${data2} para bar ${barId}`);
 
     // Try multiple sources for customer data
     let emailsData1: any[] = [];
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
       emailsData2 = periodData2;
     }
 
-    console.log(`📧 Emails encontrados - Data1: ${emailsData1.length}, Data2: ${emailsData2.length}`);
+    console.log(`ðŸ“§ Emails encontrados - Data1: ${emailsData1.length}, Data2: ${emailsData2.length}`);
 
     // If we have very little data, try to get from other sources
     if (emailsData1.length === 0 && emailsData2.length === 0) {
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         limitedData: true,
-        message: 'Dados de email limitados. Análise baseada em estimativas.',
+        message: 'Dados de email limitados. AnÃ¡lise baseada em estimativas.',
         data: {
           data1,
           data2,
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
           insights: {
             fidelizacao: 'Dados insuficientes',
             captacao: 'Dados insuficientes',
-            tendencia: totalData2 > totalData1 ? 'Crescendo' : totalData2 < totalData1 ? 'Diminuindo' : 'Estável'
+            tendencia: totalData2 > totalData1 ? 'Crescendo' : totalData2 < totalData1 ? 'Diminuindo' : 'EstÃ¡vel'
           }
         }
       });
@@ -113,9 +113,9 @@ export async function GET(request: NextRequest) {
     const percentualNovos = totalData2 > 0 ? (novos / totalData2) * 100 : 0;
     const crescimento = totalData1 > 0 ? ((totalData2 - totalData1) / totalData1) * 100 : 0;
 
-    console.log(`📊 Resultados da recorrência:`);
-    console.log(`   Data 1 (${data1}): ${totalData1} clientes únicos`);
-    console.log(`   Data 2 (${data2}): ${totalData2} clientes únicos`);
+    console.log(`ðŸ“Š Resultados da recorrÃªncia:`);
+    console.log(`   Data 1 (${data1}): ${totalData1} clientes Ãºnicos`);
+    console.log(`   Data 2 (${data2}): ${totalData2} clientes Ãºnicos`);
     console.log(`   Recorrentes: ${recorrentes} (${percentualRecorrencia.toFixed(1)}%)`);
     console.log(`   Novos: ${novos} (${percentualNovos.toFixed(1)}%)`);
     console.log(`   Crescimento: ${crescimento.toFixed(1)}%`);
@@ -134,15 +134,15 @@ export async function GET(request: NextRequest) {
         percentualNovos: parseFloat(percentualNovos.toFixed(1)),
         crescimento: parseFloat(crescimento.toFixed(1)),
         insights: {
-          fidelizacao: percentualRecorrencia >= 40 ? 'Alta' : percentualRecorrencia >= 25 ? 'Média' : 'Baixa',
+          fidelizacao: percentualRecorrencia >= 40 ? 'Alta' : percentualRecorrencia >= 25 ? 'MÃ©dia' : 'Baixa',
           captacao: percentualNovos >= 60 ? 'Excelente' : percentualNovos >= 40 ? 'Boa' : 'Regular',
-          tendencia: crescimento > 10 ? 'Crescendo' : crescimento < -10 ? 'Diminuindo' : 'Estável'
+          tendencia: crescimento > 10 ? 'Crescendo' : crescimento < -10 ? 'Diminuindo' : 'EstÃ¡vel'
         }
       }
     });
 
   } catch (error) {
-    console.error('❌ Erro na análise de recorrência:', error);
+    console.error('âŒ Erro na anÃ¡lise de recorrÃªncia:', error);
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
       details: error instanceof Error ? error.message : 'Erro desconhecido'

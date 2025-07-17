@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useMemo, Fragment } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
@@ -25,13 +25,13 @@ const GRUPOS = [
   {
     nome: 'Receitas',
     categorias: [
-      'Stone Crédito', 'Stone Débito', 'Stone Pix', 'Pix Direto na Conta', 'Dinheiro', 'Receita de Eventos', 'Outras Receitas'
+      'Stone CrÃ©dito', 'Stone DÃ©bito', 'Stone Pix', 'Pix Direto na Conta', 'Dinheiro', 'Receita de Eventos', 'Outras Receitas'
     ]
   },
   {
-    nome: 'Custos Variáveis',
+    nome: 'Custos VariÃ¡veis',
     categorias: [
-      'IMPOSTO', 'COMISSÃO 10%', 'TAXA MAQUININHA'
+      'IMPOSTO', 'COMISSÃƒO 10%', 'TAXA MAQUININHA'
     ]
   },
   {
@@ -41,37 +41,37 @@ const GRUPOS = [
     ]
   },
   {
-    nome: 'Mão-de-Obra',
+    nome: 'MÃ£o-de-Obra',
     categorias: [
-      'SALARIO FUNCIONARIOS', 'VALE TRANSPORTE', 'ALIMENTAÇÃO', 'ADICIONAIS', 'FREELA ATENDIMENTO', 'FREELA BAR', 'FREELA COZINHA', 'FREELA LIMPEZA', 'FREELA SEGURANÇA', 'PRO LABORE', 'PROVISÃO TRABALHISTA'
+      'SALARIO FUNCIONARIOS', 'VALE TRANSPORTE', 'ALIMENTAÃ‡ÃƒO', 'ADICIONAIS', 'FREELA ATENDIMENTO', 'FREELA BAR', 'FREELA COZINHA', 'FREELA LIMPEZA', 'FREELA SEGURANÃ‡A', 'PRO LABORE', 'PROVISÃƒO TRABALHISTA'
     ]
   },
   {
     nome: 'Despesas Comerciais',
     categorias: [
-      'Marketing', 'Atrações Programação', 'Produção Eventos'
+      'Marketing', 'AtraÃ§Ãµes ProgramaÃ§Ã£o', 'ProduÃ§Ã£o Eventos'
     ]
   },
   {
     nome: 'Despesas Administrativas',
     categorias: [
-      'Administrativo Ordinário', 'Escritório Central', 'Recursos Humanos'
+      'Administrativo OrdinÃ¡rio', 'EscritÃ³rio Central', 'Recursos Humanos'
     ]
   },
   {
     nome: 'Despesas Operacionais',
     categorias: [
-      'Materiais Operação', 'Materiais de Limpeza e Descartáveis', 'Utensílios', 'Estorno', 'Outros Operação'
+      'Materiais OperaÃ§Ã£o', 'Materiais de Limpeza e DescartÃ¡veis', 'UtensÃ­lios', 'Estorno', 'Outros OperaÃ§Ã£o'
     ]
   },
   {
-    nome: 'Despesas de Ocupação (Contas)',
+    nome: 'Despesas de OcupaÃ§Ã£o (Contas)',
     categorias: [
-      'ALUGUEL/CONDOMÍNIO/IPTU', 'ÁGUA', 'MANUTENÇÃO', 'INTERNET', 'GÁS', 'LUZ'
+      'ALUGUEL/CONDOMÃNIO/IPTU', 'ÃGUA', 'MANUTENÃ‡ÃƒO', 'INTERNET', 'GÃS', 'LUZ'
     ]
   },
   {
-    nome: 'Não Operacionais',
+    nome: 'NÃ£o Operacionais',
     categorias: [
       'Contratos'
     ]
@@ -79,8 +79,8 @@ const GRUPOS = [
 ];
 
 const CATEGORIA_ICONS: Record<string, any> = {
-  'Stone Crédito': <DollarSign className="w-4 h-4 text-blue-500 dark:text-blue-300" />,
-  'Stone Débito': <DollarSign className="w-4 h-4 text-blue-400 dark:text-blue-200" />,
+  'Stone CrÃ©dito': <DollarSign className="w-4 h-4 text-blue-500 dark:text-blue-300" />,
+  'Stone DÃ©bito': <DollarSign className="w-4 h-4 text-blue-400 dark:text-blue-200" />,
   'Stone Pix': <DollarSign className="w-4 h-4 text-green-500 dark:text-green-300" />,
   'Pix Direto na Conta': <DollarSign className="w-4 h-4 text-green-400 dark:text-green-200" />,
   'Dinheiro': <DollarSign className="w-4 h-4 text-yellow-500 dark:text-yellow-300" />,
@@ -89,7 +89,7 @@ const CATEGORIA_ICONS: Record<string, any> = {
 };
 
 const PERIODOS = [
-  { label: 'Todo Período', value: 'all' },
+  { label: 'Todo PerÃ­odo', value: 'all' },
   { label: 'Semana', value: 'week' },
   { label: 'Ano', value: 'year' },
 ];
@@ -113,11 +113,11 @@ function getPeriodoRange(periodo: string) {
 
 // Mapeamento de categoria da meta para categoria da tabela
 const MAP_META_TO_CATEGORIA = {
-  'Faturamento Total': 'Stone Crédito', // Exemplo, ajustar conforme real
-  // ...adicionar outros se necessário
+  'Faturamento Total': 'Stone CrÃ©dito', // Exemplo, ajustar conforme real
+  // ...adicionar outros se necessÃ¡rio
 };
 
-// 2. Spinner para exportação
+// 2. Spinner para exportaÃ§Ã£o
 function Spinner() {
   return <span className="inline-block w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin align-middle" aria-label="Carregando" />;
 }
@@ -128,13 +128,13 @@ function DrilldownModal({ open, onClose, categoria, grupo, dados }: { open: bool
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-lg w-full p-6 relative">
-        <button className="absolute top-2 right-2 text-gray-500 dark:text-gray-300" onClick={onClose} aria-label="Fechar">✕</button>
+        <button className="absolute top-2 right-2 text-gray-500 dark:text-gray-300" onClick={onClose} aria-label="Fechar">âœ•</button>
         <h2 className="card-title-dark mb-2">Detalhes: {categoria} ({grupo})</h2>
         <div className="max-h-80 overflow-y-auto">
           <table className="w-full text-xs">
             <thead>
               <tr>
-                <th className="text-left">Descrição</th>
+                <th className="text-left">DescriÃ§Ã£o</th>
                 <th className="text-right">Valor</th>
                 <th className="text-right">Data</th>
               </tr>
@@ -185,8 +185,8 @@ export default function TabelaDesempenhoPage() {
   async function fetchTabela() {
     setLoading(true);
     try {
-      // DEBUG: Forçar bar_id=3 para garantir dados reais
-      // const barIdForcado = 3; // Descomente para forçar
+      // DEBUG: ForÃ§ar bar_id=3 para garantir dados reais
+      // const barIdForcado = 3; // Descomente para forÃ§ar
       // const { data_inicio, data_fim } = getPeriodoRange(periodo);
       // const body: any = {
       //   bar_id: barIdForcado,
@@ -211,7 +211,7 @@ export default function TabelaDesempenhoPage() {
       if (!selectedBar?.id) return;
       const { data_inicio, data_fim } = getPeriodoRange(periodo);
       const body: any = {
-        bar_id: 3, // Forçado para debug/validação
+        bar_id: 3, // ForÃ§ado para debug/validaÃ§Ã£o
         page,
         pageSize,
       };
@@ -254,7 +254,7 @@ export default function TabelaDesempenhoPage() {
     return ((valor / total) * 100).toFixed(1) + '%';
   }
 
-  // Memoização de totais
+  // MemoizaÃ§Ã£o de totais
   const totalGeral = useMemo(() => dados.reduce((sum, linha) => sum + (typeof linha.valor === 'number' ? linha.valor : 0), 0), [dados]);
   const gruposUnicos = useMemo(() => Array.from(new Set(dados.map((l: any) => l.grupo))), [dados]);
   const dadosPorGrupo = useMemo(() => {
@@ -267,7 +267,7 @@ export default function TabelaDesempenhoPage() {
   function getSubtotalGrupo(grupo: string) {
     return useMemo(() => dadosPorGrupo[grupo].reduce((sum, linha) => sum + (typeof linha.valor === 'number' ? linha.valor : 0), 0), [dadosPorGrupo, grupo]);
   }
-  // Exportação CSV/XLSX
+  // ExportaÃ§Ã£o CSV/XLSX
   function exportarCSVXLSX(tipo: 'csv' | 'xlsx') {
     setExportando(true);
     setTimeout(() => {
@@ -306,10 +306,10 @@ export default function TabelaDesempenhoPage() {
   const [mesesSelecionados, setMesesSelecionados] = useState<string[]>([]);
   const mesesDisponiveis = useMemo(() => {
     const meses = Array.from(new Set(dados.map((l: any) => l.mes_ano))).filter(Boolean);
-    return [{ label: 'Todo Período', value: 'all' }, ...meses.map((m: any) => ({ label: m, value: m }))];
+    return [{ label: 'Todo PerÃ­odo', value: 'all' }, ...meses.map((m: any) => ({ label: m, value: m }))];
   }, [dados]);
 
-  // Responsividade: sticky só em desktop
+  // Responsividade: sticky sÃ³ em desktop
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
 
   return (
@@ -319,9 +319,9 @@ export default function TabelaDesempenhoPage() {
         <Card className="card-dark w-full max-w-5xl mx-auto shadow-lg border border-gray-200 dark:border-gray-700">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-slate-800 dark:text-white">Tabela de Desempenho</CardTitle>
-            <div className="card-description-dark mt-1">Acompanhe o desempenho financeiro do bar, agrupado por categoria, com visual premium e filtros rápidos.</div>
+            <div className="card-description-dark mt-1">Acompanhe o desempenho financeiro do bar, agrupado por categoria, com visual premium e filtros rÃ¡pidos.</div>
             <div className="flex flex-col sm:flex-row flex-wrap gap-2 mt-4 items-center">
-              {/* Multi-select de mês/ano */}
+              {/* Multi-select de mÃªs/ano */}
               <select
                 className="input-dark px-2 py-1 rounded border border-gray-300 dark:border-gray-600 text-sm"
                 multiple
@@ -330,7 +330,7 @@ export default function TabelaDesempenhoPage() {
                   const opts = Array.from(e.target.selectedOptions).map((o: any) => o.value);
                   setMesesSelecionados(opts.includes('all') ? [] : opts);
                 }}
-                aria-label="Filtrar por mês/ano"
+                aria-label="Filtrar por mÃªs/ano"
               >
                 {mesesDisponiveis.map((m: any) => (
                   <option key={m.value} value={m.value}>{m.label}</option>
@@ -372,23 +372,23 @@ export default function TabelaDesempenhoPage() {
               ))}
               <div className="flex-1" />
               <div className="flex gap-2 items-center">
-                <Button variant="outline" className="btn-outline-dark" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1 || loading} aria-label="Página anterior">Anterior</Button>
-                <span className="card-description-dark">Página {page}</span>
-                <Button variant="outline" className="btn-outline-dark" onClick={() => setPage(p => p + 1)} disabled={loading} aria-label="Próxima página">Próxima</Button>
+                <Button variant="outline" className="btn-outline-dark" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1 || loading} aria-label="PÃ¡gina anterior">Anterior</Button>
+                <span className="card-description-dark">PÃ¡gina {page}</span>
+                <Button variant="outline" className="btn-outline-dark" onClick={() => setPage(p => p + 1)} disabled={loading} aria-label="PrÃ³xima pÃ¡gina">PrÃ³xima</Button>
               </div>
             </div>
             {/* Tabela premium responsiva */}
             <div className="overflow-x-auto rounded-lg shadow-inner">
               <Table className="table-dark w-full text-xs sm:text-sm min-w-[600px]">
                 <TableHeader>
-                  <TableRow className={`border-b border-slate-200 dark:border-gray-700 ${!isMobile ? 'sticky top-0 z-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm' : ''}`}> {/* sticky só desktop */}
+                  <TableRow className={`border-b border-slate-200 dark:border-gray-700 ${!isMobile ? 'sticky top-0 z-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm' : ''}`}> {/* sticky sÃ³ desktop */}
                     <TableHead className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 dark:text-white text-xs sm:text-sm sticky left-0 z-20 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm">
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span>Grupo</span>
                             </TooltipTrigger>
-                            <TooltipContent>Macrogrupo financeiro (ex: Receitas, Custos, Mão-de-Obra...)</TooltipContent>
+                            <TooltipContent>Macrogrupo financeiro (ex: Receitas, Custos, MÃ£o-de-Obra...)</TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
                       </TableHead>
@@ -398,7 +398,7 @@ export default function TabelaDesempenhoPage() {
                             <TooltipTrigger asChild>
                               <span>Categoria</span>
                             </TooltipTrigger>
-                            <TooltipContent>Categoria detalhada do lançamento financeiro</TooltipContent>
+                            <TooltipContent>Categoria detalhada do lanÃ§amento financeiro</TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
                       </TableHead>
@@ -408,7 +408,7 @@ export default function TabelaDesempenhoPage() {
                             <TooltipTrigger asChild>
                               <span>Valor Real</span>
                             </TooltipTrigger>
-                            <TooltipContent>Valor consolidado da categoria no período</TooltipContent>
+                            <TooltipContent>Valor consolidado da categoria no perÃ­odo</TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
                       </TableHead>
@@ -419,7 +419,7 @@ export default function TabelaDesempenhoPage() {
                             <TooltipTrigger asChild>
                               <span className="ml-1"><Award className="w-4 h-4 text-yellow-500 dark:text-yellow-300 inline" /></span>
                             </TooltipTrigger>
-                            <TooltipContent>Meta definida para o indicador (configurada em Configurações &gt; Metas)</TooltipContent>
+                            <TooltipContent>Meta definida para o indicador (configurada em ConfiguraÃ§Ãµes &gt; Metas)</TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
                       </TableHead>
@@ -429,7 +429,7 @@ export default function TabelaDesempenhoPage() {
                             <TooltipTrigger asChild>
                               <span>% do Total</span>
                             </TooltipTrigger>
-                            <TooltipContent>Percentual do valor em relação ao total geral</TooltipContent>
+                            <TooltipContent>Percentual do valor em relaÃ§Ã£o ao total geral</TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
                       </TableHead>
@@ -483,7 +483,7 @@ export default function TabelaDesempenhoPage() {
                                               {atingiuMeta ? <Award className="w-4 h-4 text-green-500 dark:text-green-300" /> : <Award className="w-4 h-4 text-red-500 dark:text-red-300" />}
                                             </span>
                                           </TooltipTrigger>
-                                          <TooltipContent>Meta definida em <b>Configurações &gt; Metas</b>. Altere lá para ajustar este valor.</TooltipContent>
+                                          <TooltipContent>Meta definida em <b>ConfiguraÃ§Ãµes &gt; Metas</b>. Altere lÃ¡ para ajustar este valor.</TooltipContent>
                                         </Tooltip>
                                       </TooltipProvider>
                                     ) : <span className="text-gray-400 dark:text-gray-600">-</span>}
@@ -513,8 +513,8 @@ export default function TabelaDesempenhoPage() {
                       <TableCell colSpan={5} className="py-12 text-center text-gray-500 dark:text-gray-400">
                         <div className="flex flex-col items-center gap-2">
                           <TrendingUp className="w-8 h-8 text-gray-300" />
-                          <p>Nenhum dado encontrado para o período selecionado.</p>
-                          <p className="text-xs mt-2">Tente ajustar os filtros de período ou mês/ano para visualizar dados.</p>
+                          <p>Nenhum dado encontrado para o perÃ­odo selecionado.</p>
+                          <p className="text-xs mt-2">Tente ajustar os filtros de perÃ­odo ou mÃªs/ano para visualizar dados.</p>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -526,7 +526,7 @@ export default function TabelaDesempenhoPage() {
           {/* Legenda de badges/metas */}
           <div className="flex flex-wrap gap-4 mt-4 items-center text-xs">
             <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300"><Award className="w-4 h-4 text-green-500 dark:text-green-300" />Meta atingida</span>
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300"><Award className="w-4 h-4 text-red-500 dark:text-red-300" />Meta não atingida</span>
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300"><Award className="w-4 h-4 text-red-500 dark:text-red-300" />Meta nÃ£o atingida</span>
             <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-200"><ChevronDown className="w-4 h-4" />Expandir grupo</span>
           </div>
         </Card>

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic'
@@ -17,12 +17,12 @@ export async function GET(request: NextRequest) {
     const barId = parseInt(searchParams.get('bar_id') || '1');
 
     if (!dataEspecifica) {
-      return NextResponse.json({ error: 'Data específica é obrigatória' }, { status: 400 });
+      return NextResponse.json({ error: 'Data especÃ­fica Ã© obrigatÃ³ria' }, { status: 400 });
     }
 
-    console.log(`🔍 Analisando tempos para ${dataEspecifica}, período: ${periodoAnalise} dias, grupo: ${grupoFiltro}, bar: ${barId}`);
+    console.log(`ðŸ” Analisando tempos para ${dataEspecifica}, perÃ­odo: ${periodoAnalise} dias, grupo: ${grupoFiltro}, bar: ${barId}`);
 
-    // Calcular data de início do período de comparação
+    // Calcular data de inÃ­cio do perÃ­odo de comparaÃ§Ã£o
     const dataFim = new Date(dataEspecifica);
     const dataInicio = new Date(dataFim);
     
@@ -32,9 +32,9 @@ export async function GET(request: NextRequest) {
       dataInicio.setDate(dataFim.getDate() - parseInt(periodoAnalise));
     }
 
-    console.log(`📅 Período de análise: ${dataInicio.toISOString().split('T')[0]} até ${dataFim.toISOString().split('T')[0]}`);
+    console.log(`ðŸ“… PerÃ­odo de anÃ¡lise: ${dataInicio.toISOString().split('T')[0]} atÃ© ${dataFim.toISOString().split('T')[0]}`);
 
-    // Query base para buscar dados de tempo - AGORA COM TODOS OS CAMPOS NECESSÁRIOS
+    // Query base para buscar dados de tempo - AGORA COM TODOS OS CAMPOS NECESSÃRIOS
     let queryBase = supabase
       .from('tempo')
       .select(`
@@ -61,13 +61,13 @@ export async function GET(request: NextRequest) {
       queryBase = queryBase.eq('grp_desc', grupoFiltro);
     }
 
-    // Buscar dados do período de comparação usando campo 'dia' - COM PAGINAÇÃO
+    // Buscar dados do perÃ­odo de comparaÃ§Ã£o usando campo 'dia' - COM PAGINAÃ‡ÃƒO
     const diaInicioInt = parseInt(dataInicio.toISOString().split('T')[0].replace(/-/g, ''));
     const diaFimInt = parseInt(dataFim.toISOString().split('T')[0].replace(/-/g, ''));
     
-    console.log(`📅 Buscando período de comparação: ${diaInicioInt} até ${diaFimInt}`);
+    console.log(`ðŸ“… Buscando perÃ­odo de comparaÃ§Ã£o: ${diaInicioInt} atÃ© ${diaFimInt}`);
     
-    // Buscar dados do período com paginação
+    // Buscar dados do perÃ­odo com paginaÃ§Ã£o
     let dadosPeriodo: any[] = [];
     let pagina = 0;
     const tamanhoPagina = 1000;
@@ -102,30 +102,30 @@ export async function GET(request: NextRequest) {
         .range(inicio, fim);
 
       if (errorPagina) {
-        console.error('❌ Erro ao buscar dados do período:', errorPagina);
-        return NextResponse.json({ error: 'Erro ao buscar dados do período' }, { status: 500 });
+        console.error('âŒ Erro ao buscar dados do perÃ­odo:', errorPagina);
+        return NextResponse.json({ error: 'Erro ao buscar dados do perÃ­odo' }, { status: 500 });
       }
 
       if (!dadosPagina || dadosPagina.length === 0) break;
       
       dadosPeriodo = [...dadosPeriodo, ...dadosPagina];
-      console.log(`📄 Página ${pagina + 1}: ${dadosPagina.length} registros (Total: ${dadosPeriodo.length})`);
+      console.log(`ðŸ“„ PÃ¡gina ${pagina + 1}: ${dadosPagina.length} registros (Total: ${dadosPeriodo.length})`);
       
       if (dadosPagina.length < tamanhoPagina) break;
       pagina++;
     }
 
-    console.log(`📊 Total de registros do período: ${dadosPeriodo.length}`);
+    console.log(`ðŸ“Š Total de registros do perÃ­odo: ${dadosPeriodo.length}`);
 
-    // Buscar dados do dia específico - USANDO CAMPO 'dia' (YYYYMMDD)
-    console.log(`🔍 Buscando dados para o dia: ${dataEspecifica}`);
+    // Buscar dados do dia especÃ­fico - USANDO CAMPO 'dia' (YYYYMMDD)
+    console.log(`ðŸ” Buscando dados para o dia: ${dataEspecifica}`);
     
     // Converter data para formato YYYYMMDD
     const diaEspecificoInt = parseInt(dataEspecifica.replace(/-/g, '')); // 2025-06-13 -> 20250613
     
-    console.log(`📅 Convertendo data: ${dataEspecifica} → ${diaEspecificoInt}`);
+    console.log(`ðŸ“… Convertendo data: ${dataEspecifica} â†’ ${diaEspecificoInt}`);
     
-    // Buscar dados do dia específico usando campo 'dia' - COM PAGINAÇÃO
+    // Buscar dados do dia especÃ­fico usando campo 'dia' - COM PAGINAÃ‡ÃƒO
     let dadosDia: any[] = [];
     pagina = 0;
     
@@ -158,24 +158,24 @@ export async function GET(request: NextRequest) {
         .range(inicio, fim);
 
       if (errorPagina) {
-        console.error('❌ Erro ao buscar dados do dia:', errorPagina);
+        console.error('âŒ Erro ao buscar dados do dia:', errorPagina);
         return NextResponse.json({ error: 'Erro ao buscar dados do dia' }, { status: 500 });
       }
 
       if (!dadosPagina || dadosPagina.length === 0) break;
       
       dadosDia = [...dadosDia, ...dadosPagina];
-      console.log(`📄 Dia - Página ${pagina + 1}: ${dadosPagina.length} registros (Total: ${dadosDia.length})`);
+      console.log(`ðŸ“„ Dia - PÃ¡gina ${pagina + 1}: ${dadosPagina.length} registros (Total: ${dadosDia.length})`);
       
       if (dadosPagina.length < tamanhoPagina) break;
       pagina++;
     }
 
-    console.log(`📊 Dados encontrados - Período: ${dadosPeriodo?.length || 0}, Dia específico: ${dadosDia?.length || 0}`);
+    console.log(`ðŸ“Š Dados encontrados - PerÃ­odo: ${dadosPeriodo?.length || 0}, Dia especÃ­fico: ${dadosDia?.length || 0}`);
     
     // Log de debug dos primeiros registros do dia
     if (dadosDia && dadosDia.length > 0) {
-      console.log(`📋 Primeiros registros do dia:`, dadosDia.slice(0, 3).map((item: any) => ({
+      console.log(`ðŸ“‹ Primeiros registros do dia:`, dadosDia.slice(0, 3).map((item: any) => ({
         produto: item.prd_desc,
         grupo: item.grp_desc,
         dia: item.dia,
@@ -185,12 +185,12 @@ export async function GET(request: NextRequest) {
       })));
     }
 
-    // Função para determinar se é bebida ou comida e calcular tempo correto
+    // FunÃ§Ã£o para determinar se Ã© bebida ou comida e calcular tempo correto
     const calcularTempo = (item: any) => {
       const grupo = (item.grp_desc || '').toLowerCase();
       const localizacao = (item.loc_desc || '').toLowerCase();
       
-      // Determinar tipo baseado no grupo e localização
+      // Determinar tipo baseado no grupo e localizaÃ§Ã£o
       const isBebida = grupo.includes('cerveja') || 
                       grupo.includes('drink') || 
                       grupo.includes('dose') || 
@@ -216,7 +216,7 @@ export async function GET(request: NextRequest) {
       
       if (isBebida) {
         tipo = 'bebida';
-        // Para bebidas: t0-t3 (lançamento até entrega)
+        // Para bebidas: t0-t3 (lanÃ§amento atÃ© entrega)
         if (item.t0_t3 && item.t0_t3 > 0) {
           tempo = item.t0_t3;
           tempoValido = tempo >= 30 && tempo <= 1200; // 0.5 a 20 minutos
@@ -230,7 +230,7 @@ export async function GET(request: NextRequest) {
         }
       } else if (isComida) {
         tipo = 'comida';
-        // Para comidas: t1-t2 (início produção até fim produção)
+        // Para comidas: t1-t2 (inÃ­cio produÃ§Ã£o atÃ© fim produÃ§Ã£o)
         if (item.t1_t2 && item.t1_t2 > 0) {
           tempo = item.t1_t2;
           tempoValido = tempo >= 60 && tempo <= 2700; // 1 a 45 minutos
@@ -268,14 +268,14 @@ export async function GET(request: NextRequest) {
       };
     };
 
-    // Se não há dados para o dia específico, buscar dados dos últimos 7 dias para mostrar algo útil
+    // Se nÃ£o hÃ¡ dados para o dia especÃ­fico, buscar dados dos Ãºltimos 7 dias para mostrar algo Ãºtil
     let dadosRecentes = dadosDia;
     let usandoDadosRecentes = false;
     
     if (!dadosDia || dadosDia.length === 0) {
-      console.log(`⚠️ Nenhum dado encontrado para o dia ${dataEspecifica}. Buscando últimos 7 dias...`);
+      console.log(`âš ï¸ Nenhum dado encontrado para o dia ${dataEspecifica}. Buscando Ãºltimos 7 dias...`);
       
-      // Calcular range dos últimos 7 dias em formato YYYYMMDD
+      // Calcular range dos Ãºltimos 7 dias em formato YYYYMMDD
       const dataFimObj = new Date(dataEspecifica);
       const dataInicioObj = new Date(dataFimObj);
       dataInicioObj.setDate(dataFimObj.getDate() - 7);
@@ -283,9 +283,9 @@ export async function GET(request: NextRequest) {
       const diaFimInt = parseInt(dataEspecifica.replace(/-/g, ''));
       const diaInicioInt = parseInt(dataInicioObj.toISOString().split('T')[0].replace(/-/g, ''));
       
-      console.log(`📅 Buscando dados de ${diaInicioInt} até ${diaFimInt}`);
+      console.log(`ðŸ“… Buscando dados de ${diaInicioInt} atÃ© ${diaFimInt}`);
       
-      // Buscar últimos 7 dias com paginação
+      // Buscar Ãºltimos 7 dias com paginaÃ§Ã£o
       let dadosUltimos7Dias: any[] = [];
       let paginaRecente = 0;
       
@@ -321,7 +321,7 @@ export async function GET(request: NextRequest) {
         if (!dadosPagina || dadosPagina.length === 0) break;
         
         dadosUltimos7Dias = [...dadosUltimos7Dias, ...dadosPagina];
-        console.log(`📄 Últimos 7 dias - Página ${paginaRecente + 1}: ${dadosPagina.length} registros (Total: ${dadosUltimos7Dias.length})`);
+        console.log(`ðŸ“„ Ãšltimos 7 dias - PÃ¡gina ${paginaRecente + 1}: ${dadosPagina.length} registros (Total: ${dadosUltimos7Dias.length})`);
         
         if (dadosPagina.length < tamanhoPagina) break;
         paginaRecente++;
@@ -329,10 +329,10 @@ export async function GET(request: NextRequest) {
       
       dadosRecentes = dadosUltimos7Dias;
       usandoDadosRecentes = true;
-      console.log(`📊 Usando dados dos últimos 7 dias como referência: ${dadosRecentes.length} registros`);
+      console.log(`ðŸ“Š Usando dados dos Ãºltimos 7 dias como referÃªncia: ${dadosRecentes.length} registros`);
     }
 
-    // Métricas de qualidade dos dados
+    // MÃ©tricas de qualidade dos dados
     const metricas = {
       bebidas: {
         total: 0,
@@ -360,13 +360,13 @@ export async function GET(request: NextRequest) {
     // Processar dados por produto
     const produtosMap = new Map();
 
-    // Função para processar um conjunto de dados
+    // FunÃ§Ã£o para processar um conjunto de dados
     const processarDados = (dados: any[], isPeriodo: boolean) => {
       dados?.forEach((item: any) => {
         const key = `${item.prd_desc}_${item.grp_desc}`;
         const analise = calcularTempo(item);
         
-        // Atualizar métricas
+        // Atualizar mÃ©tricas
         if (analise.tipo === 'bebida') {
           metricas.bebidas.total++;
           if (analise.dadosCompletos) metricas.bebidas.completas++;
@@ -387,7 +387,7 @@ export async function GET(request: NextRequest) {
           else metricas.indefinidos.sem_dados++;
         }
         
-        // Só processar se o tempo é válido
+        // SÃ³ processar se o tempo Ã© vÃ¡lido
         if (!analise.tempoValido || analise.tempo <= 0) return;
         
         if (!produtosMap.has(key)) {
@@ -414,25 +414,25 @@ export async function GET(request: NextRequest) {
       });
     };
 
-    // Processar dados do período e do dia
+    // Processar dados do perÃ­odo e do dia
     processarDados(dadosPeriodo, true);
     processarDados(dadosRecentes, false);
 
-    console.log(`📊 Métricas de qualidade dos dados:`, metricas);
+    console.log(`ðŸ“Š MÃ©tricas de qualidade dos dados:`, metricas);
 
-    // Calcular estatísticas e detectar outliers
+    // Calcular estatÃ­sticas e detectar outliers
     const produtos = Array.from(produtosMap.values()).map((produto: any) => {
-      // Tempo médio do período (excluindo o dia específico para comparação justa)
+      // Tempo mÃ©dio do perÃ­odo (excluindo o dia especÃ­fico para comparaÃ§Ã£o justa)
       let temposPeriodoSemDia = produto.tempos_periodo;
       
-      // Se estamos usando dados do dia específico, remover esses dados do período para comparação
+      // Se estamos usando dados do dia especÃ­fico, remover esses dados do perÃ­odo para comparaÃ§Ã£o
       if (!usandoDadosRecentes && dadosDia && dadosDia.length > 0) {
-        // Filtrar dados do período que não sejam do dia específico
+        // Filtrar dados do perÃ­odo que nÃ£o sejam do dia especÃ­fico
         const dadosPeriodoSemDia = dadosPeriodo?.filter((item: any) => {
           return item.dia !== diaEspecificoInt;
         }) || [];
         
-        // Recalcular tempos do período sem o dia específico
+        // Recalcular tempos do perÃ­odo sem o dia especÃ­fico
         const temposProdutoPeriodo: number[] = [];
         dadosPeriodoSemDia.forEach((item: any) => {
           if (`${item.prd_desc}_${item.grp_desc}` === `${produto.produto}_${produto.grupo}`) {
@@ -454,12 +454,12 @@ export async function GET(request: NextRequest) {
         ? produto.tempos_dia.reduce((a: number, b: number) => a + b, 0) / produto.tempos_dia.length 
         : 0;
 
-      // Calcular variação percentual
+      // Calcular variaÃ§Ã£o percentual
       const variacaoPercentual = tempoMedioGeral > 0 
         ? ((tempoDiaEspecifico - tempoMedioGeral) / tempoMedioGeral) * 100 
         : 0;
 
-      // Determinar status baseado na variação
+      // Determinar status baseado na variaÃ§Ã£o
       let status = 'normal';
       if (Math.abs(variacaoPercentual) > 50) {
         status = 'muito_alto';
@@ -469,7 +469,7 @@ export async function GET(request: NextRequest) {
         status = 'baixo';
       }
 
-      // Calcular desvio padrão para detectar outliers
+      // Calcular desvio padrÃ£o para detectar outliers
       const temposValidos = temposPeriodoSemDia.filter((t: number) => t > 0);
       let desvio = 0;
       if (temposValidos.length > 1) {
@@ -495,10 +495,10 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // Filtrar APENAS produtos que têm dados NO DIA ESPECÍFICO (não mostrar "Sem dados")
+    // Filtrar APENAS produtos que tÃªm dados NO DIA ESPECÃFICO (nÃ£o mostrar "Sem dados")
     const produtosFiltrados = produtos.filter((p: any) => p.pedidos_dia > 0 && p.tempo_dia_especifico > 0);
 
-    // Ordenar: 1º casos GRAVES (variações positivas altas), 2º casos BONS (variações negativas), 3º normais
+    // Ordenar: 1Âº casos GRAVES (variaÃ§Ãµes positivas altas), 2Âº casos BONS (variaÃ§Ãµes negativas), 3Âº normais
     produtosFiltrados.sort((a, b) => {
       const variacaoA = a.variacao_percentual;
       const variacaoB = b.variacao_percentual;
@@ -513,15 +513,15 @@ export async function GET(request: NextRequest) {
       const bomA = variacaoA < -15;    // Casos bons: <-15% (ex: -70%)
       const bomB = variacaoB < -15;
       
-      // 1º PRIORIDADE: Casos GRAVES (variações positivas muito altas)
+      // 1Âº PRIORIDADE: Casos GRAVES (variaÃ§Ãµes positivas muito altas)
       if (graveA && !graveB) return -1;
       if (graveB && !graveA) return 1;
       if (graveA && graveB) {
-        // Ambos graves - ordenar pelo MAIS grave (maior variação positiva)
+        // Ambos graves - ordenar pelo MAIS grave (maior variaÃ§Ã£o positiva)
         return variacaoB - variacaoA; // +200% vem antes de +100%
       }
       
-      // 2º PRIORIDADE: Problemas moderados (25-50%)
+      // 2Âº PRIORIDADE: Problemas moderados (25-50%)
       if (problemaA && !problemaB && !bomB) return -1;
       if (problemaB && !problemaA && !bomA) return 1;
       if (problemaA && problemaB) {
@@ -529,7 +529,7 @@ export async function GET(request: NextRequest) {
         return variacaoB - variacaoA;
       }
       
-      // 3º PRIORIDADE: Casos BONS (variações negativas - melhorias)
+      // 3Âº PRIORIDADE: Casos BONS (variaÃ§Ãµes negativas - melhorias)
       if (bomA && !bomB && !graveB && !problemaB) return -1;
       if (bomB && !bomA && !graveA && !problemaA) return 1;
       if (bomA && bomB) {
@@ -537,7 +537,7 @@ export async function GET(request: NextRequest) {
         return variacaoA - variacaoB; // -70% vem antes de -30%
       }
       
-      // 4º PRIORIDADE: Casos normais (-15% a +25%)
+      // 4Âº PRIORIDADE: Casos normais (-15% a +25%)
       // Ordenar por melhor tempo (menor tempo = melhor performance)
       if (a.tempo_dia_especifico !== b.tempo_dia_especifico) {
         return a.tempo_dia_especifico - b.tempo_dia_especifico;
@@ -547,7 +547,7 @@ export async function GET(request: NextRequest) {
       return b.pedidos_dia - a.pedidos_dia;
     });
 
-    // Log da ordenação para debug
+    // Log da ordenaÃ§Ã£o para debug
     const categorias = {
       graves: produtosFiltrados.filter((p: any) => p.variacao_percentual > 50).length,
       problemas: produtosFiltrados.filter((p: any) => p.variacao_percentual > 25 && p.variacao_percentual <= 50).length,
@@ -555,8 +555,8 @@ export async function GET(request: NextRequest) {
       normais: produtosFiltrados.filter((p: any) => p.variacao_percentual >= -15 && p.variacao_percentual <= 25).length
     };
     
-    console.log(`📊 Ordenação aplicada:`, categorias);
-    console.log(`🔴 Primeiros 3 produtos:`, produtosFiltrados.slice(0, 3).map((p: any) => ({
+    console.log(`ðŸ“Š OrdenaÃ§Ã£o aplicada:`, categorias);
+    console.log(`ðŸ”´ Primeiros 3 produtos:`, produtosFiltrados.slice(0, 3).map((p: any) => ({
       produto: p.produto,
       variacao: p.variacao_percentual,
       categoria: p.variacao_percentual > 50 ? 'GRAVE' : 
@@ -564,7 +564,7 @@ export async function GET(request: NextRequest) {
                 p.variacao_percentual < -15 ? 'BOM' : 'NORMAL'
     })));
     
-    console.log(`✅ Processamento concluído: ${produtosFiltrados.length} produtos analisados`);
+    console.log(`âœ… Processamento concluÃ­do: ${produtosFiltrados.length} produtos analisados`);
 
     return NextResponse.json({
       success: true,
@@ -584,7 +584,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('❌ Erro na API de tempos:', error);
+    console.error('âŒ Erro na API de tempos:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 } 

@@ -1,4 +1,4 @@
-interface GoogleReviewData {
+﻿interface GoogleReviewData {
   rating: number
   reviewCount: number
   reviews: Array<{
@@ -44,7 +44,7 @@ class GoogleReviewsClient {
     placeId?: string
   }): Promise<GoogleReviewsResponse> {
     try {
-      console.log('🌟 Buscando reviews do Google:', params)
+      console.log('ðŸŒŸ Buscando reviews do Google:', params)
 
       const response = await fetch(this.baseUrl, {
         method: 'POST',
@@ -56,10 +56,10 @@ class GoogleReviewsClient {
 
       if (!response.ok) {
         if (response.status === 503) {
-          console.warn('⚠️ Google Places API não configurada')
+          console.warn('âš ï¸ Google Places API nÃ£o configurada')
           return {
             success: false,
-            error: 'Funcionalidade de reviews do Google não está configurada'
+            error: 'Funcionalidade de reviews do Google nÃ£o estÃ¡ configurada'
           }
         }
         const errorData = await response.json()
@@ -72,11 +72,11 @@ class GoogleReviewsClient {
         throw new Error(data.error || 'Erro desconhecido na API')
       }
 
-      console.log('✅ Reviews obtidos:', data.data)
+      console.log('âœ… Reviews obtidos:', data.data)
       return data
 
     } catch (error) {
-      console.error('❌ Erro ao buscar reviews:', error)
+      console.error('âŒ Erro ao buscar reviews:', error)
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erro ao buscar reviews'
@@ -85,7 +85,7 @@ class GoogleReviewsClient {
   }
 
   /**
-   * Busca reviews para múltiplos estabelecimentos (para comparação)
+   * Busca reviews para mÃºltiplos estabelecimentos (para comparaÃ§Ã£o)
    */
   async getMultipleBusinessReviews(businesses: Array<{
     name: string
@@ -108,7 +108,7 @@ class GoogleReviewsClient {
         })
 
       } catch (error) {
-        console.error(`❌ Erro ao buscar reviews para ${business.name}:`, error)
+        console.error(`âŒ Erro ao buscar reviews para ${business.name}:`, error)
         results.push({
           success: false,
           error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -116,7 +116,7 @@ class GoogleReviewsClient {
         })
       }
 
-      // Aguardar um pouco entre requisições para evitar rate limiting
+      // Aguardar um pouco entre requisiÃ§Ãµes para evitar rate limiting
       await new Promise(resolve => setTimeout(resolve, 500))
     }
 

@@ -1,9 +1,9 @@
-'use client'
+﻿'use client'
 
 // ========================================
-// 🔧 META API CONFIGURATION COMPONENT
+// ðŸ”§ META API CONFIGURATION COMPONENT
 // ========================================
-// Componente para configurar Meta API dentro da página de configurações
+// Componente para configurar Meta API dentro da pÃ¡gina de configuraÃ§Ãµes
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -56,7 +56,7 @@ interface MetaConfig {
 
 export default function MetaAPIConfig() {
   // ========================================
-  // 🔧 ESTADOS
+  // ðŸ”§ ESTADOS
   // ========================================
   const [accessToken, setAccessToken] = useState('')
   const [appId, setAppId] = useState('')
@@ -69,7 +69,7 @@ export default function MetaAPIConfig() {
   const [activeTab, setActiveTab] = useState('configure')
 
   // ========================================
-  // 🚀 CARREGAR CONFIGURAÇÕES EXISTENTES
+  // ðŸš€ CARREGAR CONFIGURAÃ‡Ã•ES EXISTENTES
   // ========================================
   useEffect(() => {
     loadConfigurations()
@@ -79,7 +79,7 @@ export default function MetaAPIConfig() {
     try {
       const userData = localStorage.getItem('sgb_user')
       if (!userData) {
-        console.error('Usuário não logado')
+        console.error('UsuÃ¡rio nÃ£o logado')
         return
       }
 
@@ -91,7 +91,7 @@ export default function MetaAPIConfig() {
       
       const data = await response.json()
       if (data.exists && data.config) {
-        // Converter a configuração única em array para compatibilidade
+        // Converter a configuraÃ§Ã£o Ãºnica em array para compatibilidade
         setConfigs([{
           id: data.config.id,
           access_token: data.config.access_token,
@@ -105,16 +105,16 @@ export default function MetaAPIConfig() {
         setConfigs([])
       }
     } catch (error) {
-      console.error('Erro ao carregar configurações:', error)
+      console.error('Erro ao carregar configuraÃ§Ãµes:', error)
     }
   }
 
   // ========================================
-  // 🧪 TESTAR API META
+  // ðŸ§ª TESTAR API META
   // ========================================
   const testMetaAPI = async () => {
     if (!accessToken) {
-      setMessage({ type: 'error', text: 'Token de acesso é obrigatório' })
+      setMessage({ type: 'error', text: 'Token de acesso Ã© obrigatÃ³rio' })
       return
     }
 
@@ -125,7 +125,7 @@ export default function MetaAPIConfig() {
     try {
       const userData = localStorage.getItem('sgb_user')
       if (!userData) {
-        setMessage({ type: 'error', text: 'Usuário não logado' })
+        setMessage({ type: 'error', text: 'UsuÃ¡rio nÃ£o logado' })
         return
       }
 
@@ -170,7 +170,7 @@ export default function MetaAPIConfig() {
         setTestResults(testResults)
         setMessage({ 
           type: 'success', 
-          text: `Configuração salva! ${data.accounts?.facebook_page_name || 'Token válido'}` 
+          text: `ConfiguraÃ§Ã£o salva! ${data.accounts?.facebook_page_name || 'Token vÃ¡lido'}` 
         })
         loadConfigurations() // Recarregar lista
         setActiveTab('results') // Ir para aba de resultados
@@ -186,14 +186,14 @@ export default function MetaAPIConfig() {
   }
 
   // ========================================
-  // 🔄 TESTAR CONFIGURAÇÃO EXISTENTE
+  // ðŸ”„ TESTAR CONFIGURAÃ‡ÃƒO EXISTENTE
   // ========================================
   const retestExistingConfig = async () => {
     setLoading(true)
     try {
       const userData = localStorage.getItem('sgb_user')
       if (!userData) {
-        setMessage({ type: 'error', text: 'Usuário não logado' })
+        setMessage({ type: 'error', text: 'UsuÃ¡rio nÃ£o logado' })
         setLoading(false)
         return
       }
@@ -236,14 +236,14 @@ export default function MetaAPIConfig() {
         setMessage({ type: 'error', text: data.error })
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Erro ao testar configuração' })
+      setMessage({ type: 'error', text: 'Erro ao testar configuraÃ§Ã£o' })
     } finally {
       setLoading(false)
     }
   }
 
   // ========================================
-  // 🎨 COMPONENTES DE RENDERIZAÇÃO
+  // ðŸŽ¨ COMPONENTES DE RENDERIZAÃ‡ÃƒO
   // ========================================
   const renderPermissions = () => {
     if (!testResults?.permissions?.length) return null
@@ -253,7 +253,7 @@ export default function MetaAPIConfig() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
-            Permissões do Token
+            PermissÃµes do Token
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -281,7 +281,7 @@ export default function MetaAPIConfig() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Facebook className="h-5 w-5 text-blue-600" />
-            Páginas Facebook ({testResults.pages.length})
+            PÃ¡ginas Facebook ({testResults.pages.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -312,7 +312,7 @@ export default function MetaAPIConfig() {
                     <div className="flex items-center gap-2">
                       <Instagram className="w-4 h-4 text-pink-600" />
                       <p className="text-sm text-pink-800 font-medium">
-                        ✅ Instagram Business conectado
+                        âœ… Instagram Business conectado
                       </p>
                     </div>
                   </div>
@@ -357,7 +357,7 @@ export default function MetaAPIConfig() {
                           <p className="text-lg font-bold text-pink-900">
                             {ig.instagram_account.followers_count.toLocaleString()}
                           </p>
-                          <p className="text-xs text-pink-700 font-medium">👥 Seguidores</p>
+                          <p className="text-xs text-pink-700 font-medium">ðŸ‘¥ Seguidores</p>
                         </div>
                       )}
                       
@@ -366,7 +366,7 @@ export default function MetaAPIConfig() {
                           <p className="text-lg font-bold text-pink-900">
                             {ig.instagram_account.media_count}
                           </p>
-                          <p className="text-xs text-pink-700 font-medium">📸 Posts</p>
+                          <p className="text-xs text-pink-700 font-medium">ðŸ“¸ Posts</p>
                         </div>
                       )}
                     </div>
@@ -379,7 +379,7 @@ export default function MetaAPIConfig() {
                 
                 <div className="mt-3 pt-3 border-t border-pink-200">
                   <p className="text-xs text-pink-700">
-                    <span className="font-medium">Vinculado à página:</span> {ig.page_name}
+                    <span className="font-medium">Vinculado Ã  pÃ¡gina:</span> {ig.page_name}
                   </p>
                 </div>
               </div>
@@ -398,7 +398,7 @@ export default function MetaAPIConfig() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5" />
-            Endpoints Disponíveis
+            Endpoints DisponÃ­veis
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -432,7 +432,7 @@ export default function MetaAPIConfig() {
   }
 
   // ========================================
-  // 🎨 RENDER PRINCIPAL
+  // ðŸŽ¨ RENDER PRINCIPAL
   // ========================================
   return (
     <div className="space-y-6">
@@ -440,9 +440,9 @@ export default function MetaAPIConfig() {
       <Alert className="border-blue-200 bg-blue-50">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription className="text-blue-800">
-          <strong>Apenas administradores podem modificar configurações da Meta.</strong>
+          <strong>Apenas administradores podem modificar configuraÃ§Ãµes da Meta.</strong>
           <br />
-          Para visualizar as configurações existentes, administradores e usuários financeiros têm acesso.
+          Para visualizar as configuraÃ§Ãµes existentes, administradores e usuÃ¡rios financeiros tÃªm acesso.
         </AlertDescription>
       </Alert>
 
@@ -458,18 +458,18 @@ export default function MetaAPIConfig() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="configure">🔧 Configurar</TabsTrigger>
-          <TabsTrigger value="results">🧪 Resultados</TabsTrigger>
-          <TabsTrigger value="existing">📋 Histórico</TabsTrigger>
+          <TabsTrigger value="configure">ðŸ”§ Configurar</TabsTrigger>
+          <TabsTrigger value="results">ðŸ§ª Resultados</TabsTrigger>
+          <TabsTrigger value="existing">ðŸ“‹ HistÃ³rico</TabsTrigger>
         </TabsList>
 
         {/* Tab: Configurar */}
         <TabsContent value="configure" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Configuração Meta API</CardTitle>
+              <CardTitle>ConfiguraÃ§Ã£o Meta API</CardTitle>
               <CardDescription>
-                Configure suas credenciais Facebook/Instagram para coleta automática de métricas
+                Configure suas credenciais Facebook/Instagram para coleta automÃ¡tica de mÃ©tricas
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -493,7 +493,7 @@ export default function MetaAPIConfig() {
                   </Button>
                 </div>
                 <p className="text-xs text-gray-500">
-                  Token obtido no Facebook Developers para acesso às APIs (válido até setembro 2025)
+                  Token obtido no Facebook Developers para acesso Ã s APIs (vÃ¡lido atÃ© setembro 2025)
                 </p>
               </div>
 
@@ -504,7 +504,7 @@ export default function MetaAPIConfig() {
                     id="app-id"
                     value={appId}
                     onChange={(e) => setAppId(e.target.value)}
-                    placeholder="ID da aplicação Facebook"
+                    placeholder="ID da aplicaÃ§Ã£o Facebook"
                   />
                 </div>
                 <div className="space-y-2">
@@ -514,7 +514,7 @@ export default function MetaAPIConfig() {
                     type="password"
                     value={appSecret}
                     onChange={(e) => setAppSecret(e.target.value)}
-                    placeholder="Secret da aplicação Facebook"
+                    placeholder="Secret da aplicaÃ§Ã£o Facebook"
                   />
                 </div>
               </div>
@@ -534,7 +534,7 @@ export default function MetaAPIConfig() {
                 ) : (
                   <>
                     <TestTube className="mr-2 h-4 w-4" />
-                    Testar e Salvar Configuração
+                    Testar e Salvar ConfiguraÃ§Ã£o
                   </>
                 )}
               </Button>
@@ -563,12 +563,12 @@ export default function MetaAPIConfig() {
                     <div className="space-y-4">
                       <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg border border-green-200">
                         <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                        <span className="text-green-800 font-medium">Token válido e funcionando!</span>
+                        <span className="text-green-800 font-medium">Token vÃ¡lido e funcionando!</span>
                       </div>
                       
                       {testResults.user_info && (
                         <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                          <h4 className="font-semibold text-blue-900 mb-2">Informações da Conta</h4>
+                          <h4 className="font-semibold text-blue-900 mb-2">InformaÃ§Ãµes da Conta</h4>
                           <div className="space-y-1">
                             <p className="text-sm text-blue-800">
                               <span className="font-medium">Nome:</span> {testResults.user_info.name || 'Meta User'}
@@ -591,7 +591,7 @@ export default function MetaAPIConfig() {
                     <div className="space-y-4">
                       <div className="flex items-center gap-2 p-3 bg-red-50 rounded-lg border border-red-200">
                         <XCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-                        <span className="text-red-800 font-medium">Token inválido ou com problemas</span>
+                        <span className="text-red-800 font-medium">Token invÃ¡lido ou com problemas</span>
                       </div>
                       
                       {testResults.error_details && (
@@ -625,13 +625,13 @@ export default function MetaAPIConfig() {
           )}
         </TabsContent>
 
-        {/* Tab: Configurações Existentes */}
+        {/* Tab: ConfiguraÃ§Ãµes Existentes */}
         <TabsContent value="existing" className="space-y-6">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Configurações Salvas</h3>
+            <h3 className="text-lg font-semibold">ConfiguraÃ§Ãµes Salvas</h3>
             <Button onClick={retestExistingConfig} variant="outline" disabled={loading}>
               <RefreshCw className="mr-2 h-4 w-4" />
-              Testar Configuração Ativa
+              Testar ConfiguraÃ§Ã£o Ativa
             </Button>
           </div>
 
@@ -660,7 +660,7 @@ export default function MetaAPIConfig() {
                           Criada: {new Date(config.criado_em).toLocaleString('pt-BR')}
                         </p>
                         <p className="text-xs text-gray-500">
-                          Última verificação: {new Date(config.ultima_verificacao).toLocaleString('pt-BR')}
+                          Ãšltima verificaÃ§Ã£o: {new Date(config.ultima_verificacao).toLocaleString('pt-BR')}
                         </p>
                       </div>
                     </div>
@@ -672,7 +672,7 @@ export default function MetaAPIConfig() {
                 <CardContent className="text-center py-8">
                   <Settings className="h-12 w-12 mx-auto text-gray-400 mb-4" />
                   <p className="text-gray-600">
-                    Nenhuma configuração encontrada. Configure uma nova API Meta.
+                    Nenhuma configuraÃ§Ã£o encontrada. Configure uma nova API Meta.
                   </p>
                 </CardContent>
               </Card>

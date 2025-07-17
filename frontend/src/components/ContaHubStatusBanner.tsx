@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 
@@ -62,15 +62,15 @@ export default function ContaHubStatusBanner({
       ) : contahubStatus?.contahub_disponivel === false ? (
         <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
           <div className="flex items-start space-x-3">
-            <div className="text-yellow-500 text-xl">⚠️</div>
+            <div className="text-yellow-500 text-xl">âš ï¸</div>
             <div className="flex-1">
-              <h3 className="font-semibold text-yellow-800 mb-1">ContaHub em Modo Manutenção</h3>
+              <h3 className="font-semibold text-yellow-800 mb-1">ContaHub em Modo ManutenÃ§Ã£o</h3>
               <p className="text-yellow-700 text-sm mb-2">
-                {contahubStatus?.contahub_status?.motivo || 'Integração temporariamente indisponível'}
+                {contahubStatus?.contahub_status?.motivo || 'IntegraÃ§Ã£o temporariamente indisponÃ­vel'}
               </p>
               <div className="text-xs text-yellow-600 space-y-1 mb-3">
-                <div>Email configurado: {contahubStatus?.contahub_status?.detalhes?.email_configurado ? '✅' : '❌'}</div>
-                <div>Senha configurada: {contahubStatus?.contahub_status?.detalhes?.senha_configurada ? '✅' : '❌'}</div>
+                <div>Email configurado: {contahubStatus?.contahub_status?.detalhes?.email_configurado ? 'âœ…' : 'âŒ'}</div>
+                <div>Senha configurada: {contahubStatus?.contahub_status?.detalhes?.senha_configurada ? 'âœ…' : 'âŒ'}</div>
               </div>
               {showRefreshButton && (
                 <button
@@ -78,7 +78,7 @@ export default function ContaHubStatusBanner({
                   disabled={statusLoading}
                   className="text-xs bg-yellow-100 text-yellow-800 px-3 py-1 rounded hover:bg-yellow-200 disabled:opacity-50"
                 >
-                  {statusLoading ? '🔄 Verificando...' : '🔄 Verificar Novamente'}
+                  {statusLoading ? 'ðŸ”„ Verificando...' : 'ðŸ”„ Verificar Novamente'}
                 </button>
               )}
             </div>
@@ -87,7 +87,7 @@ export default function ContaHubStatusBanner({
       ) : (
         <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
           <div className="flex items-center space-x-2">
-            <span className="text-green-500 text-xl">✅</span>
+            <span className="text-green-500 text-xl">âœ…</span>
             <span className="text-green-800 font-medium">ContaHub Operacional</span>
             <span className="text-green-600 text-sm">- Todos os sistemas funcionando</span>
           </div>

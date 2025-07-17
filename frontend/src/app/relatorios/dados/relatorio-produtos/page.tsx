@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import RelatorioProdutos from '@/components/relatorios/RelatorioProdutos'

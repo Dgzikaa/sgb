@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 interface ChatGPTRequest {
   message: string
@@ -29,7 +29,7 @@ export class OpenAIClient {
 
   async chat(request: ChatGPTRequest): Promise<ChatGPTResponse> {
     try {
-      console.log('🤖 Enviando para ChatGPT:', request)
+      console.log('ðŸ¤– Enviando para ChatGPT:', request)
 
       const response = await fetch(this.baseUrl, {
         method: 'POST',
@@ -45,11 +45,11 @@ export class OpenAIClient {
       }
 
       const data: ChatGPTResponse = await response.json()
-      console.log('✅ Resposta do ChatGPT:', data)
+      console.log('âœ… Resposta do ChatGPT:', data)
       
       return data
     } catch (error) {
-      console.error('❌ Erro ao comunicar com ChatGPT:', error)
+      console.error('âŒ Erro ao comunicar com ChatGPT:', error)
       throw error
     }
   }
@@ -67,14 +67,14 @@ export class OpenAIClient {
     return response.response
   }
 
-  // Sanitizar dados sensíveis antes de enviar para OpenAI
+  // Sanitizar dados sensÃ­veis antes de enviar para OpenAI
   private sanitizeData(data: any): any {
     if (!data) return data
 
-    // Criar cópia dos dados
+    // Criar cÃ³pia dos dados
     const sanitized = JSON.parse(JSON.stringify(data))
 
-    // Remover/anonimizar campos sensíveis
+    // Remover/anonimizar campos sensÃ­veis
     const sensitiveFields = ['cpf', 'senha', 'token', 'password', 'secret']
     
     const sanitizeObject = (obj: any): any => {
@@ -85,7 +85,7 @@ export class OpenAIClient {
       if (obj && typeof obj === 'object') {
         const result: any = {}
         for (const [key, value] of Object.entries(obj)) {
-          // Remover campos sensíveis
+          // Remover campos sensÃ­veis
           if (sensitiveFields.some(field => key.toLowerCase().includes(field))) {
             result[key] = '[REDACTED]'
           } else {
@@ -102,5 +102,5 @@ export class OpenAIClient {
   }
 }
 
-// Instância singleton
+// InstÃ¢ncia singleton
 export const openaiClient = new OpenAIClient() 

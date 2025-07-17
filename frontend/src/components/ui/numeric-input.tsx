@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
@@ -39,13 +39,13 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
       return;
     }
 
-    // Permitir números (0-9) do teclado principal e numérico
+    // Permitir nÃºmeros (0-9) do teclado principal e numÃ©rico
     const isNumber = (e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105);
     
-    // Permitir ponto decimal (.) se decimais são permitidos
+    // Permitir ponto decimal (.) se decimais sÃ£o permitidos
     const isDecimal = allowDecimals && (e.keyCode === 190 || e.keyCode === 110);
     
-    // Permitir sinal negativo (-) se negativos são permitidos
+    // Permitir sinal negativo (-) se negativos sÃ£o permitidos
     const isNegative = allowNegative && (e.keyCode === 189 || e.keyCode === 109);
 
     if (!isNumber && !isDecimal && !isNegative && !e.shiftKey) {
@@ -53,7 +53,7 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
       return;
     }
 
-    // Bloquear se shift está pressionado (evita símbolos)
+    // Bloquear se shift estÃ¡ pressionado (evita sÃ­mbolos)
     if (e.shiftKey && !allowedKeys.includes(e.keyCode)) {
       e.preventDefault();
       return;
@@ -63,7 +63,7 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
     if (isDecimal) {
       const currentValue = (e.target as HTMLInputElement).value;
       
-      // Não permitir mais de um ponto decimal
+      // NÃ£o permitir mais de um ponto decimal
       if (currentValue.includes('.')) {
         e.preventDefault();
         return;
@@ -75,7 +75,7 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
       const currentValue = (e.target as HTMLInputElement).value;
       const cursorPosition = (e.target as HTMLInputElement).selectionStart || 0;
       
-      // Só permitir no início do input
+      // SÃ³ permitir no inÃ­cio do input
       if (cursorPosition !== 0 || currentValue.includes('-')) {
         e.preventDefault();
         return;
@@ -89,11 +89,11 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
       onPaste(e);
     }
 
-    // Validar conteúdo da área de transferência
+    // Validar conteÃºdo da Ã¡rea de transferÃªncia
     const pasteData = e.clipboardData.getData('text');
     
-    // Criar regex baseado nas configurações
-    let regex = /^\d*$/; // Apenas números por padrão
+    // Criar regex baseado nas configuraÃ§Ãµes
+    let regex = /^\d*$/; // Apenas nÃºmeros por padrÃ£o
     
     if (allowDecimals && allowNegative) {
       regex = /^-?\d*\.?\d*$/;
@@ -108,7 +108,7 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
       return;
     }
 
-    // Validar número de casas decimais se especificado
+    // Validar nÃºmero de casas decimais se especificado
     if (allowDecimals && maxDecimals && pasteData.includes('.')) {
       const decimalPart = pasteData.split('.')[1];
       if (decimalPart && decimalPart.length > maxDecimals) {

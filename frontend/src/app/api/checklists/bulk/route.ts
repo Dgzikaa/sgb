@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 
     if (!action || !checklistIds || !Array.isArray(checklistIds) || checklistIds.length === 0) {
       return NextResponse.json({ 
-        error: 'Ação e IDs dos checklists são obrigatórios' 
+        error: 'AÃ§Ã£o e IDs dos checklists sÃ£o obrigatÃ³rios' 
       }, { status: 400 })
     }
 
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       case 'delete':
         for (const checklistId of checklistIds) {
           try {
-            // Verificar se há execuções pendentes
+            // Verificar se hÃ¡ execuÃ§Ãµes pendentes
             const { data: execucoes, error: execError } = await supabase
               .from('checklist_execucoes')
               .select('id')
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
               results.push({ 
                 id: checklistId, 
                 success: false, 
-                error: 'Checklist possui execuções em andamento' 
+                error: 'Checklist possui execuÃ§Ãµes em andamento' 
               })
               errorCount++
               continue
@@ -130,16 +130,16 @@ export async function POST(request: NextRequest) {
 
             if (fetchError) throw fetchError
 
-            // Criar cópia
+            // Criar cÃ³pia
             const { data: newChecklist, error: createError } = await supabase
               .from('checklists')
               .insert({
-                nome: `${originalChecklist.nome} (Cópia)`,
+                nome: `${originalChecklist.nome} (CÃ³pia)`,
                 descricao: originalChecklist.descricao,
                 tipo: originalChecklist.tipo,
                 bar_id: originalChecklist.bar_id,
                 agendamento_config: originalChecklist.agendamento_config,
-                ativo: false // Começar desativado
+                ativo: false // ComeÃ§ar desativado
               })
               .select()
               .single()
@@ -186,7 +186,7 @@ export async function POST(request: NextRequest) {
       case 'update_bar':
         if (!data.bar_id) {
           return NextResponse.json({ 
-            error: 'ID do bar é obrigatório para esta ação' 
+            error: 'ID do bar Ã© obrigatÃ³rio para esta aÃ§Ã£o' 
           }, { status: 400 })
         }
 
@@ -237,12 +237,12 @@ export async function POST(request: NextRequest) {
           const exportData = checklists.map((checklist: any) => ({
             'ID': checklist.id,
             'Nome': checklist.nome,
-            'Descrição': checklist.descricao,
+            'DescriÃ§Ã£o': checklist.descricao,
             'Tipo': checklist.tipo,
-            'Ativo': checklist.ativo ? 'Sim' : 'Não',
+            'Ativo': checklist.ativo ? 'Sim' : 'NÃ£o',
             'Bar': checklist.bars?.nome || 'N/A',
             'Total de Itens': checklist.checklist_items?.length || 0,
-            'Itens Obrigatórios': checklist.checklist_items?.filter((item: any) => item.obrigatorio).length || 0,
+            'Itens ObrigatÃ³rios': checklist.checklist_items?.filter((item: any) => item.obrigatorio).length || 0,
             'Criado em': new Date(checklist.created_at).toLocaleDateString('pt-BR')
           }))
 
@@ -259,7 +259,7 @@ export async function POST(request: NextRequest) {
 
       default:
         return NextResponse.json({ 
-          error: `Ação '${action}' não suportada` 
+          error: `AÃ§Ã£o '${action}' nÃ£o suportada` 
         }, { status: 400 })
     }
 
@@ -282,7 +282,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Erro na operação em lote de checklists:', error)
+    console.error('Erro na operaÃ§Ã£o em lote de checklists:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor' 
     }, { status: 500 })
@@ -314,7 +314,7 @@ export async function GET() {
       {
         id: 'duplicate',
         label: 'Duplicar checklists',
-        description: 'Cria cópias dos checklists selecionados',
+        description: 'Cria cÃ³pias dos checklists selecionados',
         requiresConfirmation: true
       },
       {

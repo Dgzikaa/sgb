@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 
-// Variável global para armazenar o interval
+// VariÃ¡vel global para armazenar o interval
 let syncInterval: NodeJS.Timeout | null = null;
 
 export async function POST(request: NextRequest) {
@@ -15,10 +15,10 @@ export async function POST(request: NextRequest) {
 
       // Configurar novo interval
       syncInterval = setInterval(async () => {
-        console.log('🔄 Executando sincronização automática...');
+        console.log('ðŸ”„ Executando sincronizaÃ§Ã£o automÃ¡tica...');
         
         try {
-          // Chamar endpoint de sincronização
+          // Chamar endpoint de sincronizaÃ§Ã£o
           const response = await fetch('http://localhost:3000/api/sync/getin-reservas', {
             method: 'POST',
             headers: {
@@ -29,20 +29,20 @@ export async function POST(request: NextRequest) {
           const result = await response.json();
           
           if (result.success) {
-            console.log('✅ Sincronização automática concluída:', result.data);
+            console.log('âœ… SincronizaÃ§Ã£o automÃ¡tica concluÃ­da:', result.data);
           } else {
-            console.error('❌ Erro na sincronização automática:', result.error);
+            console.error('âŒ Erro na sincronizaÃ§Ã£o automÃ¡tica:', result.error);
           }
         } catch (error) {
-          console.error('❌ Erro ao executar sincronização automática:', error);
+          console.error('âŒ Erro ao executar sincronizaÃ§Ã£o automÃ¡tica:', error);
         }
       }, intervalMinutes * 60 * 1000); // Converter minutos para milliseconds
 
-      console.log(`🚀 Sincronização automática iniciada a cada ${intervalMinutes} minutos`);
+      console.log(`ðŸš€ SincronizaÃ§Ã£o automÃ¡tica iniciada a cada ${intervalMinutes} minutos`);
 
       return NextResponse.json({
         success: true,
-        message: `Sincronização automática iniciada a cada ${intervalMinutes} minutos`,
+        message: `SincronizaÃ§Ã£o automÃ¡tica iniciada a cada ${intervalMinutes} minutos`,
         intervalMinutes
       });
 
@@ -50,16 +50,16 @@ export async function POST(request: NextRequest) {
       if (syncInterval) {
         clearInterval(syncInterval);
         syncInterval = null;
-        console.log('⏸️ Sincronização automática parada');
+        console.log('â¸ï¸ SincronizaÃ§Ã£o automÃ¡tica parada');
 
         return NextResponse.json({
           success: true,
-          message: 'Sincronização automática parada'
+          message: 'SincronizaÃ§Ã£o automÃ¡tica parada'
         });
       } else {
         return NextResponse.json({
           success: false,
-          message: 'Nenhuma sincronização automática estava rodando'
+          message: 'Nenhuma sincronizaÃ§Ã£o automÃ¡tica estava rodando'
         });
       }
 
@@ -67,18 +67,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         status: syncInterval ? 'running' : 'stopped',
-        message: syncInterval ? 'Sincronização automática ativa' : 'Sincronização automática parada'
+        message: syncInterval ? 'SincronizaÃ§Ã£o automÃ¡tica ativa' : 'SincronizaÃ§Ã£o automÃ¡tica parada'
       });
 
     } else {
       return NextResponse.json({
         success: false,
-        error: 'Ação inválida. Use: start, stop ou status'
+        error: 'AÃ§Ã£o invÃ¡lida. Use: start, stop ou status'
       }, { status: 400 });
     }
 
   } catch (error) {
-    console.error('❌ Erro no cron setup:', error);
+    console.error('âŒ Erro no cron setup:', error);
     
     return NextResponse.json({
       success: false,
@@ -91,6 +91,6 @@ export async function GET() {
   return NextResponse.json({
     success: true,
     status: syncInterval ? 'running' : 'stopped',
-    message: syncInterval ? 'Sincronização automática ativa' : 'Sincronização automática parada'
+    message: syncInterval ? 'SincronizaÃ§Ã£o automÃ¡tica ativa' : 'SincronizaÃ§Ã£o automÃ¡tica parada'
   });
 } 

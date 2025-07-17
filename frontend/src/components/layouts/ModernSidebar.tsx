@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -65,7 +65,7 @@ export function ModernSidebar() {
   const { isRole } = usePermissions()
   const { badges } = useMenuBadges()
   
-  // Função para obter itens da sidebar com badges dinâmicos
+  // FunÃ§Ã£o para obter itens da sidebar com badges dinÃ¢micos
   const getSidebarItems = (): SidebarItem[] => [
     { 
       icon: Home, 
@@ -84,7 +84,7 @@ export function ModernSidebar() {
           icon: CheckSquare, 
           label: 'Checklists', 
           href: '/checklists/abertura', 
-          description: 'Checklist de abertura diária'
+          description: 'Checklist de abertura diÃ¡ria'
         },
         { 
           icon: Users, 
@@ -96,7 +96,7 @@ export function ModernSidebar() {
     },
     { 
       icon: ChefHat, 
-      label: 'Produção', 
+      label: 'ProduÃ§Ã£o', 
       color: 'text-orange-600 dark:text-orange-400',
       badge: badges.producao > 0 ? badges.producao : undefined,
       subItems: [
@@ -107,7 +107,7 @@ export function ModernSidebar() {
         },
         { 
           icon: Zap, 
-          label: 'Terminal de Produção', 
+          label: 'Terminal de ProduÃ§Ã£o', 
           href: '/producao/terminal'
         },
       ]
@@ -120,12 +120,12 @@ export function ModernSidebar() {
       subItems: [
         { 
           icon: FileText, 
-          label: 'Competência', 
+          label: 'CompetÃªncia', 
           href: '/relatorios/financeiro-competencia'
         },
         { 
           icon: FileText, 
-          label: 'DRE Ordinário', 
+          label: 'DRE OrdinÃ¡rio', 
           href: '/relatorios/contaazul-competencia'
         },
       ]
@@ -145,17 +145,17 @@ export function ModernSidebar() {
     },
     // { 
     //   icon: BarChart3, 
-    //   label: 'Visão Geral', 
+    //   label: 'VisÃ£o Geral', 
     //   href: '/visao-geral', 
     //   color: 'text-purple-600 dark:text-purple-400',
     //   badge: badges.visaoGeral > 0 ? badges.visaoGeral : undefined
     // },
   ]
 
-  // Função para obter configurações com badges
+  // FunÃ§Ã£o para obter configuraÃ§Ãµes com badges
   const getConfiguracoesItems = (): SidebarItem => ({ 
     icon: Settings, 
-    label: 'Configurações', 
+    label: 'ConfiguraÃ§Ãµes', 
     color: 'text-gray-600 dark:text-gray-400',
     badge: badges.configuracoes > 0 ? badges.configuracoes : undefined,
     subItems: [
@@ -171,12 +171,12 @@ export function ModernSidebar() {
       },
       { 
         icon: Database, 
-        label: 'Integrações', 
+        label: 'IntegraÃ§Ãµes', 
         href: '/configuracoes/integracoes'
       },
       { 
         icon: Shield, 
-        label: 'Segurança', 
+        label: 'SeguranÃ§a', 
         href: '/configuracoes/seguranca'
       },
       { 
@@ -211,7 +211,7 @@ export function ModernSidebar() {
   // Obter itens da sidebar com badges
   const sidebarItems = getSidebarItems()
   
-  // Combinar itens da sidebar com configurações se for admin
+  // Combinar itens da sidebar com configuraÃ§Ãµes se for admin
   const allSidebarItems = [...sidebarItems]
   if (isRole('admin')) {
     allSidebarItems.push(getConfiguracoesItems())
@@ -248,7 +248,7 @@ export function ModernSidebar() {
       return result
     }
     
-    // Se não foi manipulado manualmente, pode usar expansão automática por hover
+    // Se nÃ£o foi manipulado manualmente, pode usar expansÃ£o automÃ¡tica por hover
     if (isHovered && hasActiveSubItem(allSidebarItems.find((item: any) => item.label === label)?.subItems)) {
       return true
     }
@@ -398,7 +398,7 @@ export function ModernSidebar() {
   )
 }
 
-// Componente auxiliar para renderizar o conteúdo do item
+// Componente auxiliar para renderizar o conteÃºdo do item
 function ItemContent({ 
   item, 
   isItemActive, 

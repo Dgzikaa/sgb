@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser, authErrorResponse } from '@/middleware/auth'
 import { z } from 'zod'
 
 // =====================================================
-// SCHEMAS DE VALIDAÇÃO
+// SCHEMAS DE VALIDAÃ‡ÃƒO
 // =====================================================
 
 const CriarNotificacaoSchema = z.object({
@@ -54,14 +54,14 @@ const FiltrosSchema = z.object({
 })
 
 // =====================================================
-// POST - CRIAR NOTIFICAÇÃO
+// POST - CRIAR NOTIFICAÃ‡ÃƒO
 // =====================================================
 export async function POST(request: NextRequest) {
   try {
-    // 🔐 AUTENTICAÇÃO
+    // ðŸ” AUTENTICAÃ‡ÃƒO
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usuário não autenticado')
+      return authErrorResponse('UsuÃ¡rio nÃ£o autenticado')
     }
 
     const body = await request.json()
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     const supabase = await getAdminClient()
 
     if (modo === 'template') {
-      // Criar notificação usando template
+      // Criar notificaÃ§Ã£o usando template
       const data = CriarNotificacaoTemplateSchema.parse(body)
       
       const { data: notificacao, error } = await supabase
@@ -87,32 +87,32 @@ export async function POST(request: NextRequest) {
         })
 
       if (error) {
-        console.error('Erro ao criar notificação via template:', error)
+        console.error('Erro ao criar notificaÃ§Ã£o via template:', error)
         return NextResponse.json({ 
-          error: 'Erro ao criar notificação via template',
+          error: 'Erro ao criar notificaÃ§Ã£o via template',
           details: error.message 
         }, { status: 500 })
       }
 
       return NextResponse.json({
         success: true,
-        message: 'Notificação criada via template',
+        message: 'NotificaÃ§Ã£o criada via template',
         notificacao_id: notificacao
       })
 
     } else {
-      // Criar notificação direta
+      // Criar notificaÃ§Ã£o direta
       const data = CriarNotificacaoSchema.parse(body)
       
-      // Validar permissões baseadas no módulo
+      // Validar permissÃµes baseadas no mÃ³dulo
       const permiteAcesso = validarPermissaoModulo(user.role, data.modulo)
       if (!permiteAcesso) {
         return NextResponse.json({ 
-          error: 'Sem permissão para criar notificações neste módulo' 
+          error: 'Sem permissÃ£o para criar notificaÃ§Ãµes neste mÃ³dulo' 
         }, { status: 403 })
       }
 
-      // Verificar duplicação se especificado
+      // Verificar duplicaÃ§Ã£o se especificado
       if (data.chave_duplicacao) {
         const { data: existente } = await supabase
           .from('notificacoes')
@@ -125,13 +125,13 @@ export async function POST(request: NextRequest) {
         if (existente) {
           return NextResponse.json({
             success: true,
-            message: 'Notificação já existe (duplicação evitada)',
+            message: 'NotificaÃ§Ã£o jÃ¡ existe (duplicaÃ§Ã£o evitada)',
             notificacao_id: existente.id
           })
         }
       }
 
-      // Criar notificação
+      // Criar notificaÃ§Ã£o
       const novaNotificacao = {
         bar_id: user.bar_id.toString(),
         usuario_id: data.usuario_id,
@@ -160,32 +160,32 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (createError) {
-        console.error('Erro ao criar notificação:', createError)
+        console.error('Erro ao criar notificaÃ§Ã£o:', createError)
         return NextResponse.json({ 
-          error: 'Erro ao criar notificação' 
+          error: 'Erro ao criar notificaÃ§Ã£o' 
         }, { status: 500 })
       }
 
-      // Processar envio imediato se necessário
+      // Processar envio imediato se necessÃ¡rio
       if (data.canais.includes('browser')) {
         await processarEnvioBrowser(supabase, notificacao)
       }
 
-      console.log(`📢 Notificação criada: ${data.modulo}/${data.categoria} - ${data.titulo}`)
+      console.log(`ðŸ“¢ NotificaÃ§Ã£o criada: ${data.modulo}/${data.categoria} - ${data.titulo}`)
 
       return NextResponse.json({
         success: true,
-        message: 'Notificação criada com sucesso',
+        message: 'NotificaÃ§Ã£o criada com sucesso',
         data: notificacao
       })
     }
 
   } catch (error: any) {
-    console.error('Erro na API de criar notificação:', error)
+    console.error('Erro na API de criar notificaÃ§Ã£o:', error)
     
     if (error instanceof z.ZodError) {
       return NextResponse.json({ 
-        error: 'Dados inválidos',
+        error: 'Dados invÃ¡lidos',
         details: error.errors 
       }, { status: 400 })
     }
@@ -198,20 +198,20 @@ export async function POST(request: NextRequest) {
 }
 
 // =====================================================
-// GET - LISTAR NOTIFICAÇÕES
+// GET - LISTAR NOTIFICAÃ‡Ã•ES
 // =====================================================
 export async function GET(request: NextRequest) {
   try {
-    // 🔐 AUTENTICAÇÃO
+    // ðŸ” AUTENTICAÃ‡ÃƒO
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usuário não autenticado')
+      return authErrorResponse('UsuÃ¡rio nÃ£o autenticado')
     }
 
     const { searchParams } = new URL(request.url)
     const filtros: any = {}
     
-    // Converter parâmetros para tipos corretos
+    // Converter parÃ¢metros para tipos corretos
     for (const [key, value] of searchParams.entries()) {
       if (key === 'page' || key === 'limit') {
         filtros[key] = parseInt(value)
@@ -246,11 +246,11 @@ export async function GET(request: NextRequest) {
       `)
       .eq('bar_id', user.bar_id.toString())
 
-    // Filtrar por usuário específico
+    // Filtrar por usuÃ¡rio especÃ­fico
     if (data.usuario_id) {
       query = query.eq('usuario_id', data.usuario_id)
     } else {
-      // Mostrar todas as notificações do bar (temporariamente)
+      // Mostrar todas as notificaÃ§Ãµes do bar (temporariamente)
       // query = query.eq('usuario_id', user.user_id)
     }
 
@@ -283,19 +283,19 @@ export async function GET(request: NextRequest) {
       query = query.in('status', ['pendente', 'enviada'])
     }
 
-    // Buscar total para paginação
+    // Buscar total para paginaÃ§Ã£o
     const { count } = await query
 
-    // Buscar notificações com paginação
+    // Buscar notificaÃ§Ãµes com paginaÃ§Ã£o
     const offset = (data.page - 1) * data.limit
     const { data: notificacoes, error } = await query
       .order('criada_em', { ascending: false })
       .range(offset, offset + data.limit - 1)
 
     if (error) {
-      console.error('Erro ao buscar notificações:', error)
+      console.error('Erro ao buscar notificaÃ§Ãµes:', error)
       return NextResponse.json({ 
-        error: 'Erro ao buscar notificações' 
+        error: 'Erro ao buscar notificaÃ§Ãµes' 
       }, { status: 500 })
     }
 
@@ -310,7 +310,7 @@ export async function GET(request: NextRequest) {
         tipo: notificacao.tipo || 'info',
         prioridade: dados.prioridade || 'media',
         categoria: dados.categoria || '',
-        titulo: notificacao.titulo || 'Notificação',
+        titulo: notificacao.titulo || 'NotificaÃ§Ã£o',
         mensagem: notificacao.mensagem || '',
         dados_extras: dados.dados_extras || {},
         acoes: dados.acoes || [],
@@ -324,7 +324,7 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Calcular estatísticas rápidas
+    // Calcular estatÃ­sticas rÃ¡pidas
     const estatisticas = await calcularEstatisticasRapidas(supabase, user.bar_id.toString(), user.user_id, user.role)
 
     return NextResponse.json({
@@ -342,11 +342,11 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('Erro na API de listar notificações:', error)
+    console.error('Erro na API de listar notificaÃ§Ãµes:', error)
     
     if (error instanceof z.ZodError) {
       return NextResponse.json({ 
-        error: 'Parâmetros inválidos',
+        error: 'ParÃ¢metros invÃ¡lidos',
         details: error.errors 
       }, { status: 400 })
     }
@@ -359,7 +359,7 @@ export async function GET(request: NextRequest) {
 }
 
 // =====================================================
-// FUNÇÕES UTILITÁRIAS
+// FUNÃ‡Ã•ES UTILITÃRIAS
 // =====================================================
 
 function validarPermissaoModulo(role: string, modulo: string): boolean {
@@ -374,7 +374,7 @@ function validarPermissaoModulo(role: string, modulo: string): boolean {
 
 async function processarEnvioBrowser(supabase: any, notificacao: any) {
   try {
-    // Marcar como enviada (browser notifications são "instantâneas")
+    // Marcar como enviada (browser notifications sÃ£o "instantÃ¢neas")
     await supabase
       .from('notificacoes')
       .update({ 
@@ -395,7 +395,7 @@ async function processarEnvioBrowser(supabase: any, notificacao: any) {
         tempo_resposta_ms: 0
       })
 
-    console.log(`📱 Notificação enviada via browser: ${notificacao.id}`)
+    console.log(`ðŸ“± NotificaÃ§Ã£o enviada via browser: ${notificacao.id}`)
 
   } catch (error: any) {
     console.error('Erro ao processar envio browser:', error)
@@ -414,13 +414,13 @@ async function processarEnvioBrowser(supabase: any, notificacao: any) {
 }
 
 async function calcularEstatisticasRapidas(supabase: any, barId: string, userId: string, userRole: string) {
-  // Estatísticas para o usuário logado
+  // EstatÃ­sticas para o usuÃ¡rio logado
   const { data: minhasStats } = await supabase
     .from('notificacoes')
     .select('status, tipo, dados')
     .eq('bar_id', barId)
     .or(`usuario_id.eq.${userId},dados->role_alvo.eq.${userRole}`)
-    .gte('criada_em', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()) // últimos 7 dias
+    .gte('criada_em', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()) // Ãºltimos 7 dias
 
   if (!minhasStats) {
     return {
@@ -459,7 +459,7 @@ async function calcularEstatisticasRapidas(supabase: any, barId: string, userId:
 }
 
 // =====================================================
-// FUNÇÕES ESPECÍFICAS PARA CHECKLISTS
+// FUNÃ‡Ã•ES ESPECÃFICAS PARA CHECKLISTS
 // =====================================================
 
 async function criarNotificacaoChecklist(
@@ -484,15 +484,15 @@ async function criarNotificacaoChecklist(
       })
 
     if (error) {
-      console.error('Erro ao criar notificação de checklist:', error)
+      console.error('Erro ao criar notificaÃ§Ã£o de checklist:', error)
       return null
     }
 
-    console.log(`📋 Notificação de checklist criada: ${categoria}`)
+    console.log(`ðŸ“‹ NotificaÃ§Ã£o de checklist criada: ${categoria}`)
     return notificacaoId
 
   } catch (error) {
-    console.error('Erro na função criarNotificacaoChecklist:', error)
+    console.error('Erro na funÃ§Ã£o criarNotificacaoChecklist:', error)
     return null
   }
 }

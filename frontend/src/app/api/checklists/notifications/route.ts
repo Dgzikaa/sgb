@@ -1,14 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser, authErrorResponse } from '@/middleware/auth'
 import { z } from 'zod'
 
 // =====================================================
-// SCHEMAS DE VALIDAÇÃO
+// SCHEMAS DE VALIDAÃ‡ÃƒO
 // =====================================================
 
 const NotificacaoChecklistSchema = z.object({
-  checklist_execucao_id: z.string().uuid('ID da execução inválido'),
+  checklist_execucao_id: z.string().uuid('ID da execuÃ§Ã£o invÃ¡lido'),
   tipo_notificacao: z.enum(['completado', 'atrasado', 'iniciado', 'problema']),
   destinatarios_customizados: z.array(z.string()).optional(),
   observacoes_extras: z.string().optional(),
@@ -17,13 +17,13 @@ const NotificacaoChecklistSchema = z.object({
 })
 
 // =====================================================
-// POST - ENVIAR NOTIFICAÇÃO DE CHECKLIST
+// POST - ENVIAR NOTIFICAÃ‡ÃƒO DE CHECKLIST
 // =====================================================
 export async function POST(request: NextRequest) {
   try {
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usuário não autenticado')
+      return authErrorResponse('UsuÃ¡rio nÃ£o autenticado')
     }
 
     const body = await request.json()
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     const supabase = await getAdminClient()
 
-    // Buscar execução do checklist com dados completos
+    // Buscar execuÃ§Ã£o do checklist com dados completos
     const { data: execucao, error: execucaoError } = await supabase
       .from('checklist_execucoes')
       .select(`
@@ -54,10 +54,10 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (execucaoError || !execucao) {
-      return NextResponse.json({ error: 'Execução de checklist não encontrada' }, { status: 404 })
+      return NextResponse.json({ error: 'ExecuÃ§Ã£o de checklist nÃ£o encontrada' }, { status: 404 })
     }
 
-    // Verificar se notificações estão ativas
+    // Verificar se notificaÃ§Ãµes estÃ£o ativas
     const notificacoesAtivas = execucao.agendamento?.notificacoes_ativas || 
                                execucao.checklist.checklist_schedules?.[0]?.notificacoes_ativas || 
                                true
@@ -65,11 +65,11 @@ export async function POST(request: NextRequest) {
     if (!notificacoesAtivas) {
       return NextResponse.json({ 
         success: true, 
-        message: 'Notificações desabilitadas para este checklist' 
+        message: 'NotificaÃ§Ãµes desabilitadas para este checklist' 
       })
     }
 
-    // Determinar destinatários
+    // Determinar destinatÃ¡rios
     const destinatarios = await determinarDestinatarios(
       supabase, 
       execucao, 
@@ -80,14 +80,14 @@ export async function POST(request: NextRequest) {
     if (destinatarios.length === 0) {
       return NextResponse.json({ 
         success: true, 
-        message: 'Nenhum destinatário configurado' 
+        message: 'Nenhum destinatÃ¡rio configurado' 
       })
     }
 
     // Gerar mensagem personalizada
     const mensagem = await gerarMensagemWhatsApp(execucao, data, user.bar_id)
 
-    // Enviar notificações
+    // Enviar notificaÃ§Ãµes
     const resultados = await enviarNotificacoesWhatsApp(
       supabase, 
       destinatarios, 
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
       data.incluir_relatorio
     )
 
-    // Registrar log da notificação
+    // Registrar log da notificaÃ§Ã£o
     await registrarLogNotificacao(supabase, {
       checklist_execucao_id: data.checklist_execucao_id,
       tipo_notificacao: data.tipo_notificacao,
@@ -107,11 +107,11 @@ export async function POST(request: NextRequest) {
       bar_id: user.bar_id
     })
 
-    console.log(`📱 Notificações enviadas para checklist ${execucao.checklist.nome}: ${resultados.sucessos.length} sucessos, ${resultados.falhas.length} falhas`)
+    console.log(`ðŸ“± NotificaÃ§Ãµes enviadas para checklist ${execucao.checklist.nome}: ${resultados.sucessos.length} sucessos, ${resultados.falhas.length} falhas`)
 
     return NextResponse.json({
       success: true,
-      message: 'Notificações processadas',
+      message: 'NotificaÃ§Ãµes processadas',
       resultados: {
         total_enviados: resultados.sucessos.length,
         total_falhas: resultados.falhas.length,
@@ -120,11 +120,11 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('Erro na API de notificações:', error)
+    console.error('Erro na API de notificaÃ§Ãµes:', error)
     
     if (error instanceof z.ZodError) {
       return NextResponse.json({ 
-        error: 'Dados inválidos',
+        error: 'Dados invÃ¡lidos',
         details: error.errors 
       }, { status: 400 })
     }
@@ -137,13 +137,13 @@ export async function POST(request: NextRequest) {
 }
 
 // =====================================================
-// GET - HISTÓRICO DE NOTIFICAÇÕES
+// GET - HISTÃ“RICO DE NOTIFICAÃ‡Ã•ES
 // =====================================================
 export async function GET(request: NextRequest) {
   try {
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usuário não autenticado')
+      return authErrorResponse('UsuÃ¡rio nÃ£o autenticado')
     }
 
     const { searchParams } = new URL(request.url)
@@ -182,8 +182,8 @@ export async function GET(request: NextRequest) {
     const { data: logs, error } = await query
 
     if (error) {
-      console.error('Erro ao buscar logs de notificação:', error)
-      return NextResponse.json({ error: 'Erro ao buscar histórico' }, { status: 500 })
+      console.error('Erro ao buscar logs de notificaÃ§Ã£o:', error)
+      return NextResponse.json({ error: 'Erro ao buscar histÃ³rico' }, { status: 500 })
     }
 
     return NextResponse.json({
@@ -193,7 +193,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('Erro na API de histórico de notificações:', error)
+    console.error('Erro na API de histÃ³rico de notificaÃ§Ãµes:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
       details: error.message 
@@ -202,29 +202,29 @@ export async function GET(request: NextRequest) {
 }
 
 // =====================================================
-// FUNÇÕES AUXILIARES
+// FUNÃ‡Ã•ES AUXILIARES
 // =====================================================
 
 async function determinarDestinatarios(supabase: any, execucao: any, customizados?: string[], barId?: number) {
   const destinatarios: any[] = []
 
-  // 1. Destinatários do agendamento
+  // 1. DestinatÃ¡rios do agendamento
   if (execucao.agendamento?.responsaveis_whatsapp) {
     destinatarios.push(...execucao.agendamento.responsaveis_whatsapp)
   }
 
-  // 2. Destinatários customizados (números diretos)
+  // 2. DestinatÃ¡rios customizados (nÃºmeros diretos)
   if (customizados && customizados.length > 0) {
     customizados.forEach(numero => {
       destinatarios.push({
-        nome: 'Destinatário customizado',
+        nome: 'DestinatÃ¡rio customizado',
         numero: numero,
         cargo: 'N/A'
       })
     })
   }
 
-  // 3. Destinatários padrão do sistema (administradores)
+  // 3. DestinatÃ¡rios padrÃ£o do sistema (administradores)
   if (destinatarios.length === 0 && barId) {
     const { data: admins } = await supabase
               .from('usuarios_bar')
@@ -246,7 +246,7 @@ async function determinarDestinatarios(supabase: any, execucao: any, customizado
     }
   }
 
-  // Remover duplicatas por número
+  // Remover duplicatas por nÃºmero
   const numerosUnicos = new Set()
   return destinatarios.filter((dest: any) => {
     if (numerosUnicos.has(dest.numero)) {
@@ -261,58 +261,58 @@ async function gerarMensagemWhatsApp(execucao: any, dados: any, barId: number) {
   const checklist = execucao.checklist
   const funcionario = execucao.funcionario
   
-  // Calcular estatísticas da execução
+  // Calcular estatÃ­sticas da execuÃ§Ã£o
   const stats = calcularEstatisticasExecucao(execucao)
   
   const emojis = {
-    completado: '✅',
-    atrasado: '🚨', 
-    iniciado: '🚀',
-    problema: '⚠️'
+    completado: 'âœ…',
+    atrasado: 'ðŸš¨', 
+    iniciado: 'ðŸš€',
+    problema: 'âš ï¸'
   }
 
-  const emoji = emojis[dados.tipo_notificacao as keyof typeof emojis] || '📋'
+  const emoji = emojis[dados.tipo_notificacao as keyof typeof emojis] || 'ðŸ“‹'
 
   let mensagem = `${emoji} *SGB - Checklist ${dados.tipo_notificacao.toUpperCase()}*
 
-📋 *Checklist:* ${checklist.nome}
-🏢 *Setor:* ${checklist.setor}
-👤 *Executado por:* ${funcionario?.nome || 'N/A'}
-⏰ *Data/Hora:* ${new Date(execucao.iniciado_em).toLocaleString('pt-BR')}
+ðŸ“‹ *Checklist:* ${checklist.nome}
+ðŸ¢ *Setor:* ${checklist.setor}
+ðŸ‘¤ *Executado por:* ${funcionario?.nome || 'N/A'}
+â° *Data/Hora:* ${new Date(execucao.iniciado_em).toLocaleString('pt-BR')}
 
-📊 *Resultados:*`
+ðŸ“Š *Resultados:*`
 
   if (dados.tipo_notificacao === 'completado') {
     mensagem += `
-✅ *Status:* Concluído com sucesso
-📈 *Progresso:* ${stats.percentual_completo}%
-⏱️ *Tempo total:* ${stats.tempo_execucao}
-⭐ *Score:* ${stats.score_qualidade}/100`
+âœ… *Status:* ConcluÃ­do com sucesso
+ðŸ“ˆ *Progresso:* ${stats.percentual_completo}%
+â±ï¸ *Tempo total:* ${stats.tempo_execucao}
+â­ *Score:* ${stats.score_qualidade}/100`
 
     if (stats.problemas_encontrados > 0) {
       mensagem += `
-⚠️ *Problemas:* ${stats.problemas_encontrados} item(s) com observações`
+âš ï¸ *Problemas:* ${stats.problemas_encontrados} item(s) com observaÃ§Ãµes`
     }
   } else if (dados.tipo_notificacao === 'atrasado') {
     const horasAtraso = Math.round(
       (new Date().getTime() - new Date(execucao.prazo_conclusao).getTime()) / (1000 * 60 * 60)
     )
     mensagem += `
-🔥 *Situação:* Atrasado há ${horasAtraso}h
-⏰ *Prazo era:* ${new Date(execucao.prazo_conclusao).toLocaleString('pt-BR')}
-📈 *Progresso:* ${stats.percentual_completo}%`
+ðŸ”¥ *SituaÃ§Ã£o:* Atrasado hÃ¡ ${horasAtraso}h
+â° *Prazo era:* ${new Date(execucao.prazo_conclusao).toLocaleString('pt-BR')}
+ðŸ“ˆ *Progresso:* ${stats.percentual_completo}%`
   }
 
   if (dados.observacoes_extras) {
     mensagem += `
 
-💬 *Observações:*
+ðŸ’¬ *ObservaÃ§Ãµes:*
 ${dados.observacoes_extras}`
   }
 
   mensagem += `
 
-_Sistema de Gestão de Bares_`
+_Sistema de GestÃ£o de Bares_`
 
   return mensagem
 }
@@ -341,13 +341,13 @@ async function enviarNotificacoesWhatsApp(supabase: any, destinatarios: any[], m
       } else {
         sucessos.push({ destinatario, resultado })
         
-        // Se incluir relatório, enviar link adicional
+        // Se incluir relatÃ³rio, enviar link adicional
         if (incluirRelatorio) {
           const linkRelatorio = `${process.env.NEXT_PUBLIC_APP_URL}/relatorios/checklist/${execucao.id}`
           await supabase.functions.invoke('whatsapp-send', {
             body: {
               to: destinatario.numero,
-              message: `📄 *Relatório Completo:* ${linkRelatorio}`,
+              message: `ðŸ“„ *RelatÃ³rio Completo:* ${linkRelatorio}`,
               type: 'text',
               modulo: 'checklists'
             }
@@ -406,6 +406,6 @@ async function registrarLogNotificacao(supabase: any, dados: any) {
     })
 
   if (error) {
-    console.error('Erro ao registrar log de notificação:', error)
+    console.error('Erro ao registrar log de notificaÃ§Ã£o:', error)
   }
 } 

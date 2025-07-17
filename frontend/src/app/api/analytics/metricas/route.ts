@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 
 export async function GET(request: NextRequest) {
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       throw error
     }
 
-    // Calcular estatísticas resumidas
+    // Calcular estatÃ­sticas resumidas
     const resumo = {
       total_metricas: metricas?.length || 0,
       metricas_por_tipo: {} as Record<string, number>,
@@ -58,10 +58,10 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Erro ao buscar métricas:', error)
+    console.error('âŒ Erro ao buscar mÃ©tricas:', error)
     return NextResponse.json({
       success: false,
-      error: 'Erro ao buscar métricas do sistema',
+      error: 'Erro ao buscar mÃ©tricas do sistema',
       details: error instanceof Error ? error.message : 'Erro desconhecido'
     }, { status: 500 })
   }
@@ -83,23 +83,23 @@ export async function POST(request: NextRequest) {
       periodo_fim
     } = body
 
-    // Validação básica
+    // ValidaÃ§Ã£o bÃ¡sica
     if (!bar_id || !tipo_metrica || !categoria || !nome_metrica || valor === undefined) {
       return NextResponse.json({
         success: false,
-        error: 'Campos obrigatórios: bar_id, tipo_metrica, categoria, nome_metrica, valor'
+        error: 'Campos obrigatÃ³rios: bar_id, tipo_metrica, categoria, nome_metrica, valor'
       }, { status: 400 })
     }
 
     const supabase = await getAdminClient()
 
-    // Calcular variação percentual se valor_anterior fornecido
+    // Calcular variaÃ§Ã£o percentual se valor_anterior fornecido
     let variacao_percentual = null
     if (valor_anterior && valor_anterior > 0) {
       variacao_percentual = ((valor - valor_anterior) / valor_anterior) * 100
     }
 
-    // Inserir métrica
+    // Inserir mÃ©trica
     const { data: metrica, error } = await supabase
       .from('sistema_metricas')
       .insert({
@@ -126,14 +126,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: metrica,
-      message: 'Métrica registrada com sucesso'
+      message: 'MÃ©trica registrada com sucesso'
     })
 
   } catch (error) {
-    console.error('❌ Erro ao registrar métrica:', error)
+    console.error('âŒ Erro ao registrar mÃ©trica:', error)
     return NextResponse.json({
       success: false,
-      error: 'Erro ao registrar métrica',
+      error: 'Erro ao registrar mÃ©trica',
       details: error instanceof Error ? error.message : 'Erro desconhecido'
     }, { status: 500 })
   }

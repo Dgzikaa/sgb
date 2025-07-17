@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
@@ -30,16 +30,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       const initialTheme = 'dark';
       setTheme(initialTheme);
       document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark'); // Salvar dark como padrão
+      localStorage.setItem('theme', 'dark'); // Salvar dark como padrÃ£o
     }
 
     setIsLoading(false);
 
-    // Listener para mudanças no prefers-color-scheme
+    // Listener para mudanÃ§as no prefers-color-scheme
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
       const newTheme = e.matches ? 'dark' : 'light';
-      if (!localStorage.getItem('theme')) {  // Só atualiza se não houver preferência salva
+      if (!localStorage.getItem('theme')) {  // SÃ³ atualiza se nÃ£o houver preferÃªncia salva
         setTheme(newTheme);
         document.documentElement.classList.toggle('dark', e.matches);
       }

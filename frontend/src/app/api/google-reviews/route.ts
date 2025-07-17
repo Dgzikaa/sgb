@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 interface GooglePlaceReview {
@@ -45,13 +45,13 @@ class GooglePlacesAPIBackend {
     this.apiKey = process.env.GOOGLE_PLACES_API_KEY || ''
     
     if (!this.apiKey) {
-      console.error('❌ GOOGLE_PLACES_API_KEY não configurada')
+      console.error('âŒ GOOGLE_PLACES_API_KEY nÃ£o configurada')
     }
   }
 
   async searchPlace(query: string, location?: { lat: number, lng: number }) {
     if (!this.apiKey) {
-      throw new Error('Google Places API key não configurada')
+      throw new Error('Google Places API key nÃ£o configurada')
     }
 
     try {
@@ -61,7 +61,7 @@ class GooglePlacesAPIBackend {
         url += `&location=${location.lat},${location.lng}&radius=1000`
       }
 
-      console.log('🔍 Buscando lugar no Google Places:', query)
+      console.log('ðŸ” Buscando lugar no Google Places:', query)
       
       const response = await fetch(url)
       
@@ -79,7 +79,7 @@ class GooglePlacesAPIBackend {
         return []
       }
 
-      console.log(`✅ Encontrados ${data.results.length} resultados`)
+      console.log(`âœ… Encontrados ${data.results.length} resultados`)
       return data.results
 
     } catch (error) {
@@ -90,7 +90,7 @@ class GooglePlacesAPIBackend {
 
   async getPlaceDetails(placeId: string): Promise<GooglePlaceDetails | null> {
     if (!this.apiKey) {
-      throw new Error('Google Places API key não configurada')
+      throw new Error('Google Places API key nÃ£o configurada')
     }
 
     try {
@@ -110,7 +110,7 @@ class GooglePlacesAPIBackend {
 
       const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=${fields}&key=${this.apiKey}&language=pt-BR`
 
-      console.log('📋 Buscando detalhes do lugar:', placeId)
+      console.log('ðŸ“‹ Buscando detalhes do lugar:', placeId)
 
       const response = await fetch(url)
       
@@ -128,7 +128,7 @@ class GooglePlacesAPIBackend {
         return null
       }
 
-      console.log(`✅ Detalhes obtidos - Rating: ${data.result.rating}, Reviews: ${data.result.reviews?.length || 0}`)
+      console.log(`âœ… Detalhes obtidos - Rating: ${data.result.rating}, Reviews: ${data.result.reviews?.length || 0}`)
       return data.result
 
     } catch (error) {
@@ -152,32 +152,32 @@ export async function POST(request: NextRequest) {
   try {
     const { businessName, address, placeId, bar_id } = await request.json()
 
-    console.log('🌟 Requisição para buscar reviews:', { businessName, address, placeId })
+    console.log('ðŸŒŸ RequisiÃ§Ã£o para buscar reviews:', { businessName, address, placeId })
 
     const googlePlaces = new GooglePlacesAPIBackend()
 
-    // Verificar se a API key está configurada
+    // Verificar se a API key estÃ¡ configurada
     if (!googlePlaces['apiKey']) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Google Places API key não configurada. Configure GOOGLE_PLACES_API_KEY no arquivo .env.local' 
+        error: 'Google Places API key nÃ£o configurada. Configure GOOGLE_PLACES_API_KEY no arquivo .env.local' 
       }, { status: 503 })
     }
 
-    // Se já temos o place_id, usar diretamente
+    // Se jÃ¡ temos o place_id, usar diretamente
     if (placeId) {
-      console.log('📍 Usando Place ID fornecido:', placeId)
+      console.log('ðŸ“ Usando Place ID fornecido:', placeId)
       
       const details = await googlePlaces.getPlaceDetails(placeId)
       
       if (!details) {
         return NextResponse.json({ 
           success: false, 
-          error: 'Lugar não encontrado com o Place ID fornecido' 
+          error: 'Lugar nÃ£o encontrado com o Place ID fornecido' 
         }, { status: 404 })
       }
 
-      // Buscar mais fotos (até 10) com diferentes tamanhos
+      // Buscar mais fotos (atÃ© 10) com diferentes tamanhos
       const photoUrls = details.photos ? details.photos.slice(0, 10).map((photo: any) => 
         googlePlaces.getPhotoUrl(photo.photo_reference, 600)
       ) : []
@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
       // Normalizar e salvar reviews na tabela avaliacoes_google
       if (details && details.reviews && Array.isArray(details.reviews)) {
         const reviewsToInsert = details.reviews.map((review: any) => ({
-          bar_id: bar_id || 1, // fallback para 1 se não enviado
+          bar_id: bar_id || 1, // fallback para 1 se nÃ£o enviado
           reviewer_name: review.author_name,
           reviewer_profile_url: review.author_url,
           comment: review.text,
@@ -219,15 +219,15 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Caso contrário, buscar primeiro
+    // Caso contrÃ¡rio, buscar primeiro
     if (!businessName) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Nome do negócio é obrigatório' 
+        error: 'Nome do negÃ³cio Ã© obrigatÃ³rio' 
       }, { status: 400 })
     }
 
-    console.log('🔍 Buscando lugar por nome:', businessName)
+    console.log('ðŸ” Buscando lugar por nome:', businessName)
     
     const searchQuery = address ? `${businessName} ${address}` : businessName
     const searchResults = await googlePlaces.searchPlace(searchQuery)
@@ -241,7 +241,7 @@ export async function POST(request: NextRequest) {
 
     // Pegar o primeiro resultado (mais relevante)
     const place = searchResults[0]
-    console.log('🎯 Lugar selecionado:', place.name)
+    console.log('ðŸŽ¯ Lugar selecionado:', place.name)
     
     // Buscar detalhes completos
     const details = await googlePlaces.getPlaceDetails(place.place_id)
@@ -249,7 +249,7 @@ export async function POST(request: NextRequest) {
     if (!details) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Não foi possível obter detalhes do lugar' 
+        error: 'NÃ£o foi possÃ­vel obter detalhes do lugar' 
       }, { status: 500 })
     }
 
@@ -261,7 +261,7 @@ export async function POST(request: NextRequest) {
     // Normalizar e salvar reviews na tabela avaliacoes_google
     if (details && details.reviews && Array.isArray(details.reviews)) {
       const reviewsToInsert = details.reviews.map((review: any) => ({
-        bar_id: bar_id || 1, // fallback para 1 se não enviado
+        bar_id: bar_id || 1, // fallback para 1 se nÃ£o enviado
         reviewer_name: review.author_name,
         reviewer_profile_url: review.author_url,
         comment: review.text,
@@ -278,7 +278,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('✅ Reviews obtidos com sucesso!')
+    console.log('âœ… Reviews obtidos com sucesso!')
 
     return NextResponse.json({
       success: true,
@@ -297,7 +297,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Erro na API de reviews:', error)
+    console.error('âŒ Erro na API de reviews:', error)
     
     return NextResponse.json({ 
       success: false, 

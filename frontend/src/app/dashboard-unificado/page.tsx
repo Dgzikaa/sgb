@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { StandardPageLayout } from '@/components/layouts'
@@ -104,7 +104,7 @@ export default function DashboardUnificado() {
   
   // Estado para widgets
   const [widgets, setWidgets] = useState<WidgetConfig[]>(() => {
-    // Tentar carregar do localStorage ou usar presets padrão
+    // Tentar carregar do localStorage ou usar presets padrÃ£o
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('dashboard-widgets')
       if (saved) {
@@ -114,7 +114,7 @@ export default function DashboardUnificado() {
     return Object.values(WIDGET_PRESETS)
   })
 
-  // Função para carregar dados
+  // FunÃ§Ã£o para carregar dados
   const carregarDados = async () => {
     if (!selectedBar?.id) return
 
@@ -139,7 +139,7 @@ export default function DashboardUnificado() {
       console.error('Erro ao carregar dados:', error)
       toast({
         title: "Erro ao carregar dados",
-        description: "Ocorreu um erro ao carregar as informações do dashboard.",
+        description: "Ocorreu um erro ao carregar as informaÃ§Ãµes do dashboard.",
         variant: "destructive"
       })
       
@@ -169,7 +169,7 @@ export default function DashboardUnificado() {
     }
   }
 
-  // Função para refresh manual
+  // FunÃ§Ã£o para refresh manual
   const handleRefresh = async () => {
     setRefreshing(true)
     await carregarDados()
@@ -181,7 +181,7 @@ export default function DashboardUnificado() {
     })
   }
 
-  // Função para salvar widgets no localStorage
+  // FunÃ§Ã£o para salvar widgets no localStorage
   const handleWidgetsChange = (newWidgets: WidgetConfig[]) => {
     setWidgets(newWidgets)
     if (typeof window !== 'undefined') {
@@ -200,7 +200,7 @@ export default function DashboardUnificado() {
     return () => clearInterval(interval)
   }, [selectedBar?.id])
 
-  // Função para formatar valores monetários
+  // FunÃ§Ã£o para formatar valores monetÃ¡rios
   const formatarValor = (valor: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -208,7 +208,7 @@ export default function DashboardUnificado() {
     }).format(valor)
   }
 
-  // Função para formatar data
+  // FunÃ§Ã£o para formatar data
   const formatarData = (data: string) => {
     return new Date(data).toLocaleString('pt-BR')
   }
@@ -217,7 +217,7 @@ export default function DashboardUnificado() {
     return (
       <StandardPageLayout>
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">🎯 Dashboard Unificado</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">ðŸŽ¯ Dashboard Unificado</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">Centro de Comando do Sistema</p>
         </div>
         
@@ -245,7 +245,7 @@ export default function DashboardUnificado() {
       <StandardPageLayout>
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">🎯 Dashboard Unificado</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">ðŸŽ¯ Dashboard Unificado</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">Centro de Comando do Sistema</p>
           </div>
           

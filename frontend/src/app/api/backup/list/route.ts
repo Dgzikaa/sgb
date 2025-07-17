@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { backupSystem } from '@/lib/backup-system';
 
 export async function GET(request: NextRequest) {
@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const barId = searchParams.get('barId');
 
-    console.log(`📋 Listando backups${barId ? ` para bar ${barId}` : ' (todos)'}...`);
+    console.log(`ðŸ“‹ Listando backups${barId ? ` para bar ${barId}` : ' (todos)'}...`);
 
     // Listar backups
     const backups = await backupSystem.listBackups(barId ? parseInt(barId) : undefined);
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('❌ Erro ao listar backups:', error);
+    console.error('âŒ Erro ao listar backups:', error);
     return NextResponse.json(
       { 
         error: 'Erro interno do servidor',

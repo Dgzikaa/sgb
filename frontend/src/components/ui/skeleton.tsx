@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils"
+﻿import { cn } from "@/lib/utils"
 
 function Skeleton({
   className,
@@ -12,7 +12,7 @@ function Skeleton({
   )
 }
 
-// Skeleton específico para cards
+// Skeleton especÃ­fico para cards
 function SkeletonCard({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn("card-dark p-6", className)} {...props}>
@@ -82,7 +82,7 @@ function SkeletonList({ items = 5, className, ...props }:
   )
 }
 
-// Skeleton para grid de métricas/stats
+// Skeleton para grid de mÃ©tricas/stats
 function SkeletonStats({ items = 4, className, ...props }: 
   { items?: number } & React.HTMLAttributes<HTMLDivElement>) {
   return (
@@ -103,7 +103,7 @@ function SkeletonStats({ items = 4, className, ...props }:
   )
 }
 
-// Skeleton para formulários
+// Skeleton para formulÃ¡rios
 function SkeletonForm({ fields = 5, className, ...props }: 
   { fields?: number } & React.HTMLAttributes<HTMLDivElement>) {
   return (
@@ -125,7 +125,7 @@ function SkeletonForm({ fields = 5, className, ...props }:
   )
 }
 
-// Skeleton para gráficos/charts
+// Skeleton para grÃ¡ficos/charts
 function SkeletonChart({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn("card-dark p-6", className)} {...props}>
@@ -142,7 +142,7 @@ function SkeletonChart({ className, ...props }: React.HTMLAttributes<HTMLDivElem
   )
 }
 
-// Skeleton para header de página
+// Skeleton para header de pÃ¡gina
 function SkeletonPageHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn("card-dark p-6 mb-6", className)} {...props}>

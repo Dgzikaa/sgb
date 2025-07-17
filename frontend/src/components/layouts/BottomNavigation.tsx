@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -28,7 +28,7 @@ interface MobileHamburgerMenuProps {
   onClose: () => void
 }
 
-// Menu hambúrguer overlay para funcionalidades avançadas
+// Menu hambÃºrguer overlay para funcionalidades avanÃ§adas
 function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
   const pathname = usePathname()
   const { isRole } = usePermissions()
@@ -42,21 +42,21 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
   const advancedItems = [
     { 
       icon: CheckSquare, 
-      label: 'Funcionário Checklists', 
+      label: 'FuncionÃ¡rio Checklists', 
       href: '/funcionario/checklists',
       description: 'Meus checklists pessoais'
     },
     { 
       icon: ChefHat, 
-      label: 'Terminal Produção', 
+      label: 'Terminal ProduÃ§Ã£o', 
       href: '/producao/terminal',
-      description: 'Terminal de produção'
+      description: 'Terminal de produÃ§Ã£o'
     },
     { 
       icon: BarChart3, 
-      label: 'Relatórios Financeiros', 
+      label: 'RelatÃ³rios Financeiros', 
       href: '/relatorios/financeiro-competencia',
-      description: 'ContaAzul relatórios'
+      description: 'ContaAzul relatÃ³rios'
     },
   ]
 
@@ -69,9 +69,9 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
     },
     { 
       icon: BarChart3, 
-      label: 'Integrações', 
+      label: 'IntegraÃ§Ãµes', 
       href: '/configuracoes/integracoes',
-      description: 'Configurar integrações'
+      description: 'Configurar integraÃ§Ãµes'
     },
   ] : []
 
@@ -107,7 +107,7 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
 
         {/* Menu items */}
         <div className="p-4 space-y-6">
-          {/* Funcionalidades Avançadas */}
+          {/* Funcionalidades AvanÃ§adas */}
           <div>
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
               Funcionalidades
@@ -139,11 +139,11 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
             </div>
           </div>
 
-          {/* Configurações (apenas admin) */}
+          {/* ConfiguraÃ§Ãµes (apenas admin) */}
           {configItems.length > 0 && (
             <div>
               <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
-                Configurações
+                ConfiguraÃ§Ãµes
               </h3>
               <div className="space-y-2">
                 {configItems.map((item) => {
@@ -221,7 +221,7 @@ export function BottomNavigation() {
     },
     { 
       icon: ChefHat, 
-      label: 'Produção', 
+      label: 'ProduÃ§Ã£o', 
       href: '/producao/receitas',
       color: 'text-orange-600 dark:text-orange-400',
       badge: badges.producao > 0 ? badges.producao : undefined
@@ -235,7 +235,7 @@ export function BottomNavigation() {
     },
     { 
       icon: BarChart3, 
-      label: 'Visão Geral', 
+      label: 'VisÃ£o Geral', 
       href: '/visao-geral',
       color: 'text-purple-600 dark:text-purple-400',
       badge: badges.visaoGeral > 0 ? badges.visaoGeral : undefined

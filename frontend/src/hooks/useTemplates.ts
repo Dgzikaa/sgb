@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { api } from '@/lib/api-client'
 
 // =====================================================
@@ -82,7 +82,7 @@ interface UseTemplatesResult {
     total: number
     pages: number
   } | null
-  // Ações
+  // AÃ§Ãµes
   setFiltros: (filtros: Partial<TemplateFilters>) => void
   carregarTemplates: () => Promise<void>
   instalarPredefinidos: () => Promise<boolean>
@@ -116,7 +116,7 @@ export function useTemplates(filtrosIniciais: TemplateFilters = {}): UseTemplate
   }, [filtros])
 
   // =====================================================
-  // FUNÇÕES PRINCIPAIS
+  // FUNÃ‡Ã•ES PRINCIPAIS
   // =====================================================
 
   const carregarTemplates = async () => {
@@ -247,7 +247,7 @@ export function useTemplate(id?: string): UseTemplateResult {
   }, [id])
 
   // =====================================================
-  // FUNÇÕES
+  // FUNÃ‡Ã•ES
   // =====================================================
 
   const carregarTemplate = async () => {
@@ -262,7 +262,7 @@ export function useTemplate(id?: string): UseTemplateResult {
       if (response.success) {
         setTemplate(response.data)
       } else {
-        setError(response.error || 'Template não encontrado')
+        setError(response.error || 'Template nÃ£o encontrado')
       }
     } catch (err: any) {
       console.error('Erro ao carregar template:', err)
@@ -320,7 +320,7 @@ export function useTemplate(id?: string): UseTemplateResult {
 }
 
 // =====================================================
-// UTILITÁRIOS
+// UTILITÃRIOS
 // =====================================================
 
 export const templateUtils = {
@@ -339,46 +339,46 @@ export const templateUtils = {
     return colors[categoria] || 'bg-gray-100 text-gray-800'
   },
 
-  // Obter ícone do tipo
+  // Obter Ã­cone do tipo
   getTipoIcon: (tipo: string): string => {
     const icons: Record<string, string> = {
-      abertura: '🌅',
-      fechamento: '🌙',
-      manutencao: '🔧',
-      qualidade: '✅',
-      seguranca: '🛡️',
-      limpeza: '🧹',
-      auditoria: '📋'
+      abertura: 'ðŸŒ…',
+      fechamento: 'ðŸŒ™',
+      manutencao: 'ðŸ”§',
+      qualidade: 'âœ…',
+      seguranca: 'ðŸ›¡ï¸',
+      limpeza: 'ðŸ§¹',
+      auditoria: 'ðŸ“‹'
     }
-    return icons[tipo] || '📋'
+    return icons[tipo] || 'ðŸ“‹'
   },
 
-  // Obter ícone do tipo de campo
+  // Obter Ã­cone do tipo de campo
   getCampoIcon: (tipo: string): string => {
     const icons: Record<string, string> = {
-      texto: '📝',
-      numero: '🔢',
-      sim_nao: '✅',
-      data: '📅',
-      assinatura: '✍️',
-      foto_camera: '📷',
-      foto_upload: '🖼️',
-      avaliacao: '⭐'
+      texto: 'ðŸ“',
+      numero: 'ðŸ”¢',
+      sim_nao: 'âœ…',
+      data: 'ðŸ“…',
+      assinatura: 'âœï¸',
+      foto_camera: 'ðŸ“·',
+      foto_upload: 'ðŸ–¼ï¸',
+      avaliacao: 'â­'
     }
-    return icons[tipo] || '📋'
+    return icons[tipo] || 'ðŸ“‹'
   },
 
   // Obter label do tipo de campo
   getCampoLabel: (tipo: string): string => {
     const labels: Record<string, string> = {
       texto: 'Texto',
-      numero: 'Número',
-      sim_nao: 'Sim/Não',
+      numero: 'NÃºmero',
+      sim_nao: 'Sim/NÃ£o',
       data: 'Data',
       assinatura: 'Assinatura',
-      foto_camera: 'Foto (Câmera)',
+      foto_camera: 'Foto (CÃ¢mera)',
       foto_upload: 'Foto (Upload)',
-      avaliacao: 'Avaliação'
+      avaliacao: 'AvaliaÃ§Ã£o'
     }
     return labels[tipo] || tipo
   },
@@ -388,39 +388,39 @@ export const templateUtils = {
     const erros: string[] = []
 
     if (!template.nome?.trim()) {
-      erros.push('Nome é obrigatório')
+      erros.push('Nome Ã© obrigatÃ³rio')
     }
 
     if (!template.setor?.trim()) {
-      erros.push('Setor é obrigatório')
+      erros.push('Setor Ã© obrigatÃ³rio')
     }
 
     if (!template.categoria) {
-      erros.push('Categoria é obrigatória')
+      erros.push('Categoria Ã© obrigatÃ³ria')
     }
 
     if (!template.tipo) {
-      erros.push('Tipo é obrigatório')
+      erros.push('Tipo Ã© obrigatÃ³rio')
     }
 
     if (!template.estrutura?.secoes?.length) {
-      erros.push('Pelo menos uma seção é obrigatória')
+      erros.push('Pelo menos uma seÃ§Ã£o Ã© obrigatÃ³ria')
     }
 
-    // Validar seções
+    // Validar seÃ§Ãµes
     template.estrutura?.secoes?.forEach((secao, index) => {
       if (!secao.nome?.trim()) {
-        erros.push(`Nome da seção ${index + 1} é obrigatório`)
+        erros.push(`Nome da seÃ§Ã£o ${index + 1} Ã© obrigatÃ³rio`)
       }
 
       if (!secao.itens?.length) {
-        erros.push(`Seção "${secao.nome}" deve ter pelo menos um item`)
+        erros.push(`SeÃ§Ã£o "${secao.nome}" deve ter pelo menos um item`)
       }
 
       // Validar itens
       secao.itens?.forEach((item, itemIndex) => {
         if (!item.titulo?.trim()) {
-          erros.push(`Título do item ${itemIndex + 1} na seção "${secao.nome}" é obrigatório`)
+          erros.push(`TÃ­tulo do item ${itemIndex + 1} na seÃ§Ã£o "${secao.nome}" Ã© obrigatÃ³rio`)
         }
       })
     })

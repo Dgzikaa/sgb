@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -70,10 +70,10 @@ interface UnifiedSearchProps {
 }
 
 const searchCategories: SearchCategory[] = [
-  { id: 'page', name: 'Páginas', icon: File, color: 'text-blue-600' },
+  { id: 'page', name: 'PÃ¡ginas', icon: File, color: 'text-blue-600' },
   { id: 'feature', name: 'Funcionalidades', icon: Zap, color: 'text-green-600' },
   { id: 'data', name: 'Dados', icon: Database, color: 'text-purple-600' },
-  { id: 'action', name: 'Ações', icon: Target, color: 'text-orange-600' },
+  { id: 'action', name: 'AÃ§Ãµes', icon: Target, color: 'text-orange-600' },
   { id: 'help', name: 'Ajuda', icon: Lightbulb, color: 'text-yellow-600' }
 ]
 
@@ -91,61 +91,61 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
 
   // Resultados de busca
   const searchResults: SearchResult[] = [
-    // Páginas principais
+    // PÃ¡ginas principais
     {
       id: 'home',
       title: 'Home',
-      description: 'Página inicial do sistema',
+      description: 'PÃ¡gina inicial do sistema',
       category: 'page',
       icon: Home,
       href: '/home',
-      keywords: ['home', 'início', 'principal', 'dashboard'],
+      keywords: ['home', 'inÃ­cio', 'principal', 'dashboard'],
       priority: 100,
       shortcut: 'Ctrl+H'
     },
     {
       id: 'dashboard-unificado',
       title: 'Dashboard Unificado',
-      description: 'Centro de comando completo com widgets personalizáveis',
+      description: 'Centro de comando completo com widgets personalizÃ¡veis',
       category: 'page',
       icon: Target,
       href: '/dashboard-unificado',
-      keywords: ['dashboard', 'unificado', 'centro', 'comando', 'widgets', 'personalização'],
+      keywords: ['dashboard', 'unificado', 'centro', 'comando', 'widgets', 'personalizaÃ§Ã£o'],
       priority: 95,
       badge: 'Novo',
       shortcut: 'Ctrl+D'
     },
     {
       id: 'visao-geral',
-      title: 'Visão Geral',
-      description: 'Análise completa do desempenho do bar',
+      title: 'VisÃ£o Geral',
+      description: 'AnÃ¡lise completa do desempenho do bar',
       category: 'page',
       icon: BarChart3,
       href: '/visao-geral',
-      keywords: ['visão', 'geral', 'análise', 'desempenho', 'métricas'],
+      keywords: ['visÃ£o', 'geral', 'anÃ¡lise', 'desempenho', 'mÃ©tricas'],
       priority: 90
     },
     
-    // Operações
+    // OperaÃ§Ãµes
     {
       id: 'checklist-abertura',
       title: 'Checklist de Abertura',
-      description: 'Lista de verificação para abertura do bar',
+      description: 'Lista de verificaÃ§Ã£o para abertura do bar',
       category: 'feature',
       icon: CheckCircle,
       href: '/operacoes/checklist-abertura',
-      keywords: ['checklist', 'abertura', 'verificação', 'operação'],
+      keywords: ['checklist', 'abertura', 'verificaÃ§Ã£o', 'operaÃ§Ã£o'],
       priority: 85,
       shortcut: 'Ctrl+O'
     },
     {
       id: 'terminal-producao',
-      title: 'Terminal de Produção',
-      description: 'Interface para gerenciamento da produção',
+      title: 'Terminal de ProduÃ§Ã£o',
+      description: 'Interface para gerenciamento da produÃ§Ã£o',
       category: 'feature',
       icon: Cpu,
       href: '/producao/terminal',
-      keywords: ['terminal', 'produção', 'cozinha', 'pedidos'],
+      keywords: ['terminal', 'produÃ§Ã£o', 'cozinha', 'pedidos'],
       priority: 85,
       shortcut: 'Ctrl+P'
     },
@@ -156,15 +156,15 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
       category: 'feature',
       icon: BookOpen,
       href: '/operacoes/receitas',
-      keywords: ['receitas', 'ingredientes', 'cardápio', 'produtos'],
+      keywords: ['receitas', 'ingredientes', 'cardÃ¡pio', 'produtos'],
       priority: 80
     },
     
-    // Relatórios
+    // RelatÃ³rios
     {
       id: 'dashboard-financeiro',
       title: 'Dashboard Financeiro',
-      description: 'Análise financeira completa',
+      description: 'AnÃ¡lise financeira completa',
       category: 'page',
       icon: DollarSign,
       href: '/dashboard-financeiro',
@@ -174,43 +174,43 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
     },
     {
       id: 'relatorio-analitico',
-      title: 'Relatório Analítico',
-      description: 'Análise detalhada de dados',
+      title: 'RelatÃ³rio AnalÃ­tico',
+      description: 'AnÃ¡lise detalhada de dados',
       category: 'page',
       icon: TrendingUp,
       href: '/relatorios/analitico',
-      keywords: ['relatório', 'analítico', 'dados', 'estatísticas'],
+      keywords: ['relatÃ³rio', 'analÃ­tico', 'dados', 'estatÃ­sticas'],
       priority: 75
     },
     
-    // Configurações
+    // ConfiguraÃ§Ãµes
     {
       id: 'configuracoes',
-      title: 'Configurações',
-      description: 'Configurações gerais do sistema',
+      title: 'ConfiguraÃ§Ãµes',
+      description: 'ConfiguraÃ§Ãµes gerais do sistema',
       category: 'page',
       icon: Settings,
       href: '/configuracoes',
-      keywords: ['configurações', 'ajustes', 'preferências', 'admin'],
+      keywords: ['configuraÃ§Ãµes', 'ajustes', 'preferÃªncias', 'admin'],
       priority: 70,
       shortcut: 'Ctrl+,'
     },
     {
       id: 'integracoes',
-      title: 'Integrações',
-      description: 'Gerenciar integrações com sistemas externos',
+      title: 'IntegraÃ§Ãµes',
+      description: 'Gerenciar integraÃ§Ãµes com sistemas externos',
       category: 'feature',
       icon: Layers,
       href: '/configuracoes/integracoes',
-      keywords: ['integrações', 'apis', 'conexões', 'contaazul', 'meta'],
+      keywords: ['integraÃ§Ãµes', 'apis', 'conexÃµes', 'contaazul', 'meta'],
       priority: 65
     },
     
-    // Ações
+    // AÃ§Ãµes
     {
       id: 'sync-contaazul',
       title: 'Sincronizar ContaAzul',
-      description: 'Forçar sincronização com ContaAzul',
+      description: 'ForÃ§ar sincronizaÃ§Ã£o com ContaAzul',
       category: 'action',
       icon: RefreshCw,
       action: () => {
@@ -235,22 +235,22 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
     // Dados
     {
       id: 'usuarios',
-      title: 'Usuários',
-      description: 'Gerenciar usuários do sistema',
+      title: 'UsuÃ¡rios',
+      description: 'Gerenciar usuÃ¡rios do sistema',
       category: 'data',
       icon: Users,
       href: '/configuracoes/usuarios',
-      keywords: ['usuários', 'pessoas', 'funcionários', 'equipe'],
+      keywords: ['usuÃ¡rios', 'pessoas', 'funcionÃ¡rios', 'equipe'],
       priority: 70
     },
     {
       id: 'produtos',
       title: 'Produtos',
-      description: 'Catálogo de produtos',
+      description: 'CatÃ¡logo de produtos',
       category: 'data',
       icon: Package,
       href: '/operacoes/produtos',
-      keywords: ['produtos', 'itens', 'cardápio', 'estoque'],
+      keywords: ['produtos', 'itens', 'cardÃ¡pio', 'estoque'],
       priority: 70
     },
     
@@ -258,7 +258,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
     {
       id: 'atalhos',
       title: 'Atalhos de Teclado',
-      description: 'Lista de atalhos disponíveis',
+      description: 'Lista de atalhos disponÃ­veis',
       category: 'help',
       icon: Keyboard,
       action: () => {
@@ -270,12 +270,12 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
     },
     {
       id: 'documentacao',
-      title: 'Documentação',
-      description: 'Documentação completa do sistema',
+      title: 'DocumentaÃ§Ã£o',
+      description: 'DocumentaÃ§Ã£o completa do sistema',
       category: 'help',
       icon: BookOpen,
       href: '/docs',
-      keywords: ['documentação', 'manual', 'guia', 'ajuda'],
+      keywords: ['documentaÃ§Ã£o', 'manual', 'guia', 'ajuda'],
       priority: 45
     }
   ]
@@ -314,7 +314,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.ctrlKey && e.key === 'k') {
       e.preventDefault()
-      // Será controlado pelo componente pai
+      // SerÃ¡ controlado pelo componente pai
     }
     
     if (!isOpen) return
@@ -399,7 +399,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
             <input
               ref={inputRef}
               type="text"
-              placeholder="Buscar páginas, funcionalidades, dados..."
+              placeholder="Buscar pÃ¡ginas, funcionalidades, dados..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="flex-1 text-lg bg-transparent border-none outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
@@ -559,11 +559,11 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
           <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
             <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400">
               <div className="flex items-center gap-1">
-                <Badge variant="outline" className="text-xs">↑↓</Badge>
+                <Badge variant="outline" className="text-xs">â†‘â†“</Badge>
                 <span>Navegar</span>
               </div>
               <div className="flex items-center gap-1">
-                <Badge variant="outline" className="text-xs">↵</Badge>
+                <Badge variant="outline" className="text-xs">â†µ</Badge>
                 <span>Selecionar</span>
               </div>
               <div className="flex items-center gap-1">

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -19,11 +19,11 @@ export async function GET(request: NextRequest) {
   if (error) {
     return NextResponse.json({ success: false, error: error.message })
   }
-  // Agregar KPIs do período
+  // Agregar KPIs do perÃ­odo
   if (!data || data.length === 0) {
     return NextResponse.json({ success: true, data: null })
   }
-  // Exemplo de agregação: soma, média, variação
+  // Exemplo de agregaÃ§Ã£o: soma, mÃ©dia, variaÃ§Ã£o
   const first = data[0]
   const last = data[data.length - 1]
   const sum = (arr: any[], key: string) => arr.reduce((acc, d) => acc + (d[key] || 0), 0)

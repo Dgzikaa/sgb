@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 
-// Configuração do Supabase
+// ConfiguraÃ§Ã£o do Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Schema de validação para filtros
+// Schema de validaÃ§Ã£o para filtros
 const FilterMetricsSchema = z.object({
   nome_metrica: z.string().optional(),
   categoria: z.enum(['produtividade', 'qualidade', 'eficiencia', 'engagement']).optional(),
@@ -25,7 +25,7 @@ const FilterMetricsSchema = z.object({
 });
 
 // ========================================
-// 📊 GET /api/ai/metrics
+// ðŸ“Š GET /api/ai/metrics
 // ========================================
 export async function GET(request: NextRequest) {
   try {
@@ -33,17 +33,17 @@ export async function GET(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'UsuÃ¡rio nÃ£o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
-    // Verificar permissões
+    // Verificar permissÃµes
     if (!['funcionario', 'financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissão para acessar métricas' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permissÃ£o para acessar mÃ©tricas' }, { status: 403 });
     }
 
-    // Parse dos parâmetros de query
+    // Parse dos parÃ¢metros de query
     const url = new URL(request.url);
     const rawParams = Object.fromEntries(url.searchParams.entries());
     
@@ -108,18 +108,18 @@ export async function GET(request: NextRequest) {
       query = query.eq('ativa', params.ativa);
     }
 
-    // Paginação
+    // PaginaÃ§Ã£o
     const offset = (params.page - 1) * params.limit;
     query = query.range(offset, offset + params.limit - 1);
 
     const { data: metrics, error } = await query;
 
     if (error) {
-      console.error('Erro ao buscar métricas:', error);
-      return NextResponse.json({ error: 'Erro ao buscar métricas' }, { status: 500 });
+      console.error('Erro ao buscar mÃ©tricas:', error);
+      return NextResponse.json({ error: 'Erro ao buscar mÃ©tricas' }, { status: 500 });
     }
 
-    // Buscar estatísticas gerais
+    // Buscar estatÃ­sticas gerais
     const { data: stats } = await supabase
       .from('ai_metrics')
       .select('nome_metrica, categoria, performance, tendencia, alerta_ativado, valor')
@@ -147,7 +147,7 @@ export async function GET(request: NextRequest) {
       }
     };
 
-    // Buscar métricas com alertas críticos
+    // Buscar mÃ©tricas com alertas crÃ­ticos
     const { data: alertas } = await supabase
       .from('ai_metrics')
       .select('nome_metrica, valor, meta_valor, performance')
@@ -157,10 +157,10 @@ export async function GET(request: NextRequest) {
       .order('data_referencia', { ascending: false })
       .limit(5);
 
-    // Calcular KPIs principais (métricas mais recentes)
+    // Calcular KPIs principais (mÃ©tricas mais recentes)
     const kpiMap = {
-      'taxa_conclusao_checklists': 'Taxa de Conclusão',
-      'tempo_medio_execucao': 'Tempo Médio',
+      'taxa_conclusao_checklists': 'Taxa de ConclusÃ£o',
+      'tempo_medio_execucao': 'Tempo MÃ©dio',
       'score_medio_qualidade': 'Score de Qualidade',
       'whatsapp_engagement': 'Engagement WhatsApp',
       'produtividade_funcionarios': 'Produtividade'
@@ -206,18 +206,18 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({
-        error: 'Parâmetros inválidos',
+        error: 'ParÃ¢metros invÃ¡lidos',
         details: error.errors
       }, { status: 400 });
     }
 
-    console.error('Erro na API de métricas:', error);
+    console.error('Erro na API de mÃ©tricas:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }
 
 // ========================================
-// 📊 GET /api/ai/metrics/trends (Tendências históricas)
+// ðŸ“Š GET /api/ai/metrics/trends (TendÃªncias histÃ³ricas)
 // ========================================
 export async function POST(request: NextRequest) {
   try {
@@ -225,26 +225,26 @@ export async function POST(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'UsuÃ¡rio nÃ£o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
     if (!['funcionario', 'financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissão para acessar tendências' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permissÃ£o para acessar tendÃªncias' }, { status: 403 });
     }
 
     const body = await request.json();
     const { metrica, periodo_dias = 30, granularidade = 'daily' } = body;
 
     if (!metrica) {
-      return NextResponse.json({ error: 'Nome da métrica é obrigatório' }, { status: 400 });
+      return NextResponse.json({ error: 'Nome da mÃ©trica Ã© obrigatÃ³rio' }, { status: 400 });
     }
 
     const dataInicio = new Date();
     dataInicio.setDate(dataInicio.getDate() - periodo_dias);
 
-    // Buscar dados históricos
+    // Buscar dados histÃ³ricos
     const { data: historico, error } = await supabase
       .from('ai_metrics')
       .select(`
@@ -262,11 +262,11 @@ export async function POST(request: NextRequest) {
       .order('data_referencia', { ascending: true });
 
     if (error) {
-      console.error('Erro ao buscar tendências:', error);
-      return NextResponse.json({ error: 'Erro ao buscar tendências' }, { status: 500 });
+      console.error('Erro ao buscar tendÃªncias:', error);
+      return NextResponse.json({ error: 'Erro ao buscar tendÃªncias' }, { status: 500 });
     }
 
-    // Calcular estatísticas da série
+    // Calcular estatÃ­sticas da sÃ©rie
     if (!historico || historico.length === 0) {
       return NextResponse.json({
         success: true,
@@ -292,11 +292,11 @@ export async function POST(request: NextRequest) {
     const valorMinimo = Math.min(...valores);
     const media = valores.reduce((a, b) => a + b, 0) / valores.length;
     
-    // Calcular desvio padrão
+    // Calcular desvio padrÃ£o
     const variance = valores.reduce((a, b) => a + Math.pow(b - media, 2), 0) / valores.length;
     const desvioPadrao = Math.sqrt(variance);
 
-    // Determinar tendência geral
+    // Determinar tendÃªncia geral
     const variacaoTotal = ((valorAtual - valorAnterior) / valorAnterior) * 100;
     let tendenciaGeral = 'estavel';
     if (variacaoTotal > 5) tendenciaGeral = 'crescente';
@@ -305,7 +305,7 @@ export async function POST(request: NextRequest) {
     // Calcular quantas vezes atingiu a meta
     const atingiuMeta = historico.filter((h: any) => h.meta_valor && h.valor >= h.meta_valor).length;
 
-    // Preparar dados para gráfico (agrupamento se necessário)
+    // Preparar dados para grÃ¡fico (agrupamento se necessÃ¡rio)
     let dadosGrafico = historico;
     
     if (granularidade === 'weekly' && historico.length > 7) {
@@ -353,7 +353,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Erro na API de tendências:', error);
+    console.error('Erro na API de tendÃªncias:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 } 

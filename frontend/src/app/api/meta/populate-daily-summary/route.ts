@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -10,31 +10,31 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🔄 Populando meta_daily_summary com dados existentes...')
+    console.log('ðŸ”„ Populando meta_daily_summary com dados existentes...')
 
     const { searchParams } = new URL(request.url)
     const barId = parseInt(searchParams.get('bar_id') || '3')
     const daysBack = parseInt(searchParams.get('days_back') || '30')
     const force = searchParams.get('force') === 'true'
 
-    console.log(`📊 Parâmetros: bar_id=${barId}, days_back=${daysBack}, force=${force}`)
+    console.log(`ðŸ“Š ParÃ¢metros: bar_id=${barId}, days_back=${daysBack}, force=${force}`)
 
-    // Calcular período
+    // Calcular perÃ­odo
     const hoje = new Date()
-    const inicioPeríodo = new Date(hoje.getTime() - daysBack * 24 * 60 * 60 * 1000)
+    const inicioPerÃ­odo = new Date(hoje.getTime() - daysBack * 24 * 60 * 60 * 1000)
 
-    console.log(`📅 Período: ${inicioPeríodo.toISOString().split('T')[0]} até ${hoje.toISOString().split('T')[0]}`)
+    console.log(`ðŸ“… PerÃ­odo: ${inicioPerÃ­odo.toISOString().split('T')[0]} atÃ© ${hoje.toISOString().split('T')[0]}`)
 
     // 1. Buscar dados existentes do Facebook por dia
     const { data: facebookData, error: fbError } = await supabase
       .from('facebook_metrics')
       .select('*')
       .eq('bar_id', barId)
-      .gte('data_referencia', inicioPeríodo.toISOString().split('T')[0])
+      .gte('data_referencia', inicioPerÃ­odo.toISOString().split('T')[0])
       .order('data_referencia', { ascending: false })
 
     if (fbError) {
-      console.error('❌ Erro ao buscar facebook_metrics:', fbError)
+      console.error('âŒ Erro ao buscar facebook_metrics:', fbError)
       throw new Error(`Erro Facebook: ${fbError.message}`)
     }
 
@@ -43,11 +43,11 @@ export async function POST(request: NextRequest) {
       .from('instagram_metrics')
       .select('*')
       .eq('bar_id', barId)
-      .gte('data_referencia', inicioPeríodo.toISOString().split('T')[0])
+      .gte('data_referencia', inicioPerÃ­odo.toISOString().split('T')[0])
       .order('data_referencia', { ascending: false })
 
     if (igError) {
-      console.error('❌ Erro ao buscar instagram_metrics:', igError)
+      console.error('âŒ Erro ao buscar instagram_metrics:', igError)
       throw new Error(`Erro Instagram: ${igError.message}`)
     }
 
@@ -56,10 +56,10 @@ export async function POST(request: NextRequest) {
       .from('meta_campaigns_history')
       .select('*')
       .eq('bar_id', barId)
-      .gte('data_coleta', inicioPeríodo.toISOString().split('T')[0])
+      .gte('data_coleta', inicioPerÃ­odo.toISOString().split('T')[0])
       .order('data_coleta', { ascending: false })
 
-    console.log(`📊 Dados encontrados: Facebook=${facebookData?.length || 0}, Instagram=${instagramData?.length || 0}, Campanhas=${campaignsData?.length || 0}`)
+    console.log(`ðŸ“Š Dados encontrados: Facebook=${facebookData?.length || 0}, Instagram=${instagramData?.length || 0}, Campanhas=${campaignsData?.length || 0}`)
 
     // 4. Criar map por data para facilitar processamento
     const fbByDate = new Map()
@@ -80,23 +80,23 @@ export async function POST(request: NextRequest) {
       campaignsByDate.get(row.data_coleta).push(row)
     })
 
-    // 5. Obter todas as datas únicas
+    // 5. Obter todas as datas Ãºnicas
     const allDates = new Set([
       ...Array.from(fbByDate.keys()),
       ...Array.from(igByDate.keys()),
       ...Array.from(campaignsByDate.keys())
     ])
 
-    console.log(`📅 Datas únicas encontradas: ${allDates.size}`)
+    console.log(`ðŸ“… Datas Ãºnicas encontradas: ${allDates.size}`)
 
-    // 6. Preparar dados para inserção
+    // 6. Preparar dados para inserÃ§Ã£o
     const dailySummaryRecords = []
     let processedDates = 0
     let skippedDates = 0
 
     for (const date of Array.from(allDates).sort().reverse()) {
       try {
-        // Verificar se já existe registro para esta data (se não forçar)
+        // Verificar se jÃ¡ existe registro para esta data (se nÃ£o forÃ§ar)
         if (!force) {
           const { data: existingRecord } = await supabase
             .from('meta_daily_summary')
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
             .single()
 
           if (existingRecord) {
-            console.log(`⏭️ Pulando ${date} - já existe`)
+            console.log(`â­ï¸ Pulando ${date} - jÃ¡ existe`)
             skippedDates++
             continue
           }
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
           
           // Facebook
           facebook_followers: fbDay?.page_fans || 0,
-          facebook_posts_count: 0, // Não temos na tabela atual
+          facebook_posts_count: 0, // NÃ£o temos na tabela atual
           facebook_total_reactions: fbDay?.post_likes || 0,
           facebook_total_comments: fbDay?.post_comments || 0,
           facebook_total_shares: fbDay?.post_shares || 0,
@@ -139,15 +139,15 @@ export async function POST(request: NextRequest) {
           // Instagram
           instagram_followers: igDay?.follower_count || 0,
           instagram_following: igDay?.following_count || 0,
-          instagram_posts_count: 0, // Não temos na tabela atual
+          instagram_posts_count: 0, // NÃ£o temos na tabela atual
           instagram_total_likes: igDay?.posts_likes || 0,
           instagram_total_comments: igDay?.posts_comments || 0,
-          instagram_total_shares: 0, // Não temos na tabela atual
+          instagram_total_shares: 0, // NÃ£o temos na tabela atual
           instagram_reach: igDay?.reach || 0,
           instagram_impressions: igDay?.impressions || 0,
-          instagram_saves: 0, // Não temos na tabela atual
-          instagram_profile_visits: 0, // Não temos na tabela atual
-          instagram_website_clicks: 0, // Não temos na tabela atual
+          instagram_saves: 0, // NÃ£o temos na tabela atual
+          instagram_profile_visits: 0, // NÃ£o temos na tabela atual
+          instagram_website_clicks: 0, // NÃ£o temos na tabela atual
           
           // Campanhas
           campaigns_active: campaignsActive,
@@ -164,14 +164,14 @@ export async function POST(request: NextRequest) {
         dailySummaryRecords.push(record)
         processedDates++
 
-        console.log(`✅ Processado ${date}: FB=${record.facebook_followers}, IG=${record.instagram_followers}, Campanhas=${record.campaigns_active}`)
+        console.log(`âœ… Processado ${date}: FB=${record.facebook_followers}, IG=${record.instagram_followers}, Campanhas=${record.campaigns_active}`)
 
       } catch (dateError) {
-        console.error(`❌ Erro ao processar data ${date}:`, dateError)
+        console.error(`âŒ Erro ao processar data ${date}:`, dateError)
       }
     }
 
-    console.log(`📊 Registros preparados: ${dailySummaryRecords.length}`)
+    console.log(`ðŸ“Š Registros preparados: ${dailySummaryRecords.length}`)
 
     // 7. Inserir dados na meta_daily_summary
     let insertedCount = 0
@@ -180,12 +180,12 @@ export async function POST(request: NextRequest) {
     if (dailySummaryRecords.length > 0) {
       // Se force=true, fazer upsert (delete + insert)
       if (force) {
-        console.log('🔄 Modo FORCE: removendo registros existentes...')
+        console.log('ðŸ”„ Modo FORCE: removendo registros existentes...')
         await supabase
           .from('meta_daily_summary')
           .delete()
           .eq('bar_id', barId)
-          .gte('data_referencia', inicioPeríodo.toISOString().split('T')[0])
+          .gte('data_referencia', inicioPerÃ­odo.toISOString().split('T')[0])
       }
 
       // Inserir em lotes de 50 para evitar timeout
@@ -200,14 +200,14 @@ export async function POST(request: NextRequest) {
             .select('data_referencia')
 
           if (insertError) {
-            console.error(`❌ Erro ao inserir lote ${i}-${i + batch.length}:`, insertError)
+            console.error(`âŒ Erro ao inserir lote ${i}-${i + batch.length}:`, insertError)
             errorCount += batch.length
           } else {
             insertedCount += insertedData?.length || batch.length
-            console.log(`✅ Lote ${i}-${i + batch.length} inserido com sucesso`)
+            console.log(`âœ… Lote ${i}-${i + batch.length} inserido com sucesso`)
           }
         } catch (batchError) {
-          console.error(`❌ Erro no lote ${i}:`, batchError)
+          console.error(`âŒ Erro no lote ${i}:`, batchError)
           errorCount += batch.length
         }
       }
@@ -221,11 +221,11 @@ export async function POST(request: NextRequest) {
 
     const responseData = {
       success: true,
-      message: 'População da meta_daily_summary concluída',
+      message: 'PopulaÃ§Ã£o da meta_daily_summary concluÃ­da',
       stats: {
         bar_id: barId,
         period: {
-          start: inicioPeríodo.toISOString().split('T')[0],
+          start: inicioPerÃ­odo.toISOString().split('T')[0],
           end: hoje.toISOString().split('T')[0],
           days_back: daysBack
         },
@@ -247,7 +247,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('✅ População concluída:', {
+    console.log('âœ… PopulaÃ§Ã£o concluÃ­da:', {
       inserted: insertedCount,
       errors: errorCount,
       total_records: finalCount?.length || 0
@@ -256,7 +256,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(responseData)
 
   } catch (error) {
-    console.error('❌ Erro na população da meta_daily_summary:', error)
+    console.error('âŒ Erro na populaÃ§Ã£o da meta_daily_summary:', error)
     
     return NextResponse.json({
       success: false,

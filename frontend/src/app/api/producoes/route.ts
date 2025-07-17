@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
-// POST - Salvar produção na tabela producoes
+// POST - Salvar produÃ§Ã£o na tabela producoes
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    console.log('💾 Dados recebidos para salvar produção:', body)
+    console.log('ðŸ’¾ Dados recebidos para salvar produÃ§Ã£o:', body)
 
     const supabase = await getSupabaseClient()
     if (!supabase) {
@@ -15,28 +15,28 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
 
-    // Validar dados obrigatórios
+    // Validar dados obrigatÃ³rios
     if (!body.receita_codigo || !body.receita_nome) {
       return NextResponse.json({
         success: false,
-        error: 'Receita código e nome são obrigatórios'
+        error: 'Receita cÃ³digo e nome sÃ£o obrigatÃ³rios'
       }, { status: 400 })
     }
 
     if (!body.rendimento_real || parseFloat(body.rendimento_real) <= 0) {
       return NextResponse.json({
         success: false,
-        error: 'Rendimento real é obrigatório e deve ser maior que zero'
+        error: 'Rendimento real Ã© obrigatÃ³rio e deve ser maior que zero'
       }, { status: 400 })
     }
 
-    // Calcular percentual de aderência à receita baseado nos insumos
-    let percentual_aderencia_receita = 100 // Default se não há insumos
+    // Calcular percentual de aderÃªncia Ã  receita baseado nos insumos
+    let percentual_aderencia_receita = 100 // Default se nÃ£o hÃ¡ insumos
     let total_desvio_insumos = 0
     let insumos_validos = 0
 
     if (body.insumos && Array.isArray(body.insumos) && body.insumos.length > 0) {
-      console.log('📊 Calculando aderência à receita com', body.insumos.length, 'insumos')
+      console.log('ðŸ“Š Calculando aderÃªncia Ã  receita com', body.insumos.length, 'insumos')
       
       body.insumos.forEach((insumo: any, index: number) => {
         const planejado = parseFloat(insumo.quantidade_necessaria) || 0
@@ -50,18 +50,18 @@ export async function POST(request: NextRequest) {
           total_desvio_insumos += desvio
           insumos_validos++
           
-          console.log(`📋 Insumo ${index + 1} (${insumo.nome}): Calculado=${calculado}${insumo.unidade_medida}, Real=${real}${insumo.unidade_medida}, Aderência=${aderencia.toFixed(1)}%`)
+          console.log(`ðŸ“‹ Insumo ${index + 1} (${insumo.nome}): Calculado=${calculado}${insumo.unidade_medida}, Real=${real}${insumo.unidade_medida}, AderÃªncia=${aderencia.toFixed(1)}%`)
         }
       })
       
       if (insumos_validos > 0) {
         const desvio_medio = total_desvio_insumos / insumos_validos
         percentual_aderencia_receita = Math.max(0, 100 - desvio_medio)
-        console.log(`🎯 Desvio médio: ${desvio_medio.toFixed(1)}% | Aderência final: ${percentual_aderencia_receita.toFixed(1)}%`)
+        console.log(`ðŸŽ¯ Desvio mÃ©dio: ${desvio_medio.toFixed(1)}% | AderÃªncia final: ${percentual_aderencia_receita.toFixed(1)}%`)
       }
     }
 
-    // Preparar dados para inserção
+    // Preparar dados para inserÃ§Ã£o
     const dadosProducao = {
       bar_id: body.bar_id || 3,
       receita_codigo: body.receita_codigo,
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
       status: body.status || 'finalizada'
     }
 
-    // Inserir produção
+    // Inserir produÃ§Ã£o
     const { data: producaoSalva, error } = await supabase
       .from('producoes')
       .insert([dadosProducao])
@@ -90,18 +90,18 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('❌ Erro ao inserir produção:', error)
+      console.error('âŒ Erro ao inserir produÃ§Ã£o:', error)
       return NextResponse.json({
         success: false,
-        error: 'Erro ao salvar produção: ' + error.message
+        error: 'Erro ao salvar produÃ§Ã£o: ' + error.message
       }, { status: 500 })
     }
 
-    console.log('✅ Produção salva com sucesso:', producaoSalva.id)
+    console.log('âœ… ProduÃ§Ã£o salva com sucesso:', producaoSalva.id)
 
     // Salvar dados detalhados dos insumos se fornecidos
     if (body.insumos && Array.isArray(body.insumos) && body.insumos.length > 0) {
-      console.log('💾 Salvando dados detalhados de', body.insumos.length, 'insumos...')
+      console.log('ðŸ’¾ Salvando dados detalhados de', body.insumos.length, 'insumos...')
       
       const insumosParaSalvar = body.insumos.map((insumo: any) => ({
         producao_id: producaoSalva.id,
@@ -120,16 +120,16 @@ export async function POST(request: NextRequest) {
         .select('*')
 
       if (insumosError) {
-        console.error('⚠️ Erro ao salvar insumos (produção salva):', insumosError)
-        // Não falhar a produção por erro nos insumos
+        console.error('âš ï¸ Erro ao salvar insumos (produÃ§Ã£o salva):', insumosError)
+        // NÃ£o falhar a produÃ§Ã£o por erro nos insumos
       } else {
-        console.log('✅ Salvos', insumosData?.length || 0, 'insumos detalhados')
+        console.log('âœ… Salvos', insumosData?.length || 0, 'insumos detalhados')
       }
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Produção salva com sucesso',
+      message: 'ProduÃ§Ã£o salva com sucesso',
       data: {
         ...producaoSalva,
         percentual_aderencia_receita,
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Erro interno na API produção:', error)
+    console.error('âŒ Erro interno na API produÃ§Ã£o:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro interno do servidor: ' + (error as Error).message
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET - Buscar histórico de produções
+// GET - Buscar histÃ³rico de produÃ§Ãµes
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -157,7 +157,7 @@ export async function GET(request: NextRequest) {
     const receita_codigo = searchParams.get('receita_codigo')
     const limite = parseInt(searchParams.get('limite') || '50')
 
-    console.log(`📊 Buscando histórico de produções para bar_id: ${barId}`)
+    console.log(`ðŸ“Š Buscando histÃ³rico de produÃ§Ãµes para bar_id: ${barId}`)
 
     const supabase = await getSupabaseClient()
     if (!supabase) {
@@ -195,14 +195,14 @@ export async function GET(request: NextRequest) {
     const { data: producoes, error } = await query
 
     if (error) {
-      console.error('❌ Erro ao buscar produções:', error)
+      console.error('âŒ Erro ao buscar produÃ§Ãµes:', error)
       return NextResponse.json({
         success: false,
-        error: 'Erro ao buscar histórico: ' + error.message
+        error: 'Erro ao buscar histÃ³rico: ' + error.message
       }, { status: 500 })
     }
 
-    // Calcular estatísticas
+    // Calcular estatÃ­sticas
     const estatisticas = {
       total_producoes: producoes?.length || 0,
       desvio_medio: 0,
@@ -226,7 +226,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    console.log(`✅ ${producoes?.length || 0} produções encontradas`)
+    console.log(`âœ… ${producoes?.length || 0} produÃ§Ãµes encontradas`)
 
     return NextResponse.json({
       success: true,
@@ -236,7 +236,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Erro interno na API histórico:', error)
+    console.error('âŒ Erro interno na API histÃ³rico:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro interno do servidor: ' + (error as Error).message

@@ -1,28 +1,28 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser, authErrorResponse, permissionErrorResponse } from '@/middleware/auth'
 import { z } from 'zod'
 
 // =====================================================
-// SCHEMAS DE VALIDAÇÃO
+// SCHEMAS DE VALIDAÃ‡ÃƒO
 // =====================================================
 
 const AgendamentoSchema = z.object({
-  checklist_id: z.string().uuid('ID do checklist inválido'),
+  checklist_id: z.string().uuid('ID do checklist invÃ¡lido'),
   titulo: z.string().min(1).max(255),
   frequencia: z.enum(['diaria', 'semanal', 'quinzenal', 'mensal', 'conforme_necessario']),
-  horario: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Horário deve estar no formato HH:MM'),
-  dias_semana: z.array(z.number().min(0).max(6)).optional(), // 0 = domingo, 6 = sábado
+  horario: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'HorÃ¡rio deve estar no formato HH:MM'),
+  dias_semana: z.array(z.number().min(0).max(6)).optional(), // 0 = domingo, 6 = sÃ¡bado
   dia_mes: z.number().min(1).max(31).optional(),
   ativo: z.boolean().default(true),
   notificacoes_ativas: z.boolean().default(true),
-  tempo_limite_horas: z.number().int().min(1).max(168).default(24), // Máx 1 semana
+  tempo_limite_horas: z.number().int().min(1).max(168).default(24), // MÃ¡x 1 semana
   tempo_alerta_horas: z.number().int().min(1).max(48).default(2), // Alerta 2h antes do prazo
   prioridade: z.enum(['baixa', 'normal', 'alta', 'critica']).default('normal'),
   observacoes: z.string().optional(),
   responsaveis_whatsapp: z.array(z.object({
     nome: z.string(),
-    numero: z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Número WhatsApp inválido'),
+    numero: z.string().regex(/^\+?[1-9]\d{1,14}$/, 'NÃºmero WhatsApp invÃ¡lido'),
     cargo: z.string().optional()
   })).default([])
 })
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
   try {
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usuário não autenticado')
+      return authErrorResponse('UsuÃ¡rio nÃ£o autenticado')
     }
 
     const { searchParams } = new URL(request.url)
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao buscar agendamentos' }, { status: 500 })
     }
 
-    // Buscar próximas execuções para cada agendamento
+    // Buscar prÃ³ximas execuÃ§Ãµes para cada agendamento
     const agendamentosComProximaExecucao = await Promise.all(
       (agendamentos || []).map(async (agendamento: any) => {
         const proximaExecucao = calcularProximaExecucao(agendamento)
@@ -123,10 +123,10 @@ export async function POST(request: NextRequest) {
   try {
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usuário não autenticado')
+      return authErrorResponse('UsuÃ¡rio nÃ£o autenticado')
     }
 
-    // Verificar permissões - apenas admin pode criar agendamentos
+    // Verificar permissÃµes - apenas admin pode criar agendamentos
     if (user.role !== 'admin') {
       return permissionErrorResponse('Apenas administradores podem criar agendamentos')
     }
@@ -145,14 +145,14 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (checklistError || !checklist) {
-      return NextResponse.json({ error: 'Checklist não encontrado' }, { status: 404 })
+      return NextResponse.json({ error: 'Checklist nÃ£o encontrado' }, { status: 404 })
     }
 
     // Verificar conflitos de agendamento
     const conflito = await verificarConflitoAgendamento(supabase, data, user.bar_id)
     if (conflito) {
       return NextResponse.json({ 
-        error: 'Já existe um agendamento similar para este horário',
+        error: 'JÃ¡ existe um agendamento similar para este horÃ¡rio',
         conflito 
       }, { status: 409 })
     }
@@ -180,8 +180,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao criar agendamento' }, { status: 500 })
     }
 
-    // Log da criação
-    console.log(`✅ Agendamento criado: ${novoAgendamento.titulo} para checklist ${checklist.nome}`)
+    // Log da criaÃ§Ã£o
+    console.log(`âœ… Agendamento criado: ${novoAgendamento.titulo} para checklist ${checklist.nome}`)
 
     return NextResponse.json({
       success: true,
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json({ 
-        error: 'Dados inválidos',
+        error: 'Dados invÃ¡lidos',
         details: error.errors 
       }, { status: 400 })
     }
@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
 }
 
 // =====================================================
-// FUNÇÕES AUXILIARES
+// FUNÃ‡Ã•ES AUXILIARES
 // =====================================================
 
 function calcularProximaExecucao(agendamento: any): string | null {
@@ -219,7 +219,7 @@ function calcularProximaExecucao(agendamento: any): string | null {
   let proximaData = new Date()
   proximaData.setHours(hora, minuto, 0, 0)
 
-  // Se já passou da hora hoje, começar de amanhã
+  // Se jÃ¡ passou da hora hoje, comeÃ§ar de amanhÃ£
   if (proximaData <= agora) {
     proximaData.setDate(proximaData.getDate() + 1)
   }
@@ -236,7 +236,7 @@ function calcularProximaExecucao(agendamento: any): string | null {
       return proximaData.toISOString()
     
     case 'quinzenal':
-      // Lógica para quinzenal (a cada 2 semanas nos dias especificados)
+      // LÃ³gica para quinzenal (a cada 2 semanas nos dias especificados)
       const diasQuinzenal = agendamento.dias_semana || []
       let encontrou = false
       let tentativas = 0
@@ -255,7 +255,7 @@ function calcularProximaExecucao(agendamento: any): string | null {
       const diaMes = agendamento.dia_mes || 1
       proximaData.setDate(diaMes)
       
-      // Se já passou este mês, próximo mês
+      // Se jÃ¡ passou este mÃªs, prÃ³ximo mÃªs
       if (proximaData <= agora) {
         proximaData.setMonth(proximaData.getMonth() + 1)
         proximaData.setDate(diaMes)

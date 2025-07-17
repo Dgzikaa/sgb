@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { agora, formatarDataHora, timestampBrasilia } from '@/lib/timezone';
 
@@ -50,12 +50,12 @@ export async function GET() {
         agora_brasil_func: supabaseResult[0]?.agora_brasil_func,
         formatado_brasil: supabaseResult[0]?.formatado_brasil
       } : {
-        error: 'Não foi possível conectar ao Supabase'
+        error: 'NÃ£o foi possÃ­vel conectar ao Supabase'
       },
       comparison: {
-        frontend_vs_utc: `Frontend está ${Math.round((frontendTime.getTime() - new Date().getTime()) / 1000 / 60 / 60)} horas de diferença do UTC`,
+        frontend_vs_utc: `Frontend estÃ¡ ${Math.round((frontendTime.getTime() - new Date().getTime()) / 1000 / 60 / 60)} horas de diferenÃ§a do UTC`,
         ambiente: process.env.NODE_ENV,
-        vercel_timezone: process.env.TZ || 'Não configurado'
+        vercel_timezone: process.env.TZ || 'NÃ£o configurado'
       },
       debug: {
         env_tz: process.env.TZ,

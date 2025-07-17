@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useUser } from '@/contexts/UserContext'
@@ -76,9 +76,9 @@ interface ChecklistItem {
 const setoresConfig = [
   { id: 'cozinha', nome: 'Cozinha', icon: ChefHat, cor: 'bg-orange-500' },
   { id: 'bar', nome: 'Bar', icon: Coffee, cor: 'bg-blue-500' },
-  { id: 'salao', nome: 'Salão', icon: Utensils, cor: 'bg-green-500' },
+  { id: 'salao', nome: 'SalÃ£o', icon: Utensils, cor: 'bg-green-500' },
   { id: 'recebimento', nome: 'Recebimento', icon: Truck, cor: 'bg-purple-500' },
-  { id: 'seguranca', nome: 'Segurança', icon: Shield, cor: 'bg-red-500' },
+  { id: 'seguranca', nome: 'SeguranÃ§a', icon: Shield, cor: 'bg-red-500' },
   { id: 'administrativo', nome: 'Administrativo', icon: FileText, cor: 'bg-gray-500' }
 ]
 
@@ -88,10 +88,10 @@ export default function ChecklistsFuncionario() {
   
   const { setPageTitle } = usePageTitle()
   
-  // Mock user data - em produção virá do contexto
+  // Mock user data - em produÃ§Ã£o virÃ¡ do contexto
   const usuario = {
     id: 'user-joao-silva-mock',
-    nome: 'João Silva',
+    nome: 'JoÃ£o Silva',
     cargo: 'Cozinheiro',
     setor: 'cozinha'
   }
@@ -101,12 +101,12 @@ export default function ChecklistsFuncionario() {
   const [loading, setLoading] = useState(false)
   const [tempoInicio, setTempoInicio] = useState<Date | null>(null)
   
-  // Estados para visualização
+  // Estados para visualizaÃ§Ã£o
   const [aba, setAba] = useState<'pendentes' | 'realizados'>('pendentes')
   const [checklistsRealizados, setChecklistsRealizados] = useState<any[]>([])
   const [loadingRealizados, setLoadingRealizados] = useState(false)
   
-  // Estados para câmera/foto
+  // Estados para cÃ¢mera/foto
   const [cameraAberta, setCameraAberta] = useState(false)
   const [itemFotoAtual, setItemFotoAtual] = useState<{secaoId: string, itemId: string} | null>(null)
   
@@ -117,16 +117,16 @@ export default function ChecklistsFuncionario() {
   // Hook de upload
   const { uploadFile } = useFileUpload()
 
-  // Mock data - filtrado por usuário
+  // Mock data - filtrado por usuÃ¡rio
   const checklistsMock: ChecklistFuncionario[] = [
     {
       id: '1',
       nome: 'Abertura Cozinha',
       setor: 'cozinha',
       tipo: 'abertura',
-      descricao: 'Checklist de abertura da cozinha - procedimentos obrigatórios',
+      descricao: 'Checklist de abertura da cozinha - procedimentos obrigatÃ³rios',
       tempo_estimado: 45,
-      responsavel: 'João Silva',
+      responsavel: 'JoÃ£o Silva',
       deadline: '07:00',
       status: 'pendente',
       prioridade: 'alta',
@@ -139,16 +139,16 @@ export default function ChecklistsFuncionario() {
             {
               id: 'temp_freezer',
               titulo: 'Temperatura do freezer',
-              descricao: 'Verificar se está entre -18°C e -15°C',
+              descricao: 'Verificar se estÃ¡ entre -18Â°C e -15Â°C',
               tipo: 'numero',
               obrigatorio: true,
               status: 'pendente',
-              opcoes: { min: -25, max: 0, placeholder: '°C' }
+              opcoes: { min: -25, max: 0, placeholder: 'Â°C' }
             },
             {
               id: 'fogao_ok',
-              titulo: 'Fogão funcionando',
-              descricao: 'Testar todas as bocas do fogão',
+              titulo: 'FogÃ£o funcionando',
+              descricao: 'Testar todas as bocas do fogÃ£o',
               tipo: 'sim_nao',
               obrigatorio: true,
               status: 'pendente'
@@ -179,14 +179,14 @@ export default function ChecklistsFuncionario() {
             {
               id: 'qualidade_limpeza',
               titulo: 'Qualidade da limpeza',
-              descricao: 'Como você avalia a limpeza geral?',
+              descricao: 'Como vocÃª avalia a limpeza geral?',
               tipo: 'avaliacao',
               obrigatorio: false,
               status: 'pendente'
             },
             {
               id: 'assinatura',
-              titulo: 'Assinatura do responsável',
+              titulo: 'Assinatura do responsÃ¡vel',
               tipo: 'assinatura',
               obrigatorio: true,
               status: 'pendente'
@@ -202,7 +202,7 @@ export default function ChecklistsFuncionario() {
       tipo: 'limpeza',
       descricao: 'Limpeza profunda semanal da cozinha',
       tempo_estimado: 90,
-      responsavel: 'João Silva',
+      responsavel: 'JoÃ£o Silva',
       status: 'atrasado',
       prioridade: 'media',
       secoes: [
@@ -230,7 +230,7 @@ export default function ChecklistsFuncionario() {
             {
               id: 'foto_exaustor',
               titulo: 'Foto do exaustor limpo',
-              descricao: 'Tirar foto do exaustor após limpeza',
+              descricao: 'Tirar foto do exaustor apÃ³s limpeza',
               tipo: 'foto_camera',
               obrigatorio: false,
               status: 'pendente',
@@ -240,12 +240,12 @@ export default function ChecklistsFuncionario() {
         },
         {
           id: 'areas_especiais',
-          nome: 'Áreas Especiais',
+          nome: 'Ãreas Especiais',
           cor: 'bg-purple-500',
           itens: [
             {
               id: 'estoque_seco',
-              titulo: 'Organização do estoque seco',
+              titulo: 'OrganizaÃ§Ã£o do estoque seco',
               descricao: 'Verificar validades e organizar produtos',
               tipo: 'sim_nao',
               obrigatorio: true,
@@ -253,25 +253,25 @@ export default function ChecklistsFuncionario() {
             },
             {
               id: 'qualidade_limpeza_semanal',
-              titulo: 'Avaliação geral da limpeza',
-              descricao: 'Como você avalia a limpeza semanal?',
+              titulo: 'AvaliaÃ§Ã£o geral da limpeza',
+              descricao: 'Como vocÃª avalia a limpeza semanal?',
               tipo: 'avaliacao',
               obrigatorio: false,
               status: 'pendente'
             },
             {
               id: 'observacoes_gerais',
-              titulo: 'Observações gerais',
-              descricao: 'Alguma observação sobre a limpeza semanal?',
+              titulo: 'ObservaÃ§Ãµes gerais',
+              descricao: 'Alguma observaÃ§Ã£o sobre a limpeza semanal?',
               tipo: 'texto',
               obrigatorio: false,
               status: 'pendente',
-              opcoes: { placeholder: 'Digite suas observações...' }
+              opcoes: { placeholder: 'Digite suas observaÃ§Ãµes...' }
             },
             {
               id: 'assinatura_supervisor',
               titulo: 'Assinatura do supervisor',
-              descricao: 'Confirme a inspeção da limpeza semanal',
+              descricao: 'Confirme a inspeÃ§Ã£o da limpeza semanal',
               tipo: 'assinatura',
               obrigatorio: true,
               status: 'pendente'
@@ -282,32 +282,32 @@ export default function ChecklistsFuncionario() {
      },
      {
       id: '3',
-      nome: 'Segurança Semanal',
+      nome: 'SeguranÃ§a Semanal',
       setor: 'seguranca',
       tipo: 'seguranca',
-      descricao: 'Verificações de segurança e prevenção de incêndios',
+      descricao: 'VerificaÃ§Ãµes de seguranÃ§a e prevenÃ§Ã£o de incÃªndios',
       tempo_estimado: 60,
-      responsavel: 'João Silva',
+      responsavel: 'JoÃ£o Silva',
       status: 'pendente',
       prioridade: 'alta',
       secoes: [
         {
           id: 'prevencao_incendio',
-          nome: 'Prevenção de Incêndios',
+          nome: 'PrevenÃ§Ã£o de IncÃªndios',
           cor: 'bg-red-500',
           itens: [
             {
               id: 'extintores',
-              titulo: 'Verificação dos extintores',
-              descricao: 'Conferir pressão e validade dos extintores',
+              titulo: 'VerificaÃ§Ã£o dos extintores',
+              descricao: 'Conferir pressÃ£o e validade dos extintores',
               tipo: 'sim_nao',
               obrigatorio: true,
               status: 'pendente'
             },
             {
               id: 'saidas_emergencia',
-              titulo: 'Saídas de emergência desobstruídas',
-              descricao: 'Verificar se as saídas estão livres',
+              titulo: 'SaÃ­das de emergÃªncia desobstruÃ­das',
+              descricao: 'Verificar se as saÃ­das estÃ£o livres',
               tipo: 'sim_nao',
               obrigatorio: true,
               status: 'pendente'
@@ -324,29 +324,29 @@ export default function ChecklistsFuncionario() {
         },
         {
           id: 'equipamentos_gas',
-          nome: 'Equipamentos de Gás',
+          nome: 'Equipamentos de GÃ¡s',
           cor: 'bg-yellow-500',
           itens: [
             {
               id: 'vazamentos_gas',
-              titulo: 'Verificação de vazamentos',
-              descricao: 'Usar detector ou água com sabão',
+              titulo: 'VerificaÃ§Ã£o de vazamentos',
+              descricao: 'Usar detector ou Ã¡gua com sabÃ£o',
               tipo: 'sim_nao',
               obrigatorio: true,
               status: 'pendente'
             },
             {
               id: 'valvulas_gas',
-              titulo: 'Funcionamento das válvulas',
-              descricao: 'Testar abertura e fechamento das válvulas',
+              titulo: 'Funcionamento das vÃ¡lvulas',
+              descricao: 'Testar abertura e fechamento das vÃ¡lvulas',
               tipo: 'sim_nao',
               obrigatorio: true,
               status: 'pendente'
             },
             {
               id: 'assinatura_responsavel_seguranca',
-              titulo: 'Assinatura do responsável',
-              descricao: 'Confirme as verificações de segurança',
+              titulo: 'Assinatura do responsÃ¡vel',
+              descricao: 'Confirme as verificaÃ§Ãµes de seguranÃ§a',
               tipo: 'assinatura',
               obrigatorio: true,
               status: 'pendente'
@@ -358,7 +358,7 @@ export default function ChecklistsFuncionario() {
    ]
 
   useEffect(() => {
-    setPageTitle('📋 Meus Checklists')
+    setPageTitle('ðŸ“‹ Meus Checklists')
     
     return () => {
       setPageTitle(null)
@@ -376,7 +376,7 @@ export default function ChecklistsFuncionario() {
 
   const carregarChecklists = async () => {
     setLoading(true)
-    // TODO: Filtrar pelo usuário logado
+    // TODO: Filtrar pelo usuÃ¡rio logado
     const checklistsUsuario = checklistsMock.filter((c: any) => 
       c.responsavel === usuario.nome || c.setor === usuario.setor
     )
@@ -393,13 +393,13 @@ export default function ChecklistsFuncionario() {
       if (response.ok) {
         const data = await response.json()
         setChecklistsRealizados(data.execucoes || [])
-        console.log('📊 Checklists realizados carregados:', data.execucoes?.length || 0)
+        console.log('ðŸ“Š Checklists realizados carregados:', data.execucoes?.length || 0)
       } else {
-        console.error('❌ Erro ao carregar checklists realizados')
+        console.error('âŒ Erro ao carregar checklists realizados')
         setChecklistsRealizados([])
       }
     } catch (error) {
-      console.error('❌ Erro ao carregar checklists realizados:', error)
+      console.error('âŒ Erro ao carregar checklists realizados:', error)
       setChecklistsRealizados([])
     } finally {
       setLoadingRealizados(false)
@@ -466,14 +466,14 @@ export default function ChecklistsFuncionario() {
     try {
       const tempoExecucao = tempoInicio ? Math.round((new Date().getTime() - tempoInicio.getTime()) / 60000) : 0
       
-      // Preparar dados da execução
+      // Preparar dados da execuÃ§Ã£o
       const executionData = {
         checklist_id: checklistAtivo.id,
         responsavel_id: usuario.id || 'user-mock-id', // TODO: pegar do contexto real
         tempo_execucao: tempoExecucao,
         total_itens: checklistAtivo.secoes.flatMap(s => s.itens).length,
         itens_ok: checklistAtivo.secoes.flatMap(s => s.itens).filter((i: any) => i.status === 'preenchido').length,
-        itens_problema: 0, // TODO: implementar lógica de problemas
+        itens_problema: 0, // TODO: implementar lÃ³gica de problemas
         itens_na: 0,
         observacoes_gerais: `Checklist realizado em ${tempoExecucao} minutos`,
         bar_id: 1, // TODO: pegar do contexto real
@@ -490,7 +490,7 @@ export default function ChecklistsFuncionario() {
         )
       }
 
-      console.log('📤 Enviando checklist para API...', executionData)
+      console.log('ðŸ“¤ Enviando checklist para API...', executionData)
 
       // Enviar para API real
       const response = await fetch('/api/checklist-execucoes', {
@@ -507,24 +507,24 @@ export default function ChecklistsFuncionario() {
         throw new Error(result.error || 'Erro ao enviar checklist')
       }
 
-      console.log('✅ Checklist enviado com sucesso:', result)
+      console.log('âœ… Checklist enviado com sucesso:', result)
       
-      // Redirecionar para página de sucesso ou histórico
-      alert('✅ Checklist enviado com sucesso!')
+      // Redirecionar para pÃ¡gina de sucesso ou histÃ³rico
+      alert('âœ… Checklist enviado com sucesso!')
       
       // Voltar para lista e recarregar
       setChecklistAtivo(null)
       setTempoInicio(null)
       carregarChecklists()
       
-      // Recarregar checklists realizados também
+      // Recarregar checklists realizados tambÃ©m
       if (aba === 'realizados') {
         carregarChecklistsRealizados()
       }
       
     } catch (error: any) {
-      console.error('❌ Erro ao enviar checklist:', error)
-      alert('❌ Erro ao enviar: ' + error.message)
+      console.error('âŒ Erro ao enviar checklist:', error)
+      alert('âŒ Erro ao enviar: ' + error.message)
     } finally {
       setLoading(false)
     }
@@ -546,25 +546,25 @@ export default function ChecklistsFuncionario() {
       // Fallback - copiar para clipboard
       const copied = await safeNavigator.clipboard.writeText(url)
       if (copied) {
-        alert('📋 Link copiado para a área de transferência!')
+        alert('ðŸ“‹ Link copiado para a Ã¡rea de transferÃªncia!')
       } else {
-        alert('❌ Erro ao compartilhar ou copiar link')
+        alert('âŒ Erro ao compartilhar ou copiar link')
       }
     }
   }
 
-  // Função para abrir câmera
+  // FunÃ§Ã£o para abrir cÃ¢mera
   const abrirCamera = (secaoId: string, itemId: string) => {
     setItemFotoAtual({ secaoId, itemId })
     setCameraAberta(true)
   }
 
-  // Função para processar foto capturada
+  // FunÃ§Ã£o para processar foto capturada
   const handleFotoCapturada = async (blob: Blob) => {
     if (!itemFotoAtual) return
 
     try {
-      // Criar URL temporária para preview imediato
+      // Criar URL temporÃ¡ria para preview imediato
       const previewUrl = URL.createObjectURL(blob)
       atualizarItem(itemFotoAtual.secaoId, itemFotoAtual.itemId, previewUrl)
       
@@ -573,7 +573,7 @@ export default function ChecklistsFuncionario() {
       const filename = `checklist-foto-${timestamp}.jpg`
       const file = new File([blob], filename, { type: 'image/jpeg' })
       
-      console.log('📸 Fazendo upload da foto...', file.name)
+      console.log('ðŸ“¸ Fazendo upload da foto...', file.name)
       
       // Fazer upload real para Supabase
       const result = await uploadFile(file, {
@@ -586,57 +586,57 @@ export default function ChecklistsFuncionario() {
       // Atualizar com URL final do Supabase
       atualizarItem(itemFotoAtual.secaoId, itemFotoAtual.itemId, result.url)
       
-      console.log('✅ Foto salva no Supabase:', result.url)
+      console.log('âœ… Foto salva no Supabase:', result.url)
       
     } catch (error) {
-      console.error('❌ Erro ao salvar foto:', error)
+      console.error('âŒ Erro ao salvar foto:', error)
       alert('Erro ao salvar foto. Tente novamente.')
     } finally {
-      // Fechar câmera
+      // Fechar cÃ¢mera
       setCameraAberta(false)
       setItemFotoAtual(null)
     }
   }
 
-  // Função para processar upload de foto
+  // FunÃ§Ã£o para processar upload de foto
   const handleFotoUpload = (secaoId: string, itemId: string, result: any) => {
     atualizarItem(secaoId, itemId, result.url || result.filename)
-    console.log('📷 Foto enviada:', result)
+    console.log('ðŸ“· Foto enviada:', result)
   }
 
-  // Função para abrir pad de assinatura
+  // FunÃ§Ã£o para abrir pad de assinatura
   const abrirAssinaturaPad = (secaoId: string, itemId: string) => {
-    console.log('🖊️ Abrindo pad de assinatura', { secaoId, itemId })
+    console.log('ðŸ–Šï¸ Abrindo pad de assinatura', { secaoId, itemId })
     setItemAssinaturaAtual({ secaoId, itemId })
     setAssinaturaPadAberto(true)
-    console.log('✅ Estados atualizados', { assinaturaPadAberto: true, itemAssinaturaAtual: { secaoId, itemId } })
+    console.log('âœ… Estados atualizados', { assinaturaPadAberto: true, itemAssinaturaAtual: { secaoId, itemId } })
   }
 
-  // Função para processar assinatura capturada
+  // FunÃ§Ã£o para processar assinatura capturada
   const handleAssinaturaCapturada = (result: any) => {
-    console.log('🎯 handleAssinaturaCapturada chamada', { result, itemAssinaturaAtual })
+    console.log('ðŸŽ¯ handleAssinaturaCapturada chamada', { result, itemAssinaturaAtual })
     
     if (!itemAssinaturaAtual) {
-      console.error('❌ itemAssinaturaAtual é null!')
+      console.error('âŒ itemAssinaturaAtual Ã© null!')
       return
     }
 
-    console.log('📝 Atualizando item com assinatura', { 
+    console.log('ðŸ“ Atualizando item com assinatura', { 
       secaoId: itemAssinaturaAtual.secaoId, 
       itemId: itemAssinaturaAtual.itemId, 
       url: result.url || result.filename 
     })
     
     atualizarItem(itemAssinaturaAtual.secaoId, itemAssinaturaAtual.itemId, result.url || result.filename)
-    console.log('✍️ Assinatura salva:', result)
+    console.log('âœï¸ Assinatura salva:', result)
     
     // Fechar pad
     setAssinaturaPadAberto(false)
     setItemAssinaturaAtual(null)
-    console.log('🔒 Modal de assinatura fechado')
+    console.log('ðŸ”’ Modal de assinatura fechado')
   }
 
-  // Função para cancelar assinatura
+  // FunÃ§Ã£o para cancelar assinatura
   const handleAssinaturaCancelada = () => {
     setAssinaturaPadAberto(false)
     setItemAssinaturaAtual(null)
@@ -681,7 +681,7 @@ export default function ChecklistsFuncionario() {
                     : 'border-green-300 text-green-700 hover:bg-green-50 hover:text-green-800 bg-white'
                 }`}
               >
-                ✅ Sim
+                âœ… Sim
               </Button>
               <Button
                 variant={item.valor === false ? 'default' : 'outline'}
@@ -692,7 +692,7 @@ export default function ChecklistsFuncionario() {
                     : 'border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800 bg-white'
                 }`}
               >
-                ❌ Não
+                âŒ NÃ£o
               </Button>
             </div>
           )}
@@ -707,7 +707,7 @@ export default function ChecklistsFuncionario() {
                     item.valor === rating ? 'bg-yellow-100 scale-110 ring-2 ring-yellow-400' : 'hover:bg-gray-100'
                   }`}
                 >
-                  {rating === 1 ? '😞' : rating === 2 ? '😐' : rating === 3 ? '🙂' : rating === 4 ? '😊' : '😍'}
+                  {rating === 1 ? 'ðŸ˜ž' : rating === 2 ? 'ðŸ˜' : rating === 3 ? 'ðŸ™‚' : rating === 4 ? 'ðŸ˜Š' : 'ðŸ˜'}
                 </button>
               ))}
             </div>
@@ -725,12 +725,12 @@ export default function ChecklistsFuncionario() {
                 }`}
               >
                 <Camera className="w-6 h-6 mr-2" />
-                {item.valor ? 'Foto Capturada ✅' : 'Tirar Foto'}
+                {item.valor ? 'Foto Capturada âœ…' : 'Tirar Foto'}
               </Button>
               
               {item.valor && (
                 <div className="bg-green-50 border border-green-200 p-4 rounded-lg text-center space-y-2">
-                  <p className="text-green-700 font-medium">📷 Foto salva com sucesso</p>
+                  <p className="text-green-700 font-medium">ðŸ“· Foto salva com sucesso</p>
                   {typeof item.valor === 'string' && (item.valor.startsWith('blob:') || item.valor.startsWith('http')) && (
                     <div className="space-y-2">
                       <img 
@@ -739,10 +739,10 @@ export default function ChecklistsFuncionario() {
                         className="max-w-full h-32 mx-auto rounded border object-cover shadow-sm"
                       />
                       {item.valor.startsWith('blob:') && (
-                        <p className="text-xs text-blue-600">⏳ Fazendo upload...</p>
+                        <p className="text-xs text-blue-600">â³ Fazendo upload...</p>
                       )}
                       {item.valor.startsWith('http') && (
-                        <p className="text-xs text-green-600">☁️ Salvo na nuvem</p>
+                        <p className="text-xs text-green-600">â˜ï¸ Salvo na nuvem</p>
                       )}
                     </div>
                   )}
@@ -755,7 +755,7 @@ export default function ChecklistsFuncionario() {
             <div className="space-y-3">
               <PhotoUpload
                 onUploadComplete={(result) => handleFotoUpload(secaoId, item.id, result)}
-                onError={(error) => alert('❌ Erro no upload: ' + error)}
+                onError={(error) => alert('âŒ Erro no upload: ' + error)}
                 folder="checklist_photos"
                 compress={true}
                 maxWidth={1920}
@@ -777,7 +777,7 @@ export default function ChecklistsFuncionario() {
                 {item.valor ? (
                   <div>
                     <PenTool className="w-8 h-8 mx-auto mb-2 text-green-600" />
-                    <p className="text-green-600 font-medium">Assinatura capturada ✅</p>
+                    <p className="text-green-600 font-medium">Assinatura capturada âœ…</p>
                   </div>
                 ) : (
                   <div>
@@ -790,7 +790,7 @@ export default function ChecklistsFuncionario() {
               {!item.valor && (
                 <Button
                   onClick={() => {
-                    console.log('🖊️ Botão "Capturar Assinatura" clicado', { secaoId, itemId: item.id, tipo: item.tipo })
+                    console.log('ðŸ–Šï¸ BotÃ£o "Capturar Assinatura" clicado', { secaoId, itemId: item.id, tipo: item.tipo })
                     abrirAssinaturaPad(secaoId, item.id)
                   }}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium min-h-[52px] touch-manipulation text-lg"
@@ -802,7 +802,7 @@ export default function ChecklistsFuncionario() {
               
               {item.valor && (
                 <div className="bg-green-50 border border-green-200 p-4 rounded-lg text-center space-y-2">
-                  <p className="text-green-700 font-medium">✍️ Assinatura salva com sucesso</p>
+                  <p className="text-green-700 font-medium">âœï¸ Assinatura salva com sucesso</p>
                   {typeof item.valor === 'string' && item.valor.startsWith('http') && (
                     <div className="space-y-2">
                       <img 
@@ -810,7 +810,7 @@ export default function ChecklistsFuncionario() {
                         alt="Assinatura capturada" 
                         className="max-w-full h-20 mx-auto rounded border object-contain shadow-sm bg-white"
                       />
-                      <p className="text-xs text-green-600">☁️ Salvo na nuvem</p>
+                      <p className="text-xs text-green-600">â˜ï¸ Salvo na nuvem</p>
                     </div>
                   )}
                 </div>
@@ -819,13 +819,13 @@ export default function ChecklistsFuncionario() {
           )}
         </div>
 
-        {/* Campo de observações */}
+        {/* Campo de observaÃ§Ãµes */}
         <div>
-          <label className="text-base text-gray-700 font-medium mb-2 block">Observações (opcional):</label>
+          <label className="text-base text-gray-700 font-medium mb-2 block">ObservaÃ§Ãµes (opcional):</label>
           <Textarea
             value={item.observacoes || ''}
             onChange={(e) => atualizar(item.valor, e.target.value)}
-            placeholder="Adicione observações se necessário..."
+            placeholder="Adicione observaÃ§Ãµes se necessÃ¡rio..."
             rows={3}
             className="text-base text-gray-900 border-gray-300 bg-white focus:border-blue-500 focus:ring-blue-500 placeholder-gray-400 p-3 touch-manipulation resize-none"
           />
@@ -870,7 +870,7 @@ export default function ChecklistsFuncionario() {
                 onClick={() => setChecklistAtivo(null)}
                 className="border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 font-medium min-h-[44px] touch-manipulation"
               >
-                ← Voltar
+                â† Voltar
               </Button>
             </div>
 
@@ -890,7 +890,7 @@ export default function ChecklistsFuncionario() {
           </div>
         </div>
 
-        {/* Conteúdo */}
+        {/* ConteÃºdo */}
         <div className="p-4 pb-24 space-y-6">
           {checklistAtivo.secoes.map((secao) => (
             <Card key={secao.id}>
@@ -905,7 +905,7 @@ export default function ChecklistsFuncionario() {
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-medium text-base text-gray-900">{item.titulo}</h3>
                         {item.obrigatorio && (
-                          <Badge className="bg-red-100 text-red-800 text-xs">Obrigatório</Badge>
+                          <Badge className="bg-red-100 text-red-800 text-xs">ObrigatÃ³rio</Badge>
                         )}
                         {item.status === 'preenchido' && (
                           <CheckCircle className="w-4 h-4 text-green-600" />
@@ -959,7 +959,7 @@ export default function ChecklistsFuncionario() {
         <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
           <div className="p-4">
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              Olá, <strong className="text-gray-800 dark:text-gray-200">{usuario.nome}</strong>
+              OlÃ¡, <strong className="text-gray-800 dark:text-gray-200">{usuario.nome}</strong>
             </p>
             {/* Abas */}
             <div className="flex border-b">
@@ -971,7 +971,7 @@ export default function ChecklistsFuncionario() {
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                📝 Pendentes ({checklists.length})
+                ðŸ“ Pendentes ({checklists.length})
               </button>
               <button
                 onClick={() => setAba('realizados')}
@@ -981,20 +981,20 @@ export default function ChecklistsFuncionario() {
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                ✅ Realizados ({checklistsRealizados.length})
+                âœ… Realizados ({checklistsRealizados.length})
               </button>
             </div>
           </div>
         </div>
 
-        {/* Conteúdo das Abas */}
+        {/* ConteÃºdo das Abas */}
         <div className="p-4 space-y-4">
           {aba === 'pendentes' ? (
             checklists.length === 0 ? (
               <div className="text-center py-12">
                 <FileText className="w-16 h-16 mx-auto mb-4 text-gray-400" />
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">Nenhum checklist pendente</h3>
-                <p className="text-gray-600">Você está em dia com suas verificações! 🎉</p>
+                <p className="text-gray-600">VocÃª estÃ¡ em dia com suas verificaÃ§Ãµes! ðŸŽ‰</p>
               </div>
             ) : (
               checklists.map((checklist) => {
@@ -1005,12 +1005,12 @@ export default function ChecklistsFuncionario() {
                 <Card key={checklist.id} className="bg-white border border-gray-200 hover:shadow-lg transition-all duration-300 hover:border-gray-300">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-4">
-                      {/* Ícone do Setor */}
+                      {/* Ãcone do Setor */}
                       <div className={`p-3 rounded-lg ${setor?.cor} text-white flex-shrink-0`}>
                         <SetorIcon className="w-6 h-6" />
                       </div>
 
-                      {/* Informações */}
+                      {/* InformaÃ§Ãµes */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
                           <h3 className="font-semibold text-lg text-gray-900 truncate">{checklist.nome}</h3>
@@ -1039,7 +1039,7 @@ export default function ChecklistsFuncionario() {
                           {checklist.deadline && (
                             <div className="flex items-center gap-1">
                               <Calendar className="w-3 h-3 text-gray-500" />
-                              Até {checklist.deadline}
+                              AtÃ© {checklist.deadline}
                             </div>
                           )}
                         </div>
@@ -1068,7 +1068,7 @@ export default function ChecklistsFuncionario() {
               <div className="text-center py-12">
                 <CheckCircle className="w-16 h-16 mx-auto mb-4 text-gray-400" />
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">Nenhum checklist realizado</h3>
-                <p className="text-gray-600">Complete alguns checklists para vê-los aqui 📊</p>
+                <p className="text-gray-600">Complete alguns checklists para vÃª-los aqui ðŸ“Š</p>
               </div>
             ) : (
               checklistsRealizados.map((execucao: any) => (
@@ -1080,19 +1080,19 @@ export default function ChecklistsFuncionario() {
                         <CheckCircle className="w-6 h-6" />
                       </div>
 
-                      {/* Informações */}
+                      {/* InformaÃ§Ãµes */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
                           <h3 className="font-semibold text-lg text-gray-900 truncate">
                             {execucao.checklists?.nome || 'Checklist'}
                           </h3>
                           <Badge className="bg-green-100 text-green-800 flex-shrink-0 border border-green-200">
-                            ✅ Concluído
+                            âœ… ConcluÃ­do
                           </Badge>
                         </div>
 
                         <p className="text-sm text-gray-700 mb-3">
-                          {execucao.checklists?.descricao || 'Sem descrição'}
+                          {execucao.checklists?.descricao || 'Sem descriÃ§Ã£o'}
                         </p>
 
                         <div className="grid grid-cols-2 gap-4 text-xs text-gray-600 mb-3">
@@ -1135,7 +1135,7 @@ export default function ChecklistsFuncionario() {
           )}
         </div>
 
-        {/* Componente de Câmera */}
+        {/* Componente de CÃ¢mera */}
         <CameraCapture
           isOpen={cameraAberta}
           onCapture={handleFotoCapturada}
@@ -1151,8 +1151,8 @@ export default function ChecklistsFuncionario() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-hidden">
               <div className="bg-blue-600 text-white p-4">
-                <h2 className="text-lg font-semibold">✍️ Assinatura Digital</h2>
-                <p className="text-sm opacity-90">Assine no espaço abaixo para confirmar</p>
+                <h2 className="text-lg font-semibold">âœï¸ Assinatura Digital</h2>
+                <p className="text-sm opacity-90">Assine no espaÃ§o abaixo para confirmar</p>
               </div>
               
               <div className="p-4">
@@ -1160,8 +1160,8 @@ export default function ChecklistsFuncionario() {
                   onSignatureComplete={handleAssinaturaCapturada}
                   onSignatureCancel={handleAssinaturaCancelada}
                   onError={(error) => {
-                    console.error('🚨 Erro na assinatura:', error)
-                    alert('❌ Erro na assinatura: ' + error)
+                    console.error('ðŸš¨ Erro na assinatura:', error)
+                    alert('âŒ Erro na assinatura: ' + error)
                   }}
                   width={350}
                   height={200}

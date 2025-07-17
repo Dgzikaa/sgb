@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 
 const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || 'http://localhost:8080'
 const EVOLUTION_API_KEY = process.env.EVOLUTION_API_KEY || 'SGB-2024-WhatsApp-Evolution-API-Key'
@@ -44,10 +44,10 @@ export async function POST(req: NextRequest) {
       checklist_data?: ChecklistNotification
     } = body
 
-    // Validar dados obrigatórios
+    // Validar dados obrigatÃ³rios
     if (!numbers || numbers.length === 0) {
       return NextResponse.json(
-        { error: 'Números de telefone são obrigatórios' },
+        { error: 'NÃºmeros de telefone sÃ£o obrigatÃ³rios' },
         { status: 400 }
       )
     }
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
 
     if (!finalMessage) {
       return NextResponse.json(
-        { error: 'Mensagem é obrigatória' },
+        { error: 'Mensagem Ã© obrigatÃ³ria' },
         { status: 400 }
       )
     }
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     const results = []
     const errors = []
 
-    // Enviar para cada número
+    // Enviar para cada nÃºmero
     for (const number of numbers) {
       try {
         const cleanNumber = cleanPhoneNumber(number)
@@ -121,11 +121,11 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Função auxiliar para enviar para Evolution API
+// FunÃ§Ã£o auxiliar para enviar para Evolution API
 async function sendToEvolutionAPI(messageData: WhatsAppMessage) {
-  // 🧪 MODO SIMULAÇÃO - Para testes sem WhatsApp real
+  // ðŸ§ª MODO SIMULAÃ‡ÃƒO - Para testes sem WhatsApp real
   if (WHATSAPP_SIMULATION_MODE) {
-    console.log('🧪 MODO SIMULAÇÃO - WhatsApp:', {
+    console.log('ðŸ§ª MODO SIMULAÃ‡ÃƒO - WhatsApp:', {
       to: messageData.number,
       message: messageData.message.substring(0, 100) + '...',
       timestamp: new Date().toISOString(),
@@ -138,12 +138,12 @@ async function sendToEvolutionAPI(messageData: WhatsAppMessage) {
       key: {
         id: `sim_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       },
-      message: 'Simulação: Mensagem enviada com sucesso',
+      message: 'SimulaÃ§Ã£o: Mensagem enviada com sucesso',
       simulated: true
     }
   }
 
-  // 📱 MODO PRODUÇÃO - Envio real para Evolution API
+  // ðŸ“± MODO PRODUÃ‡ÃƒO - Envio real para Evolution API
   const url = `${EVOLUTION_API_URL}/message/sendText/${EVOLUTION_INSTANCE_NAME}`
   
   const payload = {
@@ -178,7 +178,7 @@ async function sendToEvolutionAPI(messageData: WhatsAppMessage) {
       ...result
     }
   } catch (error) {
-    console.error('❌ Erro Evolution API:', error)
+    console.error('âŒ Erro Evolution API:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Erro desconhecido'
@@ -186,12 +186,12 @@ async function sendToEvolutionAPI(messageData: WhatsAppMessage) {
   }
 }
 
-// Função para limpar número de telefone
+// FunÃ§Ã£o para limpar nÃºmero de telefone
 function cleanPhoneNumber(number: string): string {
-  // Remove todos os caracteres não numéricos
+  // Remove todos os caracteres nÃ£o numÃ©ricos
   let cleaned = number.replace(/\D/g, '')
   
-  // Adiciona código do país se não tiver
+  // Adiciona cÃ³digo do paÃ­s se nÃ£o tiver
   if (cleaned.length === 11 && cleaned.startsWith('11')) {
     cleaned = '55' + cleaned
   } else if (cleaned.length === 10) {
@@ -203,39 +203,39 @@ function cleanPhoneNumber(number: string): string {
   return cleaned
 }
 
-// Função para formatar mensagem de checklist
+// FunÃ§Ã£o para formatar mensagem de checklist
 function formatChecklistMessage(data: ChecklistNotification): string {
   const statusEmojis = {
-    agendado: '📅',
-    em_andamento: '⏳',
-    vencido: '🚨',
-    concluido: '✅'
+    agendado: 'ðŸ“…',
+    em_andamento: 'â³',
+    vencido: 'ðŸš¨',
+    concluido: 'âœ…'
   }
 
   const prioridadeEmojis = {
-    baixa: '🔵',
-    normal: '🟡',
-    alta: '🟠',
-    critica: '🔴'
+    baixa: 'ðŸ”µ',
+    normal: 'ðŸŸ¡',
+    alta: 'ðŸŸ ',
+    critica: 'ðŸ”´'
   }
 
   const deadline = new Date(data.deadline).toLocaleString('pt-BR')
 
   return `${statusEmojis[data.status]} *SGB - Checklist ${data.status.toUpperCase()}*
 
-📋 *Checklist:* ${data.checklist_nome}
-🏢 *Bar:* ${data.bar_nome}
-👤 *Responsável:* ${data.responsavel}
-⏰ *Prazo:* ${deadline}
+ðŸ“‹ *Checklist:* ${data.checklist_nome}
+ðŸ¢ *Bar:* ${data.bar_nome}
+ðŸ‘¤ *ResponsÃ¡vel:* ${data.responsavel}
+â° *Prazo:* ${deadline}
 ${prioridadeEmojis[data.prioridade]} *Prioridade:* ${data.prioridade.toUpperCase()}
 
-${data.status === 'vencido' ? '⚠️ *ATENÇÃO: Checklist vencido!*' : ''}
-${data.status === 'agendado' ? '👆 *Acesse o sistema para executar*' : ''}
+${data.status === 'vencido' ? 'âš ï¸ *ATENÃ‡ÃƒO: Checklist vencido!*' : ''}
+${data.status === 'agendado' ? 'ðŸ‘† *Acesse o sistema para executar*' : ''}
 
-_Sistema de Gestão de Bares_`
+_Sistema de GestÃ£o de Bares_`
 }
 
-// GET - Verificar status da conexão
+// GET - Verificar status da conexÃ£o
 export async function GET() {
   try {
     const response = await fetch(`${EVOLUTION_API_URL}/instance/connectionState/${EVOLUTION_INSTANCE_NAME}`, {

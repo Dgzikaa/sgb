@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -9,7 +9,7 @@ function createServerSupabaseClient() {
   const serviceRoleKey = process.env.SERVICE_ROLE_KEY!
   
   if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error('Variáveis de ambiente do Supabase não configuradas')
+    throw new Error('VariÃ¡veis de ambiente do Supabase nÃ£o configuradas')
   }
   
   return createClient(supabaseUrl, serviceRoleKey)
@@ -24,16 +24,16 @@ export async function GET(request: NextRequest) {
 
     if (!barId) {
       return NextResponse.json(
-        { success: false, error: 'Bar ID é obrigatório' },
+        { success: false, error: 'Bar ID Ã© obrigatÃ³rio' },
         { status: 400 }
       )
     }
 
-    console.log(`📊 Buscando dados do dashboard - Bar: ${barId}, Período: ${startDate} até ${endDate}`)
+    console.log(`ðŸ“Š Buscando dados do dashboard - Bar: ${barId}, PerÃ­odo: ${startDate} atÃ© ${endDate}`)
 
     const supabase = createServerSupabaseClient()
 
-    // Buscar dados com paginação
+    // Buscar dados com paginaÃ§Ã£o
     const buscarComPaginacao = async (tabela: string, colunas: string) => {
       let todosRegistros: any[] = []
       let pagina = 0
@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
       buscarComPaginacao('fatporhora', 'hora, valor, vd_dtgerencial')
     ])
 
-    console.log(`✅ Dados carregados: ${periodoData.length} período, ${pagamentosData.length} pagamentos, ${symplaData.length} sympla, ${yuzerData.length} yuzer, ${fatporhoraData.length} fatporhora`)
+    console.log(`âœ… Dados carregados: ${periodoData.length} perÃ­odo, ${pagamentosData.length} pagamentos, ${symplaData.length} sympla, ${yuzerData.length} yuzer, ${fatporhoraData.length} fatporhora`)
 
     return NextResponse.json({
       success: true,
@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('❌ Erro na API de stats:', error)
+    console.error('âŒ Erro na API de stats:', error)
     return NextResponse.json(
       { success: false, error: `Erro interno: ${error.message}` },
       { status: 500 }

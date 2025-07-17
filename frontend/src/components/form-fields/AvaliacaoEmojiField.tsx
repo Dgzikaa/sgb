@@ -1,14 +1,14 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 
 // =====================================================
-// 🎭 CAMPO DE AVALIAÇÃO COM EMOJIS/CARINHAS
+// ðŸŽ­ CAMPO DE AVALIAÃ‡ÃƒO COM EMOJIS/CARINHAS
 // =====================================================
 // Implementa conforme documento Word:
-// "O campo de avaliação eu gosto de poder usar as carinhas"
+// "O campo de avaliaÃ§Ã£o eu gosto de poder usar as carinhas"
 
 interface AvaliacaoEmojiFieldProps {
   label: string
@@ -23,42 +23,42 @@ interface AvaliacaoEmojiFieldProps {
   showDescription?: boolean
 }
 
-// Configurações dos diferentes tipos de avaliação
+// ConfiguraÃ§Ãµes dos diferentes tipos de avaliaÃ§Ã£o
 const avaliacaoConfigs = {
   emojis: {
     opcoes: [
-      { valor: 1, emoji: '😢', label: 'Muito ruim', cor: 'text-red-500' },
-      { valor: 2, emoji: '😕', label: 'Ruim', cor: 'text-orange-500' },
-      { valor: 3, emoji: '😐', label: 'Regular', cor: 'text-yellow-500' },
-      { valor: 4, emoji: '😊', label: 'Bom', cor: 'text-blue-500' },
-      { valor: 5, emoji: '😍', label: 'Excelente', cor: 'text-green-500' }
+      { valor: 1, emoji: 'ðŸ˜¢', label: 'Muito ruim', cor: 'text-red-500' },
+      { valor: 2, emoji: 'ðŸ˜•', label: 'Ruim', cor: 'text-orange-500' },
+      { valor: 3, emoji: 'ðŸ˜', label: 'Regular', cor: 'text-yellow-500' },
+      { valor: 4, emoji: 'ðŸ˜Š', label: 'Bom', cor: 'text-blue-500' },
+      { valor: 5, emoji: 'ðŸ˜', label: 'Excelente', cor: 'text-green-500' }
     ]
   },
   faces: {
     opcoes: [
-      { valor: 1, emoji: '☹️', label: 'Insatisfeito', cor: 'text-red-500' },
-      { valor: 2, emoji: '😞', label: 'Pouco satisfeito', cor: 'text-orange-500' },
-      { valor: 3, emoji: '😐', label: 'Neutro', cor: 'text-yellow-500' },
-      { valor: 4, emoji: '🙂', label: 'Satisfeito', cor: 'text-blue-500' },
-      { valor: 5, emoji: '😁', label: 'Muito satisfeito', cor: 'text-green-500' }
+      { valor: 1, emoji: 'â˜¹ï¸', label: 'Insatisfeito', cor: 'text-red-500' },
+      { valor: 2, emoji: 'ðŸ˜ž', label: 'Pouco satisfeito', cor: 'text-orange-500' },
+      { valor: 3, emoji: 'ðŸ˜', label: 'Neutro', cor: 'text-yellow-500' },
+      { valor: 4, emoji: 'ðŸ™‚', label: 'Satisfeito', cor: 'text-blue-500' },
+      { valor: 5, emoji: 'ðŸ˜', label: 'Muito satisfeito', cor: 'text-green-500' }
     ]
   },
   qualidade: {
     opcoes: [
-      { valor: 1, emoji: '💔', label: 'Péssimo', cor: 'text-red-500' },
-      { valor: 2, emoji: '👎', label: 'Ruim', cor: 'text-orange-500' },
-      { valor: 3, emoji: '👌', label: 'Aceitável', cor: 'text-yellow-500' },
-      { valor: 4, emoji: '👍', label: 'Bom', cor: 'text-blue-500' },
-      { valor: 5, emoji: '🏆', label: 'Perfeito', cor: 'text-green-500' }
+      { valor: 1, emoji: 'ðŸ’”', label: 'PÃ©ssimo', cor: 'text-red-500' },
+      { valor: 2, emoji: 'ðŸ‘Ž', label: 'Ruim', cor: 'text-orange-500' },
+      { valor: 3, emoji: 'ðŸ‘Œ', label: 'AceitÃ¡vel', cor: 'text-yellow-500' },
+      { valor: 4, emoji: 'ðŸ‘', label: 'Bom', cor: 'text-blue-500' },
+      { valor: 5, emoji: 'ðŸ†', label: 'Perfeito', cor: 'text-green-500' }
     ]
   },
   estrelas: {
     opcoes: [
-      { valor: 1, emoji: '⭐', label: '1 estrela', cor: 'text-yellow-500' },
-      { valor: 2, emoji: '⭐⭐', label: '2 estrelas', cor: 'text-yellow-500' },
-      { valor: 3, emoji: '⭐⭐⭐', label: '3 estrelas', cor: 'text-yellow-500' },
-      { valor: 4, emoji: '⭐⭐⭐⭐', label: '4 estrelas', cor: 'text-yellow-500' },
-      { valor: 5, emoji: '⭐⭐⭐⭐⭐', label: '5 estrelas', cor: 'text-yellow-500' }
+      { valor: 1, emoji: 'â­', label: '1 estrela', cor: 'text-yellow-500' },
+      { valor: 2, emoji: 'â­â­', label: '2 estrelas', cor: 'text-yellow-500' },
+      { valor: 3, emoji: 'â­â­â­', label: '3 estrelas', cor: 'text-yellow-500' },
+      { valor: 4, emoji: 'â­â­â­â­', label: '4 estrelas', cor: 'text-yellow-500' },
+      { valor: 5, emoji: 'â­â­â­â­â­', label: '5 estrelas', cor: 'text-yellow-500' }
     ]
   }
 }
@@ -116,12 +116,12 @@ export default function AvaliacaoEmojiField({
         </div>
       )}
 
-      {/* Descrição */}
+      {/* DescriÃ§Ã£o */}
       {showDescription && descricao && (
         <p className="text-sm text-gray-600">{descricao}</p>
       )}
 
-      {/* Avaliação com Emojis */}
+      {/* AvaliaÃ§Ã£o com Emojis */}
       <div className="space-y-4">
         <div className="flex items-center justify-center gap-2 p-4 bg-gray-50 rounded-lg">
           {config.opcoes.map((opcao) => {
@@ -164,7 +164,7 @@ export default function AvaliacaoEmojiField({
           )}
           {!value && !hoveredValue && (
             <div className="text-gray-400 text-sm">
-              {obrigatorio ? 'Selecione uma avaliação' : 'Avaliação opcional'}
+              {obrigatorio ? 'Selecione uma avaliaÃ§Ã£o' : 'AvaliaÃ§Ã£o opcional'}
             </div>
           )}
         </div>
@@ -181,7 +181,7 @@ export default function AvaliacaoEmojiField({
 }
 
 // =====================================================
-// 🎨 VARIANTES PRÉ-CONFIGURADAS
+// ðŸŽ¨ VARIANTES PRÃ‰-CONFIGURADAS
 // =====================================================
 
 export function AvaliacaoSatisfacao(props: Omit<AvaliacaoEmojiFieldProps, 'variant'>) {
@@ -201,7 +201,7 @@ export function AvaliacaoEmojis(props: Omit<AvaliacaoEmojiFieldProps, 'variant'>
 }
 
 // =====================================================
-// 🔧 HOOK PARA GERENCIAR AVALIAÇÕES
+// ðŸ”§ HOOK PARA GERENCIAR AVALIAÃ‡Ã•ES
 // =====================================================
 
 export function useAvaliacaoEmoji(valorInicial?: number) {

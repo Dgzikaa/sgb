@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -70,7 +70,7 @@ export function PWAStatus({
     setIsClearingCache(true)
     try {
       await clearCache()
-      // Recarregar após limpar cache
+      // Recarregar apÃ³s limpar cache
       setTimeout(() => {
         window.location.reload()
       }, 1000)
@@ -86,8 +86,8 @@ export function PWAStatus({
       setLastUpdateCheck(new Date())
       
       if (hasUpdate) {
-        // Mostrar notificação de atualização disponível
-        console.log('Nova atualização disponível')
+        // Mostrar notificaÃ§Ã£o de atualizaÃ§Ã£o disponÃ­vel
+        console.log('Nova atualizaÃ§Ã£o disponÃ­vel')
       }
     } finally {
       setIsUpdating(false)
@@ -97,7 +97,7 @@ export function PWAStatus({
   const getStatusItems = () => [
     {
       label: 'PWA Status',
-      value: isInstalled ? 'Instalada' : 'Disponível',
+      value: isInstalled ? 'Instalada' : 'DisponÃ­vel',
       icon: isInstalled ? CheckCircle : Smartphone,
       status: isInstalled ? 'success' : 'warning',
       action: !isInstalled && isInstallable ? {
@@ -113,7 +113,7 @@ export function PWAStatus({
       status: isOnline ? 'success' : 'error'
     },
     {
-      label: 'Notificações',
+      label: 'NotificaÃ§Ãµes',
       value: notificationPermission === 'granted' ? 'Habilitadas' : 
              notificationPermission === 'denied' ? 'Negadas' : 'Pendente',
       icon: notificationPermission === 'granted' ? Bell : BellOff,
@@ -135,7 +135,7 @@ export function PWAStatus({
   if (compact) {
     return (
       <div className={`flex items-center gap-2 ${className}`}>
-        {/* Status compacto apenas com ícones */}
+        {/* Status compacto apenas com Ã­cones */}
         <div className="flex items-center gap-1">
           <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`} />
           <span className="text-xs text-gray-600 dark:text-gray-400">
@@ -210,7 +210,7 @@ export function PWAStatus({
                 className="flex-1"
               >
                 <RefreshCw className={`w-4 h-4 mr-2 ${isUpdating ? 'animate-spin' : ''}`} />
-                {isUpdating ? 'Verificando...' : 'Verificar Atualizações'}
+                {isUpdating ? 'Verificando...' : 'Verificar AtualizaÃ§Ãµes'}
               </Button>
               
               <Button
@@ -227,7 +227,7 @@ export function PWAStatus({
             
             {lastUpdateCheck && (
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
-                Última verificação: {lastUpdateCheck.toLocaleTimeString('pt-BR')}
+                Ãšltima verificaÃ§Ã£o: {lastUpdateCheck.toLocaleTimeString('pt-BR')}
               </p>
             )}
           </div>
@@ -235,9 +235,9 @@ export function PWAStatus({
 
         {/* Info adicional */}
         <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 pt-2 border-t border-gray-200 dark:border-gray-700">
-          <p>• PWA permite instalação como app nativo</p>
-          <p>• Service Worker possibilita funcionamento offline</p>
-          <p>• Cache local melhora performance significativamente</p>
+          <p>â€¢ PWA permite instalaÃ§Ã£o como app nativo</p>
+          <p>â€¢ Service Worker possibilita funcionamento offline</p>
+          <p>â€¢ Cache local melhora performance significativamente</p>
         </div>
       </CardContent>
     </Card>

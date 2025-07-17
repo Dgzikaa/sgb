@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from 'next'
+﻿import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 import { ToastProvider, GlobalToastListener } from '@/components/ui/toast'
@@ -15,8 +15,8 @@ import { CommandPaletteProvider } from '@/contexts/CommandPaletteContext'
 // Using system fonts instead of Google Fonts to avoid build connectivity issues
 
 export const metadata: Metadata = {
-  title: 'SGB - Sistema de Gestão de Bares',
-  description: 'Sistema de Gestão de Bares - Grupo Menos é Mais',
+  title: 'SGB - Sistema de GestÃ£o de Bares',
+  description: 'Sistema de GestÃ£o de Bares - Grupo Menos Ã© Mais',
   manifest: '/site.webmanifest',
   appleWebApp: {
     capable: true,
@@ -110,10 +110,10 @@ export default function RootLayout({
                 window.addEventListener('load', function() {
                   navigator.serviceWorker.register('/sw.js')
                     .then(function(registration) {
-                      console.log('✅ Service Worker registered:', registration.scope);
+                      console.log('âœ… Service Worker registered:', registration.scope);
                     })
                     .catch(function(error) {
-                      console.log('❌ Service Worker registration failed:', error);
+                      console.log('âŒ Service Worker registration failed:', error);
                     });
                 });
               }

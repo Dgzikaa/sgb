@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -23,7 +23,7 @@ import {
 } from 'lucide-react'
 
 // =====================================================
-// 🚨 SISTEMA DE ALERTAS PARA CHECKLISTS (MOBILE-FRIENDLY)
+// ðŸš¨ SISTEMA DE ALERTAS PARA CHECKLISTS (MOBILE-FRIENDLY)
 // =====================================================
 
 interface ChecklistAlert {
@@ -70,11 +70,11 @@ export default function AlertSystem({
   const urgentAlerts = activeAlerts.filter((alert: any) => alert.nivel === 'alto')
 
   const getAlertIcon = (tipo: string, nivel: string) => {
-    if (nivel === 'critico') return '🔴'
-    if (nivel === 'alto') return '🟠'
-    if (nivel === 'medio') return '🟡'
-    if (tipo === 'lembrete') return '🔔'
-    return '🔵'
+    if (nivel === 'critico') return 'ðŸ”´'
+    if (nivel === 'alto') return 'ðŸŸ '
+    if (nivel === 'medio') return 'ðŸŸ¡'
+    if (tipo === 'lembrete') return 'ðŸ””'
+    return 'ðŸ”µ'
   }
 
   const getAlertColor = (nivel: string) => {
@@ -135,10 +135,10 @@ export default function AlertSystem({
   }
 
   const snoozeOptions = [
-    { value: 15, label: '15 min', emoji: '⏰' },
-    { value: 30, label: '30 min', emoji: '⏱️' },
-    { value: 60, label: '1 hora', emoji: '🕐' },
-    { value: 120, label: '2 horas', emoji: '🕑' }
+    { value: 15, label: '15 min', emoji: 'â°' },
+    { value: 30, label: '30 min', emoji: 'â±ï¸' },
+    { value: 60, label: '1 hora', emoji: 'ðŸ•' },
+    { value: 120, label: '2 horas', emoji: 'ðŸ•‘' }
   ]
 
   // Floating Alert Button
@@ -219,7 +219,7 @@ export default function AlertSystem({
               </div>
             </div>
 
-            {/* Ações Rápidas */}
+            {/* AÃ§Ãµes RÃ¡pidas */}
             <div className="space-y-2">
               <Button
                 onClick={() => handleExecuteChecklist(selectedAlert.checklistId)}
@@ -231,7 +231,7 @@ export default function AlertSystem({
                 Executar Checklist Agora
               </Button>
 
-              {/* Opções de Soneca */}
+              {/* OpÃ§Ãµes de Soneca */}
               <div className="grid grid-cols-2 gap-2">
                 {snoozeOptions.slice(0, 2).map((option) => (
                   <Button
@@ -246,7 +246,7 @@ export default function AlertSystem({
                 ))}
               </div>
 
-              {/* Resolver/Outras ações */}
+              {/* Resolver/Outras aÃ§Ãµes */}
               <div className="flex gap-2">
                 <Button
                   variant="outline"
@@ -390,7 +390,7 @@ export default function AlertSystem({
 }
 
 // =====================================================
-// 📊 COMPONENTE DE ESTATÍSTICAS DE ALERTAS
+// ðŸ“Š COMPONENTE DE ESTATÃSTICAS DE ALERTAS
 // =====================================================
 
 interface AlertStatsProps {
@@ -447,7 +447,7 @@ export function AlertStats({ alerts, onOpenAlerts }: AlertStatsProps) {
               <div className={`text-sm ${
                 criticalCount > 0 ? 'text-red-700' : 'text-orange-700'
               }`}>
-                {criticalCount > 0 && `${criticalCount} crítico${criticalCount !== 1 ? 's' : ''} • `}
+                {criticalCount > 0 && `${criticalCount} crÃ­tico${criticalCount !== 1 ? 's' : ''} â€¢ `}
                 {urgentCount > 0 && `${urgentCount} urgente${urgentCount !== 1 ? 's' : ''}`}
               </div>
             </div>
@@ -468,7 +468,7 @@ export function AlertStats({ alerts, onOpenAlerts }: AlertStatsProps) {
 }
 
 // =====================================================
-// 🎯 HOOK PARA GERENCIAR ALERTAS
+// ðŸŽ¯ HOOK PARA GERENCIAR ALERTAS
 // =====================================================
 
 export function useAlerts() {

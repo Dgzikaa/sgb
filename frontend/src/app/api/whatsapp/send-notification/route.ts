@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -6,10 +6,10 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// 🛡️ CONFIGURAÇÕES DE SEGURANÇA ANTI-BAN
+// ðŸ›¡ï¸ CONFIGURAÃ‡Ã•ES DE SEGURANÃ‡A ANTI-BAN
 const SECURITY_CONFIG = {
-  MAX_MESSAGES_PER_DAY: 50, // Máximo de mensagens por dia
-  MIN_INTERVAL_SECONDS: 30, // Mínimo 30 segundos entre mensagens
+  MAX_MESSAGES_PER_DAY: 50, // MÃ¡ximo de mensagens por dia
+  MIN_INTERVAL_SECONDS: 30, // MÃ­nimo 30 segundos entre mensagens
   BUSINESS_HOURS: {
     START: 8, // 8h
     END: 18   // 18h
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
   try {
     const body: NotificationRequest = await req.json()
     
-    // 🔐 VALIDAÇÕES DE SEGURANÇA
+    // ðŸ” VALIDAÃ‡Ã•ES DE SEGURANÃ‡A
     const securityCheck = await validateSecurityLimits(body.responsavelNumero)
     if (!securityCheck.allowed) {
       return NextResponse.json({
@@ -39,13 +39,13 @@ export async function POST(req: NextRequest) {
       }, { status: 429 })
     }
 
-    // 📱 ENVIAR NOTIFICAÇÃO
+    // ðŸ“± ENVIAR NOTIFICAÃ‡ÃƒO
     const result = await sendSecureNotification(body)
     
     return NextResponse.json(result)
 
   } catch (error) {
-    console.error('❌ Erro ao enviar notificação:', error)
+    console.error('âŒ Erro ao enviar notificaÃ§Ã£o:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno' },
       { status: 500 }
@@ -57,7 +57,7 @@ async function validateSecurityLimits(phoneNumber: string) {
   const today = new Date().toISOString().split('T')[0]
   const currentHour = new Date().getHours()
   
-  // ⏰ VERIFICAR HORÁRIO COMERCIAL
+  // â° VERIFICAR HORÃRIO COMERCIAL
   if (currentHour < SECURITY_CONFIG.BUSINESS_HOURS.START || 
       currentHour > SECURITY_CONFIG.BUSINESS_HOURS.END) {
     const nextBusinessHour = currentHour < SECURITY_CONFIG.BUSINESS_HOURS.START 
@@ -66,12 +66,12 @@ async function validateSecurityLimits(phoneNumber: string) {
     
     return {
       allowed: false,
-      reason: 'Fora do horário comercial (8h às 18h)',
+      reason: 'Fora do horÃ¡rio comercial (8h Ã s 18h)',
       nextAvailableAt: `${nextBusinessHour}:00`
     }
   }
 
-  // 📊 VERIFICAR LIMITE DIÁRIO
+  // ðŸ“Š VERIFICAR LIMITE DIÃRIO
   const { data: todayMessages } = await supabase
     .from('whatsapp_messages')
     .select('id')
@@ -82,12 +82,12 @@ async function validateSecurityLimits(phoneNumber: string) {
   if (todayMessages && todayMessages.length >= SECURITY_CONFIG.MAX_MESSAGES_PER_DAY) {
     return {
       allowed: false,
-      reason: `Limite diário atingido (${SECURITY_CONFIG.MAX_MESSAGES_PER_DAY} mensagens)`,
-      nextAvailableAt: 'Amanhã 08:00'
+      reason: `Limite diÃ¡rio atingido (${SECURITY_CONFIG.MAX_MESSAGES_PER_DAY} mensagens)`,
+      nextAvailableAt: 'AmanhÃ£ 08:00'
     }
   }
 
-  // ⏱️ VERIFICAR INTERVALO MÍNIMO
+  // â±ï¸ VERIFICAR INTERVALO MÃNIMO
   const { data: lastMessage } = await supabase
     .from('whatsapp_messages')
     .select('sent_at')
@@ -105,7 +105,7 @@ async function validateSecurityLimits(phoneNumber: string) {
       const waitTime = SECURITY_CONFIG.MIN_INTERVAL_SECONDS - diffSeconds
       return {
         allowed: false,
-        reason: `Aguarde ${Math.ceil(waitTime)}s antes da próxima mensagem`,
+        reason: `Aguarde ${Math.ceil(waitTime)}s antes da prÃ³xima mensagem`,
         nextAvailableAt: new Date(now.getTime() + waitTime * 1000).toLocaleTimeString()
       }
     }
@@ -117,41 +117,41 @@ async function validateSecurityLimits(phoneNumber: string) {
 async function sendSecureNotification(data: NotificationRequest) {
   const { checklistId, responsavelNumero, titulo, prazo, tipo = 'novo' } = data
   
-  // 🎯 MENSAGEM PERSONALIZADA ANTI-SPAM
+  // ðŸŽ¯ MENSAGEM PERSONALIZADA ANTI-SPAM
   const emojis = {
-    novo: '📋',
-    lembrete: '⏰', 
-    urgente: '🚨'
+    novo: 'ðŸ“‹',
+    lembrete: 'â°', 
+    urgente: 'ðŸš¨'
   }
   
   const saudacoes = [
-    'Olá!', 'Oi!', 'Bom dia!', 'Boa tarde!'
+    'OlÃ¡!', 'Oi!', 'Bom dia!', 'Boa tarde!'
   ]
   
   const saudacao = saudacoes[Math.floor(Math.random() * saudacoes.length)]
   
-  // 🆔 CÓDIGO ÚNICO PARA IDENTIFICAÇÃO
+  // ðŸ†” CÃ“DIGO ÃšNICO PARA IDENTIFICAÃ‡ÃƒO
   const codigoChecklist = checklistId.slice(-8).toUpperCase()
   
   const message = `${saudacao} ${emojis[tipo]}
 
-📋 *${titulo}*
-🕐 Prazo: ${new Date(prazo).toLocaleDateString('pt-BR', { 
+ðŸ“‹ *${titulo}*
+ðŸ• Prazo: ${new Date(prazo).toLocaleDateString('pt-BR', { 
   day: '2-digit', 
   month: '2-digit',
   hour: '2-digit',
   minute: '2-digit'
 })}
 
-🆔 Código: *${codigoChecklist}*
+ðŸ†” CÃ³digo: *${codigoChecklist}*
 
-Para marcar como concluído, responda com:
-✅ "*ok ${codigoChecklist}*" ou "*pronto ${codigoChecklist}*"
+Para marcar como concluÃ­do, responda com:
+âœ… "*ok ${codigoChecklist}*" ou "*pronto ${codigoChecklist}*"
 
 _Sistema SGB - Bar Management_`
 
   try {
-    // 📤 ENVIAR VIA EVOLUTION API
+    // ðŸ“¤ ENVIAR VIA EVOLUTION API
     const evolutionResponse = await fetch(`${process.env.EVOLUTION_API_URL}/message/sendText/${process.env.EVOLUTION_INSTANCE_NAME}`, {
       method: 'POST',
       headers: {
@@ -170,7 +170,7 @@ _Sistema SGB - Bar Management_`
       throw new Error(`Evolution API error: ${evolutionResult.message}`)
     }
 
-    // 💾 SALVAR NO BANCO
+    // ðŸ’¾ SALVAR NO BANCO
     await supabase
       .from('whatsapp_messages')
       .insert({
@@ -196,9 +196,9 @@ _Sistema SGB - Bar Management_`
     }
 
   } catch (error) {
-    console.error('❌ Erro ao enviar via Evolution:', error)
+    console.error('âŒ Erro ao enviar via Evolution:', error)
     
-    // 📝 SALVAR FALHA NO BANCO
+    // ðŸ“ SALVAR FALHA NO BANCO
     await supabase
       .from('whatsapp_messages')
       .insert({
@@ -219,7 +219,7 @@ _Sistema SGB - Bar Management_`
   }
 }
 
-// GET - Status do sistema de notificações
+// GET - Status do sistema de notificaÃ§Ãµes
 export async function GET() {
   const today = new Date().toISOString().split('T')[0]
   

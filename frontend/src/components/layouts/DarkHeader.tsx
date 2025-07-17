@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useRef, useEffect } from 'react'
 import { usePageTitle } from '@/contexts/PageTitleContext'
@@ -19,33 +19,33 @@ const routeMapping: Record<string, { name: string; icon?: React.ComponentType<{ 
   '/checklists': { name: 'Checklist' },
   '/checklists/abertura': { name: 'Checklists' },
   
-  // Produção
-  '/producao': { name: 'Produção' },
+  // ProduÃ§Ã£o
+  '/producao': { name: 'ProduÃ§Ã£o' },
   '/producao/receitas': { name: 'Receitas e Insumos' },
-  '/producao/terminal': { name: 'Terminal de Produção' },
+  '/producao/terminal': { name: 'Terminal de ProduÃ§Ã£o' },
   
   // ContaAzul
-  '/relatorios/financeiro-competencia': { name: 'Competência' },
+  '/relatorios/financeiro-competencia': { name: 'CompetÃªncia' },
   
   // Marketing
   '/visao-geral/marketing-360': { name: 'Marketing 360' },
   
-  // Funcionário
-  '/funcionario': { name: 'Funcionário' },
+  // FuncionÃ¡rio
+  '/funcionario': { name: 'FuncionÃ¡rio' },
   '/funcionario/checklists': { name: 'Meus Checklists' },
   
-  // Configurações (apenas admin)
-  '/configuracoes': { name: 'Configurações' },
+  // ConfiguraÃ§Ãµes (apenas admin)
+  '/configuracoes': { name: 'ConfiguraÃ§Ãµes' },
   '/configuracoes/checklists': { name: 'Checklists' },
   '/configuracoes/metas': { name: 'Metas' },
-  '/configuracoes/integracoes': { name: 'Integrações' },
-  '/configuracoes/seguranca': { name: 'Segurança' },
+  '/configuracoes/integracoes': { name: 'IntegraÃ§Ãµes' },
+  '/configuracoes/seguranca': { name: 'SeguranÃ§a' },
   '/configuracoes/whatsapp': { name: 'WhatsApp' },
   '/configuracoes/contahub-automatico': { name: 'ContaHub Auto' },
   
   '/configuracoes/templates': { name: 'Templates' },
   
-  // Outras páginas
+  // Outras pÃ¡ginas
   '/minha-conta': { name: 'Minha Conta' },
   '/login': { name: 'Login' },
 }
@@ -100,7 +100,7 @@ export function DarkHeader() {
 
   const breadcrumbs = generateBreadcrumbs(pathname)
 
-  // Removendo o useEffect local para dark mode, pois agora é gerenciado pelo contexto
+  // Removendo o useEffect local para dark mode, pois agora Ã© gerenciado pelo contexto
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -139,22 +139,22 @@ export function DarkHeader() {
   //   {
   //     id: 1,
   //     title: 'Checklist de Abertura',
-  //     message: 'Aguardando preenchimento por João Silva',
-  //     time: '5 min atrás',
+  //     message: 'Aguardando preenchimento por JoÃ£o Silva',
+  //     time: '5 min atrÃ¡s',
   //     unread: true
   //   },
   //   {
   //     id: 2,
-  //     title: 'Sincronização ContaAzul',
+  //     title: 'SincronizaÃ§Ã£o ContaAzul',
   //     message: 'Dados atualizados com sucesso',
-  //     time: '1 hora atrás',
+  //     time: '1 hora atrÃ¡s',
   //     unread: false
   //   },
   //   {
   //     id: 3,
   //     title: 'Nova Reserva',
-  //     message: 'Mesa para 4 pessoas às 20:00',
-  //     time: '2 horas atrás',
+  //     message: 'Mesa para 4 pessoas Ã s 20:00',
+  //     time: '2 horas atrÃ¡s',
   //     unread: true
   //   }
   // ]
@@ -206,7 +206,7 @@ export function DarkHeader() {
             <CommandPaletteIconTrigger className="mr-1" />
           </div>
           
-          {/* Notificações */}
+          {/* NotificaÃ§Ãµes */}
           <div className="relative">
             <NotificationCenter />
           </div>
@@ -247,7 +247,7 @@ export function DarkHeader() {
             )}
           </div>
 
-          {/* Menu do Usuário */}
+          {/* Menu do UsuÃ¡rio */}
           <div className="relative" ref={userMenuRef}>
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
@@ -262,7 +262,7 @@ export function DarkHeader() {
               <ChevronDown className="w-3 h-3 text-gray-400 dark:text-gray-500" />
             </button>
 
-            {/* Dropdown do Usuário */}
+            {/* Dropdown do UsuÃ¡rio */}
             {showUserMenu && (
               <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 animate-slide-in-from-top">
                 {/* User Info */}

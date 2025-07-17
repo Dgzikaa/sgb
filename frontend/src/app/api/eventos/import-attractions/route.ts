@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase';
 
 // Mapeamento dos dados da planilha
@@ -27,7 +27,7 @@ const attractionsData = [
   { data: '2025-02-27', evento: 'Discolate', artista: '', genero: 'DJ', obs: '' },
   { data: '2025-02-28', evento: 'Samba das Dez', artista: '', genero: 'Samba', obs: '' },
   
-  // Março 2025
+  // MarÃ§o 2025
   { data: '2025-03-01', evento: 'MSN', artista: 'DJ Umiranda', genero: 'DJ', obs: 'Carnaval' },
   { data: '2025-03-02', evento: 'Pagode Vira-lata', artista: '12 por 8', genero: 'Pagode', obs: 'Carnaval' },
   { data: '2025-03-03', evento: 'Macetada Caramelo', artista: '', genero: 'DJ', obs: 'Carnaval' },
@@ -47,16 +47,16 @@ const attractionsData = [
   { data: '2025-03-21', evento: 'Pagode Vira-lata', artista: 'Benzadeus', genero: 'Pagode', obs: '' },
   { data: '2025-03-22', evento: 'R&Baile', artista: 'DJ Umiranda', genero: 'DJ', obs: '' },
   { data: '2025-03-23', evento: 'Uma Mesa e Um Pagode', artista: '12 por 8', genero: 'Pagode', obs: '' },
-  { data: '2025-03-24', evento: 'Dia D', artista: 'Duzão', genero: 'Pagode', obs: '' },
+  { data: '2025-03-24', evento: 'Dia D', artista: 'DuzÃ£o', genero: 'Pagode', obs: '' },
   { data: '2025-03-25', evento: 'Brasil x Argentina', artista: '', genero: 'DJ', obs: 'Jogo' },
   { data: '2025-03-26', evento: 'Quarta de Bamba', artista: 'Breno Alves', genero: 'Samba', obs: '' },
   { data: '2025-03-27', evento: 'Discolate', artista: 'DJ Hugo Drop', genero: 'DJ', obs: '' },
-  { data: '2025-03-28', evento: 'Pagode Vira-lata', artista: 'Tonzão', genero: 'Pagode', obs: '' },
+  { data: '2025-03-28', evento: 'Pagode Vira-lata', artista: 'TonzÃ£o', genero: 'Pagode', obs: '' },
   { data: '2025-03-29', evento: 'Perro Caliente', artista: 'DJ Pequi', genero: 'Cubana', obs: '' },
   { data: '2025-03-30', evento: 'Algo simples', artista: '', genero: 'DJ', obs: '' },
   
   // Abril 2025
-  { data: '2025-04-01', evento: 'Libertadores no telão', artista: '', genero: 'DJ', obs: 'Jogo' },
+  { data: '2025-04-01', evento: 'Libertadores no telÃ£o', artista: '', genero: 'DJ', obs: 'Jogo' },
   { data: '2025-04-02', evento: 'Quarta de Bamba', artista: 'Breno Alves', genero: 'Samba', obs: '' },
   { data: '2025-04-03', evento: 'Quinta de abril', artista: 'Benzadeus', genero: 'Pagode', obs: '' },
   { data: '2025-04-04', evento: 'Pagode Vira-lata', artista: 'Dudu 7 Cordas', genero: 'Pagode', obs: '' },
@@ -68,7 +68,7 @@ const attractionsData = [
   { data: '2025-04-11', evento: 'Pagode Vira-lata', artista: 'Gigi', genero: 'Pagode', obs: '' },
   { data: '2025-04-12', evento: 'MSN', artista: 'DJ Tiago Jousef', genero: 'DJ', obs: '' },
   { data: '2025-04-13', evento: 'Algo Simples', artista: '', genero: 'DJ', obs: '' },
-  { data: '2025-04-15', evento: 'Não tem futebol', artista: '', genero: 'DJ', obs: '' },
+  { data: '2025-04-15', evento: 'NÃ£o tem futebol', artista: '', genero: 'DJ', obs: '' },
   { data: '2025-04-16', evento: 'Quarta de Bamba', artista: 'Breno Alves', genero: 'Samba', obs: '' },
   { data: '2025-04-17', evento: 'Quinta de abril', artista: 'Benzadeus', genero: 'Pagode', obs: '' },
   { data: '2025-04-18', evento: 'Pagode Vira-lata', artista: 'Cris Maciel', genero: 'Pagode', obs: '' },
@@ -77,7 +77,7 @@ const attractionsData = [
   { data: '2025-04-21', evento: 'Feriado', artista: '', genero: 'DJ', obs: 'Feriado' },
   { data: '2025-04-23', evento: 'Quarta de Bamba', artista: 'Breno Alves', genero: 'Samba', obs: '' },
   { data: '2025-04-24', evento: 'Quinta de abril', artista: 'Benzadeus', genero: 'Pagode', obs: '' },
-  { data: '2025-04-25', evento: 'Pagode Vira-lata', artista: 'Tonzão', genero: 'Pagode', obs: '' },
+  { data: '2025-04-25', evento: 'Pagode Vira-lata', artista: 'TonzÃ£o', genero: 'Pagode', obs: '' },
   { data: '2025-04-26', evento: 'R&Baile', artista: 'DJ Umiranda', genero: 'DJ', obs: '' },
   { data: '2025-04-27', evento: 'Uma Mesa e um Pagode', artista: '12 por 8', genero: 'Pagode', obs: '' },
   { data: '2025-04-30', evento: 'Quarta de Bamba', artista: 'Breno Alves', genero: 'Samba', obs: 'Feriado' },
@@ -98,7 +98,7 @@ const attractionsData = [
   { data: '2025-05-17', evento: 'ESPECIAL - BETH CARVALHO', artista: '', genero: 'DJ', obs: '' },
   { data: '2025-05-18', evento: 'Um Belo Domingo', artista: 'Lado a lado', genero: 'Pagode', obs: '' },
   { data: '2025-05-21', evento: 'Quarta de Bamba', artista: 'Breno Alves', genero: 'Samba', obs: '' },
-  { data: '2025-05-22', evento: 'Modão e Viola', artista: 'Brener Viola', genero: 'Sertanejo', obs: '' },
+  { data: '2025-05-22', evento: 'ModÃ£o e Viola', artista: 'Brener Viola', genero: 'Sertanejo', obs: '' },
   { data: '2025-05-23', evento: 'Pagode Vira Lata - Benzadeus', artista: 'Benzadeus', genero: 'Pagode', obs: '' },
   { data: '2025-05-24', evento: 'ESPECIAL - "ZECA PAGODINHO"', artista: 'Nenel Vida', genero: 'Vocal', obs: '' },
   { data: '2025-05-25', evento: 'Uma mesa e um pagode', artista: '12 por 8', genero: 'Pagode', obs: '' },
@@ -108,10 +108,10 @@ const attractionsData = [
   { data: '2025-05-31', evento: 'ESPECIAL - "ALCIONE"', artista: 'Karla Sangaletti', genero: 'Vocal', obs: '' },
   
   // Junho 2025
-  { data: '2025-06-01', evento: 'Samba da tia zélia', artista: 'Tia zélia', genero: 'Pagode', obs: '' },
+  { data: '2025-06-01', evento: 'Samba da tia zÃ©lia', artista: 'Tia zÃ©lia', genero: 'Pagode', obs: '' },
   { data: '2025-06-02', evento: 'Jet - Segunda da Resenha', artista: '', genero: 'DJ', obs: '' },
   { data: '2025-06-04', evento: 'Quarta de Bamba', artista: 'Breno Alves', genero: 'Samba', obs: '' },
-  { data: '2025-06-05', evento: 'Modão e Viola', artista: '', genero: 'Sertanejo', obs: '' },
+  { data: '2025-06-05', evento: 'ModÃ£o e Viola', artista: '', genero: 'Sertanejo', obs: '' },
   { data: '2025-06-06', evento: 'Pagode Vira-Lata', artista: 'Benzadeus', genero: 'Pagode', obs: '' },
   { data: '2025-06-08', evento: 'Uma e Mesa e Um Pagode', artista: '12 por 8', genero: 'Pagode', obs: '' },
   { data: '2025-06-09', evento: 'Jet - Segunda da Resenha', artista: '', genero: 'DJ', obs: '' },
@@ -143,19 +143,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 });
     }
 
-    console.log('🔄 Iniciando limpeza e importação de atrações...');
+    console.log('ðŸ”„ Iniciando limpeza e importaÃ§Ã£o de atraÃ§Ãµes...');
     
 
     
-    // 1. Limpar todos os eventos existentes do Bar Ordinário
-    console.log('🗑️ Removendo eventos existentes...');
+    // 1. Limpar todos os eventos existentes do Bar OrdinÃ¡rio
+    console.log('ðŸ—‘ï¸ Removendo eventos existentes...');
     const { error: deleteError } = await supabase
       .from('eventos')
       .delete()
       .eq('bar_id', 1);
     
     if (deleteError) {
-      console.error('❌ Erro ao deletar eventos:', deleteError);
+      console.error('âŒ Erro ao deletar eventos:', deleteError);
       return NextResponse.json({ 
         success: false, 
         error: 'Erro ao deletar eventos existentes',
@@ -163,10 +163,10 @@ export async function POST(request: NextRequest) {
       });
     }
     
-    console.log('✅ Eventos existentes removidos com sucesso');
+    console.log('âœ… Eventos existentes removidos com sucesso');
     
     // 2. Inserir novos eventos
-    console.log('📝 Inserindo novos eventos...');
+    console.log('ðŸ“ Inserindo novos eventos...');
     const eventosParaInserir = attractionsData.map((item: any) => ({
       bar_id: 1,
       nome_evento: item.evento,
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
       horario_inicio: '19:00:00',
       horario_fim: '23:59:00',
       status: 'ativo',
-      categoria: 'música',
+      categoria: 'mÃºsica',
       tipo_evento: 'show',
       divulgacao_ativa: true,
       created_at: new Date().toISOString(),
@@ -190,7 +190,7 @@ export async function POST(request: NextRequest) {
       .select();
     
     if (insertError) {
-      console.error('❌ Erro ao inserir novos eventos:', insertError);
+      console.error('âŒ Erro ao inserir novos eventos:', insertError);
       return NextResponse.json({ 
         success: false, 
         error: 'Erro ao inserir novos eventos',
@@ -198,17 +198,17 @@ export async function POST(request: NextRequest) {
       });
     }
     
-    console.log(`✅ ${insertedEvents?.length} novos eventos inseridos com sucesso`);
+    console.log(`âœ… ${insertedEvents?.length} novos eventos inseridos com sucesso`);
     
     return NextResponse.json({
       success: true,
-      message: 'Atrações importadas com sucesso!',
+      message: 'AtraÃ§Ãµes importadas com sucesso!',
       totalImported: insertedEvents?.length || 0,
       data: insertedEvents
     });
     
   } catch (error) {
-    console.error('❌ Erro geral:', error);
+    console.error('âŒ Erro geral:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor',

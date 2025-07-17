@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser, authErrorResponse } from '@/middleware/auth'
 
@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usuário não autenticado')
+      return authErrorResponse('UsuÃ¡rio nÃ£o autenticado')
     }
 
     const body = await request.json()
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
     if (!bar_id || !user_id) {
       return NextResponse.json(
-        { error: 'bar_id e user_id são obrigatórios' },
+        { error: 'bar_id e user_id sÃ£o obrigatÃ³rios' },
         { status: 400 }
       )
     }

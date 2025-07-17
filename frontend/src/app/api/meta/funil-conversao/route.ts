@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -8,9 +8,9 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('📊 Funil de Conversão - Analisando performance de conversão...')
+    console.log('ðŸ“Š Funil de ConversÃ£o - Analisando performance de conversÃ£o...')
 
-    // Obter dados do usuário para pegar o bar_id
+    // Obter dados do usuÃ¡rio para pegar o bar_id
     const userData = request.headers.get('x-user-data')
     let barId = 3 // fallback para desenvolvimento
     
@@ -18,36 +18,36 @@ export async function GET(request: NextRequest) {
       try {
         const parsedUser = JSON.parse(decodeURIComponent(userData))
         barId = parsedUser.bar_id || 3
-        console.log(`👤 Funil de Conversão - Usando bar_id: ${barId}`)
+        console.log(`ðŸ‘¤ Funil de ConversÃ£o - Usando bar_id: ${barId}`)
       } catch (e) {
-        console.warn('⚠️ Erro ao parsear dados do usuário, usando bar_id padrão')
+        console.warn('âš ï¸ Erro ao parsear dados do usuÃ¡rio, usando bar_id padrÃ£o')
       }
     }
 
     const { searchParams } = new URL(request.url)
     const periodo = searchParams.get('periodo') || '30' // dias
     
-    console.log('📊 Funil de Conversão - Analisando para bar:', barId, 'período:', periodo, 'dias')
+    console.log('ðŸ“Š Funil de ConversÃ£o - Analisando para bar:', barId, 'perÃ­odo:', periodo, 'dias')
 
     // 1. DEFINIR ETAPAS DO FUNIL
     const etapasFunil = [
       {
-        nome: 'Impressões',
-        descricao: 'Quantas vezes o conteúdo foi exibido',
+        nome: 'ImpressÃµes',
+        descricao: 'Quantas vezes o conteÃºdo foi exibido',
         tipo: 'awareness',
         meta_ideal: 10000,
         cor: '#e3f2fd'
       },
       {
         nome: 'Alcance',
-        descricao: 'Pessoas únicas que viram o conteúdo',
+        descricao: 'Pessoas Ãºnicas que viram o conteÃºdo',
         tipo: 'reach',
         meta_ideal: 5000,
         cor: '#e8f5e8'
       },
       {
         nome: 'Engajamento',
-        descricao: 'Interações com o conteúdo',
+        descricao: 'InteraÃ§Ãµes com o conteÃºdo',
         tipo: 'engagement',
         meta_ideal: 500,
         cor: '#fff3e0'
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
         cor: '#f3e5f5'
       },
       {
-        nome: 'Conversões',
+        nome: 'ConversÃµes',
         descricao: 'Vendas/reservas efetivadas',
         tipo: 'conversions',
         meta_ideal: 10,
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
       .eq('bar_id', barId)
       .gte('updated_at', dataLimite.toISOString())
 
-    // 3. CALCULAR MÉTRICAS DO FUNIL
+    // 3. CALCULAR MÃ‰TRICAS DO FUNIL
     const calcularMetricasFunil = (dadosIG: any[], dadosFB: any[]) => {
       const todosOsDados = [...(dadosIG || []), ...(dadosFB || [])]
       
@@ -141,7 +141,7 @@ export async function GET(request: NextRequest) {
         const taxaConversao = valorAnterior > 0 ? (valor / valorAnterior) * 100 : 0
         const custoPorAcao = valor > 0 ? custoEstimado / valor : 0
         const roi = index === etapasFunil.length - 1 ? 
-          ((valor * 85) / custoEstimado - 1) * 100 : 0 // R$ 85 por conversão
+          ((valor * 85) / custoEstimado - 1) * 100 : 0 // R$ 85 por conversÃ£o
 
         return {
           ...etapa,
@@ -182,44 +182,44 @@ export async function GET(request: NextRequest) {
       return vazamentos.sort((a, b) => b.oportunidade_receita - a.oportunidade_receita)
     }
 
-    // 5. GERAR AÇÕES POR VAZAMENTO
+    // 5. GERAR AÃ‡Ã•ES POR VAZAMENTO
     const gerarAcoesPorVazamento = (etapaAtual: string, proximaEtapa: string) => {
       const acoesPorTransicao: { [key: string]: string[] } = {
-        'Impressões->Alcance': [
-          'Melhore a segmentação do público',
-          'Aumente o orçamento em horários de pico',
-          'Teste novos formatos de conteúdo'
+        'ImpressÃµes->Alcance': [
+          'Melhore a segmentaÃ§Ã£o do pÃºblico',
+          'Aumente o orÃ§amento em horÃ¡rios de pico',
+          'Teste novos formatos de conteÃºdo'
         ],
         'Alcance->Engajamento': [
-          'Crie conteúdo mais chamativo',
-          'Use mais vídeos e reels',
-          'Faça perguntas para gerar interação'
+          'Crie conteÃºdo mais chamativo',
+          'Use mais vÃ­deos e reels',
+          'FaÃ§a perguntas para gerar interaÃ§Ã£o'
         ],
         'Engajamento->Cliques': [
           'Adicione CTAs mais claros',
-          'Crie senso de urgência',
-          'Ofereça incentivos para clique'
+          'Crie senso de urgÃªncia',
+          'OfereÃ§a incentivos para clique'
         ],
         'Cliques->Leads': [
           'Simplifique o processo de cadastro',
-          'Ofereça algo em troca do contato',
+          'OfereÃ§a algo em troca do contato',
           'Melhore a landing page'
         ],
-        'Leads->Conversões': [
+        'Leads->ConversÃµes': [
           'Agilize o follow-up',
           'Personalize o atendimento',
-          'Ofereça facilidades de pagamento'
+          'OfereÃ§a facilidades de pagamento'
         ]
       }
       
       const chave = `${etapaAtual}->${proximaEtapa}`
-      return acoesPorTransicao[chave] || ['Analise o processo de transição']
+      return acoesPorTransicao[chave] || ['Analise o processo de transiÃ§Ã£o']
     }
 
     // 6. CALCULAR ROI DETALHADO
     const calcularROIDetalhado = (metricasFunil: any[], custoTotal: number = 500) => {
       const conversoes = metricasFunil[metricasFunil.length - 1].valor
-      const receitaTotal = conversoes * 85 // R$ 85 por conversão
+      const receitaTotal = conversoes * 85 // R$ 85 por conversÃ£o
       const roi = ((receitaTotal - custoTotal) / custoTotal) * 100
       
       return {
@@ -230,42 +230,42 @@ export async function GET(request: NextRequest) {
         lucro_liquido: receitaTotal - custoTotal,
         custo_por_conversao: conversoes > 0 ? custoTotal / conversoes : 0,
         valor_por_conversao: 85,
-        break_even: custoTotal / 85, // Quantas conversões para empatar
+        break_even: custoTotal / 85, // Quantas conversÃµes para empatar
         status: roi > 100 ? 'excelente' : roi > 50 ? 'bom' : roi > 0 ? 'positivo' : 'negativo'
       }
     }
 
-    // 7. SUGERIR OTIMIZAÇÕES
+    // 7. SUGERIR OTIMIZAÃ‡Ã•ES
     const sugerirOtimizacoes = (metricasFunil: any[], vazamentos: any[], roi: any) => {
       const otimizacoes = []
       
-      // Otimizações baseadas em ROI
+      // OtimizaÃ§Ãµes baseadas em ROI
       if (roi.roi_percentual < 50) {
         otimizacoes.push({
           categoria: 'ROI',
           prioridade: 'alta',
           titulo: 'ROI abaixo do esperado',
           descricao: `ROI atual: ${roi.roi_percentual.toFixed(1)}%. Meta: >50%`,
-          acao: 'Reduza custos ou aumente taxa de conversão',
-          impacto_estimado: 'R$ 200-400 por mês'
+          acao: 'Reduza custos ou aumente taxa de conversÃ£o',
+          impacto_estimado: 'R$ 200-400 por mÃªs'
         })
       }
       
-      // Otimizações baseadas em vazamentos
+      // OtimizaÃ§Ãµes baseadas em vazamentos
       vazamentos.forEach(vazamento => {
         if (vazamento.severidade === 'critica') {
           otimizacoes.push({
             categoria: 'Vazamento',
             prioridade: 'critica',
-            titulo: `Vazamento crítico: ${vazamento.de} → ${vazamento.para}`,
-            descricao: `${vazamento.taxa_vazamento.toFixed(1)}% perdidos na transição`,
+            titulo: `Vazamento crÃ­tico: ${vazamento.de} â†’ ${vazamento.para}`,
+            descricao: `${vazamento.taxa_vazamento.toFixed(1)}% perdidos na transiÃ§Ã£o`,
             acao: vazamento.acoes_sugeridas[0],
             impacto_estimado: `R$ ${vazamento.oportunidade_receita.toFixed(0)} potencial`
           })
         }
       })
       
-      // Otimizações baseadas em metas
+      // OtimizaÃ§Ãµes baseadas em metas
       metricasFunil.forEach(etapa => {
         if (etapa.status === 'abaixo') {
           otimizacoes.push({
@@ -274,7 +274,7 @@ export async function GET(request: NextRequest) {
             titulo: `${etapa.nome} abaixo da meta`,
             descricao: `Atual: ${etapa.valor} | Meta: ${etapa.meta_ideal}`,
             acao: `Invista mais em ${etapa.nome.toLowerCase()}`,
-            impacto_estimado: `${((etapa.meta_ideal - etapa.valor) * 0.1).toFixed(0)} conversões extras`
+            impacto_estimado: `${((etapa.meta_ideal - etapa.valor) * 0.1).toFixed(0)} conversÃµes extras`
           })
         }
       })
@@ -291,7 +291,7 @@ export async function GET(request: NextRequest) {
     const roiDetalhado = calcularROIDetalhado(metricasFunil)
     const otimizacoes = sugerirOtimizacoes(metricasFunil, vazamentos, roiDetalhado)
 
-    // 8. CALCULAR PROJEÇÕES
+    // 8. CALCULAR PROJEÃ‡Ã•ES
     const calcularProjecoes = (metricasFunil: any[], otimizacoes: any[]) => {
       const conversaoAtual = metricasFunil[metricasFunil.length - 1].valor
       const melhoriaEstimada = otimizacoes.reduce((acc, opt) => {
@@ -335,11 +335,11 @@ export async function GET(request: NextRequest) {
         ponto_mais_critico: vazamentos.length > 0 ? vazamentos[0].de : null,
         maior_oportunidade: vazamentos.length > 0 ? vazamentos[0].oportunidade_receita : 0,
         proxima_acao: otimizacoes.length > 0 ? otimizacoes[0].acao : 'Funil funcionando bem',
-        tempo_para_roi_positivo: roiDetalhado.roi_percentual < 0 ? '2-3 meses' : 'Já positivo'
+        tempo_para_roi_positivo: roiDetalhado.roi_percentual < 0 ? '2-3 meses' : 'JÃ¡ positivo'
       }
     }
 
-    console.log('✅ Funil de Conversão processado:', {
+    console.log('âœ… Funil de ConversÃ£o processado:', {
       conversoes: metricasFunil[metricasFunil.length - 1]?.valor || 0,
       roi: roiDetalhado.roi_percentual.toFixed(1),
       vazamentos: vazamentos.length,
@@ -349,7 +349,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(resultado)
 
   } catch (error) {
-    console.error('❌ Erro no Funil de Conversão:', error)
+    console.error('âŒ Erro no Funil de ConversÃ£o:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor',

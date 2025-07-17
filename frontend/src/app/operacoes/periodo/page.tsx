@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
@@ -8,8 +8,8 @@ export default function PeriodoPage() {
   return (
     <ProtectedRoute requiredModule="analise_periodo">
       <EmConstrucao 
-      titulo="Análise por Período"
-      descricao="Relatórios e análises detalhadas por períodos específicos com comparativos históricos."
+      titulo="AnÃ¡lise por PerÃ­odo"
+      descricao="RelatÃ³rios e anÃ¡lises detalhadas por perÃ­odos especÃ­ficos com comparativos histÃ³ricos."
       prioridade="media"
       previsao="2-3 semanas"
     />

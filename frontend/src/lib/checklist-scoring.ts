@@ -1,9 +1,9 @@
-// =====================================================
-// 🏆 SISTEMA DE SCORING INTELIGENTE - CHECKLISTS
+﻿// =====================================================
+// ðŸ† SISTEMA DE SCORING INTELIGENTE - CHECKLISTS
 // =====================================================
 // Implementa o sistema de notas conforme documento Word:
 // - "ter a 'nota' do checklist"  
-// - "se alguma era pra marcar sim e marcaram não, ficar claro"
+// - "se alguma era pra marcar sim e marcaram nÃ£o, ficar claro"
 
 interface ItemResposta {
   item_id: string
@@ -49,7 +49,7 @@ interface ScoreSecao {
 }
 
 // =====================================================
-// 🎯 FUNÇÃO PRINCIPAL DE CÁLCULO
+// ðŸŽ¯ FUNÃ‡ÃƒO PRINCIPAL DE CÃLCULO
 // =====================================================
 
 export function calcularScoreFinal(execucao: any): ScoreResult {
@@ -70,7 +70,7 @@ export function calcularScoreFinal(execucao: any): ScoreResult {
   let itensNa = 0
   let somaScores = 0
 
-  // Calcular score por seção
+  // Calcular score por seÃ§Ã£o
   estrutura.secoes.forEach((secao: any, secaoIndex: number) => {
     if (!secao.itens || !Array.isArray(secao.itens)) return
 
@@ -84,7 +84,7 @@ export function calcularScoreFinal(execucao: any): ScoreResult {
     somaScores += scoreSecao.score_secao
   })
 
-  // Calcular score total (média ponderada)
+  // Calcular score total (mÃ©dia ponderada)
   const scoreTotal = detalhesSecoes.length > 0 
     ? Math.round((somaScores / detalhesSecoes.length) * 10) / 10
     : 0
@@ -92,7 +92,7 @@ export function calcularScoreFinal(execucao: any): ScoreResult {
   // Determinar categoria
   const categoria = determinarCategoria(scoreTotal, problemas)
 
-  // Gerar recomendações
+  // Gerar recomendaÃ§Ãµes
   const recomendacoes = gerarRecomendacoes(problemas, scoreTotal)
 
   return {
@@ -110,7 +110,7 @@ export function calcularScoreFinal(execucao: any): ScoreResult {
 }
 
 // =====================================================
-// 📊 CÁLCULO POR SEÇÃO
+// ðŸ“Š CÃLCULO POR SEÃ‡ÃƒO
 // =====================================================
 
 function calcularScoreSecao(
@@ -118,7 +118,7 @@ function calcularScoreSecao(
   respostas: any, 
   problemas: ProblemIdenticado[]
 ): ScoreSecao {
-  const nomeSecao = secao.nome || 'Seção sem nome'
+  const nomeSecao = secao.nome || 'SeÃ§Ã£o sem nome'
   const itens = secao.itens || []
   
   let totalItens = itens.length
@@ -140,7 +140,7 @@ function calcularScoreSecao(
     }
   })
 
-  // Score da seção (0-100)
+  // Score da seÃ§Ã£o (0-100)
   const scoreSecao = totalItens > 0 
     ? Math.round((somaScoreItens / totalItens) * 10) / 10
     : 0
@@ -156,7 +156,7 @@ function calcularScoreSecao(
 }
 
 // =====================================================
-// 🔍 CÁLCULO POR ITEM
+// ðŸ” CÃLCULO POR ITEM
 // =====================================================
 
 function calcularScoreItem(
@@ -167,20 +167,20 @@ function calcularScoreItem(
 ): { score: number, tem_problema: boolean } {
   
   if (!resposta?.respondido) {
-    // Item não respondido
+    // Item nÃ£o respondido
     if (item.obrigatorio) {
       problemas.push({
         item_id: item.id || item.titulo,
         titulo: item.titulo,
         secao: nomeSecao,
         tipo_problema: 'obrigatorio_nao_preenchido',
-        descricao: `Item obrigatório não foi preenchido: ${item.titulo}`,
+        descricao: `Item obrigatÃ³rio nÃ£o foi preenchido: ${item.titulo}`,
         impacto: 'alto',
         requer_acao: true
       })
       return { score: 0, tem_problema: true }
     }
-    return { score: 50, tem_problema: false } // Item opcional não respondido
+    return { score: 50, tem_problema: false } // Item opcional nÃ£o respondido
   }
 
   // Item respondido - calcular score baseado no tipo e valor
@@ -225,7 +225,7 @@ function calcularScorePorTipo(
 }
 
 // =====================================================
-// 🎯 CÁLCULOS ESPECÍFICOS POR TIPO
+// ðŸŽ¯ CÃLCULOS ESPECÃFICOS POR TIPO
 // =====================================================
 
 function calcularScoreSimNao(
@@ -238,17 +238,17 @@ function calcularScoreSimNao(
   const titulo = item.titulo?.toLowerCase() || ''
   const valorBoolean = valor === true || valor === 'sim' || valor === 'yes'
   
-  // Identificar se é um item que deveria ser "sim" (positivo)
+  // Identificar se Ã© um item que deveria ser "sim" (positivo)
   const esperaPositivo = identificarItemPositivo(titulo)
   
   if (esperaPositivo && !valorBoolean) {
-    // Era pra ser SIM mas foi marcado NÃO - PROBLEMA!
+    // Era pra ser SIM mas foi marcado NÃƒO - PROBLEMA!
     problemas.push({
       item_id: item.id || item.titulo,
       titulo: item.titulo,
       secao: nomeSecao,
       tipo_problema: 'esperado_sim_marcado_nao',
-      descricao: `Item crítico marcado como "NÃO": ${item.titulo}`,
+      descricao: `Item crÃ­tico marcado como "NÃƒO": ${item.titulo}`,
       impacto: 'alto',
       requer_acao: true
     })
@@ -256,7 +256,7 @@ function calcularScoreSimNao(
   }
   
   if (!esperaPositivo && valorBoolean) {
-    // Era pra ser NÃO mas foi marcado SIM (pode indicar problema)
+    // Era pra ser NÃƒO mas foi marcado SIM (pode indicar problema)
     const ehProblemaSerio = identificarItemNegativo(titulo)
     if (ehProblemaSerio) {
       problemas.push({
@@ -264,7 +264,7 @@ function calcularScoreSimNao(
         titulo: item.titulo,
         secao: nomeSecao,
         tipo_problema: 'valor_critico',
-        descricao: `Possível problema identificado: ${item.titulo}`,
+        descricao: `PossÃ­vel problema identificado: ${item.titulo}`,
         impacto: 'medio',
         requer_acao: true
       })
@@ -290,7 +290,7 @@ function calcularScoreAvaliacao(
       titulo: item.titulo,
       secao: nomeSecao,
       tipo_problema: 'valor_critico',
-      descricao: `Avaliação baixa (${nota}/5): ${item.titulo}`,
+      descricao: `AvaliaÃ§Ã£o baixa (${nota}/5): ${item.titulo}`,
       impacto: 'alto',
       requer_acao: true
     })
@@ -320,7 +320,7 @@ function calcularScoreNumero(
       titulo: item.titulo,
       secao: nomeSecao,
       tipo_problema: 'valor_critico',
-      descricao: `Valor abaixo do mínimo (${numero} < ${opcoes.min}): ${item.titulo}`,
+      descricao: `Valor abaixo do mÃ­nimo (${numero} < ${opcoes.min}): ${item.titulo}`,
       impacto: 'alto',
       requer_acao: true
     })
@@ -333,7 +333,7 @@ function calcularScoreNumero(
       titulo: item.titulo,
       secao: nomeSecao,
       tipo_problema: 'valor_critico',
-      descricao: `Valor acima do máximo (${numero} > ${opcoes.max}): ${item.titulo}`,
+      descricao: `Valor acima do mÃ¡ximo (${numero} > ${opcoes.max}): ${item.titulo}`,
       impacto: 'alto',
       requer_acao: true
     })
@@ -417,13 +417,13 @@ function calcularScoreAssinatura(
 }
 
 // =====================================================
-// 🔍 FUNÇÕES DE IDENTIFICAÇÃO
+// ðŸ” FUNÃ‡Ã•ES DE IDENTIFICAÃ‡ÃƒO
 // =====================================================
 
 function identificarItemPositivo(titulo: string): boolean {
   const palavrasPositivas = [
     'limpo', 'funcionando', 'organizado', 'adequado', 'suficiente',
-    'disponível', 'operante', 'em bom estado', 'verificado', 'conferido',
+    'disponÃ­vel', 'operante', 'em bom estado', 'verificado', 'conferido',
     'abastecido', 'higienizado', 'calibrado', 'teste ok', 'normal',
     'dentro do prazo', 'em ordem', 'completo', 'atualizado'
   ]
@@ -434,15 +434,15 @@ function identificarItemPositivo(titulo: string): boolean {
 function identificarItemNegativo(titulo: string): boolean {
   const palavrasNegativas = [
     'vazamento', 'quebrado', 'sujo', 'vencido', 'defeito', 'problema',
-    'ruído', 'odor', 'mancha', 'rachadura', 'ferimento', 'acidente',
-    'contaminação', 'pragas', 'roedores', 'insetos'
+    'ruÃ­do', 'odor', 'mancha', 'rachadura', 'ferimento', 'acidente',
+    'contaminaÃ§Ã£o', 'pragas', 'roedores', 'insetos'
   ]
   
   return palavrasNegativas.some(palavra => titulo.includes(palavra))
 }
 
 // =====================================================
-// 🏷️ CATEGORIZAÇÃO
+// ðŸ·ï¸ CATEGORIZAÃ‡ÃƒO
 // =====================================================
 
 function determinarCategoria(score: number, problemas: ProblemIdenticado[]): 'excelente' | 'bom' | 'atencao' | 'critico' {
@@ -472,7 +472,7 @@ function determinarCategoriaSecao(score: number, problemas: number): 'excelente'
 }
 
 // =====================================================
-// 💡 RECOMENDAÇÕES
+// ðŸ’¡ RECOMENDAÃ‡Ã•ES
 // =====================================================
 
 function gerarRecomendacoes(problemas: ProblemIdenticado[], score: number): string[] {
@@ -480,27 +480,27 @@ function gerarRecomendacoes(problemas: ProblemIdenticado[], score: number): stri
   
   const problemasCriticos = problemas.filter((p: any) => p.tipo_problema === 'esperado_sim_marcado_nao')
   if (problemasCriticos.length > 0) {
-    recomendacoes.push(`🚨 AÇÃO IMEDIATA: ${problemasCriticos.length} item(ns) crítico(s) identificado(s)`)
+    recomendacoes.push(`ðŸš¨ AÃ‡ÃƒO IMEDIATA: ${problemasCriticos.length} item(ns) crÃ­tico(s) identificado(s)`)
   }
   
   const itensObrigatorios = problemas.filter((p: any) => p.tipo_problema === 'obrigatorio_nao_preenchido')
   if (itensObrigatorios.length > 0) {
-    recomendacoes.push(`📝 Completar ${itensObrigatorios.length} item(ns) obrigatório(s) pendente(s)`)
+    recomendacoes.push(`ðŸ“ Completar ${itensObrigatorios.length} item(ns) obrigatÃ³rio(s) pendente(s)`)
   }
   
   if (score < 60) {
-    recomendacoes.push('📊 Score baixo - revisar procedimentos e treinamento')
+    recomendacoes.push('ðŸ“Š Score baixo - revisar procedimentos e treinamento')
   }
   
   if (score >= 90) {
-    recomendacoes.push('🎉 Excelente execução! Parabéns pela qualidade!')
+    recomendacoes.push('ðŸŽ‰ Excelente execuÃ§Ã£o! ParabÃ©ns pela qualidade!')
   }
   
   return recomendacoes
 }
 
 // =====================================================
-// 🔧 FUNÇÕES UTILITÁRIAS
+// ðŸ”§ FUNÃ‡Ã•ES UTILITÃRIAS
 // =====================================================
 
 function encontrarResposta(item: any, respostas: any): any {
@@ -529,12 +529,12 @@ function criarScoreVazio(): ScoreResult {
     itens_na: 0,
     problemas_identificados: [],
     detalhes_por_secao: [],
-    recomendacoes: ['Estrutura do checklist não encontrada']
+    recomendacoes: ['Estrutura do checklist nÃ£o encontrada']
   }
 }
 
 // =====================================================
-// 📈 FUNÇÕES DE ANÁLISE ADICIONAL
+// ðŸ“ˆ FUNÃ‡Ã•ES DE ANÃLISE ADICIONAL
 // =====================================================
 
 export function obterCorCategoria(categoria: string): string {
@@ -549,11 +549,11 @@ export function obterCorCategoria(categoria: string): string {
 
 export function obterIconeCategoria(categoria: string): string {
   switch (categoria) {
-    case 'excelente': return '🏆'
-    case 'bom': return '✅'
-    case 'atencao': return '⚠️'
-    case 'critico': return '🚨'
-    default: return '📋'
+    case 'excelente': return 'ðŸ†'
+    case 'bom': return 'âœ…'
+    case 'atencao': return 'âš ï¸'
+    case 'critico': return 'ðŸš¨'
+    default: return 'ðŸ“‹'
   }
 }
 
@@ -562,11 +562,11 @@ export function obterResumoScore(scoreResult: ScoreResult): string {
   const problemasCriticos = problemas_identificados.filter((p: any) => p.impacto === 'alto').length
   
   if (categoria === 'excelente') {
-    return `Score excelente: ${score_total}/100 🏆`
+    return `Score excelente: ${score_total}/100 ðŸ†`
   }
   
   if (categoria === 'critico') {
-    return `Atenção necessária: ${score_total}/100 (${problemasCriticos} problema(s) crítico(s)) 🚨`
+    return `AtenÃ§Ã£o necessÃ¡ria: ${score_total}/100 (${problemasCriticos} problema(s) crÃ­tico(s)) ðŸš¨`
   }
   
   return `Score: ${score_total}/100 - ${categoria} ${obterIconeCategoria(categoria)}`

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -55,7 +55,7 @@ export default function ContaHubAutomaticoPage() {
   })
 
   useEffect(() => {
-    setPageTitle('🤖 ContaHub Automático')
+    setPageTitle('ðŸ¤– ContaHub AutomÃ¡tico')
     verificarContaHub()
     return () => setPageTitle('')
   }, [setPageTitle])
@@ -74,8 +74,8 @@ export default function ContaHubAutomaticoPage() {
   const executarColetaAutomatica = async () => {
     if (!dataInicio || !dataFim) {
       toast({
-        title: "❌ Erro",
-        description: "Por favor, selecione as datas de início e fim",
+        title: "âŒ Erro",
+        description: "Por favor, selecione as datas de inÃ­cio e fim",
         variant: "destructive"
       })
       return
@@ -106,12 +106,12 @@ export default function ContaHubAutomaticoPage() {
         setStatus({
           executando: false,
           progresso: 100,
-          etapaAtual: 'Concluída',
+          etapaAtual: 'ConcluÃ­da',
           dadosColetados: data.resultado?.total_registros || 0,
           erros: data.resultado?.erros || 0
         })
         toast({
-          title: "✅ Sucesso",
+          title: "âœ… Sucesso",
           description: `Coleta finalizada! ${data.resultado?.total_registros || 0} registros coletados.`,
         })
       } else {
@@ -126,8 +126,8 @@ export default function ContaHubAutomaticoPage() {
         erros: prev.erros + 1
       }))
       toast({
-        title: "❌ Erro",
-        description: error instanceof Error ? error.message : "Erro ao executar coleta automática",
+        title: "âŒ Erro",
+        description: error instanceof Error ? error.message : "Erro ao executar coleta automÃ¡tica",
         variant: "destructive"
       })
     } finally {
@@ -179,15 +179,15 @@ export default function ContaHubAutomaticoPage() {
                     <BarChart3 className="w-8 h-8" />
                   </div>
                   <div>
-                    <h1 className="text-3xl font-bold">ContaHub Automático</h1>
-                    <p className="text-cyan-100 mt-1">Coleta automática de dados financeiros em lote</p>
+                    <h1 className="text-3xl font-bold">ContaHub AutomÃ¡tico</h1>
+                    <p className="text-cyan-100 mt-1">Coleta automÃ¡tica de dados financeiros em lote</p>
                   </div>
                 </div>
               </div>
               
               <div className="flex items-center gap-4">
                 <div className="text-right">
-                  <div className="text-sm text-cyan-200">Status do Serviço</div>
+                  <div className="text-sm text-cyan-200">Status do ServiÃ§o</div>
                   <div className="flex items-center gap-2 mt-1">
                     <div className={`w-2 h-2 rounded-full ${contahubDisponivel ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}></div>
                     <span className="text-lg font-semibold">
@@ -260,7 +260,7 @@ export default function ContaHubAutomaticoPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Período (dias)</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">PerÃ­odo (dias)</p>
                   <p className="text-3xl font-bold text-gray-900 dark:text-white">
                     {calcularDias()}
                   </p>
@@ -276,24 +276,24 @@ export default function ContaHubAutomaticoPage() {
           </Card>
         </div>
 
-        {/* Configuração da Coleta */}
+        {/* ConfiguraÃ§Ã£o da Coleta */}
         <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
           <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
             <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
               <div className="p-2 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg">
                 <Zap className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
               </div>
-              Configuração da Coleta Automática
+              ConfiguraÃ§Ã£o da Coleta AutomÃ¡tica
             </CardTitle>
             <CardDescription>
-              Configure o período para coleta automática de dados do ContaHub
+              Configure o perÃ­odo para coleta automÃ¡tica de dados do ContaHub
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="dataInicio" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Data de Início
+                  Data de InÃ­cio
                 </Label>
                 <Input
                   id="dataInicio"
@@ -321,7 +321,7 @@ export default function ContaHubAutomaticoPage() {
 
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Período Selecionado
+                  PerÃ­odo Selecionado
                 </Label>
                 <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border">
                   <div className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -335,7 +335,7 @@ export default function ContaHubAutomaticoPage() {
 
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Ação
+                  AÃ§Ã£o
                 </Label>
                 <Button
                   onClick={executarColetaAutomatica}
@@ -362,9 +362,9 @@ export default function ContaHubAutomaticoPage() {
                 <div className="flex items-center gap-3">
                   <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
                   <div>
-                    <h4 className="font-semibold text-red-800 dark:text-red-200">ContaHub Indisponível</h4>
+                    <h4 className="font-semibold text-red-800 dark:text-red-200">ContaHub IndisponÃ­vel</h4>
                     <p className="text-sm text-red-600 dark:text-red-300 mt-1">
-                      O serviço ContaHub não está disponível. Verifique a configuração ou tente novamente mais tarde.
+                      O serviÃ§o ContaHub nÃ£o estÃ¡ disponÃ­vel. Verifique a configuraÃ§Ã£o ou tente novamente mais tarde.
                     </p>
                   </div>
                 </div>
@@ -395,7 +395,7 @@ export default function ContaHubAutomaticoPage() {
 
                 <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                   <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">
-                    {resultado.sucesso ? '✓' : '✗'}
+                    {resultado.sucesso ? 'âœ“' : 'âœ—'}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">Status</div>
                 </div>
@@ -404,13 +404,13 @@ export default function ContaHubAutomaticoPage() {
                   <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                     {Math.round(resultado.tempo_execucao || 0)}s
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Tempo de Execução</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Tempo de ExecuÃ§Ã£o</div>
                 </div>
               </div>
 
               {resultado.detalhes && (
                 <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Detalhes da Execução</h4>
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Detalhes da ExecuÃ§Ã£o</h4>
                   <pre className="text-xs text-gray-600 dark:text-gray-400 overflow-auto">
                     {JSON.stringify(resultado.detalhes, null, 2)}
                   </pre>
@@ -428,7 +428,7 @@ export default function ContaHubAutomaticoPage() {
                 <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                   <Info className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
-                Logs de Execução
+                Logs de ExecuÃ§Ã£o
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">

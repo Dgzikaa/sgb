@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -78,7 +78,7 @@ export default function MinhaContaPage() {
   const [carregando, setCarregando] = useState(true)
   const [mensagem, setMensagem] = useState<{ tipo: 'success' | 'error', texto: string } | null>(null)
 
-  // Estados para edição de perfil
+  // Estados para ediÃ§Ã£o de perfil
   const [dadosEdicao, setDadosEdicao] = useState<Partial<PerfilUsuario>>({})
 
   // Estados para troca de senha
@@ -184,7 +184,7 @@ export default function MinhaContaPage() {
         setNovaSenha('')
         setConfirmarSenha('')
         
-        // Se requer relogin, redirecionar após um tempo
+        // Se requer relogin, redirecionar apÃ³s um tempo
         if (data.require_relogin) {
           setTimeout(() => {
             localStorage.clear()
@@ -232,7 +232,7 @@ export default function MinhaContaPage() {
     return cleaned
   }
 
-  // Nova função para buscar CEP automaticamente
+  // Nova funÃ§Ã£o para buscar CEP automaticamente
   const buscarCEP = async (cep: string) => {
     const cepLimpo = cep.replace(/\D/g, '')
     
@@ -252,10 +252,10 @@ export default function MinhaContaPage() {
           
           setMensagem({ 
             tipo: 'success', 
-            texto: `Endereço encontrado: ${data.localidade}/${data.uf}` 
+            texto: `EndereÃ§o encontrado: ${data.localidade}/${data.uf}` 
           })
           
-          // Limpar mensagem após 3 segundos
+          // Limpar mensagem apÃ³s 3 segundos
           setTimeout(() => setMensagem(null), 3000)
         }
       } catch (error) {
@@ -264,10 +264,10 @@ export default function MinhaContaPage() {
     }
   }
 
-  // Função para formatar CPF enquanto digita
+  // FunÃ§Ã£o para formatar CPF enquanto digita
   const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
-    const cleaned = value.replace(/\D/g, '').slice(0, 11) // Limitar a 11 dígitos
+    const cleaned = value.replace(/\D/g, '').slice(0, 11) // Limitar a 11 dÃ­gitos
     let formatted = cleaned
     
     if (cleaned.length >= 4) {
@@ -283,9 +283,9 @@ export default function MinhaContaPage() {
     setDadosEdicao(prev => ({ ...prev, cpf: formatted }))
   }
 
-  // Função para formatar telefone enquanto digita
+  // FunÃ§Ã£o para formatar telefone enquanto digita
   const handleTelefoneChange = (value: string, tipo: 'celular' | 'telefone') => {
-    const cleaned = value.replace(/\D/g, '').slice(0, 11) // Limitar a 11 dígitos
+    const cleaned = value.replace(/\D/g, '').slice(0, 11) // Limitar a 11 dÃ­gitos
     let formatted = cleaned
     
     if (cleaned.length >= 3) {
@@ -304,10 +304,10 @@ export default function MinhaContaPage() {
     setDadosEdicao(prev => ({ ...prev, [tipo]: formatted }))
   }
 
-  // Função para formatar CEP e buscar endereço
+  // FunÃ§Ã£o para formatar CEP e buscar endereÃ§o
   const handleCEPChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
-    const cleaned = value.replace(/\D/g, '').slice(0, 8) // Limitar a 8 dígitos
+    const cleaned = value.replace(/\D/g, '').slice(0, 8) // Limitar a 8 dÃ­gitos
     let formatted = cleaned
     
     if (cleaned.length >= 6) {
@@ -316,7 +316,7 @@ export default function MinhaContaPage() {
     
     setDadosEdicao(prev => ({ ...prev, cep: formatted }))
     
-    // Buscar CEP automaticamente quando tiver 8 dígitos
+    // Buscar CEP automaticamente quando tiver 8 dÃ­gitos
     if (cleaned.length === 8) {
       buscarCEP(cleaned)
     }
@@ -358,7 +358,7 @@ export default function MinhaContaPage() {
     switch(role) {
       case 'admin': return 'Administrador'
       case 'manager': return 'Gerente'
-      default: return 'Funcionário'
+      default: return 'FuncionÃ¡rio'
     }
   }
 
@@ -375,7 +375,7 @@ export default function MinhaContaPage() {
       <div className="text-center py-8">
         <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Erro ao carregar perfil</h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-4">Não foi possível carregar os dados do seu perfil.</p>
+        <p className="text-gray-600 dark:text-gray-400 mb-4">NÃ£o foi possÃ­vel carregar os dados do seu perfil.</p>
         <Button onClick={carregarPerfil}>Tentar novamente</Button>
       </div>
     )
@@ -481,7 +481,7 @@ export default function MinhaContaPage() {
         </div>
       )}
 
-      {/* Cards de estatísticas */}
+      {/* Cards de estatÃ­sticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200">
           <CardContent className="p-6">
@@ -523,7 +523,7 @@ export default function MinhaContaPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Última Atividade</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Ãšltima Atividade</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {calcularDiasDesdeUltimaAtividade() === 0 ? 'Hoje' : `${calcularDiasDesdeUltimaAtividade()} dias`}
                 </p>
@@ -566,7 +566,7 @@ export default function MinhaContaPage() {
             className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white dark:text-gray-300"
           >
             <Shield className="h-4 w-4 mr-2" />
-            Segurança
+            SeguranÃ§a
           </TabsTrigger>
         </TabsList>
 
@@ -578,10 +578,10 @@ export default function MinhaContaPage() {
                 <div>
                   <CardTitle className="text-gray-900 dark:text-white flex items-center space-x-2">
                     <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                    <span>Informações Pessoais</span>
+                    <span>InformaÃ§Ãµes Pessoais</span>
                   </CardTitle>
                   <CardDescription className="text-gray-600 dark:text-gray-400">
-                    Gerencie suas informações pessoais e foto de perfil
+                    Gerencie suas informaÃ§Ãµes pessoais e foto de perfil
                   </CardDescription>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -601,26 +601,26 @@ export default function MinhaContaPage() {
                   currentPhoto={editandoPerfil ? dadosEdicao.foto_perfil : perfil.foto_perfil}
                   onPhotoChange={(foto) => {
                     setDadosEdicao(prev => ({ ...prev, foto_perfil: foto }))
-                    // Se não está em modo de edição, salvar a foto imediatamente
+                    // Se nÃ£o estÃ¡ em modo de ediÃ§Ã£o, salvar a foto imediatamente
                     if (!editandoPerfil) {
                       salvarFotoPerfil(foto)
                     }
                   }}
-                  disabled={false} // Sempre permitir alteração da foto
+                  disabled={false} // Sempre permitir alteraÃ§Ã£o da foto
                 />
                 <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                  Recomendado: imagem quadrada, máximo 5MB<br />
+                  Recomendado: imagem quadrada, mÃ¡ximo 5MB<br />
                   Formatos aceitos: JPG, PNG, GIF
                 </p>
               </div>
 
               <Separator className="bg-gray-200 dark:bg-gray-700" />
 
-              {/* Informações básicas */}
+              {/* InformaÃ§Ãµes bÃ¡sicas */}
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center space-x-2">
                   <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  <span>Dados Básicos</span>
+                  <span>Dados BÃ¡sicos</span>
                 </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -644,7 +644,7 @@ export default function MinhaContaPage() {
                       disabled
                       className="bg-gray-50 dark:bg-gray-600 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                     />
-                    <p className="text-xs text-gray-500 dark:text-gray-400">O e-mail não pode ser alterado</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">O e-mail nÃ£o pode ser alterado</p>
                   </div>
 
                   <div className="space-y-2">
@@ -699,11 +699,11 @@ export default function MinhaContaPage() {
 
               <Separator className="bg-gray-200 dark:bg-gray-700" />
 
-              {/* Endereço */}
+              {/* EndereÃ§o */}
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center space-x-2">
                   <MapPin className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  <span>Endereço</span>
+                  <span>EndereÃ§o</span>
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -721,13 +721,13 @@ export default function MinhaContaPage() {
                   </div>
 
                   <div className="md:col-span-2 space-y-2">
-                    <Label htmlFor="endereco" className="text-gray-700 dark:text-gray-300">Endereço completo</Label>
+                    <Label htmlFor="endereco" className="text-gray-700 dark:text-gray-300">EndereÃ§o completo</Label>
                     <Input
                       id="endereco"
                       value={editandoPerfil ? dadosEdicao.endereco || '' : perfil.endereco || ''}
                       onChange={(e) => setDadosEdicao(prev => ({ ...prev, endereco: e.target.value }))}
                       disabled={!editandoPerfil}
-                      placeholder="Rua, número, complemento"
+                      placeholder="Rua, nÃºmero, complemento"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
                   </div>
@@ -766,7 +766,7 @@ export default function MinhaContaPage() {
                 </div>
               </div>
 
-              {/* Botões de ação */}
+              {/* BotÃµes de aÃ§Ã£o */}
               <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
                 {editandoPerfil ? (
                   <>
@@ -791,7 +791,7 @@ export default function MinhaContaPage() {
                       ) : (
                         <Save className="h-4 w-4" />
                       )}
-                      <span>{salvandoPerfil ? 'Salvando...' : 'Salvar alterações'}</span>
+                      <span>{salvandoPerfil ? 'Salvando...' : 'Salvar alteraÃ§Ãµes'}</span>
                     </Button>
                   </>
                 ) : (
@@ -808,16 +808,16 @@ export default function MinhaContaPage() {
           </Card>
         </TabsContent>
 
-        {/* Tab de Segurança */}
+        {/* Tab de SeguranÃ§a */}
         <TabsContent value="seguranca" className="space-y-6">
           <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader className="border-b border-gray-200 dark:border-gray-700">
               <CardTitle className="text-gray-900 dark:text-white flex items-center space-x-2">
                 <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                <span>Segurança da Conta</span>
+                <span>SeguranÃ§a da Conta</span>
               </CardTitle>
               <CardDescription className="text-gray-600 dark:text-gray-400">
-                Gerencie sua senha e configurações de segurança
+                Gerencie sua senha e configuraÃ§Ãµes de seguranÃ§a
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8 p-8">
@@ -884,9 +884,9 @@ export default function MinhaContaPage() {
 
               <Separator className="bg-gray-200 dark:bg-gray-700" />
 
-              {/* Informações da conta */}
+              {/* InformaÃ§Ãµes da conta */}
               <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Informações da conta</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">InformaÃ§Ãµes da conta</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
                     <div className="flex items-center justify-between">
@@ -900,7 +900,7 @@ export default function MinhaContaPage() {
                   {perfil.ultima_atividade && (
                     <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-600 dark:text-gray-400 font-medium">Última atividade:</span>
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">Ãšltima atividade:</span>
                         <span className="text-gray-900 dark:text-white font-semibold">
                           {new Date(perfil.ultima_atividade).toLocaleDateString('pt-BR')}
                         </span>
@@ -912,14 +912,14 @@ export default function MinhaContaPage() {
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600 dark:text-gray-400 font-medium">Status da conta:</span>
                       <Badge variant={perfil.conta_verificada ? "default" : "secondary"} className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
-                        {perfil.conta_verificada ? "Verificada" : "Não verificada"}
+                        {perfil.conta_verificada ? "Verificada" : "NÃ£o verificada"}
                       </Badge>
                     </div>
                   </div>
 
                   <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-600 dark:text-gray-400 font-medium">Nível de acesso:</span>
+                      <span className="text-gray-600 dark:text-gray-400 font-medium">NÃ­vel de acesso:</span>
                       <div className={`px-3 py-1 rounded-full bg-gradient-to-r ${getRoleColor(perfil.role)} flex items-center space-x-1 text-white text-sm font-medium`}>
                         {getRoleIcon(perfil.role)}
                         <span>{getRoleLabel(perfil.role)}</span>

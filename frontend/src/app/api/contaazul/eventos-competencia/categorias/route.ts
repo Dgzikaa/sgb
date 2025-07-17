@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const barId = searchParams.get('bar_id')
     
     if (!barId) {
-      return NextResponse.json({ error: 'Bar ID é obrigatório' }, { status: 400 })
+      return NextResponse.json({ error: 'Bar ID Ã© obrigatÃ³rio' }, { status: 400 })
     }
 
     const supabase = createSupabaseClient()
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       .order('nome', { ascending: true })
 
     if (error) {
-      console.error('❌ Erro ao buscar categorias:', error)
+      console.error('âŒ Erro ao buscar categorias:', error)
       return NextResponse.json({ error: 'Erro ao buscar categorias' }, { status: 500 })
     }
 
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Erro na API de categorias:', error)
+    console.error('âŒ Erro na API de categorias:', error)
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

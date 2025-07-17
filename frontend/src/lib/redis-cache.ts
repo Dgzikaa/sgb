@@ -1,6 +1,6 @@
-import { getSupabaseClient } from './supabase'
+﻿import { getSupabaseClient } from './supabase'
 
-// Configurações de cache por tipo
+// ConfiguraÃ§Ãµes de cache por tipo
 const CACHE_CONFIGS = {
   usuarios: { ttl: 300 }, // 5 minutos
   bars: { ttl: 600 }, // 10 minutos  
@@ -12,7 +12,7 @@ const CACHE_CONFIGS = {
   configuracoes: { ttl: 900 }, // 15 minutos
   meta: { ttl: 3600 }, // 1 hora
   contaazul: { ttl: 600 }, // 10 minutos
-  default: { ttl: 300 } // 5 minutos padrão
+  default: { ttl: 300 } // 5 minutos padrÃ£o
 } as const
 
 type CacheType = keyof typeof CACHE_CONFIGS
@@ -45,7 +45,7 @@ class RedisCacheService {
   private cleanupInterval: NodeJS.Timeout | null = null
 
   constructor() {
-    // Limpeza automática a cada 5 minutos
+    // Limpeza automÃ¡tica a cada 5 minutos
     this.startCleanup()
   }
 
@@ -157,7 +157,7 @@ class RedisCacheService {
     this.metrics.deletes += keysToDelete.length
     this.updateMetrics()
     
-    console.log(`Cache INVALIDATE: ${keysToDelete.length} chaves removidas com padrão '${pattern}'`)
+    console.log(`Cache INVALIDATE: ${keysToDelete.length} chaves removidas com padrÃ£o '${pattern}'`)
   }
 
   async invalidateByType(type: CacheType): Promise<void> {
@@ -200,7 +200,7 @@ class RedisCacheService {
     }
   }
 
-  // Helper para cache com função de fallback
+  // Helper para cache com funÃ§Ã£o de fallback
   async getOrSet<T = any>(
     type: CacheType,
     identifier: string,
@@ -213,7 +213,7 @@ class RedisCacheService {
       return cached
     }
 
-    // Se não encontrou, executa a função e armazena
+    // Se nÃ£o encontrou, executa a funÃ§Ã£o e armazena
     try {
       const data = await fetchFunction()
       await this.set(type, identifier, data, params)
@@ -224,26 +224,26 @@ class RedisCacheService {
     }
   }
 
-  // Método para pré-aquecer cache crítico
+  // MÃ©todo para prÃ©-aquecer cache crÃ­tico
   async warmup(): Promise<void> {
     try {
       console.log('Iniciando warmup do cache...')
 
       const supabase = await getSupabaseClient()
 
-      // Cache de configurações críticas
+      // Cache de configuraÃ§Ãµes crÃ­ticas
       const { data: bars } = await supabase.from('bars').select('*').eq('ativo', true)
       if (bars) {
         await this.set('bars', 'active', bars)
       }
 
-      // Cache de usuários ativos
+      // Cache de usuÃ¡rios ativos
       const { data: usuarios } = await supabase.from('usuarios').select('*').eq('ativo', true)
       if (usuarios) {
         await this.set('usuarios', 'active', usuarios)
       }
 
-      console.log('Cache warmup concluído')
+      console.log('Cache warmup concluÃ­do')
     } catch (error) {
       console.error('Erro durante cache warmup:', error)
     }
@@ -258,7 +258,7 @@ class RedisCacheService {
   }
 }
 
-// Instância singleton
+// InstÃ¢ncia singleton
 export const cacheService = new RedisCacheService()
 
 // Hook para facilitar uso no frontend
@@ -275,7 +275,7 @@ export function useCache() {
   }
 }
 
-// Utilitários para cache de queries específicas
+// UtilitÃ¡rios para cache de queries especÃ­ficas
 export const cacheUtils = {
   // Cache para listas paginadas
   async getPagedData<T>(
@@ -308,7 +308,7 @@ export const cacheUtils = {
     )
   },
 
-  // Cache para dados de usuário específico
+  // Cache para dados de usuÃ¡rio especÃ­fico
   async getUserData<T>(
     type: CacheType,
     userId: string,

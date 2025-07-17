@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { useBar } from '@/contexts/BarContext'
@@ -54,7 +54,7 @@ export default function RelatorioProducoesPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [executandoMigration, setExecutandoMigration] = useState(false)
 
-  // NOVA FUNÇÃO: Executar migration
+  // NOVA FUNÃ‡ÃƒO: Executar migration
   const executarMigration = async () => {
     setExecutandoMigration(true)
     try {
@@ -66,20 +66,20 @@ export default function RelatorioProducoesPage() {
       const result = await response.json()
       
       if (result.success) {
-        alert(`✅ Migration executada com sucesso!\n\n` +
-              `📊 Detalhes:\n` +
-              `• Campo na tabela produções: ${result.detalhes.campo_producoes}\n` +
-              `• Atualização tabela insumos: ${result.detalhes.tabela_insumos}\n` +
-              `• Criação de índices: ${result.detalhes.indices}\n\n` +
-              `🎯 Agora o sistema pode calcular o percentual de aderência à receita!`)
+        alert(`âœ… Migration executada com sucesso!\n\n` +
+              `ðŸ“Š Detalhes:\n` +
+              `â€¢ Campo na tabela produÃ§Ãµes: ${result.detalhes.campo_producoes}\n` +
+              `â€¢ AtualizaÃ§Ã£o tabela insumos: ${result.detalhes.tabela_insumos}\n` +
+              `â€¢ CriaÃ§Ã£o de Ã­ndices: ${result.detalhes.indices}\n\n` +
+              `ðŸŽ¯ Agora o sistema pode calcular o percentual de aderÃªncia Ã  receita!`)
         
-        // Recarregar produções para pegar os novos campos
+        // Recarregar produÃ§Ãµes para pegar os novos campos
         carregarProducoes()
       } else {
-        alert(`❌ Erro na migration: ${result.error}`)
+        alert(`âŒ Erro na migration: ${result.error}`)
       }
     } catch (error) {
-      alert('❌ Erro ao executar migration de campos')
+      alert('âŒ Erro ao executar migration de campos')
     } finally {
       setExecutandoMigration(false)
     }
@@ -126,7 +126,7 @@ export default function RelatorioProducoesPage() {
   }, [selectedBar?.id, carregarProducoes])
 
   useEffect(() => {
-    setPageTitle('🏭 Relatório de Produções')
+    setPageTitle('ðŸ­ RelatÃ³rio de ProduÃ§Ãµes')
     return () => setPageTitle('')
   }, [setPageTitle])
 
@@ -135,19 +135,19 @@ export default function RelatorioProducoesPage() {
     return Math.round((real / esperado) * 100)
   }
 
-  // NOVA FUNÇÃO: Calcular desvio percentual
+  // NOVA FUNÃ‡ÃƒO: Calcular desvio percentual
   const calcularDesvio = (real: number, esperado: number): number => {
     if (!esperado || esperado === 0) return 0
     return Math.round(Math.abs((real - esperado) / esperado) * 100)
   }
 
-  // NOVA FUNÇÃO: Calcular fator de correção
+  // NOVA FUNÃ‡ÃƒO: Calcular fator de correÃ§Ã£o
   const calcularFatorCorrecao = (real: number, esperado: number): number => {
     if (!real || real === 0) return 0
     return Math.round((esperado / real) * 100) / 100
   }
 
-  // NOVA FUNÇÃO: Cor do status de aderência
+  // NOVA FUNÃ‡ÃƒO: Cor do status de aderÃªncia
   const getAdherenciaColor = (aderencia: number | undefined) => {
     if (!aderencia) return 'bg-gray-100 border-gray-300 text-gray-600'
     if (aderencia >= 95) return 'bg-green-100 border-green-300 text-green-800'
@@ -156,13 +156,13 @@ export default function RelatorioProducoesPage() {
     return 'bg-red-100 border-red-300 text-red-800'
   }
 
-  // NOVA FUNÇÃO: Texto do status de aderência
+  // NOVA FUNÃ‡ÃƒO: Texto do status de aderÃªncia
   const getAdherenciaText = (aderencia: number | undefined) => {
-    if (!aderencia) return '❓ Sem dados'
-    if (aderencia >= 95) return '🏆 Excelente'
-    if (aderencia >= 85) return '👍 Bom'
-    if (aderencia >= 75) return '⚠️ Regular'
-    return '🔴 Ruim'
+    if (!aderencia) return 'â“ Sem dados'
+    if (aderencia >= 95) return 'ðŸ† Excelente'
+    if (aderencia >= 85) return 'ðŸ‘ Bom'
+    if (aderencia >= 75) return 'âš ï¸ Regular'
+    return 'ðŸ”´ Ruim'
   }
 
   const getStatusColor = (eficiencia: number) => {
@@ -173,10 +173,10 @@ export default function RelatorioProducoesPage() {
   }
 
   const getStatusText = (eficiencia: number) => {
-    if (eficiencia >= 95) return '✅ Excelente'
-    if (eficiencia >= 85) return '👍 Boa'
-    if (eficiencia >= 75) return '⚠️ Regular'
-    return '❌ Ruim'
+    if (eficiencia >= 95) return 'âœ… Excelente'
+    if (eficiencia >= 85) return 'ðŸ‘ Boa'
+    if (eficiencia >= 75) return 'âš ï¸ Regular'
+    return 'âŒ Ruim'
   }
 
   const formatarTempo = (tempoString: string) => {
@@ -206,7 +206,7 @@ export default function RelatorioProducoesPage() {
     return (
       <div className="p-6">
         <div className="text-center">
-          <p className="text-red-600 font-medium">⚠️ Selecione um bar primeiro</p>
+          <p className="text-red-600 font-medium">âš ï¸ Selecione um bar primeiro</p>
         </div>
       </div>
     )
@@ -216,12 +216,12 @@ export default function RelatorioProducoesPage() {
       <ProtectedRoute requiredModule="relatorio_producoes">
         <div className="p-6 max-w-7xl mx-auto">
         <div className="mb-6">
-          <p className="text-gray-700">Análise de desempenho da produção por data</p>
+          <p className="text-gray-700">AnÃ¡lise de desempenho da produÃ§Ã£o por data</p>
         </div>
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-black">📅 Selecionar Data</CardTitle>
+            <CardTitle className="text-black">ðŸ“… Selecionar Data</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
@@ -236,15 +236,15 @@ export default function RelatorioProducoesPage() {
                 disabled={isLoading}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
-                {isLoading ? '⏳ Carregando...' : '🔄 Atualizar'}
+                {isLoading ? 'â³ Carregando...' : 'ðŸ”„ Atualizar'}
               </Button>
               <Button 
                 onClick={executarMigration} 
                 disabled={executandoMigration}
                 className="bg-orange-600 hover:bg-orange-700 text-white"
-                title="Executar migration para habilitar análise de aderência à receita"
+                title="Executar migration para habilitar anÃ¡lise de aderÃªncia Ã  receita"
               >
-                {executandoMigration ? '�� Executando...' : '📊 Migrar Campos'}
+                {executandoMigration ? 'ï¿½ï¿½ Executando...' : 'ðŸ“Š Migrar Campos'}
               </Button>
             </div>
           </CardContent>
@@ -253,18 +253,18 @@ export default function RelatorioProducoesPage() {
         {producoes.length > 0 && (
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle className="text-black">📈 Estatísticas do Dia</CardTitle>
+              <CardTitle className="text-black">ðŸ“ˆ EstatÃ­sticas do Dia</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center p-3 bg-blue-50 rounded-lg">
                   <div className="text-2xl font-bold text-blue-600">{estatisticas.total_producoes || producoes.length}</div>
-                  <div className="text-sm text-blue-700">Total Produções</div>
+                  <div className="text-sm text-blue-700">Total ProduÃ§Ãµes</div>
                 </div>
                 
                 <div className="text-center p-3 bg-green-50 rounded-lg">
                   <div className="text-2xl font-bold text-green-600">{estatisticas.eficiencia_excelente || 0}</div>
-                  <div className="text-sm text-green-700">Excelentes (≥95%)</div>
+                  <div className="text-sm text-green-700">Excelentes (â‰¥95%)</div>
                 </div>
                 
                 <div className="text-center p-3 bg-yellow-50 rounded-lg">
@@ -277,14 +277,14 @@ export default function RelatorioProducoesPage() {
                   <div className="text-sm text-red-700">Ruins (&lt;75%)</div>
                 </div>
                 
-                {/* NOVA SEÇÃO: Estatísticas de Aderência */}
+                {/* NOVA SEÃ‡ÃƒO: EstatÃ­sticas de AderÃªncia */}
                 {producoes.some(p => p.percentual_aderencia_receita !== undefined) && (
                   <>
                     <div className="text-center p-3 bg-purple-50 rounded-lg">
                       <div className="text-2xl font-bold text-purple-600">
                         {producoes.filter((p: any) => p.percentual_aderencia_receita && p.percentual_aderencia_receita >= 95).length}
                       </div>
-                      <div className="text-sm text-purple-700">Aderência Excelente</div>
+                      <div className="text-sm text-purple-700">AderÃªncia Excelente</div>
                     </div>
                     
                     <div className="text-center p-3 bg-indigo-50 rounded-lg">
@@ -293,14 +293,14 @@ export default function RelatorioProducoesPage() {
                           ? Math.round(producoes.filter((p: any) => p.percentual_aderencia_receita).reduce((acc, p) => acc + (p.percentual_aderencia_receita || 0), 0) / producoes.filter((p: any) => p.percentual_aderencia_receita).length)
                           : 0}%
                       </div>
-                      <div className="text-sm text-indigo-700">Aderência Média</div>
+                      <div className="text-sm text-indigo-700">AderÃªncia MÃ©dia</div>
                     </div>
                     
                     <div className="text-center p-3 bg-pink-50 rounded-lg">
                       <div className="text-2xl font-bold text-pink-600">
                         {producoes.filter((p: any) => p.percentual_aderencia_receita && p.percentual_aderencia_receita < 75).length}
                       </div>
-                      <div className="text-sm text-pink-700">Aderência Ruim</div>
+                      <div className="text-sm text-pink-700">AderÃªncia Ruim</div>
                     </div>
                     
                     <div className="text-center p-3 bg-gray-50 rounded-lg">
@@ -319,17 +319,17 @@ export default function RelatorioProducoesPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-black">
-              <span className="text-orange-600">🏭</span> Produções
+              <span className="text-orange-600">ðŸ­</span> ProduÃ§Ãµes
             </CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <div className="text-center py-8">
-                <div className="text-blue-600 text-lg">⏳ Carregando produções...</div>
+                <div className="text-blue-600 text-lg">â³ Carregando produÃ§Ãµes...</div>
               </div>
             ) : producoes.length === 0 ? (
               <div className="text-center py-8">
-                <div className="text-gray-500 text-lg">📭 Nenhuma produção encontrada</div>
+                <div className="text-gray-500 text-lg">ðŸ“­ Nenhuma produÃ§Ã£o encontrada</div>
                 <p className="text-gray-400 text-sm mt-2">
                   Data selecionada: {new Date(dataInput).toLocaleDateString('pt-BR')}
                 </p>
@@ -337,22 +337,22 @@ export default function RelatorioProducoesPage() {
             ) : (
               <div className="space-y-4">
                 <div className="text-gray-600 text-sm">
-                  Total: <strong className="text-black">{producoes.length} produções</strong> em {new Date(dataInput).toLocaleDateString('pt-BR')}
+                  Total: <strong className="text-black">{producoes.length} produÃ§Ãµes</strong> em {new Date(dataInput).toLocaleDateString('pt-BR')}
                 </div>
 
-                {/* AVISO: Migration necessária */}
+                {/* AVISO: Migration necessÃ¡ria */}
                 {producoes.length > 0 && !producoes.some(p => p.percentual_aderencia_receita !== undefined) && (
                   <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-orange-600 text-xl">⚠️</span>
-                      <h3 className="font-bold text-orange-800">Dados de Aderência Não Disponíveis</h3>
+                      <span className="text-orange-600 text-xl">âš ï¸</span>
+                      <h3 className="font-bold text-orange-800">Dados de AderÃªncia NÃ£o DisponÃ­veis</h3>
                     </div>
                     <p className="text-orange-700 text-sm mb-3">
-                      Para ver as métricas de aderência à receita, desvio e fator de correção, 
-                      execute a migration clicando no botão <strong>"📊 Migrar Campos"</strong> acima.
+                      Para ver as mÃ©tricas de aderÃªncia Ã  receita, desvio e fator de correÃ§Ã£o, 
+                      execute a migration clicando no botÃ£o <strong>"ðŸ“Š Migrar Campos"</strong> acima.
                     </p>
                     <p className="text-orange-600 text-xs">
-                      💡 A migration adiciona campos no banco para análise avançada das produções.
+                      ðŸ’¡ A migration adiciona campos no banco para anÃ¡lise avanÃ§ada das produÃ§Ãµes.
                     </p>
                   </div>
                 )}
@@ -400,7 +400,7 @@ export default function RelatorioProducoesPage() {
                                   <strong className="text-black">Peso Bruto:</strong> {producao.peso_bruto_proteina}g
                                 </p>
                                 <p className="text-gray-600">
-                                  <strong className="text-black">Peso Líquido:</strong> {producao.peso_limpo_proteina}g
+                                  <strong className="text-black">Peso LÃ­quido:</strong> {producao.peso_limpo_proteina}g
                                 </p>
                                 <p className="text-gray-600">
                                   <strong className="text-black">Insumo Chefe:</strong> {producao.insumo_chefe_nome} ({producao.peso_insumo_chefe}g)
@@ -419,21 +419,21 @@ export default function RelatorioProducoesPage() {
                                 </p>
                               </div>
 
-                              {/* NOVA COLUNA: Métricas de Análise */}
+                              {/* NOVA COLUNA: MÃ©tricas de AnÃ¡lise */}
                               <div className="bg-gray-50 p-3 rounded-lg">
                                 <p className="text-gray-600">
-                                  <strong className="text-black">📊 Desvio:</strong> {desvio}%
+                                  <strong className="text-black">ðŸ“Š Desvio:</strong> {desvio}%
                                 </p>
                                 <p className="text-gray-600">
-                                  <strong className="text-black">⚖️ Fator Correção:</strong> {fatorCorrecao}x
+                                  <strong className="text-black">âš–ï¸ Fator CorreÃ§Ã£o:</strong> {fatorCorrecao}x
                                 </p>
                                 {aderencia !== undefined ? (
                                   <p className="text-gray-600">
-                                    <strong className="text-black">🎯 Aderência:</strong> {aderencia.toFixed(1)}%
+                                    <strong className="text-black">ðŸŽ¯ AderÃªncia:</strong> {aderencia.toFixed(1)}%
                                   </p>
                                 ) : (
                                   <p className="text-gray-400 text-xs">
-                                    Execute migration para ver aderência
+                                    Execute migration para ver aderÃªncia
                                   </p>
                                 )}
                               </div>
@@ -441,12 +441,12 @@ export default function RelatorioProducoesPage() {
 
                             {producao.observacoes && (
                               <div className="mt-3 p-2 bg-gray-100 rounded text-sm">
-                                <strong className="text-black">Observações:</strong> {producao.observacoes}
+                                <strong className="text-black">ObservaÃ§Ãµes:</strong> {producao.observacoes}
                               </div>
                             )}
 
                             <div className="mt-2 text-xs text-gray-500">
-                              Início: {formatarData(producao.inicio_producao)} | 
+                              InÃ­cio: {formatarData(producao.inicio_producao)} | 
                               Fim: {formatarData(producao.fim_producao)}
                             </div>
                           </div>

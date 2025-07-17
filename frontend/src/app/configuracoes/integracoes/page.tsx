@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -53,7 +53,7 @@ export default function IntegracoesPage() {
     contahub: '',
     sympla: '',    // Alterado de 'vendas' para 'sympla'
     yuzer: '',     // Novo webhook Yuzer
-    reservas: ''   // Mantém, mas agora mapeia para sistema 'getin'
+    reservas: ''   // MantÃ©m, mas agora mapeia para sistema 'getin'
   })
   const [webhookLoading, setWebhookLoading] = useState(false)
   const [testingWebhook, setTestingWebhook] = useState<string | null>(null)
@@ -62,7 +62,7 @@ export default function IntegracoesPage() {
   const [googleResult, setGoogleResult] = useState<string | null>(null)
   
   useEffect(() => {
-    setPageTitle('Integrações')
+    setPageTitle('IntegraÃ§Ãµes')
     return () => setPageTitle('')
   }, [setPageTitle])
   
@@ -93,7 +93,7 @@ export default function IntegracoesPage() {
         //   loadAnalyticsStatus()
         //   break
         default:
-          // Aba não requer carregamento específico
+          // Aba nÃ£o requer carregamento especÃ­fico
           break
       }
     }
@@ -121,23 +121,23 @@ export default function IntegracoesPage() {
             meta: data.configuracoes.meta || '',
             checklists: data.configuracoes.checklists || '',
             contahub: data.configuracoes.contahub || '',
-            sympla: data.configuracoes.sympla || data.configuracoes.vendas || '', // Migração de vendas para sympla
+            sympla: data.configuracoes.sympla || data.configuracoes.vendas || '', // MigraÃ§Ã£o de vendas para sympla
             yuzer: data.configuracoes.yuzer || '',
             reservas: data.configuracoes.reservas || ''
           }
           setWebhookConfigs(configsCompletas)
         }
       } else {
-        console.error('❌ Erro na resposta da API:', response.status, response.statusText)
+        console.error('âŒ Erro na resposta da API:', response.status, response.statusText)
       }
     } catch (error) {
-      console.error('❌ Erro ao carregar webhooks:', error)
+      console.error('âŒ Erro ao carregar webhooks:', error)
     } finally {
       setLoadingConfigs(false)
     }
   }
   
-  // Funções de carregamento para outras abas
+  // FunÃ§Ãµes de carregamento para outras abas
   const loadContaAzulStatus = async () => {
     if (!selectedBar) return
     
@@ -147,7 +147,7 @@ export default function IntegracoesPage() {
       
       // Status verificado silenciosamente
     } catch (error) {
-      console.error('❌ Erro ao verificar status ContaAzul:', error)
+      console.error('âŒ Erro ao verificar status ContaAzul:', error)
     }
   }
   
@@ -168,7 +168,7 @@ export default function IntegracoesPage() {
       const data = await response.json()
       // Status verificado silenciosamente
     } catch (error) {
-      console.error('❌ Erro ao verificar status Meta:', error)
+      console.error('âŒ Erro ao verificar status Meta:', error)
     }
   }
   
@@ -189,33 +189,33 @@ export default function IntegracoesPage() {
       const data = await response.json()
       // Status verificado silenciosamente
     } catch (error) {
-      console.error('❌ Erro ao verificar status WhatsApp:', error)
+      console.error('âŒ Erro ao verificar status WhatsApp:', error)
     }
   }
   
-  // FUNÇÕES REMOVIDAS TEMPORARIAMENTE
+  // FUNÃ‡Ã•ES REMOVIDAS TEMPORARIAMENTE
   // const loadEmailStatus = async () => {
   //   if (!selectedBar) return
-  //   console.log('🟠 Carregando status Email para bar:', selectedBar.id)
-  //   // TODO: Implementar verificação de configurações de email
+  //   console.log('ðŸŸ  Carregando status Email para bar:', selectedBar.id)
+  //   // TODO: Implementar verificaÃ§Ã£o de configuraÃ§Ãµes de email
   //   // Pode verificar SMTP, templates, etc.
   // }
   
   const loadEventosStatus = async () => {
     if (!selectedBar) return
-    // TODO: Implementar verificação de integrações com Sympla, etc.
+    // TODO: Implementar verificaÃ§Ã£o de integraÃ§Ãµes com Sympla, etc.
   }
   
   // const loadAnalyticsStatus = async () => {
   //   if (!selectedBar) return
-  //   console.log('🔶 Carregando status Analytics para bar:', selectedBar.id)
-  //   // TODO: Implementar verificação de conexões ContaHub, Power BI, etc.
+  //   console.log('ðŸ”¶ Carregando status Analytics para bar:', selectedBar.id)
+  //   // TODO: Implementar verificaÃ§Ã£o de conexÃµes ContaHub, Power BI, etc.
   // }
   
   const handleSaveWebhooks = async () => {
     if (!selectedBar) {
       toast({
-        title: '❌ Erro',
+        title: 'âŒ Erro',
         description: 'Nenhum bar selecionado',
         variant: 'destructive'
       })
@@ -240,22 +240,22 @@ export default function IntegracoesPage() {
       
       if (data.success) {
         toast({
-          title: '✅ Webhooks salvos com sucesso!',
-          description: 'As configurações foram atualizadas no banco de dados.'
+          title: 'âœ… Webhooks salvos com sucesso!',
+          description: 'As configuraÃ§Ãµes foram atualizadas no banco de dados.'
         })
       } else {
-        console.error('❌ Erro retornado pela API:', data)
+        console.error('âŒ Erro retornado pela API:', data)
         toast({
-          title: '❌ Erro ao salvar webhooks',
+          title: 'âŒ Erro ao salvar webhooks',
           description: data.error || 'Erro desconhecido',
           variant: 'destructive'
         })
       }
     } catch (error) {
-      console.error('❌ Erro ao salvar webhooks:', error)
+      console.error('âŒ Erro ao salvar webhooks:', error)
       toast({
-        title: '❌ Erro ao salvar webhooks',
-        description: 'Erro de conexão com o servidor',
+        title: 'âŒ Erro ao salvar webhooks',
+        description: 'Erro de conexÃ£o com o servidor',
         variant: 'destructive'
       })
     } finally {
@@ -268,7 +268,7 @@ export default function IntegracoesPage() {
     
     if (!webhookUrl || webhookUrl.trim() === '') {
       toast({
-        title: '❌ Webhook não configurado',
+        title: 'âŒ Webhook nÃ£o configurado',
         description: `Configure o webhook ${webhookType} antes de testar`,
         variant: 'destructive'
       })
@@ -277,7 +277,7 @@ export default function IntegracoesPage() {
     
     if (!selectedBar) {
       toast({
-        title: '❌ Erro',
+        title: 'âŒ Erro',
         description: 'Nenhum bar selecionado',
         variant: 'destructive'
       })
@@ -290,22 +290,22 @@ export default function IntegracoesPage() {
       const testData = {
         bar_id: selectedBar.id,
         webhook_type: webhookType,
-        title: `🧪 Teste de Webhook - ${webhookType.toUpperCase()}`,
-        description: `Este é um teste do webhook **${webhookType}** realizado em ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}.\n\n✅ Se você está vendo esta mensagem, o webhook está funcionando corretamente!`,
+        title: `ðŸ§ª Teste de Webhook - ${webhookType.toUpperCase()}`,
+        description: `Este Ã© um teste do webhook **${webhookType}** realizado em ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}.\n\nâœ… Se vocÃª estÃ¡ vendo esta mensagem, o webhook estÃ¡ funcionando corretamente!`,
         color: getWebhookColor(webhookType),
         fields: [
           {
-            name: '🏢 Estabelecimento',
+            name: 'ðŸ¢ Estabelecimento',
             value: selectedBar.nome || selectedBar.id || 'N/A',
             inline: true
           },
           {
-            name: '🔗 Tipo de Webhook',
+            name: 'ðŸ”— Tipo de Webhook',
             value: webhookType.charAt(0).toUpperCase() + webhookType.slice(1),
             inline: true
           },
           {
-            name: '⏰ Horário',
+            name: 'â° HorÃ¡rio',
             value: new Date().toLocaleString('pt-BR', {
               timeZone: 'America/Sao_Paulo',
               day: '2-digit',
@@ -317,8 +317,8 @@ export default function IntegracoesPage() {
             inline: true
           },
           {
-            name: '✅ Status',
-            value: 'Configuração funcionando corretamente!',
+            name: 'âœ… Status',
+            value: 'ConfiguraÃ§Ã£o funcionando corretamente!',
             inline: false
           }
         ]
@@ -336,22 +336,22 @@ export default function IntegracoesPage() {
       
       if (data.success) {
         toast({
-          title: '✅ Teste enviado com sucesso!',
-          description: `Webhook ${webhookType} está funcionando corretamente.`
+          title: 'âœ… Teste enviado com sucesso!',
+          description: `Webhook ${webhookType} estÃ¡ funcionando corretamente.`
         })
       } else {
-        console.error('❌ Erro no teste:', data)
+        console.error('âŒ Erro no teste:', data)
         toast({
-          title: '❌ Erro no teste',
+          title: 'âŒ Erro no teste',
           description: data.error || 'Erro ao enviar teste',
           variant: 'destructive'
         })
       }
     } catch (error) {
-      console.error('❌ Erro ao testar webhook:', error)
+      console.error('âŒ Erro ao testar webhook:', error)
       toast({
-        title: '❌ Erro no teste',
-        description: 'Erro de conexão com o servidor',
+        title: 'âŒ Erro no teste',
+        description: 'Erro de conexÃ£o com o servidor',
         variant: 'destructive'
       })
     } finally {
@@ -359,10 +359,10 @@ export default function IntegracoesPage() {
     }
   }
   
-  // Função para obter cor do webhook
+  // FunÃ§Ã£o para obter cor do webhook
   const getWebhookColor = (webhookType: string) => {
     const colors = {
-      sistema: 0xff0000,      // Vermelho para sistema/segurança
+      sistema: 0xff0000,      // Vermelho para sistema/seguranÃ§a
       contaazul: 0x0066cc,    // Azul para ContaAzul
       meta: 0xff6600,         // Laranja para Meta/Social
       checklists: 0x00cc66,   // Verde para checklists
@@ -374,7 +374,7 @@ export default function IntegracoesPage() {
     return colors[webhookType as keyof typeof colors] || 0x5865F2
   }
   
-  // Função para rodar Google Avaliações
+  // FunÃ§Ã£o para rodar Google AvaliaÃ§Ãµes
   const handleRunGoogleReviews = async () => {
     setGoogleLoading(true)
     setGoogleResult(null)
@@ -387,20 +387,20 @@ export default function IntegracoesPage() {
           bar_id: selectedBar?.id || 1,
           automatic: true,
           date: yesterday,
-          businessName: 'Ordinário Bar e Música',
-          address: 'SBS Q. 2 BL Q Lojas 5/6 - Asa Sul, Brasília - DF, 70070-120',
+          businessName: 'OrdinÃ¡rio Bar e MÃºsica',
+          address: 'SBS Q. 2 BL Q Lojas 5/6 - Asa Sul, BrasÃ­lia - DF, 70070-120',
           days: 30,
           placeId: 'ChIJgTeXKY8aWpMR1hyW_mEEu2k'
         })
       })
       const data = await res.json()
       if (data.success) {
-        setGoogleResult('✅ Coleta de avaliações do Google realizada com sucesso!')
+        setGoogleResult('âœ… Coleta de avaliaÃ§Ãµes do Google realizada com sucesso!')
       } else {
-        setGoogleResult('❌ Erro: ' + (data.error || 'Erro desconhecido'))
+        setGoogleResult('âŒ Erro: ' + (data.error || 'Erro desconhecido'))
       }
     } catch (e: any) {
-      setGoogleResult('❌ Erro: ' + e.message)
+      setGoogleResult('âŒ Erro: ' + e.message)
     } finally {
       setGoogleLoading(false)
     }
@@ -418,10 +418,10 @@ export default function IntegracoesPage() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                  Central de Integrações
+                  Central de IntegraÃ§Ãµes
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400 text-lg">
-                  Configure todas as integrações do seu estabelecimento
+                  Configure todas as integraÃ§Ãµes do seu estabelecimento
                 </p>
               </div>
             </div>
@@ -446,7 +446,7 @@ export default function IntegracoesPage() {
                 <div>
                   <p className="text-green-800 dark:text-green-300 font-semibold">Ativas</p>
                   <p className="text-green-600 dark:text-green-400 text-sm">
-                    {Object.values(webhookConfigs).filter((config: any) => config && config.trim() !== '').length} integrações
+                    {Object.values(webhookConfigs).filter((config: any) => config && config.trim() !== '').length} integraÃ§Ãµes
                   </p>
                 </div>
               </div>
@@ -471,7 +471,7 @@ export default function IntegracoesPage() {
                 </div>
                 <div>
                   <p className="text-yellow-800 dark:text-yellow-300 font-semibold">Pendentes</p>
-                  <p className="text-yellow-600 dark:text-yellow-400 text-sm">2 configurações</p>
+                  <p className="text-yellow-600 dark:text-yellow-400 text-sm">2 configuraÃ§Ãµes</p>
                 </div>
               </div>
             </div>
@@ -490,7 +490,7 @@ export default function IntegracoesPage() {
           </div>
         </div>
 
-        {/* Tabs de Integrações */}
+        {/* Tabs de IntegraÃ§Ãµes */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-6 mb-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-2 shadow-sm">
             <TabsTrigger 
@@ -535,7 +535,7 @@ export default function IntegracoesPage() {
               <Calendar className="w-4 h-4" />
               Eventos
             </TabsTrigger>
-            {/* OCULTAS TEMPORARIAMENTE - NÃO SERÃO USADAS TÃO CEDO */}
+            {/* OCULTAS TEMPORARIAMENTE - NÃƒO SERÃƒO USADAS TÃƒO CEDO */}
             {/* <TabsTrigger value="email" className="flex items-center gap-2">
               <Mail className="w-4 h-4" />
               Email
@@ -558,14 +558,14 @@ export default function IntegracoesPage() {
                     <div>
                       <CardTitle className="text-2xl text-gray-900 dark:text-white">Discord Webhooks</CardTitle>
                       <p className="text-gray-600 dark:text-gray-400 mt-1">
-                        Configure notificações automáticas para o Discord
+                        Configure notificaÃ§Ãµes automÃ¡ticas para o Discord
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className={`w-3 h-3 rounded-full ${Object.values(webhookConfigs).some(config => config && config.trim() !== '') ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                     <span className={`text-sm font-medium ${Object.values(webhookConfigs).some(config => config && config.trim() !== '') ? 'text-green-600 dark:text-green-400' : 'text-gray-500'}`}>
-                      {Object.values(webhookConfigs).some(config => config && config.trim() !== '') ? 'Configurado' : 'Não configurado'}
+                      {Object.values(webhookConfigs).some(config => config && config.trim() !== '') ? 'Configurado' : 'NÃ£o configurado'}
                     </span>
                   </div>
                 </div>
@@ -576,24 +576,24 @@ export default function IntegracoesPage() {
                   {loadingConfigs && (
                     <div className="flex justify-center items-center py-12">
                       <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#5865F2]"></div>
-                      <span className="ml-3 text-gray-600 dark:text-gray-400 font-medium">Carregando configurações...</span>
+                      <span className="ml-3 text-gray-600 dark:text-gray-400 font-medium">Carregando configuraÃ§Ãµes...</span>
                     </div>
                   )}
                   
-                  {/* Webhook Sistema/Segurança */}
+                  {/* Webhook Sistema/SeguranÃ§a */}
                   {!loadingConfigs && (
                     <div className="space-y-8">
-                {/* Webhook Sistema/Segurança */}
+                {/* Webhook Sistema/SeguranÃ§a */}
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <div className="w-4 h-4 bg-red-500 rounded" />
                     <Label htmlFor="webhook-sistema" className="font-medium">
-                      Webhook Sistema & Segurança
+                      Webhook Sistema & SeguranÃ§a
                     </Label>
                     <div className="flex items-center space-x-1 ml-2">
                       <div className={`w-2 h-2 rounded-full ${webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                       <span className={`text-xs ${webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
-                        {webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'Conectado' : 'Não configurado'}
+                        {webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'Conectado' : 'NÃ£o configurado'}
                       </span>
                     </div>
                   </div>
@@ -613,11 +613,11 @@ export default function IntegracoesPage() {
                       disabled={testingWebhook === 'sistema' || !webhookConfigs.sistema || webhookLoading}
                       className="px-3"
                     >
-                      {testingWebhook === 'sistema' ? 'Testando...' : '🧪 Testar'}
+                      {testingWebhook === 'sistema' ? 'Testando...' : 'ðŸ§ª Testar'}
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500">
-                    Eventos críticos, alertas de segurança, rate limiting, SQL injection
+                    Eventos crÃ­ticos, alertas de seguranÃ§a, rate limiting, SQL injection
                   </p>
                 </div>
 
@@ -633,7 +633,7 @@ export default function IntegracoesPage() {
                     <div className="flex items-center space-x-1 ml-2">
                       <div className={`w-2 h-2 rounded-full ${webhookConfigs.contaazul && webhookConfigs.contaazul.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                       <span className={`text-xs ${webhookConfigs.contaazul && webhookConfigs.contaazul.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
-                        {webhookConfigs.contaazul && webhookConfigs.contaazul.trim() !== '' ? 'Conectado' : 'Não configurado'}
+                        {webhookConfigs.contaazul && webhookConfigs.contaazul.trim() !== '' ? 'Conectado' : 'NÃ£o configurado'}
                       </span>
                     </div>
                   </div>
@@ -653,11 +653,11 @@ export default function IntegracoesPage() {
                       disabled={testingWebhook === 'contaazul' || !webhookConfigs.contaazul || webhookLoading}
                       className="px-3"
                     >
-                      {testingWebhook === 'contaazul' ? 'Testando...' : '🧪 Testar'}
+                      {testingWebhook === 'contaazul' ? 'Testando...' : 'ðŸ§ª Testar'}
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500">
-                    Sincronizações automáticas, renovação de tokens, dados financeiros
+                    SincronizaÃ§Ãµes automÃ¡ticas, renovaÃ§Ã£o de tokens, dados financeiros
                   </p>
                 </div>
 
@@ -673,7 +673,7 @@ export default function IntegracoesPage() {
                     <div className="flex items-center space-x-1 ml-2">
                       <div className={`w-2 h-2 rounded-full ${webhookConfigs.meta && webhookConfigs.meta.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                       <span className={`text-xs ${webhookConfigs.meta && webhookConfigs.meta.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
-                        {webhookConfigs.meta && webhookConfigs.meta.trim() !== '' ? 'Conectado' : 'Não configurado'}
+                        {webhookConfigs.meta && webhookConfigs.meta.trim() !== '' ? 'Conectado' : 'NÃ£o configurado'}
                       </span>
                     </div>
                   </div>
@@ -693,7 +693,7 @@ export default function IntegracoesPage() {
                       disabled={testingWebhook === 'meta' || !webhookConfigs.meta || webhookLoading}
                       className="px-3"
                     >
-                      {testingWebhook === 'meta' ? 'Testando...' : '🧪 Testar'}
+                      {testingWebhook === 'meta' ? 'Testando...' : 'ðŸ§ª Testar'}
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500">
@@ -708,12 +708,12 @@ export default function IntegracoesPage() {
                   <div className="flex items-center space-x-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
                     <Label htmlFor="webhook-checklists" className="font-medium">
-                      Webhook Checklists & Operações
+                      Webhook Checklists & OperaÃ§Ãµes
                     </Label>
                     <div className="flex items-center space-x-1 ml-2">
                       <div className={`w-2 h-2 rounded-full ${webhookConfigs.checklists && webhookConfigs.checklists.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                       <span className={`text-xs ${webhookConfigs.checklists && webhookConfigs.checklists.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
-                        {webhookConfigs.checklists && webhookConfigs.checklists.trim() !== '' ? 'Conectado' : 'Não configurado'}
+                        {webhookConfigs.checklists && webhookConfigs.checklists.trim() !== '' ? 'Conectado' : 'NÃ£o configurado'}
                       </span>
                     </div>
                   </div>
@@ -733,11 +733,11 @@ export default function IntegracoesPage() {
                       disabled={testingWebhook === 'checklists' || !webhookConfigs.checklists || webhookLoading}
                       className="px-3"
                     >
-                      {testingWebhook === 'checklists' ? 'Testando...' : '🧪 Testar'}
+                      {testingWebhook === 'checklists' ? 'Testando...' : 'ðŸ§ª Testar'}
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500">
-                    Conclusão de checklists, alertas operacionais, relatórios diários
+                    ConclusÃ£o de checklists, alertas operacionais, relatÃ³rios diÃ¡rios
                   </p>
                 </div>
 
@@ -753,7 +753,7 @@ export default function IntegracoesPage() {
                     <div className="flex items-center space-x-1 ml-2">
                       <div className={`w-2 h-2 rounded-full ${webhookConfigs.contahub && webhookConfigs.contahub.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                       <span className={`text-xs ${webhookConfigs.contahub && webhookConfigs.contahub.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
-                        {webhookConfigs.contahub && webhookConfigs.contahub.trim() !== '' ? 'Conectado' : 'Não configurado'}
+                        {webhookConfigs.contahub && webhookConfigs.contahub.trim() !== '' ? 'Conectado' : 'NÃ£o configurado'}
                       </span>
                     </div>
                   </div>
@@ -773,11 +773,11 @@ export default function IntegracoesPage() {
                       disabled={testingWebhook === 'contahub' || !webhookConfigs.contahub || webhookLoading}
                       className="px-3"
                     >
-                      {testingWebhook === 'contahub' ? 'Testando...' : '🧪 Testar'}
+                      {testingWebhook === 'contahub' ? 'Testando...' : 'ðŸ§ª Testar'}
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500">
-                    Análises financeiras, relatórios automatizados, alertas de performance
+                    AnÃ¡lises financeiras, relatÃ³rios automatizados, alertas de performance
                   </p>
                 </div>
 
@@ -793,7 +793,7 @@ export default function IntegracoesPage() {
                     <div className="flex items-center space-x-1 ml-2">
                       <div className={`w-2 h-2 rounded-full ${webhookConfigs.sympla && webhookConfigs.sympla.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                       <span className={`text-xs ${webhookConfigs.sympla && webhookConfigs.sympla.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
-                        {webhookConfigs.sympla && webhookConfigs.sympla.trim() !== '' ? 'Conectado' : 'Não configurado'}
+                        {webhookConfigs.sympla && webhookConfigs.sympla.trim() !== '' ? 'Conectado' : 'NÃ£o configurado'}
                       </span>
                     </div>
                   </div>
@@ -813,7 +813,7 @@ export default function IntegracoesPage() {
                       disabled={testingWebhook === 'sympla' || !webhookConfigs.sympla || webhookLoading}
                       className="px-3"
                     >
-                      {testingWebhook === 'sympla' ? 'Testando...' : '🧪 Testar'}
+                      {testingWebhook === 'sympla' ? 'Testando...' : 'ðŸ§ª Testar'}
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500">
@@ -833,7 +833,7 @@ export default function IntegracoesPage() {
                     <div className="flex items-center space-x-1 ml-2">
                       <div className={`w-2 h-2 rounded-full ${webhookConfigs.yuzer && webhookConfigs.yuzer.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                       <span className={`text-xs ${webhookConfigs.yuzer && webhookConfigs.yuzer.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
-                        {webhookConfigs.yuzer && webhookConfigs.yuzer.trim() !== '' ? 'Conectado' : 'Não configurado'}
+                        {webhookConfigs.yuzer && webhookConfigs.yuzer.trim() !== '' ? 'Conectado' : 'NÃ£o configurado'}
                       </span>
                     </div>
                   </div>
@@ -853,11 +853,11 @@ export default function IntegracoesPage() {
                       disabled={testingWebhook === 'yuzer' || !webhookConfigs.yuzer || webhookLoading}
                       className="px-3"
                     >
-                      {testingWebhook === 'yuzer' ? 'Testando...' : '🧪 Testar'}
+                      {testingWebhook === 'yuzer' ? 'Testando...' : 'ðŸ§ª Testar'}
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500">
-                    Sistema Yuzer, gestão de delivery e pedidos online
+                    Sistema Yuzer, gestÃ£o de delivery e pedidos online
                   </p>
                 </div>
 
@@ -873,7 +873,7 @@ export default function IntegracoesPage() {
                     <div className="flex items-center space-x-1 ml-2">
                       <div className={`w-2 h-2 rounded-full ${webhookConfigs.reservas && webhookConfigs.reservas.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                       <span className={`text-xs ${webhookConfigs.reservas && webhookConfigs.reservas.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
-                        {webhookConfigs.reservas && webhookConfigs.reservas.trim() !== '' ? 'Conectado' : 'Não configurado'}
+                        {webhookConfigs.reservas && webhookConfigs.reservas.trim() !== '' ? 'Conectado' : 'NÃ£o configurado'}
                       </span>
                     </div>
                   </div>
@@ -893,7 +893,7 @@ export default function IntegracoesPage() {
                       disabled={testingWebhook === 'reservas' || !webhookConfigs.reservas || webhookLoading}
                       className="px-3"
                     >
-                      {testingWebhook === 'reservas' ? 'Testando...' : '🧪 Testar'}
+                      {testingWebhook === 'reservas' ? 'Testando...' : 'ðŸ§ª Testar'}
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500">
@@ -901,7 +901,7 @@ export default function IntegracoesPage() {
                   </p>
                 </div>
 
-                {/* Botão de Salvar */}
+                {/* BotÃ£o de Salvar */}
                 <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-3">
@@ -910,10 +910,10 @@ export default function IntegracoesPage() {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          Configurações alteradas
+                          ConfiguraÃ§Ãµes alteradas
                         </p>
                         <p className="text-xs text-gray-600 dark:text-gray-400">
-                          Salve as alterações para aplicar as configurações
+                          Salve as alteraÃ§Ãµes para aplicar as configuraÃ§Ãµes
                         </p>
                       </div>
                     </div>
@@ -930,7 +930,7 @@ export default function IntegracoesPage() {
                       ) : (
                         <div className="flex items-center gap-2">
                           <Save className="w-4 h-4" />
-                          Salvar Configurações
+                          Salvar ConfiguraÃ§Ãµes
                         </div>
                       )}
                     </Button>
@@ -955,7 +955,7 @@ export default function IntegracoesPage() {
                     <div>
                       <CardTitle className="text-2xl text-gray-900 dark:text-white">GetIn - Sistema de Reservas</CardTitle>
                       <p className="text-gray-600 dark:text-gray-400 mt-1">
-                        Sincronização com plataforma de reservas
+                        SincronizaÃ§Ã£o com plataforma de reservas
                       </p>
                     </div>
                   </div>
@@ -972,40 +972,40 @@ export default function IntegracoesPage() {
                 <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 p-6 rounded-lg">
                   <div className="flex items-start space-x-3">
                     <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center mt-0.5">
-                      <span className="text-white text-sm">🚧</span>
+                      <span className="text-white text-sm">ðŸš§</span>
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900 dark:text-white mb-3">🚧 Integração em Desenvolvimento</h4>
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-3">ðŸš§ IntegraÃ§Ã£o em Desenvolvimento</h4>
                       <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
-                        <p><strong>Status atual:</strong> Análise técnica concluída</p>
+                        <p><strong>Status atual:</strong> AnÃ¡lise tÃ©cnica concluÃ­da</p>
                         <p><strong>Sistema GetIn:</strong> Identificado como Single Page Application (SPA) complexo</p>
                         
                         <div className="bg-white dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 mt-4">
-                          <h5 className="font-medium text-gray-900 dark:text-white mb-3">Opções Disponíveis:</h5>
+                          <h5 className="font-medium text-gray-900 dark:text-white mb-3">OpÃ§Ãµes DisponÃ­veis:</h5>
                           <div className="space-y-3">
                             <div className="flex items-start space-x-3">
                               <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
-                                <span className="text-blue-600 text-xs">💰</span>
+                                <span className="text-blue-600 text-xs">ðŸ’°</span>
                               </div>
                               <div>
                                 <p className="font-medium text-blue-800">API Oficial GetIn</p>
-                                <p className="text-xs text-blue-700">Custo: R$ 500/mês - Integração completa e confiável</p>
+                                <p className="text-xs text-blue-700">Custo: R$ 500/mÃªs - IntegraÃ§Ã£o completa e confiÃ¡vel</p>
                               </div>
                             </div>
                             
                             <div className="flex items-start space-x-3">
                               <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mt-0.5">
-                                <span className="text-purple-600 text-xs">⚙️</span>
+                                <span className="text-purple-600 text-xs">âš™ï¸</span>
                               </div>
                               <div>
-                                <p className="font-medium text-purple-800">Automação Avançada</p>
+                                <p className="font-medium text-purple-800">AutomaÃ§Ã£o AvanÃ§ada</p>
                                 <p className="text-xs text-purple-700">Desenvolvimento customizado com Playwright/Puppeteer</p>
                               </div>
                             </div>
                             
                             <div className="flex items-start space-x-3">
                               <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-0.5">
-                                <span className="text-green-600 text-xs">🧪</span>
+                                <span className="text-green-600 text-xs">ðŸ§ª</span>
                               </div>
                               <div>
                                 <p className="font-medium text-green-800">Dados Simulados</p>
@@ -1017,8 +1017,8 @@ export default function IntegracoesPage() {
                         
                         <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 mt-4">
                           <p className="text-sm text-blue-800">
-                            <strong>Próximos passos:</strong> Avaliação de custo-benefício entre API oficial (R$ 500/mês) 
-                            versus desenvolvimento de solução customizada
+                            <strong>PrÃ³ximos passos:</strong> AvaliaÃ§Ã£o de custo-benefÃ­cio entre API oficial (R$ 500/mÃªs) 
+                            versus desenvolvimento de soluÃ§Ã£o customizada
                           </p>
                         </div>
                       </div>
@@ -1026,16 +1026,16 @@ export default function IntegracoesPage() {
                   </div>
                 </div>
 
-                {/* Informações da Integração */}
+                {/* InformaÃ§Ãµes da IntegraÃ§Ã£o */}
                 <div className="space-y-4">
                   <Separator />
                   <div>
-                    <h4 className="font-medium mb-3">Sobre a Integração GetIn</h4>
+                    <h4 className="font-medium mb-3">Sobre a IntegraÃ§Ã£o GetIn</h4>
                     <div className="space-y-3 text-sm text-gray-600">
-                      <p>• <strong>Sincronização automática</strong> de reservas do sistema GetIn</p>
-                      <p>• <strong>Dados em tempo real</strong> sobre ocupação e disponibilidade</p>
-                      <p>• <strong>Gestão centralizada</strong> de todas as reservas</p>
-                      <p>• <strong>Relatórios integrados</strong> com outros sistemas</p>
+                      <p>â€¢ <strong>SincronizaÃ§Ã£o automÃ¡tica</strong> de reservas do sistema GetIn</p>
+                      <p>â€¢ <strong>Dados em tempo real</strong> sobre ocupaÃ§Ã£o e disponibilidade</p>
+                      <p>â€¢ <strong>GestÃ£o centralizada</strong> de todas as reservas</p>
+                      <p>â€¢ <strong>RelatÃ³rios integrados</strong> com outros sistemas</p>
                     </div>
                   </div>
                 </div>
@@ -1055,11 +1055,11 @@ export default function IntegracoesPage() {
                     </div>
                     <div>
                       <CardTitle className="text-lg">WhatsApp Business API</CardTitle>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Evolution API • AWS sa-east-1</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Evolution API â€¢ AWS sa-east-1</p>
                     </div>
                   </div>
                   <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                    ✅ Conectado
+                    âœ… Conectado
                   </Badge>
                 </div>
               </CardHeader>
@@ -1069,7 +1069,7 @@ export default function IntegracoesPage() {
                   <div className="card-dark p-4">
                     <div className="flex items-center gap-3 mb-2">
                       <Smartphone className="w-5 h-5 text-green-600 dark:text-green-400" />
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Número</span>
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">NÃºmero</span>
                     </div>
                     <p className="text-lg font-semibold text-gray-900 dark:text-white">+55 61 9 9848-3434</p>
                   </div>
@@ -1085,7 +1085,7 @@ export default function IntegracoesPage() {
                   <div className="card-dark p-4">
                     <div className="flex items-center gap-3 mb-2">
                       <BarChart3 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Mensagens/mês</span>
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Mensagens/mÃªs</span>
                     </div>
                     <p className="text-lg font-semibold text-gray-900 dark:text-white">1,247</p>
                   </div>
@@ -1099,16 +1099,16 @@ export default function IntegracoesPage() {
                   </div>
                 </div>
 
-                {/* Informações Técnicas */}
+                {/* InformaÃ§Ãµes TÃ©cnicas */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="card-dark p-6">
                     <h3 className="card-title-dark mb-4 flex items-center gap-2">
                       <Settings className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                      Configuração Evolution API
+                      ConfiguraÃ§Ã£o Evolution API
                     </h3>
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Instância:</span>
+                        <span className="text-gray-600 dark:text-gray-400">InstÃ¢ncia:</span>
                         <span className="text-gray-900 dark:text-white font-medium">SGB_Instance</span>
                       </div>
                       <div className="flex justify-between">
@@ -1116,7 +1116,7 @@ export default function IntegracoesPage() {
                         <span className="text-gray-900 dark:text-white font-medium">evolution-api.sgb.aws.com</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Versão:</span>
+                        <span className="text-gray-600 dark:text-gray-400">VersÃ£o:</span>
                         <span className="text-gray-900 dark:text-white font-medium">v2.1.0</span>
                       </div>
                       <div className="flex justify-between">
@@ -1128,7 +1128,7 @@ export default function IntegracoesPage() {
                       <div className="flex justify-between">
                         <span className="text-gray-600 dark:text-gray-400">SSL:</span>
                         <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
-                          Válido até 2024
+                          VÃ¡lido atÃ© 2024
                         </Badge>
                       </div>
                     </div>
@@ -1141,7 +1141,7 @@ export default function IntegracoesPage() {
                     </h3>
                     <div className="space-y-3 text-sm">
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-700 dark:text-gray-300">Notificações reservas</span>
+                        <span className="text-gray-700 dark:text-gray-300">NotificaÃ§Ãµes reservas</span>
                         <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
                           Ativo
                         </Badge>
@@ -1159,13 +1159,13 @@ export default function IntegracoesPage() {
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-700 dark:text-gray-300">Relatórios automáticos</span>
+                        <span className="text-gray-700 dark:text-gray-300">RelatÃ³rios automÃ¡ticos</span>
                         <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
                           Ativo
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-700 dark:text-gray-300">Resposta automática</span>
+                        <span className="text-gray-700 dark:text-gray-300">Resposta automÃ¡tica</span>
                         <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 text-xs">
                           Config
                         </Badge>
@@ -1182,28 +1182,28 @@ export default function IntegracoesPage() {
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <p className="text-gray-600 dark:text-gray-400 mb-1">Região</p>
-                      <p className="font-semibold text-gray-900 dark:text-white">sa-east-1 (São Paulo)</p>
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">RegiÃ£o</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">sa-east-1 (SÃ£o Paulo)</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <p className="text-gray-600 dark:text-gray-400 mb-1">Latência</p>
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">LatÃªncia</p>
                       <p className="font-semibold text-green-600 dark:text-green-400">&lt; 50ms</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <p className="text-gray-600 dark:text-gray-400 mb-1">Última atualização</p>
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">Ãšltima atualizaÃ§Ã£o</p>
                       <p className="font-semibold text-gray-900 dark:text-white">Hoje, 14:23</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Ações */}
+                {/* AÃ§Ãµes */}
                 <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <Button
                     onClick={() => window.location.href = '/configuracoes/whatsapp'}
                     className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
                   >
                     <Settings className="w-4 h-4" />
-                    Configurações Avançadas
+                    ConfiguraÃ§Ãµes AvanÃ§adas
                   </Button>
                   
                   <Button
@@ -1238,11 +1238,11 @@ export default function IntegracoesPage() {
                     </div>
                     <div>
                       <CardTitle className="text-lg">ContaAzul Integration</CardTitle>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">OAuth 2.0 • PgCron Sync • API v2</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">OAuth 2.0 â€¢ PgCron Sync â€¢ API v2</p>
                     </div>
                   </div>
                   <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                    ✅ Conectado
+                    âœ… Conectado
                   </Badge>
                 </div>
               </CardHeader>
@@ -1252,7 +1252,7 @@ export default function IntegracoesPage() {
                   <div className="card-dark p-4">
                     <div className="flex items-center gap-3 mb-2">
                       <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Última Sync</span>
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Ãšltima Sync</span>
                     </div>
                     <p className="text-lg font-semibold text-gray-900 dark:text-white">Hoje, 15:30</p>
                   </div>
@@ -1276,24 +1276,24 @@ export default function IntegracoesPage() {
                   <div className="card-dark p-4">
                     <div className="flex items-center gap-3 mb-2">
                       <TrendingUp className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Receitas/mês</span>
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Receitas/mÃªs</span>
                     </div>
                     <p className="text-lg font-semibold text-green-600 dark:text-green-400">R$ 45.230</p>
                   </div>
                 </div>
 
-                {/* Informações Técnicas */}
+                {/* InformaÃ§Ãµes TÃ©cnicas */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="card-dark p-6">
                     <h3 className="card-title-dark mb-4 flex items-center gap-2">
                       <Settings className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                      Configuração OAuth & API
+                      ConfiguraÃ§Ã£o OAuth & API
                     </h3>
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-600 dark:text-gray-400">Token OAuth:</span>
                         <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
-                          Válido
+                          VÃ¡lido
                         </Badge>
                       </div>
                       <div className="flex justify-between">
@@ -1305,11 +1305,11 @@ export default function IntegracoesPage() {
                         <span className="text-gray-900 dark:text-white font-medium">api-v2.contaazul.com</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Versão:</span>
+                        <span className="text-gray-600 dark:text-gray-400">VersÃ£o:</span>
                         <span className="text-gray-900 dark:text-white font-medium">v2.0</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Refresh automático:</span>
+                        <span className="text-gray-600 dark:text-gray-400">Refresh automÃ¡tico:</span>
                         <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
                           Ativo
                         </Badge>
@@ -1347,29 +1347,29 @@ export default function IntegracoesPage() {
                   </div>
                 </div>
 
-                {/* PgCron & Automação */}
+                {/* PgCron & AutomaÃ§Ã£o */}
                 <div className="card-dark p-6">
                   <h3 className="card-title-dark mb-4 flex items-center gap-2">
                     <Clock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                    Automação PgCron
+                    AutomaÃ§Ã£o PgCron
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <p className="text-gray-600 dark:text-gray-400 mb-1">Frequência</p>
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">FrequÃªncia</p>
                       <p className="font-semibold text-gray-900 dark:text-white">A cada 4 horas</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <p className="text-gray-600 dark:text-gray-400 mb-1">Próxima execução</p>
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">PrÃ³xima execuÃ§Ã£o</p>
                       <p className="font-semibold text-blue-600 dark:text-blue-400">19:00 hoje</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <p className="text-gray-600 dark:text-gray-400 mb-1">Última execução</p>
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">Ãšltima execuÃ§Ã£o</p>
                       <p className="font-semibold text-green-600 dark:text-green-400">15:30 (sucesso)</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Estatísticas Financeiras */}
+                {/* EstatÃ­sticas Financeiras */}
                 <div className="card-dark p-6">
                   <h3 className="card-title-dark mb-4 flex items-center gap-2">
                     <BarChart3 className="w-5 h-5 text-green-600 dark:text-green-400" />
@@ -1389,13 +1389,13 @@ export default function IntegracoesPage() {
                       <p className="font-bold text-blue-700 dark:text-blue-300 text-lg">R$ 21.780</p>
                     </div>
                     <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                      <p className="text-purple-600 dark:text-purple-400 mb-1">Transações</p>
+                      <p className="text-purple-600 dark:text-purple-400 mb-1">TransaÃ§Ãµes</p>
                       <p className="font-bold text-purple-700 dark:text-purple-300 text-lg">2,547</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Ações */}
+                {/* AÃ§Ãµes */}
                 <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <Button
                     onClick={() => window.location.href = '/configuracoes/contaazul-pgcron'}
@@ -1428,7 +1428,7 @@ export default function IntegracoesPage() {
                     className="flex items-center gap-2"
                   >
                     <BarChart3 className="w-4 h-4" />
-                    Ver Relatórios
+                    Ver RelatÃ³rios
                   </Button>
                 </div>
               </CardContent>
@@ -1446,11 +1446,11 @@ export default function IntegracoesPage() {
                     </div>
                     <div>
                       <CardTitle className="text-lg">Meta Business APIs</CardTitle>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Facebook • Instagram • Graph API v18.0</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Facebook â€¢ Instagram â€¢ Graph API v18.0</p>
                     </div>
                   </div>
                   <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                    ✅ Conectado
+                    âœ… Conectado
                   </Badge>
                 </div>
               </CardHeader>
@@ -1460,7 +1460,7 @@ export default function IntegracoesPage() {
                   <div className="card-dark p-4">
                     <div className="flex items-center gap-3 mb-2">
                       <Calendar className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Última Coleta</span>
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Ãšltima Coleta</span>
                     </div>
                     <p className="text-lg font-semibold text-gray-900 dark:text-white">Hoje, 14:15</p>
                   </div>
@@ -1490,18 +1490,18 @@ export default function IntegracoesPage() {
                   </div>
                 </div>
 
-                {/* Informações Técnicas */}
+                {/* InformaÃ§Ãµes TÃ©cnicas */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="card-dark p-6">
                     <h3 className="card-title-dark mb-4 flex items-center gap-2">
                       <Settings className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                      Configuração API & Tokens
+                      ConfiguraÃ§Ã£o API & Tokens
                     </h3>
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-600 dark:text-gray-400">Access Token:</span>
                         <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
-                          Válido
+                          VÃ¡lido
                         </Badge>
                       </div>
                       <div className="flex justify-between">
@@ -1550,7 +1550,7 @@ export default function IntegracoesPage() {
                         <span className="text-gray-900 dark:text-white font-medium">5,471</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-700 dark:text-gray-300">Análises Content</span>
+                        <span className="text-gray-700 dark:text-gray-300">AnÃ¡lises Content</span>
                         <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 text-xs">
                           Ativo
                         </Badge>
@@ -1559,33 +1559,33 @@ export default function IntegracoesPage() {
                   </div>
                 </div>
 
-                {/* PgCron & Automação */}
+                {/* PgCron & AutomaÃ§Ã£o */}
                 <div className="card-dark p-6">
                   <h3 className="card-title-dark mb-4 flex items-center gap-2">
                     <Clock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                    Automação PgCron Meta
+                    AutomaÃ§Ã£o PgCron Meta
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <p className="text-gray-600 dark:text-gray-400 mb-1">Frequência</p>
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">FrequÃªncia</p>
                       <p className="font-semibold text-gray-900 dark:text-white">A cada 6 horas</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <p className="text-gray-600 dark:text-gray-400 mb-1">Próxima coleta</p>
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">PrÃ³xima coleta</p>
                       <p className="font-semibold text-purple-600 dark:text-purple-400">20:00 hoje</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <p className="text-gray-600 dark:text-gray-400 mb-1">Última coleta</p>
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">Ãšltima coleta</p>
                       <p className="font-semibold text-green-600 dark:text-green-400">14:15 (sucesso)</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Estatísticas de Engajamento */}
+                {/* EstatÃ­sticas de Engajamento */}
                 <div className="card-dark p-6">
                   <h3 className="card-title-dark mb-4 flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-pink-600 dark:text-pink-400" />
-                    Métricas de Engajamento (Últimos 30 dias)
+                    MÃ©tricas de Engajamento (Ãšltimos 30 dias)
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
                     <div className="text-center p-4 bg-pink-50 dark:bg-pink-900/20 rounded-lg border border-pink-200 dark:border-pink-800">
@@ -1597,7 +1597,7 @@ export default function IntegracoesPage() {
                       <p className="font-bold text-blue-700 dark:text-blue-300 text-lg">12.4K</p>
                     </div>
                     <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                      <p className="text-green-600 dark:text-green-400 mb-1">Comentários</p>
+                      <p className="text-green-600 dark:text-green-400 mb-1">ComentÃ¡rios</p>
                       <p className="font-bold text-green-700 dark:text-green-300 text-lg">1.2K</p>
                     </div>
                     <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
@@ -1607,14 +1607,14 @@ export default function IntegracoesPage() {
                   </div>
                 </div>
 
-                {/* Ações */}
+                {/* AÃ§Ãµes */}
                 <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <Button
                     variant="outline"
                     className="flex items-center gap-2"
                   >
                     <Settings className="w-4 h-4" />
-                    Configurações Avançadas
+                    ConfiguraÃ§Ãµes AvanÃ§adas
                   </Button>
                   
                   <Button
@@ -1640,7 +1640,7 @@ export default function IntegracoesPage() {
                     className="flex items-center gap-2"
                   >
                     <BarChart3 className="w-4 h-4" />
-                    Marketing 360°
+                    Marketing 360Â°
                   </Button>
 
                   <Button
@@ -1650,7 +1650,7 @@ export default function IntegracoesPage() {
                     disabled={googleLoading}
                   >
                     <Star className="w-4 h-4 text-yellow-500" />
-                    {googleLoading ? 'Coletando Google...' : 'Coletar Google Avaliações (ontem)'}
+                    {googleLoading ? 'Coletando Google...' : 'Coletar Google AvaliaÃ§Ãµes (ontem)'}
                   </Button>
                 </div>
 
@@ -1686,11 +1686,11 @@ export default function IntegracoesPage() {
                         </div>
                       </div>
                       <p className="text-sm text-gray-600 mb-4">
-                        Envio de newsletters, promoções especiais e acompanhamento de eventos
+                        Envio de newsletters, promoÃ§Ãµes especiais e acompanhamento de eventos
                       </p>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                        <span className="text-xs text-gray-500">Próxima versão</span>
+                        <span className="text-xs text-gray-500">PrÃ³xima versÃ£o</span>
                       </div>
                     </div>
                     
@@ -1705,11 +1705,11 @@ export default function IntegracoesPage() {
                         </div>
                       </div>
                       <p className="text-sm text-gray-600 mb-4">
-                        Confirmações de reserva, lembretes e notificações importantes via SMS
+                        ConfirmaÃ§Ãµes de reserva, lembretes e notificaÃ§Ãµes importantes via SMS
                       </p>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                        <span className="text-xs text-gray-500">Próxima versão</span>
+                        <span className="text-xs text-gray-500">PrÃ³xima versÃ£o</span>
                       </div>
                     </div>
                   </div>
@@ -1720,10 +1720,10 @@ export default function IntegracoesPage() {
                     </div>
                     <h3 className="text-lg font-semibold text-gray-700 mb-2">Em Desenvolvimento</h3>
                     <p className="text-gray-600 mb-4">
-                      Estamos trabalhando nas integrações de email e SMS para oferecer a melhor experiência de comunicação
+                      Estamos trabalhando nas integraÃ§Ãµes de email e SMS para oferecer a melhor experiÃªncia de comunicaÃ§Ã£o
                     </p>
                     <Badge variant="secondary" className="text-xs">
-                      Lançamento previsto para próxima versão
+                      LanÃ§amento previsto para prÃ³xima versÃ£o
                     </Badge>
                   </div>
                 </div>
@@ -1752,11 +1752,11 @@ export default function IntegracoesPage() {
                         </div>
                         <div>
                           <h4 className="font-semibold text-gray-800">Sympla</h4>
-                          <p className="text-sm text-gray-600">Gestão de eventos</p>
+                          <p className="text-sm text-gray-600">GestÃ£o de eventos</p>
                         </div>
                       </div>
                       <p className="text-sm text-gray-600 mb-4">
-                        Sincronização automática de eventos, vendas de ingressos e controle de participantes
+                        SincronizaÃ§Ã£o automÃ¡tica de eventos, vendas de ingressos e controle de participantes
                       </p>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
@@ -1775,7 +1775,7 @@ export default function IntegracoesPage() {
                         </div>
                       </div>
                       <p className="text-sm text-gray-600 mb-4">
-                        Integração para gestão de lista de convidados e controle de acesso a eventos
+                        IntegraÃ§Ã£o para gestÃ£o de lista de convidados e controle de acesso a eventos
                       </p>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
@@ -1788,7 +1788,7 @@ export default function IntegracoesPage() {
                     <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                       <Calendar className="w-8 h-8 text-purple-600" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Integrações de Eventos</h3>
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">IntegraÃ§Ãµes de Eventos</h3>
                     <p className="text-gray-600 mb-4">
                       Conecte seu estabelecimento com as principais plataformas de eventos do Brasil
                     </p>
@@ -1822,11 +1822,11 @@ export default function IntegracoesPage() {
                         </div>
                         <div>
                           <h4 className="font-semibold text-gray-800">ContaHub</h4>
-                          <p className="text-sm text-gray-600">Análise avançada</p>
+                          <p className="text-sm text-gray-600">AnÃ¡lise avanÃ§ada</p>
                         </div>
                       </div>
                       <p className="text-sm text-gray-600 mb-4">
-                        Análise avançada de dados financeiros e operacionais com insights automáticos
+                        AnÃ¡lise avanÃ§ada de dados financeiros e operacionais com insights automÃ¡ticos
                       </p>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -1841,11 +1841,11 @@ export default function IntegracoesPage() {
                         </div>
                         <div>
                           <h4 className="font-semibold text-gray-800">Power BI</h4>
-                          <p className="text-sm text-gray-600">Dashboards avançados</p>
+                          <p className="text-sm text-gray-600">Dashboards avanÃ§ados</p>
                         </div>
                       </div>
                       <p className="text-sm text-gray-600 mb-4">
-                        Dashboards interativos e relatórios personalizados com Microsoft Power BI
+                        Dashboards interativos e relatÃ³rios personalizados com Microsoft Power BI
                       </p>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
@@ -1859,7 +1859,7 @@ export default function IntegracoesPage() {
                       onClick={() => window.location.href = '/relatorios/contahub-teste'}
                       className="bg-orange-500 hover:bg-orange-600 text-white"
                     >
-                      📊 Acessar ContaHub Analytics
+                      ðŸ“Š Acessar ContaHub Analytics
                     </Button>
                   </div>
                 </div>
@@ -1868,7 +1868,7 @@ export default function IntegracoesPage() {
           </TabsContent> */}
         </Tabs>
         
-        {/* Espaçamento final para evitar corte da página */}
+        {/* EspaÃ§amento final para evitar corte da pÃ¡gina */}
         <div className="h-16"></div>
       </div>
     </div>

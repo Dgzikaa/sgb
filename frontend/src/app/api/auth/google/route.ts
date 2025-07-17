@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 
-// Configurações OAuth - ADICIONE NO SEU .env.local:
+// ConfiguraÃ§Ãµes OAuth - ADICIONE NO SEU .env.local:
 // GOOGLE_OAUTH_CLIENT_ID=your_google_oauth_client_id
 // GOOGLE_OAUTH_CLIENT_SECRET=your_google_oauth_client_secret
 
@@ -23,18 +23,18 @@ class GoogleOAuthManager {
 
   private checkCredentials(): boolean {
     if (!this.clientId || !this.clientSecret) {
-      console.error('❌ Google OAuth credentials não configuradas')
+      console.error('âŒ Google OAuth credentials nÃ£o configuradas')
       return false
     }
     return true
   }
 
   /**
-   * Gerar URL de autorização OAuth
+   * Gerar URL de autorizaÃ§Ã£o OAuth
    */
   getAuthUrl(state?: string): string {
     if (!this.checkCredentials()) {
-      throw new Error('Google OAuth credentials não configuradas')
+      throw new Error('Google OAuth credentials nÃ£o configuradas')
     }
 
     const scopes = [
@@ -58,7 +58,7 @@ class GoogleOAuthManager {
   }
 
   /**
-   * Trocar código por token
+   * Trocar cÃ³digo por token
    */
   async exchangeCodeForToken(code: string): Promise<{
     access_token: string
@@ -87,16 +87,16 @@ class GoogleOAuthManager {
 
       if (!response.ok) {
         const errorData = await response.text()
-        console.error('❌ Erro ao trocar código por token:', errorData)
+        console.error('âŒ Erro ao trocar cÃ³digo por token:', errorData)
         return null
       }
 
       const tokenData = await response.json()
-      console.log('✅ Token obtido com sucesso')
+      console.log('âœ… Token obtido com sucesso')
       
       return tokenData
     } catch (error) {
-      console.error('❌ Erro na troca de código por token:', error)
+      console.error('âŒ Erro na troca de cÃ³digo por token:', error)
       return null
     }
   }
@@ -128,16 +128,16 @@ class GoogleOAuthManager {
       })
 
       if (!response.ok) {
-        console.error('❌ Erro ao atualizar token')
+        console.error('âŒ Erro ao atualizar token')
         return null
       }
 
       const tokenData = await response.json()
-      console.log('✅ Token atualizado com sucesso')
+      console.log('âœ… Token atualizado com sucesso')
       
       return tokenData
     } catch (error) {
-      console.error('❌ Erro na atualização do token:', error)
+      console.error('âŒ Erro na atualizaÃ§Ã£o do token:', error)
       return null
     }
   }
@@ -146,7 +146,7 @@ class GoogleOAuthManager {
 const oauthManager = new GoogleOAuthManager()
 
 /**
- * GET: Redirecionar para autorização Google
+ * GET: Redirecionar para autorizaÃ§Ã£o Google
  */
 export async function GET(request: NextRequest) {
   try {
@@ -157,17 +157,17 @@ export async function GET(request: NextRequest) {
       const state = searchParams.get('state') || 'sgb-auth-' + Date.now()
       const authUrl = oauthManager.getAuthUrl(state)
       
-      console.log('🔄 Redirecionando para autorização Google...')
+      console.log('ðŸ”„ Redirecionando para autorizaÃ§Ã£o Google...')
       
       return NextResponse.redirect(authUrl)
     }
 
     return NextResponse.json({
-      error: 'Ação não especificada. Use ?action=authorize'
+      error: 'AÃ§Ã£o nÃ£o especificada. Use ?action=authorize'
     }, { status: 400 })
 
   } catch (error) {
-    console.error('❌ Erro na autorização:', error)
+    console.error('âŒ Erro na autorizaÃ§Ã£o:', error)
     return NextResponse.json({
       error: 'Erro interno do servidor'
     }, { status: 500 })
@@ -175,7 +175,7 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * POST: Trocar código por token (manual)
+ * POST: Trocar cÃ³digo por token (manual)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
     if (action === 'exchange') {
       if (!code) {
         return NextResponse.json({
-          error: 'Código de autorização é obrigatório'
+          error: 'CÃ³digo de autorizaÃ§Ã£o Ã© obrigatÃ³rio'
         }, { status: 400 })
       }
 
@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
       
       if (!refresh_token) {
         return NextResponse.json({
-          error: 'Refresh token é obrigatório'
+          error: 'Refresh token Ã© obrigatÃ³rio'
         }, { status: 400 })
       }
 
@@ -226,11 +226,11 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
-      error: 'Ação não especificada'
+      error: 'AÃ§Ã£o nÃ£o especificada'
     }, { status: 400 })
 
   } catch (error) {
-    console.error('❌ Erro na troca de token:', error)
+    console.error('âŒ Erro na troca de token:', error)
     return NextResponse.json({
       error: 'Erro interno do servidor'
     }, { status: 500 })

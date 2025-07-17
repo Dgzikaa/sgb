@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const barId = searchParams.get('bar_id') || '3'
 
-    console.log(`🔍 [DEBUG] Verificando dados na tabela contaazul para bar_id: ${barId}`)
+    console.log(`ðŸ” [DEBUG] Verificando dados na tabela contaazul para bar_id: ${barId}`)
 
     // 1. Verificar se a tabela existe e tem dados
     const { data: allData, error: allError, count: totalCount } = await supabase
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
       .limit(5)
 
     if (allError) {
-      console.error('❌ [DEBUG] Erro ao acessar tabela contaazul:', allError)
+      console.error('âŒ [DEBUG] Erro ao acessar tabela contaazul:', allError)
       return NextResponse.json({
         success: false,
         error: 'Erro ao acessar tabela contaazul',
@@ -30,14 +30,14 @@ export async function GET(request: Request) {
       })
     }
 
-    // 2. Verificar dados específicos para o bar_id
+    // 2. Verificar dados especÃ­ficos para o bar_id
     const { data: barData, error: barError, count: barCount } = await supabase
       .from('contaazul')
       .select('*', { count: 'exact' })
       .eq('bar_id', barId)
       .limit(5)
 
-    // 3. Verificar todos os bar_ids disponíveis
+    // 3. Verificar todos os bar_ids disponÃ­veis
     const { data: distinctBars, error: distinctError } = await supabase
       .from('contaazul')
       .select('bar_id')
@@ -45,7 +45,7 @@ export async function GET(request: Request) {
 
     const barIds = distinctBars ? [...new Set(distinctBars.map((item: any) => item.bar_id))] : []
 
-    // 4. Verificar últimas sincronizações
+    // 4. Verificar Ãºltimas sincronizaÃ§Ãµes
     const { data: recentData, error: recentError } = await supabase
       .from('contaazul')
       .select('id, bar_id, descricao, valor, sincronizado_em')
@@ -77,7 +77,7 @@ export async function GET(request: Request) {
     })
 
   } catch (error: any) {
-    console.error('❌ [DEBUG] Erro geral:', error)
+    console.error('âŒ [DEBUG] Erro geral:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro interno do servidor',

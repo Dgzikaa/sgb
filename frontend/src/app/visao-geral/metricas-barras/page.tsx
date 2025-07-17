@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useBar } from '@/contexts/BarContext'
@@ -42,17 +42,17 @@ export default function MetricasBarrasPage() {
   })
 
   const meses = [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Janeiro', 'Fevereiro', 'MarÃ§o', 'Abril', 'Maio', 'Junho',
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
   ]
 
   const metricas = [
-    { key: 'faturamento', label: 'Faturamento', icon: '💰', unit: 'R$', color: 'blue', metaKey: 'metaMensalFaturamento' },
-    { key: 'clientes', label: 'Clientes', icon: '👥', unit: '', color: 'green', metaKey: 'metaMensalClientes' },
-    { key: 'ticketMedio', label: 'Ticket Médio', icon: '🎯', unit: 'R$', color: 'purple', metaKey: 'ticketMedioTarget' },
-    { key: 'reservas', label: 'Reservas', icon: '📅', unit: 'pessoas', color: 'orange', metaKey: 'reservasMensais' },
-    { key: 'tempoCozinha', label: 'Tempo Cozinha', icon: '👨‍🍳', unit: 'min', color: 'red', metaKey: 'tempoSaidaCozinha' },
-    { key: 'tempoBar', label: 'Tempo Bar', icon: '🍹', unit: 'min', color: 'cyan', metaKey: 'tempoSaidaBar' }
+    { key: 'faturamento', label: 'Faturamento', icon: 'ðŸ’°', unit: 'R$', color: 'blue', metaKey: 'metaMensalFaturamento' },
+    { key: 'clientes', label: 'Clientes', icon: 'ðŸ‘¥', unit: '', color: 'green', metaKey: 'metaMensalClientes' },
+    { key: 'ticketMedio', label: 'Ticket MÃ©dio', icon: 'ðŸŽ¯', unit: 'R$', color: 'purple', metaKey: 'ticketMedioTarget' },
+    { key: 'reservas', label: 'Reservas', icon: 'ðŸ“…', unit: 'pessoas', color: 'orange', metaKey: 'reservasMensais' },
+    { key: 'tempoCozinha', label: 'Tempo Cozinha', icon: 'ðŸ‘¨â€ðŸ³', unit: 'min', color: 'red', metaKey: 'tempoSaidaCozinha' },
+    { key: 'tempoBar', label: 'Tempo Bar', icon: 'ðŸ¹', unit: 'min', color: 'cyan', metaKey: 'tempoSaidaBar' }
   ]
 
   // Carregar metas
@@ -75,25 +75,25 @@ export default function MetricasBarrasPage() {
     // Inicializar cliente Supabase
     const supabase = await getSupabaseClient();
     if (!supabase) {
-      console.error('❌ Erro ao conectar com banco');
+      console.error('âŒ Erro ao conectar com banco');
       setLoading(false);
       return;
     }
     
     try {
-      console.log('📊 Buscando dados mensais CORRETOS para', anoSelecionado, '(Sympla + Yuzer + Contahub)')
+      console.log('ðŸ“Š Buscando dados mensais CORRETOS para', anoSelecionado, '(Sympla + Yuzer + Contahub)')
       
       const dadosCompletos: DadosMensal[] = []
       
       for (let mes = 1; mes <= 12; mes++) {
-        console.log(`📅 Processando ${meses[mes - 1]} (${mes}/12)...`)
+        console.log(`ðŸ“… Processando ${meses[mes - 1]} (${mes}/12)...`)
         
         const dataInicio = `${anoSelecionado}-${mes.toString().padStart(2, '0')}-01`
         const ultimoDiaMes = new Date(anoSelecionado, mes, 0).getDate()
         const dataFim = `${anoSelecionado}-${mes.toString().padStart(2, '0')}-${ultimoDiaMes}`
         
         // BUSCAR FATURAMENTO CORRETO: Usar chunking na tabela pagamentos (Sympla + Yuzer + Contahub)
-        console.log(`💰 Buscando faturamento CORRETO para ${meses[mes - 1]}: ${dataInicio} até ${dataFim}`)
+        console.log(`ðŸ’° Buscando faturamento CORRETO para ${meses[mes - 1]}: ${dataInicio} atÃ© ${dataFim}`)
         
         const CHUNK_SIZE = 1000
         let allFaturamentoData: any[] = []
@@ -126,10 +126,10 @@ export default function MetricasBarrasPage() {
         }
         
         const faturamento = allFaturamentoData.reduce((sum: number, item: any) => sum + parseFloat(item.liquido || '0'), 0)
-        console.log(`💰 ${meses[mes - 1]}: R$ ${faturamento.toLocaleString('pt-BR')} (${allFaturamentoData.length} registros)`)
+        console.log(`ðŸ’° ${meses[mes - 1]}: R$ ${faturamento.toLocaleString('pt-BR')} (${allFaturamentoData.length} registros)`)
 
         // BUSCAR CLIENTES CORRETOS: Usar dados agregados (Sympla + Yuzer)
-        console.log(`👥 Buscando clientes CORRETOS para ${meses[mes - 1]}`)
+        console.log(`ðŸ‘¥ Buscando clientes CORRETOS para ${meses[mes - 1]}`)
         
         const { data: clientesData, error: clientesError } = await supabase
           .from('pessoas_diario_corrigido')
@@ -144,14 +144,14 @@ export default function MetricasBarrasPage() {
         if (!clientesError && clientesData) {
           clientes = clientesData.reduce((sum: number, item: any) => sum + parseInt(item.total_pessoas_bruto || '0'), 0)
           clientesPagantes = clientesData.reduce((sum: number, item: any) => sum + parseInt(item.pessoas_pagantes || '0'), 0)
-          console.log(`👥 ${meses[mes - 1]}: ${clientes} pessoas totais, ${clientesPagantes} pagantes`)
+          console.log(`ðŸ‘¥ ${meses[mes - 1]}: ${clientes} pessoas totais, ${clientesPagantes} pagantes`)
         }
         
-        // TICKET MÉDIO CORRETO: Faturamento / Pessoas Pagantes
+        // TICKET MÃ‰DIO CORRETO: Faturamento / Pessoas Pagantes
         const ticketMedio = clientesPagantes > 0 ? faturamento / clientesPagantes : 0
 
-        // BUSCAR RESERVAS CORRETAS: GetIn API com dados agregados por período
-        console.log(`📅 Buscando reservas GetIn para ${meses[mes - 1]}`)
+        // BUSCAR RESERVAS CORRETAS: GetIn API com dados agregados por perÃ­odo
+        console.log(`ðŸ“… Buscando reservas GetIn para ${meses[mes - 1]}`)
         
         let reservas = 0
         try {
@@ -160,16 +160,16 @@ export default function MetricasBarrasPage() {
           
           if (result.success && result.data?.estatisticas) {
             reservas = result.data.estatisticas.total_pessoas || 0
-            console.log(`📅 ${meses[mes - 1]}: ${reservas} pessoas reservadas (${result.data.estatisticas.total_reservas || 0} reservas)`)
+            console.log(`ðŸ“… ${meses[mes - 1]}: ${reservas} pessoas reservadas (${result.data.estatisticas.total_reservas || 0} reservas)`)
           } else {
-            console.log(`📅 ${meses[mes - 1]}: Nenhuma reserva encontrada`)
+            console.log(`ðŸ“… ${meses[mes - 1]}: Nenhuma reserva encontrada`)
           }
         } catch (error) {
-          console.error(`❌ Erro ao buscar reservas para ${meses[mes - 1]}:`, error)
+          console.error(`âŒ Erro ao buscar reservas para ${meses[mes - 1]}:`, error)
         }
 
         // BUSCAR TEMPOS CORRETOS: Usar chunking + filtros inteligentes
-        console.log(`⏱️ Buscando tempos CORRETOS para ${meses[mes - 1]}`)
+        console.log(`â±ï¸ Buscando tempos CORRETOS para ${meses[mes - 1]}`)
         
         const dataInicioInt = parseInt(dataInicio.replace(/-/g, ''))
         const dataFimInt = parseInt(dataFim.replace(/-/g, ''))
@@ -187,8 +187,8 @@ export default function MetricasBarrasPage() {
             .gte('dia', dataInicioInt)
             .lte('dia', dataFimInt)
             .not('t0_t2', 'is', null)
-            .gt('t0_t2', 60)      // Mínimo 1 minuto
-            .lt('t0_t2', 2700)    // Máximo 45 minutos
+            .gt('t0_t2', 60)      // MÃ­nimo 1 minuto
+            .lt('t0_t2', 2700)    // MÃ¡ximo 45 minutos
             .order('dia')
             .range(offset, offset + CHUNK_SIZE - 1)
 
@@ -219,8 +219,8 @@ export default function MetricasBarrasPage() {
             .gte('dia', dataInicioInt)
             .lte('dia', dataFimInt)
             .not('t0_t3', 'is', null)
-            .gt('t0_t3', 30)      // Mínimo 0.5 minutos
-            .lt('t0_t3', 1200)    // Máximo 20 minutos
+            .gt('t0_t3', 30)      // MÃ­nimo 0.5 minutos
+            .lt('t0_t3', 1200)    // MÃ¡ximo 20 minutos
             .order('dia')
             .range(offset, offset + CHUNK_SIZE - 1)
 
@@ -238,7 +238,7 @@ export default function MetricasBarrasPage() {
           }
         }
 
-        // Processar tempos com filtros adicionais e remoção de outliers
+        // Processar tempos com filtros adicionais e remoÃ§Ã£o de outliers
         let tempoCozinha = 0
         if (allTempoCozinhaData.length >= 3) {
           const temposValidosCozinha = allTempoCozinhaData
@@ -273,7 +273,7 @@ export default function MetricasBarrasPage() {
           }
         }
 
-        console.log(`⏱️ ${meses[mes - 1]}: Cozinha ${tempoCozinha.toFixed(1)}min (${allTempoCozinhaData.length} registros), Bar ${tempoBar.toFixed(1)}min (${allTempoBarData.length} registros)`)
+        console.log(`â±ï¸ ${meses[mes - 1]}: Cozinha ${tempoCozinha.toFixed(1)}min (${allTempoCozinhaData.length} registros), Bar ${tempoBar.toFixed(1)}min (${allTempoBarData.length} registros)`)
 
         dadosCompletos.push({
           mes: meses[mes - 1],
@@ -287,8 +287,8 @@ export default function MetricasBarrasPage() {
         })
       }
 
-      console.log('✅ DADOS MENSAIS CORRETOS processados com sucesso!')
-      console.log('📊 Resumo do processamento:')
+      console.log('âœ… DADOS MENSAIS CORRETOS processados com sucesso!')
+      console.log('ðŸ“Š Resumo do processamento:')
       dadosCompletos.forEach(mes => {
         console.log(`   ${mes.mes}: Fat R$ ${mes.faturamento.toLocaleString('pt-BR')}, ${mes.clientes} clientes, TM R$ ${mes.ticketMedio.toFixed(2)}, ${mes.reservas} reservas`)
       })
@@ -296,7 +296,7 @@ export default function MetricasBarrasPage() {
       setDadosMensais(dadosCompletos)
       
     } catch (error) {
-      console.error('❌ Erro ao buscar dados mensais:', error)
+      console.error('âŒ Erro ao buscar dados mensais:', error)
       setDadosMensais([])
     } finally {
       setLoading(false)
@@ -321,13 +321,13 @@ export default function MetricasBarrasPage() {
         <div className="space-y-6">
         {/* Header */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h1 className="text-2xl font-bold text-slate-800 mb-2">📊 Dashboard - Métricas Mensais Comparativas</h1>
-          <p className="text-slate-600">Comparação lado a lado das métricas mensais do {selectedBar?.nome}</p>
+          <h1 className="text-2xl font-bold text-slate-800 mb-2">ðŸ“Š Dashboard - MÃ©tricas Mensais Comparativas</h1>
+          <p className="text-slate-600">ComparaÃ§Ã£o lado a lado das mÃ©tricas mensais do {selectedBar?.nome}</p>
         </div>
 
         {/* Controles */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h3 className="text-lg font-bold text-slate-800 mb-4">🎯 Configurações da Análise</h3>
+          <h3 className="text-lg font-bold text-slate-800 mb-4">ðŸŽ¯ ConfiguraÃ§Ãµes da AnÃ¡lise</h3>
           <div className="flex items-center space-x-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Ano</label>
@@ -345,7 +345,7 @@ export default function MetricasBarrasPage() {
                 disabled={loading || !selectedBar}
                 className="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Carregando...' : '🔍 Analisar'}
+                {loading ? 'Carregando...' : 'ðŸ” Analisar'}
               </button>
             </div>
           </div>
@@ -362,7 +362,7 @@ export default function MetricasBarrasPage() {
           <>
             {/* Resumo Anual */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <h3 className="text-lg font-bold text-slate-800 mb-4">📈 Resumo Anual {anoSelecionado}</h3>
+              <h3 className="text-lg font-bold text-slate-800 mb-4">ðŸ“ˆ Resumo Anual {anoSelecionado}</h3>
               <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
                 {metricas.map((metrica: any) => {
                   const total = dadosMensais.reduce((sum, mes) => sum + (mes[metrica.key as keyof DadosMensal] as number), 0)
@@ -388,7 +388,7 @@ export default function MetricasBarrasPage() {
               </div>
             </div>
 
-            {/* Gráficos de Barras por Métrica */}
+            {/* GrÃ¡ficos de Barras por MÃ©trica */}
             {metricas.map((metrica: any) => {
               const maxValor = Math.max(...dadosMensais.map((mes: any) => mes[metrica.key as keyof DadosMensal] as number), metas[metrica.metaKey as keyof MetasConfig] as number)
               
@@ -396,7 +396,7 @@ export default function MetricasBarrasPage() {
                 <div key={metrica.key} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                   <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center">
                     <span className="text-2xl mr-3">{metrica.icon}</span>
-                    {metrica.label} - Comparação Mensal {anoSelecionado}
+                    {metrica.label} - ComparaÃ§Ã£o Mensal {anoSelecionado}
                   </h3>
                   
                   <div className="space-y-4">
@@ -404,7 +404,7 @@ export default function MetricasBarrasPage() {
                       const valor = dados[metrica.key as keyof DadosMensal] as number
                       const meta = metas[metrica.metaKey as keyof MetasConfig] as number
                       const largura = maxValor > 0 ? (valor / maxValor) * 100 : 0
-                      // Para tempos (cozinha e bar), menor é melhor - inverter lógica
+                      // Para tempos (cozinha e bar), menor Ã© melhor - inverter lÃ³gica
                       const acimaMeta = (metrica.key === 'tempoCozinha' || metrica.key === 'tempoBar') 
                         ? valor <= meta 
                         : valor >= meta
@@ -476,8 +476,8 @@ export default function MetricasBarrasPage() {
                                   <div className="mt-1 pt-1 border-t border-gray-600">
                                     <span className={`font-semibold ${acimaMeta ? 'text-green-300' : 'text-red-300'}`}>
                                       {(metrica.key === 'tempoCozinha' || metrica.key === 'tempoBar') 
-                                        ? (acimaMeta ? '✅ Dentro da meta' : '❌ Fora da meta')
-                                        : (acimaMeta ? '✅ Acima da meta' : '❌ Abaixo da meta')
+                                        ? (acimaMeta ? 'âœ… Dentro da meta' : 'âŒ Fora da meta')
+                                        : (acimaMeta ? 'âœ… Acima da meta' : 'âŒ Abaixo da meta')
                                       }
                                       {meta > 0 && (
                                         <span className="ml-1">
@@ -503,14 +503,14 @@ export default function MetricasBarrasPage() {
                             </div>
                           </div>
                           <div className="w-8">
-                            {valor > 0 ? (acimaMeta ? '✅' : '⚠️') : '❌'}
+                            {valor > 0 ? (acimaMeta ? 'âœ…' : 'âš ï¸') : 'âŒ'}
                           </div>
                         </div>
                       )
                     })}
                   </div>
 
-                  {/* Legenda e estatísticas */}
+                  {/* Legenda e estatÃ­sticas */}
                   <div className="mt-6 pt-4 border-t border-gray-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
@@ -534,10 +534,10 @@ export default function MetricasBarrasPage() {
 
             {/* Insights Comparativos */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <h3 className="text-lg font-bold text-slate-800 mb-4">🔍 Insights Comparativos</h3>
+              <h3 className="text-lg font-bold text-slate-800 mb-4">ðŸ” Insights Comparativos</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <h4 className="font-semibold text-slate-700">🏆 Melhores Meses</h4>
+                  <h4 className="font-semibold text-slate-700">ðŸ† Melhores Meses</h4>
                   {metricas.slice(0, 3).map((metrica: any) => {
                     const melhorMes = dadosMensais.reduce((max, mes) => 
                       (mes[metrica.key as keyof DadosMensal] as number) > (max[metrica.key as keyof DadosMensal] as number) ? mes : max
@@ -552,7 +552,7 @@ export default function MetricasBarrasPage() {
                 </div>
                 
                 <div className="space-y-4">
-                  <h4 className="font-semibold text-slate-700">📊 Performance Geral</h4>
+                  <h4 className="font-semibold text-slate-700">ðŸ“Š Performance Geral</h4>
                   {(() => {
                     const totalMetas = metricas.length
                     const metasAtingidas = metricas.filter((metrica: any) => {
@@ -581,10 +581,10 @@ export default function MetricasBarrasPage() {
           </>
         ) : (
           <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-100 text-center">
-            <div className="text-6xl mb-4">📊</div>
-            <h3 className="text-lg font-semibold text-slate-800 mb-2">Selecione um ano para análise</h3>
+            <div className="text-6xl mb-4">ðŸ“Š</div>
+            <h3 className="text-lg font-semibold text-slate-800 mb-2">Selecione um ano para anÃ¡lise</h3>
             <p className="text-slate-500">
-              Escolha o ano que deseja analisar e clique em "Analisar" para visualizar a comparação mensal.
+              Escolha o ano que deseja analisar e clique em "Analisar" para visualizar a comparaÃ§Ã£o mensal.
             </p>
           </div>
         )}

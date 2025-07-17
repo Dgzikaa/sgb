@@ -1,8 +1,8 @@
+﻿// ========================================
+// ðŸŽ® DISCORD WEBHOOK SERVICE - SGB
 // ========================================
-// 🎮 DISCORD WEBHOOK SERVICE - SGB
-// ========================================
-// Service completo para notificações via Discord
-// Integração com agente IA para relatórios automáticos
+// Service completo para notificaÃ§Ãµes via Discord
+// IntegraÃ§Ã£o com agente IA para relatÃ³rios automÃ¡ticos
 
 export interface DiscordWebhookConfig {
   webhook_url: string;
@@ -56,7 +56,7 @@ interface DiscordNotificationData {
 }
 
 // ========================================
-// 🎮 DISCORD SERVICE CLASS
+// ðŸŽ® DISCORD SERVICE CLASS
 // ========================================
 export class DiscordService {
   static async sendNotification(data: DiscordNotificationData) {
@@ -72,33 +72,33 @@ export class DiscordService {
       const result = await response.json()
       
       if (!response.ok) {
-        throw new Error(result.error || 'Erro ao enviar notificação')
+        throw new Error(result.error || 'Erro ao enviar notificaÃ§Ã£o')
       }
 
-      console.log('✅ Notificação Discord enviada:', result)
+      console.log('âœ… NotificaÃ§Ã£o Discord enviada:', result)
       return result
     } catch (error) {
-      console.error('❌ Erro ao enviar notificação Discord:', error)
+      console.error('âŒ Erro ao enviar notificaÃ§Ã£o Discord:', error)
       throw error
     }
   }
 
-  // Método para testar conexão com Discord
+  // MÃ©todo para testar conexÃ£o com Discord
   static async testarConexao(): Promise<boolean> {
     try {
       const testData = {
         bar_id: 'test',
         webhook_type: 'sistema' as const,
-        title: '🧪 Teste de Conexão',
-        description: 'Este é um teste automático de conectividade com Discord',
+        title: 'ðŸ§ª Teste de ConexÃ£o',
+        description: 'Este Ã© um teste automÃ¡tico de conectividade com Discord',
         fields: [
           {
-            name: '⚡ Status',
-            value: 'Conexão funcionando corretamente',
+            name: 'âš¡ Status',
+            value: 'ConexÃ£o funcionando corretamente',
             inline: true
           },
           {
-            name: '🕐 Horário',
+            name: 'ðŸ• HorÃ¡rio',
             value: new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
             inline: true
           }
@@ -109,109 +109,109 @@ export class DiscordService {
       await this.sendNotification(testData)
       return true
     } catch (error) {
-      console.error('❌ Erro ao testar conexão Discord:', error)
+      console.error('âŒ Erro ao testar conexÃ£o Discord:', error)
       return false
     }
   }
 
-  // Método para enviar alertas de anomalia
+  // MÃ©todo para enviar alertas de anomalia
   static async enviarAlertaAnomalia(anomalia: any): Promise<boolean> {
     try {
       const data = {
         bar_id: anomalia.bar_id || 'unknown',
         webhook_type: 'sistema' as const,
-        title: `🚨 ${anomalia.titulo || 'Anomalia Detectada'}`,
-        description: anomalia.descricao || 'Anomalia crítica detectada pelo sistema de IA',
+        title: `ðŸš¨ ${anomalia.titulo || 'Anomalia Detectada'}`,
+        description: anomalia.descricao || 'Anomalia crÃ­tica detectada pelo sistema de IA',
         fields: [
           {
-            name: '📊 Tipo',
+            name: 'ðŸ“Š Tipo',
             value: anomalia.tipo_anomalia || 'N/A',
             inline: true
           },
           {
-            name: '⚠️ Severidade',
+            name: 'âš ï¸ Severidade',
             value: anomalia.severidade || 'N/A',
             inline: true
           },
           {
-            name: '📈 Valor Esperado',
+            name: 'ðŸ“ˆ Valor Esperado',
             value: anomalia.valor_esperado?.toString() || 'N/A',
             inline: true
           },
           {
-            name: '📉 Valor Observado',
+            name: 'ðŸ“‰ Valor Observado',
             value: anomalia.valor_observado?.toString() || 'N/A',
             inline: true
           },
           {
-            name: '📊 Desvio',
+            name: 'ðŸ“Š Desvio',
             value: `${anomalia.desvio_percentual || 0}%`,
             inline: true
           },
           {
-            name: '🎯 Confiança',
+            name: 'ðŸŽ¯ ConfianÃ§a',
             value: `${anomalia.confianca_deteccao || 0}%`,
             inline: true
           }
         ],
-        color: anomalia.severidade === 'critica' ? 0xff0000 : 0xff6600 // Vermelho para crítica, laranja para outras
+        color: anomalia.severidade === 'critica' ? 0xff0000 : 0xff6600 // Vermelho para crÃ­tica, laranja para outras
       }
 
       await this.sendNotification(data)
       return true
     } catch (error) {
-      console.error('❌ Erro ao enviar alerta de anomalia:', error)
+      console.error('âŒ Erro ao enviar alerta de anomalia:', error)
       return false
     }
   }
 
-  // Método para enviar relatório matinal
+  // MÃ©todo para enviar relatÃ³rio matinal
   static async enviarRelatorioMatinal(dashboardData: any): Promise<boolean> {
     try {
       const data = {
         bar_id: dashboardData.bar_id || 'unknown',
         webhook_type: 'sistema' as const,
-        title: '🌅 Relatório Matinal - SGB Analytics',
-        description: `Resumo das análises e métricas do dia anterior gerado pelo sistema de IA`,
+        title: 'ðŸŒ… RelatÃ³rio Matinal - SGB Analytics',
+        description: `Resumo das anÃ¡lises e mÃ©tricas do dia anterior gerado pelo sistema de IA`,
         fields: [
           {
-            name: '📊 Métricas Calculadas',
+            name: 'ðŸ“Š MÃ©tricas Calculadas',
             value: dashboardData.metricas_count?.toString() || '0',
             inline: true
           },
           {
-            name: '🚨 Anomalias Detectadas',
+            name: 'ðŸš¨ Anomalias Detectadas',
             value: dashboardData.anomalias_count?.toString() || '0',
             inline: true
           },
           {
-            name: '💡 Insights Gerados',
+            name: 'ðŸ’¡ Insights Gerados',
             value: dashboardData.insights_count?.toString() || '0',
             inline: true
           },
           {
-            name: '📈 Score Geral',
+            name: 'ðŸ“ˆ Score Geral',
             value: dashboardData.score_geral?.toString() || 'N/A',
             inline: true
           },
           {
-            name: '⏰ Horário de Geração',
+            name: 'â° HorÃ¡rio de GeraÃ§Ã£o',
             value: new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
             inline: true
           }
         ],
-        color: 0x00aa55 // Verde para relatório matinal
+        color: 0x00aa55 // Verde para relatÃ³rio matinal
       }
 
       await this.sendNotification(data)
       return true
     } catch (error) {
-      console.error('❌ Erro ao enviar relatório matinal:', error)
+      console.error('âŒ Erro ao enviar relatÃ³rio matinal:', error)
       return false
     }
   }
 
-  // Métodos de conveniência para tipos específicos de webhook
+  // MÃ©todos de conveniÃªncia para tipos especÃ­ficos de webhook
   static async sendSystemNotification(barId: string, title: string, description: string, fields?: any[]) {
     return this.sendNotification({
       bar_id: barId,
@@ -219,7 +219,7 @@ export class DiscordService {
       title,
       description,
       fields,
-      color: 0xff0000 // Vermelho para sistema/segurança
+      color: 0xff0000 // Vermelho para sistema/seguranÃ§a
     })
   }
 
@@ -278,7 +278,7 @@ export class DiscordService {
     })
   }
 
-  // Método para enviar embed diretamente (compatibilidade com bot)
+  // MÃ©todo para enviar embed diretamente (compatibilidade com bot)
   static async sendEmbed(embed: DiscordEmbed): Promise<boolean> {
     try {
       const data = {
@@ -293,18 +293,18 @@ export class DiscordService {
       await this.sendNotification(data)
       return true
     } catch (error) {
-      console.error('❌ Erro ao enviar embed Discord:', error)
+      console.error('âŒ Erro ao enviar embed Discord:', error)
       return false
     }
   }
 
-  // Método para enviar mensagem de texto simples
+  // MÃ©todo para enviar mensagem de texto simples
   static async sendMessage(message: string): Promise<boolean> {
     try {
       const data = {
         bar_id: 'bot',
         webhook_type: 'sistema' as const,
-        title: '🤖 SGB Bot',
+        title: 'ðŸ¤– SGB Bot',
         description: message,
         color: 0x5865F2
       }
@@ -312,49 +312,49 @@ export class DiscordService {
       await this.sendNotification(data)
       return true
     } catch (error) {
-      console.error('❌ Erro ao enviar mensagem Discord:', error)
+      console.error('âŒ Erro ao enviar mensagem Discord:', error)
       return false
     }
   }
 }
 
 // ========================================
-// 🏭 FACTORY E CONFIGURAÇÕES
+// ðŸ­ FACTORY E CONFIGURAÃ‡Ã•ES
 // ========================================
 
 /**
- * Discord Service para SGB (Ordinário)
- * Como a classe é totalmente estática, exportamos diretamente
+ * Discord Service para SGB (OrdinÃ¡rio)
+ * Como a classe Ã© totalmente estÃ¡tica, exportamos diretamente
  */
 export const sgbDiscordService = DiscordService;
 
 // ========================================
-// 🕐 AGENDAMENTO PARA 8H DA MANHÃ
+// ðŸ• AGENDAMENTO PARA 8H DA MANHÃƒ
 // ========================================
 
 /**
- * Verifica se é hora de enviar relatório matinal (8h)
+ * Verifica se Ã© hora de enviar relatÃ³rio matinal (8h)
  */
 export function isHorarioRelatorioMatinal(): boolean {
   const agora = new Date();
   const hora = agora.getHours();
   const minuto = agora.getMinutes();
   
-  // 8h da manhã (entre 8:00 e 8:05 para dar margem)
+  // 8h da manhÃ£ (entre 8:00 e 8:05 para dar margem)
   return hora === 8 && minuto <= 5;
 }
 
 /**
- * Agendar próximo relatório matinal
+ * Agendar prÃ³ximo relatÃ³rio matinal
  */
 export function calcularProximoRelatorioMatinal(): Date {
   const agora = new Date();
   const proximoRelatorio = new Date();
   
-  // Configurar para 8h da manhã
+  // Configurar para 8h da manhÃ£
   proximoRelatorio.setHours(8, 0, 0, 0);
   
-  // Se já passou das 8h hoje, agendar para amanhã
+  // Se jÃ¡ passou das 8h hoje, agendar para amanhÃ£
   if (agora.getHours() >= 8) {
     proximoRelatorio.setDate(proximoRelatorio.getDate() + 1);
   }
@@ -363,7 +363,7 @@ export function calcularProximoRelatorioMatinal(): Date {
 }
 
 /**
- * Minutos até o próximo relatório matinal
+ * Minutos atÃ© o prÃ³ximo relatÃ³rio matinal
  */
 export function minutosAteProximoRelatorio(): number {
   const agora = new Date();

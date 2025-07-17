@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { usePageTitle } from '@/contexts/PageTitleContext'
@@ -66,7 +66,7 @@ export default function TabelaDesempenhoPage() {
   const URL_PLANILHA = 'https://docs.google.com/spreadsheets/d/1WRnwl_F_tgqvQmHIyQUFtiWQVujTBk2TDL-ii0JjfAY/edit?gid=972882162#gid=972882162'
 
   useEffect(() => {
-    setPageTitle('📈 Tabela de Desempenho')
+    setPageTitle('ðŸ“ˆ Tabela de Desempenho')
     
     return () => {
       setPageTitle('')
@@ -85,7 +85,7 @@ export default function TabelaDesempenhoPage() {
     if (!selectedBar?.id) return
     
     setLoading(true)
-    console.log('🔄 Carregando dados de desempenho...')
+    console.log('ðŸ”„ Carregando dados de desempenho...')
 
     try {
       const params = new URLSearchParams({
@@ -110,14 +110,14 @@ export default function TabelaDesempenhoPage() {
       if (data.success) {
         setDados(data.data || [])
         setResumo(data.resumo || null)
-        console.log('✅ Dados carregados:', data.data?.length || 0, 'semanas')
+        console.log('âœ… Dados carregados:', data.data?.length || 0, 'semanas')
       } else {
-        console.error('❌ Erro ao carregar dados:', data.error)
+        console.error('âŒ Erro ao carregar dados:', data.error)
         setDados([])
         setResumo(null)
       }
     } catch (error) {
-      console.error('❌ Erro na requisição:', error)
+      console.error('âŒ Erro na requisiÃ§Ã£o:', error)
       setDados([])
       setResumo(null)
     } finally {
@@ -134,7 +134,7 @@ export default function TabelaDesempenhoPage() {
     setSyncing(true)
     
     try {
-      console.log('🔄 Iniciando sincronização com Google Sheets...')
+      console.log('ðŸ”„ Iniciando sincronizaÃ§Ã£o com Google Sheets...')
       
       const response = await fetch('/api/desempenho/sync-sheets-service', {
         method: 'POST',
@@ -154,20 +154,20 @@ export default function TabelaDesempenhoPage() {
       const result = await response.json()
 
       if (result.success) {
-        alert(`✅ Sincronização concluída!\n\n` +
-              `📥 Importados: ${result.resultados.dados_importados}\n` +
-              `🔄 Atualizados: ${result.resultados.dados_atualizados}\n` +
-              `📊 Total processados: ${result.resultados.total_processados}\n` +
-              `❌ Erros: ${result.resultados.erros}`)
+        alert(`âœ… SincronizaÃ§Ã£o concluÃ­da!\n\n` +
+              `ðŸ“¥ Importados: ${result.resultados.dados_importados}\n` +
+              `ðŸ”„ Atualizados: ${result.resultados.dados_atualizados}\n` +
+              `ðŸ“Š Total processados: ${result.resultados.total_processados}\n` +
+              `âŒ Erros: ${result.resultados.erros}`)
         
-        // Recarregar dados após sincronização
+        // Recarregar dados apÃ³s sincronizaÃ§Ã£o
         await carregarDados()
       } else {
-        alert(`❌ Erro na sincronização:\n\n${result.error}`)
+        alert(`âŒ Erro na sincronizaÃ§Ã£o:\n\n${result.error}`)
       }
     } catch (error: any) {
-      console.error('❌ Erro na sincronização:', error)
-      alert(`❌ Erro na sincronização:\n\n${error.message}`)
+      console.error('âŒ Erro na sincronizaÃ§Ã£o:', error)
+      alert(`âŒ Erro na sincronizaÃ§Ã£o:\n\n${error.message}`)
     } finally {
       setSyncing(false)
     }
@@ -192,19 +192,19 @@ export default function TabelaDesempenhoPage() {
       const result = await response.json()
 
       if (result.success) {
-        alert('✅ Semana excluída com sucesso!')
+        alert('âœ… Semana excluÃ­da com sucesso!')
         await carregarDados()
       } else {
-        alert(`❌ Erro ao excluir: ${result.error}`)
+        alert(`âŒ Erro ao excluir: ${result.error}`)
       }
     } catch (error: any) {
-      console.error('❌ Erro ao excluir:', error)
-      alert(`❌ Erro ao excluir: ${error.message}`)
+      console.error('âŒ Erro ao excluir:', error)
+      alert(`âŒ Erro ao excluir: ${error.message}`)
     }
   }
 
   const limparTodosDados = async () => {
-    if (!confirm('⚠️ ATENÇÃO: Isso irá excluir TODOS os dados de desempenho deste bar. Esta ação não pode ser desfeita!\n\nTem certeza que deseja continuar?')) {
+    if (!confirm('âš ï¸ ATENÃ‡ÃƒO: Isso irÃ¡ excluir TODOS os dados de desempenho deste bar. Esta aÃ§Ã£o nÃ£o pode ser desfeita!\n\nTem certeza que deseja continuar?')) {
       return
     }
 
@@ -223,14 +223,14 @@ export default function TabelaDesempenhoPage() {
       const result = await response.json()
 
       if (result.success) {
-        alert('✅ Todos os dados foram excluídos!')
+        alert('âœ… Todos os dados foram excluÃ­dos!')
         await carregarDados()
       } else {
-        alert(`❌ Erro ao limpar dados: ${result.error}`)
+        alert(`âŒ Erro ao limpar dados: ${result.error}`)
       }
     } catch (error: any) {
-      console.error('❌ Erro ao limpar dados:', error)
-      alert(`❌ Erro ao limpar dados: ${error.message}`)
+      console.error('âŒ Erro ao limpar dados:', error)
+      alert(`âŒ Erro ao limpar dados: ${error.message}`)
     }
   }
 
@@ -241,7 +241,7 @@ export default function TabelaDesempenhoPage() {
       item.observacoes?.toLowerCase().includes(filtroTexto.toLowerCase())
     
     return matchTexto
-  }).sort((a, b) => b.numero_semana - a.numero_semana) // Ordenação decrescente por semana
+  }).sort((a, b) => b.numero_semana - a.numero_semana) // OrdenaÃ§Ã£o decrescente por semana
 
   const formatarMoeda = (valor: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -302,7 +302,7 @@ export default function TabelaDesempenhoPage() {
             <div>
               <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
                 <FilterIcon className="h-5 w-5" />
-                Filtros & Configurações
+                Filtros & ConfiguraÃ§Ãµes
               </CardTitle>
               <CardDescription>
                 {filtrosExpanded ? 'Clique para minimizar filtros' : 'Clique para expandir filtros de busca'}
@@ -351,7 +351,7 @@ export default function TabelaDesempenhoPage() {
                   Limpar Tudo
                 </Button>
                 <Button 
-                  onClick={() => alert('🚧 Funcionalidade de criação em desenvolvimento')}
+                  onClick={() => alert('ðŸš§ Funcionalidade de criaÃ§Ã£o em desenvolvimento')}
                   className="bg-blue-600 hover:bg-blue-700 text-white"
                   size="sm"
                 >
@@ -401,7 +401,7 @@ export default function TabelaDesempenhoPage() {
               
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Mês
+                  MÃªs
                 </label>
                 <Select value={mesFiltro} onValueChange={setMesFiltro}>
                   <SelectTrigger className="bg-white border-gray-300 text-gray-900 shadow-sm">
@@ -411,7 +411,7 @@ export default function TabelaDesempenhoPage() {
                     <SelectItem value="todos">Todos os meses</SelectItem>
                     <SelectItem value="1">Janeiro</SelectItem>
                     <SelectItem value="2">Fevereiro</SelectItem>
-                    <SelectItem value="3">Março</SelectItem>
+                    <SelectItem value="3">MarÃ§o</SelectItem>
                     <SelectItem value="4">Abril</SelectItem>
                     <SelectItem value="5">Maio</SelectItem>
                     <SelectItem value="6">Junho</SelectItem>
@@ -439,7 +439,7 @@ export default function TabelaDesempenhoPage() {
         )}
       </Card>
 
-      {/* Tabela com Ações */}
+      {/* Tabela com AÃ§Ãµes */}
       <Card className="bg-white/80 backdrop-blur-sm border border-white/20 shadow-lg">
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-slate-800">
@@ -452,14 +452,14 @@ export default function TabelaDesempenhoPage() {
               <thead>
                 <tr className="border-b border-slate-200">
                   <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm">Semana</th>
-                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm hidden-mobile">Período</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm hidden-mobile">PerÃ­odo</th>
                   <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm">Faturamento</th>
                   <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm hidden-mobile">Clientes</th>
-                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm hidden-mobile">Ticket Médio</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm hidden-mobile">Ticket MÃ©dio</th>
                   <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm hidden-mobile">Reservas</th>
                   <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm hidden-mobile">Meta</th>
                   <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm">Atingimento</th>
-                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm">Ações</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm">AÃ§Ãµes</th>
                 </tr>
               </thead>
               <tbody>
@@ -479,7 +479,7 @@ export default function TabelaDesempenhoPage() {
                       <td className="py-3 px-2 sm:px-4 text-slate-800 hidden-mobile">
                         <div className="text-sm">
                           <div>{item.data_inicio}</div>
-                          <div className="text-gray-500">até {item.data_fim}</div>
+                          <div className="text-gray-500">atÃ© {item.data_fim}</div>
                         </div>
                       </td>
                       <td className="py-3 px-2 sm:px-4 text-slate-800">
@@ -518,7 +518,7 @@ export default function TabelaDesempenhoPage() {
                       <td className="py-3 px-2 sm:px-4">
                         <div className="flex flex-col gap-1 sm:flex-row sm:gap-2">
                           <Button
-                            onClick={() => alert('🚧 Modal de edição em desenvolvimento')}
+                            onClick={() => alert('ðŸš§ Modal de ediÃ§Ã£o em desenvolvimento')}
                             variant="outline"
                             size="sm"
                             className="btn-icon-touch sm:h-8 sm:w-8 sm:p-0"

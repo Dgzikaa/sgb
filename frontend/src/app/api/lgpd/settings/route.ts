@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 
@@ -6,24 +6,24 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies })
     
-    // Verificar autenticação
+    // Verificar autenticaÃ§Ã£o
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
     }
 
-    // Buscar configurações LGPD do usuário
+    // Buscar configuraÃ§Ãµes LGPD do usuÃ¡rio
     const { data: settings, error } = await supabase
       .from('user_lgpd_settings')
       .select('*')
       .eq('user_id', user.id)
       .single()
 
-    if (error && error.code !== 'PGRST116') { // Não encontrado é OK
+    if (error && error.code !== 'PGRST116') { // NÃ£o encontrado Ã© OK
       throw error
     }
 
-    // Se não existir, retornar configurações padrão
+    // Se nÃ£o existir, retornar configuraÃ§Ãµes padrÃ£o
     if (!settings) {
       const defaultSettings = {
         user_id: user.id,
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(settings)
 
   } catch (error) {
-    console.error('Erro ao buscar configurações LGPD:', error)
+    console.error('Erro ao buscar configuraÃ§Ãµes LGPD:', error)
     return NextResponse.json(
       { error: 'Erro interno do servidor' }, 
       { status: 500 }
@@ -84,15 +84,15 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies })
     
-    // Verificar autenticação
+    // Verificar autenticaÃ§Ã£o
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
     }
 
     const settings = await request.json()
     
-    // Adicionar informações de auditoria
+    // Adicionar informaÃ§Ãµes de auditoria
     const settingsWithAudit = {
       ...settings,
       user_id: user.id,
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       user_agent: request.headers.get('user-agent') || 'unknown'
     }
 
-    // Salvar/atualizar configurações
+    // Salvar/atualizar configuraÃ§Ãµes
     const { data, error } = await supabase
       .from('user_lgpd_settings')
       .upsert(settingsWithAudit, {
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(data)
 
   } catch (error) {
-    console.error('Erro ao salvar configurações LGPD:', error)
+    console.error('Erro ao salvar configuraÃ§Ãµes LGPD:', error)
     return NextResponse.json(
       { error: 'Erro interno do servidor' }, 
       { status: 500 }

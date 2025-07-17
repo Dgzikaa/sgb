@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
   try {
     const body: EvolutionWebhookEvent = await req.json()
     
-    console.log('📥 Webhook Evolution recebido:', {
+    console.log('ðŸ“¥ Webhook Evolution recebido:', {
       event: body.event,
       instance: body.instance,
       timestamp: new Date().toISOString()
@@ -57,13 +57,13 @@ export async function POST(req: NextRequest) {
         break
         
       default:
-        console.log(`📝 Evento não processado: ${body.event}`)
+        console.log(`ðŸ“ Evento nÃ£o processado: ${body.event}`)
     }
 
     return NextResponse.json({ success: true })
 
   } catch (error) {
-    console.error('❌ Erro no webhook Evolution:', error)
+    console.error('âŒ Erro no webhook Evolution:', error)
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -78,21 +78,21 @@ async function handleNewMessage(event: EvolutionWebhookEvent) {
     const fromMe = data.key?.fromMe
     const messageText = data.message?.conversation || data.message?.extendedTextMessage?.text
     
-    // Apenas processar mensagens recebidas (não enviadas por nós)
+    // Apenas processar mensagens recebidas (nÃ£o enviadas por nÃ³s)
     if (fromMe || !messageText) return
 
     const phoneNumber = remoteJid?.replace('@s.whatsapp.net', '')
     
-    console.log('💬 Nova mensagem recebida:', {
+    console.log('ðŸ’¬ Nova mensagem recebida:', {
       from: phoneNumber,
       message: messageText,
       pushName: data.pushName
     })
 
     // Salvar mensagem no banco (usando tabela existente)
-    // Para mensagens recebidas, to_number será o número da empresa (quem recebe)
+    // Para mensagens recebidas, to_number serÃ¡ o nÃºmero da empresa (quem recebe)
     // e from_number seria quem enviou (mas usamos to_number por compatibilidade)
-    const companyNumber = '+5561918444210' // Número da empresa SGB
+    const companyNumber = '+5561918444210' // NÃºmero da empresa SGB
     
     await supabase
       .from('whatsapp_messages')
@@ -101,7 +101,7 @@ async function handleNewMessage(event: EvolutionWebhookEvent) {
         message: messageText,
         type: 'text', // Tipo de mensagem de texto
         provider: 'evolution-api',
-        status: 'delivered', // Status: foi entregue para nós
+        status: 'delivered', // Status: foi entregue para nÃ³s
         provider_response: {
           sender_name: data.pushName || 'Desconhecido',
           sender_number: phoneNumber || 'Desconhecido',
@@ -113,24 +113,24 @@ async function handleNewMessage(event: EvolutionWebhookEvent) {
         sent_at: new Date((data.messageTimestamp || 0) * 1000).toISOString()
       })
 
-    // Verificar se é uma resposta a checklist
+    // Verificar se Ã© uma resposta a checklist
     if (phoneNumber && messageText) {
       await checkChecklistResponse(phoneNumber, messageText)
     }
 
   } catch (error) {
-    console.error('❌ Erro ao processar nova mensagem:', error)
+    console.error('âŒ Erro ao processar nova mensagem:', error)
   }
 }
 
 async function checkChecklistResponse(phoneNumber: string, message: string) {
   try {
-    // 🆔 VERIFICAR SE HÁ CÓDIGO ESPECÍFICO NA MENSAGEM
+    // ðŸ†” VERIFICAR SE HÃ CÃ“DIGO ESPECÃFICO NA MENSAGEM
     const messageClean = message.toLowerCase().trim()
-    const codigoMatch = messageClean.match(/(?:ok|pronto|feito|concluido|concluído|finalizado)\s+([a-f0-9]{8})/i)
+    const codigoMatch = messageClean.match(/(?:ok|pronto|feito|concluido|concluÃ­do|finalizado)\s+([a-f0-9]{8})/i)
     
     if (codigoMatch) {
-      // 🎯 CONCLUSÃO COM CÓDIGO ESPECÍFICO
+      // ðŸŽ¯ CONCLUSÃƒO COM CÃ“DIGO ESPECÃFICO
       const codigo = codigoMatch[1].toUpperCase()
       
       const { data: agendamentos } = await supabase
@@ -158,21 +158,21 @@ async function checkChecklistResponse(phoneNumber: string, message: string) {
             })
             .eq('id', agendamento.id)
 
-          console.log(`✅ Checklist específico concluído via código ${codigo}: ${agendamento.checklist_schedules?.titulo}`)
+          console.log(`âœ… Checklist especÃ­fico concluÃ­do via cÃ³digo ${codigo}: ${agendamento.checklist_schedules?.titulo}`)
           
-          // Enviar confirmação
+          // Enviar confirmaÃ§Ã£o
           await sendConfirmationMessage(phoneNumber, agendamento.checklist_schedules?.titulo || 'Checklist', codigo)
           return
         }
       }
       
-      // Código não encontrado
+      // CÃ³digo nÃ£o encontrado
       await sendErrorMessage(phoneNumber, codigo)
       return
     }
 
-    // 📋 VERIFICAR CONCLUSÃO GERAL (SEM CÓDIGO) - APENAS 1 CHECKLIST PENDENTE
-    const conclusionWords = ['concluído', 'concluido', 'feito', 'finalizado', 'pronto', 'ok', 'sim']
+    // ðŸ“‹ VERIFICAR CONCLUSÃƒO GERAL (SEM CÃ“DIGO) - APENAS 1 CHECKLIST PENDENTE
+    const conclusionWords = ['concluÃ­do', 'concluido', 'feito', 'finalizado', 'pronto', 'ok', 'sim']
     const isCompletion = conclusionWords.some(word => messageClean.includes(word))
     
     if (isCompletion) {
@@ -193,7 +193,7 @@ async function checkChecklistResponse(phoneNumber: string, message: string) {
       ) || []
 
       if (meusAgendamentos.length === 1) {
-        // ✅ APENAS 1 CHECKLIST - PODE CONCLUIR
+        // âœ… APENAS 1 CHECKLIST - PODE CONCLUIR
         const agendamento = meusAgendamentos[0]
         await supabase
           .from('checklist_auto_executions')
@@ -203,28 +203,28 @@ async function checkChecklistResponse(phoneNumber: string, message: string) {
           })
           .eq('id', agendamento.id)
 
-        console.log(`✅ Checklist único concluído: ${agendamento.checklist_schedules?.titulo}`)
+        console.log(`âœ… Checklist Ãºnico concluÃ­do: ${agendamento.checklist_schedules?.titulo}`)
         await sendConfirmationMessage(phoneNumber, agendamento.checklist_schedules?.titulo || 'Checklist')
         
       } else if (meusAgendamentos.length > 1) {
-        // ⚠️ MÚLTIPLOS CHECKLISTS - SOLICITAR CÓDIGO
+        // âš ï¸ MÃšLTIPLOS CHECKLISTS - SOLICITAR CÃ“DIGO
         await sendMultipleChecklistsMessage(phoneNumber, meusAgendamentos)
       }
     }
 
   } catch (error) {
-    console.error('❌ Erro ao verificar resposta de checklist:', error)
+    console.error('âŒ Erro ao verificar resposta de checklist:', error)
   }
 }
 
 async function sendConfirmationMessage(phoneNumber: string, titulo: string, codigo?: string) {
-  const message = `✅ *Checklist Concluído!*
+  const message = `âœ… *Checklist ConcluÃ­do!*
 
-📋 ${titulo}
-${codigo ? `🆔 Código: ${codigo}` : ''}
-⏰ ${new Date().toLocaleString('pt-BR')}
+ðŸ“‹ ${titulo}
+${codigo ? `ðŸ†” CÃ³digo: ${codigo}` : ''}
+â° ${new Date().toLocaleString('pt-BR')}
 
-Obrigado! 👍
+Obrigado! ðŸ‘
 
 _Sistema SGB_`
 
@@ -232,14 +232,14 @@ _Sistema SGB_`
 }
 
 async function sendErrorMessage(phoneNumber: string, codigo: string) {
-  const message = `❌ *Código não encontrado*
+  const message = `âŒ *CÃ³digo nÃ£o encontrado*
 
-🆔 Código: ${codigo}
+ðŸ†” CÃ³digo: ${codigo}
 
 Verifique se:
-• O código está correto
-• O checklist ainda está pendente
-• Você é o responsável
+â€¢ O cÃ³digo estÃ¡ correto
+â€¢ O checklist ainda estÃ¡ pendente
+â€¢ VocÃª Ã© o responsÃ¡vel
 
 _Sistema SGB_`
 
@@ -255,15 +255,15 @@ async function sendMultipleChecklistsMessage(phoneNumber: string, agendamentos: 
       hour: '2-digit',
       minute: '2-digit'
     })
-    return `📋 ${ag.checklist_schedules?.titulo}\n🆔 Código: *${codigo}*\n🕐 Prazo: ${prazo}`
+    return `ðŸ“‹ ${ag.checklist_schedules?.titulo}\nðŸ†” CÃ³digo: *${codigo}*\nðŸ• Prazo: ${prazo}`
   }).join('\n\n')
 
-  const message = `⚠️ *Você tem ${agendamentos.length} checklists pendentes*
+  const message = `âš ï¸ *VocÃª tem ${agendamentos.length} checklists pendentes*
 
 ${checklistsList}
 
-Para concluir um específico, responda:
-✅ "*ok CÓDIGO*" ou "*pronto CÓDIGO*"
+Para concluir um especÃ­fico, responda:
+âœ… "*ok CÃ“DIGO*" ou "*pronto CÃ“DIGO*"
 
 Exemplo: "*ok A1B2C3D4*"
 
@@ -287,24 +287,24 @@ async function sendWhatsAppMessage(phoneNumber: string, text: string) {
     })
 
     if (!response.ok) {
-      console.error('❌ Erro ao enviar mensagem WhatsApp:', await response.text())
+      console.error('âŒ Erro ao enviar mensagem WhatsApp:', await response.text())
     }
 
   } catch (error) {
-    console.error('❌ Erro ao enviar mensagem WhatsApp:', error)
+    console.error('âŒ Erro ao enviar mensagem WhatsApp:', error)
   }
 }
 
 async function handleMessageUpdate(event: EvolutionWebhookEvent) {
   // Atualizar status de mensagem (lida, entregue, etc.)
-  console.log('📱 Status de mensagem atualizado:', event.data)
+  console.log('ðŸ“± Status de mensagem atualizado:', event.data)
 }
 
 async function handleConnectionUpdate(event: EvolutionWebhookEvent) {
   try {
     const status = event.data.status
     
-    console.log(`🔄 Status de conexão: ${status}`)
+    console.log(`ðŸ”„ Status de conexÃ£o: ${status}`)
     
     // Salvar status no banco
     await supabase
@@ -316,19 +316,19 @@ async function handleConnectionUpdate(event: EvolutionWebhookEvent) {
       })
 
   } catch (error) {
-    console.error('❌ Erro ao atualizar status de conexão:', error)
+    console.error('âŒ Erro ao atualizar status de conexÃ£o:', error)
   }
 }
 
 async function handleQRCodeUpdate(event: EvolutionWebhookEvent) {
-  console.log('📱 QR Code atualizado para instância:', event.instance)
-  // Aqui você pode notificar admins sobre novo QR Code disponível
+  console.log('ðŸ“± QR Code atualizado para instÃ¢ncia:', event.instance)
+  // Aqui vocÃª pode notificar admins sobre novo QR Code disponÃ­vel
 }
 
 // GET - Endpoint para testar webhook
 export async function GET() {
   return NextResponse.json({
-    message: 'Webhook Evolution API está funcionando',
+    message: 'Webhook Evolution API estÃ¡ funcionando',
     timestamp: new Date().toISOString()
   })
 } 

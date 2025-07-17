@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 
@@ -6,13 +6,13 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies })
     
-    // Verificar autenticação
+    // Verificar autenticaÃ§Ã£o
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
     }
 
-    // Compilar todos os dados do usuário de diferentes tabelas
+    // Compilar todos os dados do usuÃ¡rio de diferentes tabelas
     const userData: any = {
       metadata: {
         requestedAt: new Date(),
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       consentData: {}
     }
 
-    // 1. Dados pessoais básicos (tabela profiles)
+    // 1. Dados pessoais bÃ¡sicos (tabela profiles)
     const { data: profile } = await supabase
       .from('profiles')
       .select('*')
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 2. Dados do sistema (configurações, preferências)
+    // 2. Dados do sistema (configuraÃ§Ãµes, preferÃªncias)
     const { data: settings } = await supabase
       .from('user_settings')
       .select('*')
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
       preferences: {
         theme: 'Obtido do localStorage',
         language: 'pt-BR',
-        notifications: 'Configurações de notificação'
+        notifications: 'ConfiguraÃ§Ãµes de notificaÃ§Ã£o'
       }
     }
 
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
       bannerShown: lgpdSettings?.bannerShown || false
     }
 
-    // 5. Dados de negócio específicos (se aplicável)
+    // 5. Dados de negÃ³cio especÃ­ficos (se aplicÃ¡vel)
     const { data: bars } = await supabase
       .from('bars')
       .select('id, name, role')
@@ -111,18 +111,18 @@ export async function GET(request: NextRequest) {
     userData.businessData = {
       associatedBars: bars || [],
       recentChecklists: checklists || [],
-      roles: 'Extraído dos bars'
+      roles: 'ExtraÃ­do dos bars'
     }
 
-    // 6. Dados técnicos
+    // 6. Dados tÃ©cnicos
     userData.technicalData = {
-      ipAddresses: 'Histórico obtido dos logs',
-      userAgents: 'Histórico obtido dos logs',
+      ipAddresses: 'HistÃ³rico obtido dos logs',
+      userAgents: 'HistÃ³rico obtido dos logs',
       cookies: 'Baseado nos consentimentos',
-      sessions: 'Dados de sessão ativa'
+      sessions: 'Dados de sessÃ£o ativa'
     }
 
-    // Log da solicitação de acesso
+    // Log da solicitaÃ§Ã£o de acesso
     await supabase
       .from('lgpd_audit_log')
       .insert({
@@ -140,7 +140,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(userData)
 
   } catch (error) {
-    console.error('Erro ao acessar dados do usuário:', error)
+    console.error('Erro ao acessar dados do usuÃ¡rio:', error)
     return NextResponse.json(
       { error: 'Erro interno do servidor' }, 
       { status: 500 }

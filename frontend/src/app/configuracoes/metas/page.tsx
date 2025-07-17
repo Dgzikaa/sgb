@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -35,7 +35,7 @@ import { NumericFormat, NumericFormatProps } from 'react-number-format';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const CATEGORIAS = [
-  { key: 'indicadores_estrategicos', label: 'Indicadores Estratégicos' },
+  { key: 'indicadores_estrategicos', label: 'Indicadores EstratÃ©gicos' },
   { key: 'cockpit_financeiro', label: 'Cockpit Financeiro' },
   { key: 'indicadores_qualidade', label: 'Indicadores de Qualidade' },
   { key: 'cockpit_produtos', label: 'Cockpit Produtos' },
@@ -210,17 +210,17 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
 
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
            {[
-             { key: 'diario', label: 'Diário', valor: meta.valor_diario },
+             { key: 'diario', label: 'DiÃ¡rio', valor: meta.valor_diario },
              { key: 'semanal', label: 'Semanal', valor: meta.valor_semanal },
              { key: 'mensal', label: 'Mensal', valor: meta.valor_mensal },
-             { key: 'unico', label: 'Único', valor: meta.valor_unico }
+             { key: 'unico', label: 'Ãšnico', valor: meta.valor_unico }
            ]
            .filter((periodo: any) => {
              // Filtro inteligente baseado no tipo_valor
              if (meta.tipo_valor === 'unico') {
                return periodo.key === 'unico';
              } else {
-               return periodo.key !== 'unico'; // Mostra diário, semanal e mensal
+               return periodo.key !== 'unico'; // Mostra diÃ¡rio, semanal e mensal
              }
            })
            .map((periodo) => {
@@ -262,7 +262,7 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
   );
 };
 
-// Adicionar index signature em METAS_BASE para acesso dinâmico
+// Adicionar index signature em METAS_BASE para acesso dinÃ¢mico
 const METAS_BASE: Record<string, Record<string, any>> = {
   indicadores_estrategicos: {
     faturamento_total: 222000,
@@ -365,7 +365,7 @@ function formatInputValue(key: string, value: any) {
   return value ?? '';
 }
 
-// Função para transformar snake_case em label amigável
+// FunÃ§Ã£o para transformar snake_case em label amigÃ¡vel
 function toLabel(str: string) {
   return str
     .replace(/_/g, ' ')
@@ -373,7 +373,7 @@ function toLabel(str: string) {
     .replace(/\b(rs|cmv|nps|tm|qtde|o|m)\b/gi, (m: string) => m.toUpperCase());
 }
 
-// Função para sugerir tipo de input
+// FunÃ§Ã£o para sugerir tipo de input
 function getInputType(key: string) {
   if (key.includes('percent') || key.includes('cmv') || key.includes('nps')) return 'number';
   if (key.includes('valor') || key.includes('faturamento') || key.includes('rs') || key.includes('ticket') || key.includes('lucro')) return 'number';
@@ -382,7 +382,7 @@ function getInputType(key: string) {
   return 'number';
 }
 
-// Função para placeholder
+// FunÃ§Ã£o para placeholder
 function getPlaceholder(key: string) {
   if (key.includes('percent') || key.includes('cmv') || key.includes('nps')) return '%';
   if (key.includes('valor') || key.includes('faturamento') || key.includes('rs') || key.includes('ticket') || key.includes('lucro')) return 'R$';
@@ -393,31 +393,31 @@ function getPlaceholder(key: string) {
   return '';
 }
 
-// Dicionário de tooltips para cada métrica (exemplo, pode expandir)
+// DicionÃ¡rio de tooltips para cada mÃ©trica (exemplo, pode expandir)
 const METRIC_TOOLTIPS: Record<string, string> = {
-  faturamento_total: 'Faturamento bruto total do período.',
-  faturamento_couvert: 'Faturamento apenas de couvert artístico.',
+  faturamento_total: 'Faturamento bruto total do perÃ­odo.',
+  faturamento_couvert: 'Faturamento apenas de couvert artÃ­stico.',
   faturamento_bar: 'Faturamento apenas do bar.',
-  faturamento_cmovel: 'Faturamento de vendas móveis.',
+  faturamento_cmovel: 'Faturamento de vendas mÃ³veis.',
   cmv_rs: 'Custo de mercadoria vendida em reais.',
-  ticket_medio_contahub: 'Ticket médio calculado pelo ContaHub.',
-  tm_entrada: 'Ticket médio de entrada.',
-  tm_bar: 'Ticket médio do bar.',
+  ticket_medio_contahub: 'Ticket mÃ©dio calculado pelo ContaHub.',
+  tm_entrada: 'Ticket mÃ©dio de entrada.',
+  tm_bar: 'Ticket mÃ©dio do bar.',
   cmv_global_real: 'CMV global realizado (%).',
   cmo_percent: 'CMO percentual.',
-  atracao_faturamento: 'Percentual de faturamento vindo de atrações.',
-  retencao: 'Percentual de retenção de clientes.',
+  atracao_faturamento: 'Percentual de faturamento vindo de atraÃ§Ãµes.',
+  retencao: 'Percentual de retenÃ§Ã£o de clientes.',
   clientes_atendidos: 'Total de clientes atendidos.',
   clientes_ativos: 'Total de clientes ativos.',
   reservas_totais: 'Total de reservas realizadas.',
   reservas_presentes: 'Total de reservas presentes.'
-  // ...adicione mais tooltips conforme necessário
+  // ...adicione mais tooltips conforme necessÃ¡rio
 };
 
 function getBadgeUnit(key: string) {
   if (key.includes('percent') || key.includes('cmv') || key.includes('nps')) return '%';
   if (key.includes('valor') || key.includes('faturamento') || key.includes('rs') || key.includes('ticket') || key.includes('lucro')) return 'R$';
-  if (key.includes('media')) return 'Média';
+  if (key.includes('media')) return 'MÃ©dia';
   if (key.includes('tempo')) return 'min';
   if (key.includes('qtde')) return 'Qtd.';
   return '';
@@ -459,7 +459,7 @@ export default function MetasPage() {
     }
   };
 
-  // Máscara e parse para moeda/percentual
+  // MÃ¡scara e parse para moeda/percentual
   function getFormatProps(key: string) {
     if (key.includes('percent') || key.includes('cmv') || key.includes('nps')) {
       return { suffix: '%', decimalScale: 2, fixedDecimalScale: true, allowNegative: false };
@@ -507,7 +507,7 @@ export default function MetasPage() {
     setEditKey((prev) => ({ ...prev, [cat]: key }));
   };
 
-  // Cancelar edição
+  // Cancelar ediÃ§Ã£o
   const handleCancelEdit = (cat: string) => {
     setEditKey((prev) => ({ ...prev, [cat]: null }));
     setEditState((prev: any) => ({ ...prev, [cat]: { ...metas[cat] } }));
@@ -561,10 +561,10 @@ export default function MetasPage() {
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    Configuração de Metas
+                    ConfiguraÃ§Ã£o de Metas
                   </h1>
                   <p className="text-gray-600 dark:text-gray-400 text-lg">
-                    Edite as metas base do seu bar. Todos os campos são editáveis.
+                    Edite as metas base do seu bar. Todos os campos sÃ£o editÃ¡veis.
                   </p>
                 </div>
               </div>
@@ -622,7 +622,7 @@ export default function MetasPage() {
                                   </TooltipTrigger>
                                   <TooltipContent side="top">
                                     <span className="font-semibold">{toLabel(key)}</span><br />
-                                    <span className="text-xs text-gray-500">{METRIC_TOOLTIPS[key] || 'Meta configurável.'}</span>
+                                    <span className="text-xs text-gray-500">{METRIC_TOOLTIPS[key] || 'Meta configurÃ¡vel.'}</span>
                                   </TooltipContent>
                                 </Tooltip>
                               </div>

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -6,16 +6,16 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// Verificar se é um horário válido para sincronização
+// Verificar se Ã© um horÃ¡rio vÃ¡lido para sincronizaÃ§Ã£o
 function isValidSyncTime(): boolean {
   const now = new Date()
   const hour = now.getHours()
   
-  // Executar apenas durante horário comercial (8h às 22h)
+  // Executar apenas durante horÃ¡rio comercial (8h Ã s 22h)
   return hour >= 8 && hour <= 22
 }
 
-// Verificar se já foi executado recentemente
+// Verificar se jÃ¡ foi executado recentemente
 async function wasRecentlyExecuted(): Promise<boolean> {
   const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000)
   
@@ -28,11 +28,11 @@ async function wasRecentlyExecuted(): Promise<boolean> {
   return !error && data && data.length > 0
 }
 
-// Executar sincronização automática
+// Executar sincronizaÃ§Ã£o automÃ¡tica
 async function executarSincronizacaoAutomatica() {
-  console.log('🤖 Iniciando sincronização automática do ContaAzul...')
+  console.log('ðŸ¤– Iniciando sincronizaÃ§Ã£o automÃ¡tica do ContaAzul...')
   
-  // Buscar o bar_id padrão (ou configurar como necessário)
+  // Buscar o bar_id padrÃ£o (ou configurar como necessÃ¡rio)
   const { data: barsData, error: barsError } = await supabase
     .from('bars')
     .select('id')
@@ -45,8 +45,8 @@ async function executarSincronizacaoAutomatica() {
   
   const barId = barsData[0].id
   
-  // Tentar método 1: Selenium V5 (mais estável)
-  console.log('🔄 Tentando método 1: Selenium V5...')
+  // Tentar mÃ©todo 1: Selenium V5 (mais estÃ¡vel)
+  console.log('ðŸ”„ Tentando mÃ©todo 1: Selenium V5...')
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/admin/contaazul-v5-selenium`, {
       method: 'POST',
@@ -60,7 +60,7 @@ async function executarSincronizacaoAutomatica() {
     const result = await response.json()
     
     if (result.success) {
-      console.log('✅ Selenium V5 executado com sucesso')
+      console.log('âœ… Selenium V5 executado com sucesso')
       return {
         success: true,
         method: 'selenium_v5',
@@ -68,14 +68,14 @@ async function executarSincronizacaoAutomatica() {
         message: result.message
       }
     } else {
-      console.warn('⚠️ Selenium V5 falhou:', result.error)
+      console.warn('âš ï¸ Selenium V5 falhou:', result.error)
     }
   } catch (error) {
-    console.warn('⚠️ Erro no Selenium V5:', error)
+    console.warn('âš ï¸ Erro no Selenium V5:', error)
   }
   
-  // Tentar método 2: Node.js API
-  console.log('🔄 Tentando método 2: Node.js API...')
+  // Tentar mÃ©todo 2: Node.js API
+  console.log('ðŸ”„ Tentando mÃ©todo 2: Node.js API...')
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/contaazul-nodejs-sync`, {
       method: 'POST',
@@ -89,7 +89,7 @@ async function executarSincronizacaoAutomatica() {
     const result = await response.json()
     
     if (result.success) {
-      console.log('✅ Node.js API executado com sucesso')
+      console.log('âœ… Node.js API executado com sucesso')
       return {
         success: true,
         method: 'nodejs_api',
@@ -97,14 +97,14 @@ async function executarSincronizacaoAutomatica() {
         message: result.message
       }
     } else {
-      console.warn('⚠️ Node.js API falhou:', result.error)
+      console.warn('âš ï¸ Node.js API falhou:', result.error)
     }
   } catch (error) {
-    console.warn('⚠️ Erro no Node.js API:', error)
+    console.warn('âš ï¸ Erro no Node.js API:', error)
   }
   
-  // Tentar método 3: Playwright V1 (backup)
-  console.log('🔄 Tentando método 3: Playwright V1...')
+  // Tentar mÃ©todo 3: Playwright V1 (backup)
+  console.log('ðŸ”„ Tentando mÃ©todo 3: Playwright V1...')
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/contaazul-v1-sync`, {
       method: 'POST',
@@ -118,7 +118,7 @@ async function executarSincronizacaoAutomatica() {
     const result = await response.json()
     
     if (result.success) {
-      console.log('✅ Playwright V1 executado com sucesso')
+      console.log('âœ… Playwright V1 executado com sucesso')
       return {
         success: true,
         method: 'playwright_v1',
@@ -126,17 +126,17 @@ async function executarSincronizacaoAutomatica() {
         message: result.message
       }
     } else {
-      console.warn('⚠️ Playwright V1 falhou:', result.error)
+      console.warn('âš ï¸ Playwright V1 falhou:', result.error)
     }
   } catch (error) {
-    console.warn('⚠️ Erro no Playwright V1:', error)
+    console.warn('âš ï¸ Erro no Playwright V1:', error)
   }
   
-  // Se todos os métodos falharam
-  throw new Error('Todos os métodos de sincronização falharam')
+  // Se todos os mÃ©todos falharam
+  throw new Error('Todos os mÃ©todos de sincronizaÃ§Ã£o falharam')
 }
 
-// Salvar log da execução
+// Salvar log da execuÃ§Ã£o
 async function salvarLogExecucao(resultado: any) {
   const logEntry = {
     sistema: 'contaazul',
@@ -153,64 +153,64 @@ async function salvarLogExecucao(resultado: any) {
       .from('sistema_logs')
       .insert(logEntry)
   } catch (error) {
-    console.warn('⚠️ Erro ao salvar log:', error)
+    console.warn('âš ï¸ Erro ao salvar log:', error)
   }
 }
 
 // Rota do cron
 export async function POST(request: NextRequest) {
   try {
-    // Verificar se é uma chamada autorizada
+    // Verificar se Ã© uma chamada autorizada
     const cronSecret = request.headers.get('x-cron-secret')
     const internalCron = request.headers.get('x-internal-cron')
     
     if (cronSecret !== process.env.CRON_SECRET_KEY && !internalCron) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Não autorizado' 
+        error: 'NÃ£o autorizado' 
       }, { status: 401 })
     }
     
-    console.log('🕐 Executando cron job - ContaAzul Sync')
+    console.log('ðŸ• Executando cron job - ContaAzul Sync')
     
-    // 1. Verificar se é um horário válido
+    // 1. Verificar se Ã© um horÃ¡rio vÃ¡lido
     if (!isValidSyncTime()) {
-      console.log('⏰ Fora do horário comercial - pulando sincronização')
+      console.log('â° Fora do horÃ¡rio comercial - pulando sincronizaÃ§Ã£o')
       return NextResponse.json({
         success: true,
-        message: 'Fora do horário comercial',
+        message: 'Fora do horÃ¡rio comercial',
         skipped: true
       })
     }
     
-    // 2. Verificar se já foi executado recentemente
+    // 2. Verificar se jÃ¡ foi executado recentemente
     if (await wasRecentlyExecuted()) {
-      console.log('🕐 Já executado recentemente - pulando sincronização')
+      console.log('ðŸ• JÃ¡ executado recentemente - pulando sincronizaÃ§Ã£o')
       return NextResponse.json({
         success: true,
-        message: 'Já executado recentemente',
+        message: 'JÃ¡ executado recentemente',
         skipped: true
       })
     }
     
-    // 3. Executar sincronização
+    // 3. Executar sincronizaÃ§Ã£o
     const resultado = await executarSincronizacaoAutomatica()
     
     // 4. Salvar log
     await salvarLogExecucao(resultado)
     
-    console.log('✅ Cron job concluído com sucesso')
+    console.log('âœ… Cron job concluÃ­do com sucesso')
     
     return NextResponse.json({
       success: true,
-      message: 'Sincronização automática concluída',
+      message: 'SincronizaÃ§Ã£o automÃ¡tica concluÃ­da',
       method: resultado.method,
       registros: resultado.registros,
       timestamp: new Date().toISOString()
     })
     
   } catch (error: any) {
-    console.error('❌ Erro no cron job:', error)
+    console.error('âŒ Erro no cron job:', error)
     
     // Salvar log de erro
     await salvarLogExecucao({
@@ -229,7 +229,7 @@ export async function POST(request: NextRequest) {
 // Rota GET para verificar status
 export async function GET(request: NextRequest) {
   try {
-    // Buscar últimas execuções
+    // Buscar Ãºltimas execuÃ§Ãµes
     const { data: logs, error } = await supabase
       .from('sistema_logs')
       .select('*')
@@ -259,7 +259,7 @@ export async function GET(request: NextRequest) {
     })
     
   } catch (error: any) {
-    console.error('❌ Erro ao verificar status:', error)
+    console.error('âŒ Erro ao verificar status:', error)
     return NextResponse.json({
       success: false,
       error: error.message

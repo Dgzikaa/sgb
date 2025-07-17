@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+﻿import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -6,7 +6,7 @@ const supabase = createClient(
 );
 
 // ========================================
-// ✅ ANÁLISES DE CHECKLISTS & OPERACIONAL
+// âœ… ANÃLISES DE CHECKLISTS & OPERACIONAL
 // ========================================
 
 export async function getStatusChecklists(bar_id: number, inicio?: string, fim?: string) {
@@ -49,7 +49,7 @@ export async function getStatusChecklists(bar_id: number, inicio?: string, fim?:
       score_medio: scoresMedio
     },
     execucoes_detalhes: execucoes.slice(0, 10),
-    mensagem: `${concluidos} de ${total} checklists concluídos (${((concluidos/total)*100).toFixed(1)}%)`
+    mensagem: `${concluidos} de ${total} checklists concluÃ­dos (${((concluidos/total)*100).toFixed(1)}%)`
   };
 }
 
@@ -68,7 +68,7 @@ export async function getPerformanceFuncionarios(bar_id: number, inicio?: string
 
   if (!execucoes) return { erro: 'Erro ao buscar dados' };
 
-  // Agrupar por funcionário
+  // Agrupar por funcionÃ¡rio
   const funcionarios: Record<string, any> = {};
   execucoes.forEach(exec => {
     const id = exec.executado_por.toString();
@@ -109,12 +109,12 @@ export async function getPerformanceFuncionarios(bar_id: number, inicio?: string
       melhor_score: ranking[0]?.score_medio || 0,
       melhor_funcionario: ranking[0]?.nome || 'N/A'
     },
-    mensagem: `Ranking de ${ranking.length} funcionários por performance`
+    mensagem: `Ranking de ${ranking.length} funcionÃ¡rios por performance`
   };
 }
 
 // ========================================
-// 📱 ANÁLISES DE WHATSAPP
+// ðŸ“± ANÃLISES DE WHATSAPP
 // ========================================
 
 export async function getWhatsAppStats(bar_id: number, inicio?: string, fim?: string) {
@@ -135,7 +135,7 @@ export async function getWhatsAppStats(bar_id: number, inicio?: string, fim?: st
   const lidas = mensagens.filter((m: any) => m.status === 'read').length;
   const falhas = mensagens.filter((m: any) => m.status === 'failed').length;
 
-  // Estatísticas por tipo
+  // EstatÃ­sticas por tipo
   const tipoStats: Record<string, number> = {};
   mensagens.forEach(m => {
     tipoStats[m.tipo] = (tipoStats[m.tipo] || 0) + 1;
@@ -156,7 +156,7 @@ export async function getWhatsAppStats(bar_id: number, inicio?: string, fim?: st
 }
 
 // ========================================
-// 🍕 ANÁLISES DE PRODUÇÃO & TEMPO  
+// ðŸ• ANÃLISES DE PRODUÃ‡ÃƒO & TEMPO  
 // ========================================
 
 export async function getTempoProducao(bar_id: number, inicio?: string, fim?: string) {
@@ -211,12 +211,12 @@ export async function getTempoProducao(bar_id: number, inicio?: string, fim?: st
     },
     produtos_mais_demorados: produtosMaisDemorados,
     total_producoes: tempos.length,
-    mensagem: `Tempo médio de produção: ${(tempoMedioTotal/60).toFixed(1)} minutos`
+    mensagem: `Tempo mÃ©dio de produÃ§Ã£o: ${(tempoMedioTotal/60).toFixed(1)} minutos`
   };
 }
 
 // ========================================
-// 🤖 ANÁLISES DE IA & ANALYTICS
+// ðŸ¤– ANÃLISES DE IA & ANALYTICS
 // ========================================
 
 export async function getScoreSaudeGeral(bar_id: number) {
@@ -249,7 +249,7 @@ export async function getScoreSaudeGeral(bar_id: number) {
   const anomaliasAltas = anomalias.data?.filter((a: any) => a.severidade === 'alta').length || 0;
   score -= (anomaliasCriticas * 15) + (anomaliasAltas * 8);
 
-  // Ajustar por métricas vs metas
+  // Ajustar por mÃ©tricas vs metas
   const metricasAbaixoMeta = metricas.data?.filter((m: any) => 
     m.valor < (m.meta_valor * 0.9)
   ).length || 0;
@@ -278,12 +278,12 @@ export async function getScoreSaudeGeral(bar_id: number) {
       metricas_abaixo_meta: metricasAbaixoMeta,
       insights_positivos: insightsPositivos
     },
-    mensagem: `Score de saúde: ${score}% - Status: ${status.toUpperCase()}`
+    mensagem: `Score de saÃºde: ${score}% - Status: ${status.toUpperCase()}`
   };
 }
 
 // ========================================
-// 📊 DASHBOARD EXECUTIVO COMPLETO
+// ðŸ“Š DASHBOARD EXECUTIVO COMPLETO
 // ========================================
 
 export async function getDashboardExecutivo(bar_id: number, inicio?: string, fim?: string) {
@@ -329,12 +329,12 @@ export async function getDashboardExecutivo(bar_id: number, inicio?: string, fim
       whatsapp: whatsapp.estatisticas,
       producao: tempos.tempos_medios
     },
-    mensagem: `Dashboard executivo: R$ ${faturamentoTotal.toFixed(2)} em ${transacoes} transações - Score saúde: ${scoreSaude.score_saude}%`
+    mensagem: `Dashboard executivo: R$ ${faturamentoTotal.toFixed(2)} em ${transacoes} transaÃ§Ãµes - Score saÃºde: ${scoreSaude.score_saude}%`
   };
 }
 
 // ========================================
-// 🎯 ANÁLISE 360° COMPLETA
+// ðŸŽ¯ ANÃLISE 360Â° COMPLETA
 // ========================================
 
 export async function getVisao360(bar_id: number, inicio?: string, fim?: string) {
@@ -377,6 +377,6 @@ export async function getVisao360(bar_id: number, inicio?: string, fim?: string)
       insights_criticos: insights.data?.filter((i: any) => i.impacto === 'critico').length || 0,
       recomendacoes_altas: recomendacoes.data?.filter((r: any) => r.prioridade >= 8).length || 0
     },
-    mensagem: 'Análise 360° completa do estabelecimento'
+    mensagem: 'AnÃ¡lise 360Â° completa do estabelecimento'
   };
 } 

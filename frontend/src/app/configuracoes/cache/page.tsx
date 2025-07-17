@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -56,7 +56,7 @@ export default function CachePage() {
   const [warming, setWarming] = useState(false)
 
   useEffect(() => {
-    setPageTitle('Cache - Configurações')
+    setPageTitle('Cache - ConfiguraÃ§Ãµes')
     return () => setPageTitle('')
   }, [setPageTitle])
 
@@ -127,7 +127,7 @@ export default function CachePage() {
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600 dark:text-gray-400">Carregando métricas do cache...</p>
+              <p className="text-gray-600 dark:text-gray-400">Carregando mÃ©tricas do cache...</p>
             </div>
           </div>
         </div>
@@ -181,7 +181,7 @@ export default function CachePage() {
             </div>
           </div>
 
-          {/* Métricas Principais */}
+          {/* MÃ©tricas Principais */}
           {stats && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -251,13 +251,13 @@ export default function CachePage() {
                 </Card>
               </div>
 
-              {/* Estatísticas Detalhadas */}
+              {/* EstatÃ­sticas Detalhadas */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <BarChart3 className="w-5 h-5" />
-                      Operações de Cache
+                      OperaÃ§Ãµes de Cache
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -293,7 +293,7 @@ export default function CachePage() {
                     
                     <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Eficiência</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">EficiÃªncia</span>
                         <Badge className={`${getEfficiencyColor(stats.cache.efficiency)} border-current`} variant="outline">
                           {stats.cache.efficiency.toUpperCase()}
                         </Badge>
@@ -312,7 +312,7 @@ export default function CachePage() {
                   <CardContent className="space-y-4">
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Tempo Resposta Médio</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Tempo Resposta MÃ©dio</span>
                         <span className="font-semibold text-gray-900 dark:text-white">
                           {stats.performance.avgResponseTime}
                         </span>
@@ -326,14 +326,14 @@ export default function CachePage() {
                       </div>
                       
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Operações de Cache</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">OperaÃ§Ãµes de Cache</span>
                         <span className="font-semibold text-gray-900 dark:text-white">
                           {stats.performance.cacheOperations.toLocaleString()}
                         </span>
                       </div>
                       
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Uso de Memória</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Uso de MemÃ³ria</span>
                         <span className="font-semibold text-gray-900 dark:text-white">
                           {stats.performance.memoryUsage 
                             ? `${(stats.performance.memoryUsage.used / 1024 / 1024).toFixed(1)}MB`
@@ -346,13 +346,13 @@ export default function CachePage() {
                 </Card>
               </div>
 
-              {/* Recomendações */}
+              {/* RecomendaÃ§Ãµes */}
               {stats.recommendations && stats.recommendations.length > 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <AlertTriangle className="w-5 h-5 text-yellow-600" />
-                      Recomendações
+                      RecomendaÃ§Ãµes
                     </CardTitle>
                   </CardHeader>
                   <CardContent>

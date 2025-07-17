@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
 /**
  * Callback do OAuth Google
- * Recebe o código de autorização e redireciona para página de sucesso
+ * Recebe o cÃ³digo de autorizaÃ§Ã£o e redireciona para pÃ¡gina de sucesso
  */
 export async function GET(request: NextRequest) {
   try {
@@ -13,39 +13,39 @@ export async function GET(request: NextRequest) {
     const state = searchParams.get('state')
     const error = searchParams.get('error')
 
-    console.log('🔄 Callback OAuth recebido:', { code: !!code, state, error })
+    console.log('ðŸ”„ Callback OAuth recebido:', { code: !!code, state, error })
 
     if (error) {
-      console.error('❌ Erro OAuth:', error)
+      console.error('âŒ Erro OAuth:', error)
       
       const errorPageUrl = new URL('/auth/error', request.url)
       errorPageUrl.searchParams.set('error', error)
-      errorPageUrl.searchParams.set('description', searchParams.get('error_description') || 'Erro na autorização')
+      errorPageUrl.searchParams.set('description', searchParams.get('error_description') || 'Erro na autorizaÃ§Ã£o')
       
       return NextResponse.redirect(errorPageUrl)
     }
 
     if (!code) {
-      console.error('❌ Código de autorização não recebido')
+      console.error('âŒ CÃ³digo de autorizaÃ§Ã£o nÃ£o recebido')
       
       const errorPageUrl = new URL('/auth/error', request.url)
       errorPageUrl.searchParams.set('error', 'no_code')
-      errorPageUrl.searchParams.set('description', 'Código de autorização não recebido')
+      errorPageUrl.searchParams.set('description', 'CÃ³digo de autorizaÃ§Ã£o nÃ£o recebido')
       
       return NextResponse.redirect(errorPageUrl)
     }
 
-    // Redirecionar para página de sucesso com o código
+    // Redirecionar para pÃ¡gina de sucesso com o cÃ³digo
     const successPageUrl = new URL('/auth/success', request.url)
     successPageUrl.searchParams.set('code', code)
     successPageUrl.searchParams.set('state', state || '')
     
-    console.log('✅ Redirecionando para página de sucesso...')
+    console.log('âœ… Redirecionando para pÃ¡gina de sucesso...')
     
     return NextResponse.redirect(successPageUrl)
 
   } catch (error) {
-    console.error('❌ Erro no callback OAuth:', error)
+    console.error('âŒ Erro no callback OAuth:', error)
     
     const errorPageUrl = new URL('/auth/error', request.url)
     errorPageUrl.searchParams.set('error', 'internal_error')

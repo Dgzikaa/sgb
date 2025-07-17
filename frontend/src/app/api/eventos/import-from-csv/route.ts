@@ -1,4 +1,4 @@
-;
+﻿;
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase';
 import * as fs from 'fs';
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     if (!supabase) {
       return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 });
     }
-    console.log('🔄 Iniciando importação da CSV...');
+    console.log('ðŸ”„ Iniciando importaÃ§Ã£o da CSV...');
     
     // Criar cliente Supabase
 
@@ -36,17 +36,17 @@ export async function POST(request: NextRequest) {
     const csvContent = fs.readFileSync(csvPath, 'utf-8');
     const lines = csvContent.split('\n').filter((line: any) => line.trim());
     
-    console.log(`📁 CSV encontrada com ${lines.length} linhas`);
+    console.log(`ðŸ“ CSV encontrada com ${lines.length} linhas`);
     
-    // 1. Limpar todos os eventos existentes do Bar Ordinário
-    console.log('🗑️ Removendo eventos existentes...');
+    // 1. Limpar todos os eventos existentes do Bar OrdinÃ¡rio
+    console.log('ðŸ—‘ï¸ Removendo eventos existentes...');
     const { error: deleteError } = await supabase
       .from('eventos')
       .delete()
       .eq('bar_id', 1);
     
     if (deleteError) {
-      console.error('❌ Erro ao deletar eventos:', deleteError);
+      console.error('âŒ Erro ao deletar eventos:', deleteError);
       return NextResponse.json({ 
         success: false, 
         error: 'Erro ao deletar eventos existentes',
@@ -54,12 +54,12 @@ export async function POST(request: NextRequest) {
       });
     }
     
-    console.log('✅ Eventos existentes removidos com sucesso');
+    console.log('âœ… Eventos existentes removidos com sucesso');
     
     // 2. Processar CSV e inserir eventos
     const eventosParaInserir = [];
     
-    // Pular o cabeçalho (primeira linha)
+    // Pular o cabeÃ§alho (primeira linha)
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
       if (!line) continue;
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
         horario_inicio: '19:00:00',
         horario_fim: '23:59:00',
         status: 'ativo',
-        categoria: 'música',
+        categoria: 'mÃºsica',
         tipo_evento: 'show',
         divulgacao_ativa: true,
         created_at: new Date().toISOString(),
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       });
     }
     
-    console.log(`📝 Processados ${eventosParaInserir.length} eventos da CSV`);
+    console.log(`ðŸ“ Processados ${eventosParaInserir.length} eventos da CSV`);
     
     // 3. Inserir eventos em lotes
     const { data: insertedEvents, error: insertError } = await supabase
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
       .select();
     
     if (insertError) {
-      console.error('❌ Erro ao inserir novos eventos:', insertError);
+      console.error('âŒ Erro ao inserir novos eventos:', insertError);
       return NextResponse.json({ 
         success: false, 
         error: 'Erro ao inserir novos eventos',
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
       });
     }
     
-    console.log(`✅ ${insertedEvents?.length} novos eventos inseridos com sucesso`);
+    console.log(`âœ… ${insertedEvents?.length} novos eventos inseridos com sucesso`);
     
     return NextResponse.json({
       success: true,
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
     });
     
   } catch (error) {
-    console.error('❌ Erro geral:', error);
+    console.error('âŒ Erro geral:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor',

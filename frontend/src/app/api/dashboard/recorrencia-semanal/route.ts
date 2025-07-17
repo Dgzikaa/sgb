@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
@@ -12,12 +12,12 @@ export async function GET(request: NextRequest) {
 
     if (!data_inicio || !data_fim || !bar_id) {
       return NextResponse.json(
-        { success: false, error: 'Parâmetros obrigatórios: data_inicio, data_fim, bar_id' },
+        { success: false, error: 'ParÃ¢metros obrigatÃ³rios: data_inicio, data_fim, bar_id' },
         { status: 400 }
       )
     }
 
-    console.log('📱 API Recorrência Semanal - Parâmetros recebidos:', {
+    console.log('ðŸ“± API RecorrÃªncia Semanal - ParÃ¢metros recebidos:', {
       data_inicio,
       data_fim,
       bar_id
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     // Inicializar cliente Supabase
     const supabase = await getSupabaseClient()
     if (!supabase) {
-      console.error('❌ Erro ao conectar com banco')
+      console.error('âŒ Erro ao conectar com banco')
       return NextResponse.json(
         { success: false, error: 'Erro ao conectar com banco' },
         { status: 500 }
@@ -34,8 +34,8 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-      // Buscar dados de reservas com telefone/celular do período atual
-      console.log('🔍 Buscando reservas com telefones...')
+      // Buscar dados de reservas com telefone/celular do perÃ­odo atual
+      console.log('ðŸ” Buscando reservas com telefones...')
       
       // Primeira tentativa: buscar da tabela getin_reservas se existir
       let reservasQuery = supabase
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
       let dadosReservas = reservasGetin || []
 
       if (errorGetin || !reservasGetin || reservasGetin.length === 0) {
-        console.log('⚠️ Tabela getin_reservas não encontrada ou sem dados, tentando outras fontes...')
+        console.log('âš ï¸ Tabela getin_reservas nÃ£o encontrada ou sem dados, tentando outras fontes...')
         
         // Tentar buscar da tabela contahub se tiver campos de telefone
         const { data: contahubData, error: contahubError } = await supabase
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
           .limit(1000)
 
         if (!contahubError && contahubData && contahubData.length > 0) {
-          console.log(`📞 Dados ContaHub encontrados: ${contahubData.length}`)
+          console.log(`ðŸ“ž Dados ContaHub encontrados: ${contahubData.length}`)
           dadosReservas = contahubData.map((item: any) => ({
             phone: item.tel_cli,
             name: item.nm_cli,
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      console.log(`📊 Total de registros com telefone: ${dadosReservas.length}`)
+      console.log(`ðŸ“Š Total de registros com telefone: ${dadosReservas.length}`)
 
       if (dadosReservas.length === 0) {
         return NextResponse.json({
@@ -91,18 +91,18 @@ export async function GET(request: NextRequest) {
           meta: {
             periodo: `${data_inicio} a ${data_fim}`,
             bar_id: parseInt(bar_id),
-            observacao: 'Nenhum dado com telefone encontrado para análise'
+            observacao: 'Nenhum dado com telefone encontrado para anÃ¡lise'
           }
         })
       }
 
-      // Analisar recorrência por telefone
+      // Analisar recorrÃªncia por telefone
       const clientesPorTelefone = new Map()
 
       dadosReservas.forEach((reserva: any) => {
-        const telefone = String(reserva.phone).replace(/\D/g, '') // remover caracteres não numéricos
+        const telefone = String(reserva.phone).replace(/\D/g, '') // remover caracteres nÃ£o numÃ©ricos
         
-        if (telefone.length >= 8) { // telefone válido
+        if (telefone.length >= 8) { // telefone vÃ¡lido
           if (!clientesPorTelefone.has(telefone)) {
             clientesPorTelefone.set(telefone, {
               telefone,
@@ -123,13 +123,13 @@ export async function GET(request: NextRequest) {
         }
       })
 
-      // Analisar padrões de recorrência
+      // Analisar padrÃµes de recorrÃªncia
       const clientesArray = Array.from(clientesPorTelefone.values())
       const clientesUnicos = clientesArray.length
       const clientesRecorrentes = clientesArray.filter((cliente: any) => cliente.total_visitas > 1).length
       const taxaRecorrencia = clientesUnicos > 0 ? (clientesRecorrentes / clientesUnicos) * 100 : 0
 
-      // Agrupar por número de visitas
+      // Agrupar por nÃºmero de visitas
       const visitasPorCliente = {
         '1_visita': 0,
         '2_visitas': 0,
@@ -173,7 +173,7 @@ export async function GET(request: NextRequest) {
         detalhes_recorrentes: clientesRecorrentesDetalhados
       }
 
-      console.log('📱 Análise de recorrência concluída:', {
+      console.log('ðŸ“± AnÃ¡lise de recorrÃªncia concluÃ­da:', {
         clientes_unicos: clientesUnicos,
         clientes_recorrentes: clientesRecorrentes,
         taxa_recorrencia: `${recorrencia.taxa_recorrencia}%`
@@ -185,13 +185,13 @@ export async function GET(request: NextRequest) {
         meta: {
           periodo: `${data_inicio} a ${data_fim}`,
           bar_id: parseInt(bar_id),
-          criterio: 'Agrupamento por número de telefone',
+          criterio: 'Agrupamento por nÃºmero de telefone',
           fonte_dados: reservasGetin && reservasGetin.length > 0 ? 'getin_reservas' : 'analitico'
         }
       })
 
     } catch (dbError) {
-      console.error('❌ Erro ao buscar dados de recorrência:', dbError)
+      console.error('âŒ Erro ao buscar dados de recorrÃªncia:', dbError)
       return NextResponse.json(
         { success: false, error: 'Erro ao buscar dados: ' + (dbError as Error).message },
         { status: 500 }
@@ -199,7 +199,7 @@ export async function GET(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('❌ Erro na API Recorrência Semanal:', error)
+    console.error('âŒ Erro na API RecorrÃªncia Semanal:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor: ' + (error as Error).message },
       { status: 500 }

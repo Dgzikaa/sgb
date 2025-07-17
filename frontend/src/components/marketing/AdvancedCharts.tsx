@@ -1,9 +1,9 @@
-'use client'
+﻿'use client'
 
 // ========================================
-// 📊 ADVANCED MARKETING CHARTS
+// ðŸ“Š ADVANCED MARKETING CHARTS
 // ========================================
-// Componente de gráficos avançados para análise de tendências
+// Componente de grÃ¡ficos avanÃ§ados para anÃ¡lise de tendÃªncias
 // e insights de marketing social
 
 import { useState, useMemo } from 'react'
@@ -53,7 +53,7 @@ import Image from 'next/image'
 import React from 'react'
 
 // ========================================
-// 🎨 CORES E TEMAS
+// ðŸŽ¨ CORES E TEMAS
 // ========================================
 const CHART_COLORS = {
   primary: '#3B82F6',      // Azul
@@ -68,7 +68,7 @@ const CHART_COLORS = {
 }
 
 // ========================================
-// 📊 DADOS SIMULADOS PARA DEMONSTRAÇÃO
+// ðŸ“Š DADOS SIMULADOS PARA DEMONSTRAÃ‡ÃƒO
 // ========================================
 const generateTrendData = () => {
   const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
@@ -89,7 +89,7 @@ const generateTrendData = () => {
 }
 
 const generateWeeklyData = () => {
-  const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
+  const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'SÃ¡b', 'Dom']
   
   return days.map((day: any) => ({
     dia: day,
@@ -102,7 +102,7 @@ const generateWeeklyData = () => {
 
 const generateEngagementBreakdown = () => [
   { tipo: 'Curtidas', valor: 2340, cor: CHART_COLORS.success },
-  { tipo: 'Comentários', valor: 456, cor: CHART_COLORS.primary },
+  { tipo: 'ComentÃ¡rios', valor: 456, cor: CHART_COLORS.primary },
   { tipo: 'Compartilhamentos', valor: 234, cor: CHART_COLORS.secondary },
   { tipo: 'Salvamentos', valor: 189, cor: CHART_COLORS.warning },
   { tipo: 'Cliques no Link', valor: 123, cor: CHART_COLORS.danger }
@@ -112,13 +112,13 @@ const generatePerformanceRadar = () => [
   { metrica: 'Alcance', instagram: 85, facebook: 70, fullMark: 100 },
   { metrica: 'Engajamento', instagram: 78, facebook: 65, fullMark: 100 },
   { metrica: 'Crescimento', instagram: 92, facebook: 58, fullMark: 100 },
-  { metrica: 'Qualidade do Conteúdo', instagram: 88, facebook: 75, fullMark: 100 },
-  { metrica: 'Frequência de Posts', instagram: 75, facebook: 60, fullMark: 100 },
-  { metrica: 'Interação', instagram: 82, facebook: 68, fullMark: 100 }
+  { metrica: 'Qualidade do ConteÃºdo', instagram: 88, facebook: 75, fullMark: 100 },
+  { metrica: 'FrequÃªncia de Posts', instagram: 75, facebook: 60, fullMark: 100 },
+  { metrica: 'InteraÃ§Ã£o', instagram: 82, facebook: 68, fullMark: 100 }
 ]
 
 // ========================================
-// 📊 COMPONENTES DE GRÁFICOS
+// ðŸ“Š COMPONENTES DE GRÃFICOS
 // ========================================
 interface AdvancedChartsProps {
   trendData?: any[] // [{ data_coleta, instagram_followers, facebook_fans, total_impressions, total_spend, total_clicks }]
@@ -137,17 +137,17 @@ export default function AdvancedCharts({ trendData, campaignData, timeRange = 'm
   const radarData = useMemo(() => generatePerformanceRadar(), [])
 
   // ========================================
-  // 📈 GRÁFICO DE TENDÊNCIAS
+  // ðŸ“ˆ GRÃFICO DE TENDÃŠNCIAS
   // ========================================
   const TrendsChart = () => (
     <Card className="card-dark bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
       <CardHeader>
         <CardTitle className="card-title-dark flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-blue-600" />
-          Evolução de Seguidores e Métricas
+          EvoluÃ§Ã£o de Seguidores e MÃ©tricas
         </CardTitle>
         <CardDescription className="card-description-dark">
-          Evolução diária de seguidores, impressões, gasto e cliques
+          EvoluÃ§Ã£o diÃ¡ria de seguidores, impressÃµes, gasto e cliques
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -170,7 +170,7 @@ export default function AdvancedCharts({ trendData, campaignData, timeRange = 'm
             <Legend />
             <Area type="monotone" dataKey="instagram_followers" stroke={CHART_COLORS.instagram} fillOpacity={1} fill="url(#igGradient)" name="Instagram" strokeWidth={2} />
             <Area type="monotone" dataKey="facebook_fans" stroke={CHART_COLORS.facebook} fillOpacity={1} fill="url(#fbGradient)" name="Facebook" strokeWidth={2} />
-            <Area type="monotone" dataKey="total_impressions" stroke={CHART_COLORS.info} fillOpacity={0.2} fill={CHART_COLORS.info} name="Impressões" strokeDasharray="5 5" />
+            <Area type="monotone" dataKey="total_impressions" stroke={CHART_COLORS.info} fillOpacity={0.2} fill={CHART_COLORS.info} name="ImpressÃµes" strokeDasharray="5 5" />
             <Area type="monotone" dataKey="total_spend" stroke={CHART_COLORS.warning} fillOpacity={0.2} fill={CHART_COLORS.warning} name="Gasto" strokeDasharray="2 2" />
             <Area type="monotone" dataKey="total_clicks" stroke={CHART_COLORS.success} fillOpacity={0.2} fill={CHART_COLORS.success} name="Cliques" strokeDasharray="2 2" />
           </AreaChart>
@@ -180,7 +180,7 @@ export default function AdvancedCharts({ trendData, campaignData, timeRange = 'm
   )
 
   // ========================================
-  // 📊 GRÁFICO DE ENGAJAMENTO
+  // ðŸ“Š GRÃFICO DE ENGAJAMENTO
   // ========================================
   const EngagementChart = () => (
     <Card className="card-dark bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
@@ -256,17 +256,17 @@ export default function AdvancedCharts({ trendData, campaignData, timeRange = 'm
   )
 
   // ========================================
-  // 🥧 BREAKDOWN DE ENGAJAMENTO
+  // ðŸ¥§ BREAKDOWN DE ENGAJAMENTO
   // ========================================
   const EngagementBreakdown = () => (
     <Card className="card-dark bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Share2 className="h-5 w-5 text-purple-600" />
-          Tipos de Interação
+          Tipos de InteraÃ§Ã£o
         </CardTitle>
         <CardDescription>
-          Distribuição das formas de engajamento
+          DistribuiÃ§Ã£o das formas de engajamento
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -286,7 +286,7 @@ export default function AdvancedCharts({ trendData, campaignData, timeRange = 'm
               ))}
             </Pie>
             <Tooltip 
-              formatter={(value) => [value.toLocaleString(), 'Interações']}
+              formatter={(value) => [value.toLocaleString(), 'InteraÃ§Ãµes']}
             />
             <Legend />
           </PieChart>
@@ -312,7 +312,7 @@ export default function AdvancedCharts({ trendData, campaignData, timeRange = 'm
   )
 
   // ========================================
-  // 🎯 RADAR DE PERFORMANCE
+  // ðŸŽ¯ RADAR DE PERFORMANCE
   // ========================================
   const PerformanceRadar = () => (
     <Card className="card-dark bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
@@ -322,7 +322,7 @@ export default function AdvancedCharts({ trendData, campaignData, timeRange = 'm
           Performance por Categoria
         </CardTitle>
         <CardDescription>
-          Análise multidimensional das métricas
+          AnÃ¡lise multidimensional das mÃ©tricas
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -365,7 +365,7 @@ export default function AdvancedCharts({ trendData, campaignData, timeRange = 'm
   )
 
   // ========================================
-  // 📅 ATIVIDADE SEMANAL
+  // ðŸ“… ATIVIDADE SEMANAL
   // ========================================
   const WeeklyActivity = () => (
     <Card className="card-dark bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
@@ -375,7 +375,7 @@ export default function AdvancedCharts({ trendData, campaignData, timeRange = 'm
           Atividade Semanal
         </CardTitle>
         <CardDescription>
-          Padrões de engajamento por dia da semana
+          PadrÃµes de engajamento por dia da semana
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -419,7 +419,7 @@ export default function AdvancedCharts({ trendData, campaignData, timeRange = 'm
   )
 
   // ========================================
-  // 📊 RENDER PRINCIPAL
+  // ðŸ“Š RENDER PRINCIPAL
   // ========================================
   return (
     <div className="space-y-6">
@@ -427,17 +427,17 @@ export default function AdvancedCharts({ trendData, campaignData, timeRange = 'm
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
-            📊 Análise Avançada de Marketing
+            ðŸ“Š AnÃ¡lise AvanÃ§ada de Marketing
           </h2>
           <p className="text-gray-600">
-            Insights detalhados e tendências das redes sociais
+            Insights detalhados e tendÃªncias das redes sociais
           </p>
         </div>
         
         <div className="flex gap-2">
           <Button variant="outline" size="sm">
             <Calendar className="h-4 w-4 mr-2" />
-            Últimos 30 dias
+            Ãšltimos 30 dias
           </Button>
           <Button variant="outline" size="sm">
             <BarChart3 className="h-4 w-4 mr-2" />
@@ -446,13 +446,13 @@ export default function AdvancedCharts({ trendData, campaignData, timeRange = 'm
         </div>
       </div>
 
-      {/* Tabs para diferentes análises */}
+      {/* Tabs para diferentes anÃ¡lises */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 border border-gray-200 dark:border-gray-700 grid w-full grid-cols-4">
-          <TabsTrigger value="trends">📈 Tendências</TabsTrigger>
-          <TabsTrigger value="engagement">❤️ Engajamento</TabsTrigger>
-          <TabsTrigger value="breakdown">🥧 Distribuição</TabsTrigger>
-          <TabsTrigger value="performance">🎯 Performance</TabsTrigger>
+          <TabsTrigger value="trends">ðŸ“ˆ TendÃªncias</TabsTrigger>
+          <TabsTrigger value="engagement">â¤ï¸ Engajamento</TabsTrigger>
+          <TabsTrigger value="breakdown">ðŸ¥§ DistribuiÃ§Ã£o</TabsTrigger>
+          <TabsTrigger value="performance">ðŸŽ¯ Performance</TabsTrigger>
         </TabsList>
 
         <TabsContent value="trends" className="space-y-6">
@@ -478,12 +478,12 @@ export default function AdvancedCharts({ trendData, campaignData, timeRange = 'm
         </TabsContent>
       </Tabs>
 
-      {/* Insights Automáticos */}
+      {/* Insights AutomÃ¡ticos */}
       <Card className="border-l-4 border-l-blue-500">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Zap className="h-5 w-5 text-yellow-500" />
-            Insights Automáticos
+            Insights AutomÃ¡ticos
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -494,7 +494,7 @@ export default function AdvancedCharts({ trendData, campaignData, timeRange = 'm
                 <span className="font-medium text-green-800">Crescimento Positivo</span>
               </div>
               <p className="text-sm text-green-700">
-                Instagram cresceu 23% este mês, superando a meta de 15%
+                Instagram cresceu 23% este mÃªs, superando a meta de 15%
               </p>
             </div>
             
@@ -504,17 +504,17 @@ export default function AdvancedCharts({ trendData, campaignData, timeRange = 'm
                 <span className="font-medium text-blue-800">Melhor Dia</span>
               </div>
               <p className="text-sm text-blue-700">
-                Sexta-feira tem o maior engajamento (34% acima da média)
+                Sexta-feira tem o maior engajamento (34% acima da mÃ©dia)
               </p>
             </div>
             
             <div className="p-4 bg-purple-50 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <Heart className="h-4 w-4 text-purple-600" />
-                <span className="font-medium text-purple-800">Conteúdo Popular</span>
+                <span className="font-medium text-purple-800">ConteÃºdo Popular</span>
               </div>
               <p className="text-sm text-purple-700">
-                Posts com drinks especiais têm 45% mais curtidas
+                Posts com drinks especiais tÃªm 45% mais curtidas
               </p>
             </div>
           </div>
@@ -593,7 +593,7 @@ export const PostHighlightsCard: React.FC<PostHighlightsCardProps> = ({ posts, l
               <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(post.created_time || post.timestamp || '').toLocaleDateString('pt-BR')}</span>
             </div>
             <div className="font-semibold card-title-dark text-base mb-2 line-clamp-2">
-              {post.caption || post.message || 'Post sem descrição'}
+              {post.caption || post.message || 'Post sem descriÃ§Ã£o'}
             </div>
             <div className="flex items-center gap-4 mt-2">
               <span className="flex items-center gap-1 text-pink-600 dark:text-pink-400 font-medium">

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -24,8 +24,8 @@ export async function POST(request: NextRequest) {
       .limit(1)
       .single()
     if (rawError || !metaRaw) {
-      console.error('[meta-process] meta_raw não encontrado:', rawError)
-      return NextResponse.json({ success: false, error: 'meta_raw não encontrado', details: rawError }, { status: 404 })
+      console.error('[meta-process] meta_raw nÃ£o encontrado:', rawError)
+      return NextResponse.json({ success: false, error: 'meta_raw nÃ£o encontrado', details: rawError }, { status: 404 })
     }
     let rawJson: any
     try {
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
       const { error: sumError } = await supabase.from('meta_daily_summary').insert(insertSummary)
       if (sumError) logs.push({ table: 'meta_daily_summary', error: sumError })
       // Resposta final com logs detalhados
-      return NextResponse.json({ success: true, message: 'Processamento concluído e tabelas populadas.', meta_raw_id: metaRaw.id, logs }, { status: 200 })
+      return NextResponse.json({ success: true, message: 'Processamento concluÃ­do e tabelas populadas.', meta_raw_id: metaRaw.id, logs }, { status: 200 })
     } catch (procError) {
       console.error('[meta-process] Erro no processamento:', procError)
       const errorMsg = (procError && typeof procError === 'object' && 'message' in procError) ? (procError as any).message : JSON.stringify(procError)

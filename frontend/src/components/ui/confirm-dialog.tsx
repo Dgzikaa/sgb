@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { createContext, useContext, useState, useCallback } from 'react'
 import { AlertTriangle, HelpCircle, Trash2, AlertCircle, CheckCircle } from 'lucide-react'
@@ -62,7 +62,7 @@ export const ConfirmDialogProvider: React.FC<ConfirmDialogProviderProps> = ({ ch
       
       resolvePromise(true)
     } catch (error) {
-      console.error('Erro ao executar confirmação:', error)
+      console.error('Erro ao executar confirmaÃ§Ã£o:', error)
       resolvePromise(false)
     } finally {
       setIsLoading(false)
@@ -169,7 +169,7 @@ export const ConfirmDialogProvider: React.FC<ConfirmDialogProviderProps> = ({ ch
                   {options?.title}
                 </DialogTitle>
                 <DialogDescription className="text-gray-600 text-sm">
-                  Confirme sua ação
+                  Confirme sua aÃ§Ã£o
                 </DialogDescription>
               </div>
             </div>
@@ -187,7 +187,7 @@ export const ConfirmDialogProvider: React.FC<ConfirmDialogProviderProps> = ({ ch
                   <ul className="text-sm text-gray-700 space-y-1">
                     {options.details.map((detail, index) => (
                       <li key={index} className="flex items-start gap-2">
-                        <span className="text-gray-400 mt-1">•</span>
+                        <span className="text-gray-400 mt-1">â€¢</span>
                         <span>{detail}</span>
                       </li>
                     ))}
@@ -200,9 +200,9 @@ export const ConfirmDialogProvider: React.FC<ConfirmDialogProviderProps> = ({ ch
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-red-800 font-medium text-sm">Ação irreversível!</p>
+                      <p className="text-red-800 font-medium text-sm">AÃ§Ã£o irreversÃ­vel!</p>
                       <p className="text-red-700 text-sm">
-                        Esta ação não pode ser desfeita. Tenha certeza antes de continuar.
+                        Esta aÃ§Ã£o nÃ£o pode ser desfeita. Tenha certeza antes de continuar.
                       </p>
                     </div>
                   </div>
@@ -242,7 +242,7 @@ export const ConfirmDialogProvider: React.FC<ConfirmDialogProviderProps> = ({ ch
   )
 }
 
-// Hook global para usar os dialogs de confirmação
+// Hook global para usar os dialogs de confirmaÃ§Ã£o
 export const useGlobalConfirm = () => {
   const confirmDialog = useCallback((options: ConfirmDialogOptions): Promise<boolean> => {
     return new Promise((resolve) => {
@@ -260,7 +260,7 @@ export const useGlobalConfirm = () => {
     // Helpers para diferentes tipos
     confirmDelete: (itemName: string, onConfirm?: () => void | Promise<void>) => 
       confirmDialog({
-        title: 'Confirmar Exclusão',
+        title: 'Confirmar ExclusÃ£o',
         message: `Tem certeza que deseja excluir "${itemName}"?`,
         type: 'danger',
         confirmText: 'Sim, Excluir',

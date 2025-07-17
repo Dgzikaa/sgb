@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -192,7 +192,7 @@ export default function NotificationsPage() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Carregando notificações...</p>
+          <p className="text-gray-600 dark:text-gray-400">Carregando notificaÃ§Ãµes...</p>
         </div>
       </div>
     )
@@ -211,15 +211,15 @@ export default function NotificationsPage() {
                     <Bell className="w-8 h-8" />
                   </div>
                   <div>
-                    <h1 className="text-3xl font-bold">Central de Notificações</h1>
-                    <p className="text-blue-100 mt-1">Gerencie todas as suas notificações e alertas</p>
+                    <h1 className="text-3xl font-bold">Central de NotificaÃ§Ãµes</h1>
+                    <p className="text-blue-100 mt-1">Gerencie todas as suas notificaÃ§Ãµes e alertas</p>
                   </div>
                 </div>
               </div>
               
               <div className="flex items-center gap-4">
                 <div className="text-right">
-                  <div className="text-sm text-blue-200">Não Lidas</div>
+                  <div className="text-sm text-blue-200">NÃ£o Lidas</div>
                   <div className="text-2xl font-bold">{estatisticas?.nao_lidas || 0}</div>
                 </div>
                 <div className="p-3 bg-white/10 rounded-xl">
@@ -238,7 +238,7 @@ export default function NotificationsPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total da Semana</p>
                   <p className="text-3xl font-bold text-gray-900 dark:text-white">{estatisticas?.total_semana || 0}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Últimos 7 dias</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Ãšltimos 7 dias</p>
                 </div>
                 <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
                   <Activity className="w-8 h-8 text-blue-600 dark:text-blue-400" />
@@ -251,9 +251,9 @@ export default function NotificationsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Não Lidas</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">NÃ£o Lidas</p>
                   <p className="text-3xl font-bold text-red-600 dark:text-red-400">{estatisticas?.nao_lidas || 0}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Requer atenção</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Requer atenÃ§Ã£o</p>
                 </div>
                 <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-xl">
                   <BellRing className="w-8 h-8 text-red-600 dark:text-red-400" />
@@ -281,7 +281,7 @@ export default function NotificationsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Notificações Browser</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">NotificaÃ§Ãµes Browser</p>
                   <p className="text-lg font-bold text-gray-900 dark:text-white">
                     Ativas
                   </p>
@@ -305,7 +305,7 @@ export default function NotificationsPage() {
                 <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                   <Filter className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
-                Filtros e Ações
+                Filtros e AÃ§Ãµes
               </CardTitle>
               <div className="flex items-center gap-3">
                 <div className="flex items-center space-x-2">
@@ -333,7 +333,7 @@ export default function NotificationsPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
-                  placeholder="Buscar notificações..."
+                  placeholder="Buscar notificaÃ§Ãµes..."
                   value={busca}
                   onChange={(e) => handleBusca(e.target.value)}
                   className="pl-10 bg-white dark:bg-gray-700"
@@ -347,21 +347,21 @@ export default function NotificationsPage() {
                 <SelectContent>
                   <SelectItem value="">Todos</SelectItem>
                   <SelectItem value="lida">Lidas</SelectItem>
-                  <SelectItem value="pendente">Não Lidas</SelectItem>
+                  <SelectItem value="pendente">NÃ£o Lidas</SelectItem>
                   <SelectItem value="descartada">Descartadas</SelectItem>
                 </SelectContent>
               </Select>
 
               <Select value={filtros.modulo || ''} onValueChange={(value) => handleFiltros({ ...filtros, modulo: value || undefined })}>
                 <SelectTrigger className="bg-white dark:bg-gray-700">
-                  <SelectValue placeholder="Módulo" />
+                  <SelectValue placeholder="MÃ³dulo" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">Todos</SelectItem>
                   <SelectItem value="checklists">Checklists</SelectItem>
                   <SelectItem value="metas">Metas</SelectItem>
                   <SelectItem value="contaazul">ContaAzul</SelectItem>
-                  <SelectItem value="relatorios">Relatórios</SelectItem>
+                  <SelectItem value="relatorios">RelatÃ³rios</SelectItem>
                   <SelectItem value="dashboard">Dashboard</SelectItem>
                   <SelectItem value="sistema">Sistema</SelectItem>
                 </SelectContent>
@@ -373,9 +373,9 @@ export default function NotificationsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">Todas</SelectItem>
-                  <SelectItem value="critica">Crítica</SelectItem>
+                  <SelectItem value="critica">CrÃ­tica</SelectItem>
                   <SelectItem value="alta">Alta</SelectItem>
-                  <SelectItem value="media">Média</SelectItem>
+                  <SelectItem value="media">MÃ©dia</SelectItem>
                   <SelectItem value="baixa">Baixa</SelectItem>
                 </SelectContent>
               </Select>
@@ -405,7 +405,7 @@ export default function NotificationsPage() {
           </CardContent>
         </Card>
 
-        {/* Lista de Notificações */}
+        {/* Lista de NotificaÃ§Ãµes */}
         {error ? (
           <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
             <CardContent className="p-12 text-center">
@@ -426,11 +426,11 @@ export default function NotificationsPage() {
               <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
                 <Bell className="w-8 h-8 text-gray-600 dark:text-gray-400" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Nenhuma Notificação</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Nenhuma NotificaÃ§Ã£o</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
                 {busca || Object.keys(filtros).length > 0 
-                  ? 'Não há notificações que correspondem aos filtros aplicados'
-                  : 'Você está em dia! Não há notificações no momento'
+                  ? 'NÃ£o hÃ¡ notificaÃ§Ãµes que correspondem aos filtros aplicados'
+                  : 'VocÃª estÃ¡ em dia! NÃ£o hÃ¡ notificaÃ§Ãµes no momento'
                 }
               </p>
               {(busca || Object.keys(filtros).length > 0) && (
@@ -479,7 +479,7 @@ export default function NotificationsPage() {
                           )}
                           {notificacao.status === 'pendente' && (
                             <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100">
-                              Não lida
+                              NÃ£o lida
                             </Badge>
                           )}
                         </div>

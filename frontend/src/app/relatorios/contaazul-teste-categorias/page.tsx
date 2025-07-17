@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { getSupabaseClient } from '@/lib/supabase'
@@ -59,12 +59,12 @@ export default function TesteVisaoCompetenciaPage() {
   })
 
   useEffect(() => {
-    setPageTitle('🎯 Teste - Visão de Competência com Categorias')
+    setPageTitle('ðŸŽ¯ Teste - VisÃ£o de CompetÃªncia com Categorias')
     return () => setPageTitle('')
   }, [setPageTitle])
 
   useEffect(() => {
-    // Definir mês atual como padrão
+    // Definir mÃªs atual como padrÃ£o
     const agora = new Date()
     const mes = (agora.getMonth() + 1).toString().padStart(2, '0')
     const ano = agora.getFullYear()
@@ -98,7 +98,7 @@ export default function TesteVisaoCompetenciaPage() {
         .eq('bar_id', selectedBar.id)
         .gte('coletado_em', `${hoje}T00:00:00`)
 
-      // Última inserção
+      // Ãšltima inserÃ§Ã£o
       const { data: ultimaInsercao } = await supabase
         .from('contaazul_visao_competencia')
         .select('coletado_em')
@@ -130,11 +130,11 @@ export default function TesteVisaoCompetenciaPage() {
     try {
       const [ano, mes] = mesAno.split('-')
       const dataInicio = `${ano}-${mes}-01`
-      // Calcular último dia do mês corretamente
+      // Calcular Ãºltimo dia do mÃªs corretamente
       const ultimoDia = new Date(parseInt(ano), parseInt(mes), 0).getDate()
       const dataFim = `${ano}-${mes}-${ultimoDia.toString().padStart(2, '0')}`
 
-      // Carregar dados da visão de competência
+      // Carregar dados da visÃ£o de competÃªncia
       const { data: dadosVisao, error } = await supabase
         .from('contaazul_visao_competencia')
         .select('*')
@@ -169,7 +169,7 @@ export default function TesteVisaoCompetenciaPage() {
         centros_custo_distintos: centrosCusto.size
       })
 
-      // Verificar última coleta
+      // Verificar Ãºltima coleta
       const { data: configData } = await supabase
         .from('api_credentials')
         .select('ultima_sincronizacao')
@@ -182,7 +182,7 @@ export default function TesteVisaoCompetenciaPage() {
         setUltimaColeta(new Date(configData.ultima_sincronizacao).toLocaleString('pt-BR'))
       }
 
-      // Verificar estatísticas de inserção
+      // Verificar estatÃ­sticas de inserÃ§Ã£o
       await verificarStatsInsercao()
 
     } catch (error) {
@@ -199,7 +199,7 @@ export default function TesteVisaoCompetenciaPage() {
     try {
       const [ano, mes] = mesAno.split('-')
       const dataInicio = `${ano}-${mes}-01`
-      // Calcular último dia do mês corretamente
+      // Calcular Ãºltimo dia do mÃªs corretamente
       const ultimoDia = new Date(parseInt(ano), parseInt(mes), 0).getDate()
       const dataFim = `${ano}-${mes}-${ultimoDia.toString().padStart(2, '0')}`
 
@@ -221,9 +221,9 @@ export default function TesteVisaoCompetenciaPage() {
 
       const resultado = await response.json()
       
-      console.log('🎯 Resultado da coleta:', resultado)
+      console.log('ðŸŽ¯ Resultado da coleta:', resultado)
       
-      // Recarregar dados e stats após a coleta
+      // Recarregar dados e stats apÃ³s a coleta
       setTimeout(() => {
         carregarDados()
         verificarStatsInsercao()
@@ -242,7 +242,7 @@ export default function TesteVisaoCompetenciaPage() {
 
     setColetando(true)
     try {
-      console.log('📁 Iniciando coleta JSON completa (3 anos)...')
+      console.log('ðŸ“ Iniciando coleta JSON completa (3 anos)...')
       
       const response = await fetch('/api/contaazul/coletar-json-completo', {
         method: 'POST',
@@ -262,13 +262,13 @@ export default function TesteVisaoCompetenciaPage() {
 
       const resultado = await response.json()
       
-      console.log('📁 Resultado da coleta JSON:', resultado)
+      console.log('ðŸ“ Resultado da coleta JSON:', resultado)
       
-      alert(`✅ Coleta JSON concluída!\n\n` +
-            `📊 Receitas: ${resultado.resultado.receitas.total_parcelas} parcelas\n` +
-            `💸 Despesas: ${resultado.resultado.despesas.total_parcelas} parcelas\n` +
-            `📁 Arquivos: ${resultado.resultado.arquivos_gerados.length} salvos\n\n` +
-            `⚙️ Próximo passo: Clique em "Processar JSONs Offline"`)
+      alert(`âœ… Coleta JSON concluÃ­da!\n\n` +
+            `ðŸ“Š Receitas: ${resultado.resultado.receitas.total_parcelas} parcelas\n` +
+            `ðŸ’¸ Despesas: ${resultado.resultado.despesas.total_parcelas} parcelas\n` +
+            `ðŸ“ Arquivos: ${resultado.resultado.arquivos_gerados.length} salvos\n\n` +
+            `âš™ï¸ PrÃ³ximo passo: Clique em "Processar JSONs Offline"`)
 
     } catch (error) {
       console.error('Erro na coleta JSON:', error)
@@ -281,18 +281,18 @@ export default function TesteVisaoCompetenciaPage() {
   const processarJsonsOffline = async () => {
     if (!selectedBar?.id) return
 
-    // Solicitar o storage_path do usuário
+    // Solicitar o storage_path do usuÃ¡rio
     const storagePath = prompt(
-      '📁 Digite o storage_path dos JSONs coletados:\n\n' +
+      'ðŸ“ Digite o storage_path dos JSONs coletados:\n\n' +
       'Formato: contaazul-dados/3/2025-07-10T15-30-00-123Z/\n\n' +
-      '💡 Este path foi mostrado no resultado da coleta JSON anterior.'
+      'ðŸ’¡ Este path foi mostrado no resultado da coleta JSON anterior.'
     )
 
     if (!storagePath) return
 
     setColetando(true)
     try {
-      console.log('⚙️ Iniciando processamento offline...')
+      console.log('âš™ï¸ Iniciando processamento offline...')
       
       const response = await fetch('/api/contaazul/processar-json-offline', {
         method: 'POST',
@@ -311,16 +311,16 @@ export default function TesteVisaoCompetenciaPage() {
 
       const resultado = await response.json()
       
-      console.log('⚙️ Resultado do processamento:', resultado)
+      console.log('âš™ï¸ Resultado do processamento:', resultado)
       
-      alert(`✅ Processamento offline concluído!\n\n` +
-            `📊 Total inserido: ${resultado.resumo.total_geral} registros\n` +
-            `💰 Receitas: ${resultado.resumo.total_receitas}\n` +
-            `💸 Despesas: ${resultado.resumo.total_despesas}\n` +
-            `📁 Arquivos: ${resultado.resumo.arquivos_processados}\n\n` +
-            `🎉 Dados disponíveis na tabela!`)
+      alert(`âœ… Processamento offline concluÃ­do!\n\n` +
+            `ðŸ“Š Total inserido: ${resultado.resumo.total_geral} registros\n` +
+            `ðŸ’° Receitas: ${resultado.resumo.total_receitas}\n` +
+            `ðŸ’¸ Despesas: ${resultado.resumo.total_despesas}\n` +
+            `ðŸ“ Arquivos: ${resultado.resumo.arquivos_processados}\n\n` +
+            `ðŸŽ‰ Dados disponÃ­veis na tabela!`)
 
-      // Recarregar dados e stats após o processamento
+      // Recarregar dados e stats apÃ³s o processamento
       setTimeout(() => {
         carregarDados()
         verificarStatsInsercao()
@@ -354,7 +354,7 @@ export default function TesteVisaoCompetenciaPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-3xl font-bold text-gray-900">
-            🎯 Teste - Visão de Competência com Categorias
+            ðŸŽ¯ Teste - VisÃ£o de CompetÃªncia com Categorias
           </h1>
           <div className="text-sm text-gray-600">
             Bar: {selectedBar?.nome || 'Nenhum selecionado'}
@@ -362,13 +362,13 @@ export default function TesteVisaoCompetenciaPage() {
         </div>
         
         <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-          <h3 className="font-semibold text-blue-800 mb-2">📊 O que esta página faz:</h3>
+          <h3 className="font-semibold text-blue-800 mb-2">ðŸ“Š O que esta pÃ¡gina faz:</h3>
           <ul className="text-sm text-blue-700 space-y-1">
-            <li>• <strong>Busca dados:</strong> Consulta a tabela `contaazul_visao_competencia`</li>
-            <li>• <strong>Mostra categorias:</strong> Cada transação com sua categoria e centro de custo</li>
-            <li>• <strong>Coleta mensal:</strong> API `/api/contaazul/coletar-com-detalhes-otimizado` (1 mês)</li>
-            <li>• <strong>Coleta completa:</strong> API `/api/contaazul/coletar-json-completo` (3 anos → JSONs)</li>
-            <li>• <strong>Processamento offline:</strong> API `/api/contaazul/processar-json-offline` (JSONs → Banco)</li>
+            <li>â€¢ <strong>Busca dados:</strong> Consulta a tabela `contaazul_visao_competencia`</li>
+            <li>â€¢ <strong>Mostra categorias:</strong> Cada transaÃ§Ã£o com sua categoria e centro de custo</li>
+            <li>â€¢ <strong>Coleta mensal:</strong> API `/api/contaazul/coletar-com-detalhes-otimizado` (1 mÃªs)</li>
+            <li>â€¢ <strong>Coleta completa:</strong> API `/api/contaazul/coletar-json-completo` (3 anos â†’ JSONs)</li>
+            <li>â€¢ <strong>Processamento offline:</strong> API `/api/contaazul/processar-json-offline` (JSONs â†’ Banco)</li>
           </ul>
         </div>
       </div>
@@ -377,7 +377,7 @@ export default function TesteVisaoCompetenciaPage() {
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Mês/Ano (Competência):
+            MÃªs/Ano (CompetÃªncia):
           </label>
           <input
             type="month"
@@ -408,7 +408,7 @@ export default function TesteVisaoCompetenciaPage() {
             disabled={loading}
             className="bg-blue-500 hover:bg-blue-600"
           >
-            {loading ? '🔄 Carregando...' : '🔄 Recarregar'}
+            {loading ? 'ðŸ”„ Carregando...' : 'ðŸ”„ Recarregar'}
           </Button>
         </div>
         
@@ -418,7 +418,7 @@ export default function TesteVisaoCompetenciaPage() {
              disabled={coletando || !selectedBar?.id}
              className="bg-green-500 hover:bg-green-600"
            >
-             {coletando ? '🚀 Coletando...' : '🚀 Coletar Dados (Mês)'}
+             {coletando ? 'ðŸš€ Coletando...' : 'ðŸš€ Coletar Dados (MÃªs)'}
            </Button>
          </div>
          
@@ -428,14 +428,14 @@ export default function TesteVisaoCompetenciaPage() {
              disabled={loading}
              className="bg-purple-500 hover:bg-purple-600"
            >
-             🗄️ Verificar Banco
+             ðŸ—„ï¸ Verificar Banco
            </Button>
          </div>
       </div>
 
-      {/* Nova Seção: Estratégia Offline */}
+      {/* Nova SeÃ§Ã£o: EstratÃ©gia Offline */}
       <div className="mb-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
-        <h3 className="font-semibold text-orange-800 mb-3">📁 Estratégia Offline - 3 Anos Completos</h3>
+        <h3 className="font-semibold text-orange-800 mb-3">ðŸ“ EstratÃ©gia Offline - 3 Anos Completos</h3>
         <div className="mb-4 text-sm text-orange-700">
           <p><strong>Vantagem:</strong> Coleta todos os dados de 2024-2027 de uma vez, salva em JSONs e processa offline (sem rate limits).</p>
         </div>
@@ -445,14 +445,14 @@ export default function TesteVisaoCompetenciaPage() {
             disabled={coletando || !selectedBar?.id}
             className="bg-orange-500 hover:bg-orange-600"
           >
-            {coletando ? '📁 Coletando...' : '📁 Coletar JSONs (2024-2027)'}
+            {coletando ? 'ðŸ“ Coletando...' : 'ðŸ“ Coletar JSONs (2024-2027)'}
           </Button>
           <Button
             onClick={processarJsonsOffline}
             disabled={coletando || !selectedBar?.id}
             className="bg-indigo-500 hover:bg-indigo-600"
           >
-            {coletando ? '⚙️ Processando...' : '⚙️ Processar JSONs Offline'}
+            {coletando ? 'âš™ï¸ Processando...' : 'âš™ï¸ Processar JSONs Offline'}
           </Button>
         </div>
       </div>
@@ -461,7 +461,7 @@ export default function TesteVisaoCompetenciaPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
         <Card className="bg-green-50 border-green-200">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-green-800">💰 Receitas</CardTitle>
+            <CardTitle className="text-sm text-green-800">ðŸ’° Receitas</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
@@ -472,7 +472,7 @@ export default function TesteVisaoCompetenciaPage() {
 
         <Card className="bg-red-50 border-red-200">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-red-800">💸 Despesas</CardTitle>
+            <CardTitle className="text-sm text-red-800">ðŸ’¸ Despesas</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
@@ -483,7 +483,7 @@ export default function TesteVisaoCompetenciaPage() {
 
         <Card className="bg-blue-50 border-blue-200">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-blue-800">📊 Resultado</CardTitle>
+            <CardTitle className="text-sm text-blue-800">ðŸ“Š Resultado</CardTitle>
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${resumo.resultado_liquido >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -494,7 +494,7 @@ export default function TesteVisaoCompetenciaPage() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-gray-800">📋 Registros</CardTitle>
+            <CardTitle className="text-sm text-gray-800">ðŸ“‹ Registros</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-600">
@@ -505,7 +505,7 @@ export default function TesteVisaoCompetenciaPage() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-gray-800">🏷️ Categorias</CardTitle>
+            <CardTitle className="text-sm text-gray-800">ðŸ·ï¸ Categorias</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-600">
@@ -516,7 +516,7 @@ export default function TesteVisaoCompetenciaPage() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-gray-800">🎯 Centros</CardTitle>
+            <CardTitle className="text-sm text-gray-800">ðŸŽ¯ Centros</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-600">
@@ -526,12 +526,12 @@ export default function TesteVisaoCompetenciaPage() {
         </Card>
       </div>
 
-      {/* Status e Estatísticas de Inserção */}
+      {/* Status e EstatÃ­sticas de InserÃ§Ã£o */}
       <div className="mb-6 space-y-4">
         <div className="p-4 bg-gray-50 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-sm font-medium text-gray-700">Última coleta:</span>
+              <span className="text-sm font-medium text-gray-700">Ãšltima coleta:</span>
               <span className="ml-2 text-sm text-gray-600">
                 {ultimaColeta || 'Nunca executada'}
               </span>
@@ -544,7 +544,7 @@ export default function TesteVisaoCompetenciaPage() {
         </div>
 
         <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <h3 className="font-semibold text-blue-800 mb-3">🗄️ Estatísticas de Inserção no Banco</h3>
+          <h3 className="font-semibold text-blue-800 mb-3">ðŸ—„ï¸ EstatÃ­sticas de InserÃ§Ã£o no Banco</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <span className="text-sm font-medium text-blue-700">Total no banco:</span>
@@ -555,12 +555,12 @@ export default function TesteVisaoCompetenciaPage() {
               <div className="text-2xl font-bold text-green-600">{statsInsercao.registros_hoje}</div>
             </div>
             <div>
-              <span className="text-sm font-medium text-blue-700">Última inserção:</span>
+              <span className="text-sm font-medium text-blue-700">Ãšltima inserÃ§Ã£o:</span>
               <div className="text-sm text-blue-600">{statsInsercao.ultima_insercao}</div>
             </div>
           </div>
           <div className="mt-3 text-xs text-blue-600">
-            💡 Estes números mostram se a API está realmente inserindo dados na tabela contaazul_visao_competencia
+            ðŸ’¡ Estes nÃºmeros mostram se a API estÃ¡ realmente inserindo dados na tabela contaazul_visao_competencia
           </div>
         </div>
       </div>
@@ -569,7 +569,7 @@ export default function TesteVisaoCompetenciaPage() {
       <Card>
         <CardHeader>
           <CardTitle>
-            📊 Visão de Competência - {mesAno} ({dadosFiltrados.length} registros)
+            ðŸ“Š VisÃ£o de CompetÃªncia - {mesAno} ({dadosFiltrados.length} registros)
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -578,11 +578,11 @@ export default function TesteVisaoCompetenciaPage() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descrição</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">DescriÃ§Ã£o</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Valor</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoria</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Centro de Custo</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Competência</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">CompetÃªncia</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                 </tr>
               </thead>
@@ -595,7 +595,7 @@ export default function TesteVisaoCompetenciaPage() {
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-red-100 text-red-800'
                       }`}>
-                        {item.tipo === 'RECEITA' ? '💰' : '💸'} {item.tipo}
+                        {item.tipo === 'RECEITA' ? 'ðŸ’°' : 'ðŸ’¸'} {item.tipo}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-900 max-w-xs truncate">
@@ -640,9 +640,9 @@ export default function TesteVisaoCompetenciaPage() {
           
           {dadosFiltrados.length === 0 && (
             <div className="text-center py-8 text-gray-500">
-              <div className="mb-2">📭 Nenhum dado encontrado</div>
+              <div className="mb-2">ðŸ“­ Nenhum dado encontrado</div>
               <div className="text-sm">
-                Clique em "🚀 Coletar Dados" para buscar informações do ContaAzul
+                Clique em "ðŸš€ Coletar Dados" para buscar informaÃ§Ãµes do ContaAzul
               </div>
             </div>
           )}
@@ -650,7 +650,7 @@ export default function TesteVisaoCompetenciaPage() {
           {dadosFiltrados.length > 100 && (
             <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
               <div className="text-sm text-yellow-800">
-                ⚠️ Mostrando apenas os primeiros 100 registros de {dadosFiltrados.length} encontrados.
+                âš ï¸ Mostrando apenas os primeiros 100 registros de {dadosFiltrados.length} encontrados.
               </div>
             </div>
           )}

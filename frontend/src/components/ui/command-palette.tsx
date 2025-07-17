@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
@@ -53,55 +53,55 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
   const [isExecuting, setIsExecuting] = useState(false)
   const router = useRouter()
 
-  // Comandos disponíveis
+  // Comandos disponÃ­veis
   const commands: Command[] = useMemo(() => [
-    // Navegação Principal
+    // NavegaÃ§Ã£o Principal
     {
       id: 'nav-home',
       title: 'Home',
-      description: 'Página inicial do sistema',
+      description: 'PÃ¡gina inicial do sistema',
       icon: Home,
       href: '/home',
       category: 'navigation',
-      keywords: ['home', 'início', 'principal', 'dashboard']
+      keywords: ['home', 'inÃ­cio', 'principal', 'dashboard']
     },
     {
       id: 'nav-checklists',
       title: 'Checklists',
-      description: 'Gerenciar listas de verificação',
+      description: 'Gerenciar listas de verificaÃ§Ã£o',
       icon: CheckSquare,
       href: '/checklists',
       category: 'navigation',
-      keywords: ['checklist', 'lista', 'verificação', 'tarefa']
+      keywords: ['checklist', 'lista', 'verificaÃ§Ã£o', 'tarefa']
     },
     {
       id: 'nav-funcionario-checklists',
-      title: 'Checklists do Funcionário',
-      description: 'Área de checklists para funcionários',
+      title: 'Checklists do FuncionÃ¡rio',
+      description: 'Ãrea de checklists para funcionÃ¡rios',
       icon: CheckSquare,
       href: '/funcionario/checklists',
       category: 'navigation',
-      keywords: ['funcionário', 'colaborador', 'checklist', 'trabalho']
+      keywords: ['funcionÃ¡rio', 'colaborador', 'checklist', 'trabalho']
     },
 
-    // Configurações
+    // ConfiguraÃ§Ãµes
     {
       id: 'nav-config',
-      title: 'Configurações',
-      description: 'Configurações do sistema',
+      title: 'ConfiguraÃ§Ãµes',
+      description: 'ConfiguraÃ§Ãµes do sistema',
       icon: Settings,
       href: '/configuracoes',
       category: 'navigation',
-      keywords: ['configuração', 'config', 'setting', 'admin']
+      keywords: ['configuraÃ§Ã£o', 'config', 'setting', 'admin']
     },
     {
       id: 'nav-analytics',
       title: 'Analytics',
-      description: 'Métricas e analytics do sistema',
+      description: 'MÃ©tricas e analytics do sistema',
       icon: BarChart3,
       href: '/configuracoes/analytics',
       category: 'navigation',
-      keywords: ['analytics', 'métricas', 'estatísticas', 'dados'],
+      keywords: ['analytics', 'mÃ©tricas', 'estatÃ­sticas', 'dados'],
       badge: 'NEW'
     },
     {
@@ -111,7 +111,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
       icon: Database,
       href: '/configuracoes/cache',
       category: 'navigation',
-      keywords: ['cache', 'performance', 'redis', 'memória'],
+      keywords: ['cache', 'performance', 'redis', 'memÃ³ria'],
       badge: 'NEW'
     },
     {
@@ -124,44 +124,44 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
       keywords: ['template', 'modelo', 'layout']
     },
 
-    // Relatórios
+    // RelatÃ³rios
     {
       id: 'nav-relatorios',
-      title: 'Relatórios',
-      description: 'Todos os relatórios do sistema',
+      title: 'RelatÃ³rios',
+      description: 'Todos os relatÃ³rios do sistema',
       icon: PieChart,
       href: '/relatorios',
       category: 'navigation',
-      keywords: ['relatório', 'report', 'dados', 'análise']
+      keywords: ['relatÃ³rio', 'report', 'dados', 'anÃ¡lise']
     },
     {
       id: 'nav-contahub-teste',
       title: 'ContaHub Teste',
-      description: 'Relatório de teste ContaHub',
+      description: 'RelatÃ³rio de teste ContaHub',
       icon: TrendingUp,
       href: '/relatorios/contahub-teste',
       category: 'navigation',
-      keywords: ['contahub', 'teste', 'relatório']
+      keywords: ['contahub', 'teste', 'relatÃ³rio']
     },
     {
       id: 'nav-analitico',
-      title: 'Analítico',
-      description: 'Relatório analítico detalhado',
+      title: 'AnalÃ­tico',
+      description: 'RelatÃ³rio analÃ­tico detalhado',
       icon: BarChart3,
       href: '/relatorios/analitico',
       category: 'navigation',
-      keywords: ['analítico', 'análise', 'detalhado']
+      keywords: ['analÃ­tico', 'anÃ¡lise', 'detalhado']
     },
 
-    // Operações
+    // OperaÃ§Ãµes
     {
       id: 'nav-operacoes',
-      title: 'Operações',
+      title: 'OperaÃ§Ãµes',
       description: 'Funcionalidades operacionais',
       icon: Zap,
       href: '/operacoes',
       category: 'navigation',
-      keywords: ['operação', 'operacional', 'gestão']
+      keywords: ['operaÃ§Ã£o', 'operacional', 'gestÃ£o']
     },
     {
       id: 'nav-receitas',
@@ -170,7 +170,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
       icon: ChefHat,
       href: '/operacoes/receitas',
       category: 'navigation',
-      keywords: ['receita', 'produto', 'cardápio', 'comida']
+      keywords: ['receita', 'produto', 'cardÃ¡pio', 'comida']
     },
     {
       id: 'nav-tempo',
@@ -179,50 +179,50 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
       icon: Calendar,
       href: '/operacoes/tempo',
       category: 'navigation',
-      keywords: ['tempo', 'horário', 'cronômetro']
+      keywords: ['tempo', 'horÃ¡rio', 'cronÃ´metro']
     },
 
-    // Visão Geral
+    // VisÃ£o Geral
     {
       id: 'nav-visao-geral',
-      title: 'Visão Geral',
-      description: 'Análises e visões gerais',
+      title: 'VisÃ£o Geral',
+      description: 'AnÃ¡lises e visÃµes gerais',
       icon: TrendingUp,
       href: '/visao-geral',
       category: 'navigation',
-      keywords: ['visão', 'geral', 'overview', 'resumo']
+      keywords: ['visÃ£o', 'geral', 'overview', 'resumo']
     },
     {
       id: 'nav-comparativo',
       title: 'Comparativo',
-      description: 'Análise comparativa de dados',
+      description: 'AnÃ¡lise comparativa de dados',
       icon: BarChart3,
       href: '/visao-geral/comparativo',
       category: 'navigation',
-      keywords: ['comparativo', 'comparação', 'análise']
+      keywords: ['comparativo', 'comparaÃ§Ã£o', 'anÃ¡lise']
     },
 
     // Conta
     {
       id: 'nav-minha-conta',
       title: 'Minha Conta',
-      description: 'Gerenciar conta do usuário',
+      description: 'Gerenciar conta do usuÃ¡rio',
       icon: UserCircle,
       href: '/minha-conta',
       category: 'navigation',
-      keywords: ['conta', 'perfil', 'usuário', 'configuração']
+      keywords: ['conta', 'perfil', 'usuÃ¡rio', 'configuraÃ§Ã£o']
     },
     {
       id: 'nav-notifications',
-      title: 'Notificações',
-      description: 'Central de notificações',
+      title: 'NotificaÃ§Ãµes',
+      description: 'Central de notificaÃ§Ãµes',
       icon: Bell,
       href: '/notifications',
       category: 'navigation',
-      keywords: ['notificação', 'alerta', 'aviso']
+      keywords: ['notificaÃ§Ã£o', 'alerta', 'aviso']
     },
 
-    // Ações de Cache
+    // AÃ§Ãµes de Cache
     {
       id: 'action-cache-clear',
       title: 'Limpar Cache',
@@ -241,7 +241,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     {
       id: 'action-cache-warmup',
       title: 'Cache Warmup',
-      description: 'Pré-aquecer cache com dados críticos',
+      description: 'PrÃ©-aquecer cache com dados crÃ­ticos',
       icon: Zap,
       category: 'cache',
       keywords: ['warmup', 'cache', 'preaquecer', 'inicializar'],
@@ -254,11 +254,11 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
       }
     },
 
-    // Ações Rápidas
+    // AÃ§Ãµes RÃ¡pidas
     {
       id: 'action-refresh',
-      title: 'Recarregar Página',
-      description: 'Atualizar a página atual',
+      title: 'Recarregar PÃ¡gina',
+      description: 'Atualizar a pÃ¡gina atual',
       icon: RefreshCw,
       category: 'quick',
       keywords: ['refresh', 'reload', 'atualizar', 'recarregar'],
@@ -275,10 +275,10 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     const lowerQuery = query.toLowerCase()
     
     return commands.filter((command: any) => {
-      // Busca no título
+      // Busca no tÃ­tulo
       if (command.title.toLowerCase().includes(lowerQuery)) return true
       
-      // Busca na descrição
+      // Busca na descriÃ§Ã£o
       if (command.description?.toLowerCase().includes(lowerQuery)) return true
       
       // Busca nas keywords
@@ -288,7 +288,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
       
       return false
     }).sort((a, b) => {
-      // Priorizar matches exatos no título
+      // Priorizar matches exatos no tÃ­tulo
       const aExact = a.title.toLowerCase().startsWith(lowerQuery)
       const bExact = b.title.toLowerCase().startsWith(lowerQuery)
       
@@ -299,7 +299,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     })
   }, [query, commands])
 
-  // Resetar seleção quando mudar a busca
+  // Resetar seleÃ§Ã£o quando mudar a busca
   useEffect(() => {
     setSelectedIndex(0)
   }, [query])
@@ -361,11 +361,11 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
   const getCategoryLabel = (category: string) => {
     switch (category) {
-      case 'navigation': return 'Navegação'
-      case 'actions': return 'Ações'
+      case 'navigation': return 'NavegaÃ§Ã£o'
+      case 'actions': return 'AÃ§Ãµes'
       case 'cache': return 'Cache'
-      case 'admin': return 'Administração'
-      case 'quick': return 'Ações Rápidas'
+      case 'admin': return 'AdministraÃ§Ã£o'
+      case 'quick': return 'AÃ§Ãµes RÃ¡pidas'
       default: return 'Outros'
     }
   }
@@ -414,7 +414,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
               autoFocus
             />
             <div className="hidden sm:flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-              <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">↵</kbd>
+              <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">â†µ</kbd>
               <span>selecionar</span>
             </div>
           </div>
@@ -492,11 +492,11 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           <div className="hidden sm:flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
             <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
               <div className="flex items-center gap-1">
-                <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs">↑↓</kbd>
+                <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs">â†‘â†“</kbd>
                 <span>navegar</span>
               </div>
               <div className="flex items-center gap-1">
-                <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs">↵</kbd>
+                <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs">â†µ</kbd>
                 <span>selecionar</span>
               </div>
               <div className="flex items-center gap-1">

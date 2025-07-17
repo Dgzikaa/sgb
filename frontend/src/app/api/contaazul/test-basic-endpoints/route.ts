@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getValidContaAzulToken } from '@/lib/contaazul-auth-helper'
 
@@ -22,15 +22,15 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const barId = searchParams.get('barId') || '3'
     
-    console.log('🔍 TESTANDO ENDPOINTS BÁSICOS DO CONTAAZUL...')
+    console.log('ðŸ” TESTANDO ENDPOINTS BÃSICOS DO CONTAAZUL...')
 
-    // ✅ USAR HELPER QUE RENOVA AUTOMATICAMENTE (igual sync-dados-brutos)
+    // âœ… USAR HELPER QUE RENOVA AUTOMATICAMENTE (igual sync-dados-brutos)
     const accessToken = await getValidContaAzulToken(parseInt(barId))
     
     if (!accessToken) {
       return NextResponse.json({ 
-        error: 'Token ContaAzul indisponível. Verifique as credenciais ou reautorize.',
-        details: 'Renovação automática falhou'
+        error: 'Token ContaAzul indisponÃ­vel. Verifique as credenciais ou reautorize.',
+        details: 'RenovaÃ§Ã£o automÃ¡tica falhou'
       }, { status: 401 })
     }
 
@@ -40,8 +40,8 @@ export async function GET(request: NextRequest) {
       testes: [] as any[]
     }
 
-    // TESTE 1: Endpoint básico de receitas (antigo)
-    console.log('🧪 TESTE 1: Endpoint receitas básico...')
+    // TESTE 1: Endpoint bÃ¡sico de receitas (antigo)
+    console.log('ðŸ§ª TESTE 1: Endpoint receitas bÃ¡sico...')
     try {
       const urlReceitas = 'https://api.contaazul.com/v1/financeiro/contas-a-receber'
       const responseReceitas = await fetch(urlReceitas, {
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       })
       
       resultados.testes.push({
-        nome: 'Receitas básico',
+        nome: 'Receitas bÃ¡sico',
         url: urlReceitas,
         status: responseReceitas.status,
         ok: responseReceitas.ok,
@@ -61,13 +61,13 @@ export async function GET(request: NextRequest) {
       })
     } catch (error) {
       resultados.testes.push({
-        nome: 'Receitas básico',
+        nome: 'Receitas bÃ¡sico',
         erro: error instanceof Error ? error.message : 'Erro desconhecido'
       })
     }
 
-    // TESTE 2: Endpoint básico de despesas (antigo)
-    console.log('🧪 TESTE 2: Endpoint despesas básico...')
+    // TESTE 2: Endpoint bÃ¡sico de despesas (antigo)
+    console.log('ðŸ§ª TESTE 2: Endpoint despesas bÃ¡sico...')
     try {
       const urlDespesas = 'https://api.contaazul.com/v1/financeiro/contas-a-pagar'
       const responseDespesas = await fetch(urlDespesas, {
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
       })
       
       resultados.testes.push({
-        nome: 'Despesas básico',
+        nome: 'Despesas bÃ¡sico',
         url: urlDespesas,
         status: responseDespesas.status,
         ok: responseDespesas.ok,
@@ -87,13 +87,13 @@ export async function GET(request: NextRequest) {
       })
     } catch (error) {
       resultados.testes.push({
-        nome: 'Despesas básico',
+        nome: 'Despesas bÃ¡sico',
         erro: error instanceof Error ? error.message : 'Erro desconhecido'
       })
     }
 
     // TESTE 3: Endpoint de categorias
-    console.log('🧪 TESTE 3: Endpoint categorias...')
+    console.log('ðŸ§ª TESTE 3: Endpoint categorias...')
     try {
       const urlCategorias = 'https://api.contaazul.com/v1/financeiro/categorias'
       const responseCategorias = await fetch(urlCategorias, {
@@ -118,8 +118,8 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // TESTE 4: Endpoint novo com competência (exato da documentação)
-    console.log('🧪 TESTE 4: Endpoint com competência...')
+    // TESTE 4: Endpoint novo com competÃªncia (exato da documentaÃ§Ã£o)
+    console.log('ðŸ§ª TESTE 4: Endpoint com competÃªncia...')
     try {
       const urlCompetencia = new URL('https://api.contaazul.com/v1/financeiro/eventos-financeiros/contas-a-receber/buscar')
       urlCompetencia.searchParams.append('pagina', '1')
@@ -155,8 +155,8 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // TESTE 5: Endpoint só de eventos financeiros
-    console.log('🧪 TESTE 5: Endpoint eventos financeiros...')
+    // TESTE 5: Endpoint sÃ³ de eventos financeiros
+    console.log('ðŸ§ª TESTE 5: Endpoint eventos financeiros...')
     try {
       const urlEventos = 'https://api.contaazul.com/v1/financeiro/eventos-financeiros'
       const responseEventos = await fetch(urlEventos, {
@@ -168,7 +168,7 @@ export async function GET(request: NextRequest) {
       })
       
       resultados.testes.push({
-        nome: 'Eventos financeiros básico',
+        nome: 'Eventos financeiros bÃ¡sico',
         url: urlEventos,
         status: responseEventos.status,
         ok: responseEventos.ok,
@@ -176,14 +176,14 @@ export async function GET(request: NextRequest) {
       })
     } catch (error) {
       resultados.testes.push({
-        nome: 'Eventos financeiros básico',
+        nome: 'Eventos financeiros bÃ¡sico',
         erro: error instanceof Error ? error.message : 'Erro desconhecido'
       })
     }
 
     return NextResponse.json({
       sucesso: true,
-      message: 'Testes de endpoints básicos concluídos',
+      message: 'Testes de endpoints bÃ¡sicos concluÃ­dos',
       resultados,
       resumo: {
         total_testes: resultados.testes.length,
@@ -193,7 +193,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Erro interno:', error)
+    console.error('âŒ Erro interno:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
       details: error instanceof Error ? error.message : 'Erro desconhecido'

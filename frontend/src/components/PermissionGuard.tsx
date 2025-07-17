@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { ReactNode, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -31,18 +31,18 @@ export default function PermissionGuard({
   useEffect(() => {
     if (loading) return
 
-    // Se permite acesso público e não tem requisitos específicos
+    // Se permite acesso pÃºblico e nÃ£o tem requisitos especÃ­ficos
     if (allowPublic && requiredModules.length === 0 && requiredRoles.length === 0) {
       return
     }
 
-    // Se não está logado
+    // Se nÃ£o estÃ¡ logado
     if (!user) {
       router.push('/login')
       return
     }
 
-    // Se não está ativo
+    // Se nÃ£o estÃ¡ ativo
     if (!user.ativo) {
       router.push('/login')
       return
@@ -57,7 +57,7 @@ export default function PermissionGuard({
       }
     }
 
-    // Admin tem acesso a tudo por padrão (exceto se tem permissões específicas)
+    // Admin tem acesso a tudo por padrÃ£o (exceto se tem permissÃµes especÃ­ficas)
     if (user.role === 'admin') {
       const hasExplicitPermissions = user.modulos_permitidos && user.modulos_permitidos.length < 23
       if (!hasExplicitPermissions) {
@@ -65,7 +65,7 @@ export default function PermissionGuard({
       }
     }
 
-    // Verificar módulos requeridos
+    // Verificar mÃ³dulos requeridos
     if (requiredModules.length > 0) {
       const hasAllModules = requiredModules.every(module => hasPermission(module))
       if (!hasAllModules) {
@@ -81,13 +81,13 @@ export default function PermissionGuard({
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Verificando permissões...</p>
+          <p className="text-gray-600">Verificando permissÃµes...</p>
         </div>
       </div>
     )
   }
 
-  // Mostrar erro de permissão
+  // Mostrar erro de permissÃ£o
   if (showError) {
     if (fallback) {
       return <>{fallback}</>
@@ -106,7 +106,7 @@ export default function PermissionGuard({
                     Acesso Negado
                   </h2>
                   <p className="text-red-700 mb-4">
-                    Você não tem permissão para acessar esta página.
+                    VocÃª nÃ£o tem permissÃ£o para acessar esta pÃ¡gina.
                   </p>
                 </div>
                 
@@ -114,19 +114,19 @@ export default function PermissionGuard({
                   <div className="text-sm space-y-2">
                     {requiredRoles.length > 0 && (
                       <div>
-                        <strong>Roles necessários:</strong> {requiredRoles.join(', ')}
+                        <strong>Roles necessÃ¡rios:</strong> {requiredRoles.join(', ')}
                       </div>
                     )}
                     {requiredModules.length > 0 && (
                       <div>
-                        <strong>Módulos necessários:</strong> {requiredModules.join(', ')}
+                        <strong>MÃ³dulos necessÃ¡rios:</strong> {requiredModules.join(', ')}
                       </div>
                     )}
                     <div>
-                      <strong>Seu role:</strong> {user?.role || 'Não definido'}
+                      <strong>Seu role:</strong> {user?.role || 'NÃ£o definido'}
                     </div>
                     <div>
-                      <strong>Seus módulos:</strong> {user?.modulos_permitidos?.join(', ') || 'Nenhum'}
+                      <strong>Seus mÃ³dulos:</strong> {user?.modulos_permitidos?.join(', ') || 'Nenhum'}
                     </div>
                   </div>
                 </div>
@@ -160,7 +160,7 @@ export default function PermissionGuard({
     )
   }
 
-  // Se chegou até aqui, pode renderizar o conteúdo
+  // Se chegou atÃ© aqui, pode renderizar o conteÃºdo
   return <>{children}</>
 }
 
@@ -195,7 +195,7 @@ export function usePermissionGuard(
       }
     }
 
-    // Verificar módulos
+    // Verificar mÃ³dulos
     if (requiredModules.length > 0) {
       const hasAllModules = requiredModules.every(module => hasPermission(module))
       if (!hasAllModules) {

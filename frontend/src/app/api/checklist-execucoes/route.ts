@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import DiscordChecklistService from '@/lib/discord-checklist-service'
 
-// Forçar renderização dinâmica devido ao uso de request.url
+// ForÃ§ar renderizaÃ§Ã£o dinÃ¢mica devido ao uso de request.url
 export const dynamic = 'force-dynamic';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -24,16 +24,16 @@ export async function POST(request: NextRequest) {
       bar_id
     } = body
 
-    // Validações básicas
+    // ValidaÃ§Ãµes bÃ¡sicas
     if (!checklist_id || !responsavel_id || !bar_id) {
       return NextResponse.json({
-        error: 'Dados obrigatórios: checklist_id, responsavel_id, bar_id'
+        error: 'Dados obrigatÃ³rios: checklist_id, responsavel_id, bar_id'
       }, { status: 400 })
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // 1. Criar registro de execução
+    // 1. Criar registro de execuÃ§Ã£o
     const { data: execucao, error: execucaoError } = await supabase
       .from('checklist_execucoes')
       .insert({
@@ -57,14 +57,14 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (execucaoError) {
-      console.error('❌ Erro ao criar execução:', execucaoError)
+      console.error('âŒ Erro ao criar execuÃ§Ã£o:', execucaoError)
       return NextResponse.json({
-        error: 'Erro ao salvar execução do checklist',
+        error: 'Erro ao salvar execuÃ§Ã£o do checklist',
         details: execucaoError.message
       }, { status: 500 })
     }
 
-    console.log('✅ Execução criada:', execucao.id)
+    console.log('âœ… ExecuÃ§Ã£o criada:', execucao.id)
 
     // 2. Salvar respostas individuais
     if (respostas && Array.isArray(respostas) && respostas.length > 0) {
@@ -82,10 +82,10 @@ export async function POST(request: NextRequest) {
         .insert(respostasFormatadas)
 
       if (respostasError) {
-        console.error('❌ Erro ao salvar respostas:', respostasError)
-        // Não falhar a operação se só as respostas deram erro
+        console.error('âŒ Erro ao salvar respostas:', respostasError)
+        // NÃ£o falhar a operaÃ§Ã£o se sÃ³ as respostas deram erro
       } else {
-        console.log(`✅ ${respostasFormatadas.length} respostas salvas`)
+        console.log(`âœ… ${respostasFormatadas.length} respostas salvas`)
       }
     }
 
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
       }
       scoreResult = calcularScoreFinal(mockExecucao)
       
-      // Atualizar execução com score calculado
+      // Atualizar execuÃ§Ã£o com score calculado
       const { error: scoreError } = await supabase
         .from('checklist_execucoes')
         .update({
@@ -110,17 +110,17 @@ export async function POST(request: NextRequest) {
         .eq('id', execucao.id)
 
       if (scoreError) {
-        console.error('❌ Erro ao salvar score:', scoreError)
+        console.error('âŒ Erro ao salvar score:', scoreError)
       } else {
-        console.log(`✅ Score calculado: ${scoreResult.score_total}/100 (${scoreResult.categoria})`)
+        console.log(`âœ… Score calculado: ${scoreResult.score_total}/100 (${scoreResult.categoria})`)
       }
     } catch (scoreError) {
-      console.error('❌ Erro no cálculo de score:', scoreError)
+      console.error('âŒ Erro no cÃ¡lculo de score:', scoreError)
     }
 
-    // 4. 🔥 ENVIAR NOTIFICAÇÃO DISCORD DE CONCLUSÃO
+    // 4. ðŸ”¥ ENVIAR NOTIFICAÃ‡ÃƒO DISCORD DE CONCLUSÃƒO
     try {
-      // Buscar dados do checklist e usuário para notificação completa
+      // Buscar dados do checklist e usuÃ¡rio para notificaÃ§Ã£o completa
       const { data: checklistData } = await supabase
         .from('checklists')
         .select('nome, categoria, setor')
@@ -138,8 +138,8 @@ export async function POST(request: NextRequest) {
           id: execucao.id,
           checklist_id: checklist_id,
           titulo: checklistData.nome || 'Checklist',
-          responsavel: userData.nome || 'Usuário',
-          setor: checklistData.setor || 'Não informado',
+          responsavel: userData.nome || 'UsuÃ¡rio',
+          setor: checklistData.setor || 'NÃ£o informado',
           tempo_execucao: tempo_execucao || 0,
           total_itens: total_itens || 0,
           itens_ok: itens_ok || 0,
@@ -151,11 +151,11 @@ export async function POST(request: NextRequest) {
         }
 
         await DiscordChecklistService.sendCompletion(executionNotification)
-        console.log(`🎯 Notificação Discord enviada: ${checklistData.nome} concluído por ${userData.nome}`)
+        console.log(`ðŸŽ¯ NotificaÃ§Ã£o Discord enviada: ${checklistData.nome} concluÃ­do por ${userData.nome}`)
       }
     } catch (discordError) {
-      console.error('❌ Erro ao enviar notificação Discord:', discordError)
-      // Não falhar a operação se só o Discord der erro
+      console.error('âŒ Erro ao enviar notificaÃ§Ã£o Discord:', discordError)
+      // NÃ£o falhar a operaÃ§Ã£o se sÃ³ o Discord der erro
     }
 
     return NextResponse.json({
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('❌ Erro na API checklist-execucoes:', error)
+    console.error('âŒ Erro na API checklist-execucoes:', error)
     return NextResponse.json({
       error: 'Erro interno do servidor',
       details: error.message
@@ -184,7 +184,7 @@ export async function GET(request: NextRequest) {
 
     if (!bar_id) {
       return NextResponse.json({
-        error: 'Parâmetro bar_id é obrigatório'
+        error: 'ParÃ¢metro bar_id Ã© obrigatÃ³rio'
       }, { status: 400 })
     }
 
@@ -216,9 +216,9 @@ export async function GET(request: NextRequest) {
     const { data: execucoes, error } = await query
 
     if (error) {
-      console.error('❌ Erro ao buscar execuções:', error)
+      console.error('âŒ Erro ao buscar execuÃ§Ãµes:', error)
       return NextResponse.json({
-        error: 'Erro ao buscar execuções',
+        error: 'Erro ao buscar execuÃ§Ãµes',
         details: error.message
       }, { status: 500 })
     }
@@ -229,7 +229,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('❌ Erro na API GET checklist-execucoes:', error)
+    console.error('âŒ Erro na API GET checklist-execucoes:', error)
     return NextResponse.json({
       error: 'Erro interno do servidor',
       details: error.message

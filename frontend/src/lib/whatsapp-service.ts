@@ -1,7 +1,7 @@
-import { getSupabaseClient } from '@/lib/supabase'
+﻿import { getSupabaseClient } from '@/lib/supabase'
 
 // ========================================
-// 📱 WHATSAPP NOTIFICATION SERVICE
+// ðŸ“± WHATSAPP NOTIFICATION SERVICE
 // ========================================
 
 export interface WhatsAppConfig {
@@ -53,11 +53,11 @@ export class WhatsAppNotificationService {
   }
 
   // ========================================
-  // 🔧 CONFIGURAÇÃO E INICIALIZAÇÃO
+  // ðŸ”§ CONFIGURAÃ‡ÃƒO E INICIALIZAÃ‡ÃƒO
   // ========================================
 
   /**
-   * Inicializa o serviço carregando configurações
+   * Inicializa o serviÃ§o carregando configuraÃ§Ãµes
    */
   async initialize(): Promise<boolean> {
     try {
@@ -82,18 +82,18 @@ export class WhatsAppNotificationService {
   }
 
   /**
-   * Verifica se WhatsApp está ativo
+   * Verifica se WhatsApp estÃ¡ ativo
    */
   isActive(): boolean {
     return this.config !== null;
   }
 
   // ========================================
-  // 📞 GERENCIAMENTO DE CONTATOS
+  // ðŸ“ž GERENCIAMENTO DE CONTATOS
   // ========================================
 
   /**
-   * Busca contato WhatsApp por usuário
+   * Busca contato WhatsApp por usuÃ¡rio
    */
   async getContactByUserId(usuarioId: number): Promise<WhatsAppContact | null> {
     try {
@@ -112,7 +112,7 @@ export class WhatsAppNotificationService {
   }
 
   /**
-   * Busca contato WhatsApp por número
+   * Busca contato WhatsApp por nÃºmero
    */
   async getContactByPhone(numeroWhatsapp: string): Promise<WhatsAppContact | null> {
     try {
@@ -160,7 +160,7 @@ export class WhatsAppNotificationService {
   }
 
   // ========================================
-  // 📝 GERENCIAMENTO DE TEMPLATES
+  // ðŸ“ GERENCIAMENTO DE TEMPLATES
   // ========================================
 
   /**
@@ -184,7 +184,7 @@ export class WhatsAppNotificationService {
   }
 
   /**
-   * Lista templates por módulo
+   * Lista templates por mÃ³dulo
    */
   async getTemplatesByModule(modulo: string): Promise<WhatsAppTemplate[]> {
     try {
@@ -204,7 +204,7 @@ export class WhatsAppNotificationService {
   }
 
   // ========================================
-  // 💬 ENVIO DE MENSAGENS
+  // ðŸ’¬ ENVIO DE MENSAGENS
   // ========================================
 
   /**
@@ -216,24 +216,24 @@ export class WhatsAppNotificationService {
     error?: string;
   }> {
     if (!this.config) {
-      return { success: false, error: 'WhatsApp não configurado' };
+      return { success: false, error: 'WhatsApp nÃ£o configurado' };
     }
 
     try {
       // Buscar contato
       const contato = await this.getContactByPhone(options.destinatario);
       if (!contato) {
-        return { success: false, error: 'Contato não encontrado' };
+        return { success: false, error: 'Contato nÃ£o encontrado' };
       }
 
-      // Verificar permissões de notificação
+      // Verificar permissÃµes de notificaÃ§Ã£o
       if (!this.canSendNotification(contato, options.modulo)) {
-        return { success: false, error: 'Contato não aceita este tipo de notificação' };
+        return { success: false, error: 'Contato nÃ£o aceita este tipo de notificaÃ§Ã£o' };
       }
 
-      // Verificar horário permitido
+      // Verificar horÃ¡rio permitido
       if (!this.isWithinAllowedHours(contato)) {
-        return { success: false, error: 'Fora do horário permitido' };
+        return { success: false, error: 'Fora do horÃ¡rio permitido' };
       }
 
       // Preparar dados da mensagem
@@ -283,7 +283,7 @@ export class WhatsAppNotificationService {
 
     } catch (error) {
       console.error('Erro ao enviar mensagem WhatsApp:', error);
-      return { success: false, error: 'Erro interno do serviço' };
+      return { success: false, error: 'Erro interno do serviÃ§o' };
     }
   }
 
@@ -304,7 +304,7 @@ export class WhatsAppNotificationService {
     const template = await this.getTemplate(templateName);
     
     if (!template) {
-      return { success: false, error: 'Template não encontrado' };
+      return { success: false, error: 'Template nÃ£o encontrado' };
     }
 
     return this.sendMessage({
@@ -319,11 +319,11 @@ export class WhatsAppNotificationService {
   }
 
   // ========================================
-  // 🔗 INTEGRAÇÃO COM NOTIFICAÇÕES
+  // ðŸ”— INTEGRAÃ‡ÃƒO COM NOTIFICAÃ‡Ã•ES
   // ========================================
 
   /**
-   * Processa notificação para envio via WhatsApp
+   * Processa notificaÃ§Ã£o para envio via WhatsApp
    */
   async processNotificationForWhatsApp(notificacao: any): Promise<boolean> {
     if (!this.isActive()) {
@@ -331,7 +331,7 @@ export class WhatsAppNotificationService {
     }
 
     try {
-      // Buscar dados do usuário destinatário
+      // Buscar dados do usuÃ¡rio destinatÃ¡rio
       const supabase = await getSupabaseClient()
       const { data: usuario } = await supabase
         .from('usuarios_bar')
@@ -343,20 +343,20 @@ export class WhatsAppNotificationService {
         return false;
       }
 
-      // Buscar contato WhatsApp do usuário
+      // Buscar contato WhatsApp do usuÃ¡rio
       const contato = await this.getContactByUserId(usuario.id);
       if (!contato) {
         return false;
       }
 
-      // Determinar template baseado no tipo de notificação
+      // Determinar template baseado no tipo de notificaÃ§Ã£o
       const templateResult = await this.selectTemplateForNotification(notificacao);
       
       if (!templateResult) {
         return false;
       }
 
-      // Preparar parâmetros do template
+      // Preparar parÃ¢metros do template
       const parameters = this.prepareTemplateParameters(
         notificacao, 
         usuario, 
@@ -377,17 +377,17 @@ export class WhatsAppNotificationService {
       return result.success;
 
     } catch (error) {
-      console.error('Erro ao processar notificação para WhatsApp:', error);
+      console.error('Erro ao processar notificaÃ§Ã£o para WhatsApp:', error);
       return false;
     }
   }
 
   // ========================================
-  // 🔧 MÉTODOS PRIVADOS
+  // ðŸ”§ MÃ‰TODOS PRIVADOS
   // ========================================
 
   /**
-   * Verifica se pode enviar notificação
+   * Verifica se pode enviar notificaÃ§Ã£o
    */
   private canSendNotification(contato: WhatsAppContact, modulo: string): boolean {
     if (!contato.aceita_notificacoes) {
@@ -405,7 +405,7 @@ export class WhatsAppNotificationService {
   }
 
   /**
-   * Verifica horário permitido
+   * Verifica horÃ¡rio permitido
    */
   private isWithinAllowedHours(contato: WhatsAppContact): boolean {
     const now = new Date();
@@ -427,7 +427,7 @@ export class WhatsAppNotificationService {
     errorMessage?: string;
   }> {
     if (!this.config) {
-      return { success: false, errorMessage: 'Configuração não encontrada' };
+      return { success: false, errorMessage: 'ConfiguraÃ§Ã£o nÃ£o encontrada' };
     }
 
     try {
@@ -488,13 +488,13 @@ export class WhatsAppNotificationService {
       return {
         success: false,
         errorCode: 'NETWORK_ERROR',
-        errorMessage: 'Erro de conexão com WhatsApp API'
+        errorMessage: 'Erro de conexÃ£o com WhatsApp API'
       };
     }
   }
 
   /**
-   * Seleciona template baseado na notificação
+   * Seleciona template baseado na notificaÃ§Ã£o
    */
   private async selectTemplateForNotification(notificacao: any): Promise<{
     templateName: string;
@@ -502,7 +502,7 @@ export class WhatsAppNotificationService {
   } | null> {
     const moduleTemplates = await this.getTemplatesByModule(notificacao.modulo);
     
-    // Mapear tipos de notificação para templates
+    // Mapear tipos de notificaÃ§Ã£o para templates
     const templateMap: { [key: string]: string } = {
       'lembrete_agendamento': 'sgb_lembrete_checklist',
       'checklist_atrasado': 'sgb_checklist_atrasado',
@@ -520,7 +520,7 @@ export class WhatsAppNotificationService {
   }
 
   /**
-   * Prepara parâmetros do template
+   * Prepara parÃ¢metros do template
    */
   private prepareTemplateParameters(
     notificacao: any, 
@@ -529,7 +529,7 @@ export class WhatsAppNotificationService {
   ): string[] {
     const params: string[] = [];
     
-    // Parâmetros padrão baseados no tipo de notificação
+    // ParÃ¢metros padrÃ£o baseados no tipo de notificaÃ§Ã£o
     switch (notificacao.tipo) {
       case 'lembrete_agendamento':
         params.push(
@@ -556,7 +556,7 @@ export class WhatsAppNotificationService {
         params.push(
           notificacao.titulo || 'Checklist',
           usuario.nome,
-          '95', // pontuação
+          '95', // pontuaÃ§Ã£o
           new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
         );
         break;
@@ -567,11 +567,11 @@ export class WhatsAppNotificationService {
 }
 
 // ========================================
-// 🚀 FACTORY FUNCTION
+// ðŸš€ FACTORY FUNCTION
 // ========================================
 
 /**
- * Cria instância do WhatsApp Service
+ * Cria instÃ¢ncia do WhatsApp Service
  */
 export async function createWhatsAppService(barId: number): Promise<WhatsAppNotificationService | null> {
   const service = new WhatsAppNotificationService(barId);
@@ -581,7 +581,7 @@ export async function createWhatsAppService(barId: number): Promise<WhatsAppNoti
 } 
 
 // =====================================================
-// 📱 SERVIÇO WHATSAPP - LEMBRETES E COMPARTILHAMENTO
+// ðŸ“± SERVIÃ‡O WHATSAPP - LEMBRETES E COMPARTILHAMENTO
 // =====================================================
 
 interface ChecklistAlert {
@@ -619,72 +619,72 @@ interface WhatsAppMessageTemplates {
 }
 
 // =====================================================
-// 🔔 SISTEMA DE LEMBRETES AUTOMÁTICOS
+// ðŸ”” SISTEMA DE LEMBRETES AUTOMÃTICOS
 // =====================================================
 
 export class WhatsAppService {
   
-  // Templates padrão de mensagens
+  // Templates padrÃ£o de mensagens
   private static templates: WhatsAppMessageTemplates = {
-    reminder: `🔔 *Lembrete SGB*
+    reminder: `ðŸ”” *Lembrete SGB*
 
-Olá {FUNCIONARIO}! Você tem um checklist pendente:
+OlÃ¡ {FUNCIONARIO}! VocÃª tem um checklist pendente:
 
-📋 *{CHECKLIST_NOME}*
-⏰ Horário: {HORARIO}
-📍 Setor: {SETOR}
-⚡ Prioridade: {PRIORIDADE}
+ðŸ“‹ *{CHECKLIST_NOME}*
+â° HorÃ¡rio: {HORARIO}
+ðŸ“ Setor: {SETOR}
+âš¡ Prioridade: {PRIORIDADE}
 
-Por favor, execute o checklist no horário programado.
+Por favor, execute o checklist no horÃ¡rio programado.
 
-_Sistema de Gestão de Bares_`,
+_Sistema de GestÃ£o de Bares_`,
 
-    alert: `🚨 *ALERTA - Checklist Atrasado*
+    alert: `ðŸš¨ *ALERTA - Checklist Atrasado*
 
-⚠️ O checklist está atrasado!
+âš ï¸ O checklist estÃ¡ atrasado!
 
-📋 *{CHECKLIST_NOME}*
-👤 Responsável: {FUNCIONARIO}
-⏰ Era para: {HORARIO}
-⏱️ Atraso: {TEMPO_ATRASO}
-🎯 Nível: {NIVEL_URGENCIA}
+ðŸ“‹ *{CHECKLIST_NOME}*
+ðŸ‘¤ ResponsÃ¡vel: {FUNCIONARIO}
+â° Era para: {HORARIO}
+â±ï¸ Atraso: {TEMPO_ATRASO}
+ðŸŽ¯ NÃ­vel: {NIVEL_URGENCIA}
 
 Por favor, execute URGENTEMENTE!
 
-_Sistema de Gestão de Bares_`,
+_Sistema de GestÃ£o de Bares_`,
 
-    completion: `✅ *Checklist Concluído*
+    completion: `âœ… *Checklist ConcluÃ­do*
 
-📋 *{CHECKLIST_NOME}*
-👤 Responsável: {FUNCIONARIO}
-📍 Setor: {SETOR}
-⏱️ Tempo: {TEMPO_EXECUCAO}min
-📊 Status: {STATUS}
+ðŸ“‹ *{CHECKLIST_NOME}*
+ðŸ‘¤ ResponsÃ¡vel: {FUNCIONARIO}
+ðŸ“ Setor: {SETOR}
+â±ï¸ Tempo: {TEMPO_EXECUCAO}min
+ðŸ“Š Status: {STATUS}
 
 {RESUMO_RESULTADOS}
 
-_Sistema de Gestão de Bares_`,
+_Sistema de GestÃ£o de Bares_`,
 
-    share: `📋 *Relatório de Checklist*
+    share: `ðŸ“‹ *RelatÃ³rio de Checklist*
 
-✅ *{CHECKLIST_NOME}*
-📅 Data: {DATA}
-👤 Responsável: {FUNCIONARIO}
-📍 Setor: {SETOR}
+âœ… *{CHECKLIST_NOME}*
+ðŸ“… Data: {DATA}
+ðŸ‘¤ ResponsÃ¡vel: {FUNCIONARIO}
+ðŸ“ Setor: {SETOR}
 
-📊 *Resultados:*
-• ✅ Itens OK: {ITENS_OK}
-• ❌ Problemas: {ITENS_PROBLEMA}
-• 📊 Total: {TOTAL_ITENS}
-• ⏱️ Tempo: {TEMPO_EXECUCAO}min
+ðŸ“Š *Resultados:*
+â€¢ âœ… Itens OK: {ITENS_OK}
+â€¢ âŒ Problemas: {ITENS_PROBLEMA}
+â€¢ ðŸ“Š Total: {TOTAL_ITENS}
+â€¢ â±ï¸ Tempo: {TEMPO_EXECUCAO}min
 
 {OBSERVACOES}
 
-_Sistema de Gestão de Bares_`
+_Sistema de GestÃ£o de Bares_`
   }
 
   // =====================================================
-  // 📤 ENVIAR MENSAGEM
+  // ðŸ“¤ ENVIAR MENSAGEM
   // =====================================================
   
   static async sendMessage(to: string, message: string): Promise<boolean> {
@@ -695,7 +695,7 @@ _Sistema de Gestão de Bares_`
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          to: to.replace(/\D/g, ''), // Remove tudo que não é número
+          to: to.replace(/\D/g, ''), // Remove tudo que nÃ£o Ã© nÃºmero
           message
         })
       })
@@ -709,7 +709,7 @@ _Sistema de Gestão de Bares_`
   }
 
   // =====================================================
-  // 🔔 LEMBRETE DE CHECKLIST
+  // ðŸ”” LEMBRETE DE CHECKLIST
   // =====================================================
   
   static async sendReminder(
@@ -732,7 +732,7 @@ _Sistema de Gestão de Bares_`
   }
 
   // =====================================================
-  // 🚨 ALERTA DE ATRASO
+  // ðŸš¨ ALERTA DE ATRASO
   // =====================================================
   
   static async sendAlert(phoneNumber: string, alert: ChecklistAlert): Promise<boolean> {
@@ -742,7 +742,7 @@ _Sistema de Gestão de Bares_`
     
     const message = this.templates.alert
       .replace('{CHECKLIST_NOME}', alert.titulo)
-      .replace('{FUNCIONARIO}', alert.responsavel || 'Responsável')
+      .replace('{FUNCIONARIO}', alert.responsavel || 'ResponsÃ¡vel')
       .replace('{HORARIO}', alert.horaEsperada)
       .replace('{TEMPO_ATRASO}', tempoAtraso)
       .replace('{NIVEL_URGENCIA}', nivelUrgencia)
@@ -751,7 +751,7 @@ _Sistema de Gestão de Bares_`
   }
 
   // =====================================================
-  // ✅ CONFIRMAÇÃO DE CONCLUSÃO
+  // âœ… CONFIRMAÃ‡ÃƒO DE CONCLUSÃƒO
   // =====================================================
   
   static async sendCompletion(
@@ -774,7 +774,7 @@ _Sistema de Gestão de Bares_`
   }
 
   // =====================================================
-  // 📤 COMPARTILHAR CHECKLIST
+  // ðŸ“¤ COMPARTILHAR CHECKLIST
   // =====================================================
   
   static async shareChecklist(
@@ -784,7 +784,7 @@ _Sistema de Gestão de Bares_`
     
     const data = new Date(execution.concluido_em).toLocaleDateString('pt-BR')
     const observacoes = execution.observacoes_gerais 
-      ? `💬 *Observações:*\n${execution.observacoes_gerais}`
+      ? `ðŸ’¬ *ObservaÃ§Ãµes:*\n${execution.observacoes_gerais}`
       : ''
     
     const message = this.templates.share
@@ -801,7 +801,7 @@ _Sistema de Gestão de Bares_`
     let success = 0
     let failed = 0
 
-    // Enviar para cada número com delay para não sobrecarregar
+    // Enviar para cada nÃºmero com delay para nÃ£o sobrecarregar
     for (const phoneNumber of phoneNumbers) {
       const sent = await this.sendMessage(phoneNumber, message)
       
@@ -821,7 +821,7 @@ _Sistema de Gestão de Bares_`
   }
 
   // =====================================================
-  // 🧪 TESTE DE CONEXÃO
+  // ðŸ§ª TESTE DE CONEXÃƒO
   // =====================================================
   
   static async testConnection(phoneNumber: string): Promise<boolean> {
@@ -830,31 +830,31 @@ _Sistema de Gestão de Bares_`
       const result = await response.json()
       return result.success
     } catch (error) {
-      console.error('Erro no teste de conexão WhatsApp:', error)
+      console.error('Erro no teste de conexÃ£o WhatsApp:', error)
       return false
     }
   }
 
   // =====================================================
-  // 🔧 FUNÇÕES AUXILIARES
+  // ðŸ”§ FUNÃ‡Ã•ES AUXILIARES
   // =====================================================
   
   private static formatPrioridade(prioridade: string): string {
     const prioridades: Record<string, string> = {
-      'baixa': '🟢 Baixa',
-      'media': '🟡 Média',
-      'alta': '🟠 Alta',
-      'critica': '🔴 Crítica'
+      'baixa': 'ðŸŸ¢ Baixa',
+      'media': 'ðŸŸ¡ MÃ©dia',
+      'alta': 'ðŸŸ  Alta',
+      'critica': 'ðŸ”´ CrÃ­tica'
     }
     return prioridades[prioridade] || prioridade
   }
 
   private static formatNivelUrgencia(nivel: string): string {
     const niveis: Record<string, string> = {
-      'baixo': '🔵 BAIXO',
-      'medio': '🟡 MÉDIO',
-      'alto': '🟠 ALTO',
-      'critico': '🔴 CRÍTICO'
+      'baixo': 'ðŸ”µ BAIXO',
+      'medio': 'ðŸŸ¡ MÃ‰DIO',
+      'alto': 'ðŸŸ  ALTO',
+      'critico': 'ðŸ”´ CRÃTICO'
     }
     return niveis[nivel] || nivel.toUpperCase()
   }
@@ -876,10 +876,10 @@ _Sistema de Gestão de Bares_`
 
   private static formatStatus(status: string): string {
     const statusMap: Record<string, string> = {
-      'completed': '✅ Concluído',
-      'completed_with_issues': '⚠️ Concluído com Problemas',
-      'partial': '🔶 Parcialmente Concluído',
-      'failed': '❌ Falhou'
+      'completed': 'âœ… ConcluÃ­do',
+      'completed_with_issues': 'âš ï¸ ConcluÃ­do com Problemas',
+      'partial': 'ðŸ”¶ Parcialmente ConcluÃ­do',
+      'failed': 'âŒ Falhou'
     }
     return statusMap[status] || status
   }
@@ -890,31 +890,31 @@ _Sistema de Gestão de Bares_`
     const problemas = execution.itens_problema
     const percentualOk = total > 0 ? Math.round((ok / total) * 100) : 0
 
-    let summary = `📊 *${percentualOk}% Concluído*\n`
-    summary += `• ✅ ${ok} itens OK\n`
+    let summary = `ðŸ“Š *${percentualOk}% ConcluÃ­do*\n`
+    summary += `â€¢ âœ… ${ok} itens OK\n`
     
     if (problemas > 0) {
-      summary += `• ❌ ${problemas} problemas\n`
+      summary += `â€¢ âŒ ${problemas} problemas\n`
     }
     
-    summary += `• 📋 ${total} itens total`
+    summary += `â€¢ ðŸ“‹ ${total} itens total`
 
     // Adicionar emoji baseado na performance
     if (percentualOk >= 95) {
-      summary += '\n\n🎉 Excelente trabalho!'
+      summary += '\n\nðŸŽ‰ Excelente trabalho!'
     } else if (percentualOk >= 80) {
-      summary += '\n\n👍 Bom trabalho!'
+      summary += '\n\nðŸ‘ Bom trabalho!'
     } else if (percentualOk >= 60) {
-      summary += '\n\n⚠️ Precisa melhorar'
+      summary += '\n\nâš ï¸ Precisa melhorar'
     } else {
-      summary += '\n\n🚨 Atenção necessária'
+      summary += '\n\nðŸš¨ AtenÃ§Ã£o necessÃ¡ria'
     }
 
     return summary
   }
 
   // =====================================================
-  // 📝 TEMPLATES CUSTOMIZADOS
+  // ðŸ“ TEMPLATES CUSTOMIZADOS
   // =====================================================
   
   static setCustomTemplates(customTemplates: Partial<WhatsAppMessageTemplates>): void {
@@ -926,7 +926,7 @@ _Sistema de Gestão de Bares_`
   }
 
   // =====================================================
-  // 📊 ESTATÍSTICAS DE ENVIO
+  // ðŸ“Š ESTATÃSTICAS DE ENVIO
   // =====================================================
   
   static async getMessageStats(userId: string): Promise<{
@@ -940,13 +940,13 @@ _Sistema de Gestão de Bares_`
       const result = await response.json()
       return result
     } catch (error) {
-      console.error('Erro ao buscar estatísticas WhatsApp:', error)
+      console.error('Erro ao buscar estatÃ­sticas WhatsApp:', error)
       return { total: 0, sent: 0, failed: 0 }
     }
   }
 
   // =====================================================
-  // 🔄 PROCESSAMENTO DE LEMBRETES AUTOMÁTICOS
+  // ðŸ”„ PROCESSAMENTO DE LEMBRETES AUTOMÃTICOS
   // =====================================================
   
   static async processScheduledReminders(): Promise<void> {
@@ -955,25 +955,25 @@ _Sistema de Gestão de Bares_`
         method: 'POST'
       })
     } catch (error) {
-      console.error('Erro ao processar lembretes automáticos:', error)
+      console.error('Erro ao processar lembretes automÃ¡ticos:', error)
     }
   }
 
   // =====================================================
-  // 📱 VALIDAÇÃO DE NÚMERO
+  // ðŸ“± VALIDAÃ‡ÃƒO DE NÃšMERO
   // =====================================================
   
   static validatePhoneNumber(phoneNumber: string): boolean {
-    // Remove tudo que não é número
+    // Remove tudo que nÃ£o Ã© nÃºmero
     const cleaned = phoneNumber.replace(/\D/g, '')
     
-    // Verifica se tem pelo menos 10 dígitos (considerando números brasileiros)
+    // Verifica se tem pelo menos 10 dÃ­gitos (considerando nÃºmeros brasileiros)
     if (cleaned.length < 10) return false
     
-    // Se começar com 55 (código do Brasil), deve ter 13 dígitos
+    // Se comeÃ§ar com 55 (cÃ³digo do Brasil), deve ter 13 dÃ­gitos
     if (cleaned.startsWith('55') && cleaned.length !== 13) return false
     
-    // Se não começar com 55, deve ter 11 dígitos (com DDD)
+    // Se nÃ£o comeÃ§ar com 55, deve ter 11 dÃ­gitos (com DDD)
     if (!cleaned.startsWith('55') && cleaned.length !== 11) return false
     
     return true
@@ -982,7 +982,7 @@ _Sistema de Gestão de Bares_`
   static formatPhoneNumber(phoneNumber: string): string {
     const cleaned = phoneNumber.replace(/\D/g, '')
     
-    // Se não começar com 55, adiciona
+    // Se nÃ£o comeÃ§ar com 55, adiciona
     if (!cleaned.startsWith('55')) {
       return `55${cleaned}`
     }
@@ -992,7 +992,7 @@ _Sistema de Gestão de Bares_`
 }
 
 // =====================================================
-// 🎯 HOOK PARA WHATSAPP
+// ðŸŽ¯ HOOK PARA WHATSAPP
 // =====================================================
 
 export function useWhatsApp() {

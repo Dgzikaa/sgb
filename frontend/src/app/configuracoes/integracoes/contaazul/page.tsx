@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -42,8 +42,8 @@ export default function ContaAzulPage() {
     if (success === 'connected') {
       setStatus('connected')
       toast({
-        title: '✅ ContaAzul conectado',
-        description: 'Conexão estabelecida com sucesso!'
+        title: 'âœ… ContaAzul conectado',
+        description: 'ConexÃ£o estabelecida com sucesso!'
       })
       // Limpar URL parameters
       window.history.replaceState({}, '', window.location.pathname)
@@ -54,7 +54,7 @@ export default function ContaAzulPage() {
       setStatus('error')
       const errorMessage = getErrorMessage(error)
       toast({
-        title: '❌ Erro na conexão',
+        title: 'âŒ Erro na conexÃ£o',
         description: errorMessage,
         variant: 'destructive'
       })
@@ -66,13 +66,13 @@ export default function ContaAzulPage() {
   const getErrorMessage = (error: string): string => {
     switch (error) {
       case 'unauthorized':
-        return 'Não autorizado'
+        return 'NÃ£o autorizado'
       case 'missing_code':
-        return 'Código de autorização não recebido'
+        return 'CÃ³digo de autorizaÃ§Ã£o nÃ£o recebido'
       case 'invalid_state':
-        return 'Estado de segurança inválido'
+        return 'Estado de seguranÃ§a invÃ¡lido'
       case 'callback_error':
-        return 'Erro no processamento da autorização'
+        return 'Erro no processamento da autorizaÃ§Ã£o'
       default:
         return decodeURIComponent(error)
     }
@@ -110,7 +110,7 @@ export default function ContaAzulPage() {
         setStatus(isConnected ? 'connected' : 'idle')
       }
     } catch (error) {
-      console.error('Erro ao carregar configuração:', error)
+      console.error('Erro ao carregar configuraÃ§Ã£o:', error)
       setStatus('error')
     }
   }
@@ -118,7 +118,7 @@ export default function ContaAzulPage() {
   const conectarContaAzul = async () => {
     if (!selectedBar) {
       toast({
-        title: '❌ Erro',
+        title: 'âŒ Erro',
         description: 'Selecione um bar primeiro!',
         variant: 'destructive'
       })
@@ -129,8 +129,8 @@ export default function ContaAzulPage() {
     setStatus('connecting')
 
     try {
-      // 🔄 Tentar renovação automática do token primeiro
-      console.log('🔄 Tentando renovação automática do token...')
+      // ðŸ”„ Tentar renovaÃ§Ã£o automÃ¡tica do token primeiro
+      console.log('ðŸ”„ Tentando renovaÃ§Ã£o automÃ¡tica do token...')
       
       const response = await fetch('/api/contaazul/refresh-token', {
         method: 'POST',
@@ -145,9 +145,9 @@ export default function ContaAzulPage() {
       const result = await response.json()
 
       if (result.success) {
-        console.log('✅ Token renovado com sucesso!')
+        console.log('âœ… Token renovado com sucesso!')
         
-        // Atualizar configuração local
+        // Atualizar configuraÃ§Ã£o local
         setConfig(prev => ({
           ...prev,
           conectado: true,
@@ -159,29 +159,29 @@ export default function ContaAzulPage() {
         setStatus('connected')
         
         toast({
-          title: '✅ ContaAzul conectado!',
-          description: result.message || 'Token renovado e conexão estabelecida com sucesso!',
+          title: 'âœ… ContaAzul conectado!',
+          description: result.message || 'Token renovado e conexÃ£o estabelecida com sucesso!',
         })
         
-        // Recarregar configuração do banco
+        // Recarregar configuraÃ§Ã£o do banco
         await carregarConfiguracao()
       } else {
-        // Se a renovação falhar, mostrar erro e sugerir nova autorização
-        console.log('❌ Renovação automática falhou:', result.error)
+        // Se a renovaÃ§Ã£o falhar, mostrar erro e sugerir nova autorizaÃ§Ã£o
+        console.log('âŒ RenovaÃ§Ã£o automÃ¡tica falhou:', result.error)
         
         toast({
-          title: '❌ Renovação automática falhou',
-          description: result.error || 'É necessário fazer nova autorização. Clique em "Autorizar Nova Conexão" abaixo.',
+          title: 'âŒ RenovaÃ§Ã£o automÃ¡tica falhou',
+          description: result.error || 'Ã‰ necessÃ¡rio fazer nova autorizaÃ§Ã£o. Clique em "Autorizar Nova ConexÃ£o" abaixo.',
           variant: 'destructive'
         })
         
         setStatus('error')
       }
     } catch (error) {
-      console.error('❌ Erro na renovação automática:', error)
+      console.error('âŒ Erro na renovaÃ§Ã£o automÃ¡tica:', error)
       setStatus('error')
       toast({
-        title: '❌ Erro na conexão',
+        title: 'âŒ Erro na conexÃ£o',
         description: error instanceof Error ? error.message : 'Erro desconhecido',
         variant: 'destructive'
       })
@@ -193,7 +193,7 @@ export default function ContaAzulPage() {
   const autorizarNovaConexao = async () => {
     if (!selectedBar) {
       toast({
-        title: '❌ Erro',
+        title: 'âŒ Erro',
         description: 'Selecione um bar primeiro!',
         variant: 'destructive'
       })
@@ -204,7 +204,7 @@ export default function ContaAzulPage() {
     setStatus('connecting')
 
     try {
-      // Usar a API original para fazer nova autorização OAuth
+      // Usar a API original para fazer nova autorizaÃ§Ã£o OAuth
       const response = await fetch(`/api/contaazul/auth?action=authorize&barId=${selectedBar.id}`, {
         method: 'GET',
         headers: {
@@ -215,16 +215,16 @@ export default function ContaAzulPage() {
       const result = await response.json()
 
       if (result.success) {
-        console.log('🔗 Redirecionando para autorização OAuth:', result.authUrl)
+        console.log('ðŸ”— Redirecionando para autorizaÃ§Ã£o OAuth:', result.authUrl)
         window.location.href = result.authUrl
       } else {
-        throw new Error(result.error || 'Erro na autorização')
+        throw new Error(result.error || 'Erro na autorizaÃ§Ã£o')
       }
     } catch (error) {
-      console.error('❌ Erro na autorização OAuth:', error)
+      console.error('âŒ Erro na autorizaÃ§Ã£o OAuth:', error)
       setStatus('error')
       toast({
-        title: '❌ Erro na autorização',
+        title: 'âŒ Erro na autorizaÃ§Ã£o',
         description: error instanceof Error ? error.message : 'Erro desconhecido',
         variant: 'destructive'
       })
@@ -254,7 +254,7 @@ export default function ContaAzulPage() {
         setConfig({ conectado: false })
         setStatus('idle')
         toast({
-          title: '✅ Desconectado',
+          title: 'âœ… Desconectado',
           description: 'ContaAzul desconectado com sucesso!'
         })
       } else {
@@ -264,7 +264,7 @@ export default function ContaAzulPage() {
     } catch (error) {
       console.error('Erro ao desconectar:', error)
       toast({
-        title: '❌ Erro ao desconectar',
+        title: 'âŒ Erro ao desconectar',
         description: error instanceof Error ? error.message : 'Erro desconhecido',
         variant: 'destructive'
       })
@@ -294,16 +294,16 @@ export default function ContaAzulPage() {
         await carregarConfiguracao()
         const summary = result.resultado || {}
         toast({
-          title: '✅ Sincronização concluída',
+          title: 'âœ… SincronizaÃ§Ã£o concluÃ­da',
           description: `Dados sincronizados com sucesso!`
         })
       } else {
-        throw new Error(result.error || 'Erro na sincronização')
+        throw new Error(result.error || 'Erro na sincronizaÃ§Ã£o')
       }
     } catch (error) {
-      console.error('Erro na sincronização:', error)
+      console.error('Erro na sincronizaÃ§Ã£o:', error)
       toast({
-        title: '❌ Erro na sincronização',
+        title: 'âŒ Erro na sincronizaÃ§Ã£o',
         description: error instanceof Error ? error.message : 'Erro desconhecido',
         variant: 'destructive'
       })
@@ -312,7 +312,7 @@ export default function ContaAzulPage() {
     }
   }
 
-  // Função para obter o ícone do status
+  // FunÃ§Ã£o para obter o Ã­cone do status
   const getStatusIcon = () => {
     switch (status) {
       case 'connected':
@@ -326,7 +326,7 @@ export default function ContaAzulPage() {
     }
   }
 
-  // Função para obter o texto do status
+  // FunÃ§Ã£o para obter o texto do status
   const getStatusText = () => {
     switch (status) {
       case 'connected':
@@ -334,9 +334,9 @@ export default function ContaAzulPage() {
       case 'connecting':
         return 'Conectando...'
       case 'error':
-        return 'Erro na conexão'
+        return 'Erro na conexÃ£o'
       default:
-        return 'Não conectado'
+        return 'NÃ£o conectado'
     }
   }
 
@@ -360,7 +360,7 @@ export default function ContaAzulPage() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">ContaAzul</h1>
-                <p className="text-gray-600">Integração com sistema financeiro</p>
+                <p className="text-gray-600">IntegraÃ§Ã£o com sistema financeiro</p>
               </div>
             </div>
           </div>
@@ -375,16 +375,16 @@ export default function ContaAzulPage() {
 
         {/* Grid de Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Status da Conexão */}
+          {/* Status da ConexÃ£o */}
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Link2 className="w-5 h-5" />
-                  Status da Integração
+                  Status da IntegraÃ§Ã£o
                 </CardTitle>
                 <CardDescription>
-                  Acompanhe o status da conexão com o ContaAzul
+                  Acompanhe o status da conexÃ£o com o ContaAzul
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -406,7 +406,7 @@ export default function ContaAzulPage() {
                       )}
                       {config.ultima_sync && (
                         <div className="text-sm text-gray-500">
-                          Última sincronização: {new Date(config.ultima_sync).toLocaleString('pt-BR')}
+                          Ãšltima sincronizaÃ§Ã£o: {new Date(config.ultima_sync).toLocaleString('pt-BR')}
                         </div>
                       )}
                     </div>
@@ -459,7 +459,7 @@ export default function ContaAzulPage() {
                           size="sm"
                         >
                           <Link2 className="w-4 h-4 mr-2" />
-                          Autorizar Nova Conexão
+                          Autorizar Nova ConexÃ£o
                         </Button>
                       </>
                     )}
@@ -469,19 +469,19 @@ export default function ContaAzulPage() {
             </Card>
           </div>
 
-          {/* Informações Rápidas */}
+          {/* InformaÃ§Ãµes RÃ¡pidas */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Database className="w-5 h-5" />
-                Informações
+                InformaÃ§Ãµes
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
                 <Shield className="w-5 h-5 text-blue-600" />
                 <div>
-                  <div className="font-medium text-blue-900">Segurança</div>
+                  <div className="font-medium text-blue-900">SeguranÃ§a</div>
                   <div className="text-sm text-blue-700">OAuth 2.0</div>
                 </div>
               </div>
@@ -489,8 +489,8 @@ export default function ContaAzulPage() {
               <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
                 <Database className="w-5 h-5 text-green-600" />
                 <div>
-                  <div className="font-medium text-green-900">Sincronização</div>
-                  <div className="text-sm text-green-700">Automática</div>
+                  <div className="font-medium text-green-900">SincronizaÃ§Ã£o</div>
+                  <div className="text-sm text-green-700">AutomÃ¡tica</div>
                 </div>
               </div>
             </CardContent>
@@ -500,9 +500,9 @@ export default function ContaAzulPage() {
         {/* Como Funciona */}
         <Card>
           <CardHeader>
-            <CardTitle>Como funciona a integração</CardTitle>
+            <CardTitle>Como funciona a integraÃ§Ã£o</CardTitle>
             <CardDescription>
-              Entenda como a integração com o ContaAzul funciona em sua empresa
+              Entenda como a integraÃ§Ã£o com o ContaAzul funciona em sua empresa
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -513,9 +513,9 @@ export default function ContaAzulPage() {
                     <Shield className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-blue-900 mb-2">Conexão Segura</h4>
+                    <h4 className="font-semibold text-blue-900 mb-2">ConexÃ£o Segura</h4>
                     <p className="text-sm text-blue-700">
-                      Utilizamos OAuth 2.0 para garantir a máxima segurança na conexão 
+                      Utilizamos OAuth 2.0 para garantir a mÃ¡xima seguranÃ§a na conexÃ£o 
                       com seus dados do ContaAzul.
                     </p>
                   </div>
@@ -526,9 +526,9 @@ export default function ContaAzulPage() {
                     <Database className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-green-900 mb-2">Sincronização Automática</h4>
+                    <h4 className="font-semibold text-green-900 mb-2">SincronizaÃ§Ã£o AutomÃ¡tica</h4>
                     <p className="text-sm text-green-700">
-                      Seus dados financeiros são sincronizados automaticamente, 
+                      Seus dados financeiros sÃ£o sincronizados automaticamente, 
                       mantendo tudo sempre atualizado.
                     </p>
                   </div>
@@ -543,7 +543,7 @@ export default function ContaAzulPage() {
                   <div>
                     <h4 className="font-semibold text-purple-900 mb-2">Dados em Tempo Real</h4>
                     <p className="text-sm text-purple-700">
-                      Receitas, despesas e categorias são atualizadas 
+                      Receitas, despesas e categorias sÃ£o atualizadas 
                       automaticamente no sistema.
                     </p>
                   </div>
@@ -554,10 +554,10 @@ export default function ContaAzulPage() {
                     <CheckCircle className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-orange-900 mb-2">Fácil de Usar</h4>
+                    <h4 className="font-semibold text-orange-900 mb-2">FÃ¡cil de Usar</h4>
                     <p className="text-sm text-orange-700">
                       Basta clicar em "Conectar" e autorizar o acesso. 
-                      Tudo é configurado automaticamente.
+                      Tudo Ã© configurado automaticamente.
                     </p>
                   </div>
                 </div>
@@ -571,8 +571,8 @@ export default function ContaAzulPage() {
                   <div>
                     <h4 className="font-semibold text-yellow-800">Primeiro acesso</h4>
                     <p className="text-sm text-yellow-700 mt-1">
-                      Para começar a usar a integração, clique em "Conectar ContaAzul" e 
-                      autorize o acesso aos seus dados financeiros. O processo é rápido e seguro.
+                      Para comeÃ§ar a usar a integraÃ§Ã£o, clique em "Conectar ContaAzul" e 
+                      autorize o acesso aos seus dados financeiros. O processo Ã© rÃ¡pido e seguro.
                     </p>
                   </div>
                 </div>

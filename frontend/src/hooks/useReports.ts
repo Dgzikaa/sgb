@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+﻿import { useState, useEffect, useCallback } from 'react'
 import { api } from '@/lib/api-client'
 
 // =====================================================
@@ -158,26 +158,26 @@ interface UseReportsResult {
   paginacaoTemplates: any
   paginacaoExecucoes: any
   
-  // Ações para templates
+  // AÃ§Ãµes para templates
   carregarTemplates: (filtros?: FiltrosTemplates) => Promise<void>
   carregarTemplate: (id: string) => Promise<void>
   criarTemplate: (dados: NovoTemplate) => Promise<boolean>
   atualizarTemplate: (id: string, dados: Partial<NovoTemplate>) => Promise<boolean>
   excluirTemplate: (id: string) => Promise<boolean>
   
-  // Ações para execuções
+  // AÃ§Ãµes para execuÃ§Ãµes
   carregarExecucoes: (filtros?: FiltrosExecucoes) => Promise<void>
   carregarExecucao: (id: string) => Promise<void>
   executarRelatorio: (dados: ExecutarRelatorio) => Promise<string | null>
   cancelarExecucao: (id: string) => Promise<boolean>
   baixarRelatorio: (execucaoId: string) => Promise<void>
   
-  // Ações para relatórios personalizados
+  // AÃ§Ãµes para relatÃ³rios personalizados
   carregarRelatoriosPersonalizados: () => Promise<void>
   salvarRelatorioPersonalizado: (dados: any) => Promise<boolean>
   excluirRelatorioPersonalizado: (id: string) => Promise<boolean>
   
-  // Utilitários
+  // UtilitÃ¡rios
   obterTemplatesPorCategoria: (categoria: string) => Template[]
   formatarDadosParaExportacao: (dados: any[], template: Template) => any[]
   validarFiltrosTemplate: (template: Template, filtros: Record<string, any>) => { valido: boolean, erros: string[] }
@@ -209,7 +209,7 @@ export function useReports(): UseReportsResult {
   const [paginacaoExecucoes, setPaginacaoExecucoes] = useState(null)
 
   // =====================================================
-  // AÇÕES PARA TEMPLATES
+  // AÃ‡Ã•ES PARA TEMPLATES
   // =====================================================
 
   const carregarTemplates = useCallback(async (filtros: FiltrosTemplates = {}) => {
@@ -269,7 +269,7 @@ export function useReports(): UseReportsResult {
       const response = await api.post('/api/reports/templates', dados)
 
       if (response.success) {
-        console.log('📊 Template criado com sucesso!')
+        console.log('ðŸ“Š Template criado com sucesso!')
         await carregarTemplates()
         return true
       } else {
@@ -293,7 +293,7 @@ export function useReports(): UseReportsResult {
       const response = await api.put(`/api/reports/templates/${id}`, dados)
 
       if (response.success) {
-        console.log('📊 Template atualizado com sucesso!')
+        console.log('ðŸ“Š Template atualizado com sucesso!')
         await carregarTemplates()
         if (templateAtual?.id === id) {
           await carregarTemplate(id)
@@ -320,7 +320,7 @@ export function useReports(): UseReportsResult {
       const response = await api.delete(`/api/reports/templates/${id}`)
 
       if (response.success) {
-        console.log('🗑️ Template excluído com sucesso!')
+        console.log('ðŸ—‘ï¸ Template excluÃ­do com sucesso!')
         setTemplates(prev => prev.filter((t: any) => t.id !== id))
         if (templateAtual?.id === id) {
           setTemplateAtual(null)
@@ -340,7 +340,7 @@ export function useReports(): UseReportsResult {
   }, [templateAtual])
 
   // =====================================================
-  // AÇÕES PARA EXECUÇÕES
+  // AÃ‡Ã•ES PARA EXECUÃ‡Ã•ES
   // =====================================================
 
   const carregarExecucoes = useCallback(async (filtros: FiltrosExecucoes = {}) => {
@@ -362,11 +362,11 @@ export function useReports(): UseReportsResult {
         setEstatisticasExecucoes(response.data.estatisticas)
         setPaginacaoExecucoes(response.data.paginacao)
       } else {
-        setError(response.error || 'Erro ao carregar execuções')
+        setError(response.error || 'Erro ao carregar execuÃ§Ãµes')
       }
     } catch (err: any) {
-      console.error('Erro ao carregar execuções:', err)
-      setError('Erro ao carregar execuções')
+      console.error('Erro ao carregar execuÃ§Ãµes:', err)
+      setError('Erro ao carregar execuÃ§Ãµes')
     } finally {
       setLoadingExecucoes(false)
     }
@@ -382,11 +382,11 @@ export function useReports(): UseReportsResult {
       if (response.success) {
         setExecucaoAtual(response.data)
       } else {
-        setError(response.error || 'Erro ao carregar execução')
+        setError(response.error || 'Erro ao carregar execuÃ§Ã£o')
       }
     } catch (err: any) {
-      console.error('Erro ao carregar execução:', err)
-      setError('Erro ao carregar execução')
+      console.error('Erro ao carregar execuÃ§Ã£o:', err)
+      setError('Erro ao carregar execuÃ§Ã£o')
     } finally {
       setLoading(false)
     }
@@ -400,19 +400,19 @@ export function useReports(): UseReportsResult {
       const response = await api.post('/api/reports/execute', dados)
 
       if (response.success) {
-        console.log('🚀 Relatório enviado para processamento!')
+        console.log('ðŸš€ RelatÃ³rio enviado para processamento!')
         
-        // Recarregar execuções para mostrar a nova
+        // Recarregar execuÃ§Ãµes para mostrar a nova
         await carregarExecucoes()
         
         return response.data.execucao_id
       } else {
-        setError(response.error || 'Erro ao executar relatório')
+        setError(response.error || 'Erro ao executar relatÃ³rio')
         return null
       }
     } catch (err: any) {
-      console.error('Erro ao executar relatório:', err)
-      setError('Erro ao executar relatório')
+      console.error('Erro ao executar relatÃ³rio:', err)
+      setError('Erro ao executar relatÃ³rio')
       return null
     } finally {
       setExecuting(false)
@@ -427,16 +427,16 @@ export function useReports(): UseReportsResult {
       const response = await api.put(`/api/reports/execute/${id}`, { action: 'cancel' })
 
       if (response.success) {
-        console.log('⏹️ Execução cancelada!')
+        console.log('â¹ï¸ ExecuÃ§Ã£o cancelada!')
         await carregarExecucoes()
         return true
       } else {
-        setError(response.error || 'Erro ao cancelar execução')
+        setError(response.error || 'Erro ao cancelar execuÃ§Ã£o')
         return false
       }
     } catch (err: any) {
-      console.error('Erro ao cancelar execução:', err)
-      setError('Erro ao cancelar execução')
+      console.error('Erro ao cancelar execuÃ§Ã£o:', err)
+      setError('Erro ao cancelar execuÃ§Ã£o')
       return false
     } finally {
       setLoading(false)
@@ -447,11 +447,11 @@ export function useReports(): UseReportsResult {
     try {
       const execucao = execucoes.find((e: any) => e.id === execucaoId)
       if (!execucao || !execucao.arquivo_url) {
-        setError('Arquivo do relatório não encontrado')
+        setError('Arquivo do relatÃ³rio nÃ£o encontrado')
         return
       }
 
-      // Simular download (em produção seria redirect ou fetch do arquivo)
+      // Simular download (em produÃ§Ã£o seria redirect ou fetch do arquivo)
       const link = document.createElement('a')
       link.href = execucao.arquivo_url
       link.download = `relatorio_${execucao.template?.nome?.toLowerCase().replace(/\s+/g, '_')}.${execucao.formato_exportacao}`
@@ -459,16 +459,16 @@ export function useReports(): UseReportsResult {
       link.click()
       document.body.removeChild(link)
 
-      console.log(`📥 Download iniciado: ${execucao.template?.nome}`)
+      console.log(`ðŸ“¥ Download iniciado: ${execucao.template?.nome}`)
 
     } catch (err: any) {
-      console.error('Erro ao baixar relatório:', err)
-      setError('Erro ao baixar relatório')
+      console.error('Erro ao baixar relatÃ³rio:', err)
+      setError('Erro ao baixar relatÃ³rio')
     }
   }, [execucoes])
 
   // =====================================================
-  // AÇÕES PARA RELATÓRIOS PERSONALIZADOS
+  // AÃ‡Ã•ES PARA RELATÃ“RIOS PERSONALIZADOS
   // =====================================================
 
   const carregarRelatoriosPersonalizados = useCallback(async () => {
@@ -481,11 +481,11 @@ export function useReports(): UseReportsResult {
       if (response.success) {
         setRelatoriosPersonalizados(response.data.relatorios || [])
       } else {
-        setError(response.error || 'Erro ao carregar relatórios personalizados')
+        setError(response.error || 'Erro ao carregar relatÃ³rios personalizados')
       }
     } catch (err: any) {
-      console.error('Erro ao carregar relatórios personalizados:', err)
-      setError('Erro ao carregar relatórios personalizados')
+      console.error('Erro ao carregar relatÃ³rios personalizados:', err)
+      setError('Erro ao carregar relatÃ³rios personalizados')
     } finally {
       setLoading(false)
     }
@@ -499,16 +499,16 @@ export function useReports(): UseReportsResult {
       const response = await api.post('/api/reports/personalized', dados)
 
       if (response.success) {
-        console.log('💾 Relatório personalizado salvo!')
+        console.log('ðŸ’¾ RelatÃ³rio personalizado salvo!')
         await carregarRelatoriosPersonalizados()
         return true
       } else {
-        setError(response.error || 'Erro ao salvar relatório personalizado')
+        setError(response.error || 'Erro ao salvar relatÃ³rio personalizado')
         return false
       }
     } catch (err: any) {
-      console.error('Erro ao salvar relatório personalizado:', err)
-      setError('Erro ao salvar relatório personalizado')
+      console.error('Erro ao salvar relatÃ³rio personalizado:', err)
+      setError('Erro ao salvar relatÃ³rio personalizado')
       return false
     } finally {
       setCreating(false)
@@ -523,16 +523,16 @@ export function useReports(): UseReportsResult {
       const response = await api.delete(`/api/reports/personalized/${id}`)
 
       if (response.success) {
-        console.log('🗑️ Relatório personalizado excluído!')
+        console.log('ðŸ—‘ï¸ RelatÃ³rio personalizado excluÃ­do!')
         setRelatoriosPersonalizados(prev => prev.filter((r: any) => r.id !== id))
         return true
       } else {
-        setError(response.error || 'Erro ao excluir relatório personalizado')
+        setError(response.error || 'Erro ao excluir relatÃ³rio personalizado')
         return false
       }
     } catch (err: any) {
-      console.error('Erro ao excluir relatório personalizado:', err)
-      setError('Erro ao excluir relatório personalizado')
+      console.error('Erro ao excluir relatÃ³rio personalizado:', err)
+      setError('Erro ao excluir relatÃ³rio personalizado')
       return false
     } finally {
       setLoading(false)
@@ -540,7 +540,7 @@ export function useReports(): UseReportsResult {
   }, [])
 
   // =====================================================
-  // UTILITÁRIOS
+  // UTILITÃRIOS
   // =====================================================
 
   const obterTemplatesPorCategoria = useCallback((categoria: string): Template[] => {
@@ -583,20 +583,20 @@ export function useReports(): UseReportsResult {
     
     Object.entries(configFiltros).forEach(([filtro, config]: [string, any]) => {
       if (config.obrigatorio && (!filtros[filtro] || filtros[filtro] === '')) {
-        erros.push(`${config.label || filtro} é obrigatório`)
+        erros.push(`${config.label || filtro} Ã© obrigatÃ³rio`)
       }
       
       if (config.tipo === 'data' && filtros[filtro]) {
         const data = new Date(filtros[filtro])
         if (isNaN(data.getTime())) {
-          erros.push(`${config.label || filtro} deve ser uma data válida`)
+          erros.push(`${config.label || filtro} deve ser uma data vÃ¡lida`)
         }
       }
       
       if (config.tipo === 'numero' && filtros[filtro]) {
         const numero = parseFloat(filtros[filtro])
         if (isNaN(numero)) {
-          erros.push(`${config.label || filtro} deve ser um número válido`)
+          erros.push(`${config.label || filtro} deve ser um nÃºmero vÃ¡lido`)
         }
       }
     })
@@ -638,26 +638,26 @@ export function useReports(): UseReportsResult {
     paginacaoTemplates,
     paginacaoExecucoes,
     
-    // Ações para templates
+    // AÃ§Ãµes para templates
     carregarTemplates,
     carregarTemplate,
     criarTemplate,
     atualizarTemplate,
     excluirTemplate,
     
-    // Ações para execuções
+    // AÃ§Ãµes para execuÃ§Ãµes
     carregarExecucoes,
     carregarExecucao,
     executarRelatorio,
     cancelarExecucao,
     baixarRelatorio,
     
-    // Ações para relatórios personalizados
+    // AÃ§Ãµes para relatÃ³rios personalizados
     carregarRelatoriosPersonalizados,
     salvarRelatorioPersonalizado,
     excluirRelatorioPersonalizado,
     
-    // Utilitários
+    // UtilitÃ¡rios
     obterTemplatesPorCategoria,
     formatarDadosParaExportacao,
     validarFiltrosTemplate,
@@ -737,7 +737,7 @@ export function useReportExecutions() {
 }
 
 // =====================================================
-// UTILITÁRIOS EXPORTADOS
+// UTILITÃRIOS EXPORTADOS
 // =====================================================
 
 export function formatarStatusExecucao(status: string): { label: string, cor: string, icone: string } {
@@ -747,7 +747,7 @@ export function formatarStatusExecucao(status: string): { label: string, cor: st
     case 'processando':
       return { label: 'Processando', cor: 'blue', icone: 'Loader' }
     case 'concluido':
-      return { label: 'Concluído', cor: 'green', icone: 'CheckCircle' }
+      return { label: 'ConcluÃ­do', cor: 'green', icone: 'CheckCircle' }
     case 'erro':
       return { label: 'Erro', cor: 'red', icone: 'XCircle' }
     default:

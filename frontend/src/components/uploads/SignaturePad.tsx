@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useRef, useState, useEffect, useCallback } from 'react'
 import { Pen, RotateCcw, Check, X } from 'lucide-react'
@@ -34,24 +34,24 @@ export default function SignaturePad({
   const { uploadFile } = useFileUpload()
 
   // Debug logs
-  console.log('🔧 SignaturePad renderizado', { isEmpty, isUploading, onSignatureComplete })
+  console.log('ðŸ”§ SignaturePad renderizado', { isEmpty, isUploading, onSignatureComplete })
 
   // Configurar canvas
   useEffect(() => {
-    console.log('🎨 Configurando canvas...')
+    console.log('ðŸŽ¨ Configurando canvas...')
     const canvas = canvasRef.current
     if (!canvas) {
-      console.error('❌ Canvas não encontrado')
+      console.error('âŒ Canvas nÃ£o encontrado')
       return
     }
 
     const ctx = canvas.getContext('2d')
     if (!ctx) {
-      console.error('❌ Context 2d não disponível')
+      console.error('âŒ Context 2d nÃ£o disponÃ­vel')
       return
     }
 
-    // Configurar estilo do traço
+    // Configurar estilo do traÃ§o
     ctx.strokeStyle = strokeColor
     ctx.lineWidth = strokeWidth
     ctx.lineCap = 'round'
@@ -61,10 +61,10 @@ export default function SignaturePad({
     ctx.fillStyle = backgroundColor
     ctx.fillRect(0, 0, width, height)
     
-    console.log('✅ Canvas configurado', { width, height, strokeColor, strokeWidth })
+    console.log('âœ… Canvas configurado', { width, height, strokeColor, strokeWidth })
   }, [strokeColor, strokeWidth, backgroundColor, width, height])
 
-  // Obter posição do mouse/toque relativa ao canvas
+  // Obter posiÃ§Ã£o do mouse/toque relativa ao canvas
   const getPointerPosition = useCallback((event: React.MouseEvent | React.TouchEvent) => {
     const canvas = canvasRef.current
     if (!canvas) return { x: 0, y: 0 }
@@ -92,12 +92,12 @@ export default function SignaturePad({
   // Iniciar desenho
   const startDrawing = useCallback((event: React.MouseEvent | React.TouchEvent) => {
     event.preventDefault()
-    console.log('🖊️ Iniciando desenho...')
+    console.log('ðŸ–Šï¸ Iniciando desenho...')
     
     const canvas = canvasRef.current
     const ctx = canvas?.getContext('2d')
     if (!canvas || !ctx) {
-      console.error('❌ Canvas ou context não disponível para desenho')
+      console.error('âŒ Canvas ou context nÃ£o disponÃ­vel para desenho')
       return
     }
 
@@ -108,7 +108,7 @@ export default function SignaturePad({
     ctx.beginPath()
     ctx.moveTo(pos.x, pos.y)
     
-    console.log('✅ Desenho iniciado em', pos)
+    console.log('âœ… Desenho iniciado em', pos)
   }, [getPointerPosition])
 
   // Desenhar
@@ -129,13 +129,13 @@ export default function SignaturePad({
   // Parar desenho
   const stopDrawing = useCallback((event: React.MouseEvent | React.TouchEvent) => {
     event.preventDefault()
-    console.log('🖊️ Parando desenho...')
+    console.log('ðŸ–Šï¸ Parando desenho...')
     setIsDrawing(false)
   }, [])
 
   // Limpar assinatura
   const clearSignature = useCallback(() => {
-    console.log('🧹 Limpando assinatura...')
+    console.log('ðŸ§¹ Limpando assinatura...')
     const canvas = canvasRef.current
     const ctx = canvas?.getContext('2d')
     if (!canvas || !ctx) return
@@ -143,26 +143,26 @@ export default function SignaturePad({
     ctx.fillStyle = backgroundColor
     ctx.fillRect(0, 0, width, height)
     setIsEmpty(true)
-    console.log('✅ Assinatura limpa')
+    console.log('âœ… Assinatura limpa')
   }, [backgroundColor, width, height])
 
   // Converter canvas para blob
   const canvasToBlob = useCallback((): Promise<Blob> => {
     return new Promise((resolve, reject) => {
-      console.log('🔄 Convertendo canvas para blob...')
+      console.log('ðŸ”„ Convertendo canvas para blob...')
       const canvas = canvasRef.current
       if (!canvas) {
-        console.error('❌ Canvas não encontrado para conversão')
-        reject(new Error('Canvas não encontrado'))
+        console.error('âŒ Canvas nÃ£o encontrado para conversÃ£o')
+        reject(new Error('Canvas nÃ£o encontrado'))
         return
       }
 
       canvas.toBlob((blob) => {
         if (blob) {
-          console.log('✅ Canvas convertido para blob', { size: blob.size, type: blob.type })
+          console.log('âœ… Canvas convertido para blob', { size: blob.size, type: blob.type })
           resolve(blob)
         } else {
-          console.error('❌ Falha ao converter canvas para blob')
+          console.error('âŒ Falha ao converter canvas para blob')
           reject(new Error('Falha ao converter assinatura'))
         }
       }, 'image/png', 1.0)
@@ -171,29 +171,29 @@ export default function SignaturePad({
 
   // Salvar assinatura
   const saveSignature = useCallback(async () => {
-    console.log('💾 Tentando salvar assinatura...', { isEmpty, isUploading })
+    console.log('ðŸ’¾ Tentando salvar assinatura...', { isEmpty, isUploading })
     
     if (isEmpty) {
-      console.warn('⚠️ Assinatura está vazia')
+      console.warn('âš ï¸ Assinatura estÃ¡ vazia')
       if (onError) {
-        onError('Por favor, faça sua assinatura primeiro')
+        onError('Por favor, faÃ§a sua assinatura primeiro')
       }
       return
     }
 
     if (isUploading) {
-      console.warn('⚠️ Upload já em andamento')
+      console.warn('âš ï¸ Upload jÃ¡ em andamento')
       return
     }
 
     setIsUploading(true)
 
     try {
-      console.log('📤 Iniciando processo de upload da assinatura...')
+      console.log('ðŸ“¤ Iniciando processo de upload da assinatura...')
       
       // Converter canvas para blob
       const blob = await canvasToBlob()
-      console.log('✅ Blob criado:', { size: blob.size, type: blob.type })
+      console.log('âœ… Blob criado:', { size: blob.size, type: blob.type })
       
       // Criar arquivo
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
@@ -202,52 +202,52 @@ export default function SignaturePad({
         type: 'image/png' 
       })
       
-      console.log('📄 Arquivo criado:', { name: file.name, size: file.size, type: file.type })
+      console.log('ðŸ“„ Arquivo criado:', { name: file.name, size: file.size, type: file.type })
 
       // Fazer upload
-      console.log('☁️ Fazendo upload para Supabase...')
+      console.log('â˜ï¸ Fazendo upload para Supabase...')
       const result = await uploadFile(file, {
         folder: 'signatures',
-        compress: false // Não comprimir assinaturas
+        compress: false // NÃ£o comprimir assinaturas
       })
 
-      console.log('✅ Assinatura salva com sucesso:', result)
+      console.log('âœ… Assinatura salva com sucesso:', result)
 
       if (onSignatureComplete) {
-        console.log('📞 Chamando onSignatureComplete com resultado:', result)
+        console.log('ðŸ“ž Chamando onSignatureComplete com resultado:', result)
         onSignatureComplete(result)
       } else {
-        console.warn('⚠️ onSignatureComplete não está definido')
+        console.warn('âš ï¸ onSignatureComplete nÃ£o estÃ¡ definido')
       }
 
     } catch (error: any) {
-      console.error('❌ Erro ao salvar assinatura:', error)
+      console.error('âŒ Erro ao salvar assinatura:', error)
       
       if (onError) {
         onError(error.message)
       }
     } finally {
       setIsUploading(false)
-      console.log('🏁 Processo de upload finalizado')
+      console.log('ðŸ Processo de upload finalizado')
     }
   }, [isEmpty, isUploading, canvasToBlob, uploadFile, onSignatureComplete, onError])
 
   // Cancelar assinatura
   const cancelSignature = useCallback(() => {
-    console.log('❌ Cancelando assinatura...')
+    console.log('âŒ Cancelando assinatura...')
     clearSignature()
     
     if (onSignatureCancel) {
-      console.log('📞 Chamando onSignatureCancel')
+      console.log('ðŸ“ž Chamando onSignatureCancel')
       onSignatureCancel()
     } else {
-      console.warn('⚠️ onSignatureCancel não está definido')
+      console.warn('âš ï¸ onSignatureCancel nÃ£o estÃ¡ definido')
     }
   }, [clearSignature, onSignatureCancel])
 
   return (
     <div className={`border rounded-lg p-4 bg-gray-50 ${className}`}>
-      {/* Título */}
+      {/* TÃ­tulo */}
       <div className="flex items-center gap-2 mb-3">
         <Pen size={18} className="text-gray-600" />
         <h3 className="text-sm font-medium text-gray-700">Assinatura Digital</h3>
@@ -276,17 +276,17 @@ export default function SignaturePad({
         <strong>Debug:</strong> isEmpty: {isEmpty.toString()}, isDrawing: {isDrawing.toString()}, isUploading: {isUploading.toString()}
       </div>
 
-      {/* Instruções */}
+      {/* InstruÃ§Ãµes */}
       <p className="text-xs text-gray-500 mb-4">
-        📝 Assine no espaço acima usando o mouse ou toque na tela
+        ðŸ“ Assine no espaÃ§o acima usando o mouse ou toque na tela
       </p>
 
-      {/* Botões */}
+      {/* BotÃµes */}
       <div className="flex flex-col sm:flex-row gap-2">
         <button
           type="button"
           onClick={() => {
-            console.log('🧹 Botão Limpar clicado')
+            console.log('ðŸ§¹ BotÃ£o Limpar clicado')
             clearSignature()
           }}
           disabled={isEmpty || isUploading}
@@ -299,7 +299,7 @@ export default function SignaturePad({
         <button
           type="button"
           onClick={() => {
-            console.log('💾 Botão Confirmar clicado')
+            console.log('ðŸ’¾ BotÃ£o Confirmar clicado')
             saveSignature()
           }}
           disabled={isEmpty || isUploading}
@@ -313,7 +313,7 @@ export default function SignaturePad({
           <button
             type="button"
             onClick={() => {
-              console.log('❌ Botão Cancelar clicado')
+              console.log('âŒ BotÃ£o Cancelar clicado')
               cancelSignature()
             }}
             disabled={isUploading}

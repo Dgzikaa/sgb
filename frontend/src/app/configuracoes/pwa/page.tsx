@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { PWAStatus } from '@/components/PWAStatus'
@@ -32,7 +32,7 @@ export default function PWAPage() {
   const [platform, setPlatform] = useState<'desktop' | 'mobile' | 'unknown'>('unknown')
 
   useEffect(() => {
-    setPageTitle('PWA - Configurações')
+    setPageTitle('PWA - ConfiguraÃ§Ãµes')
     return () => setPageTitle('')
   }, [setPageTitle])
 
@@ -50,7 +50,7 @@ export default function PWAPage() {
     window.addEventListener('offline', handleOffline)
     setIsOnline(navigator.onLine)
 
-    // Capturar evento de instalação
+    // Capturar evento de instalaÃ§Ã£o
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault()
       setInstallPrompt(e)
@@ -69,11 +69,11 @@ export default function PWAPage() {
     if (installPrompt) {
       installPrompt.prompt()
       const { outcome } = await installPrompt.userChoice
-      console.log(`PWA instalação: ${outcome}`)
+      console.log(`PWA instalaÃ§Ã£o: ${outcome}`)
       setInstallPrompt(null)
     } else {
-      // Fallback para instruções manuais
-      alert('Para instalar, use o menu do navegador ou clique no ícone de instalação na barra de endereços.')
+      // Fallback para instruÃ§Ãµes manuais
+      alert('Para instalar, use o menu do navegador ou clique no Ã­cone de instalaÃ§Ã£o na barra de endereÃ§os.')
     }
   }
 
@@ -86,7 +86,7 @@ export default function PWAPage() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Progressive Web App</h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Instale o SGB como aplicativo nativo para melhor experiência
+                Instale o SGB como aplicativo nativo para melhor experiÃªncia
               </p>
             </div>
             
@@ -105,7 +105,7 @@ export default function PWAPage() {
             </div>
           </div>
 
-          {/* Status e Instalação */}
+          {/* Status e InstalaÃ§Ã£o */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Status atual */}
             <Card className="lg:col-span-2">
@@ -116,7 +116,7 @@ export default function PWAPage() {
                   ) : (
                     <AlertCircle className="w-5 h-5 text-yellow-600" />
                   )}
-                  Status da Instalação
+                  Status da InstalaÃ§Ã£o
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -130,7 +130,7 @@ export default function PWAPage() {
                             App Instalado com Sucesso!
                           </h3>
                           <p className="text-sm text-green-800 dark:text-green-200">
-                            O SGB está funcionando como aplicativo nativo
+                            O SGB estÃ¡ funcionando como aplicativo nativo
                           </p>
                         </div>
                       </div>
@@ -143,7 +143,7 @@ export default function PWAPage() {
                           Tela Inicial
                         </p>
                         <p className="text-xs text-blue-700 dark:text-blue-300">
-                          Ícone adicionado
+                          Ãcone adicionado
                         </p>
                       </div>
                       
@@ -165,7 +165,7 @@ export default function PWAPage() {
                         <AlertCircle className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
                         <div>
                           <h3 className="font-semibold text-yellow-900 dark:text-yellow-100">
-                            App Não Instalado
+                            App NÃ£o Instalado
                           </h3>
                           <p className="text-sm text-yellow-800 dark:text-yellow-200">
                             Instale para ter acesso offline e melhor performance
@@ -174,7 +174,7 @@ export default function PWAPage() {
                       </div>
                     </div>
                     
-                    {/* Botão de instalação automática */}
+                    {/* BotÃ£o de instalaÃ§Ã£o automÃ¡tica */}
                     {(isInstallable || installPrompt) && (
                       <div className="text-center">
                         <Button
@@ -186,7 +186,7 @@ export default function PWAPage() {
                           Instalar App Agora
                         </Button>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                          Instalação rápida e automática
+                          InstalaÃ§Ã£o rÃ¡pida e automÃ¡tica
                         </p>
                       </div>
                     )}
@@ -195,7 +195,7 @@ export default function PWAPage() {
               </CardContent>
             </Card>
 
-            {/* Informações da plataforma */}
+            {/* InformaÃ§Ãµes da plataforma */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -214,7 +214,7 @@ export default function PWAPage() {
                       <Smartphone className="w-8 h-8 text-blue-600 mx-auto mb-2" />
                       <p className="font-medium text-blue-900 dark:text-blue-100">Mobile</p>
                       <p className="text-sm text-blue-700 dark:text-blue-300">
-                        Ideal para instalação PWA
+                        Ideal para instalaÃ§Ã£o PWA
                       </p>
                     </div>
                   ) : (
@@ -270,16 +270,16 @@ export default function PWAPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                   <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-                    📱 App Nativo
+                    ðŸ“± App Nativo
                   </h3>
                   <p className="text-sm text-blue-800 dark:text-blue-200">
-                    Experiência de app nativo com instalação na tela inicial
+                    ExperiÃªncia de app nativo com instalaÃ§Ã£o na tela inicial
                   </p>
                 </div>
 
                 <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                   <h3 className="font-medium text-green-900 dark:text-green-100 mb-2">
-                    🌐 Modo Offline
+                    ðŸŒ Modo Offline
                   </h3>
                   <p className="text-sm text-green-800 dark:text-green-200">
                     Funciona sem internet com cache inteligente
@@ -288,26 +288,26 @@ export default function PWAPage() {
 
                 <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
                   <h3 className="font-medium text-purple-900 dark:text-purple-100 mb-2">
-                    🔔 Push Notifications
+                    ðŸ”” Push Notifications
                   </h3>
                   <p className="text-sm text-purple-800 dark:text-purple-200">
-                    Notificações em tempo real mesmo com app fechado
+                    NotificaÃ§Ãµes em tempo real mesmo com app fechado
                   </p>
                 </div>
 
                 <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
                   <h3 className="font-medium text-orange-900 dark:text-orange-100 mb-2">
-                    ⚡ Performance
+                    âš¡ Performance
                   </h3>
                   <p className="text-sm text-orange-800 dark:text-orange-200">
-                    Carregamento instantâneo com Service Worker
+                    Carregamento instantÃ¢neo com Service Worker
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Guia de instalação */}
+          {/* Guia de instalaÃ§Ã£o */}
           <Card>
             <CardHeader>
               <CardTitle>Como Instalar</CardTitle>
@@ -316,24 +316,24 @@ export default function PWAPage() {
               <div className="space-y-4">
                 <div>
                   <h3 className="font-medium text-gray-900 dark:text-white mb-2">
-                    📱 Mobile (Android/iOS)
+                    ðŸ“± Mobile (Android/iOS)
                   </h3>
                   <ol className="text-sm text-gray-600 dark:text-gray-400 space-y-1 list-decimal list-inside">
-                    <li>Abra o menu do navegador (⋮)</li>
-                    <li>Toque em "Adicionar à tela inicial"</li>
-                    <li>Confirme a instalação</li>
-                    <li>O app aparecerá na tela inicial</li>
+                    <li>Abra o menu do navegador (â‹®)</li>
+                    <li>Toque em "Adicionar Ã  tela inicial"</li>
+                    <li>Confirme a instalaÃ§Ã£o</li>
+                    <li>O app aparecerÃ¡ na tela inicial</li>
                   </ol>
                 </div>
 
                 <div>
                   <h3 className="font-medium text-gray-900 dark:text-white mb-2">
-                    💻 Desktop (Chrome/Edge)
+                    ðŸ’» Desktop (Chrome/Edge)
                   </h3>
                   <ol className="text-sm text-gray-600 dark:text-gray-400 space-y-1 list-decimal list-inside">
-                    <li>Clique no ícone de instalação na barra de endereços</li>
-                    <li>Ou use o menu → Instalar SGB</li>
-                    <li>O app aparecerá como programa instalado</li>
+                    <li>Clique no Ã­cone de instalaÃ§Ã£o na barra de endereÃ§os</li>
+                    <li>Ou use o menu â†’ Instalar SGB</li>
+                    <li>O app aparecerÃ¡ como programa instalado</li>
                     <li>Funciona independentemente do navegador</li>
                   </ol>
                 </div>

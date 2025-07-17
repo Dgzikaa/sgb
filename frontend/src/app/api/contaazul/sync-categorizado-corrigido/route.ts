@@ -1,16 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
 
-// Função para obter token válido do ContaAzul
+// FunÃ§Ã£o para obter token vÃ¡lido do ContaAzul
 async function getValidContaAzulToken(barId: number) {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  console.log('🔍 Buscando credenciais para bar_id:', barId)
+  console.log('ðŸ” Buscando credenciais para bar_id:', barId)
   
   const { data: credentials } = await supabase
     .from('api_credentials')
@@ -21,28 +21,28 @@ async function getValidContaAzulToken(barId: number) {
     .single()
 
   if (!credentials?.access_token) {
-    console.log('❌ Nenhuma credencial encontrada')
+    console.log('âŒ Nenhuma credencial encontrada')
     return null
   }
 
   if (credentials.expires_at && new Date(credentials.expires_at) > new Date()) {
-    console.log('✅ Token ainda válido')
+    console.log('âœ… Token ainda vÃ¡lido')
     return credentials.access_token
   }
 
-  console.log('❌ Token expirado')
+  console.log('âŒ Token expirado')
   return null
 }
 
 async function buscarDadosAPI(url: string, headers: any) {
-  console.log('🔗 Buscando:', url)
+  console.log('ðŸ”— Buscando:', url)
   
   const response = await fetch(url, { headers })
   
   if (!response.ok) {
-    console.error('❌ Erro na API:', response.status)
+    console.error('âŒ Erro na API:', response.status)
     const errorText = await response.text()
-    console.error('❌ Detalhes:', errorText)
+    console.error('âŒ Detalhes:', errorText)
     throw new Error(`Erro API: ${response.status} - ${errorText}`)
   }
 
@@ -55,15 +55,15 @@ export async function POST(request: NextRequest) {
     const { barId, force = false } = await request.json()
     
     if (!barId) {
-      return NextResponse.json({ error: 'Bar ID é obrigatório' }, { status: 400 })
+      return NextResponse.json({ error: 'Bar ID Ã© obrigatÃ³rio' }, { status: 400 })
     }
 
-    console.log('🔍 SYNC COMPLETO UNIFICADO - 7 PASSOS - Bar:', barId)
+    console.log('ðŸ” SYNC COMPLETO UNIFICADO - 7 PASSOS - Bar:', barId)
 
     const accessToken = await getValidContaAzulToken(barId)
     if (!accessToken) {
       return NextResponse.json({ 
-        error: 'Token do ContaAzul não disponível ou expirado' 
+        error: 'Token do ContaAzul nÃ£o disponÃ­vel ou expirado' 
       }, { status: 401 })
     }
 
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       passo7_parcelas_upsert: [] as any[]
     }
 
-    console.log('🏷️ PASSO 1: BUSCAR TODAS AS CATEGORIAS DA API...')
+    console.log('ðŸ·ï¸ PASSO 1: BUSCAR TODAS AS CATEGORIAS DA API...')
     
     // PASSO 1: Buscar categorias da API ContaAzul
     try {
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
           }
           
           resultados.passo1_categorias_api.push(...categoriasAPI)
-          console.log(`📊 PASSO 1 - Página ${paginaCategoria}: ${categoriasAPI.length} categorias`)
+          console.log(`ðŸ“Š PASSO 1 - PÃ¡gina ${paginaCategoria}: ${categoriasAPI.length} categorias`)
           
           if (categoriasAPI.length < 100) {
             temMaisCategorias = false
@@ -114,28 +114,28 @@ export async function POST(request: NextRequest) {
             paginaCategoria++
           }
         } catch (error) {
-          console.error(`❌ Erro na página ${paginaCategoria}:`, error)
+          console.error(`âŒ Erro na pÃ¡gina ${paginaCategoria}:`, error)
           temMaisCategorias = false
         }
       }
       
-      console.log(`📊 PASSO 1: ${resultados.passo1_categorias_api.length} categorias encontradas na API`)
+      console.log(`ðŸ“Š PASSO 1: ${resultados.passo1_categorias_api.length} categorias encontradas na API`)
       
     } catch (error) {
-      console.error('❌ ERRO no PASSO 1:', error)
+      console.error('âŒ ERRO no PASSO 1:', error)
       return NextResponse.json({ error: 'Erro ao buscar categorias da API' }, { status: 500 })
     }
 
-    console.log('💾 PASSO 2: UPSERT CATEGORIAS NO BANCO...')
+    console.log('ðŸ’¾ PASSO 2: UPSERT CATEGORIAS NO BANCO...')
     
     // PASSO 2: Upsert categorias no banco
-    const mapaCategorias: { [uuid: string]: string } = {} // ✅ Mapa UUID -> UUID (mesmo valor)
+    const mapaCategorias: { [uuid: string]: string } = {} // âœ… Mapa UUID -> UUID (mesmo valor)
     
     for (const categoria of resultados.passo1_categorias_api) {
       try {
         const dadosCategoria = {
           bar_id: barId,
-          id: categoria.id, // ✅ UUID da categoria do ContaAzul
+          id: categoria.id, // âœ… UUID da categoria do ContaAzul
           nome: categoria.nome,
           descricao: categoria.descricao || null,
           tipo: categoria.tipo,
@@ -155,29 +155,29 @@ export async function POST(request: NextRequest) {
           .select()
 
         if (erroCategoria) {
-          console.error(`❌ Erro ao inserir categoria ${categoria.nome}:`, erroCategoria)
+          console.error(`âŒ Erro ao inserir categoria ${categoria.nome}:`, erroCategoria)
         } else {
-          console.log(`✅ Categoria ${categoria.nome} inserida`)
+          console.log(`âœ… Categoria ${categoria.nome} inserida`)
           resultados.passo2_categorias_upsert.push(categoriaInserida[0])
-          // ✅ Mapear UUID -> UUID (mesmo valor, já que id é UUID)
+          // âœ… Mapear UUID -> UUID (mesmo valor, jÃ¡ que id Ã© UUID)
           mapaCategorias[categoria.id] = categoria.id
         }
       } catch (error) {
-        console.error(`❌ Erro no PASSO 2 categoria ${categoria.nome}:`, error)
+        console.error(`âŒ Erro no PASSO 2 categoria ${categoria.nome}:`, error)
       }
     }
 
     const dataInicio = '2024-01-01'
     const dataFim = '2027-01-01'
 
-    console.log('📊 PASSO 3: BUSCAR EVENTOS FINANCEIROS (CONTAS-A-RECEBER) POR CATEGORIA...')
+    console.log('ðŸ“Š PASSO 3: BUSCAR EVENTOS FINANCEIROS (CONTAS-A-RECEBER) POR CATEGORIA...')
     
     // PASSO 3: Query contas-a-receber por categoria (tipo = receita)
     const categoriasReceita = resultados.passo1_categorias_api.filter((cat: any) => cat.tipo === 'RECEITA')
     
     for (const categoria of categoriasReceita) {
       try {
-        console.log(`\n🏷️ PASSO 3: Buscando contas-a-receber da categoria ${categoria.nome}`)
+        console.log(`\nðŸ·ï¸ PASSO 3: Buscando contas-a-receber da categoria ${categoria.nome}`)
         
         let paginaReceita = 1
         let temMaisReceitas = true
@@ -198,9 +198,9 @@ export async function POST(request: NextRequest) {
               break
             }
             
-            console.log(`📊 PASSO 3 - Página ${paginaReceita}: ${receitas.length} contas-a-receber encontradas`)
+            console.log(`ðŸ“Š PASSO 3 - PÃ¡gina ${paginaReceita}: ${receitas.length} contas-a-receber encontradas`)
             
-            // ✅ contas-a-receber = tipo 'receita'
+            // âœ… contas-a-receber = tipo 'receita'
             resultados.passo3_eventos_receitas_api.push(...receitas.map((r: any) => ({ 
               ...r, 
               categoria: categoria, 
@@ -213,24 +213,24 @@ export async function POST(request: NextRequest) {
               paginaReceita++
             }
           } catch (error) {
-            console.log(`⚠️ PASSO 3 erro página ${paginaReceita}:`, error instanceof Error ? error.message : String(error))
+            console.log(`âš ï¸ PASSO 3 erro pÃ¡gina ${paginaReceita}:`, error instanceof Error ? error.message : String(error))
             temMaisReceitas = false
           }
         }
         
       } catch (error) {
-        console.log(`⚠️ PASSO 3 erro categoria ${categoria.nome}:`, error instanceof Error ? error.message : String(error))
+        console.log(`âš ï¸ PASSO 3 erro categoria ${categoria.nome}:`, error instanceof Error ? error.message : String(error))
       }
     }
 
-    console.log('📊 PASSO 4: BUSCAR EVENTOS FINANCEIROS (CONTAS-A-PAGAR) POR CATEGORIA...')
+    console.log('ðŸ“Š PASSO 4: BUSCAR EVENTOS FINANCEIROS (CONTAS-A-PAGAR) POR CATEGORIA...')
     
     // PASSO 4: Query contas-a-pagar por categoria (tipo = despesa)
     const categoriasDespesa = resultados.passo1_categorias_api.filter((cat: any) => cat.tipo === 'DESPESA')
     
     for (const categoria of categoriasDespesa) {
       try {
-        console.log(`\n🏷️ PASSO 4: Buscando contas-a-pagar da categoria ${categoria.nome}`)
+        console.log(`\nðŸ·ï¸ PASSO 4: Buscando contas-a-pagar da categoria ${categoria.nome}`)
         
         let paginaDespesa = 1
         let temMaisDespesas = true
@@ -251,9 +251,9 @@ export async function POST(request: NextRequest) {
               break
             }
             
-            console.log(`📊 PASSO 4 - Página ${paginaDespesa}: ${despesas.length} contas-a-pagar encontradas`)
+            console.log(`ðŸ“Š PASSO 4 - PÃ¡gina ${paginaDespesa}: ${despesas.length} contas-a-pagar encontradas`)
             
-            // ✅ contas-a-pagar = tipo 'despesa'
+            // âœ… contas-a-pagar = tipo 'despesa'
             resultados.passo4_eventos_despesas_api.push(...despesas.map((d: any) => ({ 
               ...d, 
               categoria: categoria, 
@@ -266,17 +266,17 @@ export async function POST(request: NextRequest) {
               paginaDespesa++
             }
           } catch (error) {
-            console.log(`⚠️ PASSO 4 erro página ${paginaDespesa}:`, error instanceof Error ? error.message : String(error))
+            console.log(`âš ï¸ PASSO 4 erro pÃ¡gina ${paginaDespesa}:`, error instanceof Error ? error.message : String(error))
             temMaisDespesas = false
           }
         }
         
       } catch (error) {
-        console.log(`⚠️ PASSO 4 erro categoria ${categoria.nome}:`, error instanceof Error ? error.message : String(error))
+        console.log(`âš ï¸ PASSO 4 erro categoria ${categoria.nome}:`, error instanceof Error ? error.message : String(error))
       }
     }
 
-    console.log('💾 PASSO 5: INSERIR TODOS OS EVENTOS FINANCEIROS NO BANCO...')
+    console.log('ðŸ’¾ PASSO 5: INSERIR TODOS OS EVENTOS FINANCEIROS NO BANCO...')
     
     // PASSO 5: Inserir todos os eventos financeiros na tabela unificada
     const todosEventos = [
@@ -284,23 +284,23 @@ export async function POST(request: NextRequest) {
       ...resultados.passo4_eventos_despesas_api
     ]
 
-    console.log(`📊 PASSO 5: ${todosEventos.length} eventos para inserir`)
+    console.log(`ðŸ“Š PASSO 5: ${todosEventos.length} eventos para inserir`)
 
     for (const evento of todosEventos) {
       try {
-        console.log(`\n💾 PASSO 5: Inserindo evento ${evento.tipo} - ${evento.descricao}`)
+        console.log(`\nðŸ’¾ PASSO 5: Inserindo evento ${evento.tipo} - ${evento.descricao}`)
         
         const dadosEvento = {
           bar_id: barId,
           evento_id: evento.evento_id || evento.id,
-          tipo: evento.tipo, // ✅ 'receita' ou 'despesa'
+          tipo: evento.tipo, // âœ… 'receita' ou 'despesa'
           descricao: evento.descricao || `Evento ${evento.tipo}`,
           valor: parseFloat(evento.total || evento.valor || 0),
           data_vencimento: evento.data_vencimento,
           data_competencia: evento.data_competencia || evento.data_vencimento,
           data_pagamento: evento.data_pagamento,
           status: evento.status || 'pendente',
-          categoria_id: mapaCategorias[evento.categoria.id] || null, // ✅ Usar mapa UUID -> UUID
+          categoria_id: mapaCategorias[evento.categoria.id] || null, // âœ… Usar mapa UUID -> UUID
           cliente_id: evento.cliente?.id,
           fornecedor_id: evento.fornecedor?.id,
           conta_financeira_id: evento.conta_financeira?.id,
@@ -316,47 +316,47 @@ export async function POST(request: NextRequest) {
           .select()
 
         if (erroEvento) {
-          console.error(`❌ PASSO 5 erro evento ${evento.tipo}:`, erroEvento)
+          console.error(`âŒ PASSO 5 erro evento ${evento.tipo}:`, erroEvento)
         } else {
-          console.log(`✅ PASSO 5 evento ${evento.tipo} inserido`)
+          console.log(`âœ… PASSO 5 evento ${evento.tipo} inserido`)
           resultados.passo5_eventos_upsert.push(eventoInserido[0])
         }
       } catch (error) {
-        console.error('❌ PASSO 5 erro:', error)
+        console.error('âŒ PASSO 5 erro:', error)
       }
     }
 
-    console.log('🔍 PASSO 6: BUSCAR PARCELAS POR EVENTO_ID...')
+    console.log('ðŸ” PASSO 6: BUSCAR PARCELAS POR EVENTO_ID...')
     
     // PASSO 6: Query parcelas usando a URL correta
     for (const evento of todosEventos) {
       try {
-        console.log(`\n🔍 PASSO 6: Buscando parcelas do evento ${evento.tipo} - ${evento.id}`)
+        console.log(`\nðŸ” PASSO 6: Buscando parcelas do evento ${evento.tipo} - ${evento.id}`)
         
-        // ✅ URL CORRETA fornecida pelo usuário
+        // âœ… URL CORRETA fornecida pelo usuÃ¡rio
         const eventId = evento.evento_id || evento.id
         const urlParcelasCorreta = `https://api-v2.contaazul.com/v1/financeiro/eventos-financeiros/${eventId}/parcelas`
         
-        console.log(`📋 Usando URL correta: ${urlParcelasCorreta}`)
+        console.log(`ðŸ“‹ Usando URL correta: ${urlParcelasCorreta}`)
         
         try {
           const parcelas = await buscarDadosAPI(urlParcelasCorreta, headers)
-          console.log(`✅ PASSO 6: ${parcelas.length} parcelas encontradas`)
+          console.log(`âœ… PASSO 6: ${parcelas.length} parcelas encontradas`)
           
           if (parcelas.length > 0) {
-            console.log(`📋 MÚLTIPLAS PARCELAS: Evento ${evento.id} possui ${parcelas.length} parcela(s)`)
+            console.log(`ðŸ“‹ MÃšLTIPLAS PARCELAS: Evento ${evento.id} possui ${parcelas.length} parcela(s)`)
             if (parcelas.length > 1) {
-              console.log('🔄 EXEMPLO: Compra parcelada (ex: 10x no cartão)')
+              console.log('ðŸ”„ EXEMPLO: Compra parcelada (ex: 10x no cartÃ£o)')
             }
             resultados.passo6_parcelas_api.push(...parcelas.map((p: any) => ({ 
               ...p, 
               evento: evento 
             })))
           } else {
-            console.log(`📋 SEM PARCELAS: Evento ${evento.id} é pagamento único`)
-            console.log('🔄 APLICANDO REGRA: data_competencia = data_vencimento')
+            console.log(`ðŸ“‹ SEM PARCELAS: Evento ${evento.id} Ã© pagamento Ãºnico`)
+            console.log('ðŸ”„ APLICANDO REGRA: data_competencia = data_vencimento')
             
-            // ✅ NOVA REGRA: Atualizar evento com data_competencia = data_vencimento
+            // âœ… NOVA REGRA: Atualizar evento com data_competencia = data_vencimento
             try {
               const dataCompetencia = evento.data_vencimento
               const { error: erroUpdate } = await supabase
@@ -369,9 +369,9 @@ export async function POST(request: NextRequest) {
                 .eq('evento_id', eventId)
               
               if (erroUpdate) {
-                console.error('❌ ERRO ao atualizar data_competencia:', erroUpdate)
+                console.error('âŒ ERRO ao atualizar data_competencia:', erroUpdate)
               } else {
-                console.log(`✅ EVENTO ATUALIZADO: data_competencia = ${dataCompetencia}`)
+                console.log(`âœ… EVENTO ATUALIZADO: data_competencia = ${dataCompetencia}`)
                 resultados.passo6_parcelas_api.push({
                   evento_id: eventId,
                   tipo: 'evento_sem_parcelas',
@@ -380,46 +380,46 @@ export async function POST(request: NextRequest) {
                 })
               }
             } catch (error) {
-              console.error('❌ ERRO ao atualizar evento:', error)
+              console.error('âŒ ERRO ao atualizar evento:', error)
             }
           }
         } catch (error) {
-          console.log(`⚠️ PASSO 6: Erro no endpoint de parcelas`)
-          console.error('❌ Erro:', error)
+          console.log(`âš ï¸ PASSO 6: Erro no endpoint de parcelas`)
+          console.error('âŒ Erro:', error)
         }
         
       } catch (error) {
-        console.error('❌ PASSO 6 erro geral:', error)
+        console.error('âŒ PASSO 6 erro geral:', error)
       }
     }
 
-    console.log('💾 PASSO 7: INSERIR PARCELAS NO BANCO...')
+    console.log('ðŸ’¾ PASSO 7: INSERIR PARCELAS NO BANCO...')
     
-    // PASSO 7: Inserir apenas parcelas REAIS (não eventos sem parcelas)
+    // PASSO 7: Inserir apenas parcelas REAIS (nÃ£o eventos sem parcelas)
     const parcelasReais = resultados.passo6_parcelas_api.filter((p: any) => p.tipo !== 'evento_sem_parcelas')
     
-    console.log(`📊 PASSO 7: ${parcelasReais.length} parcelas reais para inserir`)
+    console.log(`ðŸ“Š PASSO 7: ${parcelasReais.length} parcelas reais para inserir`)
     
     if (parcelasReais.length === 0) {
-      console.log('📋 PASSO 7: Nenhuma parcela real encontrada - apenas eventos de pagamento único')
-      console.log('✅ PASSO 7: Eventos já foram atualizados com data_competencia no PASSO 6')
+      console.log('ðŸ“‹ PASSO 7: Nenhuma parcela real encontrada - apenas eventos de pagamento Ãºnico')
+      console.log('âœ… PASSO 7: Eventos jÃ¡ foram atualizados com data_competencia no PASSO 6')
     } else {
       for (const parcela of parcelasReais) {
         try {
           const eventoId = parcela.evento?.evento_id || parcela.evento?.id || parcela.evento_id || parcela.id
           const parcelaId = parcela.parcela_id || parcela.id
           
-          console.log(`\n💾 PASSO 7: Inserindo parcela REAL ${parcelaId}`)
-          console.log(`🔗 Referenciando evento_financeiro_id: ${eventoId}`)
-          console.log(`💰 Valor: R$ ${parcela.total || parcela.valor || 0}`)
-          console.log(`📅 Vencimento: ${parcela.data_vencimento}`)
+          console.log(`\nðŸ’¾ PASSO 7: Inserindo parcela REAL ${parcelaId}`)
+          console.log(`ðŸ”— Referenciando evento_financeiro_id: ${eventoId}`)
+          console.log(`ðŸ’° Valor: R$ ${parcela.total || parcela.valor || 0}`)
+          console.log(`ðŸ“… Vencimento: ${parcela.data_vencimento}`)
           
           const dadosParcela = {
             bar_id: barId,
             parcela_id: parcelaId,
             evento_financeiro_id: eventoId,
             tipo: parcela.evento?.tipo || parcela.tipo,
-            categoria_id: mapaCategorias[parcela.evento?.categoria?.id || parcela.categoria?.id] || null, // ✅ Usar mapa
+            categoria_id: mapaCategorias[parcela.evento?.categoria?.id || parcela.categoria?.id] || null, // âœ… Usar mapa
             valor: parseFloat(parcela.total || parcela.valor || 0),
             data_vencimento: parcela.data_vencimento,
             data_competencia: parcela.data_competencia || parcela.data_vencimento,
@@ -436,20 +436,20 @@ export async function POST(request: NextRequest) {
             .select()
 
           if (erroParcela) {
-            console.error('❌ PASSO 7 erro parcela:', erroParcela)
+            console.error('âŒ PASSO 7 erro parcela:', erroParcela)
           } else {
-            console.log('✅ PASSO 7 parcela REAL inserida')
+            console.log('âœ… PASSO 7 parcela REAL inserida')
             resultados.passo7_parcelas_upsert.push(parcelaInserida[0])
           }
         } catch (error) {
-          console.error('❌ PASSO 7 erro:', error)
+          console.error('âŒ PASSO 7 erro:', error)
         }
       }
     }
 
-    console.log('✅ SYNC COMPLETO UNIFICADO FINALIZADO!')
+    console.log('âœ… SYNC COMPLETO UNIFICADO FINALIZADO!')
 
-    // Estatísticas finais
+    // EstatÃ­sticas finais
     const estatisticas = {
       categorias_processadas: resultados.passo2_categorias_upsert.length,
       eventos_receitas: resultados.passo3_eventos_receitas_api.length,
@@ -460,43 +460,43 @@ export async function POST(request: NextRequest) {
       eventos_sem_parcelas: resultados.passo6_parcelas_api.filter((p: any) => p.tipo === 'evento_sem_parcelas').length
     }
 
-    console.log('\n📊 ESTATÍSTICAS FINAIS:')
-    console.log(`   • Categorias processadas: ${estatisticas.categorias_processadas}`)
-    console.log(`   • Eventos receitas: ${estatisticas.eventos_receitas}`)
-    console.log(`   • Eventos despesas: ${estatisticas.eventos_despesas}`)
-    console.log(`   • Eventos inseridos: ${estatisticas.eventos_inseridos}`)
-    console.log(`   • Parcelas reais: ${estatisticas.parcelas_reais}`)
-    console.log(`   • Parcelas inseridas: ${estatisticas.parcelas_inseridas}`)
-    console.log(`   • Eventos sem parcelas: ${estatisticas.eventos_sem_parcelas}`)
+    console.log('\nðŸ“Š ESTATÃSTICAS FINAIS:')
+    console.log(`   â€¢ Categorias processadas: ${estatisticas.categorias_processadas}`)
+    console.log(`   â€¢ Eventos receitas: ${estatisticas.eventos_receitas}`)
+    console.log(`   â€¢ Eventos despesas: ${estatisticas.eventos_despesas}`)
+    console.log(`   â€¢ Eventos inseridos: ${estatisticas.eventos_inseridos}`)
+    console.log(`   â€¢ Parcelas reais: ${estatisticas.parcelas_reais}`)
+    console.log(`   â€¢ Parcelas inseridas: ${estatisticas.parcelas_inseridas}`)
+    console.log(`   â€¢ Eventos sem parcelas: ${estatisticas.eventos_sem_parcelas}`)
 
     return NextResponse.json({
       success: true,
-      message: '✅ Sync completo unificado executado com sucesso!',
+      message: 'âœ… Sync completo unificado executado com sucesso!',
       estatisticas,
       regras_implementadas: [
-        '✅ contas-a-receber = tipo "receita"',
-        '✅ contas-a-pagar = tipo "despesa"',
-        '✅ Tabela unificada contaazul_eventos_financeiros',
-        '✅ Parcelas referenciam evento_financeiro_id',
-        '✅ URL correta para parcelas: /eventos-financeiros/{id}/parcelas',
-        '✅ MÚLTIPLAS PARCELAS: Compra 10x = 1 evento + 10 parcelas',
-        '✅ SEM PARCELAS: data_competencia = data_vencimento (não salva na tabela parcelas)'
+        'âœ… contas-a-receber = tipo "receita"',
+        'âœ… contas-a-pagar = tipo "despesa"',
+        'âœ… Tabela unificada contaazul_eventos_financeiros',
+        'âœ… Parcelas referenciam evento_financeiro_id',
+        'âœ… URL correta para parcelas: /eventos-financeiros/{id}/parcelas',
+        'âœ… MÃšLTIPLAS PARCELAS: Compra 10x = 1 evento + 10 parcelas',
+        'âœ… SEM PARCELAS: data_competencia = data_vencimento (nÃ£o salva na tabela parcelas)'
       ],
       fluxo_unificado: [
-        '1. ✅ Buscar categorias da API (com paginação)',
-        '2. ✅ Upsert categorias no banco', 
-        '3. ✅ Buscar contas-a-receber por categoria (tipo=receita)',
-        '4. ✅ Buscar contas-a-pagar por categoria (tipo=despesa)',
-        '5. ✅ Inserir todos eventos na tabela unificada',
-        '6. ✅ Buscar parcelas por evento_id (ou atualizar data_competencia)',
-        '7. ✅ Inserir parcelas reais referenciando evento_financeiro_id'
+        '1. âœ… Buscar categorias da API (com paginaÃ§Ã£o)',
+        '2. âœ… Upsert categorias no banco', 
+        '3. âœ… Buscar contas-a-receber por categoria (tipo=receita)',
+        '4. âœ… Buscar contas-a-pagar por categoria (tipo=despesa)',
+        '5. âœ… Inserir todos eventos na tabela unificada',
+        '6. âœ… Buscar parcelas por evento_id (ou atualizar data_competencia)',
+        '7. âœ… Inserir parcelas reais referenciando evento_financeiro_id'
       ],
       resultados: resultados,
       timestamp: new Date().toISOString()
     })
 
   } catch (error) {
-    console.error('❌ Erro geral no sync completo:', error)
+    console.error('âŒ Erro geral no sync completo:', error)
     
     return NextResponse.json({
       success: false,

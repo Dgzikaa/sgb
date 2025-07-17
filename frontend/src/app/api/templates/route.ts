@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser, checkPermission, authErrorResponse, permissionErrorResponse } from '@/middleware/auth'
 import { z } from 'zod'
 
 // =====================================================
-// SCHEMAS DE VALIDAÇÃO
+// SCHEMAS DE VALIDAÃ‡ÃƒO
 // =====================================================
 
 const TemplateCreateSchema = z.object({
@@ -15,8 +15,8 @@ const TemplateCreateSchema = z.object({
   tipo: z.enum(['abertura', 'fechamento', 'manutencao', 'qualidade', 'seguranca', 'limpeza', 'auditoria']),
   frequencia: z.enum(['diaria', 'semanal', 'quinzenal', 'mensal', 'bimestral', 'trimestral', 'conforme_necessario']),
   tempo_estimado: z.number().min(1).max(480).default(30),
-  publico: z.boolean().default(false), // Se é público para todos os bares
-  predefinido: z.boolean().default(false), // Se é template do sistema
+  publico: z.boolean().default(false), // Se Ã© pÃºblico para todos os bares
+  predefinido: z.boolean().default(false), // Se Ã© template do sistema
   tags: z.array(z.string()).optional(),
   estrutura: z.object({
     secoes: z.array(z.object({
@@ -59,25 +59,25 @@ const TemplateQuerySchema = z.object({
 
 const TEMPLATES_PREDEFINIDOS = [
   {
-    nome: 'Abertura de Cozinha - Básico',
+    nome: 'Abertura de Cozinha - BÃ¡sico',
     descricao: 'Checklist essencial para abertura segura da cozinha',
     categoria: 'abertura',
     setor: 'cozinha',
     tipo: 'abertura',
     frequencia: 'diaria',
     tempo_estimado: 15,
-    tags: ['cozinha', 'abertura', 'higiene', 'básico'],
+    tags: ['cozinha', 'abertura', 'higiene', 'bÃ¡sico'],
     estrutura: {
       secoes: [
         {
           nome: 'Higiene e Limpeza',
-          descricao: 'Verificações básicas de higiene',
+          descricao: 'VerificaÃ§Ãµes bÃ¡sicas de higiene',
           cor: 'bg-blue-500',
           ordem: 1,
           itens: [
             {
               titulo: 'Bancadas limpas e sanitizadas',
-              descricao: 'Verificar se todas as bancadas estão limpas e sanitizadas',
+              descricao: 'Verificar se todas as bancadas estÃ£o limpas e sanitizadas',
               tipo: 'sim_nao',
               obrigatorio: true,
               ordem: 1
@@ -98,31 +98,31 @@ const TEMPLATES_PREDEFINIDOS = [
         },
         {
           nome: 'Equipamentos',
-          descricao: 'Verificação de equipamentos essenciais',
+          descricao: 'VerificaÃ§Ã£o de equipamentos essenciais',
           cor: 'bg-green-500',
           ordem: 2,
           itens: [
             {
-              titulo: 'Fogão funcionando corretamente',
+              titulo: 'FogÃ£o funcionando corretamente',
               tipo: 'sim_nao',
               obrigatorio: true,
               ordem: 1
             },
             {
               titulo: 'Geladeira - temperatura adequada',
-              descricao: 'Entre 0°C e 4°C',
+              descricao: 'Entre 0Â°C e 4Â°C',
               tipo: 'numero',
               obrigatorio: true,
               ordem: 2,
-              opcoes: { min: -5, max: 10, unidade: '°C' }
+              opcoes: { min: -5, max: 10, unidade: 'Â°C' }
             },
             {
               titulo: 'Freezer - temperatura adequada',
-              descricao: 'Entre -18°C e -25°C',
+              descricao: 'Entre -18Â°C e -25Â°C',
               tipo: 'numero',
               obrigatorio: true,
               ordem: 3,
-              opcoes: { min: -30, max: -15, unidade: '°C' }
+              opcoes: { min: -30, max: -15, unidade: 'Â°C' }
             }
           ]
         }
@@ -131,13 +131,13 @@ const TEMPLATES_PREDEFINIDOS = [
   },
   {
     nome: 'Limpeza de Banheiros',
-    descricao: 'Protocolo completo de limpeza e higienização de banheiros',
+    descricao: 'Protocolo completo de limpeza e higienizaÃ§Ã£o de banheiros',
     categoria: 'limpeza',
     setor: 'banheiro',
     tipo: 'limpeza',
     frequencia: 'diaria',
     tempo_estimado: 20,
-    tags: ['banheiro', 'limpeza', 'higiene', 'sanitização'],
+    tags: ['banheiro', 'limpeza', 'higiene', 'sanitizaÃ§Ã£o'],
     estrutura: {
       secoes: [
         {
@@ -146,7 +146,7 @@ const TEMPLATES_PREDEFINIDOS = [
           ordem: 1,
           itens: [
             {
-              titulo: 'Vasos sanitários limpos e desinfetados',
+              titulo: 'Vasos sanitÃ¡rios limpos e desinfetados',
               tipo: 'sim_nao',
               obrigatorio: true,
               ordem: 1
@@ -164,7 +164,7 @@ const TEMPLATES_PREDEFINIDOS = [
               ordem: 3
             },
             {
-              titulo: 'Chão lavado e seco',
+              titulo: 'ChÃ£o lavado e seco',
               tipo: 'sim_nao',
               obrigatorio: true,
               ordem: 4
@@ -177,19 +177,19 @@ const TEMPLATES_PREDEFINIDOS = [
           ordem: 2,
           itens: [
             {
-              titulo: 'Papel higiênico disponível',
+              titulo: 'Papel higiÃªnico disponÃ­vel',
               tipo: 'sim_nao',
               obrigatorio: true,
               ordem: 1
             },
             {
-              titulo: 'Sabonete/sabão disponível',
+              titulo: 'Sabonete/sabÃ£o disponÃ­vel',
               tipo: 'sim_nao',
               obrigatorio: true,
               ordem: 2
             },
             {
-              titulo: 'Papel toalha disponível',
+              titulo: 'Papel toalha disponÃ­vel',
               tipo: 'sim_nao',
               obrigatorio: true,
               ordem: 3
@@ -200,18 +200,18 @@ const TEMPLATES_PREDEFINIDOS = [
     }
   },
   {
-    nome: 'Checklist de Segurança - Básico',
-    descricao: 'Verificações essenciais de segurança do estabelecimento',
+    nome: 'Checklist de SeguranÃ§a - BÃ¡sico',
+    descricao: 'VerificaÃ§Ãµes essenciais de seguranÃ§a do estabelecimento',
     categoria: 'seguranca',
     setor: 'geral',
     tipo: 'seguranca',
     frequencia: 'diaria',
     tempo_estimado: 10,
-    tags: ['segurança', 'prevenção', 'básico'],
+    tags: ['seguranÃ§a', 'prevenÃ§Ã£o', 'bÃ¡sico'],
     estrutura: {
       secoes: [
         {
-          nome: 'Prevenção de Incêndio',
+          nome: 'PrevenÃ§Ã£o de IncÃªndio',
           cor: 'bg-red-500',
           ordem: 1,
           itens: [
@@ -222,7 +222,7 @@ const TEMPLATES_PREDEFINIDOS = [
               ordem: 1
             },
             {
-              titulo: 'Saídas de emergência desobstruídas',
+              titulo: 'SaÃ­das de emergÃªncia desobstruÃ­das',
               tipo: 'sim_nao',
               obrigatorio: true,
               ordem: 2
@@ -230,18 +230,18 @@ const TEMPLATES_PREDEFINIDOS = [
           ]
         },
         {
-          nome: 'Segurança Geral',
+          nome: 'SeguranÃ§a Geral',
           cor: 'bg-yellow-500',
           ordem: 2,
           itens: [
             {
-              titulo: 'Instalações elétricas em bom estado',
+              titulo: 'InstalaÃ§Ãµes elÃ©tricas em bom estado',
               tipo: 'sim_nao',
               obrigatorio: true,
               ordem: 1
             },
             {
-              titulo: 'Primeiros socorros - kit disponível',
+              titulo: 'Primeiros socorros - kit disponÃ­vel',
               tipo: 'sim_nao',
               obrigatorio: true,
               ordem: 2
@@ -258,10 +258,10 @@ const TEMPLATES_PREDEFINIDOS = [
 // =====================================================
 export async function GET(request: NextRequest) {
   try {
-    // 🔐 AUTENTICAÇÃO
+    // ðŸ” AUTENTICAÃ‡ÃƒO
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usuário não autenticado')
+      return authErrorResponse('UsuÃ¡rio nÃ£o autenticado')
     }
 
     const { searchParams } = new URL(request.url)
@@ -282,7 +282,7 @@ export async function GET(request: NextRequest) {
       .order('predefinido', { ascending: false }) // Templates do sistema primeiro
       .order('criado_em', { ascending: false })
 
-    // Filtrar por templates públicos OU do próprio bar
+    // Filtrar por templates pÃºblicos OU do prÃ³prio bar
             dbQuery = dbQuery.or(`publico.eq.true,bar_id.eq.${user.bar_id.toString()}`)
 
     // Aplicar filtros
@@ -310,7 +310,7 @@ export async function GET(request: NextRequest) {
       dbQuery = dbQuery.or(`nome.ilike.%${query.busca}%,descricao.ilike.%${query.busca}%`)
     }
 
-    // Paginação
+    // PaginaÃ§Ã£o
     const offset = (query.page - 1) * query.limit
     dbQuery = dbQuery.range(offset, offset + query.limit - 1)
 
@@ -321,7 +321,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao buscar templates' }, { status: 500 })
     }
 
-    // Buscar estatísticas
+    // Buscar estatÃ­sticas
     const { data: stats } = await supabase
       .from('checklist_templates')
       .select('categoria, publico, predefinido')
@@ -363,28 +363,28 @@ export async function GET(request: NextRequest) {
 // =====================================================
 export async function POST(request: NextRequest) {
   try {
-    // 🔐 AUTENTICAÇÃO
+    // ðŸ” AUTENTICAÃ‡ÃƒO
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usuário não autenticado')
+      return authErrorResponse('UsuÃ¡rio nÃ£o autenticado')
     }
 
-    // 🔒 PERMISSÕES - Verificar se pode criar templates
+    // ðŸ”’ PERMISSÃ•ES - Verificar se pode criar templates
     if (!checkPermission(user, { module: 'checklists', action: 'write' })) {
-      return permissionErrorResponse('Sem permissão para criar templates')
+      return permissionErrorResponse('Sem permissÃ£o para criar templates')
     }
 
     const body = await request.json()
     const supabase = await getAdminClient()
 
-    // Verificar se é uma solicitação para instalar templates predefinidos
+    // Verificar se Ã© uma solicitaÃ§Ã£o para instalar templates predefinidos
     if (body.action === 'install_predefined') {
-      console.log('📦 Instalando templates predefinidos...')
+      console.log('ðŸ“¦ Instalando templates predefinidos...')
       
       const templatesParaInstalar = []
       
       for (const template of TEMPLATES_PREDEFINIDOS) {
-        // Verificar se já existe
+        // Verificar se jÃ¡ existe
         const { data: existente } = await supabase
           .from('checklist_templates')
           .select('id')
@@ -397,7 +397,7 @@ export async function POST(request: NextRequest) {
             ...template,
             publico: true,
             predefinido: true,
-            bar_id: null, // Templates do sistema não pertencem a nenhum bar específico
+            bar_id: null, // Templates do sistema nÃ£o pertencem a nenhum bar especÃ­fico
             criado_por: user.user_id
           })
         }
@@ -414,7 +414,7 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ error: 'Erro ao instalar templates' }, { status: 500 })
         }
 
-        console.log(`✅ ${novosTemplates.length} templates predefinidos instalados`)
+        console.log(`âœ… ${novosTemplates.length} templates predefinidos instalados`)
 
         return NextResponse.json({
           success: true,
@@ -424,7 +424,7 @@ export async function POST(request: NextRequest) {
       } else {
         return NextResponse.json({
           success: true,
-          message: 'Todos os templates predefinidos já estão instalados',
+          message: 'Todos os templates predefinidos jÃ¡ estÃ£o instalados',
           data: []
         })
       }
@@ -433,7 +433,7 @@ export async function POST(request: NextRequest) {
     // Criar template personalizado
     const data = TemplateCreateSchema.parse(body)
     
-    // Verificar se já existe template com mesmo nome
+    // Verificar se jÃ¡ existe template com mesmo nome
     const { data: existente } = await supabase
       .from('checklist_templates')
       .select('id')
@@ -443,7 +443,7 @@ export async function POST(request: NextRequest) {
 
     if (existente) {
       return NextResponse.json({ 
-        error: 'Já existe um template com este nome' 
+        error: 'JÃ¡ existe um template com este nome' 
       }, { status: 400 })
     }
 
@@ -503,7 +503,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('✅ Template criado:', template.nome)
+    console.log('âœ… Template criado:', template.nome)
 
     return NextResponse.json({
       success: true,
@@ -516,7 +516,7 @@ export async function POST(request: NextRequest) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json({ 
-        error: 'Dados inválidos',
+        error: 'Dados invÃ¡lidos',
         details: error.errors 
       }, { status: 400 })
     }
@@ -533,22 +533,22 @@ export async function POST(request: NextRequest) {
 // =====================================================
 export async function DELETE(request: NextRequest) {
   try {
-    // 🔐 AUTENTICAÇÃO
+    // ðŸ” AUTENTICAÃ‡ÃƒO
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usuário não autenticado')
+      return authErrorResponse('UsuÃ¡rio nÃ£o autenticado')
     }
 
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
     
     if (!id) {
-      return NextResponse.json({ error: 'ID é obrigatório' }, { status: 400 })
+      return NextResponse.json({ error: 'ID Ã© obrigatÃ³rio' }, { status: 400 })
     }
 
     const supabase = await getAdminClient()
     
-    // Verificar se template existe e se pode ser excluído
+    // Verificar se template existe e se pode ser excluÃ­do
     const { data: template } = await supabase
       .from('checklist_templates')
       .select('id, nome, predefinido, publico, bar_id, criado_por')
@@ -556,30 +556,30 @@ export async function DELETE(request: NextRequest) {
       .single()
 
     if (!template) {
-      return NextResponse.json({ error: 'Template não encontrado' }, { status: 404 })
+      return NextResponse.json({ error: 'Template nÃ£o encontrado' }, { status: 404 })
     }
 
-    // Não permitir deletar templates predefinidos do sistema
+    // NÃ£o permitir deletar templates predefinidos do sistema
     if (template.predefinido) {
       return NextResponse.json({ 
-        error: 'Templates predefinidos do sistema não podem ser removidos' 
+        error: 'Templates predefinidos do sistema nÃ£o podem ser removidos' 
       }, { status: 403 })
     }
 
-    // Verificar permissões
+    // Verificar permissÃµes
     if (template.publico) {
-      // Template público só pode ser deletado por admin
+      // Template pÃºblico sÃ³ pode ser deletado por admin
       if (!checkPermission(user, { module: 'checklists', action: 'admin' })) {
-        return permissionErrorResponse('Apenas administradores podem deletar templates públicos')
+        return permissionErrorResponse('Apenas administradores podem deletar templates pÃºblicos')
       }
     } else {
-      // Template privado só pode ser deletado pelo criador ou admin do bar
+      // Template privado sÃ³ pode ser deletado pelo criador ou admin do bar
       if (template.criado_por !== user.user_id && template.bar_id !== user.bar_id) {
-        return permissionErrorResponse('Sem permissão para deletar este template')
+        return permissionErrorResponse('Sem permissÃ£o para deletar este template')
       }
     }
 
-    // Verificar se template está sendo usado
+    // Verificar se template estÃ¡ sendo usado
     const { data: checklists } = await supabase
       .from('checklists')
       .select('id')
@@ -588,7 +588,7 @@ export async function DELETE(request: NextRequest) {
 
     if (checklists && checklists.length > 0) {
       return NextResponse.json({ 
-        error: 'Template não pode ser removido pois está sendo usado por checklists existentes' 
+        error: 'Template nÃ£o pode ser removido pois estÃ¡ sendo usado por checklists existentes' 
       }, { status: 400 })
     }
 
@@ -603,7 +603,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao deletar template' }, { status: 500 })
     }
 
-    console.log('✅ Template deletado:', template.nome)
+    console.log('âœ… Template deletado:', template.nome)
 
     return NextResponse.json({
       success: true,

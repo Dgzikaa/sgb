@@ -1,16 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import { aiAgentManager, startAIAgent, stopAIAgent } from '@/lib/ai-agent-service';
 
-// Configuração do Supabase
+// ConfiguraÃ§Ã£o do Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Schema para configuração do agente
+// Schema para configuraÃ§Ã£o do agente
 const AgentConfigSchema = z.object({
   agente_ativo: z.boolean().optional(),
   frequencia_analise_minutos: z.number().int().min(5).max(1440).optional(), // 5min a 24h
@@ -47,7 +47,7 @@ const AgentConfigSchema = z.object({
 });
 
 // ========================================
-// 🤖 GET /api/ai/agent (Status e configuração)
+// ðŸ¤– GET /api/ai/agent (Status e configuraÃ§Ã£o)
 // ========================================
 export async function GET(request: NextRequest) {
   try {
@@ -55,17 +55,17 @@ export async function GET(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'UsuÃ¡rio nÃ£o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
-    // Apenas admins podem ver configurações do agente
+    // Apenas admins podem ver configuraÃ§Ãµes do agente
     if (permissao !== 'admin') {
-      return NextResponse.json({ error: 'Apenas administradores podem acessar configurações do agente' }, { status: 403 });
+      return NextResponse.json({ error: 'Apenas administradores podem acessar configuraÃ§Ãµes do agente' }, { status: 403 });
     }
 
-    // Buscar configuração atual
+    // Buscar configuraÃ§Ã£o atual
     const { data: config, error: configError } = await supabase
       .from('ai_agent_config')
       .select('*')
@@ -73,8 +73,8 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (configError && configError.code !== 'PGRST116') { // PGRST116 = not found
-      console.error('Erro ao buscar configuração do agente:', configError);
-      return NextResponse.json({ error: 'Erro ao buscar configuração' }, { status: 500 });
+      console.error('Erro ao buscar configuraÃ§Ã£o do agente:', configError);
+      return NextResponse.json({ error: 'Erro ao buscar configuraÃ§Ã£o' }, { status: 500 });
     }
 
     // Status do agente no manager
@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
       .order('data_inicio', { ascending: false })
       .limit(10);
 
-    // Calcular estatísticas das execuções
+    // Calcular estatÃ­sticas das execuÃ§Ãµes
     const { data: execStats } = await supabase
       .from('ai_agent_logs')
       .select('status, duracao_segundos, data_inicio')
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
         ((execStats.filter((e: any) => e.status === 'concluido').length / execStats.length) * 100) : 0
     };
 
-    // Próxima execução estimada
+    // PrÃ³xima execuÃ§Ã£o estimada
     let proximaExecucao = null;
     if (config && config.agente_ativo && agentRunning) {
       const ultimaExec = logs?.find((l: any) => l.status === 'concluido');
@@ -153,7 +153,7 @@ export async function GET(request: NextRequest) {
 }
 
 // ========================================
-// 🤖 PUT /api/ai/agent (Atualizar configuração)
+// ðŸ¤– PUT /api/ai/agent (Atualizar configuraÃ§Ã£o)
 // ========================================
 export async function PUT(request: NextRequest) {
   try {
@@ -161,7 +161,7 @@ export async function PUT(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'UsuÃ¡rio nÃ£o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
@@ -173,7 +173,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const validatedData = AgentConfigSchema.parse(body);
 
-    // Verificar se configuração existe
+    // Verificar se configuraÃ§Ã£o existe
     const { data: existing } = await supabase
       .from('ai_agent_config')
       .select('id, agente_ativo')
@@ -182,7 +182,7 @@ export async function PUT(request: NextRequest) {
 
     let result;
     if (existing) {
-      // Atualizar configuração existente
+      // Atualizar configuraÃ§Ã£o existente
       const { data, error } = await supabase
         .from('ai_agent_config')
         .update(validatedData)
@@ -191,12 +191,12 @@ export async function PUT(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error('Erro ao atualizar configuração:', error);
-        return NextResponse.json({ error: 'Erro ao atualizar configuração' }, { status: 500 });
+        console.error('Erro ao atualizar configuraÃ§Ã£o:', error);
+        return NextResponse.json({ error: 'Erro ao atualizar configuraÃ§Ã£o' }, { status: 500 });
       }
       result = data;
     } else {
-      // Criar nova configuração
+      // Criar nova configuraÃ§Ã£o
       const { data, error } = await supabase
         .from('ai_agent_config')
         .insert({ bar_id, ...validatedData })
@@ -204,13 +204,13 @@ export async function PUT(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error('Erro ao criar configuração:', error);
-        return NextResponse.json({ error: 'Erro ao criar configuração' }, { status: 500 });
+        console.error('Erro ao criar configuraÃ§Ã£o:', error);
+        return NextResponse.json({ error: 'Erro ao criar configuraÃ§Ã£o' }, { status: 500 });
       }
       result = data;
     }
 
-    // Gerenciar agente baseado na configuração
+    // Gerenciar agente baseado na configuraÃ§Ã£o
     if (result.agente_ativo) {
       // Se ativou o agente, iniciar
       await startAIAgent(bar_id);
@@ -222,13 +222,13 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: result,
-      message: 'Configuração atualizada com sucesso'
+      message: 'ConfiguraÃ§Ã£o atualizada com sucesso'
     });
 
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({
-        error: 'Dados inválidos',
+        error: 'Dados invÃ¡lidos',
         details: error.errors
       }, { status: 400 });
     }
@@ -239,7 +239,7 @@ export async function PUT(request: NextRequest) {
 }
 
 // ========================================
-// 🤖 POST /api/ai/agent (Ações de controle)
+// ðŸ¤– POST /api/ai/agent (AÃ§Ãµes de controle)
 // ========================================
 export async function POST(request: NextRequest) {
   try {
@@ -247,7 +247,7 @@ export async function POST(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'UsuÃ¡rio nÃ£o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
@@ -260,7 +260,7 @@ export async function POST(request: NextRequest) {
     const { action } = body;
 
     if (!action) {
-      return NextResponse.json({ error: 'Ação é obrigatória' }, { status: 400 });
+      return NextResponse.json({ error: 'AÃ§Ã£o Ã© obrigatÃ³ria' }, { status: 400 });
     }
 
     let message = '';
@@ -286,31 +286,31 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'run_analysis':
-        // Forçar execução manual de análise
+        // ForÃ§ar execuÃ§Ã£o manual de anÃ¡lise
         const agentsStatus = aiAgentManager.getAgentsStatus();
         const agentRunning = agentsStatus.some(a => a.barId === bar_id && a.running);
         
         if (!agentRunning) {
-          return NextResponse.json({ error: 'Agente não está rodando' }, { status: 400 });
+          return NextResponse.json({ error: 'Agente nÃ£o estÃ¡ rodando' }, { status: 400 });
         }
 
-        // Registrar execução manual
+        // Registrar execuÃ§Ã£o manual
         await supabase
           .from('ai_agent_logs')
           .insert({
             bar_id,
             tipo_processamento: 'analise_manual',
-            nome_processo: 'Análise Manual Solicitada',
+            nome_processo: 'AnÃ¡lise Manual Solicitada',
             status: 'iniciado',
             executado_por: 'usuario_manual'
           });
 
         success = true;
-        message = 'Análise manual iniciada';
+        message = 'AnÃ¡lise manual iniciada';
         break;
 
       case 'clear_logs':
-        // Limpar logs antigos (manter últimos 30 dias)
+        // Limpar logs antigos (manter Ãºltimos 30 dias)
         const { error: clearError } = await supabase
           .from('ai_agent_logs')
           .delete()
@@ -327,7 +327,7 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'reset_config':
-        // Resetar configuração para padrões
+        // Resetar configuraÃ§Ã£o para padrÃµes
         const defaultConfig = {
           agente_ativo: false,
           frequencia_analise_minutos: 60,
@@ -350,19 +350,19 @@ export async function POST(request: NextRequest) {
           .select();
 
         if (resetError) {
-          console.error('Erro ao resetar configuração:', resetError);
-          return NextResponse.json({ error: 'Erro ao resetar configuração' }, { status: 500 });
+          console.error('Erro ao resetar configuraÃ§Ã£o:', resetError);
+          return NextResponse.json({ error: 'Erro ao resetar configuraÃ§Ã£o' }, { status: 500 });
         }
 
         // Parar agente se estiver rodando
         stopAIAgent(bar_id);
 
         success = true;
-        message = 'Configuração resetada para padrões';
+        message = 'ConfiguraÃ§Ã£o resetada para padrÃµes';
         break;
 
       default:
-        return NextResponse.json({ error: 'Ação inválida' }, { status: 400 });
+        return NextResponse.json({ error: 'AÃ§Ã£o invÃ¡lida' }, { status: 400 });
     }
 
     return NextResponse.json({
@@ -381,11 +381,11 @@ export async function POST(request: NextRequest) {
 }
 
 // ========================================
-// 🛠️ FUNÇÕES AUXILIARES
+// ðŸ› ï¸ FUNÃ‡Ã•ES AUXILIARES
 // ========================================
 
 /**
- * Verifica se está dentro do horário de funcionamento
+ * Verifica se estÃ¡ dentro do horÃ¡rio de funcionamento
  */
 function isWithinWorkingHours(config: any): boolean {
   const now = new Date();

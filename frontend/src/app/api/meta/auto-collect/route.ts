@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -6,10 +6,10 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// Token de autenticação para pgcron
+// Token de autenticaÃ§Ã£o para pgcron
 const CRON_TOKEN = 'sgb-meta-cron-2025'
 
-// Função para buscar webhook da tabela api_credentials
+// FunÃ§Ã£o para buscar webhook da tabela api_credentials
 async function getWebhookUrl(barId: number, webhookType: string = 'meta') {
   const { data: webhookConfig, error } = await supabase
     .from('api_credentials')
@@ -21,7 +21,7 @@ async function getWebhookUrl(barId: number, webhookType: string = 'meta') {
     .single()
 
   if (error || !webhookConfig) {
-    console.warn(`⚠️ Webhook config não encontrada para bar ${barId}, erro:`, error)
+    console.warn(`âš ï¸ Webhook config nÃ£o encontrada para bar ${barId}, erro:`, error)
     // Usar webhook Meta como fallback
     return 'https://discord.com/api/webhooks/1391538130737303674/V6WiwfJodQT3C7WqdJTpmyaOLJByuKR8KZwtxW9ATmEqo0N4Msh73pF7PmOEVc12hx75'
   }
@@ -29,7 +29,7 @@ async function getWebhookUrl(barId: number, webhookType: string = 'meta') {
   const webhook = webhookConfig.configuracoes?.webhook_url
   
   if (!webhook || webhook.trim() === '') {
-    console.warn(`⚠️ Webhook ${webhookType} não configurado para bar ${barId}`)
+    console.warn(`âš ï¸ Webhook ${webhookType} nÃ£o configurado para bar ${barId}`)
     // Usar webhook Meta como fallback
     return 'https://discord.com/api/webhooks/1391538130737303674/V6WiwfJodQT3C7WqdJTpmyaOLJByuKR8KZwtxW9ATmEqo0N4Msh73pF7PmOEVc12hx75'
   }
@@ -37,18 +37,18 @@ async function getWebhookUrl(barId: number, webhookType: string = 'meta') {
   return webhook
 }
 
-// Função para enviar notificação Discord
+// FunÃ§Ã£o para enviar notificaÃ§Ã£o Discord
 async function enviarNotificacaoDiscord(barId: number, message: string, isError: boolean = false) {
   try {
     const webhookUrl = await getWebhookUrl(barId, 'meta')  // Corrigido: agora usa 'meta' em vez de 'sistema'
     
     const embed = {
-      title: isError ? '❌ Erro na Coleta Meta' : '📊 Coleta Meta Automática',
+      title: isError ? 'âŒ Erro na Coleta Meta' : 'ðŸ“Š Coleta Meta AutomÃ¡tica',
       description: message,
       color: isError ? 0xff0000 : 0x00ff00,
       timestamp: new Date().toISOString(),
       footer: {
-        text: '🤖 Sistema de Gestão de Bares - Meta API'
+        text: 'ðŸ¤– Sistema de GestÃ£o de Bares - Meta API'
       }
     }
 
@@ -60,28 +60,28 @@ async function enviarNotificacaoDiscord(barId: number, message: string, isError:
       })
     })
 
-    console.log('📱 Notificação Discord enviada')
+    console.log('ðŸ“± NotificaÃ§Ã£o Discord enviada')
   } catch (error) {
-    console.error('❌ Erro ao enviar notificação Discord:', error)
+    console.error('âŒ Erro ao enviar notificaÃ§Ã£o Discord:', error)
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🤖 Iniciando coleta automática Meta via pgcron...')
+    console.log('ðŸ¤– Iniciando coleta automÃ¡tica Meta via pgcron...')
 
-    // Verificar autenticação do pgcron
+    // Verificar autenticaÃ§Ã£o do pgcron
     const authHeader = request.headers.get('authorization')
     if (!authHeader || !authHeader.includes(CRON_TOKEN)) {
       return NextResponse.json({ 
-        error: 'Token de autorização inválido para coleta automática' 
+        error: 'Token de autorizaÃ§Ã£o invÃ¡lido para coleta automÃ¡tica' 
       }, { status: 401 })
     }
 
     const startTime = new Date()
     const results = {
       success: true,
-      message: 'Coleta automática Meta executada com sucesso!',
+      message: 'Coleta automÃ¡tica Meta executada com sucesso!',
       timestamp: startTime.toISOString(),
       collections: {} as any,
       summary: {
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('📱 1. Coletando dados do Instagram...')
+    console.log('ðŸ“± 1. Coletando dados do Instagram...')
     
     // 1. COLETA INSTAGRAM
     try {
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
         }
         results.summary.instagram_success = true
         results.summary.total_api_calls += 2
-        console.log('✅ Instagram: Sucesso')
+        console.log('âœ… Instagram: Sucesso')
       } else {
         const error = await instagramResponse.text()
         results.collections.instagram = {
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
           status: instagramResponse.status
         }
         results.summary.errors.push(`Instagram: ${error}`)
-        console.log('❌ Instagram: Erro')
+        console.log('âŒ Instagram: Erro')
       }
     } catch (error: any) {
       results.collections.instagram = {
@@ -130,10 +130,10 @@ export async function POST(request: NextRequest) {
         error: error.message
       }
       results.summary.errors.push(`Instagram: ${error.message}`)
-      console.log('❌ Instagram: Erro crítico')
+      console.log('âŒ Instagram: Erro crÃ­tico')
     }
 
-    console.log('📘 2. Coletando dados do Facebook...')
+    console.log('ðŸ“˜ 2. Coletando dados do Facebook...')
     
     // 2. COLETA FACEBOOK
     try {
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
         }
         results.summary.facebook_success = true
         results.summary.total_api_calls += 3
-        console.log('✅ Facebook: Sucesso')
+        console.log('âœ… Facebook: Sucesso')
       } else {
         const error = await facebookResponse.text()
         results.collections.facebook = {
@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
           status: facebookResponse.status
         }
         results.summary.errors.push(`Facebook: ${error}`)
-        console.log('❌ Facebook: Erro')
+        console.log('âŒ Facebook: Erro')
       }
     } catch (error: any) {
       results.collections.facebook = {
@@ -170,15 +170,15 @@ export async function POST(request: NextRequest) {
         error: error.message
       }
       results.summary.errors.push(`Facebook: ${error.message}`)
-      console.log('❌ Facebook: Erro crítico')
+      console.log('âŒ Facebook: Erro crÃ­tico')
     }
 
     const endTime = new Date()
     results.summary.total_duration_ms = endTime.getTime() - startTime.getTime()
 
-    console.log('💾 3. Registrando execução da coleta automática...')
+    console.log('ðŸ’¾ 3. Registrando execuÃ§Ã£o da coleta automÃ¡tica...')
 
-    // 3. LOG DA EXECUÇÃO AUTOMÁTICA
+    // 3. LOG DA EXECUÃ‡ÃƒO AUTOMÃTICA
     const logStatus = results.summary.instagram_success || results.summary.facebook_success ? 'sucesso' : 'erro'
     const registrosProcessados = (results.summary.instagram_success ? 1 : 0) + (results.summary.facebook_success ? 1 : 0)
 
@@ -199,8 +199,8 @@ export async function POST(request: NextRequest) {
           total_api_calls: results.summary.total_api_calls
         },
         observacoes: results.summary.errors.length > 0 ? 
-          `Execução automática com ${results.summary.errors.length} erro(s)` : 
-          'Execução automática bem-sucedida',
+          `ExecuÃ§Ã£o automÃ¡tica com ${results.summary.errors.length} erro(s)` : 
+          'ExecuÃ§Ã£o automÃ¡tica bem-sucedida',
         erro_detalhes: results.summary.errors.length > 0 ? results.summary.errors.join('; ') : null
       })
 
@@ -210,24 +210,24 @@ export async function POST(request: NextRequest) {
       results.message = `Coleta parcialmente bem-sucedida: ${registrosProcessados}/2 plataformas`
     }
 
-    console.log(`🎉 Coleta automática concluída: ${registrosProcessados}/2 plataformas`)
+    console.log(`ðŸŽ‰ Coleta automÃ¡tica concluÃ­da: ${registrosProcessados}/2 plataformas`)
 
     // 5. NOTIFICAR DISCORD
     const discordMessage = results.success 
-      ? `🎯 **Coleta Meta Automática Concluída!**\n\n` +
-        `🏢 **Bar ID:** ${3}\n` +
-        `⏰ **Horário:** ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}\n` +
-        `📈 **Plataformas Coletadas:** ${registrosProcessados}/2\n` +
-        `📊 **API Calls:** ${results.summary.total_api_calls}\n` +
-        `⚡ **Duração:** ${Math.round(results.summary.total_duration_ms / 1000)}s\n\n` +
-        `✅ **Instagram:** ${results.summary.instagram_success ? 'Sucesso' : 'Erro'}\n` +
-        `✅ **Facebook:** ${results.summary.facebook_success ? 'Sucesso' : 'Erro'}\n\n` +
-        `🔄 **Próxima coleta:** ${getNextCollectionTime()}`
-      : `❌ **Erro na Coleta Meta!**\n\n` +
-        `🏢 **Bar ID:** ${3}\n` +
-        `⏰ **Horário:** ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}\n` +
-        `🚨 **Erros:** ${results.summary.errors.join(', ')}\n\n` +
-        `📊 **Tentativas:** ${registrosProcessados}/2 plataformas`
+      ? `ðŸŽ¯ **Coleta Meta AutomÃ¡tica ConcluÃ­da!**\n\n` +
+        `ðŸ¢ **Bar ID:** ${3}\n` +
+        `â° **HorÃ¡rio:** ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}\n` +
+        `ðŸ“ˆ **Plataformas Coletadas:** ${registrosProcessados}/2\n` +
+        `ðŸ“Š **API Calls:** ${results.summary.total_api_calls}\n` +
+        `âš¡ **DuraÃ§Ã£o:** ${Math.round(results.summary.total_duration_ms / 1000)}s\n\n` +
+        `âœ… **Instagram:** ${results.summary.instagram_success ? 'Sucesso' : 'Erro'}\n` +
+        `âœ… **Facebook:** ${results.summary.facebook_success ? 'Sucesso' : 'Erro'}\n\n` +
+        `ðŸ”„ **PrÃ³xima coleta:** ${getNextCollectionTime()}`
+      : `âŒ **Erro na Coleta Meta!**\n\n` +
+        `ðŸ¢ **Bar ID:** ${3}\n` +
+        `â° **HorÃ¡rio:** ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}\n` +
+        `ðŸš¨ **Erros:** ${results.summary.errors.join(', ')}\n\n` +
+        `ðŸ“Š **Tentativas:** ${registrosProcessados}/2 plataformas`
     
     await enviarNotificacaoDiscord(3, discordMessage, !results.success)
 
@@ -242,12 +242,12 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('💥 Erro crítico na coleta automática:', error)
+    console.error('ðŸ’¥ Erro crÃ­tico na coleta automÃ¡tica:', error)
     
-    // Notificar Discord sobre erro crítico
-    await enviarNotificacaoDiscord(3, `💥 **Erro Crítico na Coleta Meta!**\n\n🚨 **Erro:** ${error.message}\n⏰ **Horário:** ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`, true)
+    // Notificar Discord sobre erro crÃ­tico
+    await enviarNotificacaoDiscord(3, `ðŸ’¥ **Erro CrÃ­tico na Coleta Meta!**\n\nðŸš¨ **Erro:** ${error.message}\nâ° **HorÃ¡rio:** ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`, true)
     
-    // Log de erro crítico
+    // Log de erro crÃ­tico
     await supabase
       .from('meta_coletas_log')
       .insert({
@@ -257,12 +257,12 @@ export async function POST(request: NextRequest) {
         finalizada_em: new Date().toISOString(),
         status: 'erro_critico',
         erro_detalhes: error.message,
-        observacoes: 'Erro crítico na execução automática'
+        observacoes: 'Erro crÃ­tico na execuÃ§Ã£o automÃ¡tica'
       })
 
     return NextResponse.json({ 
       success: false,
-      error: 'Erro crítico na coleta automática Meta',
+      error: 'Erro crÃ­tico na coleta automÃ¡tica Meta',
       details: error.message,
       timestamp: new Date().toISOString()
     }, { status: 500 })
@@ -270,8 +270,8 @@ export async function POST(request: NextRequest) {
 }
 
 // ========================================
-// 📅 GET /api/meta/auto-collect/schedule
-// Verificar próxima coleta agendada
+// ðŸ“… GET /api/meta/auto-collect/schedule
+// Verificar prÃ³xima coleta agendada
 // ========================================
 export async function GET(request: NextRequest) {
   try {
@@ -285,18 +285,18 @@ export async function GET(request: NextRequest) {
     const schedule = {
       enabled: !!config,
       frequency: 12, // 2x por dia = a cada 12 horas (otimizado)
-      frequency_note: 'Otimizado para 2x/dia: manhã (8h) e noite (20h)',
+      frequency_note: 'Otimizado para 2x/dia: manhÃ£ (8h) e noite (20h)',
       last_collection: config?.ultima_coleta,
       next_collection: config?.proxima_coleta || getNextCollectionTime(),
-      schedule_hours: [8, 20], // Horários otimizados
+      schedule_hours: [8, 20], // HorÃ¡rios otimizados
       current_time: new Date().toISOString(),
       next_in_minutes: config?.proxima_coleta 
         ? Math.max(0, Math.round((new Date(config.proxima_coleta).getTime() - Date.now()) / 60000))
         : null,
       optimization_info: {
-        api_calls_per_day: 10, // 2 coletas × 5 calls cada
+        api_calls_per_day: 10, // 2 coletas Ã— 5 calls cada
         rate_limit_usage: 'Muito baixo (~0.02% do limite)',
-        benefits: ['Economia de recursos', 'Dados frescos 2x/dia', 'Relatórios manhã/noite']
+        benefits: ['Economia de recursos', 'Dados frescos 2x/dia', 'RelatÃ³rios manhÃ£/noite']
       }
     }
 
@@ -312,14 +312,14 @@ export async function GET(request: NextRequest) {
 }
 
 // ========================================
-// 🔧 FUNÇÕES AUXILIARES
+// ðŸ”§ FUNÃ‡Ã•ES AUXILIARES
 // ========================================
 
 function getNextCollectionTime(): string {
   const agora = new Date()
-  const horariosColeta = [8, 20] // 08:00 e 20:00 - Frequência otimizada
+  const horariosColeta = [8, 20] // 08:00 e 20:00 - FrequÃªncia otimizada
   
-  // Encontrar próximo horário hoje
+  // Encontrar prÃ³ximo horÃ¡rio hoje
   for (let hora of horariosColeta) {
     const proxima = new Date(agora)
     proxima.setHours(hora, 0, 0, 0)
@@ -329,9 +329,9 @@ function getNextCollectionTime(): string {
     }
   }
   
-  // Se nenhum horário hoje, próximo é 08:00 de amanhã
+  // Se nenhum horÃ¡rio hoje, prÃ³ximo Ã© 08:00 de amanhÃ£
   const amanha = new Date(agora)
   amanha.setDate(amanha.getDate() + 1)
-  amanha.setHours(8, 0, 0, 0) // Próxima coleta sempre às 8h da manhã
+  amanha.setHours(8, 0, 0, 0) // PrÃ³xima coleta sempre Ã s 8h da manhÃ£
   return amanha.toISOString()
 } 

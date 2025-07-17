@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 // Criar tabela de insumos
@@ -26,7 +26,7 @@ const criarTabelaInsumos = async (supabase: any) => {
       ALTER TABLE insumos ADD COLUMN IF NOT EXISTS tipo_local VARCHAR(20) DEFAULT 'cozinha';
       ALTER TABLE insumos ADD COLUMN IF NOT EXISTS unidade_medida VARCHAR(10) DEFAULT 'g';
       
-      -- Adicionar constraint se não existir
+      -- Adicionar constraint se nÃ£o existir
       DO $$ 
       BEGIN
         ALTER TABLE insumos ADD CONSTRAINT insumos_tipo_local_check 
@@ -50,11 +50,11 @@ const criarTabelaInsumos = async (supabase: any) => {
   })
   
   if (error) {
-    console.error('❌ Erro ao criar tabela insumos:', error)
+    console.error('âŒ Erro ao criar tabela insumos:', error)
     throw error
   }
   
-  console.log('✅ Tabela insumos criada/verificada')
+  console.log('âœ… Tabela insumos criada/verificada')
 }
 
 // GET - Listar insumos
@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      console.error('❌ Erro ao buscar insumos:', error)
+      console.error('âŒ Erro ao buscar insumos:', error)
       return NextResponse.json({ 
         success: false, 
         error: 'Erro ao buscar insumos' 
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Erro interno:', error)
+    console.error('âŒ Erro interno:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor' 
@@ -122,13 +122,13 @@ export async function POST(request: NextRequest) {
       bar_id = 3
     } = body
 
-    console.log(`📦 Cadastrando insumo:`, { codigo, nome, categoria, tipo_local, unidade_medida })
+    console.log(`ðŸ“¦ Cadastrando insumo:`, { codigo, nome, categoria, tipo_local, unidade_medida })
 
-    // Validações
+    // ValidaÃ§Ãµes
     if (!codigo || !nome) {
       return NextResponse.json({
         success: false,
-        error: 'Campos obrigatórios: codigo, nome'
+        error: 'Campos obrigatÃ³rios: codigo, nome'
       }, { status: 400 })
     }
 
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
     // Verificar/criar tabela
     await criarTabelaInsumos(supabase)
 
-    // Verificar se código já existe
+    // Verificar se cÃ³digo jÃ¡ existe
     const { data: existente } = await supabase
       .from('insumos')
       .select('codigo')
@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
     if (existente) {
       return NextResponse.json({
         success: false,
-        error: `Código ${codigo} já existe`
+        error: `CÃ³digo ${codigo} jÃ¡ existe`
       }, { status: 400 })
     }
 
@@ -179,14 +179,14 @@ export async function POST(request: NextRequest) {
       .select()
 
     if (error) {
-      console.error('❌ Erro ao cadastrar insumo:', error)
+      console.error('âŒ Erro ao cadastrar insumo:', error)
       return NextResponse.json({ 
         success: false, 
         error: 'Erro ao cadastrar insumo' 
       }, { status: 500 })
     }
 
-    console.log(`✅ Insumo cadastrado: ${codigo}`)
+    console.log(`âœ… Insumo cadastrado: ${codigo}`)
 
     return NextResponse.json({
       success: true,
@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Erro interno:', error)
+    console.error('âŒ Erro interno:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor' 
@@ -223,7 +223,7 @@ export async function PUT(request: NextRequest) {
     if (!id) {
       return NextResponse.json({
         success: false,
-        error: 'ID é obrigatório para atualização'
+        error: 'ID Ã© obrigatÃ³rio para atualizaÃ§Ã£o'
       }, { status: 400 })
     }
 
@@ -249,7 +249,7 @@ export async function PUT(request: NextRequest) {
       .select()
 
     if (error) {
-      console.error('❌ Erro ao atualizar insumo:', error)
+      console.error('âŒ Erro ao atualizar insumo:', error)
       return NextResponse.json({ 
         success: false, 
         error: 'Erro ao atualizar insumo' 
@@ -263,7 +263,7 @@ export async function PUT(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Erro interno:', error)
+    console.error('âŒ Erro interno:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor' 

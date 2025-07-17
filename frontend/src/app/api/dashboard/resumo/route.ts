@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser, authErrorResponse } from '@/middleware/auth'
 
@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usuário não autenticado')
+      return authErrorResponse('UsuÃ¡rio nÃ£o autenticado')
     }
 
     const body = await request.json()
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
     if (!bar_id || !user_id) {
       return NextResponse.json(
-        { error: 'bar_id e user_id são obrigatórios' },
+        { error: 'bar_id e user_id sÃ£o obrigatÃ³rios' },
         { status: 400 }
       )
     }
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     
     let pendenciasGerais = 0
 
-    // Somar várias pendências para um resumo geral
+    // Somar vÃ¡rias pendÃªncias para um resumo geral
     // 1. Checklists pendentes
     const { data: checklists } = await supabase
       .from('checklist_execucoes')
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     pendenciasGerais += alertas?.length || 0
 
-    // 3. Notificações não lidas
+    // 3. NotificaÃ§Ãµes nÃ£o lidas
     const { data: notificacoes } = await supabase
       .from('notificacoes')
       .select('id')

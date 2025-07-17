@@ -1,4 +1,4 @@
-// Utilitários para gerenciamento de cookies de autenticação
+﻿// UtilitÃ¡rios para gerenciamento de cookies de autenticaÃ§Ã£o
 
 export interface UserCookie {
   id: number
@@ -13,7 +13,7 @@ export const AUTH_COOKIE_NAME = 'sgb_user'
 
 export function setAuthCookie(userData: UserCookie) {
   try {
-    // Garantir que todos os campos obrigatórios estão presentes
+    // Garantir que todos os campos obrigatÃ³rios estÃ£o presentes
     const cookieData: UserCookie = {
       id: userData.id,
       email: userData.email,
@@ -29,7 +29,7 @@ export function setAuthCookie(userData: UserCookie) {
 
     document.cookie = `${AUTH_COOKIE_NAME}=${encodeURIComponent(value)}; expires=${expires.toUTCString()}; path=/; secure=${window.location.protocol === 'https:'}; samesite=strict`
   } catch (error) {
-    console.error('❌ Erro ao salvar cookie de autenticação:', error)
+    console.error('âŒ Erro ao salvar cookie de autenticaÃ§Ã£o:', error)
   }
 }
 
@@ -46,36 +46,36 @@ export function getAuthCookie(): UserCookie | null {
     const userData = JSON.parse(decodeURIComponent(value))
     return userData
   } catch (error) {
-    console.error('❌ Erro ao ler cookie de autenticação:', error)
+    console.error('âŒ Erro ao ler cookie de autenticaÃ§Ã£o:', error)
     return null
   }
 }
 
 export function clearAuthCookie() {
   try {
-    // Limpar cookie definindo data de expiração no passado
+    // Limpar cookie definindo data de expiraÃ§Ã£o no passado
     const pastDate = 'Thu, 01 Jan 1970 00:00:00 UTC'
     
-    // Múltiplas tentativas de limpeza para garantir que o cookie seja removido
+    // MÃºltiplas tentativas de limpeza para garantir que o cookie seja removido
     document.cookie = `${AUTH_COOKIE_NAME}=; expires=${pastDate}; path=/; domain=${window.location.hostname}`
     document.cookie = `${AUTH_COOKIE_NAME}=; expires=${pastDate}; path=/`
     document.cookie = `${AUTH_COOKIE_NAME}=; expires=${pastDate}; path=/; domain=.${window.location.hostname}`
     document.cookie = `${AUTH_COOKIE_NAME}=; max-age=0; path=/`
     document.cookie = `${AUTH_COOKIE_NAME}=; max-age=0; path=/; domain=${window.location.hostname}`
     
-    console.log('✅ Cookie de autenticação removido')
+    console.log('âœ… Cookie de autenticaÃ§Ã£o removido')
   } catch (error) {
-    console.error('❌ Erro ao limpar cookie de autenticação:', error)
+    console.error('âŒ Erro ao limpar cookie de autenticaÃ§Ã£o:', error)
   }
 }
 
-// Função para sincronizar localStorage com cookie
+// FunÃ§Ã£o para sincronizar localStorage com cookie
 export function syncAuthData(userData: any) {
   try {
     // Salvar no localStorage (dados completos)
     localStorage.setItem('sgb_user', JSON.stringify(userData))
     
-    // Salvar no cookie (dados necessários para middleware)
+    // Salvar no cookie (dados necessÃ¡rios para middleware)
     const cookieData: UserCookie = {
       id: userData.id,
       email: userData.email,
@@ -87,6 +87,6 @@ export function syncAuthData(userData: any) {
     
     setAuthCookie(cookieData)
   } catch (error) {
-    console.error('❌ Erro ao sincronizar dados de autenticação:', error)
+    console.error('âŒ Erro ao sincronizar dados de autenticaÃ§Ã£o:', error)
   }
 } 

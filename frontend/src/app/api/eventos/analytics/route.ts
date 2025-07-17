@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+ï»¿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic'
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     if (!bar_id) {
       return NextResponse.json({
         success: false,
-        error: 'bar_id é obrigatório'
+        error: 'bar_id Ã© obrigatÃ³rio'
       }, { status: 400 });
     }
 
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
     switch (tipo_analise) {
       case 'artistas':
-        // Análise por artista/banda
+        // AnÃ¡lise por artista/banda
         const { data: eventosPorArtista, error: errorArtistas } = await supabase
           .from('eventos')
           .select(`
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
         // Agrupar por artista
         const artistasStats: Record<string, any> = {};
         eventosPorArtista?.forEach((evento: any) => {
-          const artista = evento.nome_artista || evento.nome_banda || 'Não informado';
+          const artista = evento.nome_artista || evento.nome_banda || 'NÃ£o informado';
           
           if (!artistasStats[artista]) {
             artistasStats[artista] = {
@@ -76,13 +76,13 @@ export async function GET(request: NextRequest) {
             stats.melhor_evento = evento;
           }
 
-          // Último evento
+          // Ãšltimo evento
           if (!stats.ultimo_evento || evento.data_evento > stats.ultimo_evento.data_evento) {
             stats.ultimo_evento = evento;
           }
         });
 
-        // Calcular médias e converter Set para Array
+        // Calcular mÃ©dias e converter Set para Array
         dados = Object.values(artistasStats).map((stats: any) => ({
           ...stats,
           publico_medio: stats.total_eventos > 0 ? stats.publico_total / stats.total_eventos : 0,
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
         break;
 
       case 'generos':
-        // Análise por gênero musical
+        // AnÃ¡lise por gÃªnero musical
         const { data: eventosPorGenero, error: errorGeneros } = await supabase
           .from('eventos')
           .select(`
@@ -113,10 +113,10 @@ export async function GET(request: NextRequest) {
 
         if (errorGeneros) throw errorGeneros;
 
-        // Agrupar por gênero
+        // Agrupar por gÃªnero
         const generosStats: Record<string, any> = {};
         eventosPorGenero?.forEach((evento: any) => {
-          const genero = evento.genero_musical || 'Não informado';
+          const genero = evento.genero_musical || 'NÃ£o informado';
           
           if (!generosStats[genero]) {
             generosStats[genero] = {
@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
           stats.total_eventos++;
           stats.publico_total += evento.publico_real || 0;
           stats.faturamento_total += evento.receita_total || 0;
-          const artista = evento.nome_artista || evento.nome_banda || 'Não informado';
+          const artista = evento.nome_artista || evento.nome_banda || 'NÃ£o informado';
           stats.artistas_unicos.add(artista);
           stats.eventos.push(evento);
 
@@ -155,7 +155,7 @@ export async function GET(request: NextRequest) {
         break;
 
       case 'periodo':
-        // Análise por período (mensal)
+        // AnÃ¡lise por perÃ­odo (mensal)
         const { data: eventosPorPeriodo, error: errorPeriodo } = await supabase
           .from('eventos')
           .select(`
@@ -174,7 +174,7 @@ export async function GET(request: NextRequest) {
 
         if (errorPeriodo) throw errorPeriodo;
 
-        // Agrupar por mês
+        // Agrupar por mÃªs
         const periodosStats: Record<string, any> = {};
         eventosPorPeriodo?.forEach((evento: any) => {
           const data = new Date(evento.data_evento);
@@ -219,7 +219,7 @@ export async function GET(request: NextRequest) {
       default:
         return NextResponse.json({
           success: false,
-          error: 'Tipo de análise inválido'
+          error: 'Tipo de anÃ¡lise invÃ¡lido'
         }, { status: 400 });
     }
 

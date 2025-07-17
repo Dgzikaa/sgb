@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 
     if (!action || !userIds || !Array.isArray(userIds) || userIds.length === 0) {
       return NextResponse.json({ 
-        error: 'Ação e IDs dos usuários são obrigatórios' 
+        error: 'AÃ§Ã£o e IDs dos usuÃ¡rios sÃ£o obrigatÃ³rios' 
       }, { status: 400 })
     }
 
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     let successCount = 0
     let errorCount = 0
 
-    // Executar ação em lote
+    // Executar aÃ§Ã£o em lote
     switch (action) {
       case 'delete':
         for (const userId of userIds) {
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       case 'update_role':
         if (!data.role) {
           return NextResponse.json({ 
-            error: 'Papel (role) é obrigatório para esta ação' 
+            error: 'Papel (role) Ã© obrigatÃ³rio para esta aÃ§Ã£o' 
           }, { status: 400 })
         }
 
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
       case 'update_bar':
         if (!data.bar_id) {
           return NextResponse.json({ 
-            error: 'ID do bar é obrigatório para esta ação' 
+            error: 'ID do bar Ã© obrigatÃ³rio para esta aÃ§Ã£o' 
           }, { status: 400 })
         }
 
@@ -160,13 +160,13 @@ export async function POST(request: NextRequest) {
 
           if (error) throw error
 
-          // Preparar dados para exportação
+          // Preparar dados para exportaÃ§Ã£o
           const exportData = users.map((user: any) => ({
             'ID': user.id,
             'Nome': user.nome,
             'Email': user.email,
             'Papel': user.role,
-            'Ativo': user.ativo ? 'Sim' : 'Não',
+            'Ativo': user.ativo ? 'Sim' : 'NÃ£o',
             'Bar': user.bars?.nome || 'N/A',
             'Criado em': new Date(user.created_at).toLocaleDateString('pt-BR')
           }))
@@ -184,11 +184,11 @@ export async function POST(request: NextRequest) {
 
       default:
         return NextResponse.json({ 
-          error: `Ação '${action}' não suportada` 
+          error: `AÃ§Ã£o '${action}' nÃ£o suportada` 
         }, { status: 400 })
     }
 
-    // Log da operação
+    // Log da operaÃ§Ã£o
     console.log(`Bulk operation ${action}:`, {
       total: userIds.length,
       success: successCount,
@@ -208,54 +208,54 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Erro na operação em lote:', error)
+    console.error('Erro na operaÃ§Ã£o em lote:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor' 
     }, { status: 500 })
   }
 }
 
-// GET para listar ações disponíveis
+// GET para listar aÃ§Ãµes disponÃ­veis
 export async function GET() {
   return NextResponse.json({
     actions: [
       {
         id: 'delete',
-        label: 'Excluir usuários',
-        description: 'Remove permanentemente os usuários selecionados',
+        label: 'Excluir usuÃ¡rios',
+        description: 'Remove permanentemente os usuÃ¡rios selecionados',
         requiresConfirmation: true,
         destructive: true
       },
       {
         id: 'activate',
-        label: 'Ativar usuários',
-        description: 'Ativa os usuários selecionados',
+        label: 'Ativar usuÃ¡rios',
+        description: 'Ativa os usuÃ¡rios selecionados',
         requiresConfirmation: false
       },
       {
         id: 'deactivate',
-        label: 'Desativar usuários',
-        description: 'Desativa os usuários selecionados',
+        label: 'Desativar usuÃ¡rios',
+        description: 'Desativa os usuÃ¡rios selecionados',
         requiresConfirmation: true
       },
       {
         id: 'update_role',
         label: 'Alterar papel',
-        description: 'Altera o papel dos usuários selecionados',
+        description: 'Altera o papel dos usuÃ¡rios selecionados',
         requiresData: ['role'],
         requiresConfirmation: true
       },
       {
         id: 'update_bar',
         label: 'Alterar bar',
-        description: 'Altera o bar dos usuários selecionados',
+        description: 'Altera o bar dos usuÃ¡rios selecionados',
         requiresData: ['bar_id'],
         requiresConfirmation: true
       },
       {
         id: 'export',
-        label: 'Exportar usuários',
-        description: 'Exporta dados dos usuários selecionados',
+        label: 'Exportar usuÃ¡rios',
+        description: 'Exporta dados dos usuÃ¡rios selecionados',
         requiresConfirmation: false
       }
     ]

@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+﻿import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,11 +35,11 @@ export class ContaAzulApi {
       .single();
 
     if (!credentials) {
-      throw new Error('Credenciais não encontradas para este bar');
+      throw new Error('Credenciais nÃ£o encontradas para este bar');
     }
 
     if (!credentials.access_token) {
-      throw new Error('Token de acesso não disponível. Autorize a integração primeiro.');
+      throw new Error('Token de acesso nÃ£o disponÃ­vel. Autorize a integraÃ§Ã£o primeiro.');
     }
 
     this.accessToken = credentials.access_token;
@@ -82,7 +82,7 @@ export class ContaAzulApi {
   }
 
   /**
-   * Prepara os headers para a requisição
+   * Prepara os headers para a requisiÃ§Ã£o
    */
   private async prepareHeaders(): Promise<HeadersInit> {
     await this.loadCredentials();
@@ -90,7 +90,7 @@ export class ContaAzulApi {
     if (this.needsTokenRefresh()) {
       const refreshed = await this.refreshToken();
       if (!refreshed) {
-        throw new Error('Não foi possível renovar o token. Autorize a integração novamente.');
+        throw new Error('NÃ£o foi possÃ­vel renovar o token. Autorize a integraÃ§Ã£o novamente.');
       }
     }
 
@@ -102,7 +102,7 @@ export class ContaAzulApi {
   }
 
   /**
-   * Faz uma requisição GET autenticada
+   * Faz uma requisiÃ§Ã£o GET autenticada
    */
   async get<T = any>(endpoint: string, params?: Record<string, any>): Promise<ContaAzulApiResponse<T>> {
     try {
@@ -127,7 +127,7 @@ export class ContaAzulApi {
       if (!response.ok) {
         return {
           success: false,
-          error: data.message || data.error || 'Erro na requisição',
+          error: data.message || data.error || 'Erro na requisiÃ§Ã£o',
           status: response.status
         };
       }
@@ -146,7 +146,7 @@ export class ContaAzulApi {
   }
 
   /**
-   * Faz uma requisição POST autenticada
+   * Faz uma requisiÃ§Ã£o POST autenticada
    */
   async post<T = any>(endpoint: string, body?: any): Promise<ContaAzulApiResponse<T>> {
     try {
@@ -163,7 +163,7 @@ export class ContaAzulApi {
       if (!response.ok) {
         return {
           success: false,
-          error: data.message || data.error || 'Erro na requisição',
+          error: data.message || data.error || 'Erro na requisiÃ§Ã£o',
           status: response.status
         };
       }
@@ -182,7 +182,7 @@ export class ContaAzulApi {
   }
 
   /**
-   * Faz uma requisição PUT autenticada
+   * Faz uma requisiÃ§Ã£o PUT autenticada
    */
   async put<T = any>(endpoint: string, body?: any): Promise<ContaAzulApiResponse<T>> {
     try {
@@ -199,7 +199,7 @@ export class ContaAzulApi {
       if (!response.ok) {
         return {
           success: false,
-          error: data.message || data.error || 'Erro na requisição',
+          error: data.message || data.error || 'Erro na requisiÃ§Ã£o',
           status: response.status
         };
       }
@@ -218,7 +218,7 @@ export class ContaAzulApi {
   }
 
   /**
-   * Faz uma requisição DELETE autenticada
+   * Faz uma requisiÃ§Ã£o DELETE autenticada
    */
   async delete<T = any>(endpoint: string): Promise<ContaAzulApiResponse<T>> {
     try {
@@ -242,7 +242,7 @@ export class ContaAzulApi {
       if (!response.ok) {
         return {
           success: false,
-          error: data.message || data.error || 'Erro na requisição',
+          error: data.message || data.error || 'Erro na requisiÃ§Ã£o',
           status: response.status
         };
       }
@@ -261,15 +261,15 @@ export class ContaAzulApi {
   }
 
   /**
-   * Testa a conexão com a API
+   * Testa a conexÃ£o com a API
    */
   async testConnection(): Promise<ContaAzulApiResponse> {
     try {
-      // Tentar buscar informações da empresa
+      // Tentar buscar informaÃ§Ãµes da empresa
       const response = await this.get('/v1/company');
       
       if (response.success) {
-        // Salvar informações da empresa no banco
+        // Salvar informaÃ§Ãµes da empresa no banco
         await supabase
           .from('api_credentials')
           .update({
@@ -285,21 +285,21 @@ export class ContaAzulApi {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Erro ao testar conexão'
+        error: error instanceof Error ? error.message : 'Erro ao testar conexÃ£o'
       };
     }
   }
 }
 
 /**
- * Função utilitária para criar uma instância da API
+ * FunÃ§Ã£o utilitÃ¡ria para criar uma instÃ¢ncia da API
  */
 export function createContaAzulApi(barId: number): ContaAzulApi {
   return new ContaAzulApi(barId);
 }
 
 /**
- * Função para verificar se a integração está configurada e ativa
+ * FunÃ§Ã£o para verificar se a integraÃ§Ã£o estÃ¡ configurada e ativa
  */
 export async function isContaAzulConnected(barId: number): Promise<boolean> {
   try {
@@ -314,7 +314,7 @@ export async function isContaAzulConnected(barId: number): Promise<boolean> {
       return false;
     }
 
-    // Verificar se o token não está expirado
+    // Verificar se o token nÃ£o estÃ¡ expirado
     if (credentials.expires_at) {
       const expiresAt = new Date(credentials.expires_at);
       const now = new Date();
@@ -325,7 +325,7 @@ export async function isContaAzulConnected(barId: number): Promise<boolean> {
 
     return true;
   } catch (error) {
-    console.error('Erro ao verificar conexão ContaAzul:', error);
+    console.error('Erro ao verificar conexÃ£o ContaAzul:', error);
     return false;
   }
 }

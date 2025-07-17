@@ -1,4 +1,4 @@
-    import React, { useState, useRef, useEffect } from 'react'
+﻿    import React, { useState, useRef, useEffect } from 'react'
 import { Search, ChevronDown, User } from 'lucide-react'
 
 interface Option {
@@ -23,7 +23,7 @@ export function SelectWithSearch({
   options,
   value,
   onValueChange,
-  placeholder = "Selecione uma opção",
+  placeholder = "Selecione uma opÃ§Ã£o",
   searchPlaceholder = "Pesquisar...",
   disabled = false,
   className = ""
@@ -34,13 +34,13 @@ export function SelectWithSearch({
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Filtrar opções baseado no termo de busca
+  // Filtrar opÃ§Ãµes baseado no termo de busca
   const filteredOptions = options.filter((option: any) =>
     option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
     option.email?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  // Encontrar a opção selecionada
+  // Encontrar a opÃ§Ã£o selecionada
   const selectedOption = options.find((option: any) => option.value === value)
 
   // Fechar dropdown quando clicar fora
@@ -64,7 +64,7 @@ export function SelectWithSearch({
     }
   }, [isOpen])
 
-  // Navegação por teclado
+  // NavegaÃ§Ã£o por teclado
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!isOpen) {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -214,7 +214,7 @@ export function SelectWithSearch({
                           'bg-green-100 text-green-800'}
                       `}>
                         {option.role === 'admin' ? 'Administrador' : 
-                         option.role === 'manager' ? 'Gerente' : 'Funcionário'}
+                         option.role === 'manager' ? 'Gerente' : 'FuncionÃ¡rio'}
                       </span>
                     )}
                   </div>

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -8,9 +8,9 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🎯 Buscando campanhas ESPECÍFICAS do Ordinário...')
+    console.log('ðŸŽ¯ Buscando campanhas ESPECÃFICAS do OrdinÃ¡rio...')
 
-    // Buscar configuração da Meta
+    // Buscar configuraÃ§Ã£o da Meta
     const { data: config, error: configError } = await supabase
       .from('api_credentials')
       .select('*')
@@ -20,13 +20,13 @@ export async function GET(request: NextRequest) {
 
     if (configError || !config) {
       return NextResponse.json({ 
-        error: 'Configuração Meta não encontrada' 
+        error: 'ConfiguraÃ§Ã£o Meta nÃ£o encontrada' 
       }, { status: 404 })
     }
 
     const accessToken = config.access_token
     
-    // CONTA ESPECÍFICA DO ORDINÁRIO que vimos no Ads Manager
+    // CONTA ESPECÃFICA DO ORDINÃRIO que vimos no Ads Manager
     const ordinarioAdAccountId = 'act_1153081576486761'
 
     const results = {
@@ -38,12 +38,12 @@ export async function GET(request: NextRequest) {
       summary: {}
     } as any
 
-    console.log(`🎯 Buscando campanhas da conta específica: ${ordinarioAdAccountId}`)
+    console.log(`ðŸŽ¯ Buscando campanhas da conta especÃ­fica: ${ordinarioAdAccountId}`)
 
-    // 1. BUSCAR CAMPANHAS DA CONTA ORDINÁRIO
+    // 1. BUSCAR CAMPANHAS DA CONTA ORDINÃRIO
     const campaignsUrl = `https://graph.facebook.com/v18.0/${ordinarioAdAccountId}/campaigns?fields=id,name,status,effective_status,objective,start_time,stop_time,daily_budget,lifetime_budget,created_time,updated_time&access_token=${accessToken}`
     
-    console.log('📊 URL das campanhas:', campaignsUrl)
+    console.log('ðŸ“Š URL das campanhas:', campaignsUrl)
     
     const campaignsResponse = await fetch(campaignsUrl)
     const campaignsData = await campaignsResponse.json()
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     if (!campaignsResponse.ok) {
       return NextResponse.json({
         success: false,
-        error: 'Erro ao buscar campanhas do Ordinário',
+        error: 'Erro ao buscar campanhas do OrdinÃ¡rio',
         details: campaignsData,
         debug: {
           account_id: ordinarioAdAccountId,
@@ -62,11 +62,11 @@ export async function GET(request: NextRequest) {
     }
 
     results.campaigns = campaignsData.data || []
-    console.log(`✅ Encontradas ${results.campaigns.length} campanhas do Ordinário`)
+    console.log(`âœ… Encontradas ${results.campaigns.length} campanhas do OrdinÃ¡rio`)
 
-    // 2. BUSCAR INSIGHTS DAS CAMPANHAS (últimos 30 dias)
+    // 2. BUSCAR INSIGHTS DAS CAMPANHAS (Ãºltimos 30 dias)
     if (results.campaigns.length > 0) {
-      console.log('📈 Buscando insights das campanhas...')
+      console.log('ðŸ“ˆ Buscando insights das campanhas...')
       
       const insightsUrl = `https://graph.facebook.com/v18.0/${ordinarioAdAccountId}/insights?fields=campaign_id,campaign_name,impressions,clicks,reach,spend,ctr,cpc,cpm,actions,cost_per_action_type,frequency&date_preset=last_30d&level=campaign&access_token=${accessToken}`
       
@@ -78,11 +78,11 @@ export async function GET(request: NextRequest) {
           data: insightsData.data || [],
           total_records: insightsData.data?.length || 0
         }
-        console.log(`📊 Insights coletados: ${results.insights.total_records} campanhas com dados`)
+        console.log(`ðŸ“Š Insights coletados: ${results.insights.total_records} campanhas com dados`)
       } else {
         results.insights = {
           error: insightsData,
-          note: 'Erro ao buscar insights - pode ser problema de permissões'
+          note: 'Erro ao buscar insights - pode ser problema de permissÃµes'
         }
       }
     }
@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
       cost_per_thousand_impressions: totalImpressions > 0 ? ((totalSpend / totalImpressions) * 1000).toFixed(2) : 0
     }
 
-    console.log('📋 Resumo das campanhas Ordinário:', results.summary)
+    console.log('ðŸ“‹ Resumo das campanhas OrdinÃ¡rio:', results.summary)
 
     // 4. CAMPANHAS DESTACADAS
     if (results.campaigns.length > 0) {
@@ -137,10 +137,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(results)
 
   } catch (error: any) {
-    console.error('❌ Erro ao buscar campanhas do Ordinário:', error)
+    console.error('âŒ Erro ao buscar campanhas do OrdinÃ¡rio:', error)
     return NextResponse.json({ 
       success: false,
-      error: 'Erro ao buscar campanhas do Ordinário',
+      error: 'Erro ao buscar campanhas do OrdinÃ¡rio',
       details: error.message 
     }, { status: 500 })
   }

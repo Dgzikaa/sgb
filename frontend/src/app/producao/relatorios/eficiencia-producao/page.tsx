@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -158,7 +158,7 @@ export default function RelatorioEficienciaProducao() {
               <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
                 <Target className="h-6 w-6" />
               </div>
-              Relatório de Eficiência de Produção
+              RelatÃ³rio de EficiÃªncia de ProduÃ§Ã£o
               {selectedBar && (
                 <Badge variant="secondary" className="bg-white/20 text-white">
                   {selectedBar.nome}
@@ -180,21 +180,21 @@ export default function RelatorioEficienciaProducao() {
                 <Input
                   value={filtros.produto}
                   onChange={(e) => setFiltros(prev => ({ ...prev, produto: e.target.value }))}
-                  placeholder="Código do produto..."
+                  placeholder="CÃ³digo do produto..."
                   className="text-black font-medium placeholder:text-gray-600 bg-white border-2 border-gray-300"
                 />
               </div>
               <div>
-                <Label className="text-black font-medium">Funcionário</Label>
+                <Label className="text-black font-medium">FuncionÃ¡rio</Label>
                 <Input
                   value={filtros.funcionario}
                   onChange={(e) => setFiltros(prev => ({ ...prev, funcionario: e.target.value }))}
-                  placeholder="Nome do funcionário..."
+                  placeholder="Nome do funcionÃ¡rio..."
                   className="text-black font-medium placeholder:text-gray-600 bg-white border-2 border-gray-300"
                 />
               </div>
               <div>
-                <Label className="text-black font-medium">Data Início</Label>
+                <Label className="text-black font-medium">Data InÃ­cio</Label>
                 <Input
                   type="date"
                   value={filtros.data_inicio}
@@ -216,7 +216,7 @@ export default function RelatorioEficienciaProducao() {
                   onClick={carregarDados}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-semibold"
                 >
-                  🔍 Filtrar
+                  ðŸ” Filtrar
                 </Button>
               </div>
             </div>
@@ -229,18 +229,18 @@ export default function RelatorioEficienciaProducao() {
                   onChange={(e) => setFiltros(prev => ({ ...prev, apenas_problemas: e.target.checked }))}
                   className="rounded"
                 />
-                Mostrar apenas problemas (eficiência &lt; 90%, variação custo &gt; R$ 1,00, perda &gt; 25%)
+                Mostrar apenas problemas (eficiÃªncia &lt; 90%, variaÃ§Ã£o custo &gt; R$ 1,00, perda &gt; 25%)
               </label>
             </div>
           </CardContent>
         </Card>
 
-        {/* Estatísticas Gerais */}
+        {/* EstatÃ­sticas Gerais */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
           <Card>
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-blue-600">{estatisticas.total_producoes}</div>
-              <div className="text-sm text-black font-medium">Produções</div>
+              <div className="text-sm text-black font-medium">ProduÃ§Ãµes</div>
             </CardContent>
           </Card>
           <Card>
@@ -248,13 +248,13 @@ export default function RelatorioEficienciaProducao() {
               <div className={`text-2xl font-bold ${getCorEficiencia(estatisticas.eficiencia_media)}`}>
                 {estatisticas.eficiencia_media}%
               </div>
-              <div className="text-sm text-black font-medium">Eficiência Média</div>
+              <div className="text-sm text-black font-medium">EficiÃªncia MÃ©dia</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-orange-600">{estatisticas.perda_media}g</div>
-              <div className="text-sm text-black font-medium">Perda Média</div>
+              <div className="text-sm text-black font-medium">Perda MÃ©dia</div>
             </CardContent>
           </Card>
           <Card>
@@ -262,13 +262,13 @@ export default function RelatorioEficienciaProducao() {
               <div className={`text-2xl font-bold ${getCorVariacao(estatisticas.variacao_custo_media)}`}>
                 R$ {estatisticas.variacao_custo_media.toFixed(2)}
               </div>
-              <div className="text-sm text-black font-medium">Variação Custo</div>
+              <div className="text-sm text-black font-medium">VariaÃ§Ã£o Custo</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-purple-600">{estatisticas.funcionarios_unicos}</div>
-              <div className="text-sm text-black font-medium">Funcionários</div>
+              <div className="text-sm text-black font-medium">FuncionÃ¡rios</div>
             </CardContent>
           </Card>
           <Card>
@@ -279,17 +279,17 @@ export default function RelatorioEficienciaProducao() {
           </Card>
         </div>
 
-        {/* Lista de Produções */}
+        {/* Lista de ProduÃ§Ãµes */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-black">Produções Detalhadas</CardTitle>
+            <CardTitle className="text-black">ProduÃ§Ãµes Detalhadas</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
               <div className="text-center py-8 text-black font-medium">Carregando...</div>
             ) : producoes.length === 0 ? (
               <div className="text-center py-8 text-black font-medium">
-                Nenhuma produção encontrada com os filtros aplicados
+                Nenhuma produÃ§Ã£o encontrada com os filtros aplicados
               </div>
             ) : (
               <div className="space-y-4 max-h-96 overflow-y-auto">
@@ -298,7 +298,7 @@ export default function RelatorioEficienciaProducao() {
                     <CardContent className="p-4">
                       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
                         
-                        {/* Informações Básicas */}
+                        {/* InformaÃ§Ãµes BÃ¡sicas */}
                         <div>
                           <div className="flex items-center gap-2 mb-2">
                             <User className="h-4 w-4 text-blue-600" />
@@ -313,7 +313,7 @@ export default function RelatorioEficienciaProducao() {
                           </div>
                         </div>
 
-                        {/* Eficiência de Quantidade */}
+                        {/* EficiÃªncia de Quantidade */}
                         <div className="text-center">
                           <div className="flex items-center justify-center gap-2 mb-2">
                             <Target className="h-4 w-4 text-purple-600" />
@@ -343,7 +343,7 @@ export default function RelatorioEficienciaProducao() {
                               <span className="font-bold text-yellow-600">{producao.perda_limpeza_g}g</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-black">Produção:</span>
+                              <span className="text-black">ProduÃ§Ã£o:</span>
                               <span className="font-bold text-orange-600">{producao.perda_producao_g}g</span>
                             </div>
                             <div className="flex justify-between">
@@ -356,7 +356,7 @@ export default function RelatorioEficienciaProducao() {
                           </div>
                         </div>
 
-                        {/* Variação de Custos */}
+                        {/* VariaÃ§Ã£o de Custos */}
                         <div className="text-center">
                           <div className="flex items-center justify-center gap-2 mb-2">
                             <Calculator className="h-4 w-4 text-green-600" />
@@ -372,7 +372,7 @@ export default function RelatorioEficienciaProducao() {
                               <span className="font-bold text-purple-600">R$ {producao.custo_total_insumos.toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-black">Variação:</span>
+                              <span className="text-black">VariaÃ§Ã£o:</span>
                               <span className={`font-bold ${getCorVariacao(producao.variacao_custo)}`}>
                                 R$ {producao.variacao_custo >= 0 ? '+' : ''}{producao.variacao_custo.toFixed(2)}
                               </span>
@@ -388,22 +388,22 @@ export default function RelatorioEficienciaProducao() {
                       <div className="mt-3 flex flex-wrap gap-2">
                         {producao.eficiencia_quantidade < 90 && (
                           <Badge variant="destructive" className="text-xs">
-                            ⚠️ Baixa eficiência quantidade
+                            âš ï¸ Baixa eficiÃªncia quantidade
                           </Badge>
                         )}
                         {Math.abs(producao.variacao_custo) > 2 && (
                           <Badge variant="destructive" className="text-xs">
-                            💰 Alta variação custo
+                            ðŸ’° Alta variaÃ§Ã£o custo
                           </Badge>
                         )}
                         {(producao.perda_total_g / producao.peso_bruto_g) > 0.25 && (
                           <Badge variant="destructive" className="text-xs">
-                            ⚖️ Perda excessiva ({((producao.perda_total_g / producao.peso_bruto_g) * 100).toFixed(0)}%)
+                            âš–ï¸ Perda excessiva ({((producao.perda_total_g / producao.peso_bruto_g) * 100).toFixed(0)}%)
                           </Badge>
                         )}
                         {producao.rendimento_real < (producao.rendimento_teorico - 10) && (
                           <Badge variant="secondary" className="text-xs">
-                            📉 Rendimento abaixo do esperado
+                            ðŸ“‰ Rendimento abaixo do esperado
                           </Badge>
                         )}
                       </div>

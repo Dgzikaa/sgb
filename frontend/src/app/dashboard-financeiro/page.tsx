@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { StandardPageLayout } from '@/components/layouts'
@@ -126,7 +126,7 @@ export default function DashboardFinanceiroPage() {
   const carregarDados = async () => {
     if (!selectedBar) {
       toast({
-        title: "Bar não selecionado",
+        title: "Bar nÃ£o selecionado",
         description: "Selecione um bar para ver os dados financeiros",
         variant: "destructive"
       })
@@ -145,8 +145,8 @@ export default function DashboardFinanceiroPage() {
       setData(result)
       
       toast({
-        title: "✅ Dados Carregados!",
-        description: `${result.resumo.total_transacoes} transações encontradas`,
+        title: "âœ… Dados Carregados!",
+        description: `${result.resumo.total_transacoes} transaÃ§Ãµes encontradas`,
       })
       
     } catch (error) {
@@ -163,7 +163,7 @@ export default function DashboardFinanceiroPage() {
   const carregarDRE = async (mes?: string) => {
     if (!selectedBar) {
       toast({
-        title: "Bar não selecionado",
+        title: "Bar nÃ£o selecionado",
         description: "Selecione um bar para ver a DRE",
         variant: "destructive"
       })
@@ -188,7 +188,7 @@ export default function DashboardFinanceiroPage() {
       setDreData(result)
       
       toast({
-        title: "📊 DRE Carregada!",
+        title: "ðŸ“Š DRE Carregada!",
         description: `${result.dre.estatisticas.eventos_mapeados} eventos processados`,
       })
       
@@ -214,46 +214,46 @@ export default function DashboardFinanceiroPage() {
     return new Date(dateString).toLocaleDateString('pt-BR')
   }
 
-  // Função para corrigir nomes das categorias com caracteres especiais mal codificados
+  // FunÃ§Ã£o para corrigir nomes das categorias com caracteres especiais mal codificados
   const fixCategoryName = (categoryName: string) => {
     if (!categoryName) return categoryName
     
     return categoryName
-      .replace(/CrÃ©dito/g, 'Crédito')
-      .replace(/DÃ©bito/g, 'Débito')
-      .replace(/EmprÃ©stimos/g, 'Empréstimos')
-      .replace(/SÃ³cios/g, 'Sócios')
-      .replace(/UtensÃ­lios/g, 'Utensílios')
-      .replace(/DescartÃ¡veis/g, 'Descartáveis')
-      .replace(/ÃgÃ¼a/g, 'Água')
-      .replace(/ÃGUA/g, 'ÁGUA')
-      .replace(/ElÃ©trica/g, 'Elétrica')
-      .replace(/ENERGIA ELÃTRICA/g, 'ENERGIA ELÉTRICA')
-      .replace(/ManutenÃ§Ã£o/g, 'Manutenção')
-      .replace(/MANUTENÃÃO/g, 'MANUTENÇÃO')
-      .replace(/AluguelCondomÃ­nio/g, 'Aluguel/Condomínio')
-      .replace(/CONDOMÃNIO/g, 'CONDOMÍNIO')
-      .replace(/SALÃRIOS/g, 'SALÁRIOS')
-      .replace(/DÃ©cimo/g, 'Décimo')
-      .replace(/GÃ¡s/g, 'Gás')
-      .replace(/EscritÃ³rio/g, 'Escritório')
-      .replace(/AdministrativoOrdinÃ¡rio/g, 'Administrativo Ordinário')
-      .replace(/ProduÃ§Ã£o/g, 'Produção')
-      .replace(/OperaÃ§Ã£o/g, 'Operação')
-      .replace(/ProgramaÃ§Ã£o/g, 'Programação')
-      .replace(/AtraÃ§Ãµes/g, 'Atrações')
+      .replace(/CrÃƒÂ©dito/g, 'CrÃ©dito')
+      .replace(/DÃƒÂ©bito/g, 'DÃ©bito')
+      .replace(/EmprÃƒÂ©stimos/g, 'EmprÃ©stimos')
+      .replace(/SÃƒÂ³cios/g, 'SÃ³cios')
+      .replace(/UtensÃƒÂ­lios/g, 'UtensÃ­lios')
+      .replace(/DescartÃƒÂ¡veis/g, 'DescartÃ¡veis')
+      .replace(/ÃƒgÃƒÂ¼a/g, 'Ãgua')
+      .replace(/ÃƒGUA/g, 'ÃGUA')
+      .replace(/ElÃƒÂ©trica/g, 'ElÃ©trica')
+      .replace(/ENERGIA ELÃƒTRICA/g, 'ENERGIA ELÃ‰TRICA')
+      .replace(/ManutenÃƒÂ§ÃƒÂ£o/g, 'ManutenÃ§Ã£o')
+      .replace(/MANUTENÃƒÃƒO/g, 'MANUTENÃ‡ÃƒO')
+      .replace(/AluguelCondomÃƒÂ­nio/g, 'Aluguel/CondomÃ­nio')
+      .replace(/CONDOMÃƒNIO/g, 'CONDOMÃNIO')
+      .replace(/SALÃƒRIOS/g, 'SALÃRIOS')
+      .replace(/DÃƒÂ©cimo/g, 'DÃ©cimo')
+      .replace(/GÃƒÂ¡s/g, 'GÃ¡s')
+      .replace(/EscritÃƒÂ³rio/g, 'EscritÃ³rio')
+      .replace(/AdministrativoOrdinÃƒÂ¡rio/g, 'Administrativo OrdinÃ¡rio')
+      .replace(/ProduÃƒÂ§ÃƒÂ£o/g, 'ProduÃ§Ã£o')
+      .replace(/OperaÃƒÂ§ÃƒÂ£o/g, 'OperaÃ§Ã£o')
+      .replace(/ProgramaÃƒÂ§ÃƒÂ£o/g, 'ProgramaÃ§Ã£o')
+      .replace(/AtraÃƒÂ§ÃƒÂµes/g, 'AtraÃ§Ãµes')
   }
 
   const getPageTitle = () => {
     switch (activeTab) {
       case 'resumo':
-        return '📊 Resumo Geral 2025'
+        return 'ðŸ“Š Resumo Geral 2025'
       case 'dre':
-        return '📊 DRE Mensal'
+        return 'ðŸ“Š DRE Mensal'
       case 'insights':
-        return '👁️ Insights'
+        return 'ðŸ‘ï¸ Insights'
       default:
-        return '📊 Dashboard Financeiro'
+        return 'ðŸ“Š Dashboard Financeiro'
     }
   }
 
@@ -278,7 +278,7 @@ export default function DashboardFinanceiroPage() {
                 {getPageTitle()}
               </h1>
               <p className="text-responsive-sm text-gray-600 mt-1">
-                Visão completa das finanças - {selectedBar?.nome}
+                VisÃ£o completa das finanÃ§as - {selectedBar?.nome}
               </p>
             </div>
             <div className="flex gap-2">
@@ -294,7 +294,7 @@ export default function DashboardFinanceiroPage() {
                   <option value="">Todos os meses de 2025</option>
                   <option value="2025-01">Janeiro 2025</option>
                   <option value="2025-02">Fevereiro 2025</option>
-                  <option value="2025-03">Março 2025</option>
+                  <option value="2025-03">MarÃ§o 2025</option>
                   <option value="2025-04">Abril 2025</option>
                   <option value="2025-05">Maio 2025</option>
                   <option value="2025-06">Junho 2025</option>
@@ -338,7 +338,7 @@ export default function DashboardFinanceiroPage() {
           </div>
 
 
-          {/* Tabs de Navegação */}
+          {/* Tabs de NavegaÃ§Ã£o */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="resumo" className="flex items-center gap-2">
@@ -393,7 +393,7 @@ export default function DashboardFinanceiroPage() {
 
                   <Card className={`shadow-lg border-0 hover:shadow-xl transition-all duration-300 ${data.resumo.saldo_liquido >= 0 ? 'bg-gradient-to-br from-green-50 to-white' : 'bg-gradient-to-br from-red-50 to-white'}`}>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-semibold text-gray-700">Saldo Líquido</CardTitle>
+                      <CardTitle className="text-sm font-semibold text-gray-700">Saldo LÃ­quido</CardTitle>
                       <BarChart3Icon className={`h-5 w-5 ${data.resumo.saldo_liquido >= 0 ? 'text-green-600' : 'text-red-600'}`} />
                     </CardHeader>
                     <CardContent>
@@ -408,7 +408,7 @@ export default function DashboardFinanceiroPage() {
 
                   <Card className="shadow-lg border-0 bg-gradient-to-br from-blue-50 to-white hover:shadow-xl transition-all duration-300">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-semibold text-gray-700">Total Transações</CardTitle>
+                      <CardTitle className="text-sm font-semibold text-gray-700">Total TransaÃ§Ãµes</CardTitle>
                       <ActivityIcon className="h-5 w-5 text-blue-600" />
                     </CardHeader>
                     <CardContent>
@@ -423,18 +423,18 @@ export default function DashboardFinanceiroPage() {
                 </div>
               )}
 
-              {/* Análises Financeiras Avançadas */}
+              {/* AnÃ¡lises Financeiras AvanÃ§adas */}
               {data && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {/* Distribuição de Receitas */}
+                  {/* DistribuiÃ§Ã£o de Receitas */}
                   <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-green-50/30">
                     <CardHeader className="pb-3">
                       <CardTitle className="flex items-center gap-2">
                         <PieChartIcon className="w-5 h-5 text-green-600" />
-                        <span className="text-gray-800 font-bold">Distribuição de Receitas</span>
+                        <span className="text-gray-800 font-bold">DistribuiÃ§Ã£o de Receitas</span>
                       </CardTitle>
                       <CardDescription className="text-gray-600 font-medium">
-                        Concentração e diversificação das fontes
+                        ConcentraÃ§Ã£o e diversificaÃ§Ã£o das fontes
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -464,42 +464,42 @@ export default function DashboardFinanceiroPage() {
                     </CardContent>
                   </Card>
 
-                  {/* Indicadores de Eficiência */}
+                  {/* Indicadores de EficiÃªncia */}
                   <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-blue-50/30">
                     <CardHeader className="pb-3">
                       <CardTitle className="flex items-center gap-2">
                         <ActivityIcon className="w-5 h-5 text-blue-600" />
-                        <span className="text-gray-800 font-bold">Indicadores de Eficiência</span>
+                        <span className="text-gray-800 font-bold">Indicadores de EficiÃªncia</span>
                       </CardTitle>
                       <CardDescription className="text-gray-600 font-medium">
-                        Métricas operacionais chave
+                        MÃ©tricas operacionais chave
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium text-gray-700">Margem Líquida</span>
+                          <span className="text-sm font-medium text-gray-700">Margem LÃ­quida</span>
                           <span className={`text-sm font-bold ${data.resumo.saldo_liquido >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {((data.resumo.saldo_liquido / data.resumo.total_receitas) * 100).toFixed(1)}%
                           </span>
                         </div>
                         
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium text-gray-700">Receita por Transação</span>
+                          <span className="text-sm font-medium text-gray-700">Receita por TransaÃ§Ã£o</span>
                           <span className="text-sm font-bold text-blue-600">
                             {formatCurrency(data.resumo.total_receitas / data.estatisticas.receitas_categorizadas)}
                           </span>
                         </div>
 
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium text-gray-700">Despesa por Transação</span>
+                          <span className="text-sm font-medium text-gray-700">Despesa por TransaÃ§Ã£o</span>
                           <span className="text-sm font-bold text-red-600">
                             {formatCurrency(data.resumo.total_despesas / data.estatisticas.despesas_categorizadas)}
                           </span>
                         </div>
 
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium text-gray-700">Taxa de Categorização</span>
+                          <span className="text-sm font-medium text-gray-700">Taxa de CategorizaÃ§Ã£o</span>
                           <span className="text-sm font-bold text-purple-600">
                             {(((data.estatisticas.receitas_categorizadas + data.estatisticas.despesas_categorizadas) / data.resumo.total_transacoes) * 100).toFixed(1)}%
                           </span>
@@ -516,7 +516,7 @@ export default function DashboardFinanceiroPage() {
                         <span className="text-gray-800 font-bold">Estrutura de Custos</span>
                       </CardTitle>
                       <CardDescription className="text-gray-600 font-medium">
-                        Análise das principais despesas
+                        AnÃ¡lise das principais despesas
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -543,15 +543,15 @@ export default function DashboardFinanceiroPage() {
                     </CardContent>
                   </Card>
 
-                  {/* Análise de Volumes */}
+                  {/* AnÃ¡lise de Volumes */}
                   <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-yellow-50/30">
                     <CardHeader className="pb-3">
                       <CardTitle className="flex items-center gap-2">
                         <TrendingUpIcon className="w-5 h-5 text-yellow-600" />
-                        <span className="text-gray-800 font-bold">Análise de Volumes</span>
+                        <span className="text-gray-800 font-bold">AnÃ¡lise de Volumes</span>
                       </CardTitle>
                       <CardDescription className="text-gray-600 font-medium">
-                        Distribuição de transações
+                        DistribuiÃ§Ã£o de transaÃ§Ãµes
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -603,7 +603,7 @@ export default function DashboardFinanceiroPage() {
                         <span className="text-gray-800 font-bold">Resumo Executivo</span>
                       </CardTitle>
                       <CardDescription className="text-gray-600 font-medium">
-                        Principais indicadores do período
+                        Principais indicadores do perÃ­odo
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -633,22 +633,22 @@ export default function DashboardFinanceiroPage() {
                             Status Financeiro
                           </div>
                           <div className={`text-lg font-bold ${data.resumo.saldo_liquido >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {data.resumo.saldo_liquido >= 0 ? 'Lucrativo' : 'Deficitário'}
+                            {data.resumo.saldo_liquido >= 0 ? 'Lucrativo' : 'DeficitÃ¡rio'}
                           </div>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
 
-                  {/* Diversificação de Receitas */}
+                  {/* DiversificaÃ§Ã£o de Receitas */}
                   <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-teal-50/30">
                     <CardHeader className="pb-3">
                       <CardTitle className="flex items-center gap-2">
                         <TrendingUp className="w-5 h-5 text-teal-600" />
-                        <span className="text-gray-800 font-bold">Diversificação</span>
+                        <span className="text-gray-800 font-bold">DiversificaÃ§Ã£o</span>
                       </CardTitle>
                       <CardDescription className="text-gray-600 font-medium">
-                        Análise de concentração de risco
+                        AnÃ¡lise de concentraÃ§Ã£o de risco
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -656,20 +656,20 @@ export default function DashboardFinanceiroPage() {
                         {(() => {
                           const topReceita = data.receitas_por_categoria[0]?.total || 0
                           const concentracao = (topReceita / data.resumo.total_receitas) * 100
-                          const risco = concentracao > 50 ? 'Alto' : concentracao > 30 ? 'Médio' : 'Baixo'
+                          const risco = concentracao > 50 ? 'Alto' : concentracao > 30 ? 'MÃ©dio' : 'Baixo'
                           const corRisco = concentracao > 50 ? 'text-red-600' : concentracao > 30 ? 'text-yellow-600' : 'text-green-600'
                           
                           return (
                             <>
                               <div className="flex justify-between items-center">
-                                <span className="text-sm font-medium text-gray-700">Concentração Principal</span>
+                                <span className="text-sm font-medium text-gray-700">ConcentraÃ§Ã£o Principal</span>
                                 <span className={`text-sm font-bold ${corRisco}`}>
                                   {concentracao.toFixed(1)}%
                                 </span>
                               </div>
                               
                               <div className="flex justify-between items-center">
-                                <span className="text-sm font-medium text-gray-700">Risco de Concentração</span>
+                                <span className="text-sm font-medium text-gray-700">Risco de ConcentraÃ§Ã£o</span>
                                 <span className={`text-sm font-bold ${corRisco}`}>
                                   {risco}
                                 </span>
@@ -684,9 +684,9 @@ export default function DashboardFinanceiroPage() {
 
                               <div className={`p-3 rounded-lg ${concentracao > 50 ? 'bg-red-50' : concentracao > 30 ? 'bg-yellow-50' : 'bg-green-50'}`}>
                                 <div className={`text-xs font-medium ${concentracao > 50 ? 'text-red-700' : concentracao > 30 ? 'text-yellow-700' : 'text-green-700'}`}>
-                                  {concentracao > 50 ? '⚠️ Alta dependência de uma fonte' : 
-                                   concentracao > 30 ? '⚡ Concentração moderada' : 
-                                   '✅ Receitas bem diversificadas'}
+                                  {concentracao > 50 ? 'âš ï¸ Alta dependÃªncia de uma fonte' : 
+                                   concentracao > 30 ? 'âš¡ ConcentraÃ§Ã£o moderada' : 
+                                   'âœ… Receitas bem diversificadas'}
                                 </div>
                               </div>
                             </>
@@ -721,7 +721,7 @@ export default function DashboardFinanceiroPage() {
                       <DollarSignIcon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                       <h3 className="text-lg font-semibold mb-2">Dados Financeiros</h3>
                       <p className="text-gray-500 mb-4">
-                        Clique em "Atualizar Dados" para carregar as informações financeiras do ContaAzul.
+                        Clique em "Atualizar Dados" para carregar as informaÃ§Ãµes financeiras do ContaAzul.
                       </p>
                       <Button onClick={carregarDados}>
                         <RefreshCwIcon className="w-4 h-4 mr-2" />
@@ -732,12 +732,12 @@ export default function DashboardFinanceiroPage() {
                 </Card>
               )}
 
-              {/* Info sobre sincronização */}
+              {/* Info sobre sincronizaÃ§Ã£o */}
               {!loading && !selectedBar && (
                 <Alert>
                   <AlertDescription>
-                    💡 Selecione um bar no menu lateral para visualizar os dados financeiros do ContaAzul.
-                    Certifique-se de que o sync categorizado foi executado nas configurações.
+                    ðŸ’¡ Selecione um bar no menu lateral para visualizar os dados financeiros do ContaAzul.
+                    Certifique-se de que o sync categorizado foi executado nas configuraÃ§Ãµes.
                   </AlertDescription>
                 </Alert>
               )}
@@ -762,7 +762,7 @@ export default function DashboardFinanceiroPage() {
                     <CardContent className="p-6">
                       <div className="text-center">
                         <h3 className={`text-xl font-semibold mb-4 ${dreData.metricas.lucro_liquido >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                          🎯 RESULTADO FINAL
+                          ðŸŽ¯ RESULTADO FINAL
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                           <div>
@@ -794,7 +794,7 @@ export default function DashboardFinanceiroPage() {
                   {/* DRE FORMATO EXCEL */}
                   <Card>
                     <CardHeader className="bg-gray-50">
-                      <CardTitle className="text-gray-800">📊 DRE - Demonstração do Resultado do Exercício</CardTitle>
+                      <CardTitle className="text-gray-800">ðŸ“Š DRE - DemonstraÃ§Ã£o do Resultado do ExercÃ­cio</CardTitle>
                       <p className="text-gray-600 text-sm mt-1">{dreData.periodo}</p>
                     </CardHeader>
                     <CardContent className="p-0">
@@ -810,7 +810,7 @@ export default function DashboardFinanceiroPage() {
                           <tbody>
                             {/* RECEITAS */}
                             <tr className="bg-green-50 border-t-2 border-green-200">
-                              <td className="py-3 px-4 font-bold text-green-700">💰 RECEITAS</td>
+                              <td className="py-3 px-4 font-bold text-green-700">ðŸ’° RECEITAS</td>
                               <td className="py-3 px-4 text-right font-bold text-green-700">
                                 {formatCurrency(dreData.dre.receitas.total)}
                               </td>
@@ -834,7 +834,7 @@ export default function DashboardFinanceiroPage() {
                             
                             {/* DESPESAS */}
                             <tr className="bg-red-50 border-t-2 border-red-200">
-                              <td className="py-3 px-4 font-bold text-red-700">💸 DESPESAS</td>
+                              <td className="py-3 px-4 font-bold text-red-700">ðŸ’¸ DESPESAS</td>
                               <td className="py-3 px-4 text-right font-bold text-red-700">
                                 {formatCurrency(dreData.metricas.despesas_total)}
                               </td>
@@ -885,7 +885,7 @@ export default function DashboardFinanceiroPage() {
                             {/* RESULTADO */}
                             <tr className={`border-t-4 ${dreData.metricas.lucro_liquido >= 0 ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'}`}>
                               <td className={`py-4 px-4 font-bold text-lg ${dreData.metricas.lucro_liquido >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                                🎯 RESULTADO DO PERÍODO
+                                ðŸŽ¯ RESULTADO DO PERÃODO
                               </td>
                               <td className={`py-4 px-4 text-right font-bold text-xl ${dreData.metricas.lucro_liquido >= 0 ? 'text-green-700' : 'text-red-700'}`}>
                                 {dreData.metricas.lucro_liquido >= 0 ? '+' : ''}{formatCurrency(dreData.metricas.lucro_liquido)}
@@ -905,9 +905,9 @@ export default function DashboardFinanceiroPage() {
                   <CardContent className="py-8">
                     <div className="text-center">
                       <BarChart3Icon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                      <h3 className="text-lg font-semibold mb-2">DRE - Demonstração do Resultado</h3>
+                      <h3 className="text-lg font-semibold mb-2">DRE - DemonstraÃ§Ã£o do Resultado</h3>
                       <p className="text-gray-500 mb-4">
-                        Selecione um mês e clique em "Atualizar DRE" para calcular a demonstração do resultado.
+                        Selecione um mÃªs e clique em "Atualizar DRE" para calcular a demonstraÃ§Ã£o do resultado.
                       </p>
                       <Button onClick={() => carregarDRE()}>
                         <BarChart3Icon className="w-4 h-4 mr-2" />
@@ -933,7 +933,7 @@ export default function DashboardFinanceiroPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-gray-600 mb-4">
-                      Análise de crescimento de receitas mês a mês
+                      AnÃ¡lise de crescimento de receitas mÃªs a mÃªs
                     </p>
                     <div className="text-center text-gray-500 py-8">
                       Em desenvolvimento...
@@ -950,7 +950,7 @@ export default function DashboardFinanceiroPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-gray-600 mb-4">
-                      Padrões sazonais de receitas e despesas
+                      PadrÃµes sazonais de receitas e despesas
                     </p>
                     <div className="text-center text-gray-500 py-8">
                       Em desenvolvimento...
@@ -962,12 +962,12 @@ export default function DashboardFinanceiroPage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <CalendarIcon className="w-5 h-5 text-purple-600" />
-                      Previsões
+                      PrevisÃµes
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-gray-600 mb-4">
-                      Projeções baseadas em dados históricos
+                      ProjeÃ§Ãµes baseadas em dados histÃ³ricos
                     </p>
                     <div className="text-center text-gray-500 py-8">
                       Em desenvolvimento...
@@ -979,8 +979,8 @@ export default function DashboardFinanceiroPage() {
               <Alert>
                 <ActivityIcon className="h-4 w-4" />
                 <AlertDescription>
-                  💡 Esta seção será desenvolvida com análises avançadas baseadas nos dados coletados. 
-                  Incluirá gráficos de tendências, comparações mensais e insights automatizados.
+                  ðŸ’¡ Esta seÃ§Ã£o serÃ¡ desenvolvida com anÃ¡lises avanÃ§adas baseadas nos dados coletados. 
+                  IncluirÃ¡ grÃ¡ficos de tendÃªncias, comparaÃ§Ãµes mensais e insights automatizados.
                 </AlertDescription>
               </Alert>
             </TabsContent>
