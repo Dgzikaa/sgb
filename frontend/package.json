@@ -1,7 +1,7 @@
 {
   "name": "sgb-v2-frontend",
   "version": "2.0.0",
-  "description": "Sistema de Gest·£o de Bares V2 - Frontend React",
+  "description": "Sistema de Gest√£o de Bares V2 - Frontend React",
   "private": true,
   "scripts": {
     "dev": "next dev --port 3001",
@@ -78,7 +78,7 @@
   },
   "keywords": [
     "bar",
-    "gest·£o",
+    "gest√£o",
     "contahub",
     "sympla",
     "yuzer",
