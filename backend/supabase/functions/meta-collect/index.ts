@@ -1,5 +1,5 @@
 // Edge Function: meta-collect
-// Coleta dados do Instagram, Facebook (curtidas) e Ads, salva em meta_raw e chama a funÃ§Ã£o de processamento
+// Coleta dados do Instagram, Facebook (curtidas) e Ads, salva em meta_raw e chama a funá§á£o de processamento
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
@@ -20,10 +20,10 @@ serve(async (req)=>{
     // Buscar credenciais do Meta
     const { data: credenciais, error: credError } = await supabase.from('api_credentials').select('*').eq('sistema', 'meta').eq('bar_id', bar_id).single();
     if (credError || !credenciais || !credenciais.configuracoes) {
-      console.error('[meta-collect] Credenciais do Meta nÃ£o encontradas', credError);
+      console.error('[meta-collect] Credenciais do Meta ná£o encontradas', credError);
       return new Response(JSON.stringify({
         success: false,
-        message: 'Credenciais do Meta nÃ£o encontradas',
+        message: 'Credenciais do Meta ná£o encontradas',
         credError
       }), { status: 400 });
     }
@@ -44,11 +44,11 @@ serve(async (req)=>{
       views_total: 0
     };
     let limitacoesData = [
-      'NÃ£o hÃ¡ variaÃ§Ã£o de seguidores por perÃ­odo',
-      'NÃ£o hÃ¡ segmentaÃ§Ã£o seguidores/nÃ£o seguidores',
+      'Ná£o há¡ variaá§á£o de seguidores por perá­odo',
+      'Ná£o há¡ segmentaá§á£o seguidores/ná£o seguidores',
       'Stories expiram em 24h',
-      'Views agregados de stories sÃ³ disponÃ­veis se coletar logo apÃ³s publicaÃ§Ã£o',
-      'Stories e reels sÃ³ aparecem se disponÃ­veis via API no momento da coleta'
+      'Views agregados de stories sá³ disponá­veis se coletar logo apá³s publicaá§á£o',
+      'Stories e reels sá³ aparecem se disponá­veis via API no momento da coleta'
     ];
     try {
       const urlProfile = `https://graph.facebook.com/v19.0/${metaConfig.instagram_account_id}?fields=username,followers_count,follows_count,media_count&access_token=${metaConfig.access_token}`;
@@ -70,7 +70,7 @@ serve(async (req)=>{
           instagramInsightsData[metric.name] = metric.values;
         }
       }
-      // PaginaÃ§Ã£o de mÃ­dias Instagram
+      // Paginaá§á£o de má­dias Instagram
       let nextMediaUrl = `https://graph.facebook.com/v19.0/${metaConfig.instagram_account_id}/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url,timestamp&access_token=${metaConfig.access_token}`;
       while (nextMediaUrl) {
         const resMedia = await fetch(nextMediaUrl);
@@ -147,7 +147,7 @@ serve(async (req)=>{
       }
       adsData.campaigns = allCampaigns;
       // Para cada campanha, buscar insights resumidos
-      adsData.campaigns = await Promise.all(adsData.campaigns.map(async (camp: any) => {
+      adsData.campaigns = await Promise.all(adsData.campaigns.map(async (camp) => {
         try {
           const urlInsights = `https://graph.facebook.com/v19.0/${camp.id}/insights?fields=impressions,reach,spend,clicks,cpc,cpm,cpp,ctr,actions,cost_per_action_type&access_token=${metaConfig.access_token}`;
           const resCamp = await fetch(urlInsights);
@@ -195,7 +195,7 @@ serve(async (req)=>{
     } catch (e) {
       console.error('[meta-collect] Erro ao salvar em meta_raw:', e);
     }
-    // Chamar a API de processamento em produÃ§Ã£o (Vercel)
+    // Chamar a API de processamento em produá§á£o (Vercel)
     try {
       const processUrl = 'https://sgbv2.vercel.app/api/meta/process';
       await fetch(processUrl, {

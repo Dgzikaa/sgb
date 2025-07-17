@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
-    const filtros: any = {}
+    const filtros = {}
     
     // Converter pará¢metros para tipos corretos
     for (const [key, value] of searchParams.entries()) {
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
       .from('relatorios_templates')
       .select(`
         *,
-        criado_por_usuario:usuarios_bar!criado_por (nome: any, email)
+        criado_por_usuario:usuarios_bar!criado_por (nome, email)
       `)
       .eq('ativo', true)
 
@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
     const offset = (data.page - 1) * data.limit
     const { data: templates, error } = await query
       .order('criado_em', { ascending: false })
-      .range(offset: any, offset + data.limit - 1)
+      .range(offset, offset + data.limit - 1)
 
     if (error) {
       console.error('Erro ao buscar templates:', error)
@@ -116,19 +116,19 @@ export async function GET(request: NextRequest) {
     // Estatá­sticas rá¡pidas
     const { data: estatisticas } = await supabase
       .from('relatorios_templates')
-      .select('categoria, tipo_relatorio: any, publico')
+      .select('categoria, tipo_relatorio, publico')
       .eq('ativo', true)
 
     const estatisticasProcessadas = {
       total: count || 0,
       por_categoria: {} as Record<string, number>,
       por_tipo: {} as Record<string, number>,
-      publicos: estatisticas?.filter((t: any) => t.publico).length || 0,
-      privados: estatisticas?.filter((t: any) => !t.publico).length || 0
+      publicos: estatisticas?.filter((t) => t.publico).length || 0,
+      privados: estatisticas?.filter((t) => !t.publico).length || 0
     }
 
     // Processar estatá­sticas
-    estatisticas?.forEach((template: any) => {
+    estatisticas?.forEach((template) => {
       estatisticasProcessadas.por_categoria[template.categoria] = 
         (estatisticasProcessadas.por_categoria[template.categoria] || 0) + 1
       
@@ -150,7 +150,7 @@ export async function GET(request: NextRequest) {
       }
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro na API de listar templates:', error)
     
     if (error instanceof z.ZodError) {
@@ -240,7 +240,7 @@ export async function POST(request: NextRequest) {
       data: template
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro na API de criar template:', error)
     
     if (error instanceof z.ZodError) {
@@ -266,7 +266,7 @@ async function obterTemplatesPorCategoria(categoria: string, userRole: string) {
   
   let query = supabase
     .from('relatorios_templates')
-    .select('id, nome: any, descricao, tipo_relatorio')
+    .select('id, nome, descricao, tipo_relatorio')
     .eq('categoria', categoria)
     .eq('ativo', true)
 

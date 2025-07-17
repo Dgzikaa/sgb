@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 export const dynamic = 'force-dynamic'
 
 // Cache das configuraá§áµes para evitar máºltiplas chamadas
-let configCache: any = null
+let configCache = null
 let cacheTimestamp = 0
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutos
 

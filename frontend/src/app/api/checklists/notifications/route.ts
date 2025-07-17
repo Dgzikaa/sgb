@@ -37,16 +37,16 @@ export async function POST(request: NextRequest) {
       .select(`
         *,
         checklist:checklists (
-          id, nome: any, setor, tipo: any,
+          id, nome, setor, tipo,
           checklist_schedules (
-            titulo, responsaveis_whatsapp: any, notificacoes_ativas
+            titulo, responsaveis_whatsapp, notificacoes_ativas
           )
         ),
         funcionario:usuarios_bar!funcionario_id (
-          nome, email: any, telefone
+          nome, email, telefone
         ),
         agendamento:checklist_schedules (
-          titulo, responsaveis_whatsapp: any, notificacoes_ativas
+          titulo, responsaveis_whatsapp, notificacoes_ativas
         )
       `)
       .eq('id', data.checklist_execucao_id)
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Gerar mensagem personalizada
-    const mensagem = await gerarMensagemWhatsApp(execucao: any, data, user.bar_id)
+    const mensagem = await gerarMensagemWhatsApp(execucao, data, user.bar_id)
 
     // Enviar notificaá§áµes
     const resultados = await enviarNotificacoesWhatsApp(
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
     )
 
     // Registrar log da notificaá§á£o
-    await registrarLogNotificacao(supabase: any, {
+    await registrarLogNotificacao(supabase, {
       checklist_execucao_id: data.checklist_execucao_id,
       tipo_notificacao: data.tipo_notificacao,
       destinatarios_enviados: resultados.sucessos,
@@ -115,11 +115,11 @@ export async function POST(request: NextRequest) {
       resultados: {
         total_enviados: resultados.sucessos.length,
         total_falhas: resultados.falhas.length,
-        destinatarios: destinatarios.map((d: any) => ({ nome: d.nome, numero: d.numero }))
+        destinatarios: destinatarios.map((d) => ({ nome: d.nome, numero: d.numero }))
       }
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro na API de notificaá§áµes:', error)
     
     if (error instanceof z.ZodError) {
@@ -160,9 +160,9 @@ export async function GET(request: NextRequest) {
       .select(`
         *,
         checklist_execucao:checklist_execucoes (
-          checklist:checklists (nome: any, setor)
+          checklist:checklists (nome, setor)
         ),
-        enviado_por_usuario:usuarios_bar!enviado_por (nome: any, email)
+        enviado_por_usuario:usuarios_bar!enviado_por (nome, email)
       `)
       .eq('bar_id', user.bar_id)
       .order('created_at', { ascending: false })
@@ -192,7 +192,7 @@ export async function GET(request: NextRequest) {
       pagination: { page, limit }
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro na API de histá³rico de notificaá§áµes:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
@@ -205,8 +205,8 @@ export async function GET(request: NextRequest) {
 // FUNá‡á•ES AUXILIARES
 // =====================================================
 
-async function determinarDestinatarios(supabase: any, execucao: any, customizados?: string[], barId?: number) {
-  const destinatarios: any[] = []
+async function determinarDestinatarios(supabase, execucao, customizados?: string[], barId?: number) {
+  const destinatarios[] = []
 
   // 1. Destinatá¡rios do agendamento
   if (execucao.agendamento?.responsaveis_whatsapp) {
@@ -234,7 +234,7 @@ async function determinarDestinatarios(supabase: any, execucao: any, customizado
       .not('telefone', 'is', null)
 
     if (admins) {
-      admins.forEach((admin: any) => {
+      admins.forEach((admin) => {
         if (admin.telefone) {
           destinatarios.push({
             nome: admin.nome,
@@ -248,7 +248,7 @@ async function determinarDestinatarios(supabase: any, execucao: any, customizado
 
   // Remover duplicatas por náºmero
   const numerosUnicos = new Set()
-  return destinatarios.filter((dest: any) => {
+  return destinatarios.filter((dest) => {
     if (numerosUnicos.has(dest.numero)) {
       return false
     }
@@ -257,7 +257,7 @@ async function determinarDestinatarios(supabase: any, execucao: any, customizado
   })
 }
 
-async function gerarMensagemWhatsApp(execucao: any, dados: any, barId: number) {
+async function gerarMensagemWhatsApp(execucao, dados, barId: number) {
   const checklist = execucao.checklist
   const funcionario = execucao.funcionario
   
@@ -317,9 +317,9 @@ _Sistema de Gestá£o de Bares_`
   return mensagem
 }
 
-async function enviarNotificacoesWhatsApp(supabase: any, destinatarios: any[], mensagem: string, execucao: any, incluirRelatorio: boolean) {
-  const sucessos: any[] = []
-  const falhas: any[] = []
+async function enviarNotificacoesWhatsApp(supabase, destinatarios[], mensagem: string, execucao, incluirRelatorio: boolean) {
+  const sucessos[] = []
+  const falhas[] = []
 
   for (const destinatario of destinatarios) {
     try {
@@ -354,7 +354,7 @@ async function enviarNotificacoesWhatsApp(supabase: any, destinatarios: any[], m
           })
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       falhas.push({ destinatario, erro: error.message })
     }
   }
@@ -362,7 +362,7 @@ async function enviarNotificacoesWhatsApp(supabase: any, destinatarios: any[], m
   return { sucessos, falhas }
 }
 
-function calcularEstatisticasExecucao(execucao: any) {
+function calcularEstatisticasExecucao(execucao) {
   const respostas = execucao.respostas || {}
   const totalItens = execucao.progresso?.total_itens || 0
   const itensRespondidos = execucao.progresso?.itens_respondidos || 0
@@ -376,8 +376,8 @@ function calcularEstatisticasExecucao(execucao: any) {
   let problemasEncontrados = 0
 
   if (respostas.secoes) {
-    respostas.secoes.forEach((secao: any) => {
-      secao.itens?.forEach((item: any) => {
+    respostas.secoes.forEach((secao) => {
+      secao.itens?.forEach((item) => {
         if (item.tipo === 'sim_nao' && item.valor === 'nao' && item.obrigatorio) {
           scoreQualidade -= 10
           problemasEncontrados++
@@ -392,12 +392,12 @@ function calcularEstatisticasExecucao(execucao: any) {
   return {
     percentual_completo: totalItens > 0 ? Math.round((itensRespondidos / totalItens) * 100) : 0,
     tempo_execucao: `${Math.floor(tempoExecucao / 60)}h ${tempoExecucao % 60}min`,
-    score_qualidade: Math.max(scoreQualidade: any, 0),
+    score_qualidade: Math.max(scoreQualidade, 0),
     problemas_encontrados: problemasEncontrados
   }
 }
 
-async function registrarLogNotificacao(supabase: any, dados: any) {
+async function registrarLogNotificacao(supabase, dados) {
   const { error } = await supabase
     .from('checklist_notification_logs')
     .insert({

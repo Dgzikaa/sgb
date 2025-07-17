@@ -43,12 +43,12 @@ export async function GET(request: Request) {
       .select('bar_id')
       .limit(100)
 
-    const barIds = distinctBars ? [...new Set(distinctBars.map((item: any) => item.bar_id))] : []
+    const barIds = distinctBars ? [...new Set(distinctBars.map((item) => item.bar_id))] : []
 
     // 4. Verificar ·∫ltimas sincroniza·ß·µes
     const { data: recentData, error: recentError } = await supabase
       .from('contaazul')
-      .select('id, bar_id: any, descricao, valor: any, sincronizado_em')
+      .select('id, bar_id, descricao, valor, sincronizado_em')
       .order('sincronizado_em', { ascending: false })
       .limit(10)
 
@@ -76,7 +76,7 @@ export async function GET(request: Request) {
       }
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ùå [DEBUG] Erro geral:', error)
     return NextResponse.json({
       success: false,

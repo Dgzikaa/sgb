@@ -17,8 +17,8 @@ function createSupabaseClient() {
 }
 
 // Funá§á£o para buscar todos os dados com paginaá§á£o
-async function buscarTodosEventosFinanceiros(supabase: any, barId: number) {
-  const todosEventos: any[] = []
+async function buscarTodosEventosFinanceiros(supabase, barId: number) {
+  const todosEventos[] = []
   let pagina = 0
   const LIMITE_POR_PAGINA = 1000
 
@@ -27,7 +27,7 @@ async function buscarTodosEventosFinanceiros(supabase: any, barId: number) {
     
     const { data: eventosPagina, error } = await supabase
       .from('contaazul_eventos_financeiros')
-      .select('tipo, valor: any, categoria_id, evento_id: any, descricao, data_competencia: any, status')
+      .select('tipo, valor, categoria_id, evento_id, descricao, data_competencia, status')
       .eq('bar_id', barId)
       .gte('data_competencia', '2025-01-01')
       .lte('data_competencia', '2025-12-31')
@@ -74,12 +74,12 @@ export async function GET(request: NextRequest) {
     console.log(`ðŸ’° BUSCANDO DADOS FINANCEIROS PARA BAR ${barId} - 2025 (COM PAGINAá‡áƒO)`)
 
     // 1. BUSCAR TODOS OS EVENTOS COM PAGINAá‡áƒO
-    const todosEventos = await buscarTodosEventosFinanceiros(supabase: any, parseInt(barId))
+    const todosEventos = await buscarTodosEventosFinanceiros(supabase, parseInt(barId))
 
     // 2. BUSCAR CATEGORIAS
     const { data: categorias, error: errorCategorias } = await supabase
       .from('contaazul_categorias')
-      .select('id, nome: any, tipo')
+      .select('id, nome, tipo')
       .eq('bar_id', parseInt(barId))
 
     if (errorCategorias) {
@@ -88,21 +88,21 @@ export async function GET(request: NextRequest) {
     }
 
     // 3. CALCULAR TOTAIS
-    const totalReceitas = todosEventos.filter((e: any) => e.tipo === 'receita').reduce((sum: number, e: any) => sum + (parseFloat(e.valor) || 0), 0)
-    const totalDespesas = todosEventos.filter((e: any) => e.tipo === 'despesa').reduce((sum: number, e: any) => sum + (parseFloat(e.valor) || 0), 0)
+    const totalReceitas = todosEventos.filter((e) => e.tipo === 'receita').reduce((sum: number, e) => sum + (parseFloat(e.valor) || 0), 0)
+    const totalDespesas = todosEventos.filter((e) => e.tipo === 'despesa').reduce((sum: number, e) => sum + (parseFloat(e.valor) || 0), 0)
     const saldoLiquido = totalReceitas - totalDespesas
 
     // 4. MAPEAR CATEGORIAS
-    const mapaCategorias = categorias?.reduce((acc: any, categoria: any) => {
+    const mapaCategorias = categorias?.reduce((acc, categoria) => {
       acc[categoria.id] = categoria
       return acc
     }, {}) || {}
 
     // 5. AGRUPAR EVENTOS POR CATEGORIA
-    const receitasAgrupadas: any = {}
-    const despesasAgrupadas: any = {}
+    const receitasAgrupadas = {}
+    const despesasAgrupadas = {}
 
-    todosEventos.forEach((evento: any) => {
+    todosEventos.forEach((evento) => {
       const categoria = mapaCategorias[evento.categoria_id]
       if (!categoria) return
 
@@ -132,15 +132,15 @@ export async function GET(request: NextRequest) {
 
     // 6. TRANSFORMAR EM ARRAYS E ORDENAR
     const topReceitas = Object.values(receitasAgrupadas)
-      .sort((a: any, b: any) => b.total - a.total)
-      .slice(0: any, 10)
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10)
 
     const topDespesas = Object.values(despesasAgrupadas)
-      .sort((a: any, b: any) => b.total - a.total)
-      .slice(0: any, 10)
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10)
 
     // 7. TRANSAá‡á•ES RECENTES (primeiras 20)
-    const transacoesRecentes = todosEventos.slice(0: any, 20).map((evento: any) => {
+    const transacoesRecentes = todosEventos.slice(0, 20).map((evento) => {
       const categoria = mapaCategorias[evento.categoria_id]
       return {
         id: evento.evento_id,
@@ -168,8 +168,8 @@ export async function GET(request: NextRequest) {
       estatisticas: {
         categorias_com_receitas: Object.keys(receitasAgrupadas).length,
         categorias_com_despesas: Object.keys(despesasAgrupadas).length,
-        receitas_categorizadas: todosEventos.filter((e: any) => e.tipo === 'receita').length,
-        despesas_categorizadas: todosEventos.filter((e: any) => e.tipo === 'despesa').length
+        receitas_categorizadas: todosEventos.filter((e) => e.tipo === 'receita').length,
+        despesas_categorizadas: todosEventos.filter((e) => e.tipo === 'despesa').length
       }
     }
 

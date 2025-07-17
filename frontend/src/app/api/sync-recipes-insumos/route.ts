@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 
     // 4. Transformar dados em arrays de objetos
     // Ajuste os campos conforme as colunas reais das abas
-    const insumos = insumosRows.map((row: any) => ({
+    const insumos = insumosRows.map((row) => ({
       codigo: row['Cá³digo'] || row['codigo'],
       nome: row['Nome'] || row['nome'],
       unidade: row['Unidade'] || row['unidade'],
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       // ...adicione outros campos conforme necessá¡rio
     }));
 
-    const receitas = receitasRows.map((row: any) => ({
+    const receitas = receitasRows.map((row) => ({
       codigo: row['Cá³digo'] || row['codigo'],
       nome: row['Nome'] || row['nome'],
       rendimento: row['Rendimento'] || row['rendimento'],
@@ -56,17 +56,17 @@ export async function POST(req: NextRequest) {
     }));
 
     // 5. Inicializar Supabase
-    const supabase = createClient(SUPABASE_URL: any, SUPABASE_SERVICE_ROLE_KEY);
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // 6. Upsert insumos
     const { data: insumosData, error: insumosError } = await supabase
       .from('insumos')
-      .upsert(insumos: any, { onConflict: 'codigo' });
+      .upsert(insumos, { onConflict: 'codigo' });
 
     // 7. Upsert receitas
     const { data: receitasData, error: receitasError } = await supabase
       .from('receitas')
-      .upsert(receitas: any, { onConflict: 'codigo' });
+      .upsert(receitas, { onConflict: 'codigo' });
 
     // 8. Retornar log detalhado
     return NextResponse.json({
@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
       insumos: { count: insumos.length, error: insumosError },
       receitas: { count: receitas.length, error: receitasError },
     });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json({ ok: false, error: err.message }, { status: 500 });
   }
 }

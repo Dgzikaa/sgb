@@ -1,10 +1,10 @@
 "use client"
 
 import React from 'react'
-import { X, Trash2: any, Edit, Archive: any, Download, Share2: any, Copy, MoreHorizontal } from 'lucide-react'
+import { X, Trash2, Edit, Archive, Download, Share2, Copy, MoreHorizontal } from 'lucide-react'
 import { Button } from './button'
 import { Badge } from './badge'
-import { Popover, PopoverContent: any, PopoverTrigger } from './popover'
+import { Popover, PopoverContent, PopoverTrigger } from './popover'
 import { Separator } from './separator'
 import { cn } from '@/lib/utils'
 
@@ -13,7 +13,7 @@ export interface BulkAction {
   label: string
   icon?: React.ComponentType<{ className?: string }>
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost'
-  onClick: (selectedItems: any[]) => void | Promise<void>
+  onClick: (selectedItems[]) => void | Promise<void>
   disabled?: boolean
   requiresConfirmation?: boolean
   confirmationMessage?: string
@@ -22,7 +22,7 @@ export interface BulkAction {
 interface BulkActionsToolbarProps {
   selectedCount: number
   totalCount: number
-  selectedItems: any[]
+  selectedItems[]
   actions: BulkAction[]
   onClearSelection: () => void
   className?: string
@@ -44,11 +44,11 @@ export function BulkActionsToolbar({
 
   const percentage = Math.round((selectedCount / totalCount) * 100)
 
-  const primaryActions = actions.filter((action: any) => 
+  const primaryActions = actions.filter((action) => 
     ['edit', 'delete', 'archive', 'download'].includes(action.id)
-  ).slice(0: any, 3)
+  ).slice(0, 3)
   
-  const secondaryActions = actions.filter((action: any) => 
+  const secondaryActions = actions.filter((action) => 
     !['edit', 'delete', 'archive', 'download'].includes(action.id)
   )
 
@@ -97,7 +97,7 @@ export function BulkActionsToolbar({
         {/* Actions */}
         <div className="flex items-center gap-2">
           {/* Primary Actions */}
-          {primaryActions.map((action: any) => {
+          {primaryActions.map((action) => {
             const IconComponent = action.icon
             return (
               <Button
@@ -126,7 +126,7 @@ export function BulkActionsToolbar({
                 </PopoverTrigger>
                 <PopoverContent className="w-48 p-1" align="end">
                   <div className="space-y-1">
-                    {secondaryActions.map((action: any, index: any) => {
+                    {secondaryActions.map((action, index) => {
                       const IconComponent = action.icon
                       return (
                         <React.Fragment key={action.id}>
@@ -175,7 +175,7 @@ export function BulkActionsToolbar({
 
 // Aá§áµes predefinidas comuns
 export const commonBulkActions = {
-  delete: (onDelete: (items: any[]) => void): BulkAction => ({
+  delete: (onDelete: (items[]) => void): BulkAction => ({
     id: 'delete',
     label: 'Excluir',
     icon: Trash2,
@@ -185,7 +185,7 @@ export const commonBulkActions = {
     confirmationMessage: 'Esta aá§á£o ná£o pode ser desfeita. Confirma a exclusá£o?'
   }),
   
-  edit: (onEdit: (items: any[]) => void): BulkAction => ({
+  edit: (onEdit: (items[]) => void): BulkAction => ({
     id: 'edit',
     label: 'Editar',
     icon: Edit,
@@ -193,7 +193,7 @@ export const commonBulkActions = {
     onClick: onEdit
   }),
   
-  archive: (onArchive: (items: any[]) => void): BulkAction => ({
+  archive: (onArchive: (items[]) => void): BulkAction => ({
     id: 'archive',
     label: 'Arquivar',
     icon: Archive,
@@ -202,7 +202,7 @@ export const commonBulkActions = {
     requiresConfirmation: true
   }),
   
-  download: (onDownload: (items: any[]) => void): BulkAction => ({
+  download: (onDownload: (items[]) => void): BulkAction => ({
     id: 'download',
     label: 'Baixar',
     icon: Download,
@@ -210,7 +210,7 @@ export const commonBulkActions = {
     onClick: onDownload
   }),
   
-  duplicate: (onDuplicate: (items: any[]) => void): BulkAction => ({
+  duplicate: (onDuplicate: (items[]) => void): BulkAction => ({
     id: 'duplicate',
     label: 'Duplicar',
     icon: Copy,
@@ -218,7 +218,7 @@ export const commonBulkActions = {
     onClick: onDuplicate
   }),
   
-  share: (onShare: (items: any[]) => void): BulkAction => ({
+  share: (onShare: (items[]) => void): BulkAction => ({
     id: 'share',
     label: 'Compartilhar',
     icon: Share2,

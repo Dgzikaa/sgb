@@ -20,7 +20,7 @@ export async function GET() {
     }
 
     // Mapear dados para estrutura padronizada
-    const data = barData.map((bar: any) => ({
+    const data = barData.map((bar) => ({
       id: bar.id,
       nome: bar.nome || bar.name || 'Sem nome',
       endereco: bar.endereco || bar.address || 'Endereço náo informado',
@@ -32,14 +32,14 @@ export async function GET() {
       updated_at: bar.updated_at || new Date().toISOString()
     }));
 
-    console.log(`? Encontrados ${data.length} bares na tabela 'bar':`, data.map((b: any) => b.nome));
+    console.log(`? Encontrados ${data.length} bares na tabela 'bar':`, data.map((b) => b.nome));
     
     return NextResponse.json({
       success: true,
       data: data
     });
     
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro ao buscar bares:', error);
     return NextResponse.json({
       success: false,
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { nome, endereco: any, telefone, cnpj: any, email } = body;
+    const { nome, endereco, telefone, cnpj, email } = body;
     
     // Validações básicas
     if (!nome || !endereco) {
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
       message: `Bar "${nome}" criado com sucesso!`
     });
     
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro ao criar bar:', error);
     return NextResponse.json({
       success: false,
@@ -165,7 +165,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id, nome: any, endereco, telefone: any, cnpj, email: any, status } = body;
+    const { id, nome, endereco, telefone, cnpj, email, status } = body;
     
     if (!id) {
       return NextResponse.json({
@@ -208,7 +208,7 @@ export async function PUT(request: NextRequest) {
       message: `Bar "${nome || data.nome}" atualizado com sucesso!`
     });
     
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro ao atualizar bar:', error);
     return NextResponse.json({
       success: false,
@@ -267,7 +267,7 @@ export async function DELETE(request: NextRequest) {
       message: `Bar "${bar.nome}" removido com sucesso!`
     });
     
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro ao deletar bar:', error);
     return NextResponse.json({
       success: false,

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -51,12 +51,12 @@ export function ChecklistReorderManager({
     if (initialChecklists.length > 0 && !isLoading) {
       setChecklists(initialChecklists)
     }
-  }, [initialChecklists, isLoading: any, setChecklists])
+  }, [initialChecklists, isLoading, setChecklists])
 
   // Handle reorder
   const handleReorder = (newChecklists: ChecklistTemplate[]) => {
     // Update ordem field based on new position
-    const updatedChecklists = newChecklists.map((checklist: any, index: any) => ({
+    const updatedChecklists = newChecklists.map((checklist, index) => ({
       ...checklist,
       ordem: index + 1
     }))
@@ -79,7 +79,7 @@ export function ChecklistReorderManager({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          checklists: checklists.map((c: any) => ({
+          checklists: checklists.map((c) => ({
             id: c.id,
             ordem: c.ordem
           }))
@@ -149,7 +149,7 @@ export function ChecklistReorderManager({
           <div className="animate-pulse space-y-4">
             <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
             <div className="space-y-3">
-              {Array.from({ length: 4 }).map((_: any, i: any) => (
+              {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
               ))}
             </div>
@@ -200,7 +200,7 @@ export function ChecklistReorderManager({
           items={checklists}
           onReorder={handleReorder}
           disabled={disabled}
-          renderItem={(checklist: any, index: any) => (
+          renderItem={(checklist, index) => (
             <div className="space-y-3">
               {/* Header */}
               <div className="flex items-center justify-between">
@@ -241,7 +241,7 @@ export function ChecklistReorderManager({
               </div>
             </div>
           )}
-          getId={(checklist: any) => checklist.id}
+          getId={(checklist) => checklist.id}
           gap="md"
           itemClassName="hover:bg-gray-50 dark:hover:bg-gray-800/50"
         />

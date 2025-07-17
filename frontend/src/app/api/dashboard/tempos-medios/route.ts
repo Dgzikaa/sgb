@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 
     if (!data_inicio || !data_fim || !bar_id) {
       return NextResponse.json(
-        { success: false, error: 'Pará¢metros obrigatá³rios: data_inicio, data_fim: any, bar_id' },
+        { success: false, error: 'Pará¢metros obrigatá³rios: data_inicio, data_fim, bar_id' },
         { status: 400 }
       )
     }
@@ -140,7 +140,7 @@ export async function GET(request: NextRequest) {
       let pedidosCozinha = 0
       let pedidosBar = 0
 
-      temposData.forEach((item: any) => {
+      temposData.forEach((item) => {
         const produto = item.prd_desc || ''
         const grupo = item.grp_desc || ''
         const quantidade = parseInt(item.itm_qtd || '1')
@@ -148,14 +148,14 @@ export async function GET(request: NextRequest) {
         let tempo = 0
         let isValidTempo = false
 
-        if (isComida(produto: any, grupo)) {
+        if (isComida(produto, grupo)) {
           // Para comidas: usar t1_t2 (iná­cio produá§á£o atá© fim produá§á£o)
           if (item.t1_t2 && item.t1_t2 > 0 && item.t1_t2 <= 2700) { // max 45 min
             tempo = item.t1_t2
             isValidTempo = true
             pedidosCozinha += quantidade
           }
-        } else if (isBebida(produto: any, grupo)) {
+        } else if (isBebida(produto, grupo)) {
           // Para bebidas: usar t0_t3 (laná§amento atá© entrega)
           if (item.t0_t3 && item.t0_t3 > 0 && item.t0_t3 <= 1200) { // max 20 min
             tempo = item.t0_t3
@@ -173,7 +173,7 @@ export async function GET(request: NextRequest) {
 
         // Adicionar tempo vá¡lido aos arrays correspondentes
         if (isValidTempo && tempo > 0) {
-          if (isComida(produto: any, grupo) || (!isBebida(produto: any, grupo))) {
+          if (isComida(produto, grupo) || (!isBebida(produto, grupo))) {
             temposCozinha.push(tempo)
           } else {
             temposBar.push(tempo)
@@ -183,16 +183,16 @@ export async function GET(request: NextRequest) {
 
       // Calcular má©dias
       const tempoMedioCozinha = temposCozinha.length > 0 
-        ? Math.round(temposCozinha.reduce((a: any, b: any) => a + b, 0) / temposCozinha.length)
+        ? Math.round(temposCozinha.reduce((a, b) => a + b, 0) / temposCozinha.length)
         : 0
 
       const tempoMedioBar = temposBar.length > 0 
-        ? Math.round(temposBar.reduce((a: any, b: any) => a + b, 0) / temposBar.length)
+        ? Math.round(temposBar.reduce((a, b) => a + b, 0) / temposBar.length)
         : 0
 
       const todosTempos = [...temposCozinha, ...temposBar]
       const tempoMedioGeral = todosTempos.length > 0 
-        ? Math.round(todosTempos.reduce((a: any, b: any) => a + b, 0) / todosTempos.length)
+        ? Math.round(todosTempos.reduce((a, b) => a + b, 0) / todosTempos.length)
         : 0
 
       const tempos = {

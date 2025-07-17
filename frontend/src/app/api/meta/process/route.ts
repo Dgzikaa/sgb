@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       console.error('[meta-process] meta_raw ná£o encontrado:', rawError)
       return NextResponse.json({ success: false, error: 'meta_raw ná£o encontrado', details: rawError }, { status: 404 })
     }
-    let rawJson: any
+    let rawJson
     try {
       rawJson = typeof metaRaw.json_raw === 'string' ? JSON.parse(metaRaw.json_raw) : metaRaw.json_raw
     } catch (e) {
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     // Processar e popular tabelas normalizadas
     try {
-      const logs: any[] = []
+      const logs[] = []
       // Facebook
       if (rawJson.facebook) {
         const fb = rawJson.facebook
@@ -53,9 +53,9 @@ export async function POST(request: NextRequest) {
           overall_star_rating: fb.page_info?.overall_star_rating || 0,
           rating_count: fb.page_info?.rating_count || 0,
           total_posts: fb.posts?.length || 0,
-          total_likes: fb.posts?.reduce((sum: number, p: any) => sum + (p.reactions?.summary?.total_count || 0), 0),
-          total_comments: fb.posts?.reduce((sum: number, p: any) => sum + (p.comments?.summary?.total_count || 0), 0),
-          total_shares: fb.posts?.reduce((sum: number, p: any) => sum + (p.shares?.count || 0), 0),
+          total_likes: fb.posts?.reduce((sum: number, p) => sum + (p.reactions?.summary?.total_count || 0), 0),
+          total_comments: fb.posts?.reduce((sum: number, p) => sum + (p.comments?.summary?.total_count || 0), 0),
+          total_shares: fb.posts?.reduce((sum: number, p) => sum + (p.shares?.count || 0), 0),
           raw_json: fb
         }
         logs.push({ table: 'facebook_daily', insertData })
@@ -74,12 +74,12 @@ export async function POST(request: NextRequest) {
           follows_count: ig.account_info?.follows_count || 0,
           media_count: ig.account_info?.media_count || 0,
           total_posts: ig.media?.length || 0,
-          total_likes: ig.media?.reduce((sum: number, m: any) => sum + (m.like_count || 0), 0),
-          total_comments: ig.media?.reduce((sum: number, m: any) => sum + (m.comments_count || 0), 0),
+          total_likes: ig.media?.reduce((sum: number, m) => sum + (m.like_count || 0), 0),
+          total_comments: ig.media?.reduce((sum: number, m) => sum + (m.comments_count || 0), 0),
           engagement: ig.insights?.engagement || 0,
-          impressions: ig.insights?.reach?.data?.[0]?.values?.reduce((sum: number, v: any) => sum + (parseInt(v.value) || 0), 0),
-          reach: ig.insights?.reach?.data?.[0]?.values?.reduce((sum: number, v: any) => sum + (parseInt(v.value) || 0), 0),
-          saves: ig.media?.reduce((sum: number, m: any) => sum + (m.saved_count || 0), 0),
+          impressions: ig.insights?.reach?.data?.[0]?.values?.reduce((sum: number, v) => sum + (parseInt(v.value) || 0), 0),
+          reach: ig.insights?.reach?.data?.[0]?.values?.reduce((sum: number, v) => sum + (parseInt(v.value) || 0), 0),
+          saves: ig.media?.reduce((sum: number, m) => sum + (m.saved_count || 0), 0),
           raw_json: ig
         }
         logs.push({ table: 'instagram_daily', insertData })
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Erro no processamento', details: errorMsg }, { status: 500 })
     }
 
-  } catch (e: any) {
+  } catch (e) {
     return NextResponse.json({ success: false, error: e.message || String(e) }, { status: 500 })
   }
 } 

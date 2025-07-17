@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { LogIn, Eye: any, EyeOff, Fingerprint } from 'lucide-react'
+import { LogIn, Eye, EyeOff, Fingerprint } from 'lucide-react'
 import BiometricAuth from '@/components/auth/BiometricAuth'
 
 export default function LoginPage() {
@@ -101,12 +101,12 @@ export default function LoginPage() {
     
     try {
       // Simulaá§á£o de envio de email de recuperaá§á£o
-      await new Promise(resolve => setTimeout(resolve: any, 2000))
+      await new Promise(resolve => setTimeout(resolve, 2000))
       
       console.log('Solicitation para recuperaá§á£o de senha:', forgotEmail)
       setForgotSuccess(true)
       
-    } catch (error: any) {
+    } catch (error) {
       setError('Erro ao enviar email de recuperaá§á£o: ' + error.message)
     } finally {
       setForgotLoading(false)
@@ -185,7 +185,7 @@ export default function LoginPage() {
         router.push(destination)
       }, 1500)
       
-    } catch (error: any) {
+    } catch (error) {
       setError('Erro na conexá£o: ' + error.message)
     } finally {
       setIsLoading(false)
@@ -398,7 +398,7 @@ export default function LoginPage() {
                       id="email"
                       type="email"
                       value={email}
-                      onChange={(e: any) => setEmail(e.target.value)}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="elegant-input w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                       placeholder="seu@email.com"
                       required
@@ -415,7 +415,7 @@ export default function LoginPage() {
                       id="password"
                       type={showPassword ? 'text' : 'password'}
                       value={password}
-                      onChange={(e: any) => setPassword(e.target.value)}
+                      onChange={(e) => setPassword(e.target.value)}
                       className="elegant-input w-full pr-12 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                       placeholder="€¢€¢€¢€¢€¢€¢€¢€¢"
                       required
@@ -542,7 +542,7 @@ export default function LoginPage() {
                   <input
                     type="email"
                     value={forgotEmail}
-                    onChange={(e: any) => setForgotEmail(e.target.value)}
+                    onChange={(e) => setForgotEmail(e.target.value)}
                     className="elegant-input w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                     placeholder="seu@email.com"
                     required

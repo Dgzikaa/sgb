@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
     console.log('?? ANÁLISE DETALHADA DE STATUS:');
     
     // Contar por status
-    const porStatus = reservas?.reduce((acc: any, r: any) => {
+    const porStatus = reservas?.reduce((acc, r) => {
       acc[r.status] = (acc[r.status] || 0) + 1;
       return acc;
     }, {}) || {};
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
     console.log('   ?? Reservas por status:', porStatus);
     
     // Pessoas por status
-    const pessoasPorStatus = reservas?.reduce((acc: any, r: any) => {
+    const pessoasPorStatus = reservas?.reduce((acc, r) => {
       acc[r.status] = (acc[r.status] || 0) + (r.people || 0);
       return acc;
     }, {}) || {};
@@ -100,30 +100,30 @@ export async function GET(request: NextRequest) {
 
     const stats = {
       total_reservas: reservas?.length || 0,
-      total_pessoas: reservas?.reduce((sum: number, r: any) => sum + (r.numero_pessoas || 0), 0) || 0,
-      confirmed: reservas?.filter((r: any) => r.status === 'confirmada').length || 0,
-      seated: reservas?.filter((r: any) => r.status === 'finalizada').length || 0,
-      pending: reservas?.filter((r: any) => r.status === 'pendente').length || 0,
+      total_pessoas: reservas?.reduce((sum: number, r) => sum + (r.numero_pessoas || 0), 0) || 0,
+      confirmed: reservas?.filter((r) => r.status === 'confirmada').length || 0,
+      seated: reservas?.filter((r) => r.status === 'finalizada').length || 0,
+      pending: reservas?.filter((r) => r.status === 'pendente').length || 0,
       
       // **NOVA MÉTRICA: Confirmadas apenas (confirmed + seated)**
-      reservas_confirmadas: reservas?.filter((r: any) => statusConfirmados.includes(r.status)).length || 0,
-      pessoas_confirmadas: reservas?.filter((r: any) => statusConfirmados.includes(r.status)).reduce((sum: number, r: any) => sum + (r.numero_pessoas || 0), 0) || 0,
+      reservas_confirmadas: reservas?.filter((r) => statusConfirmados.includes(r.status)).length || 0,
+      pessoas_confirmadas: reservas?.filter((r) => statusConfirmados.includes(r.status)).reduce((sum: number, r) => sum + (r.numero_pessoas || 0), 0) || 0,
       
       // **NOVA MÉTRICA: Confirmadas + Pendentes (como no planejamento)**
-      reservas_confirmadas_mais_pendentes: reservas?.filter((r: any) => [...statusConfirmados, ...statusPendentes].includes(r.status)).length || 0,
-      pessoas_confirmadas_mais_pendentes: reservas?.filter((r: any) => [...statusConfirmados, ...statusPendentes].includes(r.status)).reduce((sum: number, r: any) => sum + (r.numero_pessoas || 0), 0) || 0,
+      reservas_confirmadas_mais_pendentes: reservas?.filter((r) => [...statusConfirmados, ...statusPendentes].includes(r.status)).length || 0,
+      pessoas_confirmadas_mais_pendentes: reservas?.filter((r) => [...statusConfirmados, ...statusPendentes].includes(r.status)).reduce((sum: number, r) => sum + (r.numero_pessoas || 0), 0) || 0,
       
-      reservas_pendentes: reservas?.filter((r: any) => r.status === 'pendente').length || 0,
-      pessoas_pendentes: reservas?.filter((r: any) => r.status === 'pendente').reduce((sum: number, r: any) => sum + (r.numero_pessoas || 0), 0) || 0,
+      reservas_pendentes: reservas?.filter((r) => r.status === 'pendente').length || 0,
+      pessoas_pendentes: reservas?.filter((r) => r.status === 'pendente').reduce((sum: number, r) => sum + (r.numero_pessoas || 0), 0) || 0,
       
-      canceled: reservas?.filter((r: any) => r.status?.includes('cancelada')).length || 0,
-      no_show: reservas?.filter((r: any) => r.status === 'no_show').length || 0,
-      canceladas_total: reservas?.filter((r: any) => statusCancelados.includes(r.status)).length || 0,
-      pessoas_canceladas: reservas?.filter((r: any) => statusCancelados.includes(r.status)).reduce((sum: number, r: any) => sum + (r.numero_pessoas || 0), 0) || 0,
+      canceled: reservas?.filter((r) => r.status?.includes('cancelada')).length || 0,
+      no_show: reservas?.filter((r) => r.status === 'no_show').length || 0,
+      canceladas_total: reservas?.filter((r) => statusCancelados.includes(r.status)).length || 0,
+      pessoas_canceladas: reservas?.filter((r) => statusCancelados.includes(r.status)).reduce((sum: number, r) => sum + (r.numero_pessoas || 0), 0) || 0,
       
       // Agrupamento por horário
-      por_horario: reservas?.reduce((acc: any, reserva: any) => {
-        const hora = reserva.hora_reserva?.substring(0: any, 2) || '00';
+      por_horario: reservas?.reduce((acc, reserva) => {
+        const hora = reserva.hora_reserva?.substring(0, 2) || '00';
         if (!acc[hora]) {
           acc[hora] = {
             horario: `${hora}:00`,
@@ -137,7 +137,7 @@ export async function GET(request: NextRequest) {
       }, {}) || {},
 
       // Agrupamento por mesa
-      por_mesa: reservas?.reduce((acc: any, reserva: any) => {
+      por_mesa: reservas?.reduce((acc, reserva) => {
         const mesa = reserva.mesa_numero || 'Sem mesa definida';
         if (!acc[mesa]) {
           acc[mesa] = {

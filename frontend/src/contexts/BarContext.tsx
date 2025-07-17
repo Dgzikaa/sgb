@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext: any, useState, useEffect: any, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { getSupabaseClient } from '@/lib/supabase'
 import { useUser } from '@/contexts/UserContext'
 
@@ -142,7 +142,7 @@ export function BarProvider({ children }: { children: ReactNode }) {
         // Buscar os bares do usuá¡rio no banco
         const { data: userData, error: userError } = await supabase
           .from('usuarios_bar')
-          .select('id, email: any, nome, role: any, bar_id')
+          .select('id, email, nome, role, bar_id')
           .eq('email', userEmail)
           .eq('ativo', true)
 
@@ -159,7 +159,7 @@ export function BarProvider({ children }: { children: ReactNode }) {
         }
 
         // Extrair IDs áºnicos dos bares (caso usuá¡rio tenha acesso a máºltiplos bares)
-        const barIds = [...new Set(userData.map((user: any) => user.bar_id))]
+        const barIds = [...new Set(userData.map((user) => user.bar_id))]
         
         // Buscar detalhes dos bares
         const { data: barsData, error: barsError } = await supabase

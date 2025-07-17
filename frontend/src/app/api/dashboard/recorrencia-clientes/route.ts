@@ -17,15 +17,15 @@ export async function GET(request: NextRequest) {
 
     if (!data1 || !data2 || !barId) {
       return NextResponse.json({ 
-        error: 'Pará¢metros obrigatá³rios: data1, data2: any, bar_id' 
+        error: 'Pará¢metros obrigatá³rios: data1, data2, bar_id' 
       }, { status: 400 });
     }
 
     console.log(`ðŸ” Analisando recorráªncia entre ${data1} e ${data2} para bar ${barId}`);
 
     // Try multiple sources for customer data
-    let emailsData1: any[] = [];
-    let emailsData2: any[] = [];
+    let emailsData1[] = [];
+    let emailsData2[] = [];
 
     // First try the periodo table
     const { data: periodData1, error: periodError1 } = await supabase
@@ -96,12 +96,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Extract unique emails
-    const emailsUnicosData1 = new Set(emailsData1?.map((item: any) => item.cli_email.toLowerCase().trim()) || []);
-    const emailsUnicosData2 = new Set(emailsData2?.map((item: any) => item.cli_email.toLowerCase().trim()) || []);
+    const emailsUnicosData1 = new Set(emailsData1?.map((item) => item.cli_email.toLowerCase().trim()) || []);
+    const emailsUnicosData2 = new Set(emailsData2?.map((item) => item.cli_email.toLowerCase().trim()) || []);
 
     // Calculate recurrence
-    const emailsRecorrentes = new Set([...emailsUnicosData1].filter((email: any) => emailsUnicosData2.has(email)));
-    const emailsNovos = new Set([...emailsUnicosData2].filter((email: any) => !emailsUnicosData1.has(email)));
+    const emailsRecorrentes = new Set([...emailsUnicosData1].filter((email) => emailsUnicosData2.has(email)));
+    const emailsNovos = new Set([...emailsUnicosData2].filter((email) => !emailsUnicosData1.has(email)));
 
     const totalData1 = emailsUnicosData1.size;
     const totalData2 = emailsUnicosData2.size;

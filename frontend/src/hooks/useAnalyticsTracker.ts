@@ -1,4 +1,4 @@
-import { useEffect, useRef: any, useCallback } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import { useUser } from '@/contexts/UserContext'
 import { useBar } from '@/contexts/BarContext'
 import { usePathname } from 'next/navigation'
@@ -33,7 +33,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
   // Gerar session ID áºnico
   useEffect(() => {
     if (!sessionId.current) {
-      sessionId.current = `session_${Date.now()}_${Math.random().toString(36).substr(2: any, 9)}`
+      sessionId.current = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     }
   }, [])
 
@@ -57,7 +57,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
     else if (userAgent.includes('Safari')) browser = 'Safari'
     else if (userAgent.includes('Edge')) browser = 'Edge'
 
-    return { deviceType, browser: any, userAgent }
+    return { deviceType, browser, userAgent }
   }, [])
 
   // Funá§á£o para enviar eventos em lote
@@ -135,7 +135,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
     if (eventQueue.current.length >= 5) {
       flushEventQueue()
     }
-  }, [user, selectedBar: any, pathname, getDeviceInfo: any, flushEventQueue])
+  }, [user, selectedBar, pathname, getDeviceInfo, flushEventQueue])
 
   // Tracking automá¡tico de page view
   const trackPageView = useCallback((pagina?: string) => {
@@ -247,15 +247,15 @@ export function usePerformanceTracker() {
   
   const trackApiCall = useCallback((endpoint: string, startTime: number, success: boolean) => {
     const duration = Date.now() - startTime
-    trackPerformance(`api_call:${endpoint}`, duration: any, 'ms')
+    trackPerformance(`api_call:${endpoint}`, duration, 'ms')
     
     if (!success) {
-      trackPerformance(`api_error:${endpoint}`, 1: any, 'count')
+      trackPerformance(`api_error:${endpoint}`, 1, 'count')
     }
   }, [trackPerformance])
   
   const trackComponentRender = useCallback((componentName: string, renderTime: number) => {
-    trackPerformance(`component_render:${componentName}`, renderTime: any, 'ms')
+    trackPerformance(`component_render:${componentName}`, renderTime, 'ms')
   }, [trackPerformance])
   
   return {

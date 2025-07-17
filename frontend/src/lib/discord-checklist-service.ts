@@ -206,7 +206,7 @@ export class DiscordChecklistService {
     if (execution.observacoes_gerais) {
       embed.fields.push({
         name: "📝 Observa��es",
-        value: execution.observacoes_gerais.substring(0: any, 1000),
+        value: execution.observacoes_gerais.substring(0, 1000),
         inline: false
       })
     }
@@ -254,7 +254,7 @@ export class DiscordChecklistService {
         },
         {
           name: "📈 Status Geral",
-          value: this.getStatusGeral(taxa_conclusao: any, stats.alertas_criticos),
+          value: this.getStatusGeral(taxa_conclusao, stats.alertas_criticos),
           inline: true
         },
         {
@@ -278,7 +278,7 @@ export class DiscordChecklistService {
   /**
    * Envia resumo semanal de checklists
    */
-  static async sendWeeklyReport(weeklyStats: any): Promise<boolean> {
+  static async sendWeeklyReport(weeklyStats): Promise<boolean> {
     const embed = {
       title: "📊 Resumo Semanal - Checklists",
       description: "📅 **Performance da Semana**",
@@ -334,7 +334,7 @@ export class DiscordChecklistService {
   /**
    * Envia alerta de anomalia detectada pela IA
    */
-  static async sendAnomalyAlert(anomalia: any): Promise<boolean> {
+  static async sendAnomalyAlert(anomalia): Promise<boolean> {
     const severityColors = {
       critica: 0xFF0000,
       alta: 0xFF8C00,
@@ -435,7 +435,7 @@ export class DiscordChecklistService {
   /**
    * Envia webhook para Discord
    */
-  private static async sendWebhook(payload: any): Promise<boolean> {
+  private static async sendWebhook(payload): Promise<boolean> {
     try {
       const response = await fetch(this.WEBHOOK_URL, {
         method: 'POST',

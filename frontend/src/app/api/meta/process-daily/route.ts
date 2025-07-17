@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Inserir em instagram_daily
-    const instagramRows = dailySummary.map((day: any) => ({
+    const instagramRows = dailySummary.map((day) => ({
       bar_id: barId,
       data_coleta: day.data_referencia,
       followers_count: day.instagram_followers ?? null,
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
       instagram_error: igError,
       ads_error: adsError
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }
 } 

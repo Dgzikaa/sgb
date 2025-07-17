@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     // Parse dos pará¢metros
     const url = new URL(request.url);
     const rawParams = Object.fromEntries(url.searchParams.entries());
-    const processedParams: any = { ...rawParams };
+    const processedParams = { ...rawParams };
     if (processedParams.periodo_dias) processedParams.periodo_dias = parseInt(processedParams.periodo_dias);
     if (processedParams.incluir_insights) processedParams.incluir_insights = processedParams.incluir_insights === 'true';
     if (processedParams.incluir_anomalias) processedParams.incluir_anomalias = processedParams.incluir_anomalias === 'true';
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
       // Taxa de conclusá£o de checklists
       supabase
         .from('ai_metrics')
-        .select('valor, meta_valor: any, variacao_percentual, performance')
+        .select('valor, meta_valor, variacao_percentual, performance')
         .eq('bar_id', bar_id)
         .eq('nome_metrica', 'taxa_conclusao_checklists')
         .order('data_referencia', { ascending: false })
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
       // Score de qualidade
       supabase
         .from('ai_metrics')
-        .select('valor, meta_valor: any, variacao_percentual, performance')
+        .select('valor, meta_valor, variacao_percentual, performance')
         .eq('bar_id', bar_id)
         .eq('nome_metrica', 'score_medio_qualidade')
         .order('data_referencia', { ascending: false })
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
       // Tempo má©dio de execuá§á£o
       supabase
         .from('ai_metrics')
-        .select('valor, meta_valor: any, variacao_percentual, performance')
+        .select('valor, meta_valor, variacao_percentual, performance')
         .eq('bar_id', bar_id)
         .eq('nome_metrica', 'tempo_medio_execucao')
         .order('data_referencia', { ascending: false })
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
       // Produtividade
       supabase
         .from('ai_metrics')
-        .select('valor, meta_valor: any, variacao_percentual, performance')
+        .select('valor, meta_valor, variacao_percentual, performance')
         .eq('bar_id', bar_id)
         .eq('nome_metrica', 'produtividade_funcionarios')
         .order('data_referencia', { ascending: false })
@@ -102,7 +102,7 @@ export async function GET(request: NextRequest) {
         .single()
     ];
 
-    const [taxaConclusao, scoreQualidade: any, tempoMedio, produtividade] = await Promise.all(kpisPromises);
+    const [taxaConclusao, scoreQualidade, tempoMedio, produtividade] = await Promise.all(kpisPromises);
 
     const kpis = {
       taxa_conclusao: {
@@ -140,16 +140,16 @@ export async function GET(request: NextRequest) {
     // ========================================
     let insightsResumo = null;
     if (filters.incluir_insights) {
-      const [totalInsights, insightsCriticos: any, insightsRecentes] = await Promise.all([
+      const [totalInsights, insightsCriticos, insightsRecentes] = await Promise.all([
         supabase
           .from('ai_insights')
-          .select('id, impacto: any, status')
+          .select('id, impacto, status')
           .eq('bar_id', bar_id)
           .gte('created_at', dataInicioStr),
         
         supabase
           .from('ai_insights')
-          .select('id, titulo: any, impacto, confianca')
+          .select('id, titulo, impacto, confianca')
           .eq('bar_id', bar_id)
           .eq('impacto', 'critico')
           .in('status', ['novo', 'lido'])
@@ -158,7 +158,7 @@ export async function GET(request: NextRequest) {
         
         supabase
           .from('ai_insights')
-          .select('id, titulo: any, categoria, impacto: any, confianca, created_at')
+          .select('id, titulo, categoria, impacto, confianca, created_at')
           .eq('bar_id', bar_id)
           .gte('created_at', dataInicioStr)
           .order('created_at', { ascending: false })
@@ -169,12 +169,12 @@ export async function GET(request: NextRequest) {
         total: totalInsights.data?.length || 0,
         criticos_pendentes: insightsCriticos.data?.length || 0,
         por_status: totalInsights.data
-          ? totalInsights.data.reduce((acc: Record<string, number>, i: any) => {
+          ? totalInsights.data.reduce((acc: Record<string, number>, i) => {
               acc[i.status] = (acc[i.status] || 0) + 1;
               return acc;
             }, {} as Record<string, number>) || {}
           : {},
-        por_impacto: totalInsights.data?.reduce((acc: Record<string, number>, i: any) => {
+        por_impacto: totalInsights.data?.reduce((acc: Record<string, number>, i) => {
           acc[i.impacto] = (acc[i.impacto] || 0) + 1;
           return acc;
         }, {} as Record<string, number>) || {},
@@ -188,16 +188,16 @@ export async function GET(request: NextRequest) {
     // ========================================
     let anomaliasResumo = null;
     if (filters.incluir_anomalias) {
-      const [totalAnomalias, anomaliasAtivas: any, anomaliasRecentes] = await Promise.all([
+      const [totalAnomalias, anomaliasAtivas, anomaliasRecentes] = await Promise.all([
         supabase
           .from('ai_anomalies')
-          .select('id, severidade: any, status, ainda_ativa')
+          .select('id, severidade, status, ainda_ativa')
           .eq('bar_id', bar_id)
           .gte('data_inicio', dataInicioStr),
         
         supabase
           .from('ai_anomalies')
-          .select('id, titulo: any, severidade, tipo_anomalia: any, confianca_deteccao')
+          .select('id, titulo, severidade, tipo_anomalia, confianca_deteccao')
           .eq('bar_id', bar_id)
           .eq('ainda_ativa', true)
           .in('severidade', ['alta', 'critica'])
@@ -206,7 +206,7 @@ export async function GET(request: NextRequest) {
         
         supabase
           .from('ai_anomalies')
-          .select('id, titulo: any, tipo_anomalia, severidade: any, data_inicio')
+          .select('id, titulo, tipo_anomalia, severidade, data_inicio')
           .eq('bar_id', bar_id)
           .gte('data_inicio', dataInicioStr)
           .order('data_inicio', { ascending: false })
@@ -215,13 +215,13 @@ export async function GET(request: NextRequest) {
 
       anomaliasResumo = {
         total: totalAnomalias.data?.length || 0,
-        ativas: totalAnomalias.data?.filter((a: any) => a.ainda_ativa).length || 0,
+        ativas: totalAnomalias.data?.filter((a) => a.ainda_ativa).length || 0,
         criticas_ativas: anomaliasAtivas.data?.length || 0,
-        por_severidade: totalAnomalias.data?.reduce((acc: Record<string, number>, a: any) => {
+        por_severidade: totalAnomalias.data?.reduce((acc: Record<string, number>, a) => {
           acc[a.severidade] = (acc[a.severidade] || 0) + 1;
           return acc;
         }, {} as Record<string, number>) || {},
-        por_status: totalAnomalias.data?.reduce((acc: Record<string, number>, a: any) => {
+        por_status: totalAnomalias.data?.reduce((acc: Record<string, number>, a) => {
           acc[a.status] = (acc[a.status] || 0) + 1;
           return acc;
         }, {} as Record<string, number>) || {},
@@ -242,7 +242,7 @@ export async function GET(request: NextRequest) {
         'produtividade_funcionarios'
       ];
 
-      const tendenciasPromises = metricasChave.map(async (metrica: any) => {
+      const tendenciasPromises = metricasChave.map(async (metrica) => {
         const { data } = await supabase
           .from('ai_metrics')
           .select('valor, data_referencia')
@@ -267,7 +267,7 @@ export async function GET(request: NextRequest) {
       });
 
       const tendencias = await Promise.all(tendenciasPromises);
-      tendenciasMetricas = tendencias.filter((t: any) => t !== null);
+      tendenciasMetricas = tendencias.filter((t) => t !== null);
     }
 
     // ========================================
@@ -275,16 +275,16 @@ export async function GET(request: NextRequest) {
     // ========================================
     let recomendacoesResumo = null;
     if (filters.incluir_recomendacoes) {
-      const [totalRecomendacoes, recomendacoesAlta: any, recomendacoesRecentes] = await Promise.all([
+      const [totalRecomendacoes, recomendacoesAlta, recomendacoesRecentes] = await Promise.all([
         supabase
           .from('ai_recommendations')
-          .select('id, prioridade: any, status, roi_estimado')
+          .select('id, prioridade, status, roi_estimado')
           .eq('bar_id', bar_id)
           .gte('created_at', dataInicioStr),
         
         supabase
           .from('ai_recommendations')
-          .select('id, titulo: any, roi_estimado, esforco_implementacao: any, prioridade')
+          .select('id, titulo, roi_estimado, esforco_implementacao, prioridade')
           .eq('bar_id', bar_id)
           .gte('prioridade', 8)
           .in('status', ['nova', 'aprovada'])
@@ -293,20 +293,20 @@ export async function GET(request: NextRequest) {
         
         supabase
           .from('ai_recommendations')
-          .select('id, titulo: any, tipo_recomendacao, roi_estimado: any, created_at')
+          .select('id, titulo, tipo_recomendacao, roi_estimado, created_at')
           .eq('bar_id', bar_id)
           .gte('created_at', dataInicioStr)
           .order('created_at', { ascending: false })
           .limit(5)
       ]);
 
-      const roiPotencial = totalRecomendacoes.data?.reduce((acc: number, r: any) => acc + (r.roi_estimado || 0), 0) || 0;
+      const roiPotencial = totalRecomendacoes.data?.reduce((acc: number, r) => acc + (r.roi_estimado || 0), 0) || 0;
 
       recomendacoesResumo = {
         total: totalRecomendacoes.data?.length || 0,
         alta_prioridade: recomendacoesAlta.data?.length || 0,
         roi_potencial_total: roiPotencial,
-        por_status: totalRecomendacoes.data?.reduce((acc: Record<string, number>, r: any) => {
+        por_status: totalRecomendacoes.data?.reduce((acc: Record<string, number>, r) => {
           acc[r.status] = (acc[r.status] || 0) + 1;
           return acc;
         }, {} as Record<string, number>) || {},
@@ -335,8 +335,8 @@ export async function GET(request: NextRequest) {
         .gte('data_predicao', dataInicioStr)
         .order('data_predicao', { ascending: false });
 
-      const predicoesCriticas = predicoes?.filter((p: any) => p.gerar_alerta) || [];
-      const proximasSemana = predicoes?.filter((p: any) => {
+      const predicoesCriticas = predicoes?.filter((p) => p.gerar_alerta) || [];
+      const proximasSemana = predicoes?.filter((p) => {
         const dataAlvo = new Date(p.data_alvo);
         const umaSemana = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
         return dataAlvo <= umaSemana;
@@ -346,14 +346,14 @@ export async function GET(request: NextRequest) {
         total: predicoes?.length || 0,
         criticas: predicoesCriticas.length,
         proximas_semana: proximasSemana.length,
-        por_tipo: predicoes?.reduce((acc: Record<string, number>, p: any) => {
+        por_tipo: predicoes?.reduce((acc: Record<string, number>, p) => {
           acc[p.tipo_predicao] = (acc[p.tipo_predicao] || 0) + 1;
           return acc;
         }, {} as Record<string, number>) || {},
         confianca_media: predicoes?.length ? 
-          predicoes.reduce((acc: number, p: any) => acc + p.confianca, 0) / predicoes.length : 0,
-        criticas_detalhes: predicoesCriticas.slice(0: any, 3),
-        proximas_detalhes: proximasSemana.slice(0: any, 3)
+          predicoes.reduce((acc: number, p) => acc + p.confianca, 0) / predicoes.length : 0,
+        criticas_detalhes: predicoesCriticas.slice(0, 3),
+        proximas_detalhes: proximasSemana.slice(0, 3)
       };
     }
 
@@ -369,7 +369,7 @@ export async function GET(request: NextRequest) {
       
       supabase
         .from('ai_agent_logs')
-        .select('status, data_inicio: any, duracao_segundos')
+        .select('status, data_inicio, duracao_segundos')
         .eq('bar_id', bar_id)
         .order('data_inicio', { ascending: false })
         .limit(10)
@@ -382,10 +382,10 @@ export async function GET(request: NextRequest) {
         new Date(Date.now() + (configAgente.data.frequencia_analise_minutos * 60 * 1000)) : null,
       execucoes_recentes: logsRecentes.data?.length || 0,
       sucesso_rate: logsRecentes.data?.length ? 
-        (logsRecentes.data?.filter((l: any) => l.status === 'concluido').length || 0) / (logsRecentes.data?.length || 1) * 100 : 0,
+        (logsRecentes.data?.filter((l) => l.status === 'concluido').length || 0) / (logsRecentes.data?.length || 1) * 100 : 0,
       tempo_medio_execucao: logsRecentes.data?.length ?
-        logsRecentes.data.filter((l: any) => l.duracao_segundos).reduce((acc: number, l: any) => acc + l.duracao_segundos, 0) / 
-        logsRecentes.data.filter((l: any) => l.duracao_segundos).length : 0
+        logsRecentes.data.filter((l) => l.duracao_segundos).reduce((acc: number, l) => acc + l.duracao_segundos, 0) / 
+        logsRecentes.data.filter((l) => l.duracao_segundos).length : 0
     };
 
     // ========================================
@@ -404,7 +404,7 @@ export async function GET(request: NextRequest) {
 
     // Score baseado em anomalias
     if (anomaliasResumo) {
-      const scoreAnomalias = Math.max(0: any, 100 - (anomaliasResumo.criticas_ativas * 20));
+      const scoreAnomalias = Math.max(0, 100 - (anomaliasResumo.criticas_ativas * 20));
       scoresSaude.push(scoreAnomalias);
     }
 
@@ -429,7 +429,7 @@ export async function GET(request: NextRequest) {
          ...(anomaliasResumo && anomaliasResumo.criticas_ativas > 0 ? [`${anomaliasResumo.criticas_ativas} anomalias crá­ticas ativas`] : []),
          ...(insightsResumo && insightsResumo.criticos_pendentes > 0 ? [`${insightsResumo.criticos_pendentes} insights crá­ticos pendentes`] : []),
          ...(!agenteStatus.ativo ? ['Agente IA desativado'] : []),
-         ...(Object.values(kpis).filter((k: any) => k.performance === 'critico').map((k: any) => `KPI crá­tico detectado`))
+         ...(Object.values(kpis).filter((k) => k.performance === 'critico').map((k) => `KPI crá­tico detectado`))
        ],
        oportunidades: [
          ...(recomendacoesResumo && recomendacoesResumo.alta_prioridade > 0 ? [`${recomendacoesResumo.alta_prioridade} recomendaá§áµes de alta prioridade`] : []),

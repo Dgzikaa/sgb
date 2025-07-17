@@ -20,10 +20,10 @@ serve(async (req: Request): Promise<Response> => {
     const { action, barId } = await req.json()
 
     if (!barId) {
-      throw new Error('barId √© obrigat√≥rio')
+      throw new Error('barId ·© obrigat·≥rio')
     }
 
-    console.log(`ü§ñ PGCRON Manager - A√ß√£o: ${action}, Bar: ${barId}`)
+    console.log(`ü§ñ PGCRON Manager - A·ß·£o: ${action}, Bar: ${barId}`)
 
     switch (action) {
       case 'configure':
@@ -33,12 +33,12 @@ serve(async (req: Request): Promise<Response> => {
       case 'remove':
         return await removerCronJob(supabaseClient, barId)
       default:
-        throw new Error('A√ß√£o n√£o reconhecida: ' + action)
+        throw new Error('A·ß·£o n·£o reconhecida: ' + action)
     }
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
-    console.error('‚ùå Erro no PGCRON Manager:', errorMessage)
+    console.error('ùå Erro no PGCRON Manager:', errorMessage)
     return new Response(
       JSON.stringify({ error: errorMessage }),
       { 
@@ -49,17 +49,17 @@ serve(async (req: Request): Promise<Response> => {
   }
 })
 
-async function configurarCronJob(supabaseClient: any, barId: string) {
+async function configurarCronJob(supabaseClient, barId: string) {
   try {
     console.log(`üîß Configurando cron job para bar ${barId}`)
 
-    // 1. Verificar se j√° existe um job para este bar
+    // 1. Verificar se j·° existe um job para este bar
     const { data: existingJobs } = await supabaseClient.rpc('verificar_cron_jobs_contaazul', {
       target_bar_id: barId
     })
 
     if (existingJobs && existingJobs.length > 0) {
-      console.log(`‚ö†Ô∏è Job j√° existe para bar ${barId}, removendo primeiro...`)
+      console.log(`ö†Ô∏è Job j·° existe para bar ${barId}, removendo primeiro...`)
       await removerCronJobInternal(supabaseClient, barId)
     }
 
@@ -77,7 +77,7 @@ async function configurarCronJob(supabaseClient: any, barId: string) {
       throw new Error(`Erro ao criar cron job: ${error.message}`)
     }
 
-    console.log(`‚úÖ Cron job criado com sucesso: ${jobName}`)
+    console.log(`úÖ Cron job criado com sucesso: ${jobName}`)
 
     return new Response(
       JSON.stringify({ 
@@ -85,7 +85,7 @@ async function configurarCronJob(supabaseClient: any, barId: string) {
         message: 'Cron job configurado com sucesso',
         jobName,
         schedule: cronExpression,
-        nextRun: 'Pr√≥xima execu√ß√£o conforme cronograma'
+        nextRun: 'Pr·≥xima execu·ß·£o conforme cronograma'
       }),
       { 
         status: 200, 
@@ -95,12 +95,12 @@ async function configurarCronJob(supabaseClient: any, barId: string) {
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
-    console.error('‚ùå Erro ao configurar cron job:', errorMessage)
+    console.error('ùå Erro ao configurar cron job:', errorMessage)
     throw error
   }
 }
 
-async function verificarStatus(supabaseClient: any, barId: string) {
+async function verificarStatus(supabaseClient, barId: string) {
   try {
     console.log(`üîç Verificando status do cron job para bar ${barId}`)
 
@@ -113,7 +113,7 @@ async function verificarStatus(supabaseClient: any, barId: string) {
       throw new Error(`Erro ao verificar status: ${error.message}`)
     }
 
-    // Verificar √∫ltimas execu√ß√µes
+    // Verificar ·∫ltimas execu·ß·µes
     const { data: lastRuns } = await supabaseClient.rpc('verificar_ultimas_execucoes_contaazul', {
       target_bar_id: barId,
       limit_count: 5
@@ -134,12 +134,12 @@ async function verificarStatus(supabaseClient: any, barId: string) {
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
-    console.error('‚ùå Erro ao verificar status:', errorMessage)
+    console.error('ùå Erro ao verificar status:', errorMessage)
     throw error
   }
 }
 
-async function removerCronJob(supabaseClient: any, barId: string) {
+async function removerCronJob(supabaseClient, barId: string) {
   try {
     await removerCronJobInternal(supabaseClient, barId)
 
@@ -156,12 +156,12 @@ async function removerCronJob(supabaseClient: any, barId: string) {
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
-    console.error('‚ùå Erro ao remover cron job:', errorMessage)
+    console.error('ùå Erro ao remover cron job:', errorMessage)
     throw error
   }
 }
 
-async function removerCronJobInternal(supabaseClient: any, barId: string) {
+async function removerCronJobInternal(supabaseClient, barId: string) {
   console.log(`üóëÔ∏è Removendo cron job para bar ${barId}`)
 
   const jobName = `contaazul_sync_bar_${barId}`
@@ -174,5 +174,5 @@ async function removerCronJobInternal(supabaseClient: any, barId: string) {
     throw new Error(`Erro ao remover cron job: ${error.message}`)
   }
 
-  console.log(`‚úÖ Cron job removido: ${jobName}`)
+  console.log(`úÖ Cron job removido: ${jobName}`)
 } 

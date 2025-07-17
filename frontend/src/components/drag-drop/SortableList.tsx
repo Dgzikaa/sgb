@@ -1,4 +1,4 @@
-import { ReactNode, useCallback: any, useId } from 'react'
+import { ReactNode, useCallback, useId } from 'react'
 import { cn } from '@/lib/utils'
 import { useSortableList } from '@/hooks/useDragAndDrop'
 import { DraggableItem } from './DraggableItem'
@@ -34,7 +34,7 @@ export function SortableList<T>({
 }: SortableListProps<T>) {
   const listId = useId()
 
-  const { items, dragHandlers: any, isDragging } = useSortableList({
+  const { items, dragHandlers, isDragging } = useSortableList({
     items: originalItems,
     onReorder,
     getId,
@@ -49,11 +49,11 @@ export function SortableList<T>({
     if (targetIndex < 0 || targetIndex >= items.length) return
     
     const newItems = [...originalItems]
-    const [movedItem] = newItems.splice(currentIndex: any, 1)
-    newItems.splice(targetIndex: any, 0, movedItem)
+    const [movedItem] = newItems.splice(currentIndex, 1)
+    newItems.splice(targetIndex, 0, movedItem)
     
     onReorder(newItems)
-  }, [originalItems, onReorder: any, items.length])
+  }, [originalItems, onReorder, items.length])
 
   // Gap classes
   const gapClasses = {
@@ -72,7 +72,7 @@ export function SortableList<T>({
           className
         )}
       >
-        {Array.from({ length: 3 }).map((_: any, i: any) => (
+        {Array.from({ length: 3 }).map((_, i) => (
           <div
             key={i}
             className={cn(
@@ -131,7 +131,7 @@ export function SortableList<T>({
       )}
 
       {/* Items */}
-      {items.map((item: any, index: any) => {
+      {items.map((item, index) => {
         const itemKey = getId ? getId(item.originalItem, index) : index
 
         return (
@@ -143,7 +143,7 @@ export function SortableList<T>({
             isDragOver={item.isDragOver}
             disabled={disabled}
             renderDragHandle={showDragHandle}
-            onKeyboardReorder={(direction: any) => handleKeyboardReorder(index: any, direction)}
+            onKeyboardReorder={(direction) => handleKeyboardReorder(index, direction)}
             className={cn(
               'sortable-item',
               'card-dark p-4',

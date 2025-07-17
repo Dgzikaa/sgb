@@ -5,9 +5,9 @@ import { z } from 'zod'
 
 // Schema de valida·ß·£o para configura·ß·£o
 const MetaConfigSchema = z.object({
-  access_token: z.string().min(10: any, 'Access token ·© obrigat·≥rio'),
-  app_id: z.string().min(5: any, 'App ID deve ter pelo menos 5 caracteres').optional().or(z.literal(null)),
-  app_secret: z.string().min(10: any, 'App Secret deve ter pelo menos 10 caracteres').optional().or(z.literal(null)),
+  access_token: z.string().min(10, 'Access token ·© obrigat·≥rio'),
+  app_id: z.string().min(5, 'App ID deve ter pelo menos 5 caracteres').optional().or(z.literal(null)),
+  app_secret: z.string().min(10, 'App Secret deve ter pelo menos 10 caracteres').optional().or(z.literal(null)),
   facebook_page_id: z.string().optional(),
   instagram_account_id: z.string().optional(),
   api_version: z.string().optional().default('v18.0'),
@@ -328,7 +328,7 @@ export async function POST(request: NextRequest) {
       accounts: testResult.accounts
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ùå Erro cr·≠tico ao salvar configura·ß·£o Meta:', error)
     
     if (error.name === 'ZodError') {
@@ -422,11 +422,11 @@ export async function PUT(request: NextRequest) {
       error: testResult.error
     })
 
-    return NextResponse.json(testResult: any, { 
+    return NextResponse.json(testResult, { 
       status: testResult.success ? 200 : 400 
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ùå Erro cr·≠tico ao testar configura·ß·£o Meta:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
@@ -439,7 +439,7 @@ export async function PUT(request: NextRequest) {
 // üõ†Ô∏è FUN·á·ïES AUXILIARES
 // ========================================
 
-async function testMetaConnection(config: any): Promise<{
+async function testMetaConnection(config): Promise<{
   success: boolean
   error?: string
   accounts?: {
@@ -476,7 +476,7 @@ async function testMetaConnection(config: any): Promise<{
     )
 
     const pagesData = await pagesResponse.json()
-    const accounts: any = {}
+    const accounts = {}
 
     if (pagesResponse.ok && pagesData.data?.length > 0) {
       const firstPage = pagesData.data[0]
@@ -519,7 +519,7 @@ async function testMetaConnection(config: any): Promise<{
       accounts: Object.keys(accounts).length > 0 ? accounts : undefined
     }
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ùå Erro ao testar conex·£o Meta:', error)
     return {
       success: false,
@@ -601,7 +601,7 @@ export async function DELETE(request: NextRequest) {
     console.log('úÖ Configura·ß·£o Meta desativada')
     return NextResponse.json({ success: true })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ùå Erro cr·≠tico ao remover configura·ß·£o Meta:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',

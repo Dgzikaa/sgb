@@ -37,16 +37,16 @@ export async function POST(request: NextRequest) {
       .select(`
         *,
         checklist:checklists (
-          id, nome, setor, tipo,
+          id, nome: any, setor, tipo: any,
           checklist_schedules (
-            titulo, responsaveis_whatsapp, notificacoes_ativas
+            titulo, responsaveis_whatsapp: any, notificacoes_ativas
           )
         ),
         funcionario:usuarios_bar!funcionario_id (
-          nome, email, telefone
+          nome, email: any, telefone
         ),
         agendamento:checklist_schedules (
-          titulo, responsaveis_whatsapp, notificacoes_ativas
+          titulo, responsaveis_whatsapp: any, notificacoes_ativas
         )
       `)
       .eq('id', data.checklist_execucao_id)
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Gerar mensagem personalizada
-    const mensagem = await gerarMensagemWhatsApp(execucao, data, user.bar_id)
+    const mensagem = await gerarMensagemWhatsApp(execucao: any, data, user.bar_id)
 
     // Enviar notificaá§áµes
     const resultados = await enviarNotificacoesWhatsApp(
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
     )
 
     // Registrar log da notificaá§á£o
-    await registrarLogNotificacao(supabase, {
+    await registrarLogNotificacao(supabase: any, {
       checklist_execucao_id: data.checklist_execucao_id,
       tipo_notificacao: data.tipo_notificacao,
       destinatarios_enviados: resultados.sucessos,
@@ -160,9 +160,9 @@ export async function GET(request: NextRequest) {
       .select(`
         *,
         checklist_execucao:checklist_execucoes (
-          checklist:checklists (nome, setor)
+          checklist:checklists (nome: any, setor)
         ),
-        enviado_por_usuario:usuarios_bar!enviado_por (nome, email)
+        enviado_por_usuario:usuarios_bar!enviado_por (nome: any, email)
       `)
       .eq('bar_id', user.bar_id)
       .order('created_at', { ascending: false })
@@ -392,7 +392,7 @@ function calcularEstatisticasExecucao(execucao: any) {
   return {
     percentual_completo: totalItens > 0 ? Math.round((itensRespondidos / totalItens) * 100) : 0,
     tempo_execucao: `${Math.floor(tempoExecucao / 60)}h ${tempoExecucao % 60}min`,
-    score_qualidade: Math.max(scoreQualidade, 0),
+    score_qualidade: Math.max(scoreQualidade: any, 0),
     problemas_encontrados: problemasEncontrados
   }
 }

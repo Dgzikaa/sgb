@@ -4,14 +4,14 @@ import { useState, useEffect } from 'react'
 import { useBar } from '@/contexts/BarContext'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent: any, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent: any, DialogHeader, DialogTitle: any, DialogFooter } from '@/components/ui/dialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Checkbox } from '@/components/ui/checkbox'
 import { 
   Clock, 
@@ -50,7 +50,7 @@ interface ChecklistItem {
 interface Area {
   id: string
   nome: string
-  icon: any
+  icon
   cor: string
   responsavel_padrao?: string
   itens_obrigatorios: number
@@ -171,17 +171,17 @@ export default function ChecklistAbertura() {
     { titulo: 'Verificar temperatura das geladeiras', descricao: 'Conferir se todas as geladeiras est·£o entre 2-8∞C', area: 'cozinha', prioridade: 'critica', tempo_estimado: 3 },
     { titulo: 'Limpeza e sanitiza·ß·£o das bancadas', descricao: 'Limpar e sanitizar todas as superf·≠cies de trabalho', area: 'cozinha', prioridade: 'alta', tempo_estimado: 15 },
     { titulo: 'Verificar validade dos alimentos', descricao: 'Conferir datas de validade dos produtos na linha de produ·ß·£o', area: 'cozinha', prioridade: 'alta', tempo_estimado: 10 },
-    { titulo: 'Testar equipamentos da cozinha', descricao: 'Ligar e testar fog·£o, forno: any, chapa, fritadeira', area: 'cozinha', prioridade: 'media', tempo_estimado: 8 },
+    { titulo: 'Testar equipamentos da cozinha', descricao: 'Ligar e testar fog·£o, forno, chapa, fritadeira', area: 'cozinha', prioridade: 'media', tempo_estimado: 8 },
     
     // Bar
-    { titulo: 'Verificar estoque de bebidas', descricao: 'Conferir n·≠veis de cerveja, refrigerantes: any, ·°guas', area: 'bar', prioridade: 'alta', tempo_estimado: 10 },
+    { titulo: 'Verificar estoque de bebidas', descricao: 'Conferir n·≠veis de cerveja, refrigerantes, ·°guas', area: 'bar', prioridade: 'alta', tempo_estimado: 10 },
     { titulo: 'Limpeza dos equipamentos do bar', descricao: 'Limpar chopeira, m·°quina de refrigerante, m·°quina de caf·©', area: 'bar', prioridade: 'alta', tempo_estimado: 15 },
-    { titulo: 'Organizar insumos do bar', descricao: 'Repor gelo, guardanapos: any, canudos, copos limpos', area: 'bar', prioridade: 'media', tempo_estimado: 8 },
+    { titulo: 'Organizar insumos do bar', descricao: 'Repor gelo, guardanapos, canudos, copos limpos', area: 'bar', prioridade: 'media', tempo_estimado: 8 },
     { titulo: 'Testar sistemas de pagamento', descricao: 'Verificar se POS e m·°quinas de cart·£o est·£o funcionando', area: 'bar', prioridade: 'alta', tempo_estimado: 5 },
     
     // Sal·£o
     { titulo: 'Limpeza das mesas e cadeiras', descricao: 'Limpar e organizar todas as mesas e cadeiras', area: 'salao', prioridade: 'alta', tempo_estimado: 20 },
-    { titulo: 'Verificar banheiros', descricao: 'Conferir limpeza, papel higi·™nico, sabonete: any, toalhas', area: 'salao', prioridade: 'alta', tempo_estimado: 10 },
+    { titulo: 'Verificar banheiros', descricao: 'Conferir limpeza, papel higi·™nico, sabonete, toalhas', area: 'salao', prioridade: 'alta', tempo_estimado: 10 },
     { titulo: 'Organizar card·°pios e materiais', descricao: 'Distribuir card·°pios limpos e organizados nas mesas', area: 'salao', prioridade: 'media', tempo_estimado: 10 },
     { titulo: 'Testar som e ilumina·ß·£o', descricao: 'Verificar se sistema de som e luzes est·£o funcionando', area: 'salao', prioridade: 'media', tempo_estimado: 5 },
     
@@ -198,7 +198,7 @@ export default function ChecklistAbertura() {
     // Administrativo
     { titulo: 'Verificar caixa inicial', descricao: 'Conferir e registrar valor do troco inicial', area: 'administrativo', prioridade: 'alta', tempo_estimado: 10 },
     { titulo: 'Revisar agenda do dia', descricao: 'Conferir reservas, eventos especiais, funcion·°rios escalados', area: 'administrativo', prioridade: 'alta', tempo_estimado: 15 },
-    { titulo: 'Verificar sistemas', descricao: 'Testar sistema de vendas, internet: any, telefone', area: 'administrativo', prioridade: 'alta', tempo_estimado: 10 }
+    { titulo: 'Verificar sistemas', descricao: 'Testar sistema de vendas, internet, telefone', area: 'administrativo', prioridade: 'alta', tempo_estimado: 10 }
   ]
 
   // Carregar checklist do dia
@@ -231,7 +231,7 @@ export default function ChecklistAbertura() {
           setHoraInicio(data.hora_inicio || '')
         } else {
           // Criar novo checklist baseado no padr·£o
-          const novoChecklist = checklistPadrao.map((item: any, index: any) => ({
+          const novoChecklist = checklistPadrao.map((item, index) => ({
             ...item,
             id: `item_${index + 1}`,
             status: 'pendente' as const
@@ -242,7 +242,7 @@ export default function ChecklistAbertura() {
     } catch (error) {
       console.error('Erro ao carregar checklist:', error)
       // Em caso de erro, usar checklist padr·£o
-      const novoChecklist = checklistPadrao.map((item: any, index: any) => ({
+      const novoChecklist = checklistPadrao.map((item, index) => ({
         ...item,
         id: `item_${index + 1}`,
         status: 'pendente' as const
@@ -275,7 +275,7 @@ export default function ChecklistAbertura() {
   }
 
   const atualizarStatusItem = (itemId: string, novoStatus: ChecklistItem['status'], observacoes?: string) => {
-    setChecklistAtivo(prev => prev.map((item: any) => {
+    setChecklistAtivo(prev => prev.map((item) => {
       if (item.id === itemId) {
         const agora = new Date().toLocaleTimeString('pt-BR', { 
           hour: '2-digit', 
@@ -333,10 +333,10 @@ export default function ChecklistAbertura() {
   // Calcular estat·≠sticas
   const estatisticas = {
     total: checklistAtivo.length,
-    concluidos: checklistAtivo.filter((item: any) => item.status === 'concluido').length,
-    problemas: checklistAtivo.filter((item: any) => item.status === 'problema').length,
-    pendentes: checklistAtivo.filter((item: any) => item.status === 'pendente').length,
-    fazendo: checklistAtivo.filter((item: any) => item.status === 'fazendo').length
+    concluidos: checklistAtivo.filter((item) => item.status === 'concluido').length,
+    problemas: checklistAtivo.filter((item) => item.status === 'problema').length,
+    pendentes: checklistAtivo.filter((item) => item.status === 'pendente').length,
+    fazendo: checklistAtivo.filter((item) => item.status === 'fazendo').length
   }
 
   const progresso = estatisticas.total > 0 ? (estatisticas.concluidos / estatisticas.total * 100) : 0
@@ -344,7 +344,7 @@ export default function ChecklistAbertura() {
   // Filtrar itens por ·°rea
   const itensFiltrados = areaSelecionada === 'todas' 
     ? checklistAtivo 
-    : checklistAtivo.filter((item: any) => item.area === areaSelecionada)
+    : checklistAtivo.filter((item) => item.area === areaSelecionada)
 
   const obterCorPrioridade = (prioridade: string) => {
     switch (prioridade) {
@@ -474,10 +474,10 @@ export default function ChecklistAbertura() {
                 >
                   Todas ({checklistAtivo.length})
                 </TabsTrigger>
-                {areas.map((area: any) => {
+                {areas.map((area) => {
                   const AreaIcon = area.icon
-                  const itensArea = checklistAtivo.filter((item: any) => item.area === area.id)
-                  const concluidos = itensArea.filter((item: any) => item.status === 'concluido').length
+                  const itensArea = checklistAtivo.filter((item) => item.area === area.id)
+                  const concluidos = itensArea.filter((item) => item.status === 'concluido').length
                   
                   return (
                     <TabsTrigger 
@@ -494,7 +494,7 @@ export default function ChecklistAbertura() {
 
               {/* Lista de Itens */}
               <div className="mt-6 space-y-3">
-                {itensFiltrados.map((item: any) => (
+                {itensFiltrados.map((item) => (
                   <div
                     key={item.id}
                     className={`p-4 rounded-lg border-2 transition-all cursor-pointer ${
@@ -518,7 +518,7 @@ export default function ChecklistAbertura() {
                               {item.prioridade}
                             </Badge>
                             <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">
-                              {areas.find((a: any) => a.id === item.area)?.nome}
+                              {areas.find((a) => a.id === item.area)?.nome}
                             </Badge>
                           </div>
                           <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{item.descricao}</p>
@@ -540,7 +540,7 @@ export default function ChecklistAbertura() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={(e: any) => {
+                              onClick={(e) => {
                                 e.stopPropagation()
                                 atualizarStatusItem(item.id, 'fazendo')
                               }}
@@ -553,7 +553,7 @@ export default function ChecklistAbertura() {
                             <>
                               <Button
                                 size="sm"
-                                onClick={(e: any) => {
+                                onClick={(e) => {
                                   e.stopPropagation()
                                   atualizarStatusItem(item.id, 'concluido')
                                 }}
@@ -564,7 +564,7 @@ export default function ChecklistAbertura() {
                               <Button
                                 size="sm"
                                 variant="destructive"
-                                onClick={(e: any) => {
+                                onClick={(e) => {
                                   e.stopPropagation()
                                   atualizarStatusItem(item.id, 'problema')
                                 }}
@@ -611,7 +611,7 @@ export default function ChecklistAbertura() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
                   <div>
                     <span className="text-gray-600 dark:text-gray-400">·Årea:</span>
-                    <p className="font-medium text-gray-900 dark:text-white">{areas.find((a: any) => a.id === itemSelecionado.area)?.nome}</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{areas.find((a) => a.id === itemSelecionado.area)?.nome}</p>
                   </div>
                   <div>
                     <span className="text-gray-600 dark:text-gray-400">Prioridade:</span>
@@ -641,7 +641,7 @@ export default function ChecklistAbertura() {
                     <Textarea
                       placeholder="Adicionar observa·ß·µes..."
                       value={itemSelecionado.observacoes || ''}
-                      onChange={(e: any) => {
+                      onChange={(e) => {
                         if (itemSelecionado) {
                           setItemSelecionado({
                             ...itemSelecionado,

@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     const { data: pgcronJobs } = await supabase
       .rpc('get_cron_jobs')
 
-    const metaJob = pgcronJobs?.find((job: any) => 
+    const metaJob = pgcronJobs?.find((job) => 
       job.jobname?.includes(`meta_sync_bar_${bar_id}`)
     )
 
@@ -71,13 +71,13 @@ export async function GET(request: NextRequest) {
 
     const { data: recentInstagramPosts } = await supabase
       .from('meta_instagram_posts')
-      .select('engagement_rate, likes_count: any, comments_count')
+      .select('engagement_rate, likes_count, comments_count')
       .eq('bar_id', bar_id)
       .gte('created_time', thirtyDaysAgo.toISOString())
 
     const { data: recentFacebookPosts } = await supabase
       .from('meta_facebook_posts')
-      .select('engagement_rate, likes_count: any, comments_count, shares_count')
+      .select('engagement_rate, likes_count, comments_count, shares_count')
       .eq('bar_id', bar_id)
       .gte('created_time', thirtyDaysAgo.toISOString())
 
@@ -85,17 +85,17 @@ export async function GET(request: NextRequest) {
     const totalEngagement = [
       ...(recentInstagramPosts || []),
       ...(recentFacebookPosts || [])
-    ].reduce((sum: any, post: any) => sum + (post.engagement_rate || 0), 0)
+    ].reduce((sum, post) => sum + (post.engagement_rate || 0), 0)
 
     const totalLikes = [
       ...(recentInstagramPosts || []),
       ...(recentFacebookPosts || [])
-    ].reduce((sum: any, post: any) => sum + (post.likes_count || 0), 0)
+    ].reduce((sum, post) => sum + (post.likes_count || 0), 0)
 
     const totalComments = [
       ...(recentInstagramPosts || []),
       ...(recentFacebookPosts || [])
-    ].reduce((sum: any, post: any) => sum + (post.comments_count || 0), 0)
+    ].reduce((sum, post) => sum + (post.comments_count || 0), 0)
 
     const totalPosts = (recentInstagramPosts?.length || 0) + (recentFacebookPosts?.length || 0)
     const averageEngagement = totalPosts > 0 ? (totalEngagement / totalPosts).toFixed(2) : '0'

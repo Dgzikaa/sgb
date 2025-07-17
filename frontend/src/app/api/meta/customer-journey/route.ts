@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 4. ANALISAR PONTOS DE ABANDONO
-    const analisarPontosAbandono = (dadosConversao: any) => {
+    const analisarPontosAbandono = (dadosConversao) => {
       const pontosAbandono = []
       
       const etapasArray = Object.entries(dadosConversao)
@@ -166,7 +166,7 @@ export async function GET(request: NextRequest) {
             taxa_abandono: taxaAbandono,
             usuarios_perdidos: (dadosAtual as any).usuarios - (dadosProximo as any).usuarios,
             severidade: taxaAbandono > 60 ? 'critica' : taxaAbandono > 40 ? 'alta' : 'media',
-            recomendacoes: gerarRecomendacoesAbandono(nomeAtual: any, taxaAbandono)
+            recomendacoes: gerarRecomendacoesAbandono(nomeAtual, taxaAbandono)
           })
         }
       }
@@ -176,7 +176,7 @@ export async function GET(request: NextRequest) {
 
     // 5. GERAR RECOMENDAá‡á•ES POR PONTO DE ABANDONO
     const gerarRecomendacoesAbandono = (etapa: string, taxaAbandono: number) => {
-      const recomendacoes: any = {
+      const recomendacoes = {
         discovery: [
           'Melhore a qualidade do conteáºdo para aumentar o interesse',
           'Aumente a frequáªncia de postagens',
@@ -218,7 +218,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 6. CALCULAR Má‰TRICAS CHAVE
-    const calcularMetricasChave = (dadosConversao: any) => {
+    const calcularMetricasChave = (dadosConversao) => {
       const discovery = dadosConversao.discovery
       const purchase = dadosConversao.purchase
       const advocacy = dadosConversao.advocacy
@@ -236,7 +236,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 7. IDENTIFICAR OPORTUNIDADES DE MELHORIA
-    const identificarOportunidades = (pontosAbandono: any[], metricas: any) => {
+    const identificarOportunidades = (pontosAbandono[], metricas) => {
       const oportunidades = []
       
       // Oportunidades baseadas em pontos de abandono
@@ -276,20 +276,20 @@ export async function GET(request: NextRequest) {
         })
       }
       
-      return oportunidades.sort((a: any, b: any) => a.prioridade - b.prioridade)
+      return oportunidades.sort((a, b) => a.prioridade - b.prioridade)
     }
 
     // PROCESSAR TODOS OS DADOS
     const dadosConversao = simularDadosConversao()
     const pontosAbandono = analisarPontosAbandono(dadosConversao)
     const metricas = calcularMetricasChave(dadosConversao)
-    const oportunidades = identificarOportunidades(pontosAbandono: any, metricas)
+    const oportunidades = identificarOportunidades(pontosAbandono, metricas)
 
     // 8. MONTAR JORNADA VISUAL
-    const jornadaVisual = etapasJornada.map((etapa: any) => ({
+    const jornadaVisual = etapasJornada.map((etapa) => ({
       ...etapa,
       dados: dadosConversao[etapa.id as keyof typeof dadosConversao],
-      status: pontosAbandono.find((p: any) => p.etapa === etapa.id) ? 'problema' : 'saudavel'
+      status: pontosAbandono.find((p) => p.etapa === etapa.id) ? 'problema' : 'saudavel'
     }))
 
     const resultado = {
@@ -323,15 +323,15 @@ export async function GET(request: NextRequest) {
       acoes_sugeridas: [
         {
           prazo: 'Imediato',
-          acoes: oportunidades.filter((o: any) => o.tipo === 'critica').map((o: any) => o.titulo)
+          acoes: oportunidades.filter((o) => o.tipo === 'critica').map((o) => o.titulo)
         },
         {
           prazo: '7 dias',
-          acoes: oportunidades.filter((o: any) => o.tipo === 'melhoria').map((o: any) => o.titulo)
+          acoes: oportunidades.filter((o) => o.tipo === 'melhoria').map((o) => o.titulo)
         },
         {
           prazo: '30 dias',
-          acoes: oportunidades.filter((o: any) => o.tipo === 'crescimento').map((o: any) => o.titulo)
+          acoes: oportunidades.filter((o) => o.tipo === 'crescimento').map((o) => o.titulo)
         }
       ]
     }

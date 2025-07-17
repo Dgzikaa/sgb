@@ -93,7 +93,7 @@ export default function AdminPage() {
     if (currentTab === 'planejamento') {
       loadEventos();
     }
-  }, [currentTab, currentMonth: any, currentYear, selectedBarId]);
+  }, [currentTab, currentMonth, currentYear, selectedBarId]);
 
   const loadBars = async () => {
     setLoading(true);
@@ -191,7 +191,7 @@ export default function AdminPage() {
     }
   };
 
-  const saveEvento = async (evento: any) => {
+  const saveEvento = async (evento) => {
     setLoading(true);
     try {
       const method = evento.id ? 'PUT' : 'POST';
@@ -248,7 +248,7 @@ export default function AdminPage() {
 
   const importarEventosHistoricos = async () => {
     // Encontrar o bar ordin·°rio pelo nome
-    const barOrdinario = bars.find((bar: any) => 
+    const barOrdinario = bars.find((bar) => 
       bar.nome.toLowerCase().includes('ordin·°rio') || 
       bar.nome.toLowerCase().includes('ordinario')
     );
@@ -264,7 +264,7 @@ export default function AdminPage() {
       'Ä¢ ~150 eventos de diferentes g·™neros\n' +
       'Ä¢ Informa·ß·µes de artistas e capacidade\n' +
       'Ä¢ Eventos recorrentes (Quarta de Bamba, Pagode Vira-lata, etc.)\n' +
-      'Ä¢ Eventos especiais (Carnaval: any, Homenagens, Festival Junino)\n\n' +
+      'Ä¢ Eventos especiais (Carnaval, Homenagens, Festival Junino)\n\n' +
       'ö†Ô∏è Se j·° existirem eventos no per·≠odo, eles ser·£o substitu·≠dos.'
     );
     
@@ -366,7 +366,7 @@ export default function AdminPage() {
       const result = await response.json();
       
       if (result.success) {
-        const { migratedConfigs, migrationLog: any, summary } = result.data;
+        const { migratedConfigs, migrationLog, summary } = result.data;
         
         // Atualizar estado local com as configura·ß·µes migradas
         setBarConfigs({
@@ -403,7 +403,7 @@ export default function AdminPage() {
       savedBarConfigs[barId] = currentBarConfig;
       localStorage.setItem('sgb-bar-configs', JSON.stringify(savedBarConfigs));
       
-      const barName = bars.find((b: any) => b.id === barId)?.nome || 'Bar';
+      const barName = bars.find((b) => b.id === barId)?.nome || 'Bar';
       setMessage(`úÖ Configura·ß·µes do ${barName} salvas com sucesso!`);
       setTimeout(() => setMessage(''), 3000);
       
@@ -557,7 +557,7 @@ export default function AdminPage() {
       const result = await response.json();
       
       if (result.success) {
-        setBars(bars.filter((bar: any) => bar.id !== id));
+        setBars(bars.filter((bar) => bar.id !== id));
         setMessage('Bar removido com sucesso!');
       } else {
         setMessage(result.error || 'Erro ao remover bar');
@@ -688,12 +688,12 @@ export default function AdminPage() {
             <select
               id="global-bar-selector"
               value={selectedBarId || ''}
-              onChange={(e: any) => setSelectedBarId(e.target.value ? Number(e.target.value) : null)}
+              onChange={(e) => setSelectedBarId(e.target.value ? Number(e.target.value) : null)}
               className="form-input"
               style={{ padding: '8px 12px', fontSize: '0.9rem' }}
             >
               <option value="">-- Todos os Bares --</option>
-              {bars.map((bar: any) => (
+              {bars.map((bar) => (
                 <option key={bar.id} value={bar.id}>
                   {bar.nome}
                 </option>
@@ -723,17 +723,17 @@ export default function AdminPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <h3 style={{ margin: 0, color: '#1e293b', fontSize: '1.2rem' }}>
-                  üè™ {bars.find((b: any) => b.id === selectedBarId)?.nome}
+                  üè™ {bars.find((b) => b.id === selectedBarId)?.nome}
                 </h3>
                 <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.9rem' }}>
-                  üìç {bars.find((b: any) => b.id === selectedBarId)?.endereco} | 
-                  üìû {bars.find((b: any) => b.id === selectedBarId)?.telefone}
+                  üìç {bars.find((b) => b.id === selectedBarId)?.endereco} | 
+                  üìû {bars.find((b) => b.id === selectedBarId)?.telefone}
                 </p>
               </div>
               <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                {getStatusBadge(bars.find((b: any) => b.id === selectedBarId)?.status || 'inativo')}
+                {getStatusBadge(bars.find((b) => b.id === selectedBarId)?.status || 'inativo')}
                 <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                  Criado em {new Date(bars.find((b: any) => b.id === selectedBarId)?.created_at || '').toLocaleDateString('pt-BR')}
+                  Criado em {new Date(bars.find((b) => b.id === selectedBarId)?.created_at || '').toLocaleDateString('pt-BR')}
                 </span>
               </div>
             </div>
@@ -804,7 +804,7 @@ export default function AdminPage() {
           <div className="tab-content">
             {selectedBarId && (
               <div className="alert alert-info" style={{ marginBottom: '20px' }}>
-                üìä Visualizando dados espec·≠ficos de: <strong>{bars.find((b: any) => b.id === selectedBarId)?.nome}</strong>
+                üìä Visualizando dados espec·≠ficos de: <strong>{bars.find((b) => b.id === selectedBarId)?.nome}</strong>
               </div>
             )}
             <div className="grid grid-3">
@@ -828,7 +828,7 @@ export default function AdminPage() {
                   <div className="stat-row">
                     <span>Bares Ativos:</span>
                     <span className="stat-value text-blue">
-                      {selectedBarId ? '1 (selecionado)' : bars.filter((b: any) => b.status === 'ativo').length}
+                      {selectedBarId ? '1 (selecionado)' : bars.filter((b) => b.status === 'ativo').length}
                     </span>
                   </div>
                   {selectedBarId && (
@@ -836,7 +836,7 @@ export default function AdminPage() {
                       <div className="stat-row">
                         <span>APIs Configuradas:</span>
                         <span className="stat-value text-green">
-                          {Object.values(barConfigs[selectedBarId] || {}).filter((v: any) => 
+                          {Object.values(barConfigs[selectedBarId] || {}).filter((v) => 
                             typeof v === 'boolean' && v === true
                           ).length}
                         </span>
@@ -948,10 +948,10 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>üîå APIs Conectadas{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>üîå APIs Conectadas{selectedBarId ? ` - ${bars.find((b) => b.id === selectedBarId)?.nome}` : ''}</h3>
                 <p>
                   {selectedBarId 
-                    ? `Configure as APIs espec·≠ficas para ${bars.find((b: any) => b.id === selectedBarId)?.nome}`
+                    ? `Configure as APIs espec·≠ficas para ${bars.find((b) => b.id === selectedBarId)?.nome}`
                     : 'Selecione um bar no cabe·ßalho para ver suas APIs espec·≠ficas'
                   }
                 </p>
@@ -1032,7 +1032,7 @@ export default function AdminPage() {
                               <input
                                 type="checkbox"
                                 checked={barConfigs[selectedBarId]?.sympla_enabled || false}
-                                onChange={(e: any) => setBarConfigs({
+                                onChange={(e) => setBarConfigs({
                                   ...barConfigs,
                                   [selectedBarId]: {
                                     ...barConfigs[selectedBarId],
@@ -1051,7 +1051,7 @@ export default function AdminPage() {
                                 id="sympla_token"
                                 type="password"
                                 value={barConfigs[selectedBarId]?.sympla_token || ''}
-                                onChange={(e: any) => setBarConfigs({
+                                onChange={(e) => setBarConfigs({
                                   ...barConfigs,
                                   [selectedBarId]: {
                                     ...barConfigs[selectedBarId],
@@ -1071,7 +1071,7 @@ export default function AdminPage() {
                               <input
                                 type="checkbox"
                                 checked={barConfigs[selectedBarId]?.yuzer_enabled || false}
-                                onChange={(e: any) => setBarConfigs({
+                                onChange={(e) => setBarConfigs({
                                   ...barConfigs,
                                   [selectedBarId]: {
                                     ...barConfigs[selectedBarId],
@@ -1090,7 +1090,7 @@ export default function AdminPage() {
                                 id="yuzer_token"
                                 type="password"
                                 value={barConfigs[selectedBarId]?.yuzer_token || ''}
-                                onChange={(e: any) => setBarConfigs({
+                                onChange={(e) => setBarConfigs({
                                   ...barConfigs,
                                   [selectedBarId]: {
                                     ...barConfigs[selectedBarId],
@@ -1110,7 +1110,7 @@ export default function AdminPage() {
                               <input
                                 type="checkbox"
                                 checked={barConfigs[selectedBarId]?.google_places_enabled || false}
-                                onChange={(e: any) => setBarConfigs({
+                                onChange={(e) => setBarConfigs({
                                   ...barConfigs,
                                   [selectedBarId]: {
                                     ...barConfigs[selectedBarId],
@@ -1129,7 +1129,7 @@ export default function AdminPage() {
                                 id="google_places_key"
                                 type="password"
                                 value={barConfigs[selectedBarId]?.google_places_key || ''}
-                                onChange={(e: any) => setBarConfigs({
+                                onChange={(e) => setBarConfigs({
                                   ...barConfigs,
                                   [selectedBarId]: {
                                     ...barConfigs[selectedBarId],
@@ -1149,7 +1149,7 @@ export default function AdminPage() {
                               <input
                                 type="checkbox"
                                 checked={barConfigs[selectedBarId]?.openai_enabled || false}
-                                onChange={(e: any) => setBarConfigs({
+                                onChange={(e) => setBarConfigs({
                                   ...barConfigs,
                                   [selectedBarId]: {
                                     ...barConfigs[selectedBarId],
@@ -1168,7 +1168,7 @@ export default function AdminPage() {
                                 id="openai_key"
                                 type="password"
                                 value={barConfigs[selectedBarId]?.openai_key || ''}
-                                onChange={(e: any) => setBarConfigs({
+                                onChange={(e) => setBarConfigs({
                                   ...barConfigs,
                                   [selectedBarId]: {
                                     ...barConfigs[selectedBarId],
@@ -1201,7 +1201,7 @@ export default function AdminPage() {
                     {migrating ? 'üîÑ Migrando...' : 'üì• Migrar APIs Existentes'}
                   </button>
                   <p style={{ fontSize: '12px', color: '#666', margin: '5px 0 0 0' }}>
-                    üí° Importa as configura·ß·µes de APIs j·° funcionando no sistema (Sympla: any, Yuzer, Google Places, OpenAI)
+                    üí° Importa as configura·ß·µes de APIs j·° funcionando no sistema (Sympla, Yuzer, Google Places, OpenAI)
                   </p>
                 </div>
                         
@@ -1261,10 +1261,10 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>üç∫ Gerenciar Bares{selectedBarId ? ` - Foco: ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>üç∫ Gerenciar Bares{selectedBarId ? ` - Foco: ${bars.find((b) => b.id === selectedBarId)?.nome}` : ''}</h3>
                 <p>
                   {selectedBarId 
-                    ? `Visualizando detalhes e configura·ß·µes de ${bars.find((b: any) => b.id === selectedBarId)?.nome}`
+                    ? `Visualizando detalhes e configura·ß·µes de ${bars.find((b) => b.id === selectedBarId)?.nome}`
                     : 'Adicione, edite ou remova bares do sistema'
                   }
                 </p>
@@ -1279,7 +1279,7 @@ export default function AdminPage() {
                       <input
                         id="bar_nome"
                         value={newBar.nome}
-                        onChange={(e: any) => setNewBar({...newBar, nome: e.target.value})}
+                        onChange={(e) => setNewBar({...newBar, nome: e.target.value})}
                         placeholder="Ex: Bar do Jo·£o"
                         className="form-input"
                       />
@@ -1289,7 +1289,7 @@ export default function AdminPage() {
                       <input
                         id="bar_endereco"
                         value={newBar.endereco}
-                        onChange={(e: any) => setNewBar({...newBar, endereco: e.target.value})}
+                        onChange={(e) => setNewBar({...newBar, endereco: e.target.value})}
                         placeholder="Rua A, 123 - Centro"
                         className="form-input"
                       />
@@ -1299,7 +1299,7 @@ export default function AdminPage() {
                       <input
                         id="bar_telefone"
                         value={newBar.telefone}
-                        onChange={(e: any) => setNewBar({...newBar, telefone: e.target.value})}
+                        onChange={(e) => setNewBar({...newBar, telefone: e.target.value})}
                         placeholder="(11) 99999-9999"
                         className="form-input"
                       />
@@ -1323,7 +1323,7 @@ export default function AdminPage() {
                     </button>
                   </div>
                   <div className="bars-list">
-                    {bars.map((bar: any) => (
+                    {bars.map((bar) => (
                       <div key={bar.id} className="bar-item">
                         <div className="bar-info">
                           <h5>{bar.nome}</h5>
@@ -1369,7 +1369,7 @@ export default function AdminPage() {
                       <input
                         id="contahub_username"
                         value={configs.contahub_username}
-                        onChange={(e: any) => setConfigs({...configs, contahub_username: e.target.value})}
+                        onChange={(e) => setConfigs({...configs, contahub_username: e.target.value})}
                         className="form-input"
                       />
                     </div>
@@ -1379,7 +1379,7 @@ export default function AdminPage() {
                         id="contahub_password"
                         type="password"
                         value={configs.contahub_password}
-                        onChange={(e: any) => setConfigs({...configs, contahub_password: e.target.value})}
+                        onChange={(e) => setConfigs({...configs, contahub_password: e.target.value})}
                         className="form-input"
                       />
                     </div>
@@ -1388,7 +1388,7 @@ export default function AdminPage() {
                       <input
                         id="contahub_url"
                         value={configs.contahub_url}
-                        onChange={(e: any) => setConfigs({...configs, contahub_url: e.target.value})}
+                        onChange={(e) => setConfigs({...configs, contahub_url: e.target.value})}
                         placeholder="https://api.contahub.com.br"
                         className="form-input"
                       />
@@ -1404,7 +1404,7 @@ export default function AdminPage() {
                         id="discord_webhook"
                         type="password"
                         value={configs.discord_webhook}
-                        onChange={(e: any) => setConfigs({...configs, discord_webhook: e.target.value})}
+                        onChange={(e) => setConfigs({...configs, discord_webhook: e.target.value})}
                         className="form-input"
                       />
                     </div>
@@ -1414,7 +1414,7 @@ export default function AdminPage() {
                         id="discord_bot_token"
                         type="password"
                         value={configs.discord_bot_token}
-                        onChange={(e: any) => setConfigs({...configs, discord_bot_token: e.target.value})}
+                        onChange={(e) => setConfigs({...configs, discord_bot_token: e.target.value})}
                         className="form-input"
                       />
                     </div>
@@ -1423,7 +1423,7 @@ export default function AdminPage() {
                       <input
                         id="discord_channel_alerts"
                         value={configs.discord_channel_alerts}
-                        onChange={(e: any) => setConfigs({...configs, discord_channel_alerts: e.target.value})}
+                        onChange={(e) => setConfigs({...configs, discord_channel_alerts: e.target.value})}
                         className="form-input"
                       />
                     </div>
@@ -1439,11 +1439,11 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>üñ•Ô∏è Sistemas de Bar{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>üñ•Ô∏è Sistemas de Bar{selectedBarId ? ` - ${bars.find((b) => b.id === selectedBarId)?.nome}` : ''}</h3>
                 <p>
                   {selectedBarId 
-                    ? `Configure sistemas de gest·£o para ${bars.find((b: any) => b.id === selectedBarId)?.nome} (ContaHub: any, etc.)`
-                    : 'Configure e gerencie sistemas de gest·£o para cada bar (ContaHub: any, etc.)'
+                    ? `Configure sistemas de gest·£o para ${bars.find((b) => b.id === selectedBarId)?.nome} (ContaHub, etc.)`
+                    : 'Configure e gerencie sistemas de gest·£o para cada bar (ContaHub, etc.)'
                   }
                 </p>
               </div>
@@ -1473,11 +1473,11 @@ export default function AdminPage() {
                     <select
                       id="sistema-bar-selector"
                       value={selectedBarId || ''}
-                      onChange={(e: any) => setSelectedBarId(e.target.value ? Number(e.target.value) : null)}
+                      onChange={(e) => setSelectedBarId(e.target.value ? Number(e.target.value) : null)}
                       className="form-input"
                     >
                       <option value="">-- Selecione um bar --</option>
-                      {bars.map((bar: any) => (
+                      {bars.map((bar) => (
                         <option key={bar.id} value={bar.id}>
                           {bar.nome}
                         </option>
@@ -1488,14 +1488,14 @@ export default function AdminPage() {
                   {/* Configura·ß·µes quando um bar ·© selecionado */}
                   {selectedBarId && (
                     <div className="api-config-item">
-                      <h5>üñ•Ô∏è ContaHub - {bars.find((b: any) => b.id === selectedBarId)?.nome}</h5>
+                      <h5>üñ•Ô∏è ContaHub - {bars.find((b) => b.id === selectedBarId)?.nome}</h5>
                       
                       <div className="form-group">
                         <label>
                           <input
                             type="checkbox"
                             checked={barConfigs[selectedBarId]?.contahub_enabled || false}
-                            onChange={(e: any) => setBarConfigs({
+                            onChange={(e) => setBarConfigs({
                               ...barConfigs,
                               [selectedBarId]: {
                                 ...barConfigs[selectedBarId],
@@ -1515,7 +1515,7 @@ export default function AdminPage() {
                               id={`contahub_login_${selectedBarId}`}
                               type="text"
                               value={barConfigs[selectedBarId]?.contahub_login || ''}
-                              onChange={(e: any) => setBarConfigs({
+                              onChange={(e) => setBarConfigs({
                                 ...barConfigs,
                                 [selectedBarId]: {
                                   ...barConfigs[selectedBarId],
@@ -1533,7 +1533,7 @@ export default function AdminPage() {
                               id={`contahub_password_${selectedBarId}`}
                               type="password"
                               value={barConfigs[selectedBarId]?.contahub_password || ''}
-                              onChange={(e: any) => setBarConfigs({
+                              onChange={(e) => setBarConfigs({
                                 ...barConfigs,
                                 [selectedBarId]: {
                                   ...barConfigs[selectedBarId],
@@ -1551,7 +1551,7 @@ export default function AdminPage() {
                               id={`contahub_url_${selectedBarId}`}
                               type="url"
                               value={barConfigs[selectedBarId]?.contahub_url || 'https://api.contahub.com.br'}
-                              onChange={(e: any) => setBarConfigs({
+                              onChange={(e) => setBarConfigs({
                                 ...barConfigs,
                                 [selectedBarId]: {
                                   ...barConfigs[selectedBarId],
@@ -1568,7 +1568,7 @@ export default function AdminPage() {
                               id={`contahub_empresa_id_${selectedBarId}`}
                               type="text"
                               value={barConfigs[selectedBarId]?.contahub_empresa_id || ''}
-                              onChange={(e: any) => setBarConfigs({
+                              onChange={(e) => setBarConfigs({
                                 ...barConfigs,
                                 [selectedBarId]: {
                                   ...barConfigs[selectedBarId],
@@ -1659,7 +1659,7 @@ export default function AdminPage() {
                     id="admin_password"
                     type="password"
                     value={configs.admin_password}
-                    onChange={(e: any) => setConfigs({...configs, admin_password: e.target.value})}
+                    onChange={(e) => setConfigs({...configs, admin_password: e.target.value})}
                     className="form-input"
                   />
                 </div>
@@ -1670,7 +1670,7 @@ export default function AdminPage() {
                     id="jwt_secret"
                     type="password"
                     value={configs.jwt_secret}
-                    onChange={(e: any) => setConfigs({...configs, jwt_secret: e.target.value})}
+                    onChange={(e) => setConfigs({...configs, jwt_secret: e.target.value})}
                     className="form-input"
                   />
                 </div>
@@ -1699,7 +1699,7 @@ export default function AdminPage() {
                       <input
                         type="checkbox"
                         checked={configs.monitoring_enabled}
-                        onChange={(e: any) => setConfigs({...configs, monitoring_enabled: e.target.checked})}
+                        onChange={(e) => setConfigs({...configs, monitoring_enabled: e.target.checked})}
                       />
                       <span>Habilitar Monitoramento de APIs</span>
                     </label>
@@ -1708,7 +1708,7 @@ export default function AdminPage() {
                       <input
                         type="checkbox"
                         checked={configs.notifications_enabled}
-                        onChange={(e: any) => setConfigs({...configs, notifications_enabled: e.target.checked})}
+                        onChange={(e) => setConfigs({...configs, notifications_enabled: e.target.checked})}
                       />
                       <span>Habilitar Notifica·ß·µes</span>
                     </label>
@@ -1717,7 +1717,7 @@ export default function AdminPage() {
                       <input
                         type="checkbox"
                         checked={configs.auto_sync_enabled}
-                        onChange={(e: any) => setConfigs({...configs, auto_sync_enabled: e.target.checked})}
+                        onChange={(e) => setConfigs({...configs, auto_sync_enabled: e.target.checked})}
                       />
                       <span>Sincroniza·ß·£o Autom·°tica</span>
                     </label>
@@ -1726,7 +1726,7 @@ export default function AdminPage() {
                       <input
                         type="checkbox"
                         checked={configs.debug_enabled}
-                        onChange={(e: any) => setConfigs({...configs, debug_enabled: e.target.checked})}
+                        onChange={(e) => setConfigs({...configs, debug_enabled: e.target.checked})}
                       />
                       <span>Modo Debug (Desenvolvimento)</span>
                     </label>
@@ -1741,7 +1741,7 @@ export default function AdminPage() {
                       id="email_api_key"
                       type="password"
                       value={configs.email_api_key}
-                      onChange={(e: any) => setConfigs({...configs, email_api_key: e.target.value})}
+                      onChange={(e) => setConfigs({...configs, email_api_key: e.target.value})}
                       className="form-input"
                     />
                   </div>
@@ -1750,7 +1750,7 @@ export default function AdminPage() {
                     <input
                       id="email_from"
                       value={configs.email_from}
-                      onChange={(e: any) => setConfigs({...configs, email_from: e.target.value})}
+                      onChange={(e) => setConfigs({...configs, email_from: e.target.value})}
                       placeholder="noreply@seubar.com.br"
                       className="form-input"
                     />
@@ -1766,10 +1766,10 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>üéµ Planejamento Comercial{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>üéµ Planejamento Comercial{selectedBarId ? ` - ${bars.find((b) => b.id === selectedBarId)?.nome}` : ''}</h3>
                 <p>
                   {selectedBarId 
-                    ? `Gerencie as atra·ß·µes e eventos de ${bars.find((b: any) => b.id === selectedBarId)?.nome} para todos os dias do m·™s`
+                    ? `Gerencie as atra·ß·µes e eventos de ${bars.find((b) => b.id === selectedBarId)?.nome} para todos os dias do m·™s`
                     : 'Gerencie as atra·ß·µes e eventos de todos os bares para todos os dias do m·™s'
                   }
                 </p>
@@ -1789,12 +1789,12 @@ export default function AdminPage() {
                       <select
                         id="month-selector"
                         value={currentMonth}
-                        onChange={(e: any) => setCurrentMonth(Number(e.target.value))}
+                        onChange={(e) => setCurrentMonth(Number(e.target.value))}
                         className="form-input"
                       >
-                        {Array.from({ length: 12 }, (_: any, i: any) => (
+                        {Array.from({ length: 12 }, (_, i) => (
                           <option key={i + 1} value={i + 1}>
-                            {new Date(0: any, i).toLocaleString('pt-BR', { month: 'long' })}
+                            {new Date(0, i).toLocaleString('pt-BR', { month: 'long' })}
                           </option>
                         ))}
                       </select>
@@ -1805,10 +1805,10 @@ export default function AdminPage() {
                       <select
                         id="year-selector"
                         value={currentYear}
-                        onChange={(e: any) => setCurrentYear(Number(e.target.value))}
+                        onChange={(e) => setCurrentYear(Number(e.target.value))}
                         className="form-input"
                       >
-                        {Array.from({ length: 5 }, (_: any, i: any) => {
+                        {Array.from({ length: 5 }, (_, i) => {
                           const year = new Date().getFullYear() - 2 + i;
                           return (
                             <option key={year} value={year}>
@@ -1863,7 +1863,7 @@ export default function AdminPage() {
 
                 {/* Calend·°rio do M·™s */}
                 <div className="form-section">
-                  <h4>üìÖ Eventos de {new Date(currentYear: any, currentMonth - 1).toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}</h4>
+                  <h4>üìÖ Eventos de {new Date(currentYear, currentMonth - 1).toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}</h4>
                   
                   <div className="calendar-grid">
                     {/* Cabe·ßalho dos dias da semana */}
@@ -1880,8 +1880,8 @@ export default function AdminPage() {
                     {/* Dias do m·™s */}
                     <div className="calendar-body">
                       {(() => {
-                        const firstDay = new Date(currentYear: any, currentMonth - 1, 1);
-                        const lastDay = new Date(currentYear: any, currentMonth, 0);
+                        const firstDay = new Date(currentYear, currentMonth - 1, 1);
+                        const lastDay = new Date(currentYear, currentMonth, 0);
                         const startDate = new Date(firstDay);
                         startDate.setDate(startDate.getDate() - firstDay.getDay());
                         
@@ -1892,7 +1892,7 @@ export default function AdminPage() {
                           
                           // Fix timezone issue - compare dates directly as strings
                           const dateString = date.toISOString().split('T')[0];
-                          const dayEvents = eventos.filter((e: any) => 
+                          const dayEvents = eventos.filter((e) => 
                             e.data_evento === dateString
                           );
                           
@@ -1906,7 +1906,7 @@ export default function AdminPage() {
                             >
                               <div className="calendar-day-number">{date.getDate()}</div>
                               <div className="calendar-day-events">
-                                {dayEvents.slice(0: any, 2).map((evento: any, idx: any) => (
+                                {dayEvents.slice(0, 2).map((evento, idx) => (
                                   <div
                                     key={evento.id}
                                     className="calendar-event"
@@ -1973,7 +1973,7 @@ export default function AdminPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {eventos.map((evento: any) => (
+                        {eventos.map((evento) => (
                           <tr key={evento.id}>
                             <td>{new Date(evento.data_evento).toLocaleDateString('pt-BR')}</td>
                             <td>
@@ -2028,7 +2028,7 @@ export default function AdminPage() {
         {/* Modal de Evento */}
         {showEventModal && editingEvent && (
           <div className="modal-overlay" onClick={() => setShowEventModal(false)}>
-            <div className="modal-content" onClick={(e: any) => e.stopPropagation()}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <h3>{editingEvent.id ? 'úèÔ∏è Editar Evento' : 'ûï Novo Evento'}</h3>
                 <button 
@@ -2045,13 +2045,13 @@ export default function AdminPage() {
                     <label>Bar:</label>
                     <select
                       value={editingEvent.bar_id || ''}
-                      onChange={(e: any) => setEditingEvent({
+                      onChange={(e) => setEditingEvent({
                         ...editingEvent,
                         bar_id: Number(e.target.value)
                       })}
                       className="form-input"
                     >
-                      {bars.map((bar: any) => (
+                      {bars.map((bar) => (
                         <option key={bar.id} value={bar.id}>
                           {bar.nome}
                         </option>
@@ -2064,7 +2064,7 @@ export default function AdminPage() {
                     <input
                       type="date"
                       value={editingEvent.data_evento}
-                      onChange={(e: any) => setEditingEvent({
+                      onChange={(e) => setEditingEvent({
                         ...editingEvent,
                         data_evento: e.target.value
                       })}
@@ -2078,7 +2078,7 @@ export default function AdminPage() {
                   <input
                     type="text"
                     value={editingEvent.nome}
-                    onChange={(e: any) => setEditingEvent({
+                    onChange={(e) => setEditingEvent({
                       ...editingEvent,
                       nome: e.target.value
                     })}
@@ -2091,7 +2091,7 @@ export default function AdminPage() {
                   <label>Descri·ß·£o:</label>
                   <textarea
                     value={editingEvent.descricao || ''}
-                    onChange={(e: any) => setEditingEvent({
+                    onChange={(e) => setEditingEvent({
                       ...editingEvent,
                       descricao: e.target.value
                     })}
@@ -2106,7 +2106,7 @@ export default function AdminPage() {
                     <label>G·™nero Musical:</label>
                     <select
                       value={editingEvent.genero_musical || ''}
-                      onChange={(e: any) => setEditingEvent({
+                      onChange={(e) => setEditingEvent({
                         ...editingEvent,
                         genero_musical: e.target.value
                       })}
@@ -2133,7 +2133,7 @@ export default function AdminPage() {
                     <input
                       type="text"
                       value={editingEvent.artistas_bandas || ''}
-                      onChange={(e: any) => setEditingEvent({
+                      onChange={(e) => setEditingEvent({
                         ...editingEvent,
                         artistas_bandas: e.target.value
                       })}
@@ -2149,7 +2149,7 @@ export default function AdminPage() {
                     <input
                       type="time"
                       value={editingEvent.horario_inicio || ''}
-                      onChange={(e: any) => setEditingEvent({
+                      onChange={(e) => setEditingEvent({
                         ...editingEvent,
                         horario_inicio: e.target.value
                       })}
@@ -2162,7 +2162,7 @@ export default function AdminPage() {
                     <input
                       type="time"
                       value={editingEvent.horario_fim || ''}
-                      onChange={(e: any) => setEditingEvent({
+                      onChange={(e) => setEditingEvent({
                         ...editingEvent,
                         horario_fim: e.target.value
                       })}
@@ -2178,7 +2178,7 @@ export default function AdminPage() {
                       type="number"
                       step="0.01"
                       value={editingEvent.valor_cover || ''}
-                      onChange={(e: any) => setEditingEvent({
+                      onChange={(e) => setEditingEvent({
                         ...editingEvent,
                         valor_cover: e.target.value ? parseFloat(e.target.value) : null
                       })}
@@ -2193,7 +2193,7 @@ export default function AdminPage() {
                       type="number"
                       step="0.01"
                       value={editingEvent.valor_show || ''}
-                      onChange={(e: any) => setEditingEvent({
+                      onChange={(e) => setEditingEvent({
                         ...editingEvent,
                         valor_show: e.target.value ? parseFloat(e.target.value) : null
                       })}
@@ -2207,7 +2207,7 @@ export default function AdminPage() {
                     <input
                       type="number"
                       value={editingEvent.capacidade_estimada || ''}
-                      onChange={(e: any) => setEditingEvent({
+                      onChange={(e) => setEditingEvent({
                         ...editingEvent,
                         capacidade_estimada: e.target.value ? parseInt(e.target.value) : null
                       })}
@@ -2242,10 +2242,10 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>üìà Analytics de Performance{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>üìà Analytics de Performance{selectedBarId ? ` - ${bars.find((b) => b.id === selectedBarId)?.nome}` : ''}</h3>
                 <p>
                   {selectedBarId 
-                    ? `An·°lise de performance dos artistas e eventos de ${bars.find((b: any) => b.id === selectedBarId)?.nome} por dados reais de faturamento`
+                    ? `An·°lise de performance dos artistas e eventos de ${bars.find((b) => b.id === selectedBarId)?.nome} por dados reais de faturamento`
                     : 'An·°lise de performance dos artistas e eventos por dados reais de faturamento'
                   }
                 </p>
@@ -2308,7 +2308,7 @@ function AnalyticsContent({ barId }: { barId: number }) {
         <label>Tipo de An·°lise:</label>
         <select
           value={tipoAnalise}
-          onChange={(e: any) => setTipoAnalise(e.target.value)}
+          onChange={(e) => setTipoAnalise(e.target.value)}
           className="form-input"
         >
           <option value="artistas">üìä Por Artista/Banda</option>
@@ -2339,12 +2339,12 @@ function AnalyticsContent({ barId }: { barId: number }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {dadosAnalytics.map((item: any, index: any) => (
+                  {dadosAnalytics.map((item, index) => (
                     <tr key={index}>
                       <td>
                         <strong>{item.nome}</strong>
                         <div className="genres">
-                          {item.generos.slice(0: any, 2).map((genero: string) => (
+                          {item.generos.slice(0, 2).map((genero: string) => (
                             <span key={genero} className="genre-tag">{genero}</span>
                           ))}
                         </div>
@@ -2378,7 +2378,7 @@ function AnalyticsContent({ barId }: { barId: number }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {dadosAnalytics.map((item: any, index: any) => (
+                  {dadosAnalytics.map((item, index) => (
                     <tr key={index}>
                       <td><strong>{item.genero}</strong></td>
                       <td>{item.total_eventos}</td>
@@ -2418,7 +2418,7 @@ function AnalyticsContent({ barId }: { barId: number }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {dadosAnalytics.map((item: any, index: any) => (
+                  {dadosAnalytics.map((item, index) => (
                     <tr key={index}>
                       <td><strong>{item.periodo_label}</strong></td>
                       <td>{item.total_eventos}</td>
@@ -2428,7 +2428,7 @@ function AnalyticsContent({ barId }: { barId: number }) {
                       <td>{Math.round(item.publico_medio)}</td>
                       <td>
                         <div className="genres">
-                          {item.generos.slice(0: any, 3).map((genero: string) => (
+                          {item.generos.slice(0, 3).map((genero: string) => (
                             <span key={genero} className="genre-tag">{genero}</span>
                           ))}
                         </div>

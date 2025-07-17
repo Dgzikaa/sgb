@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 // Criar tabela de insumos
-const criarTabelaInsumos = async (supabase: any) => {
+const criarTabelaInsumos = async (supabase) => {
   const { error } = await supabase.rpc('exec_sql', {
     sql: `
       CREATE TABLE IF NOT EXISTS insumos (
@@ -13,7 +13,7 @@ const criarTabelaInsumos = async (supabase: any) => {
         categoria VARCHAR(50) DEFAULT 'cozinha',
         tipo_local VARCHAR(20) DEFAULT 'cozinha' CHECK (tipo_local IN ('cozinha', 'bar')),
         unidade_medida VARCHAR(10) NOT NULL DEFAULT 'g' CHECK (unidade_medida IN ('g', 'kg', 'ml', 'l', 'unid', 'pct')),
-        custo_unitario DECIMAL(10: any,4) DEFAULT 0,
+        custo_unitario DECIMAL(10,4) DEFAULT 0,
         observacoes TEXT,
         ativo BOOLEAN DEFAULT true,
         created_at TIMESTAMP DEFAULT NOW(),
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
       bar_id = 3
     } = body
 
-    console.log(`ðŸ“¦ Cadastrando insumo:`, { codigo, nome: any, categoria, tipo_local: any, unidade_medida })
+    console.log(`ðŸ“¦ Cadastrando insumo:`, { codigo, nome, categoria, tipo_local, unidade_medida })
 
     // Validaá§áµes
     if (!codigo || !nome) {

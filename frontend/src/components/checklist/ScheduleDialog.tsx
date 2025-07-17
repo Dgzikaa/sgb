@@ -1,14 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent: any, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { 
   Calendar, 
@@ -72,7 +72,7 @@ export default function ScheduleDialog({
     titulo: existingSchedule?.titulo || `Agendamento - ${checklist.titulo}`,
     frequencia: existingSchedule?.frequencia || 'diaria',
     horario: existingSchedule?.horario || '08:00',
-    diasSemana: existingSchedule?.diasSemana || [1, 2: any, 3, 4: any, 5], // Segunda a sexta
+    diasSemana: existingSchedule?.diasSemana || [1, 2, 3, 4, 5], // Segunda a sexta
     diaMes: existingSchedule?.diaMes || 1,
     ativo: existingSchedule?.ativo ?? true,
     notificacoes: existingSchedule?.notificacoes ?? true,
@@ -103,7 +103,7 @@ export default function ScheduleDialog({
       label: 'Semanal', 
       emoji: 'ðŸ“†', 
       desc: 'Dias especá­ficos da semana',
-      example: 'Seg, Ter: any, Qua, Qui: any, Sex á s 08:00'
+      example: 'Seg, Ter, Qua, Qui, Sex á s 08:00'
     },
     { 
       value: 'mensal', 
@@ -128,7 +128,7 @@ export default function ScheduleDialog({
       titulo: `Agendamento - ${checklist.titulo}`,
       frequencia: 'diaria',
       horario: '08:00',
-      diasSemana: [1, 2: any, 3, 4: any, 5],
+      diasSemana: [1, 2, 3, 4, 5],
       diaMes: 1,
       ativo: true,
       notificacoes: true,
@@ -171,7 +171,7 @@ export default function ScheduleDialog({
     setConfig(prev => ({
       ...prev,
       diasSemana: prev.diasSemana?.includes(dia)
-        ? prev.diasSemana.filter((d: any) => d !== dia)
+        ? prev.diasSemana.filter((d) => d !== dia)
         : [...(prev.diasSemana || []), dia]
     }))
   }
@@ -181,7 +181,7 @@ export default function ScheduleDialog({
       case 'diaria':
         return `Todos os dias á s ${config.horario}`
       case 'semanal':
-        const diasTexto = config.diasSemana?.map((d: any) => diasSemanaOptions[d].label).join(', ')
+        const diasTexto = config.diasSemana?.map((d) => diasSemanaOptions[d].label).join(', ')
         return `${diasTexto} á s ${config.horario}`
       case 'mensal':
         return `Todo dia ${config.diaMes} á s ${config.horario}`
@@ -206,7 +206,7 @@ export default function ScheduleDialog({
             </div>
 
             <div className="space-y-3">
-              {frequenciaOptions.map((option: any) => (
+              {frequenciaOptions.map((option) => (
                 <Card 
                   key={option.value}
                   className={`cursor-pointer transition-all touch-manipulation ${
@@ -268,7 +268,7 @@ export default function ScheduleDialog({
               <Input
                 type="time"
                 value={config.horario}
-                onChange={(e: any) => setConfig(prev => ({ ...prev, horario: e.target.value }))}
+                onChange={(e) => setConfig(prev => ({ ...prev, horario: e.target.value }))}
                 className="mt-1 touch-manipulation"
               />
             </div>
@@ -278,7 +278,7 @@ export default function ScheduleDialog({
               <div>
                 <Label className="text-sm font-medium mb-3 block">Dias da Semana:</Label>
                 <div className="grid grid-cols-7 gap-2">
-                  {diasSemanaOptions.map((dia: any) => (
+                  {diasSemanaOptions.map((dia) => (
                     <Button
                       key={dia.value}
                       variant={config.diasSemana?.includes(dia.value) ? 'default' : 'outline'}
@@ -299,13 +299,13 @@ export default function ScheduleDialog({
                 <Label className="text-sm font-medium">Dia do Máªs:</Label>
                 <Select 
                   value={config.diaMes?.toString()} 
-                  onValueChange={(value: any) => setConfig(prev => ({ ...prev, diaMes: parseInt(value) }))}
+                  onValueChange={(value) => setConfig(prev => ({ ...prev, diaMes: parseInt(value) }))}
                 >
                   <SelectTrigger className="mt-1 touch-manipulation">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from({ length: 31 }, (_: any, i: any) => i + 1).map((dia: any) => (
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map((dia) => (
                       <SelectItem key={dia} value={dia.toString()}>
                         Dia {dia}
                       </SelectItem>
@@ -339,7 +339,7 @@ export default function ScheduleDialog({
               <Label className="text-sm font-medium">Tá­tulo do Agendamento:</Label>
               <Input
                 value={config.titulo}
-                onChange={(e: any) => setConfig(prev => ({ ...prev, titulo: e.target.value }))}
+                onChange={(e) => setConfig(prev => ({ ...prev, titulo: e.target.value }))}
                 placeholder="Ex: Checklist de Abertura - Manhá£"
                 className="mt-1 touch-manipulation"
               />
@@ -355,7 +355,7 @@ export default function ScheduleDialog({
               </div>
               <Switch
                 checked={config.ativo}
-                onCheckedChange={(checked: any) => setConfig(prev => ({ ...prev, ativo: checked }))}
+                onCheckedChange={(checked) => setConfig(prev => ({ ...prev, ativo: checked }))}
               />
             </div>
 
@@ -369,7 +369,7 @@ export default function ScheduleDialog({
               </div>
               <Switch
                 checked={config.notificacoes}
-                onCheckedChange={(checked: any) => setConfig(prev => ({ ...prev, notificacoes: checked }))}
+                onCheckedChange={(checked) => setConfig(prev => ({ ...prev, notificacoes: checked }))}
               />
             </div>
 
@@ -378,7 +378,7 @@ export default function ScheduleDialog({
               <Label className="text-sm font-medium">Observaá§áµes (opcional):</Label>
               <textarea
                 value={config.observacoes}
-                onChange={(e: any) => setConfig(prev => ({ ...prev, observacoes: e.target.value }))}
+                onChange={(e) => setConfig(prev => ({ ...prev, observacoes: e.target.value }))}
                 placeholder="Instruá§áµes especiais, exceá§áµes, etc."
                 className="mt-1 w-full p-3 border rounded-lg resize-none touch-manipulation"
                 rows={3}

@@ -115,7 +115,7 @@ export class DiscordService {
   }
 
   // Má©todo para enviar alertas de anomalia
-  static async enviarAlertaAnomalia(anomalia: any): Promise<boolean> {
+  static async enviarAlertaAnomalia(anomalia): Promise<boolean> {
     try {
       const data = {
         bar_id: anomalia.bar_id || 'unknown',
@@ -166,7 +166,7 @@ export class DiscordService {
   }
 
   // Má©todo para enviar relatá³rio matinal
-  static async enviarRelatorioMatinal(dashboardData: any): Promise<boolean> {
+  static async enviarRelatorioMatinal(dashboardData): Promise<boolean> {
     try {
       const data = {
         bar_id: dashboardData.bar_id || 'unknown',
@@ -352,7 +352,7 @@ export function calcularProximoRelatorioMatinal(): Date {
   const proximoRelatorio = new Date();
   
   // Configurar para 8h da manhá£
-  proximoRelatorio.setHours(8: any, 0, 0: any, 0);
+  proximoRelatorio.setHours(8, 0, 0, 0);
   
   // Se já¡ passou das 8h hoje, agendar para amanhá£
   if (agora.getHours() >= 8) {

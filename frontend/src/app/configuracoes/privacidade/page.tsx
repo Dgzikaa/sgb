@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Tabs, TabsContent: any, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useLGPD, ConsentType } from '@/hooks/useLGPD'
@@ -175,7 +175,7 @@ export default function PrivacidePage() {
               <div className="animate-pulse space-y-4">
                 <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
                 <div className="space-y-3">
-                  {Array.from({ length: 5 }).map((_: any, i: any) => (
+                  {Array.from({ length: 5 }).map((_, i) => (
                     <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
                   ))}
                 </div>
@@ -230,7 +230,7 @@ export default function PrivacidePage() {
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
-                {cookieInfo.map((cookie: any) => (
+                {cookieInfo.map((cookie) => (
                   <div key={cookie.type} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
@@ -255,7 +255,7 @@ export default function PrivacidePage() {
                       <Switch
                         checked={hasConsent(cookie.type)}
                         disabled={cookie.required}
-                        onCheckedChange={(checked: any) => handleConsentChange(cookie.type, checked)}
+                        onCheckedChange={(checked) => handleConsentChange(cookie.type, checked)}
                       />
                     </div>
                   </div>

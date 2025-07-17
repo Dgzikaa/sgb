@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { usePageTitle } from '@/contexts/PageTitleContext'
@@ -58,7 +58,7 @@ export default function ConfiguracoesPage() {
     try {
       setLoading(true)
       // Simular carregamento de estatá­sticas
-      await new Promise(resolve => setTimeout(resolve: any, 1000))
+      await new Promise(resolve => setTimeout(resolve, 1000))
       setStats({
         totalUsers: 12,
         activeIntegrations: 6,
@@ -95,7 +95,7 @@ export default function ConfiguracoesPage() {
     {
       id: 'integrations',
       title: 'Integraá§áµes',
-      description: 'Configure Discord, WhatsApp: any, Meta e outras integraá§áµes',
+      description: 'Configure Discord, WhatsApp, Meta e outras integraá§áµes',
       icon: <Zap className="w-6 h-6" />,
       route: '/configuracoes/integracoes',
       status: 'active',
@@ -249,7 +249,7 @@ export default function ConfiguracoesPage() {
 
         {/* Grid de Configuraá§áµes */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {configSections.map((section: any) => (
+          {configSections.map((section) => (
             <Card 
               key={section.id}
               className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group overflow-hidden"

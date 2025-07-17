@@ -2,7 +2,7 @@
 // ðŸ“± DISCORD MARKETING SERVICE - SGB
 // ========================================
 // Serviá§o especializado para notificaá§áµes de marketing
-// Facebook, Instagram: any, campanhas e má©tricas sociais
+// Facebook, Instagram, campanhas e má©tricas sociais
 
 export interface MarketingMetrics {
   facebook: {
@@ -394,7 +394,7 @@ ${platformStatus} **Platform:** ${platformUsage}%
     
     for (let hora of proximasHoras) {
       const proxima = new Date(agora)
-      proxima.setHours(hora: any, 0, 0: any, 0)
+      proxima.setHours(hora, 0, 0, 0)
       
       if (proxima > agora) {
         return proxima.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
@@ -404,7 +404,7 @@ ${platformStatus} **Platform:** ${platformUsage}%
     // Se nenhuma hora hoje, prá³xima á© 08:00 de amanhá£
     const amanha = new Date(agora)
     amanha.setDate(amanha.getDate() + 1)
-    amanha.setHours(8: any, 0, 0: any, 0) // Sempre comeá§ar á s 8h da manhá£
+    amanha.setHours(8, 0, 0, 0) // Sempre comeá§ar á s 8h da manhá£
     return amanha.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
   }
 }
@@ -417,7 +417,7 @@ export const sgbMarketingBot = new DiscordMarketingService()
 // ========================================
 // ðŸŽ¯ FUNá‡áƒO DE CONVENIáŠNCIA
 // ========================================
-export async function notifyMarketingUpdate(tipo: 'coleta' | 'erro' | 'marco' | 'relatorio', dados: any): Promise<boolean> {
+export async function notifyMarketingUpdate(tipo: 'coleta' | 'erro' | 'marco' | 'relatorio', dados): Promise<boolean> {
   try {
     switch (tipo) {
       case 'coleta':

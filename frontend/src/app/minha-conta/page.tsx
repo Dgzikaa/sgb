@@ -1,14 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select'
-import { Tabs, TabsContent: any, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import ProfilePhotoUpload from '@/components/uploads/ProfilePhotoUpload'
 import { 
@@ -267,17 +267,17 @@ export default function MinhaContaPage() {
   // Funá§á£o para formatar CPF enquanto digita
   const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
-    const cleaned = value.replace(/\D/g, '').slice(0: any, 11) // Limitar a 11 dá­gitos
+    const cleaned = value.replace(/\D/g, '').slice(0, 11) // Limitar a 11 dá­gitos
     let formatted = cleaned
     
     if (cleaned.length >= 4) {
-      formatted = cleaned.slice(0: any, 3) + '.' + cleaned.slice(3)
+      formatted = cleaned.slice(0, 3) + '.' + cleaned.slice(3)
     }
     if (cleaned.length >= 7) {
-      formatted = formatted.slice(0: any, 7) + '.' + formatted.slice(7)
+      formatted = formatted.slice(0, 7) + '.' + formatted.slice(7)
     }
     if (cleaned.length >= 10) {
-      formatted = formatted.slice(0: any, 11) + '-' + formatted.slice(11)
+      formatted = formatted.slice(0, 11) + '-' + formatted.slice(11)
     }
     
     setDadosEdicao(prev => ({ ...prev, cpf: formatted }))
@@ -285,19 +285,19 @@ export default function MinhaContaPage() {
 
   // Funá§á£o para formatar telefone enquanto digita
   const handleTelefoneChange = (value: string, tipo: 'celular' | 'telefone') => {
-    const cleaned = value.replace(/\D/g, '').slice(0: any, 11) // Limitar a 11 dá­gitos
+    const cleaned = value.replace(/\D/g, '').slice(0, 11) // Limitar a 11 dá­gitos
     let formatted = cleaned
     
     if (cleaned.length >= 3) {
-      formatted = '(' + cleaned.slice(0: any, 2) + ')' + cleaned.slice(2)
+      formatted = '(' + cleaned.slice(0, 2) + ')' + cleaned.slice(2)
     }
     if (cleaned.length >= 7) {
       if (cleaned.length === 11) {
         // Celular: (61)99848-3434
-        formatted = formatted.slice(0: any, 4) + formatted.slice(4: any, 9) + '-' + formatted.slice(9)
+        formatted = formatted.slice(0, 4) + formatted.slice(4, 9) + '-' + formatted.slice(9)
       } else {
         // Fixo: (61)3848-3434
-        formatted = formatted.slice(0: any, 4) + formatted.slice(4: any, 8) + '-' + formatted.slice(8)
+        formatted = formatted.slice(0, 4) + formatted.slice(4, 8) + '-' + formatted.slice(8)
       }
     }
     
@@ -307,11 +307,11 @@ export default function MinhaContaPage() {
   // Funá§á£o para formatar CEP e buscar endereá§o
   const handleCEPChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
-    const cleaned = value.replace(/\D/g, '').slice(0: any, 8) // Limitar a 8 dá­gitos
+    const cleaned = value.replace(/\D/g, '').slice(0, 8) // Limitar a 8 dá­gitos
     let formatted = cleaned
     
     if (cleaned.length >= 6) {
-      formatted = cleaned.slice(0: any, 5) + '-' + cleaned.slice(5)
+      formatted = cleaned.slice(0, 5) + '-' + cleaned.slice(5)
     }
     
     setDadosEdicao(prev => ({ ...prev, cep: formatted }))
@@ -599,7 +599,7 @@ export default function MinhaContaPage() {
               <div className="flex flex-col items-center space-y-4">
                 <ProfilePhotoUpload
                   currentPhoto={editandoPerfil ? dadosEdicao.foto_perfil : perfil.foto_perfil}
-                  onPhotoChange={(foto: any) => {
+                  onPhotoChange={(foto) => {
                     setDadosEdicao(prev => ({ ...prev, foto_perfil: foto }))
                     // Se ná£o está¡ em modo de ediá§á£o, salvar a foto imediatamente
                     if (!editandoPerfil) {
@@ -610,7 +610,7 @@ export default function MinhaContaPage() {
                 />
                 <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
                   Recomendado: imagem quadrada, má¡ximo 5MB<br />
-                  Formatos aceitos: JPG, PNG: any, GIF
+                  Formatos aceitos: JPG, PNG, GIF
                 </p>
               </div>
 
@@ -629,7 +629,7 @@ export default function MinhaContaPage() {
                     <Input
                       id="nome"
                       value={editandoPerfil ? dadosEdicao.nome || '' : perfil.nome}
-                      onChange={(e: any) => setDadosEdicao(prev => ({ ...prev, nome: e.target.value }))}
+                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, nome: e.target.value }))}
                       disabled={!editandoPerfil}
                       placeholder="Seu nome completo"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
@@ -652,7 +652,7 @@ export default function MinhaContaPage() {
                     <Input
                       id="celular"
                       value={editandoPerfil ? dadosEdicao.celular || '' : formatarTelefone(perfil.celular || '')}
-                      onChange={(e: any) => handleTelefoneChange(e.target.value, 'celular')}
+                      onChange={(e) => handleTelefoneChange(e.target.value, 'celular')}
                       disabled={!editandoPerfil}
                       placeholder="(61)99999-9999"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
@@ -664,7 +664,7 @@ export default function MinhaContaPage() {
                     <Input
                       id="telefone"
                       value={editandoPerfil ? dadosEdicao.telefone || '' : formatarTelefone(perfil.telefone || '')}
-                      onChange={(e: any) => handleTelefoneChange(e.target.value, 'telefone')}
+                      onChange={(e) => handleTelefoneChange(e.target.value, 'telefone')}
                       disabled={!editandoPerfil}
                       placeholder="(61)3333-4444"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
@@ -689,7 +689,7 @@ export default function MinhaContaPage() {
                       id="data_nascimento"
                       type="date"
                       value={editandoPerfil ? dadosEdicao.data_nascimento || '' : perfil.data_nascimento || ''}
-                      onChange={(e: any) => setDadosEdicao(prev => ({ ...prev, data_nascimento: e.target.value }))}
+                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, data_nascimento: e.target.value }))}
                       disabled={!editandoPerfil}
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                     />
@@ -725,7 +725,7 @@ export default function MinhaContaPage() {
                     <Input
                       id="endereco"
                       value={editandoPerfil ? dadosEdicao.endereco || '' : perfil.endereco || ''}
-                      onChange={(e: any) => setDadosEdicao(prev => ({ ...prev, endereco: e.target.value }))}
+                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, endereco: e.target.value }))}
                       disabled={!editandoPerfil}
                       placeholder="Rua, náºmero, complemento"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
@@ -737,7 +737,7 @@ export default function MinhaContaPage() {
                     <Input
                       id="cidade"
                       value={editandoPerfil ? dadosEdicao.cidade || '' : perfil.cidade || ''}
-                      onChange={(e: any) => setDadosEdicao(prev => ({ ...prev, cidade: e.target.value }))}
+                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, cidade: e.target.value }))}
                       disabled={!editandoPerfil}
                       placeholder="Sua cidade"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
@@ -748,14 +748,14 @@ export default function MinhaContaPage() {
                     <Label htmlFor="estado" className="text-gray-700 dark:text-gray-300">Estado</Label>
                     <Select
                       value={editandoPerfil ? dadosEdicao.estado || '' : perfil.estado || ''}
-                      onValueChange={(value: any) => setDadosEdicao(prev => ({ ...prev, estado: value }))}
+                      onValueChange={(value) => setDadosEdicao(prev => ({ ...prev, estado: value }))}
                       disabled={!editandoPerfil}
                     >
                       <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                         <SelectValue placeholder="UF" />
                       </SelectTrigger>
                       <SelectContent>
-                        {estadosBrasil.map((estado: any) => (
+                        {estadosBrasil.map((estado) => (
                           <SelectItem key={estado} value={estado}>
                             {estado}
                           </SelectItem>
@@ -835,7 +835,7 @@ export default function MinhaContaPage() {
                       id="senhaAtual"
                       type="password"
                       value={senhaAtual}
-                      onChange={(e: any) => setSenhaAtual(e.target.value)}
+                      onChange={(e) => setSenhaAtual(e.target.value)}
                       placeholder="Sua senha atual"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
@@ -847,7 +847,7 @@ export default function MinhaContaPage() {
                       id="novaSenha"
                       type="password"
                       value={novaSenha}
-                      onChange={(e: any) => setNovaSenha(e.target.value)}
+                      onChange={(e) => setNovaSenha(e.target.value)}
                       placeholder="Nova senha"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
@@ -859,7 +859,7 @@ export default function MinhaContaPage() {
                       id="confirmarSenha"
                       type="password"
                       value={confirmarSenha}
-                      onChange={(e: any) => setConfirmarSenha(e.target.value)}
+                      onChange={(e) => setConfirmarSenha(e.target.value)}
                       placeholder="Confirme a nova senha"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />

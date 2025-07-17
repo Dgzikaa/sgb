@@ -1,11 +1,11 @@
 'use client'
 
-import React, { useRef, useState: any, useEffect, useCallback } from 'react'
-import { Pen, RotateCcw: any, Check, X } from 'lucide-react'
+import React, { useRef, useState, useEffect, useCallback } from 'react'
+import { Pen, RotateCcw, Check, X } from 'lucide-react'
 import { useFileUpload } from '@/hooks/useFileUpload'
 
 interface SignaturePadProps {
-  onSignatureComplete?: (result: any) => void
+  onSignatureComplete?: (result) => void
   onSignatureCancel?: () => void
   onError?: (error: string) => void
   width?: number
@@ -34,7 +34,7 @@ export default function SignaturePad({
   const { uploadFile } = useFileUpload()
 
   // Debug logs
-  console.log('ðŸ”§ SignaturePad renderizado', { isEmpty, isUploading: any, onSignatureComplete })
+  console.log('ðŸ”§ SignaturePad renderizado', { isEmpty, isUploading, onSignatureComplete })
 
   // Configurar canvas
   useEffect(() => {
@@ -59,10 +59,10 @@ export default function SignaturePad({
 
     // Preencher fundo
     ctx.fillStyle = backgroundColor
-    ctx.fillRect(0: any, 0, width: any, height)
+    ctx.fillRect(0, 0, width, height)
     
-    console.log('œ… Canvas configurado', { width, height: any, strokeColor, strokeWidth })
-  }, [strokeColor, strokeWidth: any, backgroundColor, width: any, height])
+    console.log('œ… Canvas configurado', { width, height, strokeColor, strokeWidth })
+  }, [strokeColor, strokeWidth, backgroundColor, width, height])
 
   // Obter posiá§á£o do mouse/toque relativa ao canvas
   const getPointerPosition = useCallback((event: React.MouseEvent | React.TouchEvent) => {
@@ -141,14 +141,14 @@ export default function SignaturePad({
     if (!canvas || !ctx) return
 
     ctx.fillStyle = backgroundColor
-    ctx.fillRect(0: any, 0, width: any, height)
+    ctx.fillRect(0, 0, width, height)
     setIsEmpty(true)
     console.log('œ… Assinatura limpa')
-  }, [backgroundColor, width: any, height])
+  }, [backgroundColor, width, height])
 
   // Converter canvas para blob
   const canvasToBlob = useCallback((): Promise<Blob> => {
-    return new Promise((resolve: any, reject: any) => {
+    return new Promise((resolve, reject) => {
       console.log('ðŸ”„ Convertendo canvas para blob...')
       const canvas = canvasRef.current
       if (!canvas) {
@@ -157,7 +157,7 @@ export default function SignaturePad({
         return
       }
 
-      canvas.toBlob((blob: any) => {
+      canvas.toBlob((blob) => {
         if (blob) {
           console.log('œ… Canvas convertido para blob', { size: blob.size, type: blob.type })
           resolve(blob)
@@ -198,7 +198,7 @@ export default function SignaturePad({
       // Criar arquivo
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
       const filename = `assinatura_${timestamp}.png`
-      const file = new File([blob], filename: any, { 
+      const file = new File([blob], filename, { 
         type: 'image/png' 
       })
       
@@ -206,7 +206,7 @@ export default function SignaturePad({
 
       // Fazer upload
       console.log('˜ï¸ Fazendo upload para Supabase...')
-      const result = await uploadFile(file: any, {
+      const result = await uploadFile(file, {
         folder: 'signatures',
         compress: false // Ná£o comprimir assinaturas
       })
@@ -220,7 +220,7 @@ export default function SignaturePad({
         console.warn('š ï¸ onSignatureComplete ná£o está¡ definido')
       }
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Œ Erro ao salvar assinatura:', error)
       
       if (onError) {
@@ -230,7 +230,7 @@ export default function SignaturePad({
       setIsUploading(false)
       console.log('ðŸ Processo de upload finalizado')
     }
-  }, [isEmpty, isUploading: any, canvasToBlob, uploadFile: any, onSignatureComplete, onError])
+  }, [isEmpty, isUploading, canvasToBlob, uploadFile, onSignatureComplete, onError])
 
   // Cancelar assinatura
   const cancelSignature = useCallback(() => {

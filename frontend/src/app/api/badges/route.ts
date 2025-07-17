@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
       success: true,
       badges,
       summary: {
-        total_issues: Object.values(badges).reduce((sum: any, count: any) => sum + count, 0),
+        total_issues: Object.values(badges).reduce((sum, count) => sum + count, 0),
         critical_issues: badges.visaoGeral,
         pending_tasks: badges.checklist + badges.producao
       }

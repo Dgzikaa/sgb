@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { AlertTriangle, TrendingUp: any, TrendingDown, Target: any, Scale, Calculator: any, Clock, User } from 'lucide-react'
+import { AlertTriangle, TrendingUp, TrendingDown, Target, Scale, Calculator, Clock, User } from 'lucide-react'
 import { useBar } from '@/contexts/BarContext'
 
 interface ProducaoEficiencia {
@@ -31,7 +31,7 @@ interface ProducaoEficiencia {
   rendimento_teorico: number
   rendimento_real: number
   tempo_total_segundos: number
-  insumos_utilizados: any[]
+  insumos_utilizados[]
 }
 
 export default function RelatorioEficienciaProducao() {
@@ -112,12 +112,12 @@ export default function RelatorioEficienciaProducao() {
       return
     }
 
-    const eficienciaMedia = dados.reduce((acc: any, p: any) => acc + p.eficiencia_quantidade, 0) / dados.length
-    const perdaMedia = dados.reduce((acc: any, p: any) => acc + p.perda_total_g, 0) / dados.length
-    const variacaoCustoMedia = dados.reduce((acc: any, p: any) => acc + p.variacao_custo, 0) / dados.length
+    const eficienciaMedia = dados.reduce((acc, p) => acc + p.eficiencia_quantidade, 0) / dados.length
+    const perdaMedia = dados.reduce((acc, p) => acc + p.perda_total_g, 0) / dados.length
+    const variacaoCustoMedia = dados.reduce((acc, p) => acc + p.variacao_custo, 0) / dados.length
     
-    const funcionarios = new Set(dados.map((p: any) => p.funcionario)).size
-    const produtos = new Set(dados.map((p: any) => p.produto_codigo)).size
+    const funcionarios = new Set(dados.map((p) => p.funcionario)).size
+    const produtos = new Set(dados.map((p) => p.produto_codigo)).size
 
     setEstatisticas({
       total_producoes: dados.length,
@@ -132,7 +132,7 @@ export default function RelatorioEficienciaProducao() {
   const formatarTempo = (segundos: number): string => {
     const mins = Math.floor(segundos / 60)
     const secs = segundos % 60
-    return `${mins}:${secs.toString().padStart(2: any, '0')}`
+    return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
   const getCorEficiencia = (eficiencia: number) => {
@@ -179,7 +179,7 @@ export default function RelatorioEficienciaProducao() {
                 <Label className="text-black font-medium">Produto</Label>
                 <Input
                   value={filtros.produto}
-                  onChange={(e: any) => setFiltros(prev => ({ ...prev, produto: e.target.value }))}
+                  onChange={(e) => setFiltros(prev => ({ ...prev, produto: e.target.value }))}
                   placeholder="Cá³digo do produto..."
                   className="text-black font-medium placeholder:text-gray-600 bg-white border-2 border-gray-300"
                 />
@@ -188,7 +188,7 @@ export default function RelatorioEficienciaProducao() {
                 <Label className="text-black font-medium">Funcioná¡rio</Label>
                 <Input
                   value={filtros.funcionario}
-                  onChange={(e: any) => setFiltros(prev => ({ ...prev, funcionario: e.target.value }))}
+                  onChange={(e) => setFiltros(prev => ({ ...prev, funcionario: e.target.value }))}
                   placeholder="Nome do funcioná¡rio..."
                   className="text-black font-medium placeholder:text-gray-600 bg-white border-2 border-gray-300"
                 />
@@ -198,7 +198,7 @@ export default function RelatorioEficienciaProducao() {
                 <Input
                   type="date"
                   value={filtros.data_inicio}
-                  onChange={(e: any) => setFiltros(prev => ({ ...prev, data_inicio: e.target.value }))}
+                  onChange={(e) => setFiltros(prev => ({ ...prev, data_inicio: e.target.value }))}
                   className="text-black font-medium bg-white border-2 border-gray-300"
                 />
               </div>
@@ -207,7 +207,7 @@ export default function RelatorioEficienciaProducao() {
                 <Input
                   type="date"
                   value={filtros.data_fim}
-                  onChange={(e: any) => setFiltros(prev => ({ ...prev, data_fim: e.target.value }))}
+                  onChange={(e) => setFiltros(prev => ({ ...prev, data_fim: e.target.value }))}
                   className="text-black font-medium bg-white border-2 border-gray-300"
                 />
               </div>
@@ -226,7 +226,7 @@ export default function RelatorioEficienciaProducao() {
                 <input
                   type="checkbox"
                   checked={filtros.apenas_problemas}
-                  onChange={(e: any) => setFiltros(prev => ({ ...prev, apenas_problemas: e.target.checked }))}
+                  onChange={(e) => setFiltros(prev => ({ ...prev, apenas_problemas: e.target.checked }))}
                   className="rounded"
                 />
                 Mostrar apenas problemas (eficiáªncia &lt; 90%, variaá§á£o custo &gt; R$ 1,00, perda &gt; 25%)
@@ -293,7 +293,7 @@ export default function RelatorioEficienciaProducao() {
               </div>
             ) : (
               <div className="space-y-4 max-h-96 overflow-y-auto">
-                {producoes.map((producao: any) => (
+                {producoes.map((producao) => (
                   <Card key={producao.id} className="border-2 border-gray-300">
                     <CardContent className="p-4">
                       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">

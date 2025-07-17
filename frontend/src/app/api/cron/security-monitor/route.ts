@@ -11,7 +11,7 @@ function getSupabaseClient() {
     throw new Error('Variá¡veis de ambiente Supabase ná£o configuradas')
   }
   
-  return createClient(supabaseUrl: any, serviceKey)
+  return createClient(supabaseUrl, serviceKey)
 }
 
 export async function GET(request: NextRequest) {
@@ -90,11 +90,11 @@ export async function GET(request: NextRequest) {
 }
 
 // Analisar padráµes suspeitos
-async function analyzeSuspiciousPatterns(events: any[]) {
+async function analyzeSuspiciousPatterns(events[]) {
   const patterns = []
   
   // Máºltiplas tentativas de login do mesmo IP
-  const loginAttempts = events.filter((e: any) => e.event_type === 'failed_login')
+  const loginAttempts = events.filter((e) => e.event_type === 'failed_login')
   const ipGroups = groupByIP(loginAttempts)
   
   for (const [ip, attempts] of Object.entries(ipGroups)) {
@@ -118,7 +118,7 @@ async function analyzeSuspiciousPatterns(events: any[]) {
 
   // Máºltiplas requisiá§áµes para endpoints sensá­veis
   const sensitiveEndpoints = ['/api/usuarios', '/api/admin', '/api/security']
-  const sensitiveRequests = events.filter((e: any) => 
+  const sensitiveRequests = events.filter((e) => 
     sensitiveEndpoints.some(endpoint => e.endpoint?.includes(endpoint))
   )
   
@@ -146,7 +146,7 @@ async function analyzeSuspiciousPatterns(events: any[]) {
 }
 
 // Verificar IPs suspeitos
-async function checkSuspiciousIPs(events: any[]) {
+async function checkSuspiciousIPs(events[]) {
   const ipCounts = new Map()
   
   events.forEach(event => {
@@ -222,7 +222,7 @@ async function generateSystemEvents() {
 }
 
 // Calcular má©tricas diá¡rias
-async function calculateDailyMetrics(supabase: any) {
+async function calculateDailyMetrics(supabase) {
   const today = new Date()
   const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate())
   
@@ -241,30 +241,30 @@ async function calculateDailyMetrics(supabase: any) {
   const metrics = {
     date: today.toISOString().split('T')[0],
     total_events: events.length,
-    critical_events: events.filter((e: any) => e.level === 'critical').length,
-    warning_events: events.filter((e: any) => e.level === 'warning').length,
-    info_events: events.filter((e: any) => e.level === 'info').length,
-    auth_events: events.filter((e: any) => e.category === 'auth').length,
-    access_events: events.filter((e: any) => e.category === 'access').length,
-    injection_events: events.filter((e: any) => e.category === 'injection').length,
-    rate_limit_events: events.filter((e: any) => e.category === 'rate_limit').length,
-    api_abuse_events: events.filter((e: any) => e.category === 'api_abuse').length,
-    backup_events: events.filter((e: any) => e.category === 'backup').length,
-    system_events: events.filter((e: any) => e.category === 'system').length,
-    unique_ips: new Set(events.map((e: any) => e.ip_address).filter(Boolean)).size,
-    failed_logins: events.filter((e: any) => e.event_type === 'failed_login').length,
-    blocked_ips: events.filter((e: any) => e.event_type === 'ip_blocked').length
+    critical_events: events.filter((e) => e.level === 'critical').length,
+    warning_events: events.filter((e) => e.level === 'warning').length,
+    info_events: events.filter((e) => e.level === 'info').length,
+    auth_events: events.filter((e) => e.category === 'auth').length,
+    access_events: events.filter((e) => e.category === 'access').length,
+    injection_events: events.filter((e) => e.category === 'injection').length,
+    rate_limit_events: events.filter((e) => e.category === 'rate_limit').length,
+    api_abuse_events: events.filter((e) => e.category === 'api_abuse').length,
+    backup_events: events.filter((e) => e.category === 'backup').length,
+    system_events: events.filter((e) => e.category === 'system').length,
+    unique_ips: new Set(events.map((e) => e.ip_address).filter(Boolean)).size,
+    failed_logins: events.filter((e) => e.event_type === 'failed_login').length,
+    blocked_ips: events.filter((e) => e.event_type === 'ip_blocked').length
   }
 
   // Inserir ou atualizar má©tricas do dia
   await supabase
     .from('security_metrics')
-    .upsert(metrics: any, { onConflict: 'date' })
+    .upsert(metrics, { onConflict: 'date' })
 }
 
 // Helpers
-function groupByIP(events: any[]) {
-  return events.reduce((groups: any, event: any) => {
+function groupByIP(events[]) {
+  return events.reduce((groups, event) => {
     const ip = event.ip_address || 'unknown'
     if (!groups[ip]) groups[ip] = []
     groups[ip].push(event)
@@ -272,8 +272,8 @@ function groupByIP(events: any[]) {
   }, {} as Record<string, any[]>)
 }
 
-function groupByEndpoint(events: any[]) {
-  return events.reduce((groups: any, event: any) => {
+function groupByEndpoint(events[]) {
+  return events.reduce((groups, event) => {
     const endpoint = event.endpoint || 'unknown'
     if (!groups[endpoint]) groups[endpoint] = []
     groups[endpoint].push(event)

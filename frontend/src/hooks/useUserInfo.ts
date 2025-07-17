@@ -10,7 +10,7 @@ interface UserInfo {
   role: string
   avatar?: string
   bar_id: number
-  modulos_permitidos: any
+  modulos_permitidos
 }
 
 export function useUserInfo() {

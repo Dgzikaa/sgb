@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -146,7 +146,7 @@ export default function ContaAzulExcelPage() {
                 <Input
                   type="email"
                   value={email}
-                  onChange={(e: any) => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="seu@email.com"
                   required
                   className="text-base"
@@ -158,7 +158,7 @@ export default function ContaAzulExcelPage() {
                 <Input
                   type="password"
                   value={senha}
-                  onChange={(e: any) => setSenha(e.target.value)}
+                  onChange={(e) => setSenha(e.target.value)}
                   placeholder="Sua senha"
                   required
                   className="text-base"
@@ -168,7 +168,7 @@ export default function ContaAzulExcelPage() {
               <div className="flex items-center space-x-2">
                 <Checkbox
                   checked={headless}
-                  onCheckedChange={(checked: any) => setHeadless(checked as boolean)}
+                  onCheckedChange={(checked) => setHeadless(checked as boolean)}
                 />
                 <label className="text-sm">
                   🕶️ Modo invis�vel (sem abrir janela do navegador)
@@ -222,7 +222,7 @@ export default function ContaAzulExcelPage() {
                 </div>
               ) : (
                 <div className="space-y-1">
-                  {logs.map((log: any, index: any) => (
+                  {logs.map((log, index) => (
                     <div key={index} className="flex gap-2">
                       <span className="text-gray-500 text-xs">{log.timestamp}</span>
                       <span className={getLogColor(log.type)}>{log.message}</span>
@@ -274,7 +274,7 @@ export default function ContaAzulExcelPage() {
                   <div>
                     <h4 className="font-medium mb-2">📊 Colunas identificadas:</h4>
                     <div className="flex flex-wrap gap-2">
-                      {result.dados.colunas.map((coluna: any, index: any) => (
+                      {result.dados.colunas.map((coluna, index) => (
                         <Badge key={index} variant="secondary">
                           {coluna}
                         </Badge>
@@ -288,7 +288,7 @@ export default function ContaAzulExcelPage() {
                     <h4 className="font-medium mb-2">📋 Primeiros registros:</h4>
                     <div className="bg-gray-50 p-4 rounded-lg overflow-x-auto">
                       <pre className="text-xs">
-                        {JSON.stringify(result.dados.primeiros_registros, null: any, 2)}
+                        {JSON.stringify(result.dados.primeiros_registros, null, 2)}
                       </pre>
                     </div>
                   </div>

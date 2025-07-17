@@ -28,13 +28,13 @@ function euclideanDistance(desc1: number[], desc2: number[]): number {
 }
 
 // Funá§á£o para encontrar a melhor correspondáªncia
-function findBestMatch(inputDescriptor: number[], storedDescriptors: any[]) {
+function findBestMatch(inputDescriptor: number[], storedDescriptors[]) {
   let bestMatch = null
   let bestDistance = Infinity
   
   for (const stored of storedDescriptors) {
     try {
-      const distance = euclideanDistance(inputDescriptor: any, stored.descriptor)
+      const distance = euclideanDistance(inputDescriptor, stored.descriptor)
       
       console.log(`ðŸ“ Distá¢ncia para ${stored.user_nome}: ${distance.toFixed(4)} (threshold: ${stored.confidence_threshold})`)
       
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     console.log(`ðŸ” Comparando com ${faceDescriptors.length} faces registradas`)
 
     // Preparar dados para comparaá§á£o
-    const storedDescriptors = faceDescriptors.map((face: any) => ({
+    const storedDescriptors = faceDescriptors.map((face) => ({
       user_id: face.user_id,
       user_nome: face.usuarios_bar.nome,
       user_email: face.usuarios_bar.email,
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
     }))
 
     // Encontrar a melhor correspondáªncia
-    const bestMatch = findBestMatch(descriptor: any, storedDescriptors)
+    const bestMatch = findBestMatch(descriptor, storedDescriptors)
 
     if (!bestMatch) {
       console.log('Œ Nenhuma correspondáªncia encontrada')
@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
         bar_id,
         role,
         modulos_permitidos,
-        bars!inner(id: any, nome, ativo)
+        bars!inner(id, nome, ativo)
       `)
       .eq('user_id', bestMatch.user_id)
       .eq('ativo', true)
@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
       console.error('Œ Erro ao buscar bares do usuá¡rio:', barsError)
     }
 
-    const availableBars = allUserBars?.map((bar: any) => ({
+    const availableBars = allUserBars?.map((bar) => ({
       bar_id: bar.bar_id,
       id: bar.bar_id,
       nome: bar.bars.nome,
@@ -226,7 +226,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(responseData)
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ðŸ”¥ Erro fatal na API de autenticaá§á£o facial:', error)
     
     return NextResponse.json(

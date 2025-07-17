@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
 
       // Processar envio imediato se necessá¡rio
       if (data.canais.includes('browser')) {
-        await processarEnvioBrowser(supabase: any, notificacao)
+        await processarEnvioBrowser(supabase, notificacao)
       }
 
       console.log(`ðŸ“¢ Notificaá§á£o criada: ${data.modulo}/${data.categoria} - ${data.titulo}`)
@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
       })
     }
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro na API de criar notificaá§á£o:', error)
     
     if (error instanceof z.ZodError) {
@@ -209,7 +209,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
-    const filtros: any = {}
+    const filtros = {}
     
     // Converter pará¢metros para tipos corretos
     for (const [key, value] of searchParams.entries()) {
@@ -290,7 +290,7 @@ export async function GET(request: NextRequest) {
     const offset = (data.page - 1) * data.limit
     const { data: notificacoes, error } = await query
       .order('criada_em', { ascending: false })
-      .range(offset: any, offset + data.limit - 1)
+      .range(offset, offset + data.limit - 1)
 
     if (error) {
       console.error('Erro ao buscar notificaá§áµes:', error)
@@ -300,7 +300,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Transformar dados para formato esperado pelo frontend
-    const notificacoesTransformadas = (notificacoes || []).map((notificacao: any) => {
+    const notificacoesTransformadas = (notificacoes || []).map((notificacao) => {
       const dados = notificacao.dados || {}
       
       return {
@@ -325,7 +325,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Calcular estatá­sticas rá¡pidas
-    const estatisticas = await calcularEstatisticasRapidas(supabase: any, user.bar_id.toString(), user.user_id, user.role)
+    const estatisticas = await calcularEstatisticasRapidas(supabase, user.bar_id.toString(), user.user_id, user.role)
 
     return NextResponse.json({
       success: true,
@@ -341,7 +341,7 @@ export async function GET(request: NextRequest) {
       }
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro na API de listar notificaá§áµes:', error)
     
     if (error instanceof z.ZodError) {
@@ -372,7 +372,7 @@ function validarPermissaoModulo(role: string, modulo: string): boolean {
   return permissoes[role]?.includes(modulo) || false
 }
 
-async function processarEnvioBrowser(supabase: any, notificacao: any) {
+async function processarEnvioBrowser(supabase, notificacao) {
   try {
     // Marcar como enviada (browser notifications sá£o "instantá¢neas")
     await supabase
@@ -397,7 +397,7 @@ async function processarEnvioBrowser(supabase: any, notificacao: any) {
 
     console.log(`ðŸ“± Notificaá§á£o enviada via browser: ${notificacao.id}`)
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro ao processar envio browser:', error)
     
     // Log do erro
@@ -413,11 +413,11 @@ async function processarEnvioBrowser(supabase: any, notificacao: any) {
   }
 }
 
-async function calcularEstatisticasRapidas(supabase: any, barId: string, userId: string, userRole: string) {
+async function calcularEstatisticasRapidas(supabase, barId: string, userId: string, userRole: string) {
   // Estatá­sticas para o usuá¡rio logado
   const { data: minhasStats } = await supabase
     .from('notificacoes')
-    .select('status, tipo: any, dados')
+    .select('status, tipo, dados')
     .eq('bar_id', barId)
     .or(`usuario_id.eq.${userId},dados->role_alvo.eq.${userRole}`)
     .gte('criada_em', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()) // áºltimos 7 dias
@@ -432,18 +432,18 @@ async function calcularEstatisticasRapidas(supabase: any, barId: string, userId:
     }
   }
 
-  const naoLidas = minhasStats.filter((n: any) => ['pendente', 'enviada'].includes(n.status)).length
-  const altaPrioridade = minhasStats.filter((n: any) => {
+  const naoLidas = minhasStats.filter((n) => ['pendente', 'enviada'].includes(n.status)).length
+  const altaPrioridade = minhasStats.filter((n) => {
     const prioridade = n.dados?.prioridade || 'media'
     return ['alta', 'critica'].includes(prioridade)
   }).length
 
-  const porTipo = minhasStats.reduce((acc: any, n: any) => {
+  const porTipo = minhasStats.reduce((acc, n) => {
     acc[n.tipo] = (acc[n.tipo] || 0) + 1
     return acc
   }, {})
 
-  const porModulo = minhasStats.reduce((acc: any, n: any) => {
+  const porModulo = minhasStats.reduce((acc, n) => {
     const modulo = n.dados?.modulo || 'sistema'
     acc[modulo] = (acc[modulo] || 0) + 1
     return acc

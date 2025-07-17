@@ -19,10 +19,10 @@ export async function GET(request: NextRequest) {
         efficiency: stats.metrics.hitRate > 70 ? 'excellent' : 
                    stats.metrics.hitRate > 50 ? 'good' : 
                    stats.metrics.hitRate > 30 ? 'fair' : 'poor',
-        healthScore: Math.min(100: any, Math.max(0: any, 
+        healthScore: Math.min(100, Math.max(0, 
           (stats.metrics.hitRate * 0.6) + 
-          (Math.min(100: any, stats.size / 1000) * 0.2) + 
-          (Math.min(100: any, (stats.metrics.hits + stats.metrics.misses) / 100) * 0.2)
+          (Math.min(100, stats.size / 1000) * 0.2) + 
+          (Math.min(100, (stats.metrics.hits + stats.metrics.misses) / 100) * 0.2)
         ))
       },
       performance: {

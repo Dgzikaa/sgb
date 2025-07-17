@@ -60,7 +60,7 @@ export function ChecklistSkeleton() {
         
         {/* Lista de checklists */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_: any, i: any) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="card-dark p-6">
               <div className="animate-pulse space-y-4">
                 <div className="flex items-center justify-between">
@@ -162,7 +162,7 @@ export function OperacoesSkeleton() {
         
         {/* Cards de operaá§áµes */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {Array.from({ length: 8 }).map((_: any, i: any) => (
+          {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="card-dark p-6">
               <div className="animate-pulse space-y-4">
                 <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
@@ -295,7 +295,7 @@ export function FuncionarioSkeleton() {
         
         {/* Cards de checklist mobile */}
         <div className="space-y-4">
-          {Array.from({ length: 5 }).map((_: any, i: any) => (
+          {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="card-dark p-6">
               <div className="animate-pulse space-y-4">
                 <div className="flex items-center justify-between">

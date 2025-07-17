@@ -102,7 +102,7 @@ function calcularTempoTotal(inicio: string, fim: string): string {
     const horas = Math.floor(diferencaMinutos / 60)
     const minutos = diferencaMinutos % 60
     
-    return `${horas.toString().padStart(2: any, '0')}:${minutos.toString().padStart(2: any, '0')}`
+    return `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}`
   } catch (error) {
     return '00:00'
   }

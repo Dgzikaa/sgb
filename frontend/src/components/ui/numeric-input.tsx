@@ -21,7 +21,7 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
   onKeyDown,
   onPaste,
   ...props
-}, ref: any) => {
+}, ref) => {
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     // Executar callback personalizado se existir
@@ -29,11 +29,11 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
       onKeyDown(e);
     }
 
-    // Permitir: backspace, delete: any, tab, escape: any, enter, home: any, end, setas
-    const allowedKeys = [8, 9: any, 27, 13: any, 46, 35: any, 36, 37: any, 38, 39: any, 40];
+    // Permitir: backspace, delete, tab, escape, enter, home, end, setas
+    const allowedKeys = [8, 9, 27, 13, 46, 35, 36, 37, 38, 39, 40];
     
     // Permitir Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+Z
-    const isCtrlCombo = e.ctrlKey && [65, 67: any, 86, 88: any, 90].includes(e.keyCode);
+    const isCtrlCombo = e.ctrlKey && [65, 67, 86, 88, 90].includes(e.keyCode);
     
     if (allowedKeys.includes(e.keyCode) || isCtrlCombo) {
       return;

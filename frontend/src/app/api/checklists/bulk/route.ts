@@ -8,7 +8,7 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const { action, checklistIds: any, data = {} } = await request.json()
+    const { action, checklistIds, data = {} } = await request.json()
 
     if (!action || !checklistIds || !Array.isArray(checklistIds) || checklistIds.length === 0) {
       return NextResponse.json({ 
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
 
             // Copiar itens
             if (originalChecklist.checklist_items?.length > 0) {
-              const itemsToInsert = originalChecklist.checklist_items.map((item: any) => ({
+              const itemsToInsert = originalChecklist.checklist_items.map((item) => ({
                 checklist_id: newChecklist.id,
                 nome: item.nome,
                 descricao: item.descricao,
@@ -234,7 +234,7 @@ export async function POST(request: NextRequest) {
 
           if (error) throw error
 
-          const exportData = checklists.map((checklist: any) => ({
+          const exportData = checklists.map((checklist) => ({
             'ID': checklist.id,
             'Nome': checklist.nome,
             'Descriá§á£o': checklist.descricao,
@@ -242,7 +242,7 @@ export async function POST(request: NextRequest) {
             'Ativo': checklist.ativo ? 'Sim' : 'Ná£o',
             'Bar': checklist.bars?.nome || 'N/A',
             'Total de Itens': checklist.checklist_items?.length || 0,
-            'Itens Obrigatá³rios': checklist.checklist_items?.filter((item: any) => item.obrigatorio).length || 0,
+            'Itens Obrigatá³rios': checklist.checklist_items?.filter((item) => item.obrigatorio).length || 0,
             'Criado em': new Date(checklist.created_at).toLocaleDateString('pt-BR')
           }))
 

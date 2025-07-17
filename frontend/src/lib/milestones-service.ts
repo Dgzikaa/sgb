@@ -175,7 +175,7 @@ export class MilestonesService {
   // ========================================
   // üîç VERIFICA·á·ÉO DE MARCOS
   // ========================================
-  async checkMilestones(metrics: any): Promise<Milestone[]> {
+  async checkMilestones(metrics): Promise<Milestone[]> {
     const newAchievements: Milestone[] = []
 
     try {
@@ -185,7 +185,7 @@ export class MilestonesService {
           continue
         }
 
-        const currentValue = this.extractCurrentValue(milestone: any, metrics)
+        const currentValue = this.extractCurrentValue(milestone, metrics)
         
         if (currentValue !== null && currentValue >= milestone.threshold) {
           // Marco alcan·ßado!
@@ -212,7 +212,7 @@ export class MilestonesService {
   // ========================================
   // üìä EXTRA·á·ÉO DE VALORES DAS M·âTRICAS  
   // ========================================
-  private extractCurrentValue(milestone: Milestone, metrics: any): number | null {
+  private extractCurrentValue(milestone: Milestone, metrics): number | null {
     try {
       switch (milestone.type) {
         case 'followers':
@@ -335,10 +335,10 @@ export class MilestonesService {
   // Verificar progresso at·© pr·≥ximo marco
   getProgressToNextMilestone(type: string, platform: string, currentValue: number) {
     const relevantMilestones = DEFAULT_MILESTONES
-      .filter((m: any) => m.type === type && m.platform === platform)
-      .filter((m: any) => !this.achieved_milestones.has(m.id))
-      .filter((m: any) => m.threshold > currentValue)
-      .sort((a: any, b: any) => a.threshold - b.threshold)
+      .filter((m) => m.type === type && m.platform === platform)
+      .filter((m) => !this.achieved_milestones.has(m.id))
+      .filter((m) => m.threshold > currentValue)
+      .sort((a, b) => a.threshold - b.threshold)
 
     if (relevantMilestones.length === 0) return null
 
@@ -348,7 +348,7 @@ export class MilestonesService {
 
     return {
       milestone: nextMilestone,
-      progress: Math.min(progress: any, 100),
+      progress: Math.min(progress, 100),
       remaining,
       percentage: `${progress.toFixed(1)}%`
     }
@@ -356,7 +356,7 @@ export class MilestonesService {
 
   // Simular marco para testes
   async simulateMilestone(milestoneId: string) {
-    const milestone = DEFAULT_MILESTONES.find((m: any) => m.id === milestoneId)
+    const milestone = DEFAULT_MILESTONES.find((m) => m.id === milestoneId)
     if (!milestone) return false
 
     const simulatedMilestone = {

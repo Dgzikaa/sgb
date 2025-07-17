@@ -3,15 +3,15 @@
 import { useState } from 'react'
 import { useBar } from '@/contexts/BarContext'
 import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select'
-import { ChevronDownIcon, MapPinIcon: any, CheckCircle2Icon } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ChevronDownIcon, MapPinIcon, CheckCircle2Icon } from 'lucide-react'
 
 interface BarSelectorProps {
   isCollapsed?: boolean
 }
 
 export default function BarSelector({ isCollapsed = false }: BarSelectorProps) {
-  const { selectedBar, availableBars: any, setSelectedBar, isLoading } = useBar()
+  const { selectedBar, availableBars, setSelectedBar, isLoading } = useBar()
   const [isOpen, setIsOpen] = useState(false)
 
   // Loading state
@@ -57,8 +57,8 @@ export default function BarSelector({ isCollapsed = false }: BarSelectorProps) {
         <div className="relative">
           <Select
             value={selectedBar?.id?.toString() || ''}
-            onValueChange={(value: any) => {
-              const bar = availableBars.find((b: any) => b.id.toString() === value)
+            onValueChange={(value) => {
+              const bar = availableBars.find((b) => b.id.toString() === value)
               if (bar) setSelectedBar(bar)
             }}
           >
@@ -84,7 +84,7 @@ export default function BarSelector({ isCollapsed = false }: BarSelectorProps) {
               </div>
             </SelectTrigger>
             <SelectContent className="w-full bg-slate-800 border-slate-700 max-h-60 overflow-y-auto">
-              {availableBars.map((bar: any) => (
+              {availableBars.map((bar) => (
                 <SelectItem 
                   key={bar.id} 
                   value={bar.id.toString()}

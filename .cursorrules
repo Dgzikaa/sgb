@@ -611,3 +611,32 @@ const SUPABASE_PROJECT_ID = "uqtgsvujwcbymjmvkjhy"
   - O usuário pedir explicitamente para pausar ou aguardar.
 - O assistente deve sempre priorizar a conclusão autônoma das tarefas, seguindo as regras e padrões do projeto.
 - Ao finalizar qualquer tarefa, o assistente deve checar e listar o checklist de tarefas pendentes, e já iniciar a próxima tarefa automaticamente. 
+
+---
+
+# 🤖 REGRAS DO ASSISTENTE E PREVENÇÃO DE ERROS DE BUILD
+
+## 1. Leitura obrigatória das regras do projeto
+- Sempre que iniciar um novo chat ou sessão, o assistente deve ler e considerar todas as regras do projeto presentes neste arquivo antes de sugerir, editar ou criar código.
+- Todas as decisões do assistente devem estar alinhadas com as convenções e padrões definidos aqui.
+
+## 2. Prevenção de erros de TypeScript/JSX/Build
+- Antes de sugerir, editar ou criar qualquer arquivo `.ts`, `.tsx` ou `.js`, o assistente deve:
+  - Validar a sintaxe sugerida (ex: inicialização de variáveis, fechamento de blocos, uso correto de JSX).
+  - Evitar caracteres especiais inesperados (ex: acentos em nomes de variáveis, caracteres invisíveis, etc).
+  - Garantir que todas as declarações `const` sejam inicializadas.
+  - Garantir que todas as linhas terminem com ponto e vírgula quando necessário.
+  - Garantir que não haja nomes de variáveis com caracteres inválidos (ex: `inicioPeríodo` com acento).
+  - Garantir que não haja código parcialmente comentado ou blocos abertos.
+  - Validar que todo JSX esteja dentro de uma função/componente válido.
+  - Validar que não haja imports ou exports quebrados.
+- O assistente nunca deve sugerir código que possa causar erro de build no Vercel.
+
+## 3. Checklist obrigatório antes de finalizar qualquer edição de código
+- [ ] O código está de acordo com as regras do projeto?
+- [ ] O código está livre de erros de sintaxe/TypeScript/JSX?
+- [ ] Todas as variáveis `const` estão inicializadas?
+- [ ] Não há caracteres especiais inesperados?
+- [ ] O arquivo está pronto para build/produção?
+
+--- 

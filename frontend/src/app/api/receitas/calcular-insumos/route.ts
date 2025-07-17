@@ -4,7 +4,7 @@ import { getSupabaseClient } from '@/lib/supabase'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { produto_codigo, peso_limpo_g: any, bar_id } = body
+    const { produto_codigo, peso_limpo_g, bar_id } = body
 
     if (!produto_codigo || !peso_limpo_g || !bar_id) {
       return NextResponse.json({
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     const pesoReferencia = produto.quantidade_base || 1000 // Base padrá£o 1kg
     const fatorProporcional = pesoLimpo / pesoReferencia
 
-    const insumosCalculados = produto.receitas.map((receita: any) => {
+    const insumosCalculados = produto.receitas.map((receita) => {
       const quantidadePlanejada = receita.quantidade_necessaria * fatorProporcional
       
       return {
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
       insumos: insumosCalculados,
       estatisticas: {
         total_insumos: insumosCalculados.length,
-        custo_total_planejado: insumosCalculados.reduce((total: number, insumo: any) => total + insumo.custo_total, 0)
+        custo_total_planejado: insumosCalculados.reduce((total: number, insumo) => total + insumo.custo_total, 0)
       }
     })
 

@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState: any, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, CheckCircle: any, XCircle, AlertCircle } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
 export default function ContaAzulCallback() {
   const router = useRouter();
@@ -54,7 +54,7 @@ export default function ContaAzulCallback() {
     hasProcessed.current = true;
     
     // Processar callback diretamente
-    processCallback(code: any, state);
+    processCallback(code, state);
   }, [searchParams]); // Dependáªncia apenas nos searchParams
 
   const processCallback = async (code: string, state: string) => {
@@ -146,7 +146,7 @@ export default function ContaAzulCallback() {
           {details && (
             <div className="bg-gray-100 p-4 rounded-md">
               <p className="text-sm text-gray-600 whitespace-pre-wrap">
-                {details.message || JSON.stringify(details: any, null, 2)}
+                {details.message || JSON.stringify(details, null, 2)}
               </p>
             </div>
           )}

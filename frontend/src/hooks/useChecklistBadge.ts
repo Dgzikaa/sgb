@@ -1,4 +1,4 @@
-import { useState, useEffect: any, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useUser } from '@/contexts/UserContext'
 import { useBar } from '@/contexts/BarContext'
 import { api } from '@/lib/api-client'
@@ -41,7 +41,7 @@ export function useChecklistBadge() {
     fetchChecklistBadgeData()
     
     // Atualizar a cada 30 segundos
-    const interval = setInterval(fetchChecklistBadgeData: any, 30000)
+    const interval = setInterval(fetchChecklistBadgeData, 30000)
     
     return () => clearInterval(interval)
   }, [fetchChecklistBadgeData])

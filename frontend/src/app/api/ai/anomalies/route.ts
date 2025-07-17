@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
     const rawParams = Object.fromEntries(url.searchParams.entries());
     
     // Converter tipos
-    const processedParams: any = { ...rawParams };
+    const processedParams = { ...rawParams };
     if (processedParams.page) processedParams.page = parseInt(processedParams.page);
     if (processedParams.limit) processedParams.limit = parseInt(processedParams.limit);
     if (processedParams.confianca_minima) processedParams.confianca_minima = parseFloat(processedParams.confianca_minima);
@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
 
     // Paginaá§á£o
     const offset = (params.page - 1) * params.limit;
-    query = query.range(offset: any, offset + params.limit - 1);
+    query = query.range(offset, offset + params.limit - 1);
 
     const { data: anomalies, error } = await query;
 
@@ -142,36 +142,36 @@ export async function GET(request: NextRequest) {
     // Buscar estatá­sticas gerais
     const { data: stats } = await supabase
       .from('ai_anomalies')
-      .select('severidade, status: any, tipo_anomalia, ainda_ativa: any, confianca_deteccao')
+      .select('severidade, status, tipo_anomalia, ainda_ativa, confianca_deteccao')
       .eq('bar_id', bar_id);
 
     const estatisticas = {
       total: stats?.length || 0,
-      ativas: stats?.filter((s: any) => s.ainda_ativa).length || 0,
-      resolvidas: stats?.filter((s: any) => s.status === 'resolvida').length || 0,
-      falsos_positivos: stats?.filter((s: any) => s.falso_positivo).length || 0,
+      ativas: stats?.filter((s) => s.ainda_ativa).length || 0,
+      resolvidas: stats?.filter((s) => s.status === 'resolvida').length || 0,
+      falsos_positivos: stats?.filter((s) => s.falso_positivo).length || 0,
       por_severidade: {
-        critica: stats?.filter((s: any) => s.severidade === 'critica').length || 0,
-        alta: stats?.filter((s: any) => s.severidade === 'alta').length || 0,
-        media: stats?.filter((s: any) => s.severidade === 'media').length || 0,
-        baixa: stats?.filter((s: any) => s.severidade === 'baixa').length || 0
+        critica: stats?.filter((s) => s.severidade === 'critica').length || 0,
+        alta: stats?.filter((s) => s.severidade === 'alta').length || 0,
+        media: stats?.filter((s) => s.severidade === 'media').length || 0,
+        baixa: stats?.filter((s) => s.severidade === 'baixa').length || 0
       },
-      por_tipo: stats?.reduce((acc: any, s: any) => {
+      por_tipo: stats?.reduce((acc, s) => {
         acc[s.tipo_anomalia] = (acc[s.tipo_anomalia] || 0) + 1;
         return acc;
       }, {} as Record<string, number>) || {},
-      por_status: stats?.reduce((acc: any, s: any) => {
+      por_status: stats?.reduce((acc, s) => {
         acc[s.status] = (acc[s.status] || 0) + 1;
         return acc;
       }, {} as Record<string, number>) || {},
       confianca_media: stats?.length ? 
-        stats.reduce((sum: any, s: any) => sum + s.confianca_deteccao, 0) / stats.length : 0
+        stats.reduce((sum, s) => sum + s.confianca_deteccao, 0) / stats.length : 0
     };
 
     // Buscar anomalias crá­ticas ativas
     const { data: criticas } = await supabase
       .from('ai_anomalies')
-      .select('id, titulo: any, severidade, data_inicio')
+      .select('id, titulo, severidade, data_inicio')
       .eq('bar_id', bar_id)
       .eq('severidade', 'critica')
       .eq('ainda_ativa', true)
@@ -250,7 +250,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Usuá¡rio ná£o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao: any, usuario_id } = JSON.parse(userData);
+    const { bar_id, permissao, usuario_id } = JSON.parse(userData);
 
     // Verificar permissáµes
     if (!['financeiro', 'admin'].includes(permissao)) {
@@ -272,7 +272,7 @@ export async function PUT(request: NextRequest) {
     // Verificar se anomalia existe e pertence ao bar
     const { data: existing, error: fetchError } = await supabase
       .from('ai_anomalies')
-      .select('id, status: any, ainda_ativa')
+      .select('id, status, ainda_ativa')
       .eq('id', id)
       .eq('bar_id', bar_id)
       .single();
@@ -282,7 +282,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Preparar dados para atualizaá§á£o
-    const updatePayload: any = { ...validatedData };
+    const updatePayload = { ...validatedData };
 
     // Lá³gica de status automá¡tico
     if (validatedData.status === 'investigando' && existing.status === 'detectada') {
@@ -367,7 +367,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Usuá¡rio ná£o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao: any, usuario_id } = JSON.parse(userData);
+    const { bar_id, permissao, usuario_id } = JSON.parse(userData);
 
     // Verificar permissáµes
     if (!['financeiro', 'admin'].includes(permissao)) {
@@ -383,7 +383,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    let updateData: any = {};
+    let updateData = {};
     let successMessage = '';
 
     switch (action) {
@@ -429,7 +429,7 @@ export async function POST(request: NextRequest) {
       .update(updateData)
       .in('id', ids)
       .eq('bar_id', bar_id)
-      .select('id, titulo: any, status');
+      .select('id, titulo, status');
 
     if (error) {
       console.error('Erro ao atualizar anomalias:', error);

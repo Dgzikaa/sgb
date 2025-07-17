@@ -115,7 +115,7 @@ async function handleNewMessage(event: EvolutionWebhookEvent) {
 
     // Verificar se á© uma resposta a checklist
     if (phoneNumber && messageText) {
-      await checkChecklistResponse(phoneNumber: any, messageText)
+      await checkChecklistResponse(phoneNumber, messageText)
     }
 
   } catch (error) {
@@ -161,13 +161,13 @@ async function checkChecklistResponse(phoneNumber: string, message: string) {
           console.log(`œ… Checklist especá­fico concluá­do via cá³digo ${codigo}: ${agendamento.checklist_schedules?.titulo}`)
           
           // Enviar confirmaá§á£o
-          await sendConfirmationMessage(phoneNumber: any, agendamento.checklist_schedules?.titulo || 'Checklist', codigo)
+          await sendConfirmationMessage(phoneNumber, agendamento.checklist_schedules?.titulo || 'Checklist', codigo)
           return
         }
       }
       
       // Cá³digo ná£o encontrado
-      await sendErrorMessage(phoneNumber: any, codigo)
+      await sendErrorMessage(phoneNumber, codigo)
       return
     }
 
@@ -188,7 +188,7 @@ async function checkChecklistResponse(phoneNumber: string, message: string) {
         .eq('status', 'pendente')
         .gte('data_limite', new Date().toISOString())
 
-      const meusAgendamentos = agendamentos?.filter((ag: any) => 
+      const meusAgendamentos = agendamentos?.filter((ag) => 
         ag.checklist_schedules?.responsaveis_whatsapp?.includes(phoneNumber)
       ) || []
 
@@ -204,11 +204,11 @@ async function checkChecklistResponse(phoneNumber: string, message: string) {
           .eq('id', agendamento.id)
 
         console.log(`œ… Checklist áºnico concluá­do: ${agendamento.checklist_schedules?.titulo}`)
-        await sendConfirmationMessage(phoneNumber: any, agendamento.checklist_schedules?.titulo || 'Checklist')
+        await sendConfirmationMessage(phoneNumber, agendamento.checklist_schedules?.titulo || 'Checklist')
         
       } else if (meusAgendamentos.length > 1) {
         // š ï¸ MášLTIPLOS CHECKLISTS - SOLICITAR Cá“DIGO
-        await sendMultipleChecklistsMessage(phoneNumber: any, meusAgendamentos)
+        await sendMultipleChecklistsMessage(phoneNumber, meusAgendamentos)
       }
     }
 
@@ -228,7 +228,7 @@ Obrigado! ðŸ‘
 
 _Sistema SGB_`
 
-  await sendWhatsAppMessage(phoneNumber: any, message)
+  await sendWhatsAppMessage(phoneNumber, message)
 }
 
 async function sendErrorMessage(phoneNumber: string, codigo: string) {
@@ -243,11 +243,11 @@ Verifique se:
 
 _Sistema SGB_`
 
-  await sendWhatsAppMessage(phoneNumber: any, message)
+  await sendWhatsAppMessage(phoneNumber, message)
 }
 
-async function sendMultipleChecklistsMessage(phoneNumber: string, agendamentos: any[]) {
-  const checklistsList = agendamentos.map((ag: any) => {
+async function sendMultipleChecklistsMessage(phoneNumber: string, agendamentos[]) {
+  const checklistsList = agendamentos.map((ag) => {
     const codigo = ag.id.slice(-8).toUpperCase()
     const prazo = new Date(ag.data_limite).toLocaleDateString('pt-BR', { 
       day: '2-digit', 
@@ -269,7 +269,7 @@ Exemplo: "*ok A1B2C3D4*"
 
 _Sistema SGB_`
 
-  await sendWhatsAppMessage(phoneNumber: any, message)
+  await sendWhatsAppMessage(phoneNumber, message)
 }
 
 async function sendWhatsAppMessage(phoneNumber: string, text: string) {
@@ -296,7 +296,7 @@ async function sendWhatsAppMessage(phoneNumber: string, text: string) {
 }
 
 async function handleMessageUpdate(event: EvolutionWebhookEvent) {
-  // Atualizar status de mensagem (lida: any, entregue, etc.)
+  // Atualizar status de mensagem (lida, entregue, etc.)
   console.log('ðŸ“± Status de mensagem atualizado:', event.data)
 }
 

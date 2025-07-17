@@ -1,18 +1,18 @@
-/** @type {import('next').NextConfig} */
+﻿/** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', 'recharts'],
   },
   
-  // Otimiza��es de performance
+  // Otimizaá§áµes de performance
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   
-  // Configura��o de bundling otimizada
+  // Configuraá§á£o de bundling otimizada
   swcMinify: true,
   
-  // Configura��o de imagens
+  // Configuraá§á£o de imagens
   images: {
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 60,
@@ -20,7 +20,7 @@ const nextConfig = {
   
   // Webpack customizado
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Otimiza��es de produ��o
+    // Otimizaá§áµes de produá§á£o
     if (!dev && !isServer) {
       config.optimization.splitChunks = {
         chunks: 'all',

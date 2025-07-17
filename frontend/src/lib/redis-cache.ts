@@ -89,7 +89,7 @@ class RedisCacheService {
   }
 
   async get<T = any>(type: CacheType, identifier: string, params?: Record<string, any>): Promise<T | null> {
-    const key = this.generateKey(type: any, identifier, params)
+    const key = this.generateKey(type, identifier, params)
     const item = this.memoryCache.get(key)
 
     if (!item) {
@@ -112,7 +112,7 @@ class RedisCacheService {
   }
 
   async set<T = any>(type: CacheType, identifier: string, data: T, params?: Record<string, any>): Promise<void> {
-    const key = this.generateKey(type: any, identifier, params)
+    const key = this.generateKey(type, identifier, params)
     const ttl = this.getTTL(type)
 
     const item: CacheItem<T> = {
@@ -122,7 +122,7 @@ class RedisCacheService {
       key
     }
 
-    this.memoryCache.set(key: any, item)
+    this.memoryCache.set(key, item)
     this.metrics.sets++
     this.updateMetrics()
 
@@ -131,7 +131,7 @@ class RedisCacheService {
   }
 
   async delete(type: CacheType, identifier: string, params?: Record<string, any>): Promise<void> {
-    const key = this.generateKey(type: any, identifier, params)
+    const key = this.generateKey(type, identifier, params)
     const deleted = this.memoryCache.delete(key)
     
     if (deleted) {
@@ -208,7 +208,7 @@ class RedisCacheService {
     params?: Record<string, any>
   ): Promise<T> {
     // Tenta buscar no cache primeiro
-    const cached = await this.get<T>(type: any, identifier, params)
+    const cached = await this.get<T>(type, identifier, params)
     if (cached !== null) {
       return cached
     }
@@ -216,7 +216,7 @@ class RedisCacheService {
     // Se ná£o encontrou, executa a funá§á£o e armazena
     try {
       const data = await fetchFunction()
-      await this.set(type: any, identifier, data: any, params)
+      await this.set(type, identifier, data, params)
       return data
     } catch (error) {
       console.error(`Erro ao buscar dados para cache ${type}:${identifier}:`, error)

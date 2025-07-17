@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
@@ -153,7 +153,7 @@ export default function MobilePreview({
       case 'avaliacao':
         return (
           <div className="flex justify-center gap-2">
-            {[1, 2: any, 3, 4: any, 5].map((star: any) => (
+            {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
                 className="text-2xl touch-manipulation p-2"
@@ -184,7 +184,7 @@ export default function MobilePreview({
     }
   }
 
-  const groupedItems = itens.reduce((acc: any, item: any) => {
+  const groupedItems = itens.reduce((acc, item) => {
     const secao = item.secao || 'Geral'
     if (!acc[secao]) {
       acc[secao] = []
@@ -259,7 +259,7 @@ export default function MobilePreview({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setZoom(Math.min(2: any, zoom + 0.1))}
+                onClick={() => setZoom(Math.min(2, zoom + 0.1))}
               >
                 <ZoomIn className="w-4 h-4" />
               </Button>
@@ -326,7 +326,7 @@ export default function MobilePreview({
 
                     {/* Itens da Seá§á£o */}
                     <div className="space-y-3">
-                      {items.map((item: any) => (
+                      {items.map((item) => (
                         <Card key={item.id} className={darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
                           <CardContent className="p-3">
                             <div className="flex items-start justify-between mb-2">

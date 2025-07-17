@@ -2,14 +2,14 @@ import { getSupabaseClient } from './supabase';
 
 const EDGE_FUNCTION_URL = 'https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1';
 
-export async function callContaAzulEdgeFunction(action: string, params: any = {}) {
+export async function callContaAzulEdgeFunction(action: string, params = {}) {
   const url = `${EDGE_FUNCTION_URL}/contaazul-service/${action}`;
   
   // Para GET requests, adicionar pará¢metros na URL
   if (params.barId && (action === 'status' || action === 'authorize' || action === 'refresh')) {
     const urlWithParams = new URL(url);
     Object.keys(params).forEach(key => {
-      urlWithParams.searchParams.append(key: any, params[key]);
+      urlWithParams.searchParams.append(key, params[key]);
     });
     
     const response = await fetch(urlWithParams.toString(), {
@@ -28,7 +28,7 @@ export async function callContaAzulEdgeFunction(action: string, params: any = {}
   }
   
   // Para POST requests
-  const response = await fetch(url: any, {
+  const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -882,7 +882,7 @@ export default function ContaHubTestePage() {
                     <div className="mb-4">
                       <div className="font-medium text-gray-800 mb-2">üïê ·öltimos Registros:</div>
                       <div className="space-y-2">
-                        {result.ultimos_registros.slice(0: any, 5).map((registro: any, index: number) => (
+                        {result.ultimos_registros.slice(0, 5).map((registro, index: number) => (
                           <div key={index} className={`p-2 rounded text-sm ${registro.processado ? 'bg-green-50' : 'bg-yellow-50'}`}>
                             <div className="flex justify-between items-center">
                               <span>ID #{registro.id} - {registro.tipo_dados || registro.tipo || 'sem tipo'}</span>
@@ -909,7 +909,7 @@ export default function ContaHubTestePage() {
                     <div className="mb-4">
                       <div className="font-medium text-gray-800 mb-2">üìÑ Exemplo de Registro:</div>
                       <div className="bg-gray-800 text-green-400 p-3 rounded text-xs font-mono overflow-x-auto">
-                        {JSON.stringify(result.estrutura_tabela.exemplo_registro, null: any, 2)}
+                        {JSON.stringify(result.estrutura_tabela.exemplo_registro, null, 2)}
                       </div>
                     </div>
                   )}
@@ -1001,7 +1001,7 @@ export default function ContaHubTestePage() {
                                 <div>
                                   <div className="font-medium mt-2 mb-1">Amostra do 1∫ item:</div>
                                   <pre className="bg-white p-2 rounded text-xs overflow-x-auto">
-{JSON.stringify(amostra.estrutura_json.list_info.primeiro_item_sample, null: any, 2)}
+{JSON.stringify(amostra.estrutura_json.list_info.primeiro_item_sample, null, 2)}
                                   </pre>
                                 </div>
                               )}
@@ -1014,12 +1014,12 @@ export default function ContaHubTestePage() {
                           <div className="p-3 bg-yellow-50 rounded">
                             <div className="font-medium text-yellow-800 mb-2">üì¶ Outros Arrays Encontrados:</div>
                             <div className="space-y-2">
-                              {amostra.estrutura_json.outros_arrays.map((arr: any, idx: number) => (
+                              {amostra.estrutura_json.outros_arrays.map((arr, idx: number) => (
                                 <div key={idx} className="text-sm text-yellow-700">
                                   <div className="font-medium">Campo: {arr.campo} ({arr.length} itens)</div>
                                   {arr.primeiro_item_keys && (
                                     <div className="flex flex-wrap gap-1 mt-1">
-                                      {arr.primeiro_item_keys.slice(0: any, 10).map((key: string, keyIdx: number) => (
+                                      {arr.primeiro_item_keys.slice(0, 10).map((key: string, keyIdx: number) => (
                                         <span key={keyIdx} className="bg-yellow-100 text-yellow-800 px-1 py-0.5 rounded text-xs">
                                           {key}
                                         </span>
@@ -1043,7 +1043,7 @@ export default function ContaHubTestePage() {
                   <h3 className="font-semibold text-gray-800 mb-2">üìä Resultado:</h3>
                   <div className="bg-white p-3 rounded border">
                     <pre className="text-sm text-gray-700 whitespace-pre-wrap">
-                      {JSON.stringify(result.resultados, null: any, 2)}
+                      {JSON.stringify(result.resultados, null, 2)}
                     </pre>
                   </div>
                 </div>
@@ -1172,7 +1172,7 @@ export default function ContaHubTestePage() {
                               <details className="text-xs mt-2">
                                 <summary className="cursor-pointer text-red-600 hover:text-red-800">Ver detalhes do erro</summary>
                                 <pre className="mt-2 bg-red-100 p-2 rounded text-red-800 overflow-x-auto">
-                                  {JSON.stringify(info.detalhes, null: any, 2)}
+                                  {JSON.stringify(info.detalhes, null, 2)}
                                 </pre>
                               </details>
                             )}
@@ -1280,7 +1280,7 @@ export default function ContaHubTestePage() {
                             <h6 className="font-semibold text-green-800 mb-2">úÖ Dados Esperados (ContaHub):</h6>
                             <div className="bg-green-50 p-3 rounded max-h-60 overflow-y-auto">
                               <pre className="text-xs text-green-800">
-                                {JSON.stringify(debugData.clientes_cpf.dados_esperados, null: any, 2)}
+                                {JSON.stringify(debugData.clientes_cpf.dados_esperados, null, 2)}
                               </pre>
                             </div>
                           </div>
@@ -1288,7 +1288,7 @@ export default function ContaHubTestePage() {
                             <h6 className="font-semibold text-blue-800 mb-2">üóÑÔ∏è Dados Reais (Banco):</h6>
                             <div className="bg-blue-50 p-3 rounded max-h-60 overflow-y-auto">
                               <pre className="text-xs text-blue-800">
-                                {JSON.stringify(debugData.clientes_cpf.dados_reais, null: any, 2)}
+                                {JSON.stringify(debugData.clientes_cpf.dados_reais, null, 2)}
                               </pre>
                             </div>
                           </div>
@@ -1327,7 +1327,7 @@ export default function ContaHubTestePage() {
                         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded">
                           <h5 className="font-semibold text-red-800 mb-2">ùå VDs Extras (n·£o esperados):</h5>
                           <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
-                            {debugData.periodo.analise.vdsExtras.slice(0: any, 20).map((vd: number) => (
+                            {debugData.periodo.analise.vdsExtras.slice(0, 20).map((vd: number) => (
                               <div key={vd} className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-mono text-center">
                                 {vd}
                               </div>
@@ -1365,7 +1365,7 @@ export default function ContaHubTestePage() {
                             <h6 className="font-semibold text-blue-800 mb-2">úÖ Primeiros 10 Esperados:</h6>
                             <div className="bg-blue-50 p-3 rounded max-h-60 overflow-y-auto">
                               <pre className="text-xs text-blue-800">
-                                {JSON.stringify(debugData.periodo.dados_esperados, null: any, 2)}
+                                {JSON.stringify(debugData.periodo.dados_esperados, null, 2)}
                               </pre>
                             </div>
                           </div>
@@ -1373,7 +1373,7 @@ export default function ContaHubTestePage() {
                             <h6 className="font-semibold text-green-800 mb-2">üóÑÔ∏è Primeiros 10 Reais:</h6>
                             <div className="bg-green-50 p-3 rounded max-h-60 overflow-y-auto">
                               <pre className="text-xs text-green-800">
-                                {JSON.stringify(debugData.periodo.dados_reais?.slice(0: any, 10), null: any, 2)}
+                                {JSON.stringify(debugData.periodo.dados_reais?.slice(0, 10), null, 2)}
                               </pre>
                             </div>
                           </div>
@@ -1411,7 +1411,7 @@ export default function ContaHubTestePage() {
                         <div className="mt-3">
                           <div className="bg-gray-50 p-3 rounded max-h-60 overflow-y-auto">
                             <pre className="text-xs text-gray-800">
-                              {JSON.stringify(debugData.tempo.analise?.primeiros_10, null: any, 2)}
+                              {JSON.stringify(debugData.tempo.analise?.primeiros_10, null, 2)}
                             </pre>
                           </div>
                         </div>
@@ -1513,7 +1513,7 @@ export default function ContaHubTestePage() {
 
                   {/* An·°lises detalhadas */}
                   <div className="space-y-4">
-                    {result.analises.map((analise: any, index: number) => (
+                    {result.analises.map((analise, index: number) => (
                       <div key={analise.id} className="p-4 border border-gray-200 rounded-lg">
                         <div className="flex justify-between items-start mb-3">
                           <div>
@@ -1578,7 +1578,7 @@ export default function ContaHubTestePage() {
                           </summary>
                           <div className="mt-2 bg-gray-100 p-3 rounded overflow-x-auto">
                             <pre className="text-xs text-gray-800">
-                              {JSON.stringify(analise.amostra_dados, null: any, 2)}
+                              {JSON.stringify(analise.amostra_dados, null, 2)}
                             </pre>
                           </div>
                         </details>
@@ -1604,7 +1604,7 @@ export default function ContaHubTestePage() {
                 Ä¢ <strong>Objetivo:</strong> Verificar mapeamento completo dos dados do ContaHub
               </PageText>
               <PageText variant="body">
-                Ä¢ <strong>Tabelas:</strong> contahub_analitico, contahub_periodo: any, contahub_fatporhora, etc.
+                Ä¢ <strong>Tabelas:</strong> contahub_analitico, contahub_periodo, contahub_fatporhora, etc.
               </PageText>
               <PageText variant="body">
                 Ä¢ <strong>Sistema:</strong> Coleta automatizada via API do ContaHub

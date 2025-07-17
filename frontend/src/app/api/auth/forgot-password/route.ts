@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Enviar e-mail de recuperaá§á£o (usando Supabase Auth)
-    const { error: authError } = await supabase.auth.resetPasswordForEmail(email: any, {
+    const { error: authError } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/redefinir-senha?token=${resetToken}&email=${encodeURIComponent(email)}`
     })
 

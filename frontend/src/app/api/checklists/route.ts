@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-const supabase = createClient(supabaseUrl: any, supabaseServiceKey)
+const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 export async function GET(req: NextRequest) {
   try {
@@ -45,9 +45,9 @@ export async function GET(req: NextRequest) {
     }
 
     // Transformar dados para o formato esperado pela interface
-    const checklistsFormatados = checklists?.map((checklist: any) => {
+    const checklistsFormatados = checklists?.map((checklist) => {
       // Contar total de itens
-      const totalItens = checklist.checklist_secoes?.reduce((total: number, secao: any) => {
+      const totalItens = checklist.checklist_secoes?.reduce((total: number, secao) => {
         return total + (secao.checklist_itens?.length || 0)
       }, 0) || 0
 

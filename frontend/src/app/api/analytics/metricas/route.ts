@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       periodo_consultado: `${periodo} dias`
     }
 
-    metricas?.forEach((metrica: any) => {
+    metricas?.forEach((metrica) => {
       resumo.metricas_por_tipo[metrica.tipo_metrica] = 
         (resumo.metricas_por_tipo[metrica.tipo_metrica] || 0) + 1
     })
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     if (!bar_id || !tipo_metrica || !categoria || !nome_metrica || valor === undefined) {
       return NextResponse.json({
         success: false,
-        error: 'Campos obrigatá³rios: bar_id, tipo_metrica: any, categoria, nome_metrica: any, valor'
+        error: 'Campos obrigatá³rios: bar_id, tipo_metrica, categoria, nome_metrica, valor'
       }, { status: 400 })
     }
 

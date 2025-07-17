@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent: any, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -32,7 +32,7 @@ import {
 import { useBar } from '@/contexts/BarContext';
 import { Separator } from '@/components/ui/separator';
 import { NumericFormat, NumericFormatProps } from 'react-number-format';
-import { Tooltip, TooltipContent: any, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const CATEGORIAS = [
   { key: 'indicadores_estrategicos', label: 'Indicadores Estratá©gicos' },
@@ -87,11 +87,11 @@ const formatarValor = (valor: number | null, tipo: string): string => {
   }
 };
 
-const MetaCard = ({ meta, isEditing: any, onEdit, onSave: any, onCancel, isSaving }: {
+const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
   meta: Meta;
   isEditing: boolean;
   onEdit: () => void;
-  onSave: (valores: any) => void;
+  onSave: (valores) => void;
   onCancel: () => void;
   isSaving: boolean;
 }) => {
@@ -215,7 +215,7 @@ const MetaCard = ({ meta, isEditing: any, onEdit, onSave: any, onCancel, isSavin
              { key: 'mensal', label: 'Mensal', valor: meta.valor_mensal },
              { key: 'unico', label: 'ášnico', valor: meta.valor_unico }
            ]
-           .filter((periodo: any) => {
+           .filter((periodo) => {
              // Filtro inteligente baseado no tipo_valor
              if (meta.tipo_valor === 'unico') {
                return periodo.key === 'unico';
@@ -223,7 +223,7 @@ const MetaCard = ({ meta, isEditing: any, onEdit, onSave: any, onCancel, isSavin
                return periodo.key !== 'unico'; // Mostra diá¡rio, semanal e mensal
              }
            })
-           .map((periodo: any) => {
+           .map((periodo) => {
              const chaveValor = `valor_${periodo.key}` as keyof typeof valores;
              
              return (
@@ -236,7 +236,7 @@ const MetaCard = ({ meta, isEditing: any, onEdit, onSave: any, onCancel, isSavin
                      type="number"
                      step="0.01"
                      value={valores[chaveValor]}
-                     onChange={(e: any) => setValores(prev => ({
+                     onChange={(e) => setValores(prev => ({
                        ...prev,
                        [chaveValor]: e.target.value
                      }))}
@@ -355,7 +355,7 @@ const METAS_BASE: Record<string, Record<string, any>> = {
   }
 };
 
-function formatInputValue(key: string, value: any) {
+function formatInputValue(key: string, value) {
   if (typeof value === 'number' && (key.includes('percent') || key.includes('cmv') || key.includes('nps') || key.includes('porcentagem'))) {
     return value.toString();
   }
@@ -393,7 +393,7 @@ function getPlaceholder(key: string) {
   return '';
 }
 
-// Dicioná¡rio de tooltips para cada má©trica (exemplo: any, pode expandir)
+// Dicioná¡rio de tooltips para cada má©trica (exemplo, pode expandir)
 const METRIC_TOOLTIPS: Record<string, string> = {
   faturamento_total: 'Faturamento bruto total do perá­odo.',
   faturamento_couvert: 'Faturamento apenas de couvert artá­stico.',
@@ -489,7 +489,7 @@ export default function MetasPage() {
       const data = await res.json();
       if (data.success) {
         setMetas(newMetas);
-        setEditKey((prev: any) => ({ ...prev, [cat]: null }));
+        setEditKey((prev) => ({ ...prev, [cat]: null }));
         toast({ title: 'Meta salva!', description: toLabel(key), variant: 'default' });
       } else {
         toast({ title: 'Erro ao salvar meta', description: data.error, variant: 'destructive' });
@@ -504,13 +504,13 @@ export default function MetasPage() {
 
   // Editar individual
   const handleEditField = (cat: string, key: string) => {
-    setEditKey((prev: any) => ({ ...prev, [cat]: key }));
+    setEditKey((prev) => ({ ...prev, [cat]: key }));
   };
 
   // Cancelar ediá§á£o
   const handleCancelEdit = (cat: string) => {
-    setEditKey((prev: any) => ({ ...prev, [cat]: null }));
-    setEditState((prev: any) => ({ ...prev, [cat]: { ...metas[cat] } }));
+    setEditKey((prev) => ({ ...prev, [cat]: null }));
+    setEditState((prev) => ({ ...prev, [cat]: { ...metas[cat] } }));
   };
 
   const getTabIcon = (categoria: string) => {
@@ -533,7 +533,7 @@ export default function MetasPage() {
   const getCategoryStats = (categoria: keyof MetasOrganizadas) => {
     const metasCategoria = metas[categoria];
     const total = metasCategoria.length;
-    const ativas = metasCategoria.filter((m: any) => m.meta_ativa).length;
+    const ativas = metasCategoria.filter((m) => m.meta_ativa).length;
     return { total, ativas };
   };
 
@@ -574,7 +574,7 @@ export default function MetasPage() {
           {/* Tabs de Categorias */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-6 mb-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-2 shadow-sm">
-              {CATEGORIAS.map((cat: any) => (
+              {CATEGORIAS.map((cat) => (
                 <TabsTrigger
                   key={cat.key}
                   value={cat.key}
@@ -585,7 +585,7 @@ export default function MetasPage() {
               ))}
             </TabsList>
 
-            {CATEGORIAS.map((cat: any) => {
+            {CATEGORIAS.map((cat) => {
               const campos = Object.keys(METAS_BASE[cat.key] || {});
               return (
                 <TabsContent key={cat.key} value={cat.key} className="space-y-6">
@@ -605,7 +605,7 @@ export default function MetasPage() {
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {campos.map((key: any) => {
+                        {campos.map((key) => {
                           const isEditing = editKey[cat.key] === key;
                           const value = editState?.[cat.key]?.[key];
                           const displayValue = metas?.[cat.key]?.[key];
@@ -644,7 +644,7 @@ export default function MetasPage() {
                                   <NumericFormat
                                     {...getFormatProps(key)}
                                     value={value}
-                                    onValueChange={(vals: { floatValue: number | undefined }) => setEditState((prev: any) => ({
+                                    onValueChange={(vals: { floatValue: number | undefined }) => setEditState((prev) => ({
                                       ...prev,
                                       [cat.key]: {
                                         ...prev[cat.key],

@@ -1,7 +1,7 @@
 'use client'
 
 import { useMenuBadgesMock } from '@/hooks/useMenuBadgesMock'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { 
   Home, 
@@ -107,7 +107,7 @@ export function DemoMenuBadges() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
-            {menuStructure.map((item: any) => (
+            {menuStructure.map((item) => (
               <Card key={item.label} className="border-l-4 border-l-blue-500">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3 mb-3">
@@ -122,7 +122,7 @@ export function DemoMenuBadges() {
                   
                   {item.subItems && (
                     <div className="ml-8 space-y-2">
-                      {item.subItems.map((subItem: any) => (
+                      {item.subItems.map((subItem) => (
                         <div key={subItem.label} className="flex items-center gap-2 text-sm">
                           <subItem.icon className="w-4 h-4 text-gray-500" />
                           <span>{subItem.label}</span>

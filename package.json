@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "google-spreadsheet": "^4.1.5",
-    "react-number-format": "^5.4.4"
-  }
-}

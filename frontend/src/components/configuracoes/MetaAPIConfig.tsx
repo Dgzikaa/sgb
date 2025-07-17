@@ -6,13 +6,13 @@
 // Componente para configurar Meta API dentro da pá¡gina de configuraá§áµes
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Tabs, TabsContent: any, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { 
   CheckCircle, 
@@ -31,13 +31,13 @@ import {
 
 interface MetaTestResults {
   access_token_valid: boolean
-  user_info: any
-  accounts: any[]
-  pages: any[]
-  instagram_accounts: any[]
-  permissions: any[]
-  available_endpoints: any[]
-  error_details: any
+  user_info
+  accounts[]
+  pages[]
+  instagram_accounts[]
+  permissions[]
+  available_endpoints[]
+  error_details
 }
 
 interface MetaConfig {
@@ -258,7 +258,7 @@ export default function MetaAPIConfig() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {testResults.permissions.map((perm: any, index: number) => (
+            {testResults.permissions.map((perm, index: number) => (
               <Badge 
                 key={index} 
                 variant={perm.status === 'granted' ? 'default' : 'secondary'}
@@ -286,7 +286,7 @@ export default function MetaAPIConfig() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {testResults.pages.map((page: any, index: number) => (
+            {testResults.pages.map((page, index: number) => (
               <div key={index} className="p-4 border border-blue-200 rounded-lg bg-blue-50">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
@@ -338,7 +338,7 @@ export default function MetaAPIConfig() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {testResults.instagram_accounts.map((ig: any, index: number) => (
+            {testResults.instagram_accounts.map((ig, index: number) => (
               <div key={index} className="p-4 border border-pink-200 rounded-lg bg-pink-50">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
@@ -403,7 +403,7 @@ export default function MetaAPIConfig() {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {testResults.available_endpoints.map((endpoint: any, index: number) => (
+            {testResults.available_endpoints.map((endpoint, index: number) => (
               <div key={index} className="flex items-center justify-between p-2 border rounded">
                 <span className="text-sm">{endpoint.name}</span>
                 <div className="flex items-center gap-2">
@@ -480,7 +480,7 @@ export default function MetaAPIConfig() {
                     id="access-token"
                     type={showToken ? 'text' : 'password'}
                     value={accessToken}
-                    onChange={(e: any) => setAccessToken(e.target.value)}
+                    onChange={(e) => setAccessToken(e.target.value)}
                     placeholder="Seu token de acesso da Meta API..."
                     className="font-mono text-sm"
                   />
@@ -503,7 +503,7 @@ export default function MetaAPIConfig() {
                   <Input
                     id="app-id"
                     value={appId}
-                    onChange={(e: any) => setAppId(e.target.value)}
+                    onChange={(e) => setAppId(e.target.value)}
                     placeholder="ID da aplicaá§á£o Facebook"
                   />
                 </div>
@@ -513,7 +513,7 @@ export default function MetaAPIConfig() {
                     id="app-secret"
                     type="password"
                     value={appSecret}
-                    onChange={(e: any) => setAppSecret(e.target.value)}
+                    onChange={(e) => setAppSecret(e.target.value)}
                     placeholder="Secret da aplicaá§á£o Facebook"
                   />
                 </div>
@@ -598,7 +598,7 @@ export default function MetaAPIConfig() {
                         <div className="p-4 bg-red-50 rounded-lg border border-red-200">
                           <h4 className="font-semibold text-red-900 mb-2">Detalhes do Erro</h4>
                           <pre className="text-sm text-red-800 whitespace-pre-wrap">
-                            {JSON.stringify(testResults.error_details, null: any, 2)}
+                            {JSON.stringify(testResults.error_details, null, 2)}
                           </pre>
                         </div>
                       )}
@@ -637,7 +637,7 @@ export default function MetaAPIConfig() {
 
           <div className="space-y-4">
             {configs.length > 0 ? (
-              configs.map((config: any) => (
+              configs.map((config) => (
                 <Card key={config.id}>
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start">

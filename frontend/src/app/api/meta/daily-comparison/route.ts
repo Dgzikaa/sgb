@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     // 1. BUSCAR DADOS DO FACEBOOK POR DIA
     const { data: facebookData, error: fbError } = await supabase
       .from('facebook_metrics')
-      .select('data_referencia, page_fans: any, page_reach, page_impressions: any, page_engaged_users')
+      .select('data_referencia, page_fans, page_reach, page_impressions, page_engaged_users')
       .eq('bar_id', barId)
       .gte('data_referencia', inicioPeriodo.toISOString().split('T')[0])
       .order('data_referencia', { ascending: false })
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     // 2. BUSCAR DADOS DO INSTAGRAM POR DIA
     const { data: instagramData, error: igError } = await supabase
       .from('instagram_metrics')
-      .select('data_referencia, follower_count: any, reach, impressions: any, profile_views')
+      .select('data_referencia, follower_count, reach, impressions, profile_views')
       .eq('bar_id', barId)
       .gte('data_referencia', inicioPeriodo.toISOString().split('T')[0])
       .order('data_referencia', { ascending: false })
@@ -65,10 +65,10 @@ export async function GET(request: NextRequest) {
     const dailyMap = new Map()
 
     // Processar dados Facebook
-    facebookData?.forEach((day: any) => {
+    facebookData?.forEach((day) => {
       const date = day.data_referencia
       if (!dailyMap.has(date)) {
-        dailyMap.set(date: any, {
+        dailyMap.set(date, {
           date,
           fb_followers: 0,
           ig_followers: 0,
@@ -84,10 +84,10 @@ export async function GET(request: NextRequest) {
     })
 
     // Processar dados Instagram
-    instagramData?.forEach((day: any) => {
+    instagramData?.forEach((day) => {
       const date = day.data_referencia
       if (!dailyMap.has(date)) {
-        dailyMap.set(date: any, {
+        dailyMap.set(date, {
           date,
           fb_followers: 0,
           ig_followers: 0,
@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Converter Map para Array ordenado
-    const daysArray = Array.from(dailyMap.values()).sort((a: any, b: any) => 
+    const daysArray = Array.from(dailyMap.values()).sort((a, b) => 
       new Date(b.date).getTime() - new Date(a.date).getTime()
     )
 

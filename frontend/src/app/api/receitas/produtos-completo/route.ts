@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 // Criar tabelas de produtos e receitas
-const criarTabelas = async (supabase: any) => {
+const criarTabelas = async (supabase) => {
   const { error } = await supabase.rpc('exec_sql', {
     sql: `
       -- Tabela de produtos
@@ -10,8 +10,8 @@ const criarTabelas = async (supabase: any) => {
         id BIGSERIAL PRIMARY KEY,
         codigo VARCHAR(20) UNIQUE NOT NULL,
         nome VARCHAR(255) NOT NULL,
-        rendimento_percentual DECIMAL(5: any,2) DEFAULT 100,
-        quantidade_base DECIMAL(10: any,3) DEFAULT 1,
+        rendimento_percentual DECIMAL(5,2) DEFAULT 100,
+        quantidade_base DECIMAL(10,3) DEFAULT 1,
         unidade_final VARCHAR(10) DEFAULT 'unid',
         observacoes TEXT,
         ativo BOOLEAN DEFAULT true,
@@ -24,11 +24,11 @@ const criarTabelas = async (supabase: any) => {
         id BIGSERIAL PRIMARY KEY,
         produto_codigo VARCHAR(20) NOT NULL,
         insumo_codigo VARCHAR(20) NOT NULL,
-        quantidade_receita DECIMAL(10: any,3) NOT NULL,
+        quantidade_receita DECIMAL(10,3) NOT NULL,
         created_at TIMESTAMP DEFAULT NOW(),
         FOREIGN KEY (produto_codigo) REFERENCES produtos(codigo) ON DELETE CASCADE,
         FOREIGN KEY (insumo_codigo) REFERENCES insumos(codigo) ON DELETE CASCADE,
-        UNIQUE(produto_codigo: any, insumo_codigo)
+        UNIQUE(produto_codigo, insumo_codigo)
       );
       
       -- ándices
@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
 
         // Calcular custo total da receita
         let custoTotalReceita = 0
-        const insumosReceita = receitas?.map((receita: any) => {
+        const insumosReceita = receitas?.map((receita) => {
           const custoInsumo = receita.quantidade_receita * receita.insumos.custo_unitario
           custoTotalReceita += custoInsumo
           
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
       receita = [] // Array de {insumo_codigo, quantidade_receita}
     } = body
 
-    console.log(`ðŸ½ï¸ Cadastrando produto:`, { codigo, nome: any, receita: receita.length })
+    console.log(`ðŸ½ï¸ Cadastrando produto:`, { codigo, nome, receita: receita.length })
 
     // Validaá§áµes
     if (!codigo || !nome) {
@@ -193,14 +193,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar se todos os insumos existem
-    const insumoCodigos = receita.map((r: any) => r.insumo_codigo)
+    const insumoCodigos = receita.map((r) => r.insumo_codigo)
     const { data: insumosExistentes } = await supabase
       .from('insumos')
       .select('codigo')
       .in('codigo', insumoCodigos)
       .eq('ativo', true)
 
-    const codigosExistentes = insumosExistentes?.map((i: any) => i.codigo) || []
+    const codigosExistentes = insumosExistentes?.map((i) => i.codigo) || []
     const insumosInvalidos = insumoCodigos.filter((codigo: string) => !codigosExistentes.includes(codigo))
 
     if (insumosInvalidos.length > 0) {
@@ -232,7 +232,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Inserir receitas
-    const receitasParaInserir = receita.map((r: any) => ({
+    const receitasParaInserir = receita.map((r) => ({
       produto_codigo: codigo,
       insumo_codigo: r.insumo_codigo,
       quantidade_receita: parseFloat(r.quantidade_receita)
@@ -329,7 +329,7 @@ export async function PUT(request: NextRequest) {
         .eq('produto_codigo', codigo)
 
       // Inserir novas receitas
-      const receitasParaInserir = receita.map((r: any) => ({
+      const receitasParaInserir = receita.map((r) => ({
         produto_codigo: codigo,
         insumo_codigo: r.insumo_codigo,
         quantidade_receita: parseFloat(r.quantidade_receita)

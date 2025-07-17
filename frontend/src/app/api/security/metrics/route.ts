@@ -43,19 +43,19 @@ export async function GET(request: NextRequest) {
 
     // Calcular má©tricas em tempo real dos eventos
     const totalEvents = events?.length || 0
-    const criticalEvents = events?.filter((e: any) => e.level === 'critical').length || 0
-    const warningEvents = events?.filter((e: any) => e.level === 'warning').length || 0
-    const infoEvents = events?.filter((e: any) => e.level === 'info').length || 0
-    const authEvents = events?.filter((e: any) => e.category === 'auth').length || 0
-    const accessEvents = events?.filter((e: any) => e.category === 'access').length || 0
-    const injectionEvents = events?.filter((e: any) => e.category === 'injection').length || 0
-    const rateLimitEvents = events?.filter((e: any) => e.category === 'rate_limit').length || 0
-    const apiAbuseEvents = events?.filter((e: any) => e.category === 'api_abuse').length || 0
-    const backupEvents = events?.filter((e: any) => e.category === 'backup').length || 0
-    const systemEvents = events?.filter((e: any) => e.category === 'system').length || 0
+    const criticalEvents = events?.filter((e) => e.level === 'critical').length || 0
+    const warningEvents = events?.filter((e) => e.level === 'warning').length || 0
+    const infoEvents = events?.filter((e) => e.level === 'info').length || 0
+    const authEvents = events?.filter((e) => e.category === 'auth').length || 0
+    const accessEvents = events?.filter((e) => e.category === 'access').length || 0
+    const injectionEvents = events?.filter((e) => e.category === 'injection').length || 0
+    const rateLimitEvents = events?.filter((e) => e.category === 'rate_limit').length || 0
+    const apiAbuseEvents = events?.filter((e) => e.category === 'api_abuse').length || 0
+    const backupEvents = events?.filter((e) => e.category === 'backup').length || 0
+    const systemEvents = events?.filter((e) => e.category === 'system').length || 0
     
-    const uniqueIps = new Set(events?.map((e: any) => e.ip_address).filter(Boolean)).size
-    const failedLogins = events?.filter((e: any) => e.event_type === 'failed_login').length || 0
+    const uniqueIps = new Set(events?.map((e) => e.ip_address).filter(Boolean)).size
+    const failedLogins = events?.filter((e) => e.event_type === 'failed_login').length || 0
     
     // Usar má©tricas do banco se disponá­veis, caso contrá¡rio usar calculadas
     const metrics = {
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
     // Validar dados de entrada
     if (!body.level || !body.category || !body.event_type) {
       return NextResponse.json(
-        { success: false, error: 'Dados obrigatá³rios ausentes: level, category: any, event_type' },
+        { success: false, error: 'Dados obrigatá³rios ausentes: level, category, event_type' },
         { status: 400 }
       )
     }

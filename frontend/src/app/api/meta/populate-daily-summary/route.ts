@@ -63,17 +63,17 @@ export async function POST(request: NextRequest) {
 
     // 4. Criar map por data para facilitar processamento
     const fbByDate = new Map()
-    facebookData?.forEach((row: any) => {
+    facebookData?.forEach((row) => {
       fbByDate.set(row.data_referencia, row)
     })
 
     const igByDate = new Map()
-    instagramData?.forEach((row: any) => {
+    instagramData?.forEach((row) => {
       igByDate.set(row.data_referencia, row)
     })
 
     const campaignsByDate = new Map()
-    campaignsData?.forEach((row: any) => {
+    campaignsData?.forEach((row) => {
       if (!campaignsByDate.has(row.data_coleta)) {
         campaignsByDate.set(row.data_coleta, [])
       }
@@ -117,11 +117,11 @@ export async function POST(request: NextRequest) {
         const campaignsDay = campaignsByDate.get(date) || []
 
         // Agregar dados de campanhas do dia
-        const campaignsActive = campaignsDay.filter((c: any) => c.effective_status === 'ACTIVE').length
-        const campaignsTotalSpend = campaignsDay.reduce((sum: number, c: any) => sum + (c.spend || 0), 0)
-        const campaignsTotalImpressions = campaignsDay.reduce((sum: number, c: any) => sum + (c.impressions || 0), 0)
-        const campaignsTotalClicks = campaignsDay.reduce((sum: number, c: any) => sum + (c.clicks || 0), 0)
-        const campaignsTotalConversions = campaignsDay.reduce((sum: number, c: any) => sum + (c.conversions || 0), 0)
+        const campaignsActive = campaignsDay.filter((c) => c.effective_status === 'ACTIVE').length
+        const campaignsTotalSpend = campaignsDay.reduce((sum: number, c) => sum + (c.spend || 0), 0)
+        const campaignsTotalImpressions = campaignsDay.reduce((sum: number, c) => sum + (c.impressions || 0), 0)
+        const campaignsTotalClicks = campaignsDay.reduce((sum: number, c) => sum + (c.clicks || 0), 0)
+        const campaignsTotalConversions = campaignsDay.reduce((sum: number, c) => sum + (c.conversions || 0), 0)
 
         const record = {
           bar_id: barId,
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
       // Inserir em lotes de 50 para evitar timeout
       const batchSize = 50
       for (let i = 0; i < dailySummaryRecords.length; i += batchSize) {
-        const batch = dailySummaryRecords.slice(i: any, i + batchSize)
+        const batch = dailySummaryRecords.slice(i, i + batchSize)
         
         try {
           const { data: insertedData, error: insertError } = await supabase

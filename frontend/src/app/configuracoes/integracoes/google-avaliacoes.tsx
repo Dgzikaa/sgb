@@ -20,7 +20,7 @@ export default function GoogleAvaliacoesIntegracao() {
       } else {
         setResult('ùå Erro: ' + (data.error || 'Erro desconhecido'))
       }
-    } catch (e: any) {
+    } catch (e) {
       setResult('ùå Erro: ' + e.message)
     } finally {
       setLoading(false)

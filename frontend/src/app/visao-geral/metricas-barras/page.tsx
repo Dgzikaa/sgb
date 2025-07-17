@@ -81,22 +81,22 @@ export default function MetricasBarrasPage() {
     }
     
     try {
-      console.log('üìä Buscando dados mensais CORRETOS para', anoSelecionado: any, '(Sympla + Yuzer + Contahub)')
+      console.log('üìä Buscando dados mensais CORRETOS para', anoSelecionado, '(Sympla + Yuzer + Contahub)')
       
       const dadosCompletos: DadosMensal[] = []
       
       for (let mes = 1; mes <= 12; mes++) {
         console.log(`üìÖ Processando ${meses[mes - 1]} (${mes}/12)...`)
         
-        const dataInicio = `${anoSelecionado}-${mes.toString().padStart(2: any, '0')}-01`
-        const ultimoDiaMes = new Date(anoSelecionado: any, mes, 0).getDate()
-        const dataFim = `${anoSelecionado}-${mes.toString().padStart(2: any, '0')}-${ultimoDiaMes}`
+        const dataInicio = `${anoSelecionado}-${mes.toString().padStart(2, '0')}-01`
+        const ultimoDiaMes = new Date(anoSelecionado, mes, 0).getDate()
+        const dataFim = `${anoSelecionado}-${mes.toString().padStart(2, '0')}-${ultimoDiaMes}`
         
         // BUSCAR FATURAMENTO CORRETO: Usar chunking na tabela pagamentos (Sympla + Yuzer + Contahub)
         console.log(`üí∞ Buscando faturamento CORRETO para ${meses[mes - 1]}: ${dataInicio} at·© ${dataFim}`)
         
         const CHUNK_SIZE = 1000
-        let allFaturamentoData: any[] = []
+        let allFaturamentoData[] = []
         let offset = 0
         let hasMore = true
         
@@ -109,7 +109,7 @@ export default function MetricasBarrasPage() {
             .lte('dt_gerencial', dataFim)
             .not('liquido', 'is', null)  // Excluir Conta Assinada
             .order('dt_gerencial')
-            .range(offset: any, offset + CHUNK_SIZE - 1)
+            .range(offset, offset + CHUNK_SIZE - 1)
 
           if (error || !chunk || chunk.length === 0) {
             hasMore = false
@@ -125,7 +125,7 @@ export default function MetricasBarrasPage() {
           }
         }
         
-        const faturamento = allFaturamentoData.reduce((sum: number, item: any) => sum + parseFloat(item.liquido || '0'), 0)
+        const faturamento = allFaturamentoData.reduce((sum: number, item) => sum + parseFloat(item.liquido || '0'), 0)
         console.log(`üí∞ ${meses[mes - 1]}: R$ ${faturamento.toLocaleString('pt-BR')} (${allFaturamentoData.length} registros)`)
 
         // BUSCAR CLIENTES CORRETOS: Usar dados agregados (Sympla + Yuzer)
@@ -133,7 +133,7 @@ export default function MetricasBarrasPage() {
         
         const { data: clientesData, error: clientesError } = await supabase
           .from('pessoas_diario_corrigido')
-          .select('dt_gerencial, total_pessoas_bruto: any, pessoas_pagantes')
+          .select('dt_gerencial, total_pessoas_bruto, pessoas_pagantes')
           .gte('dt_gerencial', dataInicio)
           .lte('dt_gerencial', dataFim)
           .order('dt_gerencial')
@@ -142,8 +142,8 @@ export default function MetricasBarrasPage() {
         let clientesPagantes = 0
         
         if (!clientesError && clientesData) {
-          clientes = clientesData.reduce((sum: number, item: any) => sum + parseInt(item.total_pessoas_bruto || '0'), 0)
-          clientesPagantes = clientesData.reduce((sum: number, item: any) => sum + parseInt(item.pessoas_pagantes || '0'), 0)
+          clientes = clientesData.reduce((sum: number, item) => sum + parseInt(item.total_pessoas_bruto || '0'), 0)
+          clientesPagantes = clientesData.reduce((sum: number, item) => sum + parseInt(item.pessoas_pagantes || '0'), 0)
           console.log(`üë• ${meses[mes - 1]}: ${clientes} pessoas totais, ${clientesPagantes} pagantes`)
         }
         
@@ -175,7 +175,7 @@ export default function MetricasBarrasPage() {
         const dataFimInt = parseInt(dataFim.replace(/-/g, ''))
 
         // TEMPO COZINHA com chunking
-        let allTempoCozinhaData: any[] = []
+        let allTempoCozinhaData[] = []
         offset = 0
         hasMore = true
         
@@ -190,7 +190,7 @@ export default function MetricasBarrasPage() {
             .gt('t0_t2', 60)      // M·≠nimo 1 minuto
             .lt('t0_t2', 2700)    // M·°ximo 45 minutos
             .order('dia')
-            .range(offset: any, offset + CHUNK_SIZE - 1)
+            .range(offset, offset + CHUNK_SIZE - 1)
 
           if (error || !chunk || chunk.length === 0) {
             hasMore = false
@@ -207,7 +207,7 @@ export default function MetricasBarrasPage() {
         }
 
         // TEMPO BAR com chunking
-        let allTempoBarData: any[] = []
+        let allTempoBarData[] = []
         offset = 0
         hasMore = true
         
@@ -222,7 +222,7 @@ export default function MetricasBarrasPage() {
             .gt('t0_t3', 30)      // M·≠nimo 0.5 minutos
             .lt('t0_t3', 1200)    // M·°ximo 20 minutos
             .order('dia')
-            .range(offset: any, offset + CHUNK_SIZE - 1)
+            .range(offset, offset + CHUNK_SIZE - 1)
 
           if (error || !chunk || chunk.length === 0) {
             hasMore = false
@@ -242,34 +242,34 @@ export default function MetricasBarrasPage() {
         let tempoCozinha = 0
         if (allTempoCozinhaData.length >= 3) {
           const temposValidosCozinha = allTempoCozinhaData
-            .map((item: any) => parseInt(item.t0_t2) / 60) // Converter para minutos
-            .filter((tempo: any) => tempo >= 1 && tempo <= 45) // Filtro adicional
-            .sort((a: any, b: any) => a - b)
+            .map((item) => parseInt(item.t0_t2) / 60) // Converter para minutos
+            .filter((tempo) => tempo >= 1 && tempo <= 45) // Filtro adicional
+            .sort((a, b) => a - b)
           
           if (temposValidosCozinha.length >= 3) {
             // Remover 10% inferior e superior (outliers)
             const inicio = Math.floor(temposValidosCozinha.length * 0.1)
             const fim = Math.ceil(temposValidosCozinha.length * 0.9)
-            const temposFiltrados = temposValidosCozinha.slice(inicio: any, fim)
+            const temposFiltrados = temposValidosCozinha.slice(inicio, fim)
             
-            tempoCozinha = temposFiltrados.reduce((sum: any, tempo: any) => sum + tempo, 0) / temposFiltrados.length
+            tempoCozinha = temposFiltrados.reduce((sum, tempo) => sum + tempo, 0) / temposFiltrados.length
           }
         }
 
         let tempoBar = 0
         if (allTempoBarData.length >= 3) {
           const temposValidosBar = allTempoBarData
-            .map((item: any) => parseInt(item.t0_t3) / 60) // Converter para minutos
-            .filter((tempo: any) => tempo >= 0.5 && tempo <= 20) // Filtro adicional
-            .sort((a: any, b: any) => a - b)
+            .map((item) => parseInt(item.t0_t3) / 60) // Converter para minutos
+            .filter((tempo) => tempo >= 0.5 && tempo <= 20) // Filtro adicional
+            .sort((a, b) => a - b)
           
           if (temposValidosBar.length >= 3) {
             // Remover 10% inferior e superior (outliers)
             const inicio = Math.floor(temposValidosBar.length * 0.1)
             const fim = Math.ceil(temposValidosBar.length * 0.9)
-            const temposFiltrados = temposValidosBar.slice(inicio: any, fim)
+            const temposFiltrados = temposValidosBar.slice(inicio, fim)
             
-            tempoBar = temposFiltrados.reduce((sum: any, tempo: any) => sum + tempo, 0) / temposFiltrados.length
+            tempoBar = temposFiltrados.reduce((sum, tempo) => sum + tempo, 0) / temposFiltrados.length
           }
         }
 
@@ -312,7 +312,7 @@ export default function MetricasBarrasPage() {
       red: '#ef4444',
       cyan: '#06b6d4'
     }
-    const info = metricas.find((m: any) => m.key === metrica)
+    const info = metricas.find((m) => m.key === metrica)
     return cores[info?.color || 'blue']
   }
 
@@ -333,7 +333,7 @@ export default function MetricasBarrasPage() {
               <label className="block text-sm font-medium text-slate-700 mb-2">Ano</label>
               <select
                 value={anoSelecionado}
-                onChange={(e: any) => setAnoSelecionado(parseInt(e.target.value))}
+                onChange={(e) => setAnoSelecionado(parseInt(e.target.value))}
                 className="rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 bg-white"
               >
                 <option value={2025} className="text-gray-900 bg-white">2025</option>
@@ -364,9 +364,9 @@ export default function MetricasBarrasPage() {
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
               <h3 className="text-lg font-bold text-slate-800 mb-4">üìà Resumo Anual {anoSelecionado}</h3>
               <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-                {metricas.map((metrica: any) => {
-                  const total = dadosMensais.reduce((sum: any, mes: any) => sum + (mes[metrica.key as keyof DadosMensal] as number), 0)
-                  const media = total / dadosMensais.filter((mes: any) => (mes[metrica.key as keyof DadosMensal] as number) > 0).length
+                {metricas.map((metrica) => {
+                  const total = dadosMensais.reduce((sum, mes) => sum + (mes[metrica.key as keyof DadosMensal] as number), 0)
+                  const media = total / dadosMensais.filter((mes) => (mes[metrica.key as keyof DadosMensal] as number) > 0).length
                   const metaAnual = (metas[metrica.metaKey as keyof MetasConfig] as number) * (metrica.key === 'faturamento' || metrica.key === 'clientes' || metrica.key === 'reservas' ? 12 : 1)
                   const percentual = metaAnual > 0 ? (total / metaAnual) * 100 : 0
                   
@@ -389,8 +389,8 @@ export default function MetricasBarrasPage() {
             </div>
 
             {/* Gr·°ficos de Barras por M·©trica */}
-            {metricas.map((metrica: any) => {
-              const maxValor = Math.max(...dadosMensais.map((mes: any) => mes[metrica.key as keyof DadosMensal] as number), metas[metrica.metaKey as keyof MetasConfig] as number)
+            {metricas.map((metrica) => {
+              const maxValor = Math.max(...dadosMensais.map((mes) => mes[metrica.key as keyof DadosMensal] as number), metas[metrica.metaKey as keyof MetasConfig] as number)
               
               return (
                 <div key={metrica.key} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
@@ -400,7 +400,7 @@ export default function MetricasBarrasPage() {
                   </h3>
                   
                   <div className="space-y-4">
-                    {dadosMensais.map((dados: any, index: any) => {
+                    {dadosMensais.map((dados, index) => {
                       const valor = dados[metrica.key as keyof DadosMensal] as number
                       const meta = metas[metrica.metaKey as keyof MetasConfig] as number
                       const largura = maxValor > 0 ? (valor / maxValor) * 100 : 0
@@ -521,8 +521,8 @@ export default function MetricasBarrasPage() {
                       </div>
                       <div className="text-xs text-slate-500">
                         {(() => {
-                          const mesesComDados = dadosMensais.filter((mes: any) => (mes[metrica.key as keyof DadosMensal] as number) > 0)
-                          const mesesAcimaMeta = mesesComDados.filter((mes: any) => (mes[metrica.key as keyof DadosMensal] as number) >= (metas[metrica.metaKey as keyof MetasConfig] as number))
+                          const mesesComDados = dadosMensais.filter((mes) => (mes[metrica.key as keyof DadosMensal] as number) > 0)
+                          const mesesAcimaMeta = mesesComDados.filter((mes) => (mes[metrica.key as keyof DadosMensal] as number) >= (metas[metrica.metaKey as keyof MetasConfig] as number))
                           return `${mesesAcimaMeta.length}/${mesesComDados.length} meses acima da meta`
                         })()}
                       </div>
@@ -538,8 +538,8 @@ export default function MetricasBarrasPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <h4 className="font-semibold text-slate-700">üèÜ Melhores Meses</h4>
-                  {metricas.slice(0: any, 3).map((metrica: any) => {
-                    const melhorMes = dadosMensais.reduce((max: any, mes: any) => 
+                  {metricas.slice(0, 3).map((metrica) => {
+                    const melhorMes = dadosMensais.reduce((max, mes) => 
                       (mes[metrica.key as keyof DadosMensal] as number) > (max[metrica.key as keyof DadosMensal] as number) ? mes : max
                     )
                     return (
@@ -555,8 +555,8 @@ export default function MetricasBarrasPage() {
                   <h4 className="font-semibold text-slate-700">üìä Performance Geral</h4>
                   {(() => {
                     const totalMetas = metricas.length
-                    const metasAtingidas = metricas.filter((metrica: any) => {
-                      const total = dadosMensais.reduce((sum: any, mes: any) => sum + (mes[metrica.key as keyof DadosMensal] as number), 0)
+                    const metasAtingidas = metricas.filter((metrica) => {
+                      const total = dadosMensais.reduce((sum, mes) => sum + (mes[metrica.key as keyof DadosMensal] as number), 0)
                       const metaAnual = (metas[metrica.metaKey as keyof MetasConfig] as number) * (metrica.key === 'faturamento' || metrica.key === 'clientes' || metrica.key === 'reservas' ? 12 : 1)
                       return total >= metaAnual
                     }).length

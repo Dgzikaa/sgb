@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { 
   ArrowLeft, 
@@ -78,7 +78,7 @@ export default function SecurityPage() {
     
     let interval: NodeJS.Timeout
     if (autoRefresh) {
-      interval = setInterval(loadSecurityData: any, 30000) // Atualizar a cada 30 segundos
+      interval = setInterval(loadSecurityData, 30000) // Atualizar a cada 30 segundos
     }
     
     return () => {
@@ -91,7 +91,7 @@ export default function SecurityPage() {
       setLoading(true)
       
       // Carregar má©tricas, eventos e logs em paralelo
-      const [metricsResponse, eventsResponse: any, auditResponse] = await Promise.all([
+      const [metricsResponse, eventsResponse, auditResponse] = await Promise.all([
         fetch('/api/security/metrics'),
         fetch('/api/security/events'),
         fetch('/api/security/audit')
@@ -442,7 +442,7 @@ export default function SecurityPage() {
                   <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">Os eventos aparecerá£o aqui quando forem registrados no sistema</p>
                 </div>
               ) : (
-                events.slice(0: any, 10).map((event: any) => (
+                events.slice(0, 10).map((event) => (
                   <div key={event.id} className="p-6 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600 hover:shadow-lg transition-all duration-300">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -488,7 +488,7 @@ export default function SecurityPage() {
                             <div className="flex items-start gap-3">
                               <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-20">Detalhes:</span>
                               <div className="text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 p-3 rounded-lg border font-mono max-w-md overflow-auto">
-                                {JSON.stringify(event.details, null: any, 2)}
+                                {JSON.stringify(event.details, null, 2)}
                               </div>
                             </div>
                           )}
@@ -533,7 +533,7 @@ export default function SecurityPage() {
                   <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">Os logs de auditoria aparecerá£o aqui quando aá§áµes forem registradas</p>
                 </div>
               ) : (
-                auditLogs.slice(0: any, 10).map((log: any) => (
+                auditLogs.slice(0, 10).map((log) => (
                   <div key={log.id} className="p-6 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600 hover:shadow-lg transition-all duration-300">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-4 flex-1">

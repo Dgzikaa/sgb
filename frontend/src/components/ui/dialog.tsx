@@ -31,7 +31,7 @@ interface DialogFooterProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode
 }
 
-const Dialog: React.FC<DialogProps> = ({ open, onOpenChange: any, children }) => {
+const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) => {
   const [mounted, setMounted] = React.useState(false)
 
   React.useEffect(() => {
@@ -76,9 +76,9 @@ const Dialog: React.FC<DialogProps> = ({ open, onOpenChange: any, children }) =>
         className="relative w-full h-full flex items-center justify-center p-6"
         data-modal-container="true"
       >
-        {React.Children.map(children: any, (child: any) => {
+        {React.Children.map(children, (child) => {
           if (React.isValidElement(child) && child.type === DialogContent) {
-            return React.cloneElement(child: any, { onClose: () => onOpenChange(false) } as any)
+            return React.cloneElement(child, { onClose: () => onOpenChange(false) } as any)
           }
           return child
         })}
@@ -87,7 +87,7 @@ const Dialog: React.FC<DialogProps> = ({ open, onOpenChange: any, children }) =>
   )
 
   // Renderizar o modal diretamente no body usando portal
-  return createPortal(modalContent: any, document.body)
+  return createPortal(modalContent, document.body)
 }
 
 const DialogContent: React.FC<DialogContentProps & { onClose?: () => void }> = ({ 
@@ -109,7 +109,7 @@ const DialogContent: React.FC<DialogContentProps & { onClose?: () => void }> = (
         "backdrop-blur-xl",
         className
       )}
-      onClick={(e: any) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
       data-modal-content="true"
       role="document"
       aria-labelledby="modal-title"
@@ -128,7 +128,7 @@ const DialogContent: React.FC<DialogContentProps & { onClose?: () => void }> = (
       
       {/* Content com scroll adequado */}
       <div className="w-full h-full flex flex-col max-h-[90vh]">
-        {React.Children.map(children: any, (child: any, index: any) => {
+        {React.Children.map(children, (child, index) => {
           if (React.isValidElement(child)) {
             // Header fica fixo no topo
             if (child.type === DialogHeader) {

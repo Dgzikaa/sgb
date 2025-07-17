@@ -1,11 +1,11 @@
 'use client'
 
 import React, { useState, useRef } from 'react'
-import { Camera, Upload: any, X, Image as ImageIcon } from 'lucide-react'
+import { Camera, Upload, X, Image as ImageIcon } from 'lucide-react'
 import { useFileUpload, UploadOptions } from '@/hooks/useFileUpload'
 
 interface PhotoUploadProps {
-  onUploadComplete?: (result: any) => void
+  onUploadComplete?: (result) => void
   onError?: (error: string) => void
   folder?: 'checklist_photos' | 'signatures' | 'profile_photos'
   compress?: boolean
@@ -67,14 +67,14 @@ export default function PhotoUpload({
 
       // Criar previews
       if (showPreview) {
-        const newPreviews = files.map((file: any) => URL.createObjectURL(file))
+        const newPreviews = files.map((file) => URL.createObjectURL(file))
         setPreviews(prev => multiple ? [...prev, ...newPreviews] : newPreviews)
       }
 
       // Fazer uploads
       for (const file of files) {
         try {
-          const result = await uploadFile(file: any, uploadOptions)
+          const result = await uploadFile(file, uploadOptions)
           
           if (onUploadComplete) {
             onUploadComplete(result)
@@ -82,7 +82,7 @@ export default function PhotoUpload({
           
           console.log('œ… Upload concluá­do:', result.filename)
           
-        } catch (error: any) {
+        } catch (error) {
           console.error('Œ Erro no upload:', error)
           
           if (onError) {
@@ -91,7 +91,7 @@ export default function PhotoUpload({
         }
       }
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Œ Erro no processamento:', error)
       
       if (onError) {
@@ -108,12 +108,12 @@ export default function PhotoUpload({
 
   // Remover preview
   const removePreview = (index: number) => {
-    setPreviews(prev => prev.filter((_: any, i: any) => i !== index))
+    setPreviews(prev => prev.filter((_, i) => i !== index))
   }
 
   // Verificar se há¡ uploads em progresso
   const uploadsInProgress = Object.values(uploads).some(upload => upload.loading)
-  const uploadProgress = Object.values(uploads).find((upload: any) => upload.loading)?.progress || 0
+  const uploadProgress = Object.values(uploads).find((upload) => upload.loading)?.progress || 0
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -163,7 +163,7 @@ export default function PhotoUpload({
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-gray-700">Fotos selecionadas:</h4>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {previews.map((preview: any, index: any) => (
+            {previews.map((preview, index) => (
               <div key={index} className="relative group">
                 <img
                   src={preview}
@@ -185,7 +185,7 @@ export default function PhotoUpload({
 
       {/* Informaá§áµes sobre upload */}
       <div className="text-xs text-gray-500 space-y-1">
-        <p>ğŸ“¸ Formatos aceitos: JPEG, PNG: any, WebP</p>
+        <p>ğŸ“¸ Formatos aceitos: JPEG, PNG, WebP</p>
         <p>ğŸ“ Tamanho má¡ximo: 10MB por foto</p>
         {compress && (
           <p>ğŸ—œï¸ Compressá£o automá¡tica ativada (má¡x. {maxWidth}px, qualidade {Math.round(quality * 100)}%)</p>

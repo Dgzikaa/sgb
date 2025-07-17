@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
           `pagina=1&` +
           `tamanho_pagina=5`
         
-        const respReceitas = await fetch(urlReceitas: any, { headers })
+        const respReceitas = await fetch(urlReceitas, { headers })
         
         let receitasData = null
         if (respReceitas.ok) {
@@ -142,7 +142,7 @@ export async function GET(request: NextRequest) {
           `pagina=1&` +
           `tamanho_pagina=5`
         
-        const respDespesas = await fetch(urlDespesas: any, { headers })
+        const respDespesas = await fetch(urlDespesas, { headers })
         
         let despesasData = null
         if (respDespesas.ok) {
@@ -196,7 +196,7 @@ export async function GET(request: NextRequest) {
           `pagina=1&` +
           `tamanho_pagina=5`
         
-        const respReceitasComp = await fetch(urlReceitasCompetencia: any, { headers })
+        const respReceitasComp = await fetch(urlReceitasCompetencia, { headers })
         
         let receitasCompData = null
         if (respReceitasComp.ok) {
@@ -250,7 +250,7 @@ export async function GET(request: NextRequest) {
           `pagina=1&` +
           `tamanho_pagina=5`
         
-        const respDespesasComp = await fetch(urlDespesasCompetencia: any, { headers })
+        const respDespesasComp = await fetch(urlDespesasCompetencia, { headers })
         
         let despesasCompData = null
         if (respDespesasComp.ok) {
@@ -297,13 +297,13 @@ export async function GET(request: NextRequest) {
       const resultadosParcelas = []
       
       // Testar os primeiros 5 IDs de eventos
-      const idsParaTestar = eventosFinanceiros.slice(0: any, 5)
+      const idsParaTestar = eventosFinanceiros.slice(0, 5)
       
       for (const evento of idsParaTestar) {
         try {
           const urlParcelas = `${baseUrl}/v1/financeiro/eventos-financeiros/${evento.evento_id}/parcelas`
           
-          const respParcelas = await fetch(urlParcelas: any, { headers })
+          const respParcelas = await fetch(urlParcelas, { headers })
           
           let parcelasData = null
           if (respParcelas.ok) {
@@ -349,7 +349,7 @@ export async function GET(request: NextRequest) {
         total_eventos_testados: idsParaTestar.length,
         resultados: resultadosParcelas,
         parcelas_tem_competencia: resultadosParcelas.some(r => r.analise?.tem_data_competencia),
-        eventos_com_sucesso: resultadosParcelas.filter((r: any) => r.ok).length
+        eventos_com_sucesso: resultadosParcelas.filter((r) => r.ok).length
       })
     }
 
@@ -359,12 +359,12 @@ export async function GET(request: NextRequest) {
       testes,
       conclusoes: {
         total_testes: testes.length,
-        testes_ok: testes.filter((t: any) => t.ok || t.eventos_com_sucesso).length,
-        receitas_tem_competencia: testes.find((t: any) => t.nome.includes('Receitas'))?.analise?.tem_data_competencia || false,
-        despesas_tem_competencia: testes.find((t: any) => t.nome.includes('Despesas'))?.analise?.tem_data_competencia || false,
-        receitas_comp_tem_competencia: testes.find((t: any) => t.nome.includes('COM data_competencia') && t.nome.includes('Receitas'))?.analise?.tem_data_competencia || false,
-        despesas_comp_tem_competencia: testes.find((t: any) => t.nome.includes('COM data_competencia') && t.nome.includes('Despesas'))?.analise?.tem_data_competencia || false,
-        parcelas_tem_competencia: testes.find((t: any) => t.nome.includes('parcelas'))?.parcelas_tem_competencia || false,
+        testes_ok: testes.filter((t) => t.ok || t.eventos_com_sucesso).length,
+        receitas_tem_competencia: testes.find((t) => t.nome.includes('Receitas'))?.analise?.tem_data_competencia || false,
+        despesas_tem_competencia: testes.find((t) => t.nome.includes('Despesas'))?.analise?.tem_data_competencia || false,
+        receitas_comp_tem_competencia: testes.find((t) => t.nome.includes('COM data_competencia') && t.nome.includes('Receitas'))?.analise?.tem_data_competencia || false,
+        despesas_comp_tem_competencia: testes.find((t) => t.nome.includes('COM data_competencia') && t.nome.includes('Despesas'))?.analise?.tem_data_competencia || false,
+        parcelas_tem_competencia: testes.find((t) => t.nome.includes('parcelas'))?.parcelas_tem_competencia || false,
         viavel_para_dre: testes.some(t => t.analise?.tem_data_competencia || t.parcelas_tem_competencia)
       }
     })

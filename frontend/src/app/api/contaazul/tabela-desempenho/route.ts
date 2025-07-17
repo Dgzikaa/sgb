@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
     }
 
     // PAGINA·á·ÉO: Buscar todos os eventos do per·≠odo
-    let eventos: any[] = [];
+    let eventos[] = [];
     let page = 1;
     let fetched = 0;
     let totalReceitas = 0;
@@ -216,11 +216,11 @@ export async function POST(request: NextRequest) {
     }
     console.log('[DEBUG] Total eventos:', eventos.length);
     console.log('[DEBUG] Total receitas:', totalReceitas);
-    console.log('[DEBUG] Exemplos descri·ß·µes receitas:', receitasDescricoes.slice(0: any, 10));
+    console.log('[DEBUG] Exemplos descri·ß·µes receitas:', receitasDescricoes.slice(0, 10));
     console.log('[DEBUG] Receitas por categoria:', receitasPorCategoria);
 
     // Agrupar por grupo/categoria
-    const resultado: Record<string, Record<string, { valor: number, eventos: any[] }>> = {};
+    const resultado: Record<string, Record<string, { valor: number, eventos[] }>> = {};
     for (const grupo of GRUPOS) {
       resultado[grupo.nome] = {};
       for (const cat of grupo.categorias) {
@@ -270,8 +270,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ success: true, tabela: any, totalEventos: eventos.length, totalReceitas: any, receitasPorCategoria, pageSize }, { status: 200 });
-  } catch (e: any) {
+    return NextResponse.json({ success: true, tabela, totalEventos: eventos.length, totalReceitas, receitasPorCategoria, pageSize }, { status: 200 });
+  } catch (e) {
     return NextResponse.json({ success: false, error: e.message || String(e) }, { status: 500 });
   }
 } 

@@ -32,7 +32,7 @@ export const safeLocalStorage = {
   setItem: (key: string, value: string): boolean => {
     if (!isClient) return false
     try {
-      localStorage.setItem(key: any, value)
+      localStorage.setItem(key, value)
       return true
     } catch (error) {
       console.warn(`Error setting localStorage for key "${key}":`, error)
@@ -130,7 +130,7 @@ export const safeWindow = {
   addEventListener: (type: string, listener: EventListener, options?: boolean | AddEventListenerOptions): boolean => {
     if (!isClient) return false
     try {
-      window.addEventListener(type: any, listener, options)
+      window.addEventListener(type, listener, options)
       return true
     } catch (error) {
       console.warn(`Error adding window event listener for "${type}":`, error)
@@ -141,7 +141,7 @@ export const safeWindow = {
   removeEventListener: (type: string, listener: EventListener, options?: boolean | EventListenerOptions): boolean => {
     if (!isClient) return false
     try {
-      window.removeEventListener(type: any, listener, options)
+      window.removeEventListener(type, listener, options)
       return true
     } catch (error) {
       console.warn(`Error removing window event listener for "${type}":`, error)
@@ -152,4 +152,4 @@ export const safeWindow = {
 
 // Export individual functions for convenience
 export const { getItem: getLocalStorage, setItem: setLocalStorage, removeItem: removeLocalStorage } = safeLocalStorage
-export const { isOnline, clipboard: any, mediaDevices, share: any, serviceWorker } = safeNavigator 
+export const { isOnline, clipboard, mediaDevices, share, serviceWorker } = safeNavigator 

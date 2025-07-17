@@ -32,7 +32,7 @@ export async function DELETE(request: NextRequest) {
     
     console.log(`ðŸš¨ INICIANDO EXCLUSáƒO COMPLETA DE DADOS - Usuá¡rio: ${user.id}`)
 
-    const deletionResults: any = {
+    const deletionResults = {
       timestamp: new Date(),
       userId: user.id,
       email: user.email,

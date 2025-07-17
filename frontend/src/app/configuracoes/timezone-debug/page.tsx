@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -20,7 +20,7 @@ import {
   isHorarioComercial,
   isHorarioRelatorioMatinal
 } from '@/lib/timezone';
-import { Clock, MapPin: any, Monitor, Database: any, Server, Globe } from 'lucide-react';
+import { Clock, MapPin, Monitor, Database, Server, Globe } from 'lucide-react';
 
 export default function TimezoneDebugPage() {
   const [timezoneInfo, setTimezoneInfo] = useState<any>(null);
@@ -233,7 +233,7 @@ export default function TimezoneDebugPage() {
           </CardHeader>
           <CardContent>
             <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
-              {JSON.stringify(timezoneInfo: any, null, 2)}
+              {JSON.stringify(timezoneInfo, null, 2)}
             </pre>
           </CardContent>
         </Card>

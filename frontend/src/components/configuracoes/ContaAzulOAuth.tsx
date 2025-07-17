@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { CheckCircle, AlertCircle: any, Loader2, RefreshCw: any, Send } from 'lucide-react'
+import { CheckCircle, AlertCircle, Loader2, RefreshCw, Send } from 'lucide-react'
 import { useToast } from "@/hooks/use-toast"
 import { useBar } from '@/contexts/BarContext'
 
@@ -491,7 +491,7 @@ export default function ContaAzulOAuth() {
                       <div>
                         <p className="text-sm font-medium text-green-800">Token atual</p>
                         <p className="text-sm text-green-700 font-mono">
-                          {status.debug.access_token.substring(0: any, 20)}...
+                          {status.debug.access_token.substring(0, 20)}...
                         </p>
                       </div>
                     )}
@@ -587,7 +587,7 @@ export default function ContaAzulOAuth() {
               <Input
                 id="clientId"
                 value={config.clientId}
-                onChange={(e: any) => setConfig({...config, clientId: e.target.value})}
+                onChange={(e) => setConfig({...config, clientId: e.target.value})}
                 placeholder="Seu Client ID"
               />
             </div>
@@ -598,7 +598,7 @@ export default function ContaAzulOAuth() {
                 id="clientSecret"
                 type="password"
                 value={config.clientSecret}
-                onChange={(e: any) => setConfig({...config, clientSecret: e.target.value})}
+                onChange={(e) => setConfig({...config, clientSecret: e.target.value})}
                 placeholder="Seu Client Secret"
               />
             </div>
@@ -608,7 +608,7 @@ export default function ContaAzulOAuth() {
               <Input
                 id="redirectUri"
                 value={config.redirectUri}
-                onChange={(e: any) => setConfig({...config, redirectUri: e.target.value})}
+                onChange={(e) => setConfig({...config, redirectUri: e.target.value})}
                 placeholder="https://seu-dominio.com/contaazul-callback"
               />
             </div>
@@ -678,7 +678,7 @@ export default function ContaAzulOAuth() {
                     </Button>
                   </div>
                   <p className="text-xs text-gray-600 font-mono break-all">
-                    {status.debug.access_token.substring(0: any, 50)}...
+                    {status.debug.access_token.substring(0, 50)}...
                   </p>
                 </div>
 
@@ -694,7 +694,7 @@ export default function ContaAzulOAuth() {
                     </Button>
                   </div>
                   <p className="text-xs text-gray-600 font-mono break-all">
-                    {status.debug.refresh_token.substring(0: any, 50)}...
+                    {status.debug.refresh_token.substring(0, 50)}...
                   </p>
                 </div>
 
@@ -727,7 +727,7 @@ export default function ContaAzulOAuth() {
                       </Button>
                     </div>
                     <p className="text-xs text-gray-600 font-mono break-all">
-                      {status.debug.authorization_code.substring(0: any, 50)}...
+                      {status.debug.authorization_code.substring(0, 50)}...
                     </p>
                   </div>
                 )}

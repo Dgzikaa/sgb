@@ -88,8 +88,8 @@ export async function GET(request: NextRequest) {
     }
 
     // 3. CALCULAR RESUMO
-    const activeCampaigns = results.campaigns.filter((c: any) => c.effective_status === 'ACTIVE')
-    const pausedCampaigns = results.campaigns.filter((c: any) => c.effective_status === 'PAUSED')
+    const activeCampaigns = results.campaigns.filter((c) => c.effective_status === 'ACTIVE')
+    const pausedCampaigns = results.campaigns.filter((c) => c.effective_status === 'PAUSED')
     
     // Calcular totais dos insights
     let totalSpend = 0
@@ -124,11 +124,11 @@ export async function GET(request: NextRequest) {
     // 4. CAMPANHAS DESTACADAS
     if (results.campaigns.length > 0) {
       results.highlighted_campaigns = {
-        most_recent: results.campaigns.sort((a: any, b: any) => 
+        most_recent: results.campaigns.sort((a, b) => 
           new Date(b.created_time).getTime() - new Date(a.created_time).getTime())[0],
         highest_budget: results.campaigns
-          .filter((c: any) => c.daily_budget || c.lifetime_budget)
-          .sort((a: any, b: any) => 
+          .filter((c) => c.daily_budget || c.lifetime_budget)
+          .sort((a, b) => 
             (parseFloat(b.daily_budget || b.lifetime_budget || 0)) - 
             (parseFloat(a.daily_budget || a.lifetime_budget || 0)))[0]
       }
@@ -136,7 +136,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(results)
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ùå Erro ao buscar campanhas do Ordin·°rio:', error)
     return NextResponse.json({ 
       success: false,

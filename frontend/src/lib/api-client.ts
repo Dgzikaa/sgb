@@ -44,7 +44,7 @@ export async function apiCall(endpoint: string, options: ApiOptions = {}) {
     }
     
     // Fazer a requisiá§á£o
-    const response = await fetch(endpoint: any, fetchOptions)
+    const response = await fetch(endpoint, fetchOptions)
     
     // Verificar se a resposta á© OK
     if (!response.ok) {
@@ -66,16 +66,16 @@ export async function apiCall(endpoint: string, options: ApiOptions = {}) {
  */
 export const api = {
   get: (endpoint: string, headers?: Record<string, string>) => 
-    apiCall(endpoint: any, { method: 'GET', headers }),
+    apiCall(endpoint, { method: 'GET', headers }),
     
   post: (endpoint: string, body?: any, headers?: Record<string, string>) => 
-    apiCall(endpoint: any, { method: 'POST', body: any, headers }),
+    apiCall(endpoint, { method: 'POST', body, headers }),
     
   put: (endpoint: string, body?: any, headers?: Record<string, string>) => 
-    apiCall(endpoint: any, { method: 'PUT', body: any, headers }),
+    apiCall(endpoint, { method: 'PUT', body, headers }),
     
   delete: (endpoint: string, headers?: Record<string, string>) => 
-    apiCall(endpoint: any, { method: 'DELETE', headers })
+    apiCall(endpoint, { method: 'DELETE', headers })
 }
 
 /**
@@ -87,7 +87,7 @@ export const checklistsApi = {
     const searchParams = new URLSearchParams()
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
-        if (value) searchParams.append(key: any, value)
+        if (value) searchParams.append(key, value)
       })
     }
     
@@ -96,10 +96,10 @@ export const checklistsApi = {
   },
   
   // Criar checklist
-  create: (checklist: any) => api.post('/api/checklists', checklist),
+  create: (checklist) => api.post('/api/checklists', checklist),
   
   // Atualizar checklist
-  update: (id: string, checklist: any) => api.put(`/api/checklists?id=${id}`, checklist),
+  update: (id: string, checklist) => api.put(`/api/checklists?id=${id}`, checklist),
   
   // Deletar checklist
   delete: (id: string) => api.delete(`/api/checklists?id=${id}`)
@@ -143,7 +143,7 @@ export const uploadsApi = {
     const searchParams = new URLSearchParams()
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) searchParams.append(key: any, String(value))
+        if (value !== undefined) searchParams.append(key, String(value))
       })
     }
     

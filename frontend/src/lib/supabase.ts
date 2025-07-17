@@ -1,7 +1,7 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
 // Cliente Supabase global
-let supabaseClient: any = null
+let supabaseClient = null
 let configLoaded = false
 
 // Configuraá§áµes do projeto - URL fixa, anon key atualizada automaticamente
@@ -40,7 +40,7 @@ async function initializeSupabaseClient() {
 
 // Proxy que intercepta chamadas e garante que o cliente está¡ inicializado
 const supabaseProxy = new Proxy({}, {
-  get(target: any, prop) {
+  get(target, prop) {
     if (prop === 'from') {
       return (table: string) => {
         if (!supabaseClient) {
@@ -66,7 +66,7 @@ const supabaseProxy = new Proxy({}, {
         if (!supabaseClient) {
           throw new Error('Cliente Supabase ná£o inicializado. Use await getSupabaseClient() primeiro.')
         }
-        return supabaseClient.rpc(fn: any, params)
+        return supabaseClient.rpc(fn, params)
       }
     }
     

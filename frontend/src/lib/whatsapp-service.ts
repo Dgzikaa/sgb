@@ -28,7 +28,7 @@ export interface WhatsAppContact {
 export interface WhatsAppTemplate {
   name: string;
   body_text: string;
-  parameters: any[];
+  parameters[];
   variables_count: number;
 }
 
@@ -227,7 +227,7 @@ export class WhatsAppNotificationService {
       }
 
       // Verificar permissáµes de notificaá§á£o
-      if (!this.canSendNotification(contato: any, options.modulo)) {
+      if (!this.canSendNotification(contato, options.modulo)) {
         return { success: false, error: 'Contato ná£o aceita este tipo de notificaá§á£o' };
       }
 
@@ -264,7 +264,7 @@ export class WhatsAppNotificationService {
       }
 
       // Enviar via WhatsApp API
-      const sendResult = await this.sendToWhatsAppAPI(contato: any, mensagem);
+      const sendResult = await this.sendToWhatsAppAPI(contato, mensagem);
 
       // Atualizar status da mensagem
       await supabase
@@ -325,7 +325,7 @@ export class WhatsAppNotificationService {
   /**
    * Processa notificaá§á£o para envio via WhatsApp
    */
-  async processNotificationForWhatsApp(notificacao: any): Promise<boolean> {
+  async processNotificationForWhatsApp(notificacao): Promise<boolean> {
     if (!this.isActive()) {
       return false;
     }
@@ -409,7 +409,7 @@ export class WhatsAppNotificationService {
    */
   private isWithinAllowedHours(contato: WhatsAppContact): boolean {
     const now = new Date();
-    const currentTime = now.toTimeString().slice(0: any, 5);
+    const currentTime = now.toTimeString().slice(0, 5);
     const currentDay = now.getDay() + 1; // 1=Domingo
 
     return contato.dias_semana.includes(currentDay) &&
@@ -420,7 +420,7 @@ export class WhatsAppNotificationService {
   /**
    * Envia para WhatsApp API
    */
-  private async sendToWhatsAppAPI(contato: WhatsAppContact, mensagem: any): Promise<{
+  private async sendToWhatsAppAPI(contato: WhatsAppContact, mensagem): Promise<{
     success: boolean;
     messageId?: string;
     errorCode?: string;
@@ -433,7 +433,7 @@ export class WhatsAppNotificationService {
     try {
       const url = `https://graph.facebook.com/${this.config.api_version}/${this.config.phone_number_id}/messages`;
       
-      let payload: any = {
+      let payload = {
         messaging_product: 'whatsapp',
         to: contato.numero_whatsapp
       };
@@ -460,7 +460,7 @@ export class WhatsAppNotificationService {
         payload.text = { body: mensagem.conteudo };
       }
 
-      const response = await fetch(url: any, {
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${this.config.access_token}`,
@@ -496,7 +496,7 @@ export class WhatsAppNotificationService {
   /**
    * Seleciona template baseado na notificaá§á£o
    */
-  private async selectTemplateForNotification(notificacao: any): Promise<{
+  private async selectTemplateForNotification(notificacao): Promise<{
     templateName: string;
     template: WhatsAppTemplate;
   } | null> {
@@ -510,7 +510,7 @@ export class WhatsAppNotificationService {
     };
 
     const templateName = templateMap[notificacao.tipo] || 'sgb_lembrete_checklist';
-    const template = moduleTemplates.find((t: any) => t.name === templateName);
+    const template = moduleTemplates.find((t) => t.name === templateName);
 
     if (!template) {
       return null;
@@ -523,8 +523,8 @@ export class WhatsAppNotificationService {
    * Prepara pará¢metros do template
    */
   private prepareTemplateParameters(
-    notificacao: any, 
-    usuario: any, 
+    notificacao, 
+    usuario, 
     template: WhatsAppTemplate
   ): string[] {
     const params: string[] = [];
@@ -562,7 +562,7 @@ export class WhatsAppNotificationService {
         break;
     }
 
-    return params.slice(0: any, template.variables_count);
+    return params.slice(0, template.variables_count);
   }
 }
 
@@ -728,7 +728,7 @@ _Sistema de Gestá£o de Bares_`
       .replace('{SETOR}', setor)
       .replace('{PRIORIDADE}', this.formatPrioridade(prioridade))
 
-    return this.sendMessage(phoneNumber: any, message)
+    return this.sendMessage(phoneNumber, message)
   }
 
   // =====================================================
@@ -747,7 +747,7 @@ _Sistema de Gestá£o de Bares_`
       .replace('{TEMPO_ATRASO}', tempoAtraso)
       .replace('{NIVEL_URGENCIA}', nivelUrgencia)
 
-    return this.sendMessage(phoneNumber: any, message)
+    return this.sendMessage(phoneNumber, message)
   }
 
   // =====================================================
@@ -770,7 +770,7 @@ _Sistema de Gestá£o de Bares_`
       .replace('{STATUS}', status)
       .replace('{RESUMO_RESULTADOS}', resumoResultados)
 
-    return this.sendMessage(phoneNumber: any, message)
+    return this.sendMessage(phoneNumber, message)
   }
 
   // =====================================================
@@ -803,7 +803,7 @@ _Sistema de Gestá£o de Bares_`
 
     // Enviar para cada náºmero com delay para ná£o sobrecarregar
     for (const phoneNumber of phoneNumbers) {
-      const sent = await this.sendMessage(phoneNumber: any, message)
+      const sent = await this.sendMessage(phoneNumber, message)
       
       if (sent) {
         success++
@@ -813,7 +813,7 @@ _Sistema de Gestá£o de Bares_`
       
       // Delay de 1 segundo entre envios
       if (phoneNumbers.indexOf(phoneNumber) < phoneNumbers.length - 1) {
-        await new Promise(resolve => setTimeout(resolve: any, 1000))
+        await new Promise(resolve => setTimeout(resolve, 1000))
       }
     }
 
@@ -997,7 +997,7 @@ _Sistema de Gestá£o de Bares_`
 
 export function useWhatsApp() {
   const sendMessage = async (to: string, message: string) => {
-    return WhatsAppService.sendMessage(to: any, message)
+    return WhatsAppService.sendMessage(to, message)
   }
 
   const sendReminder = async (
@@ -1009,20 +1009,20 @@ export function useWhatsApp() {
     prioridade: string
   ) => {
     return WhatsAppService.sendReminder(
-      phoneNumber, checklistNome: any, horario, setor: any, funcionario, prioridade
+      phoneNumber, checklistNome, horario, setor, funcionario, prioridade
     )
   }
 
   const sendAlert = async (phoneNumber: string, alert: ChecklistAlert) => {
-    return WhatsAppService.sendAlert(phoneNumber: any, alert)
+    return WhatsAppService.sendAlert(phoneNumber, alert)
   }
 
   const sendCompletion = async (phoneNumber: string, execution: ChecklistExecution) => {
-    return WhatsAppService.sendCompletion(phoneNumber: any, execution)
+    return WhatsAppService.sendCompletion(phoneNumber, execution)
   }
 
   const shareChecklist = async (phoneNumbers: string[], execution: ChecklistExecution) => {
-    return WhatsAppService.shareChecklist(phoneNumbers: any, execution)
+    return WhatsAppService.shareChecklist(phoneNumbers, execution)
   }
 
   const testConnection = async (phoneNumber: string) => {

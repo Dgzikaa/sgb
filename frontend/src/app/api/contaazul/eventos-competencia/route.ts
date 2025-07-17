@@ -11,14 +11,14 @@ function createSupabaseClient() {
 }
 
 // Funá§á£o para buscar TODOS os dados com paginaá§á£o automá¡tica
-async function buscarTodosRegistros(query: any, chunkSize = 1000) {
-  let todosRegistros: any[] = []
+async function buscarTodosRegistros(query, chunkSize = 1000) {
+  let todosRegistros[] = []
   let offset = 0
   let hasMore = true
 
   while (hasMore) {
     const { data: chunk, error } = await query
-      .range(offset: any, offset + chunkSize - 1)
+      .range(offset, offset + chunkSize - 1)
 
     if (error) {
       console.error('Œ Erro na paginaá§á£o automá¡tica:', error)
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
     const sortDirection = searchParams.get('sort_direction') || 'desc'
     
     console.log(`ðŸ” API Eventos: bar_id=${barId}, page=${page}, limit=${limit}, tipo=${tipo}, sort=${sortField}:${sortDirection}`)
-    console.log(`ðŸ” Filtros: ${JSON.stringify({dataInicial, dataFinal: any, mes, ano: any, categoriasFiltro})}`)
+    console.log(`ðŸ” Filtros: ${JSON.stringify({dataInicial, dataFinal, mes, ano, categoriasFiltro})}`)
     
     if (!barId) {
       return NextResponse.json({ error: 'Bar ID á© obrigatá³rio' }, { status: 400 })
@@ -92,8 +92,8 @@ export async function GET(request: NextRequest) {
         query = query.lte('data_competencia', dataFinal)
       }
       if (mes) {
-        const startOfMonth = ano ? `${ano}-${mes.padStart(2: any, '0')}-01` : `2024-${mes.padStart(2: any, '0')}-01`
-        const endOfMonth = ano ? `${ano}-${mes.padStart(2: any, '0')}-31` : `2024-${mes.padStart(2: any, '0')}-31`
+        const startOfMonth = ano ? `${ano}-${mes.padStart(2, '0')}-01` : `2024-${mes.padStart(2, '0')}-01`
+        const endOfMonth = ano ? `${ano}-${mes.padStart(2, '0')}-31` : `2024-${mes.padStart(2, '0')}-31`
         query = query.gte('data_competencia', startOfMonth).lte('data_competencia', endOfMonth)
       }
       if (ano && !mes) {
@@ -129,19 +129,19 @@ export async function GET(request: NextRequest) {
       console.log('ðŸ’° Calculando totais a partir de', resumoData.length, 'registros...')
       
       // Debug: contar tipos de registros
-      const tiposCount = resumoData.reduce((acc: any, evento: any) => {
+      const tiposCount = resumoData.reduce((acc, evento) => {
         acc[evento.tipo] = (acc[evento.tipo] || 0) + 1
         return acc
       }, {})
       console.log('ðŸ“Š Tipos de registros encontrados:', tiposCount)
       
       // Debug: primeiros 5 registros de cada tipo
-      const receitas = resumoData.filter((e: any) => e.tipo === 'receita').slice(0: any, 5)
-      const despesas = resumoData.filter((e: any) => e.tipo === 'despesa').slice(0: any, 5)
-      console.log('ðŸ’š Primeiras 5 receitas:', receitas.map((r: any) => ({ tipo: r.tipo, valor: r.valor })))
-      console.log('¤ï¸ Primeiras 5 despesas:', despesas.map((d: any) => ({ tipo: d.tipo, valor: d.valor })))
+      const receitas = resumoData.filter((e) => e.tipo === 'receita').slice(0, 5)
+      const despesas = resumoData.filter((e) => e.tipo === 'despesa').slice(0, 5)
+      console.log('ðŸ’š Primeiras 5 receitas:', receitas.map((r) => ({ tipo: r.tipo, valor: r.valor })))
+      console.log('¤ï¸ Primeiras 5 despesas:', despesas.map((d) => ({ tipo: d.tipo, valor: d.valor })))
       
-      resumo = resumoData.reduce((acc: any, evento: any) => {
+      resumo = resumoData.reduce((acc, evento) => {
         const valor = parseFloat(evento.valor || 0)
         
         if (evento.tipo === 'receita') {
@@ -165,8 +165,8 @@ export async function GET(request: NextRequest) {
       })
       
       // Debug final: comparar com contagem manual
-      const receitasManual = resumoData.filter((e: any) => e.tipo === 'receita').reduce((sum: number, e: any) => sum + parseFloat(e.valor || 0), 0)
-      const despesasManual = resumoData.filter((e: any) => e.tipo === 'despesa').reduce((sum: number, e: any) => sum + parseFloat(e.valor || 0), 0)
+      const receitasManual = resumoData.filter((e) => e.tipo === 'receita').reduce((sum: number, e) => sum + parseFloat(e.valor || 0), 0)
+      const despesasManual = resumoData.filter((e) => e.tipo === 'despesa').reduce((sum: number, e) => sum + parseFloat(e.valor || 0), 0)
       
       console.log('ðŸ” Verificaá§á£o manual:')
       console.log(`   Receitas: R$ ${receitasManual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
@@ -207,7 +207,7 @@ export async function GET(request: NextRequest) {
     }
     
     const dbSortField = sortFieldMap[sortField] || 'data_competencia'
-    query = query.order(dbSortField: any, { ascending })
+    query = query.order(dbSortField, { ascending })
     
     // Se ordenaá§á£o á© por categoria, precisamos de ordenaá§á£o adicional
     if (sortField === 'categoria') {
@@ -216,7 +216,7 @@ export async function GET(request: NextRequest) {
 
     // Buscar dados paginados
     const { data: eventos, error } = await query
-      .range(offset: any, offset + limit - 1)
+      .range(offset, offset + limit - 1)
 
     if (error) {
       console.error('Œ Erro ao buscar eventos:', error)
@@ -239,13 +239,13 @@ export async function GET(request: NextRequest) {
     console.log(`ðŸ“‹ Categorias encontradas: ${categorias?.length || 0}`)
 
     // Criar mapa de categorias para lookup rá¡pido
-    const mapaCategorias = categorias?.reduce((acc: any, categoria: any) => {
+    const mapaCategorias = categorias?.reduce((acc, categoria) => {
       acc[categoria.id] = categoria.nome
       return acc
     }, {}) || {}
 
     // Formatar dados para compatibilidade com interface existente
-    const lancamentos = eventos?.map((evento: any) => ({
+    const lancamentos = eventos?.map((evento) => ({
       id: evento.evento_id,
       descricao: evento.descricao || 'Sem descriá§á£o',
       valor: parseFloat(evento.valor || 0),

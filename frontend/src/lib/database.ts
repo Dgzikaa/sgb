@@ -33,7 +33,7 @@ export async function testConnection(): Promise<boolean> {
     if (!supabase) throw new Error('Erro ao conectar com banco');
     
     // Teste simples para verificar conectividade
-    const { data, error: any, count } = await supabase
+    const { data, error, count } = await supabase
       .from('analitico')
       .select('*', { count: 'exact', head: true })
     
@@ -45,7 +45,7 @@ export async function testConnection(): Promise<boolean> {
     console.log('œ… Conexá£o com Supabase OK')
     console.log(`ðŸ“Š Total de registros na tabela 'analitico': ${count}`)
     return true
-  } catch (error: any) {
+  } catch (error) {
     console.error('Œ Erro na conexá£o com Supabase:', error)
     return false
   }
@@ -62,7 +62,7 @@ export async function getProdutoMaisVendido(periodo: 'hoje' | 'semana' | 'mes' =
     const hoje = new Date().toISOString().split('T')[0]
     let query = supabase
       .from('analitico')
-      .select('prd_desc, grp_desc: any, valorfinal, qtd: any, vd_dtgerencial')
+      .select('prd_desc, grp_desc, valorfinal, qtd, vd_dtgerencial')
       .not('prd_desc', 'is', null)
       .not('grp_desc', 'is', null)
       .gt('valorfinal', 0)
@@ -101,7 +101,7 @@ export async function getProdutoMaisVendido(periodo: 'hoje' | 'semana' | 'mes' =
         
         query = supabase
           .from('analitico')
-          .select('prd_desc, grp_desc: any, valorfinal, qtd: any, vd_dtgerencial')
+          .select('prd_desc, grp_desc, valorfinal, qtd, vd_dtgerencial')
           .eq('vd_dtgerencial', dataRecente)
           .not('prd_desc', 'is', null)
           .not('grp_desc', 'is', null)
@@ -135,7 +135,7 @@ export async function getProdutoMaisVendido(periodo: 'hoje' | 'semana' | 'mes' =
     console.log(`ðŸ“… Perá­odo dos dados: ${data[0]?.vd_dtgerencial} a ${data[data.length-1]?.vd_dtgerencial}`)
     
     // Agrupar produtos e somar quantidades/valores
-    const produtosAgrupados = data.reduce((acc: any, item: any) => {
+    const produtosAgrupados = data.reduce((acc, item) => {
       const produto = item.prd_desc || 'Produto Desconhecido'
       const grupo = item.grp_desc || 'Sem Categoria'
       const valor = parseFloat(item.valorfinal) || 0
@@ -158,9 +158,9 @@ export async function getProdutoMaisVendido(periodo: 'hoje' | 'semana' | 'mes' =
     
     // Ordenar por quantidade (mais vendido)
     const produtosOrdenados = Object.values(produtosAgrupados)
-      .sort((a: any, b: any) => b.quantidade - a.quantidade)
+      .sort((a, b) => b.quantidade - a.quantidade)
     
-    console.log('ðŸ“Š Top 3 produtos por quantidade:', produtosOrdenados.slice(0: any, 3))
+    console.log('ðŸ“Š Top 3 produtos por quantidade:', produtosOrdenados.slice(0, 3))
     
     return produtosOrdenados[0] as ProdutoMaisVendido || null
     
@@ -186,7 +186,7 @@ export async function getVendasData(): Promise<VendasData> {
     // Vendas de hoje - primeiro tenta hoje, sená£o usa data mais recente
     let { data: vendasHoje, error: errorHoje } = await supabase
       .from('analitico')
-      .select('valorfinal, prd_desc: any, vd_dtgerencial, vd')
+      .select('valorfinal, prd_desc, vd_dtgerencial, vd')
       .eq('vd_dtgerencial', hoje)
       .gt('valorfinal', 0)
     
@@ -207,7 +207,7 @@ export async function getVendasData(): Promise<VendasData> {
         
         const result = await supabase
           .from('analitico')
-          .select('valorfinal, prd_desc: any, vd_dtgerencial, vd')
+          .select('valorfinal, prd_desc, vd_dtgerencial, vd')
           .eq('vd_dtgerencial', dataUsar)
           .gt('valorfinal', 0)
         
@@ -234,12 +234,12 @@ export async function getVendasData(): Promise<VendasData> {
     }
     
     // Calcular estatá­sticas
-    const valoresTotalHoje = vendasHoje?.reduce((sum: number, item: any) => sum + (parseFloat(item.valorfinal) || 0), 0) || 0
-    const valoresTotalSemana = vendasSemana?.reduce((sum: number, item: any) => sum + (parseFloat(item.valorfinal) || 0), 0) || 0
+    const valoresTotalHoje = vendasHoje?.reduce((sum: number, item) => sum + (parseFloat(item.valorfinal) || 0), 0) || 0
+    const valoresTotalSemana = vendasSemana?.reduce((sum: number, item) => sum + (parseFloat(item.valorfinal) || 0), 0) || 0
     const totalPedidosHoje = vendasHoje?.length || 0
     
     // Calcular clientes áºnicos para ticket má©dio correto
-    const clientesUnicos = new Set(vendasHoje?.map((item: any) => item.vd) || [])
+    const clientesUnicos = new Set(vendasHoje?.map((item) => item.vd) || [])
     const totalClientesHoje = clientesUnicos.size || 1
     const ticketMedio = totalClientesHoje > 0 ? valoresTotalHoje / totalClientesHoje : 0
     
@@ -276,7 +276,7 @@ export async function getClientesData(): Promise<ClientesData> {
     // Para clientes, vamos usar dados de vendas áºnicos por mesa (vd) - primeiro tenta hoje
     let { data: vendas, error } = await supabase
       .from('analitico')
-      .select('vd_dtgerencial, vd: any, vd_mesadesc')
+      .select('vd_dtgerencial, vd, vd_mesadesc')
       .eq('vd_dtgerencial', hoje)
       .not('vd', 'is', null)
     
@@ -297,7 +297,7 @@ export async function getClientesData(): Promise<ClientesData> {
         
         const result = await supabase
           .from('analitico')
-          .select('vd_dtgerencial, vd: any, vd_mesadesc')
+          .select('vd_dtgerencial, vd, vd_mesadesc')
           .eq('vd_dtgerencial', dataUsar)
           .not('vd', 'is', null)
         
@@ -312,7 +312,7 @@ export async function getClientesData(): Promise<ClientesData> {
     }
     
     // Contar mesas áºnicas (clientes áºnicos)
-    const mesasUnicas = new Set(vendas?.map((item: any) => item.vd) || [])
+    const mesasUnicas = new Set(vendas?.map((item) => item.vd) || [])
     const clientesEstimados = mesasUnicas.size
     const novosClientes = Math.floor(clientesEstimados * 0.3)
     const recorrentes = clientesEstimados - novosClientes
@@ -323,7 +323,7 @@ export async function getClientesData(): Promise<ClientesData> {
       recorrentes,
       dataUsada: vendas?.[0]?.vd_dtgerencial,
       totalRegistros: vendas?.length,
-      mesasUnicas: Array.from(mesasUnicas).slice(0: any, 5) // mostrar primeiras 5 mesas
+      mesasUnicas: Array.from(mesasUnicas).slice(0, 5) // mostrar primeiras 5 mesas
     })
     
     return {
@@ -370,26 +370,26 @@ export async function getDadosSemana(dataInicio?: string): Promise<DadosSemana[]
       diasSemana.push(data.toISOString().split('T')[0])
     }
 
-    const dadosPromises = diasSemana.map(async (data: any, index: any) => {
+    const dadosPromises = diasSemana.map(async (data, index) => {
       // Mapear corretamente o dia da semana baseado na data real
       const diaNomeReal = new Date(data + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'long' })
       const diaNomeCapitalizado = diaNomeReal.charAt(0).toUpperCase() + diaNomeReal.slice(1)
       
       try {
         // Buscar dados de todas as fontes para cada dia
-        const [periodoData, pagamentosData: any, symplaData] = await Promise.all([
-          supabase.from('periodo').select('pessoas, vr_pagamentos: any, dt_gerencial').eq('dt_gerencial', data),
+        const [periodoData, pagamentosData, symplaData] = await Promise.all([
+          supabase.from('periodo').select('pessoas, vr_pagamentos, dt_gerencial').eq('dt_gerencial', data),
           supabase.from('pagamentos').select('liquido, dt_gerencial').eq('dt_gerencial', data),
-          supabase.from('sympla_bilheteria').select('total_liquido, qtd_checkins_realizados: any, data_evento').eq('data_evento', data)
+          supabase.from('sympla_bilheteria').select('total_liquido, qtd_checkins_realizados, data_evento').eq('data_evento', data)
         ])
 
         // Calcular má©tricas do dia
-        const faturamentoPagamentos = pagamentosData.data?.reduce((sum: number, item: any) => sum + parseFloat(item.liquido || '0'), 0) || 0
-        const faturamentoSympla = symplaData.data?.reduce((sum: number, item: any) => sum + parseFloat(item.total_liquido || '0'), 0) || 0
+        const faturamentoPagamentos = pagamentosData.data?.reduce((sum: number, item) => sum + parseFloat(item.liquido || '0'), 0) || 0
+        const faturamentoSympla = symplaData.data?.reduce((sum: number, item) => sum + parseFloat(item.total_liquido || '0'), 0) || 0
         const faturamentoTotal = faturamentoPagamentos + faturamentoSympla
 
-        const pessoasPeriodo = periodoData.data?.reduce((sum: number, item: any) => sum + parseInt(item.pessoas || '0'), 0) || 0
-        const pessoasSympla = symplaData.data?.reduce((sum: number, item: any) => sum + parseInt(item.qtd_checkins_realizados || '0'), 0) || 0
+        const pessoasPeriodo = periodoData.data?.reduce((sum: number, item) => sum + parseInt(item.pessoas || '0'), 0) || 0
+        const pessoasSympla = symplaData.data?.reduce((sum: number, item) => sum + parseInt(item.qtd_checkins_realizados || '0'), 0) || 0
         const clientesTotal = pessoasPeriodo + pessoasSympla
 
         return {
@@ -455,7 +455,7 @@ export async function getHistoricoDiaSemana(diaSemana: string, ultimasSemanas = 
     // Filtrar apenas o dia da semana especá­fico e agrupar por data
     const dadosFiltratos: Record<string, any> = {}
     
-    pagamentosData.data?.forEach((item: any) => {
+    pagamentosData.data?.forEach((item) => {
       const data = new Date(item.dt_gerencial)
       if (data.getDay() === diaSemanaIndex) {
         const dataStr = item.dt_gerencial
@@ -466,7 +466,7 @@ export async function getHistoricoDiaSemana(diaSemana: string, ultimasSemanas = 
       }
     })
 
-    periodoData.data?.forEach((item: any) => {
+    periodoData.data?.forEach((item) => {
       const data = new Date(item.dt_gerencial)
       if (data.getDay() === diaSemanaIndex) {
         const dataStr = item.dt_gerencial
@@ -479,12 +479,12 @@ export async function getHistoricoDiaSemana(diaSemana: string, ultimasSemanas = 
 
     // Calcular ticket má©dio e ordenar
     const resultados = Object.values(dadosFiltratos)
-      .map((item: any) => ({
+      .map((item) => ({
         ...item,
         ticketMedio: item.clientes > 0 ? item.faturamento / item.clientes : 0
       }))
-      .sort((a: any, b: any) => new Date(b.data).getTime() - new Date(a.data).getTime())
-      .slice(0: any, ultimasSemanas)
+      .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
+      .slice(0, ultimasSemanas)
 
     console.log(`ðŸ“ˆ Histá³rico de ${diaSemana}:`, resultados.length, 'registros encontrados')
     return resultados
@@ -501,30 +501,30 @@ export async function getComparacaoPeriodos(periodo1: [string, string], periodo2
     if (!supabase) throw new Error('Erro ao conectar com banco');
 
   try {
-    console.log('ðŸŽ¯ Comparando perá­odos:', periodo1: any, 'vs', periodo2)
+    console.log('ðŸŽ¯ Comparando perá­odos:', periodo1, 'vs', periodo2)
     
     const calcularPeriodo = async ([inicio, fim]: [string, string]) => {
       const supabase = await getSupabaseClient();
       if (!supabase) throw new Error('Erro ao conectar com banco');
 
-      const [pagamentos, periodo: any, sympla] = await Promise.all([
+      const [pagamentos, periodo, sympla] = await Promise.all([
         supabase.from('pagamentos').select('liquido, dt_gerencial').gte('dt_gerencial', inicio).lte('dt_gerencial', fim),
         supabase.from('periodo').select('pessoas, dt_gerencial').gte('dt_gerencial', inicio).lte('dt_gerencial', fim),
-        supabase.from('sympla_bilheteria').select('total_liquido, qtd_checkins_realizados: any, data_evento').gte('data_evento', inicio).lte('data_evento', fim)
+        supabase.from('sympla_bilheteria').select('total_liquido, qtd_checkins_realizados, data_evento').gte('data_evento', inicio).lte('data_evento', fim)
       ])
 
-      const faturamentoPagamentos = pagamentos.data?.reduce((sum: number, item: any) => sum + parseFloat(item.liquido || '0'), 0) || 0
-      const faturamentoSympla = sympla.data?.reduce((sum: number, item: any) => sum + parseFloat(item.total_liquido || '0'), 0) || 0
+      const faturamentoPagamentos = pagamentos.data?.reduce((sum: number, item) => sum + parseFloat(item.liquido || '0'), 0) || 0
+      const faturamentoSympla = sympla.data?.reduce((sum: number, item) => sum + parseFloat(item.total_liquido || '0'), 0) || 0
       const faturamentoTotal = faturamentoPagamentos + faturamentoSympla
 
-      const pessoasPeriodo = periodo.data?.reduce((sum: number, item: any) => sum + parseInt(item.pessoas || '0'), 0) || 0
-      const pessoasSympla = sympla.data?.reduce((sum: number, item: any) => sum + parseInt(item.qtd_checkins_realizados || '0'), 0) || 0
+      const pessoasPeriodo = periodo.data?.reduce((sum: number, item) => sum + parseInt(item.pessoas || '0'), 0) || 0
+      const pessoasSympla = sympla.data?.reduce((sum: number, item) => sum + parseInt(item.qtd_checkins_realizados || '0'), 0) || 0
       const clientesTotal = pessoasPeriodo + pessoasSympla
 
       const diasUnicos = new Set([
-        ...pagamentos.data?.map((item: any) => item.dt_gerencial) || [],
-        ...periodo.data?.map((item: any) => item.dt_gerencial) || [],
-        ...sympla.data?.map((item: any) => item.data_evento) || []
+        ...pagamentos.data?.map((item) => item.dt_gerencial) || [],
+        ...periodo.data?.map((item) => item.dt_gerencial) || [],
+        ...sympla.data?.map((item) => item.data_evento) || []
       ]).size
 
       return {
@@ -588,7 +588,7 @@ export async function getAnaliseCompleta(periodo: 'hoje' | 'semana' | 'mes' = 's
     }
 
     // Buscar dados bá¡sicos
-    const [vendasData, clientesData: any, produtoTop] = await Promise.all([
+    const [vendasData, clientesData, produtoTop] = await Promise.all([
       getVendasData(),
       getClientesData(), 
       getProdutoMaisVendido(periodo)
@@ -598,13 +598,13 @@ export async function getAnaliseCompleta(periodo: 'hoje' | 'semana' | 'mes' = 's
     const dadosSemana = await getDadosSemana()
     
     // Encontrar melhor dia da semana
-    const melhorDia = dadosSemana.reduce((melhor: any, dia: any) => 
+    const melhorDia = dadosSemana.reduce((melhor, dia) => 
       dia.faturamento > melhor.faturamento ? dia : melhor
     )
 
     // Calcular má©dias
-    const mediaFaturamento = dadosSemana.reduce((sum: any, dia: any) => sum + dia.faturamento, 0) / dadosSemana.length
-    const mediaClientes = dadosSemana.reduce((sum: any, dia: any) => sum + dia.clientes, 0) / dadosSemana.length
+    const mediaFaturamento = dadosSemana.reduce((sum, dia) => sum + dia.faturamento, 0) / dadosSemana.length
+    const mediaClientes = dadosSemana.reduce((sum, dia) => sum + dia.clientes, 0) / dadosSemana.length
 
     return {
       vendas: vendasData,
@@ -619,7 +619,7 @@ export async function getAnaliseCompleta(periodo: 'hoje' | 'semana' | 'mes' = 's
       },
       insights: {
         performanceSemana: melhorDia.faturamento / mediaFaturamento,
-        consistencia: dadosSemana.filter((dia: any) => dia.faturamento > mediaFaturamento * 0.8).length / 7,
+        consistencia: dadosSemana.filter((dia) => dia.faturamento > mediaFaturamento * 0.8).length / 7,
         crescimento: vendasData ? vendasData.vendas_hoje / vendasData.vendas_semana : 0
       }
     }

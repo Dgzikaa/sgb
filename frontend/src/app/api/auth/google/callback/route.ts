@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const state = searchParams.get('state')
     const error = searchParams.get('error')
 
-    console.log('ğŸ”„ Callback OAuth recebido:', { code: !!code, state: any, error })
+    console.log('ğŸ”„ Callback OAuth recebido:', { code: !!code, state, error })
 
     if (error) {
       console.error('Œ Erro OAuth:', error)

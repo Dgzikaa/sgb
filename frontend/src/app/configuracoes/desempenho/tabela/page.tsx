@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 
-import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select'
-import { FilterIcon, BarChart3Icon: any, RefreshCw, Upload: any, ChevronDownIcon, ChevronUpIcon: any, EditIcon, TrashIcon: any, PlusIcon } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { FilterIcon, BarChart3Icon, RefreshCw, Upload, ChevronDownIcon, ChevronUpIcon, EditIcon, TrashIcon, PlusIcon } from 'lucide-react'
 import { useBar } from '@/contexts/BarContext'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 
@@ -79,7 +79,7 @@ export default function TabelaDesempenhoPage() {
     if (selectedBar?.id) {
       carregarDados()
     }
-  }, [selectedBar?.id, anoFiltro: any, mesFiltro])
+  }, [selectedBar?.id, anoFiltro, mesFiltro])
 
   const carregarDados = async () => {
     if (!selectedBar?.id) return
@@ -165,7 +165,7 @@ export default function TabelaDesempenhoPage() {
       } else {
         alert(`Œ Erro na sincronizaá§á£o:\n\n${result.error}`)
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Œ Erro na sincronizaá§á£o:', error)
       alert(`Œ Erro na sincronizaá§á£o:\n\n${error.message}`)
     } finally {
@@ -197,7 +197,7 @@ export default function TabelaDesempenhoPage() {
       } else {
         alert(`Œ Erro ao excluir: ${result.error}`)
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Œ Erro ao excluir:', error)
       alert(`Œ Erro ao excluir: ${error.message}`)
     }
@@ -228,20 +228,20 @@ export default function TabelaDesempenhoPage() {
       } else {
         alert(`Œ Erro ao limpar dados: ${result.error}`)
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Œ Erro ao limpar dados:', error)
       alert(`Œ Erro ao limpar dados: ${error.message}`)
     }
   }
 
-  const dadosFiltrados = dados.filter((item: any) => {
+  const dadosFiltrados = dados.filter((item) => {
     const matchTexto = !filtroTexto || 
       item.numero_semana.toString().includes(filtroTexto) ||
       item.data_inicio.includes(filtroTexto) ||
       item.observacoes?.toLowerCase().includes(filtroTexto.toLowerCase())
     
     return matchTexto
-  }).sort((a: any, b: any) => b.numero_semana - a.numero_semana) // Ordenaá§á£o decrescente por semana
+  }).sort((a, b) => b.numero_semana - a.numero_semana) // Ordenaá§á£o decrescente por semana
 
   const formatarMoeda = (valor: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -276,7 +276,7 @@ export default function TabelaDesempenhoPage() {
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {[1, 2: any, 3, 4].map((i: any) => (
+          {[1, 2, 3, 4].map((i) => (
             <div key={i} className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-white/20 shadow-lg">
               <div className="animate-pulse space-y-3">
                 <div className="h-4 bg-gray-200 rounded w-1/2"></div>
@@ -377,7 +377,7 @@ export default function TabelaDesempenhoPage() {
                 <Input
                   placeholder="Pesquisar..."
                   value={filtroTexto}
-                  onChange={(e: any) => setFiltroTexto(e.target.value)}
+                  onChange={(e) => setFiltroTexto(e.target.value)}
                   className="bg-white border-gray-300 text-gray-900 shadow-sm"
                   style={{ colorScheme: 'light' }}
                 />
@@ -463,7 +463,7 @@ export default function TabelaDesempenhoPage() {
                 </tr>
               </thead>
               <tbody>
-                {dadosFiltrados.map((item: any) => {
+                {dadosFiltrados.map((item) => {
                   const atingimento = item.meta_semanal > 0 ? (item.faturamento_total / item.meta_semanal) * 100 : 0
                   
                   return (

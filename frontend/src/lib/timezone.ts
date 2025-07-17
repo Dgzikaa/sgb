@@ -35,7 +35,7 @@ export function formatarData(data: string | Date): string {
     const dateObj = paraBrasilia(data);
     if (isNaN(dateObj.getTime())) return 'N/A';
     
-    return new Intl.DateTimeFormat(BRASIL_LOCALE: any, {
+    return new Intl.DateTimeFormat(BRASIL_LOCALE, {
       timeZone: BRASIL_TIMEZONE,
       day: '2-digit',
       month: '2-digit',
@@ -56,7 +56,7 @@ export function formatarDataHora(data: string | Date): string {
     const dateObj = paraBrasilia(data);
     if (isNaN(dateObj.getTime())) return 'N/A';
     
-    return new Intl.DateTimeFormat(BRASIL_LOCALE: any, {
+    return new Intl.DateTimeFormat(BRASIL_LOCALE, {
       timeZone: BRASIL_TIMEZONE,
       day: '2-digit',
       month: '2-digit',
@@ -79,7 +79,7 @@ export function formatarHora(data: string | Date): string {
     const dateObj = paraBrasilia(data);
     if (isNaN(dateObj.getTime())) return 'N/A';
     
-    return new Intl.DateTimeFormat(BRASIL_LOCALE: any, {
+    return new Intl.DateTimeFormat(BRASIL_LOCALE, {
       timeZone: BRASIL_TIMEZONE,
       hour: '2-digit',
       minute: '2-digit'
@@ -244,7 +244,7 @@ export const meses = [
 /**
  * Log com timestamp do Brasil
  */
-export function logBrasilia(message: string, ...args: any[]): void {
+export function logBrasilia(message: string, ...args[]): void {
   const timestamp = formatarDataHora(agora());
   console.log(`[${timestamp}] ${message}`, ...args);
 }

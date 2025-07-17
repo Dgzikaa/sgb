@@ -137,7 +137,7 @@ async function executarSincronizacaoAutomatica() {
 }
 
 // Salvar log da execu·ß·£o
-async function salvarLogExecucao(resultado: any) {
+async function salvarLogExecucao(resultado) {
   const logEntry = {
     sistema: 'contaazul',
     tipo: 'cron_sync',
@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString()
     })
     
-  } catch (error: any) {
+  } catch (error) {
     console.error('ùå Erro no cron job:', error)
     
     // Salvar log de erro
@@ -258,7 +258,7 @@ export async function GET(request: NextRequest) {
       historico: logs
     })
     
-  } catch (error: any) {
+  } catch (error) {
     console.error('ùå Erro ao verificar status:', error)
     return NextResponse.json({
       success: false,

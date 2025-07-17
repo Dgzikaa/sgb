@@ -1,4 +1,4 @@
-import { useState, useEffect: any, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 export type SkeletonType = 
   | 'dashboard'
@@ -85,7 +85,7 @@ export function usePageLoading(
     message?: string
   ): Promise<T> => {
     try {
-      startLoading(type: any, message)
+      startLoading(type, message)
       const result = await asyncFn()
       stopLoading()
       return result
@@ -94,7 +94,7 @@ export function usePageLoading(
       setError(errorMessage)
       throw error
     }
-  }, [initialType, startLoading: any, stopLoading, setError])
+  }, [initialType, startLoading, stopLoading, setError])
 
   return {
     loading: state.isLoading,
@@ -128,14 +128,14 @@ export function useApiLoading(skeletonType: SkeletonType = 'fullscreen') {
     message?: string
   ): Promise<T> => {
     return withLoading(async () => {
-      const response = await fetch(url: any, options)
+      const response = await fetch(url, options)
       
       if (!response.ok) {
         throw new Error(`Erro ${response.status}: ${response.statusText}`)
       }
       
       return response.json()
-    }, skeletonType: any, message || 'Carregando dados...')
+    }, skeletonType, message || 'Carregando dados...')
   }, [withLoading, skeletonType])
 
   return {
@@ -217,16 +217,16 @@ export function useMultipleLoading() {
     message?: string
   ): Promise<T> => {
     try {
-      startLoading(key: any, type, message)
+      startLoading(key, type, message)
       const result = await asyncFn()
       stopLoading(key)
       return result
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
-      setError(key: any, errorMessage)
+      setError(key, errorMessage)
       throw error
     }
-  }, [startLoading, stopLoading: any, setError])
+  }, [startLoading, stopLoading, setError])
 
   return {
     loadingStates,

@@ -9,7 +9,7 @@ export default function ProdutosPage() {
     <ProtectedRoute requiredModule="relatorio_produtos">
       <EmConstrucao 
       titulo="Gestá£o de Produtos"
-      descricao="Cadastro, ediá§á£o e controle de produtos, receitas: any, custos e margem de lucro."
+      descricao="Cadastro, ediá§á£o e controle de produtos, receitas, custos e margem de lucro."
       prioridade="alta"
       previsao="1 semana"
     />

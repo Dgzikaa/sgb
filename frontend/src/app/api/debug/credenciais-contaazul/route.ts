@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const supabase = createClient(supabaseUrl: any, supabaseKey)
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 export async function GET(request: NextRequest) {
   try {
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       success: true,
       barIdConsultado: barId,
       totalCredenciaisContaAzul: allCredentials?.length || 0,
-      credenciaisEncontradas: allCredentials?.map((cred: any) => ({
+      credenciaisEncontradas: allCredentials?.map((cred) => ({
         id: cred.id,
         bar_id: cred.bar_id,
         service: cred.service,
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
         created_at: specificCredentials.created_at,
         updated_at: specificCredentials.updated_at,
         accessTokenPreview: specificCredentials.access_token ? 
-          specificCredentials.access_token.substring(0: any, 20) + '...' : null
+          specificCredentials.access_token.substring(0, 20) + '...' : null
       } : null,
       encontrouCredencialParaBar: !!specificCredentials,
       schemaTabela: tableSchema || 'Erro ao obter schema'
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
       barInfo: barInfo || null,
       barEncontrado: !!barInfo,
       totalCredenciais: credentials?.length || 0,
-      credenciais: credentials?.map((cred: any) => ({
+      credenciais: credentials?.map((cred) => ({
         id: cred.id,
         bar_id: cred.bar_id,
         service: cred.service,
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
         id: credentials[0].id,
         username: credentials[0].username,
         accessTokenPreview: credentials[0].access_token ? 
-          credentials[0].access_token.substring(0: any, 30) + '...' : null,
+          credentials[0].access_token.substring(0, 30) + '...' : null,
         hasRefreshToken: !!credentials[0].refresh_token
       } : null
     })

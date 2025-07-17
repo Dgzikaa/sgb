@@ -1,5 +1,5 @@
-    import React, { useState, useRef: any, useEffect } from 'react'
-import { Search, ChevronDown: any, User } from 'lucide-react'
+    import React, { useState, useRef, useEffect } from 'react'
+import { Search, ChevronDown, User } from 'lucide-react'
 
 interface Option {
   value: string
@@ -35,13 +35,13 @@ export function SelectWithSearch({
   const inputRef = useRef<HTMLInputElement>(null)
 
   // Filtrar opá§áµes baseado no termo de busca
-  const filteredOptions = options.filter((option: any) =>
+  const filteredOptions = options.filter((option) =>
     option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
     option.email?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   // Encontrar a opá§á£o selecionada
-  const selectedOption = options.find((option: any) => option.value === value)
+  const selectedOption = options.find((option) => option.value === value)
 
   // Fechar dropdown quando clicar fora
   useEffect(() => {
@@ -165,7 +165,7 @@ export function SelectWithSearch({
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder={searchPlaceholder}
                 value={searchTerm}
-                onChange={(e: any) => {
+                onChange={(e) => {
                   setSearchTerm(e.target.value)
                   setHighlightedIndex(-1)
                 }}
@@ -181,7 +181,7 @@ export function SelectWithSearch({
                 Nenhum resultado encontrado
               </div>
             ) : (
-              filteredOptions.map((option: any, index: any) => (
+              filteredOptions.map((option, index) => (
                 <button
                   key={option.value}
                   type="button"

@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     const rawParams = Object.fromEntries(url.searchParams.entries());
     
     // Converter tipos
-    const processedParams: any = { ...rawParams };
+    const processedParams = { ...rawParams };
     if (processedParams.page) processedParams.page = parseInt(processedParams.page);
     if (processedParams.limit) processedParams.limit = parseInt(processedParams.limit);
     if (processedParams.ativa) processedParams.ativa = processedParams.ativa === 'true';
@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
 
     // Paginaá§á£o
     const offset = (params.page - 1) * params.limit;
-    query = query.range(offset: any, offset + params.limit - 1);
+    query = query.range(offset, offset + params.limit - 1);
 
     const { data: metrics, error } = await query;
 
@@ -122,35 +122,35 @@ export async function GET(request: NextRequest) {
     // Buscar estatá­sticas gerais
     const { data: stats } = await supabase
       .from('ai_metrics')
-      .select('nome_metrica, categoria: any, performance, tendencia: any, alerta_ativado, valor')
+      .select('nome_metrica, categoria, performance, tendencia, alerta_ativado, valor')
       .eq('bar_id', bar_id)
       .eq('ativa', true);
 
     const estatisticas = {
       total_metricas: stats?.length || 0,
-      alertas_ativos: stats?.filter((s: any) => s.alerta_ativado).length || 0,
-      por_categoria: stats?.reduce((acc: any, s: any) => {
+      alertas_ativos: stats?.filter((s) => s.alerta_ativado).length || 0,
+      por_categoria: stats?.reduce((acc, s) => {
         acc[s.categoria] = (acc[s.categoria] || 0) + 1;
         return acc;
       }, {} as Record<string, number>) || {},
       por_performance: {
-        excelente: stats?.filter((s: any) => s.performance === 'excelente').length || 0,
-        bom: stats?.filter((s: any) => s.performance === 'bom').length || 0,
-        regular: stats?.filter((s: any) => s.performance === 'regular').length || 0,
-        ruim: stats?.filter((s: any) => s.performance === 'ruim').length || 0,
-        critico: stats?.filter((s: any) => s.performance === 'critico').length || 0
+        excelente: stats?.filter((s) => s.performance === 'excelente').length || 0,
+        bom: stats?.filter((s) => s.performance === 'bom').length || 0,
+        regular: stats?.filter((s) => s.performance === 'regular').length || 0,
+        ruim: stats?.filter((s) => s.performance === 'ruim').length || 0,
+        critico: stats?.filter((s) => s.performance === 'critico').length || 0
       },
       por_tendencia: {
-        crescente: stats?.filter((s: any) => s.tendencia === 'crescente').length || 0,
-        estavel: stats?.filter((s: any) => s.tendencia === 'estavel').length || 0,
-        decrescente: stats?.filter((s: any) => s.tendencia === 'decrescente').length || 0
+        crescente: stats?.filter((s) => s.tendencia === 'crescente').length || 0,
+        estavel: stats?.filter((s) => s.tendencia === 'estavel').length || 0,
+        decrescente: stats?.filter((s) => s.tendencia === 'decrescente').length || 0
       }
     };
 
     // Buscar má©tricas com alertas crá­ticos
     const { data: alertas } = await supabase
       .from('ai_metrics')
-      .select('nome_metrica, valor: any, meta_valor, performance')
+      .select('nome_metrica, valor, meta_valor, performance')
       .eq('bar_id', bar_id)
       .eq('alerta_ativado', true)
       .in('performance', ['ruim', 'critico'])
@@ -166,10 +166,10 @@ export async function GET(request: NextRequest) {
       'produtividade_funcionarios': 'Produtividade'
     };
 
-    const kpisPromises = Object.keys(kpiMap).map(async (metrica: any) => {
+    const kpisPromises = Object.keys(kpiMap).map(async (metrica) => {
       const { data } = await supabase
         .from('ai_metrics')
-        .select('nome_metrica, valor: any, meta_valor, variacao_percentual: any, performance, tendencia')
+        .select('nome_metrica, valor, meta_valor, variacao_percentual, performance, tendencia')
         .eq('bar_id', bar_id)
         .eq('nome_metrica', metrica)
         .eq('ativa', true)
@@ -187,7 +187,7 @@ export async function GET(request: NextRequest) {
       } : null;
     });
 
-    const kpis = (await Promise.all(kpisPromises)).filter((kpi: any) => kpi !== null);
+    const kpis = (await Promise.all(kpisPromises)).filter((kpi) => kpi !== null);
 
     return NextResponse.json({
       success: true,
@@ -285,15 +285,15 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const valores = historico.map((h: any) => h.valor);
+    const valores = historico.map((h) => h.valor);
     const valorAtual = valores[valores.length - 1];
     const valorAnterior = valores[0];
     const valorMaximo = Math.max(...valores);
     const valorMinimo = Math.min(...valores);
-    const media = valores.reduce((a: any, b: any) => a + b, 0) / valores.length;
+    const media = valores.reduce((a, b) => a + b, 0) / valores.length;
     
     // Calcular desvio padrá£o
-    const variance = valores.reduce((a: any, b: any) => a + Math.pow(b - media, 2), 0) / valores.length;
+    const variance = valores.reduce((a, b) => a + Math.pow(b - media, 2), 0) / valores.length;
     const desvioPadrao = Math.sqrt(variance);
 
     // Determinar tendáªncia geral
@@ -303,14 +303,14 @@ export async function POST(request: NextRequest) {
     else if (variacaoTotal < -5) tendenciaGeral = 'decrescente';
 
     // Calcular quantas vezes atingiu a meta
-    const atingiuMeta = historico.filter((h: any) => h.meta_valor && h.valor >= h.meta_valor).length;
+    const atingiuMeta = historico.filter((h) => h.meta_valor && h.valor >= h.meta_valor).length;
 
     // Preparar dados para grá¡fico (agrupamento se necessá¡rio)
     let dadosGrafico = historico;
     
     if (granularidade === 'weekly' && historico.length > 7) {
       // Agrupar por semana
-      const semanas: any = {};
+      const semanas = {};
       historico.forEach(h => {
         const data = new Date(h.data_referencia);
         const inicioSemana = new Date(data.setDate(data.getDate() - data.getDay()));
@@ -326,7 +326,7 @@ export async function POST(request: NextRequest) {
         semanas[chave].valores.push(h.valor);
       });
 
-      dadosGrafico = Object.values(semanas).map((s: any) => ({
+      dadosGrafico = Object.values(semanas).map((s) => ({
         ...s,
         valor: s.valores.reduce((a: number, b: number) => a + b, 0) / s.valores.length
       }));
@@ -345,7 +345,7 @@ export async function POST(request: NextRequest) {
         tendencia_geral: tendenciaGeral,
         atingiu_meta: atingiuMeta,
         variacao_total: parseFloat(variacaoTotal.toFixed(2)),
-        performance_distribuicao: historico.reduce((acc: any, h: any) => {
+        performance_distribuicao: historico.reduce((acc, h) => {
           acc[h.performance] = (acc[h.performance] || 0) + 1;
           return acc;
         }, {} as Record<string, number>)

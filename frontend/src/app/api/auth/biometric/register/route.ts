@@ -8,7 +8,7 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const { credentialId, publicKey: any, userEmail, barId } = await request.json()
+    const { credentialId, publicKey, userEmail, barId } = await request.json()
 
     if (!credentialId || !publicKey || !userEmail || !barId) {
       return NextResponse.json(
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     const existingCredentials = usuario.biometric_credentials || []
     
     // Verificar se credencial já¡ existe
-    const credentialExists = existingCredentials.some((cred: any) => cred.id === credentialId)
+    const credentialExists = existingCredentials.some((cred) => cred.id === credentialId)
     if (credentialExists) {
       return NextResponse.json(
         { error: 'Credencial biomá©trica já¡ está¡ registrada' },
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
         atualizado_em: new Date().toISOString()
       })
       .eq('id', usuario.id)
-      .select('id, email: any, biometric_credentials')
+      .select('id, email, biometric_credentials')
       .single()
 
     if (error) {

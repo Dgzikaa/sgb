@@ -4,7 +4,7 @@ import { DragHandlers } from '@/hooks/useDragAndDrop'
 
 export interface DropZoneProps {
   children: ReactNode
-  onDrop: (item: any) => void
+  onDrop: (item) => void
   accepts?: string[]
   className?: string
   disabled?: boolean
@@ -174,7 +174,7 @@ export function DropZone({
           
           {accepts.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
-              {accepts.map((type: any) => (
+              {accepts.map((type) => (
                 <span
                   key={type}
                   className="px-2 py-1 bg-gray-200 dark:bg-gray-700 text-xs rounded text-gray-600 dark:text-gray-400"
@@ -191,7 +191,7 @@ export function DropZone({
 }
 
 // Variantes especá­ficas
-export function ChecklistDropZone({ onDrop, className: any, ...props }: Omit<DropZoneProps, 'zone' | 'accepts'>) {
+export function ChecklistDropZone({ onDrop, className, ...props }: Omit<DropZoneProps, 'zone' | 'accepts'>) {
   return (
     <DropZone
       {...props}
@@ -225,7 +225,7 @@ export function CategoryDropZone({
   )
 }
 
-export function TrashDropZone({ onDrop, className: any, ...props }: Omit<DropZoneProps, 'zone'>) {
+export function TrashDropZone({ onDrop, className, ...props }: Omit<DropZoneProps, 'zone'>) {
   return (
     <DropZone
       {...props}

@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent: any, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
@@ -71,16 +71,16 @@ export default function CopyItemsDialog({
   const [isLoading, setIsLoading] = useState(false)
 
   // Filtros
-  const filteredItems = sourceChecklist.items?.filter((item: any) => {
+  const filteredItems = sourceChecklist.items?.filter((item) => {
     const matchesSearch = item.titulo.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesSection = !filterBySection || item.secao === filterBySection
     const matchesRequired = !onlyRequired || item.obrigatorio
     return matchesSearch && matchesSection && matchesRequired
   }) || []
 
-  const sections = [...new Set(sourceChecklist.items?.map((item: any) => item.secao).filter(Boolean))]
-  const selectedItemsData = sourceChecklist.items?.filter((item: any) => selectedItems.includes(item.id)) || []
-  const targetChecklist = availableChecklists.find((c: any) => c.id === targetChecklistId)
+  const sections = [...new Set(sourceChecklist.items?.map((item) => item.secao).filter(Boolean))]
+  const selectedItemsData = sourceChecklist.items?.filter((item) => selectedItems.includes(item.id)) || []
+  const targetChecklist = availableChecklists.find((c) => c.id === targetChecklistId)
 
   const resetDialog = () => {
     setCurrentStep('select-items')
@@ -94,17 +94,17 @@ export default function CopyItemsDialog({
   const handleSelectItem = (itemId: string) => {
     setSelectedItems(prev => 
       prev.includes(itemId) 
-        ? prev.filter((id: any) => id !== itemId)
+        ? prev.filter((id) => id !== itemId)
         : [...prev, itemId]
     )
   }
 
   const handleSelectAll = () => {
-    const allFilteredIds = filteredItems.map((item: any) => item.id)
+    const allFilteredIds = filteredItems.map((item) => item.id)
     const isAllSelected = allFilteredIds.every(id => selectedItems.includes(id))
     
     if (isAllSelected) {
-      setSelectedItems(prev => prev.filter((id: any) => !allFilteredIds.includes(id)))
+      setSelectedItems(prev => prev.filter((id) => !allFilteredIds.includes(id)))
     } else {
       setSelectedItems(prev => [...new Set([...prev, ...allFilteredIds])])
     }
@@ -115,7 +115,7 @@ export default function CopyItemsDialog({
     
     setIsLoading(true)
     try {
-      await onCopyItems(targetChecklistId: any, selectedItemsData)
+      await onCopyItems(targetChecklistId, selectedItemsData)
       setIsOpen(false)
       resetDialog()
     } catch (error) {
@@ -151,7 +151,7 @@ export default function CopyItemsDialog({
                 <Input
                   placeholder="Buscar itens..."
                   value={searchTerm}
-                  onChange={(e: any) => setSearchTerm(e.target.value)}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="flex-1"
                 />
               </div>
@@ -159,11 +159,11 @@ export default function CopyItemsDialog({
               <div className="flex flex-wrap gap-2">
                 <select
                   value={filterBySection}
-                  onChange={(e: any) => setFilterBySection(e.target.value)}
+                  onChange={(e) => setFilterBySection(e.target.value)}
                   className="px-3 py-2 border rounded-lg text-sm"
                 >
                   <option value="">Todas as seá§áµes</option>
-                  {sections.map((section: any) => (
+                  {sections.map((section) => (
                     <option key={section} value={section}>{section}</option>
                   ))}
                 </select>
@@ -199,7 +199,7 @@ export default function CopyItemsDialog({
 
             {/* Lista de Itens */}
             <div className="space-y-2 max-h-64 overflow-y-auto">
-              {filteredItems.map((item: any) => (
+              {filteredItems.map((item) => (
                 <Card 
                   key={item.id}
                   className={`cursor-pointer transition-all touch-manipulation ${
@@ -276,8 +276,8 @@ export default function CopyItemsDialog({
               </Label>
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 {availableChecklists
-                  .filter((c: any) => c.id !== sourceChecklist.id)
-                  .map((checklist: any) => (
+                  .filter((c) => c.id !== sourceChecklist.id)
+                  .map((checklist) => (
                     <Card 
                       key={checklist.id}
                       className={`cursor-pointer transition-all touch-manipulation ${
@@ -366,7 +366,7 @@ export default function CopyItemsDialog({
               <div>
                 <Label className="text-sm font-medium text-gray-700">Itens que será£o copiados:</Label>
                 <div className="mt-2 space-y-1 max-h-32 overflow-y-auto">
-                  {selectedItemsData.map((item: any) => (
+                  {selectedItemsData.map((item) => (
                     <div key={item.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded text-sm">
                       <span className="text-lg">{getItemIcon(item.tipo)}</span>
                       <span className="truncate">{item.titulo}</span>
@@ -528,7 +528,7 @@ export function useCopyItems() {
         },
         body: JSON.stringify({
           targetChecklistId,
-          items: items.map((item: any) => ({
+          items: items.map((item) => ({
             ...item,
             id: undefined, // Remove ID para criar novo
             ordem: undefined // Será¡ definido automaticamente

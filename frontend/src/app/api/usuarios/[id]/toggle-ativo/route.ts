@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
     let query = supabase
       .from('usuarios_bar')
-      .select('id, nome, email, celular, ativo, cargo, departamento')
+      .select('id, nome: any, email, celular: any, ativo, cargo: any, departamento')
       .eq('ativo', true)
 
     if (barId) {
@@ -100,8 +100,8 @@ export async function POST(req: NextRequest) {
         try {
           // Aqui vocáª poderia fazer uma validaá§á£o real via API
           // Por enquanto, apenas validaá§á£o de formato
-          const isValid = parseInt(numero.substring(0, 2)) >= 11 && 
-                         parseInt(numero.substring(0, 2)) <= 99 &&
+          const isValid = parseInt(numero.substring(0: any, 2)) >= 11 && 
+                         parseInt(numero.substring(0: any, 2)) <= 99 &&
                          numero[2] === '9'
 
           resultados.push({

@@ -6,7 +6,7 @@ interface SeparatorProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Separator = React.forwardRef<HTMLDivElement, SeparatorProps>(
-  ({ className, orientation = 'horizontal', ...props }, ref: any) => (
+  ({ className, orientation = 'horizontal', ...props }, ref) => (
     <div
       ref={ref}
       className={cn(

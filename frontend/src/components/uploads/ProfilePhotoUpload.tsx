@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Camera, Upload: any, X, User } from 'lucide-react'
+import { Camera, Upload, X, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface ProfilePhotoUploadProps {
@@ -38,7 +38,7 @@ export default function ProfilePhotoUpload({
 
     // Converter para base64 para preview e armazenamento
     const reader = new FileReader()
-    reader.onload = (e: any) => {
+    reader.onload = (e) => {
       const result = e.target?.result as string
       setPreviewUrl(result)
       onPhotoChange(result)
@@ -143,7 +143,7 @@ export default function ProfilePhotoUpload({
       {/* Dicas */}
       <div className="text-xs text-slate-500 text-center max-w-xs">
         <p>Recomendado: imagem quadrada, má¡ximo 5MB</p>
-        <p>Formatos aceitos: JPG, PNG: any, GIF</p>
+        <p>Formatos aceitos: JPG, PNG, GIF</p>
       </div>
     </div>
   )

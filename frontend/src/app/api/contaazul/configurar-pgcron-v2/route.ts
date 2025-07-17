@@ -18,13 +18,13 @@ export async function POST(request: NextRequest) {
 
     switch (action) {
       case 'configure':
-        return await configurarCronJob(supabase: any, barId)
+        return await configurarCronJob(supabase, barId)
       case 'status':
-        return await verificarStatus(supabase: any, barId)
+        return await verificarStatus(supabase, barId)
       case 'remove':
-        return await removerCronJob(supabase: any, barId)
+        return await removerCronJob(supabase, barId)
       case 'test':
-        return await testarSyncManual(supabase: any, barId)
+        return await testarSyncManual(supabase, barId)
       default:
         return NextResponse.json({ error: 'A·ß·£o n·£o reconhecida' }, { status: 400 })
     }
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function configurarCronJob(supabase: any, barId: string) {
+async function configurarCronJob(supabase, barId: string) {
   try {
     console.log(`üîß Configurando cron job para bar ${barId}`)
 
@@ -50,7 +50,7 @@ async function configurarCronJob(supabase: any, barId: string) {
       console.warn('ö†Ô∏è Job anterior n·£o encontrado ou j·° removido:', removeError)
     }
 
-    // 2. Criar novo job - executa a cada 4 horas (4h: any, 8h, 12h: any, 16h, 20h: any, 0h)
+    // 2. Criar novo job - executa a cada 4 horas (4h, 8h, 12h, 16h, 20h, 0h)
     const cronExpression = '0 0,4,8,12,16,20 * * *'  // A cada 4 horas
     const jobName = `contaazul_sync_bar_${barId}`
 
@@ -98,7 +98,7 @@ async function configurarCronJob(supabase: any, barId: string) {
   }
 }
 
-async function verificarStatus(supabase: any, barId: string) {
+async function verificarStatus(supabase, barId: string) {
   try {
     console.log(`üîç Verificando status para bar ${barId}`)
 
@@ -144,7 +144,7 @@ async function verificarStatus(supabase: any, barId: string) {
   }
 }
 
-async function removerCronJob(supabase: any, barId: string) {
+async function removerCronJob(supabase, barId: string) {
   try {
     console.log(`üóëÔ∏è Removendo cron job para bar ${barId}`)
 
@@ -171,7 +171,7 @@ async function removerCronJob(supabase: any, barId: string) {
   }
 }
 
-async function testarSyncManual(supabase: any, barId: string) {
+async function testarSyncManual(supabase, barId: string) {
   try {
     console.log(`üß™ Testando sync manual para bar ${barId}`)
 

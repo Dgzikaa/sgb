@@ -1,5 +1,5 @@
 // Edge Function: meta-process
-// Processa o JSON bruto salvo em meta_raw e popula as tabelas di√°rias
+// Processa o JSON bruto salvo em meta_raw e popula as tabelas di·°rias
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -17,7 +17,7 @@ serve(async (req: Request) => {
     const data_coleta = body.data_coleta || hoje;
     console.log(`[meta-process] Iniciando processamento para bar_id=${bar_id}, data_coleta=${data_coleta}`);
 
-    // 1. N√ÉO limpar tabelas de destino (precisamos manter dados hist√≥ricos)
+    // 1. N·ÉO limpar tabelas de destino (precisamos manter dados hist·≥ricos)
 
     // 2. Buscar JSON bruto de meta_raw
     const { data: metaRaw, error: rawError } = await supabase
@@ -29,8 +29,8 @@ serve(async (req: Request) => {
       .limit(1)
       .single();
     if (rawError || !metaRaw) {
-      console.error('[meta-process] meta_raw n√£o encontrado:', rawError);
-      return new Response(JSON.stringify({ success: false, error: 'meta_raw n√£o encontrado', details: rawError }), { status: 404 });
+      console.error('[meta-process] meta_raw n·£o encontrado:', rawError);
+      return new Response(JSON.stringify({ success: false, error: 'meta_raw n·£o encontrado', details: rawError }), { status: 404 });
     }
     console.log('[meta-process] meta_raw encontrado:', metaRaw.id);
 
@@ -44,13 +44,13 @@ serve(async (req: Request) => {
           bar_id,
           data_coleta,
           page_fans: fb.page_info?.fan_count || 0,
-          post_likes: fb.posts?.reduce((sum: number, p: any) => sum + (p.reactions?.summary?.total_count || 0), 0),
-          post_comments: fb.posts?.reduce((sum: number, p: any) => sum + (p.comments?.summary?.total_count || 0), 0),
-          post_shares: fb.posts?.reduce((sum: number, p: any) => sum + (p.shares?.count || 0), 0),
-          page_reach: fb.insights?.reach?.data?.reduce((sum: number, i: any) => sum + (parseInt(i.value) || 0), 0),
-          page_impressions: fb.insights?.views?.data?.reduce((sum: number, i: any) => sum + (parseInt(i.value) || 0), 0),
-          post_engagements: fb.insights?.engagement?.data?.reduce((sum: number, i: any) => sum + (parseInt(i.value) || 0), 0),
-          video_views: fb.insights?.views?.data?.reduce((sum: number, i: any) => sum + (parseInt(i.value) || 0), 0),
+          post_likes: fb.posts?.reduce((sum: number, p) => sum + (p.reactions?.summary?.total_count || 0), 0),
+          post_comments: fb.posts?.reduce((sum: number, p) => sum + (p.comments?.summary?.total_count || 0), 0),
+          post_shares: fb.posts?.reduce((sum: number, p) => sum + (p.shares?.count || 0), 0),
+          page_reach: fb.insights?.reach?.data?.reduce((sum: number, i) => sum + (parseInt(i.value) || 0), 0),
+          page_impressions: fb.insights?.views?.data?.reduce((sum: number, i) => sum + (parseInt(i.value) || 0), 0),
+          post_engagements: fb.insights?.engagement?.data?.reduce((sum: number, i) => sum + (parseInt(i.value) || 0), 0),
+          video_views: fb.insights?.views?.data?.reduce((sum: number, i) => sum + (parseInt(i.value) || 0), 0),
           raw_data: fb
         });
         if (fbError) console.error('[meta-process] Erro insert facebook_daily:', fbError);
@@ -64,12 +64,12 @@ serve(async (req: Request) => {
           data_coleta,
           follower_count: ig.account_info?.followers_count || 0,
           following_count: ig.account_info?.follows_count || 0,
-          posts_likes: ig.media?.reduce((sum: number, m: any) => sum + (m.like_count || 0), 0),
-          posts_comments: ig.media?.reduce((sum: number, m: any) => sum + (m.comments_count || 0), 0),
-          posts_shares: ig.media?.reduce((sum: number, m: any) => sum + (m.shares_count || 0), 0),
-          posts_saves: ig.media?.reduce((sum: number, m: any) => sum + (m.saved_count || 0), 0),
-          reach: ig.insights?.reach?.data?.[0]?.values?.reduce((sum: number, v: any) => sum + (parseInt(v.value) || 0), 0),
-          impressions: ig.insights?.reach?.data?.[0]?.values?.reduce((sum: number, v: any) => sum + (parseInt(v.value) || 0), 0),
+          posts_likes: ig.media?.reduce((sum: number, m) => sum + (m.like_count || 0), 0),
+          posts_comments: ig.media?.reduce((sum: number, m) => sum + (m.comments_count || 0), 0),
+          posts_shares: ig.media?.reduce((sum: number, m) => sum + (m.shares_count || 0), 0),
+          posts_saves: ig.media?.reduce((sum: number, m) => sum + (m.saved_count || 0), 0),
+          reach: ig.insights?.reach?.data?.[0]?.values?.reduce((sum: number, v) => sum + (parseInt(v.value) || 0), 0),
+          impressions: ig.insights?.reach?.data?.[0]?.values?.reduce((sum: number, v) => sum + (parseInt(v.value) || 0), 0),
           profile_visits: ig.insights?.profile_visits?.data?.[0]?.total_value?.value || 0,
           website_clicks: ig.insights?.website_clicks?.data?.[0]?.total_value?.value || 0,
           media_count: ig.account_info?.media_count || 0,
@@ -130,7 +130,7 @@ serve(async (req: Request) => {
       return new Response(JSON.stringify({ success: false, error: 'Erro no processamento', details: procError }), { status: 500 });
     }
 
-    return new Response(JSON.stringify({ success: true, message: 'Processamento conclu√≠do e tabelas populadas.', meta_raw_id: metaRaw.id }), { status: 200 });
+    return new Response(JSON.stringify({ success: true, message: 'Processamento conclu·≠do e tabelas populadas.', meta_raw_id: metaRaw.id }), { status: 200 });
   } catch (e) {
     const errorMsg = e instanceof Error ? e.message : String(e);
     console.error('[meta-process] Erro geral:', errorMsg);

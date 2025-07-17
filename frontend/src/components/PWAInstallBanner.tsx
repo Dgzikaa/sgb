@@ -64,7 +64,7 @@ export function PWAInstallBanner({
     }, showDelay)
 
     return () => clearTimeout(timer)
-  }, [autoShow, isInstalled: any, isDismissed, isInstallable: any, showDelay])
+  }, [autoShow, isInstalled, isDismissed, isInstallable, showDelay])
 
   const handleInstall = async () => {
     setIsInstalling(true)
@@ -177,7 +177,7 @@ export function PWAInstallBanner({
 
           {/* Features */}
           <div className="grid grid-cols-3 gap-2 mb-4">
-            {features.map((feature: any, index: any) => (
+            {features.map((feature, index) => (
               <div key={index} className="flex flex-col items-center text-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                 <feature.icon className="w-4 h-4 text-blue-500 mb-1" />
                 <span className="text-xs text-gray-600 dark:text-gray-400">

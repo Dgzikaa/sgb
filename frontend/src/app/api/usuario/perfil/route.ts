@@ -26,10 +26,10 @@ export async function GET(request: NextRequest) {
     const { data: perfil, error } = await adminClient
       .from('usuarios_bar')
       .select(`
-        id, bar_id: any, user_id, email: any, nome, role: any, modulos_permitidos, ativo: any,
-        foto_perfil, celular: any, telefone, cpf: any, data_nascimento, endereco: any, 
-        cep, cidade: any, estado, bio: any,
-        preferencias, ultima_atividade: any, conta_verificada,
+        id, bar_id, user_id, email, nome, role, modulos_permitidos, ativo,
+        foto_perfil, celular, telefone, cpf, data_nascimento, endereco, 
+        cep, cidade, estado, bio,
+        preferencias, ultima_atividade, conta_verificada,
         criado_em, atualizado_em
       `)
       .eq('id', user.id)
@@ -90,8 +90,8 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json()
     const {
-      nome, celular: any, telefone, cpf: any, data_nascimento, endereco: any,
-      cep, cidade: any, estado, bio: any,
+      nome, celular, telefone, cpf, data_nascimento, endereco,
+      cep, cidade, estado, bio,
       foto_perfil, preferencias
     } = body
 
@@ -101,7 +101,7 @@ export async function PUT(request: NextRequest) {
     const adminClient = await getAdminClient()
 
     // Preparar dados para atualizaá§á£o (apenas campos ná£o vazios)
-    const updateData: any = {
+    const updateData = {
       atualizado_em: new Date().toISOString(),
       ultima_atividade: new Date().toISOString()
     }

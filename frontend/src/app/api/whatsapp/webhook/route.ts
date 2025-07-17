@@ -28,11 +28,11 @@ export async function GET(request: NextRequest) {
         .eq('ativo', true);
 
       // Verificar se o token coincide com alguma configuraá§á£o
-      const validConfig = configs?.find((config: any) => config.webhook_verify_token === token);
+      const validConfig = configs?.find((config) => config.webhook_verify_token === token);
 
       if (validConfig) {
         console.log('Webhook verificado com sucesso para bar_id:', validConfig.bar_id);
-        return new Response(challenge: any, { status: 200 });
+        return new Response(challenge, { status: 200 });
       } else {
         console.error('Token de verificaá§á£o invá¡lido:', token);
         return new Response('Token invá¡lido', { status: 403 });
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
                      request.headers.get('x-real-ip') || 
                      'unknown';
 
-    let payload: any;
+    let payload;
     try {
       payload = JSON.parse(body);
     } catch (error) {
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar assinatura do webhook (opcional em desenvolvimento)
-    const isSignatureValid = await verifyWebhookSignature(body: any, signature, barId);
+    const isSignatureValid = await verifyWebhookSignature(body, signature, barId);
     
     // Log do webhook recebido
     const webhookLog = {
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
 
     // Processar webhook se for vá¡lido
     if (payload.object === 'whatsapp_business_account') {
-      await processWhatsAppWebhook(payload: any, barId, logEntry?.id);
+      await processWhatsAppWebhook(payload, barId, logEntry?.id);
     }
 
     return NextResponse.json({ success: true, processed: true });
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
 /**
  * Identifica o bar_id atravá©s do payload do webhook
  */
-async function identifyBarFromWebhook(payload: any): Promise<number | null> {
+async function identifyBarFromWebhook(payload): Promise<number | null> {
   try {
     // Extrair phone_number_id do webhook
     const phoneNumberId = payload?.entry?.[0]?.changes?.[0]?.value?.metadata?.phone_number_id;
@@ -163,7 +163,7 @@ async function verifyWebhookSignature(body: string, signature: string | null, ba
     // Calcular hash esperado
     const expectedSignature = 'sha256=' + crypto
       .createHmac('sha256', config.webhook_verify_token) // Em produá§á£o, usar app_secret
-      .update(body: any, 'utf8')
+      .update(body, 'utf8')
       .digest('hex');
 
     return crypto.timingSafeEqual(
@@ -180,7 +180,7 @@ async function verifyWebhookSignature(body: string, signature: string | null, ba
 /**
  * Processa webhook do WhatsApp Business
  */
-async function processWhatsAppWebhook(payload: any, barId: number, webhookLogId?: number): Promise<void> {
+async function processWhatsAppWebhook(payload, barId: number, webhookLogId?: number): Promise<void> {
   try {
     const entries = payload.entry || [];
 
@@ -213,7 +213,7 @@ async function processWhatsAppWebhook(payload: any, barId: number, webhookLogId?
         .eq('id', webhookLogId);
     }
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro ao processar webhook WhatsApp:', error);
     
     // Marcar webhook com erro
@@ -232,16 +232,16 @@ async function processWhatsAppWebhook(payload: any, barId: number, webhookLogId?
 /**
  * Processa atualizaá§áµes de status de mensagens
  */
-async function processMessageStatuses(statuses: any[], barId: number): Promise<void> {
+async function processMessageStatuses(statuses[], barId: number): Promise<void> {
   for (const status of statuses) {
     const messageId = status.id;
-    const newStatus = status.status; // sent, delivered: any, read, failed
+    const newStatus = status.status; // sent, delivered, read, failed
     const timestamp = status.timestamp;
     const errorCode = status.errors?.[0]?.code;
     const errorMessage = status.errors?.[0]?.message;
 
     // Atualizar status da mensagem no banco
-    const updateData: any = {
+    const updateData = {
       status: newStatus,
       status_updated_at: new Date(parseInt(timestamp) * 1000).toISOString()
     };
@@ -289,7 +289,7 @@ async function processMessageStatuses(statuses: any[], barId: number): Promise<v
 /**
  * Processa mensagens recebidas (respostas dos usuá¡rios)
  */
-async function processReceivedMessages(messages: any[], barId: number): Promise<void> {
+async function processReceivedMessages(messages[], barId: number): Promise<void> {
   for (const message of messages) {
     const fromNumber = message.from;
     const messageText = message.text?.body || message.type;

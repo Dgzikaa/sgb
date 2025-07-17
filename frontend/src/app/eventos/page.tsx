@@ -1,14 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent: any, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
 import { useBar } from '@/contexts/BarContext'
 import { usePageTitle } from '@/contexts/PageTitleContext'
@@ -27,7 +27,7 @@ import {
   Search,
   Eye
 } from 'lucide-react'
-import { format, addMonths: any, subMonths, startOfMonth: any, endOfMonth, eachDayOfInterval: any, isSameMonth, isSameDay: any, isToday } from 'date-fns'
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 interface Evento {
@@ -196,7 +196,7 @@ export default function EventosPage() {
   }
 
   const getCategoria = (categoriaId: string) => {
-    return categoriasPadrao.find((cat: any) => cat.id === categoriaId) || categoriasPadrao[0]
+    return categoriasPadrao.find((cat) => cat.id === categoriaId) || categoriasPadrao[0]
   }
 
   const getStatusColor = (status: string) => {
@@ -214,7 +214,7 @@ export default function EventosPage() {
     }
   }
 
-  const filteredEventos = eventos.filter((evento: any) => {
+  const filteredEventos = eventos.filter((evento) => {
     const matchesCategoria = filtroCategoria === 'all' || evento.categoria === filtroCategoria
     const matchesStatus = filtroStatus === 'all' || evento.status === filtroStatus
     const matchesSearch = searchTerm === '' || 
@@ -225,7 +225,7 @@ export default function EventosPage() {
   })
 
   const navigateMonth = (direction: 'prev' | 'next') => {
-    setCurrentDate(direction === 'prev' ? subMonths(currentDate: any, 1) : addMonths(currentDate: any, 1))
+    setCurrentDate(direction === 'prev' ? subMonths(currentDate, 1) : addMonths(currentDate, 1))
   }
 
   return (
@@ -312,7 +312,7 @@ export default function EventosPage() {
                     <Input
                       placeholder="Nome, descriá§á£o..."
                       value={searchTerm}
-                      onChange={(e: any) => setSearchTerm(e.target.value)}
+                      onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-10"
                     />
                   </div>
@@ -326,7 +326,7 @@ export default function EventosPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todas as categorias</SelectItem>
-                      {categoriasPadrao.map((categoria: any) => (
+                      {categoriasPadrao.map((categoria) => (
                         <SelectItem key={categoria.id} value={categoria.id}>
                           {categoria.icon} {categoria.nome}
                         </SelectItem>
@@ -375,7 +375,7 @@ export default function EventosPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl">
-                    {format(currentDate: any, 'MMMM yyyy', { locale: ptBR })}
+                    {format(currentDate, 'MMMM yyyy', { locale: ptBR })}
                   </CardTitle>
                   <div className="flex gap-2">
                     <Button
@@ -406,7 +406,7 @@ export default function EventosPage() {
                 <CalendarView
                   currentDate={currentDate}
                   eventos={filteredEventos}
-                  onEditEvent={(evento: any) => {
+                  onEditEvent={(evento) => {
                     setEditingEvent(evento)
                     setShowEventModal(true)
                   }}
@@ -423,7 +423,7 @@ export default function EventosPage() {
               <CardContent>
                 <EventList
                   eventos={filteredEventos}
-                  onEditEvent={(evento: any) => {
+                  onEditEvent={(evento) => {
                     setEditingEvent(evento)
                     setShowEventModal(true)
                   }}
@@ -454,7 +454,7 @@ export default function EventosPage() {
                   <Users className="w-4 h-4 text-green-600 dark:text-green-400" />
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {eventos.filter((e: any) => e.status === 'confirmado').length}
+                  {eventos.filter((e) => e.status === 'confirmado').length}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Confirmados</p>
               </CardContent>
@@ -466,7 +466,7 @@ export default function EventosPage() {
                   <Clock className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {eventos.filter((e: any) => e.status === 'planejado').length}
+                  {eventos.filter((e) => e.status === 'planejado').length}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Planejados</p>
               </CardContent>
@@ -478,7 +478,7 @@ export default function EventosPage() {
                   <Tag className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {new Set(eventos.map((e: any) => e.categoria)).size}
+                  {new Set(eventos.map((e) => e.categoria)).size}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Categorias</p>
               </CardContent>
@@ -541,7 +541,7 @@ function EventForm({
           <Input
             id="nome_evento"
             value={formData.nome_evento}
-            onChange={(e: any) => setFormData({ ...formData, nome_evento: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, nome_evento: e.target.value })}
             placeholder="Ex: Show de Rock, Happy Hour..."
             required
           />
@@ -552,7 +552,7 @@ function EventForm({
           <Textarea
             id="descricao"
             value={formData.descricao}
-            onChange={(e: any) => setFormData({ ...formData, descricao: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
             placeholder="Descreva o evento..."
             rows={3}
           />
@@ -564,19 +564,19 @@ function EventForm({
             id="data_evento"
             type="date"
             value={formData.data_evento}
-            onChange={(e: any) => setFormData({ ...formData, data_evento: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, data_evento: e.target.value })}
             required
           />
         </div>
 
         <div>
           <Label htmlFor="categoria">Categoria *</Label>
-          <Select value={formData.categoria} onValueChange={(value: any) => setFormData({ ...formData, categoria: value })}>
+          <Select value={formData.categoria} onValueChange={(value) => setFormData({ ...formData, categoria: value })}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {categorias.map((categoria: any) => (
+              {categorias.map((categoria) => (
                 <SelectItem key={categoria.id} value={categoria.id}>
                   {categoria.icon} {categoria.nome}
                 </SelectItem>
@@ -591,7 +591,7 @@ function EventForm({
             id="hora_inicio"
             type="time"
             value={formData.hora_inicio}
-            onChange={(e: any) => setFormData({ ...formData, hora_inicio: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, hora_inicio: e.target.value })}
           />
         </div>
 
@@ -601,13 +601,13 @@ function EventForm({
             id="hora_fim"
             type="time"
             value={formData.hora_fim}
-            onChange={(e: any) => setFormData({ ...formData, hora_fim: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, hora_fim: e.target.value })}
           />
         </div>
 
         <div>
           <Label htmlFor="status">Status *</Label>
-          <Select value={formData.status} onValueChange={(value: any) => setFormData({ ...formData, status: value })}>
+          <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -625,7 +625,7 @@ function EventForm({
           <Input
             id="local"
             value={formData.local}
-            onChange={(e: any) => setFormData({ ...formData, local: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, local: e.target.value })}
             placeholder="Ex: Salá£o Principal..."
           />
         </div>
@@ -663,26 +663,26 @@ function CalendarView({
   })
 
   const getEventosForDay = (day: Date) => {
-    return eventos.filter((evento: any) => isSameDay(new Date(evento.data_evento), day))
+    return eventos.filter((evento) => isSameDay(new Date(evento.data_evento), day))
   }
 
   const getCategoria = (categoriaId: string) => {
-    return categorias.find((cat: any) => cat.id === categoriaId) || categorias[0]
+    return categorias.find((cat) => cat.id === categoriaId) || categorias[0]
   }
 
   return (
     <div className="grid grid-cols-7 gap-1">
       {/* Cabeá§alho dos dias da semana */}
-      {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sá¡b'].map((day: any) => (
+      {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sá¡b'].map((day) => (
         <div key={day} className="p-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
           {day}
         </div>
       ))}
       
       {/* Dias do máªs */}
-      {days.map((day: any) => {
+      {days.map((day) => {
         const dayEvents = getEventosForDay(day)
-        const isCurrentMonth = isSameMonth(day: any, currentDate)
+        const isCurrentMonth = isSameMonth(day, currentDate)
         const isCurrentDay = isToday(day)
         
         return (
@@ -699,11 +699,11 @@ function CalendarView({
               ${isCurrentMonth ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-600'}
               ${isCurrentDay ? 'text-purple-600 dark:text-purple-400' : ''}
             `}>
-              {format(day: any, 'd')}
+              {format(day, 'd')}
             </div>
             
             <div className="space-y-1">
-              {dayEvents.slice(0: any, 2).map((evento: any) => {
+              {dayEvents.slice(0, 2).map((evento) => {
                 const categoria = getCategoria(evento.categoria)
                 return (
                   <div
@@ -749,7 +749,7 @@ function EventList({
   categorias: CategoriaEvento[]
 }) {
   const getCategoria = (categoriaId: string) => {
-    return categorias.find((cat: any) => cat.id === categoriaId) || categorias[0]
+    return categorias.find((cat) => cat.id === categoriaId) || categorias[0]
   }
 
   const getStatusColor = (status: string) => {
@@ -778,7 +778,7 @@ function EventList({
 
   return (
     <div className="space-y-3">
-      {eventos.map((evento: any) => {
+      {eventos.map((evento) => {
         const categoria = getCategoria(evento.categoria)
         return (
           <div

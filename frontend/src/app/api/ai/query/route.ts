@@ -82,7 +82,7 @@ const QuerySchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { query_type, bar_id: any, periodo_inicio, periodo_fim: any, limite } = QuerySchema.parse(body);
+    const { query_type, bar_id, periodo_inicio, periodo_fim, limite } = QuerySchema.parse(body);
 
     let resultado;
 
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
         break;
       
       case 'faturamento_periodo':
-        resultado = await getFaturamentoPeriodo(bar_id: any, periodo_inicio, periodo_fim);
+        resultado = await getFaturamentoPeriodo(bar_id, periodo_inicio, periodo_fim);
         break;
       
       case 'comparativo_mensal':
@@ -100,40 +100,40 @@ export async function POST(request: NextRequest) {
         break;
       
       case 'top_clientes':
-        resultado = await getTopClientes(bar_id: any, limite, periodo_inicio: any, periodo_fim);
+        resultado = await getTopClientes(bar_id, limite, periodo_inicio, periodo_fim);
         break;
       
       case 'produtos_vendidos':
-        resultado = await getProdutosMaisVendidos(bar_id: any, limite, periodo_inicio: any, periodo_fim);
+        resultado = await getProdutosMaisVendidos(bar_id, limite, periodo_inicio, periodo_fim);
         break;
       
       case 'performance_periodo':
-        resultado = await getPerformancePeriodo(bar_id: any, periodo_inicio, periodo_fim);
+        resultado = await getPerformancePeriodo(bar_id, periodo_inicio, periodo_fim);
         break;
       
       case 'resumo_dia':
-        resultado = await getResumoDia(bar_id: any, periodo_inicio || new Date().toISOString().split('T')[0]);
+        resultado = await getResumoDia(bar_id, periodo_inicio || new Date().toISOString().split('T')[0]);
         break;
       
       case 'resumo_mes':
-        resultado = await getResumoMes(bar_id: any, periodo_inicio);
+        resultado = await getResumoMes(bar_id, periodo_inicio);
         break;
       
       case 'anomalias_recentes':
-        resultado = await getAnomaliasRecentes(bar_id: any, limite);
+        resultado = await getAnomaliasRecentes(bar_id, limite);
         break;
       
       case 'insights_importantes':
-        resultado = await getInsightsImportantes(bar_id: any, limite);
+        resultado = await getInsightsImportantes(bar_id, limite);
         break;
       
       // œ… Checklists & Operacional
       case 'status_checklists':
-        resultado = await getStatusChecklists(bar_id: any, periodo_inicio, periodo_fim);
+        resultado = await getStatusChecklists(bar_id, periodo_inicio, periodo_fim);
         break;
       
       case 'performance_funcionarios':
-        resultado = await getPerformanceFuncionarios(bar_id: any, periodo_inicio, periodo_fim: any, limite);
+        resultado = await getPerformanceFuncionarios(bar_id, periodo_inicio, periodo_fim, limite);
         break;
       
       case 'checklists_atrasados':
@@ -153,11 +153,11 @@ export async function POST(request: NextRequest) {
       
       // ðŸ“± WhatsApp & Comunicaá§á£o
       case 'whatsapp_stats':
-        resultado = await getWhatsAppStats(bar_id: any, periodo_inicio, periodo_fim);
+        resultado = await getWhatsAppStats(bar_id, periodo_inicio, periodo_fim);
         break;
       
       case 'engagement_whatsapp':
-        resultado = await getWhatsAppStats(bar_id: any, periodo_inicio, periodo_fim);
+        resultado = await getWhatsAppStats(bar_id, periodo_inicio, periodo_fim);
         break;
       
       case 'mensagens_pendentes':
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
       
       // ðŸ• Produá§á£o & Tempo
       case 'tempo_producao':
-        resultado = await getTempoProducao(bar_id: any, periodo_inicio, periodo_fim);
+        resultado = await getTempoProducao(bar_id, periodo_inicio, periodo_fim);
         break;
       
       case 'produtos_demorados':
@@ -209,11 +209,11 @@ export async function POST(request: NextRequest) {
       
       // ðŸ“Š Dashboards & Visá£o Geral
       case 'dashboard_executivo':
-        resultado = await getDashboardExecutivo(bar_id: any, periodo_inicio, periodo_fim);
+        resultado = await getDashboardExecutivo(bar_id, periodo_inicio, periodo_fim);
         break;
       
       case 'visao_360':
-        resultado = await getVisao360(bar_id: any, periodo_inicio, periodo_fim);
+        resultado = await getVisao360(bar_id, periodo_inicio, periodo_fim);
         break;
       
       case 'comparativo_historico':
@@ -285,7 +285,7 @@ async function getMaiorFaturamento(bar_id: number) {
     .eq('bar_id', bar_id)
     .eq('dt_gerencial', record.dt_gerencial);
 
-  const faturamentoDia = diaTotal?.reduce((total: any, item: any) => total + (item.valor_liquido || 0), 0) || 0;
+  const faturamentoDia = diaTotal?.reduce((total, item) => total + (item.valor_liquido || 0), 0) || 0;
 
   return {
     maior_venda: {
@@ -330,8 +330,8 @@ async function getFaturamentoPeriodo(bar_id: number, inicio?: string, fim?: stri
     };
   }
 
-  const faturamentoTotal = pagamentos.reduce((total: any, item: any) => total + (item.valor_liquido || 0), 0);
-  const faturamentoBruto = pagamentos.reduce((total: any, item: any) => total + (item.valor_bruto || 0), 0);
+  const faturamentoTotal = pagamentos.reduce((total, item) => total + (item.valor_liquido || 0), 0);
+  const faturamentoBruto = pagamentos.reduce((total, item) => total + (item.valor_bruto || 0), 0);
   
   // Agrupar por meio de pagamento
   const meiosPagamento: Record<string, { valor: number; transacoes: number }> = {};
@@ -354,7 +354,7 @@ async function getFaturamentoPeriodo(bar_id: number, inicio?: string, fim?: stri
     faturamentoPorDia[dia] += pag.valor_liquido || 0;
   });
 
-  const melhorDia = Object.entries(faturamentoPorDia).reduce((max: any, [dia, valor]) => 
+  const melhorDia = Object.entries(faturamentoPorDia).reduce((max, [dia, valor]) => 
     (valor as number) > max.valor ? { dia, valor: valor as number } : max, { dia: '', valor: 0 });
 
   return {
@@ -375,8 +375,8 @@ async function getFaturamentoPeriodo(bar_id: number, inicio?: string, fim?: stri
  */
 async function getComparativoMensal(bar_id: number) {
   const hoje = new Date();
-  const mesAtual = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2: any, '0')}`;
-  const mesAnterior = `${hoje.getMonth() === 0 ? hoje.getFullYear() - 1 : hoje.getFullYear()}-${String(hoje.getMonth() === 0 ? 12 : hoje.getMonth()).padStart(2: any, '0')}`;
+  const mesAtual = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
+  const mesAnterior = `${hoje.getMonth() === 0 ? hoje.getFullYear() - 1 : hoje.getFullYear()}-${String(hoje.getMonth() === 0 ? 12 : hoje.getMonth()).padStart(2, '0')}`;
 
   // Faturamento máªs atual
   const { data: fatAtual } = await supabase
@@ -394,8 +394,8 @@ async function getComparativoMensal(bar_id: number) {
     .gte('dt_gerencial', `${mesAnterior}-01`)
     .lt('dt_gerencial', `${mesAnterior}-32`);
 
-  const faturamentoAtual = fatAtual?.reduce((total: any, item: any) => total + (item.valor_liquido || 0), 0) || 0;
-  const faturamentoAnterior = fatAnterior?.reduce((total: any, item: any) => total + (item.valor_liquido || 0), 0) || 0;
+  const faturamentoAtual = fatAtual?.reduce((total, item) => total + (item.valor_liquido || 0), 0) || 0;
+  const faturamentoAnterior = fatAnterior?.reduce((total, item) => total + (item.valor_liquido || 0), 0) || 0;
   
   const variacao = faturamentoAnterior > 0 ? 
     ((faturamentoAtual - faturamentoAnterior) / faturamentoAnterior) * 100 : 0;
@@ -446,7 +446,7 @@ async function getTopClientes(bar_id: number, limite: number, inicio?: string, f
     };
   }
 
-  const clientesFormatados = clientes.map((cliente: any, index: any) => ({
+  const clientesFormatados = clientes.map((cliente, index) => ({
     posicao: index + 1,
     nome: cliente.cli_nome || 'Cliente ná£o identificado',
     cpf: cliente.cli_cpf,
@@ -456,7 +456,7 @@ async function getTopClientes(bar_id: number, limite: number, inicio?: string, f
     ultima_compra: cliente.ultima
   }));
 
-  const faturamentoTotalClientes = clientes.reduce((total: any, cliente: any) => total + (cliente.valor || 0), 0);
+  const faturamentoTotalClientes = clientes.reduce((total, cliente) => total + (cliente.valor || 0), 0);
 
   return {
     clientes: clientesFormatados,
@@ -511,9 +511,9 @@ async function getProdutosMaisVendidos(bar_id: number, limite: number, inicio?: 
   });
 
   const produtosOrdenados = Object.values(produtosAgrupados)
-    .sort((a: any, b: any) => b.quantidade_total - a.quantidade_total)
-    .slice(0: any, limite)
-    .map((produto: any, index: any) => ({
+    .sort((a, b) => b.quantidade_total - a.quantidade_total)
+    .slice(0, limite)
+    .map((produto, index) => ({
       posicao: index + 1,
       ...produto,
       preco_medio: produto.quantidade_total > 0 ? produto.valor_total / produto.quantidade_total : 0
@@ -523,8 +523,8 @@ async function getProdutosMaisVendidos(bar_id: number, limite: number, inicio?: 
     produtos: produtosOrdenados,
     resumo: {
       total_produtos: produtosOrdenados.length,
-      quantidade_total: produtosOrdenados.reduce((total: any, p: any) => total + p.quantidade_total, 0),
-      valor_total: produtosOrdenados.reduce((total: any, p: any) => total + p.valor_total, 0)
+      quantidade_total: produtosOrdenados.reduce((total, p) => total + p.quantidade_total, 0),
+      valor_total: produtosOrdenados.reduce((total, p) => total + p.valor_total, 0)
     },
     mensagem: `Top ${produtosOrdenados.length} produtos mais vendidos`
   };
@@ -538,7 +538,7 @@ async function getPerformancePeriodo(bar_id: number, inicio?: string, fim?: stri
   const dataFim = fim || new Date().toISOString().split('T')[0];
 
   // Buscar dados do perá­odo
-  const [pagamentos, tempos: any, analitico] = await Promise.all([
+  const [pagamentos, tempos, analitico] = await Promise.all([
     supabase
       .from('contahub_pagamentos')
       .select('valor_liquido, dt_gerencial')
@@ -561,10 +561,10 @@ async function getPerformancePeriodo(bar_id: number, inicio?: string, fim?: stri
       .lte('dia', `${dataFim}T23:59:59`)
   ]);
 
-  const faturamentoTotal = pagamentos.data?.reduce((total: any, item: any) => total + (item.valor_liquido || 0), 0) || 0;
-  const totalItens = analitico.data?.reduce((total: any, item: any) => total + (item.itm_qtd || 0), 0) || 0;
+  const faturamentoTotal = pagamentos.data?.reduce((total, item) => total + (item.valor_liquido || 0), 0) || 0;
+  const totalItens = analitico.data?.reduce((total, item) => total + (item.itm_qtd || 0), 0) || 0;
         const tempoMedioProducao = (tempos.data && tempos.data.length > 0) ?
-        tempos.data.reduce((total: number, item: any) => total + (item.tempo_t0_t3 || 0), 0) / (tempos.data.length || 1) : 0;
+        tempos.data.reduce((total: number, item) => total + (item.tempo_t0_t3 || 0), 0) / (tempos.data.length || 1) : 0;
 
   return {
     periodo: { inicio: dataInicio, fim: dataFim },
@@ -587,22 +587,22 @@ async function getResumoDia(bar_id: number, data: string) {
   const [pagamentos, fatPorHora] = await Promise.all([
     supabase
       .from('contahub_pagamentos')
-      .select('valor_liquido, meio: any, hr_transacao')
+      .select('valor_liquido, meio, hr_transacao')
       .eq('bar_id', bar_id)
       .eq('dt_gerencial', data),
     
     supabase
       .from('contahub_fatporhora')
-      .select('hora, qtd: any, valor')
+      .select('hora, qtd, valor')
       .eq('bar_id', bar_id)
       .eq('vd_dtgerencial', data)
       .order('hora')
   ]);
 
-  const faturamento = pagamentos.data?.reduce((total: any, item: any) => total + (item.valor_liquido || 0), 0) || 0;
+  const faturamento = pagamentos.data?.reduce((total, item) => total + (item.valor_liquido || 0), 0) || 0;
   
   // Horá¡rio de pico
-  const horarioPico = fatPorHora.data?.reduce((max: any, current: any) => 
+  const horarioPico = fatPorHora.data?.reduce((max, current) => 
     (current.valor || 0) > (max.valor || 0) ? current : max, { hora: '', valor: 0 });
 
   return {
@@ -622,7 +622,7 @@ async function getResumoDia(bar_id: number, data: string) {
  * Resumo do máªs
  */
 async function getResumoMes(bar_id: number, mes?: string) {
-  const mesReferencia = mes || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2: any, '0')}`;
+  const mesReferencia = mes || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
   
   const { data: pagamentos } = await supabase
     .from('contahub_pagamentos')
@@ -631,11 +631,11 @@ async function getResumoMes(bar_id: number, mes?: string) {
     .gte('dt_gerencial', `${mesReferencia}-01`)
     .lt('dt_gerencial', `${mesReferencia}-32`);
 
-  const faturamento = pagamentos?.reduce((total: any, item: any) => total + (item.valor_liquido || 0), 0) || 0;
+  const faturamento = pagamentos?.reduce((total, item) => total + (item.valor_liquido || 0), 0) || 0;
   
   // Agrupar por dia
   const faturamentoPorDia: Record<string, number> = {};
-  pagamentos?.forEach((pag: any) => {
+  pagamentos?.forEach((pag) => {
     const dia = pag.dt_gerencial;
     if (!faturamentoPorDia[dia]) {
       faturamentoPorDia[dia] = 0;
@@ -685,8 +685,8 @@ async function getAnomaliasRecentes(bar_id: number, limite: number) {
     anomalias: anomalias || [],
     resumo: {
       total_anomalias: anomalias?.length || 0,
-      anomalias_ativas: anomalias?.filter((a: any) => a.ainda_ativa).length || 0,
-      anomalias_criticas: anomalias?.filter((a: any) => a.severidade === 'critica').length || 0
+      anomalias_ativas: anomalias?.filter((a) => a.ainda_ativa).length || 0,
+      anomalias_criticas: anomalias?.filter((a) => a.severidade === 'critica').length || 0
     },
     mensagem: `${anomalias?.length || 0} anomalias recentes encontradas`
   };
@@ -716,8 +716,8 @@ async function getInsightsImportantes(bar_id: number, limite: number) {
     insights: insights || [],
     resumo: {
       total_insights: insights?.length || 0,
-      insights_criticos: insights?.filter((i: any) => i.impacto === 'critico').length || 0,
-      insights_urgentes: insights?.filter((i: any) => i.urgencia === 'alta').length || 0
+      insights_criticos: insights?.filter((i) => i.impacto === 'critico').length || 0,
+      insights_urgentes: insights?.filter((i) => i.urgencia === 'alta').length || 0
     },
     mensagem: `${insights?.length || 0} insights importantes encontrados`
   };

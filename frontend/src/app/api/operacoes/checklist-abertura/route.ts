@@ -81,8 +81,8 @@ export async function POST(request: NextRequest) {
 
     // Calcular estatá­sticas
     const total_itens = itens.length
-    const itens_concluidos = itens.filter((item: any) => item.status === 'concluido').length
-    const itens_problemas = itens.filter((item: any) => item.status === 'problema').length
+    const itens_concluidos = itens.filter((item) => item.status === 'concluido').length
+    const itens_problemas = itens.filter((item) => item.status === 'problema').length
     const percentual_conclusao = total_itens > 0 ? (itens_concluidos / total_itens * 100) : 0
 
     // Criar ou atualizar checklist principal
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
       .eq('checklist_id', checklistData.id)
 
     // Inserir novos itens
-    const itensParaInserir = itens.map((item: any) => ({
+    const itensParaInserir = itens.map((item) => ({
       checklist_id: checklistData.id,
       item_id: item.id,
       titulo: item.titulo,
@@ -163,7 +163,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { checklist_id, item_id: any, status, observacoes } = body
+    const { checklist_id, item_id, status, observacoes } = body
 
     if (!checklist_id || !item_id || !status) {
       return NextResponse.json({ 
@@ -201,8 +201,8 @@ export async function PUT(request: NextRequest) {
 
     if (!itensError && itens) {
       const total_itens = itens.length
-      const itens_concluidos = itens.filter((item: any) => item.status === 'concluido').length
-      const itens_problemas = itens.filter((item: any) => item.status === 'problema').length
+      const itens_concluidos = itens.filter((item) => item.status === 'concluido').length
+      const itens_problemas = itens.filter((item) => item.status === 'problema').length
       const percentual_conclusao = total_itens > 0 ? (itens_concluidos / total_itens * 100) : 0
 
       await supabase

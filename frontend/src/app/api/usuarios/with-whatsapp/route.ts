@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
     let query = supabase
       .from('usuarios_bar')
-      .select('id, nome: any, email, celular: any, ativo, cargo: any, departamento')
+      .select('id, nome, email, celular, ativo, cargo, departamento')
       .eq('ativo', true)
 
     if (barId) {
@@ -33,29 +33,29 @@ export async function GET(req: NextRequest) {
     }
 
     // Filtrar e categorizar usuá¡rios
-    const usuariosComWhatsApp = usuarios?.filter((u: any) =>
+    const usuariosComWhatsApp = usuarios?.filter((u) =>
       u.whatsapp &&
       typeof u.whatsapp === 'string' &&
       u.whatsapp.replace(/\D/g, '').length >= 10
     ) || []
 
-    const usuariosSemWhatsApp = usuarios?.filter((u: any) =>
+    const usuariosSemWhatsApp = usuarios?.filter((u) =>
       !u.whatsapp ||
       typeof u.whatsapp !== 'string' ||
       u.whatsapp.replace(/\D/g, '').length < 10
     ) || []
 
     // Validar náºmeros de WhatsApp
-    const usuariosValidados = usuariosComWhatsApp.map((usuario: any) => ({
+    const usuariosValidados = usuariosComWhatsApp.map((usuario) => ({
       ...usuario,
       whatsapp_valido: usuario.whatsapp && usuario.whatsapp.replace(/\D/g, '').length >= 10
     }))
 
-    const response: any = {
+    const response = {
       success: true,
       com_whatsapp: usuariosValidados,
       total_com_whatsapp: usuariosValidados.length,
-      total_whatsapp_valido: usuariosValidados.filter((u: any) => u.whatsapp_valido).length
+      total_whatsapp_valido: usuariosValidados.filter((u) => u.whatsapp_valido).length
     }
 
     if (includeWithout) {
@@ -100,8 +100,8 @@ export async function POST(req: NextRequest) {
         try {
           // Aqui vocáª poderia fazer uma validaá§á£o real via API
           // Por enquanto, apenas validaá§á£o de formato
-          const isValid = parseInt(numero.substring(0: any, 2)) >= 11 && 
-                         parseInt(numero.substring(0: any, 2)) <= 99 &&
+          const isValid = parseInt(numero.substring(0, 2)) >= 11 && 
+                         parseInt(numero.substring(0, 2)) <= 99 &&
                          numero[2] === '9'
 
           resultados.push({

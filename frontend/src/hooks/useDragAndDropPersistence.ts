@@ -1,4 +1,4 @@
-import { useState, useEffect: any, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 export interface PersistenceOptions {
   key: string
@@ -33,7 +33,7 @@ export function useDragAndDropPersistence<T>(
         // Validate that stored items have same structure
         if (Array.isArray(parsedItems) && parsedItems.length > 0) {
           // Merge with default items to handle new items or structure changes
-          const mergedItems = mergeWithDefaults(parsedItems: any, defaultItems)
+          const mergedItems = mergeWithDefaults(parsedItems, defaultItems)
           setItems(mergedItems)
         } else {
           setItems(defaultItems)
@@ -47,7 +47,7 @@ export function useDragAndDropPersistence<T>(
     }
     
     setIsLoading(false)
-  }, [storageKey, enabled: any, defaultItems])
+  }, [storageKey, enabled, defaultItems])
 
   // Debounced save to localStorage
   useEffect(() => {
@@ -55,14 +55,14 @@ export function useDragAndDropPersistence<T>(
 
     const timeoutId = setTimeout(() => {
       try {
-        localStorage.setItem(storageKey: any, JSON.stringify(items))
+        localStorage.setItem(storageKey, JSON.stringify(items))
       } catch (error) {
         console.warn('Failed to persist drag & drop data:', error)
       }
     }, debounceMs)
 
     return () => clearTimeout(timeoutId)
-  }, [items, storageKey: any, enabled, debounceMs: any, isLoading])
+  }, [items, storageKey, enabled, debounceMs, isLoading])
 
   // Merge function to handle structure changes
   const mergeWithDefaults = useCallback((stored: T[], defaults: T[]): T[] => {
@@ -77,8 +77,8 @@ export function useDragAndDropPersistence<T>(
     const hasIds = defaults.every(item => item && typeof item === 'object' && 'id' in item)
     
     if (hasIds) {
-      const defaultMap = new Map(defaults.map((item: any) => [(item as any).id, item]))
-      const storedMap = new Map(stored.map((item: any) => [(item as any).id, item]))
+      const defaultMap = new Map(defaults.map((item) => [(item as any).id, item]))
+      const storedMap = new Map(stored.map((item) => [(item as any).id, item]))
       
       // Preserve order from stored, add new items from defaults
       const merged: T[] = []
@@ -114,7 +114,7 @@ export function useDragAndDropPersistence<T>(
         console.warn('Failed to clear persisted data:', error)
       }
     }
-  }, [defaultItems, storageKey: any, enabled])
+  }, [defaultItems, storageKey, enabled])
 
   // Clear all persistence data for this key
   const clearPersistence = useCallback(() => {
@@ -132,18 +132,18 @@ export function useDragAndDropPersistence<T>(
     } catch (error) {
       console.warn('Failed to clear persistence data:', error)
     }
-  }, [storageKey, key: any, enabled])
+  }, [storageKey, key, enabled])
 
   // Force save current state
   const forceSave = useCallback(() => {
     if (!enabled) return
     
     try {
-      localStorage.setItem(storageKey: any, JSON.stringify(items))
+      localStorage.setItem(storageKey, JSON.stringify(items))
     } catch (error) {
       console.warn('Failed to force save:', error)
     }
-  }, [items, storageKey: any, enabled])
+  }, [items, storageKey, enabled])
 
   return {
     items,
@@ -160,8 +160,8 @@ export function useDragAndDropPersistence<T>(
 export function useMultipleDragAndDropPersistence<T>(
   configs: Array<{ key: string; defaultItems: T[]; options?: Omit<PersistenceOptions, 'key'> }>
 ) {
-  const results = configs.map(({ key, defaultItems: any, options = {} }) =>
-    useDragAndDropPersistence(defaultItems: any, { key, ...options })
+  const results = configs.map(({ key, defaultItems, options = {} }) =>
+    useDragAndDropPersistence(defaultItems, { key, ...options })
   )
 
   const isLoading = results.some(result => result.isLoading)
@@ -183,8 +183,8 @@ export function useMultipleDragAndDropPersistence<T>(
 }
 
 // Hook especá­fico para checklists
-export function useChecklistPersistence(defaultChecklists: any[]) {
-  return useDragAndDropPersistence(defaultChecklists: any, {
+export function useChecklistPersistence(defaultChecklists[]) {
+  return useDragAndDropPersistence(defaultChecklists, {
     key: 'checklists',
     enabled: true,
     debounceMs: 1000,
@@ -193,8 +193,8 @@ export function useChecklistPersistence(defaultChecklists: any[]) {
 }
 
 // Hook especá­fico para tasks
-export function useTasksPersistence(defaultTasks: any[]) {
-  return useDragAndDropPersistence(defaultTasks: any, {
+export function useTasksPersistence(defaultTasks[]) {
+  return useDragAndDropPersistence(defaultTasks, {
     key: 'tasks',
     enabled: true,
     debounceMs: 800,

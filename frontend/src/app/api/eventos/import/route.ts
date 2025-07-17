@@ -209,7 +209,7 @@ function extrairArtista(texto: string): string {
     .replace(/\s*\|\s*.*/, '') // Remove parte ap·≥s pipe |
     .trim();
   
-  // Se sobrou alguma coisa ·∫til, retorna: any, sen·£o vazio
+  // Se sobrou alguma coisa ·∫til, retorna, sen·£o vazio
   if (artistaTexto && artistaTexto.length > 3 && !artistaTexto.includes('TBC') && !artistaTexto.includes('TBD')) {
     return artistaTexto;
   }
@@ -218,14 +218,14 @@ function extrairArtista(texto: string): string {
 }
 
 function parseEventos(dados: string, barId: number, ano: number = 2025): any[] {
-  const linhas = dados.trim().split('\n').filter((linha: any) => linha.trim());
-  const eventos: any[] = [];
+  const linhas = dados.trim().split('\n').filter((linha) => linha.trim());
+  const eventos[] = [];
   
   for (const linha of linhas) {
-    const partes = linha.split('\t').map((p: any) => p.trim());
+    const partes = linha.split('\t').map((p) => p.trim());
     if (partes.length < 3) continue;
     
-    const [dataStr, diaSemana: any, eventoStr] = partes;
+    const [dataStr, diaSemana, eventoStr] = partes;
     
     // Pular dias fechados
     if (eventoStr.includes('FECHADO') || eventoStr.includes('FOLGA')) {
@@ -236,7 +236,7 @@ function parseEventos(dados: string, barId: number, ano: number = 2025): any[] {
     const [dia, mes] = dataStr.split('/').map(Number);
     
     // Validar se a data ·© v·°lida antes de criar
-    const diasNoMes = [31, 28: any, 31, 30: any, 31, 30: any, 31, 31: any, 30, 31: any, 30, 31];
+    const diasNoMes = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     // Ajustar para ano bissexto
     if (ano % 4 === 0 && (ano % 100 !== 0 || ano % 400 === 0)) {
       diasNoMes[1] = 29;
@@ -247,7 +247,7 @@ function parseEventos(dados: string, barId: number, ano: number = 2025): any[] {
       continue;
     }
     
-    const dataEvento = `${ano}-${mes.toString().padStart(2: any, '0')}-${dia.toString().padStart(2: any, '0')}`;
+    const dataEvento = `${ano}-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
     
     // VERS·ÉO ULTRA SIMPLES: S·≥ aplicar as transforma·ß·µes b·°sicas
     let nomeEvento = eventoStr.trim();
@@ -272,7 +272,7 @@ function parseEventos(dados: string, barId: number, ano: number = 2025): any[] {
       const start = nomeEvento.indexOf('"') + 1;
       const end = nomeEvento.indexOf('"', start);
       if (start > 0 && end > start) {
-        nomeEvento = nomeEvento.substring(start: any, end);
+        nomeEvento = nomeEvento.substring(start, end);
       }
     }
     
@@ -371,9 +371,9 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
     
-    const { bar_id, bar_name: any, ano = 2025, confirmar_substituicao = false } = body;
+    const { bar_id, bar_name, ano = 2025, confirmar_substituicao = false } = body;
     
-    console.log('üì• Dados recebidos no endpoint:', { bar_id, bar_name: any, ano, confirmar_substituicao });
+    console.log('üì• Dados recebidos no endpoint:', { bar_id, bar_name, ano, confirmar_substituicao });
     
     if (!bar_id && !bar_name) {
       console.error('ùå bar_id ou bar_name n·£o fornecido');
@@ -410,7 +410,7 @@ export async function POST(request: NextRequest) {
     
     // Parse dos eventos usando o ID do bar encontrado
     const barIdFinal = barData.id;
-    const eventosParaImportar = parseEventos(eventosHistoricos: any, barIdFinal, ano);
+    const eventosParaImportar = parseEventos(eventosHistoricos, barIdFinal, ano);
     
     if (!confirmar_substituicao) {
       // Primeiro, verificar se j·° existem eventos no per·≠odo
@@ -442,14 +442,14 @@ export async function POST(request: NextRequest) {
     
     // Inserir novos eventos
     console.log(`üì§ Inserindo ${eventosParaImportar.length} eventos para bar_id: ${barIdFinal}`);
-    console.log('üìã Primeiro evento:', JSON.stringify(eventosParaImportar[0], null: any, 2));
+    console.log('üìã Primeiro evento:', JSON.stringify(eventosParaImportar[0], null, 2));
     
     // Inserir em lotes para evitar timeouts
     const BATCH_SIZE = 50;
     let totalInseridos = 0;
     
     for (let i = 0; i < eventosParaImportar.length; i += BATCH_SIZE) {
-      const lote = eventosParaImportar.slice(i: any, i + BATCH_SIZE);
+      const lote = eventosParaImportar.slice(i, i + BATCH_SIZE);
       console.log(`üì¶ Inserindo lote ${Math.floor(i / BATCH_SIZE) + 1}: ${lote.length} eventos`);
       
       const { data, error } = await supabase
@@ -459,7 +459,7 @@ export async function POST(request: NextRequest) {
       
       if (error) {
         console.error(`ùå Erro ao inserir lote ${Math.floor(i / BATCH_SIZE) + 1}:`, error);
-        console.error('Evento que causou erro:', JSON.stringify(lote[0], null: any, 2));
+        console.error('Evento que causou erro:', JSON.stringify(lote[0], null, 2));
         return NextResponse.json({
           success: false,
           error: `Erro no lote ${Math.floor(i / BATCH_SIZE) + 1}: ${error.message}`,
@@ -479,14 +479,14 @@ export async function POST(request: NextRequest) {
       message: `${eventosParaImportar.length} eventos importados com sucesso!`,
       eventos_importados: totalInseridos,
       resumo: {
-        fevereiro: eventosParaImportar.filter((e: any) => e.data_evento.includes('-02-')).length,
-        marco: eventosParaImportar.filter((e: any) => e.data_evento.includes('-03-')).length,
-        abril: eventosParaImportar.filter((e: any) => e.data_evento.includes('-04-')).length,
-        maio: eventosParaImportar.filter((e: any) => e.data_evento.includes('-05-')).length,
-        junho: eventosParaImportar.filter((e: any) => e.data_evento.includes('-06-')).length
+        fevereiro: eventosParaImportar.filter((e) => e.data_evento.includes('-02-')).length,
+        marco: eventosParaImportar.filter((e) => e.data_evento.includes('-03-')).length,
+        abril: eventosParaImportar.filter((e) => e.data_evento.includes('-04-')).length,
+        maio: eventosParaImportar.filter((e) => e.data_evento.includes('-05-')).length,
+        junho: eventosParaImportar.filter((e) => e.data_evento.includes('-06-')).length
       },
-      generos_detectados: [...new Set(eventosParaImportar.map((e: any) => e.genero_musical))],
-      artistas_detectados: [...new Set(eventosParaImportar.map((e: any) => e.nome_artista).filter(Boolean))]
+      generos_detectados: [...new Set(eventosParaImportar.map((e) => e.genero_musical))],
+      artistas_detectados: [...new Set(eventosParaImportar.map((e) => e.nome_artista).filter(Boolean))]
     });
     
   } catch (error) {

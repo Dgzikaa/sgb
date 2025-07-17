@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     // Verificar se checklist existe
     const { data: checklist, error: checklistError } = await supabase
       .from('checklists')
-      .select('id, nome: any, setor, tempo_estimado')
+      .select('id, nome, setor, tempo_estimado')
       .eq('id', data.checklist_id)
       .eq('bar_id', user.bar_id)
       .eq('ativo', true)
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar conflitos de atribuiá§á£o
-    const conflitos = await verificarConflitosAtribuicao(supabase: any, data, user.bar_id.toString())
+    const conflitos = await verificarConflitosAtribuicao(supabase, data, user.bar_id.toString())
     if (conflitos.length > 0) {
       return NextResponse.json({ 
         error: 'Conflito com atribuiá§áµes existentes',
@@ -114,8 +114,8 @@ export async function POST(request: NextRequest) {
       .insert(novaAtribuicao)
       .select(`
         *,
-        checklist:checklists!checklist_id (nome: any, setor, tipo),
-        funcionario:usuarios_bar!funcionario_id (nome: any, email, cargo),
+        checklist:checklists!checklist_id (nome, setor, tipo),
+        funcionario:usuarios_bar!funcionario_id (nome, email, cargo),
         criado_por_usuario:usuarios_bar!criado_por (nome)
       `)
       .single()
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Criar agendamentos automá¡ticos para esta atribuiá§á£o
-    await criarAgendamentosAutomaticos(supabase: any, atribuicao)
+    await criarAgendamentosAutomaticos(supabase, atribuicao)
 
     console.log(`œ… Atribuiá§á£o criada: ${checklist.nome} -> ${data.tipo_atribuicao}`)
 
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
       data: atribuicao
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro na API de criar atribuiá§á£o:', error)
     
     if (error instanceof z.ZodError) {
@@ -185,8 +185,8 @@ export async function GET(request: NextRequest) {
       .from('checklist_atribuicoes')
       .select(`
         *,
-        checklist:checklists!checklist_id (nome: any, setor, tipo: any, tempo_estimado),
-        funcionario:usuarios_bar!funcionario_id (nome: any, email, cargo),
+        checklist:checklists!checklist_id (nome, setor, tipo, tempo_estimado),
+        funcionario:usuarios_bar!funcionario_id (nome, email, cargo),
         criado_por_usuario:usuarios_bar!criado_por (nome)
       `)
       .eq('bar_id', user.bar_id)
@@ -222,7 +222,7 @@ export async function GET(request: NextRequest) {
     // Buscar atribuiá§áµes com paginaá§á£o
     const { data: atribuicoes, error } = await query
       .order('criado_em', { ascending: false })
-      .range(offset: any, offset + limit - 1)
+      .range(offset, offset + limit - 1)
 
     if (error) {
       console.error('Erro ao buscar atribuiá§áµes:', error)
@@ -233,8 +233,8 @@ export async function GET(request: NextRequest) {
 
     // Enriquecer atribuiá§áµes com estatá­sticas
     const atribuicoesEnriquecidas = await Promise.all(
-      (atribuicoes || []).map(async (atribuicao: any) => {
-        const stats = await calcularEstatisticasAtribuicao(supabase: any, atribuicao.id)
+      (atribuicoes || []).map(async (atribuicao) => {
+        const stats = await calcularEstatisticasAtribuicao(supabase, atribuicao.id)
         return {
           ...atribuicao,
           estatisticas: stats
@@ -259,7 +259,7 @@ export async function GET(request: NextRequest) {
       }
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro na API de listar atribuiá§áµes:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
@@ -272,7 +272,7 @@ export async function GET(request: NextRequest) {
 // FUNá‡á•ES UTILITáRIAS
 // =====================================================
 
-function validarDadosAtribuicao(data: any) {
+function validarDadosAtribuicao(data) {
   const erros: string[] = []
 
   // Validar tipo especá­fico
@@ -332,8 +332,8 @@ function validarDadosAtribuicao(data: any) {
   }
 }
 
-async function verificarConflitosAtribuicao(supabase: any, data: any, barId: string) {
-  const conflitos: any[] = []
+async function verificarConflitosAtribuicao(supabase, data, barId: string) {
+  const conflitos[] = []
 
   // Buscar atribuiá§áµes existentes que possam conflitar
   const { data: atribuicoesExistentes } = await supabase
@@ -345,7 +345,7 @@ async function verificarConflitosAtribuicao(supabase: any, data: any, barId: str
 
   if (!atribuicoesExistentes) return conflitos
 
-  atribuicoesExistentes.forEach((existente: any) => {
+  atribuicoesExistentes.forEach((existente) => {
     // Verificar conflitos por tipo
     let temConflito = false
     let motivo = ''
@@ -392,9 +392,9 @@ async function verificarConflitosAtribuicao(supabase: any, data: any, barId: str
   return conflitos
 }
 
-async function criarAgendamentosAutomaticos(supabase: any, atribuicao: any) {
+async function criarAgendamentosAutomaticos(supabase, atribuicao) {
   try {
-    const agendamentos = gerarAgendamentos(atribuicao: any, 30) // Prá³ximos 30 dias
+    const agendamentos = gerarAgendamentos(atribuicao, 30) // Prá³ximos 30 dias
 
     if (agendamentos.length > 0) {
       const { error } = await supabase
@@ -412,8 +412,8 @@ async function criarAgendamentosAutomaticos(supabase: any, atribuicao: any) {
   }
 }
 
-function gerarAgendamentos(atribuicao: any, dias: number) {
-  const agendamentos: any[] = []
+function gerarAgendamentos(atribuicao, dias: number) {
+  const agendamentos[] = []
   const config = atribuicao.configuracao_frequencia
   const dataInicio = new Date(atribuicao.data_inicio)
   const dataFim = atribuicao.data_fim ? new Date(atribuicao.data_fim) : new Date(Date.now() + dias * 24 * 60 * 60 * 1000)
@@ -428,10 +428,10 @@ function gerarAgendamentos(atribuicao: any, dias: number) {
         config.horarios?.forEach((horario: string) => {
           const [hora, minuto] = horario.split(':').map(Number)
           const dataAgendamento = new Date(data)
-          dataAgendamento.setHours(hora: any, minuto, 0: any, 0)
+          dataAgendamento.setHours(hora, minuto, 0, 0)
 
           if (dataAgendamento > new Date()) { // Sá³ agendar para o futuro
-            agendamentos.push(criarAgendamento(atribuicao: any, dataAgendamento))
+            agendamentos.push(criarAgendamento(atribuicao, dataAgendamento))
           }
         })
       }
@@ -448,10 +448,10 @@ function gerarAgendamentos(atribuicao: any, dias: number) {
             config.horarios?.forEach((horario: string) => {
               const [hora, minuto] = horario.split(':').map(Number)
               const dataHorario = new Date(dataAgendamento)
-              dataHorario.setHours(hora: any, minuto, 0: any, 0)
+              dataHorario.setHours(hora, minuto, 0, 0)
 
               if (dataHorario > new Date()) {
-                agendamentos.push(criarAgendamento(atribuicao: any, dataHorario))
+                agendamentos.push(criarAgendamento(atribuicao, dataHorario))
               }
             })
           }
@@ -464,10 +464,10 @@ function gerarAgendamentos(atribuicao: any, dias: number) {
       for (let data = new Date(dataInicio); data <= dataFim; data.setMonth(data.getMonth() + 1)) {
         config.horarios?.forEach((horario: string) => {
           const [hora, minuto] = horario.split(':').map(Number)
-          const dataAgendamento = new Date(data.getFullYear(), data.getMonth(), 1: any, hora, minuto)
+          const dataAgendamento = new Date(data.getFullYear(), data.getMonth(), 1, hora, minuto)
 
           if (dataAgendamento > new Date() && dataAgendamento <= dataFim) {
-            agendamentos.push(criarAgendamento(atribuicao: any, dataAgendamento))
+            agendamentos.push(criarAgendamento(atribuicao, dataAgendamento))
           }
         })
       }
@@ -477,7 +477,7 @@ function gerarAgendamentos(atribuicao: any, dias: number) {
   return agendamentos
 }
 
-function criarAgendamento(atribuicao: any, dataAgendamento: Date) {
+function criarAgendamento(atribuicao, dataAgendamento: Date) {
   return {
     atribuicao_id: atribuicao.id,
     checklist_id: atribuicao.checklist_id,
@@ -497,11 +497,11 @@ function criarAgendamento(atribuicao: any, dataAgendamento: Date) {
   }
 }
 
-async function calcularEstatisticasAtribuicao(supabase: any, atribuicaoId: string) {
+async function calcularEstatisticasAtribuicao(supabase, atribuicaoId: string) {
   // Buscar agendamentos desta atribuiá§á£o
   const { data: agendamentos } = await supabase
     .from('checklist_agendamentos')
-    .select('status, data_agendada: any, execucao_id')
+    .select('status, data_agendada, execucao_id')
     .eq('atribuicao_id', atribuicaoId)
 
   if (!agendamentos) {
@@ -515,9 +515,9 @@ async function calcularEstatisticasAtribuicao(supabase: any, atribuicaoId: strin
   }
 
   const agora = new Date()
-  const concluidos = agendamentos.filter((a: any) => a.status === 'concluido').length
-  const pendentes = agendamentos.filter((a: any) => a.status === 'agendado' && new Date(a.data_agendada) > agora).length
-  const atrasados = agendamentos.filter((a: any) => a.status === 'agendado' && new Date(a.data_agendada) <= agora).length
+  const concluidos = agendamentos.filter((a) => a.status === 'concluido').length
+  const pendentes = agendamentos.filter((a) => a.status === 'agendado' && new Date(a.data_agendada) > agora).length
+  const atrasados = agendamentos.filter((a) => a.status === 'agendado' && new Date(a.data_agendada) <= agora).length
 
   return {
     total_agendados: agendamentos.length,
@@ -528,14 +528,14 @@ async function calcularEstatisticasAtribuicao(supabase: any, atribuicaoId: strin
   }
 }
 
-function calcularEstatisticasGerais(atribuicoes: any[]) {
+function calcularEstatisticasGerais(atribuicoes[]) {
   const total = atribuicoes.length
-  const ativas = atribuicoes.filter((a: any) => a.ativo).length
+  const ativas = atribuicoes.filter((a) => a.ativo).length
   const inativas = total - ativas
 
-  const totalAgendados = atribuicoes.reduce((acc: number, a: any) => acc + (a.estatisticas?.total_agendados || 0), 0)
-  const totalConcluidos = atribuicoes.reduce((acc: number, a: any) => acc + (a.estatisticas?.concluidos || 0), 0)
-  const totalAtrasados = atribuicoes.reduce((acc: number, a: any) => acc + (a.estatisticas?.atrasados || 0), 0)
+  const totalAgendados = atribuicoes.reduce((acc: number, a) => acc + (a.estatisticas?.total_agendados || 0), 0)
+  const totalConcluidos = atribuicoes.reduce((acc: number, a) => acc + (a.estatisticas?.concluidos || 0), 0)
+  const totalAtrasados = atribuicoes.reduce((acc: number, a) => acc + (a.estatisticas?.atrasados || 0), 0)
 
   return {
     total_atribuicoes: total,

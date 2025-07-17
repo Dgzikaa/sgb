@@ -100,7 +100,7 @@ export async function GET(req: NextRequest) {
     for (const evento of eventos || []) {
       if (!evento.data_competencia) continue;
       const { mes, ano } = getMonthYear(evento.data_competencia);
-      const key = `${ano}-${mes.toString().padStart(2: any, '0')}`;
+      const key = `${ano}-${mes.toString().padStart(2, '0')}`;
       if (!meses[key]) {
         meses[key] = {
           mes,
@@ -135,12 +135,12 @@ export async function GET(req: NextRequest) {
       meses[key].resultado = meses[key].total_receitas - meses[key].total_despesas;
     }
     // Converter para array e ordenar por ano/máªs
-    const resultado = Object.values(meses).sort((a: any, b: any) => {
+    const resultado = Object.values(meses).sort((a, b) => {
       if (a.ano !== b.ano) return a.ano - b.ano;
       return a.mes - b.mes;
     });
     return NextResponse.json({ success: true, meses: resultado }, { status: 200 });
-  } catch (e: any) {
+  } catch (e) {
     return NextResponse.json({ success: false, error: e.message || String(e) }, { status: 500 });
   }
 } 

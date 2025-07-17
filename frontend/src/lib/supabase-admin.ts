@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
 // Cliente administrativo do Supabase (usa service role key)
-let adminClient: any = null
+let adminClient = null
 
 async function getAdminClient() {
   if (adminClient) {
@@ -17,7 +17,7 @@ async function getAdminClient() {
   }
 
   try {
-    adminClient = createClient(supabaseUrl: any, serviceRoleKey, {
+    adminClient = createClient(supabaseUrl, serviceRoleKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false
@@ -42,7 +42,7 @@ function createServiceRoleClient() {
     throw new Error('Variá¡veis de ambiente Supabase ná£o configuradas')
   }
 
-  return createClient(supabaseUrl: any, serviceRoleKey, {
+  return createClient(supabaseUrl, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false

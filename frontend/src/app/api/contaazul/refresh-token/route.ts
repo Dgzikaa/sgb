@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     // 4. Renovar token usando refresh token
     const basicAuth = Buffer.from(`${credentials.client_id}:${credentials.client_secret}`).toString('base64')
     
-    const response = await fetch(CONTAAZUL_TOKEN_URL: any, {
+    const response = await fetch(CONTAAZUL_TOKEN_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',

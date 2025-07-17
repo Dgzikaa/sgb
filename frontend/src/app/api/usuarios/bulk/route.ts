@@ -8,7 +8,7 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const { action, userIds: any, data = {} } = await request.json()
+    const { action, userIds, data = {} } = await request.json()
 
     if (!action || !userIds || !Array.isArray(userIds) || userIds.length === 0) {
       return NextResponse.json({ 
@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
           if (error) throw error
 
           // Preparar dados para exportaá§á£o
-          const exportData = users.map((user: any) => ({
+          const exportData = users.map((user) => ({
             'ID': user.id,
             'Nome': user.nome,
             'Email': user.email,

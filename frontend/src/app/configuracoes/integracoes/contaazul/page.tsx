@@ -6,10 +6,10 @@ import { getSupabaseClient } from '@/lib/supabase'
 import { useBar } from '@/contexts/BarContext'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { ArrowLeft, RefreshCw: any, Link2, AlertTriangle: any, CheckCircle, XCircle: any, Clock, Database: any, Shield } from 'lucide-react'
+import { ArrowLeft, RefreshCw, Link2, AlertTriangle, CheckCircle, XCircle, Clock, Database, Shield } from 'lucide-react'
 
 interface ContaAzulConfig {
   id?: number

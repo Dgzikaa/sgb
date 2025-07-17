@@ -30,13 +30,13 @@ export async function getStatusChecklists(bar_id: number, inicio?: string, fim?:
   if (!execucoes) return { erro: 'Erro ao buscar dados' };
 
   const total = execucoes.length;
-  const concluidos = execucoes.filter((e: any) => e.status === 'concluido').length;
-  const pendentes = execucoes.filter((e: any) => e.status === 'em_andamento').length;
-  const atrasados = execucoes.filter((e: any) => e.status === 'atrasado').length;
+  const concluidos = execucoes.filter((e) => e.status === 'concluido').length;
+  const pendentes = execucoes.filter((e) => e.status === 'em_andamento').length;
+  const atrasados = execucoes.filter((e) => e.status === 'atrasado').length;
 
   const scoresMedio = execucoes
-    .filter((e: any) => e.pontuacao_final)
-    .reduce((acc: any, e: any) => acc + e.pontuacao_final, 0) / execucoes.filter((e: any) => e.pontuacao_final).length || 0;
+    .filter((e) => e.pontuacao_final)
+    .reduce((acc, e) => acc + e.pontuacao_final, 0) / execucoes.filter((e) => e.pontuacao_final).length || 0;
 
   return {
     periodo: { inicio: dataInicio, fim: dataFim },
@@ -48,7 +48,7 @@ export async function getStatusChecklists(bar_id: number, inicio?: string, fim?:
       taxa_conclusao: total > 0 ? (concluidos / total) * 100 : 0,
       score_medio: scoresMedio
     },
-    execucoes_detalhes: execucoes.slice(0: any, 10),
+    execucoes_detalhes: execucoes.slice(0, 10),
     mensagem: `${concluidos} de ${total} checklists concluá­dos (${((concluidos/total)*100).toFixed(1)}%)`
   };
 }
@@ -61,7 +61,7 @@ export async function getPerformanceFuncionarios(bar_id: number, inicio?: string
       status,
       pontuacao_final,
       tempo_execucao_minutos,
-      usuarios_bar!inner(nome: any, email)
+      usuarios_bar!inner(nome, email)
     `)
     .eq('bar_id', bar_id)
     .eq('status', 'concluido');
@@ -89,18 +89,18 @@ export async function getPerformanceFuncionarios(bar_id: number, inicio?: string
   });
 
   const ranking = Object.values(funcionarios)
-    .map((func: any) => ({
+    .map((func) => ({
       ...func,
       score_medio: func.total_execucoes > 0 ? func.score_total / func.total_execucoes : 0,
       tempo_medio: func.total_execucoes > 0 ? func.tempo_total / func.total_execucoes : 0,
       consistencia: func.scores.length > 1 ? 
         (func.scores.reduce((sum: number, score: number) => sum + Math.abs(score - (func.score_total / func.total_execucoes)), 0) / func.scores.length) : 0
     }))
-    .sort((a: any, b: any) => b.score_medio - a.score_medio)
-    .slice(0: any, limite);
+    .sort((a, b) => b.score_medio - a.score_medio)
+    .slice(0, limite);
 
   return {
-    ranking_funcionarios: ranking.map((f: any, index: any) => ({
+    ranking_funcionarios: ranking.map((f, index) => ({
       posicao: index + 1,
       ...f
     })),
@@ -123,7 +123,7 @@ export async function getWhatsAppStats(bar_id: number, inicio?: string, fim?: st
 
   const { data: mensagens } = await supabase
     .from('whatsapp_mensagens')
-    .select('status, tipo: any, created_at')
+    .select('status, tipo, created_at')
     .eq('bar_id', bar_id)
     .gte('created_at', `${dataInicio}T00:00:00Z`)
     .lte('created_at', `${dataFim}T23:59:59Z`);
@@ -131,9 +131,9 @@ export async function getWhatsAppStats(bar_id: number, inicio?: string, fim?: st
   if (!mensagens) return { erro: 'Erro ao buscar dados' };
 
   const total = mensagens.length;
-  const enviadas = mensagens.filter((m: any) => ['sent', 'delivered', 'read'].includes(m.status)).length;
-  const lidas = mensagens.filter((m: any) => m.status === 'read').length;
-  const falhas = mensagens.filter((m: any) => m.status === 'failed').length;
+  const enviadas = mensagens.filter((m) => ['sent', 'delivered', 'read'].includes(m.status)).length;
+  const lidas = mensagens.filter((m) => m.status === 'read').length;
+  const falhas = mensagens.filter((m) => m.status === 'failed').length;
 
   // Estatá­sticas por tipo
   const tipoStats: Record<string, number> = {};
@@ -179,10 +179,10 @@ export async function getTempoProducao(bar_id: number, inicio?: string, fim?: st
 
   if (!tempos) return { erro: 'Erro ao buscar dados' };
 
-  const tempoMedioTotal = tempos.reduce((acc: any, t: any) => acc + (t.tempo_t0_t3 || 0), 0) / tempos.length;
-  const tempoMedioPrep = tempos.reduce((acc: any, t: any) => acc + (t.tempo_t0_t1 || 0), 0) / tempos.length;
-  const tempoMedioCozinha = tempos.reduce((acc: any, t: any) => acc + (t.tempo_t1_t2 || 0), 0) / tempos.length;
-  const tempoMedioEntrega = tempos.reduce((acc: any, t: any) => acc + (t.tempo_t2_t3 || 0), 0) / tempos.length;
+  const tempoMedioTotal = tempos.reduce((acc, t) => acc + (t.tempo_t0_t3 || 0), 0) / tempos.length;
+  const tempoMedioPrep = tempos.reduce((acc, t) => acc + (t.tempo_t0_t1 || 0), 0) / tempos.length;
+  const tempoMedioCozinha = tempos.reduce((acc, t) => acc + (t.tempo_t1_t2 || 0), 0) / tempos.length;
+  const tempoMedioEntrega = tempos.reduce((acc, t) => acc + (t.tempo_t2_t3 || 0), 0) / tempos.length;
 
   // Produtos mais demorados
   const produtosTempo: Record<string, number[]> = {};
@@ -194,11 +194,11 @@ export async function getTempoProducao(bar_id: number, inicio?: string, fim?: st
   const produtosMaisDemorados = Object.entries(produtosTempo)
     .map(([produto, tempos]) => ({
       produto,
-      tempo_medio: tempos.reduce((a: any, b: any) => a + b, 0) / tempos.length,
+      tempo_medio: tempos.reduce((a, b) => a + b, 0) / tempos.length,
       total_pedidos: tempos.length
     }))
-    .sort((a: any, b: any) => b.tempo_medio - a.tempo_medio)
-    .slice(0: any, 5);
+    .sort((a, b) => b.tempo_medio - a.tempo_medio)
+    .slice(0, 5);
 
   return {
     periodo: { inicio: dataInicio, fim: dataFim },
@@ -222,10 +222,10 @@ export async function getTempoProducao(bar_id: number, inicio?: string, fim?: st
 export async function getScoreSaudeGeral(bar_id: number) {
   const hoje = new Date().toISOString().split('T')[0];
   
-  const [metricas, anomalias: any, insights] = await Promise.all([
+  const [metricas, anomalias, insights] = await Promise.all([
     supabase
       .from('ai_metrics')
-      .select('valor, meta_valor: any, nome_metrica')
+      .select('valor, meta_valor, nome_metrica')
       .eq('bar_id', bar_id)
       .eq('data_referencia', hoje),
     
@@ -245,23 +245,23 @@ export async function getScoreSaudeGeral(bar_id: number) {
   let score = 100;
 
   // Penalizar por anomalias ativas
-  const anomaliasCriticas = anomalias.data?.filter((a: any) => a.severidade === 'critica').length || 0;
-  const anomaliasAltas = anomalias.data?.filter((a: any) => a.severidade === 'alta').length || 0;
+  const anomaliasCriticas = anomalias.data?.filter((a) => a.severidade === 'critica').length || 0;
+  const anomaliasAltas = anomalias.data?.filter((a) => a.severidade === 'alta').length || 0;
   score -= (anomaliasCriticas * 15) + (anomaliasAltas * 8);
 
   // Ajustar por má©tricas vs metas
-  const metricasAbaixoMeta = metricas.data?.filter((m: any) => 
+  const metricasAbaixoMeta = metricas.data?.filter((m) => 
     m.valor < (m.meta_valor * 0.9)
   ).length || 0;
   score -= metricasAbaixoMeta * 5;
 
   // Bonificar insights positivos
-  const insightsPositivos = insights.data?.filter((i: any) => 
+  const insightsPositivos = insights.data?.filter((i) => 
     i.impacto === 'positivo'
   ).length || 0;
   score += insightsPositivos * 2;
 
-  score = Math.max(0: any, Math.min(100: any, score));
+  score = Math.max(0, Math.min(100, score));
 
   let status = 'excelente';
   if (score < 40) status = 'critico';
@@ -304,13 +304,13 @@ export async function getDashboardExecutivo(bar_id: number, inicio?: string, fim
       .gte('dt_gerencial', dataInicio)
       .lte('dt_gerencial', dataFim),
     
-    getStatusChecklists(bar_id: any, inicio, fim),
-    getWhatsAppStats(bar_id: any, inicio, fim),
-    getTempoProducao(bar_id: any, inicio, fim),
+    getStatusChecklists(bar_id, inicio, fim),
+    getWhatsAppStats(bar_id, inicio, fim),
+    getTempoProducao(bar_id, inicio, fim),
     getScoreSaudeGeral(bar_id)
   ]);
 
-  const faturamentoTotal = faturamento.data?.reduce((acc: any, f: any) => acc + (f.valor_liquido || 0), 0) || 0;
+  const faturamentoTotal = faturamento.data?.reduce((acc, f) => acc + (f.valor_liquido || 0), 0) || 0;
   const transacoes = faturamento.data?.length || 0;
 
   return {
@@ -338,27 +338,27 @@ export async function getDashboardExecutivo(bar_id: number, inicio?: string, fim
 // ========================================
 
 export async function getVisao360(bar_id: number, inicio?: string, fim?: string) {
-  const dashboard = await getDashboardExecutivo(bar_id: any, inicio, fim);
-  const performance = await getPerformanceFuncionarios(bar_id: any, inicio, fim: any, 5);
+  const dashboard = await getDashboardExecutivo(bar_id, inicio, fim);
+  const performance = await getPerformanceFuncionarios(bar_id, inicio, fim, 5);
   
-  const [anomalias, insights: any, recomendacoes] = await Promise.all([
+  const [anomalias, insights, recomendacoes] = await Promise.all([
     supabase
       .from('ai_anomalies')
-      .select('titulo, severidade: any, ainda_ativa')
+      .select('titulo, severidade, ainda_ativa')
       .eq('bar_id', bar_id)
       .eq('ainda_ativa', true)
       .limit(5),
     
     supabase
       .from('ai_insights')
-      .select('titulo, impacto: any, urgencia')
+      .select('titulo, impacto, urgencia')
       .eq('bar_id', bar_id)
       .order('created_at', { ascending: false })
       .limit(5),
     
     supabase
       .from('ai_recommendations')
-      .select('titulo, roi_estimado: any, prioridade')
+      .select('titulo, roi_estimado, prioridade')
       .eq('bar_id', bar_id)
       .order('prioridade', { ascending: false })
       .limit(5)
@@ -374,8 +374,8 @@ export async function getVisao360(bar_id: number, inicio?: string, fim?: string)
     },
     resumo_inteligencia: {
       total_anomalias_ativas: anomalias.data?.length || 0,
-      insights_criticos: insights.data?.filter((i: any) => i.impacto === 'critico').length || 0,
-      recomendacoes_altas: recomendacoes.data?.filter((r: any) => r.prioridade >= 8).length || 0
+      insights_criticos: insights.data?.filter((i) => i.impacto === 'critico').length || 0,
+      recomendacoes_altas: recomendacoes.data?.filter((r) => r.prioridade >= 8).length || 0
     },
     mensagem: 'Aná¡lise 360° completa do estabelecimento'
   };

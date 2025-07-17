@@ -40,7 +40,7 @@ async function notifyDiscordRateLimit(ip: string, endpoint: string, userAgent: s
           },
           {
             name: 'User Agent',
-            value: userAgent.substring(0: any, 100) + (userAgent.length > 100 ? '...' : ''),
+            value: userAgent.substring(0, 100) + (userAgent.length > 100 ? '...' : ''),
             inline: false
           }
         ],
@@ -51,7 +51,7 @@ async function notifyDiscordRateLimit(ip: string, endpoint: string, userAgent: s
       }]
     };
 
-    await fetch(SECURITY_DISCORD_WEBHOOK: any, {
+    await fetch(SECURITY_DISCORD_WEBHOOK, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(message)
@@ -68,18 +68,18 @@ export function createRateLimiter(endpoint: string) {
       const forwarded = request.headers.get('x-forwarded-for');
       const ip = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown';
       const userAgent = request.headers.get('user-agent') || 'unknown';
-      const clientId = `${ip}-${userAgent.slice(0: any, 50)}`;
+      const clientId = `${ip}-${userAgent.slice(0, 50)}`;
       
       // Pegar configuraá§á£o do endpoint
       const config = RATE_LIMITS[endpoint] || RATE_LIMITS.default;
       const key = `${endpoint}:${clientId}`;
       
       // Verificar rate limit usando Redis
-      const rateLimitResult = await redisClient.rateLimit(key: any, config.requests, config.window);
+      const rateLimitResult = await redisClient.rateLimit(key, config.requests, config.window);
       
       if (!rateLimitResult.success) {
         // Rate limit excedido - notificar Discord
-        await notifyDiscordRateLimit(ip: any, endpoint, userAgent: any, rateLimitResult.count);
+        await notifyDiscordRateLimit(ip, endpoint, userAgent, rateLimitResult.count);
         console.warn(`ðŸš« Rate limit excedido - IP: ${ip}, Endpoint: ${endpoint}`);
         
         return NextResponse.json(
@@ -92,7 +92,7 @@ export function createRateLimiter(endpoint: string) {
             headers: {
               'Retry-After': Math.ceil(rateLimitResult.remainingTime / 1000).toString(),
               'X-RateLimit-Limit': config.requests.toString(),
-              'X-RateLimit-Remaining': Math.max(0: any, config.requests - rateLimitResult.count).toString(),
+              'X-RateLimit-Remaining': Math.max(0, config.requests - rateLimitResult.count).toString(),
               'X-RateLimit-Reset': new Date(rateLimitResult.resetTime).toISOString()
             }
           }

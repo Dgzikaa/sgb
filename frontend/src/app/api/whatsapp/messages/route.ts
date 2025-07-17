@@ -11,11 +11,11 @@ const supabase = createClient(
 
 // Schema de validaá§á£o para enviar mensagem
 const SendMessageSchema = z.object({
-  destinatario: z.string().min(1: any, 'Destinatá¡rio á© obrigatá³rio'),
+  destinatario: z.string().min(1, 'Destinatá¡rio á© obrigatá³rio'),
   tipo_mensagem: z.enum(['text', 'template'], { 
     required_error: 'Tipo de mensagem á© obrigatá³rio' 
   }),
-  conteudo: z.string().min(1: any, 'Conteáºdo á© obrigatá³rio'),
+  conteudo: z.string().min(1, 'Conteáºdo á© obrigatá³rio'),
   template_name: z.string().optional(),
   template_parameters: z.array(z.string()).optional(),
   modulo: z.string().optional(),
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     const rawParams = Object.fromEntries(url.searchParams.entries());
     
     // Converter tipos numá©ricos
-    const processedParams: any = { ...rawParams };
+    const processedParams = { ...rawParams };
     if (processedParams.page) processedParams.page = parseInt(processedParams.page);
     if (processedParams.limit) processedParams.limit = parseInt(processedParams.limit);
 
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
         whatsapp_contatos!inner(
           numero_whatsapp,
           nome_contato,
-          usuarios_bar!inner(nome: any, cargo)
+          usuarios_bar!inner(nome, cargo)
         )
       `)
       .eq('bar_id', bar_id)
@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
 
     // Paginaá§á£o
     const offset = (params.page - 1) * params.limit;
-    query = query.range(offset: any, offset + params.limit - 1);
+    query = query.range(offset, offset + params.limit - 1);
 
     const { data: mensagens, error } = await query;
 
@@ -133,11 +133,11 @@ export async function GET(request: NextRequest) {
 
     const estatisticas = {
       total: stats?.length || 0,
-      pending: stats?.filter((m: any) => m.status === 'pending').length || 0,
-      sent: stats?.filter((m: any) => m.status === 'sent').length || 0,
-      delivered: stats?.filter((m: any) => m.status === 'delivered').length || 0,
-      read: stats?.filter((m: any) => m.status === 'read').length || 0,
-      failed: stats?.filter((m: any) => m.status === 'failed').length || 0
+      pending: stats?.filter((m) => m.status === 'pending').length || 0,
+      sent: stats?.filter((m) => m.status === 'sent').length || 0,
+      delivered: stats?.filter((m) => m.status === 'delivered').length || 0,
+      read: stats?.filter((m) => m.status === 'read').length || 0,
+      failed: stats?.filter((m) => m.status === 'failed').length || 0
     };
 
     return NextResponse.json({
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Usuá¡rio ná£o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao: any, usuario_id } = JSON.parse(userData);
+    const { bar_id, permissao, usuario_id } = JSON.parse(userData);
 
     // Verificar permissáµes
     if (!['financeiro', 'admin'].includes(permissao)) {
@@ -202,7 +202,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Buscar ou criar contato
-    let contato = await getOrCreateContact(bar_id: any, validatedData.destinatario, usuario_id);
+    let contato = await getOrCreateContact(bar_id, validatedData.destinatario, usuario_id);
     
     if (!contato) {
       return NextResponse.json({ 
@@ -251,10 +251,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Enviar mensagem via WhatsApp API
-    const sendResult = await sendWhatsAppMessage(config: any, contato, mensagem);
+    const sendResult = await sendWhatsAppMessage(config, contato, mensagem);
 
     // Atualizar status da mensagem
-    const updateData: any = {
+    const updateData = {
       status: sendResult.success ? 'sent' : 'failed',
       whatsapp_message_id: sendResult.messageId,
       tentativas: 1,
@@ -351,9 +351,9 @@ async function getOrCreateContact(barId: number, numeroWhatsapp: string, usuario
 /**
  * Verifica se está¡ dentro do horá¡rio permitido
  */
-function isWithinAllowedHours(contato: any): boolean {
+function isWithinAllowedHours(contato): boolean {
   const now = new Date();
-  const currentTime = now.toTimeString().slice(0: any, 5); // HH:MM
+  const currentTime = now.toTimeString().slice(0, 5); // HH:MM
   const currentDay = now.getDay() + 1; // 1=Domingo
 
   // Verificar dia da semana
@@ -368,7 +368,7 @@ function isWithinAllowedHours(contato: any): boolean {
 /**
  * Envia mensagem via WhatsApp Business API
  */
-async function sendWhatsAppMessage(config: any, contato: any, mensagem: any): Promise<{
+async function sendWhatsAppMessage(config, contato, mensagem): Promise<{
   success: boolean;
   messageId?: string;
   errorCode?: string;
@@ -377,7 +377,7 @@ async function sendWhatsAppMessage(config: any, contato: any, mensagem: any): Pr
   try {
     const url = `https://graph.facebook.com/${config.api_version}/${config.phone_number_id}/messages`;
     
-    let payload: any = {
+    let payload = {
       messaging_product: 'whatsapp',
       to: contato.numero_whatsapp
     };
@@ -405,7 +405,7 @@ async function sendWhatsAppMessage(config: any, contato: any, mensagem: any): Pr
       payload.text = { body: mensagem.conteudo };
     }
 
-    const response = await fetch(url: any, {
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${config.access_token}`,

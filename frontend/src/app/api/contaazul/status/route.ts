@@ -56,12 +56,12 @@ export async function GET(request: NextRequest) {
     const { data: pgcronJobs } = await supabase
       .rpc('get_cron_jobs')
 
-    const contaazulJob = pgcronJobs?.find((job: any) => 
+    const contaazulJob = pgcronJobs?.find((job) => 
       job.jobname?.includes(`contaazul_sync_bar_${bar_id}`)
     )
 
     // 6. Estatá­sticas do máªs atual
-    const currentMonth = new Date().toISOString().slice(0: any, 7) // YYYY-MM
+    const currentMonth = new Date().toISOString().slice(0, 7) // YYYY-MM
     
     const { data: statsReceitas } = await supabase
       .from('contaazul_eventos_financeiros')
@@ -79,8 +79,8 @@ export async function GET(request: NextRequest) {
       .gte('competencia', `${currentMonth}-01`)
       .lt('competencia', `${currentMonth}-32`)
 
-    const totalReceitas = statsReceitas?.reduce((sum: any, item: any) => sum + (item.valor_total || 0), 0) || 0
-    const totalDespesas = statsDespesas?.reduce((sum: any, item: any) => sum + (item.valor_total || 0), 0) || 0
+    const totalReceitas = statsReceitas?.reduce((sum, item) => sum + (item.valor_total || 0), 0) || 0
+    const totalDespesas = statsDespesas?.reduce((sum, item) => sum + (item.valor_total || 0), 0) || 0
 
     return NextResponse.json({
       success: true,

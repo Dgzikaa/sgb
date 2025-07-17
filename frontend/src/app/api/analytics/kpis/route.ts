@@ -35,12 +35,12 @@ export async function GET(request: NextRequest) {
     // Calcular estatá­sticas resumidas
     const resumo = {
       total_kpis: kpis?.length || 0,
-      kpis_atingidos: kpis?.filter((kpi: any) => kpi.status_meta === 'atingido').length || 0,
-      kpis_criticos: kpis?.filter((kpi: any) => kpi.status_meta === 'critico').length || 0,
+      kpis_atingidos: kpis?.filter((kpi) => kpi.status_meta === 'atingido').length || 0,
+      kpis_criticos: kpis?.filter((kpi) => kpi.status_meta === 'critico').length || 0,
       percentual_sucesso: kpis?.length ? 
-        Math.round((kpis.filter((kpi: any) => kpi.status_meta === 'atingido').length / kpis.length) * 100) : 0,
+        Math.round((kpis.filter((kpi) => kpi.status_meta === 'atingido').length / kpis.length) * 100) : 0,
       data_referencia: dataReferencia,
-      categorias: [...new Set(kpis?.map((kpi: any) => kpi.categoria_kpi) || [])]
+      categorias: [...new Set(kpis?.map((kpi) => kpi.categoria_kpi) || [])]
     }
 
     return NextResponse.json({
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     if (!bar_id || !categoria_kpi || !nome_kpi || valor_atual === undefined || valor_meta === undefined) {
       return NextResponse.json({
         success: false,
-        error: 'Campos obrigatá³rios: bar_id, categoria_kpi: any, nome_kpi, valor_atual: any, valor_meta'
+        error: 'Campos obrigatá³rios: bar_id, categoria_kpi, nome_kpi, valor_atual, valor_meta'
       }, { status: 400 })
     }
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
-import { authenticateUser, checkPermission: any, authErrorResponse, permissionErrorResponse } from '@/middleware/auth'
+import { authenticateUser, checkPermission, authErrorResponse, permissionErrorResponse } from '@/middleware/auth'
 import { z } from 'zod'
 
 // =====================================================
@@ -274,9 +274,9 @@ export async function GET(request: NextRequest) {
       .from('checklist_templates')
       .select(`
         *,
-        criado_por:usuarios_bar!criado_por (nome: any, email),
+        criado_por:usuarios_bar!criado_por (nome, email),
         template_tags (
-          template_tags (nome: any, cor)
+          template_tags (nome, cor)
         )
       `)
       .order('predefinido', { ascending: false }) // Templates do sistema primeiro
@@ -312,9 +312,9 @@ export async function GET(request: NextRequest) {
 
     // Paginaá§á£o
     const offset = (query.page - 1) * query.limit
-    dbQuery = dbQuery.range(offset: any, offset + query.limit - 1)
+    dbQuery = dbQuery.range(offset, offset + query.limit - 1)
 
-    const { data: templates, error: any, count } = await dbQuery
+    const { data: templates, error, count } = await dbQuery
 
     if (error) {
       console.error('Erro ao buscar templates:', error)
@@ -324,17 +324,17 @@ export async function GET(request: NextRequest) {
     // Buscar estatá­sticas
     const { data: stats } = await supabase
       .from('checklist_templates')
-      .select('categoria, publico: any, predefinido')
+      .select('categoria, publico, predefinido')
               .or(`publico.eq.true,bar_id.eq.${user.bar_id.toString()}`)
 
     const estatisticas = {
       total: stats?.length || 0,
-      por_categoria: stats?.reduce((acc: Record<string, number>, item: any) => {
+      por_categoria: stats?.reduce((acc: Record<string, number>, item) => {
         acc[item.categoria] = (acc[item.categoria] || 0) + 1
         return acc
       }, {}),
-      publicos: stats?.filter((item: any) => item.publico).length || 0,
-      predefinidos: stats?.filter((item: any) => item.predefinido).length || 0
+      publicos: stats?.filter((item) => item.publico).length || 0,
+      predefinidos: stats?.filter((item) => item.predefinido).length || 0
     }
 
     return NextResponse.json({
@@ -349,7 +349,7 @@ export async function GET(request: NextRequest) {
       estatisticas
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro na API de templates GET:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
@@ -370,7 +370,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ðŸ”’ PERMISSá•ES - Verificar se pode criar templates
-    if (!checkPermission(user: any, { module: 'checklists', action: 'write' })) {
+    if (!checkPermission(user, { module: 'checklists', action: 'write' })) {
       return permissionErrorResponse('Sem permissá£o para criar templates')
     }
 
@@ -511,7 +511,7 @@ export async function POST(request: NextRequest) {
       data: template
     }, { status: 201 })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro na API de templates POST:', error)
     
     if (error instanceof z.ZodError) {
@@ -551,7 +551,7 @@ export async function DELETE(request: NextRequest) {
     // Verificar se template existe e se pode ser excluá­do
     const { data: template } = await supabase
       .from('checklist_templates')
-      .select('id, nome: any, predefinido, publico: any, bar_id, criado_por')
+      .select('id, nome, predefinido, publico, bar_id, criado_por')
       .eq('id', id)
       .single()
 
@@ -569,7 +569,7 @@ export async function DELETE(request: NextRequest) {
     // Verificar permissáµes
     if (template.publico) {
       // Template páºblico sá³ pode ser deletado por admin
-      if (!checkPermission(user: any, { module: 'checklists', action: 'admin' })) {
+      if (!checkPermission(user, { module: 'checklists', action: 'admin' })) {
         return permissionErrorResponse('Apenas administradores podem deletar templates páºblicos')
       }
     } else {
@@ -610,7 +610,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Template deletado com sucesso'
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro na API de templates DELETE:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',

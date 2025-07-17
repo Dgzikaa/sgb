@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect: any, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -77,7 +77,7 @@ const searchCategories: SearchCategory[] = [
   { id: 'help', name: 'Ajuda', icon: Lightbulb, color: 'text-yellow-600' }
 ]
 
-export function UnifiedSearch({ isOpen, onClose: any, onNavigate }: UnifiedSearchProps) {
+export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProps) {
   const [query, setQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
@@ -282,27 +282,27 @@ export function UnifiedSearch({ isOpen, onClose: any, onNavigate }: UnifiedSearc
 
   // Filtrar resultados baseado na query
   const filteredResults = query.length > 0 
-    ? searchResults.filter((result: any) => {
+    ? searchResults.filter((result) => {
         const searchTerms = query.toLowerCase().split(' ')
         return searchTerms.every(term => 
           result.title.toLowerCase().includes(term) ||
           result.description?.toLowerCase().includes(term) ||
           result.keywords.some(keyword => keyword.toLowerCase().includes(term))
         )
-      }).sort((a: any, b: any) => b.priority - a.priority)
-    : searchResults.filter((result: any) => 
+      }).sort((a, b) => b.priority - a.priority)
+    : searchResults.filter((result) => 
         favorites.includes(result.id) || 
         result.lastUsed || 
         result.priority > 80
-      ).sort((a: any, b: any) => b.priority - a.priority)
+      ).sort((a, b) => b.priority - a.priority)
 
   // Filtrar por categoria ativa
   const categoryFilteredResults = activeCategory 
-    ? filteredResults.filter((result: any) => result.category === activeCategory)
+    ? filteredResults.filter((result) => result.category === activeCategory)
     : filteredResults
 
   // Agrupar resultados por categoria
-  const groupedResults = categoryFilteredResults.reduce((acc: any, result: any) => {
+  const groupedResults = categoryFilteredResults.reduce((acc, result) => {
     if (!acc[result.category]) {
       acc[result.category] = []
     }
@@ -338,12 +338,12 @@ export function UnifiedSearch({ isOpen, onClose: any, onNavigate }: UnifiedSearc
         }
         break
     }
-  }, [isOpen, selectedIndex: any, categoryFilteredResults, onClose])
+  }, [isOpen, selectedIndex, categoryFilteredResults, onClose])
 
   const handleResultSelect = (result: SearchResult) => {
     // Adicionar aos recentes
     setRecentSearches(prev => {
-      const newRecent = [result.title, ...prev.filter((r: any) => r !== result.title)].slice(0: any, 5)
+      const newRecent = [result.title, ...prev.filter((r) => r !== result.title)].slice(0, 5)
       return newRecent
     })
     
@@ -366,7 +366,7 @@ export function UnifiedSearch({ isOpen, onClose: any, onNavigate }: UnifiedSearc
   const toggleFavorite = (resultId: string) => {
     setFavorites(prev => 
       prev.includes(resultId)
-        ? prev.filter((id: any) => id !== resultId)
+        ? prev.filter((id) => id !== resultId)
         : [...prev, resultId]
     )
   }
@@ -399,9 +399,9 @@ export function UnifiedSearch({ isOpen, onClose: any, onNavigate }: UnifiedSearc
             <input
               ref={inputRef}
               type="text"
-              placeholder="Buscar pá¡ginas, funcionalidades: any, dados..."
+              placeholder="Buscar pá¡ginas, funcionalidades, dados..."
               value={query}
-              onChange={(e: any) => setQuery(e.target.value)}
+              onChange={(e) => setQuery(e.target.value)}
               className="flex-1 text-lg bg-transparent border-none outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
             <div className="flex items-center gap-2">
@@ -430,7 +430,7 @@ export function UnifiedSearch({ isOpen, onClose: any, onNavigate }: UnifiedSearc
             >
               Todos
             </Button>
-            {searchCategories.map((category: any) => (
+            {searchCategories.map((category) => (
               <Button
                 key={category.id}
                 variant={activeCategory === category.id ? "default" : "ghost"}
@@ -453,7 +453,7 @@ export function UnifiedSearch({ isOpen, onClose: any, onNavigate }: UnifiedSearc
                   Recentes
                 </div>
                 <div className="space-y-1">
-                  {recentSearches.map((search: any, index: any) => (
+                  {recentSearches.map((search, index) => (
                     <div key={index} className="flex items-center gap-2 px-2 py-1 text-sm text-gray-700 dark:text-gray-300">
                       <History className="h-3 w-3" />
                       {search}
@@ -464,7 +464,7 @@ export function UnifiedSearch({ isOpen, onClose: any, onNavigate }: UnifiedSearc
             )}
 
             {Object.entries(groupedResults).map(([categoryId, results]) => {
-              const category = searchCategories.find((c: any) => c.id === categoryId)
+              const category = searchCategories.find((c) => c.id === categoryId)
               if (!category || results.length === 0) return null
 
               return (
@@ -477,7 +477,7 @@ export function UnifiedSearch({ isOpen, onClose: any, onNavigate }: UnifiedSearc
                   </div>
                   
                   <div className="space-y-0">
-                    {results.map((result: any) => {
+                    {results.map((result) => {
                       const globalIndex = categoryFilteredResults.indexOf(result)
                       const isSelected = globalIndex === selectedIndex
                       const isFav = favorites.includes(result.id)
@@ -532,7 +532,7 @@ export function UnifiedSearch({ isOpen, onClose: any, onNavigate }: UnifiedSearc
                           
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={(e: any) => {
+                              onClick={(e) => {
                                 e.stopPropagation()
                                 toggleFavorite(result.id)
                               }}

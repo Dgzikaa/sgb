@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { getSupabaseClient } from '@/lib/supabase'
 import { useBar } from '@/contexts/BarContext'
 import { usePageTitle } from '@/contexts/PageTitleContext'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
 interface VisaoCompetenciaItem {
@@ -66,7 +66,7 @@ export default function TesteVisaoCompetenciaPage() {
   useEffect(() => {
     // Definir máªs atual como padrá£o
     const agora = new Date()
-    const mes = (agora.getMonth() + 1).toString().padStart(2: any, '0')
+    const mes = (agora.getMonth() + 1).toString().padStart(2, '0')
     const ano = agora.getFullYear()
     setMesAno(`${ano}-${mes}`)
   }, [])
@@ -132,7 +132,7 @@ export default function TesteVisaoCompetenciaPage() {
       const dataInicio = `${ano}-${mes}-01`
       // Calcular áºltimo dia do máªs corretamente
       const ultimoDia = new Date(parseInt(ano), parseInt(mes), 0).getDate()
-      const dataFim = `${ano}-${mes}-${ultimoDia.toString().padStart(2: any, '0')}`
+      const dataFim = `${ano}-${mes}-${ultimoDia.toString().padStart(2, '0')}`
 
       // Carregar dados da visá£o de competáªncia
       const { data: dadosVisao, error } = await supabase
@@ -151,14 +151,14 @@ export default function TesteVisaoCompetenciaPage() {
       setDados(dadosVisao || [])
 
       // Calcular resumo
-      const receitas = dadosVisao?.filter((d: any) => d.tipo === 'RECEITA') || []
-      const despesas = dadosVisao?.filter((d: any) => d.tipo === 'DESPESA') || []
+      const receitas = dadosVisao?.filter((d) => d.tipo === 'RECEITA') || []
+      const despesas = dadosVisao?.filter((d) => d.tipo === 'DESPESA') || []
       
-      const totalReceitas = receitas.reduce((sum: number, item: any) => sum + (item.valor || 0), 0)
-      const totalDespesas = despesas.reduce((sum: number, item: any) => sum + Math.abs(item.valor || 0), 0)
+      const totalReceitas = receitas.reduce((sum: number, item) => sum + (item.valor || 0), 0)
+      const totalDespesas = despesas.reduce((sum: number, item) => sum + Math.abs(item.valor || 0), 0)
       
-      const categorias = new Set(dadosVisao?.map((d: any) => d.categoria_id).filter(Boolean))
-      const centrosCusto = new Set(dadosVisao?.map((d: any) => d.centro_custo_id).filter(Boolean))
+      const categorias = new Set(dadosVisao?.map((d) => d.categoria_id).filter(Boolean))
+      const centrosCusto = new Set(dadosVisao?.map((d) => d.centro_custo_id).filter(Boolean))
 
       setResumo({
         total_receitas: totalReceitas,
@@ -201,7 +201,7 @@ export default function TesteVisaoCompetenciaPage() {
       const dataInicio = `${ano}-${mes}-01`
       // Calcular áºltimo dia do máªs corretamente
       const ultimoDia = new Date(parseInt(ano), parseInt(mes), 0).getDate()
-      const dataFim = `${ano}-${mes}-${ultimoDia.toString().padStart(2: any, '0')}`
+      const dataFim = `${ano}-${mes}-${ultimoDia.toString().padStart(2, '0')}`
 
       const response = await fetch('/api/contaazul/coletar-com-detalhes-otimizado', {
         method: 'POST',
@@ -345,7 +345,7 @@ export default function TesteVisaoCompetenciaPage() {
     return new Date(dateString).toLocaleDateString('pt-BR')
   }
 
-  const dadosFiltrados = dados.filter((item: any) => 
+  const dadosFiltrados = dados.filter((item) => 
     filtroTipo === 'TODOS' || item.tipo === filtroTipo
   )
 
@@ -382,7 +382,7 @@ export default function TesteVisaoCompetenciaPage() {
           <input
             type="month"
             value={mesAno}
-            onChange={(e: any) => setMesAno(e.target.value)}
+            onChange={(e) => setMesAno(e.target.value)}
             className="w-full border border-gray-300 rounded-md px-3 py-2"
           />
         </div>
@@ -393,7 +393,7 @@ export default function TesteVisaoCompetenciaPage() {
           </label>
           <select
             value={filtroTipo}
-            onChange={(e: any) => setFiltroTipo(e.target.value)}
+            onChange={(e) => setFiltroTipo(e.target.value)}
             className="w-full border border-gray-300 rounded-md px-3 py-2"
           >
             <option value="TODOS">Todos</option>
@@ -587,7 +587,7 @@ export default function TesteVisaoCompetenciaPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {dadosFiltrados.slice(0: any, 100).map((item: any) => (
+                {dadosFiltrados.slice(0, 100).map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${

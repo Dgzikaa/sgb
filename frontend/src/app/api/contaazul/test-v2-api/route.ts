@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
     console.log('🧪 TESTE 1: Categorias v2...')
     try {
       const urlCategorias = `${baseUrl}/v1/categorias?pagina=1&tamanho_pagina=10`
-      const respCategorias = await fetch(urlCategorias: any, { headers })
+      const respCategorias = await fetch(urlCategorias, { headers })
       
       const categoriasData = await respCategorias.json()
       
@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
     console.log('🧪 TESTE 2: Receitas v2...')
     try {
       const urlReceitas = `${baseUrl}/v1/receitas?pagina=1&tamanho_pagina=5`
-      const respReceitas = await fetch(urlReceitas: any, { headers })
+      const respReceitas = await fetch(urlReceitas, { headers })
       
       const receitasData = await respReceitas.json()
       
@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
     console.log('🧪 TESTE 3: Despesas v2...')
     try {
       const urlDespesas = `${baseUrl}/v1/despesas?pagina=1&tamanho_pagina=5`
-      const respDespesas = await fetch(urlDespesas: any, { headers })
+      const respDespesas = await fetch(urlDespesas, { headers })
       
       const despesasData = await respDespesas.json()
       
@@ -141,7 +141,7 @@ export async function GET(request: NextRequest) {
       testes,
       resumo: {
         total_testes: testes.length,
-        testes_ok: testes.filter((t: any) => t.ok).length,
+        testes_ok: testes.filter((t) => t.ok).length,
         algum_funcionou: testes.some(t => t.ok)
       }
     })

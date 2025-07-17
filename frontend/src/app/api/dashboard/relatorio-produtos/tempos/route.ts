@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const dataInicio = new Date(dataFim);
     
     if (periodoAnalise === 'todos') {
-      dataInicio.setFullYear(2025: any, 0, 1); // Desde 01/01/2025
+      dataInicio.setFullYear(2025, 0, 1); // Desde 01/01/2025
     } else {
       dataInicio.setDate(dataFim.getDate() - parseInt(periodoAnalise));
     }
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     console.log(`ðŸ“… Buscando perá­odo de comparaá§á£o: ${diaInicioInt} atá© ${diaFimInt}`);
     
     // Buscar dados do perá­odo com paginaá§á£o
-    let dadosPeriodo: any[] = [];
+    let dadosPeriodo[] = [];
     let pagina = 0;
     const tamanhoPagina = 1000;
     
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
         .gte('dia', diaInicioInt)
         .lte('dia', diaFimInt)
         .not('prd_desc', 'is', null)
-        .range(inicio: any, fim);
+        .range(inicio, fim);
 
       if (errorPagina) {
         console.error('Œ Erro ao buscar dados do perá­odo:', errorPagina);
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
     console.log(`ðŸ“… Convertendo data: ${dataEspecifica} †’ ${diaEspecificoInt}`);
     
     // Buscar dados do dia especá­fico usando campo 'dia' - COM PAGINAá‡áƒO
-    let dadosDia: any[] = [];
+    let dadosDia[] = [];
     pagina = 0;
     
     while (true) {
@@ -155,7 +155,7 @@ export async function GET(request: NextRequest) {
         .eq('bar_id', barId)
         .eq('dia', diaEspecificoInt)
         .not('prd_desc', 'is', null)
-        .range(inicio: any, fim);
+        .range(inicio, fim);
 
       if (errorPagina) {
         console.error('Œ Erro ao buscar dados do dia:', errorPagina);
@@ -175,7 +175,7 @@ export async function GET(request: NextRequest) {
     
     // Log de debug dos primeiros registros do dia
     if (dadosDia && dadosDia.length > 0) {
-      console.log(`ðŸ“‹ Primeiros registros do dia:`, dadosDia.slice(0: any, 3).map((item: any) => ({
+      console.log(`ðŸ“‹ Primeiros registros do dia:`, dadosDia.slice(0, 3).map((item) => ({
         produto: item.prd_desc,
         grupo: item.grp_desc,
         dia: item.dia,
@@ -186,7 +186,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Funá§á£o para determinar se á© bebida ou comida e calcular tempo correto
-    const calcularTempo = (item: any) => {
+    const calcularTempo = (item) => {
       const grupo = (item.grp_desc || '').toLowerCase();
       const localizacao = (item.loc_desc || '').toLowerCase();
       
@@ -286,7 +286,7 @@ export async function GET(request: NextRequest) {
       console.log(`ðŸ“… Buscando dados de ${diaInicioInt} atá© ${diaFimInt}`);
       
       // Buscar áºltimos 7 dias com paginaá§á£o
-      let dadosUltimos7Dias: any[] = [];
+      let dadosUltimos7Dias[] = [];
       let paginaRecente = 0;
       
       while (true) {
@@ -316,7 +316,7 @@ export async function GET(request: NextRequest) {
           .gte('dia', diaInicioInt)
           .lte('dia', diaFimInt)
           .not('prd_desc', 'is', null)
-          .range(inicio: any, fim);
+          .range(inicio, fim);
         
         if (!dadosPagina || dadosPagina.length === 0) break;
         
@@ -361,8 +361,8 @@ export async function GET(request: NextRequest) {
     const produtosMap = new Map();
 
     // Funá§á£o para processar um conjunto de dados
-    const processarDados = (dados: any[], isPeriodo: boolean) => {
-      dados?.forEach((item: any) => {
+    const processarDados = (dados[], isPeriodo: boolean) => {
+      dados?.forEach((item) => {
         const key = `${item.prd_desc}_${item.grp_desc}`;
         const analise = calcularTempo(item);
         
@@ -391,7 +391,7 @@ export async function GET(request: NextRequest) {
         if (!analise.tempoValido || analise.tempo <= 0) return;
         
         if (!produtosMap.has(key)) {
-          produtosMap.set(key: any, {
+          produtosMap.set(key, {
             produto: item.prd_desc,
             grupo: item.grp_desc,
             tipo: analise.tipo,
@@ -415,26 +415,26 @@ export async function GET(request: NextRequest) {
     };
 
     // Processar dados do perá­odo e do dia
-    processarDados(dadosPeriodo: any, true);
-    processarDados(dadosRecentes: any, false);
+    processarDados(dadosPeriodo, true);
+    processarDados(dadosRecentes, false);
 
     console.log(`ðŸ“Š Má©tricas de qualidade dos dados:`, metricas);
 
     // Calcular estatá­sticas e detectar outliers
-    const produtos = Array.from(produtosMap.values()).map((produto: any) => {
+    const produtos = Array.from(produtosMap.values()).map((produto) => {
       // Tempo má©dio do perá­odo (excluindo o dia especá­fico para comparaá§á£o justa)
       let temposPeriodoSemDia = produto.tempos_periodo;
       
       // Se estamos usando dados do dia especá­fico, remover esses dados do perá­odo para comparaá§á£o
       if (!usandoDadosRecentes && dadosDia && dadosDia.length > 0) {
         // Filtrar dados do perá­odo que ná£o sejam do dia especá­fico
-        const dadosPeriodoSemDia = dadosPeriodo?.filter((item: any) => {
+        const dadosPeriodoSemDia = dadosPeriodo?.filter((item) => {
           return item.dia !== diaEspecificoInt;
         }) || [];
         
         // Recalcular tempos do perá­odo sem o dia especá­fico
         const temposProdutoPeriodo: number[] = [];
-        dadosPeriodoSemDia.forEach((item: any) => {
+        dadosPeriodoSemDia.forEach((item) => {
           if (`${item.prd_desc}_${item.grp_desc}` === `${produto.produto}_${produto.grupo}`) {
             const analise = calcularTempo(item);
             if (analise.tempoValido && analise.tempo > 0) {
@@ -496,10 +496,10 @@ export async function GET(request: NextRequest) {
     });
 
     // Filtrar APENAS produtos que táªm dados NO DIA ESPECáFICO (ná£o mostrar "Sem dados")
-    const produtosFiltrados = produtos.filter((p: any) => p.pedidos_dia > 0 && p.tempo_dia_especifico > 0);
+    const produtosFiltrados = produtos.filter((p) => p.pedidos_dia > 0 && p.tempo_dia_especifico > 0);
 
     // Ordenar: 1º casos GRAVES (variaá§áµes positivas altas), 2º casos BONS (variaá§áµes negativas), 3º normais
-    produtosFiltrados.sort((a: any, b: any) => {
+    produtosFiltrados.sort((a, b) => {
       const variacaoA = a.variacao_percentual;
       const variacaoB = b.variacao_percentual;
       
@@ -549,14 +549,14 @@ export async function GET(request: NextRequest) {
 
     // Log da ordenaá§á£o para debug
     const categorias = {
-      graves: produtosFiltrados.filter((p: any) => p.variacao_percentual > 50).length,
-      problemas: produtosFiltrados.filter((p: any) => p.variacao_percentual > 25 && p.variacao_percentual <= 50).length,
-      bons: produtosFiltrados.filter((p: any) => p.variacao_percentual < -15).length,
-      normais: produtosFiltrados.filter((p: any) => p.variacao_percentual >= -15 && p.variacao_percentual <= 25).length
+      graves: produtosFiltrados.filter((p) => p.variacao_percentual > 50).length,
+      problemas: produtosFiltrados.filter((p) => p.variacao_percentual > 25 && p.variacao_percentual <= 50).length,
+      bons: produtosFiltrados.filter((p) => p.variacao_percentual < -15).length,
+      normais: produtosFiltrados.filter((p) => p.variacao_percentual >= -15 && p.variacao_percentual <= 25).length
     };
     
     console.log(`ðŸ“Š Ordenaá§á£o aplicada:`, categorias);
-    console.log(`ðŸ”´ Primeiros 3 produtos:`, produtosFiltrados.slice(0: any, 3).map((p: any) => ({
+    console.log(`ðŸ”´ Primeiros 3 produtos:`, produtosFiltrados.slice(0, 3).map((p) => ({
       produto: p.produto,
       variacao: p.variacao_percentual,
       categoria: p.variacao_percentual > 50 ? 'GRAVE' : 
@@ -575,8 +575,8 @@ export async function GET(request: NextRequest) {
         periodo_analise: periodoAnalise,
         grupo_filtro: grupoFiltro,
         total_produtos: produtosFiltrados.length,
-        produtos_com_dados_dia: produtosFiltrados.filter((p: any) => p.pedidos_dia > 0).length,
-        produtos_com_variacao_alta: produtosFiltrados.filter((p: any) => Math.abs(p.variacao_percentual) > 25).length,
+        produtos_com_dados_dia: produtosFiltrados.filter((p) => p.pedidos_dia > 0).length,
+        produtos_com_variacao_alta: produtosFiltrados.filter((p) => Math.abs(p.variacao_percentual) > 25).length,
         dados_periodo_total: dadosPeriodo?.length || 0,
         dados_dia_total: dadosRecentes?.length || 0,
         usando_dados_recentes: usandoDadosRecentes

@@ -7,8 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// FunÃ§Ã£o para buscar webhook da tabela
-async function getWebhookUrl(barId: string, webhookType: string = 'contaazul', supabaseClient: any) {
+// Funá§á£o para buscar webhook da tabela
+async function getWebhookUrl(barId: string, webhookType: string = 'contaazul', supabaseClient) {
   const { data: webhookConfig, error } = await supabaseClient
     .from('api_credentials')
     .select('configuracoes')
@@ -18,20 +18,20 @@ async function getWebhookUrl(barId: string, webhookType: string = 'contaazul', s
     .single()
 
   if (error || !webhookConfig) {
-    console.warn(`âš ï¸ Webhook config nÃ£o encontrada para bar ${barId}, usando fallback`)
-    // Fallback para webhook padrÃ£o se nÃ£o encontrar configuraÃ§Ã£o
+    console.warn(`š ï¸ Webhook config ná£o encontrada para bar ${barId}, usando fallback`)
+    // Fallback para webhook padrá£o se ná£o encontrar configuraá§á£o
     return 'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ'
   }
 
   const webhook = webhookConfig.configuracoes?.webhook_url
   
   if (!webhook || webhook.trim() === '') {
-    console.warn(`âš ï¸ Webhook ${webhookType} nÃ£o configurado para bar ${barId}, usando fallback`)
-    // Fallback para webhook padrÃ£o
+    console.warn(`š ï¸ Webhook ${webhookType} ná£o configurado para bar ${barId}, usando fallback`)
+    // Fallback para webhook padrá£o
     return 'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ'
   }
 
-  console.log(`âœ… Webhook ${webhookType} encontrado para bar ${barId}`)
+  console.log(`œ… Webhook ${webhookType} encontrado para bar ${barId}`)
   return webhook
 }
 
@@ -42,7 +42,7 @@ serve(async (req: Request): Promise<Response> => {
 
   try {
     if (req.method !== 'POST') {
-      throw new Error('MÃ©todo nÃ£o permitido')
+      throw new Error('Má©todo ná£o permitido')
     }
 
     const supabaseClient = createClient(
@@ -53,13 +53,13 @@ serve(async (req: Request): Promise<Response> => {
     const { barId, source = 'manual' } = await req.json()
 
     if (!barId) {
-      throw new Error('barId Ã© obrigatÃ³rio')
+      throw new Error('barId á© obrigatá³rio')
     }
 
-    logBrasiliaEdge(`ğŸ¤– SYNC AUTOMÃTICO - Iniciando para bar ${barId} (fonte: ${source})`)
+    logBrasiliaEdge(`ğŸ¤– SYNC AUTOMáTICO - Iniciando para bar ${barId} (fonte: ${source})`)
 
-    // Notificar inÃ­cio
-    await notificarDiscord(`ğŸš€ **ContaAzul Sync Iniciado**\n\nğŸ“Š Bar: ${barId}\nâ° HorÃ¡rio: ${formatarDataHoraEdge(new Date())}\nğŸ¤– Fonte: ${source}`, barId, supabaseClient)
+    // Notificar iná­cio
+    await notificarDiscord(`ğŸš€ **ContaAzul Sync Iniciado**\n\nğŸ“Š Bar: ${barId}\n° Horá¡rio: ${formatarDataHoraEdge(new Date())}\nğŸ¤– Fonte: ${source}`, barId, supabaseClient)
 
     const tempoInicio = Date.now()
 
@@ -73,9 +73,9 @@ serve(async (req: Request): Promise<Response> => {
       .single()
 
     if (dbError || !credentials) {
-      const mensagemErro = 'Credenciais ContaAzul nÃ£o encontradas ou inativas'
-      console.error('âŒ SYNC -', mensagemErro, dbError)
-             await notificarDiscord(`âŒ **Erro no Sync ContaAzul**\n\nğŸ“Š Bar: ${barId}\nğŸš« Erro: ${mensagemErro}\nâ° ${formatarDataHoraEdge(new Date())}`, barId, supabaseClient)
+      const mensagemErro = 'Credenciais ContaAzul ná£o encontradas ou inativas'
+      console.error('Œ SYNC -', mensagemErro, dbError)
+             await notificarDiscord(`Œ **Erro no Sync ContaAzul**\n\nğŸ“Š Bar: ${barId}\nğŸš« Erro: ${mensagemErro}\n° ${formatarDataHoraEdge(new Date())}`, barId, supabaseClient)
       throw new Error(mensagemErro)
     }
 
@@ -100,23 +100,23 @@ serve(async (req: Request): Promise<Response> => {
     if (!dadosBrutosResponse.ok) {
       const errorText = await dadosBrutosResponse.text()
       const mensagemErro = `Erro na coleta de dados brutos: ${dadosBrutosResponse.status} - ${errorText}`
-      console.error('âŒ', mensagemErro)
-             await notificarDiscord(`âŒ **Erro na Coleta de Dados Brutos**\n\nğŸ“Š Bar: ${barId}\nğŸš« Status: ${dadosBrutosResponse.status}\nğŸ“„ Detalhes: ${errorText}\nâ° ${formatarDataHoraEdge(new Date())}`, barId, supabaseClient)
+      console.error('Œ', mensagemErro)
+             await notificarDiscord(`Œ **Erro na Coleta de Dados Brutos**\n\nğŸ“Š Bar: ${barId}\nğŸš« Status: ${dadosBrutosResponse.status}\nğŸ“„ Detalhes: ${errorText}\n° ${formatarDataHoraEdge(new Date())}`, barId, supabaseClient)
       throw new Error(mensagemErro)
     }
 
     const dadosBrutosResult = await dadosBrutosResponse.json()
-    console.log('âœ… Dados brutos coletados:', dadosBrutosResult)
+    console.log('œ… Dados brutos coletados:', dadosBrutosResult)
 
     // 3. Aguardar processamento do trigger
-    console.log('â³ Aguardando trigger processar dados brutos...')
+    console.log('³ Aguardando trigger processar dados brutos...')
     await new Promise(resolve => setTimeout(resolve, 3000))
 
     const tempoTotal = Date.now() - tempoInicio
     const duracaoFormatada = `${Math.floor(tempoTotal / 1000)}s`
 
     // Notificar sucesso
-    const mensagemSucesso = `âœ… **ContaAzul Sync ConcluÃ­do**\n\nğŸ“Š Bar: ${barId}\nâ±ï¸ DuraÃ§Ã£o: ${duracaoFormatada}\nğŸ“¦ Dados brutos: âœ…\nğŸ”¥ Trigger: Processando automaticamente\nâ° ${formatarDataHoraEdge(new Date())}`
+    const mensagemSucesso = `œ… **ContaAzul Sync Concluá­do**\n\nğŸ“Š Bar: ${barId}\n±ï¸ Duraá§á£o: ${duracaoFormatada}\nğŸ“¦ Dados brutos: œ…\nğŸ”¥ Trigger: Processando automaticamente\n° ${formatarDataHoraEdge(new Date())}`
     
     await notificarDiscord(mensagemSucesso, barId, supabaseClient)
 
@@ -140,7 +140,7 @@ serve(async (req: Request): Promise<Response> => {
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
-    console.error('âŒ Erro no sync automÃ¡tico:', errorMessage)
+    console.error('Œ Erro no sync automá¡tico:', errorMessage)
     
     // Notificar erro se conseguirmos
     try {
@@ -150,10 +150,10 @@ serve(async (req: Request): Promise<Response> => {
       )
       const { barId } = await req.clone().json()
       if (barId) {
-        await notificarDiscord(`ğŸ’¥ **Erro CrÃ­tico no Sync**\n\nğŸ“Š Bar: ${barId}\nğŸš« Erro: ${errorMessage}\nâ° ${formatarDataHoraEdge(new Date())}`, barId, supabaseClient)
+        await notificarDiscord(`ğŸ’¥ **Erro Crá­tico no Sync**\n\nğŸ“Š Bar: ${barId}\nğŸš« Erro: ${errorMessage}\n° ${formatarDataHoraEdge(new Date())}`, barId, supabaseClient)
       }
     } catch (notifyError) {
-      console.error('âŒ Falha ao notificar erro:', notifyError)
+      console.error('Œ Falha ao notificar erro:', notifyError)
     }
 
     return new Response(
@@ -166,7 +166,7 @@ serve(async (req: Request): Promise<Response> => {
   }
 })
 
-async function notificarDiscord(mensagem: string, barId: string, supabaseClient: any) {
+async function notificarDiscord(mensagem: string, barId: string, supabaseClient) {
   try {
     const webhookUrl = await getWebhookUrl(barId, 'contaazul', supabaseClient)
     
@@ -181,11 +181,11 @@ async function notificarDiscord(mensagem: string, barId: string, supabaseClient:
     })
 
     if (response.ok) {
-      console.log('âœ… Discord notificado')
+      console.log('œ… Discord notificado')
     } else {
-      console.error('âŒ Erro ao notificar Discord:', response.status)
+      console.error('Œ Erro ao notificar Discord:', response.status)
     }
   } catch (error) {
-    console.error('âŒ Erro na notificaÃ§Ã£o Discord:', error)
+    console.error('Œ Erro na notificaá§á£o Discord:', error)
   }
 } 

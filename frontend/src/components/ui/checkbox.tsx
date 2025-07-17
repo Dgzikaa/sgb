@@ -10,12 +10,12 @@ interface CheckboxProps {
 }
 
 const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
-  ({ checked, onCheckedChange: any, disabled, className }, ref: any) => (
+  ({ checked, onCheckedChange, disabled, className }, ref) => (
     <input
       ref={ref}
       type="checkbox"
       checked={checked || false}
-      onChange={(e: any) => onCheckedChange?.(e.target.checked)}
+      onChange={(e) => onCheckedChange?.(e.target.checked)}
       disabled={disabled}
       className={`h-4 w-4 rounded border border-gray-300 text-blue-600 focus:ring-blue-500 ${className || ''}`}
     />

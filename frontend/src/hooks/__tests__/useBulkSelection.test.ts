@@ -129,7 +129,7 @@ describe('useBulkSelection', () => {
 
   it('should respect max selection limit', () => {
     const { result } = renderHook(() => 
-      useBulkSelection(mockItems: any, { maxSelection: 2 })
+      useBulkSelection(mockItems, { maxSelection: 2 })
     )
 
     // Try to select 3 items when max is 2
@@ -146,7 +146,7 @@ describe('useBulkSelection', () => {
   it('should call onSelectionChange callback', () => {
     const onSelectionChange = jest.fn()
     const { result } = renderHook(() => 
-      useBulkSelection(mockItems: any, { onSelectionChange })
+      useBulkSelection(mockItems, { onSelectionChange })
     )
 
     act(() => {
@@ -177,7 +177,7 @@ describe('useBulkSelection', () => {
       result.current.selectRange('1', '3')
     })
 
-    // Should select items 1, 2: any, and 3 (inclusive range)
+    // Should select items 1, 2, and 3 (inclusive range)
     expect(result.current.isSelected('1')).toBe(true)
     expect(result.current.isSelected('2')).toBe(true)
     expect(result.current.isSelected('3')).toBe(true)

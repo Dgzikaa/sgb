@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const supabase = createClient(supabaseUrl: any, supabaseServiceKey)
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     console.log('üìÖ Importando eventos:', { 
       bar_id, 
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
           eventosImportados++
         }
 
-      } catch (error: any) {
+      } catch (error) {
         erros.push(`Evento ${evento.nome}: ${error.message}`)
       }
     }
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ùå Erro na importa·ß·£o de eventos:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',

@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
 
     // 2. Para cada produto, buscar receitas com insumos
     const produtosComReceitas = await Promise.all(
-      produtosFinal.map(async (produto: any) => {
+      produtosFinal.map(async (produto) => {
         try {
           // Buscar receitas do produto com insumos usando relacionamento especá­fico
           const { data: receitasData, error: receitasError } = await supabase
@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
           }
 
           // 3. Processar receitas com dados corretos do banco
-          const receitasFormatadas = (receitasData || []).map((receita: any) => {
+          const receitasFormatadas = (receitasData || []).map((receita) => {
             return {
               id: receita.id,
               quantidade_necessaria: receita.quantidade_necessaria,
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
       })
     )
 
-    const produtosComReceitasValidas = produtosComReceitas.filter((p: any) => p.receitas && p.receitas.length > 0)
+    const produtosComReceitasValidas = produtosComReceitas.filter((p) => p.receitas && p.receitas.length > 0)
 
     console.log(`œ… ${produtosComReceitasValidas.length} produtos com receitas retornados`)
 

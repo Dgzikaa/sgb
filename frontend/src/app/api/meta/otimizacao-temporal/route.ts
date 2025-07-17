@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const plataforma = searchParams.get('plataforma') || 'all' // 'instagram', 'facebook', 'all'
     
-    console.log('° Otimizaá§á£o Temporal - Analisando para bar:', barId: any, 'plataforma:', plataforma)
+    console.log('° Otimizaá§á£o Temporal - Analisando para bar:', barId, 'plataforma:', plataforma)
 
     // 1. COLETAR DADOS HISTá“RICOS - CORRIGIR NOMES DAS TABELAS
     const { data: instagramData } = await supabase
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
       .limit(200)
 
     // 2. ANALISAR PADRá•ES TEMPORAIS
-    const analisarPadroesTemporais = (dados: any[], nomePlataforma: string) => {
+    const analisarPadroesTemporais = (dados[], nomePlataforma: string) => {
       if (!dados || dados.length === 0) return null
       
       // Aná¡lise por hora do dia
@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
       })
       
       // Calcular má©dias por hora
-      const mediasPorHora = engajamentoPorHora.map((eng: any, hora: any) => ({
+      const mediasPorHora = engajamentoPorHora.map((eng, hora) => ({
         hora,
         engajamento_medio: postsPorHora[hora] > 0 ? eng / postsPorHora[hora] : 0,
         alcance_medio: postsPorHora[hora] > 0 ? alcancePorHora[hora] / postsPorHora[hora] : 0,
@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
       
       // Calcular má©dias por dia
       const nomesDias = ['Domingo', 'Segunda', 'Terá§a', 'Quarta', 'Quinta', 'Sexta', 'Sá¡bado']
-      const mediasPorDia = engajamentoPorDia.map((eng: any, dia: any) => ({
+      const mediasPorDia = engajamentoPorDia.map((eng, dia) => ({
         dia,
         nome: nomesDias[dia],
         engajamento_medio: postsPorDia[dia] > 0 ? eng / postsPorDia[dia] : 0,
@@ -146,20 +146,20 @@ export async function GET(request: NextRequest) {
         por_hora: mediasPorHora,
         por_dia: mediasPorDia,
         por_periodo: mediasPorPeriodo,
-        melhor_hora: mediasPorHora.reduce((prev: any, curr: any) => 
+        melhor_hora: mediasPorHora.reduce((prev, curr) => 
           prev.score_combinado > curr.score_combinado ? prev : curr
         ),
-        melhor_dia: mediasPorDia.reduce((prev: any, curr: any) => 
+        melhor_dia: mediasPorDia.reduce((prev, curr) => 
           prev.score_combinado > curr.score_combinado ? prev : curr
         ),
-        melhor_periodo: mediasPorPeriodo.reduce((prev: any, curr: any) => 
+        melhor_periodo: mediasPorPeriodo.reduce((prev, curr) => 
           prev.score_combinado > curr.score_combinado ? prev : curr
         )
       }
     }
 
     // 3. GERAR RECOMENDAá‡á•ES INTELIGENTES
-    const gerarRecomendacoes = (padroes: any) => {
+    const gerarRecomendacoes = (padroes) => {
       const recomendacoes = []
       
       if (padroes.melhor_hora.posts_count >= 3) {
@@ -168,7 +168,7 @@ export async function GET(request: NextRequest) {
           prioridade: 'alta',
           titulo: `Melhor horá¡rio: ${padroes.melhor_hora.hora}h`,
           descricao: `Posts á s ${padroes.melhor_hora.hora}h táªm ${padroes.melhor_hora.engajamento_medio.toFixed(0)} engajamentos em má©dia`,
-          impacto: `+${((padroes.melhor_hora.score_combinado / (padroes.por_hora.reduce((sum: number, h: any) => sum + h.score_combinado, 0) / padroes.por_hora.length) - 1) * 100).toFixed(0)}% performance`,
+          impacto: `+${((padroes.melhor_hora.score_combinado / (padroes.por_hora.reduce((sum: number, h) => sum + h.score_combinado, 0) / padroes.por_hora.length) - 1) * 100).toFixed(0)}% performance`,
           acao: `Programe posts para ${padroes.melhor_hora.hora}h`
         })
       }
@@ -179,7 +179,7 @@ export async function GET(request: NextRequest) {
           prioridade: 'alta',
           titulo: `Melhor dia: ${padroes.melhor_dia.nome}`,
           descricao: `Posts em ${padroes.melhor_dia.nome} táªm ${padroes.melhor_dia.engajamento_medio.toFixed(0)} engajamentos em má©dia`,
-          impacto: `+${((padroes.melhor_dia.score_combinado / (padroes.por_dia.reduce((sum: number, d: any) => sum + d.score_combinado, 0) / padroes.por_dia.length) - 1) * 100).toFixed(0)}% performance`,
+          impacto: `+${((padroes.melhor_dia.score_combinado / (padroes.por_dia.reduce((sum: number, d) => sum + d.score_combinado, 0) / padroes.por_dia.length) - 1) * 100).toFixed(0)}% performance`,
           acao: `Priorize postagens em ${padroes.melhor_dia.nome}`
         })
       }
@@ -197,7 +197,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 4. DETECTAR PADRá•ES SAZONAIS
-    const detectarPadroesSazonais = (dados: any[]) => {
+    const detectarPadroesSazonais = (dados[]) => {
       if (!dados || dados.length < 30) return null
       
       // Agrupar por máªs
@@ -209,7 +209,7 @@ export async function GET(request: NextRequest) {
         const chave = `${mes}`
         
         if (!dadosPorMes.has(chave)) {
-          dadosPorMes.set(chave: any, {
+          dadosPorMes.set(chave, {
             mes,
             engajamento: 0,
             alcance: 0,
@@ -231,7 +231,7 @@ export async function GET(request: NextRequest) {
         'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
       ]
       
-      const padroesSazonais = Array.from(dadosPorMes.values()).map((dados: any) => ({
+      const padroesSazonais = Array.from(dadosPorMes.values()).map((dados) => ({
         mes: dados.mes,
         nome: nomesMeses[dados.mes],
         engajamento_medio: dados.posts > 0 ? dados.engajamento / dados.posts : 0,
@@ -239,16 +239,16 @@ export async function GET(request: NextRequest) {
         posts_count: dados.posts
       }))
       
-      return padroesSazonais.sort((a: any, b: any) => a.mes - b.mes)
+      return padroesSazonais.sort((a, b) => a.mes - b.mes)
     }
 
     // 5. SUGERIR CRONOGRAMA OTIMIZADO
-    const sugerirCronograma = (padroes: any) => {
+    const sugerirCronograma = (padroes) => {
       const cronograma = []
       const nomesDias = ['Domingo', 'Segunda', 'Terá§a', 'Quarta', 'Quinta', 'Sexta', 'Sá¡bado']
       
       // Ordenar dias por performance
-      const diasOrdenados = [...padroes.por_dia].sort((a: any, b: any) => b.score_combinado - a.score_combinado)
+      const diasOrdenados = [...padroes.por_dia].sort((a, b) => b.score_combinado - a.score_combinado)
       
       // Sugerir cronograma para os prá³ximos 7 dias
       for (let i = 0; i < 7; i++) {
@@ -272,7 +272,7 @@ export async function GET(request: NextRequest) {
         }
       }
       
-      return cronograma.sort((a: any, b: any) => a.prioridade - b.prioridade)
+      return cronograma.sort((a, b) => a.prioridade - b.prioridade)
     }
 
     // PROCESSAR DADOS

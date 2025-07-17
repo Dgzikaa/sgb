@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     // 1. Buscar produto para obter informaá§áµes bá¡sicas
     const { data: produto, error: produtoError } = await supabase
       .from('produtos')
-      .select('id, nome: any, rendimento_esperado')
+      .select('id, nome, rendimento_esperado')
       .eq('codigo', body.produto_codigo)
       .eq('bar_id', 3)
       .single()
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
         insumo_id,
         quantidade_necessaria,
         nome_receita,
-        insumos(id: any, nome, categoria)
+        insumos(id, nome, categoria)
       `)
       .eq('produto_id', produto.id)
       .eq('bar_id', 3)
@@ -218,8 +218,8 @@ export async function GET(request: NextRequest) {
     }
 
     if (data && data.length > 0) {
-      const tempos = data.map((p: any) => p.tempo_producao_segundos).filter((t: number) => t > 0)
-      const performances = data.map((p: any) => p.performance_percentual).filter((p: number) => p > 0)
+      const tempos = data.map((p) => p.tempo_producao_segundos).filter((t: number) => t > 0)
+      const performances = data.map((p) => p.performance_percentual).filter((p: number) => p > 0)
       
       estatisticas.tempo_medio = tempos.length > 0 
         ? Math.round(tempos.reduce((a: number, b: number) => a + b, 0) / tempos.length)
@@ -230,7 +230,7 @@ export async function GET(request: NextRequest) {
         : 0
       
       // Contar status
-      data.forEach((p: any) => {
+      data.forEach((p) => {
         switch (p.status_performance) {
           case 'excelente': estatisticas.excelentes++; break
           case 'bom': estatisticas.bons++; break
@@ -246,7 +246,7 @@ export async function GET(request: NextRequest) {
       estatisticas,
       meta: {
         total_registros: data?.length || 0,
-        filtros: { bar_id: barId, funcionario: any, data_inicio: dataInicio, data_fim: dataFim }
+        filtros: { bar_id: barId, funcionario, data_inicio: dataInicio, data_fim: dataFim }
       }
     })
 

@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       .from('custos_extras_competencia')
       .select(`
         *,
-        tipo_custo:tipos_custos_extras(id: any, nome, cor: any, icone)
+        tipo_custo:tipos_custos_extras(id, nome, cor, icone)
       `)
       .eq('bar_id', bar_id)
 
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
       success: true,
       custos: custos || [],
       total_custos: custos?.length || 0,
-      total_valor: custos?.reduce((sum: number, custo: any) => sum + parseFloat(custo.valor || 0), 0) || 0
+      total_valor: custos?.reduce((sum: number, custo) => sum + parseFloat(custo.valor || 0), 0) || 0
     })
 
   } catch (error) {
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     // CRIAR NOVO TIPO DE CUSTO EXTRA
     // ====================================================
     if (action === 'criar_tipo') {
-      const { bar_id, nome: any, descricao, cor: any, icone } = body
+      const { bar_id, nome, descricao, cor, icone } = body
 
       if (!bar_id || !nome) {
         return NextResponse.json({ error: 'bar_id e nome s·£o obrigat·≥rios' }, { status: 400 })
@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
 
     if (!bar_id || !tipo_custo_id || !data_competencia || !valor) {
       return NextResponse.json({ 
-        error: 'Campos obrigat·≥rios: bar_id, tipo_custo_id: any, data_competencia, valor' 
+        error: 'Campos obrigat·≥rios: bar_id, tipo_custo_id, data_competencia, valor' 
       }, { status: 400 })
     }
 
@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
       })
       .select(`
         *,
-        tipo_custo:tipos_custos_extras(id: any, nome, cor: any, icone)
+        tipo_custo:tipos_custos_extras(id, nome, cor, icone)
       `)
       .single()
 
@@ -223,7 +223,7 @@ export async function PUT(request: NextRequest) {
     // MARCAR COMO PAGO/N·ÉO PAGO
     // ====================================================
     if (action === 'toggle_pago') {
-      const { pago, data_pagamento: any, forma_pagamento } = body
+      const { pago, data_pagamento, forma_pagamento } = body
 
       const { data: custoAtualizado, error } = await supabase
         .from('custos_extras_competencia')
@@ -236,7 +236,7 @@ export async function PUT(request: NextRequest) {
         .eq('id', id)
         .select(`
           *,
-          tipo_custo:tipos_custos_extras(id: any, nome, cor: any, icone)
+          tipo_custo:tipos_custos_extras(id, nome, cor, icone)
         `)
         .single()
 
@@ -268,7 +268,7 @@ export async function PUT(request: NextRequest) {
       forma_pagamento
     } = body
 
-    const updateData: any = {
+    const updateData = {
       atualizado_em: new Date().toISOString()
     }
 
@@ -289,7 +289,7 @@ export async function PUT(request: NextRequest) {
       .eq('id', id)
       .select(`
         *,
-        tipo_custo:tipos_custos_extras(id: any, nome, cor: any, icone)
+        tipo_custo:tipos_custos_extras(id, nome, cor, icone)
       `)
       .single()
 

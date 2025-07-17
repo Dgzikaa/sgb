@@ -32,7 +32,7 @@ function SkeletonCard({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 }
 
 // Skeleton para tabelas
-function SkeletonTable({ rows = 5, columns = 4, className: any, ...props }: 
+function SkeletonTable({ rows = 5, columns = 4, className, ...props }: 
   { rows?: number; columns?: number } & React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn("card-dark overflow-hidden", className)} {...props}>
@@ -40,17 +40,17 @@ function SkeletonTable({ rows = 5, columns = 4, className: any, ...props }:
         {/* Header */}
         <div className="border-b border-gray-200 dark:border-gray-700 p-4">
           <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
-            {Array.from({ length: columns }).map((_: any, i: any) => (
+            {Array.from({ length: columns }).map((_, i) => (
               <div key={i} className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
             ))}
           </div>
         </div>
         
         {/* Rows */}
-        {Array.from({ length: rows }).map((_: any, rowIndex: any) => (
+        {Array.from({ length: rows }).map((_, rowIndex) => (
           <div key={rowIndex} className="border-b border-gray-200 dark:border-gray-700 p-4 last:border-b-0">
             <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
-              {Array.from({ length: columns }).map((_: any, colIndex: any) => (
+              {Array.from({ length: columns }).map((_, colIndex) => (
                 <div key={colIndex} className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
               ))}
             </div>
@@ -62,12 +62,12 @@ function SkeletonTable({ rows = 5, columns = 4, className: any, ...props }:
 }
 
 // Skeleton para listas
-function SkeletonList({ items = 5, className: any, ...props }: 
+function SkeletonList({ items = 5, className, ...props }: 
   { items?: number } & React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn("card-dark", className)} {...props}>
       <div className="animate-pulse space-y-4 p-6">
-        {Array.from({ length: items }).map((_: any, i: any) => (
+        {Array.from({ length: items }).map((_, i) => (
           <div key={i} className="flex items-center space-x-4">
             <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
             <div className="flex-1 space-y-2">
@@ -83,11 +83,11 @@ function SkeletonList({ items = 5, className: any, ...props }:
 }
 
 // Skeleton para grid de má©tricas/stats
-function SkeletonStats({ items = 4, className: any, ...props }: 
+function SkeletonStats({ items = 4, className, ...props }: 
   { items?: number } & React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6", className)} {...props}>
-      {Array.from({ length: items }).map((_: any, i: any) => (
+      {Array.from({ length: items }).map((_, i) => (
         <div key={i} className="card-dark p-6">
           <div className="animate-pulse space-y-3">
             <div className="flex items-center space-x-3">
@@ -104,13 +104,13 @@ function SkeletonStats({ items = 4, className: any, ...props }:
 }
 
 // Skeleton para formulá¡rios
-function SkeletonForm({ fields = 5, className: any, ...props }: 
+function SkeletonForm({ fields = 5, className, ...props }: 
   { fields?: number } & React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn("card-dark p-6", className)} {...props}>
       <div className="animate-pulse space-y-6">
         <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
-        {Array.from({ length: fields }).map((_: any, i: any) => (
+        {Array.from({ length: fields }).map((_, i) => (
           <div key={i} className="space-y-2">
             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
             <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>

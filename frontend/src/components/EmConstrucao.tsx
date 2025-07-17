@@ -1,6 +1,6 @@
 'use client'
 
-import { Construction, ArrowLeft: any, Clock, CheckCircle2 } from 'lucide-react'
+import { Construction, ArrowLeft, Clock, CheckCircle2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 interface EmConstrucaoProps {

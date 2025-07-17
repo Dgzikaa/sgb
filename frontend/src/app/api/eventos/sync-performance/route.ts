@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     // Criar cliente Supabase
 
     
-    const { data_evento, bar_id: any, forcar_atualizacao = false } = await request.json();
+    const { data_evento, bar_id, forcar_atualizacao = false } = await request.json();
 
     if (!data_evento || !bar_id) {
       return NextResponse.json({
@@ -53,18 +53,18 @@ export async function POST(request: NextRequest) {
     console.log(`ðŸ”„ Sincronizando dados para ${data_evento} - Bar ${bar_id}`);
 
     // Buscar dados de vendas do dia
-    const [periodoResponse, pagamentosResponse: any, symplaResponse] = await Promise.all([
+    const [periodoResponse, pagamentosResponse, symplaResponse] = await Promise.all([
       // 1. Dados de pessoas da tabela perá­odo
       supabase
         .from('periodo')
-        .select('pessoas, vr_produtos: any, vr_couvert, vr_pagamentos')
+        .select('pessoas, vr_produtos, vr_couvert, vr_pagamentos')
         .eq('bar_id', bar_id)
         .eq('dt_gerencial', data_evento),
 
       // 2. Faturamento da tabela pagamentos
       supabase
         .from('pagamentos')
-        .select('liquido, vr_couvert: any, meio')
+        .select('liquido, vr_couvert, meio')
         .eq('bar_id', bar_id)
         .eq('dt_gerencial', data_evento),
 
@@ -88,39 +88,39 @@ export async function POST(request: NextRequest) {
     let receita_bar = 0;
 
     // 1. Páºblico real - somar pessoas da tabela perá­odo
-    publico_real = periodoData.reduce((sum: number, item: any) => {
+    publico_real = periodoData.reduce((sum: number, item) => {
       return sum + parseInt(item.pessoas || '0');
     }, 0);
 
     // 2. Faturamento lá­quido - somar pagamentos
-    faturamento_liquido = pagamentosData.reduce((sum: number, item: any) => {
+    faturamento_liquido = pagamentosData.reduce((sum: number, item) => {
       return sum + parseFloat(item.liquido || '0');
     }, 0);
 
     // 3. Receita de couvert - tanto de perá­odo quanto pagamentos
-    receita_couvert = periodoData.reduce((sum: number, item: any) => {
+    receita_couvert = periodoData.reduce((sum: number, item) => {
       return sum + parseFloat(item.vr_couvert || '0');
     }, 0);
 
-    const couvertPagamentos = pagamentosData.reduce((sum: number, item: any) => {
+    const couvertPagamentos = pagamentosData.reduce((sum: number, item) => {
       return sum + parseFloat(item.vr_couvert || '0');
     }, 0);
 
-    receita_couvert = Math.max(receita_couvert: any, couvertPagamentos);
+    receita_couvert = Math.max(receita_couvert, couvertPagamentos);
 
     // 4. Receita de ingressos - Sympla
-    receita_ingressos = symplaData.reduce((sum: number, item: any) => {
+    receita_ingressos = symplaData.reduce((sum: number, item) => {
       return sum + parseFloat(item.total_liquido || '0');
     }, 0);
 
     // 5. Receita do bar - produtos
-    receita_bar = periodoData.reduce((sum: number, item: any) => {
+    receita_bar = periodoData.reduce((sum: number, item) => {
       return sum + parseFloat(item.vr_produtos || '0');
     }, 0);
 
     // Se ná£o temos páºblico da tabela perá­odo, tentar usar checkins do Sympla
     if (publico_real === 0 && symplaData.length > 0) {
-      publico_real = symplaData.reduce((sum: number, item: any) => {
+      publico_real = symplaData.reduce((sum: number, item) => {
         return sum + parseInt(item.qtd_checkins_realizados || '0');
       }, 0);
     }

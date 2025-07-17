@@ -1,5 +1,5 @@
 // =====================================================
-// üáßüá∑ TIMEZONE UTILS PARA EDGE FUNCTIONS - BRAS√çLIA
+// üáßüá∑ TIMEZONE UTILS PARA EDGE FUNCTIONS - BRAS·çLIA
 // Padroniza timezone em todas as edge functions
 // =====================================================
 
@@ -10,9 +10,9 @@ export const BRASIL_LOCALE = 'pt-BR';
  * Retorna data/hora atual no timezone do Brasil para Edge Functions
  */
 export function agoraEdgeFunction(): Date {
-  // Edge functions rodam em UTC, ent√£o convertemos manualmente
+  // Edge functions rodam em UTC, ent·£o convertemos manualmente
   const utcNow = new Date();
-  const brasilOffset = -3; // UTC-3 (Bras√≠lia)
+  const brasilOffset = -3; // UTC-3 (Bras·≠lia)
   return new Date(utcNow.getTime() + (brasilOffset * 60 * 60 * 1000));
 }
 
@@ -27,7 +27,7 @@ export function paraBrasiliaEdge(data: string | Date): Date {
 }
 
 /**
- * Formata data no padr√£o brasileiro para Edge Functions
+ * Formata data no padr·£o brasileiro para Edge Functions
  */
 export function formatarDataEdge(data: string | Date): string {
   if (!data) return 'N/A';
@@ -47,7 +47,7 @@ export function formatarDataEdge(data: string | Date): string {
 }
 
 /**
- * Formata data e hora no padr√£o brasileiro para Edge Functions
+ * Formata data e hora no padr·£o brasileiro para Edge Functions
  */
 export function formatarDataHoraEdge(data: string | Date): string {
   if (!data) return 'N/A';
@@ -84,7 +84,7 @@ export function logBrasiliaEdge(message: string, ...args: any[]): void {
 }
 
 /**
- * Verifica se √© hor√°rio comercial no Brasil (8h-18h)
+ * Verifica se ·© hor·°rio comercial no Brasil (8h-18h)
  */
 export function isHorarioComercialEdge(): boolean {
   const agoraBrasil = agoraEdgeFunction();

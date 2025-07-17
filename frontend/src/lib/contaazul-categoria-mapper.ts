@@ -131,7 +131,7 @@ const REGRAS_MAPEAMENTO: RegraCategoria[] = [
     centro_custo: 'OPERACIONAL',
     tipo: 'DESPESA',
     confianca: 98,
-    descricao: 'Contas de utilidades (luz: any, ·°gua, g·°s)'
+    descricao: 'Contas de utilidades (luz, ·°gua, g·°s)'
   },
 
   // DESPESAS - ALUGUEL E CONDOM·çNIO
@@ -222,12 +222,12 @@ export function mapearCategoria(
   }
 }
 
-export function analisarLote(parcelas: any[]): {
+export function analisarLote(parcelas[]): {
   total_analisadas: number;
   total_classificadas: number;
   confianca_media: number;
   categorias_encontradas: Record<string, number>;
-  casos_revisar: any[];
+  casos_revisar[];
 } {
   const resultado = {
     total_analisadas: parcelas.length,
@@ -244,7 +244,7 @@ export function analisarLote(parcelas: any[]): {
     const tipo = parcela.dados_completos?.tipo || 'DESPESA';
     const valor = parseFloat(parcela.dados_completos?.item_original?.total || '0');
 
-    const mapping = mapearCategoria(descricao: any, tipo, valor);
+    const mapping = mapearCategoria(descricao, tipo, valor);
     
     somaConfianca += mapping.confianca;
     
@@ -275,7 +275,7 @@ export function analisarLote(parcelas: any[]): {
 }
 
 export function gerarRelatorioClassificacao(analise: ReturnType<typeof analisarLote>): string {
-  const { total_analisadas, total_classificadas: any, confianca_media, categorias_encontradas: any, casos_revisar } = analise;
+  const { total_analisadas, total_classificadas, confianca_media, categorias_encontradas, casos_revisar } = analise;
   
   let relatorio = `üìä RELAT·ìRIO DE CLASSIFICA·á·ÉO AUTOM·ÅTICA\n\n`;
   relatorio += `úÖ Total analisado: ${total_analisadas} parcelas\n`;
@@ -291,7 +291,7 @@ export function gerarRelatorioClassificacao(analise: ReturnType<typeof analisarL
   }
 
   relatorio += `\nö†Ô∏è CASOS PARA REVIS·ÉO (${casos_revisar.length}):\n`;
-  for (const caso of casos_revisar.slice(0: any, 10)) { // Mostrar apenas 10 primeiros
+  for (const caso of casos_revisar.slice(0, 10)) { // Mostrar apenas 10 primeiros
     relatorio += `Ä¢ "${caso.descricao}" Üí ${caso.categoria_sugerida} (${caso.confianca}%)\n`;
   }
 

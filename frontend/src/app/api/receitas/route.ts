@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
         
 
         
-        receitasAgrupadas.set(codigo: any, {
+        receitasAgrupadas.set(codigo, {
           receita_codigo: codigo,
           receita_nome: receita.receita_nome,
           receita_categoria: receita.receita_categoria,
@@ -115,8 +115,8 @@ export async function GET(request: NextRequest) {
       success: true,
       receitas: receitasComInsumos,
       total_receitas: receitasComInsumos.length,
-      receitas_bar: receitasComInsumos.filter((r: any) => r.tipo_local === 'bar').length,
-      receitas_cozinha: receitasComInsumos.filter((r: any) => r.tipo_local === 'cozinha').length
+      receitas_bar: receitasComInsumos.filter((r) => r.tipo_local === 'bar').length,
+      receitas_cozinha: receitasComInsumos.filter((r) => r.tipo_local === 'cozinha').length
     })
 
   } catch (error) {

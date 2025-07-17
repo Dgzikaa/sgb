@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent: any, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useToast } from '@/hooks/use-toast'
 import { useBar } from '@/contexts/BarContext'
@@ -198,7 +198,7 @@ export default function IntegracoesPage() {
   //   if (!selectedBar) return
   //   console.log('üü† Carregando status Email para bar:', selectedBar.id)
   //   // TODO: Implementar verifica·ß·£o de configura·ß·µes de email
-  //   // Pode verificar SMTP, templates: any, etc.
+  //   // Pode verificar SMTP, templates, etc.
   // }
   
   const loadEventosStatus = async () => {
@@ -399,7 +399,7 @@ export default function IntegracoesPage() {
       } else {
         setGoogleResult('ùå Erro: ' + (data.error || 'Erro desconhecido'))
       }
-    } catch (e: any) {
+    } catch (e) {
       setGoogleResult('ùå Erro: ' + e.message)
     } finally {
       setGoogleLoading(false)
@@ -446,7 +446,7 @@ export default function IntegracoesPage() {
                 <div>
                   <p className="text-green-800 dark:text-green-300 font-semibold">Ativas</p>
                   <p className="text-green-600 dark:text-green-400 text-sm">
-                    {Object.values(webhookConfigs).filter((config: any) => config && config.trim() !== '').length} integra·ß·µes
+                    {Object.values(webhookConfigs).filter((config) => config && config.trim() !== '').length} integra·ß·µes
                   </p>
                 </div>
               </div>
@@ -602,7 +602,7 @@ export default function IntegracoesPage() {
                       id="webhook-sistema"
                       placeholder="https://discord.com/api/webhooks/..."
                       value={webhookConfigs.sistema}
-                      onChange={(e: any) => setWebhookConfigs({...webhookConfigs, sistema: e.target.value})}
+                      onChange={(e) => setWebhookConfigs({...webhookConfigs, sistema: e.target.value})}
                       disabled={webhookLoading}
                       className="flex-1"
                     />
@@ -642,7 +642,7 @@ export default function IntegracoesPage() {
                       id="webhook-contaazul"
                       placeholder="https://discord.com/api/webhooks/..."
                       value={webhookConfigs.contaazul}
-                      onChange={(e: any) => setWebhookConfigs({...webhookConfigs, contaazul: e.target.value})}
+                      onChange={(e) => setWebhookConfigs({...webhookConfigs, contaazul: e.target.value})}
                       disabled={webhookLoading}
                       className="flex-1"
                     />
@@ -682,7 +682,7 @@ export default function IntegracoesPage() {
                       id="webhook-meta"
                       placeholder="https://discord.com/api/webhooks/..."
                       value={webhookConfigs.meta}
-                      onChange={(e: any) => setWebhookConfigs({...webhookConfigs, meta: e.target.value})}
+                      onChange={(e) => setWebhookConfigs({...webhookConfigs, meta: e.target.value})}
                       disabled={webhookLoading}
                       className="flex-1"
                     />
@@ -697,7 +697,7 @@ export default function IntegracoesPage() {
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500">
-                    Instagram, Facebook: any, Google Reviews, campanhas de marketing
+                    Instagram, Facebook, Google Reviews, campanhas de marketing
                   </p>
                 </div>
 
@@ -722,7 +722,7 @@ export default function IntegracoesPage() {
                       id="webhook-checklists"
                       placeholder="https://discord.com/api/webhooks/..."
                       value={webhookConfigs.checklists}
-                      onChange={(e: any) => setWebhookConfigs({...webhookConfigs, checklists: e.target.value})}
+                      onChange={(e) => setWebhookConfigs({...webhookConfigs, checklists: e.target.value})}
                       disabled={webhookLoading}
                       className="flex-1"
                     />
@@ -762,7 +762,7 @@ export default function IntegracoesPage() {
                       id="webhook-contahub"
                       placeholder="https://discord.com/api/webhooks/..."
                       value={webhookConfigs.contahub}
-                      onChange={(e: any) => setWebhookConfigs({...webhookConfigs, contahub: e.target.value})}
+                      onChange={(e) => setWebhookConfigs({...webhookConfigs, contahub: e.target.value})}
                       disabled={webhookLoading}
                       className="flex-1"
                     />
@@ -802,7 +802,7 @@ export default function IntegracoesPage() {
                       id="webhook-sympla"
                       placeholder="https://discord.com/api/webhooks/..."
                       value={webhookConfigs.sympla}
-                      onChange={(e: any) => setWebhookConfigs({...webhookConfigs, sympla: e.target.value})}
+                      onChange={(e) => setWebhookConfigs({...webhookConfigs, sympla: e.target.value})}
                       disabled={webhookLoading}
                       className="flex-1"
                     />
@@ -842,7 +842,7 @@ export default function IntegracoesPage() {
                       id="webhook-yuzer"
                       placeholder="https://discord.com/api/webhooks/..."
                       value={webhookConfigs.yuzer}
-                      onChange={(e: any) => setWebhookConfigs({...webhookConfigs, yuzer: e.target.value})}
+                      onChange={(e) => setWebhookConfigs({...webhookConfigs, yuzer: e.target.value})}
                       disabled={webhookLoading}
                       className="flex-1"
                     />
@@ -882,7 +882,7 @@ export default function IntegracoesPage() {
                       id="webhook-reservas"
                       placeholder="https://discord.com/api/webhooks/..."
                       value={webhookConfigs.reservas}
-                      onChange={(e: any) => setWebhookConfigs({...webhookConfigs, reservas: e.target.value})}
+                      onChange={(e) => setWebhookConfigs({...webhookConfigs, reservas: e.target.value})}
                       disabled={webhookLoading}
                       className="flex-1"
                     />
@@ -897,7 +897,7 @@ export default function IntegracoesPage() {
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500">
-                    Novas reservas, cancelamentos: any, eventos especiais, occupancy rate
+                    Novas reservas, cancelamentos, eventos especiais, occupancy rate
                   </p>
                 </div>
 

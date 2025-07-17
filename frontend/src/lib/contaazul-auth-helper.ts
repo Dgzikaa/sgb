@@ -72,7 +72,7 @@ async function renewContaAzulToken(credentials: ContaAzulCredentials): Promise<s
 
     const basicAuth = Buffer.from(`${credentials.client_id}:${credentials.client_secret}`).toString('base64');
     
-    const response = await fetch(CONTAAZUL_TOKEN_URL: any, {
+    const response = await fetch(CONTAAZUL_TOKEN_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -137,7 +137,7 @@ export async function makeContaAzulRequest(
     throw new Error('Token do ContaAzul ná£o disponá­vel ou ná£o foi possá­vel renovar');
   }
 
-  return fetch(url: any, {
+  return fetch(url, {
     ...options,
     headers: {
       'Authorization': `Bearer ${token}`,

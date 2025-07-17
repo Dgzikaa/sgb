@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect: any, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -274,7 +274,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
     const lowerQuery = query.toLowerCase()
     
-    return commands.filter((command: any) => {
+    return commands.filter((command) => {
       // Busca no tá­tulo
       if (command.title.toLowerCase().includes(lowerQuery)) return true
       
@@ -287,7 +287,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
       )) return true
       
       return false
-    }).sort((a: any, b: any) => {
+    }).sort((a, b) => {
       // Priorizar matches exatos no tá­tulo
       const aExact = a.title.toLowerCase().startsWith(lowerQuery)
       const bExact = b.title.toLowerCase().startsWith(lowerQuery)
@@ -337,7 +337,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, filteredCommands: any, selectedIndex, onClose])
+  }, [isOpen, filteredCommands, selectedIndex, onClose])
 
   const handleSelectCommand = async (command: Command) => {
     if (isExecuting) return
@@ -383,7 +383,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
   // Agrupar comandos por categoria
   const groupedCommands = useMemo(() => {
-    const groups = filteredCommands.reduce((acc: any, command: any) => {
+    const groups = filteredCommands.reduce((acc, command) => {
       if (!acc[command.category]) {
         acc[command.category] = []
       }
@@ -409,7 +409,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
             <Input
               placeholder="Digite um comando ou navegue..."
               value={query}
-              onChange={(e: any) => setQuery(e.target.value)}
+              onChange={(e) => setQuery(e.target.value)}
               className="border-0 bg-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-0 text-base sm:text-lg flex-1"
               autoFocus
             />
@@ -428,7 +428,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                 <p className="text-sm">Tente uma busca diferente</p>
               </div>
             ) : (
-              groupedCommands.map(([category, categoryCommands], groupIndex: any) => (
+              groupedCommands.map(([category, categoryCommands], groupIndex) => (
                 <div key={category} className={groupIndex > 0 ? 'border-t border-gray-200 dark:border-gray-700' : ''}>
                   {/* Header da categoria */}
                   <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
@@ -442,7 +442,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                   </div>
 
                   {/* Comandos da categoria */}
-                  {categoryCommands.map((command: any, index: any) => {
+                  {categoryCommands.map((command, index) => {
                     const absoluteIndex = filteredCommands.indexOf(command)
                     const isSelected = selectedIndex === absoluteIndex
                     

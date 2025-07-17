@@ -113,7 +113,7 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
               Funcionalidades
             </h3>
             <div className="space-y-2">
-              {advancedItems.map((item: any) => {
+              {advancedItems.map((item) => {
                 const active = isActive(item.href)
                 return (
                   <Link
@@ -146,7 +146,7 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
                 Configuraá§áµes
               </h3>
               <div className="space-y-2">
-                {configItems.map((item: any) => {
+                {configItems.map((item) => {
                   const active = isActive(item.href)
                   return (
                     <Link
@@ -252,7 +252,7 @@ export function BottomNavigation() {
         {/* Navigation bar */}
         <div className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 px-2 py-2">
           <div className="flex items-center justify-around">
-            {bottomNavItems.map((item: any) => {
+            {bottomNavItems.map((item) => {
               const active = isActive(item.href)
               return (
                 <Link

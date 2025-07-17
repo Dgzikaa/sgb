@@ -5,15 +5,15 @@ import { useRouter } from 'next/navigation'
 import { useBar } from '@/contexts/BarContext'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent: any, DialogHeader, DialogTitle: any, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Checkbox } from '@/components/ui/checkbox'
-import { BulkActionsToolbar, commonBulkActions: any, type BulkAction } from '@/components/ui/bulk-actions-toolbar'
+import { BulkActionsToolbar, commonBulkActions, type BulkAction } from '@/components/ui/bulk-actions-toolbar'
 import { useBulkSelection } from '@/hooks/useBulkSelection'
 import { 
   Plus, 
@@ -54,7 +54,7 @@ interface ChecklistTemplate {
 interface Setor {
   id: string
   nome: string
-  icon: any
+  icon
   cor: string
   responsavel_padrao: string
 }
@@ -219,7 +219,7 @@ export default function AdminChecklists() {
   }
 
   // Filtrar checklists
-  const checklistsFiltrados = checklists.filter((checklist: any) => {
+  const checklistsFiltrados = checklists.filter((checklist) => {
     const matchSetor = setorFiltro === 'todos' || checklist.setor === setorFiltro
     const matchTipo = tipoFiltro === 'todos' || checklist.tipo === tipoFiltro
     const matchBusca = checklist.nome.toLowerCase().includes(busca.toLowerCase()) ||
@@ -229,8 +229,8 @@ export default function AdminChecklists() {
   })
 
   // Bulk selection
-  const bulkSelection = useBulkSelection(checklistsFiltrados: any, {
-    onSelectionChange: (selectedItems: any) => {
+  const bulkSelection = useBulkSelection(checklistsFiltrados, {
+    onSelectionChange: (selectedItems) => {
       console.log('Seleá§á£o alterada:', selectedItems)
     }
   })
@@ -243,7 +243,7 @@ export default function AdminChecklists() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'delete',
-          checklistIds: selectedItems.map((item: any) => item.id)
+          checklistIds: selectedItems.map((item) => item.id)
         })
       })
 
@@ -263,7 +263,7 @@ export default function AdminChecklists() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'activate',
-          checklistIds: selectedItems.map((item: any) => item.id)
+          checklistIds: selectedItems.map((item) => item.id)
         })
       })
 
@@ -283,7 +283,7 @@ export default function AdminChecklists() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'deactivate',
-          checklistIds: selectedItems.map((item: any) => item.id)
+          checklistIds: selectedItems.map((item) => item.id)
         })
       })
 
@@ -303,7 +303,7 @@ export default function AdminChecklists() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'duplicate',
-          checklistIds: selectedItems.map((item: any) => item.id)
+          checklistIds: selectedItems.map((item) => item.id)
         })
       })
 
@@ -468,7 +468,7 @@ export default function AdminChecklists() {
                 <Input
                   placeholder="Buscar por nome ou descriá§á£o..."
                   value={busca}
-                  onChange={(e: any) => setBusca(e.target.value)}
+                  onChange={(e) => setBusca(e.target.value)}
                   className="h-11 pl-10 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-700 shadow-sm focus:border-green-500 focus:ring-green-500"
                 />
               </div>
@@ -483,7 +483,7 @@ export default function AdminChecklists() {
                   <SelectItem value="todos" className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100">
                     <span className="font-medium">Todos os setores</span>
                   </SelectItem>
-                  {setores.map((setor: any) => {
+                  {setores.map((setor) => {
                     const SetorIcon = setor.icon
                     return (
                       <SelectItem key={setor.id} value={setor.id} className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100">
@@ -587,8 +587,8 @@ export default function AdminChecklists() {
 
           {/* Lista de Checklists */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {checklistsFiltrados.map((checklist: any) => {
-              const setor = setores.find((s: any) => s.id === checklist.setor)
+            {checklistsFiltrados.map((checklist) => {
+              const setor = setores.find((s) => s.id === checklist.setor)
               const SetorIcon = setor?.icon || FileText
 
               return (
@@ -734,7 +734,7 @@ export default function AdminChecklists() {
                       <Input
                         id="editNome"
                         value={checklistSelecionado.nome}
-                        onChange={(e: any) => setChecklistSelecionado({...checklistSelecionado, nome: e.target.value})}
+                        onChange={(e) => setChecklistSelecionado({...checklistSelecionado, nome: e.target.value})}
                         placeholder="Ex: Checklist de Abertura da Cozinha"
                         className="modal-input"
                       />
@@ -746,8 +746,8 @@ export default function AdminChecklists() {
                         <Store className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                         Setor *
                       </Label>
-                      <Select value={checklistSelecionado.setor} onValueChange={(value: any) => {
-                        const setorSelecionado = setores.find((s: any) => s.id === value)
+                      <Select value={checklistSelecionado.setor} onValueChange={(value) => {
+                        const setorSelecionado = setores.find((s) => s.id === value)
                         setChecklistSelecionado({
                           ...checklistSelecionado, 
                           setor: value,
@@ -758,7 +758,7 @@ export default function AdminChecklists() {
                           <SelectValue placeholder="Selecione o setor" />
                         </SelectTrigger>
                         <SelectContent className="modal-select-content">
-                          {setores.map((setor: any) => {
+                          {setores.map((setor) => {
                             const SetorIcon = setor.icon
                             return (
                               <SelectItem key={setor.id} value={setor.id} className="cursor-pointer hover:bg-gray-50">
@@ -784,7 +784,7 @@ export default function AdminChecklists() {
                       <Input
                         id="editDescricao"
                         value={checklistSelecionado.descricao}
-                        onChange={(e: any) => setChecklistSelecionado({...checklistSelecionado, descricao: e.target.value})}
+                        onChange={(e) => setChecklistSelecionado({...checklistSelecionado, descricao: e.target.value})}
                         placeholder="Breve descriá§á£o do que será¡ verificado"
                         className="h-11 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
                       />
@@ -797,7 +797,7 @@ export default function AdminChecklists() {
                           <Settings className="w-4 h-4 text-orange-600" />
                           Tipo *
                         </Label>
-                        <Select value={checklistSelecionado.tipo} onValueChange={(value: any) => setChecklistSelecionado({...checklistSelecionado, tipo: value})}>
+                        <Select value={checklistSelecionado.tipo} onValueChange={(value) => setChecklistSelecionado({...checklistSelecionado, tipo: value})}>
                           <SelectTrigger className="h-11 border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500">
                             <SelectValue />
                           </SelectTrigger>
@@ -847,7 +847,7 @@ export default function AdminChecklists() {
                           <Calendar className="w-4 h-4 text-indigo-600" />
                           Frequáªncia *
                         </Label>
-                        <Select value={checklistSelecionado.frequencia} onValueChange={(value: any) => setChecklistSelecionado({...checklistSelecionado, frequencia: value})}>
+                        <Select value={checklistSelecionado.frequencia} onValueChange={(value) => setChecklistSelecionado({...checklistSelecionado, frequencia: value})}>
                           <SelectTrigger className="h-11 border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500">
                             <SelectValue />
                           </SelectTrigger>
@@ -873,7 +873,7 @@ export default function AdminChecklists() {
                             id="editTempo"
                             type="number"
                             value={checklistSelecionado.tempo_estimado}
-                            onChange={(e: any) => setChecklistSelecionado({...checklistSelecionado, tempo_estimado: parseInt(e.target.value) || 0})}
+                            onChange={(e) => setChecklistSelecionado({...checklistSelecionado, tempo_estimado: parseInt(e.target.value) || 0})}
                             min="1"
                             max="480"
                             className="h-11 border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500 pr-16"
@@ -893,8 +893,8 @@ export default function AdminChecklists() {
                         <Input
                           id="editResponsavel"
                           value={checklistSelecionado.responsavel_padrao}
-                          onChange={(e: any) => setChecklistSelecionado({...checklistSelecionado, responsavel_padrao: e.target.value})}
-                          placeholder="Ex: Gerente, Chef: any, Bartender"
+                          onChange={(e) => setChecklistSelecionado({...checklistSelecionado, responsavel_padrao: e.target.value})}
+                          placeholder="Ex: Gerente, Chef, Bartender"
                           className="h-11 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
                         />
                       </div>
@@ -906,7 +906,7 @@ export default function AdminChecklists() {
                         <Settings className="w-4 h-4 text-gray-600" />
                         Status
                       </Label>
-                      <Select value={checklistSelecionado.ativo ? 'ativo' : 'inativo'} onValueChange={(value: any) => setChecklistSelecionado({...checklistSelecionado, ativo: value === 'ativo'})}>
+                      <Select value={checklistSelecionado.ativo ? 'ativo' : 'inativo'} onValueChange={(value) => setChecklistSelecionado({...checklistSelecionado, ativo: value === 'ativo'})}>
                         <SelectTrigger className="h-11 border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500">
                           <SelectValue />
                         </SelectTrigger>
@@ -1003,7 +1003,7 @@ export default function AdminChecklists() {
                   <Input
                     id="nome"
                     value={novoChecklist.nome}
-                    onChange={(e: any) => setNovoChecklist({...novoChecklist, nome: e.target.value})}
+                    onChange={(e) => setNovoChecklist({...novoChecklist, nome: e.target.value})}
                     placeholder="Ex: Checklist de Abertura da Cozinha"
                     className="h-11 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500"
                   />
@@ -1015,8 +1015,8 @@ export default function AdminChecklists() {
                     <Store className="w-4 h-4 text-blue-600" />
                     Setor *
                   </Label>
-                  <Select value={novoChecklist.setor} onValueChange={(value: any) => {
-                    const setorSelecionado = setores.find((s: any) => s.id === value)
+                  <Select value={novoChecklist.setor} onValueChange={(value) => {
+                    const setorSelecionado = setores.find((s) => s.id === value)
                     setNovoChecklist({
                       ...novoChecklist, 
                       setor: value,
@@ -1027,7 +1027,7 @@ export default function AdminChecklists() {
                       <SelectValue placeholder="Selecione o setor" />
                     </SelectTrigger>
                     <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                      {setores.map((setor: any) => {
+                      {setores.map((setor) => {
                         const SetorIcon = setor.icon
                         return (
                           <SelectItem key={setor.id} value={setor.id} className="cursor-pointer hover:bg-gray-50">
@@ -1053,7 +1053,7 @@ export default function AdminChecklists() {
                   <Input
                     id="descricao"
                     value={novoChecklist.descricao}
-                    onChange={(e: any) => setNovoChecklist({...novoChecklist, descricao: e.target.value})}
+                    onChange={(e) => setNovoChecklist({...novoChecklist, descricao: e.target.value})}
                     placeholder="Breve descriá§á£o do que será¡ verificado"
                     className="h-11 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500"
                   />
@@ -1066,7 +1066,7 @@ export default function AdminChecklists() {
                       <Settings className="w-4 h-4 text-orange-600" />
                       Tipo *
                     </Label>
-                    <Select value={novoChecklist.tipo} onValueChange={(value: any) => setNovoChecklist({...novoChecklist, tipo: value})}>
+                    <Select value={novoChecklist.tipo} onValueChange={(value) => setNovoChecklist({...novoChecklist, tipo: value})}>
                       <SelectTrigger className="h-11 border-gray-300 text-gray-900 focus:border-green-500 focus:ring-green-500">
                         <SelectValue />
                       </SelectTrigger>
@@ -1116,7 +1116,7 @@ export default function AdminChecklists() {
                       <Calendar className="w-4 h-4 text-indigo-600" />
                       Frequáªncia *
                     </Label>
-                    <Select value={novoChecklist.frequencia} onValueChange={(value: any) => setNovoChecklist({...novoChecklist, frequencia: value})}>
+                    <Select value={novoChecklist.frequencia} onValueChange={(value) => setNovoChecklist({...novoChecklist, frequencia: value})}>
                       <SelectTrigger className="h-11 border-gray-300 text-gray-900 focus:border-green-500 focus:ring-green-500">
                         <SelectValue />
                       </SelectTrigger>
@@ -1142,7 +1142,7 @@ export default function AdminChecklists() {
                         id="tempo"
                         type="number"
                         value={novoChecklist.tempo_estimado}
-                        onChange={(e: any) => setNovoChecklist({...novoChecklist, tempo_estimado: parseInt(e.target.value) || 0})}
+                        onChange={(e) => setNovoChecklist({...novoChecklist, tempo_estimado: parseInt(e.target.value) || 0})}
                         min="1"
                         max="480"
                         className="h-11 border-gray-300 text-gray-900 focus:border-green-500 focus:ring-green-500 pr-16"
@@ -1162,8 +1162,8 @@ export default function AdminChecklists() {
                     <Input
                       id="responsavel"
                       value={novoChecklist.responsavel_padrao}
-                      onChange={(e: any) => setNovoChecklist({...novoChecklist, responsavel_padrao: e.target.value})}
-                      placeholder="Ex: Gerente, Chef: any, Bartender"
+                      onChange={(e) => setNovoChecklist({...novoChecklist, responsavel_padrao: e.target.value})}
+                      placeholder="Ex: Gerente, Chef, Bartender"
                       className="h-11 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500"
                     />
                   </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext: any, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, ReactNode } from 'react'
 
 interface PageTitleContextType {
   pageTitle: string | null

@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useRef: any, useEffect } from 'react'
-import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
+import { useState, useRef, useEffect } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { 
@@ -89,7 +89,7 @@ export function DashboardWidget({
   const handleRefresh = async () => {
     setIsRefreshing(true)
     // Simular refresh - em implementaá§á£o real, chamar API
-    await new Promise(resolve => setTimeout(resolve: any, 1000))
+    await new Promise(resolve => setTimeout(resolve, 1000))
     setIsRefreshing(false)
   }
 
@@ -245,7 +245,7 @@ export function DashboardWidget({
               <input
                 type="number"
                 value={config.refreshInterval || ''}
-                onChange={(e: any) => {
+                onChange={(e) => {
                   const value = parseInt(e.target.value) || 0
                   if (onConfigChange) {
                     onConfigChange({

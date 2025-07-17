@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect: any, useCallback, createContext: any, useContext } from 'react'
+import { useState, useEffect, useCallback, createContext, useContext } from 'react'
 import { ReactNode } from 'react'
 
 // Funá§á£o utilitá¡ria para acessar navigator com seguraná§a
@@ -31,7 +31,7 @@ export interface LGPDConsent {
 export interface LGPDUserRights {
   accessData: () => Promise<any>           // Art. 15 - Acesso aos dados
   portabilityData: () => Promise<Blob>     // Art. 20 - Portabilidade
-  rectifyData: (data: any) => Promise<void> // Art. 16 - Retificaá§á£o
+  rectifyData: (data) => Promise<void> // Art. 16 - Retificaá§á£o
   deleteData: () => Promise<void>          // Art. 17 - Exclusá£o
   restrictProcessing: () => Promise<void>  // Art. 18 - Limitaá§á£o
   objectProcessing: () => Promise<void>    // Art. 21 - Oposiá§á£o
@@ -341,7 +341,7 @@ export function useLGPDImplementation() {
     },
 
     // Retificaá§á£o (Art. 16)
-    rectifyData: async (data: any) => {
+    rectifyData: async (data) => {
       await fetch('/api/lgpd/data-rectification', {
         method: 'POST',
         headers: {

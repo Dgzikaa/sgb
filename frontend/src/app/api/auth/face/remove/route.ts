@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ðŸ”¥ Erro fatal na API de remoá§á£o facial:', error)
     
     return NextResponse.json(

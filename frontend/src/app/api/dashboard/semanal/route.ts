@@ -16,7 +16,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
 
     if (!data_inicio || !data_fim || !bar_id) {
       return NextResponse.json(
-        { success: false, error: 'Pará¢metros obrigatá³rios: data_inicio, data_fim: any, bar_id' },
+        { success: false, error: 'Pará¢metros obrigatá³rios: data_inicio, data_fim, bar_id' },
         { status: 400 }
       )
     }
@@ -64,12 +64,12 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
       })
     }
 
-    console.log('ðŸ“… Dias da semana gerados:', diasSemana.map((d: any) => `${d.dia} (${d.data})`).join(', '))
+    console.log('ðŸ“… Dias da semana gerados:', diasSemana.map((d) => `${d.dia} (${d.data})`).join(', '))
 
     try {
       // FUNá‡áƒO PARA BUSCAR TODOS OS DADOS COM PAGINAá‡áƒO
       const buscarTodosPagamentos = async () => {
-        let todosPagamentos: any[] = []
+        let todosPagamentos[] = []
         let offset = 0
         const limit = 1000
         let hasMore = true
@@ -77,13 +77,13 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
         while (hasMore) {
           const { data, error } = await supabase
             .from('pagamentos')
-            .select('dt_gerencial, liquido: any, meio, pag: any, origem, vr_couvert')
+            .select('dt_gerencial, liquido, meio, pag, origem, vr_couvert')
             .eq('bar_id', parseInt(bar_id))
             .gte('dt_gerencial', data_inicio)
             .lte('dt_gerencial', data_fim)
             .not('liquido', 'is', null)
             .neq('pag', 'Conta Assinada')
-            .range(offset: any, offset + limit - 1)
+            .range(offset, offset + limit - 1)
 
           if (error) {
             console.error(`Œ Erro na paginaá§á£o offset ${offset}:`, error)
@@ -109,28 +109,28 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
       }
 
       // Buscar dados de TODAS as fontes (paginaá§á£o + paralelismo)
-      const [pagamentos, symplaResult: any, periodoResult] = await Promise.all([
+      const [pagamentos, symplaResult, periodoResult] = await Promise.all([
         // 1. Pagamentos ContaHub (COM PAGINAá‡áƒO)
         buscarTodosPagamentos(),
 
         // 2. Sympla bilheteria + SEM LIMITE
         supabase
           .from('sympla_bilheteria')
-          .select('data_evento, total_liquido: any, qtd_checkins_realizados')
+          .select('data_evento, total_liquido, qtd_checkins_realizados')
           .eq('bar_id', parseInt(bar_id))
           .gte('data_evento', data_inicio)
           .lte('data_evento', data_fim)
           .not('total_liquido', 'is', null)
-          .then((result: any) => result.data || []),
+          .then((result) => result.data || []),
 
         // 3. Perá­odo para clientes E faturamento adicional + SEM LIMITE
         supabase
           .from('periodo')
-          .select('dt_gerencial, pessoas: any, vr_pagamentos, vr_couvert')
+          .select('dt_gerencial, pessoas, vr_pagamentos, vr_couvert')
           .eq('bar_id', parseInt(bar_id))
           .gte('dt_gerencial', data_inicio)
           .lte('dt_gerencial', data_fim)
-          .then((result: any) => result.data || [])
+          .then((result) => result.data || [])
       ])
 
       const sympla = symplaResult
@@ -144,7 +144,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
 
       // BUSCAR DADOS YUZER (igual ao dashboard diá¡rio) + COM PAGINAá‡áƒO
       const buscarTodosYuzerBar = async () => {
-        let todosYuzerBar: any[] = []
+        let todosYuzerBar[] = []
         let offset = 0
         const limit = 1000
         let hasMore = true
@@ -152,12 +152,12 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
         while (hasMore) {
           const { data, error } = await supabase
             .from('yuzer_analitico')
-            .select('data_pedido, valor_total: any, pedido_id, produto_nome')
+            .select('data_pedido, valor_total, pedido_id, produto_nome')
             .eq('bar_id', parseInt(bar_id))
             .gte('data_pedido', data_inicio)
             .lte('data_pedido', data_fim)
             .not('produto_nome', 'ilike', '%ingresso%')
-            .range(offset: any, offset + limit - 1)
+            .range(offset, offset + limit - 1)
 
           if (error) {
             console.error(`Œ Erro na paginaá§á£o Yuzer Bar offset ${offset}:`, error)
@@ -181,7 +181,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
       }
 
       const buscarTodosYuzerIngressos = async () => {
-        let todosYuzerIngressos: any[] = []
+        let todosYuzerIngressos[] = []
         let offset = 0
         const limit = 1000
         let hasMore = true
@@ -189,12 +189,12 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
         while (hasMore) {
           const { data, error } = await supabase
             .from('yuzer_analitico')
-            .select('data_pedido, valor_total: any, pedido_id, produto_nome')
+            .select('data_pedido, valor_total, pedido_id, produto_nome')
             .eq('bar_id', parseInt(bar_id))
             .gte('data_pedido', data_inicio)
             .lte('data_pedido', data_fim)
             .ilike('produto_nome', '%ingresso%')
-            .range(offset: any, offset + limit - 1)
+            .range(offset, offset + limit - 1)
 
           if (error) {
             console.error(`Œ Erro na paginaá§á£o Yuzer Ingressos offset ${offset}:`, error)
@@ -229,27 +229,27 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
 
       // Processar faturamento de TODAS as fontes (igual ao diá¡rio)
       // 1. ContaHub (pagamentos filtrados)
-      const faturamento_contahub_real = pagamentos.reduce((sum: number, item: any) => {
+      const faturamento_contahub_real = pagamentos.reduce((sum: number, item) => {
         return sum + (parseFloat(item.liquido) || 0)
       }, 0)
 
       // 2. Bilheteria Sympla
-      const faturamento_bilheteria = sympla.reduce((sum: number, item: any) => {
+      const faturamento_bilheteria = sympla.reduce((sum: number, item) => {
         return sum + (parseFloat(item.total_liquido) || 0)
       }, 0)
 
       // 3. Yuzer Bar (faturamento bar)
-      const faturamento_yuzer_bar = yuzerBar.reduce((sum: number, item: any) => {
+      const faturamento_yuzer_bar = yuzerBar.reduce((sum: number, item) => {
         return sum + (parseFloat(item.valor_total) || 0)
       }, 0)
 
       // 4. Yuzer Ingressos (faturamento ingressos)
-      const faturamento_yuzer_ingressos = yuzerIngresso.reduce((sum: number, item: any) => {
+      const faturamento_yuzer_ingressos = yuzerIngresso.reduce((sum: number, item) => {
         return sum + (parseFloat(item.valor_total) || 0)
       }, 0)
 
       // 5. Couvert real da tabela perá­odo
-      const couvert_real_periodo = periodo.reduce((sum: number, item: any) => {
+      const couvert_real_periodo = periodo.reduce((sum: number, item) => {
         return sum + (parseFloat(item.vr_couvert) || 0)
       }, 0)
 
@@ -302,27 +302,27 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
       }
 
       // Calcular clientes do ContaHub
-      const periodo_com_pagamento = periodo.filter((item: any) => parseFloat(item.vr_pagamentos || '0') > 0)
+      const periodo_com_pagamento = periodo.filter((item) => parseFloat(item.vr_pagamentos || '0') > 0)
       const clientes_contahub_periodo = periodo_com_pagamento.length // CONTAR registros, ná£o somar pessoas
 
       // Clientes Yuzer (apenas ingressos)
-      const pedidos_unicos_yuzer_ingresso = [...new Set(yuzerIngresso.map((y: any) => y.pedido_id))]
+      const pedidos_unicos_yuzer_ingresso = [...new Set(yuzerIngresso.map((y) => y.pedido_id))]
       const clientes_yuzer = pedidos_unicos_yuzer_ingresso.length
 
       // Buscar TODAS as visitas Sympla do perá­odo COM PAGINAá‡áƒO
       console.log('ðŸ” Buscando TODAS as visitas_clientes Sympla do perá­odo COM PAGINAá‡áƒO...')
       console.log('ðŸ“‹ RESUMO PERáODO (antes de filtrar):', {
         total_registros: periodo.length,
-        amostra_5_primeiros: periodo.slice(0: any, 5).map((p: any) => ({
+        amostra_5_primeiros: periodo.slice(0, 5).map((p) => ({
           dt_gerencial: p.dt_gerencial,
           pessoas: p.pessoas,
           vr_pagamentos: p.vr_pagamentos,
-          cli_cel: p.cli_cel?.slice(0: any, 4) + '***'
+          cli_cel: p.cli_cel?.slice(0, 4) + '***'
         }))
       })
       
       const buscarTodasVisitasSympa = async () => {
-        let todasVisitas: any[] = []
+        let todasVisitas[] = []
         let offset = 0
         const limit = 1000
         let hasMore = true
@@ -335,7 +335,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
             .gte('data_visita', data_inicio)
             .lte('data_visita', data_fim)
             .eq('tipo_visita', 'evento_sympla')
-            .range(offset: any, offset + limit - 1)
+            .range(offset, offset + limit - 1)
 
           if (error) {
             console.error(`Œ Erro na paginaá§á£o Visitas Sympla offset ${offset}:`, error)
@@ -360,7 +360,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
 
       const todasVisitasSymplaData = await buscarTodasVisitasSympa()
 
-      const clientes_visitas_sympla = todasVisitasSymplaData.reduce((sum: number, item: any) => {
+      const clientes_visitas_sympla = todasVisitasSymplaData.reduce((sum: number, item) => {
         return sum + (parseInt(item.pessoas_na_mesa) || 0)
       }, 0)
 
@@ -397,18 +397,18 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
       // Distribuir nos dias da semana
       for (const dia of diasSemana) {
         // Distribuir faturamento por dia
-        const pagamentos_dia = pagamentos.filter((p: any) => p.dt_gerencial === dia.data)
-        const sympla_dia = sympla.filter((s: any) => s.data_evento === dia.data)
-        const yuzer_bar_dia = yuzerBar.filter((y: any) => y.data_pedido === dia.data)
-        const yuzer_ingresso_dia = yuzerIngresso.filter((y: any) => y.data_pedido === dia.data)
-        const periodo_dia = periodo.filter((p: any) => p.dt_gerencial === dia.data)
-        const visitas_sympla_dia = todasVisitasSymplaData.filter((v: any) => v.data_visita === dia.data)
+        const pagamentos_dia = pagamentos.filter((p) => p.dt_gerencial === dia.data)
+        const sympla_dia = sympla.filter((s) => s.data_evento === dia.data)
+        const yuzer_bar_dia = yuzerBar.filter((y) => y.data_pedido === dia.data)
+        const yuzer_ingresso_dia = yuzerIngresso.filter((y) => y.data_pedido === dia.data)
+        const periodo_dia = periodo.filter((p) => p.dt_gerencial === dia.data)
+        const visitas_sympla_dia = todasVisitasSymplaData.filter((v) => v.data_visita === dia.data)
 
-        const faturamento_contahub_dia = pagamentos_dia.reduce((sum: number, item: any) => sum + (parseFloat(item.liquido) || 0), 0)
-        const faturamento_bilheteria_dia = sympla_dia.reduce((sum: number, item: any) => sum + (parseFloat(item.total_liquido) || 0), 0)
-        const faturamento_yuzer_bar_dia = yuzer_bar_dia.reduce((sum: number, item: any) => sum + (parseFloat(item.valor_total) || 0), 0)
-        const faturamento_yuzer_ingressos_dia = yuzer_ingresso_dia.reduce((sum: number, item: any) => sum + (parseFloat(item.valor_total) || 0), 0)
-        const couvert_periodo_dia = periodo_dia.reduce((sum: number, item: any) => sum + (parseFloat(item.vr_couvert) || 0), 0)
+        const faturamento_contahub_dia = pagamentos_dia.reduce((sum: number, item) => sum + (parseFloat(item.liquido) || 0), 0)
+        const faturamento_bilheteria_dia = sympla_dia.reduce((sum: number, item) => sum + (parseFloat(item.total_liquido) || 0), 0)
+        const faturamento_yuzer_bar_dia = yuzer_bar_dia.reduce((sum: number, item) => sum + (parseFloat(item.valor_total) || 0), 0)
+        const faturamento_yuzer_ingressos_dia = yuzer_ingresso_dia.reduce((sum: number, item) => sum + (parseFloat(item.valor_total) || 0), 0)
+        const couvert_periodo_dia = periodo_dia.reduce((sum: number, item) => sum + (parseFloat(item.vr_couvert) || 0), 0)
 
         const bar_total_dia = (faturamento_contahub_dia - couvert_periodo_dia + faturamento_bilheteria_dia) + faturamento_yuzer_bar_dia
         const couvert_total_dia = couvert_periodo_dia + faturamento_yuzer_ingressos_dia
@@ -441,7 +441,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
         }
 
         // **Lá“GICA FINAL IGUAL AO DIáRIO**
-        const periodo_com_pagamento_dia = periodo_dia.filter((item: any) => parseFloat(item.vr_pagamentos || '0') > 0)
+        const periodo_com_pagamento_dia = periodo_dia.filter((item) => parseFloat(item.vr_pagamentos || '0') > 0)
         const clientes_contahub_dia = periodo_com_pagamento_dia.length // Dados do perá­odo
         
         if (clientes_pessoas_diario_dia > 0) {
@@ -457,11 +457,11 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
         }
 
         // Yuzer ingressos do dia
-        const pedidos_unicos_yuzer_ingresso_dia = [...new Set(yuzer_ingresso_dia.map((y: any) => y.pedido_id))]
+        const pedidos_unicos_yuzer_ingresso_dia = [...new Set(yuzer_ingresso_dia.map((y) => y.pedido_id))]
         const clientes_yuzer_dia = pedidos_unicos_yuzer_ingresso_dia.length
 
         // Visitas Sympla do dia (já¡ filtradas)
-        const clientes_visitas_sympla_dia = visitas_sympla_dia.reduce((sum: number, item: any) => {
+        const clientes_visitas_sympla_dia = visitas_sympla_dia.reduce((sum: number, item) => {
           return sum + (parseInt(item.pessoas_na_mesa) || 0)
         }, 0)
 
@@ -486,8 +486,8 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
         }
       })
 
-      const totalFaturamento = diasSemana.reduce((sum: any, dia: any) => sum + dia.faturamento, 0)
-      const totalClientes = diasSemana.reduce((sum: any, dia: any) => sum + dia.clientes, 0)
+      const totalFaturamento = diasSemana.reduce((sum, dia) => sum + dia.faturamento, 0)
+      const totalClientes = diasSemana.reduce((sum, dia) => sum + dia.clientes, 0)
 
       console.log('œ… Totais da semana (CORRIGIDOS):', {
         faturamento: totalFaturamento,
@@ -519,7 +519,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
           yuzer_ingressos_pedidos_unicos: clientes_yuzer,
           visitas_sympla_soma_pessoas: clientes_visitas_sympla,
           total_calculado: clientes_total,
-          amostra_periodo: periodo.slice(0: any, 3).map((p: any) => ({
+          amostra_periodo: periodo.slice(0, 3).map((p) => ({
             dt_gerencial: p.dt_gerencial,
             pessoas: p.pessoas,
             vr_pagamentos: p.vr_pagamentos,

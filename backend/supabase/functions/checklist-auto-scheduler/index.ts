@@ -19,7 +19,7 @@ serve(async (req) => {
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    console.log('ðŸš€ Iniciando verificaÃ§Ã£o de agendamentos automÃ¡ticos...')
+    console.log('ðŸš€ Iniciando verificaá§á£o de agendamentos automá¡ticos...')
     
     // Log para debug
     const authHeader = req.headers.get('authorization')
@@ -41,7 +41,7 @@ serve(async (req) => {
       .lte('proxima_execucao_em', new Date().toISOString())
 
     if (errorAgendamentos) {
-      console.error('âŒ Erro ao buscar agendamentos:', errorAgendamentos)
+      console.error('Œ Erro ao buscar agendamentos:', errorAgendamentos)
       throw errorAgendamentos
     }
 
@@ -74,14 +74,14 @@ serve(async (req) => {
           .single()
 
         if (errorNovoAgendamento) {
-          console.error(`âŒ Erro ao criar agendamento para ${agendamento.titulo}:`, errorNovoAgendamento)
+          console.error(`Œ Erro ao criar agendamento para ${agendamento.titulo}:`, errorNovoAgendamento)
           erros++
           continue
         }
 
-        console.log(`âœ… Agendamento criado:`, novoAgendamento.id)
+        console.log(`œ… Agendamento criado:`, novoAgendamento.id)
 
-        // 2. Criar execuÃ§Ã£o automÃ¡tica
+        // 2. Criar execuá§á£o automá¡tica
         const dataAlerta = new Date(deadline.getTime() - (agendamento.tempo_alerta_horas * 60 * 60 * 1000))
 
         const { error: errorExecucao } = await supabase
@@ -95,12 +95,12 @@ serve(async (req) => {
           })
 
         if (errorExecucao) {
-          console.error(`âŒ Erro ao criar execuÃ§Ã£o automÃ¡tica:`, errorExecucao)
+          console.error(`Œ Erro ao criar execuá§á£o automá¡tica:`, errorExecucao)
           erros++
           continue
         }
 
-        // 3. Atualizar Ãºltima execuÃ§Ã£o do agendamento
+        // 3. Atualizar áºltima execuá§á£o do agendamento
         const { error: errorUpdate } = await supabase
           .from('checklist_schedules')
           .update({
@@ -109,10 +109,10 @@ serve(async (req) => {
           .eq('id', agendamento.id)
 
         if (errorUpdate) {
-          console.error(`âŒ Erro ao atualizar agendamento:`, errorUpdate)
+          console.error(`Œ Erro ao atualizar agendamento:`, errorUpdate)
         }
 
-        // 4. Enviar notificaÃ§Ã£o WhatsApp
+        // 4. Enviar notificaá§á£o WhatsApp
         if (agendamento.responsaveis_whatsapp && agendamento.responsaveis_whatsapp.length > 0) {
           try {
             const whatsappResponse = await fetch('https://sgbv2.vercel.app/api/whatsapp/send', {
@@ -139,7 +139,7 @@ serve(async (req) => {
               console.log(`ðŸ“± WhatsApp enviado para: ${agendamento.responsaveis_whatsapp.join(', ')}`)
             }
           } catch (whatsappError) {
-            console.error('âŒ Erro ao enviar WhatsApp:', whatsappError)
+            console.error('Œ Erro ao enviar WhatsApp:', whatsappError)
           }
         }
 
@@ -155,15 +155,15 @@ serve(async (req) => {
               agendamento_titulo: agendamento.titulo,
               whatsapp_enviado: !!(agendamento.responsaveis_whatsapp && agendamento.responsaveis_whatsapp.length > 0)
             },
-            mensagem: `Agendamento automÃ¡tico criado com sucesso para ${agendamento.titulo}`,
+            mensagem: `Agendamento automá¡tico criado com sucesso para ${agendamento.titulo}`,
             nivel: 'info'
           })
 
         processados++
-        console.log(`âœ… Agendamento ${agendamento.titulo} processado com sucesso`)
+        console.log(`œ… Agendamento ${agendamento.titulo} processado com sucesso`)
 
-      } catch (error: any) {
-        console.error(`âŒ Erro ao processar agendamento ${agendamento.titulo}:`, error)
+      } catch (error) {
+        console.error(`Œ Erro ao processar agendamento ${agendamento.titulo}:`, error)
         erros++
 
         // Log de erro
@@ -185,10 +185,10 @@ serve(async (req) => {
       agendamentos_encontrados: agendamentosPendentes?.length || 0,
       agendamentos_processados: processados,
       erros: erros,
-      message: `Processamento concluÃ­do: ${processados} agendamentos processados, ${erros} erros`
+      message: `Processamento concluá­do: ${processados} agendamentos processados, ${erros} erros`
     }
 
-    console.log('ðŸŽ‰ Processamento concluÃ­do:', resultado)
+    console.log('ðŸŽ‰ Processamento concluá­do:', resultado)
 
     return new Response(JSON.stringify(resultado), {
       headers: {
@@ -198,8 +198,8 @@ serve(async (req) => {
       status: 200,
     })
 
-  } catch (error: any) {
-    console.error('ðŸ’¥ Erro geral na funÃ§Ã£o:', error)
+  } catch (error) {
+    console.error('ðŸ’¥ Erro geral na funá§á£o:', error)
     
     return new Response(JSON.stringify({
       success: false,

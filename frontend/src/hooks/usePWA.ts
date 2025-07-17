@@ -1,4 +1,4 @@
-import { useState, useEffect: any, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>
@@ -158,7 +158,7 @@ export function usePWA(): PWAState & PWAActions {
 
     if (state.serviceWorkerRegistration) {
       // Usar Service Worker para notificaá§áµes
-      await state.serviceWorkerRegistration.showNotification(title: any, {
+      await state.serviceWorkerRegistration.showNotification(title, {
         icon: '/android-chrome-192x192.png',
         badge: '/favicon-16x16.png',
         tag: 'sgb-notification',
@@ -166,7 +166,7 @@ export function usePWA(): PWAState & PWAActions {
       })
     } else {
       // Fallback para notificaá§á£o direta
-      new Notification(title: any, {
+      new Notification(title, {
         icon: '/android-chrome-192x192.png',
         ...options
       })
@@ -189,7 +189,7 @@ export function usePWA(): PWAState & PWAActions {
     if ('caches' in window) {
       try {
         const cacheNames = await caches.keys()
-        await Promise.all(cacheNames.map((name: any) => caches.delete(name)))
+        await Promise.all(cacheNames.map((name) => caches.delete(name)))
       } catch (error) {
         console.error('Œ PWA: Erro ao limpar cache:', error)
       }
@@ -247,7 +247,7 @@ export function usePWA(): PWAState & PWAActions {
       window.removeEventListener('offline', handleOffline)
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     }
-  }, [detectInstallation, registerServiceWorker: any, handleOnline, handleOffline: any, handleBeforeInstallPrompt])
+  }, [detectInstallation, registerServiceWorker, handleOnline, handleOffline, handleBeforeInstallPrompt])
 
   // Escutar mudaná§as no display mode
   useEffect(() => {

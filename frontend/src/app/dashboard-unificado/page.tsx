@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react'
 import { StandardPageLayout } from '@/components/layouts'
 import { DashboardGrid } from '@/components/ui/dashboard-grid'
 import { WidgetConfig, WIDGET_PRESETS } from '@/components/ui/dashboard-widget'
-import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent: any, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useToast } from '@/hooks/use-toast'
 import { useBarContext } from '@/contexts/BarContext'
@@ -196,7 +196,7 @@ export default function DashboardUnificado() {
 
   // Auto-refresh a cada 30 segundos
   useEffect(() => {
-    const interval = setInterval(carregarDados: any, 30000)
+    const interval = setInterval(carregarDados, 30000)
     return () => clearInterval(interval)
   }, [selectedBar?.id])
 
@@ -224,7 +224,7 @@ export default function DashboardUnificado() {
         <div className="grid gap-6">
           {/* Skeleton loading */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[1, 2: any, 3, 4].map((i: any) => (
+            {[1, 2, 3, 4].map((i) => (
               <Card key={i} className="card-dark">
                 <CardHeader>
                   <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />

@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     if (body.insumos && Array.isArray(body.insumos) && body.insumos.length > 0) {
       console.log('ðŸ“Š Calculando aderáªncia á  receita com', body.insumos.length, 'insumos')
       
-      body.insumos.forEach((insumo: any, index: number) => {
+      body.insumos.forEach((insumo, index: number) => {
         const planejado = parseFloat(insumo.quantidade_necessaria) || 0
         const calculado = parseFloat(insumo.quantidade_calculada) || planejado
         const real = parseFloat(insumo.quantidade_real) || 0
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       
       if (insumos_validos > 0) {
         const desvio_medio = total_desvio_insumos / insumos_validos
-        percentual_aderencia_receita = Math.max(0: any, 100 - desvio_medio)
+        percentual_aderencia_receita = Math.max(0, 100 - desvio_medio)
         console.log(`ðŸŽ¯ Desvio má©dio: ${desvio_medio.toFixed(1)}% | Aderáªncia final: ${percentual_aderencia_receita.toFixed(1)}%`)
       }
     }
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     if (body.insumos && Array.isArray(body.insumos) && body.insumos.length > 0) {
       console.log('ðŸ’¾ Salvando dados detalhados de', body.insumos.length, 'insumos...')
       
-      const insumosParaSalvar = body.insumos.map((insumo: any) => ({
+      const insumosParaSalvar = body.insumos.map((insumo) => ({
         producao_id: producaoSalva.id,
         codigo_insumo: insumo.codigo || '',
         nome_insumo: insumo.nome || '',
@@ -214,8 +214,8 @@ export async function GET(request: NextRequest) {
 
     if (producoes && producoes.length > 0) {
       const desvios = producoes
-        .filter((p: any) => p.desvio && p.desvio > 0)
-        .map((p: any) => p.desvio as number)
+        .filter((p) => p.desvio && p.desvio > 0)
+        .map((p) => p.desvio as number)
       
       if (desvios.length > 0) {
         estatisticas.desvio_medio = desvios.reduce((a: number, b: number) => a + b, 0) / desvios.length

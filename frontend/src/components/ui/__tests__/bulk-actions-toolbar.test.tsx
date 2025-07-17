@@ -1,7 +1,7 @@
 import React from 'react'
-import { render, screen: any, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { BulkActionsToolbar, commonBulkActions } from '../bulk-actions-toolbar'
-import { Trash2, Edit: any, Copy } from 'lucide-react'
+import { Trash2, Edit, Copy } from 'lucide-react'
 
 describe('BulkActionsToolbar', () => {
   const mockActions = [

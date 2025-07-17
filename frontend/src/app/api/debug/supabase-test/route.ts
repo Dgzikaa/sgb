@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     try {
       const { data, error } = await adminClient
         .from('usuarios_bar')
-        .select('id, nome: any, email')
+        .select('id, nome, email')
         .limit(1)
       
       if (error) {

@@ -38,9 +38,9 @@ export interface AIInsight {
   confianca: number;
   impacto: string;
   urgencia: string;
-  metricas_base: any;
-  evidencias: any;
-  acoes_sugeridas: any[];
+  metricas_base;
+  evidencias;
+  acoes_sugeridas[];
   periodo_analise_inicio: string;
   periodo_analise_fim: string;
 }
@@ -60,8 +60,8 @@ export interface AIAnomaly {
   confianca_deteccao: number;
   possivel_causa: string;
   impacto_estimado: string;
-  acoes_sugeridas: any[];
-  metricas_anomala: any;
+  acoes_sugeridas[];
+  metricas_anomala;
 }
 
 export interface AIRecommendation {
@@ -75,11 +75,11 @@ export interface AIRecommendation {
   esforco_implementacao: string;
   tempo_implementacao_dias: number;
   justificativa: string;
-  evidencias: any;
+  evidencias;
   prioridade: number;
   urgencia: string;
   complexidade: string;
-  passos_implementacao: any[];
+  passos_implementacao[];
 }
 
 export class AIIntelligentAgent {
@@ -114,7 +114,7 @@ export class AIIntelligentAgent {
       }
 
       return false;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao inicializar agente IA:', error);
       await this.logProcess('inicializacao', 'Erro na inicializaá§á£o', 'erro', error.message || String(error));
       return false;
@@ -222,7 +222,7 @@ export class AIIntelligentAgent {
       const endTime = new Date();
       const duration = Math.round((endTime.getTime() - startTime.getTime()) / 1000);
 
-      await this.completeProcessLog(logId: any, 'concluido', {
+      await this.completeProcessLog(logId, 'concluido', {
         duracao_segundos: duration,
         total_insights_gerados: results.insights,
         total_anomalias_detectadas: results.anomalias,
@@ -233,10 +233,10 @@ export class AIIntelligentAgent {
 
       console.log(`œ… Aná¡lise IA concluá­da em ${duration}s: ${results.insights} insights, ${results.anomalias} anomalias`);
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro no loop de aná¡lise IA:', error);
       if (logId) {
-        await this.completeProcessLog(logId: any, 'erro', { erro_detalhes: error.message || String(error) });
+        await this.completeProcessLog(logId, 'erro', { erro_detalhes: error.message || String(error) });
       }
     }
   }
@@ -324,7 +324,7 @@ export class AIIntelligentAgent {
     if (!executions || executions.length === 0) return null;
 
     const total = executions.length;
-    const concluidas = executions.filter((e: any) => e.status === 'concluido').length;
+    const concluidas = executions.filter((e) => e.status === 'concluido').length;
     const taxa = (concluidas / total) * 100;
 
     return {
@@ -359,8 +359,8 @@ export class AIIntelligentAgent {
 
     if (!executions || executions.length === 0) return null;
 
-    const tempos = executions.map((e: any) => e.tempo_execucao_minutos);
-    const tempoMedio = tempos.reduce((a: any, b: any) => a + b, 0) / tempos.length;
+    const tempos = executions.map((e) => e.tempo_execucao_minutos);
+    const tempoMedio = tempos.reduce((a, b) => a + b, 0) / tempos.length;
 
     return {
       nome_metrica: 'tempo_medio_execucao',
@@ -395,8 +395,8 @@ export class AIIntelligentAgent {
 
     if (!executions || executions.length === 0) return null;
 
-    const scores = executions.map((e: any) => e.pontuacao_final);
-    const scoreMedio = scores.reduce((a: any, b: any) => a + b, 0) / scores.length;
+    const scores = executions.map((e) => e.pontuacao_final);
+    const scoreMedio = scores.reduce((a, b) => a + b, 0) / scores.length;
 
     return {
       nome_metrica: 'score_medio_qualidade',
@@ -411,8 +411,8 @@ export class AIIntelligentAgent {
         total_execucoes: executions.length,
         score_minimo: Math.min(...scores),
         score_maximo: Math.max(...scores),
-        scores_acima_90: scores.filter((s: any) => s >= 90).length,
-        scores_abaixo_70: scores.filter((s: any) => s < 70).length
+        scores_acima_90: scores.filter((s) => s >= 90).length,
+        scores_abaixo_70: scores.filter((s) => s < 70).length
       }
     };
   }
@@ -431,8 +431,8 @@ export class AIIntelligentAgent {
     if (!messages || messages.length === 0) return null;
 
     const total = messages.length;
-    const lidas = messages.filter((m: any) => m.status === 'read').length;
-    const entregues = messages.filter((m: any) => ['delivered', 'read'].includes(m.status)).length;
+    const lidas = messages.filter((m) => m.status === 'read').length;
+    const entregues = messages.filter((m) => ['delivered', 'read'].includes(m.status)).length;
     
     const taxaLeitura = (lidas / total) * 100;
     const taxaEntrega = (entregues / total) * 100;
@@ -478,7 +478,7 @@ export class AIIntelligentAgent {
 
     // Agrupar por funcioná¡rio
     const funcionarios: Record<string, any> = {};
-    executions.forEach((exec: any) => {
+    executions.forEach((exec) => {
       const id = exec.executado_por;
       if (!funcionarios[id]) {
         funcionarios[id] = {
@@ -506,7 +506,7 @@ export class AIIntelligentAgent {
     let produtividadeTotal = 0;
     let funcionariosAtivos = 0;
 
-    Object.values(funcionarios).forEach((func: any) => {
+    Object.values(funcionarios).forEach((func) => {
       if (func.total > 0) {
         const taxaConclusao = (func.concluidos / func.total) * 100;
         const scoreMedia = func.concluidos > 0 ? func.score_total / func.concluidos : 0;
@@ -710,9 +710,9 @@ export class AIIntelligentAgent {
     if (!metrics || metrics.length < 3) return null;
 
     // Calcular má©dia e desvio padrá£o histá³rico
-    const valores = metrics.slice(0: any, -1).map((m: any) => m.valor); // Excluir hoje
-    const media = valores.reduce((a: any, b: any) => a + b, 0) / valores.length;
-    const variance = valores.reduce((a: any, b: any) => a + Math.pow(b - media, 2), 0) / valores.length;
+    const valores = metrics.slice(0, -1).map((m) => m.valor); // Excluir hoje
+    const media = valores.reduce((a, b) => a + b, 0) / valores.length;
+    const variance = valores.reduce((a, b) => a + Math.pow(b - media, 2), 0) / valores.length;
     const desvio = Math.sqrt(variance);
 
     const valorHoje = metrics[metrics.length - 1].valor;
@@ -769,9 +769,9 @@ export class AIIntelligentAgent {
 
     if (!metrics || metrics.length < 3) return null;
 
-    const valores = metrics.slice(0: any, -1).map((m: any) => m.valor);
-    const media = valores.reduce((a: any, b: any) => a + b, 0) / valores.length;
-    const variance = valores.reduce((a: any, b: any) => a + Math.pow(b - media, 2), 0) / valores.length;
+    const valores = metrics.slice(0, -1).map((m) => m.valor);
+    const media = valores.reduce((a, b) => a + b, 0) / valores.length;
+    const variance = valores.reduce((a, b) => a + Math.pow(b - media, 2), 0) / valores.length;
     const desvio = Math.sqrt(variance);
 
     const valorHoje = metrics[metrics.length - 1].valor;
@@ -827,9 +827,9 @@ export class AIIntelligentAgent {
 
     if (!metrics || metrics.length < 3) return null;
 
-    const valores = metrics.slice(0: any, -1).map((m: any) => m.valor);
-    const media = valores.reduce((a: any, b: any) => a + b, 0) / valores.length;
-    const variance = valores.reduce((a: any, b: any) => a + Math.pow(b - media, 2), 0) / valores.length;
+    const valores = metrics.slice(0, -1).map((m) => m.valor);
+    const media = valores.reduce((a, b) => a + b, 0) / valores.length;
+    const variance = valores.reduce((a, b) => a + Math.pow(b - media, 2), 0) / valores.length;
     const desvio = Math.sqrt(variance);
 
     const valorHoje = metrics[metrics.length - 1].valor;
@@ -927,8 +927,8 @@ export class AIIntelligentAgent {
 
       if (taxasHistoricas.length < 3) continue;
 
-      const mediaTaxa = taxasHistoricas.reduce((a: any, b: any) => a + b, 0) / taxasHistoricas.length;
-      const mediaScore = scoresHistoricos.length > 0 ? scoresHistoricos.reduce((a: any, b: any) => a + b, 0) / scoresHistoricos.length : 0;
+      const mediaTaxa = taxasHistoricas.reduce((a, b) => a + b, 0) / taxasHistoricas.length;
+      const mediaScore = scoresHistoricos.length > 0 ? scoresHistoricos.reduce((a, b) => a + b, 0) / scoresHistoricos.length : 0;
 
       // Detectar anomalias significativas
       const quedaTaxa = mediaTaxa - taxaConclusaoHoje;
@@ -948,7 +948,7 @@ export class AIIntelligentAgent {
           valor_observado: taxaConclusaoHoje,
           desvio_percentual: (quedaTaxa / mediaTaxa) * 100,
           confianca_deteccao: 75,
-          possivel_causa: 'Possá­veis causas: problemas pessoais, desmotivaá§á£o, sobrecarga: any, falta de treinamento ou questáµes tá©cnicas',
+          possivel_causa: 'Possá­veis causas: problemas pessoais, desmotivaá§á£o, sobrecarga, falta de treinamento ou questáµes tá©cnicas',
           impacto_estimado: 'Impacto na produtividade da equipe e qualidade do serviá§o',
           acoes_sugeridas: [
             'Conversar individualmente com o funcioná¡rio',
@@ -983,7 +983,7 @@ export class AIIntelligentAgent {
     if (!this.config) return false;
 
     const now = new Date();
-    const currentTime = now.toTimeString().slice(0: any, 5);
+    const currentTime = now.toTimeString().slice(0, 5);
     
     return currentTime >= this.config.horario_analise_inicio && 
            currentTime <= this.config.horario_analise_fim;
@@ -992,7 +992,7 @@ export class AIIntelligentAgent {
   /**
    * Salva má©trica no banco
    */
-  private async saveMetric(metric: any): Promise<void> {
+  private async saveMetric(metric): Promise<void> {
     await supabase
       .from('ai_metrics')
       .insert({
@@ -1037,7 +1037,7 @@ export class AIIntelligentAgent {
   /**
    * Completa log de processo
    */
-  private async completeProcessLog(logId: number, status: string, dados: any = {}): Promise<void> {
+  private async completeProcessLog(logId: number, status: string, dados = {}): Promise<void> {
     await supabase
       .from('ai_agent_logs')
       .update({
@@ -1163,7 +1163,7 @@ export class AIIntelligentAgent {
         }
       }
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao enviar relatá³rio matinal:', error);
       await this.logProcess(
         'relatorio_discord',
@@ -1189,7 +1189,7 @@ export class AIIntelligentAgent {
       // Buscar execuá§áµes de ontem
       const { data: execucoes } = await supabase
         .from('checklist_execucoes')
-        .select('status, tempo_execucao_minutos: any, score_final')
+        .select('status, tempo_execucao_minutos, score_final')
         .eq('bar_id', this.barId)
         .gte('created_at', `${dataOntem}T00:00:00Z`)
         .lt('created_at', `${dataOntem}T23:59:59Z`)
@@ -1200,17 +1200,17 @@ export class AIIntelligentAgent {
         .catch(() => ({ alerts: [] }))
 
       const totalExecucoes = execucoes?.length || 0
-      const execucoesConcluidas = execucoes?.filter((e: any) => e.status === 'concluido').length || 0
+      const execucoesConcluidas = execucoes?.filter((e) => e.status === 'concluido').length || 0
       const execucoesPendentes = totalExecucoes - execucoesConcluidas
 
-      const temposExecucao = execucoes?.filter((e: any) => e.tempo_execucao_minutos).map((e: any) => e.tempo_execucao_minutos) || []
-      const tempoMedio = temposExecucao.length > 0 ? temposExecucao.reduce((a: any, b: any) => a + b, 0) / temposExecucao.length : 0
+      const temposExecucao = execucoes?.filter((e) => e.tempo_execucao_minutos).map((e) => e.tempo_execucao_minutos) || []
+      const tempoMedio = temposExecucao.length > 0 ? temposExecucao.reduce((a, b) => a + b, 0) / temposExecucao.length : 0
 
-      const scores = execucoes?.filter((e: any) => e.score_final).map((e: any) => e.score_final) || []
-      const scoreMedio = scores.length > 0 ? scores.reduce((a: any, b: any) => a + b, 0) / scores.length : 0
+      const scores = execucoes?.filter((e) => e.score_final).map((e) => e.score_final) || []
+      const scoreMedio = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0
 
       const alertasAtivos = alertasData?.alerts?.length || 0
-      const alertasCriticos = alertasData?.alerts?.filter((a: any) => a.nivel === 'critico').length || 0
+      const alertasCriticos = alertasData?.alerts?.filter((a) => a.nivel === 'critico').length || 0
 
       const checklistStats = {
         total_execucoes: totalExecucoes,
@@ -1233,7 +1233,7 @@ export class AIIntelligentAgent {
         'concluido'
       )
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Œ Erro ao enviar relatá³rio matinal de checklists:', error)
       await this.logProcess(
         'relatorio_checklist',
@@ -1348,7 +1348,7 @@ export class AIIntelligentAgent {
         console.log('ðŸ“± Nenhuma má©trica social encontrada para hoje - pulando relatá³rio marketing');
       }
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao enviar relatá³rio matinal de marketing:', error);
       await this.logProcess(
         'relatorio_marketing',
@@ -1401,7 +1401,7 @@ export class AIAgentManager {
     const initialized = await agent.initialize();
     
     if (initialized) {
-      this.agents.set(barId: any, agent);
+      this.agents.set(barId, agent);
       await agent.startAgent();
       return true;
     }
@@ -1424,7 +1424,7 @@ export class AIAgentManager {
    * Para todos os agentes
    */
   stopAllAgents(): void {
-    this.agents.forEach((agent: any, barId: any) => {
+    this.agents.forEach((agent, barId) => {
       agent.stopAgent();
     });
     this.agents.clear();

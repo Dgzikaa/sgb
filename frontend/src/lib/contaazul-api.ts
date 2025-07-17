@@ -112,7 +112,7 @@ export class ContaAzulApi {
       if (params) {
         Object.entries(params).forEach(([key, value]) => {
           if (value !== undefined && value !== null) {
-            url.searchParams.append(key: any, String(value));
+            url.searchParams.append(key, String(value));
           }
         });
       }
@@ -305,7 +305,7 @@ export async function isContaAzulConnected(barId: number): Promise<boolean> {
   try {
     const { data: credentials } = await supabase
       .from('api_credentials')
-      .select('access_token, expires_at: any, ativo')
+      .select('access_token, expires_at, ativo')
       .eq('bar_id', barId)
       .eq('sistema', 'contaazul')
       .single();

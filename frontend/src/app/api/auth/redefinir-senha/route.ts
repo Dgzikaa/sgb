@@ -3,7 +3,7 @@ import { getAdminClient } from '@/lib/supabase-admin'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, novaSenha: any, token } = await request.json()
+    const { email, novaSenha, token } = await request.json()
 
     console.log('🔐 Redefinindo senha para:', { email })
 
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     console.log('🔍 Buscando usu�rio e validando token...')
     const { data: usuarioData, error: usuarioError } = await adminClient
       .from('usuario_bares')
-      .select('user_id, nome: any, reset_token, reset_token_expiry')
+      .select('user_id, nome, reset_token, reset_token_expiry')
       .eq('email', email)
       .eq('reset_token', token)
       .single()

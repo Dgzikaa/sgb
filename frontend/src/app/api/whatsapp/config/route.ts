@@ -5,9 +5,9 @@ import { createServiceRoleClient } from '@/lib/supabase-admin';
 
 // Schema de validaá§á£o para configuraá§áµes WhatsApp
 const ConfigWhatsAppSchema = z.object({
-  phone_number_id: z.string().min(1: any, 'Phone Number ID á© obrigatá³rio'),
-  access_token: z.string().min(1: any, 'Access Token á© obrigatá³rio'),
-  webhook_verify_token: z.string().min(1: any, 'Webhook Verify Token á© obrigatá³rio'),
+  phone_number_id: z.string().min(1, 'Phone Number ID á© obrigatá³rio'),
+  access_token: z.string().min(1, 'Access Token á© obrigatá³rio'),
+  webhook_verify_token: z.string().min(1, 'Webhook Verify Token á© obrigatá³rio'),
   webhook_url: z.string().url('URL do webhook deve ser vá¡lida').optional(),
   ativo: z.boolean().default(false),
   api_version: z.string().default('v18.0'),
@@ -229,7 +229,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Preparar dados para atualizaá§á£o
-    let updateData: any = { ...validatedData };
+    let updateData = { ...validatedData };
 
     // Se alterando token, validar novamente
     if (validatedData.access_token && validatedData.access_token !== existing.access_token) {
@@ -342,7 +342,7 @@ export async function DELETE(request: NextRequest) {
 /**
  * Testa conectividade com WhatsApp Business API
  */
-async function testWhatsAppConnection(config: any): Promise<{
+async function testWhatsAppConnection(config): Promise<{
   success: boolean;
   message: string;
   details?: any;

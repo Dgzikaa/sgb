@@ -13,7 +13,7 @@ interface DiscordNotification {
   footer?: {
     text: string
   }
-  bar_id: string // Obrigat√≥rio para buscar webhook
+  bar_id: string // Obrigat·≥rio para buscar webhook
   webhook_type?: 'sistema' | 'contaazul' | 'meta' | 'checklists' | 'contahub' | 'vendas' | 'reservas' // Tipo do webhook
 }
 
@@ -22,7 +22,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Fun√ß√£o para buscar webhook da tabela
+// Fun·ß·£o para buscar webhook da tabela
 async function getWebhookUrl(barId: string, webhookType: string = 'sistema') {
   const supabaseClient = createClient(
     Deno.env.get('SUPABASE_URL') ?? '',
@@ -52,20 +52,20 @@ async function getWebhookUrl(barId: string, webhookType: string = 'sistema') {
     .single()
 
   if (error || !webhookConfig) {
-    console.warn(`‚ö†Ô∏è Webhook config n√£o encontrada para bar ${barId} sistema ${sistema}, usando fallback`)
-    // Fallback para webhook padr√£o se n√£o encontrar configura√ß√£o
+    console.warn(`ö†Ô∏è Webhook config n·£o encontrada para bar ${barId} sistema ${sistema}, usando fallback`)
+    // Fallback para webhook padr·£o se n·£o encontrar configura·ß·£o
     return 'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ'
   }
 
   const webhook = webhookConfig.configuracoes?.webhook_url
   
   if (!webhook || webhook.trim() === '') {
-    console.warn(`‚ö†Ô∏è Webhook ${webhookType} n√£o configurado para bar ${barId}, usando fallback`)
-    // Fallback para webhook padr√£o
+    console.warn(`ö†Ô∏è Webhook ${webhookType} n·£o configurado para bar ${barId}, usando fallback`)
+    // Fallback para webhook padr·£o
     return 'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ'
   }
 
-  console.log(`‚úÖ Webhook ${webhookType} encontrado para bar ${barId}`)
+  console.log(`úÖ Webhook ${webhookType} encontrado para bar ${barId}`)
   return webhook
 }
 
@@ -82,10 +82,10 @@ serve(async (req: Request): Promise<Response> => {
     const notification: DiscordNotification = await req.json()
     
     if (!notification.bar_id) {
-      throw new Error('bar_id √© obrigat√≥rio')
+      throw new Error('bar_id ·© obrigat·≥rio')
     }
 
-    console.log(`üì¢ Enviando notifica√ß√£o para Discord (Bar: ${notification.bar_id}, Tipo: ${notification.webhook_type || 'sistema'}):`, notification.title)
+    console.log(`üì¢ Enviando notifica·ß·£o para Discord (Bar: ${notification.bar_id}, Tipo: ${notification.webhook_type || 'sistema'}):`, notification.title)
 
     // Buscar webhook da tabela baseado no bar_id e tipo
     const webhookUrl = await getWebhookUrl(notification.bar_id, notification.webhook_type || 'sistema')
@@ -94,10 +94,10 @@ serve(async (req: Request): Promise<Response> => {
     const embed = {
       title: notification.title,
       description: notification.description,
-      color: notification.color || 0x00ff00, // Verde por padr√£o
+      color: notification.color || 0x00ff00, // Verde por padr·£o
       fields: notification.fields || [],
       footer: notification.footer || {
-        text: `SGB v2 ‚Ä¢ Bar: ${notification.bar_id} ‚Ä¢ ${new Date().toLocaleString('pt-BR', {
+        text: `SGB v2 Ä¢ Bar: ${notification.bar_id} Ä¢ ${new Date().toLocaleString('pt-BR', {
           timeZone: 'America/Sao_Paulo'
         })}`
       },
@@ -122,15 +122,15 @@ serve(async (req: Request): Promise<Response> => {
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('‚ùå Erro ao enviar para Discord:', errorText)
+      console.error('ùå Erro ao enviar para Discord:', errorText)
       throw new Error(`Discord API erro: ${response.status} - ${errorText}`)
     }
 
-    console.log('‚úÖ Notifica√ß√£o enviada para Discord com sucesso!')
+    console.log('úÖ Notifica·ß·£o enviada para Discord com sucesso!')
 
     return new Response(JSON.stringify({ 
       success: true,
-      message: 'Notifica√ß√£o enviada para Discord',
+      message: 'Notifica·ß·£o enviada para Discord',
       webhook_type: notification.webhook_type || 'sistema',
       bar_id: notification.bar_id
     }), {
@@ -139,7 +139,7 @@ serve(async (req: Request): Promise<Response> => {
     })
 
   } catch (error) {
-    console.error('‚ùå Erro na notifica√ß√£o Discord:', error)
+    console.error('ùå Erro na notifica·ß·£o Discord:', error)
     
     return new Response(
       JSON.stringify({ 

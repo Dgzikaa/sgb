@@ -85,7 +85,7 @@ export default function ContaAzulSimplesPage() {
               <h3 className="text-lg font-semibold mb-4">📊 Seus Dados:</h3>
               <div className="text-left">
                 <pre className="bg-gray-100 p-4 rounded text-sm overflow-auto">
-                  {JSON.stringify(dados: any, null, 2)}
+                  {JSON.stringify(dados, null, 2)}
                 </pre>
               </div>
             </div>

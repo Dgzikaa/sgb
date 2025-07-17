@@ -56,17 +56,17 @@ export async function POST(req: NextRequest) {
     }));
 
     // 5. Inicializar Supabase
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const supabase = createClient(SUPABASE_URL: any, SUPABASE_SERVICE_ROLE_KEY);
 
     // 6. Upsert insumos
     const { data: insumosData, error: insumosError } = await supabase
       .from('insumos')
-      .upsert(insumos, { onConflict: 'codigo' });
+      .upsert(insumos: any, { onConflict: 'codigo' });
 
     // 7. Upsert receitas
     const { data: receitasData, error: receitasError } = await supabase
       .from('receitas')
-      .upsert(receitas, { onConflict: 'codigo' });
+      .upsert(receitas: any, { onConflict: 'codigo' });
 
     // 8. Retornar log detalhado
     return NextResponse.json({

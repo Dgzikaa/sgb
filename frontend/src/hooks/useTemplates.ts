@@ -128,7 +128,7 @@ export function useTemplates(filtrosIniciais: TemplateFilters = {}): UseTemplate
       
       Object.entries(filtros).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
-          params.append(key: any, String(value))
+          params.append(key, String(value))
         }
       })
 
@@ -141,7 +141,7 @@ export function useTemplates(filtrosIniciais: TemplateFilters = {}): UseTemplate
       } else {
         setError(response.error || 'Erro ao carregar templates')
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao carregar templates:', err)
       setError('Erro ao conectar com o servidor')
     } finally {
@@ -162,7 +162,7 @@ export function useTemplates(filtrosIniciais: TemplateFilters = {}): UseTemplate
         setError(response.error || 'Erro ao instalar templates')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao instalar templates predefinidos:', err)
       setError('Erro ao instalar templates predefinidos')
       return false
@@ -180,7 +180,7 @@ export function useTemplates(filtrosIniciais: TemplateFilters = {}): UseTemplate
         setError(response.error || 'Erro ao deletar template')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao deletar template:', err)
       setError('Erro ao deletar template')
       return false
@@ -264,7 +264,7 @@ export function useTemplate(id?: string): UseTemplateResult {
       } else {
         setError(response.error || 'Template ná£o encontrado')
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao carregar template:', err)
       setError('Erro ao carregar template')
     } finally {
@@ -285,7 +285,7 @@ export function useTemplate(id?: string): UseTemplateResult {
         setError(response.error || 'Erro ao salvar template')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao salvar template:', err)
       setError('Erro ao salvar template')
       return false
@@ -302,7 +302,7 @@ export function useTemplate(id?: string): UseTemplateResult {
         setError(response.error || 'Erro ao criar template')
         return null
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao criar template:', err)
       setError('Erro ao criar template')
       return null
@@ -408,7 +408,7 @@ export const templateUtils = {
     }
 
     // Validar seá§áµes
-    template.estrutura?.secoes?.forEach((secao: any, index: any) => {
+    template.estrutura?.secoes?.forEach((secao, index) => {
       if (!secao.nome?.trim()) {
         erros.push(`Nome da seá§á£o ${index + 1} á© obrigatá³rio`)
       }
@@ -418,7 +418,7 @@ export const templateUtils = {
       }
 
       // Validar itens
-      secao.itens?.forEach((item: any, itemIndex: any) => {
+      secao.itens?.forEach((item, itemIndex) => {
         if (!item.titulo?.trim()) {
           erros.push(`Tá­tulo do item ${itemIndex + 1} na seá§á£o "${secao.nome}" á© obrigatá³rio`)
         }
@@ -429,7 +429,7 @@ export const templateUtils = {
   },
 
   // Criar template a partir de checklist
-  criarTemplateDeChecklist: (checklist: any): Partial<Template> => {
+  criarTemplateDeChecklist: (checklist): Partial<Template> => {
     return {
       nome: `Template - ${checklist.nome}`,
       descricao: `Template criado a partir do checklist: ${checklist.nome}`,

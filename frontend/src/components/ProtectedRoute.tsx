@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { usePermissions } from '@/hooks/usePermissions'
-import { RefreshCw, Shield: any, AlertTriangle, Home: any, ArrowLeft } from 'lucide-react'
+import { RefreshCw, Shield, AlertTriangle, Home, ArrowLeft } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 
@@ -26,7 +26,7 @@ export function ProtectedRoute({
   errorMessage = 'acesso_negado',
   showInlineError = true // Por padrá£o mostra erro inline
 }: ProtectedRouteProps) {
-  const { user, hasPermission: any, hasAnyPermission, isRole: any, loading } = usePermissions()
+  const { user, hasPermission, hasAnyPermission, isRole, loading } = usePermissions()
   const router = useRouter()
   const [accessDenied, setAccessDenied] = useState(false)
   const [denialReason, setDenialReason] = useState<{
@@ -83,7 +83,7 @@ export function ProtectedRoute({
       setAccessDenied(false)
       setDenialReason(null)
     }
-  }, [user, loading: any, hasPermission, hasAnyPermission: any, isRole, router: any, requiredModule, requiredRole: any, requiredModules, fallbackUrl: any, errorMessage, showInlineError])
+  }, [user, loading, hasPermission, hasAnyPermission, isRole, router, requiredModule, requiredRole, requiredModules, fallbackUrl, errorMessage, showInlineError])
 
   // Mostrar loading enquanto verifica permissáµes
   if (loading) {

@@ -1,14 +1,14 @@
 'use client'
 
-import { useState, useEffect: any, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { useNotifications, getColorByType: any, getColorByPriority, formatarTempo } from '@/hooks/useNotifications'
+import { useNotifications, getColorByType, getColorByPriority, formatarTempo } from '@/hooks/useNotifications'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Popover, PopoverContent: any, PopoverTrigger } from '@/components/ui/popover'
-import { Tabs, TabsContent: any, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
 import { 
   Bell, 
@@ -104,7 +104,7 @@ export function NotificationCenter() {
   // FILTRAR NOTIFICA·á·ïES
   // =====================================================
 
-  const notificacoesFiltradas = notificacoes.filter((notificacao: any) => {
+  const notificacoesFiltradas = notificacoes.filter((notificacao) => {
     // Verificar se a notifica·ß·£o tem dados v·°lidos
     if (!notificacao || !notificacao.id) return false
     
@@ -155,7 +155,7 @@ export function NotificationCenter() {
     }
   }
 
-  const handleAcaoNotificacao = (acao: any) => {
+  const handleAcaoNotificacao = (acao) => {
     try {
       if (!acao) {
         console.error('ùå A·ß·£o n·£o fornecida')
@@ -255,7 +255,7 @@ export function NotificationCenter() {
 
           <CardContent className="p-0">
             {/* Tabs de Filtro */}
-            <Tabs value={filtroTab} onValueChange={(value: any) => setFiltroTab(value)}>
+            <Tabs value={filtroTab} onValueChange={(value) => setFiltroTab(value)}>
               <TabsList className="tabs-list-dark w-full rounded-none">
                 <TabsTrigger value="todas" className="tabs-trigger-dark">
                   Todas ({notificacoes.length})
@@ -286,7 +286,7 @@ export function NotificationCenter() {
                       </p>
                     </div>
                   ) : (
-                    notificacoesFiltradas.map((notificacao: any) => (
+                    notificacoesFiltradas.map((notificacao) => (
                       <Card key={notificacao.id} className="card-dark p-3 space-y-2">
                         {/* Header da Notifica·ß·£o */}
                         <div className="flex items-start justify-between">
@@ -344,7 +344,7 @@ export function NotificationCenter() {
                         {/* A·ß·µes da Notifica·ß·£o */}
                         {notificacao.acoes && Array.isArray(notificacao.acoes) && notificacao.acoes.length > 0 && (
                           <div className="flex flex-wrap gap-1 pt-2">
-                            {notificacao.acoes.map((acao: any, index: any) => (
+                            {notificacao.acoes.map((acao, index) => (
                               <Button
                                 key={index}
                                 variant="outline"
@@ -408,7 +408,7 @@ export function NotificationCenter() {
                     </span>
                     <select
                       value={configuracoes.refreshInterval}
-                      onChange={(e: any) => handleChangeInterval(parseInt(e.target.value))}
+                      onChange={(e) => handleChangeInterval(parseInt(e.target.value))}
                       className="input-dark text-xs h-6 px-2 py-0"
                     >
                       <option value={15000}>15s</option>

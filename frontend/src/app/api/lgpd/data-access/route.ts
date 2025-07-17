@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Compilar todos os dados do usuá¡rio de diferentes tabelas
-    const userData: any = {
+    const userData = {
       metadata: {
         requestedAt: new Date(),
         userId: user.id,
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
     // 5. Dados de negá³cio especá­ficos (se aplicá¡vel)
     const { data: bars } = await supabase
       .from('bars')
-      .select('id, name: any, role')
+      .select('id, name, role')
       .contains('members', [{ user_id: user.id }])
 
     const { data: checklists } = await supabase

@@ -44,11 +44,11 @@ export async function GET(request: NextRequest) {
 
     // Organizar por categoria
     const metasOrganizadas = {
-      financeiro: metas?.filter((m: any) => m.categoria === 'financeiro') || [],
-      clientes: metas?.filter((m: any) => m.categoria === 'clientes') || [],
-      avaliacoes: metas?.filter((m: any) => m.categoria === 'avaliacoes') || [],
-      cockpit_produtos: metas?.filter((m: any) => m.categoria === 'cockpit_produtos') || [],
-      marketing: metas?.filter((m: any) => m.categoria === 'marketing') || [],
+      financeiro: metas?.filter((m) => m.categoria === 'financeiro') || [],
+      clientes: metas?.filter((m) => m.categoria === 'clientes') || [],
+      avaliacoes: metas?.filter((m) => m.categoria === 'avaliacoes') || [],
+      cockpit_produtos: metas?.filter((m) => m.categoria === 'cockpit_produtos') || [],
+      marketing: metas?.filter((m) => m.categoria === 'marketing') || [],
     };
 
     return NextResponse.json({

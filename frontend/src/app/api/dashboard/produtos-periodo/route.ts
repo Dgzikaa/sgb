@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 
     if (!data_inicio || !data_fim || !bar_id) {
       return NextResponse.json(
-        { success: false, error: 'Pará¢metros obrigatá³rios: data_inicio, data_fim: any, bar_id' },
+        { success: false, error: 'Pará¢metros obrigatá³rios: data_inicio, data_fim, bar_id' },
         { status: 400 }
       )
     }
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
       console.log('ðŸ” Buscando produtos ContaHub...')
       const { data: contahubData, error: contahubError } = await supabase
         .from('analitico')
-        .select('vd_dtgerencial, prd_desc: any, qtd, valorfinal')
+        .select('vd_dtgerencial, prd_desc, qtd, valorfinal')
         .eq('bar_id', parseInt(bar_id))
         .gte('vd_dtgerencial', data_inicio)
         .lte('vd_dtgerencial', data_fim)
@@ -72,12 +72,12 @@ export async function GET(request: NextRequest) {
         console.log(`ðŸ“Š Produtos ContaHub encontrados: ${contahubData.length}`)
         
         // Agrupar produtos ContaHub por dia
-        contahubData.forEach((item: any) => {
+        contahubData.forEach((item) => {
           const dia = item.vd_dtgerencial
           if (produtosPorDia[dia]) {
             // Verificar se o produto já¡ existe para este dia
             const produtoExistente = produtosPorDia[dia].contahub.find(
-              (p: any) => p.produto === item.prd_desc
+              (p) => p.produto === item.prd_desc
             )
             
             if (produtoExistente) {
@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
       console.log('ðŸ” Buscando produtos Yuzer...')
       const { data: yuzerData, error: yuzerError } = await supabase
         .from('yuzer_analitico')
-        .select('dt_gerencial, produto: any, quantidade, valor_unitario: any, valor_total')
+        .select('dt_gerencial, produto, quantidade, valor_unitario, valor_total')
         .eq('bar_id', parseInt(bar_id))
         .gte('dt_gerencial', data_inicio)
         .lte('dt_gerencial', data_fim)
@@ -111,12 +111,12 @@ export async function GET(request: NextRequest) {
         console.log(`ðŸ“Š Produtos Yuzer encontrados: ${yuzerData.length}`)
         
         // Agrupar produtos Yuzer por dia
-        yuzerData.forEach((item: any) => {
+        yuzerData.forEach((item) => {
           const dia = item.dt_gerencial
           if (produtosPorDia[dia]) {
             // Verificar se o produto já¡ existe para este dia
             const produtoExistente = produtosPorDia[dia].yuzer.find(
-              (p: any) => p.produto === item.produto
+              (p) => p.produto === item.produto
             )
             
             if (produtoExistente) {
@@ -135,20 +135,20 @@ export async function GET(request: NextRequest) {
 
       // Ordenar produtos por quantidade em cada dia
       Object.keys(produtosPorDia).forEach(dia => {
-        produtosPorDia[dia].contahub.sort((a: any, b: any) => b.quantidade - a.quantidade)
-        produtosPorDia[dia].yuzer.sort((a: any, b: any) => b.quantidade - a.quantidade)
+        produtosPorDia[dia].contahub.sort((a, b) => b.quantidade - a.quantidade)
+        produtosPorDia[dia].yuzer.sort((a, b) => b.quantidade - a.quantidade)
       })
 
       // Log resumo
       const totalDias = Object.keys(produtosPorDia).length
-      const diasComDados = Object.keys(produtosPorDia).filter((dia: any) => 
+      const diasComDados = Object.keys(produtosPorDia).filter((dia) => 
         produtosPorDia[dia].contahub.length > 0 || produtosPorDia[dia].yuzer.length > 0
       ).length
 
       console.log('ðŸ“Š Resumo dos produtos por perá­odo:', {
         total_dias: totalDias,
         dias_com_dados: diasComDados,
-        primeiro_dia_com_dados: diasComDados > 0 ? Object.keys(produtosPorDia).find((dia: any) => 
+        primeiro_dia_com_dados: diasComDados > 0 ? Object.keys(produtosPorDia).find((dia) => 
           produtosPorDia[dia].contahub.length > 0 || produtosPorDia[dia].yuzer.length > 0
         ) : null
       })

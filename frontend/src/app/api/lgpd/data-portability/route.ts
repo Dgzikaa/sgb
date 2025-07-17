@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Buscar todos os dados do usuá¡rio para exportaá§á£o
-    const exportData: any = {
+    const exportData = {
       metadata: {
         exportedAt: new Date().toISOString(),
         userId: user.id,
@@ -134,11 +134,11 @@ export async function GET(request: NextRequest) {
       })
 
     // Criar o arquivo JSON formatado
-    const jsonData = JSON.stringify(exportData: any, null, 2)
+    const jsonData = JSON.stringify(exportData, null, 2)
     const fileName = `dados-pessoais-${user.id}-${new Date().toISOString().split('T')[0]}.json`
 
     // Retornar como blob/download
-    return new NextResponse(jsonData: any, {
+    return new NextResponse(jsonData, {
       status: 200,
       headers: {
         'Content-Type': 'application/json',

@@ -1,16 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock: any, BarChart3 } from 'lucide-react';
+import { Calendar, Clock, BarChart3 } from 'lucide-react';
 import { useBar } from '@/contexts/BarContext';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 
 // Componentes otimizados será£o criados separadamente
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function RelatorioProdutos() {
   const { selectedBar } = useBar();
@@ -38,7 +38,7 @@ export default function RelatorioProdutos() {
     return () => setPageTitle('');
   }, [setPageTitle]);
 
-  const analisarTempos = async (filtros: any) => {
+  const analisarTempos = async (filtros) => {
     if (!dataEspecifica) {
       alert('Por favor, selecione uma data para aná¡lise');
       return;
@@ -54,13 +54,13 @@ export default function RelatorioProdutos() {
         bar_id: (selectedBar?.id || 1).toString()
       });
 
-      const [produtosRes, historicoRes: any, estatisticasRes] = await Promise.all([
+      const [produtosRes, historicoRes, estatisticasRes] = await Promise.all([
         fetch(`/api/relatorios/produtos/tempos?${params}`),
         fetch(`/api/relatorios/produtos/historico?${params}`),
         fetch(`/api/relatorios/produtos/estatisticas?${params}`)
       ]);
 
-      const [produtosData, historicoData: any, estatisticasData] = await Promise.all([
+      const [produtosData, historicoData, estatisticasData] = await Promise.all([
         produtosRes.json(),
         historicoRes.json(),
         estatisticasRes.json()
@@ -141,7 +141,7 @@ export default function RelatorioProdutos() {
                   id="data"
                   type="date"
                   value={dataEspecifica}
-                  onChange={(e: any) => setDataEspecifica(e.target.value)}
+                  onChange={(e) => setDataEspecifica(e.target.value)}
                 />
               </div>
               <div className="flex items-end">

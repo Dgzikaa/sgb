@@ -54,7 +54,7 @@ export class OpenAIClient {
     }
   }
 
-  async analyzeData(data: any, question: string, context: any): Promise<string> {
+  async analyzeData(data, question: string, context): Promise<string> {
     const request: ChatGPTRequest = {
       message: question,
       context: {
@@ -68,7 +68,7 @@ export class OpenAIClient {
   }
 
   // Sanitizar dados sensá­veis antes de enviar para OpenAI
-  private sanitizeData(data: any): any {
+  private sanitizeData(data): any {
     if (!data) return data
 
     // Criar cá³pia dos dados
@@ -77,13 +77,13 @@ export class OpenAIClient {
     // Remover/anonimizar campos sensá­veis
     const sensitiveFields = ['cpf', 'senha', 'token', 'password', 'secret']
     
-    const sanitizeObject = (obj: any): any => {
+    const sanitizeObject = (obj): any => {
       if (Array.isArray(obj)) {
-        return obj.map((item: any) => sanitizeObject(item))
+        return obj.map((item) => sanitizeObject(item))
       }
       
       if (obj && typeof obj === 'object') {
-        const result: any = {}
+        const result = {}
         for (const [key, value] of Object.entries(obj)) {
           // Remover campos sensá­veis
           if (sensitiveFields.some(field => key.toLowerCase().includes(field))) {

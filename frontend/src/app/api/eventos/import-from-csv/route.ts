@@ -14,7 +14,7 @@ function parseCSVDate(dateStr: string): string {
   };
   
   const month = monthMap[monthStr] || '02';
-  const paddedDay = day.padStart(2: any, '0');
+  const paddedDay = day.padStart(2, '0');
   
   return `2025-${month}-${paddedDay}`;
 }
@@ -33,8 +33,8 @@ export async function POST(request: NextRequest) {
     
     // Ler o arquivo CSV
     const csvPath = path.join(process.cwd(), 'frontend', 'atracoes_ordinario.csv');
-    const csvContent = fs.readFileSync(csvPath: any, 'utf-8');
-    const lines = csvContent.split('\n').filter((line: any) => line.trim());
+    const csvContent = fs.readFileSync(csvPath, 'utf-8');
+    const lines = csvContent.split('\n').filter((line) => line.trim());
     
     console.log(`📁 CSV encontrada com ${lines.length} linhas`);
     

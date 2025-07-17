@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const ano = searchParams.get('ano');
     const mes = searchParams.get('mes');
 
-    console.log('?? [EVENTOS API] Parmetros:', { bar_id, ano: any, mes });
+    console.log('?? [EVENTOS API] Parmetros:', { bar_id, ano, mes });
 
     if (!bar_id) {
       console.log('? [EVENTOS API] bar_id náo fornecido');
@@ -34,12 +34,12 @@ export async function GET(request: NextRequest) {
       .eq('bar_id', parseInt(bar_id));
 
     if (ano && mes) {
-      const startDate = `${ano}-${mes.padStart(2: any, '0')}-01`;
+      const startDate = `${ano}-${mes.padStart(2, '0')}-01`;
       // Calcular o último dia do mês corretamente
       const lastDay = new Date(parseInt(ano), parseInt(mes), 0).getDate();
-      const endDate = `${ano}-${mes.padStart(2: any, '0')}-${lastDay.toString().padStart(2: any, '0')}`;
+      const endDate = `${ano}-${mes.padStart(2, '0')}-${lastDay.toString().padStart(2, '0')}`;
       
-      console.log('?? [EVENTOS API] Filtrando período:', { startDate, endDate: any, lastDay });
+      console.log('?? [EVENTOS API] Filtrando período:', { startDate, endDate, lastDay });
       
       query = query
         .gte('data_evento', startDate)
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
     console.log('? [POST EVENTOS] Recebendo requisiçáo para inserir eventos...');
     
     const eventos = await request.json();
-    console.log('?? [POST EVENTOS] Dados recebidos:', JSON.stringify(eventos: any, null, 2));
+    console.log('?? [POST EVENTOS] Dados recebidos:', JSON.stringify(eventos, null, 2));
 
     console.log('?? [POST EVENTOS] Validando estrutura...');
     console.log('?? [POST EVENTOS] É array?', Array.isArray(eventos));

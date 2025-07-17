@@ -1,17 +1,17 @@
 'use client'
 
-import { useState, useEffect: any, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useBar } from '@/contexts/BarContext'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent: any, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 interface Insumo {
   id: number
@@ -119,14 +119,14 @@ export default function TerminalProducao() {
 
   // Filtrar receitas por tipo e busca
   useEffect(() => {
-    let receitasFiltradasPorTipo = receitas.filter((receita: any) => 
+    let receitasFiltradasPorTipo = receitas.filter((receita) => 
       receita.tipo_local === tipoLocalSelecionado
     )
 
     if (!buscaReceita.trim()) {
       setReceitasFiltradas(receitasFiltradasPorTipo)
     } else {
-      const filtradas = receitasFiltradasPorTipo.filter((receita: any) => 
+      const filtradas = receitasFiltradasPorTipo.filter((receita) => 
         receita.receita_nome.toLowerCase().includes(buscaReceita.toLowerCase()) ||
         receita.receita_codigo.toLowerCase().includes(buscaReceita.toLowerCase())
       )
@@ -134,15 +134,15 @@ export default function TerminalProducao() {
     }
     
     // Ordenar por nome da receita em ordem alfabá©tica
-    setReceitasFiltradas(prev => [...prev].sort((a: any, b: any) => 
+    setReceitasFiltradas(prev => [...prev].sort((a, b) => 
       a.receita_nome.localeCompare(b.receita_nome)
     ))
-  }, [buscaReceita, receitas: any, tipoLocalSelecionado])
+  }, [buscaReceita, receitas, tipoLocalSelecionado])
 
   // Timer para todas as produá§áµes ativas
   useEffect(() => {
     const interval = setInterval(() => {
-      setProducoesAtivas(prev => prev.map((producao: any) => 
+      setProducoesAtivas(prev => prev.map((producao) => 
         producao.timerAtivo 
           ? { ...producao, segundosDecorridos: producao.segundosDecorridos + 1 }
           : producao
@@ -155,11 +155,11 @@ export default function TerminalProducao() {
   const formatarTempo = (segundos: number) => {
     const mins = Math.floor(segundos / 60)
     const secs = segundos % 60
-    return `${mins.toString().padStart(2: any, '0')}:${secs.toString().padStart(2: any, '0')}`
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
   const alternarInsumosExpandidos = (id: string) => {
-    setProducoesAtivas(prev => prev.map((producao: any) => 
+    setProducoesAtivas(prev => prev.map((producao) => 
       producao.id === id 
         ? { ...producao, insumosExpandidos: !producao.insumosExpandidos }
         : producao
@@ -167,7 +167,7 @@ export default function TerminalProducao() {
   }
 
   const alternarControlesExpandidos = (id: string) => {
-    setProducoesAtivas(prev => prev.map((producao: any) => 
+    setProducoesAtivas(prev => prev.map((producao) => 
       producao.id === id 
         ? { ...producao, controlesExpandidos: !producao.controlesExpandidos }
         : producao
@@ -194,11 +194,11 @@ export default function TerminalProducao() {
 
     // Processar insumos e identificar insumo chefe
     if (receita.insumos && receita.insumos.length > 0) {
-      const insumoChefe = receita.insumos.find((i: any) => i.is_chefe)
+      const insumoChefe = receita.insumos.find((i) => i.is_chefe)
       novaProducao.rendimentoReceita = receita.rendimento_esperado || 0
       
       // Inicializar insumos com quantidades corretas
-      const insumosCalculados = receita.insumos.map((insumo: any) => ({
+      const insumosCalculados = receita.insumos.map((insumo) => ({
         id: insumo.id,
         codigo: insumo.codigo,
         nome: insumo.nome,
@@ -228,37 +228,37 @@ export default function TerminalProducao() {
   }
 
   const atualizarProducao = (id: string, updates: Partial<ProducaoAtiva>) => {
-    setProducoesAtivas(prev => prev.map((producao: any) => 
+    setProducoesAtivas(prev => prev.map((producao) => 
       producao.id === id ? { ...producao, ...updates } : producao
     ))
   }
 
   const iniciarTimer = (id: string) => {
-    const producao = producoesAtivas.find((p: any) => p.id === id)
+    const producao = producoesAtivas.find((p) => p.id === id)
     if (!producao || !producao.pesoBruto || parseFloat(producao.pesoBruto) <= 0) {
       alert('š ï¸ Preencha o peso bruto antes de iniciar a produá§á£o!')
       return
     }
     
-    atualizarProducao(id: any, { 
+    atualizarProducao(id, { 
       timerAtivo: true
     })
   }
 
   const resetarTimer = (id: string) => {
-    atualizarProducao(id: any, { timerAtivo: false, segundosDecorridos: 0 })
+    atualizarProducao(id, { timerAtivo: false, segundosDecorridos: 0 })
   }
 
   const removerProducao = (id: string) => {
-    setProducoesAtivas(prev => prev.filter((p: any) => p.id !== id))
+    setProducoesAtivas(prev => prev.filter((p) => p.id !== id))
     if (producaoAtivaSelecionada === id) {
-      const restantes = producoesAtivas.filter((p: any) => p.id !== id)
+      const restantes = producoesAtivas.filter((p) => p.id !== id)
       setProducaoAtivaSelecionada(restantes.length > 0 ? restantes[0].id : null)
     }
   }
 
   const salvarProducao = async (id: string) => {
-    const producao = producoesAtivas.find((p: any) => p.id === id)
+    const producao = producoesAtivas.find((p) => p.id === id)
     if (!producao) return
 
     if (!producao.rendimentoProduzido.trim()) {
@@ -277,7 +277,7 @@ export default function TerminalProducao() {
     const rendimentoNum = parseFloat(producao.rendimentoProduzido) || 0
 
     // Preparar dados dos insumos para aná¡lise de aderáªncia
-    const dadosInsumos = producao.insumos.map((insumo: any) => ({
+    const dadosInsumos = producao.insumos.map((insumo) => ({
       id: insumo.id,
       codigo: insumo.codigo,
       nome: insumo.nome,
@@ -370,18 +370,18 @@ export default function TerminalProducao() {
   const atualizarQuantidadeReal = (producaoId: string, insumoId: number, quantidade: string) => {
     const quantidadeNum = parseFloat(quantidade) || 0
     
-    setProducoesAtivas(prev => prev.map((producao: any) => {
+    setProducoesAtivas(prev => prev.map((producao) => {
       if (producao.id !== producaoId) return producao
       
       // Verificar se á© insumo chefe
-      const insumo = producao.insumos.find((i: any) => i.id === insumoId)
+      const insumo = producao.insumos.find((i) => i.id === insumoId)
       if (!insumo) return producao
       
       if (insumo.is_chefe) {
         // Se editou o insumo chefe diretamente, atualizar peso lá­quido tambá©m
         const proporcao = quantidadeNum / insumo.quantidade_necessaria
         
-        const insumosAtualizados = producao.insumos.map((ins: any) => 
+        const insumosAtualizados = producao.insumos.map((ins) => 
           ins.is_chefe 
             ? { ...ins, quantidade_real: quantidadeNum }
             : { ...ins, quantidade_real: Math.round(ins.quantidade_necessaria * proporcao * 100) / 100 }
@@ -394,7 +394,7 @@ export default function TerminalProducao() {
         }
       } else {
         // Se editou insumo ná£o-chefe, apenas atualizar aquele insumo
-        const insumosAtualizados = producao.insumos.map((ins: any) => 
+        const insumosAtualizados = producao.insumos.map((ins) => 
           ins.id === insumoId 
             ? { ...ins, quantidade_real: quantidadeNum }
             : ins
@@ -409,7 +409,7 @@ export default function TerminalProducao() {
   const atualizarPesoLiquido = (id: string, novoPeso: string) => {
     const pesoNum = parseFloat(novoPeso) || 0
     
-    setProducoesAtivas(prev => prev.map((producao: any) => {
+    setProducoesAtivas(prev => prev.map((producao) => {
       if (producao.id !== id) return producao
       
       const insumoChefe = producao.insumoChefe
@@ -422,7 +422,7 @@ export default function TerminalProducao() {
       const proporcao = pesoNum / insumoChefe.quantidade_necessaria
       
       // Recalcular quantidades calculadas baseado na nova proporá§á£o
-      const insumosAtualizados = producao.insumos.map((insumo: any) => ({
+      const insumosAtualizados = producao.insumos.map((insumo) => ({
         ...insumo,
         quantidade_calculada: insumo.is_chefe 
           ? pesoNum // Insumo chefe = peso lá­quido
@@ -450,10 +450,10 @@ export default function TerminalProducao() {
   const atualizarQuantidadeRealManual = (producaoId: string, insumoId: number, quantidade: string) => {
     const quantidadeNum = parseFloat(quantidade) || 0
     
-    setProducoesAtivas(prev => prev.map((producao: any) => {
+    setProducoesAtivas(prev => prev.map((producao) => {
       if (producao.id !== producaoId) return producao
       
-      const insumosAtualizados = producao.insumos.map((ins: any) => 
+      const insumosAtualizados = producao.insumos.map((ins) => 
         ins.id === insumoId 
           ? { ...ins, quantidade_real: quantidadeNum }
           : ins
@@ -465,10 +465,10 @@ export default function TerminalProducao() {
 
   // NOVA FUNá‡áƒO: Atualizar quantidade planejada de insumo adicionado manualmente
   const atualizarQuantidadePlanejada = (producaoId: string, insumoId: number, quantidade: number) => {
-    setProducoesAtivas(prev => prev.map((producao: any) => {
+    setProducoesAtivas(prev => prev.map((producao) => {
       if (producao.id !== producaoId) return producao
       
-      const insumosAtualizados = producao.insumos.map((ins: any) => 
+      const insumosAtualizados = producao.insumos.map((ins) => 
         ins.id === insumoId 
           ? { 
               ...ins, 
@@ -484,7 +484,7 @@ export default function TerminalProducao() {
 
   // Funá§á£o para recalcular todas as quantidades quando peso lá­quido muda
   const recalcularTodasQuantidades = (producaoId: string) => {
-    const producao = producoesAtivas.find((p: any) => p.id === producaoId)
+    const producao = producoesAtivas.find((p) => p.id === producaoId)
     if (!producao) return
 
     const pesoLiquido = parseFloat(producao.pesoLiquido) || 0
@@ -493,10 +493,10 @@ export default function TerminalProducao() {
     if (insumoChefe && insumoChefe.quantidade_necessaria && pesoLiquido > 0) {
       const proporcao = pesoLiquido / insumoChefe.quantidade_necessaria
       
-      setProducoesAtivas(prev => prev.map((p: any) => {
+      setProducoesAtivas(prev => prev.map((p) => {
         if (p.id !== producaoId) return p
         
-        const insumosRecalculados = p.insumos.map((insumo: any) => ({
+        const insumosRecalculados = p.insumos.map((insumo) => ({
           ...insumo,
           quantidade_calculada: insumo.is_chefe 
             ? pesoLiquido
@@ -510,7 +510,7 @@ export default function TerminalProducao() {
 
   // Funá§á£o para adicionar insumo á  produá§á£o
   const adicionarInsumoProducao = (producaoId: string, insumo: Insumo) => {
-    setProducoesAtivas(prev => prev.map((producao: any) => {
+    setProducoesAtivas(prev => prev.map((producao) => {
       if (producao.id !== producaoId) return producao
       
       // Verificar se insumo já¡ existe
@@ -547,11 +547,11 @@ export default function TerminalProducao() {
 
   // Funá§á£o para remover insumo da produá§á£o
   const removerInsumoProducao = (producaoId: string, insumoId: number) => {
-    setProducoesAtivas(prev => prev.map((producao: any) => {
+    setProducoesAtivas(prev => prev.map((producao) => {
       if (producao.id !== producaoId) return producao
       
       // Ná£o permitir remover insumo chefe
-      const insumo = producao.insumos.find((i: any) => i.id === insumoId)
+      const insumo = producao.insumos.find((i) => i.id === insumoId)
       if (insumo?.is_chefe) {
         alert('š ï¸ Ná£o á© possá­vel remover o insumo chefe!')
         return producao
@@ -559,7 +559,7 @@ export default function TerminalProducao() {
       
       return {
         ...producao,
-        insumos: producao.insumos.filter((i: any) => i.id !== insumoId)
+        insumos: producao.insumos.filter((i) => i.id !== insumoId)
       }
     }))
   }
@@ -567,7 +567,7 @@ export default function TerminalProducao() {
   // Funá§á£o para filtrar insumos disponá­veis
   const filtrarInsumosDisponiveis = (producaoId: string) => {
     const busca = buscaInsumo[producaoId] || ''
-    const producao = producoesAtivas.find((p: any) => p.id === producaoId)
+    const producao = producoesAtivas.find((p) => p.id === producaoId)
     
     if (!producao) {
       console.log('Œ Produá§á£o ná£o encontrada:', producaoId)
@@ -575,24 +575,24 @@ export default function TerminalProducao() {
     }
     
     // Filtrar insumos que ainda ná£o está£o na produá§á£o
-    const insumosNaoUsados = insumosDisponiveis.filter((insumo: any) => 
+    const insumosNaoUsados = insumosDisponiveis.filter((insumo) => 
       !producao.insumos.some(i => i.id === insumo.id)
     )
     
     console.log(`ðŸ” Busca: "${busca}" | Insumos disponá­veis: ${insumosDisponiveis.length} | Ná£o usados: ${insumosNaoUsados.length}`)
     
     if (!busca) {
-      const resultado = insumosNaoUsados.slice(0: any, 10)
-      console.log('ðŸ“‹ Retornando primeiros 10:', resultado.map((i: any) => i.nome))
+      const resultado = insumosNaoUsados.slice(0, 10)
+      console.log('ðŸ“‹ Retornando primeiros 10:', resultado.map((i) => i.nome))
       return resultado
     }
     
-    const filtrados = insumosNaoUsados.filter((insumo: any) => 
+    const filtrados = insumosNaoUsados.filter((insumo) => 
       insumo.nome.toLowerCase().includes(busca.toLowerCase()) ||
       insumo.codigo.toLowerCase().includes(busca.toLowerCase())
     )
     
-    console.log(`ðŸ” Busca "${busca}" retornou ${filtrados.length} insumos:`, filtrados.map((i: any) => i.nome))
+    console.log(`ðŸ” Busca "${busca}" retornou ${filtrados.length} insumos:`, filtrados.map((i) => i.nome))
     return filtrados
   }
 
@@ -621,9 +621,9 @@ export default function TerminalProducao() {
     )
   }
 
-  const producaoAtual = producoesAtivas.find((p: any) => p.id === producaoAtivaSelecionada)
-  const receitasBar = receitas.filter((r: any) => r.tipo_local === 'bar').length
-  const receitasCozinha = receitas.filter((r: any) => r.tipo_local === 'cozinha').length
+  const producaoAtual = producoesAtivas.find((p) => p.id === producaoAtivaSelecionada)
+  const receitasBar = receitas.filter((r) => r.tipo_local === 'bar').length
+  const receitasCozinha = receitas.filter((r) => r.tipo_local === 'cozinha').length
 
   return (
     <ProtectedRoute requiredModule="terminal_producao">
@@ -666,7 +666,7 @@ export default function TerminalProducao() {
                     <Input
                       type="text"
                       value={buscaReceita}
-                      onChange={(e: any) => {
+                      onChange={(e) => {
                         setBuscaReceita(e.target.value)
                         setMostrarDropdown(true)
                       }}
@@ -692,7 +692,7 @@ export default function TerminalProducao() {
                 {mostrarDropdown && (
                   <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg max-h-60 overflow-y-auto">
                     {receitasFiltradas.length > 0 ? (
-                      receitasFiltradas.map((receita: any) => (
+                      receitasFiltradas.map((receita) => (
                         <div
                           key={receita.receita_codigo}
                           className="p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-600 last:border-b-0 transition-colors touch-manipulation"
@@ -723,7 +723,7 @@ export default function TerminalProducao() {
                 <CardContent>
                   <Tabs value={producaoAtivaSelecionada || ''} onValueChange={setProducaoAtivaSelecionada}>
                     <TabsList className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-2 h-auto bg-gray-100 dark:bg-gray-700">
-                      {producoesAtivas.map((producao: any) => (
+                      {producoesAtivas.map((producao) => (
                         <TabsTrigger 
                           key={producao.id} 
                           value={producao.id}
@@ -739,7 +739,7 @@ export default function TerminalProducao() {
                       ))}
                     </TabsList>
 
-                  {producoesAtivas.map((producao: any) => (
+                  {producoesAtivas.map((producao) => (
                     <TabsContent key={producao.id} value={producao.id} className="mt-6">
                         <div className="flex flex-col space-y-6">
                           
@@ -850,7 +850,7 @@ export default function TerminalProducao() {
                                       type="number"
                                       inputMode="decimal"
                                       value={producao.pesoBruto}
-                                      onChange={(e: any) => {
+                                      onChange={(e) => {
                                         const value = e.target.value.replace(/[^0-9.]/g, '')
                                         atualizarProducao(producao.id, { pesoBruto: value })
                                       }}
@@ -872,7 +872,7 @@ export default function TerminalProducao() {
                                         type="number"
                                         inputMode="decimal"
                                         value={producao.pesoLiquido}
-                                        onChange={(e: any) => {
+                                        onChange={(e) => {
                                           const value = e.target.value.replace(/[^0-9.]/g, '')
                                           atualizarPesoLiquido(producao.id, value)
                                         }}
@@ -901,7 +901,7 @@ export default function TerminalProducao() {
                                     inputMode="numeric"
                                     pattern="[0-9]*"
                                     value={producao.rendimentoProduzido}
-                                    onChange={(e: any) => {
+                                    onChange={(e) => {
                                       const value = e.target.value.replace(/[^0-9.]/g, '')
                                       atualizarProducao(producao.id, { rendimentoProduzido: value })
                                     }}
@@ -941,7 +941,7 @@ export default function TerminalProducao() {
                                   <Textarea
                                     id={`obs-${producao.id}`}
                                     value={producao.observacoes}
-                                    onChange={(e: any) => atualizarProducao(producao.id, { observacoes: e.target.value })}
+                                    onChange={(e) => atualizarProducao(producao.id, { observacoes: e.target.value })}
                                     placeholder="Anote qualquer observaá§á£o sobre a produá§á£o..."
                                     className="text-black font-medium resize-none mt-1"
                                     rows={2}
@@ -974,7 +974,7 @@ export default function TerminalProducao() {
 
                             {producao.insumosExpandidos && (
                               <div className="space-y-3">
-                                {producao.insumos.map((insumo: any) => (
+                                {producao.insumos.map((insumo) => (
                                   <div
                                     key={insumo.id}
                                     className={`p-3 rounded border-2 ${insumo.is_chefe ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'}`}
@@ -1026,7 +1026,7 @@ export default function TerminalProducao() {
                                           inputMode="numeric"
                                           pattern="[0-9]*"
                                           value={insumo.quantidade_real}
-                                          onChange={(e: any) => {
+                                          onChange={(e) => {
                                             const value = e.target.value.replace(/[^0-9.]/g, '')
                                             atualizarQuantidadeRealManual(producao.id, insumo.id, value)
                                           }}
@@ -1093,7 +1093,7 @@ export default function TerminalProducao() {
                                         <Input
                                           type="text"
                                           value={buscaInsumo[producao.id] || ''}
-                                          onChange={(e: any) => {
+                                          onChange={(e) => {
                                             setBuscaInsumo(prev => ({ ...prev, [producao.id]: e.target.value }))
                                             setMostrarDropdownInsumo(prev => ({ ...prev, [producao.id]: true }))
                                           }}
@@ -1116,7 +1116,7 @@ export default function TerminalProducao() {
                                                     ðŸ’¡ Digite para filtrar entre {filtrarInsumosDisponiveis(producao.id).length} insumos
                                                   </div>
                                                 )}
-                                                {filtrarInsumosDisponiveis(producao.id).map((insumo: any) => (
+                                                {filtrarInsumosDisponiveis(producao.id).map((insumo) => (
                                                   <div
                                                     key={insumo.id}
                                                     className="p-2 cursor-pointer hover:bg-orange-50 border-b border-orange-100 transition-colors"

@@ -49,7 +49,7 @@ interface CacheStats {
 
 export default function CachePage() {
   const { setPageTitle } = usePageTitle()
-  const { metrics, isLoading, refetch, clearCache, warmupCache } = useCacheMetrics()
+  const { metrics, isLoading: any, refetch, clearCache: any, warmupCache } = useCacheMetrics()
   const [stats, setStats] = useState<CacheStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [clearing, setClearing] = useState(false)
@@ -357,7 +357,7 @@ export default function CachePage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {stats.recommendations.map((rec, index) => (
+                      {stats.recommendations.map((rec: any, index: any) => (
                         <div key={index} className="flex items-start gap-2">
                           <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
                           <span className="text-sm text-gray-700 dark:text-gray-300">{rec}</span>

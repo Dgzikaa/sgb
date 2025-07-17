@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     // Verificar se o checklist de destino existe e pertence ao usuá¡rio
     const { data: targetChecklist, error: checklistError } = await supabase
       .from('checklists')
-      .select('id, titulo: any, user_id')
+      .select('id, titulo, user_id')
       .eq('id', targetChecklistId)
       .eq('user_id', user.id)
       .single()
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     let nextOrder = lastItem?.ordem ? lastItem.ordem + 1 : 1
 
     // Preparar itens para inserá§á£o
-    const itemsToInsert = items.map((item: any) => ({
+    const itemsToInsert = items.map((item) => ({
       checklist_id: targetChecklistId,
       titulo: item.titulo,
       tipo: item.tipo,

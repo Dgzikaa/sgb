@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     // Verificar se existe registro facial ativo
     const { data: faceRecord, error: faceError } = await supabase
       .from('face_descriptors')
-      .select('id, created_at: any, updated_at')
+      .select('id, created_at, updated_at')
       .eq('user_id', usuario.user_id)
       .eq('bar_id', barId)
       .eq('active', true)
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
       } : null
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('🔥 Erro fatal na API de status facial:', error)
     
     return NextResponse.json(

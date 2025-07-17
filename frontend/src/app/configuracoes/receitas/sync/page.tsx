@@ -29,7 +29,7 @@ export default function SyncReceitasInsumosPage() {
       const data = await res.json()
       setLog(data)
       if (!data.success) setError(data.error || 'Erro desconhecido')
-    } catch (e: any) {
+    } catch (e) {
       setError(e.message || String(e))
     } finally {
       setLoading(false)
@@ -83,7 +83,7 @@ export default function SyncReceitasInsumosPage() {
               <span className="block mb-1">{log.message}</span>
               <details className="mt-2 text-xs text-gray-600 dark:text-gray-400">
                 <summary>Ver detalhes do log</summary>
-                <pre className="overflow-x-auto whitespace-pre-wrap max-h-60">{JSON.stringify(log.logs, null: any, 2)}</pre>
+                <pre className="overflow-x-auto whitespace-pre-wrap max-h-60">{JSON.stringify(log.logs, null, 2)}</pre>
               </details>
             </div>
           )}

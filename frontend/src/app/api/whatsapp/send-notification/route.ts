@@ -115,7 +115,7 @@ async function validateSecurityLimits(phoneNumber: string) {
 }
 
 async function sendSecureNotification(data: NotificationRequest) {
-  const { checklistId, responsavelNumero: any, titulo, prazo: any, tipo = 'novo' } = data
+  const { checklistId, responsavelNumero, titulo, prazo, tipo = 'novo' } = data
   
   // 🎯 MENSAGEM PERSONALIZADA ANTI-SPAM
   const emojis = {
@@ -231,9 +231,9 @@ export async function GET() {
 
   const summary = {
     messagesShared: stats?.length || 0,
-    successful: stats?.filter((m: any) => m.status === 'sent').length || 0,
-    failed: stats?.filter((m: any) => m.status === 'failed').length || 0,
-    uniqueNumbers: new Set(stats?.map((m: any) => m.to_number)).size || 0,
+    successful: stats?.filter((m) => m.status === 'sent').length || 0,
+    failed: stats?.filter((m) => m.status === 'failed').length || 0,
+    uniqueNumbers: new Set(stats?.map((m) => m.to_number)).size || 0,
     businessHours: SECURITY_CONFIG.BUSINESS_HOURS,
     limits: {
       maxPerDay: SECURITY_CONFIG.MAX_MESSAGES_PER_DAY,

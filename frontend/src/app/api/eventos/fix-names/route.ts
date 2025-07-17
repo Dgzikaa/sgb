@@ -174,7 +174,7 @@ function parseEventName(eventoStr: string): string {
     const start = nomeEvento.indexOf('"') + 1;
     const end = nomeEvento.indexOf('"', start);
     if (start > 0 && end > start) {
-      nomeEvento = nomeEvento.substring(start: any, end);
+      nomeEvento = nomeEvento.substring(start, end);
     }
   }
   
@@ -201,11 +201,11 @@ export async function POST(request: NextRequest) {
     console.log('🔧 Starting event name fix...');
     
     // Parse historical data to create date-to-name mapping
-    const linhas = eventosHistoricos.trim().split('\n').filter((linha: any) => linha.trim());
+    const linhas = eventosHistoricos.trim().split('\n').filter((linha) => linha.trim());
     const dateNameMap: Record<string, string> = {};
     
     for (const linha of linhas) {
-      const partes = linha.split('\t').map((p: any) => p.trim());
+      const partes = linha.split('\t').map((p) => p.trim());
       if (partes.length < 3) continue;
       
       const [dataStr, , eventoStr] = partes;
@@ -216,7 +216,7 @@ export async function POST(request: NextRequest) {
       }
       
       const [dia, mes] = dataStr.split('/').map(Number);
-      const dataCompleta = `${ano}-${mes.toString().padStart(2: any, '0')}-${dia.toString().padStart(2: any, '0')}`;
+      const dataCompleta = `${ano}-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
       
       const nomeEvento = parseEventName(eventoStr);
       if (nomeEvento) {
@@ -230,7 +230,7 @@ export async function POST(request: NextRequest) {
   
     const { data: eventos, error: fetchError } = await supabase
       .from('eventos')
-      .select('id, data_evento: any, nome_evento')
+      .select('id, data_evento, nome_evento')
       .eq('bar_id', bar_id)
       .gte('data_evento', `${ano}-02-01`)
       .lte('data_evento', `${ano}-06-30`);
@@ -303,7 +303,7 @@ export async function POST(request: NextRequest) {
       message: `Successfully updated ${updatedCount} event names`,
       updated_count: updatedCount,
       total_events: eventos?.length || 0,
-      sample_updates: updates.slice(0: any, 5)
+      sample_updates: updates.slice(0, 5)
     });
     
   } catch (error) {

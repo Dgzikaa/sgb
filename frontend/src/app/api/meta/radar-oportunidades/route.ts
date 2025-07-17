@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       .limit(30)
 
     // 2. DETECTAR GAPS DE ATIVIDADE
-    const detectarGapsAtividade = (dados: any[]) => {
+    const detectarGapsAtividade = (dados[]) => {
       const agora = new Date()
       const gaps = []
       
@@ -62,15 +62,15 @@ export async function GET(request: NextRequest) {
       }
       
       // Verificar padráµes de horá¡rio
-      const postsRecentes = dados.slice(0: any, 10)
-      const horarios = postsRecentes.map((post: any) => {
+      const postsRecentes = dados.slice(0, 10)
+      const horarios = postsRecentes.map((post) => {
         const hora = new Date(post.updated_at).getHours()
         return hora
       })
       
-      const horariosPopulares = [18, 19: any, 20, 21: any, 22] // Prime time para bares
+      const horariosPopulares = [18, 19, 20, 21, 22] // Prime time para bares
       const horariosUsados = new Set(horarios)
-      const horariosLivres = horariosPopulares.filter((h: any) => !horariosUsados.has(h))
+      const horariosLivres = horariosPopulares.filter((h) => !horariosUsados.has(h))
       
       if (horariosLivres.length > 0) {
         gaps.push({
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
         { nome: 'Bar C', atividade: 'media', ultima_campanha: '2 dias atrá¡s' }
       ]
       
-      const oportunidades: any[] = []
+      const oportunidades[] = []
       
       concorrentes.forEach(concorrente => {
         if (concorrente.atividade === 'baixa') {
@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
       const diaSemana = agora.getDay()
       const hora = agora.getHours()
       
-      const oportunidades: any[] = []
+      const oportunidades[] = []
       
       // Aná¡lise por dia da semana
       if (diaSemana === 5 || diaSemana === 6) { // Sexta ou Sá¡bado
@@ -160,9 +160,9 @@ export async function GET(request: NextRequest) {
     }
 
     // 6. SCORE DE OPORTUNIDADE
-    const calcularScore = (oportunidades: any[]) => {
+    const calcularScore = (oportunidades[]) => {
       const pesos = { alta: 3, media: 2, baixa: 1 }
-      const total = oportunidades.reduce((sum: any, opp: any) => sum + pesos[opp.urgencia as keyof typeof pesos], 0)
+      const total = oportunidades.reduce((sum, opp) => sum + pesos[opp.urgencia as keyof typeof pesos], 0)
       const maximo = oportunidades.length * 3
       
       return maximo > 0 ? Math.round((total / maximo) * 100) : 0
@@ -187,16 +187,16 @@ export async function GET(request: NextRequest) {
 
     // 7. RECOMENDAá‡á•ES PRIORIZADAS
     const recomendacoesPriorizadas = todasOportunidades
-      .sort((a: any, b: any) => {
+      .sort((a, b) => {
         const prioridade = { alta: 3, media: 2, baixa: 1 }
         return prioridade[b.urgencia as keyof typeof prioridade] - prioridade[a.urgencia as keyof typeof prioridade]
       })
-      .slice(0: any, 5)
+      .slice(0, 5)
 
     // 8. ALERTAS CRáTICOS
     const alertasCriticos = todasOportunidades
-      .filter((opp: any) => opp.urgencia === 'alta')
-      .map((opp: any) => ({
+      .filter((opp) => opp.urgencia === 'alta')
+      .map((opp) => ({
         titulo: opp.descricao,
         acao: opp.acao,
         prazo: '24h'
@@ -210,9 +210,9 @@ export async function GET(request: NextRequest) {
         score_oportunidade: score,
         status: score > 70 ? 'excelente' : score > 40 ? 'bom' : 'critico',
         total_oportunidades: todasOportunidades.length,
-        oportunidades_alta: todasOportunidades.filter((o: any) => o.urgencia === 'alta').length,
-        oportunidades_media: todasOportunidades.filter((o: any) => o.urgencia === 'media').length,
-        oportunidades_baixa: todasOportunidades.filter((o: any) => o.urgencia === 'baixa').length
+        oportunidades_alta: todasOportunidades.filter((o) => o.urgencia === 'alta').length,
+        oportunidades_media: todasOportunidades.filter((o) => o.urgencia === 'media').length,
+        oportunidades_baixa: todasOportunidades.filter((o) => o.urgencia === 'baixa').length
       },
       gaps_mercado: {
         atividade_propria: gapsInstagram.concat(gapsFacebook),
@@ -225,15 +225,15 @@ export async function GET(request: NextRequest) {
       proximas_acoes: [
         {
           prazo: 'Agora',
-          acoes: alertasCriticos.map((a: any) => a.acao)
+          acoes: alertasCriticos.map((a) => a.acao)
         },
         {
           prazo: '24h',
-          acoes: todasOportunidades.filter((o: any) => o.urgencia === 'media').map((o: any) => o.acao)
+          acoes: todasOportunidades.filter((o) => o.urgencia === 'media').map((o) => o.acao)
         },
         {
           prazo: 'Esta semana',
-          acoes: todasOportunidades.filter((o: any) => o.urgencia === 'baixa').map((o: any) => o.acao)
+          acoes: todasOportunidades.filter((o) => o.urgencia === 'baixa').map((o) => o.acao)
         }
       ]
     }

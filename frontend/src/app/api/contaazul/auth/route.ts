@@ -176,7 +176,7 @@ async function handleCallback(searchParams: URLSearchParams) {
       try {
         console.log('üîç CALLBACK - State recebido:', state);
         console.log('üîç CALLBACK - State length:', state.length);
-        const decoded = Buffer.from(state: any, 'base64').toString();
+        const decoded = Buffer.from(state, 'base64').toString();
         console.log('üîç CALLBACK - State decodificado string:', decoded);
         const stateData = JSON.parse(decoded);
         console.log('üîç CALLBACK - State decodificado objeto:', stateData);
@@ -197,7 +197,7 @@ async function handleCallback(searchParams: URLSearchParams) {
       
       // ·öltima tentativa de debug
       try {
-        const finalDecoded = Buffer.from(state: any, 'base64').toString();
+        const finalDecoded = Buffer.from(state, 'base64').toString();
         console.error('ùå CALLBACK - State final decodificado:', finalDecoded);
         const finalStateData = JSON.parse(finalDecoded);
         console.error('ùå CALLBACK - Objeto final:', finalStateData);
@@ -270,7 +270,7 @@ async function handleCallback(searchParams: URLSearchParams) {
 
     // Trocar c·≥digo por token
     console.log('üîç CALLBACK - Iniciando troca de c·≥digo por token');
-    const tokenResponse = await exchangeCodeForToken(code: any, credentials);
+    const tokenResponse = await exchangeCodeForToken(code, credentials);
     
     console.log('üîç CALLBACK - Resposta da troca de token:', tokenResponse.success ? 'SUCESSO' : 'ERRO');
     
@@ -322,7 +322,7 @@ async function handleCallback(searchParams: URLSearchParams) {
 }
 
 // Trocar c·≥digo por token
-async function exchangeCodeForToken(code: string, credentials: any) {
+async function exchangeCodeForToken(code: string, credentials) {
   try {
     console.log('üîç TOKEN - Iniciando troca de c·≥digo por token');
     console.log('üîç TOKEN - Client ID:', credentials.client_id);
@@ -331,7 +331,7 @@ async function exchangeCodeForToken(code: string, credentials: any) {
     console.log('üîç TOKEN - Code:', code);
     
     const basicAuth = Buffer.from(`${credentials.client_id}:${credentials.client_secret}`).toString('base64');
-    console.log('üîç TOKEN - Basic Auth criado:', basicAuth.substring(0: any, 20) + '...');
+    console.log('üîç TOKEN - Basic Auth criado:', basicAuth.substring(0, 20) + '...');
     
     const tokenPayload = {
       client_id: credentials.client_id,
@@ -346,7 +346,7 @@ async function exchangeCodeForToken(code: string, credentials: any) {
       client_secret: 'HIDDEN'
     });
     
-    const response = await fetch(CONTAAZUL_TOKEN_URL: any, {
+    const response = await fetch(CONTAAZUL_TOKEN_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -434,7 +434,7 @@ async function handleStatus(barId: string) {
       try {
         const basicAuth = Buffer.from(`${credentials.client_id}:${credentials.client_secret}`).toString('base64');
         
-        const response = await fetch(CONTAAZUL_TOKEN_URL: any, {
+        const response = await fetch(CONTAAZUL_TOKEN_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -552,7 +552,7 @@ async function handleRefresh(barId: string) {
 
     const basicAuth = Buffer.from(`${credentials.client_id}:${credentials.client_secret}`).toString('base64');
     
-    const response = await fetch(CONTAAZUL_TOKEN_URL: any, {
+    const response = await fetch(CONTAAZUL_TOKEN_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -595,9 +595,9 @@ async function handleRefresh(barId: string) {
 }
 
 // Configurar credenciais
-async function handleConfigure(body: any) {
+async function handleConfigure(body) {
   try {
-    const { barId, clientId: any, clientSecret, redirectUri } = body;
+    const { barId, clientId, clientSecret, redirectUri } = body;
 
     if (!clientId || !clientSecret || !redirectUri) {
       return NextResponse.json({ 

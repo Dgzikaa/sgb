@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext: any, useState, useEffect: any, useCallback, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 
 interface CommandPaletteContextType {
   isOpen: boolean
@@ -65,7 +65,7 @@ export function CommandPaletteProvider({ children }: { children: ReactNode }) {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, openPalette: any, closePalette, togglePalette])
+  }, [isOpen, openPalette, closePalette, togglePalette])
 
   // Prevent body scroll when palette is open
   useEffect(() => {
@@ -81,7 +81,7 @@ export function CommandPaletteProvider({ children }: { children: ReactNode }) {
   }, [isOpen])
 
   return (
-    <CommandPaletteContext.Provider value={{ isOpen, openPalette: any, closePalette, togglePalette }}>
+    <CommandPaletteContext.Provider value={{ isOpen, openPalette, closePalette, togglePalette }}>
       {children}
     </CommandPaletteContext.Provider>
   )

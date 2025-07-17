@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     console.log('🧪 TESTE 1: Endpoint receitas b�sico...')
     try {
       const urlReceitas = 'https://api.contaazul.com/v1/financeiro/contas-a-receber'
-      const responseReceitas = await fetch(urlReceitas: any, {
+      const responseReceitas = await fetch(urlReceitas, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     console.log('🧪 TESTE 2: Endpoint despesas b�sico...')
     try {
       const urlDespesas = 'https://api.contaazul.com/v1/financeiro/contas-a-pagar'
-      const responseDespesas = await fetch(urlDespesas: any, {
+      const responseDespesas = await fetch(urlDespesas, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
     console.log('🧪 TESTE 3: Endpoint categorias...')
     try {
       const urlCategorias = 'https://api.contaazul.com/v1/financeiro/categorias'
-      const responseCategorias = await fetch(urlCategorias: any, {
+      const responseCategorias = await fetch(urlCategorias, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -159,7 +159,7 @@ export async function GET(request: NextRequest) {
     console.log('🧪 TESTE 5: Endpoint eventos financeiros...')
     try {
       const urlEventos = 'https://api.contaazul.com/v1/financeiro/eventos-financeiros'
-      const responseEventos = await fetch(urlEventos: any, {
+      const responseEventos = await fetch(urlEventos, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -187,7 +187,7 @@ export async function GET(request: NextRequest) {
       resultados,
       resumo: {
         total_testes: resultados.testes.length,
-        testes_ok: resultados.testes.filter((t: any) => t.ok).length,
+        testes_ok: resultados.testes.filter((t) => t.ok).length,
         algum_funcionou: resultados.testes.some(t => t.ok)
       }
     })

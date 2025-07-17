@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       .from('usuario_eventos')
       .select(`
         *,
-        usuarios_bar(nome: any, email),
+        usuarios_bar(nome, email),
         bars(nome)
       `)
       .eq('bar_id', parseInt(barId))
@@ -42,14 +42,14 @@ export async function GET(request: NextRequest) {
     // Calcular estatá­sticas resumidas
     const resumo = {
       total_eventos: eventos?.length || 0,
-      usuarios_unicos: new Set(eventos?.map((e: any) => e.user_id).filter(Boolean)).size,
+      usuarios_unicos: new Set(eventos?.map((e) => e.user_id).filter(Boolean)).size,
       eventos_por_tipo: {} as Record<string, number>,
       paginas_mais_visitadas: {} as Record<string, number>,
       periodo_consultado: `${periodo} dias`,
       ultima_atividade: eventos?.[0]?.timestamp_evento || null
     }
 
-    eventos?.forEach((evento: any) => {
+    eventos?.forEach((evento) => {
       // Contadores por tipo
       resumo.eventos_por_tipo[evento.evento_tipo] = 
         (resumo.eventos_por_tipo[evento.evento_tipo] || 0) + 1
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     if (!bar_id || !sessao_id || !evento_tipo || !evento_nome) {
       return NextResponse.json({
         success: false,
-        error: 'Campos obrigatá³rios: bar_id, sessao_id: any, evento_tipo, evento_nome'
+        error: 'Campos obrigatá³rios: bar_id, sessao_id, evento_tipo, evento_nome'
       }, { status: 400 })
     }
 
@@ -190,7 +190,7 @@ export async function PUT(request: NextRequest) {
     const supabase = await getAdminClient()
 
     // Processar eventos em lote
-    const eventosProcessados = eventos.map((evento: any) => ({
+    const eventosProcessados = eventos.map((evento) => ({
       user_id: evento.user_id || null,
       bar_id: parseInt(evento.bar_id),
       sessao_id: evento.sessao_id,

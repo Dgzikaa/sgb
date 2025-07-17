@@ -312,7 +312,7 @@ export default function EventosPage() {
                     <Input
                       placeholder="Nome, descriá§á£o..."
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onChange={(e: any) => setSearchTerm(e.target.value)}
                       className="pl-10"
                     />
                   </div>
@@ -406,7 +406,7 @@ export default function EventosPage() {
                 <CalendarView
                   currentDate={currentDate}
                   eventos={filteredEventos}
-                  onEditEvent={(evento) => {
+                  onEditEvent={(evento: any) => {
                     setEditingEvent(evento)
                     setShowEventModal(true)
                   }}
@@ -423,7 +423,7 @@ export default function EventosPage() {
               <CardContent>
                 <EventList
                   eventos={filteredEventos}
-                  onEditEvent={(evento) => {
+                  onEditEvent={(evento: any) => {
                     setEditingEvent(evento)
                     setShowEventModal(true)
                   }}
@@ -541,7 +541,7 @@ function EventForm({
           <Input
             id="nome_evento"
             value={formData.nome_evento}
-            onChange={(e) => setFormData({ ...formData, nome_evento: e.target.value })}
+            onChange={(e: any) => setFormData({ ...formData, nome_evento: e.target.value })}
             placeholder="Ex: Show de Rock, Happy Hour..."
             required
           />
@@ -552,7 +552,7 @@ function EventForm({
           <Textarea
             id="descricao"
             value={formData.descricao}
-            onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+            onChange={(e: any) => setFormData({ ...formData, descricao: e.target.value })}
             placeholder="Descreva o evento..."
             rows={3}
           />
@@ -564,14 +564,14 @@ function EventForm({
             id="data_evento"
             type="date"
             value={formData.data_evento}
-            onChange={(e) => setFormData({ ...formData, data_evento: e.target.value })}
+            onChange={(e: any) => setFormData({ ...formData, data_evento: e.target.value })}
             required
           />
         </div>
 
         <div>
           <Label htmlFor="categoria">Categoria *</Label>
-          <Select value={formData.categoria} onValueChange={(value) => setFormData({ ...formData, categoria: value })}>
+          <Select value={formData.categoria} onValueChange={(value: any) => setFormData({ ...formData, categoria: value })}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -591,7 +591,7 @@ function EventForm({
             id="hora_inicio"
             type="time"
             value={formData.hora_inicio}
-            onChange={(e) => setFormData({ ...formData, hora_inicio: e.target.value })}
+            onChange={(e: any) => setFormData({ ...formData, hora_inicio: e.target.value })}
           />
         </div>
 
@@ -601,7 +601,7 @@ function EventForm({
             id="hora_fim"
             type="time"
             value={formData.hora_fim}
-            onChange={(e) => setFormData({ ...formData, hora_fim: e.target.value })}
+            onChange={(e: any) => setFormData({ ...formData, hora_fim: e.target.value })}
           />
         </div>
 
@@ -625,7 +625,7 @@ function EventForm({
           <Input
             id="local"
             value={formData.local}
-            onChange={(e) => setFormData({ ...formData, local: e.target.value })}
+            onChange={(e: any) => setFormData({ ...formData, local: e.target.value })}
             placeholder="Ex: Salá£o Principal..."
           />
         </div>

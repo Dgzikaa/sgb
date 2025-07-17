@@ -15,7 +15,7 @@ interface ItemChecklist {
   opcoes?: Record<string, any>
   condicional?: {
     dependeDe: string
-    valor: any
+    valor
   }
   validacao?: Record<string, any>
 }
@@ -95,7 +95,7 @@ interface UseChecklistEditorResult {
   descartarAlteracoes: () => void
   
   // Ediá§á£o de campos bá¡sicos
-  atualizarCampo: (campo: keyof ChecklistData, valor: any) => void
+  atualizarCampo: (campo: keyof ChecklistData, valor) => void
   
   // Ediá§á£o de estrutura
   adicionarSecao: () => void
@@ -145,7 +145,7 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
 
   useEffect(() => {
     if (checklist && checklistOriginal) {
-      const mudancas = detectarMudancas(checklistOriginal: any, checklist)
+      const mudancas = detectarMudancas(checklistOriginal, checklist)
       setMudancasDetectadas(mudancas)
     }
   }, [checklist, checklistOriginal])
@@ -168,7 +168,7 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
       } else {
         setError(response.error || 'Erro ao carregar checklist')
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao carregar checklist:', err)
       setError('Erro ao carregar checklist')
     } finally {
@@ -183,7 +183,7 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
       if (response.success) {
         setVersoes(response.data.versoes_disponiveis || [])
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao carregar versáµes:', err)
     }
   }
@@ -218,7 +218,7 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
         setError(response.error || 'Erro ao salvar checklist')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao salvar checklist:', err)
       setError('Erro ao salvar checklist')
       return false
@@ -242,7 +242,7 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
         setError(response.error || 'Erro ao fazer rollback')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao fazer rollback:', err)
       setError('Erro ao fazer rollback')
       return false
@@ -259,7 +259,7 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
   // EDIá‡áƒO DE CAMPOS BáSICOS
   // =====================================================
 
-  const atualizarCampo = (campo: keyof ChecklistData, valor: any): void => {
+  const atualizarCampo = (campo: keyof ChecklistData, valor): void => {
     if (!checklist) return
     
     setChecklist(prev => ({
@@ -298,7 +298,7 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
     setChecklist(prev => ({
       ...prev!,
       estrutura: {
-        secoes: prev!.estrutura.secoes.map((secao: any, index: any) =>
+        secoes: prev!.estrutura.secoes.map((secao, index) =>
           index === secaoIndex ? { ...secao, ...updates } : secao
         )
       }
@@ -311,7 +311,7 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
     setChecklist(prev => ({
       ...prev!,
       estrutura: {
-        secoes: prev!.estrutura.secoes.filter((_: any, index: any) => index !== secaoIndex)
+        secoes: prev!.estrutura.secoes.filter((_, index) => index !== secaoIndex)
       }
     }))
   }
@@ -321,11 +321,11 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
 
     setChecklist(prev => {
       const secoes = [...prev!.estrutura.secoes]
-      const [movedSection] = secoes.splice(fromIndex: any, 1)
-      secoes.splice(toIndex: any, 0, movedSection)
+      const [movedSection] = secoes.splice(fromIndex, 1)
+      secoes.splice(toIndex, 0, movedSection)
       
       // Atualizar ordens
-      secoes.forEach((secao: any, index: any) => {
+      secoes.forEach((secao, index) => {
         secao.ordem = index + 1
       })
 
@@ -353,7 +353,7 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
       ordem: (secao.itens?.length || 0) + 1
     }
 
-    atualizarSecao(secaoIndex: any, {
+    atualizarSecao(secaoIndex, {
       itens: [...(secao.itens || []), novoItem]
     })
   }
@@ -362,20 +362,20 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
     if (!checklist) return
 
     const secao = checklist.estrutura.secoes[secaoIndex]
-    const itensAtualizados = secao.itens.map((item: any, index: any) =>
+    const itensAtualizados = secao.itens.map((item, index) =>
       index === itemIndex ? { ...item, ...updates } : item
     )
 
-    atualizarSecao(secaoIndex: any, { itens: itensAtualizados })
+    atualizarSecao(secaoIndex, { itens: itensAtualizados })
   }
 
   const removerItem = (secaoIndex: number, itemIndex: number): void => {
     if (!checklist) return
 
     const secao = checklist.estrutura.secoes[secaoIndex]
-    const itensAtualizados = secao.itens.filter((_: any, index: any) => index !== itemIndex)
+    const itensAtualizados = secao.itens.filter((_, index) => index !== itemIndex)
 
-    atualizarSecao(secaoIndex: any, { itens: itensAtualizados })
+    atualizarSecao(secaoIndex, { itens: itensAtualizados })
   }
 
   const moverItem = (secaoIndex: number, fromIndex: number, toIndex: number): void => {
@@ -383,15 +383,15 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
 
     const secao = checklist.estrutura.secoes[secaoIndex]
     const itens = [...secao.itens]
-    const [movedItem] = itens.splice(fromIndex: any, 1)
-    itens.splice(toIndex: any, 0, movedItem)
+    const [movedItem] = itens.splice(fromIndex, 1)
+    itens.splice(toIndex, 0, movedItem)
     
     // Atualizar ordens
-    itens.forEach((item: any, index: any) => {
+    itens.forEach((item, index) => {
       item.ordem = index + 1
     })
 
-    atualizarSecao(secaoIndex: any, { itens })
+    atualizarSecao(secaoIndex, { itens })
   }
 
   // =====================================================
@@ -507,7 +507,7 @@ function detectarMudancas(original: ChecklistData, atual: ChecklistData): Mudanc
   }
 
   // Verificar mudaná§as detalhadas na estrutura
-  const mudancasEstrutura = detectarMudancasEstrutura(secoesOriginais: any, secoesAtuais)
+  const mudancasEstrutura = detectarMudancasEstrutura(secoesOriginais, secoesAtuais)
   if (mudancasEstrutura.length > 0) {
     mudancas.push(...mudancasEstrutura)
     tipoMudanca = 'estrutural'
@@ -524,7 +524,7 @@ function detectarMudancasEstrutura(secoesOriginais: SecaoChecklist[], secoesAtua
   const mudancas: string[] = []
 
   // Verificar mudaná§as em seá§áµes existentes
-  secoesAtuais.forEach((secaoAtual: any, index: any) => {
+  secoesAtuais.forEach((secaoAtual, index) => {
     const secaoOriginal = secoesOriginais[index]
     
     if (!secaoOriginal) {
@@ -548,7 +548,7 @@ function detectarMudancasEstrutura(secoesOriginais: SecaoChecklist[], secoesAtua
     }
 
     // Verificar mudaná§as em itens
-    itensAtuais.forEach((itemAtual: any, itemIndex: any) => {
+    itensAtuais.forEach((itemAtual, itemIndex) => {
       const itemOriginal = itensOriginais[itemIndex]
       
       if (!itemOriginal) {
@@ -572,7 +572,7 @@ function detectarMudancasEstrutura(secoesOriginais: SecaoChecklist[], secoesAtua
   // Verificar seá§áµes removidas
   if (secoesOriginais.length > secoesAtuais.length) {
     const secoesRemovidas = secoesOriginais.slice(secoesAtuais.length)
-    secoesRemovidas.forEach((secao: any) => {
+    secoesRemovidas.forEach((secao) => {
       mudancas.push(`- Seá§á£o removida: "${secao.nome}"`)
     })
   }
@@ -613,7 +613,7 @@ export const checklistValidators = {
       return erros
     }
 
-    checklist.estrutura.secoes.forEach((secao: any, secaoIndex: any) => {
+    checklist.estrutura.secoes.forEach((secao, secaoIndex) => {
       if (!secao.nome.trim()) {
         erros.push(`Nome da seá§á£o ${secaoIndex + 1} á© obrigatá³rio`)
       }
@@ -622,7 +622,7 @@ export const checklistValidators = {
         erros.push(`Seá§á£o "${secao.nome}" deve ter pelo menos um item`)
       }
 
-      secao.itens?.forEach((item: any, itemIndex: any) => {
+      secao.itens?.forEach((item, itemIndex) => {
         if (!item.titulo.trim()) {
           erros.push(`Tá­tulo do item ${itemIndex + 1} na seá§á£o "${secao.nome}" á© obrigatá³rio`)
         }

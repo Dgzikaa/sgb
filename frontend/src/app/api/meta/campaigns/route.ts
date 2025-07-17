@@ -23,12 +23,12 @@ export async function GET(request: NextRequest) {
   if (q) {
     query = query.ilike('campaign_name', `%${q}%`)
   }
-  query = query.order(sort: any, { ascending: order === 'asc' })
-  query = query.range(offset: any, offset + limit - 1)
+  query = query.order(sort, { ascending: order === 'asc' })
+  query = query.range(offset, offset + limit - 1)
 
-  const { data, error: any, count } = await query
+  const { data, error, count } = await query
   if (error) {
     return NextResponse.json({ success: false, error: error.message })
   }
-  return NextResponse.json({ success: true, data: any, count: data?.length })
+  return NextResponse.json({ success: true, data, count: data?.length })
 } 

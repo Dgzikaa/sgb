@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     // Processar cada configura·ß·£o
     for (const config of configuracoes) {
       const barId = config.bar_id
-      const resultDetail: any = {
+      const resultDetail = {
         bar_id: barId,
         status: 'pending',
         error: null,
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
 
         results.processed++
 
-      } catch (error: any) {
+      } catch (error) {
         console.error(`ùå [${executionId}] Bar ${barId}: Erro durante coleta:`, error)
         resultDetail.status = 'failed'
         resultDetail.error = error.message
@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
       results.details.push(resultDetail)
 
       // Pequena pausa entre coletas para evitar rate limiting
-      await new Promise(resolve => setTimeout(resolve: any, 2000))
+      await new Promise(resolve => setTimeout(resolve, 2000))
     }
 
     // Log final
@@ -179,7 +179,7 @@ export async function POST(request: NextRequest) {
       message: `Processadas ${results.processed} configura·ß·µes. ${results.successful} sucessos, ${results.failed} falhas, ${results.skipped} ignoradas.`
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error(`ùå [${executionId}] Erro cr·≠tico na coleta autom·°tica:`, error)
     
     return NextResponse.json({
@@ -217,7 +217,7 @@ export async function GET(request: NextRequest) {
     }
 
     const now = new Date()
-    const agendamentos = configuracoes?.map((config: any) => {
+    const agendamentos = configuracoes?.map((config) => {
       const proximaColeta = new Date(config.proxima_coleta)
       const minutosRestantes = Math.round((proximaColeta.getTime() - now.getTime()) / (1000 * 60))
       
@@ -235,19 +235,19 @@ export async function GET(request: NextRequest) {
     // Calcular estat·≠sticas
     const stats = {
       total_configuracoes: agendamentos.length,
-      ativas: agendamentos.filter((a: any) => a.status === 'ativo').length,
-      em_atraso: agendamentos.filter((a: any) => a.em_atraso).length,
-      proxima_execucao: agendamentos.find((a: any) => !a.em_atraso)?.proxima_coleta || null
+      ativas: agendamentos.filter((a) => a.status === 'ativo').length,
+      em_atraso: agendamentos.filter((a) => a.em_atraso).length,
+      proxima_execucao: agendamentos.find((a) => !a.em_atraso)?.proxima_coleta || null
     }
 
     return NextResponse.json({
       success: true,
       timestamp: now.toISOString(),
       stats,
-      agendamentos: agendamentos.slice(0: any, 20) // Limitar retorno
+      agendamentos: agendamentos.slice(0, 20) // Limitar retorno
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ùå Erro ao consultar agendamentos:', error)
     return NextResponse.json({
       success: false,

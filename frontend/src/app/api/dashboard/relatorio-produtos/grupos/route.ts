@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Extrair grupos áºnicos
-    const gruposUnicos = [...new Set(grupos?.map((g: any) => g.grp_desc))].filter(Boolean).sort();
+    const gruposUnicos = [...new Set(grupos?.map((g) => g.grp_desc))].filter(Boolean).sort();
 
     return NextResponse.json({
       success: true,

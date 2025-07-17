@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect: any, useRef } from 'react'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState, useEffect, useRef } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent: any, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/hooks/use-toast'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 import {
@@ -42,19 +42,19 @@ import { PostHighlightsCard, PostHighlight } from '@/components/marketing/Advanc
 
 interface MetaAnalytics {
   facebook: {
-    current: any
-    history: any[]
-    error: any
+    current
+    history[]
+    error
   }
   instagram: {
-    current: any
-    history: any[]
-    error: any
+    current
+    history[]
+    error
   }
   campaigns: {
-    list: any[]
-    stats: any
-    error: any
+    list[]
+    stats
+    error
   }
   consolidated: {
     total_reach: number
@@ -82,7 +82,7 @@ interface DailySummary {
     reach_change_today: number
     followers_change_percent: number
   }
-  daily_data: any[]
+  daily_data[]
   campaigns_summary: {
     total_campaigns: number
     active_campaigns: number
@@ -91,11 +91,11 @@ interface DailySummary {
 }
 
 interface AdvancedAnalytics {
-  funil_conversao: any
-  radar_oportunidades: any
-  otimizacao_temporal: any
-  customer_journey: any
-  previsao_performance: any
+  funil_conversao
+  radar_oportunidades
+  otimizacao_temporal
+  customer_journey
+  previsao_performance
 }
 
 export default function Marketing360Page() {
@@ -148,7 +148,7 @@ export default function Marketing360Page() {
       // Montar query params de data
       let params = ''
       if (dateRange[0] && dateRange[1]) {
-        params = `?start=${dateRange[0].toISOString().slice(0: any,10)}&end=${dateRange[1].toISOString().slice(0: any,10)}`
+        params = `?start=${dateRange[0].toISOString().slice(0,10)}&end=${dateRange[1].toISOString().slice(0,10)}`
       }
       // Buscar KPIs agregados
       const analyticsResponse = await fetch(`/api/meta/analytics${params}`)
@@ -199,7 +199,7 @@ export default function Marketing360Page() {
       setAdvancedLoading(true)
       
       // Simulaá§á£o de dados avaná§ados (implementar APIs especá­ficas depois)
-      await new Promise(resolve => setTimeout(resolve: any, 1500))
+      await new Promise(resolve => setTimeout(resolve, 1500))
       
       setAdvancedData({
         funil_conversao: {
@@ -309,7 +309,7 @@ export default function Marketing360Page() {
     setCampaignsLoading(true)
     let params = ''
     if (dateRange[0] && dateRange[1]) {
-      params += `&start=${dateRange[0].toISOString().slice(0: any,10)}&end=${dateRange[1].toISOString().slice(0: any,10)}`
+      params += `&start=${dateRange[0].toISOString().slice(0,10)}&end=${dateRange[1].toISOString().slice(0,10)}`
     }
     if (campaignsSearch) {
       params += `&q=${encodeURIComponent(campaignsSearch)}`
@@ -332,7 +332,7 @@ export default function Marketing360Page() {
     setCampaignsTableLoading(true)
     let params = ''
     if (dateRange[0] && dateRange[1]) {
-      params += `&start=${dateRange[0].toISOString().slice(0: any,10)}&end=${dateRange[1].toISOString().slice(0: any,10)}`
+      params += `&start=${dateRange[0].toISOString().slice(0,10)}&end=${dateRange[1].toISOString().slice(0,10)}`
     }
     if (campaignsTableSearch) {
       params += `&q=${encodeURIComponent(campaignsTableSearch)}`
@@ -362,8 +362,8 @@ export default function Marketing360Page() {
           ...(json.management_data.instagram_posts || []),
           ...(json.management_data.facebook_posts || [])
         ]
-        // Ordenar por engagement_rate (desc), likes: any, impressáµes
-        allPosts.sort((a: any, b: any) => {
+        // Ordenar por engagement_rate (desc), likes, impressáµes
+        allPosts.sort((a, b) => {
           const erA = a.metrics.engagement_rate || 0
           const erB = b.metrics.engagement_rate || 0
           if (erB !== erA) return erB - erA
@@ -374,7 +374,7 @@ export default function Marketing360Page() {
           const impB = b.metrics.impressions || 0
           return impB - impA
         })
-        setPostHighlights(allPosts.slice(0: any, 5))
+        setPostHighlights(allPosts.slice(0, 5))
       } else {
         setPostHighlights([])
       }
@@ -388,7 +388,7 @@ export default function Marketing360Page() {
   useEffect(() => {
     loadCampaigns()
     loadCampaignsTable()
-  }, [dateRange, campaignsPage: any, campaignsSearch, campaignsSort: any, campaignsOrder, campaignsTablePage: any, campaignsTableSearch, campaignsTableSort: any, campaignsTableOrder])
+  }, [dateRange, campaignsPage, campaignsSearch, campaignsSort, campaignsOrder, campaignsTablePage, campaignsTableSearch, campaignsTableSort, campaignsTableOrder])
 
   // Carregamento automá¡tico ao trocar de aba
   useEffect(() => {
@@ -542,7 +542,7 @@ export default function Marketing360Page() {
             </div>
           </TabsContent>
 
-          {/* Tab Visá£o Geral: KPIs principais, grá¡ficos, cards: any, etc */}
+          {/* Tab Visá£o Geral: KPIs principais, grá¡ficos, cards, etc */}
           <TabsContent value="overview" className="space-y-6">
             {/* KPIs PRINCIPAIS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -701,7 +701,7 @@ export default function Marketing360Page() {
                         <tr><td colSpan={7} className="py-8 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></td></tr>
                       ) : campaignsTable.length === 0 ? (
                         <tr><td colSpan={7} className="py-8 text-center text-gray-500">Nenhuma campanha encontrada</td></tr>
-                      ) : campaignsTable.map((c: any, idx: any) => (
+                      ) : campaignsTable.map((c, idx) => (
                         <tr key={c.campaign_id+idx} className="table-row-dark">
                           <td className="table-cell-dark py-4 px-6 text-xs">{c.data_coleta}</td>
                           <td className="table-cell-dark py-4 px-6 font-medium">{c.campaign_name}</td>

@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     dataInicio.setDate(dataFim.getDate() - parseInt(periodo))
 
     // Buscar má©tricas gerais
-    const metricas = await calcularMetricasGerais(supabase: any, user.bar_id.toString(), dataInicio: any, dataFim)
+    const metricas = await calcularMetricasGerais(supabase, user.bar_id.toString(), dataInicio, dataFim)
 
     // Buscar ranking de funcioná¡rios
     const ranking = await calcularRankingFuncionarios(
@@ -44,17 +44,17 @@ export async function GET(request: NextRequest) {
     )
 
     // Buscar evoluá§á£o temporal
-    const evolucao = await calcularEvolucaoTemporal(supabase: any, user.bar_id.toString(), dataInicio: any, dataFim)
+    const evolucao = await calcularEvolucaoTemporal(supabase, user.bar_id.toString(), dataInicio, dataFim)
 
     // Buscar alertas e pendáªncias
-    const alertas = await buscarAlertas(supabase: any, user.bar_id.toString())
+    const alertas = await buscarAlertas(supabase, user.bar_id.toString())
 
     // Buscar estatá­sticas por setor/cargo
-    const estatisticasPorSetor = await calcularEstatisticasPorSetor(supabase: any, user.bar_id.toString(), dataInicio: any, dataFim)
-    const estatisticasPorCargo = await calcularEstatisticasPorCargo(supabase: any, user.bar_id.toString(), dataInicio: any, dataFim)
+    const estatisticasPorSetor = await calcularEstatisticasPorSetor(supabase, user.bar_id.toString(), dataInicio, dataFim)
+    const estatisticasPorCargo = await calcularEstatisticasPorCargo(supabase, user.bar_id.toString(), dataInicio, dataFim)
 
     // Buscar top checklists
-    const topChecklists = await buscarTopChecklists(supabase: any, user.bar_id.toString(), dataInicio: any, dataFim)
+    const topChecklists = await buscarTopChecklists(supabase, user.bar_id.toString(), dataInicio, dataFim)
 
     const dashboard = {
       periodo: {
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
       data: dashboard
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro na API de dashboard de produtividade:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
@@ -91,14 +91,14 @@ export async function GET(request: NextRequest) {
 // FUNá‡á•ES DE CáLCULO
 // =====================================================
 
-async function calcularMetricasGerais(supabase: any, barId: string, dataInicio: Date, dataFim: Date) {
+async function calcularMetricasGerais(supabase, barId: string, dataInicio: Date, dataFim: Date) {
   // Buscar execuá§áµes do perá­odo
   const { data: execucoes } = await supabase
     .from('checklist_execucoes')
     .select(`
       *,
-      checklist:checklists!checklist_id (nome: any, setor, tipo),
-              funcionario:usuarios_bar!funcionario_id (nome: any, cargo)
+      checklist:checklists!checklist_id (nome, setor, tipo),
+              funcionario:usuarios_bar!funcionario_id (nome, cargo)
     `)
     .gte('iniciado_em', dataInicio.toISOString())
     .lte('iniciado_em', dataFim.toISOString())
@@ -115,18 +115,18 @@ async function calcularMetricasGerais(supabase: any, barId: string, dataInicio: 
     }
   }
 
-  const concluidas = execucoes.filter((e: any) => e.status === 'completado')
-  const pendentes = execucoes.filter((e: any) => ['em_andamento', 'pausado'].includes(e.status))
+  const concluidas = execucoes.filter((e) => e.status === 'completado')
+  const pendentes = execucoes.filter((e) => ['em_andamento', 'pausado'].includes(e.status))
   
   const scoreTotal = concluidas
-    .filter((e: any) => e.score_final != null)
-    .reduce((acc: number, e: any) => acc + e.score_final, 0)
+    .filter((e) => e.score_final != null)
+    .reduce((acc: number, e) => acc + e.score_final, 0)
   
   const tempoTotal = concluidas
-    .filter((e: any) => e.tempo_total_minutos != null)
-    .reduce((acc: number, e: any) => acc + e.tempo_total_minutos, 0)
+    .filter((e) => e.tempo_total_minutos != null)
+    .reduce((acc: number, e) => acc + e.tempo_total_minutos, 0)
 
-  const funcionariosUnicos = new Set(execucoes.map((e: any) => e.funcionario_id)).size
+  const funcionariosUnicos = new Set(execucoes.map((e) => e.funcionario_id)).size
 
   return {
     total_execucoes: execucoes.length,
@@ -140,7 +140,7 @@ async function calcularMetricasGerais(supabase: any, barId: string, dataInicio: 
 }
 
 async function calcularRankingFuncionarios(
-  supabase: any, 
+  supabase, 
   barId: string, 
   dataInicio: Date, 
   dataFim: Date,
@@ -158,7 +158,7 @@ async function calcularRankingFuncionarios(
       tempo_total_minutos,
       iniciado_em,
       finalizado_em,
-              funcionario:usuarios_bar!funcionario_id (nome: any, email, cargo: any, setor)
+              funcionario:usuarios_bar!funcionario_id (nome, email, cargo, setor)
     `)
     .gte('iniciado_em', dataInicio.toISOString())
     .lte('iniciado_em', dataFim.toISOString())
@@ -171,25 +171,25 @@ async function calcularRankingFuncionarios(
   let execucoesFiltradas = execucoes
   
   if (funcionarioIdFiltro) {
-    execucoesFiltradas = execucoes.filter((e: any) => e.funcionario_id === funcionarioIdFiltro)
+    execucoesFiltradas = execucoes.filter((e) => e.funcionario_id === funcionarioIdFiltro)
   }
 
   if (setorFiltro) {
-    execucoesFiltradas = execucoes.filter((e: any) => e.funcionario?.setor === setorFiltro)
+    execucoesFiltradas = execucoes.filter((e) => e.funcionario?.setor === setorFiltro)
   }
 
   if (cargoFiltro) {
-    execucoesFiltradas = execucoes.filter((e: any) => e.funcionario?.cargo === cargoFiltro)
+    execucoesFiltradas = execucoes.filter((e) => e.funcionario?.cargo === cargoFiltro)
   }
 
   // Agrupar por funcioná¡rio
   const funcionarios = new Map()
 
-  execucoesFiltradas.forEach((execucao: any) => {
+  execucoesFiltradas.forEach((execucao) => {
     const funcionarioId = execucao.funcionario_id
     
     if (!funcionarios.has(funcionarioId)) {
-      funcionarios.set(funcionarioId: any, {
+      funcionarios.set(funcionarioId, {
         funcionario_id: funcionarioId,
         funcionario: execucao.funcionario,
         total_execucoes: 0,
@@ -225,7 +225,7 @@ async function calcularRankingFuncionarios(
   })
 
   // Calcular má©tricas finais e ordenar
-  const ranking = Array.from(funcionarios.values()).map((funcionario: any) => {
+  const ranking = Array.from(funcionarios.values()).map((funcionario) => {
     const taxa_conclusao = funcionario.total_execucoes > 0 ? 
       Math.round((funcionario.execucoes_concluidas / funcionario.total_execucoes) * 100) : 0
     
@@ -239,7 +239,7 @@ async function calcularRankingFuncionarios(
     const score_produtividade = Math.round(
       (taxa_conclusao * 0.4) + 
       (score_medio * 2) +  // Score 0-100 -> peso 0.2
-      (Math.max(0: any, 100 - (tempo_medio / 60) * 10) * 0.4) // Tempo menor = melhor
+      (Math.max(0, 100 - (tempo_medio / 60) * 10) * 0.4) // Tempo menor = melhor
     )
 
     return {
@@ -250,22 +250,22 @@ async function calcularRankingFuncionarios(
       dias_ativos: funcionario.dias_ativos.size,
       score_produtividade,
       // Classificaá§á£o qualitativa
-      classificacao: getClassificacaoDesempenho(score_produtividade: any, taxa_conclusao)
+      classificacao: getClassificacaoDesempenho(score_produtividade, taxa_conclusao)
     }
-  }).sort((a: any, b: any) => b.score_produtividade - a.score_produtividade)
+  }).sort((a, b) => b.score_produtividade - a.score_produtividade)
 
   // Adicionar posiá§á£o no ranking
-  return ranking.map((funcionario: any, index: any) => ({
+  return ranking.map((funcionario, index) => ({
     ...funcionario,
     posicao: index + 1,
     dias_ativos: funcionario.dias_ativos // Manter apenas o náºmero
   }))
 }
 
-async function calcularEvolucaoTemporal(supabase: any, barId: string, dataInicio: Date, dataFim: Date) {
+async function calcularEvolucaoTemporal(supabase, barId: string, dataInicio: Date, dataFim: Date) {
   const { data: execucoes } = await supabase
     .from('checklist_execucoes')
-    .select('iniciado_em, status: any, score_final')
+    .select('iniciado_em, status, score_final')
     .gte('iniciado_em', dataInicio.toISOString())
     .lte('iniciado_em', dataFim.toISOString())
 
@@ -274,11 +274,11 @@ async function calcularEvolucaoTemporal(supabase: any, barId: string, dataInicio
   // Agrupar por dia
   const evolucaoPorDia = new Map()
   
-  execucoes.forEach((execucao: any) => {
+  execucoes.forEach((execucao) => {
     const dia = execucao.iniciado_em.split('T')[0]
     
     if (!evolucaoPorDia.has(dia)) {
-      evolucaoPorDia.set(dia: any, {
+      evolucaoPorDia.set(dia, {
         data: dia,
         total_execucoes: 0,
         execucoes_concluidas: 0,
@@ -302,17 +302,17 @@ async function calcularEvolucaoTemporal(supabase: any, barId: string, dataInicio
 
   // Converter para array e calcular má©tricas
   return Array.from(evolucaoPorDia.values())
-    .map((dia: any) => ({
+    .map((dia) => ({
       ...dia,
       taxa_conclusao: dia.total_execucoes > 0 ? 
         Math.round((dia.execucoes_concluidas / dia.total_execucoes) * 100) : 0,
       score_medio: dia.execucoes_com_score > 0 ? 
         Math.round((dia.score_total / dia.execucoes_com_score) * 10) / 10 : 0
     }))
-    .sort((a: any, b: any) => a.data.localeCompare(b.data))
+    .sort((a, b) => a.data.localeCompare(b.data))
 }
 
-async function buscarAlertas(supabase: any, barId: string) {
+async function buscarAlertas(supabase, barId: string) {
   const agora = new Date()
   const alertas = []
 
@@ -335,7 +335,7 @@ async function buscarAlertas(supabase: any, barId: string) {
       severidade: 'alta',
       titulo: `${agendamentosAtrasados.length} agendamento(s) atrasado(s)`,
       descricao: 'Existem checklists que deveriam ter sido executados',
-      itens: agendamentosAtrasados.map((a: any) => ({
+      itens: agendamentosAtrasados.map((a) => ({
         checklist: a.checklist?.nome,
         funcionario: a.funcionario?.nome,
         data_agendada: a.data_agendada,
@@ -357,10 +357,10 @@ async function buscarAlertas(supabase: any, barId: string) {
     .gte('iniciado_em', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
 
   if (execucoesRecentes) {
-    const funcionariosBaixaPerformance: any[] = []
+    const funcionariosBaixaPerformance[] = []
     const funcionarios = new Map()
 
-    execucoesRecentes.forEach((exec: any) => {
+    execucoesRecentes.forEach((exec) => {
       if (!funcionarios.has(exec.funcionario_id)) {
         funcionarios.set(exec.funcionario_id, {
           funcionario: exec.funcionario,
@@ -377,7 +377,7 @@ async function buscarAlertas(supabase: any, barId: string) {
       }
     })
 
-    funcionarios.forEach((dados: any, funcionarioId: any) => {
+    funcionarios.forEach((dados, funcionarioId) => {
       if (dados.scores.length >= 3) {
         const scoreMedio = dados.scores.reduce((a: number, b: number) => a + b, 0) / dados.scores.length
         
@@ -405,7 +405,7 @@ async function buscarAlertas(supabase: any, barId: string) {
   return alertas
 }
 
-async function calcularEstatisticasPorSetor(supabase: any, barId: string, dataInicio: Date, dataFim: Date) {
+async function calcularEstatisticasPorSetor(supabase, barId: string, dataInicio: Date, dataFim: Date) {
   const { data: execucoes } = await supabase
     .from('checklist_execucoes')
     .select(`
@@ -420,11 +420,11 @@ async function calcularEstatisticasPorSetor(supabase: any, barId: string, dataIn
 
   const setores = new Map()
 
-  execucoes.forEach((exec: any) => {
+  execucoes.forEach((exec) => {
     const setor = exec.checklist?.setor || 'Sem setor'
     
     if (!setores.has(setor)) {
-      setores.set(setor: any, {
+      setores.set(setor, {
         setor,
         total_execucoes: 0,
         execucoes_concluidas: 0,
@@ -447,17 +447,17 @@ async function calcularEstatisticasPorSetor(supabase: any, barId: string, dataIn
   })
 
   return Array.from(setores.values())
-    .map((setor: any) => ({
+    .map((setor) => ({
       ...setor,
       taxa_conclusao: setor.total_execucoes > 0 ? 
         Math.round((setor.execucoes_concluidas / setor.total_execucoes) * 100) : 0,
       score_medio: setor.execucoes_com_score > 0 ? 
         Math.round((setor.score_total / setor.execucoes_com_score) * 10) / 10 : 0
     }))
-    .sort((a: any, b: any) => b.total_execucoes - a.total_execucoes)
+    .sort((a, b) => b.total_execucoes - a.total_execucoes)
 }
 
-async function calcularEstatisticasPorCargo(supabase: any, barId: string, dataInicio: Date, dataFim: Date) {
+async function calcularEstatisticasPorCargo(supabase, barId: string, dataInicio: Date, dataFim: Date) {
   const { data: execucoes } = await supabase
     .from('checklist_execucoes')
     .select(`
@@ -472,11 +472,11 @@ async function calcularEstatisticasPorCargo(supabase: any, barId: string, dataIn
 
   const cargos = new Map()
 
-  execucoes.forEach((exec: any) => {
+  execucoes.forEach((exec) => {
     const cargo = exec.funcionario?.cargo || 'Sem cargo'
     
     if (!cargos.has(cargo)) {
-      cargos.set(cargo: any, {
+      cargos.set(cargo, {
         cargo,
         total_execucoes: 0,
         execucoes_concluidas: 0,
@@ -499,17 +499,17 @@ async function calcularEstatisticasPorCargo(supabase: any, barId: string, dataIn
   })
 
   return Array.from(cargos.values())
-    .map((cargo: any) => ({
+    .map((cargo) => ({
       ...cargo,
       taxa_conclusao: cargo.total_execucoes > 0 ? 
         Math.round((cargo.execucoes_concluidas / cargo.total_execucoes) * 100) : 0,
       score_medio: cargo.execucoes_com_score > 0 ? 
         Math.round((cargo.score_total / cargo.execucoes_com_score) * 10) / 10 : 0
     }))
-    .sort((a: any, b: any) => b.total_execucoes - a.total_execucoes)
+    .sort((a, b) => b.total_execucoes - a.total_execucoes)
 }
 
-async function buscarTopChecklists(supabase: any, barId: string, dataInicio: Date, dataFim: Date) {
+async function buscarTopChecklists(supabase, barId: string, dataInicio: Date, dataFim: Date) {
   const { data: execucoes } = await supabase
     .from('checklist_execucoes')
     .select(`
@@ -517,7 +517,7 @@ async function buscarTopChecklists(supabase: any, barId: string, dataInicio: Dat
       status,
       score_final,
       tempo_total_minutos,
-      checklist:checklists!checklist_id (nome: any, setor, tipo)
+      checklist:checklists!checklist_id (nome, setor, tipo)
     `)
     .gte('iniciado_em', dataInicio.toISOString())
     .lte('iniciado_em', dataFim.toISOString())
@@ -526,11 +526,11 @@ async function buscarTopChecklists(supabase: any, barId: string, dataInicio: Dat
 
   const checklists = new Map()
 
-  execucoes.forEach((exec: any) => {
+  execucoes.forEach((exec) => {
     const checklistId = exec.checklist_id
     
     if (!checklists.has(checklistId)) {
-      checklists.set(checklistId: any, {
+      checklists.set(checklistId, {
         checklist_id: checklistId,
         checklist: exec.checklist,
         total_execucoes: 0,
@@ -561,7 +561,7 @@ async function buscarTopChecklists(supabase: any, barId: string, dataInicio: Dat
   })
 
   return Array.from(checklists.values())
-    .map((checklist: any) => ({
+    .map((checklist) => ({
       ...checklist,
       taxa_conclusao: checklist.total_execucoes > 0 ? 
         Math.round((checklist.execucoes_concluidas / checklist.total_execucoes) * 100) : 0,
@@ -570,8 +570,8 @@ async function buscarTopChecklists(supabase: any, barId: string, dataInicio: Dat
       tempo_medio: checklist.execucoes_com_tempo > 0 ? 
         Math.round(checklist.tempo_total / checklist.execucoes_com_tempo) : 0
     }))
-    .sort((a: any, b: any) => b.total_execucoes - a.total_execucoes)
-    .slice(0: any, 10) // Top 10
+    .sort((a, b) => b.total_execucoes - a.total_execucoes)
+    .slice(0, 10) // Top 10
 }
 
 // =====================================================

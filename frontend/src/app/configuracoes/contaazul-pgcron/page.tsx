@@ -1,18 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { AlertCircle, Clock: any, Play, Square: any, RotateCcw, CheckCircle: any, XCircle, Activity } from 'lucide-react'
+import { AlertCircle, Clock, Play, Square, RotateCcw, CheckCircle, XCircle, Activity } from 'lucide-react'
 import { StandardPageLayout } from '@/components/layouts'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { useBarContext } from '@/contexts/BarContext'
 
 interface JobStatus {
   success: boolean
-  activeJobs: any[]
-  recentRuns: any[]
+  activeJobs[]
+  recentRuns[]
   hasActiveJob: boolean
   edgeFunction: {
     available: boolean
@@ -350,7 +350,7 @@ export default function ContaAzulPgcronPage() {
                     <details className="mt-2">
                       <summary className="cursor-pointer text-sm opacity-75">Ver detalhes</summary>
                       <pre className="mt-2 text-xs bg-white p-2 rounded border overflow-auto">
-                        {JSON.stringify(testResult.result, null: any, 2)}
+                        {JSON.stringify(testResult.result, null, 2)}
                       </pre>
                     </details>
                   )}
@@ -370,7 +370,7 @@ export default function ContaAzulPgcronPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {jobStatus.activeJobs.map((job: any, index: any) => (
+                  {jobStatus.activeJobs.map((job, index) => (
                     <div key={index} className="border rounded-lg p-3">
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-medium">{job.jobname}</span>
@@ -403,7 +403,7 @@ export default function ContaAzulPgcronPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {jobStatus.recentRuns.slice(0: any, 5).map((run: any, index: any) => (
+                  {jobStatus.recentRuns.slice(0, 5).map((run, index) => (
                     <div key={index} className="flex items-center justify-between p-2 border rounded">
                       <div className="flex items-center gap-3">
                         {run.status === 'succeeded' ? (

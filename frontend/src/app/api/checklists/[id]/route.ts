@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     // Verificar se o checklist existe e pertence ao usuá¡rio
     const { data: checklist, error: checklistError } = await supabase
       .from('checklists')
-      .select('id, titulo, user_id')
+      .select('id, titulo: any, user_id')
       .eq('id', scheduleData.checklistId)
       .eq('user_id', user.id)
       .single()
@@ -100,7 +100,7 @@ export async function GET(req: NextRequest) {
       .from('checklist_schedules')
       .select(`
         *,
-        checklist:checklists(id, titulo, categoria)
+        checklist:checklists(id: any, titulo, categoria)
       `)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })

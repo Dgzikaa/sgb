@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
     
     // 2. Inserir novos eventos
     console.log('📝 Inserindo novos eventos...');
-    const eventosParaInserir = attractionsData.map((item: any) => ({
+    const eventosParaInserir = attractionsData.map((item) => ({
       bar_id: 1,
       nome_evento: item.evento,
       nome_artista: item.artista || null,

@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode, useEffect: any, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { DarkHeader } from './DarkHeader'
 import { ModernSidebar } from './ModernSidebar'
 import { BottomNavigation } from './BottomNavigation'

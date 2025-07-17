@@ -73,7 +73,7 @@ export function CookieBanner() {
                 { type: 'marketing', name: 'Marketing', description: 'Publicidade personalizada', required: false },
                 { type: 'preferences', name: 'Preferáªncias', description: 'Configuraá§áµes pessoais', required: false },
                 { type: 'functional', name: 'Funcionais', description: 'Recursos extras', required: false }
-              ].map((cookie: any) => (
+              ].map((cookie) => (
                 <div key={cookie.type} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div>
                     <h3 className="font-medium text-gray-900 dark:text-white">
@@ -85,7 +85,7 @@ export function CookieBanner() {
                   <Switch
                     checked={cookie.required || tempConsents[cookie.type as keyof typeof tempConsents]}
                     disabled={cookie.required}
-                    onCheckedChange={(checked: any) => {
+                    onCheckedChange={(checked) => {
                       if (!cookie.required) {
                         setTempConsents(prev => ({
                           ...prev,

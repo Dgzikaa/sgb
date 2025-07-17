@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 // Editar insumo existente
 export async function PUT(request: NextRequest) {
   try {
-    const { id, codigo: any, nome, categoria: any, unidade_medida, observacoes: any, bar_id } = await request.json()
+    const { id, codigo, nome, categoria, unidade_medida, observacoes, bar_id } = await request.json()
 
     const supabase = await getSupabaseClient()
     if (!supabase) {
@@ -89,7 +89,7 @@ export async function PUT(request: NextRequest) {
 // Cadastrar novo insumo
 export async function POST(request: NextRequest) {
   try {
-    const { codigo, nome: any, categoria, unidade_medida: any, observacoes, bar_id: any, ativo } = await request.json()
+    const { codigo, nome, categoria, unidade_medida, observacoes, bar_id, ativo } = await request.json()
 
     const supabase = await getSupabaseClient()
     if (!supabase) {

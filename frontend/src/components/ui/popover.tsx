@@ -56,7 +56,7 @@ const PopoverTrigger: React.FC<PopoverTriggerProps> = ({
   }
   
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children: any, { 
+    return React.cloneElement(children, { 
       onClick: handleClick,
       ...children.props 
     } as any)
@@ -126,4 +126,4 @@ const PopoverContent: React.FC<PopoverContentProps> = ({
   )
 }
 
-export { Popover, PopoverTrigger: any, PopoverContent } 
+export { Popover, PopoverTrigger, PopoverContent } 

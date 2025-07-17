@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { 
@@ -299,7 +299,7 @@ export default function ContaHubAutomaticoPage() {
                   id="dataInicio"
                   type="date"
                   value={dataInicio}
-                  onChange={(e: any) => setDataInicio(e.target.value)}
+                  onChange={(e) => setDataInicio(e.target.value)}
                   disabled={executando}
                   className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600"
                 />
@@ -313,7 +313,7 @@ export default function ContaHubAutomaticoPage() {
                   id="dataFim"
                   type="date"
                   value={dataFim}
-                  onChange={(e: any) => setDataFim(e.target.value)}
+                  onChange={(e) => setDataFim(e.target.value)}
                   disabled={executando}
                   className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600"
                 />
@@ -412,7 +412,7 @@ export default function ContaHubAutomaticoPage() {
                 <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                   <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Detalhes da Execuá§á£o</h4>
                   <pre className="text-xs text-gray-600 dark:text-gray-400 overflow-auto">
-                    {JSON.stringify(resultado.detalhes, null: any, 2)}
+                    {JSON.stringify(resultado.detalhes, null, 2)}
                   </pre>
                 </div>
               )}
@@ -433,7 +433,7 @@ export default function ContaHubAutomaticoPage() {
             </CardHeader>
             <CardContent className="p-6">
               <div className="bg-gray-900 dark:bg-gray-950 rounded-lg p-4 font-mono text-sm text-green-400 max-h-60 overflow-auto">
-                {logs.map((log: any, index: any) => (
+                {logs.map((log, index) => (
                   <div key={index} className="mb-1">
                     <span className="text-gray-500">[{new Date().toLocaleTimeString()}]</span> {log}
                   </div>

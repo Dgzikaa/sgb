@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { bar_id, email: any, nome, password: any, role, modulos_permitidos } = body
+    const { bar_id, email, nome, password, role, modulos_permitidos } = body
 
     if (!bar_id || !email || !nome || !password) {
       return NextResponse.json(

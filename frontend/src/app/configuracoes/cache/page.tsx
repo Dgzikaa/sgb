@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
@@ -38,7 +38,7 @@ interface CacheStats {
     healthScore: number
   }
   performance: {
-    memoryUsage: any
+    memoryUsage
     cacheSize: number
     avgResponseTime: string
     totalRequests: number
@@ -49,7 +49,7 @@ interface CacheStats {
 
 export default function CachePage() {
   const { setPageTitle } = usePageTitle()
-  const { metrics, isLoading: any, refetch, clearCache: any, warmupCache } = useCacheMetrics()
+  const { metrics, isLoading, refetch, clearCache, warmupCache } = useCacheMetrics()
   const [stats, setStats] = useState<CacheStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [clearing, setClearing] = useState(false)
@@ -357,7 +357,7 @@ export default function CachePage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {stats.recommendations.map((rec: any, index: any) => (
+                      {stats.recommendations.map((rec, index) => (
                         <div key={index} className="flex items-start gap-2">
                           <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
                           <span className="text-sm text-gray-700 dark:text-gray-300">{rec}</span>

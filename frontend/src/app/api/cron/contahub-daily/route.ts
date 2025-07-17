@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     
     console.log(`📡 Executando edge function: ${edgeFunctionUrl}`)
     
-    const response = await fetch(edgeFunctionUrl: any, {
+    const response = await fetch(edgeFunctionUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

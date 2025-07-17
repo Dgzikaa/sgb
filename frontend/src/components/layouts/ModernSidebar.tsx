@@ -230,7 +230,7 @@ export function ModernSidebar() {
   const toggleExpanded = (label: string) => {
     setExpandedItems(prev => {
       const newState = prev.includes(label) 
-        ? prev.filter((item: any) => item !== label)
+        ? prev.filter((item) => item !== label)
         : [...prev, label]
       return newState
     })
@@ -249,7 +249,7 @@ export function ModernSidebar() {
     }
     
     // Se ná£o foi manipulado manualmente, pode usar expansá£o automá¡tica por hover
-    if (isHovered && hasActiveSubItem(allSidebarItems.find((item: any) => item.label === label)?.subItems)) {
+    if (isHovered && hasActiveSubItem(allSidebarItems.find((item) => item.label === label)?.subItems)) {
       return true
     }
     
@@ -294,7 +294,7 @@ export function ModernSidebar() {
           <div className="space-y-1">
             {/* Command Palette Search Button removido da sidebar */}
             
-            {allSidebarItems.map((item: any) => {
+            {allSidebarItems.map((item) => {
               const isItemActive = item.href ? isActive(item.href) : hasActiveSubItem(item.subItems)
               const itemExpanded = isExpanded(item.label)
               
@@ -340,7 +340,7 @@ export function ModernSidebar() {
                   {/* Sub-items */}
                   {item.subItems && isHovered && itemExpanded && (
                     <div className="ml-6 mt-1 space-y-1 animate-slide-in-from-top">
-                      {item.subItems.map((subItem: any) => {
+                      {item.subItems.map((subItem) => {
                         const isSubActive = isActive(subItem.href)
                         
                         return (

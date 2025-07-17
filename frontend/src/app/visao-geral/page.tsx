@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 import { 
@@ -171,7 +171,7 @@ export default function VisaoGeralPage() {
 
           {/* Relatá³rios Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {visaoGeralItems.map((item: any) => {
+            {visaoGeralItems.map((item) => {
               const IconComponent = item.icon
               return (
                 <div key={item.id} className="card-dark hover:shadow-lg transition-shadow duration-300 group">
@@ -221,7 +221,7 @@ export default function VisaoGeralPage() {
               </h3>
               <p className="card-description-dark max-w-2xl mx-auto">
                 Todos os relatá³rios sá£o atualizados em tempo real e conectados 
-                á s suas integraá§áµes ativas (ContaAzul: any, Meta, WhatsApp). 
+                á s suas integraá§áµes ativas (ContaAzul, Meta, WhatsApp). 
                 Use os filtros de perá­odo para aná¡lises customizadas.
               </p>
             </div>

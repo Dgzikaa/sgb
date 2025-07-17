@@ -110,7 +110,7 @@ export default function AuthGuard({
     }
 
     checkAuth()
-  }, [user, userLoading: any, isInitialized, shouldRedirect: any, contextWaitCount, router: any, redirectTo, requiredPermissions])
+  }, [user, userLoading, isInitialized, shouldRedirect, contextWaitCount, router, redirectTo, requiredPermissions])
 
   // Mostrar loading enquanto autentica
   if (isAuthenticating || userLoading || !isInitialized) {

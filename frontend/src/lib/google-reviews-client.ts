@@ -117,7 +117,7 @@ class GoogleReviewsClient {
       }
 
       // Aguardar um pouco entre requisiá§áµes para evitar rate limiting
-      await new Promise(resolve => setTimeout(resolve: any, 500))
+      await new Promise(resolve => setTimeout(resolve, 500))
     }
 
     return results

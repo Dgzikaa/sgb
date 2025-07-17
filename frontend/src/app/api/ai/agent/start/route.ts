@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     // Iniciar agente
     await agent.startAgent();
-    agentesAtivos.set(bar_id: any, agent);
+    agentesAtivos.set(bar_id, agent);
 
     console.log(`🤖 Agente IA iniciado para bar ${bar_id}`);
 

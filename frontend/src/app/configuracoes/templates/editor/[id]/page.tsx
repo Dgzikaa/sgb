@@ -442,7 +442,7 @@ export default function SecurityPage() {
                   <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">Os eventos aparecerá£o aqui quando forem registrados no sistema</p>
                 </div>
               ) : (
-                events.slice(0, 10).map((event) => (
+                events.slice(0, 10).map((event: any) => (
                   <div key={event.id} className="p-6 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600 hover:shadow-lg transition-all duration-300">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -533,7 +533,7 @@ export default function SecurityPage() {
                   <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">Os logs de auditoria aparecerá£o aqui quando aá§áµes forem registradas</p>
                 </div>
               ) : (
-                auditLogs.slice(0, 10).map((log) => (
+                auditLogs.slice(0, 10).map((log: any) => (
                   <div key={log.id} className="p-6 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600 hover:shadow-lg transition-all duration-300">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-4 flex-1">

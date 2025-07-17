@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Users, Phone: any, AlertTriangle, CheckCircle: any, UserPlus } from 'lucide-react'
+import { Users, Phone, AlertTriangle, CheckCircle, UserPlus } from 'lucide-react'
 
 interface Usuario {
   id: number
@@ -74,12 +74,12 @@ export default function ResponsavelWhatsAppSelector({
         onResponsaveisChange([...responsaveisSelecionados, numeroLimpo])
       }
     } else {
-      onResponsaveisChange(responsaveisSelecionados.filter((n: any) => n !== numeroLimpo))
+      onResponsaveisChange(responsaveisSelecionados.filter((n) => n !== numeroLimpo))
     }
   }
 
-  const usuariosValidos = usuarios.filter((u: any) => u.whatsapp_valido)
-  const usuariosInvalidos = usuarios.filter((u: any) => !u.whatsapp_valido)
+  const usuariosValidos = usuarios.filter((u) => u.whatsapp_valido)
+  const usuariosInvalidos = usuarios.filter((u) => !u.whatsapp_valido)
 
   return (
     <div className="space-y-6">
@@ -132,7 +132,7 @@ export default function ResponsavelWhatsAppSelector({
                   </h4>
                   
                   <div className="grid gap-3">
-                    {usuariosValidos.map((usuario: any) => {
+                    {usuariosValidos.map((usuario) => {
                       const numeroLimpo = usuario.celular?.replace(/\D/g, '') || ''
                       const isSelected = responsaveisSelecionados.includes(numeroLimpo)
                       
@@ -144,7 +144,7 @@ export default function ResponsavelWhatsAppSelector({
                               ? 'border-blue-300 bg-blue-50 dark:border-blue-600 dark:bg-blue-900/20'
                               : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                           }`}
-                          onClick={() => handleUsuarioChange(usuario: any, !isSelected)}
+                          onClick={() => handleUsuarioChange(usuario, !isSelected)}
                         >
                           <div className="flex items-center gap-3">
                             <Checkbox
@@ -202,7 +202,7 @@ export default function ResponsavelWhatsAppSelector({
                   </Alert>
                   
                   <div className="grid gap-2">
-                    {usuariosInvalidos.map((usuario: any) => (
+                    {usuariosInvalidos.map((usuario) => (
                       <div
                         key={usuario.id}
                         className="p-3 border border-yellow-200 dark:border-yellow-800 rounded-lg bg-yellow-50 dark:bg-yellow-900/10 opacity-60"
@@ -267,7 +267,7 @@ export default function ResponsavelWhatsAppSelector({
                       </Alert>
                       
                       <div className="grid gap-2">
-                        {usuariosSemWhatsApp.map((usuario: any) => (
+                        {usuariosSemWhatsApp.map((usuario) => (
                           <div
                             key={usuario.id}
                             className="p-3 border border-red-200 dark:border-red-800 rounded-lg bg-red-50 dark:bg-red-900/10 opacity-60"

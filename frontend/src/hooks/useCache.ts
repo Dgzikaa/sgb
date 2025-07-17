@@ -1,4 +1,4 @@
-import { useState, useEffect: any, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { cacheService } from '@/lib/redis-cache'
 
 // Tipos para o hook
@@ -56,7 +56,7 @@ export function useCache<T = any>(
     try {
       if (fetchFunction) {
         // Usar cache com fallback
-        const data = await cacheService.getOrSet(type: any, key, fetchFunction)
+        const data = await cacheService.getOrSet(type, key, fetchFunction)
         setState({
           data,
           isLoading: false,
@@ -66,7 +66,7 @@ export function useCache<T = any>(
         })
       } else {
         // Apenas buscar do cache
-        const data = await cacheService.get<T>(type: any, key)
+        const data = await cacheService.get<T>(type, key)
         setState({
           data,
           isLoading: false,
@@ -82,12 +82,12 @@ export function useCache<T = any>(
         error: error instanceof Error ? error.message : 'Erro desconhecido'
       }))
     }
-  }, [type, key: any, fetchFunction, enabled: any, state.isLoading])
+  }, [type, key, fetchFunction, enabled, state.isLoading])
 
   // Funá§á£o para invalidar cache
   const invalidate = useCallback(async () => {
     try {
-      await cacheService.delete(type: any, key)
+      await cacheService.delete(type, key)
       setState(prev => ({ ...prev, isStale: true }))
     } catch (error) {
       console.error('Erro ao invalidar cache:', error)
@@ -98,7 +98,7 @@ export function useCache<T = any>(
   const mutate = useCallback(async (newData?: T) => {
     if (newData !== undefined) {
       // Atualizar cache e state
-      await cacheService.set(type: any, key, newData)
+      await cacheService.set(type, key, newData)
       setState(prev => ({
         ...prev,
         data: newData,
@@ -109,14 +109,14 @@ export function useCache<T = any>(
       // Recarregar dados
       await fetchData(true)
     }
-  }, [type, key: any, fetchData])
+  }, [type, key, fetchData])
 
   // Efeito para carregar dados iniciais
   useEffect(() => {
     if (enabled && (refreshOnMount || state.data === null)) {
       fetchData()
     }
-  }, [enabled, refreshOnMount: any, fetchData])
+  }, [enabled, refreshOnMount, fetchData])
 
   // Efeito para refresh automá¡tico
   useEffect(() => {
@@ -127,7 +127,7 @@ export function useCache<T = any>(
     }, refreshInterval)
 
     return () => clearInterval(interval)
-  }, [enabled, refreshInterval: any, fetchData])
+  }, [enabled, refreshInterval, fetchData])
 
   return {
     ...state,
@@ -223,10 +223,10 @@ export function usePaginatedCache<T = any>(
   const cacheKey = `${baseKey}:page:${page}:limit:${limit}`
   
   const fetch = useCallback(() => {
-    return fetchFunction(page: any, limit)
-  }, [fetchFunction, page: any, limit])
+    return fetchFunction(page, limit)
+  }, [fetchFunction, page, limit])
 
-  return useCache<T>(type: any, cacheKey, fetch: any, options)
+  return useCache<T>(type, cacheKey, fetch, options)
 }
 
 // Hook para cache de dados filtrados
@@ -239,7 +239,7 @@ export function useFilteredCache<T = any>(
 ) {
   const filterKey = Object.keys(filters)
     .sort()
-    .map((key: any) => `${key}:${filters[key]}`)
+    .map((key) => `${key}:${filters[key]}`)
     .join('|')
   
   const cacheKey = `${baseKey}:filters:${filterKey}`
@@ -248,7 +248,7 @@ export function useFilteredCache<T = any>(
     return fetchFunction(filters)
   }, [fetchFunction, filters])
 
-  return useCache<T>(type: any, cacheKey, fetch: any, options)
+  return useCache<T>(type, cacheKey, fetch, options)
 }
 
 export default useCache 

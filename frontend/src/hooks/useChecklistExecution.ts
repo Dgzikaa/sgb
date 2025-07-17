@@ -1,4 +1,4 @@
-import { useState, useEffect: any, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { api } from '@/lib/api-client'
 
 // =====================================================
@@ -10,7 +10,7 @@ interface ItemResposta {
   titulo: string
   tipo: 'texto' | 'numero' | 'sim_nao' | 'data' | 'assinatura' | 'foto_camera' | 'foto_upload' | 'avaliacao'
   obrigatorio: boolean
-  valor: any
+  valor
   anexos: {
     url: string
     nome: string
@@ -55,7 +55,7 @@ interface ExecucaoData {
   score_final?: number
   tempo_total_minutos?: number
   versao_checklist: number
-  estrutura_checklist: any
+  estrutura_checklist
   respostas: RespostasExecucao
   progresso: ProgressoExecucao
   checklist: {
@@ -97,8 +97,8 @@ interface UseChecklistExecutionResult {
   cancelarExecucao: (motivo?: string) => Promise<boolean>
   
   // Ediá§á£o de respostas
-  atualizarResposta: (secaoIndex: number, itemIndex: number, valor: any, anexos?: any[]) => void
-  adicionarAnexo: (secaoIndex: number, itemIndex: number, anexo: any) => void
+  atualizarResposta: (secaoIndex: number, itemIndex: number, valor, anexos?: any[]) => void
+  adicionarAnexo: (secaoIndex: number, itemIndex: number, anexo) => void
   removerAnexo: (secaoIndex: number, itemIndex: number, anexoIndex: number) => void
   
   // Utilitá¡rios
@@ -156,7 +156,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
         clearTimeout(autoSaveTimer)
       }
     }
-  }, [execucao, execucaoOriginal: any, autoSaveEnabled])
+  }, [execucao, execucaoOriginal, autoSaveEnabled])
 
   // Atualizar validaá§á£o quando execuá§á£o muda
   useEffect(() => {
@@ -188,7 +188,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
         setError(response.error || 'Erro ao iniciar execuá§á£o')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao iniciar execuá§á£o:', err)
       setError('Erro ao iniciar execuá§á£o')
       return false
@@ -211,7 +211,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
       } else {
         setError(response.error || 'Erro ao carregar execuá§á£o')
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao carregar execuá§á£o:', err)
       setError('Erro ao carregar execuá§á£o')
     } finally {
@@ -245,7 +245,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
         setError(response.error || 'Erro ao salvar respostas')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao salvar respostas:', err)
       setError('Erro ao salvar respostas')
       return false
@@ -266,7 +266,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
         return false
       }
       
-      const payload: any = {
+      const payload = {
         observacoes_finais: observacoesFinais,
         confirmacao_finalizacao: true
       }
@@ -288,7 +288,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
         setError(response.error || 'Erro ao finalizar execuá§á£o')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao finalizar execuá§á£o:', err)
       setError('Erro ao finalizar execuá§á£o')
       return false
@@ -310,7 +310,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
         setError(response.error || 'Erro ao cancelar execuá§á£o')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao cancelar execuá§á£o:', err)
       setError('Erro ao cancelar execuá§á£o')
       return false
@@ -321,7 +321,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
   // EDIá‡áƒO DE RESPOSTAS
   // =====================================================
 
-  const atualizarResposta = useCallback((secaoIndex: number, itemIndex: number, valor: any, anexos?: any[]) => {
+  const atualizarResposta = useCallback((secaoIndex: number, itemIndex: number, valor, anexos?: any[]) => {
     if (!execucao) return
     
     setExecucao(prev => {
@@ -347,7 +347,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
     })
   }, [execucao])
 
-  const adicionarAnexo = useCallback((secaoIndex: number, itemIndex: number, anexo: any) => {
+  const adicionarAnexo = useCallback((secaoIndex: number, itemIndex: number, anexo) => {
     if (!execucao) return
     
     setExecucao(prev => {
@@ -386,7 +386,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
       const item = novaExecucao.respostas.secoes[secaoIndex]?.itens[itemIndex]
       
       if (item?.anexos) {
-        item.anexos.splice(anexoIndex: any, 1)
+        item.anexos.splice(anexoIndex, 1)
         
         // Se ná£o tem mais anexos e á© campo de anexo obrigatá³rio, marcar como ná£o respondido
         if (item.anexos.length === 0 && ['foto_camera', 'foto_upload', 'assinatura'].includes(item.tipo) && item.obrigatorio) {
@@ -520,8 +520,8 @@ function validarExecucao(execucao: ExecucaoData): ValidacaoExecucao {
     }
   }
   
-  execucao.respostas.secoes.forEach((secao: any, secaoIndex: any) => {
-    secao.itens.forEach((item: any, itemIndex: any) => {
+  execucao.respostas.secoes.forEach((secao, secaoIndex) => {
+    secao.itens.forEach((item, itemIndex) => {
       if (item.obrigatorio && !item.respondido) {
         erros.push(`Campo obrigatá³rio "${item.titulo}" ná£o foi preenchido`)
         camposObrigatoriosVazios++
@@ -608,7 +608,7 @@ export function useChecklistExecutions() {
       } else {
         setError(response.error || 'Erro ao carregar execuá§áµes')
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao carregar execuá§áµes:', err)
       setError('Erro ao carregar execuá§áµes')
     } finally {

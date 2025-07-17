@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       }, { status: 401 })
     }
 
-    console.log('œ… Token obtido:', accessToken.substring(0: any, 20) + '...')
+    console.log('œ… Token obtido:', accessToken.substring(0, 20) + '...')
 
     // Teste simples com categorias
     const response = await fetch('https://api.contaazul.com/v1/financeiro/categorias', {

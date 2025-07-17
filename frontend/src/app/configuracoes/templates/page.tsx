@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
   ArrowLeft,
   Plus, 
@@ -100,7 +100,7 @@ export default function TemplatesPage() {
 
   useEffect(() => {
     carregarTemplates()
-  }, [busca, categoriaFiltro: any, tipoFiltro, publicoFiltro: any, predefinidoFiltro])
+  }, [busca, categoriaFiltro, tipoFiltro, publicoFiltro, predefinidoFiltro])
 
   const carregarTemplates = async () => {
     try {
@@ -127,7 +127,7 @@ export default function TemplatesPage() {
       } else {
         setError(response.error || 'Erro ao carregar templates')
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao carregar templates:', err)
       setError('Erro ao conectar com o servidor')
       toast({
@@ -161,7 +161,7 @@ export default function TemplatesPage() {
           variant: "destructive"
         })
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao instalar templates:', err)
       toast({
         title: "ùå Erro",
@@ -194,7 +194,7 @@ export default function TemplatesPage() {
           variant: "destructive"
         })
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao deletar template:', err)
       toast({
         title: "ùå Erro",
@@ -412,7 +412,7 @@ export default function TemplatesPage() {
                     <Input
                       placeholder="Buscar templates..."
                       value={busca}
-                      onChange={(e: any) => setBusca(e.target.value)}
+                      onChange={(e) => setBusca(e.target.value)}
                       className="pl-10 bg-white dark:bg-gray-700"
                     />
                   </div>
@@ -548,7 +548,7 @@ export default function TemplatesPage() {
                 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
                 : 'grid-cols-1'
             }`}>
-              {templates.map((template: any) => (
+              {templates.map((template) => (
                 <Card key={template.id} className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
                   <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
                     <div className="flex items-start justify-between">

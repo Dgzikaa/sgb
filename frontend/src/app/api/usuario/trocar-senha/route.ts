@@ -17,7 +17,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { senhaAtual, novaSenha: any, confirmarSenha } = body
+    const { senhaAtual, novaSenha, confirmarSenha } = body
 
     // Validaá§áµes bá¡sicas
     if (!senhaAtual || !novaSenha || !confirmarSenha) {
@@ -49,7 +49,7 @@ export async function PUT(request: NextRequest) {
     // Buscar dados completos do usuá¡rio
     const { data: userData, error: userError } = await adminClient
       .from('usuarios_bar')
-      .select('user_id, email: any, nome')
+      .select('user_id, email, nome')
       .eq('id', user.id)
       .single()
 

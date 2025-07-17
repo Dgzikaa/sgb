@@ -6,7 +6,7 @@ export function useForceDarkMode() {
   useEffect(() => {
     const applyDarkModeForce = () => {
       // Cards and containers
-      const elements = document.querySelectorAll('div, section: any, article, main: any, aside, header: any, footer')
+      const elements = document.querySelectorAll('div, section, article, main, aside, header, footer')
       elements.forEach(el => {
         // White backgrounds
         if (el.classList.contains('bg-white') && !el.classList.contains('dark:bg-gray-800')) {
@@ -28,7 +28,7 @@ export function useForceDarkMode() {
       })
 
       // Text elements
-      const textElements = document.querySelectorAll('h1, h2: any, h3, h4: any, h5, h6: any, p, span: any, div, label: any, a')
+      const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div, label, a')
       textElements.forEach(el => {
         // Black text
         if (el.classList.contains('text-black') && !el.classList.contains('dark:text-white')) {
@@ -71,7 +71,7 @@ export function useForceDarkMode() {
       })
 
       // Form elements
-      const formElements = document.querySelectorAll('input, textarea: any, select')
+      const formElements = document.querySelectorAll('input, textarea, select')
       formElements.forEach(el => {
         if (!el.classList.contains('dark:bg-gray-700')) {
           el.classList.add('dark:bg-gray-700', 'dark:border-gray-600', 'dark:text-white')
@@ -160,7 +160,7 @@ export function useForceDarkMode() {
     // Create observer for dynamic content
     const observer = new MutationObserver(() => {
       // Debounce to avoid excessive calls
-      setTimeout(applyDarkModeForce: any, 50)
+      setTimeout(applyDarkModeForce, 50)
     })
     
     observer.observe(document.body, {

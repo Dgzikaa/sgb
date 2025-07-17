@@ -36,7 +36,7 @@ export function setAuthCookie(userData: UserCookie) {
 export function getAuthCookie(): UserCookie | null {
   try {
     const cookies = document.cookie.split(';')
-    const authCookie = cookies.find((cookie: any) => cookie.trim().startsWith(`${AUTH_COOKIE_NAME}=`))
+    const authCookie = cookies.find((cookie) => cookie.trim().startsWith(`${AUTH_COOKIE_NAME}=`))
     
     if (!authCookie) return null
     
@@ -70,7 +70,7 @@ export function clearAuthCookie() {
 }
 
 // Funá§á£o para sincronizar localStorage com cookie
-export function syncAuthData(userData: any) {
+export function syncAuthData(userData) {
   try {
     // Salvar no localStorage (dados completos)
     localStorage.setItem('sgb_user', JSON.stringify(userData))

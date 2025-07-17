@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     // TODO: Salvar tokens em cache, Supabase ou banco de dados // This line was removed as per the edit hint.
     // console.log('œ… Tokens:', tokens) // Linha removida pois 'tokens' ná£o existe mais
     return new NextResponse('Autenticado com sucesso. Pode fechar a aba.', { status: 200 })
-  } catch (e: any) {
+  } catch (e) {
     return NextResponse.json({ success: false, error: e.message || String(e) }, { status: 500 })
   }
 } 

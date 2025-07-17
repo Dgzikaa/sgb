@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const periodo = searchParams.get('periodo') || '30' // dias
     
-    console.log('ðŸ“Š Funil de Conversá£o - Analisando para bar:', barId: any, 'perá­odo:', periodo: any, 'dias')
+    console.log('ðŸ“Š Funil de Conversá£o - Analisando para bar:', barId, 'perá­odo:', periodo, 'dias')
 
     // 1. DEFINIR ETAPAS DO FUNIL
     const etapasFunil = [
@@ -92,11 +92,11 @@ export async function GET(request: NextRequest) {
       .gte('updated_at', dataLimite.toISOString())
 
     // 3. CALCULAR Má‰TRICAS DO FUNIL
-    const calcularMetricasFunil = (dadosIG: any[], dadosFB: any[]) => {
+    const calcularMetricasFunil = (dadosIG[], dadosFB[]) => {
       const todosOsDados = [...(dadosIG || []), ...(dadosFB || [])]
       
       if (todosOsDados.length === 0) {
-        return etapasFunil.map((etapa: any) => ({
+        return etapasFunil.map((etapa) => ({
           ...etapa,
           valor: 0,
           taxa_conversao: 0,
@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
       }
 
       // Somar totais
-      const totais = todosOsDados.reduce((acc: any, item: any) => {
+      const totais = todosOsDados.reduce((acc, item) => {
         return {
           impressions: acc.impressions + (item.impressions || 0),
           reach: acc.reach + (item.reach || 0),
@@ -132,10 +132,10 @@ export async function GET(request: NextRequest) {
       const leads = totais.leads || Math.floor(clicks * 0.20) // 20% viram leads
       const conversions = totais.conversions || Math.floor(leads * 0.35) // 35% convertem
 
-      const valoresFunil = [impressions, reach: any, engagement, clicks: any, leads, conversions]
+      const valoresFunil = [impressions, reach, engagement, clicks, leads, conversions]
       const custoEstimado = 500 // R$ 500 de investimento estimado
 
-      return etapasFunil.map((etapa: any, index: any) => {
+      return etapasFunil.map((etapa, index) => {
         const valor = valoresFunil[index]
         const valorAnterior = index > 0 ? valoresFunil[index - 1] : valor
         const taxaConversao = valorAnterior > 0 ? (valor / valorAnterior) * 100 : 0
@@ -156,7 +156,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 4. ANALISAR PONTOS DE VAZAMENTO
-    const analisarVazamentos = (metricasFunil: any[]) => {
+    const analisarVazamentos = (metricasFunil[]) => {
       const vazamentos = []
       
       for (let i = 0; i < metricasFunil.length - 1; i++) {
@@ -179,7 +179,7 @@ export async function GET(request: NextRequest) {
         }
       }
       
-      return vazamentos.sort((a: any, b: any) => b.oportunidade_receita - a.oportunidade_receita)
+      return vazamentos.sort((a, b) => b.oportunidade_receita - a.oportunidade_receita)
     }
 
     // 5. GERAR Aá‡á•ES POR VAZAMENTO
@@ -217,7 +217,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 6. CALCULAR ROI DETALHADO
-    const calcularROIDetalhado = (metricasFunil: any[], custoTotal: number = 500) => {
+    const calcularROIDetalhado = (metricasFunil[], custoTotal: number = 500) => {
       const conversoes = metricasFunil[metricasFunil.length - 1].valor
       const receitaTotal = conversoes * 85 // R$ 85 por conversá£o
       const roi = ((receitaTotal - custoTotal) / custoTotal) * 100
@@ -236,7 +236,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 7. SUGERIR OTIMIZAá‡á•ES
-    const sugerirOtimizacoes = (metricasFunil: any[], vazamentos: any[], roi: any) => {
+    const sugerirOtimizacoes = (metricasFunil[], vazamentos[], roi) => {
       const otimizacoes = []
       
       // Otimizaá§áµes baseadas em ROI
@@ -279,7 +279,7 @@ export async function GET(request: NextRequest) {
         }
       })
       
-      return otimizacoes.sort((a: any, b: any) => {
+      return otimizacoes.sort((a, b) => {
         const prioridades = { critica: 4, alta: 3, media: 2, baixa: 1 }
         return prioridades[b.prioridade as keyof typeof prioridades] - prioridades[a.prioridade as keyof typeof prioridades]
       })
@@ -289,12 +289,12 @@ export async function GET(request: NextRequest) {
     const metricasFunil = calcularMetricasFunil(instagramData || [], facebookData || [])
     const vazamentos = analisarVazamentos(metricasFunil)
     const roiDetalhado = calcularROIDetalhado(metricasFunil)
-    const otimizacoes = sugerirOtimizacoes(metricasFunil: any, vazamentos, roiDetalhado)
+    const otimizacoes = sugerirOtimizacoes(metricasFunil, vazamentos, roiDetalhado)
 
     // 8. CALCULAR PROJEá‡á•ES
-    const calcularProjecoes = (metricasFunil: any[], otimizacoes: any[]) => {
+    const calcularProjecoes = (metricasFunil[], otimizacoes[]) => {
       const conversaoAtual = metricasFunil[metricasFunil.length - 1].valor
-      const melhoriaEstimada = otimizacoes.reduce((acc: any, opt: any) => {
+      const melhoriaEstimada = otimizacoes.reduce((acc, opt) => {
         if (opt.categoria === 'Vazamento') return acc + 0.15 // 15% melhoria
         if (opt.categoria === 'Meta') return acc + 0.10 // 10% melhoria
         return acc + 0.05 // 5% melhoria
@@ -313,7 +313,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const projecoes = calcularProjecoes(metricasFunil: any, otimizacoes)
+    const projecoes = calcularProjecoes(metricasFunil, otimizacoes)
 
     const resultado = {
       success: true,

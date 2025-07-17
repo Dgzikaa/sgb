@@ -18,9 +18,9 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    console.log('üß™ Iniciando teste do webhook Discord de seguran√ßa...')
+    console.log('üß™ Iniciando teste do webhook Discord de seguran·ßa...')
 
-    // Buscar webhook da configura√ß√£o
+    // Buscar webhook da configura·ß·£o
     const { data: webhookConfig, error: configError } = await supabaseClient
       .from('api_credentials')
       .select('configuracoes')
@@ -30,11 +30,11 @@ serve(async (req) => {
       .single()
 
     if (configError || !webhookConfig?.configuracoes?.webhook_url) {
-      console.error('‚ùå Webhook n√£o configurado:', configError)
+      console.error('ùå Webhook n·£o configurado:', configError)
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Webhook n√£o configurado',
+          error: 'Webhook n·£o configurado',
           details: configError 
         }),
         { 
@@ -59,7 +59,7 @@ serve(async (req) => {
       endpoint: '/functions/v1/discord-security-test',
       details: {
         test_type: 'webhook_verification',
-        message: 'TESTE MANUAL DO SISTEMA DE SEGURAN√áA',
+        message: 'TESTE MANUAL DO SISTEMA DE SEGURAN·áA',
         triggered_by: 'edge_function',
         timestamp: new Date().toISOString()
       },
@@ -72,25 +72,25 @@ serve(async (req) => {
       .insert([testEvent])
 
     if (insertError) {
-      console.error('‚ùå Erro ao inserir evento:', insertError)
+      console.error('ùå Erro ao inserir evento:', insertError)
     } else {
-      console.log('‚úÖ Evento de teste registrado no banco')
+      console.log('úÖ Evento de teste registrado no banco')
     }
 
     // Preparar mensagem para Discord
     const discordMessage = {
       embeds: [{
-        title: 'üß™ TESTE DO SISTEMA DE SEGURAN√áA',
-        description: `**TESTE MANUAL** - Verificando funcionamento do webhook\n\n**Se voc√™ est√° vendo esta mensagem, o sistema est√° funcionando corretamente!**`,
+        title: 'üß™ TESTE DO SISTEMA DE SEGURAN·áA',
+        description: `**TESTE MANUAL** - Verificando funcionamento do webhook\n\n**Se voc·™ est·° vendo esta mensagem, o sistema est·° funcionando corretamente!**`,
         color: 0xff6600, // Orange para teste
         fields: [
           {
             name: 'üéØ Tipo de Teste',
-            value: 'Webhook Discord - Sistema de Seguran√ßa',
+            value: 'Webhook Discord - Sistema de Seguran·ßa',
             inline: true
           },
           {
-            name: '‚è∞ Timestamp',
+            name: 'è∞ Timestamp',
             value: new Date().toLocaleString('pt-BR'),
             inline: true
           },
@@ -129,7 +129,7 @@ serve(async (req) => {
 
     if (!discordResponse.ok) {
       const errorText = await discordResponse.text()
-      console.error('‚ùå Erro ao enviar para Discord:', discordResponse.status, errorText)
+      console.error('ùå Erro ao enviar para Discord:', discordResponse.status, errorText)
       
       return new Response(
         JSON.stringify({ 
@@ -145,7 +145,7 @@ serve(async (req) => {
       )
     }
 
-    console.log('‚úÖ Mensagem enviada para Discord com sucesso!')
+    console.log('úÖ Mensagem enviada para Discord com sucesso!')
 
     return new Response(
       JSON.stringify({ 
@@ -161,7 +161,7 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('‚ùå Erro no teste do Discord:', error)
+    console.error('ùå Erro no teste do Discord:', error)
     
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     const errorStack = error instanceof Error ? error.stack : undefined

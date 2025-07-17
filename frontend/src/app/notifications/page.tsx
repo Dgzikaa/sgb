@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { 
@@ -85,7 +85,7 @@ export default function NotificationsPage() {
   const handleMarcarComoLida = async (id: string) => {
     const sucesso = await marcarComoLida(id)
     if (sucesso) {
-      setSelecionadas(prev => prev.filter((item: any) => item !== id))
+      setSelecionadas(prev => prev.filter((item) => item !== id))
     }
   }
 
@@ -99,7 +99,7 @@ export default function NotificationsPage() {
   const handleExcluirNotificacao = async (id: string) => {
     const sucesso = await excluirNotificacao(id)
     if (sucesso) {
-      setSelecionadas(prev => prev.filter((item: any) => item !== id))
+      setSelecionadas(prev => prev.filter((item) => item !== id))
     }
   }
 
@@ -128,7 +128,7 @@ export default function NotificationsPage() {
     if (selecionadas.length === notificacoes.length) {
       setSelecionadas([])
     } else {
-      setSelecionadas(notificacoes.map((n: any) => n.id))
+      setSelecionadas(notificacoes.map((n) => n.id))
     }
   }
 
@@ -179,7 +179,7 @@ export default function NotificationsPage() {
     }
   }
 
-  const notificacoesFiltradas = notificacoes.filter((notificacao: any) => {
+  const notificacoesFiltradas = notificacoes.filter((notificacao) => {
     if (busca && !notificacao.titulo.toLowerCase().includes(busca.toLowerCase()) && 
         !notificacao.mensagem.toLowerCase().includes(busca.toLowerCase())) {
       return false
@@ -335,12 +335,12 @@ export default function NotificationsPage() {
                 <Input
                   placeholder="Buscar notificaá§áµes..."
                   value={busca}
-                  onChange={(e: any) => handleBusca(e.target.value)}
+                  onChange={(e) => handleBusca(e.target.value)}
                   className="pl-10 bg-white dark:bg-gray-700"
                 />
               </div>
 
-              <Select value={filtros.status || ''} onValueChange={(value: any) => handleFiltros({ ...filtros, status: value as any || undefined })}>
+              <Select value={filtros.status || ''} onValueChange={(value) => handleFiltros({ ...filtros, status: value as any || undefined })}>
                 <SelectTrigger className="bg-white dark:bg-gray-700">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
@@ -352,7 +352,7 @@ export default function NotificationsPage() {
                 </SelectContent>
               </Select>
 
-              <Select value={filtros.modulo || ''} onValueChange={(value: any) => handleFiltros({ ...filtros, modulo: value || undefined })}>
+              <Select value={filtros.modulo || ''} onValueChange={(value) => handleFiltros({ ...filtros, modulo: value || undefined })}>
                 <SelectTrigger className="bg-white dark:bg-gray-700">
                   <SelectValue placeholder="Má³dulo" />
                 </SelectTrigger>
@@ -367,7 +367,7 @@ export default function NotificationsPage() {
                 </SelectContent>
               </Select>
 
-              <Select value={filtros.prioridade || ''} onValueChange={(value: any) => handleFiltros({ ...filtros, prioridade: value || undefined })}>
+              <Select value={filtros.prioridade || ''} onValueChange={(value) => handleFiltros({ ...filtros, prioridade: value || undefined })}>
                 <SelectTrigger className="bg-white dark:bg-gray-700">
                   <SelectValue placeholder="Prioridade" />
                 </SelectTrigger>
@@ -442,7 +442,7 @@ export default function NotificationsPage() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {notificacoesFiltradas.map((notificacao: any) => (
+            {notificacoesFiltradas.map((notificacao) => (
               <Card key={notificacao.id} className={`bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group ${
                 notificacao.status === 'pendente' ? 'ring-2 ring-blue-200 dark:ring-blue-800' : ''
               }`}>
@@ -497,7 +497,7 @@ export default function NotificationsPage() {
                           </div>
 
                           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {notificacao.acoes?.map((acao: any, index: any) => (
+                            {notificacao.acoes?.map((acao, index) => (
                               <Button
                                 key={index}
                                 size="sm"

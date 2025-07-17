@@ -12,10 +12,10 @@ const supabase = createClient(
 
 serve(async (req: Request) => {
   if (!GOOGLE_ACCESS_TOKEN || !ACCOUNT_ID || !LOCATION_ID) {
-    return new Response(JSON.stringify({ error: 'Token, AccountId ou LocationId n√£o configurados.' }), { status: 500 })
+    return new Response(JSON.stringify({ error: 'Token, AccountId ou LocationId n·£o configurados.' }), { status: 500 })
   }
 
-  // Buscar avalia√ß√µes do Google Business Profile
+  // Buscar avalia·ß·µes do Google Business Profile
   const url = `https://mybusiness.googleapis.com/v4/accounts/${ACCOUNT_ID}/locations/${LOCATION_ID}/reviews`
   const res = await fetch(url, {
     headers: {
@@ -31,7 +31,7 @@ serve(async (req: Request) => {
 
   // Salvar no Supabase (tabela avaliacoes_google_raw)
   const { error } = await supabase.from('avaliacoes_google_raw').insert({
-    bar_id: 1, // TODO: parametrizar conforme necess√°rio
+    bar_id: 1, // TODO: parametrizar conforme necess·°rio
     data_coleta: new Date().toISOString().split('T')[0],
     json_raw: data,
     criado_em: new Date().toISOString()

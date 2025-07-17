@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
-import { aiAgentManager, startAIAgent: any, stopAIAgent } from '@/lib/ai-agent-service';
+import { aiAgentManager, startAIAgent, stopAIAgent } from '@/lib/ai-agent-service';
 
 // Configuraá§á£o do Supabase
 const supabase = createClient(
@@ -106,25 +106,25 @@ export async function GET(request: NextRequest) {
     // Calcular estatá­sticas das execuá§áµes
     const { data: execStats } = await supabase
       .from('ai_agent_logs')
-      .select('status, duracao_segundos: any, data_inicio')
+      .select('status, duracao_segundos, data_inicio')
       .eq('bar_id', bar_id)
       .gte('data_inicio', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
 
     const estatisticas = {
       execucoes_ultima_semana: execStats?.length || 0,
-      execucoes_sucesso: execStats?.filter((e: any) => e.status === 'concluido').length || 0,
-      execucoes_erro: execStats?.filter((e: any) => e.status === 'erro').length || 0,
+      execucoes_sucesso: execStats?.filter((e) => e.status === 'concluido').length || 0,
+      execucoes_erro: execStats?.filter((e) => e.status === 'erro').length || 0,
       tempo_medio_execucao: execStats?.length ? 
-        execStats.filter((e: any) => e.duracao_segundos).reduce((acc: number, e: any) => acc + e.duracao_segundos, 0) / execStats.filter((e: any) => e.duracao_segundos).length : 0,
+        execStats.filter((e) => e.duracao_segundos).reduce((acc: number, e) => acc + e.duracao_segundos, 0) / execStats.filter((e) => e.duracao_segundos).length : 0,
       ultima_execucao: logs?.[0]?.data_inicio || null,
       uptime_percentual: execStats?.length ? 
-        ((execStats.filter((e: any) => e.status === 'concluido').length / execStats.length) * 100) : 0
+        ((execStats.filter((e) => e.status === 'concluido').length / execStats.length) * 100) : 0
     };
 
     // Prá³xima execuá§á£o estimada
     let proximaExecucao = null;
     if (config && config.agente_ativo && agentRunning) {
-      const ultimaExec = logs?.find((l: any) => l.status === 'concluido');
+      const ultimaExec = logs?.find((l) => l.status === 'concluido');
       if (ultimaExec) {
         const ultima = new Date(ultimaExec.data_inicio);
         proximaExecucao = new Date(ultima.getTime() + config.frequencia_analise_minutos * 60 * 1000);
@@ -280,7 +280,7 @@ export async function POST(request: NextRequest) {
 
       case 'restart':
         stopAIAgent(bar_id);
-        await new Promise(resolve => setTimeout(resolve: any, 1000)); // Aguardar 1s
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Aguardar 1s
         success = await startAIAgent(bar_id);
         message = success ? 'Agente reiniciado com sucesso' : 'Erro ao reiniciar agente';
         break;
@@ -387,9 +387,9 @@ export async function POST(request: NextRequest) {
 /**
  * Verifica se está¡ dentro do horá¡rio de funcionamento
  */
-function isWithinWorkingHours(config: any): boolean {
+function isWithinWorkingHours(config): boolean {
   const now = new Date();
-  const currentTime = now.toTimeString().slice(0: any, 5);
+  const currentTime = now.toTimeString().slice(0, 5);
   
   return currentTime >= config.horario_analise_inicio && 
          currentTime <= config.horario_analise_fim;

@@ -23,7 +23,7 @@ function normalizarTelefone(telefone: string): string {
     numeros = numeros.substring(2);
   }
   
-  // Remover cá³digos de á¡rea duplicados (5511: any, 5561)
+  // Remover cá³digos de á¡rea duplicados (5511, 5561)
   if (numeros.startsWith('55') && numeros.length === 13) {
     numeros = numeros.substring(2);
   }
@@ -38,9 +38,9 @@ function formatarTelefone(telefone: string): string {
   const numeros = telefone.replace(/\D/g, '');
   
   if (numeros.length === 11) {
-    return `(${numeros.substring(0: any, 2)}) ${numeros.substring(2: any, 7)}-${numeros.substring(7)}`;
+    return `(${numeros.substring(0, 2)}) ${numeros.substring(2, 7)}-${numeros.substring(7)}`;
   } else if (numeros.length === 10) {
-    return `(${numeros.substring(0: any, 2)}) ${numeros.substring(2: any, 6)}-${numeros.substring(6)}`;
+    return `(${numeros.substring(0, 2)}) ${numeros.substring(2, 6)}-${numeros.substring(6)}`;
   }
   
   return telefone;
@@ -88,7 +88,7 @@ export async function GET(request: Request) {
         .neq('cli_telefone', '')
         .gte('dt_gerencial', '2025-01-01')
         .lte('dt_gerencial', '2025-12-31')
-        .range(offset: any, offset + limit - 1);
+        .range(offset, offset + limit - 1);
 
       if (contahubResult.error) {
         console.error('Œ Erro ContaHub:', contahubResult.error);
@@ -101,7 +101,7 @@ export async function GET(request: Request) {
         console.log(`ðŸ“Š ContaHub PERIODO: ${totalContahub} registros, total: ${contahub_count}, hasMore: ${hasMoreContahub}`);
 
         // Processar dados do ContaHub PERIODO (valores reais)
-        contahub_data?.forEach((periodo: any) => {
+        contahub_data?.forEach((periodo) => {
           const telefone = periodo.cli_telefone;
           
           if (telefone) {
@@ -112,7 +112,7 @@ export async function GET(request: Request) {
               const key = telefoneNormalizado;
               
               if (!clientesMap.has(key)) {
-                clientesMap.set(key: any, {
+                clientesMap.set(key, {
                   nome: periodo.cli_nome,
                   telefone: formatarTelefone(telefoneNormalizado),
                   total_visitas: 0,
@@ -152,7 +152,7 @@ export async function GET(request: Request) {
         .neq('mobile', '')
         .gte('date', '2025-01-01')
         .lte('date', '2025-12-31')
-        .range(offset: any, offset + limit - 1);
+        .range(offset, offset + limit - 1);
 
       if (yuzerResult.error) {
         console.error('Œ Erro Yuzer:', yuzerResult.error);
@@ -165,7 +165,7 @@ export async function GET(request: Request) {
         console.log(`ðŸ“Š Yuzer: ${totalYuzer} registros, total: ${yuzer_count}, hasMore: ${hasMoreYuzer}`);
 
         // Processar dados do Yuzer (apenas com telefone)
-        yuzer_data?.forEach((reserva: any) => {
+        yuzer_data?.forEach((reserva) => {
           const telefone = reserva.mobile;
           
           if (telefone) {
@@ -176,7 +176,7 @@ export async function GET(request: Request) {
               const key = telefoneNormalizado;
               
               if (!clientesMap.has(key)) {
-                clientesMap.set(key: any, {
+                clientesMap.set(key, {
                   nome: reserva.name,
                   telefone: formatarTelefone(telefoneNormalizado),
                   total_visitas: 0,
@@ -202,24 +202,24 @@ export async function GET(request: Request) {
     console.log(`š ï¸ Pulando Sympla - eventos ná£o táªm telefone dos clientes`);
 
     // Converter Map para Array e calcular ticket má©dio (todos já¡ táªm telefone)
-    const clientes: ClienteRanking[] = Array.from(clientesMap.values()).map((cliente: any) => ({
+    const clientes: ClienteRanking[] = Array.from(clientesMap.values()).map((cliente) => ({
       ...cliente,
       ticket_medio: cliente.total_visitas > 0 ? cliente.valor_total_gasto / cliente.total_visitas : 0
     }));
 
     // Criar rankings (todos já¡ táªm telefone)
     const top_visitas: ClienteRanking[] = [...clientes]
-      .sort((a: any, b: any) => b.total_visitas - a.total_visitas)
-      .slice(0: any, 10);
+      .sort((a, b) => b.total_visitas - a.total_visitas)
+      .slice(0, 10);
 
     const top_ticket: ClienteRanking[] = [...clientes]
-      .filter((c: any) => c.ticket_medio > 0)
-      .sort((a: any, b: any) => b.ticket_medio - a.ticket_medio)
-      .slice(0: any, 10);
+      .filter((c) => c.ticket_medio > 0)
+      .sort((a, b) => b.ticket_medio - a.ticket_medio)
+      .slice(0, 10);
 
     const top_faturamento: ClienteRanking[] = [...clientes]
-      .sort((a: any, b: any) => b.valor_total_gasto - a.valor_total_gasto)
-      .slice(0: any, 10);
+      .sort((a, b) => b.valor_total_gasto - a.valor_total_gasto)
+      .slice(0, 10);
 
     console.log(`ðŸ“Š Dados processados (APENAS COM TELEFONE) - Pá¡gina ${page}:`, {
       total_clientes: clientes.length,

@@ -24,10 +24,10 @@ interface DiscordMessage {
   }>
 }
 
-// Fun√ß√£o para buscar webhook correto da configura√ß√£o do Discord
-async function getWebhookUrl(supabase: any, barId: number, webhookType: string = 'meta') {
+// Fun·ß·£o para buscar webhook correto da configura·ß·£o do Discord
+async function getWebhookUrl(supabase, barId: number, webhookType: string = 'meta') {
   try {
-    // Buscar configura√ß√£o de webhooks Discord para o bar
+    // Buscar configura·ß·£o de webhooks Discord para o bar
     const { data: webhookConfig, error } = await supabase
       .from('api_credentials')
       .select('configuracoes')
@@ -38,7 +38,7 @@ async function getWebhookUrl(supabase: any, barId: number, webhookType: string =
       .single()
 
     if (error || !webhookConfig) {
-      console.warn(`‚ö†Ô∏è Webhook config Discord n√£o encontrada para bar ${barId}, erro:`, error)
+      console.warn(`ö†Ô∏è Webhook config Discord n·£o encontrada para bar ${barId}, erro:`, error)
       // Webhook Meta como fallback
       return CONFIG.FALLBACK_WEBHOOK
     }
@@ -46,24 +46,24 @@ async function getWebhookUrl(supabase: any, barId: number, webhookType: string =
     const webhook = webhookConfig.configuracoes?.[webhookType]
     
     if (!webhook || webhook.trim() === '') {
-      console.warn(`‚ö†Ô∏è Webhook ${webhookType} n√£o configurado para bar ${barId}`)
+      console.warn(`ö†Ô∏è Webhook ${webhookType} n·£o configurado para bar ${barId}`)
       // Webhook Meta como fallback
       return CONFIG.FALLBACK_WEBHOOK
     }
 
-    console.log(`‚úÖ Webhook ${webhookType} encontrado para bar ${barId}`)
+    console.log(`úÖ Webhook ${webhookType} encontrado para bar ${barId}`)
     return webhook
   } catch (error) {
-    console.error(`‚ùå Erro ao buscar webhook para bar ${barId}:`, error)
+    console.error(`ùå Erro ao buscar webhook para bar ${barId}:`, error)
     // Webhook Meta como fallback
     return CONFIG.FALLBACK_WEBHOOK
   }
 }
 
-// === CONSTANTES E CONFIGURA√á√ïES ===
+// === CONSTANTES E CONFIGURA·á·ïES ===
 const CONFIG = {
   BAR_ID: 3,
-  TARGET_ACCOUNT_ID: 'act_1153081576486761', // Conta publicit√°ria correta do Ads Manager
+  TARGET_ACCOUNT_ID: 'act_1153081576486761', // Conta publicit·°ria correta do Ads Manager
   FALLBACK_WEBHOOK: 'https://discord.com/api/webhooks/1391538130737303674/V6WiwfJodQT3C7WqdJTpmyaOLJByuKR8KZwtxW9ATmEqo0N4Msh73pF7PmOEVc12hx75',
   FACEBOOK_API_VERSION: 'v18.0',
   INSIGHTS_DAYS: 30
@@ -83,10 +83,10 @@ serve(async (req) => {
   }
 
   try {
-    console.log('üîç === META SYNC AUTOM√ÅTICO INICIADO ===')
-    console.log(`‚è∞ Timestamp: ${new Date().toISOString()}`)
+    console.log('üîç === META SYNC AUTOM·ÅTICO INICIADO ===')
+    console.log(`è∞ Timestamp: ${new Date().toISOString()}`)
 
-    // Bar ID padr√£o (pode vir do request body se necess√°rio)
+    // Bar ID padr·£o (pode vir do request body se necess·°rio)
     const BAR_ID = CONFIG.BAR_ID
 
     // URL do endpoint centralizado de coleta
@@ -104,7 +104,7 @@ serve(async (req) => {
     })
 
     const result = await response.json()
-    console.log('‚úÖ Resultado da coleta centralizada:', result)
+    console.log('úÖ Resultado da coleta centralizada:', result)
 
     // === CHAMAR EDGE FUNCTION DE PROCESSAMENTO ===
     try {
@@ -118,9 +118,9 @@ serve(async (req) => {
         body: JSON.stringify({ bar_id: BAR_ID, data_coleta: result?.result?.data_coleta || new Date().toISOString().split('T')[0] })
       });
       const processResult = await processResponse.json();
-      console.log('‚úÖ Resultado do processamento autom√°tico:', processResult);
+      console.log('úÖ Resultado do processamento autom·°tico:', processResult);
     } catch (procError) {
-      console.error('‚ùå Erro ao chamar processamento autom√°tico:', procError);
+      console.error('ùå Erro ao chamar processamento autom·°tico:', procError);
     }
 
     return new Response(JSON.stringify({
@@ -132,7 +132,7 @@ serve(async (req) => {
       status: response.ok ? 200 : 500
     })
   } catch (error) {
-    console.error('‚ùå Erro no sync Meta:', error)
+    console.error('ùå Erro no sync Meta:', error)
     return new Response(JSON.stringify({
       success: false,
       error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -146,11 +146,11 @@ serve(async (req) => {
 
 async function coletarDadosFacebook(config: MetaCredentials) {
   try {
-    console.log('üìä Buscando dados COMPLETOS da p√°gina Facebook...')
+    console.log('üìä Buscando dados COMPLETOS da p·°gina Facebook...')
     console.log(`üéØ Page ID: ${config.page_id}`)
     console.log(`üîë Token length: ${config.access_token.length}`)
     
-    // Dados b√°sicos da p√°gina EXPANDIDOS
+    // Dados b·°sicos da p·°gina EXPANDIDOS
     const pageUrl = `https://graph.facebook.com/${CONFIG.FACEBOOK_API_VERSION}/${config.page_id}?fields=followers_count,fan_count,name,about,website,phone,category_list,checkins,talking_about_count,were_here_count,new_like_count,overall_star_rating,rating_count,cover,picture&access_token=${config.access_token}`
     console.log(`üì° Request URL: ${pageUrl.replace(config.access_token, 'TOKEN_HIDDEN')}`)
     
@@ -159,28 +159,28 @@ async function coletarDadosFacebook(config: MetaCredentials) {
     
     if (!pageResponse.ok) {
       const errorText = await pageResponse.text()
-      console.log(`‚ùå Error response: ${errorText}`)
-      throw new Error(`Erro ao buscar dados da p√°gina: ${pageResponse.status} - ${errorText}`)
+      console.log(`ùå Error response: ${errorText}`)
+      throw new Error(`Erro ao buscar dados da p·°gina: ${pageResponse.status} - ${errorText}`)
     }
     
     const pageData = await pageResponse.json()
     
-    // INSIGHTS COMPLETOS DA P√ÅGINA (TODOS os dados como no Meta Business Manager)
+    // INSIGHTS COMPLETOS DA P·ÅGINA (TODOS os dados como no Meta Business Manager)
     console.log('üìà Coletando insights COMPLETOS do Facebook...')
     
-    // 1. M√©tricas de Alcance e Impress√µes
+    // 1. M·©tricas de Alcance e Impress·µes
     const reachInsightsUrl = `https://graph.facebook.com/${CONFIG.FACEBOOK_API_VERSION}/${config.page_id}/insights?metric=page_impressions,page_impressions_unique,page_reach,page_reach_unique,page_posts_impressions,page_posts_impressions_unique&period=day&since=${getDateDaysAgo(CONFIG.INSIGHTS_DAYS)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
     
-    // 2. M√©tricas de Engajamento
+    // 2. M·©tricas de Engajamento
     const engagementInsightsUrl = `https://graph.facebook.com/v18.0/${config.page_id}/insights?metric=page_post_engagements,page_engaged_users,page_actions_post_reactions_total,page_actions_post_reactions_like_total,page_actions_post_reactions_love_total,page_actions_post_reactions_wow_total,page_actions_post_reactions_haha_total,page_actions_post_reactions_sorry_total,page_actions_post_reactions_anger_total&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
     
-    // 3. M√©tricas de Crescimento de F√£s
+    // 3. M·©tricas de Crescimento de F·£s
     const fansInsightsUrl = `https://graph.facebook.com/v18.0/${config.page_id}/insights?metric=page_fans,page_fan_adds,page_fan_removes,page_fans_online,page_fans_by_like_source&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
     
-    // 4. M√©tricas de Visualiza√ß√µes e Intera√ß√µes
+    // 4. M·©tricas de Visualiza·ß·µes e Intera·ß·µes
     const viewsInsightsUrl = `https://graph.facebook.com/v18.0/${config.page_id}/insights?metric=page_views_total,page_views_unique,page_video_views,page_video_views_unique,page_video_complete_views_30s,page_places_checkin_total&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
     
-    // COLETAR TODAS AS M√âTRICAS EM PARALELO
+    // COLETAR TODAS AS M·âTRICAS EM PARALELO
     const [reachResponse, engagementResponse, fansResponse, viewsResponse] = await Promise.all([
       fetch(reachInsightsUrl),
       fetch(engagementInsightsUrl),
@@ -208,8 +208,8 @@ async function coletarDadosFacebook(config: MetaCredentials) {
       insights.views = await viewsResponse.json()
     }
     
-    // DEMOGRAPHICS DA AUDI√äNCIA FACEBOOK
-    console.log('üë• Coletando dados demogr√°ficos da audi√™ncia Facebook...')
+    // DEMOGRAPHICS DA AUDI·äNCIA FACEBOOK
+    console.log('üë• Coletando dados demogr·°ficos da audi·™ncia Facebook...')
     const demographicsUrl = `https://graph.facebook.com/v18.0/${config.page_id}/insights?metric=page_fans_city,page_fans_country,page_fans_gender_age,page_fans_locale&period=lifetime&access_token=${config.access_token}`
     
     let demographics = {}
@@ -229,7 +229,7 @@ async function coletarDadosFacebook(config: MetaCredentials) {
       posts = postsData.data || []
     }
     
-    console.log(`‚úÖ Facebook coletado: ${posts.length} posts, demographics completos`)
+    console.log(`úÖ Facebook coletado: ${posts.length} posts, demographics completos`)
     
     return {
       page_info: pageData,
@@ -248,7 +248,7 @@ async function coletarDadosFacebook(config: MetaCredentials) {
     }
     
   } catch (error) {
-    console.error('‚ùå Erro ao coletar dados Facebook:', error)
+    console.error('ùå Erro ao coletar dados Facebook:', error)
     throw error
   }
 }
@@ -257,7 +257,7 @@ async function coletarDadosInstagram(config: MetaCredentials) {
   try {
     console.log('üì∏ Buscando dados COMPLETOS da conta Instagram...')
     
-    // Dados b√°sicos da conta
+    // Dados b·°sicos da conta
     const accountUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}?fields=followers_count,follows_count,media_count,username,name,biography,website,profile_picture_url&access_token=${config.access_token}`
     const accountResponse = await fetch(accountUrl)
     
@@ -270,7 +270,7 @@ async function coletarDadosInstagram(config: MetaCredentials) {
     // INSIGHTS COMPLETOS DA CONTA (TODOS os dados do Meta Business Manager)
     console.log('üìä Coletando insights COMPLETOS do Instagram...')
     
-    // 1. M√©tricas de Alcance (FUNCIONANDO 100%)
+    // 1. M·©tricas de Alcance (FUNCIONANDO 100%)
     const reachUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=reach&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
     
     // 2. Profile Views (CORRIGIDO - FUNCIONANDO)
@@ -279,10 +279,10 @@ async function coletarDadosInstagram(config: MetaCredentials) {
     // 3. Website Clicks (CORRIGIDO - FUNCIONANDO)
     const websiteClicksUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=website_clicks&metric_type=total_value&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
     
-    // 4. M√©tricas de Crescimento (Follower Count funciona)
+    // 4. M·©tricas de Crescimento (Follower Count funciona)
     const growthInsightsUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=follower_count&period=day&since=${getDateDaysAgo(30)}&until=${getDateDaysAgo(1)}&access_token=${config.access_token}`
     
-    // COLETAR M√âTRICAS QUE FUNCIONAM
+    // COLETAR M·âTRICAS QUE FUNCIONAM
     const [reachResponse, profileVisitsResponse, websiteClicksResponse, growthResponse] = await Promise.all([
       fetch(reachUrl),
       fetch(profileVisitsUrl),
@@ -310,8 +310,8 @@ async function coletarDadosInstagram(config: MetaCredentials) {
       insights.growth = await growthResponse.json()
     }
     
-    // DEMOGRAPHICS DA AUDI√äNCIA (dados demogr√°ficos como no Meta Business Manager)
-    console.log('üë• Coletando dados demogr√°ficos da audi√™ncia...')
+    // DEMOGRAPHICS DA AUDI·äNCIA (dados demogr·°ficos como no Meta Business Manager)
+    console.log('üë• Coletando dados demogr·°ficos da audi·™ncia...')
     const demographicsUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/insights?metric=audience_city,audience_country,audience_gender_age&period=lifetime&access_token=${config.access_token}`
     
     let demographics = {}
@@ -320,7 +320,7 @@ async function coletarDadosInstagram(config: MetaCredentials) {
       demographics = await demographicsResponse.json()
     }
     
-    // M√çDIA RECENTE COM INSIGHTS DETALHADOS
+    // M·çDIA RECENTE COM INSIGHTS DETALHADOS
     console.log('üì± Coletando posts recentes com insights...')
     const mediaUrl = `https://graph.facebook.com/v18.0/${config.instagram_account_id}/media?fields=id,media_type,media_url,thumbnail_url,permalink,caption,timestamp,like_count,comments_count,shares_count,saved_count,video_play_count,insights.metric(impressions,reach,saves,video_views,likes,comments,shares)&limit=20&access_token=${config.access_token}`
     
@@ -342,7 +342,7 @@ async function coletarDadosInstagram(config: MetaCredentials) {
       stories = storiesData.data || []
     }
     
-    console.log(`‚úÖ Instagram coletado: ${media.length} posts, ${stories.length} stories, demographics completos`)
+    console.log(`úÖ Instagram coletado: ${media.length} posts, ${stories.length} stories, demographics completos`)
     
     return {
       account_info: accountData,
@@ -361,18 +361,18 @@ async function coletarDadosInstagram(config: MetaCredentials) {
     }
     
   } catch (error) {
-    console.error('‚ùå Erro ao coletar dados Instagram:', error)
+    console.error('ùå Erro ao coletar dados Instagram:', error)
     throw error
   }
 }
 
-async function coletarCampanhas(config: MetaCredentials & { ad_account_id?: string }, barId: number, supabase: any) {
+async function coletarCampanhas(config: MetaCredentials & { ad_account_id?: string }, barId: number, supabase) {
   try {
     const adAccountId = config.ad_account_id
-    if (!adAccountId) throw new Error('Ad Account ID n√£o encontrado nas credenciais')
+    if (!adAccountId) throw new Error('Ad Account ID n·£o encontrado nas credenciais')
     console.log('üéØ Buscando campanhas COMPLETAS Meta Ads Manager...')
     
-    // Buscar configura√ß√µes de ad account
+    // Buscar configura·ß·µes de ad account
     const { data: credenciais } = await supabase
       .from('api_credentials')
       .select('configuracoes')
@@ -380,19 +380,19 @@ async function coletarCampanhas(config: MetaCredentials & { ad_account_id?: stri
       .eq('bar_id', barId)
       .single()
     
-    // Usar ad_account_id direto da configura√ß√£o
+    // Usar ad_account_id direto da configura·ß·£o
     const businessId = credenciais.configuracoes.business_id || 'N/A'
     console.log(`üéØ Ad Account ID configurado: ${adAccountId}`)
     console.log(`üè¢ Business ID configurado: ${businessId}`)
     
-    // Verificar se a ad account existe e est√° acess√≠vel
-    console.log('üîç Verificando acesso √† ad account...')
+    // Verificar se a ad account existe e est·° acess·≠vel
+    console.log('üîç Verificando acesso ·† ad account...')
     const accountInfoUrl = `https://graph.facebook.com/v18.0/${adAccountId}?fields=id,name,account_status,currency,timezone_name,balance,amount_spent,spend_cap&access_token=${config.access_token}`
     const accountInfoResponse = await fetch(accountInfoUrl)
     
     if (!accountInfoResponse.ok) {
       const error: any = await accountInfoResponse.json()
-      console.log('‚ö†Ô∏è Erro ao acessar ad account:', error)
+      console.log('ö†Ô∏è Erro ao acessar ad account:', error)
       
       // Buscar todas as ad accounts como fallback
       console.log('üîç Buscando todas as ad accounts como fallback...')
@@ -402,15 +402,15 @@ async function coletarCampanhas(config: MetaCredentials & { ad_account_id?: stri
       if (allAccountsResponse.ok) {
         const allAccountsData = await allAccountsResponse.json()
         const allAdAccounts = allAccountsData.data || []
-        console.log(`üìä Ad accounts dispon√≠veis:`)
-        allAdAccounts.forEach((acc: any) => console.log(`   - ${acc.id}: ${acc.name}`))
+        console.log(`üìä Ad accounts dispon·≠veis:`)
+        allAdAccounts.forEach((acc) => console.log(`   - ${acc.id}: ${acc.name}`))
         
         return { 
           campaigns: [], 
           ad_accounts: [], 
           ads: [], 
-          error: `Ad account ${adAccountId} n√£o acess√≠vel`,
-          available_accounts: allAdAccounts.map((acc: any) => `${acc.id}: ${acc.name}`)
+          error: `Ad account ${adAccountId} n·£o acess·≠vel`,
+          available_accounts: allAdAccounts.map((acc) => `${acc.id}: ${acc.name}`)
         }
       }
       
@@ -418,7 +418,7 @@ async function coletarCampanhas(config: MetaCredentials & { ad_account_id?: stri
     }
     
     const accountInfo = await accountInfoResponse.json()
-    console.log(`‚úÖ Ad account acess√≠vel: ${accountInfo.id} - ${accountInfo.name}`)
+    console.log(`úÖ Ad account acess·≠vel: ${accountInfo.id} - ${accountInfo.name}`)
     
     const adAccounts = [accountInfo] // Usar apenas a account configurada
     
@@ -430,8 +430,8 @@ async function coletarCampanhas(config: MetaCredentials & { ad_account_id?: stri
       try {
         console.log(`üí∞ Coletando dados COMPLETOS da conta: ${adAccount.id}`)
         
-        // 1. BUSCAR CAMPANHAS B√ÅSICAS PRIMEIRO
-        console.log(`üéØ Buscando campanhas b√°sicas da conta: ${adAccount.id}`)
+        // 1. BUSCAR CAMPANHAS B·ÅSICAS PRIMEIRO
+        console.log(`üéØ Buscando campanhas b·°sicas da conta: ${adAccount.id}`)
         const campaignsUrl = `https://graph.facebook.com/${CONFIG.FACEBOOK_API_VERSION}/${adAccount.id}/campaigns?fields=id,name,status,effective_status,objective,start_time,stop_time,daily_budget,lifetime_budget,created_time,updated_time&limit=100&access_token=${config.access_token}`
         const campaignsResponse = await fetch(campaignsUrl)
         
@@ -447,7 +447,7 @@ async function coletarCampanhas(config: MetaCredentials & { ad_account_id?: stri
             console.log(`   ${i + 1}/${campaigns.length}: ${campaign.name}`)
             
             try {
-              // Buscar insights da campanha espec√≠fica
+              // Buscar insights da campanha espec·≠fica
               // Insights da campanha (CAMPOS CORRIGIDOS - EXATO DA API TEST QUE FUNCIONA)
               const adsManagerFields = [
                 'campaign_name',           // Campaign
@@ -455,14 +455,14 @@ async function coletarCampanhas(config: MetaCredentials & { ad_account_id?: stri
                 'reach',                   // Reach
                 'spend',                   // Amount spent
                 'actions',                 // Results (conversions, clicks, etc)
-                'conversions',             // Results espec√≠ficos
+                'conversions',             // Results espec·≠ficos
                 'cost_per_action_type',    // Cost per result
-                'cost_per_conversion',     // Cost per result espec√≠fico
+                'cost_per_conversion',     // Cost per result espec·≠fico
                 'clicks',                  // Para calcular CTR
                 'ctr',                     // Click-through rate
                 'cpc',                     // Cost per click
                 'cpm',                     // Cost per mille
-                'date_start',              // Data in√≠cio dos insights
+                'date_start',              // Data in·≠cio dos insights
                 'date_stop'                // Data fim dos insights
               ].join(',')
               const insightsUrl = `https://graph.facebook.com/v18.0/${campaign.id}/insights?fields=${adsManagerFields}&date_preset=last_30d&access_token=${config.access_token}`
@@ -471,9 +471,9 @@ async function coletarCampanhas(config: MetaCredentials & { ad_account_id?: stri
               if (insightsResponse.ok) {
                 const insightsData = await insightsResponse.json()
                 campaign.insights = insightsData
-                console.log(`      ‚úÖ Insights coletados: ${insightsData.data?.length || 0} registros`)
+                console.log(`      úÖ Insights coletados: ${insightsData.data?.length || 0} registros`)
               } else {
-                console.log(`      ‚ö†Ô∏è Erro nos insights: ${insightsResponse.status}`)
+                console.log(`      ö†Ô∏è Erro nos insights: ${insightsResponse.status}`)
                 campaign.insights = { data: [] }
               }
               
@@ -489,20 +489,20 @@ async function coletarCampanhas(config: MetaCredentials & { ad_account_id?: stri
                 campaign.adsets = []
               }
               
-              // Buscar an√∫ncios da campanha
+              // Buscar an·∫ncios da campanha
               const campaignAdsUrl = `https://graph.facebook.com/v18.0/${campaign.id}/ads?fields=id,name,status,effective_status,creative&limit=50&access_token=${config.access_token}`
               const campaignAdsResponse = await fetch(campaignAdsUrl)
               
               if (campaignAdsResponse.ok) {
                 const campaignAdsData = await campaignAdsResponse.json()
                 campaign.ads = campaignAdsData.data || []
-                console.log(`      üé® An√∫ncios: ${campaign.ads.length}`)
+                console.log(`      üé® An·∫ncios: ${campaign.ads.length}`)
               } else {
                 campaign.ads = []
               }
               
             } catch (campaignError) {
-              console.log(`      ‚ùå Erro ao processar campanha ${campaign.name}:`, campaignError)
+              console.log(`      ùå Erro ao processar campanha ${campaign.name}:`, campaignError)
               campaign.insights = { data: [] }
               campaign.adsets = []
               campaign.ads = []
@@ -516,13 +516,13 @@ async function coletarCampanhas(config: MetaCredentials & { ad_account_id?: stri
           }
           
           allCampaigns.push(...campaigns)
-          console.log(`‚úÖ ${campaigns.length} campanhas processadas completamente da conta ${adAccount.name}`)
+          console.log(`úÖ ${campaigns.length} campanhas processadas completamente da conta ${adAccount.name}`)
         } else {
-          console.log(`‚ùå Erro ao buscar campanhas: ${campaignsResponse.status}`)
+          console.log(`ùå Erro ao buscar campanhas: ${campaignsResponse.status}`)
         }
         
-        // 2. AN√öNCIOS INDIVIDUAIS COM M√âTRICAS DETALHADAS
-        console.log(`üì¢ Coletando an√∫ncios individuais da conta: ${adAccount.id}`)
+        // 2. AN·öNCIOS INDIVIDUAIS COM M·âTRICAS DETALHADAS
+        console.log(`üì¢ Coletando an·∫ncios individuais da conta: ${adAccount.id}`)
         const adsUrl = `https://graph.facebook.com/v18.0/${adAccount.id}/ads?fields=id,name,status,effective_status,created_time,updated_time,creative.fields(title,body,image_url,video_id,thumbnail_url),targeting,insights.metric(impressions,reach,clicks,ctr,cpc,cpp,cpm,spend,frequency,actions,conversions,cost_per_conversion,video_play_actions,link_clicks,post_engagement,page_engagement,likes,comments,shares,video_view).date_preset(last_30d)&limit=50&access_token=${config.access_token}`
         const adsResponse = await fetch(adsUrl)
         
@@ -530,7 +530,7 @@ async function coletarCampanhas(config: MetaCredentials & { ad_account_id?: stri
           const adsData = await adsResponse.json()
           const ads = adsData.data || []
           
-          // Enriquecer cada an√∫ncio com dados da conta
+          // Enriquecer cada an·∫ncio com dados da conta
           for (const ad of ads) {
             ad.ad_account_id = adAccount.id
             ad.ad_account_name = adAccount.name
@@ -538,15 +538,15 @@ async function coletarCampanhas(config: MetaCredentials & { ad_account_id?: stri
           }
           
           allAds.push(...ads)
-          console.log(`üì¢ ${ads.length} an√∫ncios coletados da conta ${adAccount.name}`)
+          console.log(`üì¢ ${ads.length} an·∫ncios coletados da conta ${adAccount.name}`)
         }
         
       } catch (accountError) {
-        console.log(`‚ùå Erro ao processar account ${adAccount.id}:`, accountError)
+        console.log(`ùå Erro ao processar account ${adAccount.id}:`, accountError)
       }
     }
     
-    // CALCULAR TOTAIS E M√âTRICAS AGREGADAS DETALHADAS
+    // CALCULAR TOTAIS E M·âTRICAS AGREGADAS DETALHADAS
     console.log(`üìä Calculando totais de ${allCampaigns.length} campanhas...`)
     let totalSpend = 0
     let totalImpressions = 0
@@ -592,11 +592,11 @@ async function coletarCampanhas(config: MetaCredentials & { ad_account_id?: stri
     
     console.log(`üí∞ TOTAIS FINAIS:`)
     console.log(`   üíµ Gasto: R$${totalSpend.toFixed(2)}`)
-    console.log(`   üëÅÔ∏è Impress√µes: ${totalImpressions.toLocaleString()}`)
+    console.log(`   üëÅÔ∏è Impress·µes: ${totalImpressions.toLocaleString()}`)
     console.log(`   üéØ Alcance: ${totalReach.toLocaleString()}`)
     console.log(`   üñ±Ô∏è Cliques: ${totalClicks.toLocaleString()}`)
-    console.log(`   ‚úÖ Convers√µes: ${totalConversions}`)
-    console.log(`   üìπ Visualiza√ß√µes de v√≠deo: ${totalVideoViews.toLocaleString()}`)
+    console.log(`   úÖ Convers·µes: ${totalConversions}`)
+    console.log(`   üìπ Visualiza·ß·µes de v·≠deo: ${totalVideoViews.toLocaleString()}`)
     console.log(`   üìä Campanhas ativas: ${activeCampaigns}/${allCampaigns.length}`)
     console.log(`   üìà Campanhas com dados: ${campaignsWithData}/${allCampaigns.length}`)
     
@@ -626,13 +626,13 @@ async function coletarCampanhas(config: MetaCredentials & { ad_account_id?: stri
       ]
     }
     
-  } catch (error: any) {
-    console.error('‚ùå Erro ao coletar campanhas:', error)
+  } catch (error) {
+    console.error('ùå Erro ao coletar campanhas:', error)
     return { campaigns: [], ads: [], ad_accounts: [], error: error.message }
   }
 }
 
-async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramData: any, campaignsData: any, barId: number) {
+async function salvarDadosNoBanco(supabase, facebookData, instagramData, campaignsData, barId: number) {
   try {
     const hoje = new Date().toISOString().split('T')[0]
     console.log('üíæ Processando e salvando dados COMPLETOS do Meta...')
@@ -640,7 +640,7 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
     // === PROCESSAR DADOS FACEBOOK COMPLETOS ===
     console.log('üìò Processando insights Facebook...')
     
-    // Extrair m√©tricas dos posts
+    // Extrair m·©tricas dos posts
     let fbLikes = 0, fbComments = 0, fbShares = 0
     if (facebookData.posts && Array.isArray(facebookData.posts)) {
       for (const post of facebookData.posts) {
@@ -650,25 +650,25 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
       }
     }
     
-    // Extrair insights de alcance e impress√µes
+    // Extrair insights de alcance e impress·µes
     let pageReach = 0, pageImpressions = 0, postEngagements = 0, videoViews = 0
     if (facebookData.insights) {
-      // Somar dados dos √∫ltimos dias
+      // Somar dados dos ·∫ltimos dias
       if (facebookData.insights.reach?.data) {
-        pageReach = facebookData.insights.reach.data.reduce((sum: number, item: any) => sum + (parseInt(item.value) || 0), 0)
+        pageReach = facebookData.insights.reach.data.reduce((sum: number, item) => sum + (parseInt(item.value) || 0), 0)
       }
       if (facebookData.insights.views?.data) {
-        pageImpressions = facebookData.insights.views.data.reduce((sum: number, item: any) => sum + (parseInt(item.value) || 0), 0)
+        pageImpressions = facebookData.insights.views.data.reduce((sum: number, item) => sum + (parseInt(item.value) || 0), 0)
       }
       if (facebookData.insights.engagement?.data) {
-        postEngagements = facebookData.insights.engagement.data.reduce((sum: number, item: any) => sum + (parseInt(item.value) || 0), 0)
+        postEngagements = facebookData.insights.engagement.data.reduce((sum: number, item) => sum + (parseInt(item.value) || 0), 0)
       }
     }
     
     // === PROCESSAR DADOS INSTAGRAM COMPLETOS ===
     console.log('üì∏ Processando insights Instagram...')
     
-    // Extrair m√©tricas dos posts
+    // Extrair m·©tricas dos posts
     let igLikes = 0, igComments = 0, igShares = 0, igSaves = 0
     if (instagramData.media && Array.isArray(instagramData.media)) {
       for (const item of instagramData.media) {
@@ -684,10 +684,10 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
     if (instagramData.insights) {
       // Processar reach (funcionando perfeitamente)
       if (instagramData.insights.reach?.data?.[0]?.values) {
-        igReach = instagramData.insights.reach.data[0].values.reduce((sum: number, item: any) => sum + (parseInt(item.value) || 0), 0)
+        igReach = instagramData.insights.reach.data[0].values.reduce((sum: number, item) => sum + (parseInt(item.value) || 0), 0)
       }
       
-      // Processar profile visits (corrigido - m√©trica v√°lida da API)
+      // Processar profile visits (corrigido - m·©trica v·°lida da API)
       if (instagramData.insights.profile_visits?.data?.[0]?.total_value) {
         profileViews = parseInt(instagramData.insights.profile_visits.data[0].total_value.value) || 0
       }
@@ -697,7 +697,7 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
         websiteClicks = parseInt(instagramData.insights.website_clicks.data[0].total_value.value) || 0
       }
       
-      // Impressions n√£o est√° dispon√≠vel na API v22+ (usar reach como substituto)
+      // Impressions n·£o est·° dispon·≠vel na API v22+ (usar reach como substituto)
       igImpressions = igReach // Meta removeu impressions, usar reach como proxy
     }
     
@@ -769,8 +769,8 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
     if (campaignsData && campaignsData.campaigns && campaignsData.campaigns.length > 0) {
       console.log(`üéØ Salvando ${campaignsData.campaigns.length} campanhas...`)
       
-      // Preparar dados para inser√ß√£o com dados detalhados
-      const campaignsToInsert = campaignsData.campaigns.map((campaign: any) => {
+      // Preparar dados para inser·ß·£o com dados detalhados
+      const campaignsToInsert = campaignsData.campaigns.map((campaign) => {
         const insights = campaign.insights?.data?.[0] || {}
         
         console.log(`üíæ Preparando salvamento: ${campaign.name} - R$${insights.spend || 0}`)
@@ -835,12 +835,12 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
       campaignsSaved = campaignsData_result?.length || 0
       
       if (campaignsError_result) {
-        console.error('‚ùå Erro ao salvar campanhas:', campaignsError_result)
+        console.error('ùå Erro ao salvar campanhas:', campaignsError_result)
       } else {
-        console.log(`‚úÖ ${campaignsSaved} campanhas salvas com sucesso`)
+        console.log(`úÖ ${campaignsSaved} campanhas salvas com sucesso`)
       }
     } else {
-      console.log('‚ö†Ô∏è Nenhuma campanha para salvar')
+      console.log('ö†Ô∏è Nenhuma campanha para salvar')
     }
     
     // Verificar resultados
@@ -848,15 +848,15 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
     const igSuccess = !igError && igData && igData.length > 0
     
     if (fbError) {
-      console.error('‚ùå Erro ao salvar dados Facebook:', fbError)
+      console.error('ùå Erro ao salvar dados Facebook:', fbError)
     } else {
-      console.log('‚úÖ Dados Facebook salvos com sucesso:', fbData)
+      console.log('úÖ Dados Facebook salvos com sucesso:', fbData)
     }
     
     if (igError) {
-      console.error('‚ùå Erro ao salvar dados Instagram:', igError)
+      console.error('ùå Erro ao salvar dados Instagram:', igError)
     } else {
-      console.log('‚úÖ Dados Instagram salvos com sucesso:', igData)
+      console.log('úÖ Dados Instagram salvos com sucesso:', igData)
     }
     
     console.log(`üìä Resultado final: Facebook=${fbSuccess}, Instagram=${igSuccess}, Campanhas=${campaignsSuccess}`)
@@ -890,12 +890,12 @@ async function salvarDadosNoBanco(supabase: any, facebookData: any, instagramDat
     }
     
   } catch (error) {
-    console.error('‚ùå Erro ao salvar dados no banco:', error)
+    console.error('ùå Erro ao salvar dados no banco:', error)
     throw error
   }
 }
 
-async function enviarNotificacaoDiscord(supabase: any, resultado: any, facebookData: any, instagramData: any, campaignsData: any, barId: number) {
+async function enviarNotificacaoDiscord(supabase, resultado, facebookData, instagramData, campaignsData, barId: number) {
   try {
     // Obter webhook correto do Discord para Meta
     const webhookUrl = await getWebhookUrl(supabase, barId, 'meta')
@@ -903,7 +903,7 @@ async function enviarNotificacaoDiscord(supabase: any, resultado: any, facebookD
 
     const agora = new Date()
     
-    // Dados para exibi√ß√£o
+    // Dados para exibi·ß·£o
     const fbSeguidores = facebookData.page_info?.fan_count || 0
     const igSeguidores = instagramData.account_info?.followers_count || 0
     const igSeguindo = instagramData.account_info?.follows_count || 0
@@ -916,7 +916,7 @@ async function enviarNotificacaoDiscord(supabase: any, resultado: any, facebookD
     const igLikes = resultado.instagram_metrics?.posts_likes || 0
     const igComments = resultado.instagram_metrics?.posts_comments || 0
 
-    // ‚úÖ CORRIGIR CAMPANHAS - usar a estrutura correta
+    // úÖ CORRIGIR CAMPANHAS - usar a estrutura correta
     console.log('üéØ Debug campanhas data:', JSON.stringify({
       exists: !!campaignsData,
       totals: campaignsData?.totals,
@@ -927,35 +927,35 @@ async function enviarNotificacaoDiscord(supabase: any, resultado: any, facebookD
     // Dados de campanhas corrigidos
     const totalCampanhas = campaignsData?.campaigns?.length || campaignsData?.totals?.total_campaigns || 0
     const campanhasAtivas = campaignsData?.totals?.active_campaigns || 
-                           campaignsData?.campaigns?.filter((c: any) => c.effective_status === 'ACTIVE')?.length || 0
+                           campaignsData?.campaigns?.filter((c) => c.effective_status === 'ACTIVE')?.length || 0
     const gastoTotal = campaignsData?.totals?.total_spend || 0
 
     console.log(`üéØ Campanhas para Discord: ${totalCampanhas} total, ${campanhasAtivas} ativas, R$ ${gastoTotal}`)
 
     const message: DiscordMessage = {
       embeds: [{
-        title: 'üìä Meta Analytics - Coleta Autom√°tica',
+        title: 'üìä Meta Analytics - Coleta Autom·°tica',
         description: `Dados do Facebook e Instagram coletados com sucesso!\n\nüïê **Executado em:** ${agora.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}\nüè¢ **Bar ID:** ${barId}`,
         color: 0x4267B2, // Azul do Facebook
         fields: [
           {
             name: 'üìò Facebook',
-            value: `**${fbSeguidores}** seguidores\n**${fbLikes}** likes recentes\n**${fbComments}** coment√°rios\n**${fbShares}** compartilhamentos`,
+            value: `**${fbSeguidores}** seguidores\n**${fbLikes}** likes recentes\n**${fbComments}** coment·°rios\n**${fbShares}** compartilhamentos`,
             inline: true
           },
           {
             name: 'üì∏ Instagram',
-            value: `**${igSeguidores}** seguidores\n**${igSeguindo}** seguindo\n**${igPosts}** posts totais\n**${igLikes}** likes recentes\n**${igComments}** coment√°rios`,
+            value: `**${igSeguidores}** seguidores\n**${igSeguindo}** seguindo\n**${igPosts}** posts totais\n**${igLikes}** likes recentes\n**${igComments}** coment·°rios`,
             inline: true
           },
           {
             name: 'üéØ Campanhas (Meta Ads)',
-            value: `**${totalCampanhas}** total\n**${campanhasAtivas}** ativas\n**${campaignsData?.totals?.campaigns_with_data || 0}** com dados\n**R$ ${gastoTotal.toFixed(2)}** gasto\n**${campaignsData?.totals?.total_impressions?.toLocaleString() || 0}** impress√µes\n**${campaignsData?.totals?.total_clicks?.toLocaleString() || 0}** cliques`,
+            value: `**${totalCampanhas}** total\n**${campanhasAtivas}** ativas\n**${campaignsData?.totals?.campaigns_with_data || 0}** com dados\n**R$ ${gastoTotal.toFixed(2)}** gasto\n**${campaignsData?.totals?.total_impressions?.toLocaleString() || 0}** impress·µes\n**${campaignsData?.totals?.total_clicks?.toLocaleString() || 0}** cliques`,
             inline: true
           },
           {
             name: 'üíæ Status Salvamento',
-            value: `Facebook: ${resultado.facebook_saved ? '‚úÖ' : '‚ùå'}\nInstagram: ${resultado.instagram_saved ? '‚úÖ' : '‚ùå'}\nCampanhas: ${resultado.campaigns_saved ? '‚úÖ' : '‚ùå'}`,
+            value: `Facebook: ${resultado.facebook_saved ? 'úÖ' : 'ùå'}\nInstagram: ${resultado.instagram_saved ? 'úÖ' : 'ùå'}\nCampanhas: ${resultado.campaigns_saved ? 'úÖ' : 'ùå'}`,
             inline: true
           }
         ],
@@ -978,20 +978,20 @@ async function enviarNotificacaoDiscord(supabase: any, resultado: any, facebookD
       throw new Error(`Erro Discord: ${response.status}`)
     }
 
-    console.log('‚úÖ Notifica√ß√£o Discord enviada com sucesso')
+    console.log('úÖ Notifica·ß·£o Discord enviada com sucesso')
 
   } catch (error) {
-    console.error('‚ùå Erro ao enviar notifica√ß√£o Discord:', error)
+    console.error('ùå Erro ao enviar notifica·ß·£o Discord:', error)
   }
 }
 
-async function enviarErroDiscord(supabase: any, error: any, barId: number) {
+async function enviarErroDiscord(supabase, error, barId: number) {
   try {
     const webhookUrl = await getWebhookUrl(supabase, barId, 'meta')
 
     const message: DiscordMessage = {
       embeds: [{
-        title: '‚ùå Meta Sync - Erro na Execu√ß√£o',
+        title: 'ùå Meta Sync - Erro na Execu·ß·£o',
         description: `Falha na coleta de dados do Meta (Edge Function)`,
         color: 0xff0000,
         fields: [
@@ -1025,7 +1025,7 @@ async function enviarErroDiscord(supabase: any, error: any, barId: number) {
     })
 
   } catch (discordError) {
-    console.error('‚ùå Erro ao enviar erro para Discord:', discordError)
+    console.error('ùå Erro ao enviar erro para Discord:', discordError)
   }
 }
 
@@ -1035,7 +1035,7 @@ function getDateDaysAgo(days: number): string {
   return date.toISOString().split('T')[0]
 }
 
-// Helper para construir URLs da API Facebook - ELIMINA REPETI√á√ÉO
+// Helper para construir URLs da API Facebook - ELIMINA REPETI·á·ÉO
 function buildFacebookApiUrl(endpoint: string, params: Record<string, string>): string {
   const baseUrl = `https://graph.facebook.com/${CONFIG.FACEBOOK_API_VERSION}/${endpoint}`
   const searchParams = new URLSearchParams(params)

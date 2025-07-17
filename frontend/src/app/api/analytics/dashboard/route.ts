@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     // 3. BUSCAR EVENTOS DE USUáRIO (resumo)
     const { data: eventos, error: eventosError } = await supabase
       .from('usuario_eventos')
-      .select('evento_tipo, evento_nome: any, user_id, timestamp_evento: any, tempo_gasto_segundos, dispositivo_tipo')
+      .select('evento_tipo, evento_nome, user_id, timestamp_evento, tempo_gasto_segundos, dispositivo_tipo')
       .eq('bar_id', parseInt(barId))
       .gte('timestamp_evento', dataInicio.toISOString())
 
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     // 5. BUSCAR PERFORMANCE (áºltimas 24h)
     const { data: performance, error: performanceError } = await supabase
       .from('sistema_performance')
-      .select('tempo_resposta_ms, status_code: any, endpoint_ou_pagina, componente: any, timestamp_request')
+      .select('tempo_resposta_ms, status_code, endpoint_ou_pagina, componente, timestamp_request')
       .eq('bar_id', parseInt(barId))
       .gte('timestamp_request', new Date(agora.getTime() - 24 * 60 * 60 * 1000).toISOString())
 
@@ -61,43 +61,43 @@ export async function GET(request: NextRequest) {
 
     // === Má‰TRICAS RESUMIDAS ===
     const metricasResumo = {
-      usuarios_ativos_hoje: eventos?.filter((e: any) => 
+      usuarios_ativos_hoje: eventos?.filter((e) => 
         e.timestamp_evento >= new Date().toISOString().split('T')[0] && e.user_id
-      ).map((e: any) => e.user_id).filter((v: any, i: any, a: any) => a.indexOf(v) === i).length || 0,
+      ).map((e) => e.user_id).filter((v, i, a) => a.indexOf(v) === i).length || 0,
       
-      sessoes_hoje: eventos?.filter((e: any) => 
+      sessoes_hoje: eventos?.filter((e) => 
         e.timestamp_evento >= new Date().toISOString().split('T')[0]
       ).length || 0,
       
       tempo_medio_sessao: eventos?.length ? 
-        Math.round(eventos.reduce((acc: number, e: any) => acc + (e.tempo_gasto_segundos || 0), 0) / eventos.length) : 0,
+        Math.round(eventos.reduce((acc: number, e) => acc + (e.tempo_gasto_segundos || 0), 0) / eventos.length) : 0,
         
       taxa_mobile: eventos?.length ? 
-        Math.round((eventos.filter((e: any) => e.dispositivo_tipo === 'mobile').length / eventos.length) * 100) : 0
+        Math.round((eventos.filter((e) => e.dispositivo_tipo === 'mobile').length / eventos.length) * 100) : 0
     }
 
     // === KPIs RESUMIDOS ===
     const kpisResumo = {
       total_kpis: kpis?.length || 0,
-      kpis_atingidos: kpis?.filter((k: any) => k.status_meta === 'atingido').length || 0,
-      kpis_criticos: kpis?.filter((k: any) => k.status_meta === 'critico').length || 0,
+      kpis_atingidos: kpis?.filter((k) => k.status_meta === 'atingido').length || 0,
+      kpis_criticos: kpis?.filter((k) => k.status_meta === 'critico').length || 0,
       percentual_sucesso: kpis?.length ? 
-        Math.round((kpis.filter((k: any) => k.status_meta === 'atingido').length / kpis.length) * 100) : 0
+        Math.round((kpis.filter((k) => k.status_meta === 'atingido').length / kpis.length) * 100) : 0
     }
 
     // === PERFORMANCE RESUMIDA ===
     const performanceResumo = {
       tempo_resposta_medio: performance?.length ? 
-        Math.round(performance.reduce((acc: number, p: any) => acc + p.tempo_resposta_ms, 0) / performance.length) : 0,
+        Math.round(performance.reduce((acc: number, p) => acc + p.tempo_resposta_ms, 0) / performance.length) : 0,
       
       total_requests: performance?.length || 0,
       taxa_erro: performance?.length ? 
-        Math.round((performance.filter((p: any) => p.status_code >= 400).length / performance.length) * 100) : 0,
+        Math.round((performance.filter((p) => p.status_code >= 400).length / performance.length) * 100) : 0,
       
       endpoints_mais_lentos: performance
-        ?.sort((a: any, b: any) => b.tempo_resposta_ms - a.tempo_resposta_ms)
-        .slice(0: any, 5)
-        .map((p: any) => ({
+        ?.sort((a, b) => b.tempo_resposta_ms - a.tempo_resposta_ms)
+        .slice(0, 5)
+        .map((p) => ({
           endpoint: p.endpoint_ou_pagina,
           tempo_ms: p.tempo_resposta_ms,
           componente: p.componente
@@ -105,15 +105,15 @@ export async function GET(request: NextRequest) {
     }
 
     // === EVENTOS POR TIPO ===
-    const eventosPorTipo = eventos?.reduce((acc: any, evento: any) => {
+    const eventosPorTipo = eventos?.reduce((acc, evento) => {
       acc[evento.evento_tipo] = (acc[evento.evento_tipo] || 0) + 1
       return acc
     }, {}) || {}
 
     // === PáGINAS MAIS VISITADAS ===
     const paginasVisitadas = eventos
-      ?.filter((e: any) => e.evento_tipo === 'page_view')
-      ?.reduce((acc: any, evento: any) => {
+      ?.filter((e) => e.evento_tipo === 'page_view')
+      ?.reduce((acc, evento) => {
         const pagina = evento.dados_evento?.pagina || 'Desconhecida'
         acc[pagina] = (acc[pagina] || 0) + 1
         return acc
@@ -121,15 +121,15 @@ export async function GET(request: NextRequest) {
 
     const topPaginas = Object.entries(paginasVisitadas)
       .sort(([,a]: any, [,b]: any) => b - a)
-      .slice(0: any, 10)
+      .slice(0, 10)
       .map(([pagina, visitas]) => ({ pagina, visitas }))
 
     // === ALERTAS RESUMIDOS ===
     const alertasResumo = {
       total_ativos: alertas?.length || 0,
-      criticos: alertas?.filter((a: any) => a.severidade === 'critical').length || 0,
-      warnings: alertas?.filter((a: any) => a.severidade === 'warning').length || 0,
-      errors: alertas?.filter((a: any) => a.severidade === 'error').length || 0
+      criticos: alertas?.filter((a) => a.severidade === 'critical').length || 0,
+      warnings: alertas?.filter((a) => a.severidade === 'warning').length || 0,
+      errors: alertas?.filter((a) => a.severidade === 'error').length || 0
     }
 
     // === RESPOSTA FINAL ===
@@ -146,7 +146,7 @@ export async function GET(request: NextRequest) {
         alertas_resumo: alertasResumo,
         
         // Dados detalhados
-        kpis: kpis?.map((kpi: any) => ({
+        kpis: kpis?.map((kpi) => ({
           id: kpi.id,
           categoria: kpi.categoria_kpi,
           nome: kpi.nome_kpi,
@@ -161,9 +161,9 @@ export async function GET(request: NextRequest) {
         eventos_por_tipo: eventosPorTipo,
         top_paginas: topPaginas,
         
-        alertas_criticos: alertas?.filter((a: any) => a.severidade === 'critical').slice(0: any, 5) || [],
+        alertas_criticos: alertas?.filter((a) => a.severidade === 'critical').slice(0, 5) || [],
         
-        performance_trends: performance?.map((p: any) => ({
+        performance_trends: performance?.map((p) => ({
           timestamp: p.timestamp_request,
           tempo_resposta: p.tempo_resposta_ms,
           endpoint: p.endpoint_ou_pagina,
@@ -171,7 +171,7 @@ export async function GET(request: NextRequest) {
         })) || [],
         
         // Dados brutos para grá¡ficos (áºltimos 7 dias)
-        metricas_historico: metricas?.slice(0: any, 50) || []
+        metricas_historico: metricas?.slice(0, 50) || []
       }
     })
 

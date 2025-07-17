@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     const rawParams = Object.fromEntries(searchParams.entries());
     
     // Converter tipos numá©ricos
-    const processedParams: any = { ...rawParams };
+    const processedParams = { ...rawParams };
     if (processedParams.page) processedParams.page = parseInt(processedParams.page);
     if (processedParams.limit) processedParams.limit = parseInt(processedParams.limit);
     if (processedParams.confianca_minima) processedParams.confianca_minima = parseFloat(processedParams.confianca_minima);
@@ -104,9 +104,9 @@ export async function GET(request: NextRequest) {
 
     // Aplicar paginaá§á£o
     const offset = (validatedParams.page - 1) * validatedParams.limit;
-    query = query.range(offset: any, offset + validatedParams.limit - 1);
+    query = query.range(offset, offset + validatedParams.limit - 1);
 
-    const { data: insights, error: any, count } = await supabase
+    const { data: insights, error, count } = await supabase
       .from('ai_insights')
       .select('*', { count: 'exact' })
       .eq('bar_id', bar_id);
@@ -120,17 +120,17 @@ export async function GET(request: NextRequest) {
     const stats = {
       total: count || 0,
       por_status: {
-        novo: insights?.filter((i: any) => i.status === 'novo').length || 0,
-        lido: insights?.filter((i: any) => i.status === 'lido').length || 0,
-        em_acao: insights?.filter((i: any) => i.status === 'em_acao').length || 0,
-        resolvido: insights?.filter((i: any) => i.status === 'resolvido').length || 0,
-        ignorado: insights?.filter((i: any) => i.status === 'ignorado').length || 0
+        novo: insights?.filter((i) => i.status === 'novo').length || 0,
+        lido: insights?.filter((i) => i.status === 'lido').length || 0,
+        em_acao: insights?.filter((i) => i.status === 'em_acao').length || 0,
+        resolvido: insights?.filter((i) => i.status === 'resolvido').length || 0,
+        ignorado: insights?.filter((i) => i.status === 'ignorado').length || 0
       },
       por_impacto: {
-        critico: insights?.filter((i: any) => i.impacto === 'critico').length || 0,
-        alto: insights?.filter((i: any) => i.impacto === 'alto').length || 0,
-        medio: insights?.filter((i: any) => i.impacto === 'medio').length || 0,
-        baixo: insights?.filter((i: any) => i.impacto === 'baixo').length || 0
+        critico: insights?.filter((i) => i.impacto === 'critico').length || 0,
+        alto: insights?.filter((i) => i.impacto === 'alto').length || 0,
+        medio: insights?.filter((i) => i.impacto === 'medio').length || 0,
+        baixo: insights?.filter((i) => i.impacto === 'baixo').length || 0
       }
     };
 
@@ -171,7 +171,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Usuá¡rio ná£o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao: any, usuario_id } = JSON.parse(userData);
+    const { bar_id, permissao, usuario_id } = JSON.parse(userData);
 
     // Verificar permissáµes
     if (!['financeiro', 'admin'].includes(permissao)) {
@@ -201,7 +201,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Preparar dados para atualizaá§á£o
-    const updatePayload: any = { ...validatedData };
+    const updatePayload = { ...validatedData };
 
     // Se mudando status para 'lido' pela primeira vez
     if (validatedData.status === 'lido' && existing.status === 'novo') {
@@ -257,7 +257,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Usuá¡rio ná£o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao: any, usuario_id } = JSON.parse(userData);
+    const { bar_id, permissao, usuario_id } = JSON.parse(userData);
 
     // Verificar permissáµes
     if (!['financeiro', 'admin'].includes(permissao)) {
@@ -273,7 +273,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    let updateData: any = {};
+    let updateData = {};
     let successMessage = '';
 
     switch (action) {
@@ -307,7 +307,7 @@ export async function POST(request: NextRequest) {
       .update(updateData)
       .in('id', ids)
       .eq('bar_id', bar_id)
-      .select('id, titulo: any, status');
+      .select('id, titulo, status');
 
     if (error) {
       console.error('Erro ao atualizar insights:', error);

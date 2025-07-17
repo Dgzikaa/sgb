@@ -147,7 +147,7 @@ function encontrarMelhorMatch(nomeCategoriaBanco: string): { grupo: string | nul
       else {
         const palavrasBanco = nomeCategoriaBanco.toLowerCase().split(/[\s\/\-_]+/)
         const palavrasEspec = catEspecificada.toLowerCase().split(/[\s\/\-_]+/)
-        const palavrasComuns = palavrasBanco.filter((p: any) => palavrasEspec.includes(p))
+        const palavrasComuns = palavrasBanco.filter((p) => palavrasEspec.includes(p))
         if (palavrasComuns.length > 0) {
           similaridade = (palavrasComuns.length / Math.max(palavrasBanco.length, palavrasEspec.length)) * 60
         }
@@ -174,7 +174,7 @@ export async function GET(request: NextRequest) {
     // 1. Buscar todas as categorias
     const { data: categorias, error: errorCategorias } = await supabase
       .from('contaazul_categorias')
-      .select('id, nome: any, tipo')
+      .select('id, nome, tipo')
       .eq('bar_id', parseInt(barId))
       .order('nome')
 
@@ -186,7 +186,7 @@ export async function GET(request: NextRequest) {
     // 2. Buscar eventos financeiros (TODO o perá­odo disponá­vel) - COM PAGINAá‡áƒO
     console.log('ðŸ”„ Buscando TODOS os eventos financeiros com paginaá§á£o...')
     
-    let todosEventos: any[] = []
+    let todosEventos[] = []
     let pagina = 0
     const limite = 1000 // Limite do Supabase
     let temMaisDados = true
@@ -198,10 +198,10 @@ export async function GET(request: NextRequest) {
       
       const { data: eventosPagina, error: errorEventos } = await supabase
         .from('contaazul_eventos_financeiros')
-        .select('tipo, categoria_id: any, valor, data_competencia')
+        .select('tipo, categoria_id, valor, data_competencia')
         .eq('bar_id', parseInt(barId))
         .not('categoria_id', 'is', null)
-        .range(offset: any, offset + limite - 1)
+        .range(offset, offset + limite - 1)
         .order('data_competencia', { ascending: false })
 
       if (errorEventos) {
@@ -228,21 +228,21 @@ export async function GET(request: NextRequest) {
     const eventos = todosEventos
 
     // 3. Aná¡lise detalhada por categoria
-    const analiseDetalhada = categorias?.map((categoria: any) => {
+    const analiseDetalhada = categorias?.map((categoria) => {
       const melhorMatch = encontrarMelhorMatch(categoria.nome)
       const grupoMapeado = mapearCategoriaParaGrupo(categoria.nome)
       
       // Contar eventos desta categoria
-      const eventosCategoria = eventos?.filter((e: any) => e.categoria_id === categoria.id) || []
+      const eventosCategoria = eventos?.filter((e) => e.categoria_id === categoria.id) || []
       const totalEventos = eventosCategoria.length
-      const valorTotal = eventosCategoria.reduce((sum: any, e: any) => sum + parseFloat(e.valor || '0'), 0)
-      const eventosPorTipo = eventosCategoria.reduce((acc: any, e: any) => {
+      const valorTotal = eventosCategoria.reduce((sum, e) => sum + parseFloat(e.valor || '0'), 0)
+      const eventosPorTipo = eventosCategoria.reduce((acc, e) => {
         acc[e.tipo] = (acc[e.tipo] || 0) + 1
         return acc
       }, {})
       
       // Perá­odo dos dados
-      const datasEventos = eventosCategoria.map((e: any) => e.data_competencia).filter(Boolean).sort()
+      const datasEventos = eventosCategoria.map((e) => e.data_competencia).filter(Boolean).sort()
       const periodoInicio = datasEventos[0] || null
       const periodoFim = datasEventos[datasEventos.length - 1] || null
       
@@ -271,38 +271,38 @@ export async function GET(request: NextRequest) {
     // 4. Estatá­sticas gerais
     const estatisticasGerais = {
       total_categorias: categorias?.length || 0,
-      categorias_mapeadas: analiseDetalhada.filter((c: any) => c.mapeamento.esta_mapeado).length,
-      categorias_nao_mapeadas: analiseDetalhada.filter((c: any) => !c.mapeamento.esta_mapeado).length,
-      categorias_com_dados: analiseDetalhada.filter((c: any) => c.estatisticas.tem_dados).length,
-      categorias_sem_dados: analiseDetalhada.filter((c: any) => !c.estatisticas.tem_dados).length,
+      categorias_mapeadas: analiseDetalhada.filter((c) => c.mapeamento.esta_mapeado).length,
+      categorias_nao_mapeadas: analiseDetalhada.filter((c) => !c.mapeamento.esta_mapeado).length,
+      categorias_com_dados: analiseDetalhada.filter((c) => c.estatisticas.tem_dados).length,
+      categorias_sem_dados: analiseDetalhada.filter((c) => !c.estatisticas.tem_dados).length,
       total_eventos: eventos?.length || 0,
       periodo_geral: {
-        inicio: eventos?.map((e: any) => e.data_competencia).filter(Boolean).sort()[0] || null,
-        fim: eventos?.map((e: any) => e.data_competencia).filter(Boolean).sort().reverse()[0] || null
+        inicio: eventos?.map((e) => e.data_competencia).filter(Boolean).sort()[0] || null,
+        fim: eventos?.map((e) => e.data_competencia).filter(Boolean).sort().reverse()[0] || null
       }
     }
 
     // 5. Mapeamento por grupo
-    const mapeamentoPorGrupo: any = {}
+    const mapeamentoPorGrupo = {}
     Object.keys(CATEGORIAS_ESPECIFICADAS).forEach(grupo => {
       mapeamentoPorGrupo[grupo] = {
         categorias_especificadas: CATEGORIAS_ESPECIFICADAS[grupo as keyof typeof CATEGORIAS_ESPECIFICADAS],
-        categorias_encontradas: analiseDetalhada.filter((c: any) => c.mapeamento.grupo_mapeado === grupo),
+        categorias_encontradas: analiseDetalhada.filter((c) => c.mapeamento.grupo_mapeado === grupo),
         total_especificadas: CATEGORIAS_ESPECIFICADAS[grupo as keyof typeof CATEGORIAS_ESPECIFICADAS].length,
-        total_encontradas: analiseDetalhada.filter((c: any) => c.mapeamento.grupo_mapeado === grupo).length
+        total_encontradas: analiseDetalhada.filter((c) => c.mapeamento.grupo_mapeado === grupo).length
       }
     })
 
     // 6. Categorias ná£o mapeadas com sugestáµes
     const categoriasNaoMapeadas = analiseDetalhada
-      .filter((c: any) => !c.mapeamento.esta_mapeado)
-      .sort((a: any, b: any) => b.estatisticas.valor_total - a.estatisticas.valor_total)
+      .filter((c) => !c.mapeamento.esta_mapeado)
+      .sort((a, b) => b.estatisticas.valor_total - a.estatisticas.valor_total)
 
     // 7. Problemas identificados
     const problemasIdentificados = []
     
     // Categorias de despesa marcadas como receita
-    const despesasComoReceita = analiseDetalhada.filter((c: any) => 
+    const despesasComoReceita = analiseDetalhada.filter((c) => 
       c.tipo_banco === 'RECEITA' && 
       c.mapeamento.grupo_mapeado && 
       !['receitas'].includes(c.mapeamento.grupo_mapeado)
@@ -312,14 +312,14 @@ export async function GET(request: NextRequest) {
       problemasIdentificados.push({
         tipo: 'Classificaá§á£o incorreta',
         descricao: 'Categorias de despesa marcadas como RECEITA no banco',
-        categorias: despesasComoReceita.map((c: any) => ({ nome: c.nome_banco, deveria_ser: 'DESPESA' }))
+        categorias: despesasComoReceita.map((c) => ({ nome: c.nome_banco, deveria_ser: 'DESPESA' }))
       })
     }
 
     // 8. Listar TODAS as categorias ná£o mapeadas de forma clara
     const todasCategoriasNaoMapeadas = analiseDetalhada
-      .filter((c: any) => !c.mapeamento.esta_mapeado)
-      .map((c: any) => ({
+      .filter((c) => !c.mapeamento.esta_mapeado)
+      .map((c) => ({
         nome: c.nome_banco,
         tipo: c.tipo_banco,
         tem_dados: c.estatisticas.tem_dados,
@@ -329,7 +329,7 @@ export async function GET(request: NextRequest) {
         sugestao: c.mapeamento.categoria_especificada_mais_proxima || 'Nenhuma sugestá£o',
         similaridade: c.mapeamento.similaridade
       }))
-      .sort((a: any, b: any) => b.valor_total - a.valor_total) // Ordenar por valor (mais importantes primeiro)
+      .sort((a, b) => b.valor_total - a.valor_total) // Ordenar por valor (mais importantes primeiro)
 
     console.log(`ðŸ“Š RESUMO FINAL:`)
     console.log(`   Total de eventos processados: ${eventos.length}`)

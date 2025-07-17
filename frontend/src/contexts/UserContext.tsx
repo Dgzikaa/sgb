@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext: any, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect } from 'react'
 
 interface Usuario {
   id: number

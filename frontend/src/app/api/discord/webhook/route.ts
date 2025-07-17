@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     console.log('🎮 Webhook Discord recebido');
 
     const body = await request.json();
-    console.log('📦 Payload recebido:', JSON.stringify(body: any, null, 2));
+    console.log('📦 Payload recebido:', JSON.stringify(body, null, 2));
 
     // Verificar se � uma mensagem de usu�rio
     if (!body.content || body.content.trim() === '') {
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     console.log(`📨 Processando mensagem de ${username}: "${message}"`);
 
     // Processar comando com o bot inteligente
-    const success = await processDiscordCommand(message: any, username, BAR_ID);
+    const success = await processDiscordCommand(message, username, BAR_ID);
 
     return NextResponse.json({
       success,
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
   try {
     console.log(`🧪 Teste do Discord Bot: "${testCommand}"`);
     
-    const success = await processDiscordCommand(testCommand: any, 'Sistema de Teste', 3);
+    const success = await processDiscordCommand(testCommand, 'Sistema de Teste', 3);
     
     return NextResponse.json({
       success,

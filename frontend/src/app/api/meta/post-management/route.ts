@@ -74,9 +74,9 @@ export async function GET(request: NextRequest) {
         const facebookPostsData = await facebookPostsResponse.json()
 
         if (facebookPostsResponse.ok && facebookPostsData.data) {
-          managementData.facebook_posts = facebookPostsData.data.map((post: any) => {
+          managementData.facebook_posts = facebookPostsData.data.map((post) => {
             const comments = post.comments?.data || []
-            const pendingComments = comments.filter((comment: any) => !comment.parent)
+            const pendingComments = comments.filter((comment) => !comment.parent)
 
             return {
               id: post.id,
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
                 shares: post.shares?.count || 0,
                 reactions: post.reactions?.summary?.total_count || 0
               },
-              comments: comments.slice(0: any, 5).map((comment: any) => ({
+              comments: comments.slice(0, 5).map((comment) => ({
                 id: comment.id,
                 message: comment.message,
                 created_time: comment.created_time,
@@ -102,7 +102,7 @@ export async function GET(request: NextRequest) {
                 needs_response: !comment.parent && comment.message.includes('?')
               })),
               engagement_level: comments.length > 10 ? 'high' : comments.length > 3 ? 'medium' : 'low',
-              needs_attention: pendingComments.some((c: any) => c.message.includes('?') || c.message.includes('d·∫vida') || c.message.includes('problema'))
+              needs_attention: pendingComments.some((c) => c.message.includes('?') || c.message.includes('d·∫vida') || c.message.includes('problema'))
             }
           })
         }
@@ -113,17 +113,17 @@ export async function GET(request: NextRequest) {
         console.log('üì∑ Buscando posts do Instagram para gest·£o...')
         
         const instagramPostsResponse = await fetch(
-          `https://graph.facebook.com/v18.0/${instagramId}/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count,comments.limit(10){id,text,timestamp,from,replies},insights.metric(impressions: any,reach,engagement)&limit=20&access_token=${accessToken}`
+          `https://graph.facebook.com/v18.0/${instagramId}/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count,comments.limit(10){id,text,timestamp,from,replies},insights.metric(impressions,reach,engagement)&limit=20&access_token=${accessToken}`
         )
         const instagramPostsData = await instagramPostsResponse.json()
 
         if (instagramPostsResponse.ok && instagramPostsData.data) {
-          managementData.instagram_posts = instagramPostsData.data.map((post: any) => {
+          managementData.instagram_posts = instagramPostsData.data.map((post) => {
             const comments = post.comments?.data || []
             const insights = post.insights?.data || []
-            const impressions = insights.find((i: any) => i.name === 'impressions')?.values?.[0]?.value || 0
-            const reach = insights.find((i: any) => i.name === 'reach')?.values?.[0]?.value || 0
-            const engagement = insights.find((i: any) => i.name === 'engagement')?.values?.[0]?.value || 0
+            const impressions = insights.find((i) => i.name === 'impressions')?.values?.[0]?.value || 0
+            const reach = insights.find((i) => i.name === 'reach')?.values?.[0]?.value || 0
+            const engagement = insights.find((i) => i.name === 'engagement')?.values?.[0]?.value || 0
 
             return {
               id: post.id,
@@ -142,7 +142,7 @@ export async function GET(request: NextRequest) {
                 engagement,
                 engagement_rate: impressions > 0 ? (engagement / impressions) * 100 : 0
               },
-              comments: comments.slice(0: any, 5).map((comment: any) => ({
+              comments: comments.slice(0, 5).map((comment) => ({
                 id: comment.id,
                 text: comment.text,
                 timestamp: comment.timestamp,
@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
                 needs_response: comment.text.includes('?') || comment.text.includes('@')
               })),
               engagement_level: engagement > 100 ? 'high' : engagement > 30 ? 'medium' : 'low',
-              needs_attention: comments.some((c: any) => c.text.includes('?') && !c.has_replies)
+              needs_attention: comments.some((c) => c.text.includes('?') && !c.has_replies)
             }
           })
         }
@@ -160,14 +160,14 @@ export async function GET(request: NextRequest) {
       // 3. CONSOLIDAR COMENT·ÅRIOS PENDENTES
       const allPosts = [...managementData.facebook_posts, ...managementData.instagram_posts]
       
-      allPosts.forEach((post: any) => {
-        post.comments?.forEach((comment: any) => {
+      allPosts.forEach((post) => {
+        post.comments?.forEach((comment) => {
           if ((comment.needs_response && !comment.has_response && !comment.has_replies) || 
               comment.message?.includes('d·∫vida') || comment.text?.includes('d·∫vida')) {
             managementData.pending_responses.push({
               post_id: post.id,
               post_platform: post.platform,
-              post_preview: post.message?.substring(0: any, 50) || post.caption?.substring(0: any, 50) || '',
+              post_preview: post.message?.substring(0, 50) || post.caption?.substring(0, 50) || '',
               comment_id: comment.id,
               comment_text: comment.message || comment.text,
               comment_from: comment.from,
@@ -180,19 +180,19 @@ export async function GET(request: NextRequest) {
 
       // 4. BUSCAR COMENT·ÅRIOS RECENTES GERAIS
       managementData.recent_comments = allPosts
-        .flatMap(post => post.comments.map((comment: any) => ({
+        .flatMap(post => post.comments.map((comment) => ({
           ...comment,
           post_id: post.id,
           post_platform: post.platform,
-          post_preview: post.message?.substring(0: any, 30) || post.caption?.substring(0: any, 30) || ''
+          post_preview: post.message?.substring(0, 30) || post.caption?.substring(0, 30) || ''
         })))
-        .sort((a: any, b: any) => new Date(b.created_time || b.timestamp).getTime() - new Date(a.created_time || a.timestamp).getTime())
-        .slice(0: any, 10)
+        .sort((a, b) => new Date(b.created_time || b.timestamp).getTime() - new Date(a.created_time || a.timestamp).getTime())
+        .slice(0, 10)
 
       // 5. CALCULAR RESUMO DE ENGAJAMENTO
       managementData.engagement_summary = {
         total_posts: allPosts.length,
-        total_comments: allPosts.reduce((sum: any, post: any) => sum + post.comments.length, 0),
+        total_comments: allPosts.reduce((sum, post) => sum + post.comments.length, 0),
         pending_comments: managementData.pending_responses.length,
         response_rate: managementData.pending_responses.length > 0 ? 
           ((managementData.engagement_summary.total_comments - managementData.pending_responses.length) / managementData.engagement_summary.total_comments) * 100 : 100
@@ -210,7 +210,7 @@ export async function GET(request: NextRequest) {
         })
       }
 
-      const highEngagementPosts = allPosts.filter((post: any) => post.engagement_level === 'high')
+      const highEngagementPosts = allPosts.filter((post) => post.engagement_level === 'high')
       if (highEngagementPosts.length > 0) {
         managementInsights.push({
           type: 'opportunity',
@@ -220,7 +220,7 @@ export async function GET(request: NextRequest) {
         })
       }
 
-      const postsNeedingAttention = allPosts.filter((post: any) => post.needs_attention)
+      const postsNeedingAttention = allPosts.filter((post) => post.needs_attention)
       if (postsNeedingAttention.length > 0) {
         managementInsights.push({
           type: 'attention',
@@ -243,7 +243,7 @@ export async function GET(request: NextRequest) {
         timestamp: new Date().toISOString()
       })
 
-    } catch (metaError: any) {
+    } catch (metaError) {
       console.log(`ö†Ô∏è Erro ao buscar dados de gest·£o: ${metaError.message}`)
       
       return NextResponse.json({
@@ -265,7 +265,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ùå Erro na gest·£o de posts:', error)
     return NextResponse.json({ 
       success: false,
@@ -297,7 +297,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const { comment_id, response_text: any, platform } = await request.json()
+    const { comment_id, response_text, platform } = await request.json()
 
     if (!comment_id || !response_text) {
       return NextResponse.json({
@@ -375,7 +375,7 @@ export async function POST(request: NextRequest) {
       console.log(`úÖ Resposta enviada para ${platform}:`, {
         comment_id,
         response_id: responseResult.id,
-        response_text: response_text.substring(0: any, 50) + '...'
+        response_text: response_text.substring(0, 50) + '...'
       })
 
       return NextResponse.json({
@@ -386,7 +386,7 @@ export async function POST(request: NextRequest) {
         timestamp: new Date().toISOString()
       })
 
-    } catch (metaError: any) {
+    } catch (metaError) {
       console.error(`ùå Erro ao responder coment·°rio: ${metaError.message}`)
       
       return NextResponse.json({
@@ -397,7 +397,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ùå Erro ao processar resposta:', error)
     return NextResponse.json({ 
       success: false,

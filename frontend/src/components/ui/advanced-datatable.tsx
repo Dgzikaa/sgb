@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo: any, ReactNode } from 'react'
+import { useState, useMemo, ReactNode } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -70,7 +70,7 @@ export function AdvancedDataTable<T extends Record<string, any>>({
 
     // Filtro global
     if (globalFilter) {
-      filtered = filtered.filter((row: any) =>
+      filtered = filtered.filter((row) =>
         Object.values(row).some(value =>
           String(value).toLowerCase().includes(globalFilter.toLowerCase())
         )
@@ -80,7 +80,7 @@ export function AdvancedDataTable<T extends Record<string, any>>({
     // Filtros por coluna
     Object.entries(columnFilters).forEach(([key, filterValue]) => {
       if (filterValue) {
-        filtered = filtered.filter((row: any) => {
+        filtered = filtered.filter((row) => {
           const cellValue = String(row[key] || '').toLowerCase()
           return cellValue.includes(filterValue.toLowerCase())
         })
@@ -88,7 +88,7 @@ export function AdvancedDataTable<T extends Record<string, any>>({
     })
 
     return filtered
-  }, [data, globalFilter: any, columnFilters])
+  }, [data, globalFilter, columnFilters])
 
   // Ordenar dados
   const sortedData = useMemo(() => {
@@ -96,7 +96,7 @@ export function AdvancedDataTable<T extends Record<string, any>>({
       return filteredData
     }
 
-    return [...filteredData].sort((a: any, b: any) => {
+    return [...filteredData].sort((a, b) => {
       const aVal = a[sortConfig.key]
       const bVal = b[sortConfig.key]
 
@@ -113,15 +113,15 @@ export function AdvancedDataTable<T extends Record<string, any>>({
   // Paginar dados
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize
-    return sortedData.slice(startIndex: any, startIndex + pageSize)
-  }, [sortedData, currentPage: any, pageSize])
+    return sortedData.slice(startIndex, startIndex + pageSize)
+  }, [sortedData, currentPage, pageSize])
 
   // Total de pá¡ginas
   const totalPages = Math.ceil(sortedData.length / pageSize)
 
   // Lidar com ordenaá§á£o
   const handleSort = (key: string) => {
-    if (!columns.find((col: any) => col.key === key)?.sortable) return
+    if (!columns.find((col) => col.key === key)?.sortable) return
 
     setSortConfig(prev => {
       if (prev.key === key) {
@@ -184,7 +184,7 @@ export function AdvancedDataTable<T extends Record<string, any>>({
                 <Input
                   placeholder={searchPlaceholder}
                   value={globalFilter}
-                  onChange={(e: any) => setGlobalFilter(e.target.value)}
+                  onChange={(e) => setGlobalFilter(e.target.value)}
                   className="pl-10 w-64"
                 />
               </div>
@@ -198,9 +198,9 @@ export function AdvancedDataTable<T extends Record<string, any>>({
             >
               <Filter className="w-4 h-4" />
               {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
-              {Object.values(columnFilters).filter((v: any) => v).length > 0 && (
+              {Object.values(columnFilters).filter((v) => v).length > 0 && (
                 <Badge variant="secondary" className="ml-1">
-                  {Object.values(columnFilters).filter((v: any) => v).length}
+                  {Object.values(columnFilters).filter((v) => v).length}
                 </Badge>
               )}
             </Button>
@@ -232,7 +232,7 @@ export function AdvancedDataTable<T extends Record<string, any>>({
         {/* Filtros por coluna */}
         {showFilters && (
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {columns.filter((col: any) => col.filterable).map((column: any) => (
+            {columns.filter((col) => col.filterable).map((column) => (
               <div key={String(column.key)}>
                 <label className="block text-xs font-medium text-gray-700 mb-1">
                   {column.label}
@@ -240,14 +240,14 @@ export function AdvancedDataTable<T extends Record<string, any>>({
                 {column.filterType === 'select' && column.filterOptions ? (
                   <Select
                     value={columnFilters[String(column.key)] || ""}
-                    onValueChange={(value: any) => updateColumnFilter(String(column.key), value)}
+                    onValueChange={(value) => updateColumnFilter(String(column.key), value)}
                   >
                     <SelectTrigger className="h-8">
                       <SelectValue placeholder="Todos" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">Todos</SelectItem>
-                      {column.filterOptions.map((option: any) => (
+                      {column.filterOptions.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
                         </SelectItem>
@@ -258,7 +258,7 @@ export function AdvancedDataTable<T extends Record<string, any>>({
                   <Input
                     placeholder={`Filtrar ${column.label.toLowerCase()}...`}
                     value={columnFilters[String(column.key)] || ""}
-                    onChange={(e: any) => updateColumnFilter(String(column.key), e.target.value)}
+                    onChange={(e) => updateColumnFilter(String(column.key), e.target.value)}
                     className="h-8"
                   />
                 )}
@@ -273,7 +273,7 @@ export function AdvancedDataTable<T extends Record<string, any>>({
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              {columns.map((column: any) => (
+              {columns.map((column) => (
                 <th
                   key={String(column.key)}
                   className={`
@@ -305,9 +305,9 @@ export function AdvancedDataTable<T extends Record<string, any>>({
                 </td>
               </tr>
             ) : (
-              paginatedData.map((row: any, index: any) => (
+              paginatedData.map((row, index) => (
                 <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                  {columns.map((column: any) => (
+                  {columns.map((column) => (
                     <td
                       key={String(column.key)}
                       className={`
@@ -317,7 +317,7 @@ export function AdvancedDataTable<T extends Record<string, any>>({
                       style={{ width: column.width }}
                     >
                       {column.render 
-                        ? column.render(row: any, index)
+                        ? column.render(row, index)
                         : String(row[column.key] || '-')
                       }
                     </td>
@@ -348,7 +348,7 @@ export function AdvancedDataTable<T extends Record<string, any>>({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(prev => Math.max(1: any, prev - 1))}
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
               >
                 Anterior
@@ -356,7 +356,7 @@ export function AdvancedDataTable<T extends Record<string, any>>({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(prev => Math.min(totalPages: any, prev + 1))}
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
               >
                 Prá³xima

@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
     } : null
 
     // Preparar resposta baseada na plataforma solicitada
-    let responseData: any[] = []
+    let responseData[] = []
 
     if (platform === 'all' || platform === 'instagram') {
       responseData = responseData.concat(instagramMetrics)
@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(results)
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ùå Erro ao buscar m·©tricas Meta:', error)
     return NextResponse.json({ 
       success: false,

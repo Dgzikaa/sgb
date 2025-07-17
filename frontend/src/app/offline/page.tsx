@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { safeNavigator, isClient } from '@/lib/client-utils'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { 
   WifiOff, 
@@ -170,7 +170,7 @@ export default function OfflinePage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {offlineFeatures.map((feature: any, index: any) => (
+              {offlineFeatures.map((feature, index) => (
                 <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                   <div className="flex-shrink-0">
                     <feature.icon className="w-5 h-5 text-green-600 dark:text-green-400" />

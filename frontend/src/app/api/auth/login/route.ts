@@ -239,7 +239,7 @@ export async function POST(request: NextRequest) {
       })
     }
     
-    const baresAcesso = usuarios.map((u: any) => ({
+    const baresAcesso = usuarios.map((u) => ({
       bar_id: u.bar_id,
       role: u.role,
       modulos_permitidos: u.modulos_permitidos
@@ -248,7 +248,7 @@ export async function POST(request: NextRequest) {
     console.log('ðŸ” Buscando dados completos dos bares...')
     
     // Buscar dados completos dos bares (incluindo nome)
-    const barIds = [...new Set(baresAcesso.map((b: any) => b.bar_id))]
+    const barIds = [...new Set(baresAcesso.map((b) => b.bar_id))]
     const { data: barsData, error: barsError } = await adminClient
       .from('bars')
       .select('id, nome')
@@ -262,8 +262,8 @@ export async function POST(request: NextRequest) {
     console.log('œ… Dados dos bares encontrados:', barsData?.length || 0)
 
     // Enriquecer baresAcesso com nome dos bares
-    const baresComNome = baresAcesso.map((bar: any) => {
-      const barData = barsData?.find((b: any) => b.id === bar.bar_id)
+    const baresComNome = baresAcesso.map((bar) => {
+      const barData = barsData?.find((b) => b.id === bar.bar_id)
       return {
         ...bar,
         id: bar.bar_id, // Para compatibilidade com BarContext
@@ -274,7 +274,7 @@ export async function POST(request: NextRequest) {
     console.log('ðŸ” Buscando credenciais de APIs...')
     
     // Buscar credenciais de APIs
-    const credenciaisPromises = baresComNome.map(async (bar: any) => {
+    const credenciaisPromises = baresComNome.map(async (bar) => {
       const { data: credenciais } = await adminClient
         .from('api_credentials')
         .select('*')
@@ -336,7 +336,7 @@ export async function POST(request: NextRequest) {
     
     return nextResponse
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ðŸ”¥ Erro fatal na API de login:', error)
     
     // Log de erro interno 

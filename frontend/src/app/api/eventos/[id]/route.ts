@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     if (!supabase) {
       return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 });
     }
-    const { data_evento, bar_id, publico_real, faturamento_liquido, receita_couvert, receita_ingressos, receita_bar } = await request.json();
+    const { data_evento, bar_id: any, publico_real, faturamento_liquido: any, receita_couvert, receita_ingressos: any, receita_bar } = await request.json();
 
     if (!data_evento || !bar_id) {
       return NextResponse.json({

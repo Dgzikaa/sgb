@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { StandardPageLayout } from '@/components/layouts'
-import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Tabs, TabsContent: any, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   TrendingUpIcon, 
   TrendingDownIcon, 
@@ -264,7 +264,7 @@ export default function DashboardFinanceiroPage() {
   }, [selectedBar])
 
   const getMaxValue = (items: Array<{ total: number }>) => {
-    return Math.max(...items.map((item: any) => item.total), 1)
+    return Math.max(...items.map((item) => item.total), 1)
   }
 
       return (
@@ -285,7 +285,7 @@ export default function DashboardFinanceiroPage() {
               {activeTab === 'dre' && (
                 <select
                   value={selectedMonth}
-                  onChange={(e: any) => {
+                  onChange={(e) => {
                     setSelectedMonth(e.target.value)
                     carregarDRE(e.target.value || undefined)
                   }}
@@ -439,7 +439,7 @@ export default function DashboardFinanceiroPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        {data.receitas_por_categoria.slice(0: any, 3).map((item: any, index: any) => {
+                        {data.receitas_por_categoria.slice(0, 3).map((item, index) => {
                           const percentage = (item.total / data.resumo.total_receitas * 100)
                           return (
                             <div key={index}>
@@ -457,7 +457,7 @@ export default function DashboardFinanceiroPage() {
                         })}
                         <div className="mt-4 p-3 bg-green-50 rounded-lg">
                           <div className="text-sm text-green-700 font-medium">
-                            Top 3 representam {((data.receitas_por_categoria.slice(0: any, 3).reduce((sum: any, item: any) => sum + item.total, 0) / data.resumo.total_receitas) * 100).toFixed(1)}% do total
+                            Top 3 representam {((data.receitas_por_categoria.slice(0, 3).reduce((sum, item) => sum + item.total, 0) / data.resumo.total_receitas) * 100).toFixed(1)}% do total
                           </div>
                         </div>
                       </div>
@@ -521,7 +521,7 @@ export default function DashboardFinanceiroPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        {data.despesas_por_categoria.slice(0: any, 4).map((item: any, index: any) => {
+                        {data.despesas_por_categoria.slice(0, 4).map((item, index) => {
                           const percentage = (item.total / data.resumo.total_despesas * 100)
                           return (
                             <div key={index} className="flex justify-between items-center">

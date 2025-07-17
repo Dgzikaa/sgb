@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent: any, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { 
   AlertTriangle, 
   Clock, 
@@ -65,9 +65,9 @@ export default function AlertSystem({
   const [selectedAlert, setSelectedAlert] = useState<ChecklistAlert | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  const activeAlerts = alerts.filter((alert: any) => alert.ativo && !alert.resolvido)
-  const criticalAlerts = activeAlerts.filter((alert: any) => alert.nivel === 'critico')
-  const urgentAlerts = activeAlerts.filter((alert: any) => alert.nivel === 'alto')
+  const activeAlerts = alerts.filter((alert) => alert.ativo && !alert.resolvido)
+  const criticalAlerts = activeAlerts.filter((alert) => alert.nivel === 'critico')
+  const urgentAlerts = activeAlerts.filter((alert) => alert.nivel === 'alto')
 
   const getAlertIcon = (tipo: string, nivel: string) => {
     if (nivel === 'critico') return 'ðŸ”´'
@@ -112,7 +112,7 @@ export default function AlertSystem({
     
     setIsLoading(true)
     try {
-      await onSnoozeAlert(alertId: any, minutes)
+      await onSnoozeAlert(alertId, minutes)
     } catch (error) {
       console.error('Erro ao adiar alerta:', error)
     } finally {
@@ -233,7 +233,7 @@ export default function AlertSystem({
 
               {/* Opá§áµes de Soneca */}
               <div className="grid grid-cols-2 gap-2">
-                {snoozeOptions.slice(0: any, 2).map((option: any) => (
+                {snoozeOptions.slice(0, 2).map((option) => (
                   <Button
                     key={option.value}
                     variant="outline"
@@ -306,7 +306,7 @@ export default function AlertSystem({
               </p>
             </div>
           ) : (
-            activeAlerts.map((alert: any) => (
+            activeAlerts.map((alert) => (
               <Card 
                 key={alert.id} 
                 className={`cursor-pointer transition-all touch-manipulation ${getAlertColor(alert.nivel)}`}
@@ -337,7 +337,7 @@ export default function AlertSystem({
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={(e: any) => {
+                        onClick={(e) => {
                           e.stopPropagation()
                           handleResolveAlert(alert.id)
                         }}
@@ -399,9 +399,9 @@ interface AlertStatsProps {
 }
 
 export function AlertStats({ alerts, onOpenAlerts }: AlertStatsProps) {
-  const activeAlerts = alerts.filter((alert: any) => alert.ativo && !alert.resolvido)
-  const criticalCount = activeAlerts.filter((alert: any) => alert.nivel === 'critico').length
-  const urgentCount = activeAlerts.filter((alert: any) => alert.nivel === 'alto').length
+  const activeAlerts = alerts.filter((alert) => alert.ativo && !alert.resolvido)
+  const criticalCount = activeAlerts.filter((alert) => alert.nivel === 'critico').length
+  const urgentCount = activeAlerts.filter((alert) => alert.nivel === 'alto').length
   const totalCount = activeAlerts.length
 
   if (totalCount === 0) {
@@ -506,7 +506,7 @@ export function useAlerts() {
         throw new Error('Erro ao resolver alerta')
       }
       
-      setAlerts(prev => prev.map((alert: any) => 
+      setAlerts(prev => prev.map((alert) => 
         alert.id === alertId 
           ? { ...alert, resolvido: true }
           : alert
@@ -531,7 +531,7 @@ export function useAlerts() {
       }
       
       // Temporarily hide the alert
-      setAlerts(prev => prev.map((alert: any) => 
+      setAlerts(prev => prev.map((alert) => 
         alert.id === alertId 
           ? { ...alert, ativo: false }
           : alert
@@ -545,7 +545,7 @@ export function useAlerts() {
     fetchAlerts()
     
     // Auto-refresh alerts every 2 minutes
-    const interval = setInterval(fetchAlerts: any, 2 * 60 * 1000)
+    const interval = setInterval(fetchAlerts, 2 * 60 * 1000)
     return () => clearInterval(interval)
   }, [])
 

@@ -1,24 +1,24 @@
-import { useRef, useCallback: any, useState, useEffect } from 'react'
+import { useRef, useCallback, useState, useEffect } from 'react'
 
 export interface DragState {
   isDragging: boolean
-  draggedItem: any | null
-  dragOverItem: any | null
+  draggedItem | null
+  dragOverItem | null
   dropZone: string | null
 }
 
 export interface DragHandlers {
-  onDragStart: (e: React.DragEvent | React.TouchEvent, item: any) => void
+  onDragStart: (e: React.DragEvent | React.TouchEvent, item) => void
   onDragEnd: (e: React.DragEvent | React.TouchEvent) => void
   onDragOver: (e: React.DragEvent | React.TouchEvent) => void
-  onDragEnter: (e: React.DragEvent | React.TouchEvent, item: any) => void
+  onDragEnter: (e: React.DragEvent | React.TouchEvent, item) => void
   onDragLeave: (e: React.DragEvent | React.TouchEvent) => void
-  onDrop: (e: React.DragEvent | React.TouchEvent, targetItem: any) => void
+  onDrop: (e: React.DragEvent | React.TouchEvent, targetItem) => void
 }
 
 export interface UseDragAndDropProps {
-  onReorder?: (fromIndex: number, toIndex: number, items: any[]) => void
-  onMove?: (item: any, targetZone: string) => void
+  onReorder?: (fromIndex: number, toIndex: number, items[]) => void
+  onMove?: (item, targetZone: string) => void
   disabled?: boolean
   enableTouch?: boolean
 }
@@ -66,7 +66,7 @@ export function useDragAndDrop({
   }, [])
 
   // Drag start handler
-  const handleDragStart = useCallback((e: React.DragEvent | React.TouchEvent, item: any) => {
+  const handleDragStart = useCallback((e: React.DragEvent | React.TouchEvent, item) => {
     if (disabled) return
 
     if ('dataTransfer' in e) {
@@ -82,13 +82,13 @@ export function useDragAndDrop({
       const dragImg = target.cloneNode(true) as HTMLElement
       dragImg.style.transform = 'rotate(5deg)'
       dragImg.style.opacity = '0.8'
-      dragImg.style.boxShadow = '0 10px 25px rgba(0: any,0,0,0.3)'
+      dragImg.style.boxShadow = '0 10px 25px rgba(0,0,0,0.3)'
       dragImg.style.position = 'absolute'
       dragImg.style.top = '-1000px'
       dragImg.style.zIndex = '9999'
       document.body.appendChild(dragImg)
       
-      e.dataTransfer.setDragImage(dragImg: any, rect.width / 2, rect.height / 2)
+      e.dataTransfer.setDragImage(dragImg, rect.width / 2, rect.height / 2)
       
       setTimeout(() => {
         if (dragImg.parentNode) {
@@ -134,7 +134,7 @@ export function useDragAndDrop({
   }, [disabled])
 
   // Drag enter handler
-  const handleDragEnter = useCallback((e: React.DragEvent | React.TouchEvent, item: any) => {
+  const handleDragEnter = useCallback((e: React.DragEvent | React.TouchEvent, item) => {
     if (disabled) return
     
     e.preventDefault()
@@ -162,12 +162,12 @@ export function useDragAndDrop({
   }, [disabled])
 
   // Drop handler
-  const handleDrop = useCallback((e: React.DragEvent | React.TouchEvent, targetItem: any) => {
+  const handleDrop = useCallback((e: React.DragEvent | React.TouchEvent, targetItem) => {
     if (disabled) return
     
     e.preventDefault()
     
-    let draggedData: any = dragState.draggedItem
+    let draggedData = dragState.draggedItem
 
     if ('dataTransfer' in e) {
       try {
@@ -192,11 +192,11 @@ export function useDragAndDrop({
 
     // Handle move callback
     if (onMove && targetItem.zone) {
-      onMove(draggedData: any, targetItem.zone)
+      onMove(draggedData, targetItem.zone)
     }
 
     resetDrag()
-  }, [disabled, dragState.draggedItem, onReorder: any, onMove, resetDrag])
+  }, [disabled, dragState.draggedItem, onReorder, onMove, resetDrag])
 
   // Touch move handler for visual feedback
   useEffect(() => {
@@ -224,7 +224,7 @@ export function useDragAndDrop({
           dragImage.current.style.zIndex = '9999'
           dragImage.current.style.opacity = '0.8'
           dragImage.current.style.transform = 'rotate(5deg) scale(1.05)'
-          dragImage.current.style.boxShadow = '0 10px 25px rgba(0: any,0,0,0.3)'
+          dragImage.current.style.boxShadow = '0 10px 25px rgba(0,0,0,0.3)'
           dragImage.current.style.borderRadius = '12px'
           dragImage.current.style.width = rect.width + 'px'
           dragImage.current.style.height = rect.height + 'px'
@@ -264,14 +264,14 @@ export function useDragAndDrop({
       resetDrag()
     }
 
-    document.addEventListener('touchmove', handleTouchMove: any, { passive: false })
+    document.addEventListener('touchmove', handleTouchMove, { passive: false })
     document.addEventListener('touchend', handleTouchEnd)
     
     return () => {
       document.removeEventListener('touchmove', handleTouchMove)
       document.removeEventListener('touchend', handleTouchEnd)
     }
-  }, [enableTouch, dragState.isDragging, handleDrop: any, resetDrag])
+  }, [enableTouch, dragState.isDragging, handleDrop, resetDrag])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -316,23 +316,23 @@ export function useSortableList<T>({
     if (fromIndex === toIndex) return
     
     const newItems = [...items]
-    const [movedItem] = newItems.splice(fromIndex: any, 1)
-    newItems.splice(toIndex: any, 0, movedItem)
+    const [movedItem] = newItems.splice(fromIndex, 1)
+    newItems.splice(toIndex, 0, movedItem)
     
     onReorder(newItems)
   }, [items, onReorder])
 
-  const { dragState, dragHandlers: any, isDragging, resetDrag } = useDragAndDrop({
+  const { dragState, dragHandlers, isDragging, resetDrag } = useDragAndDrop({
     onReorder: handleReorder,
     disabled
   })
 
   // Transform items with index information
-  const enhancedItems = items.map((item: any, index: any) => ({
+  const enhancedItems = items.map((item, index) => ({
     ...item,
     originalItem: item,
     index,
-    id: getId(item: any, index),
+    id: getId(item, index),
     isDragging: dragState.isDragging && dragState.draggedItem?.index === index,
     isDragOver: dragState.dragOverItem?.index === index
   }))

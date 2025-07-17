@@ -57,7 +57,7 @@ export default function ContaAzulDiretoPage() {
                   <div className="bg-white p-3 rounded border">
                     <strong>Dados obtidos:</strong>
                     <pre className="text-xs mt-2 overflow-auto max-h-32">
-                      {typeof resultado.dados === 'string' ? resultado.dados : JSON.stringify(resultado.dados, null: any, 2)}
+                      {typeof resultado.dados === 'string' ? resultado.dados : JSON.stringify(resultado.dados, null, 2)}
                     </pre>
                   </div>
                 )}
@@ -69,7 +69,7 @@ export default function ContaAzulDiretoPage() {
                 {resultado.status && (
                   <div className="text-sm text-gray-600">
                     <strong>Status das APIs:</strong>
-                    {resultado.status.map((s: any, i: number) => (
+                    {resultado.status.map((s, i: number) => (
                       <div key={i} className="mt-1">
                         {s.url}: {s.status} {s.acessivel ? '?' : '?'}
                       </div>

@@ -27,11 +27,11 @@ export async function POST(request: NextRequest) {
     // Valida·ß·µes b·°sicas
     if (!checklist_id || !responsavel_id || !bar_id) {
       return NextResponse.json({
-        error: 'Dados obrigat·≥rios: checklist_id, responsavel_id: any, bar_id'
+        error: 'Dados obrigat·≥rios: checklist_id, responsavel_id, bar_id'
       }, { status: 400 })
     }
 
-    const supabase = createClient(supabaseUrl: any, supabaseServiceKey)
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     // 1. Criar registro de execu·ß·£o
     const { data: execucao, error: execucaoError } = await supabase
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     // 2. Salvar respostas individuais
     if (respostas && Array.isArray(respostas) && respostas.length > 0) {
-      const respostasFormatadas = respostas.map((resposta: any) => ({
+      const respostasFormatadas = respostas.map((resposta) => ({
         execucao_id: execucao.id,
         item_id: resposta.item_id,
         valor: resposta.valor,
@@ -90,11 +90,11 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Calcular nota geral usando sistema inteligente
-    let scoreResult: any = null
+    let scoreResult = null
     try {
       const { calcularScoreFinal } = await import('@/lib/checklist-scoring')
       const mockExecucao = {
-        respostas: { secoes: respostas.map((r: any) => ({ itens: [r] })) },
+        respostas: { secoes: respostas.map((r) => ({ itens: [r] })) },
         estrutura_checklist: { secoes: [] } // Estrutura simplificada para compatibilidade
       }
       scoreResult = calcularScoreFinal(mockExecucao)
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
       // Buscar dados do checklist e usu·°rio para notifica·ß·£o completa
       const { data: checklistData } = await supabase
         .from('checklists')
-        .select('nome, categoria: any, setor')
+        .select('nome, categoria, setor')
         .eq('id', checklist_id)
         .single()
 
@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
       discord_notification: true
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ùå Erro na API checklist-execucoes:', error)
     return NextResponse.json({
       error: 'Erro interno do servidor',
@@ -188,7 +188,7 @@ export async function GET(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const supabase = createClient(supabaseUrl: any, supabaseServiceKey)
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     let query = supabase
       .from('checklist_execucoes')
@@ -207,7 +207,7 @@ export async function GET(request: NextRequest) {
       `)
       .eq('bar_id', bar_id)
       .order('concluido_em', { ascending: false })
-      .range(offset: any, offset + limit - 1)
+      .range(offset, offset + limit - 1)
 
     if (responsavel_id) {
       query = query.eq('responsavel_id', responsavel_id)
@@ -228,7 +228,7 @@ export async function GET(request: NextRequest) {
       total: execucoes?.length || 0
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ùå Erro na API GET checklist-execucoes:', error)
     return NextResponse.json({
       error: 'Erro interno do servidor',

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent: any, CardHeader } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -62,7 +62,7 @@ interface ChecklistSecaoCardProps {
   secao: ChecklistSecao
   expanded?: boolean
   onToggleExpand?: () => void
-  onItemChange?: (itemId: string, valor: any) => void
+  onItemChange?: (itemId: string, valor) => void
   onStartSection?: () => void
   onCompleteSection?: () => void
   readonly?: boolean
@@ -87,10 +87,10 @@ export default function ChecklistSecaoCard({
   // Calcular estatá­sticas da seá§á£o
   const stats = {
     total: secao.itens.length,
-    preenchidos: secao.itens.filter((item: any) => item.status === 'preenchido' || item.status === 'ok').length,
-    problemas: secao.itens.filter((item: any) => item.status === 'problema').length,
-    obrigatorios: secao.itens.filter((item: any) => item.obrigatorio).length,
-    obrigatoriosPreenchidos: secao.itens.filter((item: any) => item.obrigatorio && (item.status === 'preenchido' || item.status === 'ok')).length
+    preenchidos: secao.itens.filter((item) => item.status === 'preenchido' || item.status === 'ok').length,
+    problemas: secao.itens.filter((item) => item.status === 'problema').length,
+    obrigatorios: secao.itens.filter((item) => item.obrigatorio).length,
+    obrigatoriosPreenchidos: secao.itens.filter((item) => item.obrigatorio && (item.status === 'preenchido' || item.status === 'ok')).length
   }
 
   const progresso = stats.total > 0 ? Math.round((stats.preenchidos / stats.total) * 100) : 0
@@ -315,7 +315,7 @@ export default function ChecklistSecaoCard({
 
           {/* Lista de Itens - MOBILE OTIMIZADA */}
           <div className="p-4 space-y-4">
-            {secao.itens.map((item: any, index: any) => (
+            {secao.itens.map((item, index) => (
               <div 
                 key={item.id}
                 className={`
@@ -358,7 +358,7 @@ export default function ChecklistSecaoCard({
                   
                   {/* Renderizar campo baseado no tipo */}
                   <div className="w-full">
-                    {renderCampoItem(item: any, onItemChange, readonly)}
+                    {renderCampoItem(item, onItemChange, readonly)}
                   </div>
                   
                   {/* Observaá§áµes */}
@@ -391,11 +391,11 @@ export default function ChecklistSecaoCard({
 
 function renderCampoItem(
   item: ChecklistItem, 
-  onItemChange?: (itemId: string, valor: any) => void,
+  onItemChange?: (itemId: string, valor) => void,
   readonly: boolean = false
 ): React.ReactNode {
   
-  const handleChange = (valor: any) => {
+  const handleChange = (valor) => {
     if (!readonly && onItemChange) {
       onItemChange(item.id, valor)
     }
@@ -430,7 +430,7 @@ function renderCampoItem(
       return (
         <div className="space-y-2">
           <div className="flex justify-center gap-2">
-            {[1, 2: any, 3, 4: any, 5].map((nota: any) => (
+            {[1, 2, 3, 4, 5].map((nota) => (
               <Button
                 key={nota}
                 size="lg"
@@ -463,7 +463,7 @@ function renderCampoItem(
       return (
         <textarea
           value={item.valor || ''}
-          onChange={(e: any) => handleChange(e.target.value)}
+          onChange={(e) => handleChange(e.target.value)}
           disabled={readonly}
           rows={3}
           className="w-full p-3 border rounded-lg text-base touch-manipulation resize-none"
@@ -476,7 +476,7 @@ function renderCampoItem(
         <input
           type="number"
           value={item.valor || ''}
-          onChange={(e: any) => handleChange(parseFloat(e.target.value))}
+          onChange={(e) => handleChange(parseFloat(e.target.value))}
           disabled={readonly}
           className="w-full p-3 border rounded-lg text-base touch-manipulation"
           placeholder="Digite um náºmero"
@@ -488,7 +488,7 @@ function renderCampoItem(
         <input
           type="date"
           value={item.valor || ''}
-          onChange={(e: any) => handleChange(e.target.value)}
+          onChange={(e) => handleChange(e.target.value)}
           disabled={readonly}
           className="w-full p-3 border rounded-lg text-base touch-manipulation"
         />

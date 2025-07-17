@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   console.log('🔐 API de registro facial iniciada')
   
   try {
-    const { descriptor, confidence: any, userEmail, barId } = await request.json()
+    const { descriptor, confidence, userEmail, barId } = await request.json()
 
     console.log('📊 Dados recebidos:', { 
       userEmail, 
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     // Buscar usu�rio pelo email
     const { data: usuarios, error: userError } = await supabase
       .from('usuarios_bar')
-      .select('user_id, id: any, nome')
+      .select('user_id, id, nome')
       .eq('email', userEmail)
       .eq('bar_id', barId)
       .eq('ativo', true)
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('🔥 Erro fatal na API de registro facial:', error)
     
     return NextResponse.json(

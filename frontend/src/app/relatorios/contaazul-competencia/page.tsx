@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { StandardPageLayout } from '@/components/layouts'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useRef } from 'react'
@@ -61,16 +61,16 @@ const GRUPOS_DRE = [
   }
 ];
 
-function totalGrupo(mes: any, grupo: any) {
+function totalGrupo(mes, grupo) {
   return grupo.categorias.reduce((acc: number, cat: string) => acc + (mes.categorias[cat] || 0), 0);
 }
 
-function totalReceitas(mes: any) {
+function totalReceitas(mes) {
   return GRUPOS_DRE[0].categorias.reduce((acc: number, cat: string) => acc + (mes.categorias[cat] || 0), 0);
 }
-function totalCustos(mes: any) {
+function totalCustos(mes) {
   // Soma todos os grupos exceto Receita
-  return GRUPOS_DRE.slice(1).reduce((acc: number, grupo: any) => acc + totalGrupo(mes: any, grupo), 0);
+  return GRUPOS_DRE.slice(1).reduce((acc: number, grupo) => acc + totalGrupo(mes, grupo), 0);
 }
 
 function formatarValor(valor: number) {
@@ -81,7 +81,7 @@ function formatarValor(valor: number) {
 export default function DREOrdinarioPage() {
   const [dadosMensais, setDadosMensais] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [gruposAbertos, setGruposAbertos] = useState<string[]>(GRUPOS_DRE.map((g: any) => g.nome))
+  const [gruposAbertos, setGruposAbertos] = useState<string[]>(GRUPOS_DRE.map((g) => g.nome))
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -91,7 +91,7 @@ export default function DREOrdinarioPage() {
       .then(res => {
         if (res.success) {
           // Filtrar meses a partir de fevereiro
-          const filtrados = (res.meses || []).filter((m: any) => m.mes >= 2)
+          const filtrados = (res.meses || []).filter((m) => m.mes >= 2)
           setDadosMensais(filtrados)
         }
         setLoading(false)
@@ -105,7 +105,7 @@ export default function DREOrdinarioPage() {
   }, [])
 
   const toggleGrupo = (nome: string) => {
-    setGruposAbertos(prev => prev.includes(nome) ? prev.filter((g: any) => g !== nome) : [...prev, nome])
+    setGruposAbertos(prev => prev.includes(nome) ? prev.filter((g) => g !== nome) : [...prev, nome])
   }
 
   return (
@@ -118,7 +118,7 @@ export default function DREOrdinarioPage() {
               <thead>
                 <tr>
                   <th className="table-header-dark sticky left-0 bg-gray-50 dark:bg-gray-900 z-10">Indicador</th>
-                  {dadosMensais.map((mes: any) => (
+                  {dadosMensais.map((mes) => (
                     <th key={mes.ano + '-' + mes.mes} className="table-header-dark text-center">
                       {new Date(mes.ano, mes.mes - 1).toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}
                     </th>
@@ -126,7 +126,7 @@ export default function DREOrdinarioPage() {
                 </tr>
               </thead>
               <tbody>
-                {GRUPOS_DRE.map((grupo: any) => (
+                {GRUPOS_DRE.map((grupo) => (
                   <>
                     {/* Linha macro do grupo (expand/recolher) */}
                     <tr key={grupo.nome + '-total'} className="group cursor-pointer select-none" onClick={() => toggleGrupo(grupo.nome)}>
@@ -136,15 +136,15 @@ export default function DREOrdinarioPage() {
                           : <ChevronRight className="w-4 h-4 transition-transform duration-200" />}
                         {grupo.nome} TOTAL
                       </td>
-                      {dadosMensais.map((mes: any) => (
-                        <td key={mes.ano + '-' + mes.mes} className={`table-cell-dark text-right font-mono font-bold ${grupo.cor}`}>{formatarValor(totalGrupo(mes: any, grupo))}</td>
+                      {dadosMensais.map((mes) => (
+                        <td key={mes.ano + '-' + mes.mes} className={`table-cell-dark text-right font-mono font-bold ${grupo.cor}`}>{formatarValor(totalGrupo(mes, grupo))}</td>
                       ))}
                     </tr>
                     {/* Linhas detalhadas do grupo */}
-                    {gruposAbertos.includes(grupo.nome) && grupo.categorias.map((cat: any) => (
+                    {gruposAbertos.includes(grupo.nome) && grupo.categorias.map((cat) => (
                       <tr key={grupo.nome + '-' + cat} className="transition-all">
                         <td className="table-cell-dark sticky left-0 bg-gray-50 dark:bg-gray-900 z-10 pl-8">{cat}</td>
-                        {dadosMensais.map((mes: any) => (
+                        {dadosMensais.map((mes) => (
                           <td key={mes.ano + '-' + mes.mes} className={`table-cell-dark text-right font-mono ${grupo.cor}`}>{formatarValor(mes.categorias[cat] || 0)}</td>
                         ))}
                       </tr>
@@ -154,7 +154,7 @@ export default function DREOrdinarioPage() {
                 {/* EBITDA */}
                 <tr>
                   <td className="table-cell-dark sticky left-0 bg-gray-50 dark:bg-gray-900 z-10 font-bold uppercase bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-200">EBITDA</td>
-                  {dadosMensais.map((mes: any) => (
+                  {dadosMensais.map((mes) => (
                     <td key={mes.ano + '-' + mes.mes} className="table-cell-dark text-right font-mono font-bold bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-200">{formatarValor(totalReceitas(mes) - totalCustos(mes))}</td>
                   ))}
                 </tr>

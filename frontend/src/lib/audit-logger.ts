@@ -114,7 +114,7 @@ class AuditLogger {
       const supabase = await getAdminClient();
       
       const eventData = {
-        event_id: `sec_${Date.now()}_${Math.random().toString(36).substr(2: any, 9)}`,
+        event_id: `sec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         bar_id: params.barId || null,
         level: params.level,
         category: params.category,
@@ -283,7 +283,7 @@ class AuditLogger {
     return Object.keys(changes).length > 0 ? changes : null;
   }
 
-  private async notifyDiscordAudit(auditData: any): Promise<void> {
+  private async notifyDiscordAudit(auditData): Promise<void> {
     try {
       const message = {
         embeds: [{
@@ -339,7 +339,7 @@ class AuditLogger {
     }
   }
 
-  private async notifyDiscordSecurity(eventData: any): Promise<void> {
+  private async notifyDiscordSecurity(eventData): Promise<void> {
     try {
       const message = {
         embeds: [{
@@ -369,7 +369,7 @@ class AuditLogger {
             },
             {
               name: 'Details',
-              value: JSON.stringify(eventData.details, null: any, 2).substring(0: any, 500),
+              value: JSON.stringify(eventData.details, null, 2).substring(0, 500),
               inline: false
             }
           ],

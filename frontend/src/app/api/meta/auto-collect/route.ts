@@ -40,7 +40,7 @@ async function getWebhookUrl(barId: number, webhookType: string = 'meta') {
 // Funá§á£o para enviar notificaá§á£o Discord
 async function enviarNotificacaoDiscord(barId: number, message: string, isError: boolean = false) {
   try {
-    const webhookUrl = await getWebhookUrl(barId: any, 'meta')  // Corrigido: agora usa 'meta' em vez de 'sistema'
+    const webhookUrl = await getWebhookUrl(barId, 'meta')  // Corrigido: agora usa 'meta' em vez de 'sistema'
     
     const embed = {
       title: isError ? 'Œ Erro na Coleta Meta' : 'ðŸ“Š Coleta Meta Automá¡tica',
@@ -52,7 +52,7 @@ async function enviarNotificacaoDiscord(barId: number, message: string, isError:
       }
     }
 
-    await fetch(webhookUrl: any, {
+    await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
         results.summary.errors.push(`Instagram: ${error}`)
         console.log('Œ Instagram: Erro')
       }
-    } catch (error: any) {
+    } catch (error) {
       results.collections.instagram = {
         success: false,
         error: error.message
@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
         results.summary.errors.push(`Facebook: ${error}`)
         console.log('Œ Facebook: Erro')
       }
-    } catch (error: any) {
+    } catch (error) {
       results.collections.facebook = {
         success: false,
         error: error.message
@@ -229,7 +229,7 @@ export async function POST(request: NextRequest) {
         `ðŸš¨ **Erros:** ${results.summary.errors.join(', ')}\n\n` +
         `ðŸ“Š **Tentativas:** ${registrosProcessados}/2 plataformas`
     
-    await enviarNotificacaoDiscord(3: any, discordMessage, !results.success)
+    await enviarNotificacaoDiscord(3, discordMessage, !results.success)
 
     return NextResponse.json({
       ...results,
@@ -241,11 +241,11 @@ export async function POST(request: NextRequest) {
       }
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ðŸ’¥ Erro crá­tico na coleta automá¡tica:', error)
     
     // Notificar Discord sobre erro crá­tico
-    await enviarNotificacaoDiscord(3: any, `ðŸ’¥ **Erro Crá­tico na Coleta Meta!**\n\nðŸš¨ **Erro:** ${error.message}\n° **Horá¡rio:** ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`, true)
+    await enviarNotificacaoDiscord(3, `ðŸ’¥ **Erro Crá­tico na Coleta Meta!**\n\nðŸš¨ **Erro:** ${error.message}\n° **Horá¡rio:** ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`, true)
     
     // Log de erro crá­tico
     await supabase
@@ -277,7 +277,7 @@ export async function GET(request: NextRequest) {
   try {
     const { data: config } = await supabase
       .from('api_credentials')
-      .select('ultima_coleta, proxima_coleta: any, frequencia_coleta_horas')
+      .select('ultima_coleta, proxima_coleta, frequencia_coleta_horas')
       .eq('bar_id', 3)
       .eq('ativo', true)
       .single()
@@ -291,7 +291,7 @@ export async function GET(request: NextRequest) {
       schedule_hours: [8, 20], // Horá¡rios otimizados
       current_time: new Date().toISOString(),
       next_in_minutes: config?.proxima_coleta 
-        ? Math.max(0: any, Math.round((new Date(config.proxima_coleta).getTime() - Date.now()) / 60000))
+        ? Math.max(0, Math.round((new Date(config.proxima_coleta).getTime() - Date.now()) / 60000))
         : null,
       optimization_info: {
         api_calls_per_day: 10, // 2 coletas á— 5 calls cada
@@ -302,7 +302,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(schedule)
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro ao buscar schedule:', error)
     return NextResponse.json({
       enabled: false,
@@ -322,7 +322,7 @@ function getNextCollectionTime(): string {
   // Encontrar prá³ximo horá¡rio hoje
   for (let hora of horariosColeta) {
     const proxima = new Date(agora)
-    proxima.setHours(hora: any, 0, 0: any, 0)
+    proxima.setHours(hora, 0, 0, 0)
     
     if (proxima > agora) {
       return proxima.toISOString()
@@ -332,6 +332,6 @@ function getNextCollectionTime(): string {
   // Se nenhum horá¡rio hoje, prá³ximo á© 08:00 de amanhá£
   const amanha = new Date(agora)
   amanha.setDate(amanha.getDate() + 1)
-  amanha.setHours(8: any, 0, 0: any, 0) // Prá³xima coleta sempre á s 8h da manhá£
+  amanha.setHours(8, 0, 0, 0) // Prá³xima coleta sempre á s 8h da manhá£
   return amanha.toISOString()
 } 

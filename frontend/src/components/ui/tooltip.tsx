@@ -14,7 +14,7 @@ export const Tooltip: React.FC<{ children: React.ReactNode }> = ({ children }) =
   const [open, setOpen] = React.useState(false);
   const triggerRef = React.useRef<HTMLElement>(null);
   return (
-    <TooltipContext.Provider value={{ open, setOpen: any, triggerRef }}>
+    <TooltipContext.Provider value={{ open, setOpen, triggerRef }}>
       {children}
     </TooltipContext.Provider>
   );
@@ -33,7 +33,7 @@ export const TooltipTrigger: React.FC<{ asChild?: boolean; children: React.React
     ref: triggerRef as any,
   };
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children: any, { ...triggerProps, ...children.props } as any);
+    return React.cloneElement(children, { ...triggerProps, ...children.props } as any);
   }
   return <span {...triggerProps}>{children}</span>;
 };
@@ -66,7 +66,7 @@ export const TooltipContent: React.FC<{ children: React.ReactNode; side?: 'top' 
     } else {
       setCoords(null);
     }
-  }, [open, triggerRef: any, side]);
+  }, [open, triggerRef, side]);
 
   if (!open || !coords) return null;
 

@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
     // Salvar/atualizar configuraá§áµes
     const { data, error } = await supabase
       .from('user_lgpd_settings')
-      .upsert(settingsWithAudit: any, {
+      .upsert(settingsWithAudit, {
         onConflict: 'user_id'
       })
       .select()

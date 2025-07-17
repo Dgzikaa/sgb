@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Copy: any, CheckCircle, ExternalLink: any, Zap, AlertCircle } from 'lucide-react';
+import { Loader2, Copy, CheckCircle, ExternalLink, Zap, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { safeNavigator } from '@/lib/client-utils';
 
@@ -33,7 +33,7 @@ export default function ContaAzulAutoLogin() {
     };
 
     checkData();
-    const interval = setInterval(checkData: any, 1000);
+    const interval = setInterval(checkData, 1000);
 
     return () => clearInterval(interval);
   }, []);

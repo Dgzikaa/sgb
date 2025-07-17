@@ -102,7 +102,7 @@ export function withPageLoading<T extends object>(
     error?: string | null
     loadingMessage?: string
   }) {
-    const { loading = false, error = null, loadingMessage: any, ...componentProps } = props
+    const { loading = false, error = null, loadingMessage, ...componentProps } = props
 
     return (
       <PageLoadingWrapper

@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useRef: any, useEffect, useCallback } from 'react'
-import { DashboardWidget, WidgetConfig: any, WIDGET_PRESETS } from './dashboard-widget'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { DashboardWidget, WidgetConfig, WIDGET_PRESETS } from './dashboard-widget'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { 
   Edit3, 
@@ -48,7 +48,7 @@ export function DashboardGrid({
 
   const handleWidgetConfigChange = useCallback((config: WidgetConfig) => {
     if (onWidgetsChange) {
-      const updatedWidgets = widgets.map((w: any) => 
+      const updatedWidgets = widgets.map((w) => 
         w.id === config.id ? config : w
       )
       onWidgetsChange(updatedWidgets)
@@ -57,7 +57,7 @@ export function DashboardGrid({
 
   const handleWidgetRemove = useCallback((id: string) => {
     if (onWidgetsChange) {
-      const updatedWidgets = widgets.filter((w: any) => w.id !== id)
+      const updatedWidgets = widgets.filter((w) => w.id !== id)
       onWidgetsChange(updatedWidgets)
     }
   }, [widgets, onWidgetsChange])
@@ -79,7 +79,7 @@ export function DashboardGrid({
 
   const findEmptyPosition = (): { x: number; y: number } => {
     // Simples algoritmo para encontrar posiá§á£o vazia
-    const occupied = widgets.map((w: any) => w.position)
+    const occupied = widgets.map((w) => w.position)
     
     for (let y = 0; y < 10; y++) {
       for (let x = 0; x < 6; x++) {
@@ -95,7 +95,7 @@ export function DashboardGrid({
 
   const handleResetLayout = () => {
     if (onWidgetsChange) {
-      const resetWidgets = Object.values(WIDGET_PRESETS).map((preset: any) => ({
+      const resetWidgets = Object.values(WIDGET_PRESETS).map((preset) => ({
         ...preset,
         id: preset.id,
         visible: true
@@ -107,7 +107,7 @@ export function DashboardGrid({
   const handleToggleAll = () => {
     if (onWidgetsChange) {
       const allVisible = widgets.every(w => w.visible)
-      const updatedWidgets = widgets.map((w: any) => ({ ...w, visible: !allVisible }))
+      const updatedWidgets = widgets.map((w) => ({ ...w, visible: !allVisible }))
       onWidgetsChange(updatedWidgets)
     }
   }
@@ -127,7 +127,7 @@ export function DashboardGrid({
       const rect = gridRef.current.getBoundingClientRect()
       const x = Math.floor((e.clientX - rect.left) / (rect.width / 6))
       const y = Math.floor((e.clientY - rect.top) / 100)
-      setDragOverPosition({ x: Math.max(0: any, Math.min(5: any, x)), y: Math.max(0: any, y) })
+      setDragOverPosition({ x: Math.max(0, Math.min(5, x)), y: Math.max(0, y) })
     }
   }
 
@@ -140,7 +140,7 @@ export function DashboardGrid({
     const widgetId = e.dataTransfer.getData('text/plain')
     
     if (widgetId && dragOverPosition && onWidgetsChange) {
-      const updatedWidgets = widgets.map((w: any) => 
+      const updatedWidgets = widgets.map((w) => 
         w.id === widgetId 
           ? { ...w, position: dragOverPosition }
           : w
@@ -152,8 +152,8 @@ export function DashboardGrid({
     setDragOverPosition(null)
   }
 
-  const visibleWidgets = widgets.filter((w: any) => w.visible || isEditing)
-  const hiddenCount = widgets.filter((w: any) => !w.visible).length
+  const visibleWidgets = widgets.filter((w) => w.visible || isEditing)
+  const hiddenCount = widgets.filter((w) => !w.visible).length
 
   return (
     <div className={cn('space-y-4', className)}>
@@ -306,11 +306,11 @@ export function DashboardGrid({
         )}
 
         {/* Widgets */}
-        {visibleWidgets.map((widget: any) => (
+        {visibleWidgets.map((widget) => (
           <div
             key={widget.id}
             draggable={isEditing}
-            onDragStart={(e: any) => handleDragStart(e: any, widget.id)}
+            onDragStart={(e) => handleDragStart(e, widget.id)}
             className={cn(
               'transition-all duration-200',
               draggedWidget === widget.id && 'opacity-50'

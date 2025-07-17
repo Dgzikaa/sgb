@@ -100,7 +100,7 @@ interface InstagramMedia {
 // ========================================
 
 export class MetaSocialService {
-  private supabase: any
+  private supabase
   private config: MetaConfig | null = null
   private barId: number
   private rateLimitInfo: RateLimitInfo = {}
@@ -264,7 +264,7 @@ export class MetaSocialService {
     try {
       console.log(`ðŸ“Š Coletando má©tricas do Facebook - perá­odo: ${period}`)
       
-      const logId = await this.startCollectionLog('facebook_page', { period, since: any, until })
+      const logId = await this.startCollectionLog('facebook_page', { period, since, until })
 
       // Definir má©tricas a serem coletadas
       const pageMetrics = [
@@ -282,7 +282,7 @@ export class MetaSocialService {
       ].join(',')
 
       // Definir perá­odo
-      const dateRange = this.getDateRange(period: any, since, until)
+      const dateRange = this.getDateRange(period, since, until)
       const params = new URLSearchParams({
         metric: pageMetrics,
         period: period,
@@ -309,9 +309,9 @@ export class MetaSocialService {
       const processedData = this.processFacebookMetrics(data.data || [])
       
       // Salvar no banco
-      const saved = await this.saveFacebookMetrics(processedData: any, period, data)
+      const saved = await this.saveFacebookMetrics(processedData, period, data)
 
-      await this.finishCollectionLog(logId: any, saved ? 'sucesso' : 'erro', {
+      await this.finishCollectionLog(logId, saved ? 'sucesso' : 'erro', {
         registros_processados: 1,
         registros_novos: saved ? 1 : 0
       })
@@ -319,7 +319,7 @@ export class MetaSocialService {
       console.log(`œ… Má©tricas do Facebook coletadas: 1 registro`)
       return true
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Œ Erro ao coletar má©tricas do Facebook:', error)
       return false
     }
@@ -342,7 +342,7 @@ export class MetaSocialService {
     try {
       console.log(`ðŸ“¸ Coletando má©tricas do Instagram - perá­odo: ${period}`)
       
-      const logId = await this.startCollectionLog('instagram_account', { period, since: any, until })
+      const logId = await this.startCollectionLog('instagram_account', { period, since, until })
 
       // Definir má©tricas a serem coletadas
       const accountMetrics = [
@@ -354,7 +354,7 @@ export class MetaSocialService {
       ].join(',')
 
       // Definir perá­odo
-      const dateRange = this.getDateRange(period: any, since, until)
+      const dateRange = this.getDateRange(period, since, until)
       const params = new URLSearchParams({
         metric: accountMetrics,
         period: period,
@@ -381,9 +381,9 @@ export class MetaSocialService {
       const processedData = this.processInstagramMetrics(data.data || [])
       
       // Salvar no banco
-      const saved = await this.saveInstagramMetrics(processedData: any, period, data)
+      const saved = await this.saveInstagramMetrics(processedData, period, data)
 
-      await this.finishCollectionLog(logId: any, saved ? 'sucesso' : 'erro', {
+      await this.finishCollectionLog(logId, saved ? 'sucesso' : 'erro', {
         registros_processados: 1,
         registros_novos: saved ? 1 : 0
       })
@@ -391,7 +391,7 @@ export class MetaSocialService {
       console.log(`œ… Má©tricas do Instagram coletadas: 1 registro`)
       return true
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Œ Erro ao coletar má©tricas do Instagram:', error)
       return false
     }
@@ -444,7 +444,7 @@ export class MetaSocialService {
         else if (result === 'updated') updated++
       }
 
-      await this.finishCollectionLog(logId: any, 'sucesso', {
+      await this.finishCollectionLog(logId, 'sucesso', {
         registros_processados: posts.length,
         registros_novos: saved,
         registros_atualizados: updated
@@ -453,7 +453,7 @@ export class MetaSocialService {
       console.log(`œ… Posts do Facebook coletados: ${posts.length} posts, ${saved} novos, ${updated} atualizados`)
       return true
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Œ Erro ao coletar posts do Facebook:', error)
       return false
     }
@@ -506,7 +506,7 @@ export class MetaSocialService {
         else if (result === 'updated') updated++
       }
 
-      await this.finishCollectionLog(logId: any, 'sucesso', {
+      await this.finishCollectionLog(logId, 'sucesso', {
         registros_processados: posts.length,
         registros_novos: saved,
         registros_atualizados: updated
@@ -515,7 +515,7 @@ export class MetaSocialService {
       console.log(`œ… Posts do Instagram coletados: ${posts.length} posts, ${saved} novos, ${updated} atualizados`)
       return true
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Œ Erro ao coletar posts do Instagram:', error)
       return false
     }
@@ -525,8 +525,8 @@ export class MetaSocialService {
   // ðŸ”„ PROCESSAMENTO DE DADOS
   // ========================================
 
-  private processFacebookMetrics(rawData: any[]): FacebookPageMetrics {
-    const metrics: any = {}
+  private processFacebookMetrics(rawData[]): FacebookPageMetrics {
+    const metrics = {}
     
     for (const item of rawData) {
       const metricName = item.name
@@ -553,8 +553,8 @@ export class MetaSocialService {
     }
   }
 
-  private processInstagramMetrics(rawData: any[]): InstagramAccountMetrics {
-    const metrics: any = {}
+  private processInstagramMetrics(rawData[]): InstagramAccountMetrics {
+    const metrics = {}
     
     for (const item of rawData) {
       const metricName = item.name
@@ -582,7 +582,7 @@ export class MetaSocialService {
   private async saveFacebookMetrics(
     metrics: FacebookPageMetrics,
     period: string,
-    rawData: any
+    rawData
   ): Promise<boolean> {
     try {
       const dataReferencia = new Date().toISOString().split('T')[0]
@@ -614,7 +614,7 @@ export class MetaSocialService {
   private async saveInstagramMetrics(
     metrics: InstagramAccountMetrics,
     period: string,
-    rawData: any
+    rawData
   ): Promise<boolean> {
     try {
       const dataReferencia = new Date().toISOString().split('T')[0]
@@ -749,7 +749,7 @@ export class MetaSocialService {
     return result
   }
 
-  private async startCollectionLog(tipo: string, params: any): Promise<number> {
+  private async startCollectionLog(tipo: string, params): Promise<number> {
     const { data, error } = await this.supabase
       .from('meta_coletas_log')
       .insert({
@@ -812,7 +812,7 @@ export class MetaSocialService {
       this.collectInstagramPosts(25)
     ])
 
-    const successful = results.filter((r: any) => r.status === 'fulfilled').length
+    const successful = results.filter((r) => r.status === 'fulfilled').length
     const total = results.length
 
     // Log com informaá§áµes de rate limit

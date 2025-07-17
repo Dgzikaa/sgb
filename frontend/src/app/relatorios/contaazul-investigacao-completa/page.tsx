@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { AlertCircle, CheckCircle: any, XCircle, Search: any, Target, BarChart3: any, Building2 } from 'lucide-react';
+import { AlertCircle, CheckCircle, XCircle, Search, Target, BarChart3, Building2 } from 'lucide-react';
 import ContaAzulOAuth from '@/components/configuracoes/ContaAzulOAuth';
 
 export default function ContaAzulInvestigacaoCompleta() {
@@ -237,7 +237,7 @@ export default function ContaAzulInvestigacaoCompleta() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {resultado.resultados_detalhados.map((evento: any, index: number) => (
+                  {resultado.resultados_detalhados.map((evento, index: number) => (
                     <div key={index} className="border rounded-lg p-4">
                       <div className="mb-3">
                         <h4 className="font-semibold">
@@ -314,7 +314,7 @@ export default function ContaAzulInvestigacaoCompleta() {
               </CardHeader>
               <CardContent>
                 <Textarea
-                  value={JSON.stringify(resultado: any, null, 2)}
+                  value={JSON.stringify(resultado, null, 2)}
                   readOnly
                   rows={20}
                   className="font-mono text-xs"

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useUser } from '@/contexts/UserContext'
 import { usePageTitle } from '@/contexts/PageTitleContext'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -64,7 +64,7 @@ interface ChecklistItem {
   status: 'pendente' | 'preenchido'
   condicional?: {
     dependeDe: string
-    valor: any
+    valor
   }
   opcoes?: {
     placeholder?: string
@@ -377,7 +377,7 @@ export default function ChecklistsFuncionario() {
   const carregarChecklists = async () => {
     setLoading(true)
     // TODO: Filtrar pelo usu·°rio logado
-    const checklistsUsuario = checklistsMock.filter((c: any) => 
+    const checklistsUsuario = checklistsMock.filter((c) => 
       c.responsavel === usuario.nome || c.setor === usuario.setor
     )
     setChecklists(checklistsUsuario)
@@ -411,14 +411,14 @@ export default function ChecklistsFuncionario() {
     setTempoInicio(new Date())
   }
 
-  const atualizarItem = (secaoId: string, itemId: string, valor: any, observacoes?: string) => {
+  const atualizarItem = (secaoId: string, itemId: string, valor, observacoes?: string) => {
     if (!checklistAtivo) return
 
     const novoChecklist = { ...checklistAtivo }
-    const secao = novoChecklist.secoes.find((s: any) => s.id === secaoId)
+    const secao = novoChecklist.secoes.find((s) => s.id === secaoId)
     if (!secao) return
 
-    const item = secao.itens.find((i: any) => i.id === itemId)
+    const item = secao.itens.find((i) => i.id === itemId)
     if (!item) return
 
     item.valor = valor
@@ -431,13 +431,13 @@ export default function ChecklistsFuncionario() {
   const verificarItemVisivel = (item: ChecklistItem): boolean => {
     if (!item.condicional || !checklistAtivo) return true
 
-    const secaoReferencia = checklistAtivo.secoes.find((s: any) => 
+    const secaoReferencia = checklistAtivo.secoes.find((s) => 
       s.itens.some(i => i.id === item.condicional!.dependeDe)
     )
     
     if (!secaoReferencia) return true
 
-    const itemReferencia = secaoReferencia.itens.find((i: any) => i.id === item.condicional!.dependeDe)
+    const itemReferencia = secaoReferencia.itens.find((i) => i.id === item.condicional!.dependeDe)
     if (!itemReferencia) return true
 
     return itemReferencia.valor === item.condicional.valor
@@ -448,8 +448,8 @@ export default function ChecklistsFuncionario() {
 
     const todosItens = checklistAtivo.secoes.flatMap(s => s.itens)
     const itensVisiveis = todosItens.filter(verificarItemVisivel)
-    const itensObrigatorios = itensVisiveis.filter((i: any) => i.obrigatorio)
-    const itensPreenchidos = itensObrigatorios.filter((i: any) => i.status === 'preenchido')
+    const itensObrigatorios = itensVisiveis.filter((i) => i.obrigatorio)
+    const itensPreenchidos = itensObrigatorios.filter((i) => i.status === 'preenchido')
 
     return itensObrigatorios.length > 0 ? (itensPreenchidos.length / itensObrigatorios.length) * 100 : 0
   }
@@ -472,15 +472,15 @@ export default function ChecklistsFuncionario() {
         responsavel_id: usuario.id || 'user-mock-id', // TODO: pegar do contexto real
         tempo_execucao: tempoExecucao,
         total_itens: checklistAtivo.secoes.flatMap(s => s.itens).length,
-        itens_ok: checklistAtivo.secoes.flatMap(s => s.itens).filter((i: any) => i.status === 'preenchido').length,
+        itens_ok: checklistAtivo.secoes.flatMap(s => s.itens).filter((i) => i.status === 'preenchido').length,
         itens_problema: 0, // TODO: implementar l·≥gica de problemas
         itens_na: 0,
         observacoes_gerais: `Checklist realizado em ${tempoExecucao} minutos`,
         bar_id: 1, // TODO: pegar do contexto real
         respostas: checklistAtivo.secoes.flatMap(secao => 
           secao.itens
-            .filter((item: any) => item.valor !== undefined)
-            .map((item: any) => ({
+            .filter((item) => item.valor !== undefined)
+            .map((item) => ({
               item_id: item.id,
               valor: item.valor,
               observacoes: item.observacoes || null,
@@ -522,7 +522,7 @@ export default function ChecklistsFuncionario() {
         carregarChecklistsRealizados()
       }
       
-    } catch (error: any) {
+    } catch (error) {
       console.error('ùå Erro ao enviar checklist:', error)
       alert('ùå Erro ao enviar: ' + error.message)
     } finally {
@@ -533,7 +533,7 @@ export default function ChecklistsFuncionario() {
   const compartilharChecklist = async () => {
     if (!checklistAtivo) return
     
-    // TODO: Implementar compartilhamento (WhatsApp: any, etc.)
+    // TODO: Implementar compartilhamento (WhatsApp, etc.)
     const url = `${window.location.origin}/checklist/${checklistAtivo.id}`
     
     const shared = await safeNavigator.share({
@@ -571,12 +571,12 @@ export default function ChecklistsFuncionario() {
       // Converter blob para File
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
       const filename = `checklist-foto-${timestamp}.jpg`
-      const file = new File([blob], filename: any, { type: 'image/jpeg' })
+      const file = new File([blob], filename, { type: 'image/jpeg' })
       
       console.log('üì∏ Fazendo upload da foto...', file.name)
       
       // Fazer upload real para Supabase
-      const result = await uploadFile(file: any, {
+      const result = await uploadFile(file, {
         folder: 'checklist_photos',
         compress: true,
         maxWidth: 1920,
@@ -599,8 +599,8 @@ export default function ChecklistsFuncionario() {
   }
 
   // Fun·ß·£o para processar upload de foto
-  const handleFotoUpload = (secaoId: string, itemId: string, result: any) => {
-    atualizarItem(secaoId: any, itemId, result.url || result.filename)
+  const handleFotoUpload = (secaoId: string, itemId: string, result) => {
+    atualizarItem(secaoId, itemId, result.url || result.filename)
     console.log('üì∑ Foto enviada:', result)
   }
 
@@ -613,7 +613,7 @@ export default function ChecklistsFuncionario() {
   }
 
   // Fun·ß·£o para processar assinatura capturada
-  const handleAssinaturaCapturada = (result: any) => {
+  const handleAssinaturaCapturada = (result) => {
     console.log('üéØ handleAssinaturaCapturada chamada', { result, itemAssinaturaAtual })
     
     if (!itemAssinaturaAtual) {
@@ -643,7 +643,7 @@ export default function ChecklistsFuncionario() {
   }
 
   const renderCampoItem = (item: ChecklistItem, secaoId: string) => {
-    const atualizar = (valor: any, obs?: string) => atualizarItem(secaoId: any, item.id, valor: any, obs)
+    const atualizar = (valor, obs?: string) => atualizarItem(secaoId, item.id, valor, obs)
 
     return (
       <div className="space-y-3">
@@ -652,7 +652,7 @@ export default function ChecklistsFuncionario() {
           {item.tipo === 'texto' && (
             <Input
               value={item.valor || ''}
-              onChange={(e: any) => atualizar(e.target.value)}
+              onChange={(e) => atualizar(e.target.value)}
               placeholder={item.opcoes?.placeholder || 'Digite aqui...'}
               className="text-base text-gray-900 border-gray-300 bg-white focus:border-blue-500 focus:ring-blue-500 p-3 min-h-[48px] touch-manipulation"
             />
@@ -662,7 +662,7 @@ export default function ChecklistsFuncionario() {
             <Input
               type="number"
               value={item.valor || ''}
-              onChange={(e: any) => atualizar(parseFloat(e.target.value) || 0)}
+              onChange={(e) => atualizar(parseFloat(e.target.value) || 0)}
               placeholder={item.opcoes?.placeholder || '0'}
               min={item.opcoes?.min}
               max={item.opcoes?.max}
@@ -699,7 +699,7 @@ export default function ChecklistsFuncionario() {
 
           {item.tipo === 'avaliacao' && (
             <div className="flex justify-center gap-3">
-              {[1, 2: any, 3, 4: any, 5].map((rating: any) => (
+              {[1, 2, 3, 4, 5].map((rating) => (
                 <button
                   key={rating}
                   onClick={() => atualizar(rating)}
@@ -717,7 +717,7 @@ export default function ChecklistsFuncionario() {
             <div className="space-y-3">
               <Button
                 variant="outline"
-                onClick={() => abrirCamera(secaoId: any, item.id)}
+                onClick={() => abrirCamera(secaoId, item.id)}
                 className={`w-full p-6 border-2 border-dashed font-medium transition-all min-h-[60px] touch-manipulation text-lg ${
                   item.valor 
                     ? 'border-green-300 bg-green-50 text-green-700 hover:bg-green-100' 
@@ -754,8 +754,8 @@ export default function ChecklistsFuncionario() {
           {item.tipo === 'foto_upload' && (
             <div className="space-y-3">
               <PhotoUpload
-                onUploadComplete={(result: any) => handleFotoUpload(secaoId: any, item.id, result)}
-                onError={(error: any) => alert('ùå Erro no upload: ' + error)}
+                onUploadComplete={(result) => handleFotoUpload(secaoId, item.id, result)}
+                onError={(error) => alert('ùå Erro no upload: ' + error)}
                 folder="checklist_photos"
                 compress={true}
                 maxWidth={1920}
@@ -791,7 +791,7 @@ export default function ChecklistsFuncionario() {
                 <Button
                   onClick={() => {
                     console.log('üñäÔ∏è Bot·£o "Capturar Assinatura" clicado', { secaoId, itemId: item.id, tipo: item.tipo })
-                    abrirAssinaturaPad(secaoId: any, item.id)
+                    abrirAssinaturaPad(secaoId, item.id)
                   }}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium min-h-[52px] touch-manipulation text-lg"
                 >
@@ -824,7 +824,7 @@ export default function ChecklistsFuncionario() {
           <label className="text-base text-gray-700 font-medium mb-2 block">Observa·ß·µes (opcional):</label>
           <Textarea
             value={item.observacoes || ''}
-            onChange={(e: any) => atualizar(item.valor, e.target.value)}
+            onChange={(e) => atualizar(item.valor, e.target.value)}
             placeholder="Adicione observa·ß·µes se necess·°rio..."
             rows={3}
             className="text-base text-gray-900 border-gray-300 bg-white focus:border-blue-500 focus:ring-blue-500 placeholder-gray-400 p-3 touch-manipulation resize-none"
@@ -892,14 +892,14 @@ export default function ChecklistsFuncionario() {
 
         {/* Conte·∫do */}
         <div className="p-4 pb-24 space-y-6">
-          {checklistAtivo.secoes.map((secao: any) => (
+          {checklistAtivo.secoes.map((secao) => (
             <Card key={secao.id}>
               <CardHeader className={`${secao.cor} text-white rounded-t-lg`}>
                 <CardTitle className="text-lg">{secao.nome}</CardTitle>
               </CardHeader>
               
               <CardContent className="p-4 space-y-6">
-                {secao.itens.filter(verificarItemVisivel).map((item: any) => (
+                {secao.itens.filter(verificarItemVisivel).map((item) => (
                   <div key={item.id} className="border-b pb-6 last:border-b-0 last:pb-0">
                     <div className="mb-3">
                       <div className="flex items-center gap-2 mb-1">
@@ -917,7 +917,7 @@ export default function ChecklistsFuncionario() {
                       )}
                     </div>
 
-                    {renderCampoItem(item: any, secao.id)}
+                    {renderCampoItem(item, secao.id)}
                   </div>
                 ))}
               </CardContent>
@@ -997,8 +997,8 @@ export default function ChecklistsFuncionario() {
                 <p className="text-gray-600">Voc·™ est·° em dia com suas verifica·ß·µes! üéâ</p>
               </div>
             ) : (
-              checklists.map((checklist: any) => {
-              const setor = setoresConfig.find((s: any) => s.id === checklist.setor)
+              checklists.map((checklist) => {
+              const setor = setoresConfig.find((s) => s.id === checklist.setor)
               const SetorIcon = setor?.icon || FileText
 
               return (
@@ -1071,7 +1071,7 @@ export default function ChecklistsFuncionario() {
                 <p className="text-gray-600">Complete alguns checklists para v·™-los aqui üìä</p>
               </div>
             ) : (
-              checklistsRealizados.map((execucao: any) => (
+              checklistsRealizados.map((execucao) => (
                 <Card key={execucao.id} className="bg-white border border-gray-200 hover:shadow-lg transition-all duration-300">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-4">
@@ -1159,7 +1159,7 @@ export default function ChecklistsFuncionario() {
                 <SignaturePad
                   onSignatureComplete={handleAssinaturaCapturada}
                   onSignatureCancel={handleAssinaturaCancelada}
-                  onError={(error: any) => {
+                  onError={(error) => {
                     console.error('üö® Erro na assinatura:', error)
                     alert('ùå Erro na assinatura: ' + error)
                   }}

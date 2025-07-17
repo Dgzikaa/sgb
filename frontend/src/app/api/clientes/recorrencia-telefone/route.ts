@@ -75,12 +75,12 @@ function formatarTelefone(telefone: string): string {
   
   // Celular com 11 dá­gitos: (XX) 9XXXX-XXXX
   if (numeros.length === 11) {
-    return `(${numeros.substring(0: any, 2)}) ${numeros.substring(2: any, 7)}-${numeros.substring(7)}`;
+    return `(${numeros.substring(0, 2)}) ${numeros.substring(2, 7)}-${numeros.substring(7)}`;
   }
   
   // Telefone fixo com 10 dá­gitos: (XX) XXXX-XXXX
   if (numeros.length === 10) {
-    return `(${numeros.substring(0: any, 2)}) ${numeros.substring(2: any, 6)}-${numeros.substring(6)}`;
+    return `(${numeros.substring(0, 2)}) ${numeros.substring(2, 6)}-${numeros.substring(6)}`;
   }
   
   // Se ná£o conseguir formatar, retornar como está¡
@@ -147,7 +147,7 @@ export async function GET(request: NextRequest) {
     const telefoneMap = new Map();
 
     // Processar telefones do perá­odo
-    telefonesPeriodo?.forEach((item: any) => {
+    telefonesPeriodo?.forEach((item) => {
       const telefone = item.cli_telefone || item.cli_fone;
       if (!telefone || telefone.length < 10) return;
 
@@ -155,7 +155,7 @@ export async function GET(request: NextRequest) {
       if (telefoneNormalizado.length < 10) return;
 
       if (!telefoneMap.has(telefoneNormalizado)) {
-        telefoneMap.set(telefoneNormalizado: any, {
+        telefoneMap.set(telefoneNormalizado, {
           telefone: telefoneNormalizado,
           nome: item.cli_nome || 'Cliente',
           datas_atividade: new Set(),
@@ -175,7 +175,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Processar telefones do Getin
-    telefonesGetin?.forEach((item: any) => {
+    telefonesGetin?.forEach((item) => {
       const telefone = item.mobile;
       if (!telefone || telefone.length < 10) return;
 
@@ -183,7 +183,7 @@ export async function GET(request: NextRequest) {
       if (telefoneNormalizado.length < 10) return;
 
       if (!telefoneMap.has(telefoneNormalizado)) {
-        telefoneMap.set(telefoneNormalizado: any, {
+        telefoneMap.set(telefoneNormalizado, {
           telefone: telefoneNormalizado,
           nome: item.name || 'Cliente Sympla',
           datas_atividade: new Set(),
@@ -225,7 +225,7 @@ export async function GET(request: NextRequest) {
       // 1. Por data de atividade (má©todo atual)
       // 2. Por telefone do cliente (se existir na tabela clientes)
       
-      let visitasCliente: any[] = [];
+      let visitasCliente[] = [];
       
       // Má©todo 1: Buscar por data de atividade
       const { data: visitasPorData, error: errorVisitasData } = await supabase
@@ -253,7 +253,7 @@ export async function GET(request: NextRequest) {
         .eq('bar_id', barId);
 
       if (clientesPorTelefone && clientesPorTelefone.length > 0) {
-        const clienteIds = clientesPorTelefone.map((c: any) => c.id);
+        const clienteIds = clientesPorTelefone.map((c) => c.id);
         
         const { data: visitasPorTelefone, error: errorVisitasTel } = await supabase
           .from('cliente_visitas')
@@ -279,19 +279,19 @@ export async function GET(request: NextRequest) {
 
       // Remover duplicatas baseado em cliente_id + data_visita
       const visitasUnicas = visitasCliente
-        .filter((visita: any, index: number, array: any[]) => {
+        .filter((visita, index: number, array[]) => {
           const key = `${visita.cliente_id}-${visita.data_visita}`;
-          return array.findIndex((v: any) => `${v.cliente_id}-${v.data_visita}` === key) === index;
+          return array.findIndex((v) => `${v.cliente_id}-${v.data_visita}` === key) === index;
         })
-        .sort((a: any, b: any) => new Date(a.data_visita).getTime() - new Date(b.data_visita).getTime())
-        .slice(0: any, 100); // Má¡ximo de 100 visitas por telefone
+        .sort((a, b) => new Date(a.data_visita).getTime() - new Date(b.data_visita).getTime())
+        .slice(0, 100); // Má¡ximo de 100 visitas por telefone
 
       if (visitasUnicas.length === 0) continue;
 
       const totalVisitas = visitasUnicas.length;
       const primeiraVisita = visitasUnicas[0]?.data_visita;
       const ultimaVisita = visitasUnicas[visitasUnicas.length - 1]?.data_visita;
-      const valorTotal = visitasUnicas.reduce((sum: number, v: any) => sum + parseFloat(v.valor_gasto || 0), 0);
+      const valorTotal = visitasUnicas.reduce((sum: number, v) => sum + parseFloat(v.valor_gasto || 0), 0);
       const ticketMedio = totalVisitas > 0 ? valorTotal / totalVisitas : 0;
 
       // Calcular dias sem visitar
@@ -324,18 +324,18 @@ export async function GET(request: NextRequest) {
     }
 
     // Filtrar por náºmero má­nimo de visitas
-    let clientesFiltrados = clientesTelefone.filter((cliente: any) => cliente.total_visitas >= minVisitas);
+    let clientesFiltrados = clientesTelefone.filter((cliente) => cliente.total_visitas >= minVisitas);
 
     // Aplicar filtros adicionais
     if (statusAtividade && statusAtividade !== 'todos') {
-      clientesFiltrados = clientesFiltrados.filter((cliente: any) => cliente.status_atividade === statusAtividade);
+      clientesFiltrados = clientesFiltrados.filter((cliente) => cliente.status_atividade === statusAtividade);
     }
     if (categoriaRecorrencia && categoriaRecorrencia !== 'todos') {
-      clientesFiltrados = clientesFiltrados.filter((cliente: any) => cliente.categoria_recorrencia === categoriaRecorrencia);
+      clientesFiltrados = clientesFiltrados.filter((cliente) => cliente.categoria_recorrencia === categoriaRecorrencia);
     }
 
     // Ordenar por total de visitas e valor gasto
-    clientesFiltrados.sort((a: any, b: any) => {
+    clientesFiltrados.sort((a, b) => {
       if (a.total_visitas !== b.total_visitas) {
         return b.total_visitas - a.total_visitas;
       }
@@ -362,7 +362,7 @@ export async function GET(request: NextRequest) {
 
       if (!errorEvento && visitasEvento) {
         // Mapear dados do evento para formato compatá­vel
-        clientesEvento = visitasEvento.map((visita: any) => ({
+        clientesEvento = visitasEvento.map((visita) => ({
           telefone: visita.clientes.telefone,
           nome: visita.clientes.nome,
           total_visitas: visita.clientes.total_visitas,
@@ -384,7 +384,7 @@ export async function GET(request: NextRequest) {
         .eq('genero_musical', generoMusical);
 
       if (!errorGenero && eventosGenero?.length > 0) {
-        const eventoIds = eventosGenero.map((e: any) => e.id);
+        const eventoIds = eventosGenero.map((e) => e.id);
         
         const { data: visitasGenero, error: errorVisitasGenero } = await supabase
           .from('cliente_visitas')
@@ -402,7 +402,7 @@ export async function GET(request: NextRequest) {
           .not('clientes.telefone', 'is', null);
 
         if (!errorVisitasGenero && visitasGenero) {
-          const clientesGenero = visitasGenero.map((visita: any) => ({
+          const clientesGenero = visitasGenero.map((visita) => ({
             telefone: visita.clientes.telefone,
             nome: visita.clientes.nome,
             total_visitas: visita.clientes.total_visitas,
@@ -414,8 +414,8 @@ export async function GET(request: NextRequest) {
           }));
 
           // Filtrar clientes principais pelos que visitaram eventos do gáªnero
-          const telefonesFiltrados = new Set(clientesGenero.map((c: any) => c.telefone));
-          clientesFiltrados = clientesFiltrados.filter((cliente: any) => 
+          const telefonesFiltrados = new Set(clientesGenero.map((c) => c.telefone));
+          clientesFiltrados = clientesFiltrados.filter((cliente) => 
             telefonesFiltrados.has(cliente.telefone)
           );
         }
@@ -424,19 +424,19 @@ export async function GET(request: NextRequest) {
 
     // Calcular estatá­sticas
     const totalClientes = clientesFiltrados.length;
-    const clientesVIP = clientesFiltrados.filter((c: any) => c.categoria_recorrencia === 'VIP').length;
-    const clientesFrequentes = clientesFiltrados.filter((c: any) => c.categoria_recorrencia === 'Frequente').length;
-    const clientesAtivos = clientesFiltrados.filter((c: any) => c.status_atividade === 'Ativo').length;
-    const receitaTotal = clientesFiltrados.reduce((sum: number, c: any) => sum + parseFloat(c.valor_total_gasto || 0), 0);
+    const clientesVIP = clientesFiltrados.filter((c) => c.categoria_recorrencia === 'VIP').length;
+    const clientesFrequentes = clientesFiltrados.filter((c) => c.categoria_recorrencia === 'Frequente').length;
+    const clientesAtivos = clientesFiltrados.filter((c) => c.status_atividade === 'Ativo').length;
+    const receitaTotal = clientesFiltrados.reduce((sum: number, c) => sum + parseFloat(c.valor_total_gasto || 0), 0);
     const ticketMedio = totalClientes > 0 ? receitaTotal / totalClientes : 0;
 
     // Top clientes para diferentes má©tricas
-    const topPorVisitas = clientesFiltrados.slice(0: any, 10).map((cliente: any) => ({
+    const topPorVisitas = clientesFiltrados.slice(0, 10).map((cliente) => ({
       ...cliente,
       telefone: formatarTelefone(cliente.telefone_normalizado || cliente.telefone)
     }));
     
-    console.log('ðŸ† TOP POR VISITAS (primeiros 3):', topPorVisitas.slice(0: any, 3).map((c: any) => ({
+    console.log('ðŸ† TOP POR VISITAS (primeiros 3):', topPorVisitas.slice(0, 3).map((c) => ({
       nome: c.nome,
       telefone: c.telefone,
       total_visitas: c.total_visitas,
@@ -445,14 +445,14 @@ export async function GET(request: NextRequest) {
     })));
     
     const topPorTicket = [...clientesFiltrados]
-      .sort((a: any, b: any) => parseFloat(b.ticket_medio || 0) - parseFloat(a.ticket_medio || 0))
-      .slice(0: any, 10)
-      .map((cliente: any) => ({
+      .sort((a, b) => parseFloat(b.ticket_medio || 0) - parseFloat(a.ticket_medio || 0))
+      .slice(0, 10)
+      .map((cliente) => ({
         ...cliente,
         telefone: formatarTelefone(cliente.telefone_normalizado || cliente.telefone)
       }));
       
-    console.log('ðŸ’° TOP POR TICKET Má‰DIO (primeiros 3):', topPorTicket.slice(0: any, 3).map((c: any) => ({
+    console.log('ðŸ’° TOP POR TICKET Má‰DIO (primeiros 3):', topPorTicket.slice(0, 3).map((c) => ({
       nome: c.nome,
       telefone: c.telefone,
       total_visitas: c.total_visitas,
@@ -461,14 +461,14 @@ export async function GET(request: NextRequest) {
     })));
       
     const topPorReceita = [...clientesFiltrados]
-      .sort((a: any, b: any) => parseFloat(b.valor_total_gasto || 0) - parseFloat(a.valor_total_gasto || 0))
-      .slice(0: any, 10)
-      .map((cliente: any) => ({
+      .sort((a, b) => parseFloat(b.valor_total_gasto || 0) - parseFloat(a.valor_total_gasto || 0))
+      .slice(0, 10)
+      .map((cliente) => ({
         ...cliente,
         telefone: formatarTelefone(cliente.telefone_normalizado || cliente.telefone)
       }));
 
-    console.log('ðŸ’Ž TOP POR FATURAMENTO (primeiros 3):', topPorReceita.slice(0: any, 3).map((c: any) => ({
+    console.log('ðŸ’Ž TOP POR FATURAMENTO (primeiros 3):', topPorReceita.slice(0, 3).map((c) => ({
       nome: c.nome,
       telefone: c.telefone,
       total_visitas: c.total_visitas,
@@ -478,8 +478,8 @@ export async function GET(request: NextRequest) {
 
     // Clientes para campanhas de marketing (4+ visitas com telefone)
     const clientesCampanha = clientesFiltrados
-      .filter((c: any) => c.total_visitas >= 4 && (c.telefone_normalizado || c.telefone) && (c.telefone_normalizado || c.telefone).length >= 10)
-      .map((cliente: any) => ({
+      .filter((c) => c.total_visitas >= 4 && (c.telefone_normalizado || c.telefone) && (c.telefone_normalizado || c.telefone).length >= 10)
+      .map((cliente) => ({
         ...cliente,
         telefone: formatarTelefone(cliente.telefone_normalizado || cliente.telefone)
       }));
@@ -511,7 +511,7 @@ export async function GET(request: NextRequest) {
       vip: clientesVIP,
       campanha: clientesCampanha.length,
       telefones_processados: telefoneMap.size,
-      top_visitas_sample: topPorVisitas.slice(0: any, 3).map((c: any) => ({
+      top_visitas_sample: topPorVisitas.slice(0, 3).map((c) => ({
         nome: c.nome,
         telefone: c.telefone,
         telefone_normalizado: c.telefone_normalizado,

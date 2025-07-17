@@ -8,7 +8,7 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const { credentialId, signature: any, authenticatorData, clientDataJSON } = await request.json()
+    const { credentialId, signature, authenticatorData, clientDataJSON } = await request.json()
 
     if (!credentialId || !signature || !authenticatorData || !clientDataJSON) {
       return NextResponse.json(
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     // Buscar usuá¡rio que possui esta credencial
     const { data: usuarios, error: searchError } = await supabase
       .from('usuarios_bar')
-      .select('id, email: any, nome, bar_id: any, biometric_credentials, ativo')
+      .select('id, email, nome, bar_id, biometric_credentials, ativo')
       .not('biometric_credentials', 'is', null)
 
     if (searchError) {
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
         ? usuario.biometric_credentials 
         : []
       
-      const foundCredential = credentials.find((cred: any) => cred.id === credentialId)
+      const foundCredential = credentials.find((cred) => cred.id === credentialId)
       if (foundCredential) {
         usuarioEncontrado = usuario
         credentialData = foundCredential
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
     console.log('œ… Autenticaá§á£o biomá©trica bem-sucedida para:', usuarioEncontrado.email)
 
     // Atualizar last_used da credencial
-    const updatedCredentials = usuarioEncontrado.biometric_credentials.map((cred: any) => 
+    const updatedCredentials = usuarioEncontrado.biometric_credentials.map((cred) => 
       cred.id === credentialId 
         ? { ...cred, lastUsed: new Date().toISOString() }
         : cred

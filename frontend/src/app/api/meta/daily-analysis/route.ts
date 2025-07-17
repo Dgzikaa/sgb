@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     console.log('ðŸ“Š Meta Daily Analysis - Iniciando aná¡lise diá¡ria...')
 
     const { searchParams } = new URL(request.url)
-    const platform = searchParams.get('platform') || 'all' // all, instagram: any, facebook
+    const platform = searchParams.get('platform') || 'all' // all, instagram, facebook
     const days = parseInt(searchParams.get('days') || '30') // quantos dias analisar
 
     // Obter dados do usuá¡rio para pegar o bar_id
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     console.log(`ðŸ“… Analisando perá­odo: ${inicioAnalise.toISOString().split('T')[0]} atá© ${hoje.toISOString().split('T')[0]}`)
 
     // 1. BUSCAR DADOS INSTAGRAM POR DIA
-    let instagramAnalysis: any = null
+    let instagramAnalysis = null
     if (platform === 'all' || platform === 'instagram') {
       const { data: instagramData, error: instagramError } = await supabase
         .from('meta_instagram_posts')
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 2. BUSCAR DADOS FACEBOOK POR DIA
-    let facebookAnalysis: any = null
+    let facebookAnalysis = null
     if (platform === 'all' || platform === 'facebook') {
       const { data: facebookData, error: facebookError } = await supabase
         .from('meta_facebook_posts')
@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
     })
 
     // 5. IDENTIFICAR TENDáŠNCIAS E INSIGHTS
-    const trends = identifyTrends(dailyVariations: any, days)
+    const trends = identifyTrends(dailyVariations, days)
 
     const responseData = {
       success: true,
@@ -171,7 +171,7 @@ export async function GET(request: NextRequest) {
 }
 
 // Processar dados Instagram agrupados por dia
-function processInstagramDailyData(data: any[]) {
+function processInstagramDailyData(data[]) {
   const dailyMetrics: Record<string, any> = {}
   
   data.forEach(post => {
@@ -223,7 +223,7 @@ function processInstagramDailyData(data: any[]) {
 }
 
 // Processar dados Facebook agrupados por dia
-function processFacebookDailyData(data: any[]) {
+function processFacebookDailyData(data[]) {
   const dailyMetrics: Record<string, any> = {}
   
   data.forEach(post => {
@@ -269,7 +269,7 @@ function processFacebookDailyData(data: any[]) {
 }
 
 // Processar insights (dados de seguidores) por dia
-function processInsightsDailyData(data: any[]) {
+function processInsightsDailyData(data[]) {
   const dailyInsights: Record<string, any> = {}
   
   data.forEach(insight => {
@@ -291,8 +291,8 @@ function processInsightsDailyData(data: any[]) {
 }
 
 // Calcular variaá§áµes diá¡rias
-function calculateDailyVariations(data: any) {
-  const variations: any = {
+function calculateDailyVariations(data) {
+  const variations = {
     daily_changes: {},
     avg_daily_engagement: 0,
     follower_growth_total: 0,
@@ -320,14 +320,14 @@ function calculateDailyVariations(data: any) {
     const currentDate = sortedDates[i]
     const previousDate = sortedDates[i - 1]
 
-    const currentDay: any = {
+    const currentDay = {
       date: currentDate,
       instagram: data.instagram?.daily_metrics?.[currentDate] || {},
       facebook: data.facebook?.daily_metrics?.[currentDate] || {},
       insights: data.insights?.daily_insights?.[currentDate] || {}
     }
 
-    const previousDay: any = {
+    const previousDay = {
       instagram: data.instagram?.daily_metrics?.[previousDate] || {},
       facebook: data.facebook?.daily_metrics?.[previousDate] || {},
       insights: data.insights?.daily_insights?.[previousDate] || {}
@@ -355,11 +355,11 @@ function calculateDailyVariations(data: any) {
   // Calcular má©tricas agregadas
   const dailyChanges = Object.values(variations.daily_changes) as any[]
   if (dailyChanges.length > 0) {
-    variations.avg_daily_engagement = dailyChanges.reduce((sum: number, day: any) => sum + day.engagement_rate, 0) / dailyChanges.length
-    variations.follower_growth_total = dailyChanges.reduce((sum: number, day: any) => sum + day.total_follower_change, 0)
+    variations.avg_daily_engagement = dailyChanges.reduce((sum: number, day) => sum + day.engagement_rate, 0) / dailyChanges.length
+    variations.follower_growth_total = dailyChanges.reduce((sum: number, day) => sum + day.total_follower_change, 0)
     
     // Melhor e pior dia (baseado em engagement + interaá§áµes)
-    const sortedByPerformance = dailyChanges.sort((a: any, b: any) => 
+    const sortedByPerformance = dailyChanges.sort((a, b) => 
       (b.engagement_rate + b.total_interactions) - (a.engagement_rate + a.total_interactions)
     )
     variations.best_day = sortedByPerformance[0]?.date
@@ -370,7 +370,7 @@ function calculateDailyVariations(data: any) {
 }
 
 // Identificar tendáªncias
-function identifyTrends(variations: any, days: number): any[] {
+function identifyTrends(variations, days: number): any[] {
   const trends = []
 
   // Tendáªncia de crescimento de seguidores

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
-import { authenticateUser, authErrorResponse: any, permissionErrorResponse } from '@/middleware/auth'
+import { authenticateUser, authErrorResponse, permissionErrorResponse } from '@/middleware/auth'
 import { z } from 'zod'
 
 // =====================================================
@@ -56,13 +56,13 @@ export async function GET(request: NextRequest) {
       .select(`
         *,
         checklist:checklists (
-          id, nome: any, setor, tipo: any, tempo_estimado
+          id, nome, setor, tipo, tempo_estimado
         ),
         _count_execucoes:checklist_execucoes (count)
       `)
       .eq('bar_id', user.bar_id)
       .order('created_at', { ascending: false })
-      .range(offset: any, offset + limit - 1)
+      .range(offset, offset + limit - 1)
 
     // Aplicar filtros
     if (checklistId) {
@@ -84,15 +84,15 @@ export async function GET(request: NextRequest) {
 
     // Buscar prá³ximas execuá§áµes para cada agendamento
     const agendamentosComProximaExecucao = await Promise.all(
-      (agendamentos || []).map(async (agendamento: any) => {
+      (agendamentos || []).map(async (agendamento) => {
         const proximaExecucao = calcularProximaExecucao(agendamento)
-        const ultimaExecucao = await buscarUltimaExecucao(supabase: any, agendamento.id)
+        const ultimaExecucao = await buscarUltimaExecucao(supabase, agendamento.id)
         
         return {
           ...agendamento,
           proxima_execucao: proximaExecucao,
           ultima_execucao: ultimaExecucao,
-          status_atual: determinarStatusAtual(agendamento: any, proximaExecucao, ultimaExecucao)
+          status_atual: determinarStatusAtual(agendamento, proximaExecucao, ultimaExecucao)
         }
       })
     )
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
       }
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro na API de agendamentos GET:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
     // Verificar se checklist existe
     const { data: checklist, error: checklistError } = await supabase
       .from('checklists')
-      .select('id, nome: any, setor')
+      .select('id, nome, setor')
       .eq('id', data.checklist_id)
       .eq('bar_id', user.bar_id)
       .single()
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar conflitos de agendamento
-    const conflito = await verificarConflitoAgendamento(supabase: any, data, user.bar_id)
+    const conflito = await verificarConflitoAgendamento(supabase, data, user.bar_id)
     if (conflito) {
       return NextResponse.json({ 
         error: 'Já¡ existe um agendamento similar para este horá¡rio',
@@ -170,8 +170,8 @@ export async function POST(request: NextRequest) {
       .insert(agendamentoData)
       .select(`
         *,
-        checklist:checklists (nome: any, setor),
-        criado_por_usuario:usuarios_bar!criado_por (nome: any, email)
+        checklist:checklists (nome, setor),
+        criado_por_usuario:usuarios_bar!criado_por (nome, email)
       `)
       .single()
 
@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
       data: novoAgendamento
     }, { status: 201 })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro na API de agendamentos POST:', error)
     
     if (error instanceof z.ZodError) {
@@ -210,14 +210,14 @@ export async function POST(request: NextRequest) {
 // FUNá‡á•ES AUXILIARES
 // =====================================================
 
-function calcularProximaExecucao(agendamento: any): string | null {
+function calcularProximaExecucao(agendamento): string | null {
   if (!agendamento.ativo) return null
 
   const agora = new Date()
   const [hora, minuto] = agendamento.horario.split(':').map(Number)
   
   let proximaData = new Date()
-  proximaData.setHours(hora: any, minuto, 0: any, 0)
+  proximaData.setHours(hora, minuto, 0, 0)
 
   // Se já¡ passou da hora hoje, comeá§ar de amanhá£
   if (proximaData <= agora) {
@@ -270,10 +270,10 @@ function calcularProximaExecucao(agendamento: any): string | null {
   }
 }
 
-async function buscarUltimaExecucao(supabase: any, agendamentoId: string) {
+async function buscarUltimaExecucao(supabase, agendamentoId: string) {
   const { data, error } = await supabase
     .from('checklist_execucoes')
-    .select('id, status: any, iniciado_em, concluido_em')
+    .select('id, status, iniciado_em, concluido_em')
     .eq('agendamento_id', agendamentoId)
     .order('iniciado_em', { ascending: false })
     .limit(1)
@@ -282,7 +282,7 @@ async function buscarUltimaExecucao(supabase: any, agendamentoId: string) {
   return error ? null : data
 }
 
-function determinarStatusAtual(agendamento: any, proximaExecucao: string | null, ultimaExecucao: any) {
+function determinarStatusAtual(agendamento, proximaExecucao: string | null, ultimaExecucao) {
   if (!agendamento.ativo) return 'inativo'
   if (!proximaExecucao) return 'manual'
   
@@ -296,10 +296,10 @@ function determinarStatusAtual(agendamento: any, proximaExecucao: string | null,
   return 'agendado'
 }
 
-async function verificarConflitoAgendamento(supabase: any, data: any, barId: number) {
+async function verificarConflitoAgendamento(supabase, data, barId: number) {
   const { data: conflitos, error } = await supabase
     .from('checklist_schedules')
-    .select('id, titulo: any, horario')
+    .select('id, titulo, horario')
     .eq('bar_id', barId)
     .eq('checklist_id', data.checklist_id)
     .eq('frequencia', data.frequencia)

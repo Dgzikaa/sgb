@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Tabs, TabsContent: any, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { 
   Phone, 
@@ -97,7 +97,7 @@ export default function WhatsAppFuncionariosPage() {
     const todosUsuarios = [...usuarios, ...usuariosSemWhatsApp]
     const csv = [
       'Nome,Email,Celular,WhatsApp Vá¡lido,Cargo,Departamento,Status',
-      ...todosUsuarios.map((u: any) => 
+      ...todosUsuarios.map((u) => 
         `"${u.nome}","${u.email}","${u.numero_formatado || u.celular || 'Sem celular'}","${u.whatsapp_valido ? 'Sim' : 'Ná£o'}","${u.cargo || ''}","${u.departamento || ''}","${u.ativo ? 'Ativo' : 'Inativo'}"`
       )
     ].join('\n')
@@ -110,18 +110,18 @@ export default function WhatsAppFuncionariosPage() {
     link.click()
   }
 
-  const usuariosFiltrados = usuarios.filter((u: any) =>
+  const usuariosFiltrados = usuarios.filter((u) =>
     u.nome.toLowerCase().includes(filtro.toLowerCase()) ||
     u.email.toLowerCase().includes(filtro.toLowerCase())
   )
 
-  const usuariosSemWhatsAppFiltrados = usuariosSemWhatsApp.filter((u: any) =>
+  const usuariosSemWhatsAppFiltrados = usuariosSemWhatsApp.filter((u) =>
     u.nome.toLowerCase().includes(filtro.toLowerCase()) ||
     u.email.toLowerCase().includes(filtro.toLowerCase())
   )
 
-  const usuariosValidos = usuarios.filter((u: any) => u.whatsapp_valido)
-  const usuariosInvalidos = usuarios.filter((u: any) => !u.whatsapp_valido)
+  const usuariosValidos = usuarios.filter((u) => u.whatsapp_valido)
+  const usuariosInvalidos = usuarios.filter((u) => !u.whatsapp_valido)
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -232,7 +232,7 @@ export default function WhatsAppFuncionariosPage() {
                 <Input
                   placeholder="Buscar funcioná¡rio por nome ou email..."
                   value={filtro}
-                  onChange={(e: any) => setFiltro(e.target.value)}
+                  onChange={(e) => setFiltro(e.target.value)}
                   className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
                 />
               </div>
@@ -293,7 +293,7 @@ export default function WhatsAppFuncionariosPage() {
                 </Card>
               ) : (
                 <div className="grid gap-4">
-                  {usuariosFiltrados.map((usuario: any) => (
+                  {usuariosFiltrados.map((usuario) => (
                     <Card key={usuario.id} className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
@@ -382,7 +382,7 @@ export default function WhatsAppFuncionariosPage() {
                   </Alert>
                   
                   <div className="grid gap-4">
-                    {usuariosSemWhatsAppFiltrados.map((usuario: any) => (
+                    {usuariosSemWhatsAppFiltrados.map((usuario) => (
                       <Card key={usuario.id} className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">

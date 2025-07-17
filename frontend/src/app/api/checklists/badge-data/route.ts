@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
         status,
         prazo_execucao,
         funcionario_id,
-        checklist:checklists!checklist_id (nome: any, setor, tipo)
+        checklist:checklists!checklist_id (nome, setor, tipo)
       `)
       .eq('bar_id', barId)
       .in('status', ['em_andamento', 'pausado', 'agendado'])
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
         dias_semana,
         ultimo_agendamento,
         proximo_agendamento,
-        checklist:checklists!checklist_id (nome: any, setor, tipo)
+        checklist:checklists!checklist_id (nome, setor, tipo)
       `)
       .eq('bar_id', barId)
       .eq('ativo', true)
@@ -69,19 +69,19 @@ export async function GET(request: NextRequest) {
     let atrasados = 0
     
     // Contar execuá§áµes em andamento como pendentes
-    const execucoesPendentesCount = execucoesPendentes?.filter((exec: any) => 
+    const execucoesPendentesCount = execucoesPendentes?.filter((exec) => 
       exec.status === 'em_andamento' || exec.status === 'pausado'
     ).length || 0
     
     // Contar execuá§áµes atrasadas (com prazo vencido)
-    const execucoesAtrasadas = execucoesPendentes?.filter((exec: any) => {
+    const execucoesAtrasadas = execucoesPendentes?.filter((exec) => {
       if (!exec.prazo_execucao) return false
       const prazo = new Date(exec.prazo_execucao)
       return prazo < hoje
     }).length || 0
 
     // Contar agendamentos que deveriam ter execuá§áµes hoje mas ná£o táªm
-    const agendamentosHoje = agendamentos?.filter((agendamento: any) => {
+    const agendamentosHoje = agendamentos?.filter((agendamento) => {
       if (!agendamento.proximo_agendamento) return false
       const proximoAgendamento = new Date(agendamento.proximo_agendamento)
       return proximoAgendamento.toISOString().split('T')[0] <= hojeStr
@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
       data: badgeData
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro na API de badge-data:', error)
     return NextResponse.json({
       success: false,

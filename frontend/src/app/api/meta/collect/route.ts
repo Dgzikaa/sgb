@@ -22,9 +22,9 @@ export async function POST(request: NextRequest) {
     console.log('üîÑ Solicita·ß·£o de coleta manual via Marketing 360∞...')
 
     const body = await request.json()
-    const { types, period: any, limit } = body
+    const { types, period, limit } = body
 
-    console.log('üìä Par·¢metros da coleta:', { types, period: any, limit })
+    console.log('üìä Par·¢metros da coleta:', { types, period, limit })
 
     // Chamar o endpoint de coleta autom·°tica que j·° funciona
     const autoCollectResponse = await fetch('https://sgbv2.vercel.app/api/meta/auto-collect', {
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('üí• Erro cr·≠tico na coleta manual:', error)
     
     return NextResponse.json({ 
@@ -85,12 +85,12 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { bar_id, tipo: any, json_raw } = body
+    const { bar_id, tipo, json_raw } = body
 
     if (!bar_id || !tipo || !json_raw) {
       return NextResponse.json({
         success: false,
-        message: 'Par·¢metros obrigat·≥rios: bar_id, tipo: any, json_raw'
+        message: 'Par·¢metros obrigat·≥rios: bar_id, tipo, json_raw'
       }, { status: 400 })
     }
 
@@ -117,7 +117,7 @@ export async function PUT(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }
 }
@@ -127,7 +127,7 @@ export async function PUT(request: NextRequest) {
 // Coletar dados reais do Meta e inserir JSON bruto na meta_raw (teste)
 // ========================================
 export async function PATCH(request: NextRequest) {
-  let inserts: any[] = [];
+  let inserts[] = [];
   try {
     // Recebe bar_id (ou usa padr·£o)
     const body = await request.json()
@@ -174,14 +174,14 @@ export async function PATCH(request: NextRequest) {
       const url = `https://graph.facebook.com/v18.0/${metaConfig.instagram_account_id}?fields=followers_count,follows_count,media_count,username,name,biography,website,profile_picture_url&access_token=${metaConfig.access_token}`
       const res = await fetch(url)
       instagramProfile = await res.json()
-    } catch (e: any) { instagramProfile = { error: e?.message || String(e) } }
+    } catch (e) { instagramProfile = { error: e?.message || String(e) } }
 
-    // 2. Instagram - Coleta estruturada expandida (posts: any, stories, reels)
+    // 2. Instagram - Coleta estruturada expandida (posts, stories, reels)
     let instagramProfileData = null;
     let instagramInsightsData = null;
-    let instagramPostsData: any[] = [];
-    let instagramStoriesData: any[] = [];
-    let instagramReelsData: any[] = [];
+    let instagramPostsData[] = [];
+    let instagramStoriesData[] = [];
+    let instagramReelsData[] = [];
     let estimativasData = { engagement_total: 0, views_total: 0 };
     let limitacoesData: string[] = [
       'N·£o h·° varia·ß·£o de seguidores por per·≠odo',
@@ -201,7 +201,7 @@ export async function PATCH(request: NextRequest) {
         media_count: profileJson.media_count,
         username: profileJson.username
       };
-      // 2. Coleta de m·©tricas de perfil (impressions: any, reach, profile_views: any, website_clicks)
+      // 2. Coleta de m·©tricas de perfil (impressions, reach, profile_views, website_clicks)
       const urlInsights = `https://graph.facebook.com/v19.0/${metaConfig.instagram_account_id}/insights?metric=impressions,reach,profile_views,website_clicks&period=day&access_token=${metaConfig.access_token}`;
       const resInsights = await fetch(urlInsights);
       const insightsJson = await resInsights.json();
@@ -225,7 +225,7 @@ export async function PATCH(request: NextRequest) {
           let metrics = 'impressions,reach,engagement,saved';
           if (isVideo || isReel) metrics += ',video_views';
           const urlPostInsights = `https://graph.facebook.com/v19.0/${media.id}/insights?metric=${metrics}&access_token=${metaConfig.access_token}`;
-          let postInsights: any = {};
+          let postInsights = {};
           try {
             const resPostInsights = await fetch(urlPostInsights);
             const postInsightsJson = await resPostInsights.json();
@@ -270,7 +270,7 @@ export async function PATCH(request: NextRequest) {
       // Salvar no banco
       inserts.push({ bar_id, data_coleta: hoje, tipo: 'instagram_full', json_raw: instagramFullJson });
       console.log('[Instagram] JSON estruturado expandido salvo em inserts:', JSON.stringify(instagramFullJson));
-    } catch (e: any) {
+    } catch (e) {
       console.error('[Instagram] Erro na coleta estruturada expandida:', e);
     }
 
@@ -284,7 +284,7 @@ export async function PATCH(request: NextRequest) {
       if (facebookProfile.error) {
         console.error('[Facebook] Erro perfil:', facebookProfile.error)
       }
-    } catch (e: any) { 
+    } catch (e) { 
       facebookProfile = { error: e?.message || String(e) }
       console.error('[Facebook] Exce·ß·£o perfil:', facebookProfile.error)
     }
@@ -299,7 +299,7 @@ export async function PATCH(request: NextRequest) {
       if (facebookInsights.error) {
         console.error('[Facebook] Erro insights:', facebookInsights.error)
       }
-    } catch (e: any) { 
+    } catch (e) { 
       facebookInsights = { error: e?.message || String(e) }
       console.error('[Facebook] Exce·ß·£o insights:', facebookInsights.error)
     }
@@ -326,13 +326,13 @@ export async function PATCH(request: NextRequest) {
               console.error('[Facebook] Erro post insights:', insightsJson.error)
             }
             facebookPostInsights.push({ post_id: post.id, insights: insightsJson.data || [] })
-          } catch (e: any) {
+          } catch (e) {
             facebookPostInsights.push({ post_id: post.id, insights: [{ error: e?.message || String(e) }] })
             console.error('[Facebook] Exce·ß·£o post insights:', e?.message || String(e))
           }
         }
       }
-    } catch (e: any) { 
+    } catch (e) { 
       facebookPosts = { error: e?.message || String(e) }
       console.error('[Facebook] Exce·ß·£o posts:', facebookPosts.error)
     }
@@ -361,13 +361,13 @@ export async function PATCH(request: NextRequest) {
               console.error('[Ads] Erro insights campanha:', insightsJson.error)
             }
             adsDetailed.push({ ...campaign, insights: insightsJson.data?.[0] || null })
-          } catch (e: any) {
+          } catch (e) {
             adsDetailed.push({ ...campaign, insights: { error: e?.message || String(e) } })
             console.error('[Ads] Exce·ß·£o insights campanha:', e?.message || String(e))
           }
         }
       }
-    } catch (e: any) { 
+    } catch (e) { 
       adsData = { error: e?.message || String(e) }
       console.error('[Ads] Exce·ß·£o campanhas:', adsData.error)
     }
@@ -426,12 +426,12 @@ export async function PATCH(request: NextRequest) {
       .select()
 
     if (insertError) {
-      return NextResponse.json({ success: false, insertError: any, inserts }, { status: 500 })
+      return NextResponse.json({ success: false, insertError, inserts }, { status: 500 })
     }
 
     // Retornar resposta simples
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }
 }
@@ -472,7 +472,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Agrupar por tipo
-    const statusByType = coletas?.reduce((acc: any, coleta: any) => {
+    const statusByType = coletas?.reduce((acc, coleta) => {
       if (!acc[coleta.tipo_coleta]) {
         acc[coleta.tipo_coleta] = []
       }
@@ -489,7 +489,7 @@ export async function GET(request: NextRequest) {
         tipo: ultimaColeta.tipo_coleta,
         registros: ultimaColeta.registros_processados
       } : null,
-      total_coletas_hoje: coletas?.filter((c: any) => 
+      total_coletas_hoje: coletas?.filter((c) => 
         new Date(c.iniciada_em).toDateString() === new Date().toDateString()
       ).length || 0,
       por_tipo: statusByType,
@@ -498,7 +498,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(resumo)
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ùå Erro ao buscar status das coletas:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',

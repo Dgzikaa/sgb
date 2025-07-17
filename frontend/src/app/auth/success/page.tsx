@@ -102,7 +102,7 @@ export default function AuthSuccessPage() {
 
   const copyTokenToClipboard = () => {
     if (tokenData) {
-      navigator.clipboard.writeText(JSON.stringify(tokenData: any, null, 2))
+      navigator.clipboard.writeText(JSON.stringify(tokenData, null, 2))
       alert('Token copiado para á¡rea de transferáªncia!')
     }
   }
@@ -251,7 +251,7 @@ export default function AuthSuccessPage() {
                 ðŸ”§ Detalhes Tá©cnicos do Token (Clique para expandir)
               </summary>
               <pre className="text-xs bg-gray-800 text-green-400 p-4 rounded overflow-x-auto">
-                {JSON.stringify(tokenData: any, null, 2)}
+                {JSON.stringify(tokenData, null, 2)}
               </pre>
             </details>
           </div>

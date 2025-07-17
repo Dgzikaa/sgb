@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useRef: any, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 import { useBar } from '@/contexts/BarContext'
 import { useUser } from '@/contexts/UserContext'
-import { ChevronDown, User: any, Settings, LogOut: any, Moon, Sun: any, Bell, Check: any, Building2, ChevronRight: any, Home } from 'lucide-react'
+import { ChevronDown, User, Settings, LogOut, Moon, Sun, Bell, Check, Building2, ChevronRight, Home } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -68,7 +68,7 @@ function generateBreadcrumbs(pathname: string) {
   
   // Build progressive paths
   let currentPath = ''
-  segments.forEach((segment: any, index: any) => {
+  segments.forEach((segment, index) => {
     currentPath += `/${segment}`
     const route = routeMapping[currentPath]
     
@@ -87,7 +87,7 @@ function generateBreadcrumbs(pathname: string) {
 
 export function DarkHeader() {
   const { pageTitle } = usePageTitle()
-  const { selectedBar, availableBars: any, setSelectedBar } = useBar()
+  const { selectedBar, availableBars, setSelectedBar } = useBar()
   const { user, logout } = useUser()
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()  // Usando o contexto global
@@ -159,14 +159,14 @@ export function DarkHeader() {
   //   }
   // ]
 
-  // const unreadCount = notifications.filter((n: any) => n.unread).length
+  // const unreadCount = notifications.filter((n) => n.unread).length
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 dark:bg-gray-900/80 dark:border-gray-800">
       <div className="flex items-center justify-between h-12 px-2 sm:px-4">
         {/* Breadcrumb Navigation - estilo Notion */}
         <div className="flex items-center gap-1 flex-1 min-w-0">
-          {breadcrumbs.map((crumb: any, index: any) => (
+          {breadcrumbs.map((crumb, index) => (
             <div key={`${crumb.href}-${index}`} className="flex items-center gap-1">
               {/* Separador */}
               {index > 0 && (
@@ -230,7 +230,7 @@ export function DarkHeader() {
                     Estabelecimentos
                   </span>
                 </div>
-                {availableBars.map((bar: any) => (
+                {availableBars.map((bar) => (
                   <button
                     key={bar.id}
                     onClick={() => handleBarSelect(bar)}

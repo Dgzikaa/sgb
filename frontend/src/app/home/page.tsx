@@ -128,7 +128,7 @@ export default function HomePage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat: any, index: any) => (
+        {stats.map((stat, index) => (
           <div key={index} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm transition-colors duration-300">
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors duration-300 ${stat.color}`}>
               <stat.icon className="w-6 h-6" />
@@ -151,7 +151,7 @@ export default function HomePage() {
             <p className="text-sm text-gray-500 dark:text-gray-400">Acesso rá¡pido á s principais funcionalidades</p>
           </div>
           <div className="space-y-3">
-            {quickActions.map((action: any, index: any) => (
+            {quickActions.map((action, index) => (
               <a 
                 key={index}
                 href={action.href}
@@ -178,7 +178,7 @@ export default function HomePage() {
             <p className="text-sm text-gray-500 dark:text-gray-400">ášltimas aá§áµes realizadas no sistema</p>
           </div>
           <div className="space-y-4">
-            {recentActivity.map((activity: any, index: any) => (
+            {recentActivity.map((activity, index) => (
               <div key={index} className="flex items-start">
                 <div className={`w-2 h-2 rounded-full mt-2 mr-3 ${
                   activity.type === 'success' ? 'bg-green-500' : 'bg-blue-500'

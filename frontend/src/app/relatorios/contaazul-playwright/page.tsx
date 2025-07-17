@@ -5,7 +5,7 @@ import { usePageTitle } from '@/contexts/PageTitleContext';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -108,7 +108,7 @@ export default function ContaAzulPlaywrightPage() {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e: any) => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@email.com"
               />
             </div>
@@ -119,7 +119,7 @@ export default function ContaAzulPlaywrightPage() {
                 id="senha"
                 type="password"
                 value={senha}
-                onChange={(e: any) => setSenha(e.target.value)}
+                onChange={(e) => setSenha(e.target.value)}
                 placeholder="Sua senha"
               />
             </div>
@@ -130,7 +130,7 @@ export default function ContaAzulPlaywrightPage() {
                 id="periodo"
                 type="number"
                 value={periodo}
-                onChange={(e: any) => setPeriodo(e.target.value)}
+                onChange={(e) => setPeriodo(e.target.value)}
                 placeholder="30"
                 min="1"
                 max="365"
@@ -140,7 +140,7 @@ export default function ContaAzulPlaywrightPage() {
             <div className="flex items-center space-x-2">
               <Checkbox
                 checked={headless}
-                onCheckedChange={(checked: any) => setHeadless(checked as boolean)}
+                onCheckedChange={(checked) => setHeadless(checked as boolean)}
               />
               <label className="text-sm cursor-pointer">
                 ðŸ‘» Modo invisá­vel (headless)
@@ -243,7 +243,7 @@ export default function ContaAzulPlaywrightPage() {
           </CardHeader>
           <CardContent>
             <div className="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm max-h-96 overflow-y-auto">
-              {logs.map((log: any, index: any) => (
+              {logs.map((log, index) => (
                 <div key={index} className="mb-1">
                   {log}
                 </div>

@@ -268,7 +268,7 @@ export function StatCard({
       {data.length > 0 && (
         <div className="mt-4">
           <div className="flex items-end space-x-1 h-16">
-            {data.map((point: any, index: any) => (
+            {data.map((point, index) => (
               <div
                 key={index}
                 className="bg-gradient-to-t from-indigo-500 to-purple-600 rounded-sm flex-1 transition-all duration-300 hover:from-indigo-600 hover:to-purple-700"

@@ -114,7 +114,7 @@ export class DiscordBotService {
       }
 
       // Criar resposta formatada
-      const embed = this.createEmbedResponse(queryType: any, data, command.message);
+      const embed = this.createEmbedResponse(queryType, data, command.message);
       
       return {
         success: true,
@@ -213,7 +213,7 @@ export class DiscordBotService {
    * Extrai pará¢metros da mensagem
    */
   private extractParameters(message: string, queryType: string): any {
-    const params: any = {};
+    const params = {};
 
     // Extrair datas
     const dateRegex = /(\d{4}-\d{2}-\d{2})/g;
@@ -259,7 +259,7 @@ export class DiscordBotService {
   /**
    * Cria embed formatado baseado no tipo de consulta
    */
-  private createEmbedResponse(queryType: string, data: any, originalMessage: string): DiscordEmbed {
+  private createEmbedResponse(queryType: string, data, originalMessage: string): DiscordEmbed {
     const timestamp = new Date().toISOString();
 
     switch (queryType) {
@@ -390,7 +390,7 @@ export class DiscordBotService {
           fields: [
             {
               name: 'ğŸ“Š Dados',
-              value: JSON.stringify(data).substring(0: any, 1000) + (JSON.stringify(data).length > 1000 ? '...' : ''),
+              value: JSON.stringify(data).substring(0, 1000) + (JSON.stringify(data).length > 1000 ? '...' : ''),
               inline: false
             }
           ],

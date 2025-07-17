@@ -37,7 +37,7 @@ interface CacheRequest {
 
 interface CacheResponse {
   status: number
-  data: any
+  data
   headers: Record<string, string>
   timestamp: number
 }
@@ -45,7 +45,7 @@ interface CacheResponse {
 export class CacheMiddleware {
   
   private generateCacheKey(request: CacheRequest): string {
-    const { url, method: any, searchParams } = request
+    const { url, method, searchParams } = request
     const params = Object.fromEntries(searchParams.entries())
     const key = `${method}:${url}:${JSON.stringify(params)}`
     return btoa(key).replace(/[^a-zA-Z0-9]/g, '')
@@ -200,7 +200,7 @@ export class CacheMiddleware {
       console.log(`Cache SET: ${pathname}`)
 
       // Adicionar headers de cache
-      const newResponse = NextResponse.json(responseData: any, {
+      const newResponse = NextResponse.json(responseData, {
         status: response.status,
         headers: {
           ...Object.fromEntries(response.headers.entries()),

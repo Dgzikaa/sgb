@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 
     if (!data_inicio || !data_fim || !bar_id) {
       return NextResponse.json(
-        { success: false, error: 'Pará¢metros obrigatá³rios: data_inicio, data_fim: any, bar_id' },
+        { success: false, error: 'Pará¢metros obrigatá³rios: data_inicio, data_fim, bar_id' },
         { status: 400 }
       )
     }
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
       // Primeira tentativa: buscar da tabela getin_reservas se existir
       let reservasQuery = supabase
         .from('getin_reservas')
-        .select('phone, name: any, date, people')
+        .select('phone, name, date, people')
         .gte('date', data_inicio)
         .lte('date', data_fim)
         .not('phone', 'is', null)
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
         // Tentar buscar da tabela contahub se tiver campos de telefone
         const { data: contahubData, error: contahubError } = await supabase
           .from('analitico')
-          .select('vd_dtgerencial, tel_cli: any, nm_cli')
+          .select('vd_dtgerencial, tel_cli, nm_cli')
           .eq('bar_id', parseInt(bar_id))
           .gte('vd_dtgerencial', data_inicio)
           .lte('vd_dtgerencial', data_fim)
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
 
         if (!contahubError && contahubData && contahubData.length > 0) {
           console.log(`ðŸ“ž Dados ContaHub encontrados: ${contahubData.length}`)
-          dadosReservas = contahubData.map((item: any) => ({
+          dadosReservas = contahubData.map((item) => ({
             phone: item.tel_cli,
             name: item.nm_cli,
             date: item.vd_dtgerencial,
@@ -99,12 +99,12 @@ export async function GET(request: NextRequest) {
       // Analisar recorráªncia por telefone
       const clientesPorTelefone = new Map()
 
-      dadosReservas.forEach((reserva: any) => {
+      dadosReservas.forEach((reserva) => {
         const telefone = String(reserva.phone).replace(/\D/g, '') // remover caracteres ná£o numá©ricos
         
         if (telefone.length >= 8) { // telefone vá¡lido
           if (!clientesPorTelefone.has(telefone)) {
-            clientesPorTelefone.set(telefone: any, {
+            clientesPorTelefone.set(telefone, {
               telefone,
               nome: reserva.name || 'Cliente',
               visitas: [],
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
       // Analisar padráµes de recorráªncia
       const clientesArray = Array.from(clientesPorTelefone.values())
       const clientesUnicos = clientesArray.length
-      const clientesRecorrentes = clientesArray.filter((cliente: any) => cliente.total_visitas > 1).length
+      const clientesRecorrentes = clientesArray.filter((cliente) => cliente.total_visitas > 1).length
       const taxaRecorrencia = clientesUnicos > 0 ? (clientesRecorrentes / clientesUnicos) * 100 : 0
 
       // Agrupar por náºmero de visitas
@@ -151,17 +151,17 @@ export async function GET(request: NextRequest) {
 
       // Detalhar clientes mais recorrentes (top 10)
       const clientesRecorrentesDetalhados = clientesArray
-        .filter((cliente: any) => cliente.total_visitas > 1)
-        .sort((a: any, b: any) => b.total_visitas - a.total_visitas)
-        .slice(0: any, 10)
-        .map((cliente: any) => ({
+        .filter((cliente) => cliente.total_visitas > 1)
+        .sort((a, b) => b.total_visitas - a.total_visitas)
+        .slice(0, 10)
+        .map((cliente) => ({
           nome: cliente.nome,
           telefone: cliente.telefone.replace(/(\d{2})(\d{4,5})(\d{4})/, '($1) $2-$3'), // formatar telefone
           total_visitas: cliente.total_visitas,
           total_pessoas: cliente.total_pessoas,
           primeira_visita: cliente.visitas[0]?.data,
           ultima_visita: cliente.visitas[cliente.visitas.length - 1]?.data,
-          datas_visitas: cliente.visitas.map((v: any) => v.data).join(', ')
+          datas_visitas: cliente.visitas.map((v) => v.data).join(', ')
         }))
 
       const recorrencia = {

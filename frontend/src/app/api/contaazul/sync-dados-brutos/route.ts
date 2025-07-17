@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Bar ID ·© obrigat·≥rio' }, { status: 400 })
     }
 
-    console.log('üóÇÔ∏è COLETA DE DADOS BRUTOS - Bar:', barId: any, 'Source:', source)
+    console.log('üóÇÔ∏è COLETA DE DADOS BRUTOS - Bar:', barId, 'Source:', source)
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
 
     while (true) {
       const urlCategorias = `${baseUrl}/v1/categorias?pagina=${paginaCategoria}&tamanho_pagina=${tamanhoPagina}`
-      const respCategorias = await fetch(urlCategorias: any, { headers })
+      const respCategorias = await fetch(urlCategorias, { headers })
       
       if (!respCategorias.ok) {
         console.error(`ùå Erro na API categorias: ${respCategorias.status}`)
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
               `pagina=${paginaReceita}&` +
               `tamanho_pagina=${tamanhoPagina}`
             
-            const respReceitas = await fetch(urlReceitas: any, { headers })
+            const respReceitas = await fetch(urlReceitas, { headers })
             
             if (!respReceitas.ok) {
               console.warn(`ö†Ô∏è Erro na API receitas - Cat: ${categoria.id}, P·°gina: ${paginaReceita} - Status: ${respReceitas.status}`)
@@ -211,7 +211,7 @@ export async function POST(request: NextRequest) {
               `pagina=${paginaDespesa}&` +
               `tamanho_pagina=${tamanhoPagina}`
             
-            const respDespesas = await fetch(urlDespesas: any, { headers })
+            const respDespesas = await fetch(urlDespesas, { headers })
             
             if (!respDespesas.ok) {
               console.warn(`ö†Ô∏è Erro na API despesas - Cat: ${categoria.id}, P·°gina: ${paginaDespesa} - Status: ${respDespesas.status}`)

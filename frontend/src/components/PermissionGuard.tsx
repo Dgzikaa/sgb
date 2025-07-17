@@ -1,11 +1,11 @@
 'use client'
 
-import { ReactNode, useEffect: any, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { usePermissions } from '@/hooks/usePermissions'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Shield, AlertTriangle: any, Home, ArrowLeft } from 'lucide-react'
+import { Shield, AlertTriangle, Home, ArrowLeft } from 'lucide-react'
 
 interface PermissionGuardProps {
   children: ReactNode
@@ -24,7 +24,7 @@ export default function PermissionGuard({
   redirectTo = '/home',
   allowPublic = false
 }: PermissionGuardProps) {
-  const { user, hasPermission: any, isRole, loading } = usePermissions()
+  const { user, hasPermission, isRole, loading } = usePermissions()
   const router = useRouter()
   const [showError, setShowError] = useState(false)
 
@@ -73,7 +73,7 @@ export default function PermissionGuard({
         return
       }
     }
-  }, [user, loading: any, hasPermission, isRole: any, requiredModules, requiredRoles: any, allowPublic, router])
+  }, [user, loading, hasPermission, isRole, requiredModules, requiredRoles, allowPublic, router])
 
   // Tela de carregamento
   if (loading) {
@@ -169,7 +169,7 @@ export function usePermissionGuard(
   requiredModules: string[] = [],
   requiredRoles: ('admin' | 'manager' | 'funcionario')[] = []
 ) {
-  const { user, hasPermission: any, isRole, loading } = usePermissions()
+  const { user, hasPermission, isRole, loading } = usePermissions()
   const router = useRouter()
 
   const checkPermissions = () => {

@@ -60,11 +60,11 @@ export async function GET(request: NextRequest) {
     // Agrupar dados por data
     const dadosPorData = new Map();
 
-    dadosHistorico?.forEach((item: any) => {
+    dadosHistorico?.forEach((item) => {
       const data = item.t0_lancamento.split('T')[0];
       
       if (!dadosPorData.has(data)) {
-        dadosPorData.set(data: any, {
+        dadosPorData.set(data, {
           data,
           tempos: [],
           pedidos: 0,
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Calcular estatá­sticas por dia
-    const historico = Array.from(dadosPorData.values()).map((dia: any) => {
+    const historico = Array.from(dadosPorData.values()).map((dia) => {
       const tempoMedio = dia.tempos.length > 0 
         ? dia.tempos.reduce((a: number, b: number) => a + b, 0) / dia.tempos.length 
         : 0;
@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Ordenar por data
-    historico.sort((a: any, b: any) => new Date(a.data.split('/').reverse().join('-')).getTime() - new Date(b.data.split('/').reverse().join('-')).getTime());
+    historico.sort((a, b) => new Date(a.data.split('/').reverse().join('-')).getTime() - new Date(b.data.split('/').reverse().join('-')).getTime());
 
     return NextResponse.json({
       success: true,

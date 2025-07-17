@@ -12,25 +12,25 @@ let toastCount = 0
 export function useToast() {
   const [toasts, setToasts] = useState<Toast[]>([])
 
-  const toast = ({ title, description: any, variant = 'default' }: Omit<Toast, 'id'>) => {
+  const toast = ({ title, description, variant = 'default' }: Omit<Toast, 'id'>) => {
     const id = (++toastCount).toString()
-    const newToast: Toast = { id, title: any, description, variant }
+    const newToast: Toast = { id, title, description, variant }
     
     setToasts(prev => [...prev, newToast])
     
     // Auto remove after 5 seconds
     setTimeout(() => {
-      setToasts(prev => prev.filter((t: any) => t.id !== id))
+      setToasts(prev => prev.filter((t) => t.id !== id))
     }, 5000)
     
     // Show browser notification
     if ('Notification' in window) {
       if (Notification.permission === 'granted') {
-        new Notification(title: any, { body: description })
+        new Notification(title, { body: description })
       } else if (Notification.permission !== 'denied') {
         Notification.requestPermission().then(permission => {
           if (permission === 'granted') {
-            new Notification(title: any, { body: description })
+            new Notification(title, { body: description })
           }
         })
       }
@@ -41,7 +41,7 @@ export function useToast() {
   }
 
   const dismiss = (toastId: string) => {
-    setToasts(prev => prev.filter((t: any) => t.id !== toastId))
+    setToasts(prev => prev.filter((t) => t.id !== toastId))
   }
 
   return {

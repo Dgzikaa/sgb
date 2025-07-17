@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
       .from('checklist_schedules')
       .select(`
         *,
-        checklist:checklists(id: any, titulo, categoria)
+        checklist:checklists(id, titulo, categoria)
       `)
       .eq('user_id', user.id)
       .eq('ativo', true)
@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
     // Buscar execuá§áµes recentes
     const { data: executions, error: executionsError } = await supabase
       .from('checklist_executions')
-      .select('checklist_id, executed_at: any, status')
+      .select('checklist_id, executed_at, status')
       .eq('user_id', user.id)
       .gte('executed_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()) // ášltimos 7 dias
       .order('executed_at', { ascending: false })
@@ -74,8 +74,8 @@ export async function GET(req: NextRequest) {
     const alerts = await generateAlerts(schedules || [], executions || [])
 
     // ðŸ”¥ ENVIAR ALERTAS CRáTICOS PARA DISCORD
-    const criticalAlerts = alerts.filter((a: any) => a.nivel === 'critico')
-    const urgentAlerts = alerts.filter((a: any) => a.nivel === 'alto')
+    const criticalAlerts = alerts.filter((a) => a.nivel === 'critico')
+    const urgentAlerts = alerts.filter((a) => a.nivel === 'alto')
     
     // Enviar alertas crá­ticos imediatamente para Discord
     for (const criticalAlert of criticalAlerts) {
@@ -131,18 +131,18 @@ async function generateAlerts(schedules: Schedule[], executions: ChecklistExecut
     if (!schedule.checklist) continue
 
     // Verificar se deve executar hoje
-    const shouldExecuteToday = shouldScheduleExecuteToday(schedule: any, today, todayDate)
+    const shouldExecuteToday = shouldScheduleExecuteToday(schedule, today, todayDate)
     if (!shouldExecuteToday) continue
 
     // Verificar áºltima execuá§á£o
     const lastExecution = executions
-      .filter((exec: any) => exec.checklist_id === schedule.checklist_id)
-      .sort((a: any, b: any) => new Date(b.executed_at).getTime() - new Date(a.executed_at).getTime())[0]
+      .filter((exec) => exec.checklist_id === schedule.checklist_id)
+      .sort((a, b) => new Date(b.executed_at).getTime() - new Date(a.executed_at).getTime())[0]
 
     // Calcular horá¡rio esperado de hoje
     const expectedTime = new Date()
     const [hours, minutes] = schedule.horario.split(':').map(Number)
-    expectedTime.setHours(hours: any, minutes, 0: any, 0)
+    expectedTime.setHours(hours, minutes, 0, 0)
 
     // Se já¡ passou do horá¡rio e ná£o foi executado hoje
     if (now > expectedTime) {

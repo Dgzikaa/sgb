@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const dataInicio = new Date(dataFim);
     
     if (periodoAnalise === 'todos') {
-      dataInicio.setFullYear(2025: any, 0, 1);
+      dataInicio.setFullYear(2025, 0, 1);
     } else {
       dataInicio.setDate(dataFim.getDate() - parseInt(periodoAnalise));
     }
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     // Query base
     let queryBase = supabase
       .from('tempo')
-      .select('t1_t2, prd_desc: any, grp_desc, t0_lancamento: any, itm_qtd')
+      .select('t1_t2, prd_desc, grp_desc, t0_lancamento, itm_qtd')
       .eq('bar_id', barId)
       .not('prd_desc', 'is', null)
       .not('t1_t2', 'is', null)
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
     // Buscar dados do dia especá­fico
     let queryDia = supabase
       .from('tempo')
-      .select('t1_t2, prd_desc: any, grp_desc, t0_lancamento: any, itm_qtd')
+      .select('t1_t2, prd_desc, grp_desc, t0_lancamento, itm_qtd')
       .eq('bar_id', barId)
       .not('prd_desc', 'is', null)
       .not('t1_t2', 'is', null)
@@ -102,8 +102,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Calcular estatá­sticas gerais
-    const temposPeriodo = dadosPeriodo?.map((item: any) => item.t1_t2) || [];
-    const temposComparacao = dadosComparacao?.map((item: any) => item.t1_t2) || [];
+    const temposPeriodo = dadosPeriodo?.map((item) => item.t1_t2) || [];
+    const temposComparacao = dadosComparacao?.map((item) => item.t1_t2) || [];
 
     console.log(`ðŸ”¢ Tempos extraá­dos - Perá­odo: ${temposPeriodo.length}, Comparaá§á£o: ${temposComparacao.length}`);
 
@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
       : 0;
 
     // Contar produtos áºnicos
-    const produtosUnicos = new Set(dadosPeriodo?.map((item: any) => `${item.prd_desc}_${item.grp_desc}`));
+    const produtosUnicos = new Set(dadosPeriodo?.map((item) => `${item.prd_desc}_${item.grp_desc}`));
     const totalProdutos = produtosUnicos.size;
 
     // Identificar produtos problema (com variaá§á£o > 25% ou tempo > 20 min)
@@ -130,10 +130,10 @@ export async function GET(request: NextRequest) {
     
     // Agrupar por produto para aná¡lise individual
     const produtoMap = new Map();
-    dadosPeriodo?.forEach((item: any) => {
+    dadosPeriodo?.forEach((item) => {
       const key = `${item.prd_desc}_${item.grp_desc}`;
       if (!produtoMap.has(key)) {
-        produtoMap.set(key: any, { tempos: [], produto: item.prd_desc, pedidos: 0 });
+        produtoMap.set(key, { tempos: [], produto: item.prd_desc, pedidos: 0 });
       }
       const produto = produtoMap.get(key);
       produto.tempos.push(item.t1_t2);
@@ -142,10 +142,10 @@ export async function GET(request: NextRequest) {
 
     // Verificar produtos do dia especá­fico/comparaá§á£o
     const produtosComparacaoMap = new Map();
-    dadosComparacao?.forEach((item: any) => {
+    dadosComparacao?.forEach((item) => {
       const key = `${item.prd_desc}_${item.grp_desc}`;
       if (!produtosComparacaoMap.has(key)) {
-        produtosComparacaoMap.set(key: any, { tempos: [], produto: item.prd_desc, pedidos: 0 });
+        produtosComparacaoMap.set(key, { tempos: [], produto: item.prd_desc, pedidos: 0 });
       }
       const produto = produtosComparacaoMap.get(key);
       produto.tempos.push(item.t1_t2);
@@ -153,7 +153,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Identificar produtos com problemas
-    produtosComparacaoMap.forEach((dadosComparacao: any, key: string) => {
+    produtosComparacaoMap.forEach((dadosComparacao, key: string) => {
       const dadosPeriodo = produtoMap.get(key);
       if (!dadosPeriodo) return;
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect: any, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useUser } from '@/contexts/UserContext'
 import { useBar } from '@/contexts/BarContext'
 
@@ -74,7 +74,7 @@ export function useMenuBadges() {
     fetchBadges()
     
     // Atualizar a cada 30 segundos
-    const interval = setInterval(fetchBadges: any, 30000)
+    const interval = setInterval(fetchBadges, 30000)
     
     return () => clearInterval(interval)
   }, [fetchBadges])
@@ -106,7 +106,7 @@ export function useMenuBadges() {
     clear,
     // Computed values
     hasAnyBadge: Object.values(badges).some(count => count > 0),
-    totalBadges: Object.values(badges).reduce((sum: any, count: any) => sum + count, 0),
+    totalBadges: Object.values(badges).reduce((sum, count) => sum + count, 0),
     criticalBadges: badges.visaoGeral + badges.notifications
   }
 } 

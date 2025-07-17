@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     if (!bar_id || !produto_codigo || !funcionario || !peso_bruto_g) {
       return NextResponse.json({
         success: false,
-        error: 'Dados obrigatá³rios: bar_id, produto_codigo: any, funcionario, peso_bruto_g'
+        error: 'Dados obrigatá³rios: bar_id, produto_codigo, funcionario, peso_bruto_g'
       }, { status: 400 })
     }
 
@@ -229,7 +229,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Transformar dados para incluir informaá§áµes do produto
-    const producoesComProdutos = producoes?.map((producao: any) => ({
+    const producoesComProdutos = producoes?.map((producao) => ({
       ...producao,
       produto_codigo: producao.produtos?.codigo,
       produto_nome: producao.produtos?.nome,

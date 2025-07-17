@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { usePWA } from '@/hooks/usePWA'
@@ -165,7 +165,7 @@ export function PWAStatus({
       <CardContent className="space-y-4">
         {/* Status items */}
         <div className="space-y-3">
-          {getStatusItems().map((item: any, index: any) => (
+          {getStatusItems().map((item, index) => (
             <div key={index} className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <item.icon className={`w-4 h-4 ${

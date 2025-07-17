@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
 
     console.log('🎯 Webhook selecionado:', { 
       webhookType, 
-      webhookUrl: webhookUrl ? webhookUrl.substring(0: any, 50) + '...' : 'VAZIO',
+      webhookUrl: webhookUrl ? webhookUrl.substring(0, 50) + '...' : 'VAZIO',
       hasUrl: !!webhookUrl 
     })
 
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Enviar para Discord
-    const discordResponse = await fetch(webhookUrl: any, {
+    const discordResponse = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
         status: discordResponse.status,
         error: errorText,
         webhook_type: webhookType,
-        webhook_url: webhookUrl.substring(0: any, 50) + '...'
+        webhook_url: webhookUrl.substring(0, 50) + '...'
       })
       return NextResponse.json(
         { success: false, error: `Erro Discord: ${discordResponse.status} - ${errorText}` },

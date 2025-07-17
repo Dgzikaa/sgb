@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect: any, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { getSupabaseClient } from '@/lib/supabase'
 import { useBar } from '@/contexts/BarContext'
 import { usePageTitle } from '@/contexts/PageTitleContext'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface FinancialSummary {
   receber_total: number
@@ -64,7 +64,7 @@ export default function ContaAzulFinanceiroPage() {
   const [categorias, setCategorias] = useState<Categoria[]>([])
   
   const [filtroStatus, setFiltroStatus] = useState('TODOS')
-  const [tipoVisualizacao, setTipoVisualizacao] = useState('RECEBER') // RECEBER, PAGAR: any, CATEGORIAS
+  const [tipoVisualizacao, setTipoVisualizacao] = useState('RECEBER') // RECEBER, PAGAR, CATEGORIAS
   const [ultimaSync, setUltimaSync] = useState<string>('')
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -95,22 +95,22 @@ export default function ContaAzulFinanceiroPage() {
       // 1. Carregar resumo financeiro
       const { data: reciverData } = await supabase
         .from('contaazul_contas_receber')
-        .select('total, pago: any, nao_pago')
+        .select('total, pago, nao_pago')
         .eq('bar_id', selectedBar!.id)
 
       const { data: pagarData } = await supabase
         .from('contaazul_contas_pagar')
-        .select('total, pago: any, nao_pago')
+        .select('total, pago, nao_pago')
         .eq('bar_id', selectedBar!.id)
 
       if (reciverData && pagarData) {
-        const reciverTotal = reciverData.reduce((sum: number, item: any) => sum + (item.total || 0), 0)
-        const reciverPago = reciverData.reduce((sum: number, item: any) => sum + (item.pago || 0), 0)
-        const reciverAberto = reciverData.reduce((sum: number, item: any) => sum + (item.nao_pago || 0), 0)
+        const reciverTotal = reciverData.reduce((sum: number, item) => sum + (item.total || 0), 0)
+        const reciverPago = reciverData.reduce((sum: number, item) => sum + (item.pago || 0), 0)
+        const reciverAberto = reciverData.reduce((sum: number, item) => sum + (item.nao_pago || 0), 0)
 
-        const pagarTotal = pagarData.reduce((sum: number, item: any) => sum + (item.total || 0), 0)
-        const pagarPago = pagarData.reduce((sum: number, item: any) => sum + (item.pago || 0), 0)
-        const pagarAberto = pagarData.reduce((sum: number, item: any) => sum + (item.nao_pago || 0), 0)
+        const pagarTotal = pagarData.reduce((sum: number, item) => sum + (item.total || 0), 0)
+        const pagarPago = pagarData.reduce((sum: number, item) => sum + (item.pago || 0), 0)
+        const pagarAberto = pagarData.reduce((sum: number, item) => sum + (item.nao_pago || 0), 0)
 
         setSummary({
           receber_total: reciverTotal,
@@ -214,11 +214,11 @@ export default function ContaAzulFinanceiroPage() {
     }
   }
 
-  const contasReceberFiltradas = contasReceber.filter((conta: any) => 
+  const contasReceberFiltradas = contasReceber.filter((conta) => 
     filtroStatus === 'TODOS' || conta.status === filtroStatus
   )
 
-  const contasPagarFiltradas = contasPagar.filter((conta: any) => 
+  const contasPagarFiltradas = contasPagar.filter((conta) => 
     filtroStatus === 'TODOS' || conta.status === filtroStatus
   )
 
@@ -271,7 +271,7 @@ export default function ContaAzulFinanceiroPage() {
           <label className="block text-sm font-medium text-gray-700 mb-2">Visualiza·ß·£o:</label>
           <select
             value={tipoVisualizacao}
-            onChange={(e: any) => setTipoVisualizacao(e.target.value)}
+            onChange={(e) => setTipoVisualizacao(e.target.value)}
             className="border border-gray-300 rounded-md px-3 py-2"
           >
             <option value="RECEBER">üì• Contas a Receber</option>
@@ -285,7 +285,7 @@ export default function ContaAzulFinanceiroPage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">Status:</label>
             <select
               value={filtroStatus}
-              onChange={(e: any) => setFiltroStatus(e.target.value)}
+              onChange={(e) => setFiltroStatus(e.target.value)}
               className="border border-gray-300 rounded-md px-3 py-2"
             >
               <option value="TODOS">Todos</option>
@@ -315,7 +315,7 @@ export default function ContaAzulFinanceiroPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {contasReceberFiltradas.slice(0: any, 50).map((conta: any) => (
+                  {contasReceberFiltradas.slice(0, 50).map((conta) => (
                     <tr key={conta.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(conta.status)}`}>
@@ -363,7 +363,7 @@ export default function ContaAzulFinanceiroPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {contasPagarFiltradas.slice(0: any, 50).map((conta: any) => (
+                  {contasPagarFiltradas.slice(0, 50).map((conta) => (
                     <tr key={conta.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(conta.status)}`}>
@@ -398,7 +398,7 @@ export default function ContaAzulFinanceiroPage() {
         <div>
           <h2 className="text-2xl font-bold mb-4">üè∑Ô∏è Categorias ({categorias.length})</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {categorias.map((categoria: any) => (
+            {categorias.map((categoria) => (
               <div key={categoria.id} className="bg-white p-4 rounded-lg shadow border">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-semibold text-gray-900">{categoria.nome}</h3>

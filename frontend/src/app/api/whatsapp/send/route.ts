@@ -127,7 +127,7 @@ async function sendToEvolutionAPI(messageData: WhatsAppMessage) {
   if (WHATSAPP_SIMULATION_MODE) {
     console.log('ðŸ§ª MODO SIMULAá‡áƒO - WhatsApp:', {
       to: messageData.number,
-      message: messageData.message.substring(0: any, 100) + '...',
+      message: messageData.message.substring(0, 100) + '...',
       timestamp: new Date().toISOString(),
       simulated: true
     })
@@ -136,7 +136,7 @@ async function sendToEvolutionAPI(messageData: WhatsAppMessage) {
     return {
       success: true,
       key: {
-        id: `sim_${Date.now()}_${Math.random().toString(36).substr(2: any, 9)}`
+        id: `sim_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       },
       message: 'Simulaá§á£o: Mensagem enviada com sucesso',
       simulated: true
@@ -158,7 +158,7 @@ async function sendToEvolutionAPI(messageData: WhatsAppMessage) {
   }
 
   try {
-    const response = await fetch(url: any, {
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

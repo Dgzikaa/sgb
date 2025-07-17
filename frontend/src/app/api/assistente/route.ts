@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { OpenAI } from 'openai'
-import { getVendasData, getClientesData: any, getProdutoMaisVendido, getAnaliseCompleta: any, getDadosSemana, getHistoricoDiaSemana } from '@/lib/database'
+import { getVendasData, getClientesData, getProdutoMaisVendido, getAnaliseCompleta, getDadosSemana, getHistoricoDiaSemana } from '@/lib/database'
 
 // Configurar OpenAI
 const openai = new OpenAI({
@@ -93,11 +93,11 @@ ${analiseCompleta ? `
 - ðŸ“Š Má‰DIA DIáRIA: R$ ${analiseCompleta.medias.faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
 - ðŸ‘¥ Má‰DIA CLIENTES/DIA: ${analiseCompleta.medias.clientes.toFixed(0)} pessoas
 
-ðŸ‘¥ TOTAL CLIENTES DA SEMANA: ${analiseCompleta.dadosSemana.reduce((sum: any, dia: any) => sum + dia.clientes, 0)}
-ðŸ’° TOTAL FATURAMENTO DA SEMANA: R$ ${analiseCompleta.dadosSemana.reduce((sum: any, dia: any) => sum + dia.faturamento, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+ðŸ‘¥ TOTAL CLIENTES DA SEMANA: ${analiseCompleta.dadosSemana.reduce((sum, dia) => sum + dia.clientes, 0)}
+ðŸ’° TOTAL FATURAMENTO DA SEMANA: R$ ${analiseCompleta.dadosSemana.reduce((sum, dia) => sum + dia.faturamento, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
 
 DADOS POR DIA DA SEMANA:
-${analiseCompleta.dadosSemana.map((dia: any) => 
+${analiseCompleta.dadosSemana.map((dia) => 
   `  ${dia.dia}: R$ ${dia.faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${dia.clientes} pessoas)`
 ).join('\n')}
 ` : '- Aná¡lise avaná§ada indisponá­vel no momento'}
@@ -106,7 +106,7 @@ ${analiseCompleta.dadosSemana.map((dia: any) =>
 - Nome: Bar Ordiná¡rio
 - Sistema: SGB (Sistema de Gestá£o de Bares)
 - Dados em tempo real via Supabase
-- Integraá§á£o com máºltiplas fontes (Contahub: any, Sympla, Yuzer)
+- Integraá§á£o com máºltiplas fontes (Contahub, Sympla, Yuzer)
 
 ðŸ’¡ INSTRUá‡á•ES AVANá‡ADAS:
 - Use SEMPRE os dados acima para responder perguntas sobre vendas, clientes e produtos

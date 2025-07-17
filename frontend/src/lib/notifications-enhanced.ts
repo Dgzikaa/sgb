@@ -89,7 +89,7 @@ export class EnhancedNotificationService {
     if (options.canais.browser) {
       try {
         results.channels.browser = await this.sendBrowserNotification(notificacao);
-             } catch (error: any) {
+             } catch (error) {
          results.errors.push(`Browser: ${error?.message || 'Erro desconhecido'}`);
        }
     }
@@ -97,8 +97,8 @@ export class EnhancedNotificationService {
     // 3. Enviar por WhatsApp
     if (options.canais.whatsapp) {
       try {
-        results.channels.whatsapp = await this.sendWhatsAppNotification(notificacao: any, options);
-      } catch (error: any) {
+        results.channels.whatsapp = await this.sendWhatsAppNotification(notificacao, options);
+      } catch (error) {
         results.errors.push(`WhatsApp: ${error?.message || 'Erro desconhecido'}`);
       }
     }
@@ -107,7 +107,7 @@ export class EnhancedNotificationService {
     if (options.canais.email) {
       try {
         results.channels.email = await this.sendEmailNotification(notificacao);
-      } catch (error: any) {
+      } catch (error) {
         results.errors.push(`Email: ${error?.message || 'Erro desconhecido'}`);
       }
     }
@@ -116,7 +116,7 @@ export class EnhancedNotificationService {
     if (options.canais.sms) {
       try {
         results.channels.sms = await this.sendSMSNotification(notificacao);
-      } catch (error: any) {
+      } catch (error) {
         results.errors.push(`SMS: ${error?.message || 'Erro desconhecido'}`);
       }
     }
@@ -314,7 +314,7 @@ export class EnhancedNotificationService {
   /**
    * Envia notificaá§á£o browser (sistema existente)
    */
-  private async sendBrowserNotification(notificacao: any): Promise<boolean> {
+  private async sendBrowserNotification(notificacao): Promise<boolean> {
     try {
       // Usar API existente de notificaá§áµes browser
       const response = await fetch('/api/notifications', {
@@ -340,7 +340,7 @@ export class EnhancedNotificationService {
   /**
    * Envia notificaá§á£o WhatsApp
    */
-  private async sendWhatsAppNotification(notificacao: any, options: EnhancedNotificationOptions): Promise<boolean> {
+  private async sendWhatsAppNotification(notificacao, options: EnhancedNotificationOptions): Promise<boolean> {
     try {
       const whatsappService = await createWhatsAppService(this.barId);
       if (!whatsappService) {
@@ -369,7 +369,7 @@ export class EnhancedNotificationService {
   /**
    * Envia notificaá§á£o por email (placeholder)
    */
-  private async sendEmailNotification(notificacao: any): Promise<boolean> {
+  private async sendEmailNotification(notificacao): Promise<boolean> {
     // TODO: Implementar quando necessá¡rio
     console.log('Email notification (placeholder):', notificacao.titulo);
     return false;
@@ -378,7 +378,7 @@ export class EnhancedNotificationService {
   /**
    * Envia notificaá§á£o por SMS (placeholder)
    */
-  private async sendSMSNotification(notificacao: any): Promise<boolean> {
+  private async sendSMSNotification(notificacao): Promise<boolean> {
     // TODO: Implementar quando necessá¡rio
     console.log('SMS notification (placeholder):', notificacao.titulo);
     return false;
@@ -387,10 +387,10 @@ export class EnhancedNotificationService {
   /**
    * Atualiza estatá­sticas da notificaá§á£o
    */
-  private async updateNotificationStats(notificacaoId: number, results: any): Promise<void> {
+  private async updateNotificationStats(notificacaoId: number, results): Promise<void> {
     try {
       const channelsUsed = Object.values(results.channels).filter(Boolean).length;
-      const channelsSuccess = Object.values(results.channels).filter((v: any) => v === true).length;
+      const channelsSuccess = Object.values(results.channels).filter((v) => v === true).length;
 
       await supabase
         .from('notificacoes')
@@ -452,7 +452,7 @@ export async function sendBulkNotifications(
       if (result.success) {
         successCount++;
       }
-    } catch (error: any) {
+    } catch (error) {
       results.push({
         usuario_id: usuarioId,
         success: false,

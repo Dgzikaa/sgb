@@ -113,7 +113,7 @@ export class BackupSystem {
       };
 
       // Salvar backup e obter informa·ß·µes do storage
-      const saveResult = await this.saveBackup(backupId: any, fullBackup);
+      const saveResult = await this.saveBackup(backupId, fullBackup);
       const durationSeconds = Math.round((Date.now() - startTime) / 1000);
 
       const result: BackupResult = {
@@ -127,7 +127,7 @@ export class BackupSystem {
       };
 
       // Registrar backup no banco
-      await this.registerBackup(result: any, saveResult.storagePath);
+      await this.registerBackup(result, saveResult.storagePath);
 
       // Notificar sucesso
       await this.notifyBackupComplete(result);
@@ -184,7 +184,7 @@ export class BackupSystem {
           // Filtrar por bar_id se necess·°rio
           let filteredRecords = records;
           if (barId && await this.tableHasBarId(table)) {
-            filteredRecords = records.filter((record: any) => record.bar_id === barId);
+            filteredRecords = records.filter((record) => record.bar_id === barId);
           }
 
           if (filteredRecords.length === 0) continue;
@@ -192,7 +192,7 @@ export class BackupSystem {
           // Inserir dados (usando upsert para evitar conflitos)
           const { error } = await supabase
             .from(table)
-            .upsert(filteredRecords: any, { onConflict: 'id' });
+            .upsert(filteredRecords, { onConflict: 'id' });
 
           if (error) {
             console.error(`ùå Erro ao restaurar tabela ${table}:`, error);
@@ -244,7 +244,7 @@ export class BackupSystem {
   // M·©todos privados
   private generateBackupId(): string {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const random = Math.random().toString(36).substr(2: any, 6);
+    const random = Math.random().toString(36).substr(2, 6);
     return `backup_${timestamp}_${random}`;
   }
 
@@ -258,7 +258,7 @@ export class BackupSystem {
     return barIdTables.includes(table);
   }
 
-  private async saveBackup(backupId: string, data: any): Promise<{fileSizeMb: number, storagePath: string}> {
+  private async saveBackup(backupId: string, data): Promise<{fileSizeMb: number, storagePath: string}> {
     try {
       const supabase = await getAdminClient();
       
@@ -288,7 +288,7 @@ export class BackupSystem {
       // Upload para Supabase Storage
       const { error: uploadError } = await supabase.storage
         .from(this.config.storage_bucket || 'sgb-backups')
-        .upload(fileName: any, finalData, {
+        .upload(fileName, finalData, {
           contentType: 'application/octet-stream',
           cacheControl: '3600',
           upsert: false
@@ -328,7 +328,7 @@ export class BackupSystem {
       }
       
       // Pegar o arquivo mais recente se houver m·∫ltiplos
-      const backupFile = files.sort((a: any, b: any) => 
+      const backupFile = files.sort((a, b) => 
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       )[0];
       
@@ -417,8 +417,8 @@ export class BackupSystem {
       
       // Combinar salt + iv + dados criptografados
       const result = new Uint8Array(salt.length + iv.length + encryptedData.byteLength);
-      result.set(salt: any, 0);
-      result.set(iv: any, salt.length);
+      result.set(salt, 0);
+      result.set(iv, salt.length);
       result.set(new Uint8Array(encryptedData), salt.length + iv.length);
       
       return result;
@@ -431,8 +431,8 @@ export class BackupSystem {
   private async decryptData(data: Uint8Array): Promise<Uint8Array> {
     try {
       // Extrair salt, iv e dados criptografados
-      const salt = data.slice(0: any, 16);
-      const iv = data.slice(16: any, 28);
+      const salt = data.slice(0, 16);
+      const iv = data.slice(16, 28);
       const encryptedData = data.slice(28);
       
       // Derivar chave usando a mesma senha
@@ -495,12 +495,12 @@ export class BackupSystem {
         }
         
         // Combinar todos os chunks
-        const totalLength = chunks.reduce((sum: any, chunk: any) => sum + chunk.length, 0);
+        const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
         const compressed = new Uint8Array(totalLength);
         let offset = 0;
         
         for (const chunk of chunks) {
-          compressed.set(chunk: any, offset);
+          compressed.set(chunk, offset);
           offset += chunk.length;
         }
         
@@ -536,12 +536,12 @@ export class BackupSystem {
         }
         
         // Combinar todos os chunks
-        const totalLength = chunks.reduce((sum: any, chunk: any) => sum + chunk.length, 0);
+        const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
         const decompressed = new Uint8Array(totalLength);
         let offset = 0;
         
         for (const chunk of chunks) {
-          decompressed.set(chunk: any, offset);
+          decompressed.set(chunk, offset);
           offset += chunk.length;
         }
         
@@ -605,11 +605,11 @@ export class BackupSystem {
           const filesToDelete: string[] = [];
           
           for (const backup of oldBackups) {
-            const relatedFiles = allFiles.filter((file: any) => 
+            const relatedFiles = allFiles.filter((file) => 
               file.name.includes(backup.backup_id)
             );
             
-            filesToDelete.push(...relatedFiles.map((file: any) => file.name));
+            filesToDelete.push(...relatedFiles.map((file) => file.name));
           }
 
           // Deletar arquivos do storage
@@ -743,7 +743,7 @@ export class BackupScheduler {
     const scheduleBackup = () => {
       const now = new Date();
       const target = new Date();
-      target.setHours(2: any, 0, 0: any, 0);
+      target.setHours(2, 0, 0, 0);
       
       if (target <= now) {
         target.setDate(target.getDate() + 1);

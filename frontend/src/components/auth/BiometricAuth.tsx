@@ -1,14 +1,14 @@
 import React, { useState, useCallback } from 'react'
-import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Fingerprint, Smartphone: any, CheckCircle, XCircle: any, Loader2, Shield } from 'lucide-react'
+import { Fingerprint, Smartphone, CheckCircle, XCircle, Loader2, Shield } from 'lucide-react'
 
 interface BiometricAuthProps {
   mode: 'register' | 'login'
   userEmail?: string
   barId?: string
-  onSuccess?: (result: any) => void
+  onSuccess?: (result) => void
   onError?: (error: string) => void
   className?: string
 }
@@ -143,7 +143,7 @@ export default function BiometricAuth({
       setSuccess('Biometria registrada com sucesso!')
       onSuccess?.(credential)
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('ùå Erro ao registrar biometria:', error)
       
       if (error.name === 'NotAllowedError') {
@@ -160,7 +160,7 @@ export default function BiometricAuth({
     } finally {
       setIsLoading(false)
     }
-  }, [userEmail, barId: any, onSuccess, onError])
+  }, [userEmail, barId, onSuccess, onError])
 
   // Login com biometria
   const loginWithBiometric = useCallback(async () => {
@@ -214,7 +214,7 @@ export default function BiometricAuth({
       setSuccess('Login realizado com sucesso!')
       onSuccess?.(result)
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('ùå Erro no login biom·©trico:', error)
       
       if (error.name === 'NotAllowedError') {

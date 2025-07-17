@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Converter para integer para garantir compatibilidade
-    const barIdInt = parseInt(barId: any, 10)
+    const barIdInt = parseInt(barId, 10)
     console.log('üîç Bar ID convertido para int:', barIdInt)
 
     // Buscar cada webhook no seu sistema espec·≠fico
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
           )
         }
 
-        results.push({ webhook: webhookKey, sistema: any, saved: true })
+        results.push({ webhook: webhookKey, sistema, saved: true })
       } else {
         console.log(`ö†Ô∏è Webhook ${webhookKey} est·° vazio, pulando...`)
       }

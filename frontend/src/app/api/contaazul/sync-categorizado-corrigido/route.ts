@@ -34,10 +34,10 @@ async function getValidContaAzulToken(barId: number) {
   return null
 }
 
-async function buscarDadosAPI(url: string, headers: any) {
+async function buscarDadosAPI(url: string, headers) {
   console.log('ğŸ”— Buscando:', url)
   
-  const response = await fetch(url: any, { headers })
+  const response = await fetch(url, { headers })
   
   if (!response.ok) {
     console.error('Œ Erro na API:', response.status)
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       while (temMaisCategorias) {
         const urlPagina = `${urlCategorias}?pagina=${paginaCategoria}&tamanho_pagina=100`
         try {
-          const categoriasAPI: any[] = await buscarDadosAPI(urlPagina: any, headers)
+          const categoriasAPI[] = await buscarDadosAPI(urlPagina, headers)
           
           if (categoriasAPI.length === 0) {
             temMaisCategorias = false
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
 
         const { data: categoriaInserida, error: erroCategoria } = await supabase
           .from('contaazul_categorias')
-          .upsert(dadosCategoria: any, { 
+          .upsert(dadosCategoria, { 
             onConflict: 'bar_id,id',
             ignoreDuplicates: false 
           })
@@ -173,7 +173,7 @@ export async function POST(request: NextRequest) {
     console.log('ğŸ“Š PASSO 3: BUSCAR EVENTOS FINANCEIROS (CONTAS-A-RECEBER) POR CATEGORIA...')
     
     // PASSO 3: Query contas-a-receber por categoria (tipo = receita)
-    const categoriasReceita = resultados.passo1_categorias_api.filter((cat: any) => cat.tipo === 'RECEITA')
+    const categoriasReceita = resultados.passo1_categorias_api.filter((cat) => cat.tipo === 'RECEITA')
     
     for (const categoria of categoriasReceita) {
       try {
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
             `tamanho_pagina=100`
 
           try {
-            const receitas = await buscarDadosAPI(urlReceitas: any, headers)
+            const receitas = await buscarDadosAPI(urlReceitas, headers)
             
             if (receitas.length === 0) {
               temMaisReceitas = false
@@ -201,7 +201,7 @@ export async function POST(request: NextRequest) {
             console.log(`ğŸ“Š PASSO 3 - Pá¡gina ${paginaReceita}: ${receitas.length} contas-a-receber encontradas`)
             
             // œ… contas-a-receber = tipo 'receita'
-            resultados.passo3_eventos_receitas_api.push(...receitas.map((r: any) => ({ 
+            resultados.passo3_eventos_receitas_api.push(...receitas.map((r) => ({ 
               ...r, 
               categoria: categoria, 
               tipo: 'receita' 
@@ -226,7 +226,7 @@ export async function POST(request: NextRequest) {
     console.log('ğŸ“Š PASSO 4: BUSCAR EVENTOS FINANCEIROS (CONTAS-A-PAGAR) POR CATEGORIA...')
     
     // PASSO 4: Query contas-a-pagar por categoria (tipo = despesa)
-    const categoriasDespesa = resultados.passo1_categorias_api.filter((cat: any) => cat.tipo === 'DESPESA')
+    const categoriasDespesa = resultados.passo1_categorias_api.filter((cat) => cat.tipo === 'DESPESA')
     
     for (const categoria of categoriasDespesa) {
       try {
@@ -244,7 +244,7 @@ export async function POST(request: NextRequest) {
             `tamanho_pagina=100`
 
           try {
-            const despesas = await buscarDadosAPI(urlDespesas: any, headers)
+            const despesas = await buscarDadosAPI(urlDespesas, headers)
             
             if (despesas.length === 0) {
               temMaisDespesas = false
@@ -254,7 +254,7 @@ export async function POST(request: NextRequest) {
             console.log(`ğŸ“Š PASSO 4 - Pá¡gina ${paginaDespesa}: ${despesas.length} contas-a-pagar encontradas`)
             
             // œ… contas-a-pagar = tipo 'despesa'
-            resultados.passo4_eventos_despesas_api.push(...despesas.map((d: any) => ({ 
+            resultados.passo4_eventos_despesas_api.push(...despesas.map((d) => ({ 
               ...d, 
               categoria: categoria, 
               tipo: 'despesa' 
@@ -309,7 +309,7 @@ export async function POST(request: NextRequest) {
 
         const { data: eventoInserido, error: erroEvento } = await supabase
           .from('contaazul_eventos_financeiros')
-          .upsert(dadosEvento: any, { 
+          .upsert(dadosEvento, { 
             onConflict: 'bar_id,evento_id',
             ignoreDuplicates: false 
           })
@@ -340,7 +340,7 @@ export async function POST(request: NextRequest) {
         console.log(`ğŸ“‹ Usando URL correta: ${urlParcelasCorreta}`)
         
         try {
-          const parcelas = await buscarDadosAPI(urlParcelasCorreta: any, headers)
+          const parcelas = await buscarDadosAPI(urlParcelasCorreta, headers)
           console.log(`œ… PASSO 6: ${parcelas.length} parcelas encontradas`)
           
           if (parcelas.length > 0) {
@@ -348,7 +348,7 @@ export async function POST(request: NextRequest) {
             if (parcelas.length > 1) {
               console.log('ğŸ”„ EXEMPLO: Compra parcelada (ex: 10x no cartá£o)')
             }
-            resultados.passo6_parcelas_api.push(...parcelas.map((p: any) => ({ 
+            resultados.passo6_parcelas_api.push(...parcelas.map((p) => ({ 
               ...p, 
               evento: evento 
             })))
@@ -396,7 +396,7 @@ export async function POST(request: NextRequest) {
     console.log('ğŸ’¾ PASSO 7: INSERIR PARCELAS NO BANCO...')
     
     // PASSO 7: Inserir apenas parcelas REAIS (ná£o eventos sem parcelas)
-    const parcelasReais = resultados.passo6_parcelas_api.filter((p: any) => p.tipo !== 'evento_sem_parcelas')
+    const parcelasReais = resultados.passo6_parcelas_api.filter((p) => p.tipo !== 'evento_sem_parcelas')
     
     console.log(`ğŸ“Š PASSO 7: ${parcelasReais.length} parcelas reais para inserir`)
     
@@ -429,7 +429,7 @@ export async function POST(request: NextRequest) {
 
           const { data: parcelaInserida, error: erroParcela } = await supabase
             .from('contaazul_parcelas')
-            .upsert(dadosParcela: any, { 
+            .upsert(dadosParcela, { 
               onConflict: 'bar_id,parcela_id',
               ignoreDuplicates: false 
             })
@@ -457,7 +457,7 @@ export async function POST(request: NextRequest) {
       eventos_inseridos: resultados.passo5_eventos_upsert.length,
       parcelas_reais: parcelasReais.length,
       parcelas_inseridas: resultados.passo7_parcelas_upsert.length,
-      eventos_sem_parcelas: resultados.passo6_parcelas_api.filter((p: any) => p.tipo === 'evento_sem_parcelas').length
+      eventos_sem_parcelas: resultados.passo6_parcelas_api.filter((p) => p.tipo === 'evento_sem_parcelas').length
     }
 
     console.log('\nğŸ“Š ESTATáSTICAS FINAIS:')

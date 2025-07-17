@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 import {
@@ -43,9 +43,9 @@ interface DailyAnalysisData {
     worst_day: string | null
   }
   platform_analysis: {
-    instagram: any
-    facebook: any
-    insights: any
+    instagram
+    facebook
+    insights
   }
   trends_and_insights: Array<{
     type: string
@@ -91,7 +91,7 @@ export default function DiarioPage() {
 
   useEffect(() => {
     loadDailyAnalysis()
-  }, [selectedDays, selectedPlatform: any, startDate, endDate: any, filterType])
+  }, [selectedDays, selectedPlatform, startDate, endDate, filterType])
 
   const loadDailyAnalysis = async () => {
     try {
@@ -256,7 +256,7 @@ export default function DiarioPage() {
                   <Input
                     type="date"
                     value={startDate}
-                    onChange={(e: any) => setStartDate(e.target.value)}
+                    onChange={(e) => setStartDate(e.target.value)}
                     className="w-36"
                     placeholder="Data inicial"
                   />
@@ -264,12 +264,12 @@ export default function DiarioPage() {
                   <Input
                     type="date"
                     value={endDate}
-                    onChange={(e: any) => setEndDate(e.target.value)}
+                    onChange={(e) => setEndDate(e.target.value)}
                     className="w-36"
                     placeholder="Data final"
                   />
                   <span className="text-sm text-gray-500 dark:text-gray-400">
-                    ({calculateDaysDifference(startDate: any, endDate)} dias)
+                    ({calculateDaysDifference(startDate, endDate)} dias)
                   </span>
                 </div>
               )}
@@ -395,7 +395,7 @@ export default function DiarioPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {data.trends_and_insights.map((trend: any, index: any) => (
+                      {data.trends_and_insights.map((trend, index) => (
                         <div 
                           key={index} 
                           className={`p-4 border rounded-lg ${getTrendColor(trend.type)}`}

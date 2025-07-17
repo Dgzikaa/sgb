@@ -1,4 +1,4 @@
-import { useState, useEffect: any, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { api } from '@/lib/api-client'
 
 // =====================================================
@@ -153,10 +153,10 @@ interface UseReportsResult {
   error: string | null
   
   // Dados auxiliares
-  estatisticasTemplates: any
-  estatisticasExecucoes: any
-  paginacaoTemplates: any
-  paginacaoExecucoes: any
+  estatisticasTemplates
+  estatisticasExecucoes
+  paginacaoTemplates
+  paginacaoExecucoes
   
   // Aá§áµes para templates
   carregarTemplates: (filtros?: FiltrosTemplates) => Promise<void>
@@ -174,12 +174,12 @@ interface UseReportsResult {
   
   // Aá§áµes para relatá³rios personalizados
   carregarRelatoriosPersonalizados: () => Promise<void>
-  salvarRelatorioPersonalizado: (dados: any) => Promise<boolean>
+  salvarRelatorioPersonalizado: (dados) => Promise<boolean>
   excluirRelatorioPersonalizado: (id: string) => Promise<boolean>
   
   // Utilitá¡rios
   obterTemplatesPorCategoria: (categoria: string) => Template[]
-  formatarDadosParaExportacao: (dados: any[], template: Template) => any[]
+  formatarDadosParaExportacao: (dados[], template: Template) => any[]
   validarFiltrosTemplate: (template: Template, filtros: Record<string, any>) => { valido: boolean, erros: string[] }
   recarregar: () => Promise<void>
   limparErro: () => void
@@ -220,7 +220,7 @@ export function useReports(): UseReportsResult {
       const params = new URLSearchParams()
       Object.entries(filtros).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-          params.append(key: any, value.toString())
+          params.append(key, value.toString())
         }
       })
 
@@ -233,7 +233,7 @@ export function useReports(): UseReportsResult {
       } else {
         setError(response.error || 'Erro ao carregar templates')
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao carregar templates:', err)
       setError('Erro ao carregar templates')
     } finally {
@@ -253,7 +253,7 @@ export function useReports(): UseReportsResult {
       } else {
         setError(response.error || 'Erro ao carregar template')
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao carregar template:', err)
       setError('Erro ao carregar template')
     } finally {
@@ -276,7 +276,7 @@ export function useReports(): UseReportsResult {
         setError(response.error || 'Erro ao criar template')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao criar template:', err)
       setError('Erro ao criar template')
       return false
@@ -303,14 +303,14 @@ export function useReports(): UseReportsResult {
         setError(response.error || 'Erro ao atualizar template')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao atualizar template:', err)
       setError('Erro ao atualizar template')
       return false
     } finally {
       setLoading(false)
     }
-  }, [carregarTemplates, carregarTemplate: any, templateAtual])
+  }, [carregarTemplates, carregarTemplate, templateAtual])
 
   const excluirTemplate = useCallback(async (id: string): Promise<boolean> => {
     try {
@@ -321,7 +321,7 @@ export function useReports(): UseReportsResult {
 
       if (response.success) {
         console.log('ðŸ—‘ï¸ Template excluá­do com sucesso!')
-        setTemplates(prev => prev.filter((t: any) => t.id !== id))
+        setTemplates(prev => prev.filter((t) => t.id !== id))
         if (templateAtual?.id === id) {
           setTemplateAtual(null)
         }
@@ -330,7 +330,7 @@ export function useReports(): UseReportsResult {
         setError(response.error || 'Erro ao excluir template')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao excluir template:', err)
       setError('Erro ao excluir template')
       return false
@@ -351,7 +351,7 @@ export function useReports(): UseReportsResult {
       const params = new URLSearchParams()
       Object.entries(filtros).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-          params.append(key: any, value.toString())
+          params.append(key, value.toString())
         }
       })
 
@@ -364,7 +364,7 @@ export function useReports(): UseReportsResult {
       } else {
         setError(response.error || 'Erro ao carregar execuá§áµes')
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao carregar execuá§áµes:', err)
       setError('Erro ao carregar execuá§áµes')
     } finally {
@@ -384,7 +384,7 @@ export function useReports(): UseReportsResult {
       } else {
         setError(response.error || 'Erro ao carregar execuá§á£o')
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao carregar execuá§á£o:', err)
       setError('Erro ao carregar execuá§á£o')
     } finally {
@@ -410,7 +410,7 @@ export function useReports(): UseReportsResult {
         setError(response.error || 'Erro ao executar relatá³rio')
         return null
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao executar relatá³rio:', err)
       setError('Erro ao executar relatá³rio')
       return null
@@ -434,7 +434,7 @@ export function useReports(): UseReportsResult {
         setError(response.error || 'Erro ao cancelar execuá§á£o')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao cancelar execuá§á£o:', err)
       setError('Erro ao cancelar execuá§á£o')
       return false
@@ -445,7 +445,7 @@ export function useReports(): UseReportsResult {
 
   const baixarRelatorio = useCallback(async (execucaoId: string) => {
     try {
-      const execucao = execucoes.find((e: any) => e.id === execucaoId)
+      const execucao = execucoes.find((e) => e.id === execucaoId)
       if (!execucao || !execucao.arquivo_url) {
         setError('Arquivo do relatá³rio ná£o encontrado')
         return
@@ -461,7 +461,7 @@ export function useReports(): UseReportsResult {
 
       console.log(`ðŸ“¥ Download iniciado: ${execucao.template?.nome}`)
 
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao baixar relatá³rio:', err)
       setError('Erro ao baixar relatá³rio')
     }
@@ -483,7 +483,7 @@ export function useReports(): UseReportsResult {
       } else {
         setError(response.error || 'Erro ao carregar relatá³rios personalizados')
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao carregar relatá³rios personalizados:', err)
       setError('Erro ao carregar relatá³rios personalizados')
     } finally {
@@ -491,7 +491,7 @@ export function useReports(): UseReportsResult {
     }
   }, [])
 
-  const salvarRelatorioPersonalizado = useCallback(async (dados: any): Promise<boolean> => {
+  const salvarRelatorioPersonalizado = useCallback(async (dados): Promise<boolean> => {
     try {
       setCreating(true)
       setError(null)
@@ -506,7 +506,7 @@ export function useReports(): UseReportsResult {
         setError(response.error || 'Erro ao salvar relatá³rio personalizado')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao salvar relatá³rio personalizado:', err)
       setError('Erro ao salvar relatá³rio personalizado')
       return false
@@ -524,13 +524,13 @@ export function useReports(): UseReportsResult {
 
       if (response.success) {
         console.log('ðŸ—‘ï¸ Relatá³rio personalizado excluá­do!')
-        setRelatoriosPersonalizados(prev => prev.filter((r: any) => r.id !== id))
+        setRelatoriosPersonalizados(prev => prev.filter((r) => r.id !== id))
         return true
       } else {
         setError(response.error || 'Erro ao excluir relatá³rio personalizado')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao excluir relatá³rio personalizado:', err)
       setError('Erro ao excluir relatá³rio personalizado')
       return false
@@ -544,14 +544,14 @@ export function useReports(): UseReportsResult {
   // =====================================================
 
   const obterTemplatesPorCategoria = useCallback((categoria: string): Template[] => {
-    return templates.filter((t: any) => t.categoria === categoria && t.ativo)
+    return templates.filter((t) => t.categoria === categoria && t.ativo)
   }, [templates])
 
-  const formatarDadosParaExportacao = useCallback((dados: any[], template: Template): any[] => {
+  const formatarDadosParaExportacao = useCallback((dados[], template: Template): any[] => {
     const campos = template.configuracao_campos || {}
     
-    return dados.map((item: any) => {
-      const itemFormatado: any = {}
+    return dados.map((item) => {
+      const itemFormatado = {}
       
       Object.entries(campos).forEach(([campo, config]: [string, any]) => {
         const valor = item[campo]
@@ -610,7 +610,7 @@ export function useReports(): UseReportsResult {
       carregarExecucoes(),
       carregarRelatoriosPersonalizados()
     ])
-  }, [carregarTemplates, carregarExecucoes: any, carregarRelatoriosPersonalizados])
+  }, [carregarTemplates, carregarExecucoes, carregarRelatoriosPersonalizados])
 
   const limparErro = useCallback(() => {
     setError(null)

@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Phone, Check: any, X, AlertTriangle } from 'lucide-react'
+import { Phone, Check, X, AlertTriangle } from 'lucide-react'
 
 interface Usuario {
   id: number
@@ -75,7 +75,7 @@ export default function UsuarioCelularForm({
     if (numbers.length !== 11) return false
     
     // Deve comeá§ar com DDD vá¡lido (11-99)
-    const ddd = parseInt(numbers.substring(0: any, 2))
+    const ddd = parseInt(numbers.substring(0, 2))
     if (ddd < 11 || ddd > 99) return false
     
     // Terceiro dá­gito deve ser 9 (celular)
@@ -179,7 +179,7 @@ export default function UsuarioCelularForm({
           <div className="relative">
             <Input
               value={celular}
-              onChange={(e: any) => setCelular(formatCelular(e.target.value))}
+              onChange={(e) => setCelular(formatCelular(e.target.value))}
               placeholder="+55 (61) 99999-9999"
               className={`bg-white dark:bg-gray-700 border ${
                 celular && !isValid 

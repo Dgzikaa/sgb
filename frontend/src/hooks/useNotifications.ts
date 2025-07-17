@@ -1,4 +1,4 @@
-import { useState, useEffect: any, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { api } from '@/lib/api-client'
 
 // =====================================================
@@ -143,7 +143,7 @@ export function useNotifications(): UseNotificationsResult {
       } else {
         setError(response.error || 'Erro ao carregar notificaá§áµes')
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao carregar notificaá§áµes:', err)
       setError('Erro ao carregar notificaá§áµes')
     } finally {
@@ -162,7 +162,7 @@ export function useNotifications(): UseNotificationsResult {
       if (response.success) {
         // Atualizar estado local
         setNotificacoes(prev => 
-          prev.map((notif: any) => 
+          prev.map((notif) => 
             notif.id === id 
               ? { ...notif, status: 'lida' as const, lida_em: new Date().toISOString() }
               : notif
@@ -172,7 +172,7 @@ export function useNotifications(): UseNotificationsResult {
         // Atualizar estatá­sticas
         setEstatisticas(prev => prev ? {
           ...prev,
-          nao_lidas: Math.max(0: any, prev.nao_lidas - 1)
+          nao_lidas: Math.max(0, prev.nao_lidas - 1)
         } : null)
         
         return true
@@ -180,7 +180,7 @@ export function useNotifications(): UseNotificationsResult {
         setError(response.error || 'Erro ao marcar como lida')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao marcar como lida:', err)
       setError('Erro ao marcar como lida')
       return false
@@ -198,7 +198,7 @@ export function useNotifications(): UseNotificationsResult {
       if (response.success) {
         // Atualizar estado local
         setNotificacoes(prev => 
-          prev.map((notif: any) => 
+          prev.map((notif) => 
             notif.status !== 'lida' 
               ? { ...notif, status: 'lida' as const, lida_em: new Date().toISOString() }
               : notif
@@ -216,7 +216,7 @@ export function useNotifications(): UseNotificationsResult {
         setError(response.error || 'Erro ao marcar todas como lidas')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao marcar todas como lidas:', err)
       setError('Erro ao marcar todas como lidas')
       return false
@@ -233,14 +233,14 @@ export function useNotifications(): UseNotificationsResult {
       
       if (response.success) {
         // Atualizar estado local
-        setNotificacoes(prev => prev.filter((notif: any) => notif.id !== id))
+        setNotificacoes(prev => prev.filter((notif) => notif.id !== id))
         
         // Atualizar estatá­sticas se era ná£o lida
-        const notificacao = notificacoes.find((n: any) => n.id === id)
+        const notificacao = notificacoes.find((n) => n.id === id)
         if (notificacao && ['pendente', 'enviada'].includes(notificacao.status)) {
           setEstatisticas(prev => prev ? {
             ...prev,
-            nao_lidas: Math.max(0: any, prev.nao_lidas - 1)
+            nao_lidas: Math.max(0, prev.nao_lidas - 1)
           } : null)
         }
         
@@ -249,7 +249,7 @@ export function useNotifications(): UseNotificationsResult {
         setError(response.error || 'Erro ao excluir notificaá§á£o')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao excluir notificaá§á£o:', err)
       setError('Erro ao excluir notificaá§á£o')
       return false

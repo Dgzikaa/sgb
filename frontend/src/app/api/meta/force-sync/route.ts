@@ -33,7 +33,7 @@ export async function POST() {
       }
     })
     
-  } catch (error: any) {
+  } catch (error) {
     console.error('ùå Erro ao for·ßar sync:', error)
     return NextResponse.json({
       success: false,

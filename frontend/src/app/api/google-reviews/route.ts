@@ -150,9 +150,9 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const { businessName, address: any, placeId, bar_id } = await request.json()
+    const { businessName, address, placeId, bar_id } = await request.json()
 
-    console.log('ðŸŒŸ Requisiá§á£o para buscar reviews:', { businessName, address: any, placeId })
+    console.log('ðŸŒŸ Requisiá§á£o para buscar reviews:', { businessName, address, placeId })
 
     const googlePlaces = new GooglePlacesAPIBackend()
 
@@ -178,13 +178,13 @@ export async function POST(request: NextRequest) {
       }
 
       // Buscar mais fotos (atá© 10) com diferentes tamanhos
-      const photoUrls = details.photos ? details.photos.slice(0: any, 10).map((photo: any) => 
+      const photoUrls = details.photos ? details.photos.slice(0, 10).map((photo) => 
         googlePlaces.getPhotoUrl(photo.photo_reference, 600)
       ) : []
 
       // Normalizar e salvar reviews na tabela avaliacoes_google
       if (details && details.reviews && Array.isArray(details.reviews)) {
-        const reviewsToInsert = details.reviews.map((review: any) => ({
+        const reviewsToInsert = details.reviews.map((review) => ({
           bar_id: bar_id || 1, // fallback para 1 se ná£o enviado
           reviewer_name: review.author_name,
           reviewer_profile_url: review.author_url,
@@ -254,13 +254,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Processar fotos (buscar mais fotos com melhor qualidade)
-    const photoUrls = details.photos ? details.photos.slice(0: any, 10).map((photo: any) => 
+    const photoUrls = details.photos ? details.photos.slice(0, 10).map((photo) => 
       googlePlaces.getPhotoUrl(photo.photo_reference, 600)
     ) : []
 
     // Normalizar e salvar reviews na tabela avaliacoes_google
     if (details && details.reviews && Array.isArray(details.reviews)) {
-      const reviewsToInsert = details.reviews.map((review: any) => ({
+      const reviewsToInsert = details.reviews.map((review) => ({
         bar_id: bar_id || 1, // fallback para 1 se ná£o enviado
         reviewer_name: review.author_name,
         reviewer_profile_url: review.author_url,

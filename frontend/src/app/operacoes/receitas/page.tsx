@@ -1,18 +1,18 @@
 'use client'
 
-import { useState, useEffect: any, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useBar } from '@/contexts/BarContext'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 import { useForceDarkMode } from '@/hooks/useForceDarkMode'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent: any, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent: any, DialogHeader, DialogTitle: any, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { toast } from '@/components/ui/toast'
 import { useGlobalConfirm } from '@/components/ui/confirm-dialog'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
@@ -187,7 +187,7 @@ export default function ReceitasPage() {
       
       if (data.success && data.data) {
         // Mapear dados da API para o formato esperado
-        const insumosFormatados = data.data.map((insumo: any) => ({
+        const insumosFormatados = data.data.map((insumo) => ({
           id: insumo.id,
           codigo: insumo.codigo,
           nome: insumo.nome,
@@ -201,8 +201,8 @@ export default function ReceitasPage() {
         setInsumos(insumosFormatados)
         
         // Debug: verificar distribuiá§á£o por tipo_local
-        const cozinhaCount = insumosFormatados.filter((i: any) => i.tipo_local === 'cozinha').length
-        const barCount = insumosFormatados.filter((i: any) => i.tipo_local === 'bar').length
+        const cozinhaCount = insumosFormatados.filter((i) => i.tipo_local === 'cozinha').length
+        const barCount = insumosFormatados.filter((i) => i.tipo_local === 'bar').length
         console.log(`œ… ${insumosFormatados.length} insumos carregados - Cozinha: ${cozinhaCount}, Bar: ${barCount}`)
       } else {
         console.error('Œ Erro na resposta da API insumos:', data)
@@ -254,11 +254,11 @@ export default function ReceitasPage() {
 
   // Funá§á£o para obter receitas onde o insumo á© chefe
   const getReceitasOndeEChefe = useCallback((insumoId: number) => {
-    return receitas.filter((receita: any) => 
+    return receitas.filter((receita) => 
       receita.insumos?.some(insumo => 
         insumo.id === insumoId && insumo.is_chefe
       )
-    ).map((receita: any) => receita.receita_nome)
+    ).map((receita) => receita.receita_nome)
   }, [receitas])
 
   // Carregar dados quando o bar for selecionado
@@ -278,42 +278,42 @@ export default function ReceitasPage() {
       
       carregarDados()
     }
-  }, [selectedBar, carregarInsumos: any, carregarReceitas])
+  }, [selectedBar, carregarInsumos, carregarReceitas])
 
   const insumosFiltrados = useMemo(() => {
     // Filtrar por tipo_local primeiro
-    const insumosPorTipo = insumos.filter((insumo: any) => 
+    const insumosPorTipo = insumos.filter((insumo) => 
       insumo.tipo_local === tipoLocalInsumos
     )
     
-    return insumosPorTipo.filter((insumo: any) =>
+    return insumosPorTipo.filter((insumo) =>
       insumo.nome.toLowerCase().includes(buscaInsumos.toLowerCase()) ||
       insumo.codigo.toLowerCase().includes(buscaInsumos.toLowerCase()) ||
       insumo.categoria.toLowerCase().includes(buscaInsumos.toLowerCase())
     )
-  }, [insumos, buscaInsumos: any, tipoLocalInsumos])
+  }, [insumos, buscaInsumos, tipoLocalInsumos])
 
   const receitasFiltradas = useMemo(() => {
     // Filtrar por tipo_local primeiro
-    const receitasPorTipo = receitas.filter((receita: any) => 
+    const receitasPorTipo = receitas.filter((receita) => 
       receita.tipo_local === tipoLocalReceitas
     )
     
-    return receitasPorTipo.filter((receita: any) =>
+    return receitasPorTipo.filter((receita) =>
       receita.receita_nome.toLowerCase().includes(buscaReceitas.toLowerCase()) ||
       receita.receita_codigo.toLowerCase().includes(buscaReceitas.toLowerCase()) ||
       receita.receita_categoria.toLowerCase().includes(buscaReceitas.toLowerCase())
     )
-  }, [receitas, buscaReceitas: any, tipoLocalReceitas])
+  }, [receitas, buscaReceitas, tipoLocalReceitas])
 
   // Otimizaá§á£o: calcular insumos chefes uma vez
   const insumosChefes = useMemo(() => {
-    return insumos.filter((insumo: any) => isInsumoChefe(insumo.id))
+    return insumos.filter((insumo) => isInsumoChefe(insumo.id))
   }, [insumos, isInsumoChefe])
 
   // Filtrar insumos para adicionar na receita (baseado na busca)
   const insumosParaReceita = useMemo(() => {
-    return insumos.filter((insumo: any) =>
+    return insumos.filter((insumo) =>
       insumo.nome.toLowerCase().includes(buscaInsumoReceita.toLowerCase()) ||
       insumo.codigo.toLowerCase().includes(buscaInsumoReceita.toLowerCase())
     )
@@ -325,17 +325,17 @@ export default function ReceitasPage() {
     
     // Buscar cá³digos que seguem o padrá£o i0000
     const codigosNumericos = insumos
-      .map((insumo: any) => insumo.codigo)
-      .filter((codigo: any) => /^i\d+$/.test(codigo))
-      .map((codigo: any) => parseInt(codigo.substring(1)))
-      .filter((numero: any) => !isNaN(numero))
+      .map((insumo) => insumo.codigo)
+      .filter((codigo) => /^i\d+$/.test(codigo))
+      .map((codigo) => parseInt(codigo.substring(1)))
+      .filter((numero) => !isNaN(numero))
     
     if (codigosNumericos.length === 0) return 'i0001'
     
     const maiorNumero = Math.max(...codigosNumericos)
     const proximoNumero = maiorNumero + 1
     
-    return `i${proximoNumero.toString().padStart(4: any, '0')}`
+    return `i${proximoNumero.toString().padStart(4, '0')}`
   }, [insumos])
 
   // Funá§á£o para gerar prá³ximo cá³digo de receita baseado no tipo local
@@ -346,18 +346,18 @@ export default function ReceitasPage() {
     
     // Buscar cá³digos que seguem o padrá£o pc000 ou pd000
     const codigosNumericos = receitas
-      .filter((receita: any) => receita.tipo_local === tipoLocal)
-      .map((receita: any) => receita.receita_codigo)
-      .filter((codigo: any) => new RegExp(`^${prefixo}\\d+$`).test(codigo))
-      .map((codigo: any) => parseInt(codigo.substring(2)))
-      .filter((numero: any) => !isNaN(numero))
+      .filter((receita) => receita.tipo_local === tipoLocal)
+      .map((receita) => receita.receita_codigo)
+      .filter((codigo) => new RegExp(`^${prefixo}\\d+$`).test(codigo))
+      .map((codigo) => parseInt(codigo.substring(2)))
+      .filter((numero) => !isNaN(numero))
     
     if (codigosNumericos.length === 0) return `${prefixo}001`
     
     const maiorNumero = Math.max(...codigosNumericos)
     const proximoNumero = maiorNumero + 1
     
-    return `${prefixo}${proximoNumero.toString().padStart(3: any, '0')}`
+    return `${prefixo}${proximoNumero.toString().padStart(3, '0')}`
   }, [receitas])
 
   // Atualizar cá³digo do insumo quando os dados carregarem
@@ -380,7 +380,7 @@ export default function ReceitasPage() {
         receita_codigo: novoCodigo
       }))
     }
-  }, [novaReceita.tipo_local, modalCriarReceita: any, gerarProximoCodigoReceita])
+  }, [novaReceita.tipo_local, modalCriarReceita, gerarProximoCodigoReceita])
 
 
 
@@ -424,7 +424,7 @@ export default function ReceitasPage() {
       }
 
       // Atualizar na lista local
-      setInsumos(prev => prev.map((insumo: any) => 
+      setInsumos(prev => prev.map((insumo) => 
         insumo.id === insumoEditando.id 
           ? { ...insumoEditando }
           : insumo
@@ -519,7 +519,7 @@ export default function ReceitasPage() {
       setIsLoading(true)
       
       // Mapear insumos para o formato correto da API
-      const insumosParaAPI = (receitaEditando.insumos || []).map((insumo: any) => ({
+      const insumosParaAPI = (receitaEditando.insumos || []).map((insumo) => ({
         id: insumo.id,
         quantidade_necessaria: insumo.quantidade_necessaria || 0,
         is_chefe: insumo.is_chefe || false
@@ -584,7 +584,7 @@ export default function ReceitasPage() {
         try {
           // TODO: Implementar API de exclusá£o
           // Por enquanto, remover localmente
-          setInsumos(prev => prev.filter((i: any) => i.id !== insumo.id))
+          setInsumos(prev => prev.filter((i) => i.id !== insumo.id))
           toast.success('Sucesso!', 'Insumo excluá­do com sucesso')
         } catch (error) {
           toast.error('Erro', 'Falha ao excluir insumo')
@@ -657,23 +657,23 @@ export default function ReceitasPage() {
   }
 
   const removerInsumoReceita = (insumoId: number) => {
-    setInsumosReceita(prev => prev.filter((i: any) => i.insumo_id !== insumoId))
+    setInsumosReceita(prev => prev.filter((i) => i.insumo_id !== insumoId))
   }
 
   const definirInsumoChefe = (insumoId: number) => {
     setInsumosReceita(prev => {
-      const insumoClicado = prev.find((i: any) => i.insumo_id === insumoId)
+      const insumoClicado = prev.find((i) => i.insumo_id === insumoId)
       
       if (insumoClicado?.is_chefe) {
         // Se já¡ á© chefe, desmarcar
-        return prev.map((i: any) => 
+        return prev.map((i) => 
           i.insumo_id === insumoId 
             ? { ...i, is_chefe: false }
             : i
         )
       } else {
         // Se ná£o á© chefe, marcar como chefe e desmarcar todos os outros
-        return prev.map((i: any) => ({
+        return prev.map((i) => ({
           ...i,
           is_chefe: i.insumo_id === insumoId
         }))
@@ -763,7 +763,7 @@ export default function ReceitasPage() {
       async () => {
         try {
           // TODO: Implementar API de exclusá£o de receitas
-          setReceitas(prev => prev.filter((r: any) => r.receita_codigo !== receita.receita_codigo))
+          setReceitas(prev => prev.filter((r) => r.receita_codigo !== receita.receita_codigo))
           toast.success('Sucesso!', 'Receita excluá­da com sucesso')
         } catch (error) {
           toast.error('Erro', 'Falha ao excluir receita')
@@ -791,14 +791,14 @@ export default function ReceitasPage() {
 
   // Funá§á£o para obter nome do insumo por ID
   const obterNomeInsumo = (insumoId: number) => {
-    const insumo = insumos.find((i: any) => i.id === insumoId)
+    const insumo = insumos.find((i) => i.id === insumoId)
     return insumo ? insumo.nome : `Insumo #${insumoId}`
   }
 
   // Funá§á£o para obter insumo chefe de uma receita
   const obterInsumoChefe = (receita: Receita) => {
     if (!receita.insumos) return null
-    return receita.insumos.find((i: any) => i.is_chefe)
+    return receita.insumos.find((i) => i.is_chefe)
   }
 
   // Funá§á£o para sincronizar receitas/insumos do Google Sheets
@@ -913,14 +913,14 @@ export default function ReceitasPage() {
                     onClick={() => setTipoLocalInsumos('cozinha')}
                     className="flex items-center justify-center gap-1 sm:gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
-                    ðŸ‘¨€ðŸ³ Cozinha ({insumos.filter((i: any) => i.tipo_local === 'cozinha').length})
+                    ðŸ‘¨€ðŸ³ Cozinha ({insumos.filter((i) => i.tipo_local === 'cozinha').length})
                   </Button>
                   <Button
                     variant={tipoLocalInsumos === 'bar' ? 'default' : 'outline'}
                     onClick={() => setTipoLocalInsumos('bar')}
                     className="flex items-center justify-center gap-1 sm:gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
-                    ðŸº Bar ({insumos.filter((i: any) => i.tipo_local === 'bar').length})
+                    ðŸº Bar ({insumos.filter((i) => i.tipo_local === 'bar').length})
                   </Button>
                 </div>
               </div>
@@ -956,7 +956,7 @@ export default function ReceitasPage() {
                   <Input
                     type="text"
                     value={buscaInsumos}
-                    onChange={(e: any) => setBuscaInsumos(e.target.value)}
+                    onChange={(e) => setBuscaInsumos(e.target.value)}
                     placeholder="Buscar insumo..."
                     className="pl-10 sm:pl-12 h-12 text-base bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
@@ -975,7 +975,7 @@ export default function ReceitasPage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                    {insumosFiltrados.map((insumo: any) => {
+                    {insumosFiltrados.map((insumo) => {
                       const ehChefe = isInsumoChefe(insumo.id)
                       const receitasChefe = getReceitasOndeEChefe(insumo.id)
                       
@@ -1056,7 +1056,7 @@ export default function ReceitasPage() {
                                   Insumo chefe em:
                                 </span>
                                 <div className="mt-1 flex flex-wrap gap-1">
-                                  {receitasChefe.slice(0: any, 2).map((nomeReceita: any, index: any) => (
+                                  {receitasChefe.slice(0, 2).map((nomeReceita, index) => (
                                     <Badge 
                                       key={index} 
                                       variant="secondary" 
@@ -1106,14 +1106,14 @@ export default function ReceitasPage() {
                     onClick={() => setTipoLocalReceitas('cozinha')}
                     className="flex items-center justify-center gap-1 sm:gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
-                    ðŸ‘¨€ðŸ³ Cozinha ({receitas.filter((r: any) => r.tipo_local === 'cozinha').length})
+                    ðŸ‘¨€ðŸ³ Cozinha ({receitas.filter((r) => r.tipo_local === 'cozinha').length})
                   </Button>
                   <Button
                     variant={tipoLocalReceitas === 'bar' ? 'default' : 'outline'}
                     onClick={() => setTipoLocalReceitas('bar')}
                     className="flex items-center justify-center gap-1 sm:gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
-                    ðŸº Bar ({receitas.filter((r: any) => r.tipo_local === 'bar').length})
+                    ðŸº Bar ({receitas.filter((r) => r.tipo_local === 'bar').length})
                   </Button>
                 </div>
               </div>
@@ -1141,7 +1141,7 @@ export default function ReceitasPage() {
                   <Input
                     type="text"
                     value={buscaReceitas}
-                    onChange={(e: any) => setBuscaReceitas(e.target.value)}
+                    onChange={(e) => setBuscaReceitas(e.target.value)}
                     placeholder="Buscar receita..."
                     className="pl-10 sm:pl-12 h-12 text-base bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
@@ -1160,7 +1160,7 @@ export default function ReceitasPage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                    {receitasFiltradas.map((receita: any) => {
+                    {receitasFiltradas.map((receita) => {
                       const insumoChefe = obterInsumoChefe(receita)
                       
                       return (
@@ -1293,7 +1293,7 @@ export default function ReceitasPage() {
                   <div className="flex gap-2">
                     <Input
                       value={novaReceita.receita_codigo}
-                      onChange={(e: any) => setNovaReceita(prev => ({ ...prev, receita_codigo: e.target.value }))}
+                      onChange={(e) => setNovaReceita(prev => ({ ...prev, receita_codigo: e.target.value }))}
                       placeholder="Ex: r0001"
                       disabled={true}
                       className="bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-300 cursor-not-allowed"
@@ -1318,7 +1318,7 @@ export default function ReceitasPage() {
                   <Label className="text-gray-700 dark:text-gray-300">Nome <span className="text-red-500">*</span></Label>
                   <Input
                     value={novaReceita.receita_nome}
-                    onChange={(e: any) => setNovaReceita(prev => ({ ...prev, receita_nome: e.target.value }))}
+                    onChange={(e) => setNovaReceita(prev => ({ ...prev, receita_nome: e.target.value }))}
                     placeholder="Ex: Frango á  Passarinho"
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
@@ -1328,7 +1328,7 @@ export default function ReceitasPage() {
                   <Label className="text-gray-700 dark:text-gray-300">Categoria</Label>
                   <Input
                     value={novaReceita.receita_categoria}
-                    onChange={(e: any) => setNovaReceita(prev => ({ ...prev, receita_categoria: e.target.value }))}
+                    onChange={(e) => setNovaReceita(prev => ({ ...prev, receita_categoria: e.target.value }))}
                     placeholder="Ex: Petiscos"
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
@@ -1355,7 +1355,7 @@ export default function ReceitasPage() {
                   <Input
                     type="number"
                     value={novaReceita.rendimento_esperado}
-                    onChange={(e: any) => setNovaReceita(prev => ({ ...prev, rendimento_esperado: parseInt(e.target.value) || 0 }))}
+                    onChange={(e) => setNovaReceita(prev => ({ ...prev, rendimento_esperado: parseInt(e.target.value) || 0 }))}
                     placeholder="1000"
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
@@ -1376,7 +1376,7 @@ export default function ReceitasPage() {
                       <Input
                         type="text"
                         value={buscaInsumoReceita}
-                        onChange={(e: any) => {
+                        onChange={(e) => {
                           setBuscaInsumoReceita(e.target.value)
                           setInsumoSelecionado('') // Limpar seleá§á£o ao digitar
                         }}
@@ -1389,7 +1389,7 @@ export default function ReceitasPage() {
                     {/* Dropdown de resultados */}
                     {buscaInsumoReceita && insumosParaReceita.length > 0 && (
                       <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                        {insumosParaReceita.slice(0: any, 10).map((insumo: any) => (
+                        {insumosParaReceita.slice(0, 10).map((insumo) => (
                           <button
                             key={insumo.id}
                             type="button"
@@ -1423,7 +1423,7 @@ export default function ReceitasPage() {
                       inputMode="decimal"
                       step="0.1"
                       value={quantidadeInsumo}
-                      onChange={(e: any) => setQuantidadeInsumo(e.target.value)}
+                      onChange={(e) => setQuantidadeInsumo(e.target.value)}
                       placeholder="100"
                       className="bg-white dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-900 dark:text-white h-12 text-base"
                     />
@@ -1444,8 +1444,8 @@ export default function ReceitasPage() {
                 {insumosReceita.length > 0 && (
                   <div className="space-y-2">
                     <Label className="text-gray-700 dark:text-gray-300">Insumos Adicionados:</Label>
-                    {insumosReceita.map((insumoReceita: any) => {
-                      const insumo = insumos.find((i: any) => i.id === insumoReceita.insumo_id)
+                    {insumosReceita.map((insumoReceita) => {
+                      const insumo = insumos.find((i) => i.id === insumoReceita.insumo_id)
                       if (!insumo) return null
 
                       return (
@@ -1579,7 +1579,7 @@ export default function ReceitasPage() {
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Insumos</h3>
                     </div>
                     <div className="space-y-2">
-                      {receitaEditando.insumos.map((insumo: any) => (
+                      {receitaEditando.insumos.map((insumo) => (
                         <div 
                           key={insumo.id}
                           className={`p-3 rounded-lg border ${
@@ -1663,7 +1663,7 @@ export default function ReceitasPage() {
                     <Input
                       id="edit-codigo"
                       value={insumoEditando.codigo}
-                      onChange={(e: any) => setInsumoEditando({...insumoEditando, codigo: e.target.value})}
+                      onChange={(e) => setInsumoEditando({...insumoEditando, codigo: e.target.value})}
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                       placeholder="Ex: i0001"
                     />
@@ -1676,7 +1676,7 @@ export default function ReceitasPage() {
                     <Input
                       id="edit-nome"
                       value={insumoEditando.nome}
-                      onChange={(e: any) => setInsumoEditando({...insumoEditando, nome: e.target.value})}
+                      onChange={(e) => setInsumoEditando({...insumoEditando, nome: e.target.value})}
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                       placeholder="Nome do insumo"
                       required
@@ -1689,7 +1689,7 @@ export default function ReceitasPage() {
                     </Label>
                     <Select 
                       value={insumoEditando.categoria} 
-                      onValueChange={(value: any) => setInsumoEditando({...insumoEditando, categoria: value})}
+                      onValueChange={(value) => setInsumoEditando({...insumoEditando, categoria: value})}
                     >
                       <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                         <SelectValue placeholder="Selecione a categoria" />
@@ -1711,7 +1711,7 @@ export default function ReceitasPage() {
                     </Label>
                     <Select 
                       value={insumoEditando.tipo_local} 
-                      onValueChange={(value: any) => setInsumoEditando({...insumoEditando, tipo_local: value as 'bar' | 'cozinha'})}
+                      onValueChange={(value) => setInsumoEditando({...insumoEditando, tipo_local: value as 'bar' | 'cozinha'})}
                     >
                       <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                         <SelectValue placeholder="Selecione o tipo local" />
@@ -1729,7 +1729,7 @@ export default function ReceitasPage() {
                     </Label>
                     <Select 
                       value={insumoEditando.unidade_medida} 
-                      onValueChange={(value: any) => setInsumoEditando({...insumoEditando, unidade_medida: value})}
+                      onValueChange={(value) => setInsumoEditando({...insumoEditando, unidade_medida: value})}
                     >
                       <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                         <SelectValue placeholder="Selecione a unidade" />
@@ -1756,7 +1756,7 @@ export default function ReceitasPage() {
                       step="0.01"
                       min="0"
                       value={insumoEditando.custo_unitario || ''}
-                      onChange={(e: any) => setInsumoEditando({
+                      onChange={(e) => setInsumoEditando({
                         ...insumoEditando, 
                         custo_unitario: e.target.value ? parseFloat(e.target.value) : undefined
                       })}
@@ -1773,7 +1773,7 @@ export default function ReceitasPage() {
                   <Textarea
                     id="edit-observacoes"
                     value={insumoEditando.observacoes || ''}
-                    onChange={(e: any) => setInsumoEditando({...insumoEditando, observacoes: e.target.value})}
+                    onChange={(e) => setInsumoEditando({...insumoEditando, observacoes: e.target.value})}
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                     placeholder="Observaá§áµes adicionais sobre o insumo..."
                     rows={3}
@@ -1829,7 +1829,7 @@ export default function ReceitasPage() {
                     <Input
                       id="edit-receita-codigo"
                       value={receitaEditando.receita_codigo}
-                      onChange={(e: any) => setReceitaEditando({...receitaEditando, receita_codigo: e.target.value})}
+                      onChange={(e) => setReceitaEditando({...receitaEditando, receita_codigo: e.target.value})}
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                       placeholder="Ex: r0001"
                     />
@@ -1842,7 +1842,7 @@ export default function ReceitasPage() {
                     <Input
                       id="edit-receita-nome"
                       value={receitaEditando.receita_nome}
-                      onChange={(e: any) => setReceitaEditando({...receitaEditando, receita_nome: e.target.value})}
+                      onChange={(e) => setReceitaEditando({...receitaEditando, receita_nome: e.target.value})}
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                       placeholder="Nome da receita"
                       required
@@ -1856,9 +1856,9 @@ export default function ReceitasPage() {
                     <Input
                       id="edit-receita-categoria"
                       value={receitaEditando.receita_categoria}
-                      onChange={(e: any) => setReceitaEditando({...receitaEditando, receita_categoria: e.target.value})}
+                      onChange={(e) => setReceitaEditando({...receitaEditando, receita_categoria: e.target.value})}
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                      placeholder="Ex: Pratos principais, Bebidas: any, Sobremesas"
+                      placeholder="Ex: Pratos principais, Bebidas, Sobremesas"
                     />
                   </div>
 
@@ -1889,7 +1889,7 @@ export default function ReceitasPage() {
                       type="number"
                       min="0"
                       value={receitaEditando.rendimento_esperado || ''}
-                      onChange={(e: any) => setReceitaEditando({
+                      onChange={(e) => setReceitaEditando({
                         ...receitaEditando, 
                         rendimento_esperado: e.target.value ? parseInt(e.target.value) : undefined
                       })}
@@ -1904,7 +1904,7 @@ export default function ReceitasPage() {
                     </Label>
                     <Select 
                       value={receitaEditando.ativo !== false ? 'true' : 'false'} 
-                      onValueChange={(value: any) => setReceitaEditando({...receitaEditando, ativo: value === 'true'})}
+                      onValueChange={(value) => setReceitaEditando({...receitaEditando, ativo: value === 'true'})}
                     >
                       <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                         <SelectValue />
@@ -1924,7 +1924,7 @@ export default function ReceitasPage() {
                   <Textarea
                     id="edit-observacoes-receita"
                     value={receitaEditando.observacoes || ''}
-                    onChange={(e: any) => setReceitaEditando({...receitaEditando, observacoes: e.target.value})}
+                    onChange={(e) => setReceitaEditando({...receitaEditando, observacoes: e.target.value})}
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                     placeholder="Observaá§áµes adicionais sobre a receita..."
                     rows={3}
@@ -1946,7 +1946,7 @@ export default function ReceitasPage() {
                     
                     <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 max-h-80 overflow-y-auto">
                       <div className="space-y-3">
-                        {receitaEditando.insumos.map((insumo: any, index: any) => (
+                        {receitaEditando.insumos.map((insumo, index) => (
                           <div 
                             key={insumo.id}
                             className={`p-4 rounded-lg border-2 transition-all ${
@@ -1981,7 +1981,7 @@ export default function ReceitasPage() {
                                       step="0.1"
                                       min="0"
                                       value={insumo.quantidade_necessaria || ''}
-                                      onChange={(e: any) => {
+                                      onChange={(e) => {
                                         const newInsumos = [...receitaEditando.insumos!]
                                         newInsumos[index] = {
                                           ...newInsumos[index],
@@ -2001,11 +2001,11 @@ export default function ReceitasPage() {
                                   <div className="flex items-center space-x-2 pt-4">
                                     <Checkbox
                                       checked={insumo.is_chefe || false}
-                                      onCheckedChange={(checked: any) => {
+                                      onCheckedChange={(checked) => {
                                         const newInsumos = [...receitaEditando.insumos!]
                                         // Se marcando como chefe, desmarcar todos os outros
                                         if (checked) {
-                                          newInsumos.forEach((item: any, i: any) => {
+                                          newInsumos.forEach((item, i) => {
                                             item.is_chefe = i === index
                                           })
                                         } else {
@@ -2031,7 +2031,7 @@ export default function ReceitasPage() {
                               {/* Botá£o remover */}
                               <Button
                                 onClick={() => {
-                                  const newInsumos = receitaEditando.insumos!.filter((_: any, i: any) => i !== index)
+                                  const newInsumos = receitaEditando.insumos!.filter((_, i) => i !== index)
                                   setReceitaEditando({
                                     ...receitaEditando,
                                     insumos: newInsumos
@@ -2125,7 +2125,7 @@ export default function ReceitasPage() {
                   <div className="flex gap-2">
                     <Input
                       value={novoInsumo.codigo}
-                      onChange={(e: any) => setNovoInsumo(prev => ({ ...prev, codigo: e.target.value }))}
+                      onChange={(e) => setNovoInsumo(prev => ({ ...prev, codigo: e.target.value }))}
                       placeholder="Ex: i0001"
                       disabled={true}
                       className="bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-300 cursor-not-allowed"
@@ -2146,7 +2146,7 @@ export default function ReceitasPage() {
                   <Label className="text-gray-700 dark:text-gray-300">Nome <span className="text-red-500">*</span></Label>
                   <Input
                     value={novoInsumo.nome}
-                    onChange={(e: any) => setNovoInsumo(prev => ({ ...prev, nome: e.target.value }))}
+                    onChange={(e) => setNovoInsumo(prev => ({ ...prev, nome: e.target.value }))}
                     placeholder="Ex: Frango á  passarinho"
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
@@ -2156,7 +2156,7 @@ export default function ReceitasPage() {
                   <Label className="text-gray-700 dark:text-gray-300">Categoria</Label>
                   <Select 
                     value={novoInsumo.categoria} 
-                    onValueChange={(value: any) => setNovoInsumo(prev => ({ ...prev, categoria: value }))}
+                    onValueChange={(value) => setNovoInsumo(prev => ({ ...prev, categoria: value }))}
                   >
                     <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                       <SelectValue />
@@ -2172,7 +2172,7 @@ export default function ReceitasPage() {
                   <Label className="text-gray-700 dark:text-gray-300">Tipo Local</Label>
                   <Select 
                     value={novoInsumo.tipo_local} 
-                    onValueChange={(value: any) => setNovoInsumo(prev => ({ ...prev, tipo_local: value as 'bar' | 'cozinha' }))}
+                    onValueChange={(value) => setNovoInsumo(prev => ({ ...prev, tipo_local: value as 'bar' | 'cozinha' }))}
                   >
                     <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                       <SelectValue />
@@ -2188,7 +2188,7 @@ export default function ReceitasPage() {
                   <Label className="text-gray-700 dark:text-gray-300">Unidade de Medida</Label>
                   <Select 
                     value={novoInsumo.unidade_medida} 
-                    onValueChange={(value: any) => setNovoInsumo(prev => ({ ...prev, unidade_medida: value }))}
+                    onValueChange={(value) => setNovoInsumo(prev => ({ ...prev, unidade_medida: value }))}
                   >
                     <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                       <SelectValue />
@@ -2211,7 +2211,7 @@ export default function ReceitasPage() {
                     step="0.01"
                     min="0"
                     value={novoInsumo.custo_unitario || ''}
-                    onChange={(e: any) => setNovoInsumo(prev => ({ ...prev, custo_unitario: parseFloat(e.target.value) || 0 }))}
+                    onChange={(e) => setNovoInsumo(prev => ({ ...prev, custo_unitario: parseFloat(e.target.value) || 0 }))}
                     placeholder="0,00"
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
@@ -2222,7 +2222,7 @@ export default function ReceitasPage() {
                 <Label className="text-gray-700 dark:text-gray-300">Observaá§áµes</Label>
                 <Textarea
                   value={novoInsumo.observacoes}
-                  onChange={(e: any) => setNovoInsumo(prev => ({ ...prev, observacoes: e.target.value }))}
+                  onChange={(e) => setNovoInsumo(prev => ({ ...prev, observacoes: e.target.value }))}
                   placeholder="Observaá§áµes adicionais..."
                   className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                 />

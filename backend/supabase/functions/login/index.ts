@@ -1,7 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-// Usar as variÃ¡veis de ambiente corretas do Supabase
+// Usar as variá¡veis de ambiente corretas do Supabase
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://uqtgsvujwcbymjmvkjhy.supabase.co'
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
@@ -40,7 +40,7 @@ Deno.serve(async (req: Request) => {
 
     if (!email || !password) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Email e password sÃ£o obrigatÃ³rios' }),
+        JSON.stringify({ success: false, error: 'Email e password sá£o obrigatá³rios' }),
         { 
           status: 400, 
           headers: { 
@@ -51,7 +51,7 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // Buscar usuÃ¡rio na tabela usuarios_bar
+    // Buscar usuá¡rio na tabela usuarios_bar
     const { data: usuarios, error } = await supabase
       .from('usuarios_bar')
       .select('*')
@@ -59,7 +59,7 @@ Deno.serve(async (req: Request) => {
       .eq('ativo', true)
 
     if (error) {
-      console.error('Erro ao buscar usuÃ¡rio:', error)
+      console.error('Erro ao buscar usuá¡rio:', error)
       return new Response(
         JSON.stringify({ success: false, error: 'Erro interno do servidor' }),
         { 
@@ -74,7 +74,7 @@ Deno.serve(async (req: Request) => {
 
     if (!usuarios || usuarios.length === 0) {
       return new Response(
-        JSON.stringify({ success: false, error: 'UsuÃ¡rio nÃ£o encontrado ou inativo' }),
+        JSON.stringify({ success: false, error: 'Usuá¡rio ná£o encontrado ou inativo' }),
         { 
           status: 401, 
           headers: { 
@@ -85,13 +85,13 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // REMOVIDO: Sistema de senhas hardcoded foi eliminado por seguranÃ§a
-    // A autenticaÃ§Ã£o deve ser feita exclusivamente via Supabase Auth
+    // REMOVIDO: Sistema de senhas hardcoded foi eliminado por seguraná§a
+    // A autenticaá§á£o deve ser feita exclusivamente via Supabase Auth
     
-    // Se chegou atÃ© aqui, significa que o usuÃ¡rio existe na tabela
-    // mas devemos usar apenas Supabase Auth para validaÃ§Ã£o de senha
+    // Se chegou atá© aqui, significa que o usuá¡rio existe na tabela
+    // mas devemos usar apenas Supabase Auth para validaá§á£o de senha
     return new Response(
-      JSON.stringify({ success: false, error: 'Este endpoint estÃ¡ obsoleto. Use /api/auth/login no frontend.' }),
+      JSON.stringify({ success: false, error: 'Este endpoint está¡ obsoleto. Use /api/auth/login no frontend.' }),
       { 
         status: 410, // Gone - endpoint descontinuado
         headers: { 
@@ -101,8 +101,8 @@ Deno.serve(async (req: Request) => {
       }
     )
 
-    // Esta edge function estÃ¡ obsoleta - toda autenticaÃ§Ã£o deve ser feita via frontend
-    // Retornar sempre erro para forÃ§ar migraÃ§Ã£o para sistema seguro
+    // Esta edge function está¡ obsoleta - toda autenticaá§á£o deve ser feita via frontend
+    // Retornar sempre erro para forá§ar migraá§á£o para sistema seguro
 
   } catch (error) {
     console.error('Erro na Edge Function de login:', error)

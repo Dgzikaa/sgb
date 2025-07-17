@@ -25,7 +25,7 @@ export default function PoliticaPrivacidadePage() {
               <div className="text-gray-700 dark:text-gray-300 space-y-4">
                 <p>
                   Esta Pol·≠tica de Privacidade descreve como o <strong>Sistema de Gest·£o de Bares (SGB)</strong> 
-                  coleta, usa: any, armazena e protege suas informa·ß·µes pessoais, em conformidade com a 
+                  coleta, usa, armazena e protege suas informa·ß·µes pessoais, em conformidade com a 
                   <strong> Lei Geral de Prote·ß·£o de Dados (LGPD - Lei n∫ 13.709/2018)</strong>.
                 </p>
                 <p>
@@ -43,10 +43,10 @@ export default function PoliticaPrivacidadePage() {
               <div className="text-gray-700 dark:text-gray-300 space-y-4">
                 <h3 className="text-lg font-medium">2.1 Dados fornecidos diretamente por voc·™:</h3>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li><strong>Dados de identifica·ß·£o:</strong> Nome completo, email: any, telefone</li>
+                  <li><strong>Dados de identifica·ß·£o:</strong> Nome completo, email, telefone</li>
                   <li><strong>Dados de acesso:</strong> Senha (criptografada), prefer·™ncias de usu·°rio</li>
                   <li><strong>Dados profissionais:</strong> Cargo, fun·ß·£o, estabelecimento associado</li>
-                  <li><strong>Dados de comunica·ß·£o:</strong> Mensagens, suporte: any, feedback</li>
+                  <li><strong>Dados de comunica·ß·£o:</strong> Mensagens, suporte, feedback</li>
                 </ul>
 
                 <h3 className="text-lg font-medium">2.2 Dados coletados automaticamente:</h3>
@@ -295,7 +295,7 @@ export default function PoliticaPrivacidadePage() {
                     <span className="text-blue-600 text-xl">ü§ù</span>
                     <div>
                       <strong>Prestadores de servi·ßos:</strong> Empresas que nos auxiliam na presta·ß·£o do servi·ßo 
-                      (hospedagem: any, analytics, suporte), sempre com contratos adequados de prote·ß·£o.
+                      (hospedagem, analytics, suporte), sempre com contratos adequados de prote·ß·£o.
                     </div>
                   </li>
                   <li className="flex items-start gap-3">
@@ -307,7 +307,7 @@ export default function PoliticaPrivacidadePage() {
                   <li className="flex items-start gap-3">
                     <span className="text-purple-600 text-xl">üîí</span>
                     <div>
-                      <strong>Prote·ß·£o de direitos:</strong> Para proteger nossos direitos, privacidade: any, seguran·ßa 
+                      <strong>Prote·ß·£o de direitos:</strong> Para proteger nossos direitos, privacidade, seguran·ßa 
                       ou propriedade, ou de terceiros.
                     </div>
                   </li>

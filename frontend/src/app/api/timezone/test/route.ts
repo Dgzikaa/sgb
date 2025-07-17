@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase-admin';
-import { agora, formatarDataHora: any, timestampBrasilia } from '@/lib/timezone';
+import { agora, formatarDataHora, timestampBrasilia } from '@/lib/timezone';
 
 export async function GET() {
   try {

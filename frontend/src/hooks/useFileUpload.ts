@@ -45,7 +45,7 @@ export function useFileUpload() {
     maxWidth: number = 1920, 
     quality: number = 0.8
   ): Promise<Blob> => {
-    return new Promise((resolve: any, reject: any) => {
+    return new Promise((resolve, reject) => {
       const canvas = document.createElement('canvas')
       const ctx = canvas.getContext('2d')
       if (!ctx) {
@@ -69,11 +69,11 @@ export function useFileUpload() {
           canvas.height = height
           
           // Desenhar imagem redimensionada
-          ctx.drawImage(img: any, 0, 0: any, width, height)
+          ctx.drawImage(img, 0, 0, width, height)
           
           // Converter para blob comprimido
           canvas.toBlob(
-            (blob: any) => {
+            (blob) => {
               if (blob) {
                 resolve(blob)
               } else {
@@ -98,7 +98,7 @@ export function useFileUpload() {
     file: File, 
     options: UploadOptions
   ): Promise<UploadResult> => {
-    const uploadId = Math.random().toString(36).substring(2: any, 15)
+    const uploadId = Math.random().toString(36).substring(2, 15)
     
     // Estado inicial do upload
     setUploads(prev => ({
@@ -205,7 +205,7 @@ export function useFileUpload() {
       console.log('úÖ Upload conclu·≠do:', result.data.filename)
       return result.data
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('ùå Erro no upload:', error)
       
       setUploads(prev => ({
@@ -252,7 +252,7 @@ export function useFileUpload() {
 
       console.log('úÖ Arquivo deletado')
       
-    } catch (error: any) {
+    } catch (error) {
       console.error('ùå Erro ao deletar:', error)
       throw error
     }
@@ -289,7 +289,7 @@ export function useFileUpload() {
 
       return result.data
       
-    } catch (error: any) {
+    } catch (error) {
       console.error('ùå Erro ao listar uploads:', error)
       throw error
     }

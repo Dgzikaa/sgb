@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { usePageTitle } from '@/contexts/PageTitleContext';
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 // import { toast } from '@/hooks/use-toast';
-import { Tabs, TabsContent: any, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   CalendarDays, 
   TrendingUp, 
@@ -67,7 +67,7 @@ export default function CompetenciaPage() {
   const [filtroMes, setFiltroMes] = useState<string>('');
 
   const barId = 1; // TODO: Pegar do contexto
-  const anosDisponiveis = Array.from(new Set(competencias.map((c: any) => c.ano))).sort((a: any, b: any) => b - a);
+  const anosDisponiveis = Array.from(new Set(competencias.map((c) => c.ano))).sort((a, b) => b - a);
   const mesesDisponiveis = ['Janeiro', 'Fevereiro', 'Mará§o', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
   const carregarCompetencias = async () => {
@@ -186,17 +186,17 @@ export default function CompetenciaPage() {
     carregarCompetencias();
   }, [filtroAno, filtroMes]);
 
-  const competenciaAtual = competencias.find((c: any) => 
+  const competenciaAtual = competencias.find((c) => 
     c.ano === new Date().getFullYear() && c.mes === new Date().getMonth() + 1
   );
 
-  const melhorMes = competencias.reduce((best: any, current: any) => 
+  const melhorMes = competencias.reduce((best, current) => 
     !best || current.faturamento_total_mes > best.faturamento_total_mes ? current : best
   , null as CompetenciaMensal | null);
 
   const totalAnual = competencias
-    .filter((c: any) => c.ano === new Date().getFullYear())
-    .reduce((sum: any, c: any) => sum + c.faturamento_total_mes, 0);
+    .filter((c) => c.ano === new Date().getFullYear())
+    .reduce((sum, c) => sum + c.faturamento_total_mes, 0);
 
   return (
     <div className="space-y-6">
@@ -242,7 +242,7 @@ export default function CompetenciaPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">Todos os anos</SelectItem>
-                  {anosDisponiveis.map((ano: any) => (
+                  {anosDisponiveis.map((ano) => (
                     <SelectItem key={ano} value={ano.toString()}>
                       {ano}
                     </SelectItem>
@@ -258,7 +258,7 @@ export default function CompetenciaPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">Todos os meses</SelectItem>
-                  {mesesDisponiveis.map((mes: any, index: any) => (
+                  {mesesDisponiveis.map((mes, index) => (
                     <SelectItem key={index + 1} value={(index + 1).toString()}>
                       {mes}
                     </SelectItem>
@@ -280,7 +280,7 @@ export default function CompetenciaPage() {
           <CardContent>
             <div className="text-2xl font-bold">{formatarMoeda(totalAnual)}</div>
             <p className="text-xs text-muted-foreground">
-              {competencias.filter((c: any) => c.ano === new Date().getFullYear()).length} meses com dados
+              {competencias.filter((c) => c.ano === new Date().getFullYear()).length} meses com dados
             </p>
           </CardContent>
         </Card>
@@ -322,7 +322,7 @@ export default function CompetenciaPage() {
         
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(6)].map((_: any, i: any) => (
+            {[...Array(6)].map((_, i) => (
               <Card key={i} className="animate-pulse">
                 <CardHeader>
                   <div className="h-4 bg-gray-200 rounded w-3/4"></div>
@@ -338,7 +338,7 @@ export default function CompetenciaPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {competencias.map((competencia: any) => (
+            {competencias.map((competencia) => (
               <Card key={competencia.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">

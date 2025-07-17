@@ -1,13 +1,13 @@
 'use client'
 
 import * as React from 'react'
-import { Dialog, DialogContent: any, DialogHeader, DialogTitle: any, DialogFooter } from './dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './dialog'
 import { Button } from './button'
 import { Input } from './input'
 import { Label } from './label'
 import { Textarea } from './textarea'
-import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from './select'
-import { X, Save: any, AlertCircle, Settings } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select'
+import { X, Save, AlertCircle, Settings } from 'lucide-react'
 
 interface ModernModalProps {
   open: boolean
@@ -137,7 +137,7 @@ interface ChecklistModalProps {
     tempo_estimado: number
     responsavel_padrao: string
   }
-  onSave: (data: any) => void
+  onSave: (data) => void
   mode: 'create' | 'edit'
 }
 
@@ -190,7 +190,7 @@ export function ChecklistModal({
         >
           <Input
             value={formData.nome}
-            onChange={(e: any) => setFormData({...formData, nome: e.target.value})}
+            onChange={(e) => setFormData({...formData, nome: e.target.value})}
             placeholder="Ex: Checklist de Abertura da Cozinha"
             className="modal-input"
           />
@@ -199,7 +199,7 @@ export function ChecklistModal({
         <ModalField label="Setor" required icon={Settings}>
           <Select 
             value={formData.setor} 
-            onValueChange={(value: any) => setFormData({...formData, setor: value})}
+            onValueChange={(value) => setFormData({...formData, setor: value})}
           >
             <SelectTrigger className="modal-select-trigger">
               <SelectValue placeholder="Selecione o setor" />
@@ -221,7 +221,7 @@ export function ChecklistModal({
         <ModalField label="Tipo" required icon={Settings}>
           <Select 
             value={formData.tipo} 
-            onValueChange={(value: any) => setFormData({...formData, tipo: value})}
+            onValueChange={(value) => setFormData({...formData, tipo: value})}
           >
             <SelectTrigger className="modal-select-trigger">
               <SelectValue />
@@ -250,7 +250,7 @@ export function ChecklistModal({
             min="5"
             max="480"
             value={formData.tempo_estimado}
-            onChange={(e: any) => setFormData({...formData, tempo_estimado: parseInt(e.target.value) || 30})}
+            onChange={(e) => setFormData({...formData, tempo_estimado: parseInt(e.target.value) || 30})}
             className="modal-input"
           />
         </ModalField>
@@ -263,7 +263,7 @@ export function ChecklistModal({
         >
           <Textarea
             value={formData.descricao}
-            onChange={(e: any) => setFormData({...formData, descricao: e.target.value})}
+            onChange={(e) => setFormData({...formData, descricao: e.target.value})}
             placeholder="Descreva o propá³sito e objetivos deste checklist..."
             className="modal-textarea"
           />

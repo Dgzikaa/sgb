@@ -63,7 +63,7 @@ async function configurarCronJobMeta(barId: string) {
         'Authorization', 'Bearer sgb-meta-cron-2025'
       ),
       body := jsonb_build_object(
-        'automatic', true: any,
+        'automatic', true,
         'source', 'pgcron',
         'bar_id', ${barId},
         'timestamp', now()

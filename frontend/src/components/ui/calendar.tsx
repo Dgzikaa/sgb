@@ -26,8 +26,8 @@ const Calendar: React.FC<CalendarProps> = ({
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear()
     const month = date.getMonth()
-    const firstDay = new Date(year: any, month, 1)
-    const lastDay = new Date(year: any, month + 1, 0)
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
     const daysInMonth = lastDay.getDate()
     const startingDayOfWeek = firstDay.getDay()
     
@@ -40,7 +40,7 @@ const Calendar: React.FC<CalendarProps> = ({
     
     // Add days of the month
     for (let day = 1; day <= daysInMonth; day++) {
-      days.push(new Date(year: any, month, day))
+      days.push(new Date(year, month, day))
     }
     
     return days
@@ -102,7 +102,7 @@ const Calendar: React.FC<CalendarProps> = ({
       
       {/* Day headers */}
       <div className="grid grid-cols-7 gap-1 mb-2">
-        {dayNames.map((day: any) => (
+        {dayNames.map((day) => (
           <div key={day} className="p-2 text-center text-sm font-medium text-gray-500">
             {day}
           </div>
@@ -111,7 +111,7 @@ const Calendar: React.FC<CalendarProps> = ({
       
       {/* Days */}
       <div className="grid grid-cols-7 gap-1">
-        {days.map((date: any, index: any) => {
+        {days.map((date, index) => {
           if (!date) {
             return <div key={index} className="p-2" />
           }

@@ -86,18 +86,18 @@ export async function GET(request: NextRequest) {
         console.log('ðŸ“· Analisando posts do Instagram...')
         
         const instagramPostsResponse = await fetch(
-          `https://graph.facebook.com/v18.0/${instagramId}/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count,insights.metric(impressions: any,reach,engagement,saves,video_views)&limit=50&access_token=${accessToken}`
+          `https://graph.facebook.com/v18.0/${instagramId}/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count,insights.metric(impressions,reach,engagement,saves,video_views)&limit=50&access_token=${accessToken}`
         )
         const instagramPostsData = await instagramPostsResponse.json()
 
         if (instagramPostsResponse.ok && instagramPostsData.data) {
-          const posts = instagramPostsData.data.map((post: any) => {
+          const posts = instagramPostsData.data.map((post) => {
             const insights = post.insights?.data || []
-            const impressions = insights.find((i: any) => i.name === 'impressions')?.values?.[0]?.value || 0
-            const reach = insights.find((i: any) => i.name === 'reach')?.values?.[0]?.value || 0
-            const engagement = insights.find((i: any) => i.name === 'engagement')?.values?.[0]?.value || 0
-            const saves = insights.find((i: any) => i.name === 'saves')?.values?.[0]?.value || 0
-            const videoViews = insights.find((i: any) => i.name === 'video_views')?.values?.[0]?.value || 0
+            const impressions = insights.find((i) => i.name === 'impressions')?.values?.[0]?.value || 0
+            const reach = insights.find((i) => i.name === 'reach')?.values?.[0]?.value || 0
+            const engagement = insights.find((i) => i.name === 'engagement')?.values?.[0]?.value || 0
+            const saves = insights.find((i) => i.name === 'saves')?.values?.[0]?.value || 0
+            const videoViews = insights.find((i) => i.name === 'video_views')?.values?.[0]?.value || 0
 
             const engagementRate = impressions > 0 ? (engagement / impressions) * 100 : 0
             const saveRate = impressions > 0 ? (saves / impressions) * 100 : 0
@@ -145,20 +145,20 @@ export async function GET(request: NextRequest) {
           if (posts.length > 0) {
             contentAnalysis.instagram.metrics.total_posts = posts.length
             contentAnalysis.instagram.metrics.avg_engagement_rate = 
-              posts.reduce((sum: number, post: any) => sum + post.metrics.engagement_rate, 0) / posts.length
+              posts.reduce((sum: number, post) => sum + post.metrics.engagement_rate, 0) / posts.length
 
             // Melhor e pior post
             contentAnalysis.instagram.metrics.best_performing_post = 
-              posts.reduce((best: any, current: any) => 
+              posts.reduce((best, current) => 
                 current.analysis.performance_score > best.analysis.performance_score ? current : best)
 
             contentAnalysis.instagram.metrics.worst_performing_post = 
-              posts.reduce((worst: any, current: any) => 
+              posts.reduce((worst, current) => 
                 current.analysis.performance_score < worst.analysis.performance_score ? current : worst)
 
             // Aná¡lise por tipo de conteáºdo
-            const typePerformance: any = {}
-            posts.forEach((post: any) => {
+            const typePerformance = {}
+            posts.forEach((post) => {
               if (!typePerformance[post.media_type]) {
                 typePerformance[post.media_type] = {
                   count: 0,
@@ -178,8 +178,8 @@ export async function GET(request: NextRequest) {
             contentAnalysis.instagram.metrics.engagement_by_type = typePerformance
 
             // Aná¡lise de horá¡rios á³timos
-            const hourPerformance: any = {}
-            posts.forEach((post: any) => {
+            const hourPerformance = {}
+            posts.forEach((post) => {
               const hour = post.analysis.hour_posted
               if (!hourPerformance[hour]) {
                 hourPerformance[hour] = {
@@ -200,7 +200,7 @@ export async function GET(request: NextRequest) {
             // Top 3 horá¡rios
             contentAnalysis.insights.optimal_posting_times = Object.entries(hourPerformance)
               .sort(([,a]: any, [,b]: any) => b.avg_engagement - a.avg_engagement)
-              .slice(0: any, 3)
+              .slice(0, 3)
               .map(([hour, data]: any) => ({
                 hour: parseInt(hour),
                 avg_engagement: data.avg_engagement,
@@ -208,8 +208,8 @@ export async function GET(request: NextRequest) {
               }))
 
             // Aná¡lise de hashtags
-            const hashtagPerformance: any = {}
-            posts.forEach((post: any) => {
+            const hashtagPerformance = {}
+            posts.forEach((post) => {
               post.analysis.hashtags.forEach((hashtag: string) => {
                 if (!hashtagPerformance[hashtag]) {
                   hashtagPerformance[hashtag] = {
@@ -231,7 +231,7 @@ export async function GET(request: NextRequest) {
             // Top 10 hashtags
             contentAnalysis.insights.hashtag_performance = Object.entries(hashtagPerformance)
               .sort(([,a]: any, [,b]: any) => b.avg_engagement - a.avg_engagement)
-              .slice(0: any, 10)
+              .slice(0, 10)
               .map(([hashtag, data]: any) => ({
                 tag: hashtag,
                 avg_engagement: data.avg_engagement,
@@ -244,17 +244,17 @@ export async function GET(request: NextRequest) {
         try {
           console.log('ðŸ“– Analisando Instagram Stories...')
           const storiesResponse = await fetch(
-            `https://graph.facebook.com/v18.0/${instagramId}/stories?fields=id,media_type,media_url,timestamp,insights.metric(impressions: any,reach,replies,exits)&access_token=${accessToken}`
+            `https://graph.facebook.com/v18.0/${instagramId}/stories?fields=id,media_type,media_url,timestamp,insights.metric(impressions,reach,replies,exits)&access_token=${accessToken}`
           )
           const storiesData = await storiesResponse.json()
 
           if (storiesResponse.ok && storiesData.data) {
-            contentAnalysis.instagram.stories = storiesData.data.map((story: any) => {
+            contentAnalysis.instagram.stories = storiesData.data.map((story) => {
               const insights = story.insights?.data || []
-              const impressions = insights.find((i: any) => i.name === 'impressions')?.values?.[0]?.value || 0
-              const reach = insights.find((i: any) => i.name === 'reach')?.values?.[0]?.value || 0
-              const replies = insights.find((i: any) => i.name === 'replies')?.values?.[0]?.value || 0
-              const exits = insights.find((i: any) => i.name === 'exits')?.values?.[0]?.value || 0
+              const impressions = insights.find((i) => i.name === 'impressions')?.values?.[0]?.value || 0
+              const reach = insights.find((i) => i.name === 'reach')?.values?.[0]?.value || 0
+              const replies = insights.find((i) => i.name === 'replies')?.values?.[0]?.value || 0
+              const exits = insights.find((i) => i.name === 'exits')?.values?.[0]?.value || 0
 
               return {
                 id: story.id,
@@ -281,16 +281,16 @@ export async function GET(request: NextRequest) {
         console.log('ðŸ“˜ Analisando posts do Facebook...')
         
         const facebookPostsResponse = await fetch(
-          `https://graph.facebook.com/v18.0/${pageId}/posts?fields=id,message,created_time,type,link,picture,full_picture,likes.summary(true),comments.summary(true),shares,insights.metric(post_impressions: any,post_engaged_users,post_clicks,post_reactions_by_type_total)&limit=50&access_token=${accessToken}`
+          `https://graph.facebook.com/v18.0/${pageId}/posts?fields=id,message,created_time,type,link,picture,full_picture,likes.summary(true),comments.summary(true),shares,insights.metric(post_impressions,post_engaged_users,post_clicks,post_reactions_by_type_total)&limit=50&access_token=${accessToken}`
         )
         const facebookPostsData = await facebookPostsResponse.json()
 
         if (facebookPostsResponse.ok && facebookPostsData.data) {
-          const posts = facebookPostsData.data.map((post: any) => {
+          const posts = facebookPostsData.data.map((post) => {
             const insights = post.insights?.data || []
-            const impressions = insights.find((i: any) => i.name === 'post_impressions')?.values?.[0]?.value || 0
-            const engagedUsers = insights.find((i: any) => i.name === 'post_engaged_users')?.values?.[0]?.value || 0
-            const clicks = insights.find((i: any) => i.name === 'post_clicks')?.values?.[0]?.value || 0
+            const impressions = insights.find((i) => i.name === 'post_impressions')?.values?.[0]?.value || 0
+            const engagedUsers = insights.find((i) => i.name === 'post_engaged_users')?.values?.[0]?.value || 0
+            const clicks = insights.find((i) => i.name === 'post_clicks')?.values?.[0]?.value || 0
 
             const likes = post.likes?.summary?.total_count || 0
             const comments = post.comments?.summary?.total_count || 0
@@ -324,14 +324,14 @@ export async function GET(request: NextRequest) {
           if (posts.length > 0) {
             contentAnalysis.facebook.metrics.total_posts = posts.length
             contentAnalysis.facebook.metrics.avg_engagement_rate = 
-              posts.reduce((sum: number, post: any) => sum + post.metrics.engagement_rate, 0) / posts.length
+              posts.reduce((sum: number, post) => sum + post.metrics.engagement_rate, 0) / posts.length
 
             contentAnalysis.facebook.metrics.best_performing_post = 
-              posts.reduce((best: any, current: any) => 
+              posts.reduce((best, current) => 
                 current.metrics.engagement_rate > best.metrics.engagement_rate ? current : best)
 
             contentAnalysis.facebook.metrics.worst_performing_post = 
-              posts.reduce((worst: any, current: any) => 
+              posts.reduce((worst, current) => 
                 current.metrics.engagement_rate < worst.metrics.engagement_rate ? current : worst)
           }
         }
@@ -385,13 +385,13 @@ export async function GET(request: NextRequest) {
           total_facebook_posts: contentAnalysis.facebook.metrics.total_posts,
           avg_instagram_engagement: contentAnalysis.instagram.metrics.avg_engagement_rate,
           avg_facebook_engagement: contentAnalysis.facebook.metrics.avg_engagement_rate,
-          top_hashtags: contentAnalysis.insights.hashtag_performance.slice(0: any, 3),
+          top_hashtags: contentAnalysis.insights.hashtag_performance.slice(0, 3),
           optimal_times: contentAnalysis.insights.optimal_posting_times
         },
         timestamp: new Date().toISOString()
       })
 
-    } catch (metaError: any) {
+    } catch (metaError) {
       console.log(`š ï¸ Erro ao analisar conteáºdo: ${metaError.message}`)
       
       return NextResponse.json({
@@ -411,7 +411,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Œ Erro ao analisar conteáºdo:', error)
     return NextResponse.json({ 
       success: false,

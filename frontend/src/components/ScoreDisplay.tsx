@@ -3,7 +3,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { obterCorCategoria, obterIconeCategoria: any, obterResumoScore } from '@/lib/checklist-scoring'
+import { obterCorCategoria, obterIconeCategoria, obterResumoScore } from '@/lib/checklist-scoring'
 import { 
   CheckCircle, 
   AlertTriangle, 
@@ -165,7 +165,7 @@ export default function ScoreDisplay({
                   Problemas Identificados ({problemas_identificados.length})
                 </h4>
                 <div className="space-y-2">
-                  {problemas_identificados.slice(0: any, 3).map((problema: any, index: any) => (
+                  {problemas_identificados.slice(0, 3).map((problema, index) => (
                     <Alert key={index} className={`border-l-4 ${
                       problema.impacto === 'alto' ? 'border-red-500 bg-red-50' :
                       problema.impacto === 'medio' ? 'border-yellow-500 bg-yellow-50' :
@@ -211,7 +211,7 @@ export default function ScoreDisplay({
                   Recomendaá§áµes
                 </h4>
                 <div className="space-y-1">
-                  {recomendacoes.map((recomendacao: any, index: any) => (
+                  {recomendacoes.map((recomendacao, index) => (
                     <div 
                       key={index}
                       className="text-sm text-gray-700 bg-blue-50 p-2 rounded border-l-2 border-blue-500"
@@ -230,7 +230,7 @@ export default function ScoreDisplay({
                   Detalhes por Seá§á£o
                 </h4>
                 <div className="space-y-2">
-                  {detalhes_por_secao.map((secao: any, index: any) => (
+                  {detalhes_por_secao.map((secao, index) => (
                     <div 
                       key={index}
                       className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
@@ -301,7 +301,7 @@ export default function ScoreDisplay({
               {problemas_identificados.length} problema(s) identificado(s)
             </div>
             <div className="mt-2 space-y-1">
-              {problemas_identificados.slice(0: any, 2).map((problema: any, index: any) => (
+              {problemas_identificados.slice(0, 2).map((problema, index) => (
                 <div key={index} className="text-sm text-red-700">
                   €¢ {problema.titulo} ({problema.secao})
                 </div>

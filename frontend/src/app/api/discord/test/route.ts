@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
         console.log(`ðŸ¤– Testando comando: "${cmd}"`);
         
         try {
-          const success = await processDiscordCommand(cmd: any, 'Sistema de Teste', 3);
+          const success = await processDiscordCommand(cmd, 'Sistema de Teste', 3);
           resultados.push({
             comando: cmd,
             sucesso: success,
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
           });
           
           // Pausa entre comandos para ná£o sobrecarregar
-          await new Promise(resolve => setTimeout(resolve: any, 2000));
+          await new Promise(resolve => setTimeout(resolve, 2000));
           
         } catch (error) {
           resultados.push({
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
       // Testar comando especá­fico
       console.log(`ðŸ§ª Testando comando especá­fico: "${comando}"`);
       
-      const success = await processDiscordCommand(comando: any, 'Sistema de Teste', 3);
+      const success = await processDiscordCommand(comando, 'Sistema de Teste', 3);
       
       return NextResponse.json({
         success,
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
       // Testar comando personalizado
       console.log(`ðŸ§ª Comando personalizado: "${comando_personalizado}"`);
       
-      const success = await processDiscordCommand(comando_personalizado: any, 'Teste POST', 3);
+      const success = await processDiscordCommand(comando_personalizado, 'Teste POST', 3);
       
       return NextResponse.json({
         success,

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { usePageTitle } from '@/contexts/PageTitleContext';
-import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -29,7 +29,7 @@ interface ColecaoResultV3 {
     registros_inseridos: number;
     screenshots_salvos: string[];
     melhorias_v3: string[];
-    primeiros_registros: any[];
+    primeiros_registros[];
   };
   error?: string;
 }
@@ -85,7 +85,7 @@ export default function ContaAzulV3Page() {
 
     try {
       addLog('INFO', 'ðŸš€ Iniciando coleta ContaAzul V3 (Versá£o Final Robusta)...');
-      addLog('INFO', 'ðŸ”§ Melhorias: Unicode, DateTime: any, Retry, Screenshots');
+      addLog('INFO', 'ðŸ”§ Melhorias: Unicode, DateTime, Retry, Screenshots');
       addLog('INFO', 'š¡ Performance: ~1 minuto para coleta completa');
       addLog('INFO', 'ðŸ›¡ï¸ Sistema: Anti-detecá§á£o e timeouts inteligentes');
 
@@ -185,7 +185,7 @@ export default function ContaAzulV3Page() {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e: any) => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="seu@email.com"
                   className="text-black"
                 />
@@ -197,7 +197,7 @@ export default function ContaAzulV3Page() {
                   id="senha"
                   type="password"
                   value={senha}
-                  onChange={(e: any) => setSenha(e.target.value)}
+                  onChange={(e) => setSenha(e.target.value)}
                   placeholder="Sua senha"
                   className="text-black"
                 />
@@ -207,7 +207,7 @@ export default function ContaAzulV3Page() {
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     checked={headless}
-                    onCheckedChange={(checked: any) => setHeadless(checked as boolean)}
+                    onCheckedChange={(checked) => setHeadless(checked as boolean)}
                   />
                   <label className="text-sm cursor-pointer text-black">
                     ðŸ‘» Modo invisá­vel (headless)
@@ -217,7 +217,7 @@ export default function ContaAzulV3Page() {
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     checked={forcarProcessamento}
-                    onCheckedChange={(checked: any) => setForcarProcessamento(checked as boolean)}
+                    onCheckedChange={(checked) => setForcarProcessamento(checked as boolean)}
                   />
                   <label className="text-sm cursor-pointer text-black">
                     ðŸ”„ Forá§ar processamento automá¡tico
@@ -302,7 +302,7 @@ export default function ContaAzulV3Page() {
                 <div>
                   <h4 className="font-semibold text-black mb-2">ðŸ”§ Melhorias V3</h4>
                   <div className="grid grid-cols-1 gap-1">
-                    {result.dados.melhorias_v3?.map((melhoria: any, idx: any) => (
+                    {result.dados.melhorias_v3?.map((melhoria, idx) => (
                       <div key={idx} className="text-xs text-green-700 bg-green-50 p-1 rounded">
                         œ… {melhoria}
                       </div>
@@ -377,7 +377,7 @@ export default function ContaAzulV3Page() {
                 <div className="text-black">Logs aparecerá£o aqui durante a execuá§á£o</div>
               </div>
             ) : (
-              logs.map((log: any, index: any) => (
+              logs.map((log, index) => (
                 <div
                   key={index}
                   className={`text-sm p-2 rounded-lg border ${getLogColor(log.type)}`}

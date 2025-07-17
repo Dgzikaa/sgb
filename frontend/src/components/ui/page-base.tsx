@@ -33,7 +33,7 @@ export function PageBase({ children, className }: PageBaseProps) {
 }
 
 // Header da pá¡gina com estilos padronizados
-export function PageHeader({ title, description: any, badge, children: any, className }: PageHeaderProps) {
+export function PageHeader({ title, description, badge, children, className }: PageHeaderProps) {
   return (
     <div className={cn("mb-6", className)}>
       <div className="flex items-center justify-between mb-2">

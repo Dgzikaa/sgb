@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef: any, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { getSupabaseClient } from '@/lib/supabase'
 import { openaiClient } from '@/lib/openai-client'
 
@@ -25,7 +25,7 @@ interface SGBAssistantProps {
   } | null
 }
 
-export default function SGBAssistant({ isOpen, onToggle: any, barInfo }: SGBAssistantProps) {
+export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistantProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -81,7 +81,7 @@ export default function SGBAssistant({ isOpen, onToggle: any, barInfo }: SGBAssi
 
     try {
       // Processar comando do usuá¡rio
-      const response = await processUserInput(userInput: any, barInfo)
+      const response = await processUserInput(userInput, barInfo)
       
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -118,7 +118,7 @@ export default function SGBAssistant({ isOpen, onToggle: any, barInfo }: SGBAssi
       return;
     }
 
-    setMessages(prev => prev.map((msg: any) => 
+    setMessages(prev => prev.map((msg) => 
       msg.id === messageId 
         ? { ...msg, metadata: { ...msg.metadata, feedback } }
         : msg
@@ -179,7 +179,7 @@ export default function SGBAssistant({ isOpen, onToggle: any, barInfo }: SGBAssi
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
-        {messages.map((message: any) => (
+        {messages.map((message) => (
           <div
             key={message.id}
             className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -250,7 +250,7 @@ export default function SGBAssistant({ isOpen, onToggle: any, barInfo }: SGBAssi
           <input
             type="text"
             value={input}
-            onChange={(e: any) => setInput(e.target.value)}
+            onChange={(e) => setInput(e.target.value)}
             placeholder="Digite sua pergunta..."
             className="assistant-input flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 bg-white placeholder-gray-500"
             disabled={isLoading}
@@ -269,7 +269,7 @@ export default function SGBAssistant({ isOpen, onToggle: any, barInfo }: SGBAssi
         
         {/* Quick Commands */}
         <div className="mt-2 flex flex-wrap gap-1">
-          {['ğŸ’° Vendas hoje', 'ğŸ“Š Aná¡lise semana', 'ğŸ” Anomalias', 'ğŸ’¡ Sugestáµes'].map((cmd: any) => (
+          {['ğŸ’° Vendas hoje', 'ğŸ“Š Aná¡lise semana', 'ğŸ” Anomalias', 'ğŸ’¡ Sugestáµes'].map((cmd) => (
             <button
               key={cmd}
               onClick={() => setInput(cmd)}
@@ -285,7 +285,7 @@ export default function SGBAssistant({ isOpen, onToggle: any, barInfo }: SGBAssi
 }
 
 // Funá§á£o para processar input do usuá¡rio
-async function processUserInput(input: string, barInfo: any): Promise<{ content: string; metadata?: any }> {
+async function processUserInput(input: string, barInfo): Promise<{ content: string; metadata?: any }> {
   const lowercaseInput = input.toLowerCase()
 
   // Comandos especá­ficos que usam aná¡lise local
@@ -346,20 +346,20 @@ async function processUserInput(input: string, barInfo: any): Promise<{ content:
 }
 
 // Funá§á£o para buscar dados bá¡sicos de vendas para contexto
-async function getBasicSalesData(barInfo: any) {
+async function getBasicSalesData(barInfo) {
   try {
     const today = new Date().toISOString().split('T')[0]
     const supabase = await getSupabaseClient();
     if (!supabase) return 0;
     const { data: vendas } = await supabase
       .from('pagamentos')
-      .select('liquido, meio: any, created_at')
+      .select('liquido, meio, created_at')
       .gte('created_at', `${today}T00:00:00`)
       .lt('created_at', `${today}T23:59:59`)
       .eq('bar_id', barInfo?.id || 1)
       .limit(10) // Limitar para ná£o sobrecarregar
 
-    const total = vendas?.reduce((sum: number, venda: any) => sum + parseFloat(venda.liquido || '0'), 0) || 0
+    const total = vendas?.reduce((sum: number, venda) => sum + parseFloat(venda.liquido || '0'), 0) || 0
     const quantidade = vendas?.length || 0
 
     return {
@@ -368,7 +368,7 @@ async function getBasicSalesData(barInfo: any) {
         quantidade,
         ticketMedio: quantidade > 0 ? total / quantidade : 0
       },
-      ultimasVendas: vendas?.slice(0: any, 5) // ášltimas 5 vendas como contexto
+      ultimasVendas: vendas?.slice(0, 5) // ášltimas 5 vendas como contexto
     }
   } catch (error) {
     console.warn('š ï¸ Erro ao buscar dados de contexto:', error)
@@ -377,7 +377,7 @@ async function getBasicSalesData(barInfo: any) {
 }
 
 // Funá§áµes de aná¡lise (comeá§ando simples, vá£o evoluir)
-async function analyzeToday(barInfo: any) {
+async function analyzeToday(barInfo) {
   const today = new Date().toISOString().split('T')[0]
   
   try {
@@ -388,14 +388,14 @@ async function analyzeToday(barInfo: any) {
     };
     const { data: vendas, error } = await supabase
       .from('pagamentos')
-      .select('liquido, meio: any, created_at')
+      .select('liquido, meio, created_at')
       .gte('created_at', `${today}T00:00:00`)
       .lt('created_at', `${today}T23:59:59`)
       .eq('bar_id', barInfo?.id || 1)
 
     if (error) throw error
 
-    const total = vendas?.reduce((sum: number, venda: any) => sum + parseFloat(venda.liquido || '0'), 0) || 0
+    const total = vendas?.reduce((sum: number, venda) => sum + parseFloat(venda.liquido || '0'), 0) || 0
     const quantidade = vendas?.length || 0
 
     return {
@@ -409,21 +409,21 @@ async function analyzeToday(barInfo: any) {
   }
 }
 
-async function analyzeWeek(barInfo: any) {
+async function analyzeWeek(barInfo) {
   return {
     content: `ğŸ“Š **Aná¡lise Semanal:**\n\nğŸš§ Esta funcionalidade está¡ sendo desenvolvida...\n\nEm breve vocáª terá¡:\n€¢ Comparativo com semana anterior\n€¢ Tendáªncias de crescimento\n€¢ Melhores dias da semana\n€¢ Projeá§áµes para prá³xima semana\n\n³ Aguarde as prá³ximas atualizaá§áµes!`,
     metadata: { command: 'analise_semana' }
   }
 }
 
-async function detectAnomalies(barInfo: any) {
+async function detectAnomalies(barInfo) {
   return {
     content: `ğŸ” **Detecá§á£o de Anomalias:**\n\nğŸš§ Sistema de detecá§á£o em desenvolvimento...\n\nFuturas funcionalidades:\n€¢ Vendas muito baixas/altas\n€¢ Padráµes estranhos nos pagamentos\n€¢ Horá¡rios de pico diferentes\n€¢ Alertas automá¡ticos\n\nğŸ¤– O sistema está¡ aprendendo os padráµes do seu negá³cio!`,
     metadata: { command: 'anomalias' }
   }
 }
 
-async function generateSuggestions(barInfo: any) {
+async function generateSuggestions(barInfo) {
   return {
     content: `ğŸ’¡ **Sugestáµes de Melhoria:**\n\nğŸš§ Sistema de sugestáµes em treinamento...\n\nEm breve vocáª receberá¡:\n€¢ Recomendaá§áµes baseadas em dados\n€¢ Melhores horá¡rios para promoá§áµes\n€¢ Estratá©gias para aumentar vendas\n€¢ Otimizaá§áµes operacionais\n\nğŸ“ˆ Quanto mais vocáª usar, melhores será£o as sugestáµes!`,
     metadata: { command: 'sugestoes' }

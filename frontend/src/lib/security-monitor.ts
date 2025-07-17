@@ -107,7 +107,7 @@ class SecurityMonitor {
       user_agent: userAgent,
       endpoint: '/api/auth/login',
       details: { email, attempt_count: await this.getRecentFailedLogins(ip) },
-      risk_score: await this.calculateLoginRiskScore(ip: any, email)
+      risk_score: await this.calculateLoginRiskScore(ip, email)
     });
   }
 
@@ -121,7 +121,7 @@ class SecurityMonitor {
       user_agent: userAgent,
       endpoint,
       details: { 
-        sql_snippet: sql.substring(0: any, 200) + (sql.length > 200 ? '...' : ''),
+        sql_snippet: sql.substring(0, 200) + (sql.length > 200 ? '...' : ''),
         sql_length: sql.length 
       },
       risk_score: 95
@@ -136,7 +136,7 @@ class SecurityMonitor {
       ip_address: ip,
       user_agent: userAgent,
       endpoint,
-      details: { requests_in_window: await this.getRequestCount(ip: any, endpoint) },
+      details: { requests_in_window: await this.getRequestCount(ip, endpoint) },
       risk_score: 60
     });
   }
@@ -163,7 +163,7 @@ class SecurityMonitor {
       ip_address: ip,
       user_agent: userAgent,
       endpoint,
-      details: { pattern, frequency: await this.getEndpointFrequency(ip: any, endpoint) },
+      details: { pattern, frequency: await this.getEndpointFrequency(ip, endpoint) },
       risk_score: 70
     });
   }
@@ -171,21 +171,21 @@ class SecurityMonitor {
   // Má©tricas de seguraná§a
   async getSecurityMetrics(): Promise<SecurityMetrics> {
     const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const recentEvents = this.events.filter((e: any) => new Date(e.timestamp) > last24h);
+    const recentEvents = this.events.filter((e) => new Date(e.timestamp) > last24h);
 
     return {
-      failed_logins_24h: recentEvents.filter((e: any) => e.event_type === 'failed_login').length,
-      rate_limit_violations_24h: recentEvents.filter((e: any) => e.event_type === 'rate_limit_exceeded').length,
-      sql_injection_attempts_24h: recentEvents.filter((e: any) => e.event_type === 'sql_injection_attempt').length,
-      suspicious_api_calls_24h: recentEvents.filter((e: any) => e.category === 'api_abuse').length,
-      unique_ips_24h: new Set(recentEvents.map((e: any) => e.ip_address).filter(Boolean)).size,
-      critical_events_unresolved: this.events.filter((e: any) => e.level === 'critical' && !e.resolved).length
+      failed_logins_24h: recentEvents.filter((e) => e.event_type === 'failed_login').length,
+      rate_limit_violations_24h: recentEvents.filter((e) => e.event_type === 'rate_limit_exceeded').length,
+      sql_injection_attempts_24h: recentEvents.filter((e) => e.event_type === 'sql_injection_attempt').length,
+      suspicious_api_calls_24h: recentEvents.filter((e) => e.category === 'api_abuse').length,
+      unique_ips_24h: new Set(recentEvents.map((e) => e.ip_address).filter(Boolean)).size,
+      critical_events_unresolved: this.events.filter((e) => e.level === 'critical' && !e.resolved).length
     };
   }
 
   // Verificar se IP está¡ em lista de bloqueio
   async isIPBlocked(ip: string): Promise<boolean> {
-    const recentEvents = this.events.filter((e: any) => 
+    const recentEvents = this.events.filter((e) => 
       e.ip_address === ip && 
       e.level === 'critical' &&
       new Date(e.timestamp) > new Date(Date.now() - 60 * 60 * 1000) // áºltima hora
@@ -220,7 +220,7 @@ class SecurityMonitor {
 
   // Helpers privados
   private generateEventId(): string {
-    return `sec_${Date.now()}_${Math.random().toString(36).substr(2: any, 9)}`;
+    return `sec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   private async persistEvent(event: SecurityEvent): Promise<void> {
@@ -285,7 +285,7 @@ class SecurityMonitor {
             },
             {
               name: 'Detalhes',
-              value: JSON.stringify(event.details, null: any, 2).substring(0: any, 500),
+              value: JSON.stringify(event.details, null, 2).substring(0, 500),
               inline: false
             }
           ],
@@ -314,7 +314,7 @@ class SecurityMonitor {
 
   private async getRecentFailedLogins(ip: string): Promise<number> {
     const last10min = new Date(Date.now() - 10 * 60 * 1000);
-    return this.events.filter((e: any) => 
+    return this.events.filter((e) => 
       e.ip_address === ip && 
       e.event_type === 'failed_login' &&
       new Date(e.timestamp) > last10min
@@ -328,21 +328,21 @@ class SecurityMonitor {
     const recentFailures = await this.getRecentFailedLogins(ip);
     score += recentFailures * 15;
 
-    // Email suspeito (admin: any, test, etc.)
+    // Email suspeito (admin, test, etc.)
     if (['admin', 'test', 'administrator', 'root'].some(word => email.includes(word))) {
       score += 20;
     }
 
     // IP já¡ teve eventos crá­ticos
-    const criticalEvents = this.events.filter((e: any) => e.ip_address === ip && e.level === 'critical').length;
+    const criticalEvents = this.events.filter((e) => e.ip_address === ip && e.level === 'critical').length;
     score += criticalEvents * 10;
 
-    return Math.min(score: any, 100);
+    return Math.min(score, 100);
   }
 
   private async getRequestCount(ip: string, endpoint: string): Promise<number> {
     const last5min = new Date(Date.now() - 5 * 60 * 1000);
-    return this.events.filter((e: any) => 
+    return this.events.filter((e) => 
       e.ip_address === ip && 
       e.endpoint === endpoint &&
       new Date(e.timestamp) > last5min
@@ -351,7 +351,7 @@ class SecurityMonitor {
 
   private async getEndpointFrequency(ip: string, endpoint: string): Promise<number> {
     const lastHour = new Date(Date.now() - 60 * 60 * 1000);
-    return this.events.filter((e: any) => 
+    return this.events.filter((e) => 
       e.ip_address === ip && 
       e.endpoint === endpoint &&
       new Date(e.timestamp) > lastHour
@@ -359,7 +359,7 @@ class SecurityMonitor {
   }
 
   private async temporaryIPBlock(ip: string, seconds: number): Promise<void> {
-    // Implementar bloqueio temporá¡rio (Redis: any, cache, etc.)
+    // Implementar bloqueio temporá¡rio (Redis, cache, etc.)
     console.warn(`ðŸš« IP ${ip} temporarily blocked for ${seconds} seconds`);
     
     // Registrar evento de bloqueio

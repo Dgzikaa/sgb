@@ -7,10 +7,10 @@
 // e insights de marketing social
 
 import { useState, useMemo } from 'react'
-import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent: any, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   LineChart, 
   Line, 
@@ -73,7 +73,7 @@ const CHART_COLORS = {
 const generateTrendData = () => {
   const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
   
-  return months.map((month: any, index: any) => ({
+  return months.map((month, index) => ({
     mes: month,
     instagram_seguidores: 800 + (index * 120) + Math.random() * 100,
     facebook_seguidores: 400 + (index * 80) + Math.random() * 50,
@@ -91,7 +91,7 @@ const generateTrendData = () => {
 const generateWeeklyData = () => {
   const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sá¡b', 'Dom']
   
-  return days.map((day: any) => ({
+  return days.map((day) => ({
     dia: day,
     alcance: Math.floor(Math.random() * 2000) + 500,
     engajamento: Math.floor(Math.random() * 300) + 50,
@@ -121,12 +121,12 @@ const generatePerformanceRadar = () => [
 // ðŸ“Š COMPONENTES DE GRáFICOS
 // ========================================
 interface AdvancedChartsProps {
-  trendData?: any[] // [{ data_coleta, instagram_followers: any, facebook_fans, total_impressions: any, total_spend, total_clicks }]
-  campaignData?: any[] // [{ status, objective: any, spend, impressions: any, clicks }]
+  trendData?: any[] // [{ data_coleta, instagram_followers, facebook_fans, total_impressions, total_spend, total_clicks }]
+  campaignData?: any[] // [{ status, objective, spend, impressions, clicks }]
   timeRange?: 'week' | 'month' | 'quarter' | 'year'
 }
 
-export default function AdvancedCharts({ trendData, campaignData: any, timeRange = 'month' }: AdvancedChartsProps) {
+export default function AdvancedCharts({ trendData, campaignData, timeRange = 'month' }: AdvancedChartsProps) {
   const [activeTab, setActiveTab] = useState('trends')
 
   // Dados processados
@@ -214,7 +214,7 @@ export default function AdvancedCharts({ trendData, campaignData: any, timeRange
               stroke="#888"
             />
             <Tooltip 
-              formatter={(value: any, name: any) => [
+              formatter={(value, name) => [
                 typeof value === 'number' ? `${value.toFixed(2)}%` : value,
                 name
               ]}
@@ -222,7 +222,7 @@ export default function AdvancedCharts({ trendData, campaignData: any, timeRange
                 backgroundColor: '#fff', 
                 border: '1px solid #e0e0e0',
                 borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgba(0: any, 0, 0: any, 0.1)'
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
               }}
             />
             <Legend />
@@ -231,14 +231,14 @@ export default function AdvancedCharts({ trendData, campaignData: any, timeRange
               dataKey="instagram_engajamento"
               fill={CHART_COLORS.instagram}
               name="Instagram (%)"
-              radius={[4, 4: any, 0, 0]}
+              radius={[4, 4, 0, 0]}
             />
             <Bar
               yAxisId="left"
               dataKey="facebook_engajamento"
               fill={CHART_COLORS.facebook}
               name="Facebook (%)"
-              radius={[4, 4: any, 0, 0]}
+              radius={[4, 4, 0, 0]}
             />
             <Line
               yAxisId="right"
@@ -281,12 +281,12 @@ export default function AdvancedCharts({ trendData, campaignData: any, timeRange
               paddingAngle={5}
               dataKey="valor"
             >
-              {engagementData.map((entry: any, index: any) => (
+              {engagementData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.cor} />
               ))}
             </Pie>
             <Tooltip 
-              formatter={(value: any) => [value.toLocaleString(), 'Interaá§áµes']}
+              formatter={(value) => [value.toLocaleString(), 'Interaá§áµes']}
             />
             <Legend />
           </PieChart>
@@ -294,7 +294,7 @@ export default function AdvancedCharts({ trendData, campaignData: any, timeRange
         
         {/* Legenda personalizada */}
         <div className="grid grid-cols-2 gap-3 mt-4">
-          {engagementData.map((item: any, index: any) => (
+          {engagementData.map((item, index) => (
             <div key={index} className="flex items-center gap-2">
               <div 
                 className="w-3 h-3 rounded-full"
@@ -356,7 +356,7 @@ export default function AdvancedCharts({ trendData, campaignData: any, timeRange
             />
             <Legend />
             <Tooltip 
-              formatter={(value: any) => [`${value}%`, '']}
+              formatter={(value) => [`${value}%`, '']}
             />
           </RadarChart>
         </ResponsiveContainer>
@@ -396,7 +396,7 @@ export default function AdvancedCharts({ trendData, campaignData: any, timeRange
                 backgroundColor: '#fff', 
                 border: '1px solid #e0e0e0',
                 borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgba(0: any, 0, 0: any, 0.1)'
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
               }}
             />
             <Legend />
@@ -404,13 +404,13 @@ export default function AdvancedCharts({ trendData, campaignData: any, timeRange
               dataKey="alcance" 
               fill={CHART_COLORS.primary}
               name="Alcance"
-              radius={[4, 4: any, 0, 0]}
+              radius={[4, 4, 0, 0]}
             />
             <Bar 
               dataKey="engajamento" 
               fill={CHART_COLORS.secondary}
               name="Engajamento"
-              radius={[4, 4: any, 0, 0]}
+              radius={[4, 4, 0, 0]}
             />
           </BarChart>
         </ResponsiveContainer>
@@ -552,7 +552,7 @@ interface PostHighlightsCardProps {
   max?: number
 }
 
-export const PostHighlightsCard: React.FC<PostHighlightsCardProps> = ({ posts, loading: any, max = 5 }) => {
+export const PostHighlightsCard: React.FC<PostHighlightsCardProps> = ({ posts, loading, max = 5 }) => {
   if (loading) {
     return (
       <Card className="card-dark p-6 flex flex-col items-center justify-center min-h-[200px]">
@@ -570,7 +570,7 @@ export const PostHighlightsCard: React.FC<PostHighlightsCardProps> = ({ posts, l
   }
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {posts.slice(0: any, max).map((post: any, idx: any) => (
+      {posts.slice(0, max).map((post, idx) => (
         <Card key={post.id} className="card-dark p-0 overflow-hidden shadow-lg hover:scale-[1.02] transition-transform">
           {post.media_url && (
             <div className="relative w-full h-48 bg-gray-200 dark:bg-gray-700">

@@ -6,7 +6,7 @@ import { PWAInstallBanner } from '@/components/PWAInstallBanner'
 import { usePWA } from '@/hooks/usePWA'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { 
   Download, 
@@ -51,7 +51,7 @@ export default function PWAPage() {
     setIsOnline(navigator.onLine)
 
     // Capturar evento de instalaá§á£o
-    const handleBeforeInstallPrompt = (e: any) => {
+    const handleBeforeInstallPrompt = (e) => {
       e.preventDefault()
       setInstallPrompt(e)
     }

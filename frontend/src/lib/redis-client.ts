@@ -46,12 +46,12 @@ class RedisClient {
     
     if (this.useCluster && process.env.REDIS_CLUSTER_NODES) {
       // Configurar Redis Cluster
-      const clusterNodes = process.env.REDIS_CLUSTER_NODES.split(',').map((node: any) => {
+      const clusterNodes = process.env.REDIS_CLUSTER_NODES.split(',').map((node) => {
         const [host, port] = node.split(':');
         return { host, port: parseInt(port) };
       });
 
-      this.cluster = new Cluster(clusterNodes: any, {
+      this.cluster = new Cluster(clusterNodes, {
         redisOptions: config,
         enableOfflineQueue: false,
       });
@@ -62,7 +62,7 @@ class RedisClient {
       const redisUrl = process.env.REDIS_URL;
       
       if (redisUrl) {
-        this.client = new Redis(redisUrl: any, config);
+        this.client = new Redis(redisUrl, config);
       } else {
         this.client = new Redis(config);
       }
@@ -84,7 +84,7 @@ class RedisClient {
       this.isConnected = true;
     });
 
-    this.client.on('error', (error: any) => {
+    this.client.on('error', (error) => {
       console.error('ùå Redis erro:', error);
       this.isConnected = false;
     });
@@ -99,7 +99,7 @@ class RedisClient {
     });
 
     if (this.useCluster && this.cluster) {
-      this.cluster.on('node error', (error: any, node: any) => {
+      this.cluster.on('node error', (error, node) => {
         console.error(`ùå Redis cluster node erro (${node.options.host}:${node.options.port}):`, error);
       });
     }
@@ -157,7 +157,7 @@ class RedisClient {
     try {
       // Usar pipeline para opera·ß·µes at·¥micas
       pipeline.incr(rateLimitKey);
-      pipeline.expire(rateLimitKey: any, Math.ceil(windowMs / 1000));
+      pipeline.expire(rateLimitKey, Math.ceil(windowMs / 1000));
       
       const results = await pipeline.exec();
       
@@ -197,9 +197,9 @@ class RedisClient {
   public async set(key: string, value: string, ttlSeconds?: number): Promise<boolean> {
     try {
       if (ttlSeconds) {
-        await this.client.setex(key: any, ttlSeconds, value);
+        await this.client.setex(key, ttlSeconds, value);
       } else {
-        await this.client.set(key: any, value);
+        await this.client.set(key, value);
       }
       return true;
     } catch (error) {

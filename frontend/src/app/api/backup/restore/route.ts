@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     console.log(`🔄 Iniciando restore do backup ${backupId}${barId ? ` para bar ${barId}` : ''}...`);
 
     // Restaurar backup
-    const success = await backupSystem.restoreBackup(backupId: any, barId ? parseInt(barId) : undefined);
+    const success = await backupSystem.restoreBackup(backupId, barId ? parseInt(barId) : undefined);
 
     if (success) {
       return NextResponse.json({

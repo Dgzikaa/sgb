@@ -36,12 +36,12 @@ async function notifyDiscordSQLThreat(sql: string, errors: string[], clientInfo?
           },
           {
             name: 'SQL Query (truncated)',
-            value: '```sql\n' + sql.substring(0: any, 200) + (sql.length > 200 ? '...' : '') + '\n```',
+            value: '```sql\n' + sql.substring(0, 200) + (sql.length > 200 ? '...' : '') + '\n```',
             inline: false
           },
           {
             name: 'User Agent',
-            value: clientInfo?.userAgent?.substring(0: any, 100) + (clientInfo?.userAgent && clientInfo.userAgent.length > 100 ? '...' : '') || 'Unknown',
+            value: clientInfo?.userAgent?.substring(0, 100) + (clientInfo?.userAgent && clientInfo.userAgent.length > 100 ? '...' : '') || 'Unknown',
             inline: false
           }
         ],
@@ -52,7 +52,7 @@ async function notifyDiscordSQLThreat(sql: string, errors: string[], clientInfo?
       }]
     };
 
-    await fetch(SECURITY_DISCORD_WEBHOOK: any, {
+    await fetch(SECURITY_DISCORD_WEBHOOK, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(message)
@@ -103,12 +103,12 @@ export class SQLSecurityValidator {
       // 1. Validaá§áµes bá¡sicas
       if (!sql || sql.trim().length === 0) {
         errors.push('SQL query is empty');
-        return { isValid: false, errors: any, warnings };
+        return { isValid: false, errors, warnings };
       }
 
       if (sql.length > this.config.maxQueryLength) {
         errors.push(`Query exceeds maximum length of ${this.config.maxQueryLength} characters`);
-        return { isValid: false, errors: any, warnings };
+        return { isValid: false, errors, warnings };
       }
 
       const sqlLower = sql.toLowerCase().trim();
@@ -116,7 +116,7 @@ export class SQLSecurityValidator {
       // 2. Verificar se á© apenas SELECT
       if (!sqlLower.startsWith('select')) {
         errors.push('Only SELECT statements are allowed');
-        return { isValid: false, errors: any, warnings };
+        return { isValid: false, errors, warnings };
       }
 
       // 3. Comandos perigosos (lista expandida)
@@ -135,7 +135,7 @@ export class SQLSecurityValidator {
 
       // 4. Verificar filtro bar_id obrigatá³rio
       if (this.config.requireBarIdFilter && barId) {
-        if (!this.hasBarIdFilter(sql: any, barId)) {
+        if (!this.hasBarIdFilter(sql, barId)) {
           errors.push('Query must include bar_id filter for security (multi-tenant isolation)');
         }
       }
@@ -187,7 +187,7 @@ export class SQLSecurityValidator {
 
       // 10. Notificar Discord sobre tentativas crá­ticas de SQL injection
       if (errors.length > 0) {
-        const criticalErrors = errors.filter((error: any) => 
+        const criticalErrors = errors.filter((error) => 
           error.includes('Dangerous command') || 
           error.includes('Suspicious SQL pattern') ||
           error.includes('injection')
@@ -195,7 +195,7 @@ export class SQLSecurityValidator {
         
         if (criticalErrors.length > 0) {
           // Notificar Discord de forma assá­ncrona (ná£o bloquear validaá§á£o)
-          notifyDiscordSQLThreat(sql: any, criticalErrors, clientInfo).catch(console.error);
+          notifyDiscordSQLThreat(sql, criticalErrors, clientInfo).catch(console.error);
         }
       }
 
@@ -208,7 +208,7 @@ export class SQLSecurityValidator {
 
     } catch (error) {
       errors.push(`Validation error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      return { isValid: false, errors: any, warnings };
+      return { isValid: false, errors, warnings };
     }
   }
 
@@ -274,13 +274,13 @@ export class SQLSecurityValidator {
 // Helper function para usar em APIs
 export function validateSQL(sql: string, config?: Partial<SQLSecurityConfig>, barId?: number, clientInfo?: { ip?: string; userAgent?: string; endpoint?: string }): SQLValidationResult {
   const validator = new SQLSecurityValidator(config);
-  return validator.validate(sql: any, barId, clientInfo);
+  return validator.validate(sql, barId, clientInfo);
 }
 
 // Middleware para APIs que executam SQL diná¢mico
 export function requireSQLValidation(config?: Partial<SQLSecurityConfig>) {
   return (sql: string, barId?: number) => {
-    const result = validateSQL(sql: any, config, barId);
+    const result = validateSQL(sql, config, barId);
     
     if (!result.isValid) {
       throw new Error(`SQL Security Violation: ${result.errors.join(', ')}`);

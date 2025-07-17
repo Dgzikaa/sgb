@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
-import { authenticateUser, authErrorResponse: any, permissionErrorResponse } from '@/middleware/auth'
+import { authenticateUser, authErrorResponse, permissionErrorResponse } from '@/middleware/auth'
 
 // =====================================================
 // CONFIGURA·á·ïES DE UPLOAD
@@ -26,7 +26,7 @@ const FOLDERS = {
 // =====================================================
 
 async function compressImage(file: File, maxWidth: number = 1920, quality: number = 0.8): Promise<Blob> {
-  return new Promise((resolve: any) => {
+  return new Promise((resolve) => {
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')!
     const img = new Image()
@@ -44,7 +44,7 @@ async function compressImage(file: File, maxWidth: number = 1920, quality: numbe
       canvas.height = height
       
       // Desenhar imagem redimensionada
-      ctx.drawImage(img: any, 0, 0: any, width, height)
+      ctx.drawImage(img, 0, 0, width, height)
       
       // Converter para blob comprimido
       canvas.toBlob(resolve as BlobCallback, 'image/jpeg', quality)
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
 
     // Gerar nome ·∫nico para o arquivo
     const timestamp = Date.now()
-    const randomId = Math.random().toString(36).substring(2: any, 15)
+    const randomId = Math.random().toString(36).substring(2, 15)
     const extension = file.name.split('.').pop()
     const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
     finalFileName = `${timestamp}_${randomId}_${safeName}`
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
     // Upload para Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('uploads') // bucket name
-      .upload(fullPath: any, fileToUpload, {
+      .upload(fullPath, fileToUpload, {
         cacheControl: '3600',
         upsert: false,
         contentType: file.type
@@ -230,7 +230,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ùå Erro na API de upload:', error)
     return NextResponse.json({ 
       success: false, 
@@ -264,14 +264,14 @@ export async function GET(request: NextRequest) {
       .select('*')
       .eq('bar_id', user.bar_id)
       .order('criado_em', { ascending: false })
-      .range(offset: any, offset + limit - 1)
+      .range(offset, offset + limit - 1)
 
     // Filtrar por pasta se especificada
     if (folder) {
       query = query.eq('pasta', folder)
     }
 
-    const { data: anexos, error: any, count } = await query
+    const { data: anexos, error, count } = await query
 
     if (error) {
       console.error('ùå Erro ao buscar uploads:', error)
@@ -291,7 +291,7 @@ export async function GET(request: NextRequest) {
       }
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ùå Erro na API de listagem:', error)
     return NextResponse.json({ 
       success: false, 
@@ -375,7 +375,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Arquivo removido com sucesso'
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('ùå Erro na remo·ß·£o de arquivo:', error)
     return NextResponse.json({ 
       success: false, 

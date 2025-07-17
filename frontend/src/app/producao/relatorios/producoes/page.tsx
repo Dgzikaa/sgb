@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect: any, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useBar } from '@/contexts/BarContext'
 import { usePageTitle } from '@/contexts/PageTitleContext'
-import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -184,7 +184,7 @@ export default function RelatorioProducoesPage() {
     // Se for formato PostgreSQL interval (00:05:30)
     const match = tempoString.match(/(\d{2}):(\d{2}):(\d{2})/)
     if (match) {
-      const [, horas: any, minutos, segundos] = match
+      const [, horas, minutos, segundos] = match
       if (parseInt(horas) > 0) {
         return `${parseInt(horas)}h ${parseInt(minutos)}m`
       }
@@ -228,7 +228,7 @@ export default function RelatorioProducoesPage() {
               <Input
                 type="date"
                 value={dataInput}
-                onChange={(e: any) => setDataInput(e.target.value)}
+                onChange={(e) => setDataInput(e.target.value)}
                 className="w-auto max-w-48 text-black font-medium border-2 border-gray-300"
               />
               <Button 
@@ -282,7 +282,7 @@ export default function RelatorioProducoesPage() {
                   <>
                     <div className="text-center p-3 bg-purple-50 rounded-lg">
                       <div className="text-2xl font-bold text-purple-600">
-                        {producoes.filter((p: any) => p.percentual_aderencia_receita && p.percentual_aderencia_receita >= 95).length}
+                        {producoes.filter((p) => p.percentual_aderencia_receita && p.percentual_aderencia_receita >= 95).length}
                       </div>
                       <div className="text-sm text-purple-700">Aderáªncia Excelente</div>
                     </div>
@@ -290,7 +290,7 @@ export default function RelatorioProducoesPage() {
                     <div className="text-center p-3 bg-indigo-50 rounded-lg">
                       <div className="text-2xl font-bold text-indigo-600">
                         {producoes.some(p => p.percentual_aderencia_receita) 
-                          ? Math.round(producoes.filter((p: any) => p.percentual_aderencia_receita).reduce((acc: any, p: any) => acc + (p.percentual_aderencia_receita || 0), 0) / producoes.filter((p: any) => p.percentual_aderencia_receita).length)
+                          ? Math.round(producoes.filter((p) => p.percentual_aderencia_receita).reduce((acc, p) => acc + (p.percentual_aderencia_receita || 0), 0) / producoes.filter((p) => p.percentual_aderencia_receita).length)
                           : 0}%
                       </div>
                       <div className="text-sm text-indigo-700">Aderáªncia Má©dia</div>
@@ -298,14 +298,14 @@ export default function RelatorioProducoesPage() {
                     
                     <div className="text-center p-3 bg-pink-50 rounded-lg">
                       <div className="text-2xl font-bold text-pink-600">
-                        {producoes.filter((p: any) => p.percentual_aderencia_receita && p.percentual_aderencia_receita < 75).length}
+                        {producoes.filter((p) => p.percentual_aderencia_receita && p.percentual_aderencia_receita < 75).length}
                       </div>
                       <div className="text-sm text-pink-700">Aderáªncia Ruim</div>
                     </div>
                     
                     <div className="text-center p-3 bg-gray-50 rounded-lg">
                       <div className="text-2xl font-bold text-gray-600">
-                        {producoes.filter((p: any) => !p.percentual_aderencia_receita).length}
+                        {producoes.filter((p) => !p.percentual_aderencia_receita).length}
                       </div>
                       <div className="text-sm text-gray-700">Sem Dados</div>
                     </div>
@@ -358,7 +358,7 @@ export default function RelatorioProducoesPage() {
                 )}
 
                 <div className="space-y-3">
-                  {producoes.map((producao: any) => {
+                  {producoes.map((producao) => {
                     const eficiencia = calcularEficiencia(producao.rendimento_real, producao.rendimento_esperado)
                     const desvio = calcularDesvio(producao.rendimento_real, producao.rendimento_esperado)
                     const fatorCorrecao = calcularFatorCorrecao(producao.rendimento_real, producao.rendimento_esperado)

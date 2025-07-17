@@ -151,7 +151,7 @@ export default function AnalyticsPage() {
           <div className="animate-pulse space-y-6">
             <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[...Array(8)].map((_: any, i: any) => (
+              {[...Array(8)].map((_, i) => (
                 <div key={i} className="h-32 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
               ))}
             </div>
@@ -180,7 +180,7 @@ export default function AnalyticsPage() {
             {/* Seletor de perá­odo */}
             <select 
               value={selectedPeriod}
-              onChange={(e: any) => setSelectedPeriod(e.target.value)}
+              onChange={(e) => setSelectedPeriod(e.target.value)}
               className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="1">ášltimo dia</option>
@@ -288,7 +288,7 @@ export default function AnalyticsPage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data?.kpis.map((kpi: any) => (
+            {data?.kpis.map((kpi) => (
               <div key={kpi.id} className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
@@ -342,7 +342,7 @@ export default function AnalyticsPage() {
             </div>
             
             <div className="space-y-3">
-              {data?.top_paginas.slice(0: any, 5).map((pagina: any, index: any) => (
+              {data?.top_paginas.slice(0, 5).map((pagina, index) => (
                 <div key={index} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
                   <span className="text-sm text-gray-900 dark:text-white font-medium">
                     {pagina.pagina}
@@ -390,7 +390,7 @@ export default function AnalyticsPage() {
             </div>
             
             <div className="space-y-3">
-              {data.alertas_criticos.map((alerta: any) => (
+              {data.alertas_criticos.map((alerta) => (
                 <div key={alerta.id} className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
                   <div className="flex items-start justify-between">
                     <div>

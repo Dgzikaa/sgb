@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const bar_id = searchParams.get('bar_id');
-    const tipo_analise = searchParams.get('tipo') || 'artistas'; // artistas, generos: any, periodo
+    const tipo_analise = searchParams.get('tipo') || 'artistas'; // artistas, generos, periodo
 
     if (!bar_id) {
       return NextResponse.json({
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
 
         // Agrupar por artista
         const artistasStats: Record<string, any> = {};
-        eventosPorArtista?.forEach((evento: any) => {
+        eventosPorArtista?.forEach((evento) => {
           const artista = evento.nome_artista || evento.nome_banda || 'Náo informado';
           
           if (!artistasStats[artista]) {
@@ -83,13 +83,13 @@ export async function GET(request: NextRequest) {
         });
 
         // Calcular médias e converter Set para Array
-        dados = Object.values(artistasStats).map((stats: any) => ({
+        dados = Object.values(artistasStats).map((stats) => ({
           ...stats,
           publico_medio: stats.total_eventos > 0 ? stats.publico_total / stats.total_eventos : 0,
           faturamento_medio: stats.total_eventos > 0 ? stats.faturamento_total / stats.total_eventos : 0,
           ticket_medio_geral: stats.publico_total > 0 ? stats.faturamento_total / stats.publico_total : 0,
           generos: Array.from(stats.generos)
-        })).sort((a: any, b: any) => b.faturamento_total - a.faturamento_total);
+        })).sort((a, b) => b.faturamento_total - a.faturamento_total);
 
         break;
 
@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
 
         // Agrupar por gênero
         const generosStats: Record<string, any> = {};
-        eventosPorGenero?.forEach((evento: any) => {
+        eventosPorGenero?.forEach((evento) => {
           const genero = evento.genero_musical || 'Náo informado';
           
           if (!generosStats[genero]) {
@@ -143,14 +143,14 @@ export async function GET(request: NextRequest) {
           }
         });
 
-        dados = Object.values(generosStats).map((stats: any) => ({
+        dados = Object.values(generosStats).map((stats) => ({
           ...stats,
           publico_medio: stats.total_eventos > 0 ? stats.publico_total / stats.total_eventos : 0,
           faturamento_medio: stats.total_eventos > 0 ? stats.faturamento_total / stats.total_eventos : 0,
           ticket_medio_geral: stats.publico_total > 0 ? stats.faturamento_total / stats.publico_total : 0,
           total_artistas: stats.artistas_unicos.size,
           artistas_unicos: Array.from(stats.artistas_unicos)
-        })).sort((a: any, b: any) => b.faturamento_total - a.faturamento_total);
+        })).sort((a, b) => b.faturamento_total - a.faturamento_total);
 
         break;
 
@@ -176,9 +176,9 @@ export async function GET(request: NextRequest) {
 
         // Agrupar por mês
         const periodosStats: Record<string, any> = {};
-        eventosPorPeriodo?.forEach((evento: any) => {
+        eventosPorPeriodo?.forEach((evento) => {
           const data = new Date(evento.data_evento);
-          const mesAno = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2: any, '0')}`;
+          const mesAno = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`;
           const mesLabel = data.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long' });
           
           if (!periodosStats[mesAno]) {
@@ -206,13 +206,13 @@ export async function GET(request: NextRequest) {
           }
         });
 
-        dados = Object.values(periodosStats).map((stats: any) => ({
+        dados = Object.values(periodosStats).map((stats) => ({
           ...stats,
           publico_medio: stats.total_eventos > 0 ? stats.publico_total / stats.total_eventos : 0,
           faturamento_medio: stats.total_eventos > 0 ? stats.faturamento_total / stats.total_eventos : 0,
           ticket_medio_geral: stats.publico_total > 0 ? stats.faturamento_total / stats.publico_total : 0,
           generos: Array.from(stats.generos)
-        })).sort((a: any, b: any) => b.periodo.localeCompare(a.periodo));
+        })).sort((a, b) => b.periodo.localeCompare(a.periodo));
 
         break;
 

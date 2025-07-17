@@ -1,24 +1,24 @@
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 export const logger = {
-  log: (message: string, ...args: any[]) => {
+  log: (message: string, ...args[]) => {
     if (isDevelopment) {
-      console.log(message: any, ...args);
+      console.log(message, ...args);
     }
   },
-  error: (message: string, ...args: any[]) => {
+  error: (message: string, ...args[]) => {
     if (isDevelopment) {
-      console.error(message: any, ...args);
+      console.error(message, ...args);
     }
   },
-  warn: (message: string, ...args: any[]) => {
+  warn: (message: string, ...args[]) => {
     if (isDevelopment) {
-      console.warn(message: any, ...args);
+      console.warn(message, ...args);
     }
   },
-  info: (message: string, ...args: any[]) => {
+  info: (message: string, ...args[]) => {
     if (isDevelopment) {
-      console.info(message: any, ...args);
+      console.info(message, ...args);
     }
   }
 };

@@ -146,7 +146,7 @@ export async function GET(request: NextRequest) {
 }
 
 // Processar dados da meta_daily_summary
-function processDailySummaryData(summaryData: any[], fallbackData: any) {
+function processDailySummaryData(summaryData[], fallbackData) {
   if (summaryData.length === 0 && fallbackData) {
     // Usar dados de fallback
     return {
@@ -156,7 +156,7 @@ function processDailySummaryData(summaryData: any[], fallbackData: any) {
                           (fallbackData.instagram?.posts_likes || 0) + (fallbackData.instagram?.posts_comments || 0),
         facebook_followers: fallbackData.facebook?.page_fans || 0,
         instagram_followers: fallbackData.instagram?.follower_count || 0,
-        campaigns_active: fallbackData.campaigns?.filter((c: any) => c.effective_status === 'ACTIVE').length || 0,
+        campaigns_active: fallbackData.campaigns?.filter((c) => c.effective_status === 'ACTIVE').length || 0,
         total_reach: (fallbackData.facebook?.page_reach || 0) + (fallbackData.instagram?.reach || 0)
       },
       daily_data: [{
@@ -164,7 +164,7 @@ function processDailySummaryData(summaryData: any[], fallbackData: any) {
         facebook_followers: fallbackData.facebook?.page_fans || 0,
         instagram_followers: fallbackData.instagram?.follower_count || 0,
         total_engagement: (fallbackData.facebook?.post_likes || 0) + (fallbackData.instagram?.posts_likes || 0),
-        campaigns_active: fallbackData.campaigns?.filter((c: any) => c.effective_status === 'ACTIVE').length || 0
+        campaigns_active: fallbackData.campaigns?.filter((c) => c.effective_status === 'ACTIVE').length || 0
       }],
       variations: {
         followers_change_today: 0,
@@ -173,8 +173,8 @@ function processDailySummaryData(summaryData: any[], fallbackData: any) {
       },
       campaigns_summary: {
         total_campaigns: fallbackData.campaigns?.length || 0,
-        active_campaigns: fallbackData.campaigns?.filter((c: any) => c.effective_status === 'ACTIVE').length || 0,
-        total_spend: fallbackData.campaigns?.reduce((sum: number, c: any) => sum + (c.spend || 0), 0) || 0
+        active_campaigns: fallbackData.campaigns?.filter((c) => c.effective_status === 'ACTIVE').length || 0,
+        total_spend: fallbackData.campaigns?.reduce((sum: number, c) => sum + (c.spend || 0), 0) || 0
       }
     }
   }
@@ -210,7 +210,7 @@ function processDailySummaryData(summaryData: any[], fallbackData: any) {
     total_clicks: latestData?.campaigns_total_clicks || 0
   }
 
-  const daily_data = summaryData.map((day: any) => ({
+  const daily_data = summaryData.map((day) => ({
     date: day.data_referencia,
     facebook_followers: day.facebook_followers,
     instagram_followers: day.instagram_followers,
@@ -233,7 +233,7 @@ function processDailySummaryData(summaryData: any[], fallbackData: any) {
 }
 
 // Processar dados de tendências
-function processTrendsData(trendsData: any[]) {
+function processTrendsData(trendsData[]) {
   if (trendsData.length === 0) {
     return {
       growth_rate_7d: 0,

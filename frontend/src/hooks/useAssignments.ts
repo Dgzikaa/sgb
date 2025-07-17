@@ -1,4 +1,4 @@
-import { useState, useEffect: any, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { api } from '@/lib/api-client'
 
 // =====================================================
@@ -89,8 +89,8 @@ interface UseAssignmentsResult {
   error: string | null
   
   // Dados auxiliares
-  estatisticas: any
-  paginacao: any
+  estatisticas
+  paginacao
   
   // Aá§áµes CRUD
   carregarAtribuicoes: (filtros?: FiltrosAtribuicao) => Promise<void>
@@ -133,7 +133,7 @@ export function useAssignments(): UseAssignmentsResult {
       const params = new URLSearchParams()
       Object.entries(filtros).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-          params.append(key: any, value.toString())
+          params.append(key, value.toString())
         }
       })
 
@@ -146,7 +146,7 @@ export function useAssignments(): UseAssignmentsResult {
       } else {
         setError(response.error || 'Erro ao carregar atribuiá§áµes')
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao carregar atribuiá§áµes:', err)
       setError('Erro ao carregar atribuiá§áµes')
     } finally {
@@ -166,7 +166,7 @@ export function useAssignments(): UseAssignmentsResult {
       } else {
         setError(response.error || 'Erro ao carregar atribuiá§á£o')
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao carregar atribuiá§á£o:', err)
       setError('Erro ao carregar atribuiá§á£o')
     } finally {
@@ -190,7 +190,7 @@ export function useAssignments(): UseAssignmentsResult {
         setError(response.error || 'Erro ao criar atribuiá§á£o')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao criar atribuiá§á£o:', err)
       setError('Erro ao criar atribuiá§á£o')
       return false
@@ -210,7 +210,7 @@ export function useAssignments(): UseAssignmentsResult {
         console.log('ðŸ“ Atribuiá§á£o atualizada com sucesso!')
         
         // Atualizar na lista
-        setAtribuicoes(prev => prev.map((a: any) => 
+        setAtribuicoes(prev => prev.map((a) => 
           a.id === id ? { ...a, ...response.data } : a
         ))
         
@@ -224,7 +224,7 @@ export function useAssignments(): UseAssignmentsResult {
         setError(response.error || 'Erro ao atualizar atribuiá§á£o')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao atualizar atribuiá§á£o:', err)
       setError('Erro ao atualizar atribuiá§á£o')
       return false
@@ -245,7 +245,7 @@ export function useAssignments(): UseAssignmentsResult {
         console.log('ðŸ—‘ï¸ Atribuiá§á£o excluá­da com sucesso!')
         
         // Remover da lista
-        setAtribuicoes(prev => prev.filter((a: any) => a.id !== id))
+        setAtribuicoes(prev => prev.filter((a) => a.id !== id))
         
         // Limpar atribuiá§á£o individual se era a atual
         if (atribuicao?.id === id) {
@@ -257,7 +257,7 @@ export function useAssignments(): UseAssignmentsResult {
         setError(response.error || 'Erro ao excluir atribuiá§á£o')
         return false
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao excluir atribuiá§á£o:', err)
       setError('Erro ao excluir atribuiá§á£o')
       return false
@@ -324,14 +324,14 @@ interface DashboardData {
     tempo_medio: number
     funcionarios_ativos: number
   }
-  ranking_funcionarios: any[]
-  evolucao_temporal: any[]
-  alertas: any[]
+  ranking_funcionarios[]
+  evolucao_temporal[]
+  alertas[]
   estatisticas: {
-    por_setor: any[]
-    por_cargo: any[]
+    por_setor[]
+    por_cargo[]
   }
-  top_checklists: any[]
+  top_checklists[]
 }
 
 interface UseDashboardResult {
@@ -362,7 +362,7 @@ export function useProductivityDashboard(): UseDashboardResult {
       const params = new URLSearchParams()
       Object.entries(filtros).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-          params.append(key: any, value.toString())
+          params.append(key, value.toString())
         }
       })
 
@@ -373,7 +373,7 @@ export function useProductivityDashboard(): UseDashboardResult {
       } else {
         setError(response.error || 'Erro ao carregar dashboard')
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao carregar dashboard:', err)
       setError('Erro ao carregar dashboard')
     } finally {
@@ -408,7 +408,7 @@ export function useAssignmentForm() {
     }
   })
 
-  const updateField = useCallback((field: keyof NovaAtribuicao, value: any) => {
+  const updateField = useCallback((field: keyof NovaAtribuicao, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }, [])
 
@@ -560,7 +560,7 @@ export function formatarHorarios(horarios: string[]): string {
   
   if (horarios.length <= 3) return horarios.join(', ')
   
-  return `${horarios.slice(0: any, 2).join(', ')} e +${horarios.length - 2}`
+  return `${horarios.slice(0, 2).join(', ')} e +${horarios.length - 2}`
 }
 
 export function formatarDiasSemana(dias: number[]): string {
@@ -568,9 +568,9 @@ export function formatarDiasSemana(dias: number[]): string {
   
   const nomesDias = dias
     .sort()
-    .map((dia: any) => diasSemana.find((d: any) => d.value === dia)?.abrev || dia.toString())
+    .map((dia) => diasSemana.find((d) => d.value === dia)?.abrev || dia.toString())
   
   if (nomesDias.length <= 3) return nomesDias.join(', ')
   
-  return `${nomesDias.slice(0: any, 2).join(', ')} e +${nomesDias.length - 2}`
+  return `${nomesDias.slice(0, 2).join(', ')} e +${nomesDias.length - 2}`
 } 

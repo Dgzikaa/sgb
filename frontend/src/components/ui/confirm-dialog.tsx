@@ -1,8 +1,8 @@
 'use client'
 
-import React, { createContext, useContext: any, useState, useCallback } from 'react'
-import { AlertTriangle, HelpCircle: any, Trash2, AlertCircle: any, CheckCircle } from 'lucide-react'
-import { Dialog, DialogContent: any, DialogHeader, DialogTitle: any, DialogDescription, DialogFooter } from './dialog'
+import React, { createContext, useContext, useState, useCallback } from 'react'
+import { AlertTriangle, HelpCircle, Trash2, AlertCircle, CheckCircle } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './dialog'
 
 interface ConfirmDialogOptions {
   title: string
@@ -43,7 +43,7 @@ export const ConfirmDialogProvider: React.FC<ConfirmDialogProviderProps> = ({ ch
   const [isLoading, setIsLoading] = useState(false)
 
   const confirm = useCallback((dialogOptions: ConfirmDialogOptions): Promise<boolean> => {
-    return new Promise((resolve: any) => {
+    return new Promise((resolve) => {
       setOptions(dialogOptions)
       setResolvePromise(() => resolve)
       setIsOpen(true)
@@ -185,7 +185,7 @@ export const ConfirmDialogProvider: React.FC<ConfirmDialogProviderProps> = ({ ch
                 <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                   <h4 className="font-medium text-gray-800 mb-2">Detalhes:</h4>
                   <ul className="text-sm text-gray-700 space-y-1">
-                    {options.details.map((detail: any, index: any) => (
+                    {options.details.map((detail, index) => (
                       <li key={index} className="flex items-start gap-2">
                         <span className="text-gray-400 mt-1">€¢</span>
                         <span>{detail}</span>
@@ -245,7 +245,7 @@ export const ConfirmDialogProvider: React.FC<ConfirmDialogProviderProps> = ({ ch
 // Hook global para usar os dialogs de confirmaá§á£o
 export const useGlobalConfirm = () => {
   const confirmDialog = useCallback((options: ConfirmDialogOptions): Promise<boolean> => {
-    return new Promise((resolve: any) => {
+    return new Promise((resolve) => {
       if (typeof window !== 'undefined') {
         const event = new CustomEvent('showConfirmDialog', {
           detail: { ...options, resolve }

@@ -86,7 +86,7 @@ export default function MobileItemReorder({
     newItens[targetIndex] = temp
     
     // Atualizar ordens
-    newItens.forEach((item: any, index: any) => {
+    newItens.forEach((item, index) => {
       item.ordem = index + 1
     })
 
@@ -120,7 +120,7 @@ export default function MobileItemReorder({
   if (readonly) {
     return (
       <div className="space-y-3">
-        {itens.map((item: any, index: any) => (
+        {itens.map((item, index) => (
           <Card key={item.id} className="bg-gray-50">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
@@ -190,7 +190,7 @@ export default function MobileItemReorder({
 
       {/* Lista de Itens */}
       <div className="space-y-3">
-        {localItens.map((item: any, index: any) => (
+        {localItens.map((item, index) => (
           <Card 
             key={item.id} 
             className={`

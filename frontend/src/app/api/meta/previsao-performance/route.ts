@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const tipo = searchParams.get('tipo') || 'geral' // 'post', 'campanha', 'geral'
     
-    console.log('ðŸ”® Previsá£o de Performance - Analisando para bar:', barId: any, 'tipo:', tipo)
+    console.log('ðŸ”® Previsá£o de Performance - Analisando para bar:', barId, 'tipo:', tipo)
 
     // 1. COLETAR DADOS HISTá“RICOS - CORRIGIR NOMES DAS TABELAS
     const { data: instagramHistorico } = await supabase
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
       .limit(100)
 
     // 2. ANáLISE DE PADRá•ES HISTá“RICOS
-    const analisarPadroes = (dados: any[]) => {
+    const analisarPadroes = (dados[]) => {
       if (!dados || dados.length === 0) return null
       
       const padroes = {
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
       }
       
       // Calcular má©dias - AJUSTAR CAMPOS PARA TABELA CORRETA
-      const totalEngajamento = dados.reduce((sum: any, item: any) => {
+      const totalEngajamento = dados.reduce((sum, item) => {
         // Para Instagram: posts_likes + posts_comments
         // Para Facebook: post_likes + post_comments
         const engagement = (item.posts_likes || item.post_likes || 0) + 
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
         return sum + engagement
       }, 0)
       
-      const totalAlcance = dados.reduce((sum: any, item: any) => {
+      const totalAlcance = dados.reduce((sum, item) => {
         return sum + (item.reach || item.impressions || item.page_reach || 0)
       }, 0)
       
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
       
       let melhorDia = 0
       let melhorEngajamento = 0
-      diasSemana.forEach((count: any, dia: any) => {
+      diasSemana.forEach((count, dia) => {
         if (count > 0) {
           const mediaEngajamento = engajamentoPorDia[dia] / count
           if (mediaEngajamento > melhorEngajamento) {
@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
       
       let melhorHora = 0
       let melhorEngajamentoHora = 0
-      horarios.forEach((count: any, hora: any) => {
+      horarios.forEach((count, hora) => {
         if (count > 0) {
           const mediaEngajamento = engajamentoPorHora[hora] / count
           if (mediaEngajamento > melhorEngajamentoHora) {
@@ -128,11 +128,11 @@ export async function GET(request: NextRequest) {
       padroes.melhor_horario = melhorHora
       
       // Detectar tendáªncia
-      const recentes = dados.slice(0: any, 10)
+      const recentes = dados.slice(0, 10)
       const antigos = dados.slice(-10)
       
-      const calcularEngajamento = (items: any[]) => {
-        return items.reduce((sum: any, item: any) => {
+      const calcularEngajamento = (items[]) => {
+        return items.reduce((sum, item) => {
           const engagement = (item.posts_likes || item.post_likes || 0) + 
                             (item.posts_comments || item.post_comments || 0)
           return sum + engagement
@@ -145,11 +145,11 @@ export async function GET(request: NextRequest) {
       padroes.trending_up = engajamentoRecente > engajamentoAntigo
       
       // Identificar fatores de sucesso
-      const topPosts = dados.sort((a: any, b: any) => {
+      const topPosts = dados.sort((a, b) => {
         const engA = (a.posts_likes || a.post_likes || 0) + (a.posts_comments || a.post_comments || 0)
         const engB = (b.posts_likes || b.post_likes || 0) + (b.posts_comments || b.post_comments || 0)
         return engB - engA
-      }).slice(0: any, 5)
+      }).slice(0, 5)
       
       const fatores = new Set<string>()
       
@@ -171,7 +171,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 3. ALGORITMO DE PREVISáƒO IA
-    const preverPerformance = (padroes: any, contexto: any) => {
+    const preverPerformance = (padroes, contexto) => {
       if (!padroes) return null
       
       const agora = new Date()
@@ -209,7 +209,7 @@ export async function GET(request: NextRequest) {
       }
       
       // Normalizar score
-      const scoreFinal = Math.max(0: any, Math.min(100: any, scoreBase))
+      const scoreFinal = Math.max(0, Math.min(100, scoreBase))
       
       return {
         score_predicao: scoreFinal,
@@ -227,7 +227,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 4. RECOMENDAá‡á•ES ESPECáFICAS POR TIPO
-    const gerarRecomendacoes = (previsao: any, tipo: string) => {
+    const gerarRecomendacoes = (previsao, tipo: string) => {
       const recomendacoes = []
       
       if (tipo === 'post' || tipo === 'geral') {
@@ -274,7 +274,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 5. ALERTAS INTELIGENTES
-    const gerarAlertas = (previsao: any) => {
+    const gerarAlertas = (previsao) => {
       const alertas = []
       
       if (previsao.confianca === 'baixa') {
@@ -321,9 +321,9 @@ export async function GET(request: NextRequest) {
       fatores_sucesso: [...padroesInstagram.fatores_sucesso, ...padroesFacebook.fatores_sucesso]
     } : padroesInstagram || padroesFacebook
 
-    const previsaoInstagram = preverPerformance(padroesInstagram: any, { plataforma: 'instagram' })
-    const previsaoFacebook = preverPerformance(padroesFacebook: any, { plataforma: 'facebook' })
-    const previsaoGeral = preverPerformance(padroesCombinados: any, { plataforma: 'geral' })
+    const previsaoInstagram = preverPerformance(padroesInstagram, { plataforma: 'instagram' })
+    const previsaoFacebook = preverPerformance(padroesFacebook, { plataforma: 'facebook' })
+    const previsaoGeral = preverPerformance(padroesCombinados, { plataforma: 'geral' })
 
     const resultado = {
       success: true,
@@ -335,7 +335,7 @@ export async function GET(request: NextRequest) {
         facebook: previsaoFacebook,
         geral: previsaoGeral
       },
-      recomendacoes: gerarRecomendacoes(previsaoGeral: any, tipo),
+      recomendacoes: gerarRecomendacoes(previsaoGeral, tipo),
       alertas: gerarAlertas(previsaoGeral),
       historico_analisado: {
         instagram_posts: instagramHistorico?.length || 0,

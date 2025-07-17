@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
           console.log(`? Fixed event: ${mapping.name}`);
           totalFixed++;
         }
-      } catch (err: any) {
+      } catch (err) {
         errors.push(`Exception fixing ${mapping.name}: ${err.message}`);
       }
     }
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       message: `Fixed ${totalFixed} event names successfully`
     });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('? Error in fix-all endpoint:', error);
     return NextResponse.json({
       success: false,

@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect: any, useMemo, Fragment } from 'react';
-import { Card, CardHeader: any, CardContent, CardTitle } from '@/components/ui/card';
+import { useState, useEffect, useMemo, Fragment } from 'react';
+import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useBar } from '@/contexts/BarContext';
 import { usePageTitle } from '@/contexts/PageTitleContext';
-import { Calendar, TrendingUp: any, DollarSign, Award: any, ChevronDown, ChevronRight: any, Download } from 'lucide-react';
+import { Calendar, TrendingUp, DollarSign, Award, ChevronDown, ChevronRight, Download } from 'lucide-react';
 import {
   Table,
   TableHeader,
@@ -16,7 +16,7 @@ import {
   TableCell
 } from '@/components/ui/table';
 import { SkeletonTable } from '@/components/ui/skeleton';
-import { Tooltip, TooltipProvider: any, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { saveAs } from 'file-saver';
 // 1. Importar libs extras
 import * as XLSX from 'xlsx';
@@ -104,7 +104,7 @@ function getPeriodoRange(periodo: string) {
   }
   if (periodo === 'year') {
     const fim = hoje.toISOString().split('T')[0];
-    const inicio = new Date(hoje.getFullYear(), 0: any, 1);
+    const inicio = new Date(hoje.getFullYear(), 0, 1);
     return { data_inicio: inicio.toISOString().split('T')[0], data_fim: fim };
   }
   // all
@@ -123,7 +123,7 @@ function Spinner() {
 }
 
 // 3. Modal de drilldown
-function DrilldownModal({ open, onClose: any, categoria, grupo: any, dados }: { open: boolean, onClose: () => void, categoria?: string, grupo?: string, dados: any[] }) {
+function DrilldownModal({ open, onClose, categoria, grupo, dados }: { open: boolean, onClose: () => void, categoria?: string, grupo?: string, dados[] }) {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -140,7 +140,7 @@ function DrilldownModal({ open, onClose: any, categoria, grupo: any, dados }: { 
               </tr>
             </thead>
             <tbody>
-              {dados.map((l: any, i: number) => (
+              {dados.map((l, i: number) => (
                 <tr key={i}>
                   <td>{l.descricao || '-'}</td>
                   <td className="text-right">{l.valor ? l.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '-'}</td>
@@ -180,7 +180,7 @@ export default function TabelaDesempenhoPage() {
       fetchTabela();
     }
     // eslint-disable-next-line
-  }, [selectedBar?.id, page: any, periodo]);
+  }, [selectedBar?.id, page, periodo]);
 
   async function fetchTabela() {
     setLoading(true);
@@ -188,7 +188,7 @@ export default function TabelaDesempenhoPage() {
       // DEBUG: Forá§ar bar_id=3 para garantir dados reais
       // const barIdForcado = 3; // Descomente para forá§ar
       // const { data_inicio, data_fim } = getPeriodoRange(periodo);
-      // const body: any = {
+      // const body = {
       //   bar_id: barIdForcado,
       //   page,
       //   pageSize,
@@ -210,7 +210,7 @@ export default function TabelaDesempenhoPage() {
       // ---
       if (!selectedBar?.id) return;
       const { data_inicio, data_fim } = getPeriodoRange(periodo);
-      const body: any = {
+      const body = {
         bar_id: 3, // Forá§ado para debug/validaá§á£o
         page,
         pageSize,
@@ -255,30 +255,30 @@ export default function TabelaDesempenhoPage() {
   }
 
   // Memoizaá§á£o de totais
-  const totalGeral = useMemo(() => dados.reduce((sum: any, linha: any) => sum + (typeof linha.valor === 'number' ? linha.valor : 0), 0), [dados]);
-  const gruposUnicos = useMemo(() => Array.from(new Set(dados.map((l: any) => l.grupo))), [dados]);
+  const totalGeral = useMemo(() => dados.reduce((sum, linha) => sum + (typeof linha.valor === 'number' ? linha.valor : 0), 0), [dados]);
+  const gruposUnicos = useMemo(() => Array.from(new Set(dados.map((l) => l.grupo))), [dados]);
   const dadosPorGrupo = useMemo(() => {
     const out: Record<string, any[]> = {};
     gruposUnicos.forEach(grupo => {
-      out[grupo] = dados.filter((l: any) => l.grupo === grupo);
+      out[grupo] = dados.filter((l) => l.grupo === grupo);
     });
     return out;
   }, [dados, gruposUnicos]);
   function getSubtotalGrupo(grupo: string) {
-    return useMemo(() => dadosPorGrupo[grupo].reduce((sum: any, linha: any) => sum + (typeof linha.valor === 'number' ? linha.valor : 0), 0), [dadosPorGrupo, grupo]);
+    return useMemo(() => dadosPorGrupo[grupo].reduce((sum, linha) => sum + (typeof linha.valor === 'number' ? linha.valor : 0), 0), [dadosPorGrupo, grupo]);
   }
   // Exportaá§á£o CSV/XLSX
   function exportarCSVXLSX(tipo: 'csv' | 'xlsx') {
     setExportando(true);
     setTimeout(() => {
       const header = ['Grupo', 'Categoria', 'Valor Real', 'Meta', '% do Total'];
-      const rows: any[] = [];
+      const rows[] = [];
       gruposUnicos.forEach(grupo => {
         dadosPorGrupo[grupo].forEach(linha => {
           if (mesesSelecionados.length && !mesesSelecionados.includes('all') && !mesesSelecionados.includes(linha.mes_ano)) return;
           const valor = typeof linha.valor === 'number' ? linha.valor : 0;
           const meta = metas[linha.categoria] || '';
-          const percent = getPercent(valor: any, totalGeral);
+          const percent = getPercent(valor, totalGeral);
           rows.push([
             grupo,
             linha.categoria,
@@ -290,14 +290,14 @@ export default function TabelaDesempenhoPage() {
       });
       if (tipo === 'csv') {
         let csv = header.join(';') + '\n';
-        csv += rows.map((r: any) => r.join(';')).join('\n');
+        csv += rows.map((r) => r.join(';')).join('\n');
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        saveAs(blob: any, 'tabela_desempenho.csv');
+        saveAs(blob, 'tabela_desempenho.csv');
       } else {
         const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb: any, ws, 'Desempenho');
-        XLSX.writeFile(wb: any, 'tabela_desempenho.xlsx');
+        XLSX.utils.book_append_sheet(wb, ws, 'Desempenho');
+        XLSX.writeFile(wb, 'tabela_desempenho.xlsx');
       }
       setExportando(false);
     }, 300);
@@ -305,8 +305,8 @@ export default function TabelaDesempenhoPage() {
   // Multi-select de meses
   const [mesesSelecionados, setMesesSelecionados] = useState<string[]>([]);
   const mesesDisponiveis = useMemo(() => {
-    const meses = Array.from(new Set(dados.map((l: any) => l.mes_ano))).filter(Boolean);
-    return [{ label: 'Todo Perá­odo', value: 'all' }, ...meses.map((m: any) => ({ label: m, value: m }))];
+    const meses = Array.from(new Set(dados.map((l) => l.mes_ano))).filter(Boolean);
+    return [{ label: 'Todo Perá­odo', value: 'all' }, ...meses.map((m) => ({ label: m, value: m }))];
   }, [dados]);
 
   // Responsividade: sticky sá³ em desktop
@@ -314,7 +314,7 @@ export default function TabelaDesempenhoPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-      <DrilldownModal open={!!drilldown} onClose={() => setDrilldown(null)} categoria={drilldown?.categoria} grupo={drilldown?.grupo} dados={dados.filter((l: any) => l.categoria === drilldown?.categoria && l.grupo === drilldown?.grupo)} />
+      <DrilldownModal open={!!drilldown} onClose={() => setDrilldown(null)} categoria={drilldown?.categoria} grupo={drilldown?.grupo} dados={dados.filter((l) => l.categoria === drilldown?.categoria && l.grupo === drilldown?.grupo)} />
       <div className="container mx-auto px-2 sm:px-4 py-4 flex-1 flex flex-col">
         <Card className="card-dark w-full max-w-5xl mx-auto shadow-lg border border-gray-200 dark:border-gray-700">
           <CardHeader>
@@ -327,12 +327,12 @@ export default function TabelaDesempenhoPage() {
                 multiple
                 value={mesesSelecionados.length ? mesesSelecionados : ['all']}
                 onChange={e => {
-                  const opts = Array.from(e.target.selectedOptions).map((o: any) => o.value);
+                  const opts = Array.from(e.target.selectedOptions).map((o) => o.value);
                   setMesesSelecionados(opts.includes('all') ? [] : opts);
                 }}
                 aria-label="Filtrar por máªs/ano"
               >
-                {mesesDisponiveis.map((m: any) => (
+                {mesesDisponiveis.map((m) => (
                   <option key={m.value} value={m.value}>{m.label}</option>
                 ))}
               </select>
@@ -359,7 +359,7 @@ export default function TabelaDesempenhoPage() {
           <CardContent>
             {/* Filtros premium */}
             <div className="flex flex-col sm:flex-row flex-wrap gap-2 mb-4 items-end">
-              {PERIODOS.map((p: any) => (
+              {PERIODOS.map((p) => (
                 <Button
                   key={p.value}
                   variant={periodo === p.value ? 'default' : 'outline'}
@@ -372,7 +372,7 @@ export default function TabelaDesempenhoPage() {
               ))}
               <div className="flex-1" />
               <div className="flex gap-2 items-center">
-                <Button variant="outline" className="btn-outline-dark" onClick={() => setPage(p => Math.max(1: any, p - 1))} disabled={page === 1 || loading} aria-label="Pá¡gina anterior">Anterior</Button>
+                <Button variant="outline" className="btn-outline-dark" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1 || loading} aria-label="Pá¡gina anterior">Anterior</Button>
                 <span className="card-description-dark">Pá¡gina {page}</span>
                 <Button variant="outline" className="btn-outline-dark" onClick={() => setPage(p => p + 1)} disabled={loading} aria-label="Prá³xima pá¡gina">Prá³xima</Button>
               </div>
@@ -388,7 +388,7 @@ export default function TabelaDesempenhoPage() {
                             <TooltipTrigger asChild>
                               <span>Grupo</span>
                             </TooltipTrigger>
-                            <TooltipContent>Macrogrupo financeiro (ex: Receitas, Custos: any, Má£o-de-Obra...)</TooltipContent>
+                            <TooltipContent>Macrogrupo financeiro (ex: Receitas, Custos, Má£o-de-Obra...)</TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
                       </TableHead>
@@ -436,7 +436,7 @@ export default function TabelaDesempenhoPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {gruposUnicos.map((grupo: any) => (
+                    {gruposUnicos.map((grupo) => (
                     <Fragment key={grupo}>
                       <TableRow
                         className={`bg-gray-100 dark:bg-gray-800/80 ${!isMobile ? 'sticky top-0 z-10' : ''}`}
@@ -458,7 +458,7 @@ export default function TabelaDesempenhoPage() {
                       <tr style={{ height: expandedGroups[grupo] !== false ? 'auto' : 0, overflow: 'hidden', transition: 'height 0.3s' }}>
                         <td colSpan={5} className="p-0">
                           <div style={{ maxHeight: expandedGroups[grupo] !== false ? 9999 : 0, overflow: 'hidden', transition: 'max-height 0.3s' }}>
-                            {expandedGroups[grupo] !== false && dadosPorGrupo[grupo].map((linha: any, idx: any) => {
+                            {expandedGroups[grupo] !== false && dadosPorGrupo[grupo].map((linha, idx) => {
                               const valor = typeof linha.valor === 'number' ? linha.valor : 0;
                               const meta = metas[linha.categoria] || null;
                               const atingiuMeta = meta && valor >= meta;
@@ -488,7 +488,7 @@ export default function TabelaDesempenhoPage() {
                                       </TooltipProvider>
                                     ) : <span className="text-gray-400 dark:text-gray-600">-</span>}
                                   </TableCell>
-                                  <TableCell className="py-3 px-2 sm:px-4 text-right align-top">{getPercent(valor: any, totalGeral)}</TableCell>
+                                  <TableCell className="py-3 px-2 sm:px-4 text-right align-top">{getPercent(valor, totalGeral)}</TableCell>
                                 </TableRow>
                               );
                             })}

@@ -355,7 +355,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
 
   // Filtrar itens baseado no contexto
   const getContextualItems = (context: NavigationContext): MenuItem[] => {
-    let filtered = menuItems.filter((item: any) => {
+    let filtered = menuItems.filter((item) => {
       // Filtrar por role
       if (item.requiredRole && context.userRole !== item.requiredRole) {
         return false
@@ -372,7 +372,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
     })
 
     // Priorizar baseado no contexto de workflow
-    filtered = filtered.sort((a: any, b: any) => {
+    filtered = filtered.sort((a, b) => {
       const getWorkflowScore = (item: MenuItem) => {
         switch (context.workflowState) {
           case 'opening':
@@ -413,7 +413,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
   const toggleFavorite = (itemId: string) => {
     setFavorites(prev => 
       prev.includes(itemId) 
-        ? prev.filter((id: any) => id !== itemId)
+        ? prev.filter((id) => id !== itemId)
         : [...prev, itemId]
     )
   }
@@ -422,7 +422,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
   const toggleCategory = (category: string) => {
     setExpandedCategories(prev => 
       prev.includes(category)
-        ? prev.filter((c: any) => c !== category)
+        ? prev.filter((c) => c !== category)
         : [...prev, category]
     )
   }
@@ -436,7 +436,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
   const contextualItems = getContextualItems(context)
 
   // Agrupar itens por categoria
-  const groupedItems = contextualItems.reduce((acc: any, item: any) => {
+  const groupedItems = contextualItems.reduce((acc, item) => {
     const category = item.category
     if (!acc[category]) acc[category] = []
     acc[category].push(item)
@@ -494,7 +494,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
               type="text"
               placeholder="Buscar..."
               value={searchQuery}
-              onChange={(e: any) => setSearchQuery(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -547,7 +547,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
               {/* Category Items */}
               {(isCollapsed || expandedCategories.includes(category)) && (
                 <div className="space-y-1">
-                  {items.map((item: any) => (
+                  {items.map((item) => (
                     <NavItem
                       key={item.id}
                       item={item}
@@ -626,7 +626,7 @@ function NavItem({
             )}
             
             <button
-              onClick={(e: any) => {
+              onClick={(e) => {
                 e.preventDefault()
                 onToggleFavorite(item.id)
               }}

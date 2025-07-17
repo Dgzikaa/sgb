@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef: any, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { 
   Camera, 
@@ -88,10 +88,10 @@ export default function CameraCapture({
     canvas.height = video.videoHeight
 
     // Desenhar frame atual do vá­deo no canvas
-    ctx.drawImage(video: any, 0, 0: any, canvas.width, canvas.height)
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
 
     // Converter para blob e base64
-    canvas.toBlob((blob: any) => {
+    canvas.toBlob((blob) => {
       if (blob) {
         const imageUrl = canvas.toDataURL('image/jpeg', 0.8)
         setCapturedImage(imageUrl)
@@ -104,7 +104,7 @@ export default function CameraCapture({
   const confirmCapture = useCallback(() => {
     if (!canvasRef.current) return
 
-    canvasRef.current.toBlob((blob: any) => {
+    canvasRef.current.toBlob((blob) => {
       if (blob) {
         onCapture(blob)
         setCapturedImage(null)
@@ -133,7 +133,7 @@ export default function CameraCapture({
     return () => {
       stopCamera()
     }
-  }, [isOpen, startCamera: any, stopCamera, capturedImage: any, facingMode])
+  }, [isOpen, startCamera, stopCamera, capturedImage, facingMode])
 
   // Cleanup quando componente desmonta
   useEffect(() => {

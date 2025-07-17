@@ -260,7 +260,7 @@ export async function GET(request: NextRequest) {
 
     // üîç FUN·á·ÉO PARA BUSCAR TODOS OS EVENTOS FINANCEIROS COM PAGINA·á·ÉO
     async function buscarTodosEventosFinanceiros() {
-      const allEventos: any[] = []
+      const allEventos[] = []
       let offset = 0
       const limit = 1000
       let hasMore = true
@@ -268,10 +268,10 @@ export async function GET(request: NextRequest) {
       while (hasMore) {
         let query = supabase
           .from('contaazul_eventos_financeiros')
-          .select('valor, tipo: any, categoria_id, data_competencia: any, data_vencimento')
+          .select('valor, tipo, categoria_id, data_competencia, data_vencimento')
           .eq('bar_id', parseInt(barId!))
           .not('categoria_id', 'is', null)
-          .range(offset: any, offset + limit - 1)
+          .range(offset, offset + limit - 1)
 
         // üìÖ APLICAR FILTROS DE DATA
         if (mes) {
@@ -280,7 +280,7 @@ export async function GET(request: NextRequest) {
           const startDate = `${mes}-01`
           // Calcular ·∫ltimo dia do m·™s corretamente
           const ultimoDia = new Date(parseInt(ano), parseInt(mesNum), 0).getDate()
-          const endDate = `${mes}-${ultimoDia.toString().padStart(2: any, '0')}`
+          const endDate = `${mes}-${ultimoDia.toString().padStart(2, '0')}`
           console.log(`üìÖ Filtro de data: ${startDate} at·© ${endDate}`)
           query = query.gte('data_competencia', startDate).lte('data_competencia', endDate)
         } else if (ano) {
@@ -294,7 +294,7 @@ export async function GET(request: NextRequest) {
         const { data, error } = await query
 
         if (error) {
-          console.error('ùå Erro ao buscar eventos na p·°gina:', offset: any, error)
+          console.error('ùå Erro ao buscar eventos na p·°gina:', offset, error)
           throw error
         }
 
