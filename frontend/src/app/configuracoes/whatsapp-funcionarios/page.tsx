@@ -97,7 +97,7 @@ export default function WhatsAppFuncionariosPage() {
     const todosUsuarios = [...usuarios, ...usuariosSemWhatsApp]
     const csv = [
       'Nome,Email,Celular,WhatsApp Válido,Cargo,Departamento,Status',
-      ...todosUsuarios.map(u => 
+      ...todosUsuarios.map((u: any) => 
         `"${u.nome}","${u.email}","${u.numero_formatado || u.celular || 'Sem celular'}","${u.whatsapp_valido ? 'Sim' : 'Não'}","${u.cargo || ''}","${u.departamento || ''}","${u.ativo ? 'Ativo' : 'Inativo'}"`
       )
     ].join('\n')
@@ -110,18 +110,18 @@ export default function WhatsAppFuncionariosPage() {
     link.click()
   }
 
-  const usuariosFiltrados = usuarios.filter(u =>
+  const usuariosFiltrados = usuarios.filter((u: any) =>
     u.nome.toLowerCase().includes(filtro.toLowerCase()) ||
     u.email.toLowerCase().includes(filtro.toLowerCase())
   )
 
-  const usuariosSemWhatsAppFiltrados = usuariosSemWhatsApp.filter(u =>
+  const usuariosSemWhatsAppFiltrados = usuariosSemWhatsApp.filter((u: any) =>
     u.nome.toLowerCase().includes(filtro.toLowerCase()) ||
     u.email.toLowerCase().includes(filtro.toLowerCase())
   )
 
-  const usuariosValidos = usuarios.filter(u => u.whatsapp_valido)
-  const usuariosInvalidos = usuarios.filter(u => !u.whatsapp_valido)
+  const usuariosValidos = usuarios.filter((u: any) => u.whatsapp_valido)
+  const usuariosInvalidos = usuarios.filter((u: any) => !u.whatsapp_valido)
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

@@ -654,7 +654,7 @@ export default function ComparativoPage() {
           let faturamentoAcumulado = 0
           let clientesAcumulados = 0
 
-          faturamento_horas = horasOrdenadas.map(hora => {
+          faturamento_horas = horasOrdenadas.map((hora: any) => {
             const dados = dadosPorHora[hora]
             const faturamento = dados.faturamento
             // CORREÇÃO: Para dias Yuzer, usar clientes distribuídos proporcionalmente
@@ -1496,7 +1496,7 @@ export default function ComparativoPage() {
                 className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Selecione o artista 1</option>
-                {listaArtistas.map(artista => (
+                {listaArtistas.map((artista: any) => (
                   <option key={artista} value={artista}>{artista}</option>
                 ))}
               </select>
@@ -1511,7 +1511,7 @@ export default function ComparativoPage() {
                 className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Selecione o artista 2</option>
-                {listaArtistas.filter(a => a !== artistaSelecionado1).map(artista => (
+                {listaArtistas.filter((a: any) => a !== artistaSelecionado1).map((artista: any) => (
                   <option key={artista} value={artista}>{artista}</option>
                 ))}
               </select>
@@ -1967,9 +1967,9 @@ export default function ComparativoPage() {
 
                     {/* Dados por horário */}
                     <div className="max-h-96 overflow-y-auto space-y-1">
-                      {horariosOrdenados.map(hora => {
-                        const data1Hora = dadosComparativos[0].faturamento_horas.find(h => h.hora === hora)
-                        const data2Hora = dadosComparativos[1].faturamento_horas.find(h => h.hora === hora)
+                      {horariosOrdenados.map((hora: any) => {
+                        const data1Hora = dadosComparativos[0].faturamento_horas.find((h: any) => h.hora === hora)
+                        const data2Hora = dadosComparativos[1].faturamento_horas.find((h: any) => h.hora === hora)
                         
                         const valor1 = data1Hora?.faturamento || 0
                         const valor2 = data2Hora?.faturamento || 0

@@ -118,7 +118,7 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
       return;
     }
 
-    setMessages(prev => prev.map(msg => 
+    setMessages(prev => prev.map((msg: any) => 
       msg.id === messageId 
         ? { ...msg, metadata: { ...msg.metadata, feedback } }
         : msg

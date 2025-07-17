@@ -115,8 +115,8 @@ export async function GET(request: NextRequest) {
       success: true,
       receitas: receitasComInsumos,
       total_receitas: receitasComInsumos.length,
-      receitas_bar: receitasComInsumos.filter(r => r.tipo_local === 'bar').length,
-      receitas_cozinha: receitasComInsumos.filter(r => r.tipo_local === 'cozinha').length
+      receitas_bar: receitasComInsumos.filter((r: any) => r.tipo_local === 'bar').length,
+      receitas_cozinha: receitasComInsumos.filter((r: any) => r.tipo_local === 'cozinha').length
     })
 
   } catch (error) {

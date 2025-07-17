@@ -48,7 +48,7 @@ export function DashboardGrid({
 
   const handleWidgetConfigChange = useCallback((config: WidgetConfig) => {
     if (onWidgetsChange) {
-      const updatedWidgets = widgets.map(w => 
+      const updatedWidgets = widgets.map((w: any) => 
         w.id === config.id ? config : w
       )
       onWidgetsChange(updatedWidgets)
@@ -57,7 +57,7 @@ export function DashboardGrid({
 
   const handleWidgetRemove = useCallback((id: string) => {
     if (onWidgetsChange) {
-      const updatedWidgets = widgets.filter(w => w.id !== id)
+      const updatedWidgets = widgets.filter((w: any) => w.id !== id)
       onWidgetsChange(updatedWidgets)
     }
   }, [widgets, onWidgetsChange])
@@ -79,7 +79,7 @@ export function DashboardGrid({
 
   const findEmptyPosition = (): { x: number; y: number } => {
     // Simples algoritmo para encontrar posição vazia
-    const occupied = widgets.map(w => w.position)
+    const occupied = widgets.map((w: any) => w.position)
     
     for (let y = 0; y < 10; y++) {
       for (let x = 0; x < 6; x++) {
@@ -95,7 +95,7 @@ export function DashboardGrid({
 
   const handleResetLayout = () => {
     if (onWidgetsChange) {
-      const resetWidgets = Object.values(WIDGET_PRESETS).map(preset => ({
+      const resetWidgets = Object.values(WIDGET_PRESETS).map((preset: any) => ({
         ...preset,
         id: preset.id,
         visible: true
@@ -107,7 +107,7 @@ export function DashboardGrid({
   const handleToggleAll = () => {
     if (onWidgetsChange) {
       const allVisible = widgets.every(w => w.visible)
-      const updatedWidgets = widgets.map(w => ({ ...w, visible: !allVisible }))
+      const updatedWidgets = widgets.map((w: any) => ({ ...w, visible: !allVisible }))
       onWidgetsChange(updatedWidgets)
     }
   }
@@ -140,7 +140,7 @@ export function DashboardGrid({
     const widgetId = e.dataTransfer.getData('text/plain')
     
     if (widgetId && dragOverPosition && onWidgetsChange) {
-      const updatedWidgets = widgets.map(w => 
+      const updatedWidgets = widgets.map((w: any) => 
         w.id === widgetId 
           ? { ...w, position: dragOverPosition }
           : w
@@ -152,8 +152,8 @@ export function DashboardGrid({
     setDragOverPosition(null)
   }
 
-  const visibleWidgets = widgets.filter(w => w.visible || isEditing)
-  const hiddenCount = widgets.filter(w => !w.visible).length
+  const visibleWidgets = widgets.filter((w: any) => w.visible || isEditing)
+  const hiddenCount = widgets.filter((w: any) => !w.visible).length
 
   return (
     <div className={cn('space-y-4', className)}>

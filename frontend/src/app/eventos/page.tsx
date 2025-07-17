@@ -196,7 +196,7 @@ export default function EventosPage() {
   }
 
   const getCategoria = (categoriaId: string) => {
-    return categoriasPadrao.find(cat => cat.id === categoriaId) || categoriasPadrao[0]
+    return categoriasPadrao.find((cat: any) => cat.id === categoriaId) || categoriasPadrao[0]
   }
 
   const getStatusColor = (status: string) => {
@@ -214,7 +214,7 @@ export default function EventosPage() {
     }
   }
 
-  const filteredEventos = eventos.filter(evento => {
+  const filteredEventos = eventos.filter((evento: any) => {
     const matchesCategoria = filtroCategoria === 'all' || evento.categoria === filtroCategoria
     const matchesStatus = filtroStatus === 'all' || evento.status === filtroStatus
     const matchesSearch = searchTerm === '' || 
@@ -326,7 +326,7 @@ export default function EventosPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todas as categorias</SelectItem>
-                      {categoriasPadrao.map(categoria => (
+                      {categoriasPadrao.map((categoria: any) => (
                         <SelectItem key={categoria.id} value={categoria.id}>
                           {categoria.icon} {categoria.nome}
                         </SelectItem>
@@ -454,7 +454,7 @@ export default function EventosPage() {
                   <Users className="w-4 h-4 text-green-600 dark:text-green-400" />
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {eventos.filter(e => e.status === 'confirmado').length}
+                  {eventos.filter((e: any) => e.status === 'confirmado').length}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Confirmados</p>
               </CardContent>
@@ -466,7 +466,7 @@ export default function EventosPage() {
                   <Clock className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {eventos.filter(e => e.status === 'planejado').length}
+                  {eventos.filter((e: any) => e.status === 'planejado').length}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Planejados</p>
               </CardContent>
@@ -478,7 +478,7 @@ export default function EventosPage() {
                   <Tag className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {new Set(eventos.map(e => e.categoria)).size}
+                  {new Set(eventos.map((e: any) => e.categoria)).size}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Categorias</p>
               </CardContent>
@@ -576,7 +576,7 @@ function EventForm({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {categorias.map(categoria => (
+              {categorias.map((categoria: any) => (
                 <SelectItem key={categoria.id} value={categoria.id}>
                   {categoria.icon} {categoria.nome}
                 </SelectItem>
@@ -663,24 +663,24 @@ function CalendarView({
   })
 
   const getEventosForDay = (day: Date) => {
-    return eventos.filter(evento => isSameDay(new Date(evento.data_evento), day))
+    return eventos.filter((evento: any) => isSameDay(new Date(evento.data_evento), day))
   }
 
   const getCategoria = (categoriaId: string) => {
-    return categorias.find(cat => cat.id === categoriaId) || categorias[0]
+    return categorias.find((cat: any) => cat.id === categoriaId) || categorias[0]
   }
 
   return (
     <div className="grid grid-cols-7 gap-1">
       {/* Cabeçalho dos dias da semana */}
-      {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (
+      {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day: any) => (
         <div key={day} className="p-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
           {day}
         </div>
       ))}
       
       {/* Dias do mês */}
-      {days.map(day => {
+      {days.map((day: any) => {
         const dayEvents = getEventosForDay(day)
         const isCurrentMonth = isSameMonth(day, currentDate)
         const isCurrentDay = isToday(day)
@@ -703,7 +703,7 @@ function CalendarView({
             </div>
             
             <div className="space-y-1">
-              {dayEvents.slice(0, 2).map(evento => {
+              {dayEvents.slice(0, 2).map((evento: any) => {
                 const categoria = getCategoria(evento.categoria)
                 return (
                   <div
@@ -749,7 +749,7 @@ function EventList({
   categorias: CategoriaEvento[]
 }) {
   const getCategoria = (categoriaId: string) => {
-    return categorias.find(cat => cat.id === categoriaId) || categorias[0]
+    return categorias.find((cat: any) => cat.id === categoriaId) || categorias[0]
   }
 
   const getStatusColor = (status: string) => {
@@ -778,7 +778,7 @@ function EventList({
 
   return (
     <div className="space-y-3">
-      {eventos.map(evento => {
+      {eventos.map((evento: any) => {
         const categoria = getCategoria(evento.categoria)
         return (
           <div

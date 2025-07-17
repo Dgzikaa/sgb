@@ -174,7 +174,7 @@ export function DropZone({
           
           {accepts.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
-              {accepts.map(type => (
+              {accepts.map((type: any) => (
                 <span
                   key={type}
                   className="px-2 py-1 bg-gray-200 dark:bg-gray-700 text-xs rounded text-gray-600 dark:text-gray-400"

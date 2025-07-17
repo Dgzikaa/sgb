@@ -35,13 +35,13 @@ export function SelectWithSearch({
   const inputRef = useRef<HTMLInputElement>(null)
 
   // Filtrar opções baseado no termo de busca
-  const filteredOptions = options.filter(option =>
+  const filteredOptions = options.filter((option: any) =>
     option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
     option.email?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   // Encontrar a opção selecionada
-  const selectedOption = options.find(option => option.value === value)
+  const selectedOption = options.find((option: any) => option.value === value)
 
   // Fechar dropdown quando clicar fora
   useEffect(() => {

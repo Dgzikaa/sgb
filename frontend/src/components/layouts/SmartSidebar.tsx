@@ -355,7 +355,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
 
   // Filtrar itens baseado no contexto
   const getContextualItems = (context: NavigationContext): MenuItem[] => {
-    let filtered = menuItems.filter(item => {
+    let filtered = menuItems.filter((item: any) => {
       // Filtrar por role
       if (item.requiredRole && context.userRole !== item.requiredRole) {
         return false
@@ -413,7 +413,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
   const toggleFavorite = (itemId: string) => {
     setFavorites(prev => 
       prev.includes(itemId) 
-        ? prev.filter(id => id !== itemId)
+        ? prev.filter((id: any) => id !== itemId)
         : [...prev, itemId]
     )
   }
@@ -422,7 +422,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
   const toggleCategory = (category: string) => {
     setExpandedCategories(prev => 
       prev.includes(category)
-        ? prev.filter(c => c !== category)
+        ? prev.filter((c: any) => c !== category)
         : [...prev, category]
     )
   }

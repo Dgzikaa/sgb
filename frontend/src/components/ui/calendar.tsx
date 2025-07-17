@@ -102,7 +102,7 @@ const Calendar: React.FC<CalendarProps> = ({
       
       {/* Day headers */}
       <div className="grid grid-cols-7 gap-1 mb-2">
-        {dayNames.map(day => (
+        {dayNames.map((day: any) => (
           <div key={day} className="p-2 text-center text-sm font-medium text-gray-500">
             {day}
           </div>

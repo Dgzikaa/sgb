@@ -74,12 +74,12 @@ export default function ResponsavelWhatsAppSelector({
         onResponsaveisChange([...responsaveisSelecionados, numeroLimpo])
       }
     } else {
-      onResponsaveisChange(responsaveisSelecionados.filter(n => n !== numeroLimpo))
+      onResponsaveisChange(responsaveisSelecionados.filter((n: any) => n !== numeroLimpo))
     }
   }
 
-  const usuariosValidos = usuarios.filter(u => u.whatsapp_valido)
-  const usuariosInvalidos = usuarios.filter(u => !u.whatsapp_valido)
+  const usuariosValidos = usuarios.filter((u: any) => u.whatsapp_valido)
+  const usuariosInvalidos = usuarios.filter((u: any) => !u.whatsapp_valido)
 
   return (
     <div className="space-y-6">

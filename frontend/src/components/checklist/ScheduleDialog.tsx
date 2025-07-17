@@ -171,7 +171,7 @@ export default function ScheduleDialog({
     setConfig(prev => ({
       ...prev,
       diasSemana: prev.diasSemana?.includes(dia)
-        ? prev.diasSemana.filter(d => d !== dia)
+        ? prev.diasSemana.filter((d: any) => d !== dia)
         : [...(prev.diasSemana || []), dia]
     }))
   }
@@ -181,7 +181,7 @@ export default function ScheduleDialog({
       case 'diaria':
         return `Todos os dias às ${config.horario}`
       case 'semanal':
-        const diasTexto = config.diasSemana?.map(d => diasSemanaOptions[d].label).join(', ')
+        const diasTexto = config.diasSemana?.map((d: any) => diasSemanaOptions[d].label).join(', ')
         return `${diasTexto} às ${config.horario}`
       case 'mensal':
         return `Todo dia ${config.diaMes} às ${config.horario}`
@@ -305,7 +305,7 @@ export default function ScheduleDialog({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from({ length: 31 }, (_, i) => i + 1).map(dia => (
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map((dia: any) => (
                       <SelectItem key={dia} value={dia.toString()}>
                         Dia {dia}
                       </SelectItem>

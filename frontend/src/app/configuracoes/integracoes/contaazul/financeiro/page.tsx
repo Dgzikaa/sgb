@@ -214,11 +214,11 @@ export default function ContaAzulFinanceiroPage() {
     }
   }
 
-  const contasReceberFiltradas = contasReceber.filter(conta => 
+  const contasReceberFiltradas = contasReceber.filter((conta: any) => 
     filtroStatus === 'TODOS' || conta.status === filtroStatus
   )
 
-  const contasPagarFiltradas = contasPagar.filter(conta => 
+  const contasPagarFiltradas = contasPagar.filter((conta: any) => 
     filtroStatus === 'TODOS' || conta.status === filtroStatus
   )
 

@@ -57,7 +57,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   }, [])
 
   const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id))
+    setToasts(prev => prev.filter((toast: any) => toast.id !== id))
   }, [])
 
   return (
@@ -78,7 +78,7 @@ const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, removeToast }) 
 
   return (
     <div className="fixed top-4 right-4 z-50 flex flex-col gap-3 max-w-md">
-      {toasts.map(toast => (
+      {toasts.map((toast: any) => (
         <ToastItem key={toast.id} toast={toast} onRemove={removeToast} />
       ))}
     </div>

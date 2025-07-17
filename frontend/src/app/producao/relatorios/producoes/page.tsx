@@ -282,7 +282,7 @@ export default function RelatorioProducoesPage() {
                   <>
                     <div className="text-center p-3 bg-purple-50 rounded-lg">
                       <div className="text-2xl font-bold text-purple-600">
-                        {producoes.filter(p => p.percentual_aderencia_receita && p.percentual_aderencia_receita >= 95).length}
+                        {producoes.filter((p: any) => p.percentual_aderencia_receita && p.percentual_aderencia_receita >= 95).length}
                       </div>
                       <div className="text-sm text-purple-700">Aderência Excelente</div>
                     </div>
@@ -290,7 +290,7 @@ export default function RelatorioProducoesPage() {
                     <div className="text-center p-3 bg-indigo-50 rounded-lg">
                       <div className="text-2xl font-bold text-indigo-600">
                         {producoes.some(p => p.percentual_aderencia_receita) 
-                          ? Math.round(producoes.filter(p => p.percentual_aderencia_receita).reduce((acc, p) => acc + (p.percentual_aderencia_receita || 0), 0) / producoes.filter(p => p.percentual_aderencia_receita).length)
+                          ? Math.round(producoes.filter((p: any) => p.percentual_aderencia_receita).reduce((acc, p) => acc + (p.percentual_aderencia_receita || 0), 0) / producoes.filter((p: any) => p.percentual_aderencia_receita).length)
                           : 0}%
                       </div>
                       <div className="text-sm text-indigo-700">Aderência Média</div>
@@ -298,14 +298,14 @@ export default function RelatorioProducoesPage() {
                     
                     <div className="text-center p-3 bg-pink-50 rounded-lg">
                       <div className="text-2xl font-bold text-pink-600">
-                        {producoes.filter(p => p.percentual_aderencia_receita && p.percentual_aderencia_receita < 75).length}
+                        {producoes.filter((p: any) => p.percentual_aderencia_receita && p.percentual_aderencia_receita < 75).length}
                       </div>
                       <div className="text-sm text-pink-700">Aderência Ruim</div>
                     </div>
                     
                     <div className="text-center p-3 bg-gray-50 rounded-lg">
                       <div className="text-2xl font-bold text-gray-600">
-                        {producoes.filter(p => !p.percentual_aderencia_receita).length}
+                        {producoes.filter((p: any) => !p.percentual_aderencia_receita).length}
                       </div>
                       <div className="text-sm text-gray-700">Sem Dados</div>
                     </div>

@@ -254,11 +254,11 @@ export default function ReceitasPage() {
 
   // Função para obter receitas onde o insumo é chefe
   const getReceitasOndeEChefe = useCallback((insumoId: number) => {
-    return receitas.filter(receita => 
+    return receitas.filter((receita: any) => 
       receita.insumos?.some(insumo => 
         insumo.id === insumoId && insumo.is_chefe
       )
-    ).map(receita => receita.receita_nome)
+    ).map((receita: any) => receita.receita_nome)
   }, [receitas])
 
   // Carregar dados quando o bar for selecionado
@@ -282,11 +282,11 @@ export default function ReceitasPage() {
 
   const insumosFiltrados = useMemo(() => {
     // Filtrar por tipo_local primeiro
-    const insumosPorTipo = insumos.filter(insumo => 
+    const insumosPorTipo = insumos.filter((insumo: any) => 
       insumo.tipo_local === tipoLocalInsumos
     )
     
-    return insumosPorTipo.filter(insumo =>
+    return insumosPorTipo.filter((insumo: any) =>
       insumo.nome.toLowerCase().includes(buscaInsumos.toLowerCase()) ||
       insumo.codigo.toLowerCase().includes(buscaInsumos.toLowerCase()) ||
       insumo.categoria.toLowerCase().includes(buscaInsumos.toLowerCase())
@@ -295,11 +295,11 @@ export default function ReceitasPage() {
 
   const receitasFiltradas = useMemo(() => {
     // Filtrar por tipo_local primeiro
-    const receitasPorTipo = receitas.filter(receita => 
+    const receitasPorTipo = receitas.filter((receita: any) => 
       receita.tipo_local === tipoLocalReceitas
     )
     
-    return receitasPorTipo.filter(receita =>
+    return receitasPorTipo.filter((receita: any) =>
       receita.receita_nome.toLowerCase().includes(buscaReceitas.toLowerCase()) ||
       receita.receita_codigo.toLowerCase().includes(buscaReceitas.toLowerCase()) ||
       receita.receita_categoria.toLowerCase().includes(buscaReceitas.toLowerCase())
@@ -308,12 +308,12 @@ export default function ReceitasPage() {
 
   // Otimização: calcular insumos chefes uma vez
   const insumosChefes = useMemo(() => {
-    return insumos.filter(insumo => isInsumoChefe(insumo.id))
+    return insumos.filter((insumo: any) => isInsumoChefe(insumo.id))
   }, [insumos, isInsumoChefe])
 
   // Filtrar insumos para adicionar na receita (baseado na busca)
   const insumosParaReceita = useMemo(() => {
-    return insumos.filter(insumo =>
+    return insumos.filter((insumo: any) =>
       insumo.nome.toLowerCase().includes(buscaInsumoReceita.toLowerCase()) ||
       insumo.codigo.toLowerCase().includes(buscaInsumoReceita.toLowerCase())
     )
@@ -325,10 +325,10 @@ export default function ReceitasPage() {
     
     // Buscar códigos que seguem o padrão i0000
     const codigosNumericos = insumos
-      .map(insumo => insumo.codigo)
-      .filter(codigo => /^i\d+$/.test(codigo))
-      .map(codigo => parseInt(codigo.substring(1)))
-      .filter(numero => !isNaN(numero))
+      .map((insumo: any) => insumo.codigo)
+      .filter((codigo: any) => /^i\d+$/.test(codigo))
+      .map((codigo: any) => parseInt(codigo.substring(1)))
+      .filter((numero: any) => !isNaN(numero))
     
     if (codigosNumericos.length === 0) return 'i0001'
     
@@ -346,11 +346,11 @@ export default function ReceitasPage() {
     
     // Buscar códigos que seguem o padrão pc000 ou pd000
     const codigosNumericos = receitas
-      .filter(receita => receita.tipo_local === tipoLocal)
-      .map(receita => receita.receita_codigo)
-      .filter(codigo => new RegExp(`^${prefixo}\\d+$`).test(codigo))
-      .map(codigo => parseInt(codigo.substring(2)))
-      .filter(numero => !isNaN(numero))
+      .filter((receita: any) => receita.tipo_local === tipoLocal)
+      .map((receita: any) => receita.receita_codigo)
+      .filter((codigo: any) => new RegExp(`^${prefixo}\\d+$`).test(codigo))
+      .map((codigo: any) => parseInt(codigo.substring(2)))
+      .filter((numero: any) => !isNaN(numero))
     
     if (codigosNumericos.length === 0) return `${prefixo}001`
     
@@ -424,7 +424,7 @@ export default function ReceitasPage() {
       }
 
       // Atualizar na lista local
-      setInsumos(prev => prev.map(insumo => 
+      setInsumos(prev => prev.map((insumo: any) => 
         insumo.id === insumoEditando.id 
           ? { ...insumoEditando }
           : insumo
@@ -519,7 +519,7 @@ export default function ReceitasPage() {
       setIsLoading(true)
       
       // Mapear insumos para o formato correto da API
-      const insumosParaAPI = (receitaEditando.insumos || []).map(insumo => ({
+      const insumosParaAPI = (receitaEditando.insumos || []).map((insumo: any) => ({
         id: insumo.id,
         quantidade_necessaria: insumo.quantidade_necessaria || 0,
         is_chefe: insumo.is_chefe || false
@@ -584,7 +584,7 @@ export default function ReceitasPage() {
         try {
           // TODO: Implementar API de exclusão
           // Por enquanto, remover localmente
-          setInsumos(prev => prev.filter(i => i.id !== insumo.id))
+          setInsumos(prev => prev.filter((i: any) => i.id !== insumo.id))
           toast.success('Sucesso!', 'Insumo excluído com sucesso')
         } catch (error) {
           toast.error('Erro', 'Falha ao excluir insumo')
@@ -657,23 +657,23 @@ export default function ReceitasPage() {
   }
 
   const removerInsumoReceita = (insumoId: number) => {
-    setInsumosReceita(prev => prev.filter(i => i.insumo_id !== insumoId))
+    setInsumosReceita(prev => prev.filter((i: any) => i.insumo_id !== insumoId))
   }
 
   const definirInsumoChefe = (insumoId: number) => {
     setInsumosReceita(prev => {
-      const insumoClicado = prev.find(i => i.insumo_id === insumoId)
+      const insumoClicado = prev.find((i: any) => i.insumo_id === insumoId)
       
       if (insumoClicado?.is_chefe) {
         // Se já é chefe, desmarcar
-        return prev.map(i => 
+        return prev.map((i: any) => 
           i.insumo_id === insumoId 
             ? { ...i, is_chefe: false }
             : i
         )
       } else {
         // Se não é chefe, marcar como chefe e desmarcar todos os outros
-        return prev.map(i => ({
+        return prev.map((i: any) => ({
           ...i,
           is_chefe: i.insumo_id === insumoId
         }))
@@ -763,7 +763,7 @@ export default function ReceitasPage() {
       async () => {
         try {
           // TODO: Implementar API de exclusão de receitas
-          setReceitas(prev => prev.filter(r => r.receita_codigo !== receita.receita_codigo))
+          setReceitas(prev => prev.filter((r: any) => r.receita_codigo !== receita.receita_codigo))
           toast.success('Sucesso!', 'Receita excluída com sucesso')
         } catch (error) {
           toast.error('Erro', 'Falha ao excluir receita')
@@ -791,14 +791,14 @@ export default function ReceitasPage() {
 
   // Função para obter nome do insumo por ID
   const obterNomeInsumo = (insumoId: number) => {
-    const insumo = insumos.find(i => i.id === insumoId)
+    const insumo = insumos.find((i: any) => i.id === insumoId)
     return insumo ? insumo.nome : `Insumo #${insumoId}`
   }
 
   // Função para obter insumo chefe de uma receita
   const obterInsumoChefe = (receita: Receita) => {
     if (!receita.insumos) return null
-    return receita.insumos.find(i => i.is_chefe)
+    return receita.insumos.find((i: any) => i.is_chefe)
   }
 
   // Função para sincronizar receitas/insumos do Google Sheets
@@ -913,14 +913,14 @@ export default function ReceitasPage() {
                     onClick={() => setTipoLocalInsumos('cozinha')}
                     className="flex items-center justify-center gap-1 sm:gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
-                    👨‍🍳 Cozinha ({insumos.filter(i => i.tipo_local === 'cozinha').length})
+                    👨‍🍳 Cozinha ({insumos.filter((i: any) => i.tipo_local === 'cozinha').length})
                   </Button>
                   <Button
                     variant={tipoLocalInsumos === 'bar' ? 'default' : 'outline'}
                     onClick={() => setTipoLocalInsumos('bar')}
                     className="flex items-center justify-center gap-1 sm:gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
-                    🍺 Bar ({insumos.filter(i => i.tipo_local === 'bar').length})
+                    🍺 Bar ({insumos.filter((i: any) => i.tipo_local === 'bar').length})
                   </Button>
                 </div>
               </div>
@@ -1106,14 +1106,14 @@ export default function ReceitasPage() {
                     onClick={() => setTipoLocalReceitas('cozinha')}
                     className="flex items-center justify-center gap-1 sm:gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
-                    👨‍🍳 Cozinha ({receitas.filter(r => r.tipo_local === 'cozinha').length})
+                    👨‍🍳 Cozinha ({receitas.filter((r: any) => r.tipo_local === 'cozinha').length})
                   </Button>
                   <Button
                     variant={tipoLocalReceitas === 'bar' ? 'default' : 'outline'}
                     onClick={() => setTipoLocalReceitas('bar')}
                     className="flex items-center justify-center gap-1 sm:gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
-                    🍺 Bar ({receitas.filter(r => r.tipo_local === 'bar').length})
+                    🍺 Bar ({receitas.filter((r: any) => r.tipo_local === 'bar').length})
                   </Button>
                 </div>
               </div>
@@ -1445,7 +1445,7 @@ export default function ReceitasPage() {
                   <div className="space-y-2">
                     <Label className="text-gray-700 dark:text-gray-300">Insumos Adicionados:</Label>
                     {insumosReceita.map((insumoReceita) => {
-                      const insumo = insumos.find(i => i.id === insumoReceita.insumo_id)
+                      const insumo = insumos.find((i: any) => i.id === insumoReceita.insumo_id)
                       if (!insumo) return null
 
                       return (

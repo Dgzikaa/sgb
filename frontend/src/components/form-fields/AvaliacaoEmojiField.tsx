@@ -94,7 +94,7 @@ export default function AvaliacaoEmojiField({
 
   const getOpcaoAtual = () => {
     const valorAtual = hoveredValue ?? value
-    return config.opcoes.find(opcao => opcao.valor === valorAtual)
+    return config.opcoes.find((opcao: any) => opcao.valor === valorAtual)
   }
 
   const opcaoAtual = getOpcaoAtual()
@@ -216,13 +216,13 @@ export function useAvaliacaoEmoji(valorInicial?: number) {
   const getLabel = (variant: keyof typeof avaliacaoConfigs = 'emojis') => {
     if (!valor) return ''
     const config = avaliacaoConfigs[variant]
-    return config.opcoes.find(opcao => opcao.valor === valor)?.label || ''
+    return config.opcoes.find((opcao: any) => opcao.valor === valor)?.label || ''
   }
   
   const getEmoji = (variant: keyof typeof avaliacaoConfigs = 'emojis') => {
     if (!valor) return ''
     const config = avaliacaoConfigs[variant]
-    return config.opcoes.find(opcao => opcao.valor === valor)?.emoji || ''
+    return config.opcoes.find((opcao: any) => opcao.valor === valor)?.emoji || ''
   }
   
   return {

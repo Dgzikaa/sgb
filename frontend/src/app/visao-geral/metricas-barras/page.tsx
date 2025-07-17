@@ -243,7 +243,7 @@ export default function MetricasBarrasPage() {
         if (allTempoCozinhaData.length >= 3) {
           const temposValidosCozinha = allTempoCozinhaData
             .map((item: any) => parseInt(item.t0_t2) / 60) // Converter para minutos
-            .filter(tempo => tempo >= 1 && tempo <= 45) // Filtro adicional
+            .filter((tempo: any) => tempo >= 1 && tempo <= 45) // Filtro adicional
             .sort((a, b) => a - b)
           
           if (temposValidosCozinha.length >= 3) {
@@ -260,7 +260,7 @@ export default function MetricasBarrasPage() {
         if (allTempoBarData.length >= 3) {
           const temposValidosBar = allTempoBarData
             .map((item: any) => parseInt(item.t0_t3) / 60) // Converter para minutos
-            .filter(tempo => tempo >= 0.5 && tempo <= 20) // Filtro adicional
+            .filter((tempo: any) => tempo >= 0.5 && tempo <= 20) // Filtro adicional
             .sort((a, b) => a - b)
           
           if (temposValidosBar.length >= 3) {
@@ -312,7 +312,7 @@ export default function MetricasBarrasPage() {
       red: '#ef4444',
       cyan: '#06b6d4'
     }
-    const info = metricas.find(m => m.key === metrica)
+    const info = metricas.find((m: any) => m.key === metrica)
     return cores[info?.color || 'blue']
   }
 
@@ -364,9 +364,9 @@ export default function MetricasBarrasPage() {
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
               <h3 className="text-lg font-bold text-slate-800 mb-4">📈 Resumo Anual {anoSelecionado}</h3>
               <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-                {metricas.map(metrica => {
+                {metricas.map((metrica: any) => {
                   const total = dadosMensais.reduce((sum, mes) => sum + (mes[metrica.key as keyof DadosMensal] as number), 0)
-                  const media = total / dadosMensais.filter(mes => (mes[metrica.key as keyof DadosMensal] as number) > 0).length
+                  const media = total / dadosMensais.filter((mes: any) => (mes[metrica.key as keyof DadosMensal] as number) > 0).length
                   const metaAnual = (metas[metrica.metaKey as keyof MetasConfig] as number) * (metrica.key === 'faturamento' || metrica.key === 'clientes' || metrica.key === 'reservas' ? 12 : 1)
                   const percentual = metaAnual > 0 ? (total / metaAnual) * 100 : 0
                   
@@ -389,8 +389,8 @@ export default function MetricasBarrasPage() {
             </div>
 
             {/* Gráficos de Barras por Métrica */}
-            {metricas.map(metrica => {
-              const maxValor = Math.max(...dadosMensais.map(mes => mes[metrica.key as keyof DadosMensal] as number), metas[metrica.metaKey as keyof MetasConfig] as number)
+            {metricas.map((metrica: any) => {
+              const maxValor = Math.max(...dadosMensais.map((mes: any) => mes[metrica.key as keyof DadosMensal] as number), metas[metrica.metaKey as keyof MetasConfig] as number)
               
               return (
                 <div key={metrica.key} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
@@ -521,8 +521,8 @@ export default function MetricasBarrasPage() {
                       </div>
                       <div className="text-xs text-slate-500">
                         {(() => {
-                          const mesesComDados = dadosMensais.filter(mes => (mes[metrica.key as keyof DadosMensal] as number) > 0)
-                          const mesesAcimaMeta = mesesComDados.filter(mes => (mes[metrica.key as keyof DadosMensal] as number) >= (metas[metrica.metaKey as keyof MetasConfig] as number))
+                          const mesesComDados = dadosMensais.filter((mes: any) => (mes[metrica.key as keyof DadosMensal] as number) > 0)
+                          const mesesAcimaMeta = mesesComDados.filter((mes: any) => (mes[metrica.key as keyof DadosMensal] as number) >= (metas[metrica.metaKey as keyof MetasConfig] as number))
                           return `${mesesAcimaMeta.length}/${mesesComDados.length} meses acima da meta`
                         })()}
                       </div>
@@ -538,7 +538,7 @@ export default function MetricasBarrasPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <h4 className="font-semibold text-slate-700">🏆 Melhores Meses</h4>
-                  {metricas.slice(0, 3).map(metrica => {
+                  {metricas.slice(0, 3).map((metrica: any) => {
                     const melhorMes = dadosMensais.reduce((max, mes) => 
                       (mes[metrica.key as keyof DadosMensal] as number) > (max[metrica.key as keyof DadosMensal] as number) ? mes : max
                     )
@@ -555,7 +555,7 @@ export default function MetricasBarrasPage() {
                   <h4 className="font-semibold text-slate-700">📊 Performance Geral</h4>
                   {(() => {
                     const totalMetas = metricas.length
-                    const metasAtingidas = metricas.filter(metrica => {
+                    const metasAtingidas = metricas.filter((metrica: any) => {
                       const total = dadosMensais.reduce((sum, mes) => sum + (mes[metrica.key as keyof DadosMensal] as number), 0)
                       const metaAnual = (metas[metrica.metaKey as keyof MetasConfig] as number) * (metrica.key === 'faturamento' || metrica.key === 'clientes' || metrica.key === 'reservas' ? 12 : 1)
                       return total >= metaAnual

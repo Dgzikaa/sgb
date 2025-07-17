@@ -69,7 +69,7 @@ export default function MetricaEvolucaoPage() {
   useEffect(() => {
     // Só ajustar automaticamente se ainda não foi feito para esta métrica
     if (!jaAjustouPeriodo) {
-      const metricaInfo = metricas.find(m => m.value === metricaSelecionada)
+      const metricaInfo = metricas.find((m: any) => m.value === metricaSelecionada)
       if (metricaInfo?.dataInicio) {
         console.log(`📅 Ajustando período inicial para métrica ${metricaSelecionada}: início em ${metricaInfo.dataInicio}`)
         setPeriodoInicio(metricaInfo.dataInicio)
@@ -469,11 +469,11 @@ export default function MetricaEvolucaoPage() {
               console.log('👥 DEBUG - Clientes por dia antes do filtro:', clientesPorDia)
               
               // Verificar se há dados para o período específico de março
-              const diasComDados = Object.keys(faturamentoPorDia).filter(data => data >= '2025-03-01' && data <= '2025-03-04')
+              const diasComDados = Object.keys(faturamentoPorDia).filter((data: any) => data >= '2025-03-01' && data <= '2025-03-04')
               console.log('📅 DEBUG - Dias com dados em março (01-04):', diasComDados)
               
               dados = Object.keys(faturamentoPorDia)
-                .filter(data => {
+                .filter((data: any) => {
                   const temClientes = clientesPorDia[data] > 0
                   const temFaturamento = faturamentoPorDia[data] > 0
                   
@@ -481,7 +481,7 @@ export default function MetricaEvolucaoPage() {
                   
                   return temClientes && temFaturamento // Só dias com clientes E faturamento
                 })
-                .map(data => {
+                .map((data: any) => {
                   const faturamento = faturamentoPorDia[data]
                   const clientes = clientesPorDia[data]
                   const ticketCalculado = faturamento / clientes
@@ -775,7 +775,7 @@ export default function MetricaEvolucaoPage() {
     }
   }
 
-  const metricaInfo = metricas.find(m => m.value === metricaSelecionada)
+  const metricaInfo = metricas.find((m: any) => m.value === metricaSelecionada)
   const valorTotal = dadosEvolucao.reduce((sum: number, item: any) => sum + item.valor, 0)
   const valorMedio = dadosEvolucao.length > 0 ? valorTotal / dadosEvolucao.length : 0
   const metaMedia = dadosEvolucao.length > 0 ? dadosEvolucao[0].meta || 0 : 0
@@ -807,7 +807,7 @@ export default function MetricaEvolucaoPage() {
                   setJaAjustouPeriodo(false)
                   
                   // Ajustar período baseado na métrica selecionada
-                  const metricaSelecionadaInfo = metricas.find(m => m.value === e.target.value)
+                  const metricaSelecionadaInfo = metricas.find((m: any) => m.value === e.target.value)
                   if (metricaSelecionadaInfo?.dataInicio) {
                     console.log(`🔧 Usuário selecionou ${e.target.value} - ajustando data para ${metricaSelecionadaInfo.dataInicio}`)
                     setPeriodoInicio(metricaSelecionadaInfo.dataInicio)
@@ -821,7 +821,7 @@ export default function MetricaEvolucaoPage() {
                 }}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 bg-white"
               >
-                {metricas.map(metrica => (
+                {metricas.map((metrica: any) => (
                   <option key={metrica.value} value={metrica.value} className="text-gray-900 bg-white">
                     {metrica.icon} {metrica.label}
                   </option>
@@ -1171,7 +1171,7 @@ export default function MetricaEvolucaoPage() {
               {dadosEvolucao.length === 0 && (metricaSelecionada && periodoInicio && periodoFim) ? (
                 <>
                   <p>
-                    Não foram encontrados dados para <strong>{metricas.find(m => m.value === metricaSelecionada)?.label}</strong> 
+                    Não foram encontrados dados para <strong>{metricas.find((m: any) => m.value === metricaSelecionada)?.label}</strong> 
                     no período de <strong>{new Date(periodoInicio).toLocaleDateString('pt-BR')}</strong> até <strong>{new Date(periodoFim).toLocaleDateString('pt-BR')}</strong>.
                   </p>
                   <div className="mt-4 p-4 bg-blue-50 rounded-lg text-left">

@@ -133,7 +133,7 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
   const [testResult, setTestResult] = useState<{success: boolean, message: string} | null>(null)
   const [saving, setSaving] = useState(false)
 
-  const selectedProvider = providers.find(p => p.id === config.provider)
+  const selectedProvider = providers.find((p: any) => p.id === config.provider)
 
   const handleProviderChange = (providerId: string) => {
     setConfig(prev => ({

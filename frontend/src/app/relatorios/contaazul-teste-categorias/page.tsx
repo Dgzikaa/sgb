@@ -345,7 +345,7 @@ export default function TesteVisaoCompetenciaPage() {
     return new Date(dateString).toLocaleDateString('pt-BR')
   }
 
-  const dadosFiltrados = dados.filter(item => 
+  const dadosFiltrados = dados.filter((item: any) => 
     filtroTipo === 'TODOS' || item.tipo === filtroTipo
   )
 

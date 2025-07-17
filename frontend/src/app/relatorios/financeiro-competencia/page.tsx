@@ -256,11 +256,11 @@ export default function TabelaDesempenhoPage() {
 
   // Memoização de totais
   const totalGeral = useMemo(() => dados.reduce((sum, linha) => sum + (typeof linha.valor === 'number' ? linha.valor : 0), 0), [dados]);
-  const gruposUnicos = useMemo(() => Array.from(new Set(dados.map(l => l.grupo))), [dados]);
+  const gruposUnicos = useMemo(() => Array.from(new Set(dados.map((l: any) => l.grupo))), [dados]);
   const dadosPorGrupo = useMemo(() => {
     const out: Record<string, any[]> = {};
     gruposUnicos.forEach(grupo => {
-      out[grupo] = dados.filter(l => l.grupo === grupo);
+      out[grupo] = dados.filter((l: any) => l.grupo === grupo);
     });
     return out;
   }, [dados, gruposUnicos]);
@@ -290,7 +290,7 @@ export default function TabelaDesempenhoPage() {
       });
       if (tipo === 'csv') {
         let csv = header.join(';') + '\n';
-        csv += rows.map(r => r.join(';')).join('\n');
+        csv += rows.map((r: any) => r.join(';')).join('\n');
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         saveAs(blob, 'tabela_desempenho.csv');
       } else {
@@ -305,8 +305,8 @@ export default function TabelaDesempenhoPage() {
   // Multi-select de meses
   const [mesesSelecionados, setMesesSelecionados] = useState<string[]>([]);
   const mesesDisponiveis = useMemo(() => {
-    const meses = Array.from(new Set(dados.map(l => l.mes_ano))).filter(Boolean);
-    return [{ label: 'Todo Período', value: 'all' }, ...meses.map(m => ({ label: m, value: m }))];
+    const meses = Array.from(new Set(dados.map((l: any) => l.mes_ano))).filter(Boolean);
+    return [{ label: 'Todo Período', value: 'all' }, ...meses.map((m: any) => ({ label: m, value: m }))];
   }, [dados]);
 
   // Responsividade: sticky só em desktop
@@ -314,7 +314,7 @@ export default function TabelaDesempenhoPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-      <DrilldownModal open={!!drilldown} onClose={() => setDrilldown(null)} categoria={drilldown?.categoria} grupo={drilldown?.grupo} dados={dados.filter(l => l.categoria === drilldown?.categoria && l.grupo === drilldown?.grupo)} />
+      <DrilldownModal open={!!drilldown} onClose={() => setDrilldown(null)} categoria={drilldown?.categoria} grupo={drilldown?.grupo} dados={dados.filter((l: any) => l.categoria === drilldown?.categoria && l.grupo === drilldown?.grupo)} />
       <div className="container mx-auto px-2 sm:px-4 py-4 flex-1 flex flex-col">
         <Card className="card-dark w-full max-w-5xl mx-auto shadow-lg border border-gray-200 dark:border-gray-700">
           <CardHeader>
@@ -327,12 +327,12 @@ export default function TabelaDesempenhoPage() {
                 multiple
                 value={mesesSelecionados.length ? mesesSelecionados : ['all']}
                 onChange={e => {
-                  const opts = Array.from(e.target.selectedOptions).map(o => o.value);
+                  const opts = Array.from(e.target.selectedOptions).map((o: any) => o.value);
                   setMesesSelecionados(opts.includes('all') ? [] : opts);
                 }}
                 aria-label="Filtrar por mês/ano"
               >
-                {mesesDisponiveis.map(m => (
+                {mesesDisponiveis.map((m: any) => (
                   <option key={m.value} value={m.value}>{m.label}</option>
                 ))}
               </select>
@@ -359,7 +359,7 @@ export default function TabelaDesempenhoPage() {
           <CardContent>
             {/* Filtros premium */}
             <div className="flex flex-col sm:flex-row flex-wrap gap-2 mb-4 items-end">
-              {PERIODOS.map(p => (
+              {PERIODOS.map((p: any) => (
                 <Button
                   key={p.value}
                   variant={periodo === p.value ? 'default' : 'outline'}
@@ -436,7 +436,7 @@ export default function TabelaDesempenhoPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {gruposUnicos.map(grupo => (
+                    {gruposUnicos.map((grupo: any) => (
                     <Fragment key={grupo}>
                       <TableRow
                         className={`bg-gray-100 dark:bg-gray-800/80 ${!isMobile ? 'sticky top-0 z-10' : ''}`}

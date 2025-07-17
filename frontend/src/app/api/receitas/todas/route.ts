@@ -97,8 +97,8 @@ export async function GET(request: NextRequest) {
     const receitasComInsumos = Array.from(receitasAgrupadas.values())
     
     // Estatísticas
-    const receitasAtivas = receitasComInsumos.filter(r => r.ativo !== false)
-    const receitasInativas = receitasComInsumos.filter(r => r.ativo === false)
+    const receitasAtivas = receitasComInsumos.filter((r: any) => r.ativo !== false)
+    const receitasInativas = receitasComInsumos.filter((r: any) => r.ativo === false)
     
     console.log(`✅ ${receitasComInsumos.length} receitas processadas: ${receitasAtivas.length} ativas, ${receitasInativas.length} inativas`)
 
@@ -109,8 +109,8 @@ export async function GET(request: NextRequest) {
         total_receitas: receitasComInsumos.length,
         receitas_ativas: receitasAtivas.length,
         receitas_inativas: receitasInativas.length,
-        receitas_bar: receitasComInsumos.filter(r => r.tipo_local === 'bar').length,
-        receitas_cozinha: receitasComInsumos.filter(r => r.tipo_local === 'cozinha').length
+        receitas_bar: receitasComInsumos.filter((r: any) => r.tipo_local === 'bar').length,
+        receitas_cozinha: receitasComInsumos.filter((r: any) => r.tipo_local === 'cozinha').length
       }
     })
 

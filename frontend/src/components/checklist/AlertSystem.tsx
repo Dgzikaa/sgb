@@ -65,9 +65,9 @@ export default function AlertSystem({
   const [selectedAlert, setSelectedAlert] = useState<ChecklistAlert | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  const activeAlerts = alerts.filter(alert => alert.ativo && !alert.resolvido)
-  const criticalAlerts = activeAlerts.filter(alert => alert.nivel === 'critico')
-  const urgentAlerts = activeAlerts.filter(alert => alert.nivel === 'alto')
+  const activeAlerts = alerts.filter((alert: any) => alert.ativo && !alert.resolvido)
+  const criticalAlerts = activeAlerts.filter((alert: any) => alert.nivel === 'critico')
+  const urgentAlerts = activeAlerts.filter((alert: any) => alert.nivel === 'alto')
 
   const getAlertIcon = (tipo: string, nivel: string) => {
     if (nivel === 'critico') return '🔴'
@@ -399,9 +399,9 @@ interface AlertStatsProps {
 }
 
 export function AlertStats({ alerts, onOpenAlerts }: AlertStatsProps) {
-  const activeAlerts = alerts.filter(alert => alert.ativo && !alert.resolvido)
-  const criticalCount = activeAlerts.filter(alert => alert.nivel === 'critico').length
-  const urgentCount = activeAlerts.filter(alert => alert.nivel === 'alto').length
+  const activeAlerts = alerts.filter((alert: any) => alert.ativo && !alert.resolvido)
+  const criticalCount = activeAlerts.filter((alert: any) => alert.nivel === 'critico').length
+  const urgentCount = activeAlerts.filter((alert: any) => alert.nivel === 'alto').length
   const totalCount = activeAlerts.length
 
   if (totalCount === 0) {
@@ -506,7 +506,7 @@ export function useAlerts() {
         throw new Error('Erro ao resolver alerta')
       }
       
-      setAlerts(prev => prev.map(alert => 
+      setAlerts(prev => prev.map((alert: any) => 
         alert.id === alertId 
           ? { ...alert, resolvido: true }
           : alert
@@ -531,7 +531,7 @@ export function useAlerts() {
       }
       
       // Temporarily hide the alert
-      setAlerts(prev => prev.map(alert => 
+      setAlerts(prev => prev.map((alert: any) => 
         alert.id === alertId 
           ? { ...alert, ativo: false }
           : alert

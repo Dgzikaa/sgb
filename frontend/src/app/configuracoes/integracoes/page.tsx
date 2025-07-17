@@ -446,7 +446,7 @@ export default function IntegracoesPage() {
                 <div>
                   <p className="text-green-800 dark:text-green-300 font-semibold">Ativas</p>
                   <p className="text-green-600 dark:text-green-400 text-sm">
-                    {Object.values(webhookConfigs).filter(config => config && config.trim() !== '').length} integrações
+                    {Object.values(webhookConfigs).filter((config: any) => config && config.trim() !== '').length} integrações
                   </p>
                 </div>
               </div>

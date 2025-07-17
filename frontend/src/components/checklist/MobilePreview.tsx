@@ -153,7 +153,7 @@ export default function MobilePreview({
       case 'avaliacao':
         return (
           <div className="flex justify-center gap-2">
-            {[1, 2, 3, 4, 5].map(star => (
+            {[1, 2, 3, 4, 5].map((star: any) => (
               <button
                 key={star}
                 className="text-2xl touch-manipulation p-2"

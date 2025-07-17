@@ -230,7 +230,7 @@ export function ModernSidebar() {
   const toggleExpanded = (label: string) => {
     setExpandedItems(prev => {
       const newState = prev.includes(label) 
-        ? prev.filter(item => item !== label)
+        ? prev.filter((item: any) => item !== label)
         : [...prev, label]
       return newState
     })
@@ -249,7 +249,7 @@ export function ModernSidebar() {
     }
     
     // Se não foi manipulado manualmente, pode usar expansão automática por hover
-    if (isHovered && hasActiveSubItem(allSidebarItems.find(item => item.label === label)?.subItems)) {
+    if (isHovered && hasActiveSubItem(allSidebarItems.find((item: any) => item.label === label)?.subItems)) {
       return true
     }
     

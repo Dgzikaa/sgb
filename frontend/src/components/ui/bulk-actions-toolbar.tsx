@@ -44,11 +44,11 @@ export function BulkActionsToolbar({
 
   const percentage = Math.round((selectedCount / totalCount) * 100)
 
-  const primaryActions = actions.filter(action => 
+  const primaryActions = actions.filter((action: any) => 
     ['edit', 'delete', 'archive', 'download'].includes(action.id)
   ).slice(0, 3)
   
-  const secondaryActions = actions.filter(action => 
+  const secondaryActions = actions.filter((action: any) => 
     !['edit', 'delete', 'archive', 'download'].includes(action.id)
   )
 

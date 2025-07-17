@@ -79,7 +79,7 @@ export function ChecklistReorderManager({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          checklists: checklists.map(c => ({
+          checklists: checklists.map((c: any) => ({
             id: c.id,
             ordem: c.ordem
           }))

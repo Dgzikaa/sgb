@@ -104,7 +104,7 @@ export function NotificationCenter() {
   // FILTRAR NOTIFICAÇÕES
   // =====================================================
 
-  const notificacoesFiltradas = notificacoes.filter(notificacao => {
+  const notificacoesFiltradas = notificacoes.filter((notificacao: any) => {
     // Verificar se a notificação tem dados válidos
     if (!notificacao || !notificacao.id) return false
     

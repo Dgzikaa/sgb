@@ -274,7 +274,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
     const lowerQuery = query.toLowerCase()
     
-    return commands.filter(command => {
+    return commands.filter((command: any) => {
       // Busca no título
       if (command.title.toLowerCase().includes(lowerQuery)) return true
       

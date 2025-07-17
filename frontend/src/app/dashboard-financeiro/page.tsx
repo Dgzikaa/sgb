@@ -264,7 +264,7 @@ export default function DashboardFinanceiroPage() {
   }, [selectedBar])
 
   const getMaxValue = (items: Array<{ total: number }>) => {
-    return Math.max(...items.map(item => item.total), 1)
+    return Math.max(...items.map((item: any) => item.total), 1)
   }
 
       return (

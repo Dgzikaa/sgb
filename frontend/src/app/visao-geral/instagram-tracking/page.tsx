@@ -135,7 +135,7 @@ export default function InstagramTrackingPage() {
             trend_direction: variations.follower_growth_total > 0 ? 'growing' : 
                             variations.follower_growth_total < 0 ? 'declining' : 'stable'
           },
-          daily_data: Object.keys(instagramAnalysis?.daily_metrics || {}).map(date => {
+          daily_data: Object.keys(instagramAnalysis?.daily_metrics || {}).map((date: any) => {
             const dayData = instagramAnalysis.daily_metrics[date]
             return {
               date,

@@ -67,7 +67,7 @@ export default function CompetenciaPage() {
   const [filtroMes, setFiltroMes] = useState<string>('');
 
   const barId = 1; // TODO: Pegar do contexto
-  const anosDisponiveis = Array.from(new Set(competencias.map(c => c.ano))).sort((a, b) => b - a);
+  const anosDisponiveis = Array.from(new Set(competencias.map((c: any) => c.ano))).sort((a, b) => b - a);
   const mesesDisponiveis = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
   const carregarCompetencias = async () => {
@@ -186,7 +186,7 @@ export default function CompetenciaPage() {
     carregarCompetencias();
   }, [filtroAno, filtroMes]);
 
-  const competenciaAtual = competencias.find(c => 
+  const competenciaAtual = competencias.find((c: any) => 
     c.ano === new Date().getFullYear() && c.mes === new Date().getMonth() + 1
   );
 
@@ -195,7 +195,7 @@ export default function CompetenciaPage() {
   , null as CompetenciaMensal | null);
 
   const totalAnual = competencias
-    .filter(c => c.ano === new Date().getFullYear())
+    .filter((c: any) => c.ano === new Date().getFullYear())
     .reduce((sum, c) => sum + c.faturamento_total_mes, 0);
 
   return (
@@ -242,7 +242,7 @@ export default function CompetenciaPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">Todos os anos</SelectItem>
-                  {anosDisponiveis.map(ano => (
+                  {anosDisponiveis.map((ano: any) => (
                     <SelectItem key={ano} value={ano.toString()}>
                       {ano}
                     </SelectItem>
@@ -280,7 +280,7 @@ export default function CompetenciaPage() {
           <CardContent>
             <div className="text-2xl font-bold">{formatarMoeda(totalAnual)}</div>
             <p className="text-xs text-muted-foreground">
-              {competencias.filter(c => c.ano === new Date().getFullYear()).length} meses com dados
+              {competencias.filter((c: any) => c.ano === new Date().getFullYear()).length} meses com dados
             </p>
           </CardContent>
         </Card>

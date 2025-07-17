@@ -248,7 +248,7 @@ export default function AdminPage() {
 
   const importarEventosHistoricos = async () => {
     // Encontrar o bar ordinário pelo nome
-    const barOrdinario = bars.find(bar => 
+    const barOrdinario = bars.find((bar: any) => 
       bar.nome.toLowerCase().includes('ordinário') || 
       bar.nome.toLowerCase().includes('ordinario')
     );
@@ -403,7 +403,7 @@ export default function AdminPage() {
       savedBarConfigs[barId] = currentBarConfig;
       localStorage.setItem('sgb-bar-configs', JSON.stringify(savedBarConfigs));
       
-      const barName = bars.find(b => b.id === barId)?.nome || 'Bar';
+      const barName = bars.find((b: any) => b.id === barId)?.nome || 'Bar';
       setMessage(`✅ Configurações do ${barName} salvas com sucesso!`);
       setTimeout(() => setMessage(''), 3000);
       
@@ -557,7 +557,7 @@ export default function AdminPage() {
       const result = await response.json();
       
       if (result.success) {
-        setBars(bars.filter(bar => bar.id !== id));
+        setBars(bars.filter((bar: any) => bar.id !== id));
         setMessage('Bar removido com sucesso!');
       } else {
         setMessage(result.error || 'Erro ao remover bar');
@@ -693,7 +693,7 @@ export default function AdminPage() {
               style={{ padding: '8px 12px', fontSize: '0.9rem' }}
             >
               <option value="">-- Todos os Bares --</option>
-              {bars.map(bar => (
+              {bars.map((bar: any) => (
                 <option key={bar.id} value={bar.id}>
                   {bar.nome}
                 </option>
@@ -723,17 +723,17 @@ export default function AdminPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <h3 style={{ margin: 0, color: '#1e293b', fontSize: '1.2rem' }}>
-                  🏪 {bars.find(b => b.id === selectedBarId)?.nome}
+                  🏪 {bars.find((b: any) => b.id === selectedBarId)?.nome}
                 </h3>
                 <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.9rem' }}>
-                  📍 {bars.find(b => b.id === selectedBarId)?.endereco} | 
-                  📞 {bars.find(b => b.id === selectedBarId)?.telefone}
+                  📍 {bars.find((b: any) => b.id === selectedBarId)?.endereco} | 
+                  📞 {bars.find((b: any) => b.id === selectedBarId)?.telefone}
                 </p>
               </div>
               <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                {getStatusBadge(bars.find(b => b.id === selectedBarId)?.status || 'inativo')}
+                {getStatusBadge(bars.find((b: any) => b.id === selectedBarId)?.status || 'inativo')}
                 <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                  Criado em {new Date(bars.find(b => b.id === selectedBarId)?.created_at || '').toLocaleDateString('pt-BR')}
+                  Criado em {new Date(bars.find((b: any) => b.id === selectedBarId)?.created_at || '').toLocaleDateString('pt-BR')}
                 </span>
               </div>
             </div>
@@ -804,7 +804,7 @@ export default function AdminPage() {
           <div className="tab-content">
             {selectedBarId && (
               <div className="alert alert-info" style={{ marginBottom: '20px' }}>
-                📊 Visualizando dados específicos de: <strong>{bars.find(b => b.id === selectedBarId)?.nome}</strong>
+                📊 Visualizando dados específicos de: <strong>{bars.find((b: any) => b.id === selectedBarId)?.nome}</strong>
               </div>
             )}
             <div className="grid grid-3">
@@ -948,10 +948,10 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>🔌 APIs Conectadas{selectedBarId ? ` - ${bars.find(b => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>🔌 APIs Conectadas{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
                 <p>
                   {selectedBarId 
-                    ? `Configure as APIs específicas para ${bars.find(b => b.id === selectedBarId)?.nome}`
+                    ? `Configure as APIs específicas para ${bars.find((b: any) => b.id === selectedBarId)?.nome}`
                     : 'Selecione um bar no cabeçalho para ver suas APIs específicas'
                   }
                 </p>
@@ -1261,10 +1261,10 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>🍺 Gerenciar Bares{selectedBarId ? ` - Foco: ${bars.find(b => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>🍺 Gerenciar Bares{selectedBarId ? ` - Foco: ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
                 <p>
                   {selectedBarId 
-                    ? `Visualizando detalhes e configurações de ${bars.find(b => b.id === selectedBarId)?.nome}`
+                    ? `Visualizando detalhes e configurações de ${bars.find((b: any) => b.id === selectedBarId)?.nome}`
                     : 'Adicione, edite ou remova bares do sistema'
                   }
                 </p>
@@ -1439,10 +1439,10 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>🖥️ Sistemas de Bar{selectedBarId ? ` - ${bars.find(b => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>🖥️ Sistemas de Bar{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
                 <p>
                   {selectedBarId 
-                    ? `Configure sistemas de gestão para ${bars.find(b => b.id === selectedBarId)?.nome} (ContaHub, etc.)`
+                    ? `Configure sistemas de gestão para ${bars.find((b: any) => b.id === selectedBarId)?.nome} (ContaHub, etc.)`
                     : 'Configure e gerencie sistemas de gestão para cada bar (ContaHub, etc.)'
                   }
                 </p>
@@ -1477,7 +1477,7 @@ export default function AdminPage() {
                       className="form-input"
                     >
                       <option value="">-- Selecione um bar --</option>
-                      {bars.map(bar => (
+                      {bars.map((bar: any) => (
                         <option key={bar.id} value={bar.id}>
                           {bar.nome}
                         </option>
@@ -1488,7 +1488,7 @@ export default function AdminPage() {
                   {/* Configurações quando um bar é selecionado */}
                   {selectedBarId && (
                     <div className="api-config-item">
-                      <h5>🖥️ ContaHub - {bars.find(b => b.id === selectedBarId)?.nome}</h5>
+                      <h5>🖥️ ContaHub - {bars.find((b: any) => b.id === selectedBarId)?.nome}</h5>
                       
                       <div className="form-group">
                         <label>
@@ -1766,10 +1766,10 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>🎵 Planejamento Comercial{selectedBarId ? ` - ${bars.find(b => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>🎵 Planejamento Comercial{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
                 <p>
                   {selectedBarId 
-                    ? `Gerencie as atrações e eventos de ${bars.find(b => b.id === selectedBarId)?.nome} para todos os dias do mês`
+                    ? `Gerencie as atrações e eventos de ${bars.find((b: any) => b.id === selectedBarId)?.nome} para todos os dias do mês`
                     : 'Gerencie as atrações e eventos de todos os bares para todos os dias do mês'
                   }
                 </p>
@@ -1973,7 +1973,7 @@ export default function AdminPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {eventos.map(evento => (
+                        {eventos.map((evento: any) => (
                           <tr key={evento.id}>
                             <td>{new Date(evento.data_evento).toLocaleDateString('pt-BR')}</td>
                             <td>
@@ -2051,7 +2051,7 @@ export default function AdminPage() {
                       })}
                       className="form-input"
                     >
-                      {bars.map(bar => (
+                      {bars.map((bar: any) => (
                         <option key={bar.id} value={bar.id}>
                           {bar.nome}
                         </option>
@@ -2242,10 +2242,10 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>📈 Analytics de Performance{selectedBarId ? ` - ${bars.find(b => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>📈 Analytics de Performance{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
                 <p>
                   {selectedBarId 
-                    ? `Análise de performance dos artistas e eventos de ${bars.find(b => b.id === selectedBarId)?.nome} por dados reais de faturamento`
+                    ? `Análise de performance dos artistas e eventos de ${bars.find((b: any) => b.id === selectedBarId)?.nome} por dados reais de faturamento`
                     : 'Análise de performance dos artistas e eventos por dados reais de faturamento'
                   }
                 </p>

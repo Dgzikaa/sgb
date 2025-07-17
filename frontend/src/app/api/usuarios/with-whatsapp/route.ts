@@ -33,37 +33,29 @@ export async function GET(req: NextRequest) {
     }
 
     // Filtrar e categorizar usuários
-    const usuariosComWhatsApp = usuarios?.filter(u => 
-      u.celular && u.celular.length === 11
+    const usuariosComWhatsApp = usuarios?.filter((u: any) =>
+      u.whatsapp &&
+      typeof u.whatsapp === 'string' &&
+      u.whatsapp.replace(/\D/g, '').length >= 10
     ) || []
 
-    const usuariosSemWhatsApp = usuarios?.filter(u => 
-      !u.celular || u.celular.length !== 11
+    const usuariosSemWhatsApp = usuarios?.filter((u: any) =>
+      !u.whatsapp ||
+      typeof u.whatsapp !== 'string' ||
+      u.whatsapp.replace(/\D/g, '').length < 10
     ) || []
 
     // Validar números de WhatsApp
-    const usuariosValidados = usuariosComWhatsApp.map(usuario => {
-      const numero = usuario.celular
-      const isValid = numero && 
-                     numero.length === 11 && 
-                     parseInt(numero.substring(0, 2)) >= 11 && 
-                     parseInt(numero.substring(0, 2)) <= 99 &&
-                     numero[2] === '9'
-
-      return {
-        ...usuario,
-        whatsapp_valido: isValid,
-        numero_formatado: numero ? 
-          `+55 (${numero.substring(0, 2)}) ${numero.substring(2, 7)}-${numero.substring(7)}` : 
-          null
-      }
-    })
+    const usuariosValidados = usuariosComWhatsApp.map((usuario: any) => ({
+      ...usuario,
+      whatsapp_valido: usuario.whatsapp && usuario.whatsapp.replace(/\D/g, '').length >= 10
+    }))
 
     const response: any = {
       success: true,
       com_whatsapp: usuariosValidados,
       total_com_whatsapp: usuariosValidados.length,
-      total_whatsapp_valido: usuariosValidados.filter(u => u.whatsapp_valido).length
+      total_whatsapp_valido: usuariosValidados.filter((u: any) => u.whatsapp_valido).length
     }
 
     if (includeWithout) {

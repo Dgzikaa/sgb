@@ -116,8 +116,8 @@ export default function RelatorioEficienciaProducao() {
     const perdaMedia = dados.reduce((acc, p) => acc + p.perda_total_g, 0) / dados.length
     const variacaoCustoMedia = dados.reduce((acc, p) => acc + p.variacao_custo, 0) / dados.length
     
-    const funcionarios = new Set(dados.map(p => p.funcionario)).size
-    const produtos = new Set(dados.map(p => p.produto_codigo)).size
+    const funcionarios = new Set(dados.map((p: any) => p.funcionario)).size
+    const produtos = new Set(dados.map((p: any) => p.produto_codigo)).size
 
     setEstatisticas({
       total_producoes: dados.length,

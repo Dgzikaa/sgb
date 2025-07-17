@@ -119,14 +119,14 @@ export default function TerminalProducao() {
 
   // Filtrar receitas por tipo e busca
   useEffect(() => {
-    let receitasFiltradasPorTipo = receitas.filter(receita => 
+    let receitasFiltradasPorTipo = receitas.filter((receita: any) => 
       receita.tipo_local === tipoLocalSelecionado
     )
 
     if (!buscaReceita.trim()) {
       setReceitasFiltradas(receitasFiltradasPorTipo)
     } else {
-      const filtradas = receitasFiltradasPorTipo.filter(receita => 
+      const filtradas = receitasFiltradasPorTipo.filter((receita: any) => 
         receita.receita_nome.toLowerCase().includes(buscaReceita.toLowerCase()) ||
         receita.receita_codigo.toLowerCase().includes(buscaReceita.toLowerCase())
       )
@@ -142,7 +142,7 @@ export default function TerminalProducao() {
   // Timer para todas as produções ativas
   useEffect(() => {
     const interval = setInterval(() => {
-      setProducoesAtivas(prev => prev.map(producao => 
+      setProducoesAtivas(prev => prev.map((producao: any) => 
         producao.timerAtivo 
           ? { ...producao, segundosDecorridos: producao.segundosDecorridos + 1 }
           : producao
@@ -159,7 +159,7 @@ export default function TerminalProducao() {
   }
 
   const alternarInsumosExpandidos = (id: string) => {
-    setProducoesAtivas(prev => prev.map(producao => 
+    setProducoesAtivas(prev => prev.map((producao: any) => 
       producao.id === id 
         ? { ...producao, insumosExpandidos: !producao.insumosExpandidos }
         : producao
@@ -167,7 +167,7 @@ export default function TerminalProducao() {
   }
 
   const alternarControlesExpandidos = (id: string) => {
-    setProducoesAtivas(prev => prev.map(producao => 
+    setProducoesAtivas(prev => prev.map((producao: any) => 
       producao.id === id 
         ? { ...producao, controlesExpandidos: !producao.controlesExpandidos }
         : producao
@@ -194,11 +194,11 @@ export default function TerminalProducao() {
 
     // Processar insumos e identificar insumo chefe
     if (receita.insumos && receita.insumos.length > 0) {
-      const insumoChefe = receita.insumos.find(i => i.is_chefe)
+      const insumoChefe = receita.insumos.find((i: any) => i.is_chefe)
       novaProducao.rendimentoReceita = receita.rendimento_esperado || 0
       
       // Inicializar insumos com quantidades corretas
-      const insumosCalculados = receita.insumos.map(insumo => ({
+      const insumosCalculados = receita.insumos.map((insumo: any) => ({
         id: insumo.id,
         codigo: insumo.codigo,
         nome: insumo.nome,
@@ -228,13 +228,13 @@ export default function TerminalProducao() {
   }
 
   const atualizarProducao = (id: string, updates: Partial<ProducaoAtiva>) => {
-    setProducoesAtivas(prev => prev.map(producao => 
+    setProducoesAtivas(prev => prev.map((producao: any) => 
       producao.id === id ? { ...producao, ...updates } : producao
     ))
   }
 
   const iniciarTimer = (id: string) => {
-    const producao = producoesAtivas.find(p => p.id === id)
+    const producao = producoesAtivas.find((p: any) => p.id === id)
     if (!producao || !producao.pesoBruto || parseFloat(producao.pesoBruto) <= 0) {
       alert('⚠️ Preencha o peso bruto antes de iniciar a produção!')
       return
@@ -250,15 +250,15 @@ export default function TerminalProducao() {
   }
 
   const removerProducao = (id: string) => {
-    setProducoesAtivas(prev => prev.filter(p => p.id !== id))
+    setProducoesAtivas(prev => prev.filter((p: any) => p.id !== id))
     if (producaoAtivaSelecionada === id) {
-      const restantes = producoesAtivas.filter(p => p.id !== id)
+      const restantes = producoesAtivas.filter((p: any) => p.id !== id)
       setProducaoAtivaSelecionada(restantes.length > 0 ? restantes[0].id : null)
     }
   }
 
   const salvarProducao = async (id: string) => {
-    const producao = producoesAtivas.find(p => p.id === id)
+    const producao = producoesAtivas.find((p: any) => p.id === id)
     if (!producao) return
 
     if (!producao.rendimentoProduzido.trim()) {
@@ -277,7 +277,7 @@ export default function TerminalProducao() {
     const rendimentoNum = parseFloat(producao.rendimentoProduzido) || 0
 
     // Preparar dados dos insumos para análise de aderência
-    const dadosInsumos = producao.insumos.map(insumo => ({
+    const dadosInsumos = producao.insumos.map((insumo: any) => ({
       id: insumo.id,
       codigo: insumo.codigo,
       nome: insumo.nome,
@@ -370,18 +370,18 @@ export default function TerminalProducao() {
   const atualizarQuantidadeReal = (producaoId: string, insumoId: number, quantidade: string) => {
     const quantidadeNum = parseFloat(quantidade) || 0
     
-    setProducoesAtivas(prev => prev.map(producao => {
+    setProducoesAtivas(prev => prev.map((producao: any) => {
       if (producao.id !== producaoId) return producao
       
       // Verificar se é insumo chefe
-      const insumo = producao.insumos.find(i => i.id === insumoId)
+      const insumo = producao.insumos.find((i: any) => i.id === insumoId)
       if (!insumo) return producao
       
       if (insumo.is_chefe) {
         // Se editou o insumo chefe diretamente, atualizar peso líquido também
         const proporcao = quantidadeNum / insumo.quantidade_necessaria
         
-        const insumosAtualizados = producao.insumos.map(ins => 
+        const insumosAtualizados = producao.insumos.map((ins: any) => 
           ins.is_chefe 
             ? { ...ins, quantidade_real: quantidadeNum }
             : { ...ins, quantidade_real: Math.round(ins.quantidade_necessaria * proporcao * 100) / 100 }
@@ -394,7 +394,7 @@ export default function TerminalProducao() {
         }
       } else {
         // Se editou insumo não-chefe, apenas atualizar aquele insumo
-        const insumosAtualizados = producao.insumos.map(ins => 
+        const insumosAtualizados = producao.insumos.map((ins: any) => 
           ins.id === insumoId 
             ? { ...ins, quantidade_real: quantidadeNum }
             : ins
@@ -409,7 +409,7 @@ export default function TerminalProducao() {
   const atualizarPesoLiquido = (id: string, novoPeso: string) => {
     const pesoNum = parseFloat(novoPeso) || 0
     
-    setProducoesAtivas(prev => prev.map(producao => {
+    setProducoesAtivas(prev => prev.map((producao: any) => {
       if (producao.id !== id) return producao
       
       const insumoChefe = producao.insumoChefe
@@ -422,7 +422,7 @@ export default function TerminalProducao() {
       const proporcao = pesoNum / insumoChefe.quantidade_necessaria
       
       // Recalcular quantidades calculadas baseado na nova proporção
-      const insumosAtualizados = producao.insumos.map(insumo => ({
+      const insumosAtualizados = producao.insumos.map((insumo: any) => ({
         ...insumo,
         quantidade_calculada: insumo.is_chefe 
           ? pesoNum // Insumo chefe = peso líquido
@@ -450,10 +450,10 @@ export default function TerminalProducao() {
   const atualizarQuantidadeRealManual = (producaoId: string, insumoId: number, quantidade: string) => {
     const quantidadeNum = parseFloat(quantidade) || 0
     
-    setProducoesAtivas(prev => prev.map(producao => {
+    setProducoesAtivas(prev => prev.map((producao: any) => {
       if (producao.id !== producaoId) return producao
       
-      const insumosAtualizados = producao.insumos.map(ins => 
+      const insumosAtualizados = producao.insumos.map((ins: any) => 
         ins.id === insumoId 
           ? { ...ins, quantidade_real: quantidadeNum }
           : ins
@@ -465,10 +465,10 @@ export default function TerminalProducao() {
 
   // NOVA FUNÇÃO: Atualizar quantidade planejada de insumo adicionado manualmente
   const atualizarQuantidadePlanejada = (producaoId: string, insumoId: number, quantidade: number) => {
-    setProducoesAtivas(prev => prev.map(producao => {
+    setProducoesAtivas(prev => prev.map((producao: any) => {
       if (producao.id !== producaoId) return producao
       
-      const insumosAtualizados = producao.insumos.map(ins => 
+      const insumosAtualizados = producao.insumos.map((ins: any) => 
         ins.id === insumoId 
           ? { 
               ...ins, 
@@ -484,7 +484,7 @@ export default function TerminalProducao() {
 
   // Função para recalcular todas as quantidades quando peso líquido muda
   const recalcularTodasQuantidades = (producaoId: string) => {
-    const producao = producoesAtivas.find(p => p.id === producaoId)
+    const producao = producoesAtivas.find((p: any) => p.id === producaoId)
     if (!producao) return
 
     const pesoLiquido = parseFloat(producao.pesoLiquido) || 0
@@ -493,10 +493,10 @@ export default function TerminalProducao() {
     if (insumoChefe && insumoChefe.quantidade_necessaria && pesoLiquido > 0) {
       const proporcao = pesoLiquido / insumoChefe.quantidade_necessaria
       
-      setProducoesAtivas(prev => prev.map(p => {
+      setProducoesAtivas(prev => prev.map((p: any) => {
         if (p.id !== producaoId) return p
         
-        const insumosRecalculados = p.insumos.map(insumo => ({
+        const insumosRecalculados = p.insumos.map((insumo: any) => ({
           ...insumo,
           quantidade_calculada: insumo.is_chefe 
             ? pesoLiquido
@@ -510,7 +510,7 @@ export default function TerminalProducao() {
 
   // Função para adicionar insumo à produção
   const adicionarInsumoProducao = (producaoId: string, insumo: Insumo) => {
-    setProducoesAtivas(prev => prev.map(producao => {
+    setProducoesAtivas(prev => prev.map((producao: any) => {
       if (producao.id !== producaoId) return producao
       
       // Verificar se insumo já existe
@@ -547,11 +547,11 @@ export default function TerminalProducao() {
 
   // Função para remover insumo da produção
   const removerInsumoProducao = (producaoId: string, insumoId: number) => {
-    setProducoesAtivas(prev => prev.map(producao => {
+    setProducoesAtivas(prev => prev.map((producao: any) => {
       if (producao.id !== producaoId) return producao
       
       // Não permitir remover insumo chefe
-      const insumo = producao.insumos.find(i => i.id === insumoId)
+      const insumo = producao.insumos.find((i: any) => i.id === insumoId)
       if (insumo?.is_chefe) {
         alert('⚠️ Não é possível remover o insumo chefe!')
         return producao
@@ -559,7 +559,7 @@ export default function TerminalProducao() {
       
       return {
         ...producao,
-        insumos: producao.insumos.filter(i => i.id !== insumoId)
+        insumos: producao.insumos.filter((i: any) => i.id !== insumoId)
       }
     }))
   }
@@ -567,7 +567,7 @@ export default function TerminalProducao() {
   // Função para filtrar insumos disponíveis
   const filtrarInsumosDisponiveis = (producaoId: string) => {
     const busca = buscaInsumo[producaoId] || ''
-    const producao = producoesAtivas.find(p => p.id === producaoId)
+    const producao = producoesAtivas.find((p: any) => p.id === producaoId)
     
     if (!producao) {
       console.log('❌ Produção não encontrada:', producaoId)
@@ -575,7 +575,7 @@ export default function TerminalProducao() {
     }
     
     // Filtrar insumos que ainda não estão na produção
-    const insumosNaoUsados = insumosDisponiveis.filter(insumo => 
+    const insumosNaoUsados = insumosDisponiveis.filter((insumo: any) => 
       !producao.insumos.some(i => i.id === insumo.id)
     )
     
@@ -583,16 +583,16 @@ export default function TerminalProducao() {
     
     if (!busca) {
       const resultado = insumosNaoUsados.slice(0, 10)
-      console.log('📋 Retornando primeiros 10:', resultado.map(i => i.nome))
+      console.log('📋 Retornando primeiros 10:', resultado.map((i: any) => i.nome))
       return resultado
     }
     
-    const filtrados = insumosNaoUsados.filter(insumo => 
+    const filtrados = insumosNaoUsados.filter((insumo: any) => 
       insumo.nome.toLowerCase().includes(busca.toLowerCase()) ||
       insumo.codigo.toLowerCase().includes(busca.toLowerCase())
     )
     
-    console.log(`🔍 Busca "${busca}" retornou ${filtrados.length} insumos:`, filtrados.map(i => i.nome))
+    console.log(`🔍 Busca "${busca}" retornou ${filtrados.length} insumos:`, filtrados.map((i: any) => i.nome))
     return filtrados
   }
 
@@ -621,9 +621,9 @@ export default function TerminalProducao() {
     )
   }
 
-  const producaoAtual = producoesAtivas.find(p => p.id === producaoAtivaSelecionada)
-  const receitasBar = receitas.filter(r => r.tipo_local === 'bar').length
-  const receitasCozinha = receitas.filter(r => r.tipo_local === 'cozinha').length
+  const producaoAtual = producoesAtivas.find((p: any) => p.id === producaoAtivaSelecionada)
+  const receitasBar = receitas.filter((r: any) => r.tipo_local === 'bar').length
+  const receitasCozinha = receitas.filter((r: any) => r.tipo_local === 'cozinha').length
 
   return (
     <ProtectedRoute requiredModule="terminal_producao">

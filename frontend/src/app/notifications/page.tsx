@@ -85,7 +85,7 @@ export default function NotificationsPage() {
   const handleMarcarComoLida = async (id: string) => {
     const sucesso = await marcarComoLida(id)
     if (sucesso) {
-      setSelecionadas(prev => prev.filter(item => item !== id))
+      setSelecionadas(prev => prev.filter((item: any) => item !== id))
     }
   }
 
@@ -99,7 +99,7 @@ export default function NotificationsPage() {
   const handleExcluirNotificacao = async (id: string) => {
     const sucesso = await excluirNotificacao(id)
     if (sucesso) {
-      setSelecionadas(prev => prev.filter(item => item !== id))
+      setSelecionadas(prev => prev.filter((item: any) => item !== id))
     }
   }
 
@@ -128,7 +128,7 @@ export default function NotificationsPage() {
     if (selecionadas.length === notificacoes.length) {
       setSelecionadas([])
     } else {
-      setSelecionadas(notificacoes.map(n => n.id))
+      setSelecionadas(notificacoes.map((n: any) => n.id))
     }
   }
 
@@ -179,7 +179,7 @@ export default function NotificationsPage() {
     }
   }
 
-  const notificacoesFiltradas = notificacoes.filter(notificacao => {
+  const notificacoesFiltradas = notificacoes.filter((notificacao: any) => {
     if (busca && !notificacao.titulo.toLowerCase().includes(busca.toLowerCase()) && 
         !notificacao.mensagem.toLowerCase().includes(busca.toLowerCase())) {
       return false

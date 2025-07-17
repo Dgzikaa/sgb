@@ -755,7 +755,7 @@ export default function MinhaContaPage() {
                         <SelectValue placeholder="UF" />
                       </SelectTrigger>
                       <SelectContent>
-                        {estadosBrasil.map(estado => (
+                        {estadosBrasil.map((estado: any) => (
                           <SelectItem key={estado} value={estado}>
                             {estado}
                           </SelectItem>

@@ -377,7 +377,7 @@ export default function ChecklistsFuncionario() {
   const carregarChecklists = async () => {
     setLoading(true)
     // TODO: Filtrar pelo usuário logado
-    const checklistsUsuario = checklistsMock.filter(c => 
+    const checklistsUsuario = checklistsMock.filter((c: any) => 
       c.responsavel === usuario.nome || c.setor === usuario.setor
     )
     setChecklists(checklistsUsuario)
@@ -415,10 +415,10 @@ export default function ChecklistsFuncionario() {
     if (!checklistAtivo) return
 
     const novoChecklist = { ...checklistAtivo }
-    const secao = novoChecklist.secoes.find(s => s.id === secaoId)
+    const secao = novoChecklist.secoes.find((s: any) => s.id === secaoId)
     if (!secao) return
 
-    const item = secao.itens.find(i => i.id === itemId)
+    const item = secao.itens.find((i: any) => i.id === itemId)
     if (!item) return
 
     item.valor = valor
@@ -431,13 +431,13 @@ export default function ChecklistsFuncionario() {
   const verificarItemVisivel = (item: ChecklistItem): boolean => {
     if (!item.condicional || !checklistAtivo) return true
 
-    const secaoReferencia = checklistAtivo.secoes.find(s => 
+    const secaoReferencia = checklistAtivo.secoes.find((s: any) => 
       s.itens.some(i => i.id === item.condicional!.dependeDe)
     )
     
     if (!secaoReferencia) return true
 
-    const itemReferencia = secaoReferencia.itens.find(i => i.id === item.condicional!.dependeDe)
+    const itemReferencia = secaoReferencia.itens.find((i: any) => i.id === item.condicional!.dependeDe)
     if (!itemReferencia) return true
 
     return itemReferencia.valor === item.condicional.valor
@@ -448,8 +448,8 @@ export default function ChecklistsFuncionario() {
 
     const todosItens = checklistAtivo.secoes.flatMap(s => s.itens)
     const itensVisiveis = todosItens.filter(verificarItemVisivel)
-    const itensObrigatorios = itensVisiveis.filter(i => i.obrigatorio)
-    const itensPreenchidos = itensObrigatorios.filter(i => i.status === 'preenchido')
+    const itensObrigatorios = itensVisiveis.filter((i: any) => i.obrigatorio)
+    const itensPreenchidos = itensObrigatorios.filter((i: any) => i.status === 'preenchido')
 
     return itensObrigatorios.length > 0 ? (itensPreenchidos.length / itensObrigatorios.length) * 100 : 0
   }
@@ -472,15 +472,15 @@ export default function ChecklistsFuncionario() {
         responsavel_id: usuario.id || 'user-mock-id', // TODO: pegar do contexto real
         tempo_execucao: tempoExecucao,
         total_itens: checklistAtivo.secoes.flatMap(s => s.itens).length,
-        itens_ok: checklistAtivo.secoes.flatMap(s => s.itens).filter(i => i.status === 'preenchido').length,
+        itens_ok: checklistAtivo.secoes.flatMap(s => s.itens).filter((i: any) => i.status === 'preenchido').length,
         itens_problema: 0, // TODO: implementar lógica de problemas
         itens_na: 0,
         observacoes_gerais: `Checklist realizado em ${tempoExecucao} minutos`,
         bar_id: 1, // TODO: pegar do contexto real
         respostas: checklistAtivo.secoes.flatMap(secao => 
           secao.itens
-            .filter(item => item.valor !== undefined)
-            .map(item => ({
+            .filter((item: any) => item.valor !== undefined)
+            .map((item: any) => ({
               item_id: item.id,
               valor: item.valor,
               observacoes: item.observacoes || null,
@@ -998,7 +998,7 @@ export default function ChecklistsFuncionario() {
               </div>
             ) : (
               checklists.map((checklist) => {
-              const setor = setoresConfig.find(s => s.id === checklist.setor)
+              const setor = setoresConfig.find((s: any) => s.id === checklist.setor)
               const SetorIcon = setor?.icon || FileText
 
               return (

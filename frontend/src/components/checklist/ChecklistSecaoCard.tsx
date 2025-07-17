@@ -87,10 +87,10 @@ export default function ChecklistSecaoCard({
   // Calcular estatísticas da seção
   const stats = {
     total: secao.itens.length,
-    preenchidos: secao.itens.filter(item => item.status === 'preenchido' || item.status === 'ok').length,
-    problemas: secao.itens.filter(item => item.status === 'problema').length,
-    obrigatorios: secao.itens.filter(item => item.obrigatorio).length,
-    obrigatoriosPreenchidos: secao.itens.filter(item => item.obrigatorio && (item.status === 'preenchido' || item.status === 'ok')).length
+    preenchidos: secao.itens.filter((item: any) => item.status === 'preenchido' || item.status === 'ok').length,
+    problemas: secao.itens.filter((item: any) => item.status === 'problema').length,
+    obrigatorios: secao.itens.filter((item: any) => item.obrigatorio).length,
+    obrigatoriosPreenchidos: secao.itens.filter((item: any) => item.obrigatorio && (item.status === 'preenchido' || item.status === 'ok')).length
   }
 
   const progresso = stats.total > 0 ? Math.round((stats.preenchidos / stats.total) * 100) : 0
@@ -430,7 +430,7 @@ function renderCampoItem(
       return (
         <div className="space-y-2">
           <div className="flex justify-center gap-2">
-            {[1, 2, 3, 4, 5].map(nota => (
+            {[1, 2, 3, 4, 5].map((nota: any) => (
               <Button
                 key={nota}
                 size="lg"

@@ -159,7 +159,7 @@ export function DarkHeader() {
   //   }
   // ]
 
-  // const unreadCount = notifications.filter(n => n.unread).length
+  // const unreadCount = notifications.filter((n: any) => n.unread).length
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 dark:bg-gray-900/80 dark:border-gray-800">

@@ -81,7 +81,7 @@ function formatarValor(valor: number) {
 export default function DREOrdinarioPage() {
   const [dadosMensais, setDadosMensais] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [gruposAbertos, setGruposAbertos] = useState<string[]>(GRUPOS_DRE.map(g => g.nome))
+  const [gruposAbertos, setGruposAbertos] = useState<string[]>(GRUPOS_DRE.map((g: any) => g.nome))
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -105,7 +105,7 @@ export default function DREOrdinarioPage() {
   }, [])
 
   const toggleGrupo = (nome: string) => {
-    setGruposAbertos(prev => prev.includes(nome) ? prev.filter(g => g !== nome) : [...prev, nome])
+    setGruposAbertos(prev => prev.includes(nome) ? prev.filter((g: any) => g !== nome) : [...prev, nome])
   }
 
   return (
@@ -126,7 +126,7 @@ export default function DREOrdinarioPage() {
                 </tr>
               </thead>
               <tbody>
-                {GRUPOS_DRE.map(grupo => (
+                {GRUPOS_DRE.map((grupo: any) => (
                   <>
                     {/* Linha macro do grupo (expand/recolher) */}
                     <tr key={grupo.nome + '-total'} className="group cursor-pointer select-none" onClick={() => toggleGrupo(grupo.nome)}>
@@ -141,7 +141,7 @@ export default function DREOrdinarioPage() {
                       ))}
                     </tr>
                     {/* Linhas detalhadas do grupo */}
-                    {gruposAbertos.includes(grupo.nome) && grupo.categorias.map(cat => (
+                    {gruposAbertos.includes(grupo.nome) && grupo.categorias.map((cat: any) => (
                       <tr key={grupo.nome + '-' + cat} className="transition-all">
                         <td className="table-cell-dark sticky left-0 bg-gray-50 dark:bg-gray-900 z-10 pl-8">{cat}</td>
                         {dadosMensais.map((mes: any) => (

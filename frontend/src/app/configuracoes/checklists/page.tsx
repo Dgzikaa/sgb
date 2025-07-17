@@ -219,7 +219,7 @@ export default function AdminChecklists() {
   }
 
   // Filtrar checklists
-  const checklistsFiltrados = checklists.filter(checklist => {
+  const checklistsFiltrados = checklists.filter((checklist: any) => {
     const matchSetor = setorFiltro === 'todos' || checklist.setor === setorFiltro
     const matchTipo = tipoFiltro === 'todos' || checklist.tipo === tipoFiltro
     const matchBusca = checklist.nome.toLowerCase().includes(busca.toLowerCase()) ||
@@ -243,7 +243,7 @@ export default function AdminChecklists() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'delete',
-          checklistIds: selectedItems.map(item => item.id)
+          checklistIds: selectedItems.map((item: any) => item.id)
         })
       })
 
@@ -263,7 +263,7 @@ export default function AdminChecklists() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'activate',
-          checklistIds: selectedItems.map(item => item.id)
+          checklistIds: selectedItems.map((item: any) => item.id)
         })
       })
 
@@ -283,7 +283,7 @@ export default function AdminChecklists() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'deactivate',
-          checklistIds: selectedItems.map(item => item.id)
+          checklistIds: selectedItems.map((item: any) => item.id)
         })
       })
 
@@ -303,7 +303,7 @@ export default function AdminChecklists() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'duplicate',
-          checklistIds: selectedItems.map(item => item.id)
+          checklistIds: selectedItems.map((item: any) => item.id)
         })
       })
 
@@ -588,7 +588,7 @@ export default function AdminChecklists() {
           {/* Lista de Checklists */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {checklistsFiltrados.map((checklist) => {
-              const setor = setores.find(s => s.id === checklist.setor)
+              const setor = setores.find((s: any) => s.id === checklist.setor)
               const SetorIcon = setor?.icon || FileText
 
               return (
@@ -747,7 +747,7 @@ export default function AdminChecklists() {
                         Setor *
                       </Label>
                       <Select value={checklistSelecionado.setor} onValueChange={(value) => {
-                        const setorSelecionado = setores.find(s => s.id === value)
+                        const setorSelecionado = setores.find((s: any) => s.id === value)
                         setChecklistSelecionado({
                           ...checklistSelecionado, 
                           setor: value,
@@ -1016,7 +1016,7 @@ export default function AdminChecklists() {
                     Setor *
                   </Label>
                   <Select value={novoChecklist.setor} onValueChange={(value) => {
-                    const setorSelecionado = setores.find(s => s.id === value)
+                    const setorSelecionado = setores.find((s: any) => s.id === value)
                     setNovoChecklist({
                       ...novoChecklist, 
                       setor: value,

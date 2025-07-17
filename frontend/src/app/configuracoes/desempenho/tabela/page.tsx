@@ -234,7 +234,7 @@ export default function TabelaDesempenhoPage() {
     }
   }
 
-  const dadosFiltrados = dados.filter(item => {
+  const dadosFiltrados = dados.filter((item: any) => {
     const matchTexto = !filtroTexto || 
       item.numero_semana.toString().includes(filtroTexto) ||
       item.data_inicio.includes(filtroTexto) ||
@@ -276,7 +276,7 @@ export default function TabelaDesempenhoPage() {
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map(i => (
+          {[1, 2, 3, 4].map((i: any) => (
             <div key={i} className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-white/20 shadow-lg">
               <div className="animate-pulse space-y-3">
                 <div className="h-4 bg-gray-200 rounded w-1/2"></div>

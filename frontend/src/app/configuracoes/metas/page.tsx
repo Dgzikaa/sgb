@@ -215,7 +215,7 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
              { key: 'mensal', label: 'Mensal', valor: meta.valor_mensal },
              { key: 'unico', label: 'Único', valor: meta.valor_unico }
            ]
-           .filter(periodo => {
+           .filter((periodo: any) => {
              // Filtro inteligente baseado no tipo_valor
              if (meta.tipo_valor === 'unico') {
                return periodo.key === 'unico';
@@ -533,7 +533,7 @@ export default function MetasPage() {
   const getCategoryStats = (categoria: keyof MetasOrganizadas) => {
     const metasCategoria = metas[categoria];
     const total = metasCategoria.length;
-    const ativas = metasCategoria.filter(m => m.meta_ativa).length;
+    const ativas = metasCategoria.filter((m: any) => m.meta_ativa).length;
     return { total, ativas };
   };
 
@@ -574,7 +574,7 @@ export default function MetasPage() {
           {/* Tabs de Categorias */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-6 mb-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-2 shadow-sm">
-              {CATEGORIAS.map(cat => (
+              {CATEGORIAS.map((cat: any) => (
                 <TabsTrigger
                   key={cat.key}
                   value={cat.key}
@@ -585,7 +585,7 @@ export default function MetasPage() {
               ))}
             </TabsList>
 
-            {CATEGORIAS.map(cat => {
+            {CATEGORIAS.map((cat: any) => {
               const campos = Object.keys(METAS_BASE[cat.key] || {});
               return (
                 <TabsContent key={cat.key} value={cat.key} className="space-y-6">

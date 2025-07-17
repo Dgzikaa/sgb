@@ -275,7 +275,7 @@ export default function ChecklistAbertura() {
   }
 
   const atualizarStatusItem = (itemId: string, novoStatus: ChecklistItem['status'], observacoes?: string) => {
-    setChecklistAtivo(prev => prev.map(item => {
+    setChecklistAtivo(prev => prev.map((item: any) => {
       if (item.id === itemId) {
         const agora = new Date().toLocaleTimeString('pt-BR', { 
           hour: '2-digit', 
@@ -333,10 +333,10 @@ export default function ChecklistAbertura() {
   // Calcular estatísticas
   const estatisticas = {
     total: checklistAtivo.length,
-    concluidos: checklistAtivo.filter(item => item.status === 'concluido').length,
-    problemas: checklistAtivo.filter(item => item.status === 'problema').length,
-    pendentes: checklistAtivo.filter(item => item.status === 'pendente').length,
-    fazendo: checklistAtivo.filter(item => item.status === 'fazendo').length
+    concluidos: checklistAtivo.filter((item: any) => item.status === 'concluido').length,
+    problemas: checklistAtivo.filter((item: any) => item.status === 'problema').length,
+    pendentes: checklistAtivo.filter((item: any) => item.status === 'pendente').length,
+    fazendo: checklistAtivo.filter((item: any) => item.status === 'fazendo').length
   }
 
   const progresso = estatisticas.total > 0 ? (estatisticas.concluidos / estatisticas.total * 100) : 0
@@ -344,7 +344,7 @@ export default function ChecklistAbertura() {
   // Filtrar itens por área
   const itensFiltrados = areaSelecionada === 'todas' 
     ? checklistAtivo 
-    : checklistAtivo.filter(item => item.area === areaSelecionada)
+    : checklistAtivo.filter((item: any) => item.area === areaSelecionada)
 
   const obterCorPrioridade = (prioridade: string) => {
     switch (prioridade) {
@@ -476,8 +476,8 @@ export default function ChecklistAbertura() {
                 </TabsTrigger>
                 {areas.map((area) => {
                   const AreaIcon = area.icon
-                  const itensArea = checklistAtivo.filter(item => item.area === area.id)
-                  const concluidos = itensArea.filter(item => item.status === 'concluido').length
+                  const itensArea = checklistAtivo.filter((item: any) => item.area === area.id)
+                  const concluidos = itensArea.filter((item: any) => item.status === 'concluido').length
                   
                   return (
                     <TabsTrigger 
@@ -518,7 +518,7 @@ export default function ChecklistAbertura() {
                               {item.prioridade}
                             </Badge>
                             <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">
-                              {areas.find(a => a.id === item.area)?.nome}
+                              {areas.find((a: any) => a.id === item.area)?.nome}
                             </Badge>
                           </div>
                           <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{item.descricao}</p>
@@ -611,7 +611,7 @@ export default function ChecklistAbertura() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
                   <div>
                     <span className="text-gray-600 dark:text-gray-400">Área:</span>
-                    <p className="font-medium text-gray-900 dark:text-white">{areas.find(a => a.id === itemSelecionado.area)?.nome}</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{areas.find((a: any) => a.id === itemSelecionado.area)?.nome}</p>
                   </div>
                   <div>
                     <span className="text-gray-600 dark:text-gray-400">Prioridade:</span>

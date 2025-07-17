@@ -282,7 +282,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
 
   // Filtrar resultados baseado na query
   const filteredResults = query.length > 0 
-    ? searchResults.filter(result => {
+    ? searchResults.filter((result: any) => {
         const searchTerms = query.toLowerCase().split(' ')
         return searchTerms.every(term => 
           result.title.toLowerCase().includes(term) ||
@@ -290,7 +290,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
           result.keywords.some(keyword => keyword.toLowerCase().includes(term))
         )
       }).sort((a, b) => b.priority - a.priority)
-    : searchResults.filter(result => 
+    : searchResults.filter((result: any) => 
         favorites.includes(result.id) || 
         result.lastUsed || 
         result.priority > 80
@@ -298,7 +298,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
 
   // Filtrar por categoria ativa
   const categoryFilteredResults = activeCategory 
-    ? filteredResults.filter(result => result.category === activeCategory)
+    ? filteredResults.filter((result: any) => result.category === activeCategory)
     : filteredResults
 
   // Agrupar resultados por categoria
@@ -343,7 +343,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
   const handleResultSelect = (result: SearchResult) => {
     // Adicionar aos recentes
     setRecentSearches(prev => {
-      const newRecent = [result.title, ...prev.filter(r => r !== result.title)].slice(0, 5)
+      const newRecent = [result.title, ...prev.filter((r: any) => r !== result.title)].slice(0, 5)
       return newRecent
     })
     
@@ -366,7 +366,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
   const toggleFavorite = (resultId: string) => {
     setFavorites(prev => 
       prev.includes(resultId)
-        ? prev.filter(id => id !== resultId)
+        ? prev.filter((id: any) => id !== resultId)
         : [...prev, resultId]
     )
   }
@@ -430,7 +430,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
             >
               Todos
             </Button>
-            {searchCategories.map(category => (
+            {searchCategories.map((category: any) => (
               <Button
                 key={category.id}
                 variant={activeCategory === category.id ? "default" : "ghost"}
@@ -464,7 +464,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
             )}
 
             {Object.entries(groupedResults).map(([categoryId, results]) => {
-              const category = searchCategories.find(c => c.id === categoryId)
+              const category = searchCategories.find((c: any) => c.id === categoryId)
               if (!category || results.length === 0) return null
 
               return (

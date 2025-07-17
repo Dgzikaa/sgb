@@ -67,7 +67,7 @@ export default function PhotoUpload({
 
       // Criar previews
       if (showPreview) {
-        const newPreviews = files.map(file => URL.createObjectURL(file))
+        const newPreviews = files.map((file: any) => URL.createObjectURL(file))
         setPreviews(prev => multiple ? [...prev, ...newPreviews] : newPreviews)
       }
 
@@ -113,7 +113,7 @@ export default function PhotoUpload({
 
   // Verificar se há uploads em progresso
   const uploadsInProgress = Object.values(uploads).some(upload => upload.loading)
-  const uploadProgress = Object.values(uploads).find(upload => upload.loading)?.progress || 0
+  const uploadProgress = Object.values(uploads).find((upload: any) => upload.loading)?.progress || 0
 
   return (
     <div className={`space-y-4 ${className}`}>

@@ -58,7 +58,7 @@ export default function BarSelector({ isCollapsed = false }: BarSelectorProps) {
           <Select
             value={selectedBar?.id?.toString() || ''}
             onValueChange={(value) => {
-              const bar = availableBars.find(b => b.id.toString() === value)
+              const bar = availableBars.find((b: any) => b.id.toString() === value)
               if (bar) setSelectedBar(bar)
             }}
           >

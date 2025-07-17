@@ -71,16 +71,16 @@ export default function CopyItemsDialog({
   const [isLoading, setIsLoading] = useState(false)
 
   // Filtros
-  const filteredItems = sourceChecklist.items?.filter(item => {
+  const filteredItems = sourceChecklist.items?.filter((item: any) => {
     const matchesSearch = item.titulo.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesSection = !filterBySection || item.secao === filterBySection
     const matchesRequired = !onlyRequired || item.obrigatorio
     return matchesSearch && matchesSection && matchesRequired
   }) || []
 
-  const sections = [...new Set(sourceChecklist.items?.map(item => item.secao).filter(Boolean))]
-  const selectedItemsData = sourceChecklist.items?.filter(item => selectedItems.includes(item.id)) || []
-  const targetChecklist = availableChecklists.find(c => c.id === targetChecklistId)
+  const sections = [...new Set(sourceChecklist.items?.map((item: any) => item.secao).filter(Boolean))]
+  const selectedItemsData = sourceChecklist.items?.filter((item: any) => selectedItems.includes(item.id)) || []
+  const targetChecklist = availableChecklists.find((c: any) => c.id === targetChecklistId)
 
   const resetDialog = () => {
     setCurrentStep('select-items')
@@ -94,17 +94,17 @@ export default function CopyItemsDialog({
   const handleSelectItem = (itemId: string) => {
     setSelectedItems(prev => 
       prev.includes(itemId) 
-        ? prev.filter(id => id !== itemId)
+        ? prev.filter((id: any) => id !== itemId)
         : [...prev, itemId]
     )
   }
 
   const handleSelectAll = () => {
-    const allFilteredIds = filteredItems.map(item => item.id)
+    const allFilteredIds = filteredItems.map((item: any) => item.id)
     const isAllSelected = allFilteredIds.every(id => selectedItems.includes(id))
     
     if (isAllSelected) {
-      setSelectedItems(prev => prev.filter(id => !allFilteredIds.includes(id)))
+      setSelectedItems(prev => prev.filter((id: any) => !allFilteredIds.includes(id)))
     } else {
       setSelectedItems(prev => [...new Set([...prev, ...allFilteredIds])])
     }
@@ -163,7 +163,7 @@ export default function CopyItemsDialog({
                   className="px-3 py-2 border rounded-lg text-sm"
                 >
                   <option value="">Todas as seções</option>
-                  {sections.map(section => (
+                  {sections.map((section: any) => (
                     <option key={section} value={section}>{section}</option>
                   ))}
                 </select>
@@ -276,7 +276,7 @@ export default function CopyItemsDialog({
               </Label>
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 {availableChecklists
-                  .filter(c => c.id !== sourceChecklist.id)
+                  .filter((c: any) => c.id !== sourceChecklist.id)
                   .map((checklist) => (
                     <Card 
                       key={checklist.id}
@@ -528,7 +528,7 @@ export function useCopyItems() {
         },
         body: JSON.stringify({
           targetChecklistId,
-          items: items.map(item => ({
+          items: items.map((item: any) => ({
             ...item,
             id: undefined, // Remove ID para criar novo
             ordem: undefined // Será definido automaticamente

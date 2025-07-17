@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
       })
     )
 
-    const produtosComReceitasValidas = produtosComReceitas.filter(p => p.receitas && p.receitas.length > 0)
+    const produtosComReceitasValidas = produtosComReceitas.filter((p: any) => p.receitas && p.receitas.length > 0)
 
     console.log(`✅ ${produtosComReceitasValidas.length} produtos com receitas retornados`)
 

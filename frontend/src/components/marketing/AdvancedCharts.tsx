@@ -91,7 +91,7 @@ const generateTrendData = () => {
 const generateWeeklyData = () => {
   const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
   
-  return days.map(day => ({
+  return days.map((day: any) => ({
     dia: day,
     alcance: Math.floor(Math.random() * 2000) + 500,
     engajamento: Math.floor(Math.random() * 300) + 50,
