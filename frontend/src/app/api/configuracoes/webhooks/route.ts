@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 // Usar service role para bypass RLS
@@ -12,21 +12,21 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const barId = searchParams.get('bar_id')
     
-    console.log('ðŸ” GET /api/configuracoes/webhooks - Bar ID:', barId)
+    console.log('🔍 GET /api/configuracoes/webhooks - Bar ID:', barId)
     
     if (!barId) {
       return NextResponse.json(
-        { success: false, error: 'Bar ID Ã© obrigatÃ³rio' },
+        { success: false, error: 'Bar ID � obrigat�rio' },
         { status: 400 }
       )
     }
 
     // Converter para integer para garantir compatibilidade
     const barIdInt = parseInt(barId, 10)
-    console.log('ðŸ” Bar ID convertido para int:', barIdInt)
+    console.log('🔍 Bar ID convertido para int:', barIdInt)
 
-    // Buscar cada webhook no seu sistema especÃ­fico
-    console.log('ðŸ” Buscando webhooks nos sistemas especÃ­ficos...')
+    // Buscar cada webhook no seu sistema espec�fico
+    console.log('🔍 Buscando webhooks nos sistemas espec�ficos...')
     
     const webhookMapping = {
       sistema: 'sistema',
@@ -52,14 +52,14 @@ export async function GET(request: NextRequest) {
 
       if (!webhookError && webhookData && webhookData.configuracoes?.webhook_url) {
         finalConfiguracoes[webhookKey] = webhookData.configuracoes.webhook_url
-        console.log(`âœ… Webhook ${webhookKey} encontrado no sistema ${sistema}`)
+        console.log(`�� Webhook ${webhookKey} encontrado no sistema ${sistema}`)
       } else {
         finalConfiguracoes[webhookKey] = ''
-        console.log(`âš ï¸ Webhook ${webhookKey} nÃ£o encontrado no sistema ${sistema}`)
+        console.log(`��️ Webhook ${webhookKey} n�o encontrado no sistema ${sistema}`)
       }
     }
 
-    console.log('âœ… ConfiguraÃ§Ãµes finais:', finalConfiguracoes)
+    console.log('�� Configura��es finais:', finalConfiguracoes)
     
     return NextResponse.json({
       success: true,
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('âŒ Erro na API de configuraÃ§Ãµes:', error)
+    console.error('�� Erro na API de configura��es:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },
       { status: 500 }
@@ -79,18 +79,18 @@ export async function POST(request: NextRequest) {
   try {
     const { bar_id, configuracoes } = await request.json()
     
-    console.log('ðŸ’¾ POST /api/configuracoes/webhooks - Dados recebidos:', { bar_id, configuracoes })
+    console.log('💾 POST /api/configuracoes/webhooks - Dados recebidos:', { bar_id, configuracoes })
     
     if (!bar_id || !configuracoes) {
-      console.log('âŒ Dados insuficientes:', { bar_id, configuracoes })
+      console.log('�� Dados insuficientes:', { bar_id, configuracoes })
       return NextResponse.json(
-        { success: false, error: 'Bar ID e configuraÃ§Ãµes sÃ£o obrigatÃ³rios' },
+        { success: false, error: 'Bar ID e configura��es s�o obrigat�rios' },
         { status: 400 }
       )
     }
 
-    // Salvar cada webhook no seu sistema especÃ­fico
-    console.log('ðŸ’¾ Tentando salvar configuraÃ§Ãµes...')
+    // Salvar cada webhook no seu sistema espec�fico
+    console.log('💾 Tentando salvar configura��es...')
     
     // Mapear webhooks para seus respectivos sistemas
     const webhookMapping = {
@@ -106,12 +106,12 @@ export async function POST(request: NextRequest) {
 
     const results = []
     
-    // Salvar cada webhook no seu sistema especÃ­fico
+    // Salvar cada webhook no seu sistema espec�fico
     for (const [webhookKey, sistema] of Object.entries(webhookMapping)) {
       const webhookUrl = configuracoes[webhookKey]
       
       if (webhookUrl && webhookUrl.trim()) {
-        console.log(`ðŸ’¾ Salvando webhook ${webhookKey} no sistema ${sistema}`)
+        console.log(`💾 Salvando webhook ${webhookKey} no sistema ${sistema}`)
         
         const { data: specificData, error: specificError } = await supabaseAdmin
           .from('api_credentials')
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
           })
 
         if (specificError) {
-          console.error(`âŒ Erro ao salvar webhook ${webhookKey}:`, specificError)
+          console.error(`�� Erro ao salvar webhook ${webhookKey}:`, specificError)
           return NextResponse.json(
             { success: false, error: `Erro ao salvar webhook ${webhookKey}`, details: specificError },
             { status: 500 }
@@ -140,21 +140,21 @@ export async function POST(request: NextRequest) {
 
         results.push({ webhook: webhookKey, sistema, saved: true })
       } else {
-        console.log(`âš ï¸ Webhook ${webhookKey} estÃ¡ vazio, pulando...`)
+        console.log(`��️ Webhook ${webhookKey} est� vazio, pulando...`)
       }
     }
 
-    console.log('âœ… ConfiguraÃ§Ãµes salvas com sucesso!')
-    console.log('âœ… Resultados:', results)
+    console.log('�� Configura��es salvas com sucesso!')
+    console.log('�� Resultados:', results)
     
     return NextResponse.json({
       success: true,
-      message: 'ConfiguraÃ§Ãµes salvas com sucesso',
+      message: 'Configura��es salvas com sucesso',
       results
     })
 
   } catch (error) {
-    console.error('âŒ Erro na API de configuraÃ§Ãµes:', error)
+    console.error('�� Erro na API de configura��es:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },
       { status: 500 }

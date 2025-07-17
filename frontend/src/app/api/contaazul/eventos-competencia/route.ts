@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -10,7 +10,7 @@ function createSupabaseClient() {
   )
 }
 
-// FunÃ§Ã£o para buscar TODOS os dados com paginaÃ§Ã£o automÃ¡tica
+// Fun��o para buscar TODOS os dados com pagina��o autom�tica
 async function buscarTodosRegistros(query: any, chunkSize = 1000) {
   let todosRegistros: any[] = []
   let offset = 0
@@ -21,7 +21,7 @@ async function buscarTodosRegistros(query: any, chunkSize = 1000) {
       .range(offset, offset + chunkSize - 1)
 
     if (error) {
-      console.error('âŒ Erro na paginaÃ§Ã£o automÃ¡tica:', error)
+      console.error('�� Erro na pagina��o autom�tica:', error)
       break
     }
 
@@ -31,7 +31,7 @@ async function buscarTodosRegistros(query: any, chunkSize = 1000) {
     }
 
     todosRegistros = todosRegistros.concat(chunk)
-    console.log(`ðŸ“¦ Chunk ${Math.floor(offset/chunkSize) + 1}: ${chunk.length} registros (total: ${todosRegistros.length})`)
+    console.log(`📦 Chunk ${Math.floor(offset/chunkSize) + 1}: ${chunk.length} registros (total: ${todosRegistros.length})`)
     
     // Se retornou menos que o chunk size, chegamos ao fim
     if (chunk.length < chunkSize) {
@@ -57,23 +57,23 @@ export async function GET(request: NextRequest) {
     const ano = searchParams.get('ano')
     const categoriasFiltro = searchParams.get('categorias')
     
-    // Novos parÃ¢metros para ordenaÃ§Ã£o
+    // Novos par�metros para ordena��o
     const sortField = searchParams.get('sort_field') || 'data_competencia'
     const sortDirection = searchParams.get('sort_direction') || 'desc'
     
-    console.log(`ðŸ” API Eventos: bar_id=${barId}, page=${page}, limit=${limit}, tipo=${tipo}, sort=${sortField}:${sortDirection}`)
-    console.log(`ðŸ” Filtros: ${JSON.stringify({dataInicial, dataFinal, mes, ano, categoriasFiltro})}`)
+    console.log(`🔍 API Eventos: bar_id=${barId}, page=${page}, limit=${limit}, tipo=${tipo}, sort=${sortField}:${sortDirection}`)
+    console.log(`🔍 Filtros: ${JSON.stringify({dataInicial, dataFinal, mes, ano, categoriasFiltro})}`)
     
     if (!barId) {
-      return NextResponse.json({ error: 'Bar ID Ã© obrigatÃ³rio' }, { status: 400 })
+      return NextResponse.json({ error: 'Bar ID � obrigat�rio' }, { status: 400 })
     }
 
     const supabase = createSupabaseClient()
 
-    // Calcular offset para paginaÃ§Ã£o
+    // Calcular offset para pagina��o
     const offset = (page - 1) * limit
 
-    // FunÃ§Ã£o para criar query base com filtros
+    // Fun��o para criar query base com filtros
     const criarQueryComFiltros = (selectFields: string) => {
       let query = supabase
         .from('contaazul_eventos_financeiros')
@@ -109,13 +109,13 @@ export async function GET(request: NextRequest) {
       return query
     }
 
-    // ðŸš¨ BUSCAR TODOS OS DADOS PARA CÃLCULO CORRETO DOS TOTAIS
-    console.log('ðŸ”¢ Buscando TODOS os registros para calcular totais corretos (sem limite de 1000)...')
+    // 🚨 BUSCAR TODOS OS DADOS PARA C�LCULO CORRETO DOS TOTAIS
+    console.log('🔢 Buscando TODOS os registros para calcular totais corretos (sem limite de 1000)...')
     
     const queryResumo = criarQueryComFiltros('tipo, valor')
     const resumoData = await buscarTodosRegistros(queryResumo)
     
-    console.log(`ðŸ’° Total de registros encontrados para cÃ¡lculo: ${resumoData.length}`)
+    console.log(`💰 Total de registros encontrados para c�lculo: ${resumoData.length}`)
 
     // Calcular resumo com TODOS os dados
     let resumo = {
@@ -126,20 +126,20 @@ export async function GET(request: NextRequest) {
     }
 
     if (resumoData && resumoData.length > 0) {
-      console.log('ðŸ’° Calculando totais a partir de', resumoData.length, 'registros...')
+      console.log('💰 Calculando totais a partir de', resumoData.length, 'registros...')
       
       // Debug: contar tipos de registros
       const tiposCount = resumoData.reduce((acc: any, evento: any) => {
         acc[evento.tipo] = (acc[evento.tipo] || 0) + 1
         return acc
       }, {})
-      console.log('ðŸ“Š Tipos de registros encontrados:', tiposCount)
+      console.log('📊 Tipos de registros encontrados:', tiposCount)
       
       // Debug: primeiros 5 registros de cada tipo
       const receitas = resumoData.filter((e: any) => e.tipo === 'receita').slice(0, 5)
       const despesas = resumoData.filter((e: any) => e.tipo === 'despesa').slice(0, 5)
-      console.log('ðŸ’š Primeiras 5 receitas:', receitas.map((r: any) => ({ tipo: r.tipo, valor: r.valor })))
-      console.log('â¤ï¸ Primeiras 5 despesas:', despesas.map((d: any) => ({ tipo: d.tipo, valor: d.valor })))
+      console.log('💚 Primeiras 5 receitas:', receitas.map((r: any) => ({ tipo: r.tipo, valor: r.valor })))
+      console.log('��️ Primeiras 5 despesas:', despesas.map((d: any) => ({ tipo: d.tipo, valor: d.valor })))
       
       resumo = resumoData.reduce((acc, evento) => {
         const valor = parseFloat(evento.valor || 0)
@@ -149,7 +149,7 @@ export async function GET(request: NextRequest) {
         } else if (evento.tipo === 'despesa') {
           acc.total_despesas += valor
         } else {
-          console.warn(`âš ï¸ Tipo nÃ£o reconhecido: ${evento.tipo}`)
+          console.warn(`��️ Tipo n�o reconhecido: ${evento.tipo}`)
         }
         acc.total_lancamentos++
         return acc
@@ -157,7 +157,7 @@ export async function GET(request: NextRequest) {
       
       resumo.saldo_liquido = resumo.total_receitas - resumo.total_despesas
       
-      console.log('âœ… Totais calculados corretamente:', {
+      console.log('�� Totais calculados corretamente:', {
         total_receitas: `R$ ${resumo.total_receitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
         total_despesas: `R$ ${resumo.total_despesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 
         saldo_liquido: `R$ ${resumo.saldo_liquido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
@@ -168,17 +168,17 @@ export async function GET(request: NextRequest) {
       const receitasManual = resumoData.filter((e: any) => e.tipo === 'receita').reduce((sum: number, e: any) => sum + parseFloat(e.valor || 0), 0)
       const despesasManual = resumoData.filter((e: any) => e.tipo === 'despesa').reduce((sum: number, e: any) => sum + parseFloat(e.valor || 0), 0)
       
-      console.log('ðŸ” VerificaÃ§Ã£o manual:')
+      console.log('🔍 Verifica��o manual:')
       console.log(`   Receitas: R$ ${receitasManual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
       console.log(`   Despesas: R$ ${despesasManual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
-      console.log(`   DiferenÃ§a receitas: ${Math.abs(resumo.total_receitas - receitasManual) < 0.01 ? 'âœ… OK' : 'âŒ ERRO'}`)
-      console.log(`   DiferenÃ§a despesas: ${Math.abs(resumo.total_despesas - despesasManual) < 0.01 ? 'âœ… OK' : 'âŒ ERRO'}`)
+      console.log(`   Diferen�a receitas: ${Math.abs(resumo.total_receitas - receitasManual) < 0.01 ? '�� OK' : '�� ERRO'}`)
+      console.log(`   Diferen�a despesas: ${Math.abs(resumo.total_despesas - despesasManual) < 0.01 ? '�� OK' : '�� ERRO'}`)
       
     } else {
-      console.log('âš ï¸ Nenhum dado encontrado para cÃ¡lculo dos totais')
+      console.log('��️ Nenhum dado encontrado para c�lculo dos totais')
     }
 
-    // Buscar dados paginados com ordenaÃ§Ã£o correta na API
+    // Buscar dados paginados com ordena��o correta na API
     let query = criarQueryComFiltros(`
       evento_id,
       tipo,
@@ -194,24 +194,24 @@ export async function GET(request: NextRequest) {
       categoria_id
     `)
 
-    // Aplicar ordenaÃ§Ã£o na API
+    // Aplicar ordena��o na API
     const ascending = sortDirection === 'asc'
     
-    // Mapear campos de ordenaÃ§Ã£o
+    // Mapear campos de ordena��o
     const sortFieldMap: { [key: string]: string } = {
       'data_competencia': 'data_competencia',
       'descricao': 'descricao',
       'valor': 'valor',
-      'categoria': 'categoria_id', // SerÃ¡ ordenado pelo ID da categoria
+      'categoria': 'categoria_id', // Ser� ordenado pelo ID da categoria
       'tipo': 'tipo'
     }
     
     const dbSortField = sortFieldMap[sortField] || 'data_competencia'
     query = query.order(dbSortField, { ascending })
     
-    // Se ordenaÃ§Ã£o Ã© por categoria, precisamos de ordenaÃ§Ã£o adicional
+    // Se ordena��o � por categoria, precisamos de ordena��o adicional
     if (sortField === 'categoria') {
-      query = query.order('data_competencia', { ascending: false }) // OrdenaÃ§Ã£o secundÃ¡ria
+      query = query.order('data_competencia', { ascending: false }) // Ordena��o secund�ria
     }
 
     // Buscar dados paginados
@@ -219,11 +219,11 @@ export async function GET(request: NextRequest) {
       .range(offset, offset + limit - 1)
 
     if (error) {
-      console.error('âŒ Erro ao buscar eventos:', error)
+      console.error('�� Erro ao buscar eventos:', error)
       return NextResponse.json({ error: 'Erro ao buscar eventos financeiros' }, { status: 500 })
     }
 
-    console.log(`ðŸ“Š Eventos paginados encontrados: ${eventos?.length || 0}`)
+    console.log(`📊 Eventos paginados encontrados: ${eventos?.length || 0}`)
 
     // Buscar categorias separadamente
     const { data: categorias, error: categoriasError } = await supabase
@@ -232,13 +232,13 @@ export async function GET(request: NextRequest) {
       .eq('bar_id', parseInt(barId))
 
     if (categoriasError) {
-      console.error('âŒ Erro ao buscar categorias:', categoriasError)
+      console.error('�� Erro ao buscar categorias:', categoriasError)
       return NextResponse.json({ error: 'Erro ao buscar categorias' }, { status: 500 })
     }
 
-    console.log(`ðŸ“‹ Categorias encontradas: ${categorias?.length || 0}`)
+    console.log(`📋 Categorias encontradas: ${categorias?.length || 0}`)
 
-    // Criar mapa de categorias para lookup rÃ¡pido
+    // Criar mapa de categorias para lookup r�pido
     const mapaCategorias = categorias?.reduce((acc: any, categoria) => {
       acc[categoria.id] = categoria.nome
       return acc
@@ -247,7 +247,7 @@ export async function GET(request: NextRequest) {
     // Formatar dados para compatibilidade com interface existente
     const lancamentos = eventos?.map((evento: any) => ({
       id: evento.evento_id,
-      descricao: evento.descricao || 'Sem descriÃ§Ã£o',
+      descricao: evento.descricao || 'Sem descri��o',
       valor: parseFloat(evento.valor || 0),
       categoria: mapaCategorias[evento.categoria_id] || 'Sem categoria',
       data_competencia: evento.data_competencia,
@@ -255,13 +255,13 @@ export async function GET(request: NextRequest) {
       data_pagamento: evento.data_pagamento,
       tipo: evento.tipo === 'receita' ? 'Receita' : 'Despesa',
       cliente_fornecedor: evento.cliente_id || evento.fornecedor_id || 'N/A',
-      documento: 'N/A' // NÃ£o temos documento na estrutura atual
+      documento: 'N/A' // N�o temos documento na estrutura atual
     })) || []
 
-    // Total de registros para paginaÃ§Ã£o (usar o total jÃ¡ calculado)
+    // Total de registros para pagina��o (usar o total j� calculado)
     const totalRegistros = resumo.total_lancamentos
 
-    console.log(`âœ… Eventos carregados: ${lancamentos.length} de ${totalRegistros} total`)
+    console.log(`�� Eventos carregados: ${lancamentos.length} de ${totalRegistros} total`)
 
     return NextResponse.json({
       success: true,
@@ -274,7 +274,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('âŒ Erro na API de eventos financeiros:', error)
+    console.error('�� Erro na API de eventos financeiros:', error)
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

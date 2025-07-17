@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -24,7 +24,7 @@ export function ProtectedRoute({
   requiredModules = [],
   fallbackUrl = '/home',
   errorMessage = 'acesso_negado',
-  showInlineError = true // Por padrÃ£o mostra erro inline
+  showInlineError = true // Por padr�o mostra erro inline
 }: ProtectedRouteProps) {
   const { user, hasPermission, hasAnyPermission, isRole, loading } = usePermissions()
   const router = useRouter()
@@ -37,7 +37,7 @@ export function ProtectedRoute({
 
   useEffect(() => {
     if (!loading && user) {
-      // Verificar role especÃ­fico
+      // Verificar role espec�fico
       if (requiredRole && !isRole(requiredRole)) {
         setAccessDenied(true)
         setDenialReason({
@@ -52,7 +52,7 @@ export function ProtectedRoute({
         return
       }
 
-      // Verificar mÃ³dulo especÃ­fico
+      // Verificar m�dulo espec�fico
       if (requiredModule && !hasPermission(requiredModule)) {
         setAccessDenied(true)
         setDenialReason({
@@ -66,7 +66,7 @@ export function ProtectedRoute({
         return
       }
 
-      // Verificar mÃºltiplos mÃ³dulos
+      // Verificar m�ltiplos m�dulos
       if (requiredModules.length > 0 && !hasAnyPermission(requiredModules)) {
         setAccessDenied(true)
         setDenialReason({
@@ -85,19 +85,19 @@ export function ProtectedRoute({
     }
   }, [user, loading, hasPermission, hasAnyPermission, isRole, router, requiredModule, requiredRole, requiredModules, fallbackUrl, errorMessage, showInlineError])
 
-  // Mostrar loading enquanto verifica permissÃµes
+  // Mostrar loading enquanto verifica permiss�es
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Verificando permissÃµes...</p>
+          <p>Verificando permiss�es...</p>
         </div>
       </div>
     )
   }
 
-  // Se nÃ£o tem usuÃ¡rio, nÃ£o renderizar (serÃ¡ redirecionado)
+  // Se n�o tem usu�rio, n�o renderizar (ser� redirecionado)
   if (!user) {
     return null
   }
@@ -108,22 +108,22 @@ export function ProtectedRoute({
       <div className="fixed inset-0 bg-slate-50 flex items-start justify-center pt-32 p-4">
         <div className="w-full max-w-md">
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 text-center">
-            {/* Ãcone */}
+            {/* �cone */}
             <div className="mx-auto flex items-center justify-center w-16 h-16 bg-slate-100 rounded-full mb-6">
               <Shield className="w-8 h-8 text-slate-600" />
             </div>
 
-            {/* TÃ­tulo */}
+            {/* T�tulo */}
             <h1 className="text-2xl font-bold text-slate-900 mb-3">
               Acesso Negado
             </h1>
 
             {/* Mensagem */}
             <p className="text-slate-600 mb-8 leading-relaxed">
-              VocÃª nÃ£o tem permissÃ£o para acessar esta pÃ¡gina.
+              Voc� n�o tem permiss�o para acessar esta p�gina.
             </p>
 
-            {/* BotÃµes */}
+            {/* Bot�es */}
             <div className="flex flex-col gap-3">
               <Button
                 onClick={() => router.back()}
@@ -148,11 +148,11 @@ export function ProtectedRoute({
     )
   }
 
-  // Se acesso negado mas nÃ£o deve mostrar erro inline, nÃ£o renderizar (foi redirecionado)
+  // Se acesso negado mas n�o deve mostrar erro inline, n�o renderizar (foi redirecionado)
   if (accessDenied && !showInlineError) {
     return null
   }
 
-  // Se chegou atÃ© aqui, tem permissÃ£o
+  // Se chegou at� aqui, tem permiss�o
   return <>{children}</>
 } 

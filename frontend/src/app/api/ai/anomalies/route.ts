@@ -1,9 +1,9 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
 import { createServiceRoleClient } from '@/lib/supabase-admin';
 
-// Schema de validaÃ§Ã£o para filtros
+// Schema de valida��o para filtros
 const FilterAnomaliesSchema = z.object({
   tipo_anomalia: z.string().optional(),
   severidade: z.enum(['baixa', 'media', 'alta', 'critica']).optional(),
@@ -19,7 +19,7 @@ const FilterAnomaliesSchema = z.object({
   order_direction: z.enum(['asc', 'desc']).default('desc')
 });
 
-// Schema para atualizaÃ§Ã£o de anomalia
+// Schema para atualiza��o de anomalia
 const UpdateAnomalySchema = z.object({
   status: z.enum(['detectada', 'investigando', 'resolvendo', 'resolvida', 'falso_positivo']).optional(),
   causa_real: z.string().optional(),
@@ -31,7 +31,7 @@ const UpdateAnomalySchema = z.object({
 });
 
 // ========================================
-// ðŸš¨ GET /api/ai/anomalies
+// 🚨 GET /api/ai/anomalies
 // ========================================
 export async function GET(request: NextRequest) {
   try {
@@ -39,17 +39,17 @@ export async function GET(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'UsuÃ¡rio nÃ£o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
-    // Verificar permissÃµes
+    // Verificar permiss�es
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissÃ£o para acessar anomalias' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permiss�o para acessar anomalias' }, { status: 403 });
     }
 
-    // Parse dos parÃ¢metros de query
+    // Parse dos par�metros de query
     const url = new URL(request.url);
     const rawParams = Object.fromEntries(url.searchParams.entries());
     
@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
       query = query.gte('confianca_deteccao', params.confianca_minima);
     }
 
-    // PaginaÃ§Ã£o
+    // Pagina��o
     const offset = (params.page - 1) * params.limit;
     query = query.range(offset, offset + params.limit - 1);
 
@@ -139,7 +139,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao buscar anomalias' }, { status: 500 });
     }
 
-    // Buscar estatÃ­sticas gerais
+    // Buscar estat�sticas gerais
     const { data: stats } = await supabase
       .from('ai_anomalies')
       .select('severidade, status, tipo_anomalia, ainda_ativa, confianca_deteccao')
@@ -168,7 +168,7 @@ export async function GET(request: NextRequest) {
         stats.reduce((sum: any, s: any) => sum + s.confianca_deteccao, 0) / stats.length : 0
     };
 
-    // Buscar anomalias crÃ­ticas ativas
+    // Buscar anomalias cr�ticas ativas
     const { data: criticas } = await supabase
       .from('ai_anomalies')
       .select('id, titulo, severidade, data_inicio')
@@ -178,7 +178,7 @@ export async function GET(request: NextRequest) {
       .order('data_inicio', { ascending: false })
       .limit(5);
 
-    // Calcular tendÃªncias (Ãºltimos 7 vs 7 anteriores)
+    // Calcular tend�ncias (�ltimos 7 vs 7 anteriores)
     const hoje = new Date();
     const setedias = new Date(hoje.getTime() - 7 * 24 * 60 * 60 * 1000);
     const quatorzeDias = new Date(hoje.getTime() - 14 * 24 * 60 * 60 * 1000);
@@ -228,7 +228,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({
-        error: 'ParÃ¢metros invÃ¡lidos',
+        error: 'Par�metros inv�lidos',
         details: error.errors
       }, { status: 400 });
     }
@@ -239,7 +239,7 @@ export async function GET(request: NextRequest) {
 }
 
 // ========================================
-// ðŸš¨ PUT /api/ai/anomalies
+// 🚨 PUT /api/ai/anomalies
 // ========================================
 export async function PUT(request: NextRequest) {
   try {
@@ -247,21 +247,21 @@ export async function PUT(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'UsuÃ¡rio nÃ£o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao, usuario_id } = JSON.parse(userData);
 
-    // Verificar permissÃµes
+    // Verificar permiss�es
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissÃ£o para atualizar anomalias' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permiss�o para atualizar anomalias' }, { status: 403 });
     }
 
     const body = await request.json();
     const { id, ...updateData } = body;
 
     if (!id) {
-      return NextResponse.json({ error: 'ID da anomalia Ã© obrigatÃ³rio' }, { status: 400 });
+      return NextResponse.json({ error: 'ID da anomalia � obrigat�rio' }, { status: 400 });
     }
 
     const validatedData = UpdateAnomalySchema.parse(updateData);
@@ -278,13 +278,13 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (fetchError || !existing) {
-      return NextResponse.json({ error: 'Anomalia nÃ£o encontrada' }, { status: 404 });
+      return NextResponse.json({ error: 'Anomalia n�o encontrada' }, { status: 404 });
     }
 
-    // Preparar dados para atualizaÃ§Ã£o
+    // Preparar dados para atualiza��o
     const updatePayload: any = { ...validatedData };
 
-    // LÃ³gica de status automÃ¡tico
+    // L�gica de status autom�tico
     if (validatedData.status === 'investigando' && existing.status === 'detectada') {
       updatePayload.investigada_por = usuario_id;
       updatePayload.investigada_em = new Date().toISOString();
@@ -294,12 +294,12 @@ export async function PUT(request: NextRequest) {
       updatePayload.resolvida_em = new Date().toISOString();
       updatePayload.ainda_ativa = false;
       
-      // Se nÃ£o forneceu data_fim, usar agora
+      // Se n�o forneceu data_fim, usar agora
       if (!validatedData.data_fim) {
         updatePayload.data_fim = new Date().toISOString();
       }
       
-      // Calcular duraÃ§Ã£o se possÃ­vel
+      // Calcular dura��o se poss�vel
       const { data: original } = await supabase
         .from('ai_anomalies')
         .select('data_inicio')
@@ -345,7 +345,7 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({
-        error: 'Dados invÃ¡lidos',
+        error: 'Dados inv�lidos',
         details: error.errors
       }, { status: 400 });
     }
@@ -356,7 +356,7 @@ export async function PUT(request: NextRequest) {
 }
 
 // ========================================
-// ðŸš¨ POST /api/ai/anomalies (AÃ§Ãµes em lote)
+// 🚨 POST /api/ai/anomalies (A��es em lote)
 // ========================================
 export async function POST(request: NextRequest) {
   try {
@@ -364,14 +364,14 @@ export async function POST(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'UsuÃ¡rio nÃ£o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao, usuario_id } = JSON.parse(userData);
 
-    // Verificar permissÃµes
+    // Verificar permiss�es
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissÃ£o para atualizar anomalias' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permiss�o para atualizar anomalias' }, { status: 403 });
     }
 
     const body = await request.json();
@@ -379,7 +379,7 @@ export async function POST(request: NextRequest) {
 
     if (!action || !Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json({ 
-        error: 'AÃ§Ã£o e lista de IDs sÃ£o obrigatÃ³rios' 
+        error: 'A��o e lista de IDs s�o obrigat�rios' 
       }, { status: 400 });
     }
 
@@ -393,7 +393,7 @@ export async function POST(request: NextRequest) {
           investigada_por: usuario_id,
           investigada_em: new Date().toISOString()
         };
-        successMessage = 'Anomalias marcadas como em investigaÃ§Ã£o';
+        successMessage = 'Anomalias marcadas como em investiga��o';
         break;
       
       case 'mark_resolved':
@@ -417,13 +417,13 @@ export async function POST(request: NextRequest) {
         break;
       
       default:
-        return NextResponse.json({ error: 'AÃ§Ã£o invÃ¡lida' }, { status: 400 });
+        return NextResponse.json({ error: 'A��o inv�lida' }, { status: 400 });
     }
 
     // Criar cliente Supabase
     const supabase = createServiceRoleClient();
 
-    // Atualizar mÃºltiplas anomalias
+    // Atualizar m�ltiplas anomalias
     const { data, error } = await supabase
       .from('ai_anomalies')
       .update(updateData)

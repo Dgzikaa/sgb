@@ -1,14 +1,14 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { AIIntelligentAgent } from '@/lib/ai-agent-service';
 
 // ========================================
-// ðŸš€ API PARA INICIAR AGENTE IA
+// 🚀 API PARA INICIAR AGENTE IA
 // ========================================
 
 let agentesAtivos: Map<number, AIIntelligentAgent> = new Map();
 
 // ========================================
-// ðŸš€ POST /api/ai/agent/start
+// 🚀 POST /api/ai/agent/start
 // ========================================
 export async function POST(request: NextRequest) {
   try {
@@ -18,15 +18,15 @@ export async function POST(request: NextRequest) {
     if (!bar_id) {
       return NextResponse.json({
         success: false,
-        error: 'bar_id Ã© obrigatÃ³rio'
+        error: 'bar_id � obrigat�rio'
       }, { status: 400 });
     }
 
-    // Verificar se agente jÃ¡ estÃ¡ rodando
+    // Verificar se agente j� est� rodando
     if (agentesAtivos.has(bar_id)) {
       return NextResponse.json({
         success: true,
-        message: 'Agente IA jÃ¡ estÃ¡ ativo',
+        message: 'Agente IA j� est� ativo',
         bar_id,
         status: 'running'
       });
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     if (!initialized) {
       return NextResponse.json({
         success: false,
-        error: 'Falha ao inicializar agente - verifique configuraÃ§Ã£o na tabela ai_agent_config'
+        error: 'Falha ao inicializar agente - verifique configura��o na tabela ai_agent_config'
       }, { status: 400 });
     }
 
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     await agent.startAgent();
     agentesAtivos.set(bar_id, agent);
 
-    console.log(`ðŸ¤– Agente IA iniciado para bar ${bar_id}`);
+    console.log(`🤖 Agente IA iniciado para bar ${bar_id}`);
 
     return NextResponse.json({
       success: true,
@@ -55,12 +55,12 @@ export async function POST(request: NextRequest) {
       bar_id,
       status: 'started',
       funcionalidades: [
-        'AnÃ¡lise automÃ¡tica a cada 30 minutos',
-        'DetecÃ§Ã£o de anomalias em tempo real',
-        'GeraÃ§Ã£o de insights estratÃ©gicos',
-        'RelatÃ³rio matinal Ã s 8h no Discord',
-        'NotificaÃ§Ãµes de eventos crÃ­ticos',
-        'RecomendaÃ§Ãµes baseadas em IA'
+        'An�lise autom�tica a cada 30 minutos',
+        'Detec��o de anomalias em tempo real',
+        'Gera��o de insights estrat�gicos',
+        'Relat�rio matinal �s 8h no Discord',
+        'Notifica��es de eventos cr�ticos',
+        'Recomenda��es baseadas em IA'
       ],
       timestamp: new Date().toISOString()
     });
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
 }
 
 // ========================================
-// ðŸ“Š GET /api/ai/agent/start (Status)
+// 📊 GET /api/ai/agent/start (Status)
 // ========================================
 export async function GET(request: NextRequest) {
   try {
@@ -101,10 +101,10 @@ export async function GET(request: NextRequest) {
         }
       },
       instrucoes: [
-        'ðŸ“¡ Para iniciar: POST /api/ai/agent/start com {"bar_id": 3}',
-        'ðŸ›‘ Para parar: POST /api/ai/agent/stop com {"bar_id": 3}',
-        'ðŸ“Š Para status: GET /api/ai/agent/start?bar_id=3',
-        'ðŸŽ® Discord Bot: Pergunte qualquer coisa no canal Discord'
+        '📡 Para iniciar: POST /api/ai/agent/start com {"bar_id": 3}',
+        '🛑 Para parar: POST /api/ai/agent/stop com {"bar_id": 3}',
+        '📊 Para status: GET /api/ai/agent/start?bar_id=3',
+        '🎮 Discord Bot: Pergunte qualquer coisa no canal Discord'
       ]
     };
 
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
 }
 
 // ========================================
-// ðŸ›‘ DELETE /api/ai/agent/start (Parar)
+// 🛑 DELETE /api/ai/agent/start (Parar)
 // ========================================
 export async function DELETE(request: NextRequest) {
   try {
@@ -133,7 +133,7 @@ export async function DELETE(request: NextRequest) {
     if (!bar_id) {
       return NextResponse.json({
         success: false,
-        error: 'bar_id Ã© obrigatÃ³rio'
+        error: 'bar_id � obrigat�rio'
       }, { status: 400 });
     }
 
@@ -141,7 +141,7 @@ export async function DELETE(request: NextRequest) {
     if (!agent) {
       return NextResponse.json({
         success: false,
-        error: 'Agente nÃ£o estÃ¡ rodando'
+        error: 'Agente n�o est� rodando'
       }, { status: 400 });
     }
 
@@ -149,7 +149,7 @@ export async function DELETE(request: NextRequest) {
     agent.stopAgent();
     agentesAtivos.delete(bar_id);
 
-    console.log(`ðŸ›‘ Agente IA parado para bar ${bar_id}`);
+    console.log(`🛑 Agente IA parado para bar ${bar_id}`);
 
     return NextResponse.json({
       success: true,

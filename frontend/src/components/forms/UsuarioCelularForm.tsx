@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
@@ -49,12 +49,12 @@ export default function UsuarioCelularForm({
         setCelular(data.usuario.celular || '')
       }
     } catch (error) {
-      console.error('Erro ao carregar usuÃ¡rio:', error)
+      console.error('Erro ao carregar usu�rio:', error)
     }
   }
 
   const formatCelular = (value: string) => {
-    // Remove tudo que nÃ£o Ã© nÃºmero
+    // Remove tudo que n�o � n�mero
     const numbers = value.replace(/\D/g, '')
     
     // Formatar: +55 (XX) 9XXXX-XXXX
@@ -71,14 +71,14 @@ export default function UsuarioCelularForm({
   const validateCelular = (cel: string) => {
     const numbers = cel.replace(/\D/g, '')
     
-    // Deve ter 11 dÃ­gitos: DD9XXXXXXXX
+    // Deve ter 11 d�gitos: DD9XXXXXXXX
     if (numbers.length !== 11) return false
     
-    // Deve comeÃ§ar com DDD vÃ¡lido (11-99)
+    // Deve come�ar com DDD v�lido (11-99)
     const ddd = parseInt(numbers.substring(0, 2))
     if (ddd < 11 || ddd > 99) return false
     
-    // Terceiro dÃ­gito deve ser 9 (celular)
+    // Terceiro d�gito deve ser 9 (celular)
     if (numbers[2] !== '9') return false
     
     return true
@@ -98,7 +98,7 @@ export default function UsuarioCelularForm({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           numero: numbers,
-          mensagem: `ðŸ“± Teste de WhatsApp - SGB\n\nOlÃ¡! Este Ã© um teste de conectividade.\n\nSe vocÃª recebeu esta mensagem, seu nÃºmero estÃ¡ funcionando perfeitamente para receber notificaÃ§Ãµes do sistema!\n\nâœ… NÃºmero validado: +${numbers}\n\n_Sistema SGB - ${new Date().toLocaleString('pt-BR')}_`
+          mensagem: `📱 Teste de WhatsApp - SGB\n\nOl�! Este � um teste de conectividade.\n\nSe voc� recebeu esta mensagem, seu n�mero est� funcionando perfeitamente para receber notifica��es do sistema!\n\n�� N�mero validado: +${numbers}\n\n_Sistema SGB - ${new Date().toLocaleString('pt-BR')}_`
         })
       })
       
@@ -120,7 +120,7 @@ export default function UsuarioCelularForm({
 
   const handleSave = async () => {
     if (!validateCelular(celular)) {
-      alert('NÃºmero de celular invÃ¡lido! Use o formato: +55 (XX) 9XXXX-XXXX')
+      alert('N�mero de celular inv�lido! Use o formato: +55 (XX) 9XXXX-XXXX')
       return
     }
 
@@ -133,7 +133,7 @@ export default function UsuarioCelularForm({
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          celular: numbers // Salvar apenas nÃºmeros
+          celular: numbers // Salvar apenas n�meros
         })
       })
       
@@ -163,10 +163,10 @@ export default function UsuarioCelularForm({
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
           <Phone className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-          WhatsApp do FuncionÃ¡rio
+          WhatsApp do Funcion�rio
         </CardTitle>
         <CardDescription className="text-gray-600 dark:text-gray-400">
-          {usuario ? `Configure o WhatsApp de ${usuario.nome}` : 'Configure o nÃºmero para receber notificaÃ§Ãµes'}
+          {usuario ? `Configure o WhatsApp de ${usuario.nome}` : 'Configure o n�mero para receber notifica��es'}
         </CardDescription>
       </CardHeader>
       
@@ -174,7 +174,7 @@ export default function UsuarioCelularForm({
         {/* Campo de Celular */}
         <div className="space-y-2">
           <Label className="text-gray-700 dark:text-gray-300">
-            NÃºmero do WhatsApp
+            N�mero do WhatsApp
           </Label>
           <div className="relative">
             <Input
@@ -189,7 +189,7 @@ export default function UsuarioCelularForm({
               maxLength={18}
             />
             
-            {/* Status de ValidaÃ§Ã£o */}
+            {/* Status de Valida��o */}
             {celular && (
               <div className="absolute right-3 top-3">
                 {isValid ? (
@@ -201,11 +201,11 @@ export default function UsuarioCelularForm({
             )}
           </div>
           
-          {/* Mensagem de ValidaÃ§Ã£o */}
+          {/* Mensagem de Valida��o */}
           {celular && !isValid && (
             <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
               <AlertTriangle className="h-4 w-4" />
-              Formato invÃ¡lido. Use: +55 (XX) 9XXXX-XXXX
+              Formato inv�lido. Use: +55 (XX) 9XXXX-XXXX
             </div>
           )}
         </div>
@@ -219,18 +219,18 @@ export default function UsuarioCelularForm({
             <div className="flex items-center gap-2">
               {whatsappStatus === 'valid' ? (
                 <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                  âœ… WhatsApp Funcionando
+                  �� WhatsApp Funcionando
                 </Badge>
               ) : (
                 <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-                  âŒ WhatsApp IndisponÃ­vel
+                  �� WhatsApp Indispon�vel
                 </Badge>
               )}
             </div>
           </div>
         )}
 
-        {/* BotÃµes */}
+        {/* Bot�es */}
         <div className="flex gap-3 pt-4">
           {showValidation && (
             <Button
@@ -252,16 +252,16 @@ export default function UsuarioCelularForm({
           </Button>
         </div>
 
-        {/* InformaÃ§Ãµes de SeguranÃ§a */}
+        {/* Informa��es de Seguran�a */}
         <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
           <h4 className="font-medium text-blue-900 dark:text-blue-200 mb-2">
-            ðŸ›¡ï¸ InformaÃ§Ãµes de SeguranÃ§a
+            🛡️ Informa��es de Seguran�a
           </h4>
           <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-            <li>â€¢ MÃ¡ximo 50 mensagens por dia por nÃºmero</li>
-            <li>â€¢ Intervalo mÃ­nimo de 30 segundos entre mensagens</li>
-            <li>â€¢ Funcionamento apenas em horÃ¡rio comercial (8h Ã s 18h)</li>
-            <li>â€¢ Mensagens personalizadas para evitar spam</li>
+            <li>�� M�ximo 50 mensagens por dia por n�mero</li>
+            <li>�� Intervalo m�nimo de 30 segundos entre mensagens</li>
+            <li>�� Funcionamento apenas em hor�rio comercial (8h �s 18h)</li>
+            <li>�� Mensagens personalizadas para evitar spam</li>
           </ul>
         </div>
       </CardContent>

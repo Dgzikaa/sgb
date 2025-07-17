@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useRef, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -54,7 +54,7 @@ const sizeClasses = {
 
 const sizeLabels = {
   small: 'Pequeno',
-  medium: 'MÃ©dio',
+  medium: 'M�dio',
   large: 'Grande',
   full: 'Largura Total'
 }
@@ -88,7 +88,7 @@ export function DashboardWidget({
 
   const handleRefresh = async () => {
     setIsRefreshing(true)
-    // Simular refresh - em implementaÃ§Ã£o real, chamar API
+    // Simular refresh - em implementa��o real, chamar API
     await new Promise(resolve => setTimeout(resolve, 1000))
     setIsRefreshing(false)
   }
@@ -326,7 +326,7 @@ export const WIDGET_PRESETS = {
   },
   producao_ativa: {
     id: 'producao_ativa',
-    title: 'ProduÃ§Ã£o Ativa',
+    title: 'Produ��o Ativa',
     type: 'status' as WidgetType,
     size: 'small' as WidgetSize,
     position: { x: 1, y: 1 },
@@ -335,7 +335,7 @@ export const WIDGET_PRESETS = {
   },
   metricas_integracoes: {
     id: 'metricas_integracoes',
-    title: 'MÃ©tricas das IntegraÃ§Ãµes',
+    title: 'M�tricas das Integra��es',
     type: 'metric' as WidgetType,
     size: 'large' as WidgetSize,
     position: { x: 0, y: 2 },

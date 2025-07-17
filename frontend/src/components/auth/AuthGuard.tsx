@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -25,54 +25,54 @@ export default function AuthGuard({
 
   useEffect(() => {
     const checkAuth = async () => {
-      // Aguardar atÃ© que os dados do usuÃ¡rio sejam inicializados
+      // Aguardar at� que os dados do usu�rio sejam inicializados
       if (!isInitialized || userLoading) {
         return
       }
 
-      // Se nÃ£o hÃ¡ usuÃ¡rio, verificar localStorage diretamente antes de redirecionar
+      // Se n�o h� usu�rio, verificar localStorage diretamente antes de redirecionar
       if (!user) {
-        // VerificaÃ§Ã£o dupla para evitar loop infinito
+        // Verifica��o dupla para evitar loop infinito
         try {
           const userData = localStorage.getItem('sgb_user')
-          console.log('ðŸ” AuthGuard: Verificando localStorage...', userData ? 'Dados encontrados' : 'Nenhum dado')
+          console.log('🔍 AuthGuard: Verificando localStorage...', userData ? 'Dados encontrados' : 'Nenhum dado')
           
           if (userData) {
             const parsedUser = JSON.parse(userData)
-            console.log('ðŸ” AuthGuard: Dados parseados:', parsedUser)
+            console.log('🔍 AuthGuard: Dados parseados:', parsedUser)
             
             if (parsedUser && parsedUser.id && parsedUser.email && parsedUser.nome) {
-              // UsuÃ¡rio existe no localStorage, aguardar o contexto se atualizar
-              console.log('ðŸ”„ UsuÃ¡rio encontrado no localStorage, aguardando contexto... (tentativa:', contextWaitCount + 1, ')')
+              // Usu�rio existe no localStorage, aguardar o contexto se atualizar
+              console.log('🔄 Usu�rio encontrado no localStorage, aguardando contexto... (tentativa:', contextWaitCount + 1, ')')
               
-              // Tentar forÃ§ar o contexto a recarregar os dados
+              // Tentar for�ar o contexto a recarregar os dados
               const contextRefresh = new CustomEvent('refreshUserContext')
               window.dispatchEvent(contextRefresh)
               
               // Incrementar contador de espera
               setContextWaitCount(prev => prev + 1)
               
-              // Se jÃ¡ aguardou muito tempo, permitir acesso direto
+              // Se j� aguardou muito tempo, permitir acesso direto
               if (contextWaitCount > 5) {
-                console.log('âš ï¸ AuthGuard: Timeout aguardando contexto, permitindo acesso direto')
+                console.log('��️ AuthGuard: Timeout aguardando contexto, permitindo acesso direto')
                 setIsAuthenticating(false)
                 return
               }
               
               return
             } else {
-              console.log('âš ï¸ AuthGuard: Dados invÃ¡lidos no localStorage')
+              console.log('��️ AuthGuard: Dados inv�lidos no localStorage')
             }
           } else {
-            console.log('ðŸ” AuthGuard: Nenhum dado no localStorage')
+            console.log('🔍 AuthGuard: Nenhum dado no localStorage')
           }
         } catch (error) {
-          console.error('âŒ AuthGuard: Erro ao verificar localStorage:', error)
+          console.error('�� AuthGuard: Erro ao verificar localStorage:', error)
         }
         
-        // Se realmente nÃ£o hÃ¡ usuÃ¡rio, definir para redirecionar
+        // Se realmente n�o h� usu�rio, definir para redirecionar
         if (!shouldRedirect) {
-          console.log('ðŸ”’ UsuÃ¡rio nÃ£o autenticado, agendando redirecionamento...')
+          console.log('🔒 Usu�rio n�o autenticado, agendando redirecionamento...')
           setShouldRedirect(true)
           // Aguardar um pouco antes de redirecionar para evitar loop
           setTimeout(() => {
@@ -83,22 +83,22 @@ export default function AuthGuard({
         return
       }
 
-      // Verificar permissÃµes se necessÃ¡rio
+      // Verificar permiss�es se necess�rio
       if (requiredPermissions.length > 0) {
         const hasRequiredPermissions = requiredPermissions.some(permission => 
           user.modulos_permitidos?.includes(permission)
         )
         
         if (!hasRequiredPermissions) {
-          console.log('ðŸš« UsuÃ¡rio nÃ£o tem permissÃµes necessÃ¡rias:', requiredPermissions)
-          router.push('/home') // Redirecionar para uma pÃ¡gina permitida
+          console.log('🚫 Usu�rio n�o tem permiss�es necess�rias:', requiredPermissions)
+          router.push('/home') // Redirecionar para uma p�gina permitida
           return
         }
       }
 
-      // Verificar se o usuÃ¡rio estÃ¡ ativo
+      // Verificar se o usu�rio est� ativo
       if (!user.ativo) {
-        console.log('âš ï¸ UsuÃ¡rio inativo, redirecionando para login')
+        console.log('��️ Usu�rio inativo, redirecionando para login')
         router.push(redirectTo)
         return
       }
@@ -117,7 +117,7 @@ export default function AuthGuard({
     return <AuthLoadingScreen />
   }
 
-  // Se chegou atÃ© aqui, usuÃ¡rio estÃ¡ autenticado e com permissÃµes
+  // Se chegou at� aqui, usu�rio est� autenticado e com permiss�es
   return <>{children}</>
 }
 
@@ -128,10 +128,10 @@ function AuthLoadingScreen() {
         <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
         <div className="space-y-2">
           <p className="text-lg font-medium text-gray-900 dark:text-white">
-            Carregando suas informaÃ§Ãµes...
+            Carregando suas informa��es...
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Aguarde enquanto verificamos suas permissÃµes
+            Aguarde enquanto verificamos suas permiss�es
           </p>
         </div>
       </div>

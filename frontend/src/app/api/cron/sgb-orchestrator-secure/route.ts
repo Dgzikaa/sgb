@@ -1,17 +1,17 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('ðŸ”„ Cron SGB Orchestrator Secure iniciado');
+    console.log('🔄 Cron SGB Orchestrator Secure iniciado');
     
-    // Verificar se Ã© uma requisiÃ§Ã£o de cron vÃ¡lida
+    // Verificar se � uma requisi��o de cron v�lida
     const authHeader = request.headers.get('authorization');
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      console.log('âŒ Acesso negado - token invÃ¡lido');
+      console.log('�� Acesso negado - token inv�lido');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Chamar a funÃ§Ã£o Supabase segura
+    // Chamar a fun��o Supabase segura
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const response = await fetch(`${supabaseUrl}/functions/v1/sgb-orchestrator-realtime-secure`, {
       method: 'POST',
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('âŒ Erro na funÃ§Ã£o Supabase:', errorText);
+      console.error('�� Erro na fun��o Supabase:', errorText);
       return NextResponse.json({ 
         success: false, 
         error: 'Supabase function failed',
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     }
 
     const result = await response.json();
-    console.log('âœ… Cron executado com sucesso:', result);
+    console.log('�� Cron executado com sucesso:', result);
 
     return NextResponse.json({
       success: true,
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('âŒ Erro no cron:', error);
+    console.error('�� Erro no cron:', error);
     return NextResponse.json({ 
       success: false, 
       error: error instanceof Error ? error.message : 'Unknown error'

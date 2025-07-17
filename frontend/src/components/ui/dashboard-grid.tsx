@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { DashboardWidget, WidgetConfig, WIDGET_PRESETS } from './dashboard-widget'
@@ -78,7 +78,7 @@ export function DashboardGrid({
   }
 
   const findEmptyPosition = (): { x: number; y: number } => {
-    // Simples algoritmo para encontrar posiÃ§Ã£o vazia
+    // Simples algoritmo para encontrar posi��o vazia
     const occupied = widgets.map((w: any) => w.position)
     
     for (let y = 0; y < 10; y++) {
@@ -339,10 +339,10 @@ export function DashboardGrid({
             <div className="text-center">
               <Layers className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="font-medium text-gray-900 dark:text-white mb-2">
-                Nenhum widget visÃ­vel
+                Nenhum widget vis�vel
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Adicione widgets ou torne alguns visÃ­veis para comeÃ§ar
+                Adicione widgets ou torne alguns vis�veis para come�ar
               </p>
               <Button
                 onClick={() => setShowAddWidget(true)}
@@ -361,7 +361,7 @@ export function DashboardGrid({
         <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
           <Settings className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           <span className="text-sm text-blue-800 dark:text-blue-200">
-            Modo de ediÃ§Ã£o ativo: arraste widgets para reposicionar, use os controles para configurar ou remover
+            Modo de edi��o ativo: arraste widgets para reposicionar, use os controles para configurar ou remover
           </span>
         </div>
       )}
@@ -380,7 +380,7 @@ function WidgetContent({ widget }: { widget: WidgetConfig }) {
             R$ 1.234,56
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-400">
-            +12% vs. perÃ­odo anterior
+            +12% vs. per�odo anterior
           </div>
         </div>
       )
@@ -395,7 +395,7 @@ function WidgetContent({ widget }: { widget: WidgetConfig }) {
             </span>
           </div>
           <div className="text-xs text-gray-600 dark:text-gray-400">
-            Ãšltima atualizaÃ§Ã£o: agora
+            �ltima atualiza��o: agora
           </div>
         </div>
       )
@@ -408,10 +408,10 @@ function WidgetContent({ widget }: { widget: WidgetConfig }) {
           </div>
           <div className="space-y-1">
             <div className="text-sm text-gray-900 dark:text-white">
-              Sync ContaAzul concluÃ­do
+              Sync ContaAzul conclu�do
             </div>
             <div className="text-xs text-gray-600 dark:text-gray-400">
-              hÃ¡ 2 minutos
+              h� 2 minutos
             </div>
           </div>
         </div>

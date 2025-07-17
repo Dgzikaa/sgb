@@ -1,4 +1,4 @@
-ï»¿'use client'
+'use client'
 
 import { useState, useCallback } from 'react'
 
@@ -39,7 +39,7 @@ export interface UploadProgress {
 export function useFileUpload() {
   const [uploads, setUploads] = useState<Record<string, UploadProgress>>({})
 
-  // FunÃƒÂ§ÃƒÂ£o para comprimir imagem no frontend
+  // Funá§á£o para comprimir imagem no frontend
   const compressImage = useCallback(async (
     file: File, 
     maxWidth: number = 1920, 
@@ -49,7 +49,7 @@ export function useFileUpload() {
       const canvas = document.createElement('canvas')
       const ctx = canvas.getContext('2d')
       if (!ctx) {
-        reject(new Error('Canvas context nÃƒÂ£o disponÃƒÂ­vel'))
+        reject(new Error('Canvas context ná£o disponá­vel'))
         return
       }
 
@@ -57,7 +57,7 @@ export function useFileUpload() {
       
       img.onload = () => {
         try {
-          // Calcular dimensÃƒÂµes mantendo aspect ratio
+          // Calcular dimensáµes mantendo aspect ratio
           let { width, height } = img
           
           if (width > maxWidth) {
@@ -77,7 +77,7 @@ export function useFileUpload() {
               if (blob) {
                 resolve(blob)
               } else {
-                reject(new Error('Falha na compressÃƒÂ£o'))
+                reject(new Error('Falha na compressá£o'))
               }
             }, 
             'image/jpeg', 
@@ -93,7 +93,7 @@ export function useFileUpload() {
     })
   }, [])
 
-  // FunÃƒÂ§ÃƒÂ£o principal de upload
+  // Funá§á£o principal de upload
   const uploadFile = useCallback(async (
     file: File, 
     options: UploadOptions
@@ -112,18 +112,18 @@ export function useFileUpload() {
     }))
 
     try {
-      // ValidaÃƒÂ§ÃƒÂµes bÃƒÂ¡sicas no frontend
+      // Validaá§áµes bá¡sicas no frontend
       const maxSize = (options.maxSizeMB || 10) * 1024 * 1024
       if (file.size > maxSize) {
-        throw new Error(`Arquivo muito grande. MÃƒÂ¡ximo: ${options.maxSizeMB || 10}MB`)
+        throw new Error(`Arquivo muito grande. Má¡ximo: ${options.maxSizeMB || 10}MB`)
       }
 
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
       if (!allowedTypes.includes(file.type)) {
-        throw new Error(`Tipo nÃƒÂ£o permitido. Aceitos: ${allowedTypes.join(', ')}`)
+        throw new Error(`Tipo ná£o permitido. Aceitos: ${allowedTypes.join(', ')}`)
       }
 
-      // Preparar arquivo (comprimir se necessÃƒÂ¡rio)
+      // Preparar arquivo (comprimir se necessá¡rio)
       let fileToUpload: File | Blob = file
       
       if (options.compress && file.type.startsWith('image/')) {
@@ -132,14 +132,14 @@ export function useFileUpload() {
           [uploadId]: { ...prev[uploadId], progress: 20 }
         }))
 
-        console.log('Ã°Å¸â€œÂ¸ Comprimindo imagem...')
+        console.log('ðŸ“¸ Comprimindo imagem...')
         fileToUpload = await compressImage(
           file, 
           options.maxWidth || 1920, 
           options.quality || 0.8
         )
         
-        console.log(`Ã¢Å“â€¦ CompressÃƒÂ£o: ${file.size} Ã¢â€ â€™ ${fileToUpload.size} bytes`)
+        console.log(`œ… Compressá£o: ${file.size} †’ ${fileToUpload.size} bytes`)
       }
 
       // Preparar FormData
@@ -155,7 +155,7 @@ export function useFileUpload() {
         [uploadId]: { ...prev[uploadId], progress: 50 }
       }))
 
-      // Pegar dados do usuÃƒÂ¡rio para header
+      // Pegar dados do usuá¡rio para header
       const userData = localStorage.getItem('sgb_user')
       const headers: Record<string, string> = {}
       
@@ -202,11 +202,11 @@ export function useFileUpload() {
         }
       }))
 
-      console.log('Ã¢Å“â€¦ Upload concluÃƒÂ­do:', result.data.filename)
+      console.log('œ… Upload concluá­do:', result.data.filename)
       return result.data
 
     } catch (error: any) {
-      console.error('Ã¢ÂÅ’ Erro no upload:', error)
+      console.error('Œ Erro no upload:', error)
       
       setUploads(prev => ({
         ...prev,
@@ -222,7 +222,7 @@ export function useFileUpload() {
     }
   }, [compressImage])
 
-  // FunÃƒÂ§ÃƒÂ£o para remover arquivo
+  // Funá§á£o para remover arquivo
   const deleteFile = useCallback(async (fileId: string): Promise<void> => {
     try {
       const userData = localStorage.getItem('sgb_user')
@@ -250,15 +250,15 @@ export function useFileUpload() {
         throw new Error(result.error || 'Erro ao deletar arquivo')
       }
 
-      console.log('Ã¢Å“â€¦ Arquivo deletado')
+      console.log('œ… Arquivo deletado')
       
     } catch (error: any) {
-      console.error('Ã¢ÂÅ’ Erro ao deletar:', error)
+      console.error('Œ Erro ao deletar:', error)
       throw error
     }
   }, [])
 
-  // FunÃƒÂ§ÃƒÂ£o para listar uploads
+  // Funá§á£o para listar uploads
   const listUploads = useCallback(async (folder?: string) => {
     try {
       const userData = localStorage.getItem('sgb_user')
@@ -290,12 +290,12 @@ export function useFileUpload() {
       return result.data
       
     } catch (error: any) {
-      console.error('Ã¢ÂÅ’ Erro ao listar uploads:', error)
+      console.error('Œ Erro ao listar uploads:', error)
       throw error
     }
   }, [])
 
-  // Limpar estado de um upload especÃƒÂ­fico
+  // Limpar estado de um upload especá­fico
   const clearUpload = useCallback((uploadId: string) => {
     setUploads(prev => {
       const { [uploadId]: _, ...rest } = prev

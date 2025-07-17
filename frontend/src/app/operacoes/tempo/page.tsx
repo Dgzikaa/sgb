@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
@@ -8,8 +8,8 @@ export default function TempoPage() {
   return (
     <ProtectedRoute requiredModule="analise_tempo">
       <EmConstrucao 
-      titulo="GestÃ£o de Tempo"
-      descricao="AnÃ¡lise de tempos de produÃ§Ã£o, eficiÃªncia operacional e otimizaÃ§Ã£o de processos."
+      titulo="Gest�o de Tempo"
+      descricao="An�lise de tempos de produ��o, efici�ncia operacional e otimiza��o de processos."
       prioridade="baixa"
       previsao="1-2 meses"
     />

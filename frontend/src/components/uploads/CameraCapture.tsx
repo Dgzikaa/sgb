@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
@@ -34,7 +34,7 @@ export default function CameraCapture({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
 
-  // Iniciar stream da cÃ¢mera
+  // Iniciar stream da c�mera
   const startCamera = useCallback(async () => {
     try {
       setError(null)
@@ -59,12 +59,12 @@ export default function CameraCapture({
         streamRef.current = stream
       }
     } catch (err) {
-      console.error('Erro ao acessar cÃ¢mera:', err)
-      setError('NÃ£o foi possÃ­vel acessar a cÃ¢mera. Verifique as permissÃµes.')
+      console.error('Erro ao acessar c�mera:', err)
+      setError('N�o foi poss�vel acessar a c�mera. Verifique as permiss�es.')
     }
   }, [facingMode])
 
-  // Parar stream da cÃ¢mera
+  // Parar stream da c�mera
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop())
@@ -83,11 +83,11 @@ export default function CameraCapture({
 
     if (!ctx) return
 
-    // Definir tamanho do canvas baseado no vÃ­deo
+    // Definir tamanho do canvas baseado no v�deo
     canvas.width = video.videoWidth
     canvas.height = video.videoHeight
 
-    // Desenhar frame atual do vÃ­deo no canvas
+    // Desenhar frame atual do v�deo no canvas
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
 
     // Converter para blob e base64
@@ -113,18 +113,18 @@ export default function CameraCapture({
     }, 'image/jpeg', 0.8)
   }, [onCapture, onClose])
 
-  // RecomeÃ§ar captura
+  // Recome�ar captura
   const retakePhoto = useCallback(() => {
     setCapturedImage(null)
     startCamera()
   }, [startCamera])
 
-  // Alternar cÃ¢mera frontal/traseira
+  // Alternar c�mera frontal/traseira
   const toggleCamera = useCallback(() => {
     setFacingMode(prev => prev === 'user' ? 'environment' : 'user')
   }, [])
 
-  // Efeitos para gerenciar o ciclo de vida da cÃ¢mera
+  // Efeitos para gerenciar o ciclo de vida da c�mera
   useEffect(() => {
     if (isOpen && !capturedImage) {
       startCamera()
@@ -160,7 +160,7 @@ export default function CameraCapture({
           </div>
         </div>
 
-        {/* ConteÃºdo principal */}
+        {/* Conte�do principal */}
         <div className="relative w-full h-full flex items-center justify-center">
           {error ? (
             <div className="text-center text-white p-8">
@@ -188,7 +188,7 @@ export default function CameraCapture({
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center text-white">
                     <Camera className="w-16 h-16 mx-auto mb-4 animate-pulse" />
-                    <p>Iniciando cÃ¢mera...</p>
+                    <p>Iniciando c�mera...</p>
                   </div>
                 </div>
               )}

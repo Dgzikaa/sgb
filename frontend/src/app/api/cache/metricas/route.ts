@@ -1,13 +1,13 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { cacheService } from '@/lib/redis-cache'
 import { cacheMiddleware } from '@/middleware/cache-middleware'
 
 export async function GET(request: NextRequest) {
   try {
-    // Obter estatÃ­sticas detalhadas do cache
+    // Obter estat�sticas detalhadas do cache
     const stats = cacheMiddleware.getCacheStats()
     
-    // Calcular mÃ©tricas adicionais
+    // Calcular m�tricas adicionais
     const now = Date.now()
     const uptime = process.uptime?.() || 0
     
@@ -36,11 +36,11 @@ export async function GET(request: NextRequest) {
       recommendations: [] as string[]
     }
 
-    // Gerar recomendaÃ§Ãµes baseadas nas mÃ©tricas
+    // Gerar recomenda��es baseadas nas m�tricas
     const recommendations: string[] = []
     
     if (stats.metrics.hitRate < 30) {
-      recommendations.push('Hit rate baixo - considere aumentar TTL para dados estÃ¡veis')
+      recommendations.push('Hit rate baixo - considere aumentar TTL para dados est�veis')
     }
     
     if (stats.size > 5000) {
@@ -48,11 +48,11 @@ export async function GET(request: NextRequest) {
     }
     
     if (stats.metrics.misses > stats.metrics.hits * 2) {
-      recommendations.push('Muitos cache misses - verifique se as chaves estÃ£o sendo geradas corretamente')
+      recommendations.push('Muitos cache misses - verifique se as chaves est�o sendo geradas corretamente')
     }
     
     if (stats.metrics.sets < 10) {
-      recommendations.push('Poucas operaÃ§Ãµes de set - verifique se o cache estÃ¡ sendo utilizado adequadamente')
+      recommendations.push('Poucas opera��es de set - verifique se o cache est� sendo utilizado adequadamente')
     }
 
     detailedMetrics.recommendations = recommendations
@@ -64,11 +64,11 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Erro ao obter mÃ©tricas de cache:', error)
+    console.error('Erro ao obter m�tricas de cache:', error)
     
     return NextResponse.json({
       success: false,
-      error: 'Erro interno do servidor ao obter mÃ©tricas de cache',
+      error: 'Erro interno do servidor ao obter m�tricas de cache',
       details: error instanceof Error ? error.message : 'Erro desconhecido'
     }, { status: 500 })
   }
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
           await cacheMiddleware.invalidateCacheManual(patterns)
           return NextResponse.json({
             success: true,
-            message: `Cache invalidado para padrÃµes: ${patterns.join(', ')}`
+            message: `Cache invalidado para padr�es: ${patterns.join(', ')}`
           })
         }
         break
@@ -108,16 +108,16 @@ export async function POST(request: NextRequest) {
       default:
         return NextResponse.json({
           success: false,
-          error: 'AÃ§Ã£o invÃ¡lida'
+          error: 'A��o inv�lida'
         }, { status: 400 })
     }
 
   } catch (error) {
-    console.error('Erro na operaÃ§Ã£o de cache:', error)
+    console.error('Erro na opera��o de cache:', error)
     
     return NextResponse.json({
       success: false,
-      error: 'Erro interno do servidor na operaÃ§Ã£o de cache',
+      error: 'Erro interno do servidor na opera��o de cache',
       details: error instanceof Error ? error.message : 'Erro desconhecido'
     }, { status: 500 })
   }

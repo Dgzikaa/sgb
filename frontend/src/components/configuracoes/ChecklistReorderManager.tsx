@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -101,7 +101,7 @@ export function ChecklistReorderManager({
     } catch (error) {
       toast({
         title: 'Erro ao salvar',
-        description: 'NÃ£o foi possÃ­vel salvar a nova ordem. Tente novamente.',
+        description: 'N�o foi poss�vel salvar a nova ordem. Tente novamente.',
         variant: 'destructive'
       })
     }
@@ -114,7 +114,7 @@ export function ChecklistReorderManager({
     
     toast({
       title: 'Ordem resetada',
-      description: 'A ordem foi restaurada para o padrÃ£o original.'
+      description: 'A ordem foi restaurada para o padr�o original.'
     })
   }
 
@@ -164,16 +164,16 @@ export function ChecklistReorderManager({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="card-title-dark">ðŸ”„ Reordenar Checklists</CardTitle>
+            <CardTitle className="card-title-dark">🔄 Reordenar Checklists</CardTitle>
             <p className="card-description-dark mt-2">
-              Arraste os checklists para reorganizar a ordem de execuÃ§Ã£o.
+              Arraste os checklists para reorganizar a ordem de execu��o.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             {hasChanges && (
               <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300">
-                AlteraÃ§Ãµes pendentes
+                Altera��es pendentes
               </Badge>
             )}
             
@@ -191,7 +191,7 @@ export function ChecklistReorderManager({
         <Alert>
           <AlertDescription>
             <strong>Como usar:</strong> Arraste os checklists para reorganizar a ordem.
-            No desktop, use <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs">Ctrl + â†‘/â†“</kbd> para mover via teclado.
+            No desktop, use <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs">Ctrl + ��/��</kbd> para mover via teclado.
           </AlertDescription>
         </Alert>
 
@@ -254,7 +254,7 @@ export function ChecklistReorderManager({
               disabled={!hasChanges || disabled}
               className="btn-primary-dark"
             >
-              ðŸ’¾ Salvar Ordem
+              💾 Salvar Ordem
             </Button>
 
             <Button
@@ -263,7 +263,7 @@ export function ChecklistReorderManager({
               disabled={!hasChanges || disabled}
               className="btn-secondary-dark"
             >
-              ðŸ”„ Resetar
+              🔄 Resetar
             </Button>
           </div>
 

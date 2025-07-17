@@ -1,10 +1,10 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser, authErrorResponse } from '@/middleware/auth'
 import { z } from 'zod'
 
 // =====================================================
-// SCHEMAS DE VALIDAÃ‡ÃƒO
+// SCHEMAS DE VALIDA��O
 // =====================================================
 
 const TemplateRelatorioCriarSchema = z.object({
@@ -35,20 +35,20 @@ const FiltrosTemplatesSchema = z.object({
 })
 
 // =====================================================
-// GET - LISTAR TEMPLATES DE RELATÃ“RIOS
+// GET - LISTAR TEMPLATES DE RELAT�RIOS
 // =====================================================
 export async function GET(request: NextRequest) {
   try {
-    // ðŸ” AUTENTICAÃ‡ÃƒO
+    // 🔐 AUTENTICA��O
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('UsuÃ¡rio nÃ£o autenticado')
+      return authErrorResponse('Usu�rio n�o autenticado')
     }
 
     const { searchParams } = new URL(request.url)
     const filtros: any = {}
     
-    // Converter parÃ¢metros para tipos corretos
+    // Converter par�metros para tipos corretos
     for (const [key, value] of searchParams.entries()) {
       if (key === 'page' || key === 'limit') {
         filtros[key] = parseInt(value)
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
       `)
       .eq('ativo', true)
 
-    // Aplicar filtros de permissÃ£o
+    // Aplicar filtros de permiss�o
     if (user.role !== 'admin') {
       query = query.or(`publico.eq.true,roles_permitidas.cs.["${user.role}"]`)
     }
@@ -97,10 +97,10 @@ export async function GET(request: NextRequest) {
       query = query.or(`nome.ilike.%${data.busca}%,descricao.ilike.%${data.busca}%`)
     }
 
-    // Buscar total para paginaÃ§Ã£o
+    // Buscar total para pagina��o
     const { count } = await query
 
-    // Buscar templates com paginaÃ§Ã£o
+    // Buscar templates com pagina��o
     const offset = (data.page - 1) * data.limit
     const { data: templates, error } = await query
       .order('criado_em', { ascending: false })
@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
       }, { status: 500 })
     }
 
-    // EstatÃ­sticas rÃ¡pidas
+    // Estat�sticas r�pidas
     const { data: estatisticas } = await supabase
       .from('relatorios_templates')
       .select('categoria, tipo_relatorio, publico')
@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
       privados: estatisticas?.filter((t: any) => !t.publico).length || 0
     }
 
-    // Processar estatÃ­sticas
+    // Processar estat�sticas
     estatisticas?.forEach((template: any) => {
       estatisticasProcessadas.por_categoria[template.categoria] = 
         (estatisticasProcessadas.por_categoria[template.categoria] || 0) + 1
@@ -155,7 +155,7 @@ export async function GET(request: NextRequest) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json({ 
-        error: 'ParÃ¢metros invÃ¡lidos',
+        error: 'Par�metros inv�lidos',
         details: error.errors 
       }, { status: 400 })
     }
@@ -168,20 +168,20 @@ export async function GET(request: NextRequest) {
 }
 
 // =====================================================
-// POST - CRIAR TEMPLATE DE RELATÃ“RIO
+// POST - CRIAR TEMPLATE DE RELAT�RIO
 // =====================================================
 export async function POST(request: NextRequest) {
   try {
-    // ðŸ” AUTENTICAÃ‡ÃƒO
+    // 🔐 AUTENTICA��O
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('UsuÃ¡rio nÃ£o autenticado')
+      return authErrorResponse('Usu�rio n�o autenticado')
     }
 
-    // Verificar permissÃµes (apenas admin e financeiro podem criar templates)
+    // Verificar permiss�es (apenas admin e financeiro podem criar templates)
     if (!['admin', 'financeiro'].includes(user.role)) {
       return NextResponse.json({ 
-        error: 'Sem permissÃ£o para criar templates de relatÃ³rios' 
+        error: 'Sem permiss�o para criar templates de relat�rios' 
       }, { status: 403 })
     }
 
@@ -190,7 +190,7 @@ export async function POST(request: NextRequest) {
     
     const supabase = await getAdminClient()
 
-    // Verificar se jÃ¡ existe template com o mesmo nome
+    // Verificar se j� existe template com o mesmo nome
     const { data: existente } = await supabase
       .from('relatorios_templates')
       .select('id')
@@ -200,11 +200,11 @@ export async function POST(request: NextRequest) {
 
     if (existente) {
       return NextResponse.json({ 
-        error: 'JÃ¡ existe um template com este nome' 
+        error: 'J� existe um template com este nome' 
       }, { status: 400 })
     }
 
-    // Validar SQL do template (bÃ¡sico)
+    // Validar SQL do template (b�sico)
     if (!data.configuracao_sql.toLowerCase().includes('select')) {
       return NextResponse.json({ 
         error: 'SQL do template deve conter ao menos um SELECT' 
@@ -232,7 +232,7 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
 
-    console.log(`ðŸ“Š Template de relatÃ³rio criado: ${data.nome} (${data.categoria})`)
+    console.log(`📊 Template de relat�rio criado: ${data.nome} (${data.categoria})`)
 
     return NextResponse.json({
       success: true,
@@ -245,7 +245,7 @@ export async function POST(request: NextRequest) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json({ 
-        error: 'Dados invÃ¡lidos',
+        error: 'Dados inv�lidos',
         details: error.errors 
       }, { status: 400 })
     }
@@ -258,7 +258,7 @@ export async function POST(request: NextRequest) {
 }
 
 // =====================================================
-// FUNÃ‡Ã•ES UTILITÃRIAS
+// FUN��ES UTILIT�RIAS
 // =====================================================
 
 async function obterTemplatesPorCategoria(categoria: string, userRole: string) {
@@ -270,7 +270,7 @@ async function obterTemplatesPorCategoria(categoria: string, userRole: string) {
     .eq('categoria', categoria)
     .eq('ativo', true)
 
-  // Aplicar filtros de permissÃ£o
+  // Aplicar filtros de permiss�o
   if (userRole !== 'admin') {
     query = query.or(`publico.eq.true,roles_permitidas.cs.["${userRole}"]`)
   }
@@ -287,7 +287,7 @@ async function obterTemplatesPorCategoria(categoria: string, userRole: string) {
 
 async function validarSqlTemplate(sql: string): Promise<{ valido: boolean, erro?: string }> {
   try {
-    // ValidaÃ§Ãµes bÃ¡sicas de seguranÃ§a
+    // Valida��es b�sicas de seguran�a
     const sqlLower = sql.toLowerCase()
     
     // Deve conter SELECT
@@ -295,22 +295,22 @@ async function validarSqlTemplate(sql: string): Promise<{ valido: boolean, erro?
       return { valido: false, erro: 'SQL deve conter ao menos um SELECT' }
     }
 
-    // NÃ£o deve conter comandos perigosos
+    // N�o deve conter comandos perigosos
     const comandosProibidos = ['drop', 'delete', 'update', 'insert', 'create', 'alter', 'truncate']
     for (const comando of comandosProibidos) {
       if (sqlLower.includes(comando)) {
-        return { valido: false, erro: `Comando nÃ£o permitido: ${comando.toUpperCase()}` }
+        return { valido: false, erro: `Comando n�o permitido: ${comando.toUpperCase()}` }
       }
     }
 
-    // Deve referenciar $bar_id para seguranÃ§a multi-tenant
+    // Deve referenciar $bar_id para seguran�a multi-tenant
     if (!sql.includes('$bar_id')) {
-      return { valido: false, erro: 'SQL deve incluir filtro por $bar_id para seguranÃ§a' }
+      return { valido: false, erro: 'SQL deve incluir filtro por $bar_id para seguran�a' }
     }
 
     return { valido: true }
 
   } catch (error) {
-    return { valido: false, erro: 'Erro na validaÃ§Ã£o do SQL' }
+    return { valido: false, erro: 'Erro na valida��o do SQL' }
   }
 } 

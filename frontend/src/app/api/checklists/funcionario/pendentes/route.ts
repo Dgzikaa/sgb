@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
@@ -10,14 +10,14 @@ export async function POST(request: NextRequest) {
 
     if (!bar_id || !user_id) {
       return NextResponse.json(
-        { error: 'bar_id e user_id sÃ£o obrigatÃ³rios' },
+        { error: 'bar_id e user_id s�o obrigat�rios' },
         { status: 400 }
       )
     }
 
     const supabase = await getSupabaseClient()
     
-    // Buscar checklists atribuÃ­dos ao funcionÃ¡rio atual
+    // Buscar checklists atribu�dos ao funcion�rio atual
     const { data: checklists, error } = await supabase
       .from('checklist_funcionario')
       .select('id, titulo, status, prazo, created_at')
@@ -27,13 +27,13 @@ export async function POST(request: NextRequest) {
       .order('prazo', { ascending: true })
 
     if (error) {
-      console.error('Erro ao buscar checklists de funcionÃ¡rio:', error)
+      console.error('Erro ao buscar checklists de funcion�rio:', error)
       return NextResponse.json({ meus_pendentes: 0 })
     }
 
     const meusPendentes = checklists?.length || 0
 
-    // Separar por urgÃªncia baseado no prazo
+    // Separar por urg�ncia baseado no prazo
     const agora = new Date()
     const urgentes = checklists?.filter((c: any) => {
       if (!c.prazo) return false
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Erro ao buscar checklists de funcionÃ¡rio pendentes:', error)
+    console.error('Erro ao buscar checklists de funcion�rio pendentes:', error)
     return NextResponse.json({ meus_pendentes: 0 })
   }
 } 

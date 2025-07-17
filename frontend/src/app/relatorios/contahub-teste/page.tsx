@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { PageCard, PageText } from '@/components/ui/page-base'
@@ -98,7 +98,7 @@ export default function ContaHubTestePage() {
   const [contahubStatus, setContahubStatus] = useState<ContaHubStatus | null>(null)
   const [statusLoading, setStatusLoading] = useState(true)
 
-  // Verificar status do ContaHub ao carregar a pÃ¡gina
+  // Verificar status do ContaHub ao carregar a p�gina
   useEffect(() => {
     verificarStatusContaHub()
   }, [])
@@ -139,7 +139,7 @@ export default function ContaHubTestePage() {
     } catch (error) {
       setResult({
         success: false,
-        message: `Erro na requisiÃ§Ã£o: ${error instanceof Error ? error.message : String(error)}`
+        message: `Erro na requisi��o: ${error instanceof Error ? error.message : String(error)}`
       })
     } finally {
       setLoading(false)
@@ -174,7 +174,7 @@ export default function ContaHubTestePage() {
       if (response.ok) {
         setResult({
           success: true,
-          message: data.message || 'Processamento concluÃ­do com sucesso!',
+          message: data.message || 'Processamento conclu�do com sucesso!',
           logs: Array.isArray(data.logs) ? data.logs : [],
           estatisticas: {
             totalRegistros: data.processados || 0,
@@ -183,7 +183,7 @@ export default function ContaHubTestePage() {
           }
         })
       } else {
-        const errorLogs = Array.isArray(data.logs) ? data.logs.filter((log: string) => log.includes('âŒ')) : [];
+        const errorLogs = Array.isArray(data.logs) ? data.logs.filter((log: string) => log.includes('��')) : [];
         const allLogs = Array.isArray(data.logs) ? data.logs : [];
         
         setResult({
@@ -198,7 +198,7 @@ export default function ContaHubTestePage() {
       setResult({
         success: false,
         message: `Erro ao processar dados: ${error instanceof Error ? error.message : String(error)}`,
-        logs: [`âŒ Erro de conexÃ£o: ${error}`]
+        logs: [`�� Erro de conex�o: ${error}`]
       })
     } finally {
       setProcessLoading(false)
@@ -211,13 +211,13 @@ export default function ContaHubTestePage() {
       const data = await response.json()
       setResult({
         success: true,
-        message: 'Debug das variÃ¡veis de ambiente',
+        message: 'Debug das vari�veis de ambiente',
         debug_env: data
       })
     } catch (error) {
       setResult({
         success: false,
-        message: `Erro ao verificar variÃ¡veis: ${error instanceof Error ? error.message : String(error)}`
+        message: `Erro ao verificar vari�veis: ${error instanceof Error ? error.message : String(error)}`
       })
     }
   }
@@ -410,47 +410,47 @@ export default function ContaHubTestePage() {
   const handleDebugDiscrepancias = async () => {
     try {
       setLoading(true);
-      console.log('ðŸ” Iniciando debug de discrepÃ¢ncias...');
+      console.log('🔍 Iniciando debug de discrep�ncias...');
       
       const response = await fetch('/api/contahub/processar-raw', {
         method: 'GET'
       });
       
-      console.log('ðŸ“¡ Response status:', response.status);
+      console.log('📡 Response status:', response.status);
       
       const result = await response.json();
-      console.log('ðŸ“Š Resultado completo:', result);
+      console.log('📊 Resultado completo:', result);
       
       if (result.success) {
         setDebugData(result.debug_analysis);
-        console.log('âœ… Debug data set:', result.debug_analysis);
+        console.log('�� Debug data set:', result.debug_analysis);
         
-        // Definir como resultado tambÃ©m para mostrar na interface
+        // Definir como resultado tamb�m para mostrar na interface
         setResult({
           success: true,
-          message: 'âœ… AnÃ¡lise de discrepÃ¢ncias concluÃ­da',
+          message: '�� An�lise de discrep�ncias conclu�da',
           logs: [
-            'ðŸ” AnÃ¡lise de discrepÃ¢ncias concluÃ­da',
-            `ðŸ“Š Clientes CPF: ${result.debug_analysis.clientes_cpf?.analise?.esperados || 0} esperados, ${result.debug_analysis.clientes_cpf?.analise?.inseridos || 0} inseridos`,
-            `ðŸ“Š PerÃ­odo: ${result.debug_analysis.periodo?.analise?.esperados || 0} esperados, ${result.debug_analysis.periodo?.analise?.inseridos || 0} inseridos`,
-            `ðŸ“Š Tempo: ${result.debug_analysis.tempo?.analise?.inseridos || 0} registros inseridos`
+            '🔍 An�lise de discrep�ncias conclu�da',
+            `📊 Clientes CPF: ${result.debug_analysis.clientes_cpf?.analise?.esperados || 0} esperados, ${result.debug_analysis.clientes_cpf?.analise?.inseridos || 0} inseridos`,
+            `📊 Per�odo: ${result.debug_analysis.periodo?.analise?.esperados || 0} esperados, ${result.debug_analysis.periodo?.analise?.inseridos || 0} inseridos`,
+            `📊 Tempo: ${result.debug_analysis.tempo?.analise?.inseridos || 0} registros inseridos`
           ]
         });
       } else {
-        console.error('âŒ Erro na anÃ¡lise:', result.error);
+        console.error('�� Erro na an�lise:', result.error);
         setResult({
           success: false,
-          message: `âŒ Erro na anÃ¡lise: ${result.error}`,
-          logs: [`âŒ Erro: ${result.error}`]
+          message: `�� Erro na an�lise: ${result.error}`,
+          logs: [`�� Erro: ${result.error}`]
         });
       }
       
     } catch (error) {
-      console.error('Erro ao analisar discrepÃ¢ncias:', error);
+      console.error('Erro ao analisar discrep�ncias:', error);
       setResult({
         success: false,
-        message: `âŒ Erro: ${error}`,
-        logs: [`âŒ Erro de conexÃ£o: ${error}`]
+        message: `�� Erro: ${error}`,
+        logs: [`�� Erro de conex�o: ${error}`]
       });
     } finally {
       setLoading(false);
@@ -473,22 +473,22 @@ export default function ContaHubTestePage() {
         ) : contahubStatus?.contahub_disponivel === false ? (
           <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <div className="flex items-start space-x-3">
-              <div className="text-yellow-500 text-xl">âš ï¸</div>
+              <div className="text-yellow-500 text-xl">��️</div>
               <div>
-                <h3 className="font-semibold text-yellow-800 mb-1">ContaHub em Modo ManutenÃ§Ã£o</h3>
+                <h3 className="font-semibold text-yellow-800 mb-1">ContaHub em Modo Manuten��o</h3>
                 <p className="text-yellow-700 text-sm mb-2">
-                  {contahubStatus?.contahub_status?.motivo || 'IntegraÃ§Ã£o temporariamente indisponÃ­vel'}
+                  {contahubStatus?.contahub_status?.motivo || 'Integra��o temporariamente indispon�vel'}
                 </p>
                 <div className="text-xs text-yellow-600 space-y-1">
-                  <div>Email configurado: {contahubStatus?.contahub_status?.detalhes?.email_configurado ? 'âœ…' : 'âŒ'}</div>
-                  <div>Senha configurada: {contahubStatus?.contahub_status?.detalhes?.senha_configurada ? 'âœ…' : 'âŒ'}</div>
+                  <div>Email configurado: {contahubStatus?.contahub_status?.detalhes?.email_configurado ? '��' : '��'}</div>
+                  <div>Senha configurada: {contahubStatus?.contahub_status?.detalhes?.senha_configurada ? '��' : '��'}</div>
                 </div>
                 <div className="mt-3 flex space-x-2">
                   <button
                     onClick={verificarStatusContaHub}
                     className="text-xs bg-yellow-100 text-yellow-800 px-3 py-1 rounded hover:bg-yellow-200"
                   >
-                    ðŸ”„ Verificar Novamente
+                    🔄 Verificar Novamente
                   </button>
                 </div>
               </div>
@@ -497,7 +497,7 @@ export default function ContaHubTestePage() {
         ) : (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
             <div className="flex items-center space-x-2">
-              <span className="text-green-500 text-xl">âœ…</span>
+              <span className="text-green-500 text-xl">��</span>
               <span className="text-green-800 font-medium">ContaHub Operacional</span>
               <span className="text-green-600 text-sm">- Todos os sistemas funcionando</span>
             </div>
@@ -508,13 +508,13 @@ export default function ContaHubTestePage() {
         <PageCard>
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Testes BÃ¡sicos</h3>
+              <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Testes B�sicos</h3>
               
               <button
                 onClick={executarTeste}
                 disabled={loading || processLoading || debugDadosLoading || limparLoading || contahubStatus?.contahub_disponivel === false}
                 className="w-full bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 disabled:opacity-50 flex items-center justify-center space-x-2"
-                title={contahubStatus?.contahub_disponivel === false ? 'ContaHub em modo manutenÃ§Ã£o' : ''}
+                title={contahubStatus?.contahub_disponivel === false ? 'ContaHub em modo manuten��o' : ''}
               >
                 {loading ? (
                   <>
@@ -523,12 +523,12 @@ export default function ContaHubTestePage() {
                   </>
                 ) : contahubStatus?.contahub_disponivel === false ? (
                   <>
-                    <span>ðŸ”§</span>
-                    <span>ManutenÃ§Ã£o</span>
+                    <span>🔧</span>
+                    <span>Manuten��o</span>
                   </>
                 ) : (
                   <>
-                    <span>ðŸ”</span>
+                    <span>🔍</span>
                     <span>Teste Simples</span>
                   </>
                 )}
@@ -538,7 +538,7 @@ export default function ContaHubTestePage() {
                 onClick={executarTeste}
                 disabled={loading || processLoading || debugDadosLoading || limparLoading || contahubStatus?.contahub_disponivel === false}
                 className="w-full bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center space-x-2"
-                title={contahubStatus?.contahub_disponivel === false ? 'ContaHub em modo manutenÃ§Ã£o' : ''}
+                title={contahubStatus?.contahub_disponivel === false ? 'ContaHub em modo manuten��o' : ''}
               >
                 {loading ? (
                   <>
@@ -547,12 +547,12 @@ export default function ContaHubTestePage() {
                   </>
                 ) : contahubStatus?.contahub_disponivel === false ? (
                   <>
-                    <span>ðŸ”§</span>
-                    <span>ManutenÃ§Ã£o</span>
+                    <span>🔧</span>
+                    <span>Manuten��o</span>
                   </>
                 ) : (
                   <>
-                    <span>ðŸš€</span>
+                    <span>🚀</span>
                     <span>Executar Teste</span>
                   </>
                 )}
@@ -560,7 +560,7 @@ export default function ContaHubTestePage() {
             </div>
 
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">VerificaÃ§Ãµes</h3>
+              <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Verifica��es</h3>
               
               <button
                 onClick={verificarStatus}
@@ -574,7 +574,7 @@ export default function ContaHubTestePage() {
                   </>
                 ) : (
                   <>
-                    <span>ðŸ“Š</span>
+                    <span>📊</span>
                     <span>Verificar Status</span>
                   </>
                 )}
@@ -592,7 +592,7 @@ export default function ContaHubTestePage() {
                   </>
                 ) : (
                   <>
-                    <span>ðŸ”¬</span>
+                    <span>🔬</span>
                     <span>Debug Dados</span>
                   </>
                 )}
@@ -610,8 +610,8 @@ export default function ContaHubTestePage() {
                   </>
                 ) : (
                   <>
-                    <span>ðŸ”</span>
-                    <span>Debug DiscrepÃ¢ncias</span>
+                    <span>🔍</span>
+                    <span>Debug Discrep�ncias</span>
                   </>
                 )}
               </button>
@@ -628,7 +628,7 @@ export default function ContaHubTestePage() {
                   </>
                 ) : (
                   <>
-                    <span>ðŸ§ª</span>
+                    <span>🧪</span>
                     <span>Testar Campos</span>
                   </>
                 )}
@@ -646,7 +646,7 @@ export default function ContaHubTestePage() {
                   </>
                 ) : (
                   <>
-                    <span>ðŸ”</span>
+                    <span>🔍</span>
                     <span>Descobrir Campos</span>
                   </>
                 )}
@@ -660,7 +660,7 @@ export default function ContaHubTestePage() {
                 onClick={processarDadosRaw}
                 disabled={loading || processLoading || debugDadosLoading || limparLoading || contahubStatus?.contahub_disponivel === false}
                 className="w-full bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center justify-center space-x-2"
-                title={contahubStatus?.contahub_disponivel === false ? 'ContaHub em modo manutenÃ§Ã£o' : ''}
+                title={contahubStatus?.contahub_disponivel === false ? 'ContaHub em modo manuten��o' : ''}
               >
                 {processLoading ? (
                   <>
@@ -669,12 +669,12 @@ export default function ContaHubTestePage() {
                   </>
                 ) : contahubStatus?.contahub_disponivel === false ? (
                   <>
-                    <span>ðŸ”§</span>
-                    <span>ManutenÃ§Ã£o</span>
+                    <span>🔧</span>
+                    <span>Manuten��o</span>
                   </>
                 ) : (
                   <>
-                    <span>âš™ï¸</span>
+                    <span>��️</span>
                     <span>Processar Dados</span>
                   </>
                 )}
@@ -692,7 +692,7 @@ export default function ContaHubTestePage() {
                   </>
                 ) : (
                   <>
-                    <span>ðŸ—‘ï¸</span>
+                    <span>🗑️</span>
                     <span>Limpar Tudo</span>
                   </>
                 )}
@@ -707,7 +707,7 @@ export default function ContaHubTestePage() {
               {/* Header da resposta */}
               <div className={`flex items-center space-x-2 mb-4 ${result.success ? 'text-green-600' : 'text-red-600'}`}>
                 <span className="text-lg">
-                  {result.success ? 'âœ…' : 'âŒ'}
+                  {result.success ? '��' : '��'}
                 </span>
                 <span className="font-semibold">
                   {result.success ? 'Sucesso' : 'Erro'}
@@ -717,10 +717,10 @@ export default function ContaHubTestePage() {
               {/* Mensagem principal */}
               <p className="text-gray-700 mb-4">{result.message}</p>
 
-              {/* Logs do servidor (se disponÃ­veis) */}
+              {/* Logs do servidor (se dispon�veis) */}
               {result.logs && result.logs.length > 0 && (
                 <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">ðŸ“ Logs do Servidor:</h3>
+                  <h3 className="font-semibold text-gray-800 mb-2">📝 Logs do Servidor:</h3>
                   <div className="bg-gray-800 text-green-400 p-3 rounded text-sm font-mono max-h-96 overflow-y-auto">
                     {result.logs.map((log: string, index: number) => (
                       <div key={index} className="mb-1">{log}</div>
@@ -732,7 +732,7 @@ export default function ContaHubTestePage() {
               {/* Erros do servidor (se houver) */}
               {(result as any).errors && Array.isArray((result as any).errors) && (result as any).errors.length > 0 && (
                 <div className="mb-4">
-                  <h3 className="font-semibold text-red-600 mb-2">âš ï¸ Erros Detectados:</h3>
+                  <h3 className="font-semibold text-red-600 mb-2">��️ Erros Detectados:</h3>
                   <div className="bg-red-50 border border-red-200 p-3 rounded">
                     {(result as any).errors.map((error: string, index: number) => (
                       <div key={index} className="text-red-700 mb-1 text-sm">{error}</div>
@@ -741,10 +741,10 @@ export default function ContaHubTestePage() {
                 </div>
               )}
 
-              {/* EstatÃ­sticas ou dados especÃ­ficos */}
+              {/* Estat�sticas ou dados espec�ficos */}
               {result.estatisticas && (
                 <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">ðŸ“Š EstatÃ­sticas:</h3>
+                  <h3 className="font-semibold text-gray-800 mb-2">📊 Estat�sticas:</h3>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     <div className="bg-blue-50 p-3 rounded">
                       <div className="text-sm text-blue-600">Total de Registros</div>
@@ -765,14 +765,14 @@ export default function ContaHubTestePage() {
               {/* Resultados da limpeza */}
               {result.resultados && (
                 <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">ðŸ§¹ Resultados da Limpeza:</h3>
+                  <h3 className="font-semibold text-gray-800 mb-2">🧹 Resultados da Limpeza:</h3>
                   
                   {/* Sistema Raw */}
                   {result.resultados.sistema_raw && (
                     <div className="mb-3 p-3 bg-blue-50 rounded">
                       <div className="font-medium text-blue-800">sistema_raw</div>
                       <div className="text-sm text-blue-600">
-                        {result.resultados.sistema_raw.antes} â†’ {result.resultados.sistema_raw.depois} 
+                        {result.resultados.sistema_raw.antes} �� {result.resultados.sistema_raw.depois} 
                         ({result.resultados.sistema_raw.removidos} removidos)
                       </div>
                     </div>
@@ -781,13 +781,13 @@ export default function ContaHubTestePage() {
                   {/* Detalhes por Tabela */}
                   {result.resultados.tabelas_contahub && (
                     <div className="space-y-2">
-                      <h4 className="font-medium text-gray-700">ðŸ“‹ Detalhes por Tabela:</h4>
+                      <h4 className="font-medium text-gray-700">📋 Detalhes por Tabela:</h4>
                       {Object.entries(result.resultados.tabelas_contahub).map(([tabela, info]: [string, any]) => (
                         <div key={tabela} className="flex justify-between items-center p-2 bg-gray-100 rounded text-sm">
                           <span className="font-mono">{tabela}</span>
                           <span className={info.removidos > 0 ? 'text-green-600' : 'text-gray-500'}>
-                            {info.antes} â†’ {info.depois} ({info.removidos} removidos)
-                            {info.erro && <span className="text-red-500 ml-2">âŒ {info.erro}</span>}
+                            {info.antes} �� {info.depois} ({info.removidos} removidos)
+                            {info.erro && <span className="text-red-500 ml-2">�� {info.erro}</span>}
                           </span>
                         </div>
                       ))}
@@ -799,7 +799,7 @@ export default function ContaHubTestePage() {
               {/* Totais da limpeza */}
               {result.totais && (
                 <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded">
-                  <h3 className="font-semibold text-yellow-800 mb-2">ðŸ“Š Resultados da Limpeza Completa</h3>
+                  <h3 className="font-semibold text-yellow-800 mb-2">📊 Resultados da Limpeza Completa</h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-yellow-700">Sistema Raw:</span>
@@ -824,9 +824,9 @@ export default function ContaHubTestePage() {
               {/* Debug de Logs */}
               {result.amostra_estrutura && (
                 <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">ðŸ“ Debug de Logs e Status:</h3>
+                  <h3 className="font-semibold text-gray-800 mb-2">📝 Debug de Logs e Status:</h3>
                   
-                  {/* EstatÃ­sticas resumidas */}
+                  {/* Estat�sticas resumidas */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                     <div className="bg-blue-50 p-3 rounded">
                       <div className="text-sm text-blue-600">Total de Registros</div>
@@ -837,11 +837,11 @@ export default function ContaHubTestePage() {
                       <div className="font-bold text-green-800">{result.estatisticas?.processados || 0}</div>
                     </div>
                     <div className="bg-yellow-50 p-3 rounded">
-                      <div className="text-sm text-yellow-600">NÃ£o Processados</div>
+                      <div className="text-sm text-yellow-600">N�o Processados</div>
                       <div className="font-bold text-yellow-800">{result.estatisticas?.nao_processados || 0}</div>
                     </div>
                     <div className="bg-red-50 p-3 rounded">
-                      <div className="text-sm text-red-600">ProblemÃ¡ticos</div>
+                      <div className="text-sm text-red-600">Problem�ticos</div>
                       <div className="font-bold text-red-800">{result.estatisticas?.registros_problematicos || 0}</div>
                     </div>
                   </div>
@@ -849,7 +849,7 @@ export default function ContaHubTestePage() {
                   {/* Estrutura da tabela */}
                   {result.estrutura_tabela && (
                     <div className="mb-4 p-3 bg-gray-50 rounded">
-                      <div className="font-medium text-gray-800 mb-2">ðŸ—ï¸ Estrutura da Tabela sistema_raw:</div>
+                      <div className="font-medium text-gray-800 mb-2">🏗️ Estrutura da Tabela sistema_raw:</div>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                         {result.estrutura_tabela.colunas_disponiveis.map((coluna: string) => (
                           <div key={coluna} className="bg-white p-2 rounded text-sm">
@@ -866,7 +866,7 @@ export default function ContaHubTestePage() {
                   {/* Contagem por tipo */}
                   {result.estatisticas?.contagem_por_tipo && (
                     <div className="mb-4 p-3 bg-gray-50 rounded">
-                      <div className="font-medium text-gray-800 mb-2">ðŸ“Š Contagem por Tipo:</div>
+                      <div className="font-medium text-gray-800 mb-2">📊 Contagem por Tipo:</div>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                         {Object.entries(result.estatisticas.contagem_por_tipo).map(([tipo, quantidade]: [string, any]) => (
                           <div key={tipo} className="bg-white p-2 rounded text-sm">
@@ -877,10 +877,10 @@ export default function ContaHubTestePage() {
                     </div>
                   )}
 
-                  {/* Ãšltimos registros */}
+                  {/* �ltimos registros */}
                   {result.ultimos_registros && result.ultimos_registros.length > 0 && (
                     <div className="mb-4">
-                      <div className="font-medium text-gray-800 mb-2">ðŸ• Ãšltimos Registros:</div>
+                      <div className="font-medium text-gray-800 mb-2">🕐 �ltimos Registros:</div>
                       <div className="space-y-2">
                         {result.ultimos_registros.slice(0, 5).map((registro: any, index: number) => (
                           <div key={index} className={`p-2 rounded text-sm ${registro.processado ? 'bg-green-50' : 'bg-yellow-50'}`}>
@@ -907,7 +907,7 @@ export default function ContaHubTestePage() {
                   {/* Exemplo de registro */}
                   {result.estrutura_tabela?.exemplo_registro && (
                     <div className="mb-4">
-                      <div className="font-medium text-gray-800 mb-2">ðŸ“„ Exemplo de Registro:</div>
+                      <div className="font-medium text-gray-800 mb-2">📄 Exemplo de Registro:</div>
                       <div className="bg-gray-800 text-green-400 p-3 rounded text-xs font-mono overflow-x-auto">
                         {JSON.stringify(result.estrutura_tabela.exemplo_registro, null, 2)}
                       </div>
@@ -916,10 +916,10 @@ export default function ContaHubTestePage() {
                 </div>
               )}
 
-              {/* AnÃ¡lise de dados (Debug Dados) */}
+              {/* An�lise de dados (Debug Dados) */}
               {result.analise && (
                 <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">ðŸ” AnÃ¡lise da Estrutura dos Dados:</h3>
+                  <h3 className="font-semibold text-gray-800 mb-2">🔍 An�lise da Estrutura dos Dados:</h3>
                   
                   <div className="mb-3 p-3 bg-blue-50 rounded">
                     <div className="font-medium text-blue-800">Total de Registros Analisados: {result.analise.total_registros}</div>
@@ -935,7 +935,7 @@ export default function ContaHubTestePage() {
                       <div className="space-y-3">
                         {/* Estrutura principal */}
                         <div>
-                          <div className="font-medium text-gray-700 mb-1">ðŸ“‹ Estrutura Principal:</div>
+                          <div className="font-medium text-gray-700 mb-1">📋 Estrutura Principal:</div>
                           <div className="flex flex-wrap gap-1">
                             {amostra.estrutura_json.keys_principais.map((key: string, idx: number) => (
                               <span key={idx} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
@@ -949,15 +949,15 @@ export default function ContaHubTestePage() {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                           <div className={`p-2 rounded text-sm ${amostra.estrutura_json.tem_metadados ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
                             <div className="font-medium">Metadados</div>
-                            <div>{amostra.estrutura_json.tem_metadados ? 'âœ… Sim' : 'âŒ NÃ£o'}</div>
+                            <div>{amostra.estrutura_json.tem_metadados ? '�� Sim' : '�� N�o'}</div>
                           </div>
                           <div className={`p-2 rounded text-sm ${amostra.estrutura_json.tem_list ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
                             <div className="font-medium">Campo 'list'</div>
-                            <div>{amostra.estrutura_json.tem_list ? 'âœ… Sim' : 'âŒ NÃ£o'}</div>
+                            <div>{amostra.estrutura_json.tem_list ? '�� Sim' : '�� N�o'}</div>
                           </div>
                           <div className={`p-2 rounded text-sm ${amostra.estrutura_json.list_e_array ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
-                            <div className="font-medium">Ã‰ Array</div>
-                            <div>{amostra.estrutura_json.list_e_array ? 'âœ… Sim' : 'âš ï¸ ' + amostra.estrutura_json.tipo_list}</div>
+                            <div className="font-medium">� Array</div>
+                            <div>{amostra.estrutura_json.list_e_array ? '�� Sim' : '��️ ' + amostra.estrutura_json.tipo_list}</div>
                           </div>
                           <div className="p-2 bg-blue-50 text-blue-700 rounded text-sm">
                             <div className="font-medium">Length</div>
@@ -968,7 +968,7 @@ export default function ContaHubTestePage() {
                         {/* Metadados info */}
                         {amostra.estrutura_json.metadados_info && (
                           <div className="p-3 bg-blue-50 rounded">
-                            <div className="font-medium text-blue-800 mb-2">ðŸ·ï¸ InformaÃ§Ãµes dos Metadados:</div>
+                            <div className="font-medium text-blue-800 mb-2">🏷️ Informa��es dos Metadados:</div>
                             <div className="text-sm text-blue-700">
                               <div>Query ID: {amostra.estrutura_json.metadados_info.query_id}</div>
                               <div>Query Nome: {amostra.estrutura_json.metadados_info.query_nome}</div>
@@ -980,13 +980,13 @@ export default function ContaHubTestePage() {
                         {/* List info */}
                         {amostra.estrutura_json.list_info && (
                           <div className="p-3 bg-green-50 rounded">
-                            <div className="font-medium text-green-800 mb-2">ðŸ“‹ InformaÃ§Ãµes da List:</div>
+                            <div className="font-medium text-green-800 mb-2">📋 Informa��es da List:</div>
                             <div className="text-sm text-green-700 space-y-1">
                               <div>Tamanho: {amostra.estrutura_json.list_info.length} registros</div>
                               
                               {amostra.estrutura_json.list_info.primeiro_item_keys && (
                                 <div>
-                                  <div className="font-medium mt-2 mb-1">Campos do 1Âº item:</div>
+                                  <div className="font-medium mt-2 mb-1">Campos do 1� item:</div>
                                   <div className="flex flex-wrap gap-1">
                                     {amostra.estrutura_json.list_info.primeiro_item_keys.map((key: string, idx: number) => (
                                       <span key={idx} className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
@@ -999,7 +999,7 @@ export default function ContaHubTestePage() {
 
                               {amostra.estrutura_json.list_info.primeiro_item_sample && (
                                 <div>
-                                  <div className="font-medium mt-2 mb-1">Amostra do 1Âº item:</div>
+                                  <div className="font-medium mt-2 mb-1">Amostra do 1� item:</div>
                                   <pre className="bg-white p-2 rounded text-xs overflow-x-auto">
 {JSON.stringify(amostra.estrutura_json.list_info.primeiro_item_sample, null, 2)}
                                   </pre>
@@ -1012,7 +1012,7 @@ export default function ContaHubTestePage() {
                         {/* Outros arrays encontrados */}
                         {amostra.estrutura_json.outros_arrays && amostra.estrutura_json.outros_arrays.length > 0 && (
                           <div className="p-3 bg-yellow-50 rounded">
-                            <div className="font-medium text-yellow-800 mb-2">ðŸ“¦ Outros Arrays Encontrados:</div>
+                            <div className="font-medium text-yellow-800 mb-2">📦 Outros Arrays Encontrados:</div>
                             <div className="space-y-2">
                               {amostra.estrutura_json.outros_arrays.map((arr: any, idx: number) => (
                                 <div key={idx} className="text-sm text-yellow-700">
@@ -1040,7 +1040,7 @@ export default function ContaHubTestePage() {
               {/* Resultado (outras APIs) */}
               {result.resultados && (
                 <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">ðŸ“Š Resultado:</h3>
+                  <h3 className="font-semibold text-gray-800 mb-2">📊 Resultado:</h3>
                   <div className="bg-white p-3 rounded border">
                     <pre className="text-sm text-gray-700 whitespace-pre-wrap">
                       {JSON.stringify(result.resultados, null, 2)}
@@ -1049,10 +1049,10 @@ export default function ContaHubTestePage() {
                 </div>
               )}
 
-              {/* Logs da execuÃ§Ã£o (APIs antigas) */}
+              {/* Logs da execu��o (APIs antigas) */}
               {result.logs && result.logs.length > 0 && (
                 <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">ðŸ“‹ Logs da ExecuÃ§Ã£o:</h3>
+                  <h3 className="font-semibold text-gray-800 mb-2">📋 Logs da Execu��o:</h3>
                   <div className="bg-gray-800 text-green-400 p-3 rounded text-sm font-mono max-h-64 overflow-y-auto">
                     {result.logs.map((line: string, index: number) => (
                       <div key={index}>{line}</div>
@@ -1061,12 +1061,12 @@ export default function ContaHubTestePage() {
                 </div>
               )}
 
-              {/* Erros da execuÃ§Ã£o (APIs antigas) */}
+              {/* Erros da execu��o (APIs antigas) */}
               {result.logs && result.logs.length > 0 && (
                 <div className="mb-4">
-                  <h3 className="font-semibold text-red-600 mb-2">âš ï¸ Erros da ExecuÃ§Ã£o:</h3>
+                  <h3 className="font-semibold text-red-600 mb-2">��️ Erros da Execu��o:</h3>
                   <div className="bg-red-50 border border-red-200 p-3 rounded text-sm">
-                    {result.logs.filter((log: string) => log.includes('âŒ')).map((error: string, index: number) => (
+                    {result.logs.filter((log: string) => log.includes('��')).map((error: string, index: number) => (
                       <div key={index} className="text-red-700">{error}</div>
                     ))}
                   </div>
@@ -1076,7 +1076,7 @@ export default function ContaHubTestePage() {
               {/* Status das tabelas */}
               {result.status && (
                 <div>
-                  <h3 className="font-semibold text-gray-800 mb-2">ðŸ“Š Status das Tabelas:</h3>
+                  <h3 className="font-semibold text-gray-800 mb-2">📊 Status das Tabelas:</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Sistema Raw */}
                     {result.status.sistema_raw && (
@@ -1087,7 +1087,7 @@ export default function ContaHubTestePage() {
                             `${(result.status.sistema_raw as any).registros} registros` : 
                             typeof result.status.sistema_raw === 'number' ? 
                               `${result.status.sistema_raw} registros` : 
-                              'Tabela nÃ£o encontrada'
+                              'Tabela n�o encontrada'
                           }
                         </div>
                       </div>
@@ -1100,7 +1100,7 @@ export default function ContaHubTestePage() {
                         <div className="text-sm text-gray-600">
                           {info.existe ? 
                             `${info.registros} registros` : 
-                            info.erro || 'Tabela nÃ£o existe'
+                            info.erro || 'Tabela n�o existe'
                           }
                         </div>
                       </div>
@@ -1112,7 +1112,7 @@ export default function ContaHubTestePage() {
               {/* Teste de Campos (nova funcionalidade) */}
               {result.resultados && Object.keys(result.resultados).length > 0 && (
                 <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">ðŸ§ª Teste de Campos das Tabelas:</h3>
+                  <h3 className="font-semibold text-gray-800 mb-2">🧪 Teste de Campos das Tabelas:</h3>
                   
                   {/* Resumo */}
                   {result.resumo && (
@@ -1137,7 +1137,7 @@ export default function ContaHubTestePage() {
                         <div className="flex justify-between items-start mb-2">
                           <h4 className="font-mono font-semibold text-gray-800">{tabela}</h4>
                           <span className={`px-2 py-1 rounded text-xs font-medium ${info.status === 'sucesso' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>
-                            {info.status === 'sucesso' ? 'âœ… OK' : 'âŒ ERRO'}
+                            {info.status === 'sucesso' ? '�� OK' : '�� ERRO'}
                           </span>
                         </div>
                         
@@ -1184,17 +1184,17 @@ export default function ContaHubTestePage() {
                 </div>
               )}
 
-              {/* Debug de DiscrepÃ¢ncias */}
+              {/* Debug de Discrep�ncias */}
               {debugData && (
                 <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">ðŸ” AnÃ¡lise de DiscrepÃ¢ncias dos Dados</h3>
+                  <h3 className="font-semibold text-gray-800 mb-2">🔍 An�lise de Discrep�ncias dos Dados</h3>
                   
-                  {/* AnÃ¡lise Clientes CPF */}
+                  {/* An�lise Clientes CPF */}
                   {debugData.clientes_cpf && (
                     <div className="p-4 border border-gray-200 rounded-lg mb-4">
-                      <h4 className="font-semibold text-lg mb-3">ðŸ“‹ Clientes CPF:</h4>
+                      <h4 className="font-semibold text-lg mb-3">📋 Clientes CPF:</h4>
                       
-                      {/* Resumo da discrepÃ¢ncia */}
+                      {/* Resumo da discrep�ncia */}
                       <div className="grid grid-cols-3 gap-4 mb-4">
                         <div className="text-center p-3 bg-blue-50 rounded">
                           <div className="text-2xl font-bold text-blue-600">{debugData.clientes_cpf.analise?.esperados || 0}</div>
@@ -1209,7 +1209,7 @@ export default function ContaHubTestePage() {
                             {debugData.clientes_cpf.analise?.diferenca > 0 ? '+' : ''}{debugData.clientes_cpf.analise?.diferenca || 0}
                           </div>
                           <div className={`text-sm ${(debugData.clientes_cpf.analise?.diferenca || 0) === 0 ? 'text-green-700' : 'text-red-700'}`}>
-                            DiferenÃ§a
+                            Diferen�a
                           </div>
                         </div>
                       </div>
@@ -1217,7 +1217,7 @@ export default function ContaHubTestePage() {
                       {/* CPFs Extras */}
                       {debugData.clientes_cpf.analise?.cpfsExtras?.length > 0 && (
                         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded">
-                          <h5 className="font-semibold text-red-800 mb-2">âŒ CPFs Extras (nÃ£o deveriam estar no banco):</h5>
+                          <h5 className="font-semibold text-red-800 mb-2">�� CPFs Extras (n�o deveriam estar no banco):</h5>
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                             {debugData.clientes_cpf.analise.cpfsExtras.map((cpf: string) => (
                               <div key={cpf} className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-mono">
@@ -1231,7 +1231,7 @@ export default function ContaHubTestePage() {
                       {/* CPFs Faltando */}
                       {debugData.clientes_cpf.analise?.cpfsFaltando?.length > 0 && (
                         <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded">
-                          <h5 className="font-semibold text-orange-800 mb-2">âš ï¸ CPFs Faltando (deveriam estar no banco):</h5>
+                          <h5 className="font-semibold text-orange-800 mb-2">��️ CPFs Faltando (deveriam estar no banco):</h5>
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                             {debugData.clientes_cpf.analise.cpfsFaltando.map((cpf: string) => (
                               <div key={cpf} className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-sm font-mono">
@@ -1245,7 +1245,7 @@ export default function ContaHubTestePage() {
                       {/* CPFs Duplicados */}
                       {debugData.clientes_cpf.duplicatas?.cpfs_duplicados?.length > 0 && (
                         <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
-                          <h5 className="font-semibold text-yellow-800 mb-2">ðŸ”„ CPFs Duplicados:</h5>
+                          <h5 className="font-semibold text-yellow-800 mb-2">🔄 CPFs Duplicados:</h5>
                           <div className="space-y-1">
                             {debugData.clientes_cpf.duplicatas.cpfs_duplicados.map(([cpf, count]: [string, number]) => (
                               <div key={cpf} className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-sm font-mono">
@@ -1259,7 +1259,7 @@ export default function ContaHubTestePage() {
                       {/* Raw IDs Duplicados */}
                       {debugData.clientes_cpf.duplicatas?.raw_ids_duplicados?.length > 0 && (
                         <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded">
-                          <h5 className="font-semibold text-purple-800 mb-2">ðŸ”¢ Raw IDs com MÃºltiplos Registros:</h5>
+                          <h5 className="font-semibold text-purple-800 mb-2">🔢 Raw IDs com M�ltiplos Registros:</h5>
                           <div className="space-y-1">
                             {debugData.clientes_cpf.duplicatas.raw_ids_duplicados.map(([rawId, count]: [string, number]) => (
                               <div key={rawId} className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm font-mono">
@@ -1270,14 +1270,14 @@ export default function ContaHubTestePage() {
                         </div>
                       )}
 
-                      {/* ComparaÃ§Ã£o Detalhada */}
+                      {/* Compara��o Detalhada */}
                       <details className="mt-4">
                         <summary className="cursor-pointer text-sm font-semibold text-gray-700 hover:text-gray-900">
-                          ðŸ“Š Ver ComparaÃ§Ã£o Detalhada dos Dados
+                          📊 Ver Compara��o Detalhada dos Dados
                         </summary>
                         <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-4">
                           <div>
-                            <h6 className="font-semibold text-green-800 mb-2">âœ… Dados Esperados (ContaHub):</h6>
+                            <h6 className="font-semibold text-green-800 mb-2">�� Dados Esperados (ContaHub):</h6>
                             <div className="bg-green-50 p-3 rounded max-h-60 overflow-y-auto">
                               <pre className="text-xs text-green-800">
                                 {JSON.stringify(debugData.clientes_cpf.dados_esperados, null, 2)}
@@ -1285,7 +1285,7 @@ export default function ContaHubTestePage() {
                             </div>
                           </div>
                           <div>
-                            <h6 className="font-semibold text-blue-800 mb-2">ðŸ—„ï¸ Dados Reais (Banco):</h6>
+                            <h6 className="font-semibold text-blue-800 mb-2">🗄️ Dados Reais (Banco):</h6>
                             <div className="bg-blue-50 p-3 rounded max-h-60 overflow-y-auto">
                               <pre className="text-xs text-blue-800">
                                 {JSON.stringify(debugData.clientes_cpf.dados_reais, null, 2)}
@@ -1297,12 +1297,12 @@ export default function ContaHubTestePage() {
                     </div>
                   )}
 
-                  {/* AnÃ¡lise PerÃ­odo */}
+                  {/* An�lise Per�odo */}
                   {debugData.periodo && (
                     <div className="p-4 border border-gray-200 rounded-lg mb-4">
-                      <h4 className="font-semibold text-lg mb-3">ðŸ“… PerÃ­odo:</h4>
+                      <h4 className="font-semibold text-lg mb-3">📅 Per�odo:</h4>
                       
-                      {/* Resumo da discrepÃ¢ncia perÃ­odo */}
+                      {/* Resumo da discrep�ncia per�odo */}
                       <div className="grid grid-cols-3 gap-4 mb-4">
                         <div className="text-center p-3 bg-blue-50 rounded">
                           <div className="text-2xl font-bold text-blue-600">{debugData.periodo.analise?.esperados || 0}</div>
@@ -1317,7 +1317,7 @@ export default function ContaHubTestePage() {
                             {debugData.periodo.analise?.diferenca > 0 ? '+' : ''}{debugData.periodo.analise?.diferenca || 0}
                           </div>
                           <div className={`text-sm ${(debugData.periodo.analise?.diferenca || 0) >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                            DiferenÃ§a
+                            Diferen�a
                           </div>
                         </div>
                       </div>
@@ -1325,7 +1325,7 @@ export default function ContaHubTestePage() {
                       {/* VDs Extras */}
                       {debugData.periodo.analise?.vdsExtras?.length > 0 && (
                         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded">
-                          <h5 className="font-semibold text-red-800 mb-2">âŒ VDs Extras (nÃ£o esperados):</h5>
+                          <h5 className="font-semibold text-red-800 mb-2">�� VDs Extras (n�o esperados):</h5>
                           <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
                             {debugData.periodo.analise.vdsExtras.slice(0, 20).map((vd: number) => (
                               <div key={vd} className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-mono text-center">
@@ -1344,7 +1344,7 @@ export default function ContaHubTestePage() {
                       {/* VDs Faltando */}
                       {debugData.periodo.analise?.vdsFaltando?.length > 0 && (
                         <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded">
-                          <h5 className="font-semibold text-orange-800 mb-2">âš ï¸ VDs Faltando:</h5>
+                          <h5 className="font-semibold text-orange-800 mb-2">��️ VDs Faltando:</h5>
                           <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
                             {debugData.periodo.analise.vdsFaltando.map((vd: number) => (
                               <div key={vd} className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-sm font-mono text-center">
@@ -1358,11 +1358,11 @@ export default function ContaHubTestePage() {
                       {/* Dados Reais vs Esperados */}
                       <details className="mt-4">
                         <summary className="cursor-pointer text-sm font-semibold text-gray-700 hover:text-gray-900">
-                          ðŸ“Š Ver Dados de PerÃ­odo Detalhados
+                          📊 Ver Dados de Per�odo Detalhados
                         </summary>
                         <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-4">
                           <div>
-                            <h6 className="font-semibold text-blue-800 mb-2">âœ… Primeiros 10 Esperados:</h6>
+                            <h6 className="font-semibold text-blue-800 mb-2">�� Primeiros 10 Esperados:</h6>
                             <div className="bg-blue-50 p-3 rounded max-h-60 overflow-y-auto">
                               <pre className="text-xs text-blue-800">
                                 {JSON.stringify(debugData.periodo.dados_esperados, null, 2)}
@@ -1370,7 +1370,7 @@ export default function ContaHubTestePage() {
                             </div>
                           </div>
                           <div>
-                            <h6 className="font-semibold text-green-800 mb-2">ðŸ—„ï¸ Primeiros 10 Reais:</h6>
+                            <h6 className="font-semibold text-green-800 mb-2">🗄️ Primeiros 10 Reais:</h6>
                             <div className="bg-green-50 p-3 rounded max-h-60 overflow-y-auto">
                               <pre className="text-xs text-green-800">
                                 {JSON.stringify(debugData.periodo.dados_reais?.slice(0, 10), null, 2)}
@@ -1382,10 +1382,10 @@ export default function ContaHubTestePage() {
                     </div>
                   )}
 
-                  {/* AnÃ¡lise Tempo */}
+                  {/* An�lise Tempo */}
                   {debugData.tempo && (
                     <div className="p-4 border border-gray-200 rounded-lg">
-                      <h4 className="font-semibold text-lg mb-3">â±ï¸ Tempo (Apenas Dados Reais):</h4>
+                      <h4 className="font-semibold text-lg mb-3">��️ Tempo (Apenas Dados Reais):</h4>
                       
                       {/* Resumo tempo - APENAS DADOS REAIS */}
                       <div className="grid grid-cols-2 gap-4 mb-4">
@@ -1400,13 +1400,13 @@ export default function ContaHubTestePage() {
                       </div>
                       
                       <div className="text-sm text-gray-600 mb-4">
-                        ðŸ“ <strong>PolÃ­tica:</strong> Apenas registros com vd, itm e prd vÃ¡lidos sÃ£o inseridos. Dados incompletos sÃ£o ignorados (nÃ£o geram erro).
+                        📝 <strong>Pol�tica:</strong> Apenas registros com vd, itm e prd v�lidos s�o inseridos. Dados incompletos s�o ignorados (n�o geram erro).
                       </div>
                       
                       {/* Dados de exemplo */}
                       <details className="mt-4">
                         <summary className="cursor-pointer text-sm font-semibold text-gray-700 hover:text-gray-900">
-                          ðŸ“Š Ver Primeiros 10 Registros de Tempo
+                          📊 Ver Primeiros 10 Registros de Tempo
                         </summary>
                         <div className="mt-3">
                           <div className="bg-gray-50 p-3 rounded max-h-60 overflow-y-auto">
@@ -1424,7 +1424,7 @@ export default function ContaHubTestePage() {
               {/* Descoberta de Campos (nova funcionalidade) */}
               {result.resultados && Object.entries(result.resultados).some(([tabela, info]: [string, any]) => info.campos_existentes) && (
                 <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">ðŸ” Descoberta de Campos Reais:</h3>
+                  <h3 className="font-semibold text-gray-800 mb-2">🔍 Descoberta de Campos Reais:</h3>
                   
                   <div className="space-y-4">
                     {Object.entries(result.resultados).map(([tabela, info]: [string, any]) => {
@@ -1436,10 +1436,10 @@ export default function ContaHubTestePage() {
                             <h4 className="font-mono font-semibold text-gray-800">{tabela}</h4>
                             <div className="flex space-x-2">
                               <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-sm font-medium">
-                                âœ… {info.total_existentes} existem
+                                �� {info.total_existentes} existem
                               </span>
                               <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-sm font-medium">
-                                âŒ {info.total_inexistentes} faltam
+                                �� {info.total_inexistentes} faltam
                               </span>
                               <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium">
                                 {info.percentual_sucesso}% sucesso
@@ -1451,7 +1451,7 @@ export default function ContaHubTestePage() {
                             {/* Campos que existem */}
                             <div>
                               <h5 className="text-sm font-semibold text-green-700 mb-2">
-                                âœ… Campos que EXISTEM ({info.total_existentes}):
+                                �� Campos que EXISTEM ({info.total_existentes}):
                               </h5>
                               <div className="grid grid-cols-2 gap-1 max-h-40 overflow-y-auto">
                                 {info.campos_existentes.map((campo: string) => (
@@ -1462,11 +1462,11 @@ export default function ContaHubTestePage() {
                               </div>
                             </div>
 
-                            {/* Campos que NÃƒO existem */}
+                            {/* Campos que N�O existem */}
                             {info.total_inexistentes > 0 && (
                               <div>
                                 <h5 className="text-sm font-semibold text-red-700 mb-2">
-                                  âŒ Campos que NÃƒO EXISTEM ({info.total_inexistentes}):
+                                  �� Campos que N�O EXISTEM ({info.total_inexistentes}):
                                 </h5>
                                 <div className="grid grid-cols-2 gap-1 max-h-40 overflow-y-auto">
                                   {info.campos_inexistentes.map((campo: string) => (
@@ -1488,19 +1488,19 @@ export default function ContaHubTestePage() {
               {/* Debug Raw Data (nova funcionalidade) */}
               {result.analises && result.analises.length > 0 && (
                 <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">ðŸ”¬ AnÃ¡lise da Estrutura dos Dados:</h3>
+                  <h3 className="font-semibold text-gray-800 mb-2">🔬 An�lise da Estrutura dos Dados:</h3>
                   
                   {/* Resumo geral */}
                   {result.resumo && (
                     <div className="mb-4 p-3 bg-blue-50 rounded">
-                      <h4 className="font-semibold text-blue-800 mb-2">ðŸ“Š Resumo Geral:</h4>
+                      <h4 className="font-semibold text-blue-800 mb-2">📊 Resumo Geral:</h4>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                         <div>
                           <div className="font-medium text-blue-700">Tipos encontrados:</div>
                           <div className="text-blue-600">{result.resumo.tipos_encontrados?.join(', ')}</div>
                         </div>
                         <div>
-                          <div className="font-medium text-blue-700">Datas de referÃªncia:</div>
+                          <div className="font-medium text-blue-700">Datas de refer�ncia:</div>
                           <div className="text-blue-600">{result.resumo.datas_referencia?.join(', ')}</div>
                         </div>
                         <div>
@@ -1511,7 +1511,7 @@ export default function ContaHubTestePage() {
                     </div>
                   )}
 
-                  {/* AnÃ¡lises detalhadas */}
+                  {/* An�lises detalhadas */}
                   <div className="space-y-4">
                     {result.analises.map((analise: any, index: number) => (
                       <div key={analise.id} className="p-4 border border-gray-200 rounded-lg">
@@ -1525,33 +1525,33 @@ export default function ContaHubTestePage() {
                             </div>
                           </div>
                           <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">
-                            AnÃ¡lise {index + 1}/5
+                            An�lise {index + 1}/5
                           </span>
                         </div>
 
                         {/* Estrutura do registro */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
                           <div>
-                            <h5 className="text-sm font-semibold text-gray-700 mb-2">ðŸ—ï¸ Estrutura do Registro:</h5>
+                            <h5 className="text-sm font-semibold text-gray-700 mb-2">🏗️ Estrutura do Registro:</h5>
                             <div className="bg-gray-50 p-2 rounded text-xs">
                               <div><strong>Campos diretos:</strong> {analise.estrutura_registro?.campos_diretos?.join(', ')}</div>
-                              <div><strong>Tem dados:</strong> {analise.estrutura_registro?.tem_dados ? 'âœ…' : 'âŒ'}</div>
+                              <div><strong>Tem dados:</strong> {analise.estrutura_registro?.tem_dados ? '��' : '��'}</div>
                               <div><strong>Tipo de dados:</strong> {analise.estrutura_registro?.tipo_dados_campo}</div>
-                              <div><strong>Ã‰ objeto:</strong> {analise.estrutura_registro?.dados_e_objeto ? 'âœ…' : 'âŒ'}</div>
+                              <div><strong>� objeto:</strong> {analise.estrutura_registro?.dados_e_objeto ? '��' : '��'}</div>
                             </div>
                           </div>
 
                           <div>
-                            <h5 className="text-sm font-semibold text-gray-700 mb-2">ðŸ” Campos de IdentificaÃ§Ã£o:</h5>
+                            <h5 className="text-sm font-semibold text-gray-700 mb-2">🔍 Campos de Identifica��o:</h5>
                             <div className="bg-gray-50 p-2 rounded text-xs">
                               {typeof analise.campos_identificacao === 'object' && analise.campos_identificacao !== null ? (
                                 <>
-                                  <div><strong>vd:</strong> {analise.campos_identificacao.tem_vd ? 'âœ…' : 'âŒ'}</div>
-                                  <div><strong>trn:</strong> {analise.campos_identificacao.tem_trn ? 'âœ…' : 'âŒ'}</div>
-                                  <div><strong>dt_gerencial:</strong> {analise.campos_identificacao.tem_dt_gerencial ? 'âœ…' : 'âŒ'}</div>
-                                  <div><strong>pag:</strong> {analise.campos_identificacao.tem_pag ? 'âœ…' : 'âŒ'}</div>
-                                  <div><strong>itm/prd:</strong> {analise.campos_identificacao.tem_itm ? 'âœ…' : 'âŒ'} / {analise.campos_identificacao.tem_prd ? 'âœ…' : 'âŒ'}</div>
-                                  <div><strong>hora/dds:</strong> {analise.campos_identificacao.tem_hora ? 'âœ…' : 'âŒ'} / {analise.campos_identificacao.tem_dds ? 'âœ…' : 'âŒ'}</div>
+                                  <div><strong>vd:</strong> {analise.campos_identificacao.tem_vd ? '��' : '��'}</div>
+                                  <div><strong>trn:</strong> {analise.campos_identificacao.tem_trn ? '��' : '��'}</div>
+                                  <div><strong>dt_gerencial:</strong> {analise.campos_identificacao.tem_dt_gerencial ? '��' : '��'}</div>
+                                  <div><strong>pag:</strong> {analise.campos_identificacao.tem_pag ? '��' : '��'}</div>
+                                  <div><strong>itm/prd:</strong> {analise.campos_identificacao.tem_itm ? '��' : '��'} / {analise.campos_identificacao.tem_prd ? '��' : '��'}</div>
+                                  <div><strong>hora/dds:</strong> {analise.campos_identificacao.tem_hora ? '��' : '��'} / {analise.campos_identificacao.tem_dds ? '��' : '��'}</div>
                                   {analise.campos_identificacao.primeiros_campos && (
                                     <div><strong>Primeiros campos:</strong> {analise.campos_identificacao.primeiros_campos.join(', ')}</div>
                                   )}
@@ -1565,16 +1565,16 @@ export default function ContaHubTestePage() {
 
                         {/* Wrapper format */}
                         <div className="mb-4">
-                          <h5 className="text-sm font-semibold text-gray-700 mb-2">ðŸ“¦ Wrapper Format:</h5>
+                          <h5 className="text-sm font-semibold text-gray-700 mb-2">📦 Wrapper Format:</h5>
                           <div className="bg-gray-50 p-2 rounded text-xs">
-                            <div><strong>Tem wrapper:</strong> {analise.tem_wrapper ? 'âœ… SIM' : 'âŒ NÃƒO'}</div>
+                            <div><strong>Tem wrapper:</strong> {analise.tem_wrapper ? '�� SIM' : '�� N�O'}</div>
                           </div>
                         </div>
 
                         {/* Amostra dos dados */}
                         <details className="mt-3">
                           <summary className="cursor-pointer text-sm font-semibold text-gray-700 hover:text-gray-900">
-                            ðŸ“‹ Ver Amostra dos Dados
+                            📋 Ver Amostra dos Dados
                           </summary>
                           <div className="mt-2 bg-gray-100 p-3 rounded overflow-x-auto">
                             <pre className="text-xs text-gray-800">
@@ -1590,39 +1590,39 @@ export default function ContaHubTestePage() {
             </div>
         )}
 
-        {/* InformaÃ§Ãµes */}
+        {/* Informa��es */}
         <PageCard>
           <div className="space-y-3">
             <PageText variant="subtitle">
-              â„¹ï¸ InformaÃ§Ãµes do Teste
+              ��️ Informa��es do Teste
             </PageText>
             <div className="space-y-2">
               <PageText variant="body">
-                â€¢ <strong>PerÃ­odo:</strong> 31/01/2025 atÃ© 04/02/2025 (5 dias)
+                �� <strong>Per�odo:</strong> 31/01/2025 at� 04/02/2025 (5 dias)
               </PageText>
               <PageText variant="body">
-                â€¢ <strong>Objetivo:</strong> Verificar mapeamento completo dos dados do ContaHub
+                �� <strong>Objetivo:</strong> Verificar mapeamento completo dos dados do ContaHub
               </PageText>
               <PageText variant="body">
-                â€¢ <strong>Tabelas:</strong> contahub_analitico, contahub_periodo, contahub_fatporhora, etc.
+                �� <strong>Tabelas:</strong> contahub_analitico, contahub_periodo, contahub_fatporhora, etc.
               </PageText>
               <PageText variant="body">
-                â€¢ <strong>Sistema:</strong> Coleta automatizada via API do ContaHub
+                �� <strong>Sistema:</strong> Coleta automatizada via API do ContaHub
               </PageText>
               <PageText variant="body">
-                â€¢ <strong>ðŸš€ Executar Teste:</strong> Coleta dados de 5 dias e salva na sistema_raw
+                �� <strong>🚀 Executar Teste:</strong> Coleta dados de 5 dias e salva na sistema_raw
               </PageText>
               <PageText variant="body">
-                â€¢ <strong>âš™ï¸ Processar Dados:</strong> Processa dados da sistema_raw para tabelas especÃ­ficas
+                �� <strong>��️ Processar Dados:</strong> Processa dados da sistema_raw para tabelas espec�ficas
               </PageText>
               <PageText variant="body">
-                â€¢ <strong>ðŸ“Š Verificar Status:</strong> Mostra status das tabelas ContaHub
+                �� <strong>📊 Verificar Status:</strong> Mostra status das tabelas ContaHub
               </PageText>
               <PageText variant="body">
-                â€¢ <strong>ðŸ”§ Debug Dados:</strong> Analisa a estrutura dos dados salvos na sistema_raw para entender campos disponÃ­veis
+                �� <strong>🔧 Debug Dados:</strong> Analisa a estrutura dos dados salvos na sistema_raw para entender campos dispon�veis
               </PageText>
               <PageText variant="body">
-                â€¢ <strong>ðŸ§¹ Limpar Tudo:</strong> Remove TODOS os dados das tabelas contahub_* e sistema_raw do ContaHub
+                �� <strong>🧹 Limpar Tudo:</strong> Remove TODOS os dados das tabelas contahub_* e sistema_raw do ContaHub
               </PageText>
             </div>
           </div>

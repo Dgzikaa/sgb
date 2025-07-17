@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -56,7 +56,7 @@ export default function WhatsAppFuncionariosPage() {
         setUsuariosSemWhatsApp(data.sem_whatsapp || [])
       }
     } catch (error) {
-      console.error('Erro ao carregar usuÃ¡rios:', error)
+      console.error('Erro ao carregar usu�rios:', error)
     } finally {
       setLoading(false)
     }
@@ -73,21 +73,21 @@ export default function WhatsAppFuncionariosPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           numero: usuario.celular,
-          mensagem: `ðŸ“± Teste WhatsApp - SGB\n\nOlÃ¡ ${usuario.nome}!\n\nEste Ã© um teste do sistema de notificaÃ§Ãµes.\n\nâœ… Seu WhatsApp estÃ¡ funcionando perfeitamente!\n\n_Sistema SGB - ${new Date().toLocaleString('pt-BR')}_`
+          mensagem: `📱 Teste WhatsApp - SGB\n\nOl� ${usuario.nome}!\n\nEste � um teste do sistema de notifica��es.\n\n�� Seu WhatsApp est� funcionando perfeitamente!\n\n_Sistema SGB - ${new Date().toLocaleString('pt-BR')}_`
         })
       })
       
       const result = await response.json()
       
       if (result.success) {
-        alert(`âœ… Teste enviado com sucesso para ${usuario.nome}!`)
+        alert(`�� Teste enviado com sucesso para ${usuario.nome}!`)
       } else {
-        alert(`âŒ Erro ao enviar teste: ${result.error}`)
+        alert(`�� Erro ao enviar teste: ${result.error}`)
       }
       
     } catch (error) {
       console.error('Erro ao testar:', error)
-      alert('âŒ Erro ao enviar teste')
+      alert('�� Erro ao enviar teste')
     } finally {
       setTestingUser(null)
     }
@@ -96,9 +96,9 @@ export default function WhatsAppFuncionariosPage() {
   const exportarRelatorio = () => {
     const todosUsuarios = [...usuarios, ...usuariosSemWhatsApp]
     const csv = [
-      'Nome,Email,Celular,WhatsApp VÃ¡lido,Cargo,Departamento,Status',
+      'Nome,Email,Celular,WhatsApp V�lido,Cargo,Departamento,Status',
       ...todosUsuarios.map((u: any) => 
-        `"${u.nome}","${u.email}","${u.numero_formatado || u.celular || 'Sem celular'}","${u.whatsapp_valido ? 'Sim' : 'NÃ£o'}","${u.cargo || ''}","${u.departamento || ''}","${u.ativo ? 'Ativo' : 'Inativo'}"`
+        `"${u.nome}","${u.email}","${u.numero_formatado || u.celular || 'Sem celular'}","${u.whatsapp_valido ? 'Sim' : 'N�o'}","${u.cargo || ''}","${u.departamento || ''}","${u.ativo ? 'Ativo' : 'Inativo'}"`
       )
     ].join('\n')
 
@@ -131,10 +131,10 @@ export default function WhatsAppFuncionariosPage() {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                Gerenciar WhatsApp dos FuncionÃ¡rios
+                Gerenciar WhatsApp dos Funcion�rios
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
-                Configure e valide os nÃºmeros de WhatsApp para notificaÃ§Ãµes automÃ¡ticas
+                Configure e valide os n�meros de WhatsApp para notifica��es autom�ticas
               </p>
             </div>
             
@@ -157,7 +157,7 @@ export default function WhatsAppFuncionariosPage() {
             </div>
           </div>
 
-          {/* EstatÃ­sticas */}
+          {/* Estat�sticas */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
               <CardContent className="p-4">
@@ -184,7 +184,7 @@ export default function WhatsAppFuncionariosPage() {
                       {usuariosInvalidos.length}
                     </div>
                     <div className="text-sm text-yellow-600 dark:text-yellow-400">
-                      NÃºmero InvÃ¡lido
+                      N�mero Inv�lido
                     </div>
                   </div>
                 </div>
@@ -216,7 +216,7 @@ export default function WhatsAppFuncionariosPage() {
                       {usuarios.length + usuariosSemWhatsApp.length}
                     </div>
                     <div className="text-sm text-blue-600 dark:text-blue-400">
-                      Total FuncionÃ¡rios
+                      Total Funcion�rios
                     </div>
                   </div>
                 </div>
@@ -230,7 +230,7 @@ export default function WhatsAppFuncionariosPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Buscar funcionÃ¡rio por nome ou email..."
+                  placeholder="Buscar funcion�rio por nome ou email..."
                   value={filtro}
                   onChange={(e) => setFiltro(e.target.value)}
                   className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
@@ -239,7 +239,7 @@ export default function WhatsAppFuncionariosPage() {
             </CardContent>
           </Card>
 
-          {/* Modal de EdiÃ§Ã£o */}
+          {/* Modal de Edi��o */}
           {editandoUsuario && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
               <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -280,14 +280,14 @@ export default function WhatsAppFuncionariosPage() {
               </TabsTrigger>
             </TabsList>
 
-            {/* FuncionÃ¡rios com WhatsApp */}
+            {/* Funcion�rios com WhatsApp */}
             <TabsContent value="com-whatsapp" className="space-y-4">
               {usuariosFiltrados.length === 0 ? (
                 <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                   <CardContent className="p-8 text-center">
                     <Phone className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 dark:text-gray-400">
-                      {filtro ? 'Nenhum funcionÃ¡rio encontrado com o filtro aplicado' : 'Nenhum funcionÃ¡rio com WhatsApp configurado'}
+                      {filtro ? 'Nenhum funcion�rio encontrado com o filtro aplicado' : 'Nenhum funcion�rio com WhatsApp configurado'}
                     </p>
                   </CardContent>
                 </Card>
@@ -304,26 +304,26 @@ export default function WhatsAppFuncionariosPage() {
                               </div>
                               {usuario.whatsapp_valido ? (
                                 <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                  âœ… VÃ¡lido
+                                  �� V�lido
                                 </Badge>
                               ) : (
                                 <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                                  âš ï¸ InvÃ¡lido
+                                  ��️ Inv�lido
                                 </Badge>
                               )}
                             </div>
                             
                             <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                              ðŸ“§ {usuario.email}
+                              📧 {usuario.email}
                             </div>
                             
                             <div className="text-sm text-gray-700 dark:text-gray-300 font-mono">
-                              ðŸ“± {usuario.numero_formatado}
+                              📱 {usuario.numero_formatado}
                             </div>
                             
                             {(usuario.cargo || usuario.departamento) && (
                               <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                                {[usuario.cargo, usuario.departamento].filter(Boolean).join(' â€¢ ')}
+                                {[usuario.cargo, usuario.departamento].filter(Boolean).join(' �� ')}
                               </div>
                             )}
                           </div>
@@ -360,14 +360,14 @@ export default function WhatsAppFuncionariosPage() {
               )}
             </TabsContent>
 
-            {/* FuncionÃ¡rios sem WhatsApp */}
+            {/* Funcion�rios sem WhatsApp */}
             <TabsContent value="sem-whatsapp" className="space-y-4">
               {usuariosSemWhatsAppFiltrados.length === 0 ? (
                 <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                   <CardContent className="p-8 text-center">
                     <CheckCircle className="h-12 w-12 text-green-400 mx-auto mb-4" />
                     <p className="text-gray-600 dark:text-gray-400">
-                      {filtro ? 'Nenhum funcionÃ¡rio encontrado com o filtro aplicado' : 'Todos os funcionÃ¡rios tÃªm WhatsApp configurado!'}
+                      {filtro ? 'Nenhum funcion�rio encontrado com o filtro aplicado' : 'Todos os funcion�rios t�m WhatsApp configurado!'}
                     </p>
                   </CardContent>
                 </Card>
@@ -376,8 +376,8 @@ export default function WhatsAppFuncionariosPage() {
                   <Alert className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20">
                     <UserPlus className="h-4 w-4 text-red-600" />
                     <AlertDescription className="text-red-700 dark:text-red-300">
-                      <strong>AtenÃ§Ã£o:</strong> Estes funcionÃ¡rios nÃ£o podem receber notificaÃ§Ãµes de checklist via WhatsApp. 
-                      Configure os nÃºmeros antes de atribuÃ­-los como responsÃ¡veis.
+                      <strong>Aten��o:</strong> Estes funcion�rios n�o podem receber notifica��es de checklist via WhatsApp. 
+                      Configure os n�meros antes de atribu�-los como respons�veis.
                     </AlertDescription>
                   </Alert>
                   
@@ -392,17 +392,17 @@ export default function WhatsAppFuncionariosPage() {
                                   {usuario.nome}
                                 </div>
                                 <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-                                  âŒ Sem WhatsApp
+                                  �� Sem WhatsApp
                                 </Badge>
                               </div>
                               
                               <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                ðŸ“§ {usuario.email}
+                                📧 {usuario.email}
                               </div>
                               
                               {(usuario.cargo || usuario.departamento) && (
                                 <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                                  {[usuario.cargo, usuario.departamento].filter(Boolean).join(' â€¢ ')}
+                                  {[usuario.cargo, usuario.departamento].filter(Boolean).join(' �� ')}
                                 </div>
                               )}
                             </div>
@@ -430,64 +430,64 @@ export default function WhatsAppFuncionariosPage() {
               <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <CardHeader>
                   <CardTitle className="text-gray-900 dark:text-white">
-                    ðŸ›¡ï¸ ConfiguraÃ§Ãµes de SeguranÃ§a
+                    🛡️ Configura��es de Seguran�a
                   </CardTitle>
                   <CardDescription className="text-gray-600 dark:text-gray-400">
-                    Limites e proteÃ§Ãµes para evitar ban do WhatsApp
+                    Limites e prote��es para evitar ban do WhatsApp
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                       <h4 className="font-medium text-blue-900 dark:text-blue-200 mb-2">
-                        ðŸ“Š Limites DiÃ¡rios
+                        📊 Limites Di�rios
                       </h4>
                       <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                        <li>â€¢ MÃ¡ximo 50 mensagens por dia por nÃºmero</li>
-                        <li>â€¢ Intervalo mÃ­nimo de 30 segundos entre mensagens</li>
-                        <li>â€¢ Funcionamento apenas em horÃ¡rio comercial (8h Ã s 18h)</li>
+                        <li>�� M�ximo 50 mensagens por dia por n�mero</li>
+                        <li>�� Intervalo m�nimo de 30 segundos entre mensagens</li>
+                        <li>�� Funcionamento apenas em hor�rio comercial (8h �s 18h)</li>
                       </ul>
                     </div>
                     
                     <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
                       <h4 className="font-medium text-green-900 dark:text-green-200 mb-2">
-                        âœ… ProteÃ§Ãµes Ativas
+                        �� Prote��es Ativas
                       </h4>
                       <ul className="text-sm text-green-700 dark:text-green-300 space-y-1">
-                        <li>â€¢ Mensagens personalizadas (anti-spam)</li>
-                        <li>â€¢ CÃ³digos Ãºnicos para identificaÃ§Ã£o</li>
-                        <li>â€¢ ValidaÃ§Ã£o de nÃºmeros antes do envio</li>
+                        <li>�� Mensagens personalizadas (anti-spam)</li>
+                        <li>�� C�digos �nicos para identifica��o</li>
+                        <li>�� Valida��o de n�meros antes do envio</li>
                       </ul>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* RecomendaÃ§Ãµes */}
+              {/* Recomenda��es */}
               <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <CardHeader>
                   <CardTitle className="text-gray-900 dark:text-white">
-                    ðŸ’¡ RecomendaÃ§Ãµes
+                    💡 Recomenda��es
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20">
                     <AlertDescription className="text-blue-700 dark:text-blue-300">
-                      <strong>Campo ObrigatÃ³rio:</strong> Recomendamos tornar o celular obrigatÃ³rio no cadastro de novos funcionÃ¡rios 
-                      para evitar problemas na atribuiÃ§Ã£o de checklists.
+                      <strong>Campo Obrigat�rio:</strong> Recomendamos tornar o celular obrigat�rio no cadastro de novos funcion�rios 
+                      para evitar problemas na atribui��o de checklists.
                     </AlertDescription>
                   </Alert>
                   
                   <Alert className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20">
                     <AlertDescription className="text-yellow-700 dark:text-yellow-300">
-                      <strong>Backup:</strong> Mantenha sempre um responsÃ¡vel adicional nos checklists crÃ­ticos 
-                      caso um nÃºmero fique indisponÃ­vel.
+                      <strong>Backup:</strong> Mantenha sempre um respons�vel adicional nos checklists cr�ticos 
+                      caso um n�mero fique indispon�vel.
                     </AlertDescription>
                   </Alert>
                   
                   <Alert className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20">
                     <AlertDescription className="text-green-700 dark:text-green-300">
-                      <strong>Teste Regular:</strong> Teste os nÃºmeros periodicamente para garantir que estÃ£o funcionando.
+                      <strong>Teste Regular:</strong> Teste os n�meros periodicamente para garantir que est�o funcionando.
                     </AlertDescription>
                   </Alert>
                 </CardContent>

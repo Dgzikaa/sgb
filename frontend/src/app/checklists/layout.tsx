@@ -1,4 +1,4 @@
-﻿import { DarkSidebarLayout } from '@/components/layouts'
+import { DarkSidebarLayout } from '@/components/layouts'
 
 export default function ChecklistsLayout({
   children,

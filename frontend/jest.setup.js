@@ -152,7 +152,7 @@ jest.mock('@supabase/supabase-js', () => ({
 // Configurar timezone para testes consistentes
 process.env.TZ = 'UTC'
 
-// Limpar todos os mocks apÃ³s cada teste
+// Limpar todos os mocks apá³s cada teste
 afterEach(() => {
   jest.clearAllMocks()
   localStorageMock.getItem.mockClear()

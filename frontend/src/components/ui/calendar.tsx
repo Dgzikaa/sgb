@@ -1,4 +1,4 @@
-Ôªøimport * as React from "react"
+import * as React from "react"
 import { cn } from "@/lib/utils"
 
 interface CalendarProps {
@@ -20,7 +20,7 @@ const Calendar: React.FC<CalendarProps> = ({
   const [currentMonth, setCurrentMonth] = React.useState(new Date())
   
   const today = new Date()
-  // Suporte a todos os modos de sele√É¬ß√É¬£o
+  // Suporte a todos os modos de sele·ß·£o
   const selectedDate = Array.isArray(selected) ? selected[0] : selected
 
   const getDaysInMonth = (date: Date) => {
@@ -48,11 +48,11 @@ const Calendar: React.FC<CalendarProps> = ({
   
   const days = getDaysInMonth(currentMonth)
   const monthNames = [
-    'Janeiro', 'Fevereiro', 'Mar√É¬ßo', 'Abril', 'Maio', 'Junho',
+    'Janeiro', 'Fevereiro', 'Mar·ßo', 'Abril', 'Maio', 'Junho',
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
   ]
   
-  const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'S√É¬°b']
+  const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'S·°b']
   
   const navigateMonth = (direction: 'prev' | 'next') => {
     setCurrentMonth(prev => {
@@ -87,7 +87,7 @@ const Calendar: React.FC<CalendarProps> = ({
           onClick={() => navigateMonth('prev')}
           className="p-2 hover:bg-gray-100 rounded"
         >
-          √¢‚Ä†¬ê
+          Üê
         </button>
         <h2 className="font-semibold">
           {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
@@ -96,7 +96,7 @@ const Calendar: React.FC<CalendarProps> = ({
           onClick={() => navigateMonth('next')}
           className="p-2 hover:bg-gray-100 rounded"
         >
-          √¢‚Ä†‚Äô
+          Üí
         </button>
       </div>
       

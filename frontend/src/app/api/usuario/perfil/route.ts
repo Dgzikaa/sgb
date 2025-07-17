@@ -1,23 +1,23 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { getUserAuth } from '@/lib/auth-helper'
 
-// ForÃ§a runtime dinÃ¢mico para evitar erro de static generation
+// For�a runtime din�mico para evitar erro de static generation
 export const dynamic = 'force-dynamic'
 
-// GET - Buscar dados do perfil do usuÃ¡rio logado
+// GET - Buscar dados do perfil do usu�rio logado
 export async function GET(request: NextRequest) {
   try {
-    // Obter dados do usuÃ¡rio autenticado
+    // Obter dados do usu�rio autenticado
     const user = await getUserAuth(request)
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'UsuÃ¡rio nÃ£o autenticado' },
+        { success: false, error: 'Usu�rio n�o autenticado' },
         { status: 401 }
       )
     }
 
-    console.log('ðŸ“Š Buscando perfil do usuÃ¡rio:', user.id)
+    console.log('📊 Buscando perfil do usu�rio:', user.id)
 
     // Usar cliente administrativo
     const adminClient = await getAdminClient()
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('âŒ Erro ao buscar perfil:', error)
+      console.error('�� Erro ao buscar perfil:', error)
       return NextResponse.json(
         { success: false, error: 'Erro ao buscar dados do perfil' },
         { status: 500 }
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
 
     if (!perfil) {
       return NextResponse.json(
-        { success: false, error: 'Perfil nÃ£o encontrado' },
+        { success: false, error: 'Perfil n�o encontrado' },
         { status: 404 }
       )
     }
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
       .eq('id', perfil.bar_id)
       .single()
 
-    console.log('âœ… Perfil encontrado para:', perfil.nome)
+    console.log('�� Perfil encontrado para:', perfil.nome)
 
     return NextResponse.json({
       success: true,
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('âŒ Erro na API de perfil (GET):', error)
+    console.error('�� Erro na API de perfil (GET):', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },
       { status: 500 }
@@ -76,14 +76,14 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// PUT - Atualizar dados do perfil do usuÃ¡rio logado
+// PUT - Atualizar dados do perfil do usu�rio logado
 export async function PUT(request: NextRequest) {
   try {
-    // Obter dados do usuÃ¡rio autenticado
+    // Obter dados do usu�rio autenticado
     const user = await getUserAuth(request)
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'UsuÃ¡rio nÃ£o autenticado' },
+        { success: false, error: 'Usu�rio n�o autenticado' },
         { status: 401 }
       )
     }
@@ -95,12 +95,12 @@ export async function PUT(request: NextRequest) {
       foto_perfil, preferencias
     } = body
 
-    console.log('ðŸ”„ Atualizando perfil do usuÃ¡rio:', user.id)
+    console.log('🔄 Atualizando perfil do usu�rio:', user.id)
 
     // Usar cliente administrativo
     const adminClient = await getAdminClient()
 
-    // Preparar dados para atualizaÃ§Ã£o (apenas campos nÃ£o vazios)
+    // Preparar dados para atualiza��o (apenas campos n�o vazios)
     const updateData: any = {
       atualizado_em: new Date().toISOString(),
       ultima_atividade: new Date().toISOString()
@@ -120,17 +120,17 @@ export async function PUT(request: NextRequest) {
     if (foto_perfil !== undefined) updateData.foto_perfil = foto_perfil
     if (preferencias !== undefined) updateData.preferencias = preferencias
 
-    // ValidaÃ§Ãµes bÃ¡sicas
+    // Valida��es b�sicas
     if (cpf && cpf.length > 0 && !isValidCPF(cpf)) {
       return NextResponse.json(
-        { success: false, error: 'CPF invÃ¡lido' },
+        { success: false, error: 'CPF inv�lido' },
         { status: 400 }
       )
     }
 
     if (celular && celular.length > 0 && !isValidPhone(celular)) {
       return NextResponse.json(
-        { success: false, error: 'Celular invÃ¡lido' },
+        { success: false, error: 'Celular inv�lido' },
         { status: 400 }
       )
     }
@@ -144,14 +144,14 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('âŒ Erro ao atualizar perfil:', error)
+      console.error('�� Erro ao atualizar perfil:', error)
       return NextResponse.json(
         { success: false, error: 'Erro ao atualizar perfil' },
         { status: 500 }
       )
     }
 
-    console.log('âœ… Perfil atualizado com sucesso:', perfilAtualizado.nome)
+    console.log('�� Perfil atualizado com sucesso:', perfilAtualizado.nome)
 
     return NextResponse.json({
       success: true,
@@ -160,7 +160,7 @@ export async function PUT(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('âŒ Erro na API de perfil (PUT):', error)
+    console.error('�� Erro na API de perfil (PUT):', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },
       { status: 500 }
@@ -168,18 +168,18 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// FunÃ§Ã£o para validar CPF
+// Fun��o para validar CPF
 function isValidCPF(cpf: string): boolean {
-  // Remove caracteres nÃ£o numÃ©ricos
+  // Remove caracteres n�o num�ricos
   const cleanCPF = cpf.replace(/[^\d]/g, '')
   
-  // Verifica se tem 11 dÃ­gitos
+  // Verifica se tem 11 d�gitos
   if (cleanCPF.length !== 11) return false
   
-  // Verifica se nÃ£o sÃ£o todos iguais
+  // Verifica se n�o s�o todos iguais
   if (/^(\d)\1{10}$/.test(cleanCPF)) return false
   
-  // Valida dÃ­gitos verificadores
+  // Valida d�gitos verificadores
   let sum = 0
   for (let i = 0; i < 9; i++) {
     sum += parseInt(cleanCPF.charAt(i)) * (10 - i)
@@ -199,11 +199,11 @@ function isValidCPF(cpf: string): boolean {
   return true
 }
 
-// FunÃ§Ã£o para validar telefone
+// Fun��o para validar telefone
 function isValidPhone(phone: string): boolean {
-  // Remove caracteres nÃ£o numÃ©ricos
+  // Remove caracteres n�o num�ricos
   const cleanPhone = phone.replace(/[^\d]/g, '')
   
-  // Verifica se tem 10 ou 11 dÃ­gitos (com DDD)
+  // Verifica se tem 10 ou 11 d�gitos (com DDD)
   return cleanPhone.length >= 10 && cleanPhone.length <= 11
 } 

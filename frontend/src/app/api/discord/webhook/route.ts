@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { processDiscordCommand } from '@/lib/discord-bot-service';
 import { z } from 'zod';
 
@@ -14,33 +14,33 @@ const DiscordWebhookSchema = z.object({
 });
 
 // ========================================
-// ðŸŽ® POST /api/discord/webhook
+// 🎮 POST /api/discord/webhook
 // ========================================
 export async function POST(request: NextRequest) {
   try {
-    console.log('ðŸŽ® Webhook Discord recebido');
+    console.log('🎮 Webhook Discord recebido');
 
     const body = await request.json();
-    console.log('ðŸ“¦ Payload recebido:', JSON.stringify(body, null, 2));
+    console.log('📦 Payload recebido:', JSON.stringify(body, null, 2));
 
-    // Verificar se Ã© uma mensagem de usuÃ¡rio
+    // Verificar se � uma mensagem de usu�rio
     if (!body.content || body.content.trim() === '') {
-      return NextResponse.json({ success: true, message: 'Sem conteÃºdo' });
+      return NextResponse.json({ success: true, message: 'Sem conte�do' });
     }
 
     // Ignorar mensagens de bots
     if (body.author?.bot || body.webhook_id) {
-      console.log('ðŸ¤– Ignorando mensagem de bot');
+      console.log('🤖 Ignorando mensagem de bot');
       return NextResponse.json({ success: true, message: 'Bot ignorado' });
     }
 
     const message = body.content.trim();
-    const username = body.author?.username || 'UsuÃ¡rio Desconhecido';
+    const username = body.author?.username || 'Usu�rio Desconhecido';
     
-    // Bar ID do OrdinÃ¡rio Bar
-    const BAR_ID = 3; // OrdinÃ¡rio Bar
+    // Bar ID do Ordin�rio Bar
+    const BAR_ID = 3; // Ordin�rio Bar
 
-    console.log(`ðŸ“¨ Processando mensagem de ${username}: "${message}"`);
+    console.log(`📨 Processando mensagem de ${username}: "${message}"`);
 
     // Processar comando com o bot inteligente
     const success = await processDiscordCommand(message, username, BAR_ID);
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('âŒ Erro no webhook Discord:', error);
+    console.error('�� Erro no webhook Discord:', error);
     
     return NextResponse.json({
       success: false,
@@ -61,14 +61,14 @@ export async function POST(request: NextRequest) {
 }
 
 // ========================================
-// ðŸ§ª GET /api/discord/webhook (Teste)
+// 🧪 GET /api/discord/webhook (Teste)
 // ========================================
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const testCommand = url.searchParams.get('test') || 'dashboard executivo';
   
   try {
-    console.log(`ðŸ§ª Teste do Discord Bot: "${testCommand}"`);
+    console.log(`🧪 Teste do Discord Bot: "${testCommand}"`);
     
     const success = await processDiscordCommand(testCommand, 'Sistema de Teste', 3);
     
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('âŒ Erro no teste:', error);
+    console.error('�� Erro no teste:', error);
     
     return NextResponse.json({
       success: false,

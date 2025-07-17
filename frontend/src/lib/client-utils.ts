@@ -1,17 +1,17 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 /**
- * UtilitÃ¡rios para verificaÃ§Ã£o de ambiente cliente/servidor
+ * Utilit�rios para verifica��o de ambiente cliente/servidor
  * e acesso seguro a APIs do navegador
  */
 
 /**
- * Verifica se o cÃ³digo estÃ¡ rodando no cliente (navegador)
+ * Verifica se o c�digo est� rodando no cliente (navegador)
  */
 export const isClient = typeof window !== 'undefined'
 
 /**
- * Verifica se o cÃ³digo estÃ¡ rodando no servidor
+ * Verifica se o c�digo est� rodando no servidor
  */
 export const isServer = typeof window === 'undefined'
 

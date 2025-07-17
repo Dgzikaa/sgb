@@ -1,4 +1,4 @@
-﻿import { useRef, useCallback, useState, useEffect } from 'react'
+import { useRef, useCallback, useState, useEffect } from 'react'
 
 export interface DragState {
   isDragging: boolean
@@ -297,7 +297,7 @@ export function useDragAndDrop({
   }
 }
 
-// Hook especÃ­fico para listas ordenÃ¡veis
+// Hook espec�fico para listas orden�veis
 export interface UseSortableListProps<T> {
   items: T[]
   onReorder: (newItems: T[]) => void

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,7 +21,7 @@ export default function ContaAzulAutoLogin() {
       if (dataStr) {
         const data = JSON.parse(dataStr);
         
-        // Verificar se ainda Ã© vÃ¡lido (5 min)
+        // Verificar se ainda � v�lido (5 min)
         if (Date.now() - data.timestamp > 300000) {
           setPhase('expired');
           sessionStorage.removeItem('contaazul_auto_login');
@@ -39,13 +39,13 @@ export default function ContaAzulAutoLogin() {
   }, []);
 
   const copyAutoFillScript = async () => {
-    const script = `// ðŸ¤– Script AutomÃ¡tico ContaAzul - Cole e pressione Enter
+    const script = `// 🤖 Script Autom�tico ContaAzul - Cole e pressione Enter
 // Email: ${autoLoginData?.email}
 // Senha: ${autoLoginData?.password}
-// CÃ³digo 2FA: ${autoLoginData?.totpCode}
+// C�digo 2FA: ${autoLoginData?.totpCode}
 
 (function() {
-  console.log('ðŸš€ Iniciando preenchimento automÃ¡tico...');
+  console.log('🚀 Iniciando preenchimento autom�tico...');
   
   // Preencher email
   const emailFields = document.querySelectorAll('input[type="email"], input[name="username"], input[name="email"], input[placeholder*="mail" i]');
@@ -63,21 +63,21 @@ export default function ContaAzulAutoLogin() {
     field.dispatchEvent(new Event('change', { bubbles: true }));
   });
   
-  console.log('âœ… Campos preenchidos! Clicando em login...');
+  console.log('�� Campos preenchidos! Clicando em login...');
   
-  // Clicar no botÃ£o de login apÃ³s 500ms
+  // Clicar no bot�o de login ap�s 500ms
   setTimeout(() => {
     const submitButtons = document.querySelectorAll('button[type="submit"], button.btn-primary, input[type="submit"]');
     if (submitButtons.length > 0) {
       submitButtons[0].click();
-      console.log('âœ… BotÃ£o de login clicado!');
+      console.log('�� Bot�o de login clicado!');
     }
   }, 500);
   
   // Monitorar campo 2FA
-  console.log('ðŸ‘€ Aguardando campo 2FA...');
+  console.log('👀 Aguardando campo 2FA...');
   const checkFor2FA = setInterval(() => {
-    const totpFields = document.querySelectorAll('input[name="totp"], input[name="code"], input[placeholder*="cÃ³digo" i], input[placeholder*="2fa" i], input[type="text"][maxlength="6"]');
+    const totpFields = document.querySelectorAll('input[name="totp"], input[name="code"], input[placeholder*="c�digo" i], input[placeholder*="2fa" i], input[type="text"][maxlength="6"]');
     
     if (totpFields.length > 0) {
       totpFields.forEach(field => {
@@ -85,14 +85,14 @@ export default function ContaAzulAutoLogin() {
           field.value = '${autoLoginData?.totpCode}';
           field.dispatchEvent(new Event('input', { bubbles: true }));
           field.dispatchEvent(new Event('change', { bubbles: true }));
-          console.log('âœ… CÃ³digo 2FA preenchido!');
+          console.log('�� C�digo 2FA preenchido!');
           
-          // Submeter apÃ³s preencher 2FA
+          // Submeter ap�s preencher 2FA
           setTimeout(() => {
             const submit2FA = document.querySelectorAll('button[type="submit"], button.btn-primary');
             if (submit2FA.length > 0) {
               submit2FA[0].click();
-              console.log('âœ… CÃ³digo 2FA enviado!');
+              console.log('�� C�digo 2FA enviado!');
             }
           }, 500);
         }
@@ -101,7 +101,7 @@ export default function ContaAzulAutoLogin() {
     }
   }, 1000);
   
-  // Parar de verificar apÃ³s 30 segundos
+  // Parar de verificar ap�s 30 segundos
   setTimeout(() => clearInterval(checkFor2FA), 30000);
 })();`;
 
@@ -110,22 +110,22 @@ export default function ContaAzulAutoLogin() {
       if (copied) {
         setScriptCopied(true);
         toast({
-          title: "Script Copiado! ðŸ“‹",
+          title: "Script Copiado! 📋",
           description: "Agora abra o ContaAzul, pressione F12, cole no Console e pressione Enter",
         });
       } else {
         throw new Error('Falha ao copiar para clipboard');
       }
       
-      // Abrir ContaAzul na mesma aba apÃ³s pequeno delay
+      // Abrir ContaAzul na mesma aba ap�s pequeno delay
       setTimeout(() => {
         window.location.href = 'https://sgb-v2.vercel.app/api/contaazul/auth';
       }, 1000);
       
-      // Mostrar instruÃ§Ãµes avanÃ§adas
+      // Mostrar instru��es avan�adas
       toast({
         title: "ContaAzul Aberto",
-        description: "Use o cÃ³digo 2FA mostrado abaixo quando solicitado",
+        description: "Use o c�digo 2FA mostrado abaixo quando solicitado",
       });
       
       setTimeout(() => setScriptCopied(false), 5000);
@@ -165,7 +165,7 @@ export default function ContaAzulAutoLogin() {
           <CardHeader>
             <CardTitle className="text-center">
               <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-              Aguardando dados de autenticaÃ§Ã£o...
+              Aguardando dados de autentica��o...
             </CardTitle>
           </CardHeader>
         </Card>
@@ -184,7 +184,7 @@ export default function ContaAzulAutoLogin() {
           </CardHeader>
           <CardContent>
             <p className="text-center text-gray-600">
-              Os dados de autenticaÃ§Ã£o expiraram. Por favor, tente novamente.
+              Os dados de autentica��o expiraram. Por favor, tente novamente.
             </p>
           </CardContent>
         </Card>
@@ -197,11 +197,11 @@ export default function ContaAzulAutoLogin() {
       <Card className="w-full max-w-2xl">
         <CardHeader>
           <CardTitle className="text-center">
-            ðŸ¤– Login AutomÃ¡tico ContaAzul
+            🤖 Login Autom�tico ContaAzul
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* BotÃ£o Principal */}
+          {/* Bot�o Principal */}
           <Button
             onClick={copyAutoFillScript}
             size="lg"
@@ -216,7 +216,7 @@ export default function ContaAzulAutoLogin() {
             ) : (
               <>
                 <Zap className="w-6 h-6 mr-2" />
-                Copiar Script AutomÃ¡tico e Abrir ContaAzul
+                Copiar Script Autom�tico e Abrir ContaAzul
               </>
             )}
           </Button>
@@ -226,18 +226,18 @@ export default function ContaAzulAutoLogin() {
             <AlertDescription className="text-blue-800">
               <strong>Como usar:</strong>
               <ol className="list-decimal list-inside mt-2 space-y-1">
-                <li>Clique no botÃ£o acima para copiar o script</li>
-                <li>Na pÃ¡gina do ContaAzul, pressione <kbd>F12</kbd></li>
+                <li>Clique no bot�o acima para copiar o script</li>
+                <li>Na p�gina do ContaAzul, pressione <kbd>F12</kbd></li>
                 <li>Clique na aba <strong>Console</strong></li>
                 <li>Cole o script (<kbd>Ctrl+V</kbd>) e pressione <kbd>Enter</kbd></li>
-                <li>O login serÃ¡ feito automaticamente!</li>
+                <li>O login ser� feito automaticamente!</li>
               </ol>
             </AlertDescription>
           </Alert>
 
-          {/* Dados para cÃ³pia manual */}
+          {/* Dados para c�pia manual */}
           <div className="pt-4 border-t">
-            <h3 className="font-semibold mb-3">ðŸ“‹ Copiar Manualmente:</h3>
+            <h3 className="font-semibold mb-3">📋 Copiar Manualmente:</h3>
             <div className="space-y-2">
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div>
@@ -256,7 +256,7 @@ export default function ContaAzulAutoLogin() {
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div>
                   <p className="text-sm text-gray-600">Senha</p>
-                  <p className="font-mono text-sm">{'â€¢'.repeat(8)}</p>
+                  <p className="font-mono text-sm">{'��'.repeat(8)}</p>
                 </div>
                 <Button
                   size="sm"
@@ -269,14 +269,14 @@ export default function ContaAzulAutoLogin() {
 
               <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
                 <div>
-                  <p className="text-sm text-gray-600 font-semibold">CÃ³digo 2FA</p>
+                  <p className="text-sm text-gray-600 font-semibold">C�digo 2FA</p>
                   <p className="font-mono text-2xl font-bold text-blue-600">{autoLoginData?.totpCode}</p>
-                  <p className="text-xs text-gray-500 mt-1">VÃ¡lido por 30 segundos</p>
+                  <p className="text-xs text-gray-500 mt-1">V�lido por 30 segundos</p>
                 </div>
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => copyField(autoLoginData?.totpCode, 'CÃ³digo 2FA')}
+                  onClick={() => copyField(autoLoginData?.totpCode, 'C�digo 2FA')}
                   className="border-blue-300"
                 >
                   <Copy className="w-4 h-4" />

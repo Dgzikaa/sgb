@@ -1,11 +1,11 @@
-﻿import { type ClassValue, clsx } from 'clsx'
+import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// FunÃ§Ã£o para formatar valores monetÃ¡rios
+// Fun��o para formatar valores monet�rios
 export function formatCurrency(value: number): string {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -14,16 +14,16 @@ export function formatCurrency(value: number): string {
 }
 
 // =====================================================
-// ðŸ‡§ðŸ‡· FUNÃ‡Ã•ES DE DATA - USANDO TIMEZONE CENTRALIZADO
+// 🇧🇷 FUN��ES DE DATA - USANDO TIMEZONE CENTRALIZADO
 // =====================================================
 import { formatarData, formatarDataHora } from './timezone'
 
-// FunÃ§Ã£o para formatar datas (migrada para timezone.ts)
+// Fun��o para formatar datas (migrada para timezone.ts)
 export function formatDate(date: string | Date): string {
   return formatarData(date)
 }
 
-// FunÃ§Ã£o para formatar data e hora (migrada para timezone.ts)
+// Fun��o para formatar data e hora (migrada para timezone.ts)
 export function formatDateTime(date: string | Date): string {
   return formatarDataHora(date)
 } 

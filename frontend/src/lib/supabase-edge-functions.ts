@@ -1,11 +1,11 @@
-﻿import { getSupabaseClient } from './supabase';
+import { getSupabaseClient } from './supabase';
 
 const EDGE_FUNCTION_URL = 'https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1';
 
 export async function callContaAzulEdgeFunction(action: string, params: any = {}) {
   const url = `${EDGE_FUNCTION_URL}/contaazul-service/${action}`;
   
-  // Para GET requests, adicionar parÃ¢metros na URL
+  // Para GET requests, adicionar par�metros na URL
   if (params.barId && (action === 'status' || action === 'authorize' || action === 'refresh')) {
     const urlWithParams = new URL(url);
     Object.keys(params).forEach(key => {

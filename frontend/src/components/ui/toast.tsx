@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react'
@@ -48,7 +48,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
 
     setToasts(prev => [...prev, newToast])
 
-    // Auto-remove apÃ³s a duraÃ§Ã£o especificada
+    // Auto-remove ap�s a dura��o especificada
     if (newToast.duration && newToast.duration > 0) {
       setTimeout(() => {
         removeToast(id)
@@ -95,7 +95,7 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
   const [isLeaving, setIsLeaving] = useState(false)
 
   useEffect(() => {
-    // AnimaÃ§Ã£o de entrada
+    // Anima��o de entrada
     const timer = setTimeout(() => setIsVisible(true), 50)
     return () => clearTimeout(timer)
   }, [])

@@ -1,15 +1,15 @@
-﻿'use client'
+'use client'
 
 import { useEffect } from 'react'
 import { syncAuthData } from '@/lib/cookies'
 
 /**
- * Componente para sincronizar automaticamente dados de autenticaÃ§Ã£o
+ * Componente para sincronizar automaticamente dados de autentica��o
  * entre localStorage e cookies para que o middleware funcione corretamente
  */
 export default function AuthSync() {
   useEffect(() => {
-    // FunÃ§Ã£o para sincronizar dados
+    // Fun��o para sincronizar dados
     const syncUserData = () => {
       try {
         const userData = localStorage.getItem('sgb_user')
@@ -20,21 +20,21 @@ export default function AuthSync() {
           }
         }
       } catch (error) {
-        console.error('âŒ Erro ao sincronizar dados de auth:', error)
+        console.error('�� Erro ao sincronizar dados de auth:', error)
       }
     }
 
     // Sincronizar imediatamente
     syncUserData()
 
-    // Listener para mudanÃ§as no localStorage
+    // Listener para mudan�as no localStorage
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'sgb_user' && e.newValue) {
         syncUserData()
       }
     }
 
-    // Listener customizado para mudanÃ§as internas
+    // Listener customizado para mudan�as internas
     const handleCustomUpdate = () => {
       syncUserData()
     }
@@ -48,6 +48,6 @@ export default function AuthSync() {
     }
   }, [])
 
-  // Este componente nÃ£o renderiza nada
+  // Este componente n�o renderiza nada
   return null
 } 

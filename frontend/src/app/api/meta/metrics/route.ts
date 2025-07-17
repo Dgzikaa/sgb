@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -10,15 +10,15 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('ðŸ“Š Buscando mÃ©tricas consolidadas Meta...')
+    console.log('📊 Buscando m�tricas consolidadas Meta...')
 
     const { searchParams } = new URL(request.url)
     const platform = searchParams.get('platform') || 'all'
     const period = searchParams.get('period') || 'week'
 
-    console.log(`ðŸŽ¯ ParÃ¢metros: platform=${platform}, period=${period}`)
+    console.log(`🎯 Par�metros: platform=${platform}, period=${period}`)
 
-    // Obter dados do usuÃ¡rio para pegar o bar_id
+    // Obter dados do usu�rio para pegar o bar_id
     const userData = request.headers.get('x-user-data')
     let barId = 3 // fallback para desenvolvimento
     
@@ -26,9 +26,9 @@ export async function GET(request: NextRequest) {
       try {
         const parsedUser = JSON.parse(decodeURIComponent(userData))
         barId = parsedUser.bar_id || 3
-        console.log(`ðŸ‘¤ Usando bar_id: ${barId}`)
+        console.log(`👤 Usando bar_id: ${barId}`)
       } catch (e) {
-        console.warn('âš ï¸ Erro ao parsear dados do usuÃ¡rio, usando bar_id padrÃ£o')
+        console.warn('��️ Erro ao parsear dados do usu�rio, usando bar_id padr�o')
       }
     }
 
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
       .select('*')
       .eq('bar_id', barId)
       .order('data_referencia', { ascending: false })
-      .limit(7) // Ãšltima semana
+      .limit(7) // �ltima semana
 
     // Buscar dados mais recentes do Facebook  
     const { data: facebookData, error: facebookError } = await supabase
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
       .select('*')
       .eq('bar_id', barId)
       .order('data_referencia', { ascending: false })
-      .limit(7) // Ãšltima semana
+      .limit(7) // �ltima semana
 
     // Buscar dados consolidados
     const { data: consolidatedData, error: consolidatedError } = await supabase
@@ -54,15 +54,15 @@ export async function GET(request: NextRequest) {
       .select('*')
       .eq('bar_id', barId)
       .order('data_referencia', { ascending: false })
-      .limit(7) // Ãšltima semana
+      .limit(7) // �ltima semana
 
-    console.log('ðŸ“± Dados encontrados:', {
+    console.log('📱 Dados encontrados:', {
       instagram: instagramData?.length || 0,
       facebook: facebookData?.length || 0,
       consolidated: consolidatedData?.length || 0
     })
 
-    // Processar dados do Instagram (estrutura que a pÃ¡gina espera)
+    // Processar dados do Instagram (estrutura que a p�gina espera)
     const instagramMetrics = instagramData && instagramData.length > 0 ? [{
       platform: 'instagram',
       follower_count: instagramData[0].follower_count || 0,
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
       data_referencia: instagramData[0].data_referencia
     }] : []
 
-    // Processar dados do Facebook (estrutura que a pÃ¡gina espera)
+    // Processar dados do Facebook (estrutura que a p�gina espera)
     const facebookMetrics = facebookData && facebookData.length > 0 ? [{
       platform: 'facebook',
       page_fans: facebookData[0].page_fans || facebookData[0].fan_count || 0,
@@ -116,9 +116,9 @@ export async function GET(request: NextRequest) {
       responseData = responseData.concat(facebookMetrics)
     }
 
-    // Se nÃ£o hÃ¡ dados, retornar array vazio - SEM DADOS FALSOS
+    // Se n�o h� dados, retornar array vazio - SEM DADOS FALSOS
     if (responseData.length === 0) {
-      console.log('âš ï¸ Nenhum dado REAL encontrado no banco. Retornando vazio.')
+      console.log('��️ Nenhum dado REAL encontrado no banco. Retornando vazio.')
       responseData = []
     }
 
@@ -137,7 +137,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString()
     }
 
-    console.log('âœ… MÃ©tricas consolidadas retornadas:', {
+    console.log('�� M�tricas consolidadas retornadas:', {
       platforms: results.summary.total_platforms,
       total_followers: results.summary.total_followers,
       has_data: responseData.length > 0
@@ -146,10 +146,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(results)
 
   } catch (error: any) {
-    console.error('âŒ Erro ao buscar mÃ©tricas Meta:', error)
+    console.error('�� Erro ao buscar m�tricas Meta:', error)
     return NextResponse.json({ 
       success: false,
-      error: 'Erro ao buscar mÃ©tricas Meta',
+      error: 'Erro ao buscar m�tricas Meta',
       details: error.message,
       data: [],
       consolidated: null

@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -10,13 +10,13 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('ðŸ“Š Meta Daily Analysis - Iniciando anÃ¡lise diÃ¡ria...')
+    console.log('📊 Meta Daily Analysis - Iniciando an�lise di�ria...')
 
     const { searchParams } = new URL(request.url)
     const platform = searchParams.get('platform') || 'all' // all, instagram, facebook
     const days = parseInt(searchParams.get('days') || '30') // quantos dias analisar
 
-    // Obter dados do usuÃ¡rio para pegar o bar_id
+    // Obter dados do usu�rio para pegar o bar_id
     const userData = request.headers.get('x-user-data')
     let barId = 3 // fallback para desenvolvimento
 
@@ -24,9 +24,9 @@ export async function GET(request: NextRequest) {
       try {
         const parsedUser = JSON.parse(decodeURIComponent(userData))
         barId = parsedUser.bar_id || 3
-        console.log(`ðŸ‘¤ Usando bar_id: ${barId}`)
+        console.log(`👤 Usando bar_id: ${barId}`)
       } catch (e) {
-        console.log('âš ï¸ Erro ao parsear userData, usando barId padrÃ£o:', e)
+        console.log('��️ Erro ao parsear userData, usando barId padr�o:', e)
       }
     }
 
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     const ontem = new Date(hoje.getTime() - 24 * 60 * 60 * 1000)
     const inicioAnalise = new Date(hoje.getTime() - days * 24 * 60 * 60 * 1000)
 
-    console.log(`ðŸ“… Analisando perÃ­odo: ${inicioAnalise.toISOString().split('T')[0]} atÃ© ${hoje.toISOString().split('T')[0]}`)
+    console.log(`📅 Analisando per�odo: ${inicioAnalise.toISOString().split('T')[0]} at� ${hoje.toISOString().split('T')[0]}`)
 
     // 1. BUSCAR DADOS INSTAGRAM POR DIA
     let instagramAnalysis: any = null
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
         .order('timestamp', { ascending: false })
 
       if (instagramError) {
-        console.error('âŒ Erro ao buscar Instagram:', instagramError)
+        console.error('�� Erro ao buscar Instagram:', instagramError)
       } else {
         instagramAnalysis = processInstagramDailyData(instagramData || [])
       }
@@ -88,13 +88,13 @@ export async function GET(request: NextRequest) {
         .order('created_time', { ascending: false })
 
       if (facebookError) {
-        console.error('âŒ Erro ao buscar Facebook:', facebookError)
+        console.error('�� Erro ao buscar Facebook:', facebookError)
       } else {
         facebookAnalysis = processFacebookDailyData(facebookData || [])
       }
     }
 
-    // 3. BUSCAR INSIGHTS DIÃRIOS (mÃ©tricas de seguidores)
+    // 3. BUSCAR INSIGHTS DI�RIOS (m�tricas de seguidores)
     const { data: insightsData, error: insightsError } = await supabase
       .from('meta_insights')
       .select('*')
@@ -103,19 +103,19 @@ export async function GET(request: NextRequest) {
       .order('date', { ascending: false })
 
     if (insightsError) {
-      console.error('âŒ Erro ao buscar insights:', insightsError)
+      console.error('�� Erro ao buscar insights:', insightsError)
     }
 
     const insightsAnalysis = processInsightsDailyData(insightsData || [])
 
-    // 4. CALCULAR VARIAÃ‡Ã•ES GERAIS
+    // 4. CALCULAR VARIA��ES GERAIS
     const dailyVariations = calculateDailyVariations({
       instagram: instagramAnalysis,
       facebook: facebookAnalysis,
       insights: insightsAnalysis
     })
 
-    // 5. IDENTIFICAR TENDÃŠNCIAS E INSIGHTS
+    // 5. IDENTIFICAR TEND�NCIAS E INSIGHTS
     const trends = identifyTrends(dailyVariations, days)
 
     const responseData = {
@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    console.log('âœ… Meta Daily Analysis - AnÃ¡lise concluÃ­da:', {
+    console.log('�� Meta Daily Analysis - An�lise conclu�da:', {
       days_analyzed: days,
       variations_calculated: Object.keys(dailyVariations).length,
       trends_identified: trends.length
@@ -160,7 +160,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(responseData)
 
   } catch (error) {
-    console.error('âŒ Erro na anÃ¡lise diÃ¡ria Meta:', error)
+    console.error('�� Erro na an�lise di�ria Meta:', error)
     
     return NextResponse.json({
       success: false,
@@ -290,7 +290,7 @@ function processInsightsDailyData(data: any[]) {
   }
 }
 
-// Calcular variaÃ§Ãµes diÃ¡rias
+// Calcular varia��es di�rias
 function calculateDailyVariations(data: any) {
   const variations: any = {
     daily_changes: {},
@@ -300,7 +300,7 @@ function calculateDailyVariations(data: any) {
     worst_day: null
   }
 
-  // Combinar todas as datas disponÃ­veis
+  // Combinar todas as datas dispon�veis
   const allDates = new Set<string>()
   
   if (data.instagram?.daily_metrics) {
@@ -315,7 +315,7 @@ function calculateDailyVariations(data: any) {
 
   const sortedDates = Array.from(allDates).sort()
 
-  // Calcular variaÃ§Ãµes dia a dia
+  // Calcular varia��es dia a dia
   for (let i = 1; i < sortedDates.length; i++) {
     const currentDate = sortedDates[i]
     const previousDate = sortedDates[i - 1]
@@ -333,7 +333,7 @@ function calculateDailyVariations(data: any) {
       insights: data.insights?.daily_insights?.[previousDate] || {}
     }
 
-    // Calcular variaÃ§Ã£o de seguidores
+    // Calcular varia��o de seguidores
     const followerChange = {
       instagram: (currentDay.insights.followers_instagram || 0) - (previousDay.insights.followers_instagram || 0),
       facebook: (currentDay.insights.followers_facebook || 0) - (previousDay.insights.followers_facebook || 0)
@@ -352,13 +352,13 @@ function calculateDailyVariations(data: any) {
     }
   }
 
-  // Calcular mÃ©tricas agregadas
+  // Calcular m�tricas agregadas
   const dailyChanges = Object.values(variations.daily_changes) as any[]
   if (dailyChanges.length > 0) {
     variations.avg_daily_engagement = dailyChanges.reduce((sum: number, day: any) => sum + day.engagement_rate, 0) / dailyChanges.length
     variations.follower_growth_total = dailyChanges.reduce((sum: number, day: any) => sum + day.total_follower_change, 0)
     
-    // Melhor e pior dia (baseado em engagement + interaÃ§Ãµes)
+    // Melhor e pior dia (baseado em engagement + intera��es)
     const sortedByPerformance = dailyChanges.sort((a, b) => 
       (b.engagement_rate + b.total_interactions) - (a.engagement_rate + a.total_interactions)
     )
@@ -369,49 +369,49 @@ function calculateDailyVariations(data: any) {
   return variations
 }
 
-// Identificar tendÃªncias
+// Identificar tend�ncias
 function identifyTrends(variations: any, days: number): any[] {
   const trends = []
 
-  // TendÃªncia de crescimento de seguidores
+  // Tend�ncia de crescimento de seguidores
   if (variations.follower_growth_total > 0) {
     trends.push({
       type: 'positive',
       category: 'followers',
       title: 'Crescimento de Seguidores',
-      description: `Ganhou ${variations.follower_growth_total} seguidores nos Ãºltimos ${days} dias`,
+      description: `Ganhou ${variations.follower_growth_total} seguidores nos �ltimos ${days} dias`,
       value: variations.follower_growth_total,
-      recommendation: 'Continue com a estratÃ©gia atual de conteÃºdo'
+      recommendation: 'Continue com a estrat�gia atual de conte�do'
     })
   } else if (variations.follower_growth_total < 0) {
     trends.push({
       type: 'negative',
       category: 'followers',
       title: 'Perda de Seguidores',
-      description: `Perdeu ${Math.abs(variations.follower_growth_total)} seguidores nos Ãºltimos ${days} dias`,
+      description: `Perdeu ${Math.abs(variations.follower_growth_total)} seguidores nos �ltimos ${days} dias`,
       value: variations.follower_growth_total,
-      recommendation: 'Revisar estratÃ©gia de conteÃºdo e engajamento'
+      recommendation: 'Revisar estrat�gia de conte�do e engajamento'
     })
   }
 
-  // TendÃªncia de engagement
+  // Tend�ncia de engagement
   if (variations.avg_daily_engagement > 4) {
     trends.push({
       type: 'positive',
       category: 'engagement',
       title: 'Alto Engajamento',
-      description: `Taxa mÃ©dia de engajamento de ${variations.avg_daily_engagement.toFixed(1)}%`,
+      description: `Taxa m�dia de engajamento de ${variations.avg_daily_engagement.toFixed(1)}%`,
       value: variations.avg_daily_engagement,
-      recommendation: 'Excelente! Mantenha o tipo de conteÃºdo que estÃ¡ funcionando'
+      recommendation: 'Excelente! Mantenha o tipo de conte�do que est� funcionando'
     })
   } else if (variations.avg_daily_engagement < 2) {
     trends.push({
       type: 'warning',
       category: 'engagement',
       title: 'Engajamento Baixo',
-      description: `Taxa mÃ©dia de engajamento de apenas ${variations.avg_daily_engagement.toFixed(1)}%`,
+      description: `Taxa m�dia de engajamento de apenas ${variations.avg_daily_engagement.toFixed(1)}%`,
       value: variations.avg_daily_engagement,
-      recommendation: 'Considere variar tipos de conteÃºdo e horÃ¡rios de postagem'
+      recommendation: 'Considere variar tipos de conte�do e hor�rios de postagem'
     })
   }
 

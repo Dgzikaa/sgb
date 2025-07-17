@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useRef, useEffect } from 'react'
 import { getSupabaseClient } from '@/lib/supabase'
@@ -30,7 +30,7 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
     {
       id: '1',
       type: 'assistant',
-      content: `OlÃ¡! Sou o SGB Assistant ðŸ¤–\n\nSou seu assistente inteligente para anÃ¡lise de dados do ${barInfo?.nome || 'bar'}. Posso te ajudar com:\n\nâ€¢ ðŸ“Š AnÃ¡lises de vendas e faturamento\nâ€¢ ðŸ” DetecÃ§Ã£o de padrÃµes e anomalias\nâ€¢ ðŸ’¡ SugestÃµes de melhorias\nâ€¢ â“ Respostas sobre o negÃ³cio\n\nO que vocÃª gostaria de saber?`,
+      content: `Ol�! Sou o SGB Assistant 🤖\n\nSou seu assistente inteligente para an�lise de dados do ${barInfo?.nome || 'bar'}. Posso te ajudar com:\n\n�� 📊 An�lises de vendas e faturamento\n�� 🔍 Detec��o de padr�es e anomalias\n�� 💡 Sugest�es de melhorias\n�� �� Respostas sobre o neg�cio\n\nO que voc� gostaria de saber?`,
       timestamp: new Date()
     }
   ])
@@ -51,7 +51,7 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
     // Inicializar cliente Supabase
     const supabase = await getSupabaseClient();
     if (!supabase) {
-      console.error('âŒ Erro ao conectar com banco');
+      console.error('�� Erro ao conectar com banco');
       return;
     }
 
@@ -59,7 +59,7 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
     if (!input.trim() || isLoading) return
 
     const userInput = input.trim()
-    console.log('ðŸ¤– Enviando mensagem:', userInput)
+    console.log('🤖 Enviando mensagem:', userInput)
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -68,10 +68,10 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
       timestamp: new Date()
     }
 
-    // Adicionar mensagem do usuÃ¡rio imediatamente
+    // Adicionar mensagem do usu�rio imediatamente
     setMessages(prev => {
       const newMessages = [...prev, userMessage]
-      console.log('ðŸ“ Mensagens atualizadas:', newMessages)
+      console.log('📝 Mensagens atualizadas:', newMessages)
       return newMessages
     })
     
@@ -80,7 +80,7 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
     setIsLoading(true)
 
     try {
-      // Processar comando do usuÃ¡rio
+      // Processar comando do usu�rio
       const response = await processUserInput(userInput, barInfo)
       
       const assistantMessage: Message = {
@@ -92,14 +92,14 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
       }
 
       setMessages(prev => [...prev, assistantMessage])
-      console.log('ðŸ¤– Resposta enviada:', response.content)
+      console.log('🤖 Resposta enviada:', response.content)
     } catch (error) {
-      console.error('âŒ Erro no assistant:', error)
+      console.error('�� Erro no assistant:', error)
       
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: 'Desculpe, ocorreu um erro ao processar sua solicitaÃ§Ã£o. Tente novamente.',
+        content: 'Desculpe, ocorreu um erro ao processar sua solicita��o. Tente novamente.',
         timestamp: new Date()
       }
 
@@ -114,7 +114,7 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
     // Inicializar cliente Supabase
     const supabase = await getSupabaseClient();
     if (!supabase) {
-      console.error('âŒ Erro ao conectar com banco');
+      console.error('�� Erro ao conectar com banco');
       return;
     }
 
@@ -133,7 +133,7 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
       {
         id: '1',
         type: 'assistant',
-        content: `Chat limpo! ðŸ§¹\n\nSou o SGB Assistant do ${barInfo?.nome || 'bar'}. Como posso te ajudar agora?`,
+        content: `Chat limpo! 🧹\n\nSou o SGB Assistant do ${barInfo?.nome || 'bar'}. Como posso te ajudar agora?`,
         timestamp: new Date()
       }
     ])
@@ -148,7 +148,7 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center">
-              <span className="text-white">ðŸ¤–</span>
+              <span className="text-white">🤖</span>
             </div>
             <div>
               <h3 className="font-bold text-white">SGB Assistant</h3>
@@ -204,9 +204,9 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
                           ? 'bg-green-100 text-green-600'
                           : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
                       }`}
-                      title="Resposta Ãºtil"
+                      title="Resposta �til"
                     >
-                      ðŸ‘
+                      👍
                     </button>
                     <button
                       onClick={() => handleFeedback(message.id, 'negative')}
@@ -215,9 +215,9 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
                           ? 'bg-red-100 text-red-600'
                           : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
                       }`}
-                      title="Resposta nÃ£o Ãºtil"
+                      title="Resposta n�o �til"
                     >
-                      ðŸ‘Ž
+                      👎
                     </button>
                   </div>
                   <span className="text-xs text-gray-400">
@@ -269,7 +269,7 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
         
         {/* Quick Commands */}
         <div className="mt-2 flex flex-wrap gap-1">
-          {['ðŸ’° Vendas hoje', 'ðŸ“Š AnÃ¡lise semana', 'ðŸ” Anomalias', 'ðŸ’¡ SugestÃµes'].map((cmd) => (
+          {['💰 Vendas hoje', '📊 An�lise semana', '🔍 Anomalias', '💡 Sugest�es'].map((cmd) => (
             <button
               key={cmd}
               onClick={() => setInput(cmd)}
@@ -284,23 +284,23 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
   )
 }
 
-// FunÃ§Ã£o para processar input do usuÃ¡rio
+// Fun��o para processar input do usu�rio
 async function processUserInput(input: string, barInfo: any): Promise<{ content: string; metadata?: any }> {
   const lowercaseInput = input.toLowerCase()
 
-  // Comandos especÃ­ficos que usam anÃ¡lise local
-  if (lowercaseInput.includes('vendas hoje') || lowercaseInput.includes('ðŸ’° vendas hoje')) {
+  // Comandos espec�ficos que usam an�lise local
+  if (lowercaseInput.includes('vendas hoje') || lowercaseInput.includes('💰 vendas hoje')) {
     return await analyzeToday(barInfo)
   }
   
   // Para outros comandos e perguntas livres, usar ChatGPT
   try {
-    console.log('ðŸ¤– Processando com ChatGPT:', input)
+    console.log('🤖 Processando com ChatGPT:', input)
     
-    // Buscar dados contextuais se necessÃ¡rio
+    // Buscar dados contextuais se necess�rio
     let contextData = null
     if (lowercaseInput.includes('vendas') || lowercaseInput.includes('faturamento')) {
-      // Buscar dados bÃ¡sicos de vendas para contexto
+      // Buscar dados b�sicos de vendas para contexto
       contextData = await getBasicSalesData(barInfo)
     }
 
@@ -322,30 +322,30 @@ async function processUserInput(input: string, barInfo: any): Promise<{ content:
       }
     }
   } catch (error) {
-    console.error('âŒ Erro ao processar com ChatGPT:', error)
+    console.error('�� Erro ao processar com ChatGPT:', error)
     
-    // Fallback para comandos especÃ­ficos em caso de erro
-    if (lowercaseInput.includes('anÃ¡lise semana') || lowercaseInput.includes('ðŸ“Š anÃ¡lise semana')) {
+    // Fallback para comandos espec�ficos em caso de erro
+    if (lowercaseInput.includes('an�lise semana') || lowercaseInput.includes('📊 an�lise semana')) {
       return await analyzeWeek(barInfo)
     }
     
-    if (lowercaseInput.includes('anomalias') || lowercaseInput.includes('ðŸ” anomalias')) {
+    if (lowercaseInput.includes('anomalias') || lowercaseInput.includes('🔍 anomalias')) {
       return await detectAnomalies(barInfo)
     }
     
-    if (lowercaseInput.includes('sugestÃµes') || lowercaseInput.includes('ðŸ’¡ sugestÃµes')) {
+    if (lowercaseInput.includes('sugest�es') || lowercaseInput.includes('💡 sugest�es')) {
       return await generateSuggestions(barInfo)
     }
 
-    // Resposta de erro amigÃ¡vel
+    // Resposta de erro amig�vel
     return {
-      content: `âŒ **Erro de ConexÃ£o**\n\nNÃ£o consegui processar sua pergunta: "${input}"\n\nðŸ”§ **PossÃ­veis soluÃ§Ãµes:**\nâ€¢ Verifique sua conexÃ£o com a internet\nâ€¢ Tente novamente em alguns segundos\nâ€¢ Use comandos bÃ¡sicos como "vendas hoje"\n\nðŸ’¡ **Comandos disponÃ­veis offline:**\nâ€¢ ðŸ’° Vendas hoje\nâ€¢ ðŸ“Š AnÃ¡lise semana\nâ€¢ ðŸ” Anomalias\nâ€¢ ðŸ’¡ SugestÃµes`,
+      content: `�� **Erro de Conex�o**\n\nN�o consegui processar sua pergunta: "${input}"\n\n🔧 **Poss�veis solu��es:**\n�� Verifique sua conex�o com a internet\n�� Tente novamente em alguns segundos\n�� Use comandos b�sicos como "vendas hoje"\n\n💡 **Comandos dispon�veis offline:**\n�� 💰 Vendas hoje\n�� 📊 An�lise semana\n�� 🔍 Anomalias\n�� 💡 Sugest�es`,
       metadata: { command: 'error', error: error instanceof Error ? error.message : 'Unknown error' }
     }
   }
 }
 
-// FunÃ§Ã£o para buscar dados bÃ¡sicos de vendas para contexto
+// Fun��o para buscar dados b�sicos de vendas para contexto
 async function getBasicSalesData(barInfo: any) {
   try {
     const today = new Date().toISOString().split('T')[0]
@@ -357,7 +357,7 @@ async function getBasicSalesData(barInfo: any) {
       .gte('created_at', `${today}T00:00:00`)
       .lt('created_at', `${today}T23:59:59`)
       .eq('bar_id', barInfo?.id || 1)
-      .limit(10) // Limitar para nÃ£o sobrecarregar
+      .limit(10) // Limitar para n�o sobrecarregar
 
     const total = vendas?.reduce((sum: number, venda: any) => sum + parseFloat(venda.liquido || '0'), 0) || 0
     const quantidade = vendas?.length || 0
@@ -368,15 +368,15 @@ async function getBasicSalesData(barInfo: any) {
         quantidade,
         ticketMedio: quantidade > 0 ? total / quantidade : 0
       },
-      ultimasVendas: vendas?.slice(0, 5) // Ãšltimas 5 vendas como contexto
+      ultimasVendas: vendas?.slice(0, 5) // �ltimas 5 vendas como contexto
     }
   } catch (error) {
-    console.warn('âš ï¸ Erro ao buscar dados de contexto:', error)
+    console.warn('��️ Erro ao buscar dados de contexto:', error)
     return null
   }
 }
 
-// FunÃ§Ãµes de anÃ¡lise (comeÃ§ando simples, vÃ£o evoluir)
+// Fun��es de an�lise (come�ando simples, v�o evoluir)
 async function analyzeToday(barInfo: any) {
   const today = new Date().toISOString().split('T')[0]
   
@@ -384,7 +384,7 @@ async function analyzeToday(barInfo: any) {
     // Buscar dados do dia atual
     const supabase = await getSupabaseClient();
     if (!supabase) return {
-      content: 'âŒ Erro ao conectar com banco de dados.'
+      content: '�� Erro ao conectar com banco de dados.'
     };
     const { data: vendas, error } = await supabase
       .from('pagamentos')
@@ -399,33 +399,33 @@ async function analyzeToday(barInfo: any) {
     const quantidade = vendas?.length || 0
 
     return {
-      content: `ðŸ“Š **Vendas de Hoje (${new Date().toLocaleDateString()}):**\n\nðŸ’° **Faturamento:** R$ ${total.toFixed(2)}\nðŸŽ« **TransaÃ§Ãµes:** ${quantidade}\nðŸ’³ **Ticket MÃ©dio:** R$ ${quantidade > 0 ? (total / quantidade).toFixed(2) : '0.00'}\n\n${total > 1000 ? 'ðŸŽ‰ Ã“timo dia de vendas!' : total > 500 ? 'ðŸ‘ Dia normal de vendas' : 'ðŸ“ˆ Ainda hÃ¡ tempo para melhorar!'}`,
+      content: `📊 **Vendas de Hoje (${new Date().toLocaleDateString()}):**\n\n💰 **Faturamento:** R$ ${total.toFixed(2)}\n🎫 **Transa��es:** ${quantidade}\n💳 **Ticket M�dio:** R$ ${quantidade > 0 ? (total / quantidade).toFixed(2) : '0.00'}\n\n${total > 1000 ? '🎉 �timo dia de vendas!' : total > 500 ? '👍 Dia normal de vendas' : '📈 Ainda h� tempo para melhorar!'}`,
       metadata: { command: 'vendas_hoje', data: { total, quantidade } }
     }
   } catch (error) {
     return {
-      content: 'âŒ Erro ao buscar dados de vendas de hoje. Verifique a conexÃ£o com o banco de dados.'
+      content: '�� Erro ao buscar dados de vendas de hoje. Verifique a conex�o com o banco de dados.'
     }
   }
 }
 
 async function analyzeWeek(barInfo: any) {
   return {
-    content: `ðŸ“Š **AnÃ¡lise Semanal:**\n\nðŸš§ Esta funcionalidade estÃ¡ sendo desenvolvida...\n\nEm breve vocÃª terÃ¡:\nâ€¢ Comparativo com semana anterior\nâ€¢ TendÃªncias de crescimento\nâ€¢ Melhores dias da semana\nâ€¢ ProjeÃ§Ãµes para prÃ³xima semana\n\nâ³ Aguarde as prÃ³ximas atualizaÃ§Ãµes!`,
+    content: `📊 **An�lise Semanal:**\n\n🚧 Esta funcionalidade est� sendo desenvolvida...\n\nEm breve voc� ter�:\n�� Comparativo com semana anterior\n�� Tend�ncias de crescimento\n�� Melhores dias da semana\n�� Proje��es para pr�xima semana\n\n�� Aguarde as pr�ximas atualiza��es!`,
     metadata: { command: 'analise_semana' }
   }
 }
 
 async function detectAnomalies(barInfo: any) {
   return {
-    content: `ðŸ” **DetecÃ§Ã£o de Anomalias:**\n\nðŸš§ Sistema de detecÃ§Ã£o em desenvolvimento...\n\nFuturas funcionalidades:\nâ€¢ Vendas muito baixas/altas\nâ€¢ PadrÃµes estranhos nos pagamentos\nâ€¢ HorÃ¡rios de pico diferentes\nâ€¢ Alertas automÃ¡ticos\n\nðŸ¤– O sistema estÃ¡ aprendendo os padrÃµes do seu negÃ³cio!`,
+    content: `🔍 **Detec��o de Anomalias:**\n\n🚧 Sistema de detec��o em desenvolvimento...\n\nFuturas funcionalidades:\n�� Vendas muito baixas/altas\n�� Padr�es estranhos nos pagamentos\n�� Hor�rios de pico diferentes\n�� Alertas autom�ticos\n\n🤖 O sistema est� aprendendo os padr�es do seu neg�cio!`,
     metadata: { command: 'anomalias' }
   }
 }
 
 async function generateSuggestions(barInfo: any) {
   return {
-    content: `ðŸ’¡ **SugestÃµes de Melhoria:**\n\nðŸš§ Sistema de sugestÃµes em treinamento...\n\nEm breve vocÃª receberÃ¡:\nâ€¢ RecomendaÃ§Ãµes baseadas em dados\nâ€¢ Melhores horÃ¡rios para promoÃ§Ãµes\nâ€¢ EstratÃ©gias para aumentar vendas\nâ€¢ OtimizaÃ§Ãµes operacionais\n\nðŸ“ˆ Quanto mais vocÃª usar, melhores serÃ£o as sugestÃµes!`,
+    content: `💡 **Sugest�es de Melhoria:**\n\n🚧 Sistema de sugest�es em treinamento...\n\nEm breve voc� receber�:\n�� Recomenda��es baseadas em dados\n�� Melhores hor�rios para promo��es\n�� Estrat�gias para aumentar vendas\n�� Otimiza��es operacionais\n\n📈 Quanto mais voc� usar, melhores ser�o as sugest�es!`,
     metadata: { command: 'sugestoes' }
   }
 } 

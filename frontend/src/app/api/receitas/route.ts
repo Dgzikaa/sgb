@@ -1,15 +1,15 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
 
-// GET - Buscar receitas com insumos para terminal de produÃ§Ã£o
+// GET - Buscar receitas com insumos para terminal de produ��o
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const barId = parseInt(searchParams.get('bar_id') || '3')
     
-    console.log(`ðŸ½ï¸ Buscando receitas para bar_id: ${barId}`)
+    console.log(`🍽️ Buscando receitas para bar_id: ${barId}`)
 
     const supabase = await getSupabaseClient()
     if (!supabase) {
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       }, { status: 500 })
     }
 
-    // OTIMIZAÃ‡ÃƒO: Buscar TODAS as receitas ATIVAS e insumos em uma Ãºnica consulta
+    // OTIMIZA��O: Buscar TODAS as receitas ATIVAS e insumos em uma �nica consulta
     const { data: todasReceitas, error: receitasError } = await supabase
       .from('receitas')
       .select(`
@@ -45,23 +45,23 @@ export async function GET(request: NextRequest) {
       .order('receita_codigo')
 
     if (receitasError) {
-      console.error('âŒ Erro ao buscar receitas:', receitasError)
+      console.error('�� Erro ao buscar receitas:', receitasError)
       return NextResponse.json({
         success: false,
         error: 'Erro ao buscar receitas: ' + receitasError.message
       }, { status: 500 })
     }
 
-    console.log(`ðŸ½ï¸ ${todasReceitas?.length || 0} registros de receitas encontrados`)
+    console.log(`🍽️ ${todasReceitas?.length || 0} registros de receitas encontrados`)
 
-    // Agrupar receitas por cÃ³digo para evitar mÃºltiplas consultas
+    // Agrupar receitas por c�digo para evitar m�ltiplas consultas
     const receitasAgrupadas = new Map()
     
     for (const receita of todasReceitas || []) {
       const codigo = receita.receita_codigo
       
       if (!receitasAgrupadas.has(codigo)) {
-        // CORREÃ‡ÃƒO: Buscar rendimento_esperado apenas do insumo chefe
+        // CORRE��O: Buscar rendimento_esperado apenas do insumo chefe
         let rendimentoEsperado = 0
         if (receita.insumo_chefe_id && receita.insumo_id === receita.insumo_chefe_id) {
           rendimentoEsperado = receita.rendimento_esperado || 0
@@ -73,27 +73,27 @@ export async function GET(request: NextRequest) {
           receita_codigo: codigo,
           receita_nome: receita.receita_nome,
           receita_categoria: receita.receita_categoria,
-          rendimento_esperado: 0, // SerÃ¡ preenchido quando encontrar o insumo chefe
+          rendimento_esperado: 0, // Ser� preenchido quando encontrar o insumo chefe
           insumo_chefe_id: receita.insumo_chefe_id,
           tipo_local: receita.receita_categoria?.includes('DRINKS') ? 'bar' : 'cozinha',
           insumos: []
         })
       }
       
-      // Adicionar insumo Ã  receita
+      // Adicionar insumo � receita
       if (receita.insumos) {
         const receitaObj = receitasAgrupadas.get(codigo)
         const isChefe = receita.insumo_chefe_id === receita.insumos.id
         
-        // Se este Ã© o insumo chefe, aplicar o rendimento esperado Ã  receita
+        // Se este � o insumo chefe, aplicar o rendimento esperado � receita
         if (isChefe && receita.rendimento_esperado) {
           receitaObj.rendimento_esperado = receita.rendimento_esperado
-          console.log(`ðŸŽ¯ Receita ${codigo}: rendimento ${receita.rendimento_esperado}g aplicado do insumo chefe ${receita.insumos.nome}`)
+          console.log(`🎯 Receita ${codigo}: rendimento ${receita.rendimento_esperado}g aplicado do insumo chefe ${receita.insumos.nome}`)
         }
         
-        // DEBUG especÃ­fico para pc0005
+        // DEBUG espec�fico para pc0005
         if (codigo === 'pc0005') {
-          console.log(`ðŸ” pc0005 - insumo: ${receita.insumos.nome}, is_chefe: ${isChefe}, rendimento: ${receita.rendimento_esperado}`)
+          console.log(`🔍 pc0005 - insumo: ${receita.insumos.nome}, is_chefe: ${isChefe}, rendimento: ${receita.rendimento_esperado}`)
         }
         
         receitaObj.insumos.push({
@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
     }
 
     const receitasComInsumos = Array.from(receitasAgrupadas.values())
-    console.log(`âœ… ${receitasComInsumos.length} receitas Ãºnicas processadas com insumos`)
+    console.log(`�� ${receitasComInsumos.length} receitas �nicas processadas com insumos`)
 
     return NextResponse.json({
       success: true,
@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('âŒ Erro interno na API receitas:', error)
+    console.error('�� Erro interno na API receitas:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro interno do servidor: ' + (error as Error).message

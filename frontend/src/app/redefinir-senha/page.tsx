@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -20,7 +20,7 @@ export default function RedefinirSenhaPage() {
 
   const validarSenha = () => {
     if (!novaSenha) {
-      setErro('Nova senha Ã© obrigatÃ³ria')
+      setErro('Nova senha � obrigat�ria')
       return false
     }
     if (novaSenha.length < 6) {
@@ -28,7 +28,7 @@ export default function RedefinirSenhaPage() {
       return false
     }
     if (novaSenha !== confirmarSenha) {
-      setErro('As senhas nÃ£o coincidem')
+      setErro('As senhas n�o coincidem')
       return false
     }
     setErro('')
@@ -67,7 +67,7 @@ export default function RedefinirSenhaPage() {
         setErro(data.error || 'Erro ao redefinir senha')
       }
     } catch (error) {
-      setErro('Erro de conexÃ£o. Tente novamente.')
+      setErro('Erro de conex�o. Tente novamente.')
     } finally {
       setCarregando(false)
     }
@@ -84,7 +84,7 @@ export default function RedefinirSenhaPage() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Senha Redefinida!</h1>
           <p className="text-gray-600 mb-4">
-            Sua senha foi atualizada com sucesso. VocÃª serÃ¡ redirecionado para a pÃ¡gina de login.
+            Sua senha foi atualizada com sucesso. Voc� ser� redirecionado para a p�gina de login.
           </p>
           <div className="animate-pulse text-blue-600 font-medium">
             Redirecionando em 3 segundos...
@@ -106,7 +106,7 @@ export default function RedefinirSenhaPage() {
             Defina sua Nova Senha
           </h1>
           <p className="text-gray-600">
-            Como Ã© seu primeiro acesso, vocÃª precisa criar uma nova senha para sua conta.
+            Como � seu primeiro acesso, voc� precisa criar uma nova senha para sua conta.
           </p>
         </div>
 
@@ -146,7 +146,7 @@ export default function RedefinirSenhaPage() {
               </button>
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              MÃ­nimo de 6 caracteres
+              M�nimo de 6 caracteres
             </p>
           </div>
 
@@ -181,7 +181,7 @@ export default function RedefinirSenhaPage() {
             </div>
           )}
 
-          {/* BotÃ£o */}
+          {/* Bot�o */}
           <button
             type="submit"
             disabled={carregando}
@@ -207,7 +207,7 @@ export default function RedefinirSenhaPage() {
         {/* Footer */}
         <div className="mt-8 text-center">
           <p className="text-xs text-gray-500">
-            ApÃ³s redefinir, vocÃª serÃ¡ redirecionado para fazer login com sua nova senha.
+            Ap�s redefinir, voc� ser� redirecionado para fazer login com sua nova senha.
           </p>
         </div>
       </div>

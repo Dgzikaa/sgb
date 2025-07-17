@@ -1,7 +1,7 @@
-﻿import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js'
 
 // ========================================
-// ðŸ”§ CONFIGURAÃ‡Ã•ES E TIPOS
+// 🔧 CONFIGURA��ES E TIPOS
 // ========================================
 
 interface MetaConfig {
@@ -96,7 +96,7 @@ interface InstagramMedia {
 }
 
 // ========================================
-// ðŸŒ SERVIÃ‡O PRINCIPAL
+// 🌐 SERVI�O PRINCIPAL
 // ========================================
 
 export class MetaSocialService {
@@ -114,7 +114,7 @@ export class MetaSocialService {
   }
 
   // ========================================
-  // ðŸ“Š MONITORAMENTO DE RATE LIMITS
+  // 📊 MONITORAMENTO DE RATE LIMITS
   // ========================================
 
   private processRateLimitHeaders(response: Response): void {
@@ -129,17 +129,17 @@ export class MetaSocialService {
       const bucUsage = response.headers.get('X-Business-Use-Case-Usage')
       if (bucUsage) {
         const parsed = JSON.parse(bucUsage)
-        // Pegar o primeiro business case (normalmente sÃ³ hÃ¡ um)
+        // Pegar o primeiro business case (normalmente s� h� um)
         const businessId = Object.keys(parsed)[0]
         if (businessId && parsed[businessId][0]) {
           this.rateLimitInfo.business_usage = parsed[businessId][0]
         }
       }
 
-      // Log se estivermos prÃ³ximos do limite
+      // Log se estivermos pr�ximos do limite
       this.checkRateLimitWarnings()
     } catch (error) {
-      console.warn('âš ï¸ Erro ao processar headers de rate limit:', error)
+      console.warn('��️ Erro ao processar headers de rate limit:', error)
     }
   }
 
@@ -148,14 +148,14 @@ export class MetaSocialService {
 
     // Avisar se plataforma estiver acima de 70%
     if (platform_usage && platform_usage.call_count > 70) {
-      console.warn(`âš ï¸ Platform Rate Limit: ${platform_usage.call_count}% usado`)
+      console.warn(`��️ Platform Rate Limit: ${platform_usage.call_count}% usado`)
     }
 
     // Avisar se business usage estiver acima de 70%
     if (business_usage && business_usage.call_count > 70) {
-      console.warn(`âš ï¸ Business Use Case Rate Limit: ${business_usage.call_count}% usado`)
+      console.warn(`��️ Business Use Case Rate Limit: ${business_usage.call_count}% usado`)
       if (business_usage.estimated_time_to_regain_access > 0) {
-        console.warn(`â° Tempo para recuperar acesso: ${business_usage.estimated_time_to_regain_access} minutos`)
+        console.warn(`�� Tempo para recuperar acesso: ${business_usage.estimated_time_to_regain_access} minutos`)
       }
     }
   }
@@ -165,12 +165,12 @@ export class MetaSocialService {
   }
 
   // ========================================
-  // ðŸ”‘ GERENCIAMENTO DE CONFIGURAÃ‡ÃƒO
+  // 🔑 GERENCIAMENTO DE CONFIGURA��O
   // ========================================
 
   async initializeConfig(): Promise<boolean> {
     try {
-      console.log('ðŸ”§ Inicializando configuraÃ§Ã£o Meta para bar:', this.barId)
+      console.log('🔧 Inicializando configura��o Meta para bar:', this.barId)
 
       const { data, error } = await this.supabase
         .from('api_credentials')
@@ -181,11 +181,11 @@ export class MetaSocialService {
         .single()
 
       if (error || !data) {
-        console.error('âŒ ConfiguraÃ§Ã£o Meta nÃ£o encontrada:', error)
+        console.error('�� Configura��o Meta n�o encontrada:', error)
         return false
       }
 
-      // Combinar dados bÃ¡sicos com configuraÃ§Ãµes unificadas
+      // Combinar dados b�sicos com configura��es unificadas
       const configs = data.configuracoes || {}
       this.config = {
         access_token: data.access_token,
@@ -198,22 +198,22 @@ export class MetaSocialService {
         business_id: configs.configuracoes_adicionais?.business_id || configs.business_id
       }
 
-      console.log('âœ… ConfiguraÃ§Ã£o Meta carregada')
+      console.log('�� Configura��o Meta carregada')
       return true
     } catch (error) {
-      console.error('âŒ Erro ao inicializar configuraÃ§Ã£o Meta:', error)
+      console.error('�� Erro ao inicializar configura��o Meta:', error)
       return false
     }
   }
 
   async testConnection(): Promise<boolean> {
     if (!this.config) {
-      console.error('âŒ ConfiguraÃ§Ã£o nÃ£o inicializada')
+      console.error('�� Configura��o n�o inicializada')
       return false
     }
 
     try {
-      console.log('ðŸ” Testando conexÃ£o com Meta API...')
+      console.log('🔍 Testando conex�o com Meta API...')
 
       // Testar com uma chamada simples
       const response = await fetch(
@@ -227,9 +227,9 @@ export class MetaSocialService {
       const data = await response.json()
 
       if (response.ok && data.id) {
-        console.log('âœ… ConexÃ£o com Meta API OK')
+        console.log('�� Conex�o com Meta API OK')
         
-        // Atualizar timestamp de Ãºltimo teste
+        // Atualizar timestamp de �ltimo teste
         await this.supabase
           .from('api_credentials')
           .update({ atualizado_em: new Date().toISOString() })
@@ -238,17 +238,17 @@ export class MetaSocialService {
 
         return true
       } else {
-        console.error('âŒ Erro na conexÃ£o Meta API:', data)
+        console.error('�� Erro na conex�o Meta API:', data)
         return false
       }
     } catch (error) {
-      console.error('âŒ Erro ao testar conexÃ£o Meta:', error)
+      console.error('�� Erro ao testar conex�o Meta:', error)
       return false
     }
   }
 
   // ========================================
-  // ðŸ“Š COLETA DE MÃ‰TRICAS DO FACEBOOK
+  // 📊 COLETA DE M�TRICAS DO FACEBOOK
   // ========================================
 
   async collectFacebookMetrics(
@@ -257,16 +257,16 @@ export class MetaSocialService {
     until?: string
   ): Promise<boolean> {
     if (!this.config?.facebook_page_id) {
-      console.error('âŒ Page ID do Facebook nÃ£o configurado')
+      console.error('�� Page ID do Facebook n�o configurado')
       return false
     }
 
     try {
-      console.log(`ðŸ“Š Coletando mÃ©tricas do Facebook - perÃ­odo: ${period}`)
+      console.log(`📊 Coletando m�tricas do Facebook - per�odo: ${period}`)
       
       const logId = await this.startCollectionLog('facebook_page', { period, since, until })
 
-      // Definir mÃ©tricas a serem coletadas
+      // Definir m�tricas a serem coletadas
       const pageMetrics = [
         'page_impressions',
         'page_reach',
@@ -281,7 +281,7 @@ export class MetaSocialService {
         'page_video_complete_views'
       ].join(',')
 
-      // Definir perÃ­odo
+      // Definir per�odo
       const dateRange = this.getDateRange(period, since, until)
       const params = new URLSearchParams({
         metric: pageMetrics,
@@ -290,7 +290,7 @@ export class MetaSocialService {
         ...dateRange
       })
 
-      // Fazer chamada Ã  API
+      // Fazer chamada � API
       const response = await fetch(
         `https://graph.facebook.com/${this.config.api_version}/${this.config.facebook_page_id}/insights?${params}`,
         { method: 'GET' }
@@ -316,17 +316,17 @@ export class MetaSocialService {
         registros_novos: saved ? 1 : 0
       })
 
-      console.log(`âœ… MÃ©tricas do Facebook coletadas: 1 registro`)
+      console.log(`�� M�tricas do Facebook coletadas: 1 registro`)
       return true
 
     } catch (error: any) {
-      console.error('âŒ Erro ao coletar mÃ©tricas do Facebook:', error)
+      console.error('�� Erro ao coletar m�tricas do Facebook:', error)
       return false
     }
   }
 
   // ========================================
-  // ðŸ“¸ COLETA DE MÃ‰TRICAS DO INSTAGRAM
+  // 📸 COLETA DE M�TRICAS DO INSTAGRAM
   // ========================================
 
   async collectInstagramMetrics(
@@ -335,16 +335,16 @@ export class MetaSocialService {
     until?: string
   ): Promise<boolean> {
     if (!this.config?.instagram_account_id) {
-      console.error('âŒ Account ID do Instagram nÃ£o configurado')
+      console.error('�� Account ID do Instagram n�o configurado')
       return false
     }
 
     try {
-      console.log(`ðŸ“¸ Coletando mÃ©tricas do Instagram - perÃ­odo: ${period}`)
+      console.log(`📸 Coletando m�tricas do Instagram - per�odo: ${period}`)
       
       const logId = await this.startCollectionLog('instagram_account', { period, since, until })
 
-      // Definir mÃ©tricas a serem coletadas
+      // Definir m�tricas a serem coletadas
       const accountMetrics = [
         'follower_count',
         'following_count',
@@ -353,7 +353,7 @@ export class MetaSocialService {
         'profile_views'
       ].join(',')
 
-      // Definir perÃ­odo
+      // Definir per�odo
       const dateRange = this.getDateRange(period, since, until)
       const params = new URLSearchParams({
         metric: accountMetrics,
@@ -362,7 +362,7 @@ export class MetaSocialService {
         ...dateRange
       })
 
-      // Fazer chamada Ã  API
+      // Fazer chamada � API
       const response = await fetch(
         `https://graph.facebook.com/${this.config.api_version}/${this.config.instagram_account_id}/insights?${params}`,
         { method: 'GET' }
@@ -388,27 +388,27 @@ export class MetaSocialService {
         registros_novos: saved ? 1 : 0
       })
 
-      console.log(`âœ… MÃ©tricas do Instagram coletadas: 1 registro`)
+      console.log(`�� M�tricas do Instagram coletadas: 1 registro`)
       return true
 
     } catch (error: any) {
-      console.error('âŒ Erro ao coletar mÃ©tricas do Instagram:', error)
+      console.error('�� Erro ao coletar m�tricas do Instagram:', error)
       return false
     }
   }
 
   // ========================================
-  // ðŸ“ COLETA DE POSTS DO FACEBOOK
+  // 📝 COLETA DE POSTS DO FACEBOOK
   // ========================================
 
   async collectFacebookPosts(limit: number = 25): Promise<boolean> {
     if (!this.config?.facebook_page_id) {
-      console.error('âŒ Page ID do Facebook nÃ£o configurado')
+      console.error('�� Page ID do Facebook n�o configurado')
       return false
     }
 
     try {
-      console.log(`ðŸ“ Coletando posts do Facebook - limite: ${limit}`)
+      console.log(`📝 Coletando posts do Facebook - limite: ${limit}`)
       
       const logId = await this.startCollectionLog('facebook_posts', { limit })
 
@@ -450,27 +450,27 @@ export class MetaSocialService {
         registros_atualizados: updated
       })
 
-      console.log(`âœ… Posts do Facebook coletados: ${posts.length} posts, ${saved} novos, ${updated} atualizados`)
+      console.log(`�� Posts do Facebook coletados: ${posts.length} posts, ${saved} novos, ${updated} atualizados`)
       return true
 
     } catch (error: any) {
-      console.error('âŒ Erro ao coletar posts do Facebook:', error)
+      console.error('�� Erro ao coletar posts do Facebook:', error)
       return false
     }
   }
 
   // ========================================
-  // ðŸ“± COLETA DE POSTS DO INSTAGRAM
+  // 📱 COLETA DE POSTS DO INSTAGRAM
   // ========================================
 
   async collectInstagramPosts(limit: number = 25): Promise<boolean> {
     if (!this.config?.instagram_account_id) {
-      console.error('âŒ Account ID do Instagram nÃ£o configurado')
+      console.error('�� Account ID do Instagram n�o configurado')
       return false
     }
 
     try {
-      console.log(`ðŸ“± Coletando posts do Instagram - limite: ${limit}`)
+      console.log(`📱 Coletando posts do Instagram - limite: ${limit}`)
       
       const logId = await this.startCollectionLog('instagram_posts', { limit })
 
@@ -512,17 +512,17 @@ export class MetaSocialService {
         registros_atualizados: updated
       })
 
-      console.log(`âœ… Posts do Instagram coletados: ${posts.length} posts, ${saved} novos, ${updated} atualizados`)
+      console.log(`�� Posts do Instagram coletados: ${posts.length} posts, ${saved} novos, ${updated} atualizados`)
       return true
 
     } catch (error: any) {
-      console.error('âŒ Erro ao coletar posts do Instagram:', error)
+      console.error('�� Erro ao coletar posts do Instagram:', error)
       return false
     }
   }
 
   // ========================================
-  // ðŸ”„ PROCESSAMENTO DE DADOS
+  // 🔄 PROCESSAMENTO DE DADOS
   // ========================================
 
   private processFacebookMetrics(rawData: any[]): FacebookPageMetrics {
@@ -576,7 +576,7 @@ export class MetaSocialService {
   }
 
   // ========================================
-  // ðŸ’¾ SALVAMENTO NO BANCO
+  // 💾 SALVAMENTO NO BANCO
   // ========================================
 
   private async saveFacebookMetrics(
@@ -600,13 +600,13 @@ export class MetaSocialService {
         })
 
       if (error) {
-        console.error('âŒ Erro ao salvar mÃ©tricas do Facebook:', error)
+        console.error('�� Erro ao salvar m�tricas do Facebook:', error)
         return false
       }
 
       return true
     } catch (error) {
-      console.error('âŒ Erro ao salvar mÃ©tricas do Facebook:', error)
+      console.error('�� Erro ao salvar m�tricas do Facebook:', error)
       return false
     }
   }
@@ -632,13 +632,13 @@ export class MetaSocialService {
         })
 
       if (error) {
-        console.error('âŒ Erro ao salvar mÃ©tricas do Instagram:', error)
+        console.error('�� Erro ao salvar m�tricas do Instagram:', error)
         return false
       }
 
       return true
     } catch (error) {
-      console.error('âŒ Erro ao salvar mÃ©tricas do Instagram:', error)
+      console.error('�� Erro ao salvar m�tricas do Instagram:', error)
       return false
     }
   }
@@ -674,13 +674,13 @@ export class MetaSocialService {
         })
 
       if (error) {
-        console.error('âŒ Erro ao salvar post do Facebook:', error)
+        console.error('�� Erro ao salvar post do Facebook:', error)
         return 'error'
       }
 
-      return 'new' // Supabase upsert nÃ£o retorna se foi insert ou update
+      return 'new' // Supabase upsert n�o retorna se foi insert ou update
     } catch (error) {
-      console.error('âŒ Erro ao salvar post do Facebook:', error)
+      console.error('�� Erro ao salvar post do Facebook:', error)
       return 'error'
     }
   }
@@ -713,19 +713,19 @@ export class MetaSocialService {
         })
 
       if (error) {
-        console.error('âŒ Erro ao salvar post do Instagram:', error)
+        console.error('�� Erro ao salvar post do Instagram:', error)
         return 'error'
       }
 
-      return 'new' // Supabase upsert nÃ£o retorna se foi insert ou update
+      return 'new' // Supabase upsert n�o retorna se foi insert ou update
     } catch (error) {
-      console.error('âŒ Erro ao salvar post do Instagram:', error)
+      console.error('�� Erro ao salvar post do Instagram:', error)
       return 'error'
     }
   }
 
   // ========================================
-  // ðŸ” UTILITÃRIOS
+  // 🔍 UTILIT�RIOS
   // ========================================
 
   private getDateRange(period: string, since?: string, until?: string): Record<string, string> {
@@ -734,7 +734,7 @@ export class MetaSocialService {
     if (since) result.since = since
     if (until) result.until = until
     
-    // Se nÃ£o foi especificado, usar defaults baseados no perÃ­odo
+    // Se n�o foi especificado, usar defaults baseados no per�odo
     if (!since && !until) {
       const today = new Date()
       const daysAgo = period === 'day' ? 1 : period === 'week' ? 7 : 30
@@ -762,7 +762,7 @@ export class MetaSocialService {
       .single()
 
     if (error) {
-      console.error('âŒ Erro ao criar log de coleta:', error)
+      console.error('�� Erro ao criar log de coleta:', error)
       return 0
     }
 
@@ -791,11 +791,11 @@ export class MetaSocialService {
   }
 
   // ========================================
-  // ðŸŽ¯ MÃ‰TODOS PÃšBLICOS PRINCIPAIS
+  // 🎯 M�TODOS P�BLICOS PRINCIPAIS
   // ========================================
 
   async collectAllMetrics(): Promise<boolean> {
-    console.log('ðŸš€ Iniciando coleta completa de mÃ©tricas Meta...')
+    console.log('🚀 Iniciando coleta completa de m�tricas Meta...')
     
     if (!await this.initializeConfig()) {
       return false
@@ -815,18 +815,18 @@ export class MetaSocialService {
     const successful = results.filter((r: any) => r.status === 'fulfilled').length
     const total = results.length
 
-    // Log com informaÃ§Ãµes de rate limit
+    // Log com informa��es de rate limit
     const rateLimitInfo = this.getRateLimitInfo()
-    console.log(`ðŸ“Š Coleta completa finalizada: ${successful}/${total} sucessos`)
+    console.log(`📊 Coleta completa finalizada: ${successful}/${total} sucessos`)
     
     if (rateLimitInfo.business_usage) {
-      console.log(`ðŸ“ˆ Rate Limit Usage: ${rateLimitInfo.business_usage.call_count}% (Business)`)
+      console.log(`📈 Rate Limit Usage: ${rateLimitInfo.business_usage.call_count}% (Business)`)
     }
     if (rateLimitInfo.platform_usage) {
-      console.log(`ðŸ“ˆ Rate Limit Usage: ${rateLimitInfo.platform_usage.call_count}% (Platform)`)
+      console.log(`📈 Rate Limit Usage: ${rateLimitInfo.platform_usage.call_count}% (Platform)`)
     }
 
-    // Consolidar mÃ©tricas se pelo menos Facebook ou Instagram teve sucesso
+    // Consolidar m�tricas se pelo menos Facebook ou Instagram teve sucesso
     if (successful >= 2) {
       await this.consolidateMetrics()
     }
@@ -835,7 +835,7 @@ export class MetaSocialService {
   }
 
   async consolidateMetrics(): Promise<void> {
-    console.log('ðŸ”„ Consolidando mÃ©tricas sociais...')
+    console.log('🔄 Consolidando m�tricas sociais...')
     
     try {
       const today = new Date().toISOString().split('T')[0]
@@ -848,18 +848,18 @@ export class MetaSocialService {
         })
 
       if (error) {
-        console.error('âŒ Erro ao consolidar mÃ©tricas:', error)
+        console.error('�� Erro ao consolidar m�tricas:', error)
       } else {
-        console.log('âœ… MÃ©tricas consolidadas com sucesso')
+        console.log('�� M�tricas consolidadas com sucesso')
       }
     } catch (error) {
-      console.error('âŒ Erro ao consolidar mÃ©tricas:', error)
+      console.error('�� Erro ao consolidar m�tricas:', error)
     }
   }
 }
 
 // ========================================
-// ðŸ­ FACTORY FUNCTION
+// 🏭 FACTORY FUNCTION
 // ========================================
 
 export async function createMetaSocialService(barId: number): Promise<MetaSocialService | null> {

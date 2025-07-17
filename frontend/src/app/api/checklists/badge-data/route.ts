@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser } from '@/middleware/auth'
 
@@ -7,11 +7,11 @@ import { authenticateUser } from '@/middleware/auth'
 // =====================================================
 export async function GET(request: NextRequest) {
   try {
-    // ðŸ” AUTENTICAÃ‡ÃƒO
+    // 🔐 AUTENTICA��O
     const user = await authenticateUser(request)
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'UsuÃ¡rio nÃ£o autenticado' },
+        { success: false, error: 'Usu�rio n�o autenticado' },
         { status: 401 }
       )
     }
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const hoje = new Date()
     const hojeStr = hoje.toISOString().split('T')[0]
     
-    // Buscar execuÃ§Ãµes pendentes
+    // Buscar execu��es pendentes
     const { data: execucoesPendentes, error: execucoesError } = await supabase
       .from('checklist_execucoes')
       .select(`
@@ -41,10 +41,10 @@ export async function GET(request: NextRequest) {
       .in('status', ['em_andamento', 'pausado', 'agendado'])
 
     if (execucoesError) {
-      console.error('Erro ao buscar execuÃ§Ãµes pendentes:', execucoesError)
+      console.error('Erro ao buscar execu��es pendentes:', execucoesError)
     }
 
-    // Buscar agendamentos ativos que deveriam ter execuÃ§Ãµes hoje
+    // Buscar agendamentos ativos que deveriam ter execu��es hoje
     const { data: agendamentos, error: agendamentosError } = await supabase
       .from('checklist_schedules')
       .select(`
@@ -68,19 +68,19 @@ export async function GET(request: NextRequest) {
     let pendentes = 0
     let atrasados = 0
     
-    // Contar execuÃ§Ãµes em andamento como pendentes
+    // Contar execu��es em andamento como pendentes
     const execucoesPendentesCount = execucoesPendentes?.filter((exec: any) => 
       exec.status === 'em_andamento' || exec.status === 'pausado'
     ).length || 0
     
-    // Contar execuÃ§Ãµes atrasadas (com prazo vencido)
+    // Contar execu��es atrasadas (com prazo vencido)
     const execucoesAtrasadas = execucoesPendentes?.filter((exec: any) => {
       if (!exec.prazo_execucao) return false
       const prazo = new Date(exec.prazo_execucao)
       return prazo < hoje
     }).length || 0
 
-    // Contar agendamentos que deveriam ter execuÃ§Ãµes hoje mas nÃ£o tÃªm
+    // Contar agendamentos que deveriam ter execu��es hoje mas n�o t�m
     const agendamentosHoje = agendamentos?.filter((agendamento: any) => {
       if (!agendamento.proximo_agendamento) return false
       const proximoAgendamento = new Date(agendamento.proximo_agendamento)

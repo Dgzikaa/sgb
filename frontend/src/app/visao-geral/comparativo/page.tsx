@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useBar } from '@/contexts/BarContext'
@@ -19,7 +19,7 @@ interface DadosComparacao {
   tempoBar: number
   pratos: { nome: string; quantidade: number }[]
   artista?: string
-  // Dados por horÃ¡rio
+  // Dados por hor�rio
   faturamento_horas: Array<{
     hora: string
     faturamento: number
@@ -38,14 +38,14 @@ interface ArtistaStats {
   faturamentoSymplaTotal: number
   clientesTotal: number
   reservasTotal: number
-  // MÃ‰DIAS (total dividido pelo nÃºmero de eventos)
+  // M�DIAS (total dividido pelo n�mero de eventos)
   faturamentoMedio: number
   faturamentoYuzerMedio: number
   faturamentoContaHubMedio: number
   faturamentoSymplaMedio: number
   clientesMedio: number
   reservasMedio: number
-  // TICKET MÃ‰DIO (faturamento total / clientes total)
+  // TICKET M�DIO (faturamento total / clientes total)
   ticketMedio: number
   tempoMedioCozinha: number
   tempoMedioBar: number
@@ -65,14 +65,14 @@ export default function ComparativoPage() {
   
   const [tipoComparacao, setTipoComparacao] = useState<TipoComparacao>('datas-especificas')
   
-  // Para comparaÃ§Ã£o de datas especÃ­ficas
+  // Para compara��o de datas espec�ficas
   const [data1, setData1] = useState('')
   const [data2, setData2] = useState('')
   const [dadosComparativos, setDadosComparativos] = useState<DadosComparacao[]>([])
   const [insights, setInsights] = useState<string[]>([])
   const [recorrenciaClientes, setRecorrenciaClientes] = useState<any>(null)
   
-  // Para comparaÃ§Ã£o de artistas
+  // Para compara��o de artistas
   const [artistaSelecionado1, setArtistaSelecionado1] = useState('')
   const [artistaSelecionado2, setArtistaSelecionado2] = useState('')
   const [listaArtistas, setListaArtistas] = useState<string[]>([])
@@ -83,7 +83,7 @@ export default function ComparativoPage() {
   
   const [loading, setLoading] = useState(false)
 
-  // Buscar lista de artistas Ãºnicos
+  // Buscar lista de artistas �nicos
   useEffect(() => {
     if (selectedBar && tipoComparacao === 'artistas') {
       buscarArtistas()
@@ -94,7 +94,7 @@ export default function ComparativoPage() {
     if (!selectedBar) return
     
     try {
-      console.log('ðŸŽ¤ Padronizando artistas...')
+      console.log('🎤 Padronizando artistas...')
       const response = await fetch('/api/padronizar-artistas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -103,10 +103,10 @@ export default function ComparativoPage() {
       
       const result = await response.json()
       if (result.success) {
-        console.log('âœ… Artistas padronizados:', result.message)
+        console.log('�� Artistas padronizados:', result.message)
       }
     } catch (error) {
-      console.log('âš ï¸ Erro na padronizaÃ§Ã£o (continuando):', error)
+      console.log('��️ Erro na padroniza��o (continuando):', error)
     }
   }
 
@@ -115,7 +115,7 @@ export default function ComparativoPage() {
       // Inicializar cliente Supabase
       const supabase = await getSupabaseClient();
       if (!supabase) {
-        console.error('âŒ Erro ao conectar com banco');
+        console.error('�� Erro ao conectar com banco');
         return;
       }
 
@@ -129,7 +129,7 @@ export default function ComparativoPage() {
       if (!error && data) {
         const artistasUnicos = [...new Set(data.map((item: any) => item.nome_artista))] as string[]
         setListaArtistas(artistasUnicos.sort())
-        console.log('ðŸŽ¤ Artistas encontrados:', artistasUnicos)
+        console.log('🎤 Artistas encontrados:', artistasUnicos)
       } else {
         console.error('Erro ao buscar artistas:', error)
       }
@@ -138,13 +138,13 @@ export default function ComparativoPage() {
     }
   }
 
-  // FunÃ§Ã£o para converter data sem problemas de timezone
+  // Fun��o para converter data sem problemas de timezone
   const parseDataSemTimezone = (dataString: string) => {
     const [ano, mes, dia] = dataString.split('-').map(Number)
     return new Date(ano, mes - 1, dia) // mes - 1 porque Date usa 0-11 para meses
   }
 
-  // FunÃ§Ã£o para buscar TODOS os registros com paginaÃ§Ã£o automÃ¡tica
+  // Fun��o para buscar TODOS os registros com pagina��o autom�tica
   const buscarTodosRegistros = async (query: any, chunkSize = 1000) => {
     let todosRegistros: any[] = []
     let offset = 0
@@ -155,7 +155,7 @@ export default function ComparativoPage() {
         .range(offset, offset + chunkSize - 1)
 
       if (error) {
-        console.error('Erro na paginaÃ§Ã£o:', error)
+        console.error('Erro na pagina��o:', error)
         break
       }
 
@@ -165,7 +165,7 @@ export default function ComparativoPage() {
       }
 
       todosRegistros = todosRegistros.concat(chunk)
-      console.log(`ðŸ“¦ Chunk ${Math.floor(offset/chunkSize) + 1}: ${chunk.length} registros (total: ${todosRegistros.length})`)
+      console.log(`📦 Chunk ${Math.floor(offset/chunkSize) + 1}: ${chunk.length} registros (total: ${todosRegistros.length})`)
       
       // Se retornou menos que o chunk size, chegamos ao fim
       if (chunk.length < chunkSize) {
@@ -182,7 +182,7 @@ export default function ComparativoPage() {
     // Inicializar cliente Supabase
     const supabase = await getSupabaseClient();
     if (!supabase) {
-      console.error('âŒ Erro ao conectar com banco');
+      console.error('�� Erro ao conectar com banco');
       return {
         data,
         faturamento: 0,
@@ -209,11 +209,11 @@ export default function ComparativoPage() {
     let offset = 0
 
     try {
-      // 1. DETECÃ‡ÃƒO INTELIGENTE DO SISTEMA USADO (Yuzer vs ContaHub)
-      console.log(`ðŸ” Detectando sistema usado para ${data}...`)
+      // 1. DETEC��O INTELIGENTE DO SISTEMA USADO (Yuzer vs ContaHub)
+      console.log(`🔍 Detectando sistema usado para ${data}...`)
       
-      // 1.1. Verificar TOTAL COMPLETO do Yuzer (com paginaÃ§Ã£o automÃ¡tica)
-      console.log(`ðŸ” Buscando TODOS os registros do Yuzer para ${data}...`)
+      // 1.1. Verificar TOTAL COMPLETO do Yuzer (com pagina��o autom�tica)
+      console.log(`🔍 Buscando TODOS os registros do Yuzer para ${data}...`)
       
       const queryYuzerTotal = supabase
         .from('yuzer_analitico')
@@ -222,7 +222,7 @@ export default function ComparativoPage() {
         .eq('data_pedido', data)
       
       const yuzerTotalData = await buscarTodosRegistros(queryYuzerTotal)
-      console.log(`ðŸ“¦ Total de registros Yuzer encontrados: ${yuzerTotalData.length}`)
+      console.log(`📦 Total de registros Yuzer encontrados: ${yuzerTotalData.length}`)
 
       const yuzerFaturamentoTotal = yuzerTotalData?.reduce((sum: number, item: any) => sum + (parseFloat(item.valor_total) || 0), 0) || 0
       const yuzerRegistrosTotal = yuzerTotalData?.length || 0
@@ -241,26 +241,26 @@ export default function ComparativoPage() {
       const isYuzerDay = yuzerRegistrosTotal > 0 && (yuzerFaturamentoTotal > contahubFaturamentoTotal)
       const isContaHubDay = contahubRegistrosTotal > 0 && !isYuzerDay
 
-      console.log(`ðŸ“Š DETECÃ‡ÃƒO DE SISTEMA para ${data}:`)
-      console.log(`   ðŸº Yuzer: ${yuzerRegistrosTotal} registros, R$ ${yuzerFaturamentoTotal.toFixed(2)} (TOTAL COMPLETO)`)
-      console.log(`   ðŸ’» ContaHub: ${contahubRegistrosTotal} registros, R$ ${contahubFaturamentoTotal.toFixed(2)} (TOTAL COMPLETO)`)
-      console.log(`   ðŸŽ¯ Sistema detectado: ${isYuzerDay ? 'YUZER' : isContaHubDay ? 'CONTAHUB' : 'HÃBRIDO'}`)
+      console.log(`📊 DETEC��O DE SISTEMA para ${data}:`)
+      console.log(`   🍺 Yuzer: ${yuzerRegistrosTotal} registros, R$ ${yuzerFaturamentoTotal.toFixed(2)} (TOTAL COMPLETO)`)
+      console.log(`   💻 ContaHub: ${contahubRegistrosTotal} registros, R$ ${contahubFaturamentoTotal.toFixed(2)} (TOTAL COMPLETO)`)
+      console.log(`   🎯 Sistema detectado: ${isYuzerDay ? 'YUZER' : isContaHubDay ? 'CONTAHUB' : 'H�BRIDO'}`)
 
       // 2. BUSCAR FATURAMENTO DA FONTE PRINCIPAL DETECTADA
       if (isYuzerDay) {
-        // DIA YUZER: Usar dados jÃ¡ buscados
-        console.log(`ðŸº DIA YUZER DETECTADO - Usando faturamento completo: R$ ${yuzerFaturamentoTotal.toFixed(2)}`)
+        // DIA YUZER: Usar dados j� buscados
+        console.log(`🍺 DIA YUZER DETECTADO - Usando faturamento completo: R$ ${yuzerFaturamentoTotal.toFixed(2)}`)
         faturamentoYuzer = yuzerFaturamentoTotal
 
         // Buscar dados complementares do ContaHub (se houver)
         if (contahubFaturamentoTotal > 0) {
-          console.log(`ðŸ’» Adicionando dados complementares do ContaHub: R$ ${contahubFaturamentoTotal.toFixed(2)}`)
+          console.log(`💻 Adicionando dados complementares do ContaHub: R$ ${contahubFaturamentoTotal.toFixed(2)}`)
           faturamentoContaHub = contahubFaturamentoTotal
         }
 
       } else {
-        // DIA CONTAHUB: Usar lÃ³gica original
-        console.log(`ðŸ’» Buscando faturamento do ContaHub/Pagamentos para ${data}...`)
+        // DIA CONTAHUB: Usar l�gica original
+        console.log(`💻 Buscando faturamento do ContaHub/Pagamentos para ${data}...`)
         
         // Buscar dados do Yuzer (pode ter alguns dados)
         const { data: yuzerEstatisticas } = await supabase
@@ -271,7 +271,7 @@ export default function ComparativoPage() {
 
         if (yuzerEstatisticas && yuzerEstatisticas.length > 0) {
           faturamentoYuzer = yuzerEstatisticas.reduce((sum: number, item: any) => sum + (parseFloat(item.total) || 0), 0)
-          console.log(`ðŸº Faturamento Yuzer (estatÃ­sticas): R$ ${faturamentoYuzer.toFixed(2)}`)
+          console.log(`🍺 Faturamento Yuzer (estat�sticas): R$ ${faturamentoYuzer.toFixed(2)}`)
         }
 
         // Buscar dados do ContaHub via pagamentos
@@ -299,7 +299,7 @@ export default function ComparativoPage() {
           faturamentoContaHub += chunkContaHub
           totalRegistrosFaturamento += fatData.length
           
-          console.log(`ðŸ’» Chunk processado: ${fatData.length} registros, Sympla: R$ ${chunkSympla.toFixed(2)}, ContaHub: R$ ${chunkContaHub.toFixed(2)}`)
+          console.log(`💻 Chunk processado: ${fatData.length} registros, Sympla: R$ ${chunkSympla.toFixed(2)}, ContaHub: R$ ${chunkContaHub.toFixed(2)}`)
           
           offset += CHUNK_SIZE
           if (fatData.length < CHUNK_SIZE) break
@@ -309,8 +309,8 @@ export default function ComparativoPage() {
       // FATURAMENTO TOTAL = Fonte principal + complementares
       faturamento = faturamentoYuzer + faturamentoContaHub + faturamentoSympla
       
-      // 2.1. FATURAMENTO PERÃODO (adicional da tabela periodo)
-      console.log(`ðŸ’° Buscando faturamento adicional na tabela 'periodo' para ${data}...`)
+      // 2.1. FATURAMENTO PER�ODO (adicional da tabela periodo)
+      console.log(`💰 Buscando faturamento adicional na tabela 'periodo' para ${data}...`)
       let faturamentoPeriodo = 0
       try {
         const { data: periodoData } = await supabase
@@ -320,24 +320,24 @@ export default function ComparativoPage() {
           .eq('dt_gerencial', data.replace(/-/g, ''))
 
         if (periodoData && periodoData.length > 0) {
-          // Filtrar apenas valores nÃ£o nulos no JavaScript
+          // Filtrar apenas valores n�o nulos no JavaScript
           const dadosValidos = periodoData.filter((item: any) => item.liquido_netto != null)
           if (dadosValidos.length > 0) {
             faturamentoPeriodo = dadosValidos.reduce((sum: number, item: any) => sum + (parseFloat(item.liquido_netto) || 0), 0)
-            console.log(`ðŸ’° Faturamento perÃ­odo encontrado: R$ ${faturamentoPeriodo.toFixed(2)} (${dadosValidos.length} registros)`)
+            console.log(`💰 Faturamento per�odo encontrado: R$ ${faturamentoPeriodo.toFixed(2)} (${dadosValidos.length} registros)`)
             faturamento += faturamentoPeriodo
           } else {
-            console.log(`ðŸ’° Nenhum faturamento perÃ­odo vÃ¡lido encontrado para ${data}`)
+            console.log(`💰 Nenhum faturamento per�odo v�lido encontrado para ${data}`)
           }
         } else {
-          console.log(`ðŸ’° Nenhum faturamento perÃ­odo encontrado para ${data}`)
+          console.log(`💰 Nenhum faturamento per�odo encontrado para ${data}`)
         }
       } catch (error) {
-        console.log(`âŒ Erro ao buscar faturamento perÃ­odo:`, error)
+        console.log(`�� Erro ao buscar faturamento per�odo:`, error)
       }
       
       // 2.2. FATURAMENTO BILHETERIA SYMPLA (adicional da tabela sympla_bilheteria)
-      console.log(`ðŸŽ« Buscando faturamento de bilheteria Sympla para ${data}...`)
+      console.log(`🎫 Buscando faturamento de bilheteria Sympla para ${data}...`)
       let faturamentoBilheteriaSympla = 0
       try {
         const { data: bilheteriaData } = await supabase
@@ -349,29 +349,29 @@ export default function ComparativoPage() {
 
         if (bilheteriaData && bilheteriaData.length > 0) {
           faturamentoBilheteriaSympla = bilheteriaData.reduce((sum: number, item: any) => sum + (parseFloat(item.total_liquido) || 0), 0)
-          console.log(`ðŸŽ« Faturamento bilheteria Sympla encontrado: R$ ${faturamentoBilheteriaSympla.toFixed(2)} (${bilheteriaData.length} registros)`)
+          console.log(`🎫 Faturamento bilheteria Sympla encontrado: R$ ${faturamentoBilheteriaSympla.toFixed(2)} (${bilheteriaData.length} registros)`)
           faturamento += faturamentoBilheteriaSympla
           faturamentoSympla += faturamentoBilheteriaSympla // Adicionar ao total Sympla
         } else {
-          console.log(`ðŸŽ« Nenhum faturamento de bilheteria Sympla encontrado para ${data}`)
+          console.log(`🎫 Nenhum faturamento de bilheteria Sympla encontrado para ${data}`)
         }
       } catch (error) {
-        console.log(`âŒ Erro ao buscar faturamento bilheteria Sympla:`, error)
+        console.log(`�� Erro ao buscar faturamento bilheteria Sympla:`, error)
       }
       
-      console.log(`ðŸ’° FATURAMENTO TOTAL FINAL: R$ ${faturamento.toFixed(2)} (Yuzer: R$ ${faturamentoYuzer.toFixed(2)} + ContaHub: R$ ${faturamentoContaHub.toFixed(2)} + Sympla: R$ ${faturamentoSympla.toFixed(2)} + PerÃ­odo: R$ ${faturamentoPeriodo.toFixed(2)} + Bilheteria: R$ ${faturamentoBilheteriaSympla.toFixed(2)})`)
+      console.log(`💰 FATURAMENTO TOTAL FINAL: R$ ${faturamento.toFixed(2)} (Yuzer: R$ ${faturamentoYuzer.toFixed(2)} + ContaHub: R$ ${faturamentoContaHub.toFixed(2)} + Sympla: R$ ${faturamentoSympla.toFixed(2)} + Per�odo: R$ ${faturamentoPeriodo.toFixed(2)} + Bilheteria: R$ ${faturamentoBilheteriaSympla.toFixed(2)})`)
       
       if (faturamento === 0) {
-        console.log(`âš ï¸ ATENÃ‡ÃƒO: Nenhum faturamento encontrado para ${data}. Pode ser uma data futura sem dados reais.`)
+        console.log(`��️ ATEN��O: Nenhum faturamento encontrado para ${data}. Pode ser uma data futura sem dados reais.`)
       }
 
-      // 3. CLIENTES (LÃ“GICA INTELIGENTE BASEADA NO SISTEMA DETECTADO)
+      // 3. CLIENTES (L�GICA INTELIGENTE BASEADA NO SISTEMA DETECTADO)
       let clientes = 0
       let clientesSource = 'N/A'
       
       if (isYuzerDay) {
         // DIA YUZER: Priorizar check-ins Sympla (clientes reais)
-        console.log(`ðŸ‘¥ DIA YUZER - Buscando check-ins Sympla para ${data}...`)
+        console.log(`👥 DIA YUZER - Buscando check-ins Sympla para ${data}...`)
         try {
           const { data: symplaData } = await supabase
             .from('cliente_visitas')
@@ -383,11 +383,11 @@ export default function ComparativoPage() {
           if (symplaData && symplaData.length > 0) {
             clientes = symplaData.length
             clientesSource = 'sympla_checkins_yuzer'
-            console.log(`ðŸŽ« Check-ins Sympla encontrados para dia Yuzer: ${clientes}`)
+            console.log(`🎫 Check-ins Sympla encontrados para dia Yuzer: ${clientes}`)
           } else {
-            console.log(`ðŸŽ« Nenhum check-in Sympla encontrado para dia Yuzer ${data}`)
-            // Fallback para pessoas_diario_corrigido se nÃ£o houver Sympla
-            console.log(`ðŸ‘¥ Fallback: Buscando clientes na tabela 'pessoas_diario_corrigido' para ${data}...`)
+            console.log(`🎫 Nenhum check-in Sympla encontrado para dia Yuzer ${data}`)
+            // Fallback para pessoas_diario_corrigido se n�o houver Sympla
+            console.log(`👥 Fallback: Buscando clientes na tabela 'pessoas_diario_corrigido' para ${data}...`)
             try {
               const { data: pessoasData } = await supabase
                 .from('pessoas_diario_corrigido')
@@ -400,15 +400,15 @@ export default function ComparativoPage() {
                 clientesSource = 'pessoas_diario_fallback_yuzer'
               }
             } catch (error) {
-              console.log(`âŒ Erro ao buscar fallback pessoas_diario_corrigido:`, error)
+              console.log(`�� Erro ao buscar fallback pessoas_diario_corrigido:`, error)
             }
           }
         } catch (error) {
-          console.log(`âŒ Erro ao buscar check-ins Sympla para dia Yuzer:`, error)
+          console.log(`�� Erro ao buscar check-ins Sympla para dia Yuzer:`, error)
         }
       } else {
-        // DIA CONTAHUB: Usar lÃ³gica original (pessoas_diario_corrigido + Sympla como complemento)
-        console.log(`ðŸ‘¥ DIA CONTAHUB - Buscando clientes na tabela 'pessoas_diario_corrigido' para ${data}...`)
+        // DIA CONTAHUB: Usar l�gica original (pessoas_diario_corrigido + Sympla como complemento)
+        console.log(`👥 DIA CONTAHUB - Buscando clientes na tabela 'pessoas_diario_corrigido' para ${data}...`)
         try {
           const { data: pessoasData, error: pessoasError } = await supabase
             .from('pessoas_diario_corrigido')
@@ -420,14 +420,14 @@ export default function ComparativoPage() {
             clientes = pessoasData.total_pessoas_bruto || 0
             clientesSource = 'pessoas_diario_corrigido'
           } else {
-            console.log(`âš ï¸ Nenhum dado de clientes encontrado na tabela pessoas_diario_corrigido para ${data}`)
+            console.log(`��️ Nenhum dado de clientes encontrado na tabela pessoas_diario_corrigido para ${data}`)
           }
         } catch (error) {
-          console.log(`âŒ Erro ao buscar clientes pessoas_diario_corrigido:`, error)
+          console.log(`�� Erro ao buscar clientes pessoas_diario_corrigido:`, error)
         }
 
-        // Buscar Sympla como complemento/comparaÃ§Ã£o
-        console.log(`ðŸŽ« Buscando check-ins Sympla para ${data}...`)
+        // Buscar Sympla como complemento/compara��o
+        console.log(`🎫 Buscando check-ins Sympla para ${data}...`)
         let clientesSympla = 0
         try {
           const { data: symplaData } = await supabase
@@ -439,28 +439,28 @@ export default function ComparativoPage() {
 
           if (symplaData && symplaData.length > 0) {
             clientesSympla = symplaData.length
-            console.log(`ðŸŽ« Check-ins Sympla encontrados: ${clientesSympla}`)
+            console.log(`🎫 Check-ins Sympla encontrados: ${clientesSympla}`)
             
-            // Se nÃ£o tinha dados de pessoas_diario_corrigido, usar Sympla
+            // Se n�o tinha dados de pessoas_diario_corrigido, usar Sympla
             if (clientes === 0) {
               clientes = clientesSympla
               clientesSource = 'sympla_checkins'
             } else {
               // Se tinha dados de pessoas_diario_corrigido, comparar e usar o maior
               if (clientesSympla > clientes) {
-                console.log(`ðŸ“Š Sympla tem mais clientes (${clientesSympla}) que pessoas_diario_corrigido (${clientes}), usando Sympla`)
+                console.log(`📊 Sympla tem mais clientes (${clientesSympla}) que pessoas_diario_corrigido (${clientes}), usando Sympla`)
                 clientes = clientesSympla
                 clientesSource = 'sympla_checkins_maior'
               } else {
-                console.log(`ðŸ“Š Mantendo pessoas_diario_corrigido (${clientes}) maior que Sympla (${clientesSympla})`)
+                console.log(`📊 Mantendo pessoas_diario_corrigido (${clientes}) maior que Sympla (${clientesSympla})`)
                 clientesSource = 'pessoas_diario_corrigido_maior'
               }
             }
           } else {
-            console.log(`ðŸŽ« Nenhum check-in Sympla encontrado para ${data}`)
+            console.log(`🎫 Nenhum check-in Sympla encontrado para ${data}`)
           }
         } catch (error) {
-          console.log(`âŒ Erro ao buscar check-ins Sympla:`, error)
+          console.log(`�� Erro ao buscar check-ins Sympla:`, error)
         }
       }
 
@@ -470,37 +470,37 @@ export default function ComparativoPage() {
         clientesSource = 'sem_dados'
       }
 
-      console.log(`ðŸ‘¥ Total clientes FINAL (${clientesSource}): ${clientes}`)
+      console.log(`👥 Total clientes FINAL (${clientesSource}): ${clientes}`)
 
-      // DEBUG: Verificar se hÃ¡ problema com datas futuras
+      // DEBUG: Verificar se h� problema com datas futuras
       const hoje = new Date().toISOString().split('T')[0]
       const isDataFutura = data > hoje
       if (isDataFutura) {
-        console.log(`âš ï¸ ATENÃ‡ÃƒO: ${data} Ã© uma data futura (hoje: ${hoje})`)
+        console.log(`��️ ATEN��O: ${data} � uma data futura (hoje: ${hoje})`)
       }
 
       // DEBUG: Resumo final dos dados encontrados
-      console.log(`ðŸ“Š RESUMO FINAL para ${data}:`)
-      console.log(`   ðŸ’° Faturamento total: R$ ${faturamento.toFixed(2)}`)
-      console.log(`   ðŸ‘¥ Clientes total: ${clientes}`)
-      console.log(`   ðŸ“… Ã‰ data futura? ${isDataFutura ? 'SIM' : 'NÃƒO'}`)
-      console.log(`   âœ… Dados vÃ¡lidos? ${(faturamento > 0 || clientes > 0) ? 'SIM' : 'NÃƒO'}`)
+      console.log(`📊 RESUMO FINAL para ${data}:`)
+      console.log(`   💰 Faturamento total: R$ ${faturamento.toFixed(2)}`)
+      console.log(`   👥 Clientes total: ${clientes}`)
+      console.log(`   📅 � data futura? ${isDataFutura ? 'SIM' : 'N�O'}`)
+      console.log(`   �� Dados v�lidos? ${(faturamento > 0 || clientes > 0) ? 'SIM' : 'N�O'}`)
 
       // 4. RESERVAS GETIN
       let reservas = 0
       if (data && data.length === 10) {
         try {
-          console.log(`ðŸ“… Buscando reservas GetIn para ${data}...`)
+          console.log(`📅 Buscando reservas GetIn para ${data}...`)
           const response = await fetch(`/api/dashboard/reservas-getin?data=${data}&tipo=dia`)
           if (response.ok) {
             const reservaData = await response.json()
             if (reservaData.success) {
               reservas = reservaData.data.estatisticas.total_reservas || 0
-              console.log(`ðŸ“… Total reservas: ${reservas}`)
+              console.log(`📅 Total reservas: ${reservas}`)
             }
           }
         } catch (error) {
-          console.log(`âŒ Erro na API de reservas:`, error)
+          console.log(`�� Erro na API de reservas:`, error)
         }
       }
 
@@ -508,11 +508,11 @@ export default function ComparativoPage() {
       let tempoMedioCozinha = 0
       let tempoMedioBar = 0
       
-      console.log(`â±ï¸ Buscando tempos para ${data}...`)
-      // CORREÃ‡ÃƒO: Evitar problemas de timezone usando split ao invÃ©s de new Date()
+      console.log(`��️ Buscando tempos para ${data}...`)
+      // CORRE��O: Evitar problemas de timezone usando split ao inv�s de new Date()
       const [ano, mes, dia] = data.split('-').map(Number)
 
-      console.log(`â±ï¸ Buscando tempo para ano=${ano}, mes=${mes}, dia=${dia}`)
+      console.log(`��️ Buscando tempo para ano=${ano}, mes=${mes}, dia=${dia}`)
 
       const { data: tempoData } = await supabase
         .from('tempo')
@@ -524,7 +524,7 @@ export default function ComparativoPage() {
         .not('t1_t2', 'is', null)
 
       if (tempoData && tempoData.length > 0) {
-        console.log(`â±ï¸ Dados de tempo encontrados: ${tempoData.length} registros`)
+        console.log(`��️ Dados de tempo encontrados: ${tempoData.length} registros`)
         
         // Filtrar dados de bar/bebidas
         const temposBar = tempoData.filter((item: any) => {
@@ -564,19 +564,19 @@ export default function ComparativoPage() {
           ? temposCozinha.reduce((sum: number, item: any) => sum + parseFloat(item.t1_t2), 0) / temposCozinha.length 
           : 0
         
-        console.log(`â±ï¸ Tempo mÃ©dio cozinha: ${tempoMedioCozinha.toFixed(1)}min (${temposCozinha.length} registros)`)
-        console.log(`â±ï¸ Tempo mÃ©dio bar: ${tempoMedioBar.toFixed(1)}min (${temposBar.length} registros)`)
+        console.log(`��️ Tempo m�dio cozinha: ${tempoMedioCozinha.toFixed(1)}min (${temposCozinha.length} registros)`)
+        console.log(`��️ Tempo m�dio bar: ${tempoMedioBar.toFixed(1)}min (${temposBar.length} registros)`)
         
         if (temposCozinha.length === 0 && temposBar.length === 0) {
-          console.log(`âš ï¸ Nenhum tempo vÃ¡lido encontrado nos ${tempoData.length} registros para ${data}`)
-          console.log(`ðŸ“‹ Grupos encontrados: ${[...new Set(tempoData.map((t: any) => t.grp_desc))].slice(0,5).join(', ')}`)
+          console.log(`��️ Nenhum tempo v�lido encontrado nos ${tempoData.length} registros para ${data}`)
+          console.log(`📋 Grupos encontrados: ${[...new Set(tempoData.map((t: any) => t.grp_desc))].slice(0,5).join(', ')}`)
         }
       } else {
-        console.log(`â±ï¸ Nenhum dado de tempo encontrado para ${data}`)
+        console.log(`��️ Nenhum dado de tempo encontrado para ${data}`)
       }
 
       // 6. FATURAMENTO E CLIENTES POR HORA (INTELIGENTE)
-      console.log(`â° Buscando faturamento e clientes por hora para ${data}...`)
+      console.log(`�� Buscando faturamento e clientes por hora para ${data}...`)
       
       let faturamento_horas: Array<{
         hora: string
@@ -587,8 +587,8 @@ export default function ComparativoPage() {
       }> = []
 
       if (isYuzerDay) {
-        // DIA YUZER: Buscar dados por hora do yuzer_analitico (com paginaÃ§Ã£o automÃ¡tica)
-        console.log(`ðŸº Buscando TODOS os dados por hora do Yuzer para ${data}...`)
+        // DIA YUZER: Buscar dados por hora do yuzer_analitico (com pagina��o autom�tica)
+        console.log(`🍺 Buscando TODOS os dados por hora do Yuzer para ${data}...`)
         
         const queryYuzerHora = supabase
           .from('yuzer_analitico')
@@ -598,18 +598,18 @@ export default function ComparativoPage() {
           .not('data_hora_pedido', 'is', null)
         
         const yuzerHoraData = await buscarTodosRegistros(queryYuzerHora)
-        console.log(`ðŸ“¦ Total de registros por hora encontrados: ${yuzerHoraData.length}`)
+        console.log(`📦 Total de registros por hora encontrados: ${yuzerHoraData.length}`)
 
         if (yuzerHoraData && yuzerHoraData.length > 0) {
           // Para dias Yuzer, distribuir check-ins Sympla proporcionalmente ao faturamento por hora
-          console.log(`ðŸŽ« Distribuindo ${clientes} check-ins Sympla proporcionalmente ao faturamento Yuzer por hora...`)
+          console.log(`🎫 Distribuindo ${clientes} check-ins Sympla proporcionalmente ao faturamento Yuzer por hora...`)
 
           // Agrupar faturamento por hora
           const dadosPorHora: {[hora: string]: {faturamento: number, pedidos: Set<string>}} = {}
           
           yuzerHoraData.forEach((item: any) => {
             if (item.data_hora_pedido) {
-              // CORREÃ‡ÃƒO: Extrair hora diretamente da string para evitar problemas de timezone
+              // CORRE��O: Extrair hora diretamente da string para evitar problemas de timezone
               const horaString = item.data_hora_pedido.split('T')[1] || '00:00:00'
               const hora = horaString.split(':')[0].padStart(2, '0') + ':00'
               
@@ -624,7 +624,7 @@ export default function ComparativoPage() {
             }
           })
 
-          // Calcular faturamento total para proporÃ§Ã£o
+          // Calcular faturamento total para propor��o
           const faturamentoTotal = Object.values(dadosPorHora).reduce((sum, dados) => sum + dados.faturamento, 0)
           
           // Distribuir clientes proporcionalmente ao faturamento
@@ -638,7 +638,7 @@ export default function ComparativoPage() {
             clientesDistribuidos += clientesHora
           })
           
-          // Ajustar diferenÃ§a de arredondamento
+          // Ajustar diferen�a de arredondamento
           const diferenca = clientes - clientesDistribuidos
           if (diferenca !== 0) {
             const horaComMaiorFaturamento = Object.keys(dadosPorHora).reduce((max, hora) => 
@@ -647,7 +647,7 @@ export default function ComparativoPage() {
             clientesPorHora[horaComMaiorFaturamento] += diferenca
           }
           
-          console.log(`ðŸŽ« Clientes distribuÃ­dos por hora:`, clientesPorHora)
+          console.log(`🎫 Clientes distribu�dos por hora:`, clientesPorHora)
 
           // Converter para array ordenado
           const horasOrdenadas = Object.keys(dadosPorHora).sort()
@@ -657,7 +657,7 @@ export default function ComparativoPage() {
           faturamento_horas = horasOrdenadas.map((hora: any) => {
             const dados = dadosPorHora[hora]
             const faturamento = dados.faturamento
-            // CORREÃ‡ÃƒO: Para dias Yuzer, usar clientes distribuÃ­dos proporcionalmente
+            // CORRE��O: Para dias Yuzer, usar clientes distribu�dos proporcionalmente
             const vendas = clientesPorHora[hora] || 0
             
             faturamentoAcumulado += faturamento
@@ -672,14 +672,14 @@ export default function ComparativoPage() {
             }
           })
 
-          console.log(`ðŸº Yuzer - Dados por hora: ${faturamento_horas.length} horÃ¡rios`)
-          console.log(`ðŸ“Š Faturamento acumulado: R$ ${faturamentoAcumulado.toFixed(2)}`)
-          console.log(`ðŸ‘¥ Clientes acumulados: ${clientesAcumulados}`)
+          console.log(`🍺 Yuzer - Dados por hora: ${faturamento_horas.length} hor�rios`)
+          console.log(`📊 Faturamento acumulado: R$ ${faturamentoAcumulado.toFixed(2)}`)
+          console.log(`👥 Clientes acumulados: ${clientesAcumulados}`)
         }
 
       } else {
-        // DIA CONTAHUB: Usar lÃ³gica original (fatporhora + analitico)
-        console.log(`ðŸ’» Buscando dados por hora do ContaHub para ${data}...`)
+        // DIA CONTAHUB: Usar l�gica original (fatporhora + analitico)
+        console.log(`💻 Buscando dados por hora do ContaHub para ${data}...`)
         
         const { data: fatHoraData, error: fatHoraError } = await supabase
           .from('fatporhora')
@@ -693,8 +693,8 @@ export default function ComparativoPage() {
           console.error('Erro ao buscar faturamento por hora:', fatHoraError)
         }
 
-        // BUSCAR CLIENTES POR HORA DA TABELA ANALITICO (com paginaÃ§Ã£o automÃ¡tica)
-        console.log(`ðŸ‘¥ Buscando clientes por hora da tabela analitico para ${data}...`)
+        // BUSCAR CLIENTES POR HORA DA TABELA ANALITICO (com pagina��o autom�tica)
+        console.log(`👥 Buscando clientes por hora da tabela analitico para ${data}...`)
         
         const queryClientesHora = supabase
           .from('analitico')
@@ -704,17 +704,17 @@ export default function ComparativoPage() {
           .not('vd', 'is', null)
         
         const clientesHoraData = await buscarTodosRegistros(queryClientesHora)
-        console.log(`ðŸ‘¥ Total de registros de clientes encontrados: ${clientesHoraData.length}`)
+        console.log(`👥 Total de registros de clientes encontrados: ${clientesHoraData.length}`)
 
         let clientesPorHora: {[hora: string]: number} = {}
         
         if (clientesHoraData && clientesHoraData.length > 0) {
-          // Agrupar clientes Ãºnicos por hora
+          // Agrupar clientes �nicos por hora
           const clientesUnicos = new Map()
           
           clientesHoraData.forEach((item: any) => {
             if (item.created_at && item.vd) {
-              // CORREÃ‡ÃƒO: Extrair hora diretamente da string para evitar problemas de timezone
+              // CORRE��O: Extrair hora diretamente da string para evitar problemas de timezone
               const horaString = item.created_at.split('T')[1] || '00:00:00'
               const hora = horaString.split(':')[0].padStart(2, '0') + ':00'
               const clienteId = item.vd
@@ -731,9 +731,9 @@ export default function ComparativoPage() {
             clientesPorHora[hora] = clientes.size
           })
           
-          console.log(`ðŸ‘¥ Clientes por hora encontrados:`, clientesPorHora)
+          console.log(`👥 Clientes por hora encontrados:`, clientesPorHora)
         } else {
-          console.log(`ðŸ‘¥ Nenhum dado de clientes por hora encontrado na tabela analitico para ${data}`)
+          console.log(`👥 Nenhum dado de clientes por hora encontrado na tabela analitico para ${data}`)
         }
 
         // Processar faturamento por hora com valores acumulados
@@ -743,7 +743,7 @@ export default function ComparativoPage() {
             .map((f: any) => {
               const hora = f.hora
               const faturamento = parseFloat(f.valor) || 0
-              // CORREÃ‡ÃƒO: Usar qtd da fatporhora ou clientes da analitico
+              // CORRE��O: Usar qtd da fatporhora ou clientes da analitico
               const vendas = clientesPorHora[hora] || parseInt(f.qtd) || 0
               
               return {
@@ -769,23 +769,23 @@ export default function ComparativoPage() {
             }
           })
 
-          console.log(`ðŸ’» ContaHub - Dados por hora: ${faturamento_horas.length} horÃ¡rios`)
-          console.log(`ðŸ“Š Faturamento acumulado: R$ ${faturamentoAcumulado.toFixed(2)}`)
-          console.log(`ðŸ‘¥ Clientes acumulados: ${clientesAcumulados}`)
+          console.log(`💻 ContaHub - Dados por hora: ${faturamento_horas.length} hor�rios`)
+          console.log(`📊 Faturamento acumulado: R$ ${faturamentoAcumulado.toFixed(2)}`)
+          console.log(`👥 Clientes acumulados: ${clientesAcumulados}`)
         }
       }
 
-      // Debug dos primeiros horÃ¡rios
+      // Debug dos primeiros hor�rios
       if (faturamento_horas.length > 0) {
-        console.log(`â° Primeiros horÃ¡rios:`)
+        console.log(`�� Primeiros hor�rios:`)
         faturamento_horas.slice(0, 3).forEach((h: any) => {
           console.log(`   ${h.hora}: R$ ${h.faturamento.toFixed(2)} | ${h.vendas} clientes | Acum: R$ ${h.faturamento_acumulado?.toFixed(2)} | ${h.clientes_acumulados} clientes`)
         })
       } else {
-        console.log(`â° Nenhum dado de faturamento por hora encontrado para ${data}`)
+        console.log(`�� Nenhum dado de faturamento por hora encontrado para ${data}`)
       }
 
-      // 7. TICKET MÃ‰DIO
+      // 7. TICKET M�DIO
       const ticketMedio = clientes > 0 ? faturamento / clientes : 0
 
       const resultado = {
@@ -804,11 +804,11 @@ export default function ComparativoPage() {
         faturamento_horas
       }
 
-      console.log(`ðŸ“Š Dados finais para ${data}:`, resultado)
+      console.log(`📊 Dados finais para ${data}:`, resultado)
       return resultado
 
     } catch (error) {
-      console.error(`âŒ Erro ao buscar dados para ${data}:`, error)
+      console.error(`�� Erro ao buscar dados para ${data}:`, error)
       return {
         data,
         faturamento: 0,
@@ -829,16 +829,16 @@ export default function ComparativoPage() {
 
   const buscarComparacaoDatas = async () => {
     if (!selectedBar || !data1 || !data2) {
-      alert('Por favor, selecione um bar e duas datas para comparaÃ§Ã£o!')
+      alert('Por favor, selecione um bar e duas datas para compara��o!')
       return
     }
 
     setLoading(true)
     try {
-      // Padronizar artistas antes da comparaÃ§Ã£o
+      // Padronizar artistas antes da compara��o
       await padronizarArtistas()
       
-      console.log('ðŸ“Š Comparando datas:', data1, 'vs', data2)
+      console.log('📊 Comparando datas:', data1, 'vs', data2)
 
       // Buscar dados das duas datas em paralelo
       const [dados1, dados2] = await Promise.all([
@@ -848,7 +848,7 @@ export default function ComparativoPage() {
 
       setDadosComparativos([dados1, dados2])
 
-      // Buscar anÃ¡lise de recorrÃªncia de clientes
+      // Buscar an�lise de recorr�ncia de clientes
       try {
         const response = await fetch(
           `/api/dashboard/recorrencia-clientes?bar_id=${selectedBar.id}&data1=${data1}&data2=${data2}&artista1=${(dados1 as any).artista || 'N/A'}&artista2=${(dados2 as any).artista || 'N/A'}`
@@ -858,12 +858,12 @@ export default function ComparativoPage() {
           setRecorrenciaClientes(result.data)
         }
       } catch (error) {
-        console.log('Erro ao buscar recorrÃªncia:', error)
+        console.log('Erro ao buscar recorr�ncia:', error)
         setRecorrenciaClientes(null)
       }
       
     } catch (error) {
-      console.error('âŒ Erro ao buscar comparaÃ§Ã£o de datas:', error)
+      console.error('�� Erro ao buscar compara��o de datas:', error)
       setDadosComparativos([])
       setRecorrenciaClientes(null)
     } finally {
@@ -879,7 +879,7 @@ export default function ComparativoPage() {
 
     setLoading(true)
     try {
-      console.log('ðŸŽ¤ Comparando artistas:', artistaSelecionado1, 'vs', artistaSelecionado2)
+      console.log('🎤 Comparando artistas:', artistaSelecionado1, 'vs', artistaSelecionado2)
 
       const statsArtistas = await Promise.all([
         buscarStatsArtista(artistaSelecionado1),
@@ -892,7 +892,7 @@ export default function ComparativoPage() {
       })
       
     } catch (error) {
-      console.error('âŒ Erro ao buscar comparaÃ§Ã£o de artistas:', error)
+      console.error('�� Erro ao buscar compara��o de artistas:', error)
       setDadosArtistas({ artista1: null, artista2: null })
     } finally {
       setLoading(false)
@@ -901,17 +901,17 @@ export default function ComparativoPage() {
 
   const buscarStatsArtista = async (nomeArtista: string): Promise<ArtistaStats | null> => {
     try {
-      console.log(`ðŸŽ¤ Buscando stats para artista: ${nomeArtista}`)
+      console.log(`🎤 Buscando stats para artista: ${nomeArtista}`)
 
       // Inicializar cliente Supabase
       const supabase = await getSupabaseClient();
       if (!supabase) {
-        console.error('âŒ Erro ao conectar com banco');
+        console.error('�� Erro ao conectar com banco');
         return null;
       }
 
       // Buscar eventos do artista
-      console.log(`ðŸ” Buscando TODOS os eventos para ${nomeArtista} no bar ${selectedBar?.id}...`)
+      console.log(`🔍 Buscando TODOS os eventos para ${nomeArtista} no bar ${selectedBar?.id}...`)
       const { data: eventos } = await supabase
         .from('eventos')
         .select('data_evento')
@@ -920,48 +920,48 @@ export default function ComparativoPage() {
         .order('data_evento', { ascending: false })
 
       if (!eventos || eventos.length === 0) {
-        console.log(`âŒ Nenhum evento encontrado para ${nomeArtista}`)
+        console.log(`�� Nenhum evento encontrado para ${nomeArtista}`)
         return null
       }
 
-      console.log(`ðŸ“… TOTAL de eventos encontrados para ${nomeArtista}: ${eventos.length}`)
-      console.log(`ðŸ“… Eventos completos:`, eventos)
+      console.log(`📅 TOTAL de eventos encontrados para ${nomeArtista}: ${eventos.length}`)
+      console.log(`📅 Eventos completos:`, eventos)
       const datasEventos = eventos.map((e: any) => e.data_evento)
-      console.log(`ðŸ“† TODAS as datas dos eventos (${datasEventos.length}): ${datasEventos.join(', ')}`)
+      console.log(`📆 TODAS as datas dos eventos (${datasEventos.length}): ${datasEventos.join(', ')}`)
 
       // Buscar dados de todas as datas
       const dadosEventos = await Promise.all(
         datasEventos.map((data: any) => buscarDadosData(data))
       )
 
-      console.log(`ðŸ“ˆ Todos os dados dos eventos:`, dadosEventos)
+      console.log(`📈 Todos os dados dos eventos:`, dadosEventos)
 
-      // Filtrar apenas dados vÃ¡lidos (com faturamento > 0 ou clientes > 0)
+      // Filtrar apenas dados v�lidos (com faturamento > 0 ou clientes > 0)
       const dadosValidos = dadosEventos.filter((d: any) => d.faturamento > 0 || d.clientes > 0)
-      console.log(`âœ… Dados vÃ¡lidos (faturamento > 0 ou clientes > 0): ${dadosValidos.length}`)
+      console.log(`�� Dados v�lidos (faturamento > 0 ou clientes > 0): ${dadosValidos.length}`)
 
       // LOGS DETALHADOS para debug
-      console.log(`ðŸ” ANÃLISE DETALHADA DOS EVENTOS DE ${nomeArtista}:`)
+      console.log(`🔍 AN�LISE DETALHADA DOS EVENTOS DE ${nomeArtista}:`)
       dadosEventos.forEach((dados, index) => {
         const isValido = dados.faturamento > 0 || dados.clientes > 0
-        console.log(`ðŸ“… ${dados.data}: Faturamento R$ ${dados.faturamento.toFixed(2)}, Clientes: ${dados.clientes}, VÃ¡lido: ${isValido ? 'âœ…' : 'âŒ'}`)
+        console.log(`📅 ${dados.data}: Faturamento R$ ${dados.faturamento.toFixed(2)}, Clientes: ${dados.clientes}, V�lido: ${isValido ? '��' : '��'}`)
         if (!isValido) {
-          console.log(`   âš ï¸ Evento sem dados: pode ser data futura ou problema na busca`)
+          console.log(`   ��️ Evento sem dados: pode ser data futura ou problema na busca`)
         }
       })
 
       if (dadosValidos.length < datasEventos.length) {
         const datasSemDados = datasEventos.filter((d: any) => d.faturamento === 0 && d.clientes === 0).map((d: any) => d.data)
-        console.log(`âš ï¸ ATENÃ‡ÃƒO: ${datasSemDados.length} datas sem dados vÃ¡lidos: ${datasSemDados.join(', ')}`)
-        console.log(`ðŸ’¡ Provavelmente sÃ£o datas futuras ainda sem movimentaÃ§Ã£o real`)
+        console.log(`��️ ATEN��O: ${datasSemDados.length} datas sem dados v�lidos: ${datasSemDados.join(', ')}`)
+        console.log(`💡 Provavelmente s�o datas futuras ainda sem movimenta��o real`)
       }
 
       if (dadosValidos.length === 0) {
-        console.log(`âŒ Nenhum dado vÃ¡lido encontrado para ${nomeArtista}`)
+        console.log(`�� Nenhum dado v�lido encontrado para ${nomeArtista}`)
         return null
       }
 
-      // Calcular mÃ©tricas bÃ¡sicas
+      // Calcular m�tricas b�sicas
       const totalFaturamento = dadosValidos.reduce((sum, d) => sum + d.faturamento, 0)
       const totalFaturamentoYuzer = dadosValidos.reduce((sum, d) => sum + d.faturamentoYuzer, 0)
       const totalFaturamentoContaHub = dadosValidos.reduce((sum, d) => sum + d.faturamentoContaHub, 0)
@@ -969,15 +969,15 @@ export default function ComparativoPage() {
       const totalClientes = dadosValidos.reduce((sum, d) => sum + d.clientes, 0)
       const totalReservas = dadosValidos.reduce((sum, d) => sum + d.reservas, 0)
       
-      console.log(`ðŸ§® CÃLCULOS PARA ${nomeArtista}:`)
-      console.log(`ðŸ“Š Total de eventos vÃ¡lidos: ${dadosValidos.length}`)
-      console.log(`ðŸ’° Total faturamento: R$ ${totalFaturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
-      console.log(`ðŸ» Total Yuzer: R$ ${totalFaturamentoYuzer.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
-      console.log(`ðŸŽ« Total ContaHub: R$ ${totalFaturamentoContaHub.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
-      console.log(`ðŸŽŸï¸ Total Sympla: R$ ${totalFaturamentoSympla.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
-      console.log(`ðŸ”„ Faturamento mÃ©dio serÃ¡: R$ ${(totalFaturamento / dadosValidos.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
+      console.log(`🧮 C�LCULOS PARA ${nomeArtista}:`)
+      console.log(`📊 Total de eventos v�lidos: ${dadosValidos.length}`)
+      console.log(`💰 Total faturamento: R$ ${totalFaturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
+      console.log(`🍻 Total Yuzer: R$ ${totalFaturamentoYuzer.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
+      console.log(`🎫 Total ContaHub: R$ ${totalFaturamentoContaHub.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
+      console.log(`🎟️ Total Sympla: R$ ${totalFaturamentoSympla.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
+      console.log(`🔄 Faturamento m�dio ser�: R$ ${(totalFaturamento / dadosValidos.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
 
-      // Calcular tempos mÃ©dios (apenas onde hÃ¡ dados)
+      // Calcular tempos m�dios (apenas onde h� dados)
       const dadosComTempoCozinha = dadosValidos.filter((d: any) => d.tempoCozinha > 0)
       const dadosComTempoBar = dadosValidos.filter((d: any) => d.tempoBar > 0)
       
@@ -989,17 +989,17 @@ export default function ComparativoPage() {
         ? dadosComTempoBar.reduce((sum, d) => sum + d.tempoBar, 0) / dadosComTempoBar.length 
         : 0
 
-      // Buscar recorrÃªncia mÃ©dia do artista
+      // Buscar recorr�ncia m�dia do artista
       const recorrenciaMedia = await buscarRecorrenciaPorArtista(nomeArtista)
 
-      // Calcular eficiÃªncia de atendimento (baseado nos tempos)
+      // Calcular efici�ncia de atendimento (baseado nos tempos)
       let eficienciaAtendimento = 0
       if (tempoMedioBar > 0) {
-        // Quanto menor o tempo, maior a eficiÃªncia (escala 0-100)
+        // Quanto menor o tempo, maior a efici�ncia (escala 0-100)
         eficienciaAtendimento = Math.max(0, Math.min(100, 100 - (tempoMedioBar * 5)))
       }
 
-      // Calcular crescimento de clientes (comparar primeiro vs Ãºltimo evento)
+      // Calcular crescimento de clientes (comparar primeiro vs �ltimo evento)
       let crescimentoClientes = 0
       if (dadosValidos.length >= 2) {
         const primeiroEvento = dadosValidos[dadosValidos.length - 1] // mais antigo
@@ -1009,7 +1009,7 @@ export default function ComparativoPage() {
         }
       }
 
-      // FidelizaÃ§Ã£o = recorrÃªncia + crescimento (mÃ©trica combinada)
+      // Fideliza��o = recorr�ncia + crescimento (m�trica combinada)
       const fidelizacaoClientes = (recorrenciaMedia * 0.7) + (Math.max(0, crescimentoClientes) * 0.3)
 
       const resultado: ArtistaStats = {
@@ -1021,14 +1021,14 @@ export default function ComparativoPage() {
         faturamentoSymplaTotal: totalFaturamentoSympla,
         clientesTotal: totalClientes,
         reservasTotal: totalReservas,
-        // MÃ‰DIAS (total dividido pelo nÃºmero de eventos)
+        // M�DIAS (total dividido pelo n�mero de eventos)
         faturamentoMedio: totalFaturamento / dadosValidos.length,
         faturamentoYuzerMedio: totalFaturamentoYuzer / dadosValidos.length,
         faturamentoContaHubMedio: totalFaturamentoContaHub / dadosValidos.length,
         faturamentoSymplaMedio: totalFaturamentoSympla / dadosValidos.length,
         clientesMedio: totalClientes / dadosValidos.length,
         reservasMedio: totalReservas / dadosValidos.length,
-        // TICKET MÃ‰DIO (faturamento total / clientes total)
+        // TICKET M�DIO (faturamento total / clientes total)
         ticketMedio: totalClientes > 0 ? totalFaturamento / totalClientes : 0,
         tempoMedioCozinha,
         tempoMedioBar,
@@ -1040,11 +1040,11 @@ export default function ComparativoPage() {
         eficienciaAtendimento
       }
 
-      console.log(`ðŸ† Resultado final para ${nomeArtista}:`, resultado)
+      console.log(`🏆 Resultado final para ${nomeArtista}:`, resultado)
       return resultado
 
     } catch (error) {
-      console.error(`âŒ Erro ao buscar stats do artista ${nomeArtista}:`, error)
+      console.error(`�� Erro ao buscar stats do artista ${nomeArtista}:`, error)
       return null
     }
   }
@@ -1060,36 +1060,36 @@ export default function ComparativoPage() {
     const percFaturamento = (dados1?.faturamento || 0) > 0 ? (difFaturamento / (dados1?.faturamento || 0)) * 100 : 0
     
     if (difFaturamento > 0) {
-      insights.push(`ðŸ“ˆ Faturamento cresceu R$ ${difFaturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (+${percFaturamento.toFixed(1)}%)`)
+      insights.push(`📈 Faturamento cresceu R$ ${difFaturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (+${percFaturamento.toFixed(1)}%)`)
     } else if (difFaturamento < 0) {
-      insights.push(`ðŸ“‰ Faturamento caiu R$ ${Math.abs(difFaturamento).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${percFaturamento.toFixed(1)}%)`)
+      insights.push(`📉 Faturamento caiu R$ ${Math.abs(difFaturamento).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${percFaturamento.toFixed(1)}%)`)
     }
 
     // Clientes
     const difClientes = (dados2?.clientes || 0) - (dados1?.clientes || 0)
     if (difClientes > 0) {
-      insights.push(`ðŸ‘¥ Recebeu ${difClientes} clientes a mais`)
+      insights.push(`👥 Recebeu ${difClientes} clientes a mais`)
     } else if (difClientes < 0) {
-      insights.push(`ðŸ‘¥ Recebeu ${Math.abs(difClientes)} clientes a menos`)
+      insights.push(`👥 Recebeu ${Math.abs(difClientes)} clientes a menos`)
     }
 
-    // Ticket mÃ©dio
+    // Ticket m�dio
     const difTicket = (dados2?.ticketMedio || 0) - (dados1?.ticketMedio || 0)
     if (Math.abs(difTicket) > 5) {
-      insights.push(`ðŸŽ¯ Ticket mÃ©dio ${difTicket > 0 ? 'aumentou' : 'diminuiu'} R$ ${Math.abs(difTicket).toFixed(2)}`)
+      insights.push(`🎯 Ticket m�dio ${difTicket > 0 ? 'aumentou' : 'diminuiu'} R$ ${Math.abs(difTicket).toFixed(2)}`)
     }
 
     // Tempos
     if ((dados2?.tempoCozinha || 0) > 0 && (dados1?.tempoCozinha || 0) > 0) {
       const difTempoCozinha = (dados2?.tempoCozinha || 0) - (dados1?.tempoCozinha || 0)
       if (Math.abs(difTempoCozinha) > 1) {
-        insights.push(`ðŸ‘¨â€ðŸ³ Tempo de cozinha ${difTempoCozinha > 0 ? 'aumentou' : 'diminuiu'} ${Math.abs(difTempoCozinha).toFixed(1)} min`)
+        insights.push(`👨��🍳 Tempo de cozinha ${difTempoCozinha > 0 ? 'aumentou' : 'diminuiu'} ${Math.abs(difTempoCozinha).toFixed(1)} min`)
       }
     }
 
     // Artistas
     if ((dados2?.artista || 0) !== (dados1?.artista || 0)) {
-      insights.push(`ðŸŽ¤ MudanÃ§a de artista: ${(dados1?.artista || 0)} â†’ ${(dados2?.artista || 0)}`)
+      insights.push(`🎤 Mudan�a de artista: ${(dados1?.artista || 0)} �� ${(dados2?.artista || 0)}`)
     }
 
     return insights
@@ -1101,77 +1101,77 @@ export default function ComparativoPage() {
 
     const insights = []
 
-    // Faturamento mÃ©dio
+    // Faturamento m�dio
     const melhorFaturamento = artista1.faturamentoMedio > artista2.faturamentoMedio ? artista1 : artista2
     const difFaturamento = Math.abs(artista1.faturamentoMedio - artista2.faturamentoMedio)
-    insights.push(`ðŸ’° ${melhorFaturamento.nome} gera R$ ${difFaturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} a mais por evento`)
+    insights.push(`💰 ${melhorFaturamento.nome} gera R$ ${difFaturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} a mais por evento`)
 
-    // Clientes mÃ©dios
+    // Clientes m�dios
     const melhorClientes = artista1.clientesMedio > artista2.clientesMedio ? artista1 : artista2
     const difClientes = Math.abs(artista1.clientesMedio - artista2.clientesMedio)
-    insights.push(`ðŸ‘¥ ${melhorClientes.nome} atrai ${difClientes.toFixed(0)} clientes a mais por evento`)
+    insights.push(`👥 ${melhorClientes.nome} atrai ${difClientes.toFixed(0)} clientes a mais por evento`)
 
-    // Ticket mÃ©dio
+    // Ticket m�dio
     const melhorTicket = artista1.ticketMedio > artista2.ticketMedio ? artista1 : artista2
     const difTicket = Math.abs(artista1.ticketMedio - artista2.ticketMedio)
-    insights.push(`ðŸŽ¯ ${melhorTicket.nome} tem ticket mÃ©dio R$ ${difTicket.toFixed(2)} superior`)
+    insights.push(`🎯 ${melhorTicket.nome} tem ticket m�dio R$ ${difTicket.toFixed(2)} superior`)
 
-    // ConsistÃªncia
+    // Consist�ncia
     const maisConsistente = artista1.totalEventos > artista2.totalEventos ? artista1 : artista2
-    insights.push(`ðŸŽª ${maisConsistente.nome} tem mais eventos registrados (${maisConsistente.totalEventos} vs ${maisConsistente === artista1 ? artista2.totalEventos : artista1.totalEventos})`)
+    insights.push(`🎪 ${maisConsistente.nome} tem mais eventos registrados (${maisConsistente.totalEventos} vs ${maisConsistente === artista1 ? artista2.totalEventos : artista1.totalEventos})`)
 
     // Performance geral
     const scoreArtista1 = (artista1.faturamentoMedio * 0.4) + (artista1.clientesMedio * 0.3) + (artista1.ticketMedio * 0.3)
     const scoreArtista2 = (artista2.faturamentoMedio * 0.4) + (artista2.clientesMedio * 0.3) + (artista2.ticketMedio * 0.3)
     const melhorGeral = scoreArtista1 > scoreArtista2 ? artista1 : artista2
-    insights.push(`ðŸ† ${melhorGeral.nome} tem melhor performance geral para a casa`)
+    insights.push(`🏆 ${melhorGeral.nome} tem melhor performance geral para a casa`)
 
     return insights
   }
 
-  // Gerar insights avanÃ§ados baseados na comparaÃ§Ã£o
+  // Gerar insights avan�ados baseados na compara��o
   const gerarInsights = (dados1: DadosComparacao, dados2: DadosComparacao, stats1: ArtistaStats, stats2: ArtistaStats): string[] => {
     const insights: string[] = []
     
-    // AnÃ¡lise de faturamento
+    // An�lise de faturamento
     const diferencaFat = (((dados1?.faturamento || 0) - (dados2?.faturamento || 0)) / (dados2?.faturamento || 0)) * 100
     if (Math.abs(diferencaFat) > 20) {
       const melhor = diferencaFat > 0 ? (dados1?.artista || 0) : (dados2?.artista || 0)
-      insights.push(`ðŸ’° ${melhor} tem faturamento ${Math.abs(diferencaFat).toFixed(1)}% superior`)
+      insights.push(`💰 ${melhor} tem faturamento ${Math.abs(diferencaFat).toFixed(1)}% superior`)
     }
     
-    // AnÃ¡lise de ticket mÃ©dio
+    // An�lise de ticket m�dio
     const diferencaTicket = (((dados1?.ticketMedio || 0) - (dados2?.ticketMedio || 0)) / (dados2?.ticketMedio || 0)) * 100
     if (Math.abs(diferencaTicket) > 15) {
       const melhor = diferencaTicket > 0 ? (dados1?.artista || 0) : (dados2?.artista || 0)
-      insights.push(`ðŸŽ¯ ${melhor} gera ticket mÃ©dio ${Math.abs(diferencaTicket).toFixed(1)}% maior`)
+      insights.push(`🎯 ${melhor} gera ticket m�dio ${Math.abs(diferencaTicket).toFixed(1)}% maior`)
     }
     
-    // AnÃ¡lise de tempos
+    // An�lise de tempos
     if ((dados1?.tempoBar || 0) > 0 && (dados2?.tempoBar || 0) > 0) {
       const melhorTempo = (dados1?.tempoBar || 0) < (dados2?.tempoBar || 0) ? (dados1?.artista || 0) : (dados2?.artista || 0)
-      insights.push(`âš¡ ${melhorTempo} tem atendimento mais rÃ¡pido no bar`)
+      insights.push(`�� ${melhorTempo} tem atendimento mais r�pido no bar`)
     }
     
-    // AnÃ¡lise de clientes
+    // An�lise de clientes
     const diferencaClientes = (((dados1?.clientes || 0) - (dados2?.clientes || 0)) / (dados2?.clientes || 0)) * 100
     if (Math.abs(diferencaClientes) > 25) {
       const melhor = diferencaClientes > 0 ? (dados1?.artista || 0) : (dados2?.artista || 0)
-      insights.push(`ðŸ‘¥ ${melhor} atrai ${Math.abs(diferencaClientes).toFixed(1)}% mais pÃºblico`)
+      insights.push(`👥 ${melhor} atrai ${Math.abs(diferencaClientes).toFixed(1)}% mais p�blico`)
     }
     
     return insights
   }
 
-  // Buscar dados de recorrÃªncia especÃ­ficos por artista (otimizado)
+  // Buscar dados de recorr�ncia espec�ficos por artista (otimizado)
   const buscarRecorrenciaPorArtista = async (nomeArtista: string) => {
     try {
-      console.log(`ðŸ”„ Calculando recorrÃªncia estimada para ${nomeArtista}...`)
+      console.log(`🔄 Calculando recorr�ncia estimada para ${nomeArtista}...`)
       
       // Inicializar cliente Supabase
       const supabase = await getSupabaseClient();
       if (!supabase) {
-        console.error('âŒ Erro ao conectar com banco');
+        console.error('�� Erro ao conectar com banco');
         return 0;
       }
       
@@ -1184,7 +1184,7 @@ export default function ComparativoPage() {
         .order('data_evento', { ascending: true })
 
       if (!eventosArtista || eventosArtista.length < 2) {
-        console.log(`âŒ Poucos eventos para ${nomeArtista}: ${eventosArtista?.length || 0}`)
+        console.log(`�� Poucos eventos para ${nomeArtista}: ${eventosArtista?.length || 0}`)
         return 0
       }
 
@@ -1205,7 +1205,7 @@ export default function ComparativoPage() {
 
           let pessoasEvento = pessoasData?.total_pessoas_bruto || 0
 
-          // Se nÃ£o tem dados em pessoas_diario_corrigido, buscar em Sympla
+          // Se n�o tem dados em pessoas_diario_corrigido, buscar em Sympla
           if (pessoasEvento === 0) {
             const { data: symplaData } = await supabase
               .from('cliente_visitas')
@@ -1228,14 +1228,14 @@ export default function ComparativoPage() {
         }
       }
 
-      // Calcular estimativa de recorrÃªncia baseada em heurÃ­sticas melhoradas
+      // Calcular estimativa de recorr�ncia baseada em heur�sticas melhoradas
       let recorrenciaEstimada = 0
       
       if (eventosComDados > 0) {
         const mediaPessoas = totalPessoas / eventosComDados
         const percentualEventosComDados = (eventosComDados / totalEventos) * 100
         
-        // HeurÃ­stica melhorada: considera nÃºmero de eventos, pÃºblico mÃ©dio e consistÃªncia
+        // Heur�stica melhorada: considera n�mero de eventos, p�blico m�dio e consist�ncia
         if (totalEventos >= 10) {
           if (mediaPessoas > 500) {
             recorrenciaEstimada = 45 + (percentualEventosComDados * 0.3)
@@ -1262,18 +1262,18 @@ export default function ComparativoPage() {
           }
         }
       } else {
-        // Fallback baseado apenas no nÃºmero de eventos
+        // Fallback baseado apenas no n�mero de eventos
         recorrenciaEstimada = totalEventos >= 10 ? 30 : totalEventos >= 5 ? 20 : 15
       }
 
       // Limitar entre 5% e 80%
       recorrenciaEstimada = Math.max(5, Math.min(80, recorrenciaEstimada))
 
-      console.log(`ðŸ“Š RecorrÃªncia estimada para ${nomeArtista}: ${recorrenciaEstimada.toFixed(1)}% (${totalEventos} eventos, ${eventosComDados} com dados, mÃ©dia ${(totalPessoas/eventosComDados || 0).toFixed(0)} pessoas)`)
+      console.log(`📊 Recorr�ncia estimada para ${nomeArtista}: ${recorrenciaEstimada.toFixed(1)}% (${totalEventos} eventos, ${eventosComDados} com dados, m�dia ${(totalPessoas/eventosComDados || 0).toFixed(0)} pessoas)`)
       return recorrenciaEstimada
 
     } catch (error) {
-      console.log(`Erro ao buscar recorrÃªncia para ${nomeArtista}:`, error)
+      console.log(`Erro ao buscar recorr�ncia para ${nomeArtista}:`, error)
       return 0
     }
   }
@@ -1282,10 +1282,10 @@ export default function ComparativoPage() {
     if (!artistaSelecionado1 || !artistaSelecionado2 || !selectedBar?.id) return
     
     setLoading(true)
-    console.log(`ðŸŽ¤ Comparando artistas: ${artistaSelecionado1} vs ${artistaSelecionado2}`)
+    console.log(`🎤 Comparando artistas: ${artistaSelecionado1} vs ${artistaSelecionado2}`)
 
     try {
-      // Buscar estatÃ­sticas de ambos os artistas
+      // Buscar estat�sticas de ambos os artistas
       const [stats1, stats2] = await Promise.all([
         buscarStatsArtista(artistaSelecionado1),
         buscarStatsArtista(artistaSelecionado2)
@@ -1296,13 +1296,13 @@ export default function ComparativoPage() {
         return
       }
 
-      // Para comparaÃ§Ã£o de artistas, nÃ£o precisamos dos dados detalhados de recorrÃªncia
-      // A recorrÃªncia jÃ¡ estÃ¡ calculada nas stats individuais de cada artista
-      setRecorrenciaClientes(null) // Limpar dados de recorrÃªncia detalhada
+      // Para compara��o de artistas, n�o precisamos dos dados detalhados de recorr�ncia
+      // A recorr�ncia j� est� calculada nas stats individuais de cada artista
+      setRecorrenciaClientes(null) // Limpar dados de recorr�ncia detalhada
 
-      // Calcular mÃ©dias e criar dados comparativos
+      // Calcular m�dias e criar dados comparativos
       const dadosData1: DadosComparacao = {
-        data: `${artistaSelecionado1} (MÃ©dia)`,
+        data: `${artistaSelecionado1} (M�dia)`,
         faturamento: stats1.faturamentoMedio,
         faturamentoYuzer: stats1.faturamentoYuzerMedio,
         faturamentoContaHub: stats1.faturamentoContaHubMedio,
@@ -1314,11 +1314,11 @@ export default function ComparativoPage() {
         tempoBar: stats1.tempoMedioBar,
         pratos: [],
         artista: artistaSelecionado1,
-        faturamento_horas: [] // Dados por hora nÃ£o disponÃ­veis para comparaÃ§Ã£o de artistas
+        faturamento_horas: [] // Dados por hora n�o dispon�veis para compara��o de artistas
       }
 
       const dadosData2: DadosComparacao = {
-        data: `${artistaSelecionado2} (MÃ©dia)`,
+        data: `${artistaSelecionado2} (M�dia)`,
         faturamento: stats2.faturamentoMedio,
         faturamentoYuzer: stats2.faturamentoYuzerMedio,
         faturamentoContaHub: stats2.faturamentoContaHubMedio,
@@ -1330,7 +1330,7 @@ export default function ComparativoPage() {
         tempoBar: stats2.tempoMedioBar,
         pratos: [],
         artista: artistaSelecionado2,
-        faturamento_horas: [] // Dados por hora nÃ£o disponÃ­veis para comparaÃ§Ã£o de artistas
+        faturamento_horas: [] // Dados por hora n�o dispon�veis para compara��o de artistas
       }
 
       setDadosComparativos([dadosData1, dadosData2])
@@ -1340,7 +1340,7 @@ export default function ComparativoPage() {
       setInsights(novosInsights)
 
     } catch (error) {
-      console.error('Erro na comparaÃ§Ã£o:', error)
+      console.error('Erro na compara��o:', error)
       alert('Erro ao processar dados. Tente novamente.')
     } finally {
       setLoading(false)
@@ -1349,7 +1349,7 @@ export default function ComparativoPage() {
 
   return (
     <div className="space-y-6">
-      {/* BotÃ£o de Voltar */}
+      {/* Bot�o de Voltar */}
       <div className="flex items-center gap-4">
         <button
           onClick={() => router.push('/configuracoes')}
@@ -1358,15 +1358,15 @@ export default function ComparativoPage() {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Voltar para ConfiguraÃ§Ãµes
+          Voltar para Configura��es
         </button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-slate-800">ðŸ“Š ComparaÃ§Ã£o de Dados</h1>
-          <p className="text-slate-600 mt-1">Compare performance entre datas especÃ­ficas ou artistas diferentes</p>
+          <h1 className="text-2xl font-bold text-slate-800">📊 Compara��o de Dados</h1>
+          <p className="text-slate-600 mt-1">Compare performance entre datas espec�ficas ou artistas diferentes</p>
         </div>
       </div>
 
-      {/* Adicionar CSS especÃ­fico para valores monetÃ¡rios */}
+      {/* Adicionar CSS espec�fico para valores monet�rios */}
       <style jsx>{`
         .valor-monetario {
           font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
@@ -1418,23 +1418,23 @@ export default function ComparativoPage() {
         }
       `}</style>
 
-      {/* Controles de ComparaÃ§Ã£o */}
+      {/* Controles de Compara��o */}
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <h2 className="text-xl font-bold text-slate-800 mb-4">ðŸ“Š ComparaÃ§Ã£o de Dados</h2>
+        <h2 className="text-xl font-bold text-slate-800 mb-4">📊 Compara��o de Dados</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Tipo de ComparaÃ§Ã£o */}
+          {/* Tipo de Compara��o */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Tipo de ComparaÃ§Ã£o
+              Tipo de Compara��o
             </label>
             <select 
               value={tipoComparacao} 
               onChange={(e) => setTipoComparacao(e.target.value as TipoComparacao)}
               className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="datas-especificas">ðŸ—“ï¸ Comparar Datas EspecÃ­ficas</option>
-              <option value="artistas">ðŸŽ¤ Comparar Artistas</option>
+              <option value="datas-especificas">🗓️ Comparar Datas Espec�ficas</option>
+              <option value="artistas">🎤 Comparar Artistas</option>
             </select>
           </div>
 
@@ -1447,7 +1447,7 @@ export default function ComparativoPage() {
           </div>
         </div>
 
-        {/* Controles especÃ­ficos para cada tipo */}
+        {/* Controles espec�ficos para cada tipo */}
         {tipoComparacao === 'datas-especificas' && (
           <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
@@ -1529,58 +1529,58 @@ export default function ComparativoPage() {
         )}
       </div>
 
-      {/* Resultados da ComparaÃ§Ã£o */}
+      {/* Resultados da Compara��o */}
       {((tipoComparacao === 'datas-especificas' && dadosComparativos.length === 2) ||
         (tipoComparacao === 'artistas' && dadosArtistas.artista1 && dadosArtistas.artista2)) && (
         <>
-          {/* VisÃ£o Geral dos Dados */}
+          {/* Vis�o Geral dos Dados */}
           {tipoComparacao === 'artistas' && dadosArtistas.artista1 && dadosArtistas.artista2 && (
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <h3 className="text-lg font-bold text-slate-800 mb-4">ðŸŽ¯ VisÃ£o Geral dos Artistas</h3>
+              <h3 className="text-lg font-bold text-slate-800 mb-4">🎯 Vis�o Geral dos Artistas</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <span className="font-medium">ðŸŽ¤ {dadosArtistas.artista1.nome}:</span>
-                  <span className="ml-2 text-green-600">âœ… Dados disponÃ­veis</span>
+                  <span className="font-medium">🎤 {dadosArtistas.artista1.nome}:</span>
+                  <span className="ml-2 text-green-600">�� Dados dispon�veis</span>
                   <div className="mt-1 text-xs text-gray-600 space-y-1">
-                    <div>ðŸ’° Faturamento mÃ©dio: R$ {dadosArtistas.artista1.faturamentoMedio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                    <div>ðŸ“Š Faturamento total: R$ {dadosArtistas.artista1.faturamentoTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                    <div>💰 Faturamento m�dio: R$ {dadosArtistas.artista1.faturamentoMedio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                    <div>📊 Faturamento total: R$ {dadosArtistas.artista1.faturamentoTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
                     {dadosArtistas.artista1.faturamentoYuzerTotal > 0 && (
-                      <div>ðŸ» Yuzer total: R$ {dadosArtistas.artista1.faturamentoYuzerTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                      <div>🍻 Yuzer total: R$ {dadosArtistas.artista1.faturamentoYuzerTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
                     )}
                     {dadosArtistas.artista1.faturamentoContaHubTotal > 0 && (
-                      <div>ðŸŽ« ContaHub total: R$ {dadosArtistas.artista1.faturamentoContaHubTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                      <div>🎫 ContaHub total: R$ {dadosArtistas.artista1.faturamentoContaHubTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
                     )}
                     {dadosArtistas.artista1.faturamentoSymplaTotal > 0 && (
-                      <div>ðŸŽŸï¸ Sympla total: R$ {dadosArtistas.artista1.faturamentoSymplaTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                      <div>🎟️ Sympla total: R$ {dadosArtistas.artista1.faturamentoSymplaTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
                     )}
-                    <div>ðŸ‘¥ Clientes total: {dadosArtistas.artista1.clientesTotal.toLocaleString('pt-BR')}</div>
-                    <div>ðŸ“Š {dadosArtistas.artista1.eventosComDados}/{dadosArtistas.artista1.totalEventos} eventos com dados</div>
+                    <div>👥 Clientes total: {dadosArtistas.artista1.clientesTotal.toLocaleString('pt-BR')}</div>
+                    <div>📊 {dadosArtistas.artista1.eventosComDados}/{dadosArtistas.artista1.totalEventos} eventos com dados</div>
                   </div>
                 </div>
                 <div>
-                  <span className="font-medium">ðŸŽ¤ {dadosArtistas.artista2.nome}:</span>
-                  <span className="ml-2 text-green-600">âœ… Dados disponÃ­veis</span>
+                  <span className="font-medium">🎤 {dadosArtistas.artista2.nome}:</span>
+                  <span className="ml-2 text-green-600">�� Dados dispon�veis</span>
                   <div className="mt-1 text-xs text-gray-600 space-y-1">
-                    <div>ðŸ’° Faturamento mÃ©dio: R$ {dadosArtistas.artista2.faturamentoMedio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                    <div>ðŸ“Š Faturamento total: R$ {dadosArtistas.artista2.faturamentoTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                    <div>💰 Faturamento m�dio: R$ {dadosArtistas.artista2.faturamentoMedio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                    <div>📊 Faturamento total: R$ {dadosArtistas.artista2.faturamentoTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
                     {dadosArtistas.artista2.faturamentoYuzerTotal > 0 && (
-                      <div>ðŸ» Yuzer total: R$ {dadosArtistas.artista2.faturamentoYuzerTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                      <div>🍻 Yuzer total: R$ {dadosArtistas.artista2.faturamentoYuzerTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
                     )}
                     {dadosArtistas.artista2.faturamentoContaHubTotal > 0 && (
-                      <div>ðŸŽ« ContaHub total: R$ {dadosArtistas.artista2.faturamentoContaHubTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                      <div>🎫 ContaHub total: R$ {dadosArtistas.artista2.faturamentoContaHubTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
                     )}
                     {dadosArtistas.artista2.faturamentoSymplaTotal > 0 && (
-                      <div>ðŸŽŸï¸ Sympla total: R$ {dadosArtistas.artista2.faturamentoSymplaTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                      <div>🎟️ Sympla total: R$ {dadosArtistas.artista2.faturamentoSymplaTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
                     )}
-                    <div>ðŸ‘¥ Clientes total: {dadosArtistas.artista2.clientesTotal.toLocaleString('pt-BR')}</div>
-                    <div>ðŸ“Š {dadosArtistas.artista2.eventosComDados}/{dadosArtistas.artista2.totalEventos} eventos com dados</div>
+                    <div>👥 Clientes total: {dadosArtistas.artista2.clientesTotal.toLocaleString('pt-BR')}</div>
+                    <div>📊 {dadosArtistas.artista2.eventosComDados}/{dadosArtistas.artista2.totalEventos} eventos com dados</div>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Cards de ComparaÃ§Ã£o - Datas */}
+          {/* Cards de Compara��o - Datas */}
           {tipoComparacao === 'datas-especificas' && dadosComparativos.length === 2 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {dadosComparativos.map((dados: any, index: any) => (
@@ -1588,7 +1588,7 @@ export default function ComparativoPage() {
                   index === 0 ? 'border-blue-200 bg-blue-50' : 'border-green-200 bg-green-50'
                 }`}>
                   <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
-                    {index === 0 ? 'ðŸ“… Data 1' : 'ðŸ“… Data 2'}
+                    {index === 0 ? '📅 Data 1' : '📅 Data 2'}
                     <span className="ml-auto text-sm font-normal text-slate-600">
                       {parseDataSemTimezone(dados.data).toLocaleDateString('pt-BR')}
                     </span>
@@ -1597,7 +1597,7 @@ export default function ComparativoPage() {
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="card-valor">
-                        <div className="text-2xl mb-1">ðŸ’°</div>
+                        <div className="text-2xl mb-1">💰</div>
                         <div className="valor-monetario">
                           R$ {dados.faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </div>
@@ -1607,24 +1607,24 @@ export default function ComparativoPage() {
                         <div className="text-xs text-slate-600">Faturamento</div>
                       </div>
                       <div className="card-valor">
-                        <div className="text-2xl mb-1">ðŸ‘¥</div>
+                        <div className="text-2xl mb-1">👥</div>
                         <div className="valor-monetario">
                           {dados.clientes}
                         </div>
                         <div className="text-xs text-slate-600">Clientes</div>
                       </div>
                       <div className="card-valor">
-                        <div className="text-2xl mb-1">ðŸŽ¯</div>
+                        <div className="text-2xl mb-1">🎯</div>
                         <div className="valor-monetario">
                           R$ {dados.ticketMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </div>
                         <div className="debug-valor">
                           DEBUG: {dados.ticketMedio}
                         </div>
-                        <div className="text-xs text-slate-600">Ticket MÃ©dio</div>
+                        <div className="text-xs text-slate-600">Ticket M�dio</div>
                       </div>
                       <div className="card-valor">
-                        <div className="text-2xl mb-1">ðŸ“…</div>
+                        <div className="text-2xl mb-1">📅</div>
                         <div className="valor-monetario">
                           {dados.reservas}
                         </div>
@@ -1635,14 +1635,14 @@ export default function ComparativoPage() {
                     {dados.tempoCozinha > 0 && dados.tempoBar > 0 && (
                       <div className="grid grid-cols-2 gap-4">
                         <div className="card-valor">
-                          <div className="text-2xl mb-1">ðŸ‘¨â€ðŸ³</div>
+                          <div className="text-2xl mb-1">👨��🍳</div>
                           <div className="valor-monetario">
                             {dados.tempoCozinha.toFixed(1)} min
                           </div>
                           <div className="text-xs text-slate-600">Tempo Cozinha</div>
                         </div>
                         <div className="card-valor">
-                          <div className="text-2xl mb-1">ðŸ¹</div>
+                          <div className="text-2xl mb-1">🍹</div>
                           <div className="valor-monetario">
                             {dados.tempoBar.toFixed(1)} min
                           </div>
@@ -1652,8 +1652,8 @@ export default function ComparativoPage() {
                     )}
 
                     <div className="bg-white rounded-lg p-3">
-                      <div className="text-sm font-medium text-slate-700 mb-2">ðŸŽ¤ Artista: {dados.artista}</div>
-                      <div className="text-sm font-medium text-slate-700 mb-2">ðŸ½ï¸ Top Pratos:</div>
+                      <div className="text-sm font-medium text-slate-700 mb-2">🎤 Artista: {dados.artista}</div>
+                      <div className="text-sm font-medium text-slate-700 mb-2">🍽️ Top Pratos:</div>
                       <div className="space-y-1">
                         {dados.pratos.slice(0, 3).map((prato: any, i: any) => (
                           <div key={i} className="flex justify-between text-xs text-slate-600">
@@ -1669,7 +1669,7 @@ export default function ComparativoPage() {
             </div>
           )}
 
-          {/* Cards de ComparaÃ§Ã£o - Artistas */}
+          {/* Cards de Compara��o - Artistas */}
           {tipoComparacao === 'artistas' && dadosArtistas.artista1 && dadosArtistas.artista2 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {[dadosArtistas.artista1, dadosArtistas.artista2].map((artista: any, index: any) => (
@@ -1677,7 +1677,7 @@ export default function ComparativoPage() {
                   index === 0 ? 'border-blue-200 bg-blue-50' : 'border-green-200 bg-green-50'
                 }`}>
                   <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
-                    ðŸŽ¤ Artista: {artista.nome}
+                    🎤 Artista: {artista.nome}
                     <span className="ml-auto text-sm font-normal text-slate-600">
                       {artista.totalEventos} eventos ({artista.eventosComDados} com dados)
                     </span>
@@ -1686,7 +1686,7 @@ export default function ComparativoPage() {
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="card-valor">
-                        <div className="text-2xl mb-1">ðŸ’°</div>
+                        <div className="text-2xl mb-1">💰</div>
                         <div className="valor-monetario">
                           R$ {artista.faturamentoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </div>
@@ -1695,72 +1695,72 @@ export default function ComparativoPage() {
                         </div>
                         <div className="text-xs text-slate-600">Faturamento Total</div>
                         <div className="text-xs text-gray-500 mt-1">
-                          MÃ©dia: R$ {artista.faturamentoMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          M�dia: R$ {artista.faturamentoMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </div>
                       </div>
                       <div className="card-valor">
-                        <div className="text-2xl mb-1">ðŸ‘¥</div>
+                        <div className="text-2xl mb-1">👥</div>
                         <div className="valor-monetario">
                           {artista.clientesTotal.toLocaleString('pt-BR')}
                         </div>
                         <div className="text-xs text-slate-600">Clientes Total</div>
                         <div className="text-xs text-gray-500 mt-1">
-                          MÃ©dia: {artista.clientesMedio.toFixed(1)}
+                          M�dia: {artista.clientesMedio.toFixed(1)}
                         </div>
                       </div>
                       <div className="card-valor">
-                        <div className="text-2xl mb-1">ðŸŽ¯</div>
+                        <div className="text-2xl mb-1">🎯</div>
                         <div className="valor-monetario">
                           R$ {artista.ticketMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </div>
                         <div className="debug-valor">
                           DEBUG: {artista.ticketMedio}
                         </div>
-                        <div className="text-xs text-slate-600">Ticket MÃ©dio</div>
+                        <div className="text-xs text-slate-600">Ticket M�dio</div>
                         <div className="text-xs text-gray-500 mt-1">
-                          (Total Ã· Total clientes)
+                          (Total � Total clientes)
                         </div>
                       </div>
                       <div className="card-valor">
-                        <div className="text-2xl mb-1">ðŸ“…</div>
+                        <div className="text-2xl mb-1">📅</div>
                         <div className="valor-monetario">
                           {artista.reservasTotal.toLocaleString('pt-BR')}
                         </div>
                         <div className="text-xs text-slate-600">Reservas Total</div>
                         <div className="text-xs text-gray-500 mt-1">
-                          MÃ©dia: {artista.reservasMedio.toFixed(1)}
+                          M�dia: {artista.reservasMedio.toFixed(1)}
                         </div>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="card-valor">
-                        <div className="text-2xl mb-1">ðŸ”„</div>
+                        <div className="text-2xl mb-1">🔄</div>
                         <div className="valor-monetario">
                           {artista.recorrenciaMedia.toFixed(1)}%
                         </div>
-                        <div className="text-xs text-slate-600">RecorrÃªncia</div>
+                        <div className="text-xs text-slate-600">Recorr�ncia</div>
                       </div>
                       <div className="card-valor">
-                        <div className="text-2xl mb-1">ðŸ’</div>
+                        <div className="text-2xl mb-1">💝</div>
                         <div className="valor-monetario">
                           {artista.fidelizacaoClientes.toFixed(1)}%
                         </div>
-                        <div className="text-xs text-slate-600">FidelizaÃ§Ã£o</div>
+                        <div className="text-xs text-slate-600">Fideliza��o</div>
                       </div>
                     </div>
 
                     {artista.tempoMedioCozinha > 0 && artista.tempoMedioBar > 0 && (
                       <div className="grid grid-cols-2 gap-4">
                         <div className="card-valor">
-                          <div className="text-2xl mb-1">ðŸ‘¨â€ðŸ³</div>
+                          <div className="text-2xl mb-1">👨��🍳</div>
                           <div className="valor-monetario">
                             {artista.tempoMedioCozinha.toFixed(1)} min
                           </div>
                           <div className="text-xs text-slate-600">Tempo Cozinha</div>
                         </div>
                         <div className="card-valor">
-                          <div className="text-2xl mb-1">ðŸ¹</div>
+                          <div className="text-2xl mb-1">🍹</div>
                           <div className="valor-monetario">
                             {artista.tempoMedioBar.toFixed(1)} min
                           </div>
@@ -1775,13 +1775,13 @@ export default function ComparativoPage() {
                           <div className="valor-monetario text-purple-800">
                             {artista.fidelizacaoClientes.toFixed(1)}%
                           </div>
-                          <div className="text-xs text-slate-600">FidelizaÃ§Ã£o</div>
+                          <div className="text-xs text-slate-600">Fideliza��o</div>
                         </div>
                         <div>
                           <div className="valor-monetario text-orange-800">
                             {artista.eficienciaAtendimento.toFixed(1)}%
                           </div>
-                          <div className="text-xs text-slate-600">EficiÃªncia</div>
+                          <div className="text-xs text-slate-600">Efici�ncia</div>
                         </div>
                       </div>
                     </div>
@@ -1791,14 +1791,14 @@ export default function ComparativoPage() {
             </div>
           )}
 
-          {/* AnÃ¡lise de RecorrÃªncia de Clientes - ComparaÃ§Ã£o de Datas */}
+          {/* An�lise de Recorr�ncia de Clientes - Compara��o de Datas */}
           {recorrenciaClientes && tipoComparacao === 'datas-especificas' && typeof recorrenciaClientes === 'object' && (
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <h3 className="text-lg font-bold text-slate-800 mb-4">ðŸ‘¥ AnÃ¡lise de RecorrÃªncia de Clientes</h3>
+              <h3 className="text-lg font-bold text-slate-800 mb-4">👥 An�lise de Recorr�ncia de Clientes</h3>
               {recorrenciaClientes.limitedData ? (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                   <div className="flex items-center">
-                    <div className="text-2xl mr-3">âš ï¸</div>
+                    <div className="text-2xl mr-3">��️</div>
                     <div>
                       <h4 className="font-semibold text-yellow-800">Dados Limitados</h4>
                       <p className="text-sm text-yellow-700 mt-1">{recorrenciaClientes.message}</p>
@@ -1819,7 +1819,7 @@ export default function ComparativoPage() {
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <div className="text-3xl mb-2">ðŸ”„</div>
+                      <div className="text-3xl mb-2">🔄</div>
                       <div className="text-2xl font-bold text-blue-800">
                         {recorrenciaClientes.recorrentes || 0}
                       </div>
@@ -1829,7 +1829,7 @@ export default function ComparativoPage() {
                       </div>
                     </div>
                     <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <div className="text-3xl mb-2">âœ¨</div>
+                      <div className="text-3xl mb-2">��</div>
                       <div className="text-2xl font-bold text-green-800">
                         {recorrenciaClientes.novos || 0}
                       </div>
@@ -1839,11 +1839,11 @@ export default function ComparativoPage() {
                       </div>
                     </div>
                     <div className="text-center p-4 bg-purple-50 rounded-lg">
-                      <div className="text-3xl mb-2">ðŸ“Š</div>
+                      <div className="text-3xl mb-2">📊</div>
                       <div className="text-lg font-bold text-purple-800">
                         {recorrenciaClientes.insights?.fidelizacao || 'N/A'}
                       </div>
-                      <div className="text-sm text-purple-600">FidelizaÃ§Ã£o</div>
+                      <div className="text-sm text-purple-600">Fideliza��o</div>
                       <div className="text-xs text-purple-500 mt-1">
                         Crescimento: {recorrenciaClientes.crescimento?.toFixed(1) || 0}%
                       </div>
@@ -1854,13 +1854,13 @@ export default function ComparativoPage() {
             </div>
           )}
 
-          {/* Insights da ComparaÃ§Ã£o de Datas */}
+          {/* Insights da Compara��o de Datas */}
           {tipoComparacao === 'datas-especificas' && dadosComparativos.length === 2 && (
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <h3 className="text-lg font-bold text-slate-800 mb-4">ðŸ” Insights da ComparaÃ§Ã£o</h3>
+              <h3 className="text-lg font-bold text-slate-800 mb-4">🔍 Insights da Compara��o</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-semibold text-slate-700 mb-3">ðŸ“Š MudanÃ§as Identificadas</h4>
+                  <h4 className="font-semibold text-slate-700 mb-3">📊 Mudan�as Identificadas</h4>
                   <div className="space-y-2">
                     {gerarInsightComparacao()?.map((insight: any, i: any) => (
                       <div key={i} className="text-sm text-slate-600 bg-gray-50 p-2 rounded">
@@ -1870,27 +1870,27 @@ export default function ComparativoPage() {
                   </div>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-slate-700 mb-3">ðŸ’¡ RecomendaÃ§Ãµes</h4>
+                  <h4 className="font-semibold text-slate-700 mb-3">💡 Recomenda��es</h4>
                   <div className="space-y-2">
                     {(() => {
                       const insights = gerarInsightComparacao() || []
                       const recomendacoes = []
                       
                       if (insights.some(i => i.includes('Faturamento caiu'))) {
-                        recomendacoes.push('ðŸ”„ Revisar estratÃ©gias de pricing e promoÃ§Ãµes')
+                        recomendacoes.push('🔄 Revisar estrat�gias de pricing e promo��es')
                       }
                       if (insights.some(i => i.includes('clientes a menos'))) {
-                        recomendacoes.push('ðŸ“¢ Intensificar marketing e divulgaÃ§Ã£o')
+                        recomendacoes.push('📢 Intensificar marketing e divulga��o')
                       }
                       if (insights.some(i => i.includes('Tempo de cozinha aumentou'))) {
-                        recomendacoes.push('âš¡ Otimizar processos da cozinha')
+                        recomendacoes.push('�� Otimizar processos da cozinha')
                       }
-                      if (insights.some(i => i.includes('MudanÃ§a de artista'))) {
-                        recomendacoes.push('ðŸŽµ Avaliar impacto do artista nos resultados')
+                      if (insights.some(i => i.includes('Mudan�a de artista'))) {
+                        recomendacoes.push('🎵 Avaliar impacto do artista nos resultados')
                       }
                       
                       if (recomendacoes.length === 0) {
-                        recomendacoes.push('âœ… Performance consistente, manter estratÃ©gias atuais')
+                        recomendacoes.push('�� Performance consistente, manter estrat�gias atuais')
                       }
                       
                       return recomendacoes.map((rec: any, i: any) => (
@@ -1905,32 +1905,32 @@ export default function ComparativoPage() {
             </div>
           )}
 
-          {/* ComparaÃ§Ã£o por HorÃ¡rio - Apenas para datas especÃ­ficas */}
+          {/* Compara��o por Hor�rio - Apenas para datas espec�ficas */}
           {tipoComparacao === 'datas-especificas' && dadosComparativos.length === 2 && (
             dadosComparativos[0].faturamento_horas.length > 0 || dadosComparativos[1].faturamento_horas.length > 0
           ) && (
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <h3 className="text-lg font-bold text-slate-800 mb-4">â° ComparaÃ§Ã£o por HorÃ¡rio</h3>
+              <h3 className="text-lg font-bold text-slate-800 mb-4">�� Compara��o por Hor�rio</h3>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <h4 className="text-sm font-semibold text-blue-800 mb-2">ðŸ“‹ Como interpretar os dados:</h4>
+                <h4 className="text-sm font-semibold text-blue-800 mb-2">📋 Como interpretar os dados:</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-blue-700">
                   <div>
-                    <div className="font-semibold mb-1">ðŸ’° Faturamento:</div>
-                    <div>â€¢ <strong>Linha superior:</strong> Vendas naquela hora especÃ­fica</div>
-                    <div>â€¢ <strong>Linha inferior:</strong> Total acumulado atÃ© aquela hora</div>
+                    <div className="font-semibold mb-1">💰 Faturamento:</div>
+                    <div>�� <strong>Linha superior:</strong> Vendas naquela hora espec�fica</div>
+                    <div>�� <strong>Linha inferior:</strong> Total acumulado at� aquela hora</div>
                   </div>
                   <div>
-                    <div className="font-semibold mb-1">ðŸ‘¥ Clientes:</div>
-                    <div>â€¢ <strong>Linha superior:</strong> Clientes acumulados da Data 1</div>
-                    <div>â€¢ <strong>Linha inferior:</strong> Clientes acumulados da Data 2</div>
+                    <div className="font-semibold mb-1">👥 Clientes:</div>
+                    <div>�� <strong>Linha superior:</strong> Clientes acumulados da Data 1</div>
+                    <div>�� <strong>Linha inferior:</strong> Clientes acumulados da Data 2</div>
                   </div>
                 </div>
                 <div className="mt-2 text-xs text-blue-600">
-                  <strong>Exemplo:</strong> Ã€s 18h, se mostra "R$ 500 | R$ 2.000", significa que naquela hora vendeu R$ 500 e o total do dia atÃ© Ã s 18h era R$ 2.000
+                  <strong>Exemplo:</strong> �s 18h, se mostra "R$ 500 | R$ 2.000", significa que naquela hora vendeu R$ 500 e o total do dia at� �s 18h era R$ 2.000
                 </div>
               </div>
               
-              {/* FunÃ§Ã£o para formatar horas */}
+              {/* Fun��o para formatar horas */}
               {(() => {
                 const formatHour = (hour: string) => {
                   if (hour === "24:00") return "00:00"
@@ -1938,7 +1938,7 @@ export default function ComparativoPage() {
                   return hour
                 }
 
-                // Combinar horÃ¡rios das duas datas
+                // Combinar hor�rios das duas datas
                 const todosHorarios = new Set([
                   ...dadosComparativos[0].faturamento_horas.map((h: any) => h.hora),
                   ...dadosComparativos[1].faturamento_horas.map((h: any) => h.hora)
@@ -1948,24 +1948,24 @@ export default function ComparativoPage() {
 
                 return (
                   <div className="space-y-4">
-                    {/* CabeÃ§alhos */}
+                    {/* Cabe�alhos */}
                     <div className="grid grid-cols-5 gap-2 text-xs font-semibold text-slate-700 border-b pb-2">
-                      <div>HorÃ¡rio</div>
-                      <div className="text-center">ðŸ“… {parseDataSemTimezone(dadosComparativos[0].data).toLocaleDateString('pt-BR')}<br/>
+                      <div>Hor�rio</div>
+                      <div className="text-center">📅 {parseDataSemTimezone(dadosComparativos[0].data).toLocaleDateString('pt-BR')}<br/>
                         <span className="text-xs font-normal text-slate-500">Hora | Acumulado</span>
                       </div>
-                      <div className="text-center">ðŸ“… {parseDataSemTimezone(dadosComparativos[1].data).toLocaleDateString('pt-BR')}<br/>
+                      <div className="text-center">📅 {parseDataSemTimezone(dadosComparativos[1].data).toLocaleDateString('pt-BR')}<br/>
                         <span className="text-xs font-normal text-slate-500">Hora | Acumulado</span>
                       </div>
-                      <div className="text-center">ðŸ‘¥ Clientes<br/>
+                      <div className="text-center">👥 Clientes<br/>
                         <span className="text-xs font-normal text-slate-500">Data 1 | Data 2</span>
                       </div>
-                      <div className="text-center">ðŸ“Š DiferenÃ§a<br/>
+                      <div className="text-center">📊 Diferen�a<br/>
                         <span className="text-xs font-normal text-slate-500">Hora | Acumulado</span>
                       </div>
                     </div>
 
-                    {/* Dados por horÃ¡rio */}
+                    {/* Dados por hor�rio */}
                     <div className="max-h-96 overflow-y-auto space-y-1">
                       {horariosOrdenados.map((hora: any) => {
                         const data1Hora = dadosComparativos[0].faturamento_horas.find((h: any) => h.hora === hora)
@@ -1978,7 +1978,7 @@ export default function ComparativoPage() {
                         const clientes1 = data1Hora?.clientes_acumulados || 0
                         const clientes2 = data2Hora?.clientes_acumulados || 0
                         
-                        // Calcular diferenÃ§as percentuais
+                        // Calcular diferen�as percentuais
                         const diferencaHora = ((valor2 - valor1) / (valor1 || 1)) * 100
                         const diferencaAcumulado = ((acumulado2 - acumulado1) / (acumulado1 || 1)) * 100
                         const temDiferenca = Math.abs(diferencaHora) > 5 || Math.abs(diferencaAcumulado) > 5
@@ -1987,7 +1987,7 @@ export default function ComparativoPage() {
                           <div key={hora} className={`grid grid-cols-5 gap-2 text-xs py-2 px-2 rounded-lg ${
                             temDiferenca ? 'bg-yellow-50 border border-yellow-200' : 'bg-gray-50'
                           }`}>
-                            {/* HorÃ¡rio */}
+                            {/* Hor�rio */}
                             <div className="font-medium text-slate-700 text-center">
                               {formatHour(hora)}
                             </div>
@@ -2026,9 +2026,9 @@ export default function ComparativoPage() {
                               </div>
                             </div>
                             
-                            {/* DiferenÃ§as */}
+                            {/* Diferen�as */}
                             <div className="text-center">
-                              {/* DiferenÃ§a da hora */}
+                              {/* Diferen�a da hora */}
                               {valor1 > 0 && valor2 > 0 && (
                                 <div className={`text-xs px-1 py-0.5 rounded mb-1 ${
                                   diferencaHora > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
@@ -2036,7 +2036,7 @@ export default function ComparativoPage() {
                                   {diferencaHora > 0 ? '+' : ''}{diferencaHora.toFixed(0)}%
                                 </div>
                               )}
-                              {/* DiferenÃ§a acumulado */}
+                              {/* Diferen�a acumulado */}
                               {acumulado1 > 0 && acumulado2 > 0 && (
                                 <div className={`text-xs px-1 py-0.5 rounded ${
                                   diferencaAcumulado > 0 ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'
@@ -2050,14 +2050,14 @@ export default function ComparativoPage() {
                       })}
                     </div>
 
-                    {/* Resumo dos horÃ¡rios */}
+                    {/* Resumo dos hor�rios */}
                     <div className="mt-4 pt-4 border-t">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <div className="space-y-2">
-                          <h4 className="font-semibold text-slate-700">ðŸ“Š {parseDataSemTimezone(dadosComparativos[0].data).toLocaleDateString('pt-BR')}:</h4>
+                          <h4 className="font-semibold text-slate-700">📊 {parseDataSemTimezone(dadosComparativos[0].data).toLocaleDateString('pt-BR')}:</h4>
                           {(() => {
                             const horas1 = dadosComparativos[0].faturamento_horas.filter((h: any) => h.faturamento > 0)
-                            if (horas1.length === 0) return <span className="text-gray-500">Sem dados de horÃ¡rio</span>
+                            if (horas1.length === 0) return <span className="text-gray-500">Sem dados de hor�rio</span>
                             
                             const melhorHora1 = horas1.reduce((max, h) => h.faturamento > max.faturamento ? h : max)
                             const totalHoras1 = horas1.length
@@ -2065,19 +2065,19 @@ export default function ComparativoPage() {
                             
                             return (
                               <div className="space-y-1 text-xs text-slate-600">
-                                <div>ðŸ• Melhor horÃ¡rio: <span className="font-semibold">{formatHour(melhorHora1.hora)}</span> (R$ {melhorHora1.faturamento.toLocaleString('pt-BR', {minimumFractionDigits: 0})})</div>
-                                <div>ðŸ“ˆ HorÃ¡rios ativos: <span className="font-semibold">{totalHoras1}</span></div>
-                                <div>ðŸ’° Faturamento final: <span className="font-semibold">R$ {(ultimaHora1?.faturamento_acumulado || 0).toLocaleString('pt-BR', {minimumFractionDigits: 0})}</span></div>
-                                <div>ðŸ‘¥ Clientes finais: <span className="font-semibold">{ultimaHora1?.clientes_acumulados || 0}</span></div>
+                                <div>🕐 Melhor hor�rio: <span className="font-semibold">{formatHour(melhorHora1.hora)}</span> (R$ {melhorHora1.faturamento.toLocaleString('pt-BR', {minimumFractionDigits: 0})})</div>
+                                <div>📈 Hor�rios ativos: <span className="font-semibold">{totalHoras1}</span></div>
+                                <div>💰 Faturamento final: <span className="font-semibold">R$ {(ultimaHora1?.faturamento_acumulado || 0).toLocaleString('pt-BR', {minimumFractionDigits: 0})}</span></div>
+                                <div>👥 Clientes finais: <span className="font-semibold">{ultimaHora1?.clientes_acumulados || 0}</span></div>
                               </div>
                             )
                           })()}
                         </div>
                         <div className="space-y-2">
-                          <h4 className="font-semibold text-slate-700">ðŸ“Š {parseDataSemTimezone(dadosComparativos[1].data).toLocaleDateString('pt-BR')}:</h4>
+                          <h4 className="font-semibold text-slate-700">📊 {parseDataSemTimezone(dadosComparativos[1].data).toLocaleDateString('pt-BR')}:</h4>
                           {(() => {
                             const horas2 = dadosComparativos[1].faturamento_horas.filter((h: any) => h.faturamento > 0)
-                            if (horas2.length === 0) return <span className="text-gray-500">Sem dados de horÃ¡rio</span>
+                            if (horas2.length === 0) return <span className="text-gray-500">Sem dados de hor�rio</span>
                             
                             const melhorHora2 = horas2.reduce((max, h) => h.faturamento > max.faturamento ? h : max)
                             const totalHoras2 = horas2.length
@@ -2085,10 +2085,10 @@ export default function ComparativoPage() {
                             
                             return (
                               <div className="space-y-1 text-xs text-slate-600">
-                                <div>ðŸ• Melhor horÃ¡rio: <span className="font-semibold">{formatHour(melhorHora2.hora)}</span> (R$ {melhorHora2.faturamento.toLocaleString('pt-BR', {minimumFractionDigits: 0})})</div>
-                                <div>ðŸ“ˆ HorÃ¡rios ativos: <span className="font-semibold">{totalHoras2}</span></div>
-                                <div>ðŸ’° Faturamento final: <span className="font-semibold">R$ {(ultimaHora2?.faturamento_acumulado || 0).toLocaleString('pt-BR', {minimumFractionDigits: 0})}</span></div>
-                                <div>ðŸ‘¥ Clientes finais: <span className="font-semibold">{ultimaHora2?.clientes_acumulados || 0}</span></div>
+                                <div>🕐 Melhor hor�rio: <span className="font-semibold">{formatHour(melhorHora2.hora)}</span> (R$ {melhorHora2.faturamento.toLocaleString('pt-BR', {minimumFractionDigits: 0})})</div>
+                                <div>📈 Hor�rios ativos: <span className="font-semibold">{totalHoras2}</span></div>
+                                <div>💰 Faturamento final: <span className="font-semibold">R$ {(ultimaHora2?.faturamento_acumulado || 0).toLocaleString('pt-BR', {minimumFractionDigits: 0})}</span></div>
+                                <div>👥 Clientes finais: <span className="font-semibold">{ultimaHora2?.clientes_acumulados || 0}</span></div>
                               </div>
                             )
                           })()}
@@ -2101,12 +2101,12 @@ export default function ComparativoPage() {
             </div>
           )}
 
-          {/* Insights da ComparaÃ§Ã£o de Artistas */}
+          {/* Insights da Compara��o de Artistas */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <h3 className="text-lg font-bold text-slate-800 mb-4">ðŸ” AnÃ¡lise Comparativa</h3>
+            <h3 className="text-lg font-bold text-slate-800 mb-4">🔍 An�lise Comparativa</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h4 className="font-semibold text-slate-700 mb-3">ðŸ“Š Insights Identificados</h4>
+                <h4 className="font-semibold text-slate-700 mb-3">📊 Insights Identificados</h4>
                 <div className="space-y-2">
                   {gerarInsightArtistas()?.map((insight: any, i: any) => (
                     <div key={i} className="text-sm text-slate-600 bg-gray-50 p-2 rounded">
@@ -2116,7 +2116,7 @@ export default function ComparativoPage() {
                 </div>
               </div>
               <div>
-                <h4 className="font-semibold text-slate-700 mb-3">ðŸ’¡ EstratÃ©gias Recomendadas</h4>
+                <h4 className="font-semibold text-slate-700 mb-3">💡 Estrat�gias Recomendadas</h4>
                 <div className="space-y-2">
                   {(() => {
                     const { artista1, artista2 } = dadosArtistas
@@ -2126,10 +2126,10 @@ export default function ComparativoPage() {
                     const melhor = artista1.faturamentoMedio > artista2.faturamentoMedio ? artista1 : artista2
                     const pior = melhor === artista1 ? artista2 : artista1
                     
-                    recomendacoes.push(`ðŸŽ¯ Priorizar agendamento de ${melhor.nome} para datas especiais`)
-                    recomendacoes.push(`ðŸ“ˆ ${melhor.nome} tem ROI superior para eventos premium`)
-                    recomendacoes.push(`ðŸ”„ Analisar estratÃ©gias de ${pior.nome} para otimizar performance`)
-                    recomendacoes.push(`ðŸ’° ${melhor.nome} justifica investimento maior em cachÃª`)
+                    recomendacoes.push(`🎯 Priorizar agendamento de ${melhor.nome} para datas especiais`)
+                    recomendacoes.push(`📈 ${melhor.nome} tem ROI superior para eventos premium`)
+                    recomendacoes.push(`🔄 Analisar estrat�gias de ${pior.nome} para otimizar performance`)
+                    recomendacoes.push(`💰 ${melhor.nome} justifica investimento maior em cach�`)
                     
                     return recomendacoes.map((rec: any, i: any) => (
                       <div key={i} className="text-sm text-slate-600 bg-blue-50 p-2 rounded">
@@ -2149,18 +2149,18 @@ export default function ComparativoPage() {
         (tipoComparacao === 'artistas' && !dadosArtistas.artista1 && !dadosArtistas.artista2)) && (
         <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-100 text-center">
           <div className="text-6xl mb-4">
-            {tipoComparacao === 'datas-especificas' ? 'ðŸ“…' : 'ðŸŽ¤'}
+            {tipoComparacao === 'datas-especificas' ? '📅' : '🎤'}
           </div>
           <h3 className="text-lg font-semibold text-slate-800 mb-2">
             {tipoComparacao === 'datas-especificas' 
-              ? 'Selecione duas datas para comparaÃ§Ã£o' 
-              : 'Selecione dois artistas para comparaÃ§Ã£o'
+              ? 'Selecione duas datas para compara��o' 
+              : 'Selecione dois artistas para compara��o'
             }
           </h3>
           <p className="text-slate-500">
             {tipoComparacao === 'datas-especificas' 
-              ? 'Escolha duas datas diferentes e compare dados de faturamento, clientes, recorrÃªncia e performance.'
-              : 'Compare o desempenho de diferentes artistas para otimizar a programaÃ§Ã£o do seu bar.'
+              ? 'Escolha duas datas diferentes e compare dados de faturamento, clientes, recorr�ncia e performance.'
+              : 'Compare o desempenho de diferentes artistas para otimizar a programa��o do seu bar.'
             }
           </p>
         </div>

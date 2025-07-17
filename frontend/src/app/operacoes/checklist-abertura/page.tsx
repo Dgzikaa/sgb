@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -7,7 +7,7 @@ export default function ChecklistAberturaRedirect() {
   const router = useRouter()
 
   useEffect(() => {
-    // Redirecionar para a nova localizaÃ§Ã£o
+    // Redirecionar para a nova localiza��o
     router.replace('/checklists/abertura')
   }, [router])
 
@@ -15,9 +15,9 @@ export default function ChecklistAberturaRedirect() {
     <div className="flex items-center justify-center min-h-screen">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-        <p className="text-slate-600">Redirecionando para nova localizaÃ§Ã£o...</p>
+        <p className="text-slate-600">Redirecionando para nova localiza��o...</p>
         <p className="text-sm text-slate-400 mt-2">
-          Esta pÃ¡gina foi movida para <strong>/checklists/abertura</strong>
+          Esta p�gina foi movida para <strong>/checklists/abertura</strong>
         </p>
       </div>
     </div>

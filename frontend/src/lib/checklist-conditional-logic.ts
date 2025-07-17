@@ -1,29 +1,29 @@
-﻿// =====================================================
-// ðŸ”„ SISTEMA DE LÃ“GICA CONDICIONAL PARA CHECKLISTS
+// =====================================================
+// 🔄 SISTEMA DE L�GICA CONDICIONAL PARA CHECKLISTS
 // =====================================================
 // Implementa conforme documento Word:
-// "se clicar nÃ£o, aparece" - lÃ³gica condicional baseada em respostas
+// "se clicar n�o, aparece" - l�gica condicional baseada em respostas
 
 interface CondicaoItem {
   // Item que vai aparecer/desaparecer
   itemId: string
   
-  // CondiÃ§Ãµes para mostrar o item
+  // Condi��es para mostrar o item
   condicoes: {
-    // ID do item que controla a condiÃ§Ã£o
+    // ID do item que controla a condi��o
     itemDependencia: string
     
-    // Operador de comparaÃ§Ã£o
+    // Operador de compara��o
     operador: 'igual' | 'diferente' | 'maior_que' | 'menor_que' | 'contem' | 'nao_contem'
     
-    // Valor para comparaÃ§Ã£o
+    // Valor para compara��o
     valor: any
     
-    // Tipo de aÃ§Ã£o
+    // Tipo de a��o
     acao: 'mostrar' | 'ocultar' | 'obrigar' | 'opcional'
   }[]
   
-  // Operador lÃ³gico entre condiÃ§Ãµes (se mÃºltiplas)
+  // Operador l�gico entre condi��es (se m�ltiplas)
   operadorLogico: 'E' | 'OU'
 }
 
@@ -41,7 +41,7 @@ interface ItemCondicional {
 }
 
 // =====================================================
-// ðŸŽ¯ FUNÃ‡ÃƒO PRINCIPAL DE AVALIAÃ‡ÃƒO
+// 🎯 FUN��O PRINCIPAL DE AVALIA��O
 // =====================================================
 
 export function avaliarCondicoes(
@@ -49,7 +49,7 @@ export function avaliarCondicoes(
   itensCondicionais: CondicaoItem[]
 ): ItemCondicional[] {
   
-  // Criar mapa de valores atuais para rÃ¡pido acesso
+  // Criar mapa de valores atuais para r�pido acesso
   const valoresItens = new Map<string, any>()
   itens.forEach(item => {
     valoresItens.set(item.id, item.valor)
@@ -61,11 +61,11 @@ export function avaliarCondicoes(
     const regraCondicional = itensCondicionais.find((regra: any) => regra.itemId === item.id)
     
     if (!regraCondicional) {
-      // Item sem condiÃ§Ãµes, manter estado atual
+      // Item sem condi��es, manter estado atual
       return { ...item, visivel: true }
     }
 
-    // Avaliar condiÃ§Ãµes
+    // Avaliar condi��es
     const resultadoCondicoes = avaliarCondicoesItem(
       regraCondicional.condicoes,
       regraCondicional.operadorLogico || 'E',
@@ -108,7 +108,7 @@ export function avaliarCondicoes(
 }
 
 // =====================================================
-// ðŸ” AVALIAÃ‡ÃƒO DE CONDIÃ‡Ã•ES INDIVIDUAIS
+// 🔍 AVALIA��O DE CONDI��ES INDIVIDUAIS
 // =====================================================
 
 function avaliarCondicoesItem(
@@ -145,10 +145,10 @@ function avaliarCondicoesItem(
       condicoesFalharam.push(descricaoCondicao)
     }
 
-    detalhes.push(`${descricaoCondicao}: ${resultadoCondicao ? 'âœ…' : 'âŒ'}`)
+    detalhes.push(`${descricaoCondicao}: ${resultadoCondicao ? '��' : '��'}`)
   })
 
-  // Aplicar operador lÃ³gico
+  // Aplicar operador l�gico
   const resultado = operadorLogico === 'E' 
     ? resultados.every(r => r)
     : resultados.some(r => r)
@@ -197,7 +197,7 @@ function avaliarCondicaoSimples(
 }
 
 // =====================================================
-// ðŸ› ï¸ FUNÃ‡Ã•ES UTILITÃRIAS
+// 🛠️ FUN��ES UTILIT�RIAS
 // =====================================================
 
 export function criarRegraCondicional(
@@ -240,11 +240,11 @@ export function criarRegraCondicionalMultipla(
 }
 
 // =====================================================
-// ðŸ“‹ EXEMPLOS DE USO COMUNS
+// 📋 EXEMPLOS DE USO COMUNS
 // =====================================================
 
 export const ExemplosCondicionais = {
-  // Se clicar "NÃƒO" em limpeza, aparece campo de observaÃ§Ã£o
+  // Se clicar "N�O" em limpeza, aparece campo de observa��o
   seNaoApareceObservacao: (itemPrincipal: string, itemObservacao: string) =>
     criarRegraCondicional(itemObservacao, itemPrincipal, 'igual', false, 'mostrar'),
 
@@ -255,17 +255,17 @@ export const ExemplosCondicionais = {
       { itemDependencia: itemTemperatura, operador: 'maior_que', valor: maxTemp, acao: 'obrigar' }
     ], 'OU'),
 
-  // Se avaliaÃ§Ã£o baixa (â‰¤2), obrigar justificativa
+  // Se avalia��o baixa (��2), obrigar justificativa
   seAvaliacaoBaixaObrigarJustificativa: (itemAvaliacao: string, itemJustificativa: string) =>
     criarRegraCondicional(itemJustificativa, itemAvaliacao, 'menor_que', 3, 'obrigar'),
 
-  // Se equipamento nÃ£o funcionando, mostrar campos de manutenÃ§Ã£o
+  // Se equipamento n�o funcionando, mostrar campos de manuten��o
   seEquipamentoNaoFuncionandoMostrarManutencao: (itemEquipamento: string, itensManutencao: string[]) =>
     itensManutencao.map((itemManutencao: any) =>
       criarRegraCondicional(itemManutencao, itemEquipamento, 'igual', false, 'mostrar')
     ),
 
-  // Se tipo de problema selecionado, mostrar campos especÃ­ficos
+  // Se tipo de problema selecionado, mostrar campos espec�ficos
   seTipoProblemaShowCampos: (itemTipoProblema: string, valor: string, itensEspecificos: string[]) =>
     itensEspecificos.map((item: any) =>
       criarRegraCondicional(item, itemTipoProblema, 'igual', valor, 'mostrar')
@@ -273,7 +273,7 @@ export const ExemplosCondicionais = {
 }
 
 // =====================================================
-// ðŸŽ® HOOK PARA COMPONENTES REACT
+// 🎮 HOOK PARA COMPONENTES REACT
 // =====================================================
 
 export function useConditionalLogic(
@@ -294,7 +294,7 @@ export function useConditionalLogic(
       item.id === itemId ? { ...item, valor: novoValor } : item
     )
     
-    // Reavaliar condiÃ§Ãµes apÃ³s mudanÃ§a
+    // Reavaliar condi��es ap�s mudan�a
     return processarItens(itensAtualizados)
   }
 

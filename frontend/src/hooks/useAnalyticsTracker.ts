@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import { useUser } from '@/contexts/UserContext'
 import { useBar } from '@/contexts/BarContext'
 import { usePathname } from 'next/navigation'
@@ -30,14 +30,14 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
   const eventQueue = useRef<any[]>([])
   const isFlushingQueue = useRef<boolean>(false)
 
-  // Gerar session ID Ãºnico
+  // Gerar session ID �nico
   useEffect(() => {
     if (!sessionId.current) {
       sessionId.current = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     }
   }, [])
 
-  // Detectar informaÃ§Ãµes do dispositivo
+  // Detectar informa��es do dispositivo
   const getDeviceInfo = useCallback(() => {
     if (typeof window === 'undefined' || !navigator) {
       return { deviceType: 'desktop', browser: 'Unknown', userAgent: 'Server' }
@@ -60,7 +60,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
     return { deviceType, browser, userAgent }
   }, [])
 
-  // FunÃ§Ã£o para enviar eventos em lote
+  // Fun��o para enviar eventos em lote
   const flushEventQueue = useCallback(async () => {
     if (isFlushingQueue.current || eventQueue.current.length === 0) return
 
@@ -94,11 +94,11 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
     return () => clearInterval(interval)
   }, [flushEventQueue])
 
-  // Flush na saÃ­da da pÃ¡gina
+  // Flush na sa�da da p�gina
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (eventQueue.current.length > 0 && typeof window !== 'undefined' && navigator && navigator.sendBeacon) {
-        // Usar sendBeacon para envio garantido na saÃ­da
+        // Usar sendBeacon para envio garantido na sa�da
         navigator.sendBeacon(
           '/api/analytics/eventos',
           JSON.stringify({ eventos: eventQueue.current })
@@ -110,7 +110,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [])
 
-  // FunÃ§Ã£o principal para tracking
+  // Fun��o principal para tracking
   const trackEvent = useCallback((eventData: EventData) => {
     if (!selectedBar) return
 
@@ -128,7 +128,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
       user_agent: deviceInfo.userAgent
     }
 
-    // Adicionar Ã  fila
+    // Adicionar � fila
     eventQueue.current.push(evento)
 
     // Flush imediato se a fila estiver cheia
@@ -137,9 +137,9 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
     }
   }, [user, selectedBar, pathname, getDeviceInfo, flushEventQueue])
 
-  // Tracking automÃ¡tico de page view
+  // Tracking autom�tico de page view
   const trackPageView = useCallback((pagina?: string) => {
-    // Calcular tempo na pÃ¡gina anterior
+    // Calcular tempo na p�gina anterior
     const tempoGasto = Math.round((Date.now() - pageStartTime.current) / 1000)
     
     trackEvent({
@@ -152,7 +152,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
       }
     })
 
-    // Reset timer para nova pÃ¡gina
+    // Reset timer para nova p�gina
     pageStartTime.current = Date.now()
   }, [pathname, trackEvent])
 
@@ -166,7 +166,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
     })
   }, [trackEvent])
 
-  // Tracking de aÃ§Ãµes
+  // Tracking de a��es
   const trackAction = useCallback((acao: string, dados?: Record<string, any>) => {
     trackEvent({
       evento_tipo: 'action',
@@ -203,7 +203,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
   // Auto tracking de page view quando pathname muda
   useEffect(() => {
     trackPageView()
-  }, [pathname]) // Removido trackPageView da dependÃªncia para evitar loop
+  }, [pathname]) // Removido trackPageView da depend�ncia para evitar loop
 
   return {
     trackEvent,
@@ -215,24 +215,24 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
   }
 }
 
-// Hook simplificado para uso rÃ¡pido
+// Hook simplificado para uso r�pido
 export function useQuickTracker() {
   const { trackClick, trackAction } = useAnalyticsTracker()
   
   return {
-    // Tracking rÃ¡pido de botÃµes
+    // Tracking r�pido de bot�es
     onButtonClick: (buttonName: string, data?: Record<string, any>) => 
       trackClick(`button:${buttonName}`, data),
     
-    // Tracking rÃ¡pido de links
+    // Tracking r�pido de links
     onLinkClick: (linkName: string, href?: string) => 
       trackClick(`link:${linkName}`, { href }),
     
-    // Tracking rÃ¡pido de formulÃ¡rios
+    // Tracking r�pido de formul�rios
     onFormSubmit: (formName: string, data?: Record<string, any>) => 
       trackAction(`form_submit:${formName}`, data),
     
-    // Tracking rÃ¡pido de modais
+    // Tracking r�pido de modais
     onModalOpen: (modalName: string) => 
       trackAction(`modal_open:${modalName}`),
     

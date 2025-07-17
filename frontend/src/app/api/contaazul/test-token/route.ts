@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getValidContaAzulToken } from '@/lib/contaazul-auth-helper'
 
 export const dynamic = 'force-dynamic'
@@ -8,19 +8,19 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const barId = searchParams.get('barId') || '3'
     
-    console.log('ðŸ”‘ TESTANDO TOKEN CONTAAZUL...')
+    console.log('🔑 TESTANDO TOKEN CONTAAZUL...')
 
     const accessToken = await getValidContaAzulToken(parseInt(barId))
     
     if (!accessToken) {
       return NextResponse.json({ 
-        error: 'Token indisponÃ­vel',
+        error: 'Token indispon�vel',
         token_length: 0,
         token_valid: false
       }, { status: 401 })
     }
 
-    console.log('âœ… Token obtido:', accessToken.substring(0, 20) + '...')
+    console.log('�� Token obtido:', accessToken.substring(0, 20) + '...')
 
     // Teste simples com categorias
     const response = await fetch('https://api.contaazul.com/v1/financeiro/categorias', {
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('âŒ Erro no teste de token:', error)
+    console.error('�� Erro no teste de token:', error)
     return NextResponse.json({ 
       error: 'Erro interno',
       details: error instanceof Error ? error.message : 'Erro desconhecido'

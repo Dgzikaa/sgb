@@ -4,15 +4,15 @@ const nextConfig = {
     optimizePackageImports: ['lucide-react', 'recharts'],
   },
   
-  // Otimiza√ß√µes de performance
+  // Otimiza·ß·µes de performance
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   
-  // Configura√ß√£o de bundling otimizada
+  // Configura·ß·£o de bundling otimizada
   swcMinify: true,
   
-  // Configura√ß√£o de imagens
+  // Configura·ß·£o de imagens
   images: {
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 60,
@@ -20,7 +20,7 @@ const nextConfig = {
   
   // Webpack customizado
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Otimiza√ß√µes de produ√ß√£o
+    // Otimiza·ß·µes de produ·ß·£o
     if (!dev && !isServer) {
       config.optimization.splitChunks = {
         chunks: 'all',

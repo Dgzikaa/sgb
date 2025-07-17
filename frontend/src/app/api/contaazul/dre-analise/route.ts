@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -20,19 +20,19 @@ function createSupabaseClient() {
 const mapeamentoCategoriaDRE: { [key: string]: string } = {
   
   // === RECEITAS ===
-  'Stone CrÃ©dito': 'receitas',
-  'Stone CrÃƒÂ©dito': 'receitas',
-  'Stone DÃ©bito': 'receitas', 
-  'Stone DÃƒÂ©bito': 'receitas',
+  'Stone Cr�dito': 'receitas',
+  'Stone Crჩdito': 'receitas',
+  'Stone D�bito': 'receitas', 
+  'Stone Dჩbito': 'receitas',
   'Stone Pix': 'receitas',
   'Receita de Eventos': 'receitas',
-  'Receita Ã  Vista': 'receitas',
-  'Receitas de serviÃ§os': 'receitas',
+  'Receita � Vista': 'receitas',
+  'Receitas de servi�os': 'receitas',
   'Outras Receitas': 'receitas',
   'Pix Direto na Conta': 'receitas',
   'Dinheiro': 'receitas',
 
-  // === CUSTOS VARIÃVEIS ===
+  // === CUSTOS VARI�VEIS ===
   'Custo Fixo': 'custos_variaveis',
   'MC': 'custos_variaveis', 
   'Breakeven': 'custos_variaveis',
@@ -40,10 +40,10 @@ const mapeamentoCategoriaDRE: { [key: string]: string } = {
   'Stone Taxa Entrega': 'custos_variaveis',
   'TaxaContaAzul': 'custos_variaveis',
   'IMPOSTO': 'custos_variaveis',
-  'COMISSÃƒO 10%': 'custos_variaveis',
+  'COMISS�O 10%': 'custos_variaveis',
   // NOMES EXATOS DA PLANILHA:
-  'Custos VariÃ¡veis': 'custos_variaveis',
-  'CUSTOS VARIÃVEIS': 'custos_variaveis',
+  'Custos Vari�veis': 'custos_variaveis',
+  'CUSTOS VARI�VEIS': 'custos_variaveis',
 
   // === CMV - CUSTO MERCADORIA VENDIDA ===
   'Custo insumos (CMV)': 'cmv',
@@ -59,11 +59,11 @@ const mapeamentoCategoriaDRE: { [key: string]: string } = {
   'CUSTO INSUMOS': 'cmv',
   'CUSTO INSUMOS (CMV)': 'cmv',
 
-  // === CMO - MÃƒO DE OBRA ===
-  'MÃ£o-deObra': 'cmo',
-  'MÃƒO-DEOBRA': 'cmo',
-  'MÃ£o de Obra': 'cmo',
-  'MÃƒO DE OBRA': 'cmo',
+  // === CMO - M�O DE OBRA ===
+  'M�o-deObra': 'cmo',
+  'M�O-DEOBRA': 'cmo',
+  'M�o de Obra': 'cmo',
+  'M�O DE OBRA': 'cmo',
   'SALARIO FUNCIONARIOS': 'cmo',
   'VALE TRANSPORTE': 'cmo',
   'UNIFORMES': 'cmo', 
@@ -71,79 +71,79 @@ const mapeamentoCategoriaDRE: { [key: string]: string } = {
   'FGTS': 'cmo',
   'SAL?RIOS': 'cmo',
   'Salarios': 'cmo',
-  'SalÃ¡rio': 'cmo',
+  'Sal�rio': 'cmo',
   'SALARIOS': 'cmo',
   'INSS': 'cmo',
   'DECIMO TERCEIRO': 'cmo',
   'VR E VA': 'cmo',
   'Plano de saude': 'cmo',
   'Recursos Humanos': 'cmo',
-  'ALIMENTAÃ‡ÃƒO': 'cmo',
+  'ALIMENTA��O': 'cmo',
   'ADICIONAIS': 'cmo',
   'FREELA ATENDIMENTO': 'cmo',
   'FREELA BAR': 'cmo',
   'FREELA COZINHA': 'cmo',
   'FREELA LIMPEZA': 'cmo',
-  'FREELA SEGURANÃ‡A': 'cmo',
+  'FREELA SEGURAN�A': 'cmo',
   'PRO LABORE': 'cmo',
-  'PROVISÃƒO TRABALHISTA': 'cmo',
+  'PROVIS�O TRABALHISTA': 'cmo',
 
   // === DESPESAS COMERCIAIS ===
   'Despesas Comerciais': 'despesas_comerciais',
   'Marketing': 'despesas_comerciais',
   'MARKETING': 'despesas_comerciais',
   'Publicidade': 'despesas_comerciais',
-  'AtraÃ§Ãµes ProgramaÃ§Ã£o': 'despesas_comerciais',
-  'ProduÃ§Ã£o Eventos': 'despesas_comerciais',
+  'Atra��es Programa��o': 'despesas_comerciais',
+  'Produ��o Eventos': 'despesas_comerciais',
 
   // === DESPESAS ADMINISTRATIVAS ===
   'Despesas Administrativas': 'despesas_administrativas',
   'Administrativo': 'despesas_administrativas',
   'ADMNISTRATIVO': 'despesas_administrativas',
   'ESCRITORIO': 'despesas_administrativas',
-  'Administrativo OrdinÃ¡rio': 'despesas_administrativas',
-  'EscritÃ³rio Central': 'despesas_administrativas',
+  'Administrativo Ordin�rio': 'despesas_administrativas',
+  'Escrit�rio Central': 'despesas_administrativas',
 
   // === DESPESAS OPERACIONAIS ===
   'Despesas Operacionais': 'despesas_operacionais',
   'Equipamentos': 'despesas_operacionais',
-  'UtensÃ­lios': 'despesas_operacionais',
+  'Utens�lios': 'despesas_operacionais',
   'Limpeza': 'despesas_operacionais',
   'Tarifas': 'despesas_operacionais',
   'iFoodGuru': 'despesas_operacionais',
-  'Outros OperaÃƒÂ§ÃƒÂ£o': 'despesas_operacionais',
-  'Materiais OperaÃ§Ã£o': 'despesas_operacionais',
-  'Materiais de Limpeza e DescartÃ¡veis': 'despesas_operacionais',
+  'Outros Operaყუo': 'despesas_operacionais',
+  'Materiais Opera��o': 'despesas_operacionais',
+  'Materiais de Limpeza e Descart�veis': 'despesas_operacionais',
   'Estorno': 'despesas_operacionais',
-  'Outros OperaÃ§Ã£o': 'despesas_operacionais',
+  'Outros Opera��o': 'despesas_operacionais',
 
-  // === DESPESAS DE OCUPAÃ‡ÃƒO ===
-  'Despesas de OcupaÃ§Ã£o (Contas)': 'despesas_ocupacao',
+  // === DESPESAS DE OCUPA��O ===
+  'Despesas de Ocupa��o (Contas)': 'despesas_ocupacao',
   'Aluguel': 'despesas_ocupacao',
   'Energia': 'despesas_ocupacao',
   'Internet': 'despesas_ocupacao',
   'ENERGIA ELETRICA': 'despesas_ocupacao',
   'Telefone': 'despesas_ocupacao',
-  'CondomÃ­nio': 'despesas_ocupacao',
-  'ÃƒGUA': 'despesas_ocupacao',
-  'ALUGUEL/CONDOMÃNIO/IPTU': 'despesas_ocupacao',
-  'ÃGUA': 'despesas_ocupacao',
-  'MANUTENÃ‡ÃƒO': 'despesas_ocupacao',
-  'GÃS': 'despesas_ocupacao',
+  'Condom�nio': 'despesas_ocupacao',
+  '�GUA': 'despesas_ocupacao',
+  'ALUGUEL/CONDOM�NIO/IPTU': 'despesas_ocupacao',
+  '�GUA': 'despesas_ocupacao',
+  'MANUTEN��O': 'despesas_ocupacao',
+  'G�S': 'despesas_ocupacao',
   'LUZ': 'despesas_ocupacao',
 
-  // === NÃƒO OPERACIONAIS ===
-  'NÃ£o Operacionais': 'nao_operacionais',
-  'Taxas BancÃ¡rias': 'nao_operacionais',
-  'EmprÃ©stimos de SÃ³cios': 'nao_operacionais',
-  'Outros SÃ³cios': 'nao_operacionais',
+  // === N�O OPERACIONAIS ===
+  'N�o Operacionais': 'nao_operacionais',
+  'Taxas Banc�rias': 'nao_operacionais',
+  'Empr�stimos de S�cios': 'nao_operacionais',
+  'Outros S�cios': 'nao_operacionais',
   'Contratos': 'nao_operacionais',
 
   // === INVESTIMENTOS ===
   'Investimentos': 'investimentos',
-  'ConstruÃ§Ã£o': 'investimentos',
+  'Constru��o': 'investimentos',
   'Reformas': 'investimentos',
-  'MobÃ­lia': 'investimentos',
+  'Mob�lia': 'investimentos',
   'MOBILIARIO': 'investimentos',
   'Softwares': 'investimentos',
   'Dividendos': 'investimentos',
@@ -157,11 +157,11 @@ const mapeamentoCategoriaDRE: { [key: string]: string } = {
   // === EBITDA (tratado como operacional) ===
   'EBITDA': 'despesas_operacionais',
 
-  // === SÃ“CIOS (tratado como nÃ£o operacional) ===
-  'SÃ³cios': 'nao_operacionais',
+  // === S�CIOS (tratado como n�o operacional) ===
+  'S�cios': 'nao_operacionais',
 }
 
-// âœ… FUNÃ‡ÃƒO PARA MAPEAR CATEGORIA PARA GRUPO DRE - VERSÃƒO MELHORADA
+// �� FUN��O PARA MAPEAR CATEGORIA PARA GRUPO DRE - VERS�O MELHORADA
 function mapearCategoriaParaGrupo(nomeCategoria: string): string | null {
   if (!nomeCategoria) return null
   
@@ -170,22 +170,22 @@ function mapearCategoriaParaGrupo(nomeCategoria: string): string | null {
     return mapeamentoCategoriaDRE[nomeCategoria]
   }
 
-  // Normalizar nome para busca (remover acentos, espaÃ§os extras, etc)
+  // Normalizar nome para busca (remover acentos, espa�os extras, etc)
   const normalizar = (texto: string) => texto
     .toLowerCase()
     .trim()
     .replace(/\s+/g, ' ')
-    .replace(/[Ã Ã¡Ã¢Ã£Ã¤Ã¥]/g, 'a')
-    .replace(/[Ã¨Ã©ÃªÃ«]/g, 'e')
-    .replace(/[Ã¬Ã­Ã®Ã¯]/g, 'i')
-    .replace(/[Ã²Ã³Ã´ÃµÃ¶]/g, 'o')
-    .replace(/[Ã¹ÃºÃ»Ã¼]/g, 'u')
-    .replace(/[Ã§]/g, 'c')
+    .replace(/[������]/g, 'a')
+    .replace(/[����]/g, 'e')
+    .replace(/[����]/g, 'i')
+    .replace(/[�����]/g, 'o')
+    .replace(/[����]/g, 'u')
+    .replace(/[�]/g, 'c')
     .replace(/[-_]/g, ' ')
 
   const nomeNormalizado = normalizar(nomeCategoria)
 
-  // Busca por palavras-chave especÃ­ficas para categorias importantes
+  // Busca por palavras-chave espec�ficas para categorias importantes
   if (nomeNormalizado.includes('custo') && (nomeNormalizado.includes('variav') || nomeNormalizado.includes('fixo'))) {
     return 'custos_variaveis'
   }
@@ -218,7 +218,7 @@ function mapearCategoriaParaGrupo(nomeCategoria: string): string | null {
     }
   }
   
-  return null // Categoria nÃ£o mapeada
+  return null // Categoria n�o mapeada
 }
 
 export async function GET(request: NextRequest) {
@@ -229,25 +229,25 @@ export async function GET(request: NextRequest) {
     const ano = searchParams.get('ano') // formato: '2024' ou null
     
     if (!barId) {
-      return NextResponse.json({ error: 'Bar ID Ã© obrigatÃ³rio' }, { status: 400 })
+      return NextResponse.json({ error: 'Bar ID � obrigat�rio' }, { status: 400 })
     }
 
-    console.log(`ðŸ“Š CALCULANDO DRE PARA BAR ${barId} - MÃªs: ${mes || 'TODOS'} - Ano: ${ano || 'TODOS'}`)
+    console.log(`📊 CALCULANDO DRE PARA BAR ${barId} - M�s: ${mes || 'TODOS'} - Ano: ${ano || 'TODOS'}`)
 
     const supabase = createSupabaseClient()
 
-    // ðŸ” BUSCAR CATEGORIAS COM MAPEAMENTO
+    // 🔍 BUSCAR CATEGORIAS COM MAPEAMENTO
     const { data: categorias, error: errorCategorias } = await supabase
       .from('contaazul_categorias')
       .select('id, nome')
       .eq('bar_id', parseInt(barId))
 
     if (errorCategorias) {
-      console.error('âŒ Erro ao buscar categorias:', errorCategorias)
+      console.error('�� Erro ao buscar categorias:', errorCategorias)
       return NextResponse.json({ error: 'Erro ao buscar categorias' }, { status: 500 })
     }
 
-    // ðŸ“‹ CRIAR MAPA DE CATEGORIAS ID -> NOME E GRUPO
+    // 📋 CRIAR MAPA DE CATEGORIAS ID -> NOME E GRUPO
     const mapaCategorias: Record<string, { nome: string, grupo: string | null }> = {}
     categorias?.forEach((cat: { id: string, nome: string }) => {
       mapaCategorias[cat.id] = {
@@ -256,9 +256,9 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    console.log(`ðŸ“‹ Categorias carregadas: ${Object.keys(mapaCategorias).length}`)
+    console.log(`📋 Categorias carregadas: ${Object.keys(mapaCategorias).length}`)
 
-    // ðŸ” FUNÃ‡ÃƒO PARA BUSCAR TODOS OS EVENTOS FINANCEIROS COM PAGINAÃ‡ÃƒO
+    // 🔍 FUN��O PARA BUSCAR TODOS OS EVENTOS FINANCEIROS COM PAGINA��O
     async function buscarTodosEventosFinanceiros() {
       const allEventos: any[] = []
       let offset = 0
@@ -273,34 +273,34 @@ export async function GET(request: NextRequest) {
           .not('categoria_id', 'is', null)
           .range(offset, offset + limit - 1)
 
-        // ðŸ“… APLICAR FILTROS DE DATA
+        // 📅 APLICAR FILTROS DE DATA
         if (mes) {
-          // Filtro por mÃªs especÃ­fico (ex: 2025-01)
+          // Filtro por m�s espec�fico (ex: 2025-01)
           const [ano, mesNum] = mes.split('-')
           const startDate = `${mes}-01`
-          // Calcular Ãºltimo dia do mÃªs corretamente
+          // Calcular �ltimo dia do m�s corretamente
           const ultimoDia = new Date(parseInt(ano), parseInt(mesNum), 0).getDate()
           const endDate = `${mes}-${ultimoDia.toString().padStart(2, '0')}`
-          console.log(`ðŸ“… Filtro de data: ${startDate} atÃ© ${endDate}`)
+          console.log(`📅 Filtro de data: ${startDate} at� ${endDate}`)
           query = query.gte('data_competencia', startDate).lte('data_competencia', endDate)
         } else if (ano) {
           // Filtro por ano (ex: 2025)
           query = query.gte('data_competencia', `${ano}-01-01`).lte('data_competencia', `${ano}-12-31`)
         } else {
-          // âœ… PADRÃƒO: Dados de 2025 se nÃ£o especificado
+          // �� PADR�O: Dados de 2025 se n�o especificado
           query = query.gte('data_competencia', '2025-01-01').lte('data_competencia', '2025-12-31')
         }
 
         const { data, error } = await query
 
         if (error) {
-          console.error('âŒ Erro ao buscar eventos na pÃ¡gina:', offset, error)
+          console.error('�� Erro ao buscar eventos na p�gina:', offset, error)
           throw error
         }
 
         if (data && data.length > 0) {
           allEventos.push(...data)
-          console.log(`ðŸ“„ PÃ¡gina ${Math.floor(offset/limit) + 1}: ${data.length} eventos | Total: ${allEventos.length}`)
+          console.log(`📄 P�gina ${Math.floor(offset/limit) + 1}: ${data.length} eventos | Total: ${allEventos.length}`)
           
           if (data.length < limit) {
             hasMore = false
@@ -315,12 +315,12 @@ export async function GET(request: NextRequest) {
       return allEventos
     }
 
-    // ðŸ” BUSCAR TODOS OS EVENTOS FINANCEIROS COM PAGINAÃ‡ÃƒO
+    // 🔍 BUSCAR TODOS OS EVENTOS FINANCEIROS COM PAGINA��O
     const eventos = await buscarTodosEventosFinanceiros()
 
-    console.log(`ðŸ’° Eventos encontrados: ${eventos?.length || 0}`)
+    console.log(`💰 Eventos encontrados: ${eventos?.length || 0}`)
 
-    // ðŸ“Š CALCULAR DRE
+    // 📊 CALCULAR DRE
     const dre = {
       receitas: {
         total: 0,
@@ -347,7 +347,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // ðŸ“ˆ PROCESSAR CADA EVENTO
+    // 📈 PROCESSAR CADA EVENTO
     eventos?.forEach((evento: { valor: string, categoria_id: string, tipo: string, data_competencia: string }) => {
       const valor = parseFloat(evento.valor || '0')
       const categoriaInfo = mapaCategorias[evento.categoria_id]
@@ -355,7 +355,7 @@ export async function GET(request: NextRequest) {
       dre.estatisticas.total_eventos++
 
       if (!categoriaInfo) {
-        // Categoria nÃ£o encontrada
+        // Categoria n�o encontrada
         dre.estatisticas.eventos_nao_mapeados++
         return
       }
@@ -364,7 +364,7 @@ export async function GET(request: NextRequest) {
       const grupo = categoriaInfo.grupo
 
       if (!grupo) {
-        // Categoria nÃ£o mapeada para DRE
+        // Categoria n�o mapeada para DRE
         dre.categorias_nao_mapeadas[nomeCategoria] = (dre.categorias_nao_mapeadas[nomeCategoria] || 0) + valor
         dre.estatisticas.eventos_nao_mapeados++
         return
@@ -372,7 +372,7 @@ export async function GET(request: NextRequest) {
 
       dre.estatisticas.eventos_mapeados++
 
-      // âœ… MAPEAR PARA ESTRUTURA DRE
+      // �� MAPEAR PARA ESTRUTURA DRE
       if (grupo === 'receitas') {
         dre.receitas.total += valor
         dre.receitas.detalhes[nomeCategoria] = (dre.receitas.detalhes[nomeCategoria] || 0) + valor
@@ -406,13 +406,13 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // ðŸ“Š CÃLCULOS DRE CORRETOS
+    // 📊 C�LCULOS DRE CORRETOS
     const receitaTotal = dre.receitas.total
     
-    // CUSTOS: CMV + CMO + Custos VariÃ¡veis
+    // CUSTOS: CMV + CMO + Custos Vari�veis
     const custosTotal = dre.custos.cmv.total + dre.custos.cmo.total + dre.custos.custos_variaveis.total
     
-    // DESPESAS OPERACIONAIS: Comerciais + Administrativas + Operacionais + OcupaÃ§Ã£o + NÃ£o Operacionais
+    // DESPESAS OPERACIONAIS: Comerciais + Administrativas + Operacionais + Ocupa��o + N�o Operacionais
     const despesasOperacionais = dre.despesas.despesas_comerciais.total + 
                                 dre.despesas.despesas_administrativas.total + 
                                 dre.despesas.despesas_operacionais.total + 
@@ -422,7 +422,7 @@ export async function GET(request: NextRequest) {
     // TOTAL DE DESPESAS: Operacionais + Investimentos
     const despesasTotal = despesasOperacionais + dre.despesas.investimentos.total
     
-    // CÃLCULOS DRE:
+    // C�LCULOS DRE:
     const lucroBruto = receitaTotal - dre.custos.cmv.total
     const lucroOperacional = lucroBruto - dre.custos.cmo.total - dre.custos.custos_variaveis.total - despesasOperacionais
     const lucroLiquido = lucroOperacional - dre.despesas.investimentos.total
@@ -438,7 +438,7 @@ export async function GET(request: NextRequest) {
         lucro_operacional: lucroOperacional,
         lucro_liquido: lucroLiquido,
         
-        // ðŸ“ˆ PERCENTUAIS SOBRE RECEITA
+        // 📈 PERCENTUAIS SOBRE RECEITA
         percentuais: {
           cmo_percent: receitaTotal > 0 ? (dre.custos.cmo.total / receitaTotal) * 100 : 0,
           cmv_percent: receitaTotal > 0 ? (dre.custos.cmv.total / receitaTotal) * 100 : 0,
@@ -453,12 +453,12 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    console.log(`âœ… DRE calculada - Receitas: R$ ${receitaTotal.toFixed(2)} - Eventos mapeados: ${dre.estatisticas.eventos_mapeados}/${dre.estatisticas.total_eventos}`)
+    console.log(`�� DRE calculada - Receitas: R$ ${receitaTotal.toFixed(2)} - Eventos mapeados: ${dre.estatisticas.eventos_mapeados}/${dre.estatisticas.total_eventos}`)
 
     return NextResponse.json(resultado)
 
   } catch (error) {
-    console.error('âŒ Erro interno na API DRE:', error)
+    console.error('�� Erro interno na API DRE:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
       details: error instanceof Error ? error.message : 'Erro desconhecido'

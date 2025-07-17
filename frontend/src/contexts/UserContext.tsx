@@ -1,4 +1,4 @@
-Ôªø'use client'
+'use client'
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
 
@@ -28,7 +28,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [isInitialized, setIsInitialized] = useState(false)
 
-  // Carregar dados do usu√É¬°rio ao inicializar
+  // Carregar dados do usu·°rio ao inicializar
   useEffect(() => {
     // Only run on client side
     if (typeof window === 'undefined') {
@@ -39,7 +39,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     loadUserData()
   }, [])
 
-  // Configurar listeners para atualiza√É¬ß√É¬µes
+  // Configurar listeners para atualiza·ß·µes
   useEffect(() => {
     if (typeof window === 'undefined') return
 
@@ -84,7 +84,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       if (userData) {
         const parsedUser = JSON.parse(userData)
         
-        // Validar se os dados do usu√É¬°rio s√É¬£o v√É¬°lidos
+        // Validar se os dados do usu·°rio s·£o v·°lidos
         if (parsedUser && parsedUser.id && parsedUser.email && parsedUser.nome) {
           setUser(parsedUser)
         } else {
@@ -95,7 +95,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         setUser(null)
       }
     } catch (error) {
-      console.error('√¢¬ù≈í Erro ao carregar dados do usu√É¬°rio:', error)
+      console.error('ùå Erro ao carregar dados do usu·°rio:', error)
       // Limpar dados corrompidos
       localStorage.removeItem('sgb_user')
       setUser(null)
@@ -115,7 +115,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         window.dispatchEvent(new CustomEvent('userDataUpdated'))
       }
     } catch (error) {
-      console.error('√¢¬ù≈í Erro ao atualizar dados do usu√É¬°rio:', error)
+      console.error('ùå Erro ao atualizar dados do usu·°rio:', error)
     }
   }
 
@@ -145,7 +145,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         setUser(null)
       }
     } catch (error) {
-      console.error('Erro ao recarregar dados do usu√É¬°rio:', error)
+      console.error('Erro ao recarregar dados do usu·°rio:', error)
       setUser(null)
     }
   }

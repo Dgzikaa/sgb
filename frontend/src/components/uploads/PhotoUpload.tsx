@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useRef } from 'react'
 import { Camera, Upload, X, Image as ImageIcon } from 'lucide-react'
@@ -34,7 +34,7 @@ export default function PhotoUpload({
   
   const { uploadFile, uploads } = useFileUpload()
 
-  // FunÃ§Ã£o para capturar foto da cÃ¢mera
+  // Fun��o para capturar foto da c�mera
   const handleCameraCapture = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (!files || files.length === 0) return
@@ -42,7 +42,7 @@ export default function PhotoUpload({
     await processFiles(Array.from(files))
   }
 
-  // FunÃ§Ã£o para upload de arquivo
+  // Fun��o para upload de arquivo
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (!files || files.length === 0) return
@@ -80,10 +80,10 @@ export default function PhotoUpload({
             onUploadComplete(result)
           }
           
-          console.log('âœ… Upload concluÃ­do:', result.filename)
+          console.log('�� Upload conclu�do:', result.filename)
           
         } catch (error: any) {
-          console.error('âŒ Erro no upload:', error)
+          console.error('�� Erro no upload:', error)
           
           if (onError) {
             onError(error.message)
@@ -92,7 +92,7 @@ export default function PhotoUpload({
       }
 
     } catch (error: any) {
-      console.error('âŒ Erro no processamento:', error)
+      console.error('�� Erro no processamento:', error)
       
       if (onError) {
         onError(error.message)
@@ -111,15 +111,15 @@ export default function PhotoUpload({
     setPreviews(prev => prev.filter((_, i) => i !== index))
   }
 
-  // Verificar se hÃ¡ uploads em progresso
+  // Verificar se h� uploads em progresso
   const uploadsInProgress = Object.values(uploads).some(upload => upload.loading)
   const uploadProgress = Object.values(uploads).find((upload: any) => upload.loading)?.progress || 0
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {/* BotÃµes de Upload */}
+      {/* Bot�es de Upload */}
       <div className="flex flex-col sm:flex-row gap-3">
-        {/* BotÃ£o CÃ¢mera */}
+        {/* Bot�o C�mera */}
         <button
           type="button"
           onClick={() => cameraInputRef.current?.click()}
@@ -130,7 +130,7 @@ export default function PhotoUpload({
           <span>Capturar Foto</span>
         </button>
 
-        {/* BotÃ£o Galeria */}
+        {/* Bot�o Galeria */}
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
@@ -183,12 +183,12 @@ export default function PhotoUpload({
         </div>
       )}
 
-      {/* InformaÃ§Ãµes sobre upload */}
+      {/* Informa��es sobre upload */}
       <div className="text-xs text-gray-500 space-y-1">
-        <p>ðŸ“¸ Formatos aceitos: JPEG, PNG, WebP</p>
-        <p>ðŸ“ Tamanho mÃ¡ximo: 10MB por foto</p>
+        <p>📸 Formatos aceitos: JPEG, PNG, WebP</p>
+        <p>📏 Tamanho m�ximo: 10MB por foto</p>
         {compress && (
-          <p>ðŸ—œï¸ CompressÃ£o automÃ¡tica ativada (mÃ¡x. {maxWidth}px, qualidade {Math.round(quality * 100)}%)</p>
+          <p>🗜️ Compress�o autom�tica ativada (m�x. {maxWidth}px, qualidade {Math.round(quality * 100)}%)</p>
         )}
       </div>
 

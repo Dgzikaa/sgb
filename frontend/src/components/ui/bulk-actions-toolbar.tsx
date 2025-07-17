@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import React from 'react'
 import { X, Trash2, Edit, Archive, Download, Share2, Copy, MoreHorizontal } from 'lucide-react'
@@ -56,7 +56,7 @@ export function BulkActionsToolbar({
     if (action.requiresConfirmation) {
       const confirmed = window.confirm(
         action.confirmationMessage || 
-        `Confirma a aÃ§Ã£o "${action.label}" em ${selectedCount} item(s)?`
+        `Confirma a a��o "${action.label}" em ${selectedCount} item(s)?`
       )
       if (!confirmed) return
     }
@@ -64,7 +64,7 @@ export function BulkActionsToolbar({
     try {
       await action.onClick(selectedItems)
     } catch (error) {
-      console.error('Erro na aÃ§Ã£o em lote:', error)
+      console.error('Erro na a��o em lote:', error)
     }
   }
 
@@ -173,7 +173,7 @@ export function BulkActionsToolbar({
   )
 }
 
-// AÃ§Ãµes predefinidas comuns
+// A��es predefinidas comuns
 export const commonBulkActions = {
   delete: (onDelete: (items: any[]) => void): BulkAction => ({
     id: 'delete',
@@ -182,7 +182,7 @@ export const commonBulkActions = {
     variant: 'destructive' as const,
     onClick: onDelete,
     requiresConfirmation: true,
-    confirmationMessage: 'Esta aÃ§Ã£o nÃ£o pode ser desfeita. Confirma a exclusÃ£o?'
+    confirmationMessage: 'Esta a��o n�o pode ser desfeita. Confirma a exclus�o?'
   }),
   
   edit: (onEdit: (items: any[]) => void): BulkAction => ({

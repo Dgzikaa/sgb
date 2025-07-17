@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -10,12 +10,12 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('📊 Meta Daily Summary - Buscando dados consolidados...')
+    console.log('?? Meta Daily Summary - Buscando dados consolidados...')
 
     const { searchParams } = new URL(request.url)
     const days = parseInt(searchParams.get('days') || '30')
 
-    // Obter dados do usuário para pegar o bar_id
+    // Obter dados do usu�rio para pegar o bar_id
     const userData = request.headers.get('x-user-data')
     let barId = 3 // fallback para desenvolvimento
 
@@ -23,9 +23,9 @@ export async function GET(request: NextRequest) {
       try {
         const parsedUser = JSON.parse(decodeURIComponent(userData))
         barId = parsedUser.bar_id || 3
-        console.log(`👤 Usando bar_id: ${barId}`)
+        console.log(`?? Usando bar_id: ${barId}`)
       } catch (e) {
-        console.log('⚠️ Erro ao parsear userData, usando barId padrão:', e)
+        console.log('?? Erro ao parsear userData, usando barId padr�o:', e)
       }
     }
 
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     const hoje = new Date()
     const inicioPeriodo = new Date(hoje.getTime() - days * 24 * 60 * 60 * 1000)
 
-    console.log(`📅 Buscando dados de ${inicioPeriodo.toISOString().split('T')[0]} até ${hoje.toISOString().split('T')[0]}`)
+    console.log(`?? Buscando dados de ${inicioPeriodo.toISOString().split('T')[0]} at� ${hoje.toISOString().split('T')[0]}`)
 
     // 1. BUSCAR DADOS CONSOLIDADOS DA TABELA meta_daily_summary
     const { data: dailySummary, error: summaryError } = await supabase
@@ -44,13 +44,13 @@ export async function GET(request: NextRequest) {
       .order('data_referencia', { ascending: false })
 
     if (summaryError) {
-      console.error('❌ Erro ao buscar meta_daily_summary:', summaryError)
+      console.error('? Erro ao buscar meta_daily_summary:', summaryError)
     }
 
     // 2. BUSCAR DADOS RECENTES DAS TABELAS EXISTENTES (fallback se meta_daily_summary estiver vazia)
     let fallbackData = null
     if (!dailySummary || dailySummary.length === 0) {
-      console.log('⚠️ meta_daily_summary vazia, usando fallback das tabelas originais')
+      console.log('?? meta_daily_summary vazia, usando fallback das tabelas originais')
       
       const hoje_str = hoje.toISOString().split('T')[0]
       
@@ -84,10 +84,10 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 3. PROCESSAR DADOS E CALCULAR MÉTRICAS
+    // 3. PROCESSAR DADOS E CALCULAR M�TRICAS
     const processedData = processDailySummaryData(dailySummary || [], fallbackData)
 
-    // 4. BUSCAR TENDÊNCIAS (view meta_trends_analysis)
+    // 4. BUSCAR TEND�NCIAS (view meta_trends_analysis)
     const { data: trendsData, error: trendsError } = await supabase
       .from('meta_trends_analysis')
       .select('*')
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
       .limit(7)
 
     if (trendsError) {
-      console.error('❌ Erro ao buscar trends:', trendsError)
+      console.error('? Erro ao buscar trends:', trendsError)
     }
 
     const responseData = {
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    console.log('✅ Meta Daily Summary - Dados processados:', {
+    console.log('? Meta Daily Summary - Dados processados:', {
       source: responseData.meta.source,
       records: responseData.meta.records_found,
       total_followers: processedData.summary.total_followers
@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(responseData)
 
   } catch (error) {
-    console.error('❌ Erro na API Meta Daily Summary:', error)
+    console.error('? Erro na API Meta Daily Summary:', error)
     
     return NextResponse.json({
       success: false,
@@ -232,7 +232,7 @@ function processDailySummaryData(summaryData: any[], fallbackData: any) {
   }
 }
 
-// Processar dados de tendências
+// Processar dados de tend�ncias
 function processTrendsData(trendsData: any[]) {
   if (trendsData.length === 0) {
     return {

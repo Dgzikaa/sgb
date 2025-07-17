@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { cacheService } from '@/lib/redis-cache'
 
 // Tipos para o hook
@@ -47,7 +47,7 @@ export function useCache<T = any>(
     lastUpdated: null
   })
 
-  // FunÃ§Ã£o para buscar dados
+  // Fun��o para buscar dados
   const fetchData = useCallback(async (force = false) => {
     if (!enabled || (!force && state.isLoading)) return
 
@@ -70,7 +70,7 @@ export function useCache<T = any>(
         setState({
           data,
           isLoading: false,
-          error: data === null ? 'Dados nÃ£o encontrados no cache' : null,
+          error: data === null ? 'Dados n�o encontrados no cache' : null,
           isStale: false,
           lastUpdated: Date.now()
         })
@@ -84,7 +84,7 @@ export function useCache<T = any>(
     }
   }, [type, key, fetchFunction, enabled, state.isLoading])
 
-  // FunÃ§Ã£o para invalidar cache
+  // Fun��o para invalidar cache
   const invalidate = useCallback(async () => {
     try {
       await cacheService.delete(type, key)
@@ -94,7 +94,7 @@ export function useCache<T = any>(
     }
   }, [type, key])
 
-  // FunÃ§Ã£o para atualizar dados manualmente
+  // Fun��o para atualizar dados manualmente
   const mutate = useCallback(async (newData?: T) => {
     if (newData !== undefined) {
       // Atualizar cache e state
@@ -118,7 +118,7 @@ export function useCache<T = any>(
     }
   }, [enabled, refreshOnMount, fetchData])
 
-  // Efeito para refresh automÃ¡tico
+  // Efeito para refresh autom�tico
   useEffect(() => {
     if (!enabled || !refreshInterval) return
 
@@ -137,7 +137,7 @@ export function useCache<T = any>(
   }
 }
 
-// Hook para mÃ©tricas de cache
+// Hook para m�tricas de cache
 export function useCacheMetrics() {
   const [metrics, setMetrics] = useState<CacheMetrics | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -152,7 +152,7 @@ export function useCacheMetrics() {
         setMetrics(result.data.cache.metrics)
       }
     } catch (error) {
-      console.error('Erro ao buscar mÃ©tricas de cache:', error)
+      console.error('Erro ao buscar m�tricas de cache:', error)
     } finally {
       setIsLoading(false)
     }

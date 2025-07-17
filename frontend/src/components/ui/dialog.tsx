@@ -1,4 +1,4 @@
-﻿import * as React from "react"
+import * as React from "react"
 import { createPortal } from "react-dom"
 import { cn } from "@/lib/utils"
 import { X } from "lucide-react"
@@ -146,7 +146,7 @@ const DialogContent: React.FC<DialogContentProps & { onClose?: () => void }> = (
                 </div>
               )
             }
-            // Content Ã¡rea com scroll
+            // Content �rea com scroll
             return (
               <div key={index} className="flex-1 overflow-y-auto px-8 py-6 bg-white dark:bg-gray-800" style={{ maxHeight: 'calc(90vh - 200px)' }}>
                 {child}

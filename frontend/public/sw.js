@@ -2,7 +2,7 @@
 const CACHE_NAME = 'sgb-v2-cache-v1.0.1'
 const OFFLINE_URL = '/offline'
 
-// Recursos cr√≠ticos para cache
+// Recursos cr·≠ticos para cache
 const CORE_CACHE_RESOURCES = [
   '/',
   '/home',
@@ -16,7 +16,7 @@ const CORE_CACHE_RESOURCES = [
   '/android-chrome-512x512.png'
 ]
 
-// Recursos est√°ticos para cache
+// Recursos est·°ticos para cache
 const STATIC_CACHE_RESOURCES = [
   '/site.webmanifest',
   '/apple-touch-icon.png',
@@ -39,20 +39,20 @@ self.addEventListener('install', event => {
   event.waitUntil(
     (async () => {
       try {
-        // Cache recursos cr√≠ticos
+        // Cache recursos cr·≠ticos
         const coreCache = await caches.open(CACHE_NAME + '-core')
         await coreCache.addAll(CORE_CACHE_RESOURCES)
-        console.log('‚úÖ SW: Cache principal criado')
+        console.log('úÖ SW: Cache principal criado')
 
-        // Cache recursos est√°ticos
+        // Cache recursos est·°ticos
         const staticCache = await caches.open(CACHE_NAME + '-static')
         await staticCache.addAll(STATIC_CACHE_RESOURCES)
-        console.log('‚úÖ SW: Cache est√°tico criado')
+        console.log('úÖ SW: Cache est·°tico criado')
 
-        // For√ßar ativa√ß√£o
+        // For·ßar ativa·ß·£o
         self.skipWaiting()
       } catch (error) {
-        console.error('‚ùå SW: Erro durante instala√ß√£o:', error)
+        console.error('ùå SW: Erro durante instala·ß·£o:', error)
       }
     })()
   )
@@ -76,28 +76,28 @@ self.addEventListener('activate', event => {
 
         // Assumir controle de todas as abas
         self.clients.claim()
-        console.log('‚úÖ SW: Service Worker ativado')
+        console.log('úÖ SW: Service Worker ativado')
       } catch (error) {
-        console.error('‚ùå SW: Erro durante ativa√ß√£o:', error)
+        console.error('ùå SW: Erro durante ativa·ß·£o:', error)
       }
     })()
   )
 })
 
-// Interceptar requisi√ß√µes
+// Interceptar requisi·ß·µes
 self.addEventListener('fetch', event => {
-  // S√≥ processar requisi√ß√µes HTTP/HTTPS
+  // S·≥ processar requisi·ß·µes HTTP/HTTPS
   if (!event.request.url.startsWith('http')) return
 
   event.respondWith(handleFetch(event.request))
 })
 
-// Estrat√©gia principal de fetch
+// Estrat·©gia principal de fetch
 async function handleFetch(request) {
   const url = new URL(request.url)
   
   try {
-    // 1. P√°ginas HTML - Cache First com Network Fallback
+    // 1. P·°ginas HTML - Cache First com Network Fallback
     if (request.destination === 'document') {
       return await handlePageRequest(request, url)
     }
@@ -107,7 +107,7 @@ async function handleFetch(request) {
       return await handleApiRequest(request, url)
     }
     
-    // 3. Recursos est√°ticos - Cache First
+    // 3. Recursos est·°ticos - Cache First
     if (request.destination === 'image' || 
         request.destination === 'style' ||
         request.destination === 'script' ||
@@ -115,16 +115,16 @@ async function handleFetch(request) {
       return await handleStaticRequest(request)
     }
     
-    // 4. Outras requisi√ß√µes - Network First
+    // 4. Outras requisi·ß·µes - Network First
     return await handleNetworkFirst(request)
     
   } catch (error) {
-    console.error('‚ùå SW: Erro no fetch:', error)
+    console.error('ùå SW: Erro no fetch:', error)
     return await handleOfflineFallback(request)
   }
 }
 
-// Gerenciar requisi√ß√µes de p√°ginas
+// Gerenciar requisi·ß·µes de p·°ginas
 async function handlePageRequest(request, url) {
   const cache = await caches.open(CACHE_NAME + '-core')
   
@@ -133,7 +133,7 @@ async function handlePageRequest(request, url) {
     const networkResponse = await fetch(request, { timeout: 3000 })
     
     if (networkResponse.ok) {
-      // Cachear p√°ginas importantes
+      // Cachear p·°ginas importantes
       if (isImportantPage(url.pathname)) {
         cache.put(request, networkResponse.clone())
       }
@@ -145,20 +145,20 @@ async function handlePageRequest(request, url) {
     // Fallback para cache
     const cachedResponse = await cache.match(request)
     if (cachedResponse) {
-      console.log('üì± SW: Servindo p√°gina do cache:', url.pathname)
+      console.log('üì± SW: Servindo p·°gina do cache:', url.pathname)
       return cachedResponse
     }
     
-    // P√°gina offline como √∫ltimo recurso
+    // P·°gina offline como ·∫ltimo recurso
     if (url.pathname !== '/offline') {
       return caches.match('/offline') || new Response('Offline', { status: 503 })
     }
     
-    return new Response('P√°gina n√£o dispon√≠vel offline', { status: 503 })
+    return new Response('P·°gina n·£o dispon·≠vel offline', { status: 503 })
   }
 }
 
-// Gerenciar requisi√ß√µes de API
+// Gerenciar requisi·ß·µes de API
 async function handleApiRequest(request, url) {
   const cache = await caches.open(CACHE_NAME + '-api')
   
@@ -176,13 +176,13 @@ async function handleApiRequest(request, url) {
     
     throw new Error('API response not ok')
   } catch (error) {
-    // Fallback para cache apenas para APIs espec√≠ficas
+    // Fallback para cache apenas para APIs espec·≠ficas
     if (request.method === 'GET' && isOfflineCompatibleApi(url.pathname)) {
       const cachedResponse = await cache.match(request)
       if (cachedResponse) {
         console.log('üì° SW: Servindo API do cache:', url.pathname)
         
-        // Adicionar header indicando que √© cache
+        // Adicionar header indicando que ·© cache
         const headers = new Headers(cachedResponse.headers)
         headers.set('X-SW-Cache', 'true')
         headers.set('X-SW-Timestamp', Date.now())
@@ -198,7 +198,7 @@ async function handleApiRequest(request, url) {
     // Retornar erro estruturado para APIs
     return new Response(JSON.stringify({
       success: false,
-      error: 'Funcionalidade n√£o dispon√≠vel offline',
+      error: 'Funcionalidade n·£o dispon·≠vel offline',
       offline: true,
       timestamp: Date.now()
     }), {
@@ -208,11 +208,11 @@ async function handleApiRequest(request, url) {
   }
 }
 
-// Gerenciar recursos est√°ticos
+// Gerenciar recursos est·°ticos
 async function handleStaticRequest(request) {
   const cache = await caches.open(CACHE_NAME + '-static')
   
-  // Cache First para recursos est√°ticos
+  // Cache First para recursos est·°ticos
   const cachedResponse = await cache.match(request)
   if (cachedResponse) {
     return cachedResponse
@@ -225,12 +225,12 @@ async function handleStaticRequest(request) {
     }
     return networkResponse
   } catch (error) {
-    // Fallback para recursos cr√≠ticos
+    // Fallback para recursos cr·≠ticos
     return await handleOfflineFallback(request)
   }
 }
 
-// Network First padr√£o
+// Network First padr·£o
 async function handleNetworkFirst(request) {
   try {
     const networkResponse = await fetch(request, { timeout: 5000 })
@@ -251,7 +251,7 @@ async function handleOfflineFallback(request) {
         return cachedOffline
       }
       
-      // Fallback para uma p√°gina offline b√°sica
+      // Fallback para uma p·°gina offline b·°sica
       return new Response(`
         <!DOCTYPE html>
         <html>
@@ -260,8 +260,8 @@ async function handleOfflineFallback(request) {
           <meta name="viewport" content="width=device-width, initial-scale=1">
         </head>
         <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
-          <h1>üîå Voc√™ est√° offline</h1>
-          <p>Reconecte-se √† internet para continuar usando o SGB.</p>
+          <h1>üîå Voc·™ est·° offline</h1>
+          <p>Reconecte-se ·† internet para continuar usando o SGB.</p>
         </body>
         </html>
       `, {
@@ -269,7 +269,7 @@ async function handleOfflineFallback(request) {
         headers: { 'Content-Type': 'text/html' }
       })
     } catch (error) {
-      console.error('‚ùå SW: Erro no fallback offline:', error)
+      console.error('ùå SW: Erro no fallback offline:', error)
       return new Response('Offline', { 
         status: 503,
         headers: { 'Content-Type': 'text/plain' }
@@ -283,7 +283,7 @@ async function handleOfflineFallback(request) {
   })
 }
 
-// Verificar se √© p√°gina importante para cache
+// Verificar se ·© p·°gina importante para cache
 function isImportantPage(pathname) {
   const importantPages = [
     '/',
@@ -300,12 +300,12 @@ function isImportantPage(pathname) {
   )
 }
 
-// Verificar se API √© compat√≠vel com offline
+// Verificar se API ·© compat·≠vel com offline
 function isOfflineCompatibleApi(pathname) {
   return OFFLINE_FALLBACK_APIS.some(api => pathname.startsWith(api))
 }
 
-// Background Sync para a√ß√µes quando online
+// Background Sync para a·ß·µes quando online
 self.addEventListener('sync', event => {
   if (event.tag === 'background-sync') {
     console.log('üîÑ SW: Executando background sync...')
@@ -313,46 +313,46 @@ self.addEventListener('sync', event => {
   }
 })
 
-// Gerenciar sincroniza√ß√£o em background
+// Gerenciar sincroniza·ß·£o em background
 async function handleBackgroundSync() {
   try {
-    // Buscar a√ß√µes pendentes do IndexedDB
+    // Buscar a·ß·µes pendentes do IndexedDB
     const pendingActions = await getPendingActions()
     
     for (const action of pendingActions) {
       try {
         await executeAction(action)
         await removePendingAction(action.id)
-        console.log('‚úÖ SW: A√ß√£o sincronizada:', action.type)
+        console.log('úÖ SW: A·ß·£o sincronizada:', action.type)
       } catch (error) {
-        console.error('‚ùå SW: Erro ao sincronizar:', action.type, error)
+        console.error('ùå SW: Erro ao sincronizar:', action.type, error)
       }
     }
   } catch (error) {
-    console.error('‚ùå SW: Erro no background sync:', error)
+    console.error('ùå SW: Erro no background sync:', error)
   }
 }
 
-// Simular fun√ß√µes de IndexedDB (implementa√ß√£o completa seria mais complexa)
+// Simular fun·ß·µes de IndexedDB (implementa·ß·£o completa seria mais complexa)
 async function getPendingActions() {
-  // Aqui seria implementada a l√≥gica para buscar do IndexedDB
+  // Aqui seria implementada a l·≥gica para buscar do IndexedDB
   return []
 }
 
 async function executeAction(action) {
-  // Executar a√ß√£o quando online
+  // Executar a·ß·£o quando online
   return fetch(action.url, action.options)
 }
 
 async function removePendingAction(id) {
-  // Remover a√ß√£o do IndexedDB
+  // Remover a·ß·£o do IndexedDB
   return true
 }
 
 // Push Notifications
 self.addEventListener('push', event => {
   const options = {
-    body: event.data ? event.data.text() : 'Nova notifica√ß√£o do SGB',
+    body: event.data ? event.data.text() : 'Nova notifica·ß·£o do SGB',
     icon: '/android-chrome-192x192.png',
     badge: '/favicon-16x16.png',
     vibrate: [100, 50, 100],
@@ -374,11 +374,11 @@ self.addEventListener('push', event => {
   }
 
   event.waitUntil(
-    self.registration.showNotification('SGB - Sistema de Gest√£o', options)
+    self.registration.showNotification('SGB - Sistema de Gest·£o', options)
   )
 })
 
-// Gerenciar cliques em notifica√ß√µes
+// Gerenciar cliques em notifica·ß·µes
 self.addEventListener('notificationclick', event => {
   event.notification.close()
 
@@ -389,9 +389,9 @@ self.addEventListener('notificationclick', event => {
   }
 })
 
-// Detectar mudan√ßas de conectividade
+// Detectar mudan·ßas de conectividade
 self.addEventListener('online', () => {
-  console.log('üåê SW: Conex√£o online detectada')
+  console.log('üåê SW: Conex·£o online detectada')
   // Trigger background sync
   self.registration.sync.register('background-sync')
 })
@@ -400,5 +400,5 @@ self.addEventListener('offline', () => {
   console.log('üì± SW: Modo offline detectado')
 })
 
-// Log de instala√ß√£o completa
+// Log de instala·ß·£o completa
 console.log('üöÄ SGB_V2 Service Worker carregado - v1.0.1') 

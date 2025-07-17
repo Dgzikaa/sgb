@@ -1,16 +1,16 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import { aiAgentManager, startAIAgent, stopAIAgent } from '@/lib/ai-agent-service';
 
-// ConfiguraÃ§Ã£o do Supabase
+// Configura��o do Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Schema para configuraÃ§Ã£o do agente
+// Schema para configura��o do agente
 const AgentConfigSchema = z.object({
   agente_ativo: z.boolean().optional(),
   frequencia_analise_minutos: z.number().int().min(5).max(1440).optional(), // 5min a 24h
@@ -47,7 +47,7 @@ const AgentConfigSchema = z.object({
 });
 
 // ========================================
-// ðŸ¤– GET /api/ai/agent (Status e configuraÃ§Ã£o)
+// 🤖 GET /api/ai/agent (Status e configura��o)
 // ========================================
 export async function GET(request: NextRequest) {
   try {
@@ -55,17 +55,17 @@ export async function GET(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'UsuÃ¡rio nÃ£o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
-    // Apenas admins podem ver configuraÃ§Ãµes do agente
+    // Apenas admins podem ver configura��es do agente
     if (permissao !== 'admin') {
-      return NextResponse.json({ error: 'Apenas administradores podem acessar configuraÃ§Ãµes do agente' }, { status: 403 });
+      return NextResponse.json({ error: 'Apenas administradores podem acessar configura��es do agente' }, { status: 403 });
     }
 
-    // Buscar configuraÃ§Ã£o atual
+    // Buscar configura��o atual
     const { data: config, error: configError } = await supabase
       .from('ai_agent_config')
       .select('*')
@@ -73,8 +73,8 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (configError && configError.code !== 'PGRST116') { // PGRST116 = not found
-      console.error('Erro ao buscar configuraÃ§Ã£o do agente:', configError);
-      return NextResponse.json({ error: 'Erro ao buscar configuraÃ§Ã£o' }, { status: 500 });
+      console.error('Erro ao buscar configura��o do agente:', configError);
+      return NextResponse.json({ error: 'Erro ao buscar configura��o' }, { status: 500 });
     }
 
     // Status do agente no manager
@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
       .order('data_inicio', { ascending: false })
       .limit(10);
 
-    // Calcular estatÃ­sticas das execuÃ§Ãµes
+    // Calcular estat�sticas das execu��es
     const { data: execStats } = await supabase
       .from('ai_agent_logs')
       .select('status, duracao_segundos, data_inicio')
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
         ((execStats.filter((e: any) => e.status === 'concluido').length / execStats.length) * 100) : 0
     };
 
-    // PrÃ³xima execuÃ§Ã£o estimada
+    // Pr�xima execu��o estimada
     let proximaExecucao = null;
     if (config && config.agente_ativo && agentRunning) {
       const ultimaExec = logs?.find((l: any) => l.status === 'concluido');
@@ -153,7 +153,7 @@ export async function GET(request: NextRequest) {
 }
 
 // ========================================
-// ðŸ¤– PUT /api/ai/agent (Atualizar configuraÃ§Ã£o)
+// 🤖 PUT /api/ai/agent (Atualizar configura��o)
 // ========================================
 export async function PUT(request: NextRequest) {
   try {
@@ -161,7 +161,7 @@ export async function PUT(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'UsuÃ¡rio nÃ£o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
@@ -173,7 +173,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const validatedData = AgentConfigSchema.parse(body);
 
-    // Verificar se configuraÃ§Ã£o existe
+    // Verificar se configura��o existe
     const { data: existing } = await supabase
       .from('ai_agent_config')
       .select('id, agente_ativo')
@@ -182,7 +182,7 @@ export async function PUT(request: NextRequest) {
 
     let result;
     if (existing) {
-      // Atualizar configuraÃ§Ã£o existente
+      // Atualizar configura��o existente
       const { data, error } = await supabase
         .from('ai_agent_config')
         .update(validatedData)
@@ -191,12 +191,12 @@ export async function PUT(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error('Erro ao atualizar configuraÃ§Ã£o:', error);
-        return NextResponse.json({ error: 'Erro ao atualizar configuraÃ§Ã£o' }, { status: 500 });
+        console.error('Erro ao atualizar configura��o:', error);
+        return NextResponse.json({ error: 'Erro ao atualizar configura��o' }, { status: 500 });
       }
       result = data;
     } else {
-      // Criar nova configuraÃ§Ã£o
+      // Criar nova configura��o
       const { data, error } = await supabase
         .from('ai_agent_config')
         .insert({ bar_id, ...validatedData })
@@ -204,13 +204,13 @@ export async function PUT(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error('Erro ao criar configuraÃ§Ã£o:', error);
-        return NextResponse.json({ error: 'Erro ao criar configuraÃ§Ã£o' }, { status: 500 });
+        console.error('Erro ao criar configura��o:', error);
+        return NextResponse.json({ error: 'Erro ao criar configura��o' }, { status: 500 });
       }
       result = data;
     }
 
-    // Gerenciar agente baseado na configuraÃ§Ã£o
+    // Gerenciar agente baseado na configura��o
     if (result.agente_ativo) {
       // Se ativou o agente, iniciar
       await startAIAgent(bar_id);
@@ -222,13 +222,13 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: result,
-      message: 'ConfiguraÃ§Ã£o atualizada com sucesso'
+      message: 'Configura��o atualizada com sucesso'
     });
 
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({
-        error: 'Dados invÃ¡lidos',
+        error: 'Dados inv�lidos',
         details: error.errors
       }, { status: 400 });
     }
@@ -239,7 +239,7 @@ export async function PUT(request: NextRequest) {
 }
 
 // ========================================
-// ðŸ¤– POST /api/ai/agent (AÃ§Ãµes de controle)
+// 🤖 POST /api/ai/agent (A��es de controle)
 // ========================================
 export async function POST(request: NextRequest) {
   try {
@@ -247,7 +247,7 @@ export async function POST(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'UsuÃ¡rio nÃ£o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
@@ -260,7 +260,7 @@ export async function POST(request: NextRequest) {
     const { action } = body;
 
     if (!action) {
-      return NextResponse.json({ error: 'AÃ§Ã£o Ã© obrigatÃ³ria' }, { status: 400 });
+      return NextResponse.json({ error: 'A��o � obrigat�ria' }, { status: 400 });
     }
 
     let message = '';
@@ -286,31 +286,31 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'run_analysis':
-        // ForÃ§ar execuÃ§Ã£o manual de anÃ¡lise
+        // For�ar execu��o manual de an�lise
         const agentsStatus = aiAgentManager.getAgentsStatus();
         const agentRunning = agentsStatus.some(a => a.barId === bar_id && a.running);
         
         if (!agentRunning) {
-          return NextResponse.json({ error: 'Agente nÃ£o estÃ¡ rodando' }, { status: 400 });
+          return NextResponse.json({ error: 'Agente n�o est� rodando' }, { status: 400 });
         }
 
-        // Registrar execuÃ§Ã£o manual
+        // Registrar execu��o manual
         await supabase
           .from('ai_agent_logs')
           .insert({
             bar_id,
             tipo_processamento: 'analise_manual',
-            nome_processo: 'AnÃ¡lise Manual Solicitada',
+            nome_processo: 'An�lise Manual Solicitada',
             status: 'iniciado',
             executado_por: 'usuario_manual'
           });
 
         success = true;
-        message = 'AnÃ¡lise manual iniciada';
+        message = 'An�lise manual iniciada';
         break;
 
       case 'clear_logs':
-        // Limpar logs antigos (manter Ãºltimos 30 dias)
+        // Limpar logs antigos (manter �ltimos 30 dias)
         const { error: clearError } = await supabase
           .from('ai_agent_logs')
           .delete()
@@ -327,7 +327,7 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'reset_config':
-        // Resetar configuraÃ§Ã£o para padrÃµes
+        // Resetar configura��o para padr�es
         const defaultConfig = {
           agente_ativo: false,
           frequencia_analise_minutos: 60,
@@ -350,19 +350,19 @@ export async function POST(request: NextRequest) {
           .select();
 
         if (resetError) {
-          console.error('Erro ao resetar configuraÃ§Ã£o:', resetError);
-          return NextResponse.json({ error: 'Erro ao resetar configuraÃ§Ã£o' }, { status: 500 });
+          console.error('Erro ao resetar configura��o:', resetError);
+          return NextResponse.json({ error: 'Erro ao resetar configura��o' }, { status: 500 });
         }
 
         // Parar agente se estiver rodando
         stopAIAgent(bar_id);
 
         success = true;
-        message = 'ConfiguraÃ§Ã£o resetada para padrÃµes';
+        message = 'Configura��o resetada para padr�es';
         break;
 
       default:
-        return NextResponse.json({ error: 'AÃ§Ã£o invÃ¡lida' }, { status: 400 });
+        return NextResponse.json({ error: 'A��o inv�lida' }, { status: 400 });
     }
 
     return NextResponse.json({
@@ -381,11 +381,11 @@ export async function POST(request: NextRequest) {
 }
 
 // ========================================
-// ðŸ› ï¸ FUNÃ‡Ã•ES AUXILIARES
+// 🛠️ FUN��ES AUXILIARES
 // ========================================
 
 /**
- * Verifica se estÃ¡ dentro do horÃ¡rio de funcionamento
+ * Verifica se est� dentro do hor�rio de funcionamento
  */
 function isWithinWorkingHours(config: any): boolean {
   const now = new Date();

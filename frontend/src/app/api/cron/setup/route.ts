@@ -1,6 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-// VariÃ¡vel global para armazenar o interval
+// Vari�vel global para armazenar o interval
 let syncInterval: NodeJS.Timeout | null = null;
 
 export async function POST(request: NextRequest) {
@@ -15,10 +15,10 @@ export async function POST(request: NextRequest) {
 
       // Configurar novo interval
       syncInterval = setInterval(async () => {
-        console.log('ðŸ”„ Executando sincronizaÃ§Ã£o automÃ¡tica...');
+        console.log('🔄 Executando sincroniza��o autom�tica...');
         
         try {
-          // Chamar endpoint de sincronizaÃ§Ã£o
+          // Chamar endpoint de sincroniza��o
           const response = await fetch('http://localhost:3000/api/sync/getin-reservas', {
             method: 'POST',
             headers: {
@@ -29,20 +29,20 @@ export async function POST(request: NextRequest) {
           const result = await response.json();
           
           if (result.success) {
-            console.log('âœ… SincronizaÃ§Ã£o automÃ¡tica concluÃ­da:', result.data);
+            console.log('�� Sincroniza��o autom�tica conclu�da:', result.data);
           } else {
-            console.error('âŒ Erro na sincronizaÃ§Ã£o automÃ¡tica:', result.error);
+            console.error('�� Erro na sincroniza��o autom�tica:', result.error);
           }
         } catch (error) {
-          console.error('âŒ Erro ao executar sincronizaÃ§Ã£o automÃ¡tica:', error);
+          console.error('�� Erro ao executar sincroniza��o autom�tica:', error);
         }
       }, intervalMinutes * 60 * 1000); // Converter minutos para milliseconds
 
-      console.log(`ðŸš€ SincronizaÃ§Ã£o automÃ¡tica iniciada a cada ${intervalMinutes} minutos`);
+      console.log(`🚀 Sincroniza��o autom�tica iniciada a cada ${intervalMinutes} minutos`);
 
       return NextResponse.json({
         success: true,
-        message: `SincronizaÃ§Ã£o automÃ¡tica iniciada a cada ${intervalMinutes} minutos`,
+        message: `Sincroniza��o autom�tica iniciada a cada ${intervalMinutes} minutos`,
         intervalMinutes
       });
 
@@ -50,16 +50,16 @@ export async function POST(request: NextRequest) {
       if (syncInterval) {
         clearInterval(syncInterval);
         syncInterval = null;
-        console.log('â¸ï¸ SincronizaÃ§Ã£o automÃ¡tica parada');
+        console.log('��️ Sincroniza��o autom�tica parada');
 
         return NextResponse.json({
           success: true,
-          message: 'SincronizaÃ§Ã£o automÃ¡tica parada'
+          message: 'Sincroniza��o autom�tica parada'
         });
       } else {
         return NextResponse.json({
           success: false,
-          message: 'Nenhuma sincronizaÃ§Ã£o automÃ¡tica estava rodando'
+          message: 'Nenhuma sincroniza��o autom�tica estava rodando'
         });
       }
 
@@ -67,18 +67,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         status: syncInterval ? 'running' : 'stopped',
-        message: syncInterval ? 'SincronizaÃ§Ã£o automÃ¡tica ativa' : 'SincronizaÃ§Ã£o automÃ¡tica parada'
+        message: syncInterval ? 'Sincroniza��o autom�tica ativa' : 'Sincroniza��o autom�tica parada'
       });
 
     } else {
       return NextResponse.json({
         success: false,
-        error: 'AÃ§Ã£o invÃ¡lida. Use: start, stop ou status'
+        error: 'A��o inv�lida. Use: start, stop ou status'
       }, { status: 400 });
     }
 
   } catch (error) {
-    console.error('âŒ Erro no cron setup:', error);
+    console.error('�� Erro no cron setup:', error);
     
     return NextResponse.json({
       success: false,
@@ -91,6 +91,6 @@ export async function GET() {
   return NextResponse.json({
     success: true,
     status: syncInterval ? 'running' : 'stopped',
-    message: syncInterval ? 'SincronizaÃ§Ã£o automÃ¡tica ativa' : 'SincronizaÃ§Ã£o automÃ¡tica parada'
+    message: syncInterval ? 'Sincroniza��o autom�tica ativa' : 'Sincroniza��o autom�tica parada'
   });
 } 

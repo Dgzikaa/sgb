@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useMenuBadgesMock } from '@/hooks/useMenuBadgesMock'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -46,7 +46,7 @@ export function DemoMenuBadges() {
     },
     {
       icon: ChefHat,
-      label: 'ProduÃ§Ã£o',
+      label: 'Produ��o',
       badge: badges.producao,
       color: 'text-orange-600',
       subItems: [
@@ -60,7 +60,7 @@ export function DemoMenuBadges() {
       badge: badges.contaazul,
       color: 'text-blue-500',
       subItems: [
-        { icon: FileText, label: 'CompetÃªncia', badge: badges.contaazulCompetencia }
+        { icon: FileText, label: 'Compet�ncia', badge: badges.contaazulCompetencia }
       ]
     },
     {
@@ -74,14 +74,14 @@ export function DemoMenuBadges() {
     },
     {
       icon: Settings,
-      label: 'ConfiguraÃ§Ãµes',
+      label: 'Configura��es',
       badge: badges.configuracoes,
       color: 'text-gray-600',
       subItems: [
         { icon: CheckSquare, label: 'Checklists', badge: badges.configChecklists },
         { icon: Target, label: 'Metas', badge: badges.configMetas },
-        { icon: Database, label: 'IntegraÃ§Ãµes', badge: badges.configIntegracoes },
-        { icon: Shield, label: 'SeguranÃ§a', badge: badges.configSeguranca },
+        { icon: Database, label: 'Integra��es', badge: badges.configIntegracoes },
+        { icon: Shield, label: 'Seguran�a', badge: badges.configSeguranca },
         { icon: MessageSquare, label: 'WhatsApp', badge: badges.configWhatsapp },
         { icon: Zap, label: 'ContaHub Auto', badge: badges.configContahub },
         { icon: Clock, label: 'Meta Config', badge: badges.configMeta },
@@ -99,10 +99,10 @@ export function DemoMenuBadges() {
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
-            ðŸ·ï¸ Sistema de Badges - Menu Lateral
+            🏷️ Sistema de Badges - Menu Lateral
           </CardTitle>
           <p className="text-center text-gray-600 dark:text-gray-400">
-            DemonstraÃ§Ã£o dos badges implementados em todos os itens do menu
+            Demonstra��o dos badges implementados em todos os itens do menu
           </p>
         </CardHeader>
         <CardContent>
@@ -142,30 +142,30 @@ export function DemoMenuBadges() {
           
           <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
             <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
-              ðŸ“Š Resumo dos Badges
+              📊 Resumo dos Badges
             </h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
               <div>Total Home: <Badge variant="secondary">{badges.home}</Badge></div>
               <div>Total Checklist: <Badge variant="secondary">{badges.checklist}</Badge></div>
-              <div>Total ProduÃ§Ã£o: <Badge variant="secondary">{badges.producao}</Badge></div>
+              <div>Total Produ��o: <Badge variant="secondary">{badges.producao}</Badge></div>
               <div>Total ContaAzul: <Badge variant="secondary">{badges.contaazul}</Badge></div>
               <div>Total Marketing: <Badge variant="secondary">{badges.marketing}</Badge></div>
-              <div>Total ConfiguraÃ§Ãµes: <Badge variant="secondary">{badges.configuracoes}</Badge></div>
+              <div>Total Configura��es: <Badge variant="secondary">{badges.configuracoes}</Badge></div>
             </div>
           </div>
           
           <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
             <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2">
-              âœ… Recursos Implementados
+              �� Recursos Implementados
             </h4>
             <ul className="text-sm space-y-1">
-              <li>â€¢ Badges dinÃ¢micos em todos os itens do menu</li>
-              <li>â€¢ Badges compostos (soma dos subitens)</li>
-              <li>â€¢ Hook centralizado para gerenciar badges</li>
-              <li>â€¢ Sistema de permissÃµes integrado</li>
-              <li>â€¢ AtualizaÃ§Ã£o em tempo real</li>
-              <li>â€¢ Suporte a dark mode</li>
-              <li>â€¢ Performance otimizada com batching</li>
+              <li>�� Badges din�micos em todos os itens do menu</li>
+              <li>�� Badges compostos (soma dos subitens)</li>
+              <li>�� Hook centralizado para gerenciar badges</li>
+              <li>�� Sistema de permiss�es integrado</li>
+              <li>�� Atualiza��o em tempo real</li>
+              <li>�� Suporte a dark mode</li>
+              <li>�� Performance otimizada com batching</li>
             </ul>
           </div>
         </CardContent>

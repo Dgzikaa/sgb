@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -54,10 +54,10 @@ export default function ContaAzulExcelPage() {
     setResult(null);
 
     try {
-      addLog('INFO', 'ðŸš€ Iniciando coleta de dados ContaAzul...');
-      addLog('INFO', 'ðŸ“¥ MÃ©todo: Download de Excel via Playwright');
-      addLog('INFO', 'ðŸ” AutenticaÃ§Ã£o: Login + 2FA automÃ¡tico');
-      addLog('INFO', 'ðŸ“Š PerÃ­odo: Todo o perÃ­odo disponÃ­vel');
+      addLog('INFO', '🚀 Iniciando coleta de dados ContaAzul...');
+      addLog('INFO', '📥 M�todo: Download de Excel via Playwright');
+      addLog('INFO', '🔐 Autentica��o: Login + 2FA autom�tico');
+      addLog('INFO', '📊 Per�odo: Todo o per�odo dispon�vel');
 
               const response = await fetch('/api/contaazul/playwright-excel', {
         method: 'POST',
@@ -74,37 +74,37 @@ export default function ContaAzulExcelPage() {
       const data = await response.json();
 
       if (data.success) {
-        addLog('SUCCESS', 'âœ… Coleta realizada com sucesso!');
+        addLog('SUCCESS', '�� Coleta realizada com sucesso!');
         
         if (data.dados) {
-          addLog('INFO', `ðŸ“‹ Total de registros: ${data.dados.total_registros}`);
-          addLog('INFO', `ðŸ“ Arquivo Excel: ${data.dados.arquivo_excel}`);
-          addLog('INFO', `ðŸ“„ Arquivo JSON: ${data.dados.arquivo_json}`);
+          addLog('INFO', `📋 Total de registros: ${data.dados.total_registros}`);
+          addLog('INFO', `📁 Arquivo Excel: ${data.dados.arquivo_excel}`);
+          addLog('INFO', `📄 Arquivo JSON: ${data.dados.arquivo_json}`);
           
           if (data.dados.registros_inseridos) {
-            addLog('SUCCESS', `ðŸ’¾ Registros inseridos no banco: ${data.dados.registros_inseridos}`);
-            addLog('INFO', `ðŸ—„ï¸ Tabela: ${data.dados.tabela_raw}`);
+            addLog('SUCCESS', `💾 Registros inseridos no banco: ${data.dados.registros_inseridos}`);
+            addLog('INFO', `🗄️ Tabela: ${data.dados.tabela_raw}`);
           }
           
           if (data.dados.colunas) {
-            addLog('INFO', `ðŸ“Š Colunas encontradas: ${data.dados.colunas.join(', ')}`);
+            addLog('INFO', `📊 Colunas encontradas: ${data.dados.colunas.join(', ')}`);
           }
         }
         
         setResult(data);
       } else {
-        addLog('ERROR', `âŒ Erro: ${data.error}`);
+        addLog('ERROR', `�� Erro: ${data.error}`);
         if (data.details) {
-          addLog('ERROR', `ðŸ“ Detalhes: ${data.details}`);
+          addLog('ERROR', `📝 Detalhes: ${data.details}`);
         }
         setResult(data);
       }
 
     } catch (error) {
-      addLog('ERROR', `ðŸ’¥ Erro de conexÃ£o: ${error}`);
+      addLog('ERROR', `💥 Erro de conex�o: ${error}`);
       setResult({
         success: false,
-        error: 'Erro de conexÃ£o com a API'
+        error: 'Erro de conex�o com a API'
       });
     } finally {
       setIsLoading(false);
@@ -123,7 +123,7 @@ export default function ContaAzulExcelPage() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center gap-3 mb-6">
-        <div className="text-3xl">ðŸ“¥</div>
+        <div className="text-3xl">📥</div>
         <div>
           <h1 className="text-2xl font-bold">ContaAzul - Download Excel</h1>
           <p className="text-gray-600">Coleta de dados financeiros via download de planilha</p>
@@ -131,18 +131,18 @@ export default function ContaAzulExcelPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* FormulÃ¡rio de ConfiguraÃ§Ã£o */}
+        {/* Formul�rio de Configura��o */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span>âš™ï¸</span>
-              ConfiguraÃ§Ã£o da Coleta
+              <span>��️</span>
+              Configura��o da Coleta
             </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">ðŸ“§ Email ContaAzul</label>
+                <label className="text-sm font-medium">📧 Email ContaAzul</label>
                 <Input
                   type="email"
                   value={email}
@@ -154,7 +154,7 @@ export default function ContaAzulExcelPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">ðŸ”‘ Senha</label>
+                <label className="text-sm font-medium">🔑 Senha</label>
                 <Input
                   type="password"
                   value={senha}
@@ -171,17 +171,17 @@ export default function ContaAzulExcelPage() {
                   onCheckedChange={(checked) => setHeadless(checked as boolean)}
                 />
                 <label className="text-sm">
-                  ðŸ•¶ï¸ Modo invisÃ­vel (sem abrir janela do navegador)
+                  🕶️ Modo invis�vel (sem abrir janela do navegador)
                 </label>
               </div>
 
               <div className="bg-blue-50 p-4 rounded-lg">
-                <h4 className="font-medium text-blue-900 mb-2">â„¹ï¸ InformaÃ§Ãµes da Coleta</h4>
+                <h4 className="font-medium text-blue-900 mb-2">��️ Informa��es da Coleta</h4>
                 <ul className="text-sm text-blue-800 space-y-1">
-                  <li>â€¢ <strong>PerÃ­odo:</strong> Todo o perÃ­odo disponÃ­vel</li>
-                  <li>â€¢ <strong>MÃ©todo:</strong> Download de Excel automatizado</li>
-                  <li>â€¢ <strong>2FA:</strong> CÃ³digo gerado automaticamente</li>
-                  <li>â€¢ <strong>Processamento:</strong> ConversÃ£o para JSON e inserÃ§Ã£o no banco</li>
+                  <li>�� <strong>Per�odo:</strong> Todo o per�odo dispon�vel</li>
+                  <li>�� <strong>M�todo:</strong> Download de Excel automatizado</li>
+                  <li>�� <strong>2FA:</strong> C�digo gerado automaticamente</li>
+                  <li>�� <strong>Processamento:</strong> Convers�o para JSON e inser��o no banco</li>
                 </ul>
               </div>
 
@@ -197,7 +197,7 @@ export default function ContaAzulExcelPage() {
                   </>
                 ) : (
                   <>
-                    <span className="mr-2">ðŸš€</span>
+                    <span className="mr-2">🚀</span>
                     Iniciar Coleta
                   </>
                 )}
@@ -210,15 +210,15 @@ export default function ContaAzulExcelPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span>ðŸ“‹</span>
-              Logs da ExecuÃ§Ã£o
+              <span>📋</span>
+              Logs da Execu��o
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="bg-gray-900 rounded-lg p-4 h-96 overflow-y-auto font-mono text-sm">
               {logs.length === 0 ? (
                 <div className="text-gray-500 text-center py-8">
-                  Aguardando inÃ­cio da coleta...
+                  Aguardando in�cio da coleta...
                 </div>
               ) : (
                 <div className="space-y-1">
@@ -240,7 +240,7 @@ export default function ContaAzulExcelPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span>{result.success ? 'âœ…' : 'âŒ'}</span>
+              <span>{result.success ? '��' : '��'}</span>
               Resultado da Coleta
             </CardTitle>
           </CardHeader>
@@ -272,7 +272,7 @@ export default function ContaAzulExcelPage() {
 
                 {result.dados?.colunas && (
                   <div>
-                    <h4 className="font-medium mb-2">ðŸ“Š Colunas identificadas:</h4>
+                    <h4 className="font-medium mb-2">📊 Colunas identificadas:</h4>
                     <div className="flex flex-wrap gap-2">
                       {result.dados.colunas.map((coluna, index) => (
                         <Badge key={index} variant="secondary">
@@ -285,7 +285,7 @@ export default function ContaAzulExcelPage() {
 
                 {result.dados?.primeiros_registros && (
                   <div>
-                    <h4 className="font-medium mb-2">ðŸ“‹ Primeiros registros:</h4>
+                    <h4 className="font-medium mb-2">📋 Primeiros registros:</h4>
                     <div className="bg-gray-50 p-4 rounded-lg overflow-x-auto">
                       <pre className="text-xs">
                         {JSON.stringify(result.dados.primeiros_registros, null, 2)}
@@ -295,17 +295,17 @@ export default function ContaAzulExcelPage() {
                 )}
 
                 <div className="bg-green-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-green-900 mb-2">âœ… PrÃ³ximos Passos</h4>
+                  <h4 className="font-medium text-green-900 mb-2">�� Pr�ximos Passos</h4>
                   <ul className="text-sm text-green-800 space-y-1">
-                    <li>â€¢ Dados salvos na tabela <code className="bg-green-100 px-1 rounded">{result.dados?.tabela_raw}</code></li>
-                    <li>â€¢ Trigger automÃ¡tico processarÃ¡ os dados para a tabela final</li>
-                    <li>â€¢ Dados estarÃ£o disponÃ­veis nos relatÃ³rios em alguns minutos</li>
+                    <li>�� Dados salvos na tabela <code className="bg-green-100 px-1 rounded">{result.dados?.tabela_raw}</code></li>
+                    <li>�� Trigger autom�tico processar� os dados para a tabela final</li>
+                    <li>�� Dados estar�o dispon�veis nos relat�rios em alguns minutos</li>
                   </ul>
                 </div>
               </div>
             ) : (
               <div className="bg-red-50 p-4 rounded-lg">
-                <h4 className="font-medium text-red-900 mb-2">âŒ Erro na Coleta</h4>
+                <h4 className="font-medium text-red-900 mb-2">�� Erro na Coleta</h4>
                 <p className="text-red-800 mb-2">{result.error}</p>
                 {result.details && (
                   <div className="text-sm text-red-700 bg-red-100 p-2 rounded">

@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -13,11 +13,11 @@ export async function POST(req: NextRequest) {
     if (!email) {
       return NextResponse.json({ 
         success: false, 
-        error: 'E-mail Ã© obrigatÃ³rio' 
+        error: 'E-mail � obrigat�rio' 
       }, { status: 400 })
     }
 
-    // Verificar se o usuÃ¡rio existe na tabela usuario_bares
+    // Verificar se o usu�rio existe na tabela usuario_bares
     const { data: user, error: userError } = await supabase
       .from('usuario_bares')
       .select('*')
@@ -27,11 +27,11 @@ export async function POST(req: NextRequest) {
     if (userError || !user) {
       return NextResponse.json({ 
         success: false, 
-        error: 'E-mail nÃ£o encontrado em nosso sistema' 
+        error: 'E-mail n�o encontrado em nosso sistema' 
       }, { status: 404 })
     }
 
-    // Gerar token de redefiniÃ§Ã£o de senha
+    // Gerar token de redefini��o de senha
     const resetToken = crypto.randomUUID()
     const resetTokenExpiry = new Date()
     resetTokenExpiry.setHours(resetTokenExpiry.getHours() + 1) // Expira em 1 hora
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
       }, { status: 500 })
     }
 
-    // Enviar e-mail de recuperaÃ§Ã£o (usando Supabase Auth)
+    // Enviar e-mail de recupera��o (usando Supabase Auth)
     const { error: authError } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/redefinir-senha?token=${resetToken}&email=${encodeURIComponent(email)}`
     })
@@ -62,17 +62,17 @@ export async function POST(req: NextRequest) {
       console.error('Erro ao enviar e-mail:', authError)
       return NextResponse.json({ 
         success: false, 
-        error: 'Erro ao enviar e-mail de recuperaÃ§Ã£o' 
+        error: 'Erro ao enviar e-mail de recupera��o' 
       }, { status: 500 })
     }
 
     return NextResponse.json({ 
       success: true, 
-      message: 'E-mail de recuperaÃ§Ã£o enviado com sucesso' 
+      message: 'E-mail de recupera��o enviado com sucesso' 
     })
 
   } catch (error) {
-    console.error('Erro na recuperaÃ§Ã£o de senha:', error)
+    console.error('Erro na recupera��o de senha:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor' 

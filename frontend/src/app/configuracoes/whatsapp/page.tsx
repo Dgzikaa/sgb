@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -45,7 +45,7 @@ export default function WhatsAppConfigPage() {
   const [checking, setChecking] = useState(false)
 
   useEffect(() => {
-    setPageTitle('WhatsApp - ConfiguraÃ§Ãµes')
+    setPageTitle('WhatsApp - Configura��es')
     loadEvolutionStatus()
     return () => setPageTitle('')
   }, [setPageTitle])
@@ -81,7 +81,7 @@ export default function WhatsAppConfigPage() {
           })
         }
       } else {
-        throw new Error('Falha na conexÃ£o')
+        throw new Error('Falha na conex�o')
       }
     } catch (error) {
       console.error('Erro ao carregar status Evolution:', error)
@@ -106,8 +106,8 @@ export default function WhatsAppConfigPage() {
     setChecking(false)
     
     toast({
-      title: 'âœ… Status atualizado',
-      description: 'InformaÃ§Ãµes da conexÃ£o foram atualizadas'
+      title: '�� Status atualizado',
+      description: 'Informa��es da conex�o foram atualizadas'
     })
   }
 
@@ -128,7 +128,7 @@ export default function WhatsAppConfigPage() {
         }))
         
         toast({
-          title: 'âœ… Desconectado',
+          title: '�� Desconectado',
           description: 'WhatsApp desconectado com sucesso'
         })
       } else {
@@ -136,7 +136,7 @@ export default function WhatsAppConfigPage() {
       }
     } catch (error) {
       toast({
-        title: 'âŒ Erro',
+        title: '�� Erro',
         description: 'Falha ao desconectar o WhatsApp',
         variant: 'destructive'
       })
@@ -164,14 +164,14 @@ export default function WhatsAppConfigPage() {
           }))
           
           toast({
-            title: 'ðŸ“± QR Code gerado',
+            title: '📱 QR Code gerado',
             description: 'Escaneie o QR Code no seu WhatsApp'
           })
         }
       }
     } catch (error) {
       toast({
-        title: 'âŒ Erro',
+        title: '�� Erro',
         description: 'Falha ao gerar QR Code',
         variant: 'destructive'
       })
@@ -197,15 +197,15 @@ export default function WhatsAppConfigPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'connected':
-        return <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">âœ… Conectado</Badge>
+        return <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">�� Conectado</Badge>
       case 'qr_pending':
-        return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">ðŸ”„ QR Pendente</Badge>
+        return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">🔄 QR Pendente</Badge>
       case 'disconnected':
-        return <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">âŒ Desconectado</Badge>
+        return <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">�� Desconectado</Badge>
       case 'error':
-        return <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">âš ï¸ Erro</Badge>
+        return <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">��️ Erro</Badge>
       default:
-        return <Badge variant="secondary">ðŸ” Verificando</Badge>
+        return <Badge variant="secondary">🔍 Verificando</Badge>
     }
   };
 
@@ -221,7 +221,7 @@ export default function WhatsAppConfigPage() {
                 className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
-                IntegraÃ§Ãµes
+                Integra��es
               </Link>
               <span className="text-gray-400">/</span>
               <div className="flex items-center gap-2">
@@ -256,7 +256,7 @@ export default function WhatsAppConfigPage() {
                 <div>
                   <h1 className="card-title-dark mb-2">WhatsApp Business API</h1>
                   <p className="card-description-dark">
-                    ConfiguraÃ§Ã£o Evolution API â€¢ NotificaÃ§Ãµes automÃ¡ticas e comunicaÃ§Ã£o com clientes
+                    Configura��o Evolution API �� Notifica��es autom�ticas e comunica��o com clientes
                   </p>
                 </div>
               </div>
@@ -266,11 +266,11 @@ export default function WhatsAppConfigPage() {
             {loading ? (
               <div className="flex justify-center items-center py-8">
                 <Loader2 className="w-8 h-8 animate-spin text-green-600" />
-                <span className="ml-3 text-gray-600 dark:text-gray-400">Verificando conexÃ£o...</span>
+                <span className="ml-3 text-gray-600 dark:text-gray-400">Verificando conex�o...</span>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Status da ConexÃ£o */}
+                {/* Status da Conex�o */}
                 <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
                   <div className="flex items-center gap-3 mb-2">
                     {evolutionStatus.connected ? (
@@ -285,11 +285,11 @@ export default function WhatsAppConfigPage() {
                   </p>
                 </div>
 
-                {/* NÃºmero Conectado */}
+                {/* N�mero Conectado */}
                 <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
                   <div className="flex items-center gap-3 mb-2">
                     <Phone className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">NÃºmero</span>
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">N�mero</span>
                   </div>
                   <p className="text-lg font-semibold text-gray-900 dark:text-white">
                     {evolutionStatus.phoneNumber || '--'}
@@ -307,11 +307,11 @@ export default function WhatsAppConfigPage() {
                   </p>
                 </div>
 
-                {/* Ãšltima ConexÃ£o */}
+                {/* �ltima Conex�o */}
                 <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
                   <div className="flex items-center gap-3 mb-2">
                     <Clock className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Ãšltima conexÃ£o</span>
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">�ltima conex�o</span>
                   </div>
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">
                     {evolutionStatus.lastConnection 
@@ -323,7 +323,7 @@ export default function WhatsAppConfigPage() {
               </div>
             )}
 
-            {/* AÃ§Ãµes */}
+            {/* A��es */}
             {!loading && (
               <div className="flex flex-wrap gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                 {evolutionStatus.connected ? (
@@ -353,7 +353,7 @@ export default function WhatsAppConfigPage() {
                   className="flex items-center gap-2"
                 >
                   <Settings className="w-4 h-4" />
-                  ConfiguraÃ§Ãµes AvanÃ§adas
+                  Configura��es Avan�adas
                 </Button>
               </div>
             )}
@@ -369,7 +369,7 @@ export default function WhatsAppConfigPage() {
               </h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">NotificaÃ§Ãµes de reservas</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Notifica��es de reservas</span>
                   <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Ativo</Badge>
                 </div>
                 <div className="flex items-center justify-between">
@@ -381,15 +381,15 @@ export default function WhatsAppConfigPage() {
                   <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Ativo</Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">RelatÃ³rios compartilhados</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Relat�rios compartilhados</span>
                   <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Ativo</Badge>
                 </div>
               </div>
             </div>
 
-            {/* EstatÃ­sticas */}
+            {/* Estat�sticas */}
             <div className="card-dark p-6">
-              <h3 className="card-title-dark mb-4">EstatÃ­sticas do MÃªs</h3>
+              <h3 className="card-title-dark mb-4">Estat�sticas do M�s</h3>
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between items-center mb-1">
@@ -424,17 +424,17 @@ export default function WhatsAppConfigPage() {
             </div>
           </div>
 
-          {/* InformaÃ§Ãµes TÃ©cnicas */}
+          {/* Informa��es T�cnicas */}
           <div className="card-dark p-6">
-            <h3 className="card-title-dark mb-4">InformaÃ§Ãµes TÃ©cnicas</h3>
+            <h3 className="card-title-dark mb-4">Informa��es T�cnicas</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
                 <h4 className="font-medium text-gray-900 dark:text-white mb-2">Evolution API</h4>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                  <strong>InstÃ¢ncia:</strong> {evolutionStatus.instanceName || 'SGB_Instance'}
+                  <strong>Inst�ncia:</strong> {evolutionStatus.instanceName || 'SGB_Instance'}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                  <strong>VersÃ£o:</strong> v2.1.0
+                  <strong>Vers�o:</strong> v2.1.0
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   <strong>Webhook:</strong> Configurado
@@ -444,18 +444,18 @@ export default function WhatsAppConfigPage() {
               <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
                 <h4 className="font-medium text-gray-900 dark:text-white mb-2">Servidor AWS</h4>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                  <strong>RegiÃ£o:</strong> sa-east-1 (SÃ£o Paulo)
+                  <strong>Regi�o:</strong> sa-east-1 (S�o Paulo)
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
                   <strong>Uptime:</strong> 99.9%
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  <strong>SSL:</strong> VÃ¡lido atÃ© 2024
+                  <strong>SSL:</strong> V�lido at� 2024
                 </p>
               </div>
               
               <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
-                <h4 className="font-medium text-gray-900 dark:text-white mb-2">ConfiguraÃ§Ã£o</h4>
+                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Configura��o</h4>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
                   <strong>Mensagens/hora:</strong> 1000
                 </p>

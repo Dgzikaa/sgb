@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 
@@ -6,13 +6,13 @@ export async function DELETE(request: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies })
     
-    // Verificar autenticaÃ§Ã£o
+    // Verificar autentica��o
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'N�o autorizado' }, { status: 401 })
     }
 
-    // Log inicial da solicitaÃ§Ã£o de exclusÃ£o
+    // Log inicial da solicita��o de exclus�o
     await supabase
       .from('lgpd_audit_log')
       .insert({
@@ -28,9 +28,9 @@ export async function DELETE(request: NextRequest) {
         timestamp: new Date()
       })
 
-    // âš ï¸ PROCESSO DE EXCLUSÃƒO IRREVERSÃVEL âš ï¸
+    // ��️ PROCESSO DE EXCLUS�O IRREVERS�VEL ��️
     
-    console.log(`ðŸš¨ INICIANDO EXCLUSÃƒO COMPLETA DE DADOS - UsuÃ¡rio: ${user.id}`)
+    console.log(`🚨 INICIANDO EXCLUS�O COMPLETA DE DADOS - Usu�rio: ${user.id}`)
 
     const deletionResults: any = {
       timestamp: new Date(),
@@ -40,7 +40,7 @@ export async function DELETE(request: NextRequest) {
       errors: []
     }
 
-    // 1. Excluir configuraÃ§Ãµes LGPD
+    // 1. Excluir configura��es LGPD
     try {
       const { error } = await supabase
         .from('user_lgpd_settings')
@@ -53,7 +53,7 @@ export async function DELETE(request: NextRequest) {
       deletionResults.errors.push(`user_lgpd_settings: ${error}`)
     }
 
-    // 2. Excluir configuraÃ§Ãµes do usuÃ¡rio
+    // 2. Excluir configura��es do usu�rio
     try {
       const { error } = await supabase
         .from('user_settings')
@@ -66,7 +66,7 @@ export async function DELETE(request: NextRequest) {
       deletionResults.errors.push(`user_settings: ${error}`)
     }
 
-    // 3. Excluir histÃ³rico de login
+    // 3. Excluir hist�rico de login
     try {
       const { error } = await supabase
         .from('user_sessions')
@@ -79,7 +79,7 @@ export async function DELETE(request: NextRequest) {
       deletionResults.errors.push(`user_sessions: ${error}`)
     }
 
-    // 4. Excluir execuÃ§Ãµes de checklist
+    // 4. Excluir execu��es de checklist
     try {
       const { error } = await supabase
         .from('checklist_executions')
@@ -92,7 +92,7 @@ export async function DELETE(request: NextRequest) {
       deletionResults.errors.push(`checklist_executions: ${error}`)
     }
 
-    // 5. Excluir notificaÃ§Ãµes
+    // 5. Excluir notifica��es
     try {
       const { error } = await supabase
         .from('notifications')
@@ -118,7 +118,7 @@ export async function DELETE(request: NextRequest) {
       deletionResults.errors.push(`uploads: ${error}`)
     }
 
-    // 7. Remover associaÃ§Ãµes com bars (mas manter histÃ³rico anÃ´nimo se necessÃ¡rio)
+    // 7. Remover associa��es com bars (mas manter hist�rico an�nimo se necess�rio)
     try {
       const { error } = await supabase
         .from('user_bars')
@@ -133,12 +133,12 @@ export async function DELETE(request: NextRequest) {
 
     // 8. Anonimizar dados em tabelas que precisam manter integridade referencial
     try {
-      // Exemplo: checklist_templates criados pelo usuÃ¡rio (manter anÃ´nimo)
+      // Exemplo: checklist_templates criados pelo usu�rio (manter an�nimo)
       const { error } = await supabase
         .from('checklist_templates')
         .update({ 
-          created_by: '00000000-0000-0000-0000-000000000000', // UUID anÃ´nimo
-          creator_name: 'UsuÃ¡rio Removido'
+          created_by: '00000000-0000-0000-0000-000000000000', // UUID an�nimo
+          creator_name: 'Usu�rio Removido'
         })
         .eq('created_by', user.id)
       
@@ -148,12 +148,12 @@ export async function DELETE(request: NextRequest) {
       deletionResults.errors.push(`checklist_templates anonimization: ${error}`)
     }
 
-    // 9. Log final da exclusÃ£o (mantido para auditoria legal)
+    // 9. Log final da exclus�o (mantido para auditoria legal)
     try {
       await supabase
         .from('lgpd_audit_log')
         .insert({
-          user_id: user.id, // Ãšltima vez que serÃ¡ registrado
+          user_id: user.id, // �ltima vez que ser� registrado
           action: 'data_deletion_completed',
           details: deletionResults,
           ip_address: getClientIP(request),
@@ -164,7 +164,7 @@ export async function DELETE(request: NextRequest) {
       console.error('Erro ao registrar log final:', error)
     }
 
-    // 10. Excluir perfil do usuÃ¡rio (por Ãºltimo)
+    // 10. Excluir perfil do usu�rio (por �ltimo)
     try {
       const { error } = await supabase
         .from('profiles')
@@ -177,7 +177,7 @@ export async function DELETE(request: NextRequest) {
       deletionResults.errors.push(`profiles: ${error}`)
     }
 
-    // 11. Excluir conta de autenticaÃ§Ã£o (Supabase Auth)
+    // 11. Excluir conta de autentica��o (Supabase Auth)
     try {
       const { error } = await supabase.auth.admin.deleteUser(user.id)
       
@@ -187,21 +187,21 @@ export async function DELETE(request: NextRequest) {
       deletionResults.errors.push(`auth.users: ${error}`)
     }
 
-    console.log(`âœ… EXCLUSÃƒO CONCLUÃDA - UsuÃ¡rio: ${user.id}`, deletionResults)
+    console.log(`�� EXCLUS�O CONCLU�DA - Usu�rio: ${user.id}`, deletionResults)
 
     // Resposta final
     return NextResponse.json({
       success: true,
-      message: 'Todos os seus dados foram excluÃ­dos permanentemente conforme a LGPD',
+      message: 'Todos os seus dados foram exclu�dos permanentemente conforme a LGPD',
       deletedAt: new Date(),
       deletedTables: deletionResults.deletedTables,
       errors: deletionResults.errors.length > 0 ? deletionResults.errors : undefined
     })
 
   } catch (error) {
-    console.error('ERRO CRÃTICO na exclusÃ£o de dados:', error)
+    console.error('ERRO CR�TICO na exclus�o de dados:', error)
     
-    // Log de erro crÃ­tico
+    // Log de erro cr�tico
     try {
       const supabase = createRouteHandlerClient({ cookies })
       const { data: { user } } = await supabase.auth.getUser()
@@ -227,7 +227,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json(
       { 
-        error: 'Erro crÃ­tico durante exclusÃ£o de dados',
+        error: 'Erro cr�tico durante exclus�o de dados',
         message: 'Entre em contato com o DPO imediatamente',
         timestamp: new Date()
       }, 

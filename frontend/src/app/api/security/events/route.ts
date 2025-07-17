@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase-admin'
 
 export async function GET(request: NextRequest) {
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error('Erro ao buscar eventos:', error)
       return NextResponse.json(
-        { success: false, error: 'Erro ao buscar eventos de seguranÃ§a' },
+        { success: false, error: 'Erro ao buscar eventos de seguran�a' },
         { status: 500 }
       )
     }

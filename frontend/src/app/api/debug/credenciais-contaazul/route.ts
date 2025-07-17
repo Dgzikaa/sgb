@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao consultar banco de dados' }, { status: 500 })
     }
 
-    // Se barId foi especificado, buscar credenciais especÃ­ficas
+    // Se barId foi especificado, buscar credenciais espec�ficas
     let specificCredentials = null
     if (barId) {
       const { data: specific, error: specificError } = await supabase
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
         .single()
 
       if (specificError) {
-        console.log('Erro ao buscar credencial especÃ­fica:', specificError)
+        console.log('Erro ao buscar credencial espec�fica:', specificError)
       } else {
         specificCredentials = specific
       }
@@ -82,13 +82,13 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Adicionar mÃ©todo POST para casos onde precisamos verificar credenciais via POST
+// Adicionar m�todo POST para casos onde precisamos verificar credenciais via POST
 export async function POST(request: NextRequest) {
   try {
     const { barId } = await request.json()
 
     if (!barId) {
-      return NextResponse.json({ error: 'barId Ã© obrigatÃ³rio' }, { status: 400 })
+      return NextResponse.json({ error: 'barId � obrigat�rio' }, { status: 400 })
     }
 
     // Buscar credenciais do ContaAzul para o bar especificado
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao consultar banco de dados' }, { status: 500 })
     }
 
-    // Buscar informaÃ§Ãµes do bar
+    // Buscar informa��es do bar
     const { data: barInfo, error: barError } = await supabase
       .from('bars')
       .select('id, nome')

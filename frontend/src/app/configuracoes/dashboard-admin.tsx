@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import './admin.css';
@@ -49,10 +49,10 @@ export default function AdminPage() {
   const [editingEvent, setEditingEvent] = useState<any>(null);
   const [showEventModal, setShowEventModal] = useState(false);
   
-  // Estados para configuraÃ§Ãµes de APIs por bar
+  // Estados para configura��es de APIs por bar
   const [barConfigs, setBarConfigs] = useState<Record<number, any>>({});
   
-  // Estados para configuraÃ§Ãµes gerais do sistema
+  // Estados para configura��es gerais do sistema
   const [configs, setConfigs] = useState({
     // ContaHub
     contahub_username: '',
@@ -69,7 +69,7 @@ export default function AdminPage() {
     email_api_key: '',
     email_from: '',
     
-    // SeguranÃ§a
+    // Seguran�a
     admin_password: '',
     jwt_secret: '',
     
@@ -80,7 +80,7 @@ export default function AdminPage() {
     notifications_enabled: true
   });
 
-  // Estados para verificaÃ§Ã£o de receitas
+  // Estados para verifica��o de receitas
   const [verificandoReceitas, setVerificandoReceitas] = useState(false);
   const [resultadoVerificacao, setResultadoVerificacao] = useState<any>(null);
 
@@ -98,32 +98,32 @@ export default function AdminPage() {
   const loadBars = async () => {
     setLoading(true);
     try {
-      console.log('ðŸ” Carregando bares do banco de dados...');
+      console.log('🔍 Carregando bares do banco de dados...');
       const response = await fetch('/api/bars');
-      console.log('ðŸ“¡ Response status:', response.status);
+      console.log('📡 Response status:', response.status);
       
       const result = await response.json();
-      console.log('ðŸ“Š Resultado da API:', result);
+      console.log('📊 Resultado da API:', result);
       
       if (result.success) {
         setBars(result.data);
         
-        // Selecionar automaticamente o Bar OrdinÃ¡rio (ID 1) por padrÃ£o
+        // Selecionar automaticamente o Bar Ordin�rio (ID 1) por padr�o
         const barOrdinario = result.data.find((bar: Bar) => bar.id === 1);
         if (barOrdinario && !selectedBarId) {
           setSelectedBarId(1);
         }
         
-        setMessage(`âœ… ${result.data.length} bares carregados com sucesso!`);
-        console.log(`âœ… ${result.data.length} bares carregados:`, result.data);
+        setMessage(`�� ${result.data.length} bares carregados com sucesso!`);
+        console.log(`�� ${result.data.length} bares carregados:`, result.data);
       } else {
-        setMessage(`âŒ Erro ao carregar bares: ${result.error}`);
-        console.error('âŒ Erro da API:', result.error);
+        setMessage(`�� Erro ao carregar bares: ${result.error}`);
+        console.error('�� Erro da API:', result.error);
         setBars([]);
       }
     } catch (error) {
-      console.error('ðŸ’¥ Erro ao carregar bares:', error);
-      setMessage(`ðŸ’¥ Erro de conexÃ£o: ${error}`);
+      console.error('💥 Erro ao carregar bares:', error);
+      setMessage(`💥 Erro de conex�o: ${error}`);
       setBars([]);
     } finally {
       setLoading(false);
@@ -138,13 +138,13 @@ export default function AdminPage() {
         setConfigs({ ...configs, ...JSON.parse(saved) });
       }
 
-      // Carregar configuraÃ§Ãµes dos bares
+      // Carregar configura��es dos bares
       const savedBarConfigs = localStorage.getItem('sgb-bar-configs');
       if (savedBarConfigs) {
         setBarConfigs(JSON.parse(savedBarConfigs));
       }
     } catch (error) {
-      console.error('Erro ao carregar configuraÃ§Ãµes:', error);
+      console.error('Erro ao carregar configura��es:', error);
     }
   };
 
@@ -152,19 +152,19 @@ export default function AdminPage() {
     setLoading(true);
     try {
       localStorage.setItem('sgb-admin-configs', JSON.stringify(configs));
-      setMessage('ConfiguraÃ§Ãµes salvas com sucesso!');
+      setMessage('Configura��es salvas com sucesso!');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
-      console.error('Erro ao salvar configuraÃ§Ãµes:', error);
-      setMessage('Erro ao salvar configuraÃ§Ãµes');
+      console.error('Erro ao salvar configura��es:', error);
+      setMessage('Erro ao salvar configura��es');
     } finally {
       setLoading(false);
     }
   };
 
-  // FunÃ§Ãµes para Planejamento Comercial
+  // Fun��es para Planejamento Comercial
   const loadEventos = async () => {
-    // NÃ£o carregar eventos se nenhum bar estiver selecionado
+    // N�o carregar eventos se nenhum bar estiver selecionado
     if (!selectedBarId) {
       setEventos([]);
       return;
@@ -247,32 +247,32 @@ export default function AdminPage() {
   };
 
   const importarEventosHistoricos = async () => {
-    // Encontrar o bar ordinÃ¡rio pelo nome
+    // Encontrar o bar ordin�rio pelo nome
     const barOrdinario = bars.find((bar: any) => 
-      bar.nome.toLowerCase().includes('ordinÃ¡rio') || 
+      bar.nome.toLowerCase().includes('ordin�rio') || 
       bar.nome.toLowerCase().includes('ordinario')
     );
     
     if (!barOrdinario) {
-      setMessage('âŒ Bar OrdinÃ¡rio nÃ£o encontrado na lista de bares');
+      setMessage('�� Bar Ordin�rio n�o encontrado na lista de bares');
       return;
     }
     
     const confirmacao = confirm(
-      `ðŸš€ Deseja importar os dados histÃ³ricos de Fevereiro a Junho 2025 para o ${barOrdinario.nome}?\n\n` +
-      'ðŸ“Š Isso incluirÃ¡:\n' +
-      'â€¢ ~150 eventos de diferentes gÃªneros\n' +
-      'â€¢ InformaÃ§Ãµes de artistas e capacidade\n' +
-      'â€¢ Eventos recorrentes (Quarta de Bamba, Pagode Vira-lata, etc.)\n' +
-      'â€¢ Eventos especiais (Carnaval, Homenagens, Festival Junino)\n\n' +
-      'âš ï¸ Se jÃ¡ existirem eventos no perÃ­odo, eles serÃ£o substituÃ­dos.'
+      `🚀 Deseja importar os dados hist�ricos de Fevereiro a Junho 2025 para o ${barOrdinario.nome}?\n\n` +
+      '📊 Isso incluir�:\n' +
+      '�� ~150 eventos de diferentes g�neros\n' +
+      '�� Informa��es de artistas e capacidade\n' +
+      '�� Eventos recorrentes (Quarta de Bamba, Pagode Vira-lata, etc.)\n' +
+      '�� Eventos especiais (Carnaval, Homenagens, Festival Junino)\n\n' +
+      '��️ Se j� existirem eventos no per�odo, eles ser�o substitu�dos.'
     );
     
     if (!confirmacao) return;
     
     setLoading(true);
     try {
-      console.log(`ðŸ“Š Importando eventos para bar: ${barOrdinario.nome} (ID: ${barOrdinario.id})`);
+      console.log(`📊 Importando eventos para bar: ${barOrdinario.nome} (ID: ${barOrdinario.id})`);
       
       // Primeira tentativa - verificar se existem eventos
               const response1 = await fetch('/api/eventos/import', {
@@ -289,10 +289,10 @@ export default function AdminPage() {
       
       if (result1.requer_confirmacao) {
         const confirmarSubstituicao = confirm(
-          `âš ï¸ AtenÃ§Ã£o: JÃ¡ existem ${result1.eventos_existentes} eventos no perÃ­odo!\n\n` +
-          `ðŸ“¥ Eventos para importar: ${result1.eventos_para_importar}\n` +
-          `ðŸ—‘ï¸ Eventos existentes: ${result1.eventos_existentes}\n\n` +
-          'Deseja SUBSTITUIR os eventos existentes pelos dados histÃ³ricos?'
+          `��️ Aten��o: J� existem ${result1.eventos_existentes} eventos no per�odo!\n\n` +
+          `📥 Eventos para importar: ${result1.eventos_para_importar}\n` +
+          `🗑️ Eventos existentes: ${result1.eventos_existentes}\n\n` +
+          'Deseja SUBSTITUIR os eventos existentes pelos dados hist�ricos?'
         );
         
         if (!confirmarSubstituicao) {
@@ -300,7 +300,7 @@ export default function AdminPage() {
           return;
         }
         
-        // Segunda tentativa - confirmar substituiÃ§Ã£o
+        // Segunda tentativa - confirmar substitui��o
         const response2 = await fetch('/api/eventos/import', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -315,37 +315,37 @@ export default function AdminPage() {
         
         if (result2.success) {
           setMessage(
-            `ðŸŽ‰ ${result2.eventos_importados} eventos importados com sucesso!\n\n` +
-            `ðŸ“… Resumo por mÃªs:\n` +
-            `â€¢ Fevereiro: ${result2.resumo.fevereiro} eventos\n` +
-            `â€¢ MarÃ§o: ${result2.resumo.marco} eventos\n` +
-            `â€¢ Abril: ${result2.resumo.abril} eventos\n` +
-            `â€¢ Maio: ${result2.resumo.maio} eventos\n` +
-            `â€¢ Junho: ${result2.resumo.junho} eventos\n\n` +
-            `ðŸŽµ GÃªneros: ${result2.generos_detectados.join(', ')}`
+            `🎉 ${result2.eventos_importados} eventos importados com sucesso!\n\n` +
+            `📅 Resumo por m�s:\n` +
+            `�� Fevereiro: ${result2.resumo.fevereiro} eventos\n` +
+            `�� Mar�o: ${result2.resumo.marco} eventos\n` +
+            `�� Abril: ${result2.resumo.abril} eventos\n` +
+            `�� Maio: ${result2.resumo.maio} eventos\n` +
+            `�� Junho: ${result2.resumo.junho} eventos\n\n` +
+            `🎵 G�neros: ${result2.generos_detectados.join(', ')}`
           );
           loadEventos();
         } else {
-          setMessage(`âŒ Erro na importaÃ§Ã£o: ${result2.error}`);
+          setMessage(`�� Erro na importa��o: ${result2.error}`);
         }
       } else if (result1.success) {
         setMessage(
-          `ðŸŽ‰ ${result1.eventos_importados} eventos importados com sucesso!\n\n` +
-          `ðŸ“… Resumo por mÃªs:\n` +
-          `â€¢ Fevereiro: ${result1.resumo.fevereiro} eventos\n` +
-          `â€¢ MarÃ§o: ${result1.resumo.marco} eventos\n` +
-          `â€¢ Abril: ${result1.resumo.abril} eventos\n` +
-          `â€¢ Maio: ${result1.resumo.maio} eventos\n` +
-          `â€¢ Junho: ${result1.resumo.junho} eventos\n\n` +
-          `ðŸŽµ GÃªneros: ${result1.generos_detectados.join(', ')}`
+          `🎉 ${result1.eventos_importados} eventos importados com sucesso!\n\n` +
+          `📅 Resumo por m�s:\n` +
+          `�� Fevereiro: ${result1.resumo.fevereiro} eventos\n` +
+          `�� Mar�o: ${result1.resumo.marco} eventos\n` +
+          `�� Abril: ${result1.resumo.abril} eventos\n` +
+          `�� Maio: ${result1.resumo.maio} eventos\n` +
+          `�� Junho: ${result1.resumo.junho} eventos\n\n` +
+          `🎵 G�neros: ${result1.generos_detectados.join(', ')}`
         );
         loadEventos();
       } else {
-        setMessage(`âŒ Erro na importaÃ§Ã£o: ${result1.error}`);
+        setMessage(`�� Erro na importa��o: ${result1.error}`);
       }
     } catch (error) {
-      console.error('Erro ao importar eventos histÃ³ricos:', error);
-      setMessage('âŒ Erro ao importar eventos histÃ³ricos');
+      console.error('Erro ao importar eventos hist�ricos:', error);
+      setMessage('�� Erro ao importar eventos hist�ricos');
     } finally {
       setLoading(false);
       setTimeout(() => setMessage(''), 10000); // Mensagem mais longa para mostrar o resumo
@@ -368,7 +368,7 @@ export default function AdminPage() {
       if (result.success) {
         const { migratedConfigs, migrationLog, summary } = result.data;
         
-        // Atualizar estado local com as configuraÃ§Ãµes migradas
+        // Atualizar estado local com as configura��es migradas
         setBarConfigs({
           ...barConfigs,
           [barId]: {
@@ -377,16 +377,16 @@ export default function AdminPage() {
           }
         });
         
-        setMessage(`âœ… MigraÃ§Ã£o concluÃ­da! ${summary.successful}/${summary.total} APIs migradas com sucesso`);
+        setMessage(`�� Migra��o conclu�da! ${summary.successful}/${summary.total} APIs migradas com sucesso`);
         
         // Log detalhado
-        console.log('ðŸ“‹ MigraÃ§Ã£o detalhada:', migrationLog);
+        console.log('📋 Migra��o detalhada:', migrationLog);
       } else {
-        setMessage(`âŒ Erro na migraÃ§Ã£o: ${result.error}`);
+        setMessage(`�� Erro na migra��o: ${result.error}`);
       }
     } catch (error) {
-      console.error('Erro ao migrar configuraÃ§Ãµes:', error);
-      setMessage('âŒ Erro ao migrar configuraÃ§Ãµes existentes');
+      console.error('Erro ao migrar configura��es:', error);
+      setMessage('�� Erro ao migrar configura��es existentes');
     } finally {
       setMigrating(false);
       setTimeout(() => setMessage(''), 5000);
@@ -404,13 +404,13 @@ export default function AdminPage() {
       localStorage.setItem('sgb-bar-configs', JSON.stringify(savedBarConfigs));
       
       const barName = bars.find((b: any) => b.id === barId)?.nome || 'Bar';
-      setMessage(`âœ… ConfiguraÃ§Ãµes do ${barName} salvas com sucesso!`);
+      setMessage(`�� Configura��es do ${barName} salvas com sucesso!`);
       setTimeout(() => setMessage(''), 3000);
       
-      console.log(`ðŸ’¾ ConfiguraÃ§Ãµes salvas para bar ${barId}:`, currentBarConfig);
+      console.log(`💾 Configura��es salvas para bar ${barId}:`, currentBarConfig);
     } catch (error) {
-      console.error('Erro ao salvar configuraÃ§Ãµes do bar:', error);
-      setMessage('Erro ao salvar configuraÃ§Ãµes do bar');
+      console.error('Erro ao salvar configura��es do bar:', error);
+      setMessage('Erro ao salvar configura��es do bar');
     } finally {
       setLoading(false);
     }
@@ -436,7 +436,7 @@ export default function AdminPage() {
 
   const testSystemConnection = async (barId: number) => {
     if (!barConfigs[barId]?.contahub_enabled) {
-      setMessage('âŒ Sistema ContaHub nÃ£o estÃ¡ habilitado para este bar');
+      setMessage('�� Sistema ContaHub n�o est� habilitado para este bar');
       return;
     }
 
@@ -448,7 +448,7 @@ export default function AdminPage() {
     };
 
     if (!credentials.username || !credentials.password) {
-      setMessage('âŒ Credenciais incompletas. Login e senha sÃ£o obrigatÃ³rios.');
+      setMessage('�� Credenciais incompletas. Login e senha s�o obrigat�rios.');
       return;
     }
 
@@ -467,9 +467,9 @@ export default function AdminPage() {
       const result = await response.json();
       
       if (result.success && result.data.success) {
-        setMessage(`âœ… ConexÃ£o bem-sucedida! Tempo de resposta: ${result.data.responseTime}ms`);
+        setMessage(`�� Conex�o bem-sucedida! Tempo de resposta: ${result.data.responseTime}ms`);
         
-        // Atualizar configuraÃ§Ã£o com sucesso
+        // Atualizar configura��o com sucesso
         setBarConfigs({
           ...barConfigs,
           [barId]: {
@@ -481,9 +481,9 @@ export default function AdminPage() {
         });
       } else {
         const errorMsg = result.data?.message || result.error || 'Erro desconhecido';
-        setMessage(`âŒ Falha na conexÃ£o: ${errorMsg}`);
+        setMessage(`�� Falha na conex�o: ${errorMsg}`);
         
-        // Atualizar configuraÃ§Ã£o com erro
+        // Atualizar configura��o com erro
         setBarConfigs({
           ...barConfigs,
           [barId]: {
@@ -495,11 +495,11 @@ export default function AdminPage() {
         });
       }
     } catch (error) {
-      console.error('Erro ao testar conexÃ£o:', error);
-      const errorMsg = 'Erro de comunicaÃ§Ã£o com o servidor';
-      setMessage(`âŒ ${errorMsg}`);
+      console.error('Erro ao testar conex�o:', error);
+      const errorMsg = 'Erro de comunica��o com o servidor';
+      setMessage(`�� ${errorMsg}`);
       
-      // Atualizar configuraÃ§Ã£o com erro
+      // Atualizar configura��o com erro
       setBarConfigs({
         ...barConfigs,
         [barId]: {
@@ -517,7 +517,7 @@ export default function AdminPage() {
 
   const addBar = async () => {
     if (!newBar.nome || !newBar.endereco) {
-      setMessage('Nome e endereÃ§o sÃ£o obrigatÃ³rios');
+      setMessage('Nome e endere�o s�o obrigat�rios');
       return;
     }
 
@@ -586,13 +586,13 @@ export default function AdminPage() {
 
   const verificarReceitasProblematicas = async () => {
     if (!selectedBarId) {
-      setMessage('âŒ Selecione um bar primeiro');
+      setMessage('�� Selecione um bar primeiro');
       return;
     }
 
     setVerificandoReceitas(true);
     try {
-      console.log(`ðŸ” Verificando receitas problemÃ¡ticas para bar ${selectedBarId}...`);
+      console.log(`🔍 Verificando receitas problem�ticas para bar ${selectedBarId}...`);
       
               const response = await fetch(`/api/receitas/verificar-sem-nome?bar_id=${selectedBarId}`);
       const result = await response.json();
@@ -601,40 +601,40 @@ export default function AdminPage() {
         setResultadoVerificacao(result.data);
         
         const { estatisticas } = result.data;
-        let mensagem = `âœ… VerificaÃ§Ã£o concluÃ­da!\n\n`;
-        mensagem += `ðŸ“Š ESTATÃSTICAS:\n`;
-        mensagem += `â€¢ Total de receitas: ${estatisticas.total_receitas}\n`;
-        mensagem += `â€¢ Total de problemas: ${estatisticas.total_problemas}\n\n`;
+        let mensagem = `�� Verifica��o conclu�da!\n\n`;
+        mensagem += `📊 ESTAT�STICAS:\n`;
+        mensagem += `�� Total de receitas: ${estatisticas.total_receitas}\n`;
+        mensagem += `�� Total de problemas: ${estatisticas.total_problemas}\n\n`;
         
         if (estatisticas.total_problemas > 0) {
-          mensagem += `âŒ PROBLEMAS ENCONTRADOS:\n`;
+          mensagem += `�� PROBLEMAS ENCONTRADOS:\n`;
           if (estatisticas.codigo_sem_nome > 0) {
-            mensagem += `â€¢ ${estatisticas.codigo_sem_nome} insumos com cÃ³digo mas sem nome\n`;
+            mensagem += `�� ${estatisticas.codigo_sem_nome} insumos com c�digo mas sem nome\n`;
           }
           if (estatisticas.nome_sem_codigo > 0) {
-            mensagem += `â€¢ ${estatisticas.nome_sem_codigo} insumos com nome mas sem cÃ³digo\n`;
+            mensagem += `�� ${estatisticas.nome_sem_codigo} insumos com nome mas sem c�digo\n`;
           }
           if (estatisticas.sem_codigo_e_nome > 0) {
-            mensagem += `â€¢ ${estatisticas.sem_codigo_e_nome} insumos sem cÃ³digo e sem nome\n`;
+            mensagem += `�� ${estatisticas.sem_codigo_e_nome} insumos sem c�digo e sem nome\n`;
           }
-          mensagem += `\nðŸ“‹ Verifique o console para mais detalhes.`;
+          mensagem += `\n📋 Verifique o console para mais detalhes.`;
         } else {
-          mensagem += `âœ… Nenhum problema encontrado! Todas as receitas estÃ£o OK.`;
+          mensagem += `�� Nenhum problema encontrado! Todas as receitas est�o OK.`;
         }
         
         setMessage(mensagem);
         
         // Log detalhado no console
         if (result.data.problemas.length > 0) {
-          console.log(`âš ï¸ PROBLEMAS ENCONTRADOS:`, result.data.problemas);
-          console.log(`ðŸ“‹ RECEITAS COM PROBLEMAS:`, result.data.receitas_com_problemas);
+          console.log(`��️ PROBLEMAS ENCONTRADOS:`, result.data.problemas);
+          console.log(`📋 RECEITAS COM PROBLEMAS:`, result.data.receitas_com_problemas);
         }
       } else {
-        setMessage(`âŒ Erro na verificaÃ§Ã£o: ${result.error}`);
+        setMessage(`�� Erro na verifica��o: ${result.error}`);
       }
     } catch (error) {
       console.error('Erro ao verificar receitas:', error);
-      setMessage('âŒ Erro ao verificar receitas problemÃ¡ticas');
+      setMessage('�� Erro ao verificar receitas problem�ticas');
     } finally {
       setVerificandoReceitas(false);
       setTimeout(() => setMessage(''), 10000); // Mensagem mais longa
@@ -644,7 +644,7 @@ export default function AdminPage() {
   const adicionarCamposProducao = async () => {
     setLoading(true);
     try {
-      console.log('ðŸ”§ Executando migration para campos de aderÃªncia Ã  receita...');
+      console.log('🔧 Executando migration para campos de ader�ncia � receita...');
       
               const response = await fetch('/api/producoes/adicionar-campos', {
         method: 'POST',
@@ -654,18 +654,18 @@ export default function AdminPage() {
       const result = await response.json();
       
       if (result.success) {
-        setMessage(`âœ… Migration executada com sucesso!\n\n` +
-                  `ðŸ“Š Detalhes:\n` +
-                  `â€¢ Campo na tabela produÃ§Ãµes: ${result.detalhes.campo_producoes}\n` +
-                  `â€¢ AtualizaÃ§Ã£o tabela insumos: ${result.detalhes.tabela_insumos}\n` +
-                  `â€¢ CriaÃ§Ã£o de Ã­ndices: ${result.detalhes.indices}\n\n` +
-                  `ðŸŽ¯ Agora o sistema pode calcular o percentual de aderÃªncia Ã  receita!`);
+        setMessage(`�� Migration executada com sucesso!\n\n` +
+                  `📊 Detalhes:\n` +
+                  `�� Campo na tabela produ��es: ${result.detalhes.campo_producoes}\n` +
+                  `�� Atualiza��o tabela insumos: ${result.detalhes.tabela_insumos}\n` +
+                  `�� Cria��o de �ndices: ${result.detalhes.indices}\n\n` +
+                  `🎯 Agora o sistema pode calcular o percentual de ader�ncia � receita!`);
       } else {
-        setMessage(`âŒ Erro na migration: ${result.error}`);
+        setMessage(`�� Erro na migration: ${result.error}`);
       }
     } catch (error) {
       console.error('Erro ao executar migration:', error);
-      setMessage('âŒ Erro ao executar migration de campos');
+      setMessage('�� Erro ao executar migration de campos');
     } finally {
       setLoading(false);
       setTimeout(() => setMessage(''), 10000);
@@ -677,7 +677,7 @@ export default function AdminPage() {
       <div className="admin-header">
         <div>
           <h1>Painel Administrativo</h1>
-          <p>Gerencie todas as configuraÃ§Ãµes do sistema SGB</p>
+          <p>Gerencie todas as configura��es do sistema SGB</p>
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           {/* Seletor de Bar Global */}
@@ -705,7 +705,7 @@ export default function AdminPage() {
             disabled={loading}
             className="btn btn-primary"
           >
-            ðŸ’¾ Salvar ConfiguraÃ§Ãµes
+            💾 Salvar Configura��es
           </button>
         </div>
       </div>
@@ -716,18 +716,18 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* InformaÃ§Ãµes do Bar Selecionado */}
+      {/* Informa��es do Bar Selecionado */}
       {selectedBarId && (
         <div className="card" style={{ marginBottom: '24px' }}>
           <div className="card-content">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <h3 style={{ margin: 0, color: '#1e293b', fontSize: '1.2rem' }}>
-                  ðŸª {bars.find((b: any) => b.id === selectedBarId)?.nome}
+                  🏪 {bars.find((b: any) => b.id === selectedBarId)?.nome}
                 </h3>
                 <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.9rem' }}>
-                  ðŸ“ {bars.find((b: any) => b.id === selectedBarId)?.endereco} | 
-                  ðŸ“ž {bars.find((b: any) => b.id === selectedBarId)?.telefone}
+                  📍 {bars.find((b: any) => b.id === selectedBarId)?.endereco} | 
+                  📞 {bars.find((b: any) => b.id === selectedBarId)?.telefone}
                 </p>
               </div>
               <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -747,70 +747,70 @@ export default function AdminPage() {
             className={`tab-button ${currentTab === 'overview' ? 'active' : ''}`}
             onClick={() => setCurrentTab('overview')}
           >
-            ðŸ“Š VisÃ£o Geral
+            📊 Vis�o Geral
           </button>
           <button 
             className={`tab-button ${currentTab === 'apis' ? 'active' : ''}`}
             onClick={() => setCurrentTab('apis')}
           >
-            ðŸ“¡ APIs
+            📡 APIs
           </button>
           <button 
             className={`tab-button ${currentTab === 'bars' ? 'active' : ''}`}
             onClick={() => setCurrentTab('bars')}
           >
-            ðŸº Bares
+            🍺 Bares
           </button>
           <button 
             className={`tab-button ${currentTab === 'services' ? 'active' : ''}`}
             onClick={() => setCurrentTab('services')}
           >
-            âš™ï¸ ServiÃ§os
+            ��️ Servi�os
           </button>
           <button 
             className={`tab-button ${currentTab === 'sistemas' ? 'active' : ''}`}
             onClick={() => setCurrentTab('sistemas')}
           >
-            ðŸ–¥ï¸ Sistemas
+            🖥️ Sistemas
           </button>
           <button 
             className={`tab-button ${currentTab === 'security' ? 'active' : ''}`}
             onClick={() => setCurrentTab('security')}
           >
-            ðŸ”’ SeguranÃ§a
+            🔒 Seguran�a
           </button>
           <button 
             className={`tab-button ${currentTab === 'monitoring' ? 'active' : ''}`}
             onClick={() => setCurrentTab('monitoring')}
           >
-            ðŸ“ˆ Monitoramento
+            📈 Monitoramento
           </button>
           <button 
             className={`tab-button ${currentTab === 'planejamento' ? 'active' : ''}`}
             onClick={() => setCurrentTab('planejamento')}
           >
-            ðŸŽµ Planejamento
+            🎵 Planejamento
           </button>
           <button 
             className={`tab-button ${currentTab === 'analytics' ? 'active' : ''}`}
             onClick={() => setCurrentTab('analytics')}
           >
-            ðŸ“ˆ Analytics
+            📈 Analytics
           </button>
         </div>
 
-        {/* VisÃ£o Geral */}
+        {/* Vis�o Geral */}
         {currentTab === 'overview' && (
           <div className="tab-content">
             {selectedBarId && (
               <div className="alert alert-info" style={{ marginBottom: '20px' }}>
-                ðŸ“Š Visualizando dados especÃ­ficos de: <strong>{bars.find((b: any) => b.id === selectedBarId)?.nome}</strong>
+                📊 Visualizando dados espec�ficos de: <strong>{bars.find((b: any) => b.id === selectedBarId)?.nome}</strong>
               </div>
             )}
             <div className="grid grid-3">
               <div className="card">
                 <div className="card-header">
-                  <h3>ðŸ“Š Status do Sistema</h3>
+                  <h3>📊 Status do Sistema</h3>
                 </div>
                 <div className="card-content">
                   <div className="stat-row">
@@ -845,8 +845,8 @@ export default function AdminPage() {
                         <span>Sistema Integrado:</span>
                         <span className="stat-value">
                           {barConfigs[selectedBarId]?.contahub_login ? 
-                            <span className="text-green">âœ… ContaHub</span> : 
-                            <span className="text-red">âŒ Nenhum</span>
+                            <span className="text-green">�� ContaHub</span> : 
+                            <span className="text-red">�� Nenhum</span>
                           }
                         </span>
                       </div>
@@ -857,7 +857,7 @@ export default function AdminPage() {
 
               <div className="card">
                 <div className="card-header">
-                  <h3>ðŸ” Monitoramento</h3>
+                  <h3>🔍 Monitoramento</h3>
                 </div>
                 <div className="card-content">
                   <button 
@@ -865,12 +865,12 @@ export default function AdminPage() {
                     disabled={loading}
                     className="btn btn-primary btn-full"
                   >
-                    {loading ? 'ðŸ”„ Verificando...' : 'â–¶ï¸ Verificar APIs'}
+                    {loading ? '🔄 Verificando...' : '��️ Verificar APIs'}
                   </button>
                   
                   {monitoringResult && (
                     <div className="last-check">
-                      Ãšltima verificaÃ§Ã£o: {new Date(monitoringResult.timestamp).toLocaleString('pt-BR')}
+                      �ltima verifica��o: {new Date(monitoringResult.timestamp).toLocaleString('pt-BR')}
                     </div>
                   )}
                 </div>
@@ -878,33 +878,33 @@ export default function AdminPage() {
 
               <div className="card">
                 <div className="card-header">
-                  <h3>âš¡ AÃ§Ãµes RÃ¡pidas</h3>
+                  <h3>�� A��es R�pidas</h3>
                 </div>
                 <div className="card-content">
                   <button className="btn btn-outline btn-full">
-                    ðŸ’¾ Backup do Banco
+                    💾 Backup do Banco
                   </button>
                   <button className="btn btn-outline btn-full">
-                    ðŸ”„ Sincronizar Dados
+                    🔄 Sincronizar Dados
                   </button>
                   <button className="btn btn-outline btn-full">
-                    ðŸ”‘ Gerar Nova API Key
+                    🔑 Gerar Nova API Key
                   </button>
                   <button 
                     onClick={verificarReceitasProblematicas}
                     disabled={verificandoReceitas || !selectedBarId}
                     className="btn btn-outline btn-full"
-                    title={!selectedBarId ? 'Selecione um bar primeiro' : 'Verificar receitas com insumos problemÃ¡ticos'}
+                    title={!selectedBarId ? 'Selecione um bar primeiro' : 'Verificar receitas com insumos problem�ticos'}
                   >
-                    {verificandoReceitas ? 'ðŸ” Verificando...' : 'ðŸ§ª Verificar Receitas'}
+                    {verificandoReceitas ? '🔍 Verificando...' : '🧪 Verificar Receitas'}
                   </button>
                   <button 
                     onClick={adicionarCamposProducao}
                     disabled={loading}
                     className="btn btn-outline btn-full"
-                    title="Adicionar campos para controle de aderÃªncia Ã  receita"
+                    title="Adicionar campos para controle de ader�ncia � receita"
                   >
-                    {loading ? 'ðŸ”§ Executando...' : 'ðŸ“Š Migrar Campos ProduÃ§Ã£o'}
+                    {loading ? '🔧 Executando...' : '📊 Migrar Campos Produ��o'}
                   </button>
                 </div>
               </div>
@@ -914,7 +914,7 @@ export default function AdminPage() {
             {monitoringResult && (
               <div className="card mt-20">
                 <div className="card-header">
-                  <h3>ðŸ“ˆ Status das APIs</h3>
+                  <h3>📈 Status das APIs</h3>
                 </div>
                 <div className="card-content">
                   <div className="grid grid-4">
@@ -943,38 +943,38 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* ConfiguraÃ§Ã£o de APIs por Bar */}
+        {/* Configura��o de APIs por Bar */}
         {currentTab === 'apis' && (
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>ðŸ”Œ APIs Conectadas{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>🔌 APIs Conectadas{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
                 <p>
                   {selectedBarId 
-                    ? `Configure as APIs especÃ­ficas para ${bars.find((b: any) => b.id === selectedBarId)?.nome}`
-                    : 'Selecione um bar no cabeÃ§alho para ver suas APIs especÃ­ficas'
+                    ? `Configure as APIs espec�ficas para ${bars.find((b: any) => b.id === selectedBarId)?.nome}`
+                    : 'Selecione um bar no cabe�alho para ver suas APIs espec�ficas'
                   }
                 </p>
               </div>
               <div className="card-content">
                 {!selectedBarId && (
                   <div className="alert alert-info">
-                    ðŸ‘† Selecione um bar no seletor do cabeÃ§alho para configurar suas APIs especÃ­ficas
+                    👆 Selecione um bar no seletor do cabe�alho para configurar suas APIs espec�ficas
                   </div>
                 )}
 
-                {/* ConfiguraÃ§Ãµes de APIs (sÃ³ aparece quando um bar for selecionado) */}
+                {/* Configura��es de APIs (s� aparece quando um bar for selecionado) */}
                 {selectedBarId && (
                   <div className="form-section">
                     <div style={{ marginBottom: '20px' }}>
-                      <h4>ðŸ“‹ Status das APIs Configuradas</h4>
+                      <h4>📋 Status das APIs Configuradas</h4>
                       <div className="grid grid-2" style={{ marginBottom: '20px' }}>
                         <div className="api-status-card">
                           <div className="api-header">
                             <span className="api-name">Sympla</span>
                             {barConfigs[selectedBarId]?.sympla_enabled ? 
-                              <span className="status-badge status-online">âœ… Ativa</span> : 
-                              <span className="status-badge status-offline">âŒ Inativa</span>
+                              <span className="status-badge status-online">�� Ativa</span> : 
+                              <span className="status-badge status-offline">�� Inativa</span>
                             }
                           </div>
                           {barConfigs[selectedBarId]?.sympla_token && (
@@ -985,8 +985,8 @@ export default function AdminPage() {
                           <div className="api-header">
                             <span className="api-name">Yuzer</span>
                             {barConfigs[selectedBarId]?.yuzer_enabled ? 
-                              <span className="status-badge status-online">âœ… Ativa</span> : 
-                              <span className="status-badge status-offline">âŒ Inativa</span>
+                              <span className="status-badge status-online">�� Ativa</span> : 
+                              <span className="status-badge status-offline">�� Inativa</span>
                             }
                           </div>
                           {barConfigs[selectedBarId]?.yuzer_token && (
@@ -997,8 +997,8 @@ export default function AdminPage() {
                           <div className="api-header">
                             <span className="api-name">Google Places</span>
                             {barConfigs[selectedBarId]?.google_places_enabled ? 
-                              <span className="status-badge status-online">âœ… Ativa</span> : 
-                              <span className="status-badge status-offline">âŒ Inativa</span>
+                              <span className="status-badge status-online">�� Ativa</span> : 
+                              <span className="status-badge status-offline">�� Inativa</span>
                             }
                           </div>
                           {barConfigs[selectedBarId]?.google_places_key && (
@@ -1009,8 +1009,8 @@ export default function AdminPage() {
                           <div className="api-header">
                             <span className="api-name">OpenAI</span>
                             {barConfigs[selectedBarId]?.openai_enabled ? 
-                              <span className="status-badge status-online">âœ… Ativa</span> : 
-                              <span className="status-badge status-offline">âŒ Inativa</span>
+                              <span className="status-badge status-online">�� Ativa</span> : 
+                              <span className="status-badge status-offline">�� Inativa</span>
                             }
                           </div>
                           {barConfigs[selectedBarId]?.openai_key && (
@@ -1020,11 +1020,11 @@ export default function AdminPage() {
                       </div>
                     </div>
                     
-                    <h4>âš™ï¸ Configurar APIs</h4>
+                    <h4>��️ Configurar APIs</h4>
                     
                     <div className="grid grid-2">
                       <div>
-                        <h5>ðŸ­ APIs de ProduÃ§Ã£o</h5>
+                        <h5>🏭 APIs de Produ��o</h5>
                         
                         <div className="api-config-item">
                           <div className="form-group">
@@ -1184,13 +1184,13 @@ export default function AdminPage() {
                       </div>
 
                       <div>
-                        <h5>â³ APIs Futuras</h5>
+                        <h5>�� APIs Futuras</h5>
                         
                                         <div className="alert alert-info">
-                  âš ï¸ Essas APIs serÃ£o integradas em breve. Configure antecipadamente.
+                  ��️ Essas APIs ser�o integradas em breve. Configure antecipadamente.
                 </div>
                 
-                {/* BotÃ£o de MigraÃ§Ã£o */}
+                {/* Bot�o de Migra��o */}
                 <div className="form-group">
                   <button 
                     onClick={() => migrateExistingConfigs(selectedBarId)}
@@ -1198,10 +1198,10 @@ export default function AdminPage() {
                     className="btn btn-outline"
                     style={{ marginBottom: '10px' }}
                   >
-                    {migrating ? 'ðŸ”„ Migrando...' : 'ðŸ“¥ Migrar APIs Existentes'}
+                    {migrating ? '🔄 Migrando...' : '📥 Migrar APIs Existentes'}
                   </button>
                   <p style={{ fontSize: '12px', color: '#666', margin: '5px 0 0 0' }}>
-                    ðŸ’¡ Importa as configuraÃ§Ãµes de APIs jÃ¡ funcionando no sistema (Sympla, Yuzer, Google Places, OpenAI)
+                    💡 Importa as configura��es de APIs j� funcionando no sistema (Sympla, Yuzer, Google Places, OpenAI)
                   </p>
                 </div>
                         
@@ -1240,7 +1240,7 @@ export default function AdminPage() {
                         disabled={loading}
                         className="btn btn-primary"
                       >
-                        ðŸ’¾ Salvar ConfiguraÃ§Ãµes do Bar
+                        💾 Salvar Configura��es do Bar
                       </button>
                     </div>
                   </div>
@@ -1248,7 +1248,7 @@ export default function AdminPage() {
 
                 {!selectedBarId && (
                   <div className="alert alert-info">
-                    ðŸ‘† Selecione um bar acima para configurar suas APIs especÃ­ficas
+                    👆 Selecione um bar acima para configurar suas APIs espec�ficas
                   </div>
                 )}
               </div>
@@ -1261,10 +1261,10 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>ðŸº Gerenciar Bares{selectedBarId ? ` - Foco: ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>🍺 Gerenciar Bares{selectedBarId ? ` - Foco: ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
                 <p>
                   {selectedBarId 
-                    ? `Visualizando detalhes e configuraÃ§Ãµes de ${bars.find((b: any) => b.id === selectedBarId)?.nome}`
+                    ? `Visualizando detalhes e configura��es de ${bars.find((b: any) => b.id === selectedBarId)?.nome}`
                     : 'Adicione, edite ou remova bares do sistema'
                   }
                 </p>
@@ -1280,12 +1280,12 @@ export default function AdminPage() {
                         id="bar_nome"
                         value={newBar.nome}
                         onChange={(e) => setNewBar({...newBar, nome: e.target.value})}
-                        placeholder="Ex: Bar do JoÃ£o"
+                        placeholder="Ex: Bar do Jo�o"
                         className="form-input"
                       />
                     </div>
                     <div className="form-group">
-                      <label htmlFor="bar_endereco">EndereÃ§o</label>
+                      <label htmlFor="bar_endereco">Endere�o</label>
                       <input
                         id="bar_endereco"
                         value={newBar.endereco}
@@ -1306,7 +1306,7 @@ export default function AdminPage() {
                     </div>
                   </div>
                   <button onClick={addBar} disabled={loading} className="btn btn-primary">
-                    âž• Adicionar Bar
+                    �� Adicionar Bar
                   </button>
                 </div>
 
@@ -1319,7 +1319,7 @@ export default function AdminPage() {
                       disabled={loading}
                       className="btn btn-outline btn-small"
                     >
-                      {loading ? 'ðŸ”„ Carregando...' : 'ðŸ”„ Recarregar'}
+                      {loading ? '🔄 Carregando...' : '🔄 Recarregar'}
                     </button>
                   </div>
                   <div className="bars-list">
@@ -1333,13 +1333,13 @@ export default function AdminPage() {
                         <div className="bar-actions">
                           {getStatusBadge(bar.status)}
                           <button className="btn btn-small btn-outline">
-                            âœï¸ Editar
+                            ��️ Editar
                           </button>
                           <button 
                             className="btn btn-small btn-outline btn-danger"
                             onClick={() => deleteBar(bar.id)}
                           >
-                            ðŸ—‘ï¸ Excluir
+                            🗑️ Excluir
                           </button>
                         </div>
                       </div>
@@ -1351,21 +1351,21 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* ServiÃ§os Externos */}
+        {/* Servi�os Externos */}
         {currentTab === 'services' && (
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>âš™ï¸ ServiÃ§os Externos</h3>
-                <p>Configure integraÃ§Ãµes com serviÃ§os externos</p>
+                <h3>��️ Servi�os Externos</h3>
+                <p>Configure integra��es com servi�os externos</p>
               </div>
               <div className="card-content">
                 <div className="grid grid-2">
                   {/* ContaHub */}
                   <div>
-                    <h4>ðŸ¢ ContaHub</h4>
+                    <h4>🏢 ContaHub</h4>
                     <div className="form-group">
-                      <label htmlFor="contahub_username">UsuÃ¡rio</label>
+                      <label htmlFor="contahub_username">Usu�rio</label>
                       <input
                         id="contahub_username"
                         value={configs.contahub_username}
@@ -1397,7 +1397,7 @@ export default function AdminPage() {
 
                   {/* Discord */}
                   <div>
-                    <h4>ðŸ’¬ Discord</h4>
+                    <h4>💬 Discord</h4>
                     <div className="form-group">
                       <label htmlFor="discord_webhook">Webhook URL</label>
                       <input
@@ -1439,23 +1439,23 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>ðŸ–¥ï¸ Sistemas de Bar{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>🖥️ Sistemas de Bar{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
                 <p>
                   {selectedBarId 
-                    ? `Configure sistemas de gestÃ£o para ${bars.find((b: any) => b.id === selectedBarId)?.nome} (ContaHub, etc.)`
-                    : 'Configure e gerencie sistemas de gestÃ£o para cada bar (ContaHub, etc.)'
+                    ? `Configure sistemas de gest�o para ${bars.find((b: any) => b.id === selectedBarId)?.nome} (ContaHub, etc.)`
+                    : 'Configure e gerencie sistemas de gest�o para cada bar (ContaHub, etc.)'
                   }
                 </p>
               </div>
               <div className="card-content">
                 <div className="form-section">
-                  <h4>ðŸ“‹ Sistemas DisponÃ­veis</h4>
+                  <h4>📋 Sistemas Dispon�veis</h4>
                   <div className="bars-list">
                     <div className="bar-item">
                       <div className="bar-info">
                         <h5>ContaHub</h5>
-                        <p>Sistema de gestÃ£o para bares e restaurantes</p>
-                        <p><strong>Campos obrigatÃ³rios:</strong> Login e Senha</p>
+                        <p>Sistema de gest�o para bares e restaurantes</p>
+                        <p><strong>Campos obrigat�rios:</strong> Login e Senha</p>
                       </div>
                       <div className="bar-actions">
                         <span className="status-badge status-online">Ativo</span>
@@ -1465,7 +1465,7 @@ export default function AdminPage() {
                 </div>
 
                 <div className="form-section">
-                  <h4>âš™ï¸ Configurar Sistema por Bar</h4>
+                  <h4>��️ Configurar Sistema por Bar</h4>
                   
                   {/* Seletor de Bar */}
                   <div className="form-group">
@@ -1485,10 +1485,10 @@ export default function AdminPage() {
                     </select>
                   </div>
 
-                  {/* ConfiguraÃ§Ãµes quando um bar Ã© selecionado */}
+                  {/* Configura��es quando um bar � selecionado */}
                   {selectedBarId && (
                     <div className="api-config-item">
-                      <h5>ðŸ–¥ï¸ ContaHub - {bars.find((b: any) => b.id === selectedBarId)?.nome}</h5>
+                      <h5>🖥️ ContaHub - {bars.find((b: any) => b.id === selectedBarId)?.nome}</h5>
                       
                       <div className="form-group">
                         <label>
@@ -1540,7 +1540,7 @@ export default function AdminPage() {
                                   contahub_password: e.target.value
                                 }
                               })}
-                              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                              placeholder="����������������"
                               className="form-input"
                             />
                           </div>
@@ -1575,7 +1575,7 @@ export default function AdminPage() {
                                   contahub_empresa_id: e.target.value
                                 }
                               })}
-                              placeholder="ID Ãºnico da empresa no ContaHub (opcional)"
+                              placeholder="ID �nico da empresa no ContaHub (opcional)"
                               className="form-input"
                             />
                           </div>
@@ -1588,7 +1588,7 @@ export default function AdminPage() {
                           disabled={loading}
                           className="btn btn-primary"
                         >
-                          {loading ? 'ðŸ’¾ Salvando...' : 'ðŸ’¾ Salvar ConfiguraÃ§Ãµes'}
+                          {loading ? '💾 Salvando...' : '💾 Salvar Configura��es'}
                         </button>
                         
                         {barConfigs[selectedBarId]?.contahub_enabled && (
@@ -1597,15 +1597,15 @@ export default function AdminPage() {
                             disabled={loading || testingConnection}
                             className="btn btn-outline"
                           >
-                            {testingConnection ? 'ðŸ”„ Testando...' : 'ðŸ” Testar ConexÃ£o'}
+                            {testingConnection ? '🔄 Testando...' : '🔍 Testar Conex�o'}
                           </button>
                         )}
                       </div>
 
-                      {/* Status do Ãºltimo teste */}
+                      {/* Status do �ltimo teste */}
                       {barConfigs[selectedBarId]?.last_test_time && (
                         <div className="api-config-item">
-                          <h5>ðŸ“Š Status da Ãšltima ConexÃ£o</h5>
+                          <h5>📊 Status da �ltima Conex�o</h5>
                           <div className="form-group">
                             <div className="stat-row">
                               <span>Status:</span>
@@ -1614,11 +1614,11 @@ export default function AdminPage() {
                                   ? 'status-online' 
                                   : 'status-offline'
                               }`}>
-                                {barConfigs[selectedBarId]?.last_test_status === 'success' ? 'âœ… Online' : 'âŒ Offline'}
+                                {barConfigs[selectedBarId]?.last_test_status === 'success' ? '�� Online' : '�� Offline'}
                               </span>
                             </div>
                             <div className="stat-row">
-                              <span>Ãšltimo teste:</span>
+                              <span>�ltimo teste:</span>
                               <span>{new Date(barConfigs[selectedBarId]?.last_test_time).toLocaleString('pt-BR')}</span>
                             </div>
                             {barConfigs[selectedBarId]?.last_error && (
@@ -1635,7 +1635,7 @@ export default function AdminPage() {
                   
                   {!selectedBarId && (
                     <div className="alert alert-info">
-                      ðŸ‘† Selecione um bar acima para configurar seus sistemas de gestÃ£o
+                      👆 Selecione um bar acima para configurar seus sistemas de gest�o
                     </div>
                   )}
                 </div>
@@ -1644,13 +1644,13 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* SeguranÃ§a */}
+        {/* Seguran�a */}
         {currentTab === 'security' && (
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>ðŸ”’ ConfiguraÃ§Ãµes de SeguranÃ§a</h3>
-                <p>Configure senhas e chaves de seguranÃ§a do sistema</p>
+                <h3>🔒 Configura��es de Seguran�a</h3>
+                <p>Configure senhas e chaves de seguran�a do sistema</p>
               </div>
               <div className="card-content">
                 <div className="form-group">
@@ -1676,8 +1676,8 @@ export default function AdminPage() {
                 </div>
                 
                 <div className="alert alert-warning">
-                  ðŸ›¡ï¸ Essas configuraÃ§Ãµes sÃ£o crÃ­ticas para a seguranÃ§a do sistema. 
-                  Altere apenas se necessÃ¡rio e mantenha em local seguro.
+                  🛡️ Essas configura��es s�o cr�ticas para a seguran�a do sistema. 
+                  Altere apenas se necess�rio e mantenha em local seguro.
                 </div>
               </div>
             </div>
@@ -1689,8 +1689,8 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>ðŸ“ˆ ConfiguraÃ§Ãµes de Monitoramento</h3>
-                <p>Configure alertas, notificaÃ§Ãµes e recursos de monitoramento</p>
+                <h3>📈 Configura��es de Monitoramento</h3>
+                <p>Configure alertas, notifica��es e recursos de monitoramento</p>
               </div>
               <div className="card-content">
                 <div className="form-section">
@@ -1710,7 +1710,7 @@ export default function AdminPage() {
                         checked={configs.notifications_enabled}
                         onChange={(e) => setConfigs({...configs, notifications_enabled: e.target.checked})}
                       />
-                      <span>Habilitar NotificaÃ§Ãµes</span>
+                      <span>Habilitar Notifica��es</span>
                     </label>
                     
                     <label className="checkbox-label">
@@ -1719,7 +1719,7 @@ export default function AdminPage() {
                         checked={configs.auto_sync_enabled}
                         onChange={(e) => setConfigs({...configs, auto_sync_enabled: e.target.checked})}
                       />
-                      <span>SincronizaÃ§Ã£o AutomÃ¡tica</span>
+                      <span>Sincroniza��o Autom�tica</span>
                     </label>
                     
                     <label className="checkbox-label">
@@ -1734,7 +1734,7 @@ export default function AdminPage() {
                 </div>
                 
                 <div className="form-section">
-                  <h4>ðŸ“§ Email de NotificaÃ§Ãµes</h4>
+                  <h4>📧 Email de Notifica��es</h4>
                   <div className="form-group">
                     <label htmlFor="email_api_key">API Key de Email</label>
                     <input
@@ -1766,26 +1766,26 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>ðŸŽµ Planejamento Comercial{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>🎵 Planejamento Comercial{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
                 <p>
                   {selectedBarId 
-                    ? `Gerencie as atraÃ§Ãµes e eventos de ${bars.find((b: any) => b.id === selectedBarId)?.nome} para todos os dias do mÃªs`
-                    : 'Gerencie as atraÃ§Ãµes e eventos de todos os bares para todos os dias do mÃªs'
+                    ? `Gerencie as atra��es e eventos de ${bars.find((b: any) => b.id === selectedBarId)?.nome} para todos os dias do m�s`
+                    : 'Gerencie as atra��es e eventos de todos os bares para todos os dias do m�s'
                   }
                 </p>
               </div>
               <div className="card-content">
                 {!selectedBarId && (
                   <div className="alert alert-info" style={{ marginBottom: '20px' }}>
-                    â„¹ï¸ Selecione um bar no cabeÃ§alho para focar no planejamento especÃ­fico, ou continue vendo todos os eventos
+                    ��️ Selecione um bar no cabe�alho para focar no planejamento espec�fico, ou continue vendo todos os eventos
                   </div>
                 )}
                 
-                {/* Controles do CalendÃ¡rio */}
+                {/* Controles do Calend�rio */}
                 <div className="form-section">
                   <div className="grid grid-2">
                     <div className="form-group">
-                      <label htmlFor="month-selector">MÃªs:</label>
+                      <label htmlFor="month-selector">M�s:</label>
                       <select
                         id="month-selector"
                         value={currentMonth}
@@ -1839,7 +1839,7 @@ export default function AdminPage() {
                       }}
                       className="btn btn-primary"
                     >
-                      âž• Adicionar Evento
+                      �� Adicionar Evento
                     </button>
                     
                     <button 
@@ -1847,7 +1847,7 @@ export default function AdminPage() {
                       disabled={loading}
                       className="btn btn-outline"
                     >
-                      {loading ? 'ðŸ”„ Carregando...' : 'ðŸ”„ Recarregar'}
+                      {loading ? '🔄 Carregando...' : '🔄 Recarregar'}
                     </button>
                     
                     <button 
@@ -1856,17 +1856,17 @@ export default function AdminPage() {
                       className="btn btn-outline"
                       style={{ backgroundColor: '#e67e22', color: 'white' }}
                     >
-                      ðŸ“Š Importar Dados HistÃ³ricos
+                      📊 Importar Dados Hist�ricos
                     </button>
                   </div>
                 </div>
 
-                {/* CalendÃ¡rio do MÃªs */}
+                {/* Calend�rio do M�s */}
                 <div className="form-section">
-                  <h4>ðŸ“… Eventos de {new Date(currentYear, currentMonth - 1).toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}</h4>
+                  <h4>📅 Eventos de {new Date(currentYear, currentMonth - 1).toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}</h4>
                   
                   <div className="calendar-grid">
-                    {/* CabeÃ§alho dos dias da semana */}
+                    {/* Cabe�alho dos dias da semana */}
                     <div className="calendar-header">
                       <div className="calendar-day-header">Dom</div>
                       <div className="calendar-day-header">Seg</div>
@@ -1874,10 +1874,10 @@ export default function AdminPage() {
                       <div className="calendar-day-header">Qua</div>
                       <div className="calendar-day-header">Qui</div>
                       <div className="calendar-day-header">Sex</div>
-                      <div className="calendar-day-header">SÃ¡b</div>
+                      <div className="calendar-day-header">S�b</div>
                     </div>
                     
-                    {/* Dias do mÃªs */}
+                    {/* Dias do m�s */}
                     <div className="calendar-body">
                       {(() => {
                         const firstDay = new Date(currentYear, currentMonth - 1, 1);
@@ -1914,7 +1914,7 @@ export default function AdminPage() {
                                       setEditingEvent(evento);
                                       setShowEventModal(true);
                                     }}
-                                    title={`${evento.nome} - ${evento.descricao || 'Sem descriÃ§Ã£o'}`}
+                                    title={`${evento.nome} - ${evento.descricao || 'Sem descri��o'}`}
                                   >
                                     <span className="event-name">{evento.nome}</span>
                                     <span className="event-genre">{evento.genero_musical}</span>
@@ -1944,7 +1944,7 @@ export default function AdminPage() {
                                       setShowEventModal(true);
                                     }}
                                   >
-                                    âž•
+                                    ��
                                   </button>
                                 )}
                               </div>
@@ -1959,17 +1959,17 @@ export default function AdminPage() {
 
                 {/* Lista detalhada dos eventos */}
                 <div className="form-section">
-                  <h4>ðŸ“‹ Lista de Eventos</h4>
+                  <h4>📋 Lista de Eventos</h4>
                   <div className="events-table">
                     <table>
                       <thead>
                         <tr>
                           <th>Data</th>
                           <th>Nome</th>
-                          <th>GÃªnero</th>
+                          <th>G�nero</th>
                           <th>Artista/Banda</th>
-                          <th>HorÃ¡rio</th>
-                          <th>AÃ§Ãµes</th>
+                          <th>Hor�rio</th>
+                          <th>A��es</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1997,13 +1997,13 @@ export default function AdminPage() {
                                   }}
                                   className="btn btn-small btn-outline"
                                 >
-                                  âœï¸
+                                  ��️
                                 </button>
                                 <button
                                   onClick={() => deleteEvento(evento.id)}
                                   className="btn btn-small btn-outline btn-danger"
                                 >
-                                  ðŸ—‘ï¸
+                                  🗑️
                                 </button>
                               </div>
                             </td>
@@ -2012,7 +2012,7 @@ export default function AdminPage() {
                         {eventos.length === 0 && (
                           <tr>
                             <td colSpan={6} style={{ textAlign: 'center', padding: '32px' }}>
-                              ðŸ“… Nenhum evento encontrado para este perÃ­odo
+                              📅 Nenhum evento encontrado para este per�odo
                             </td>
                           </tr>
                         )}
@@ -2030,12 +2030,12 @@ export default function AdminPage() {
           <div className="modal-overlay" onClick={() => setShowEventModal(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
-                <h3>{editingEvent.id ? 'âœï¸ Editar Evento' : 'âž• Novo Evento'}</h3>
+                <h3>{editingEvent.id ? '��️ Editar Evento' : '�� Novo Evento'}</h3>
                 <button 
                   onClick={() => setShowEventModal(false)}
                   className="modal-close"
                 >
-                  âœ•
+                  ��
                 </button>
               </div>
               
@@ -2088,14 +2088,14 @@ export default function AdminPage() {
                 </div>
                 
                 <div className="form-group">
-                  <label>DescriÃ§Ã£o:</label>
+                  <label>Descri��o:</label>
                   <textarea
                     value={editingEvent.descricao || ''}
                     onChange={(e) => setEditingEvent({
                       ...editingEvent,
                       descricao: e.target.value
                     })}
-                    placeholder="DescriÃ§Ã£o do evento..."
+                    placeholder="Descri��o do evento..."
                     className="form-input"
                     rows={3}
                   />
@@ -2103,7 +2103,7 @@ export default function AdminPage() {
                 
                 <div className="grid grid-2">
                   <div className="form-group">
-                    <label>GÃªnero Musical:</label>
+                    <label>G�nero Musical:</label>
                     <select
                       value={editingEvent.genero_musical || ''}
                       onChange={(e) => setEditingEvent({
@@ -2118,11 +2118,11 @@ export default function AdminPage() {
                       <option value="sertanejo">Sertanejo</option>
                       <option value="rock">Rock</option>
                       <option value="pop">Pop</option>
-                      <option value="eletronica">EletrÃ´nica</option>
+                      <option value="eletronica">Eletr�nica</option>
                       <option value="funk">Funk</option>
                       <option value="rap">Rap</option>
                       <option value="reggae">Reggae</option>
-                      <option value="karaoke">KaraokÃª</option>
+                      <option value="karaoke">Karaok�</option>
                       <option value="dj_set">DJ Set</option>
                       <option value="outro">Outro</option>
                     </select>
@@ -2145,7 +2145,7 @@ export default function AdminPage() {
                 
                 <div className="grid grid-2">
                   <div className="form-group">
-                    <label>HorÃ¡rio InÃ­cio:</label>
+                    <label>Hor�rio In�cio:</label>
                     <input
                       type="time"
                       value={editingEvent.horario_inicio || ''}
@@ -2158,7 +2158,7 @@ export default function AdminPage() {
                   </div>
                   
                   <div className="form-group">
-                    <label>HorÃ¡rio Fim:</label>
+                    <label>Hor�rio Fim:</label>
                     <input
                       type="time"
                       value={editingEvent.horario_fim || ''}
@@ -2242,18 +2242,18 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>ðŸ“ˆ Analytics de Performance{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>📈 Analytics de Performance{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
                 <p>
                   {selectedBarId 
-                    ? `AnÃ¡lise de performance dos artistas e eventos de ${bars.find((b: any) => b.id === selectedBarId)?.nome} por dados reais de faturamento`
-                    : 'AnÃ¡lise de performance dos artistas e eventos por dados reais de faturamento'
+                    ? `An�lise de performance dos artistas e eventos de ${bars.find((b: any) => b.id === selectedBarId)?.nome} por dados reais de faturamento`
+                    : 'An�lise de performance dos artistas e eventos por dados reais de faturamento'
                   }
                 </p>
               </div>
               <div className="card-content">
                 {!selectedBarId && (
                   <div className="alert alert-warning">
-                    ðŸ“Š Selecione um bar no cabeÃ§alho para visualizar suas anÃ¡lises de performance
+                    📊 Selecione um bar no cabe�alho para visualizar suas an�lises de performance
                   </div>
                 )}
 
@@ -2303,39 +2303,39 @@ function AnalyticsContent({ barId }: { barId: number }) {
 
   return (
     <div className="analytics-content">
-      {/* Selector de Tipo de AnÃ¡lise */}
+      {/* Selector de Tipo de An�lise */}
       <div className="form-group">
-        <label>Tipo de AnÃ¡lise:</label>
+        <label>Tipo de An�lise:</label>
         <select
           value={tipoAnalise}
           onChange={(e) => setTipoAnalise(e.target.value)}
           className="form-input"
         >
-          <option value="artistas">ðŸ“Š Por Artista/Banda</option>
-          <option value="generos">ðŸŽµ Por GÃªnero Musical</option>
-          <option value="periodo">ðŸ“… Por PerÃ­odo (Mensal)</option>
+          <option value="artistas">📊 Por Artista/Banda</option>
+          <option value="generos">🎵 Por G�nero Musical</option>
+          <option value="periodo">📅 Por Per�odo (Mensal)</option>
         </select>
       </div>
 
       {loading ? (
         <div className="loading-analytics">
-          <div>ðŸ”„ Carregando anÃ¡lises...</div>
+          <div>🔄 Carregando an�lises...</div>
         </div>
       ) : dadosAnalytics.length > 0 ? (
         <div className="analytics-results">
           {tipoAnalise === 'artistas' && (
             <div className="analytics-table">
-              <h4>ðŸŽ¤ Performance por Artista</h4>
+              <h4>🎤 Performance por Artista</h4>
               <table>
                 <thead>
                   <tr>
                     <th>Artista/Banda</th>
                     <th>Total Eventos</th>
-                    <th>PÃºblico Total</th>
+                    <th>P�blico Total</th>
                     <th>Faturamento Total</th>
-                    <th>Ticket MÃ©dio</th>
-                    <th>PÃºblico MÃ©dio</th>
-                    <th>Ãšltimo Evento</th>
+                    <th>Ticket M�dio</th>
+                    <th>P�blico M�dio</th>
+                    <th>�ltimo Evento</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2364,16 +2364,16 @@ function AnalyticsContent({ barId }: { barId: number }) {
 
           {tipoAnalise === 'generos' && (
             <div className="analytics-table">
-              <h4>ðŸŽµ Performance por GÃªnero Musical</h4>
+              <h4>🎵 Performance por G�nero Musical</h4>
               <table>
                 <thead>
                   <tr>
-                    <th>GÃªnero</th>
+                    <th>G�nero</th>
                     <th>Total Eventos</th>
-                    <th>Artistas Ãšnicos</th>
-                    <th>PÃºblico Total</th>
+                    <th>Artistas �nicos</th>
+                    <th>P�blico Total</th>
                     <th>Faturamento Total</th>
-                    <th>Ticket MÃ©dio</th>
+                    <th>Ticket M�dio</th>
                     <th>Melhor Evento</th>
                   </tr>
                 </thead>
@@ -2404,17 +2404,17 @@ function AnalyticsContent({ barId }: { barId: number }) {
 
           {tipoAnalise === 'periodo' && (
             <div className="analytics-table">
-              <h4>ðŸ“… Performance por PerÃ­odo</h4>
+              <h4>📅 Performance por Per�odo</h4>
               <table>
                 <thead>
                   <tr>
-                    <th>PerÃ­odo</th>
+                    <th>Per�odo</th>
                     <th>Total Eventos</th>
-                    <th>PÃºblico Total</th>
+                    <th>P�blico Total</th>
                     <th>Faturamento Total</th>
-                    <th>Ticket MÃ©dio</th>
-                    <th>PÃºblico MÃ©dio/Evento</th>
-                    <th>GÃªneros</th>
+                    <th>Ticket M�dio</th>
+                    <th>P�blico M�dio/Evento</th>
+                    <th>G�neros</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2442,8 +2442,8 @@ function AnalyticsContent({ barId }: { barId: number }) {
         </div>
       ) : (
         <div className="no-data">
-          <div>ðŸ“Š Nenhum dado de performance encontrado</div>
-          <p>Os eventos precisam ter dados de pÃºblico e faturamento sincronizados para aparecer nas anÃ¡lises.</p>
+          <div>📊 Nenhum dado de performance encontrado</div>
+          <p>Os eventos precisam ter dados de p�blico e faturamento sincronizados para aparecer nas an�lises.</p>
         </div>
       )}
     </div>

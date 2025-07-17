@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -53,7 +53,7 @@ export default function IntegracoesPage() {
     contahub: '',
     sympla: '',    // Alterado de 'vendas' para 'sympla'
     yuzer: '',     // Novo webhook Yuzer
-    reservas: ''   // MantÃ©m, mas agora mapeia para sistema 'getin'
+    reservas: ''   // Mant�m, mas agora mapeia para sistema 'getin'
   })
   const [webhookLoading, setWebhookLoading] = useState(false)
   const [testingWebhook, setTestingWebhook] = useState<string | null>(null)
@@ -62,7 +62,7 @@ export default function IntegracoesPage() {
   const [googleResult, setGoogleResult] = useState<string | null>(null)
   
   useEffect(() => {
-    setPageTitle('IntegraÃ§Ãµes')
+    setPageTitle('Integra��es')
     return () => setPageTitle('')
   }, [setPageTitle])
   
@@ -93,7 +93,7 @@ export default function IntegracoesPage() {
         //   loadAnalyticsStatus()
         //   break
         default:
-          // Aba nÃ£o requer carregamento especÃ­fico
+          // Aba n�o requer carregamento espec�fico
           break
       }
     }
@@ -121,23 +121,23 @@ export default function IntegracoesPage() {
             meta: data.configuracoes.meta || '',
             checklists: data.configuracoes.checklists || '',
             contahub: data.configuracoes.contahub || '',
-            sympla: data.configuracoes.sympla || data.configuracoes.vendas || '', // MigraÃ§Ã£o de vendas para sympla
+            sympla: data.configuracoes.sympla || data.configuracoes.vendas || '', // Migra��o de vendas para sympla
             yuzer: data.configuracoes.yuzer || '',
             reservas: data.configuracoes.reservas || ''
           }
           setWebhookConfigs(configsCompletas)
         }
       } else {
-        console.error('âŒ Erro na resposta da API:', response.status, response.statusText)
+        console.error('�� Erro na resposta da API:', response.status, response.statusText)
       }
     } catch (error) {
-      console.error('âŒ Erro ao carregar webhooks:', error)
+      console.error('�� Erro ao carregar webhooks:', error)
     } finally {
       setLoadingConfigs(false)
     }
   }
   
-  // FunÃ§Ãµes de carregamento para outras abas
+  // Fun��es de carregamento para outras abas
   const loadContaAzulStatus = async () => {
     if (!selectedBar) return
     
@@ -147,7 +147,7 @@ export default function IntegracoesPage() {
       
       // Status verificado silenciosamente
     } catch (error) {
-      console.error('âŒ Erro ao verificar status ContaAzul:', error)
+      console.error('�� Erro ao verificar status ContaAzul:', error)
     }
   }
   
@@ -168,7 +168,7 @@ export default function IntegracoesPage() {
       const data = await response.json()
       // Status verificado silenciosamente
     } catch (error) {
-      console.error('âŒ Erro ao verificar status Meta:', error)
+      console.error('�� Erro ao verificar status Meta:', error)
     }
   }
   
@@ -189,33 +189,33 @@ export default function IntegracoesPage() {
       const data = await response.json()
       // Status verificado silenciosamente
     } catch (error) {
-      console.error('âŒ Erro ao verificar status WhatsApp:', error)
+      console.error('�� Erro ao verificar status WhatsApp:', error)
     }
   }
   
-  // FUNÃ‡Ã•ES REMOVIDAS TEMPORARIAMENTE
+  // FUN��ES REMOVIDAS TEMPORARIAMENTE
   // const loadEmailStatus = async () => {
   //   if (!selectedBar) return
-  //   console.log('ðŸŸ  Carregando status Email para bar:', selectedBar.id)
-  //   // TODO: Implementar verificaÃ§Ã£o de configuraÃ§Ãµes de email
+  //   console.log('🟠 Carregando status Email para bar:', selectedBar.id)
+  //   // TODO: Implementar verifica��o de configura��es de email
   //   // Pode verificar SMTP, templates, etc.
   // }
   
   const loadEventosStatus = async () => {
     if (!selectedBar) return
-    // TODO: Implementar verificaÃ§Ã£o de integraÃ§Ãµes com Sympla, etc.
+    // TODO: Implementar verifica��o de integra��es com Sympla, etc.
   }
   
   // const loadAnalyticsStatus = async () => {
   //   if (!selectedBar) return
-  //   console.log('ðŸ”¶ Carregando status Analytics para bar:', selectedBar.id)
-  //   // TODO: Implementar verificaÃ§Ã£o de conexÃµes ContaHub, Power BI, etc.
+  //   console.log('🔶 Carregando status Analytics para bar:', selectedBar.id)
+  //   // TODO: Implementar verifica��o de conex�es ContaHub, Power BI, etc.
   // }
   
   const handleSaveWebhooks = async () => {
     if (!selectedBar) {
       toast({
-        title: 'âŒ Erro',
+        title: '�� Erro',
         description: 'Nenhum bar selecionado',
         variant: 'destructive'
       })
@@ -240,22 +240,22 @@ export default function IntegracoesPage() {
       
       if (data.success) {
         toast({
-          title: 'âœ… Webhooks salvos com sucesso!',
-          description: 'As configuraÃ§Ãµes foram atualizadas no banco de dados.'
+          title: '�� Webhooks salvos com sucesso!',
+          description: 'As configura��es foram atualizadas no banco de dados.'
         })
       } else {
-        console.error('âŒ Erro retornado pela API:', data)
+        console.error('�� Erro retornado pela API:', data)
         toast({
-          title: 'âŒ Erro ao salvar webhooks',
+          title: '�� Erro ao salvar webhooks',
           description: data.error || 'Erro desconhecido',
           variant: 'destructive'
         })
       }
     } catch (error) {
-      console.error('âŒ Erro ao salvar webhooks:', error)
+      console.error('�� Erro ao salvar webhooks:', error)
       toast({
-        title: 'âŒ Erro ao salvar webhooks',
-        description: 'Erro de conexÃ£o com o servidor',
+        title: '�� Erro ao salvar webhooks',
+        description: 'Erro de conex�o com o servidor',
         variant: 'destructive'
       })
     } finally {
@@ -268,7 +268,7 @@ export default function IntegracoesPage() {
     
     if (!webhookUrl || webhookUrl.trim() === '') {
       toast({
-        title: 'âŒ Webhook nÃ£o configurado',
+        title: '�� Webhook n�o configurado',
         description: `Configure o webhook ${webhookType} antes de testar`,
         variant: 'destructive'
       })
@@ -277,7 +277,7 @@ export default function IntegracoesPage() {
     
     if (!selectedBar) {
       toast({
-        title: 'âŒ Erro',
+        title: '�� Erro',
         description: 'Nenhum bar selecionado',
         variant: 'destructive'
       })
@@ -290,22 +290,22 @@ export default function IntegracoesPage() {
       const testData = {
         bar_id: selectedBar.id,
         webhook_type: webhookType,
-        title: `ðŸ§ª Teste de Webhook - ${webhookType.toUpperCase()}`,
-        description: `Este Ã© um teste do webhook **${webhookType}** realizado em ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}.\n\nâœ… Se vocÃª estÃ¡ vendo esta mensagem, o webhook estÃ¡ funcionando corretamente!`,
+        title: `🧪 Teste de Webhook - ${webhookType.toUpperCase()}`,
+        description: `Este � um teste do webhook **${webhookType}** realizado em ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}.\n\n�� Se voc� est� vendo esta mensagem, o webhook est� funcionando corretamente!`,
         color: getWebhookColor(webhookType),
         fields: [
           {
-            name: 'ðŸ¢ Estabelecimento',
+            name: '🏢 Estabelecimento',
             value: selectedBar.nome || selectedBar.id || 'N/A',
             inline: true
           },
           {
-            name: 'ðŸ”— Tipo de Webhook',
+            name: '🔗 Tipo de Webhook',
             value: webhookType.charAt(0).toUpperCase() + webhookType.slice(1),
             inline: true
           },
           {
-            name: 'â° HorÃ¡rio',
+            name: '�� Hor�rio',
             value: new Date().toLocaleString('pt-BR', {
               timeZone: 'America/Sao_Paulo',
               day: '2-digit',
@@ -317,8 +317,8 @@ export default function IntegracoesPage() {
             inline: true
           },
           {
-            name: 'âœ… Status',
-            value: 'ConfiguraÃ§Ã£o funcionando corretamente!',
+            name: '�� Status',
+            value: 'Configura��o funcionando corretamente!',
             inline: false
           }
         ]
@@ -336,22 +336,22 @@ export default function IntegracoesPage() {
       
       if (data.success) {
         toast({
-          title: 'âœ… Teste enviado com sucesso!',
-          description: `Webhook ${webhookType} estÃ¡ funcionando corretamente.`
+          title: '�� Teste enviado com sucesso!',
+          description: `Webhook ${webhookType} est� funcionando corretamente.`
         })
       } else {
-        console.error('âŒ Erro no teste:', data)
+        console.error('�� Erro no teste:', data)
         toast({
-          title: 'âŒ Erro no teste',
+          title: '�� Erro no teste',
           description: data.error || 'Erro ao enviar teste',
           variant: 'destructive'
         })
       }
     } catch (error) {
-      console.error('âŒ Erro ao testar webhook:', error)
+      console.error('�� Erro ao testar webhook:', error)
       toast({
-        title: 'âŒ Erro no teste',
-        description: 'Erro de conexÃ£o com o servidor',
+        title: '�� Erro no teste',
+        description: 'Erro de conex�o com o servidor',
         variant: 'destructive'
       })
     } finally {
@@ -359,10 +359,10 @@ export default function IntegracoesPage() {
     }
   }
   
-  // FunÃ§Ã£o para obter cor do webhook
+  // Fun��o para obter cor do webhook
   const getWebhookColor = (webhookType: string) => {
     const colors = {
-      sistema: 0xff0000,      // Vermelho para sistema/seguranÃ§a
+      sistema: 0xff0000,      // Vermelho para sistema/seguran�a
       contaazul: 0x0066cc,    // Azul para ContaAzul
       meta: 0xff6600,         // Laranja para Meta/Social
       checklists: 0x00cc66,   // Verde para checklists
@@ -374,7 +374,7 @@ export default function IntegracoesPage() {
     return colors[webhookType as keyof typeof colors] || 0x5865F2
   }
   
-  // FunÃ§Ã£o para rodar Google AvaliaÃ§Ãµes
+  // Fun��o para rodar Google Avalia��es
   const handleRunGoogleReviews = async () => {
     setGoogleLoading(true)
     setGoogleResult(null)
@@ -387,20 +387,20 @@ export default function IntegracoesPage() {
           bar_id: selectedBar?.id || 1,
           automatic: true,
           date: yesterday,
-          businessName: 'OrdinÃ¡rio Bar e MÃºsica',
-          address: 'SBS Q. 2 BL Q Lojas 5/6 - Asa Sul, BrasÃ­lia - DF, 70070-120',
+          businessName: 'Ordin�rio Bar e M�sica',
+          address: 'SBS Q. 2 BL Q Lojas 5/6 - Asa Sul, Bras�lia - DF, 70070-120',
           days: 30,
           placeId: 'ChIJgTeXKY8aWpMR1hyW_mEEu2k'
         })
       })
       const data = await res.json()
       if (data.success) {
-        setGoogleResult('âœ… Coleta de avaliaÃ§Ãµes do Google realizada com sucesso!')
+        setGoogleResult('�� Coleta de avalia��es do Google realizada com sucesso!')
       } else {
-        setGoogleResult('âŒ Erro: ' + (data.error || 'Erro desconhecido'))
+        setGoogleResult('�� Erro: ' + (data.error || 'Erro desconhecido'))
       }
     } catch (e: any) {
-      setGoogleResult('âŒ Erro: ' + e.message)
+      setGoogleResult('�� Erro: ' + e.message)
     } finally {
       setGoogleLoading(false)
     }
@@ -418,10 +418,10 @@ export default function IntegracoesPage() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                  Central de IntegraÃ§Ãµes
+                  Central de Integra��es
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400 text-lg">
-                  Configure todas as integraÃ§Ãµes do seu estabelecimento
+                  Configure todas as integra��es do seu estabelecimento
                 </p>
               </div>
             </div>
@@ -446,7 +446,7 @@ export default function IntegracoesPage() {
                 <div>
                   <p className="text-green-800 dark:text-green-300 font-semibold">Ativas</p>
                   <p className="text-green-600 dark:text-green-400 text-sm">
-                    {Object.values(webhookConfigs).filter((config: any) => config && config.trim() !== '').length} integraÃ§Ãµes
+                    {Object.values(webhookConfigs).filter((config: any) => config && config.trim() !== '').length} integra��es
                   </p>
                 </div>
               </div>
@@ -471,7 +471,7 @@ export default function IntegracoesPage() {
                 </div>
                 <div>
                   <p className="text-yellow-800 dark:text-yellow-300 font-semibold">Pendentes</p>
-                  <p className="text-yellow-600 dark:text-yellow-400 text-sm">2 configuraÃ§Ãµes</p>
+                  <p className="text-yellow-600 dark:text-yellow-400 text-sm">2 configura��es</p>
                 </div>
               </div>
             </div>
@@ -490,7 +490,7 @@ export default function IntegracoesPage() {
           </div>
         </div>
 
-        {/* Tabs de IntegraÃ§Ãµes */}
+        {/* Tabs de Integra��es */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-6 mb-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-2 shadow-sm">
             <TabsTrigger 
@@ -535,7 +535,7 @@ export default function IntegracoesPage() {
               <Calendar className="w-4 h-4" />
               Eventos
             </TabsTrigger>
-            {/* OCULTAS TEMPORARIAMENTE - NÃƒO SERÃƒO USADAS TÃƒO CEDO */}
+            {/* OCULTAS TEMPORARIAMENTE - N�O SER�O USADAS T�O CEDO */}
             {/* <TabsTrigger value="email" className="flex items-center gap-2">
               <Mail className="w-4 h-4" />
               Email
@@ -558,14 +558,14 @@ export default function IntegracoesPage() {
                     <div>
                       <CardTitle className="text-2xl text-gray-900 dark:text-white">Discord Webhooks</CardTitle>
                       <p className="text-gray-600 dark:text-gray-400 mt-1">
-                        Configure notificaÃ§Ãµes automÃ¡ticas para o Discord
+                        Configure notifica��es autom�ticas para o Discord
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className={`w-3 h-3 rounded-full ${Object.values(webhookConfigs).some(config => config && config.trim() !== '') ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                     <span className={`text-sm font-medium ${Object.values(webhookConfigs).some(config => config && config.trim() !== '') ? 'text-green-600 dark:text-green-400' : 'text-gray-500'}`}>
-                      {Object.values(webhookConfigs).some(config => config && config.trim() !== '') ? 'Configurado' : 'NÃ£o configurado'}
+                      {Object.values(webhookConfigs).some(config => config && config.trim() !== '') ? 'Configurado' : 'N�o configurado'}
                     </span>
                   </div>
                 </div>
@@ -576,24 +576,24 @@ export default function IntegracoesPage() {
                   {loadingConfigs && (
                     <div className="flex justify-center items-center py-12">
                       <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#5865F2]"></div>
-                      <span className="ml-3 text-gray-600 dark:text-gray-400 font-medium">Carregando configuraÃ§Ãµes...</span>
+                      <span className="ml-3 text-gray-600 dark:text-gray-400 font-medium">Carregando configura��es...</span>
                     </div>
                   )}
                   
-                  {/* Webhook Sistema/SeguranÃ§a */}
+                  {/* Webhook Sistema/Seguran�a */}
                   {!loadingConfigs && (
                     <div className="space-y-8">
-                {/* Webhook Sistema/SeguranÃ§a */}
+                {/* Webhook Sistema/Seguran�a */}
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <div className="w-4 h-4 bg-red-500 rounded" />
                     <Label htmlFor="webhook-sistema" className="font-medium">
-                      Webhook Sistema & SeguranÃ§a
+                      Webhook Sistema & Seguran�a
                     </Label>
                     <div className="flex items-center space-x-1 ml-2">
                       <div className={`w-2 h-2 rounded-full ${webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                       <span className={`text-xs ${webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
-                        {webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'Conectado' : 'NÃ£o configurado'}
+                        {webhookConfigs.sistema && webhookConfigs.sistema.trim() !== '' ? 'Conectado' : 'N�o configurado'}
                       </span>
                     </div>
                   </div>
@@ -613,11 +613,11 @@ export default function IntegracoesPage() {
                       disabled={testingWebhook === 'sistema' || !webhookConfigs.sistema || webhookLoading}
                       className="px-3"
                     >
-                      {testingWebhook === 'sistema' ? 'Testando...' : 'ðŸ§ª Testar'}
+                      {testingWebhook === 'sistema' ? 'Testando...' : '🧪 Testar'}
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500">
-                    Eventos crÃ­ticos, alertas de seguranÃ§a, rate limiting, SQL injection
+                    Eventos cr�ticos, alertas de seguran�a, rate limiting, SQL injection
                   </p>
                 </div>
 
@@ -633,7 +633,7 @@ export default function IntegracoesPage() {
                     <div className="flex items-center space-x-1 ml-2">
                       <div className={`w-2 h-2 rounded-full ${webhookConfigs.contaazul && webhookConfigs.contaazul.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                       <span className={`text-xs ${webhookConfigs.contaazul && webhookConfigs.contaazul.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
-                        {webhookConfigs.contaazul && webhookConfigs.contaazul.trim() !== '' ? 'Conectado' : 'NÃ£o configurado'}
+                        {webhookConfigs.contaazul && webhookConfigs.contaazul.trim() !== '' ? 'Conectado' : 'N�o configurado'}
                       </span>
                     </div>
                   </div>
@@ -653,11 +653,11 @@ export default function IntegracoesPage() {
                       disabled={testingWebhook === 'contaazul' || !webhookConfigs.contaazul || webhookLoading}
                       className="px-3"
                     >
-                      {testingWebhook === 'contaazul' ? 'Testando...' : 'ðŸ§ª Testar'}
+                      {testingWebhook === 'contaazul' ? 'Testando...' : '🧪 Testar'}
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500">
-                    SincronizaÃ§Ãµes automÃ¡ticas, renovaÃ§Ã£o de tokens, dados financeiros
+                    Sincroniza��es autom�ticas, renova��o de tokens, dados financeiros
                   </p>
                 </div>
 
@@ -673,7 +673,7 @@ export default function IntegracoesPage() {
                     <div className="flex items-center space-x-1 ml-2">
                       <div className={`w-2 h-2 rounded-full ${webhookConfigs.meta && webhookConfigs.meta.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                       <span className={`text-xs ${webhookConfigs.meta && webhookConfigs.meta.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
-                        {webhookConfigs.meta && webhookConfigs.meta.trim() !== '' ? 'Conectado' : 'NÃ£o configurado'}
+                        {webhookConfigs.meta && webhookConfigs.meta.trim() !== '' ? 'Conectado' : 'N�o configurado'}
                       </span>
                     </div>
                   </div>
@@ -693,7 +693,7 @@ export default function IntegracoesPage() {
                       disabled={testingWebhook === 'meta' || !webhookConfigs.meta || webhookLoading}
                       className="px-3"
                     >
-                      {testingWebhook === 'meta' ? 'Testando...' : 'ðŸ§ª Testar'}
+                      {testingWebhook === 'meta' ? 'Testando...' : '🧪 Testar'}
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500">
@@ -708,12 +708,12 @@ export default function IntegracoesPage() {
                   <div className="flex items-center space-x-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
                     <Label htmlFor="webhook-checklists" className="font-medium">
-                      Webhook Checklists & OperaÃ§Ãµes
+                      Webhook Checklists & Opera��es
                     </Label>
                     <div className="flex items-center space-x-1 ml-2">
                       <div className={`w-2 h-2 rounded-full ${webhookConfigs.checklists && webhookConfigs.checklists.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                       <span className={`text-xs ${webhookConfigs.checklists && webhookConfigs.checklists.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
-                        {webhookConfigs.checklists && webhookConfigs.checklists.trim() !== '' ? 'Conectado' : 'NÃ£o configurado'}
+                        {webhookConfigs.checklists && webhookConfigs.checklists.trim() !== '' ? 'Conectado' : 'N�o configurado'}
                       </span>
                     </div>
                   </div>
@@ -733,11 +733,11 @@ export default function IntegracoesPage() {
                       disabled={testingWebhook === 'checklists' || !webhookConfigs.checklists || webhookLoading}
                       className="px-3"
                     >
-                      {testingWebhook === 'checklists' ? 'Testando...' : 'ðŸ§ª Testar'}
+                      {testingWebhook === 'checklists' ? 'Testando...' : '🧪 Testar'}
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500">
-                    ConclusÃ£o de checklists, alertas operacionais, relatÃ³rios diÃ¡rios
+                    Conclus�o de checklists, alertas operacionais, relat�rios di�rios
                   </p>
                 </div>
 
@@ -753,7 +753,7 @@ export default function IntegracoesPage() {
                     <div className="flex items-center space-x-1 ml-2">
                       <div className={`w-2 h-2 rounded-full ${webhookConfigs.contahub && webhookConfigs.contahub.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                       <span className={`text-xs ${webhookConfigs.contahub && webhookConfigs.contahub.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
-                        {webhookConfigs.contahub && webhookConfigs.contahub.trim() !== '' ? 'Conectado' : 'NÃ£o configurado'}
+                        {webhookConfigs.contahub && webhookConfigs.contahub.trim() !== '' ? 'Conectado' : 'N�o configurado'}
                       </span>
                     </div>
                   </div>
@@ -773,11 +773,11 @@ export default function IntegracoesPage() {
                       disabled={testingWebhook === 'contahub' || !webhookConfigs.contahub || webhookLoading}
                       className="px-3"
                     >
-                      {testingWebhook === 'contahub' ? 'Testando...' : 'ðŸ§ª Testar'}
+                      {testingWebhook === 'contahub' ? 'Testando...' : '🧪 Testar'}
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500">
-                    AnÃ¡lises financeiras, relatÃ³rios automatizados, alertas de performance
+                    An�lises financeiras, relat�rios automatizados, alertas de performance
                   </p>
                 </div>
 
@@ -793,7 +793,7 @@ export default function IntegracoesPage() {
                     <div className="flex items-center space-x-1 ml-2">
                       <div className={`w-2 h-2 rounded-full ${webhookConfigs.sympla && webhookConfigs.sympla.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                       <span className={`text-xs ${webhookConfigs.sympla && webhookConfigs.sympla.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
-                        {webhookConfigs.sympla && webhookConfigs.sympla.trim() !== '' ? 'Conectado' : 'NÃ£o configurado'}
+                        {webhookConfigs.sympla && webhookConfigs.sympla.trim() !== '' ? 'Conectado' : 'N�o configurado'}
                       </span>
                     </div>
                   </div>
@@ -813,7 +813,7 @@ export default function IntegracoesPage() {
                       disabled={testingWebhook === 'sympla' || !webhookConfigs.sympla || webhookLoading}
                       className="px-3"
                     >
-                      {testingWebhook === 'sympla' ? 'Testando...' : 'ðŸ§ª Testar'}
+                      {testingWebhook === 'sympla' ? 'Testando...' : '🧪 Testar'}
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500">
@@ -833,7 +833,7 @@ export default function IntegracoesPage() {
                     <div className="flex items-center space-x-1 ml-2">
                       <div className={`w-2 h-2 rounded-full ${webhookConfigs.yuzer && webhookConfigs.yuzer.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                       <span className={`text-xs ${webhookConfigs.yuzer && webhookConfigs.yuzer.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
-                        {webhookConfigs.yuzer && webhookConfigs.yuzer.trim() !== '' ? 'Conectado' : 'NÃ£o configurado'}
+                        {webhookConfigs.yuzer && webhookConfigs.yuzer.trim() !== '' ? 'Conectado' : 'N�o configurado'}
                       </span>
                     </div>
                   </div>
@@ -853,11 +853,11 @@ export default function IntegracoesPage() {
                       disabled={testingWebhook === 'yuzer' || !webhookConfigs.yuzer || webhookLoading}
                       className="px-3"
                     >
-                      {testingWebhook === 'yuzer' ? 'Testando...' : 'ðŸ§ª Testar'}
+                      {testingWebhook === 'yuzer' ? 'Testando...' : '🧪 Testar'}
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500">
-                    Sistema Yuzer, gestÃ£o de delivery e pedidos online
+                    Sistema Yuzer, gest�o de delivery e pedidos online
                   </p>
                 </div>
 
@@ -873,7 +873,7 @@ export default function IntegracoesPage() {
                     <div className="flex items-center space-x-1 ml-2">
                       <div className={`w-2 h-2 rounded-full ${webhookConfigs.reservas && webhookConfigs.reservas.trim() !== '' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                       <span className={`text-xs ${webhookConfigs.reservas && webhookConfigs.reservas.trim() !== '' ? 'text-green-600' : 'text-gray-500'}`}>
-                        {webhookConfigs.reservas && webhookConfigs.reservas.trim() !== '' ? 'Conectado' : 'NÃ£o configurado'}
+                        {webhookConfigs.reservas && webhookConfigs.reservas.trim() !== '' ? 'Conectado' : 'N�o configurado'}
                       </span>
                     </div>
                   </div>
@@ -893,7 +893,7 @@ export default function IntegracoesPage() {
                       disabled={testingWebhook === 'reservas' || !webhookConfigs.reservas || webhookLoading}
                       className="px-3"
                     >
-                      {testingWebhook === 'reservas' ? 'Testando...' : 'ðŸ§ª Testar'}
+                      {testingWebhook === 'reservas' ? 'Testando...' : '🧪 Testar'}
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500">
@@ -901,7 +901,7 @@ export default function IntegracoesPage() {
                   </p>
                 </div>
 
-                {/* BotÃ£o de Salvar */}
+                {/* Bot�o de Salvar */}
                 <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-3">
@@ -910,10 +910,10 @@ export default function IntegracoesPage() {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          ConfiguraÃ§Ãµes alteradas
+                          Configura��es alteradas
                         </p>
                         <p className="text-xs text-gray-600 dark:text-gray-400">
-                          Salve as alteraÃ§Ãµes para aplicar as configuraÃ§Ãµes
+                          Salve as altera��es para aplicar as configura��es
                         </p>
                       </div>
                     </div>
@@ -930,7 +930,7 @@ export default function IntegracoesPage() {
                       ) : (
                         <div className="flex items-center gap-2">
                           <Save className="w-4 h-4" />
-                          Salvar ConfiguraÃ§Ãµes
+                          Salvar Configura��es
                         </div>
                       )}
                     </Button>
@@ -955,7 +955,7 @@ export default function IntegracoesPage() {
                     <div>
                       <CardTitle className="text-2xl text-gray-900 dark:text-white">GetIn - Sistema de Reservas</CardTitle>
                       <p className="text-gray-600 dark:text-gray-400 mt-1">
-                        SincronizaÃ§Ã£o com plataforma de reservas
+                        Sincroniza��o com plataforma de reservas
                       </p>
                     </div>
                   </div>
@@ -972,40 +972,40 @@ export default function IntegracoesPage() {
                 <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 p-6 rounded-lg">
                   <div className="flex items-start space-x-3">
                     <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center mt-0.5">
-                      <span className="text-white text-sm">ðŸš§</span>
+                      <span className="text-white text-sm">🚧</span>
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900 dark:text-white mb-3">ðŸš§ IntegraÃ§Ã£o em Desenvolvimento</h4>
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-3">🚧 Integra��o em Desenvolvimento</h4>
                       <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
-                        <p><strong>Status atual:</strong> AnÃ¡lise tÃ©cnica concluÃ­da</p>
+                        <p><strong>Status atual:</strong> An�lise t�cnica conclu�da</p>
                         <p><strong>Sistema GetIn:</strong> Identificado como Single Page Application (SPA) complexo</p>
                         
                         <div className="bg-white dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 mt-4">
-                          <h5 className="font-medium text-gray-900 dark:text-white mb-3">OpÃ§Ãµes DisponÃ­veis:</h5>
+                          <h5 className="font-medium text-gray-900 dark:text-white mb-3">Op��es Dispon�veis:</h5>
                           <div className="space-y-3">
                             <div className="flex items-start space-x-3">
                               <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
-                                <span className="text-blue-600 text-xs">ðŸ’°</span>
+                                <span className="text-blue-600 text-xs">💰</span>
                               </div>
                               <div>
                                 <p className="font-medium text-blue-800">API Oficial GetIn</p>
-                                <p className="text-xs text-blue-700">Custo: R$ 500/mÃªs - IntegraÃ§Ã£o completa e confiÃ¡vel</p>
+                                <p className="text-xs text-blue-700">Custo: R$ 500/m�s - Integra��o completa e confi�vel</p>
                               </div>
                             </div>
                             
                             <div className="flex items-start space-x-3">
                               <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mt-0.5">
-                                <span className="text-purple-600 text-xs">âš™ï¸</span>
+                                <span className="text-purple-600 text-xs">��️</span>
                               </div>
                               <div>
-                                <p className="font-medium text-purple-800">AutomaÃ§Ã£o AvanÃ§ada</p>
+                                <p className="font-medium text-purple-800">Automa��o Avan�ada</p>
                                 <p className="text-xs text-purple-700">Desenvolvimento customizado com Playwright/Puppeteer</p>
                               </div>
                             </div>
                             
                             <div className="flex items-start space-x-3">
                               <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-0.5">
-                                <span className="text-green-600 text-xs">ðŸ§ª</span>
+                                <span className="text-green-600 text-xs">🧪</span>
                               </div>
                               <div>
                                 <p className="font-medium text-green-800">Dados Simulados</p>
@@ -1017,8 +1017,8 @@ export default function IntegracoesPage() {
                         
                         <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 mt-4">
                           <p className="text-sm text-blue-800">
-                            <strong>PrÃ³ximos passos:</strong> AvaliaÃ§Ã£o de custo-benefÃ­cio entre API oficial (R$ 500/mÃªs) 
-                            versus desenvolvimento de soluÃ§Ã£o customizada
+                            <strong>Pr�ximos passos:</strong> Avalia��o de custo-benef�cio entre API oficial (R$ 500/m�s) 
+                            versus desenvolvimento de solu��o customizada
                           </p>
                         </div>
                       </div>
@@ -1026,16 +1026,16 @@ export default function IntegracoesPage() {
                   </div>
                 </div>
 
-                {/* InformaÃ§Ãµes da IntegraÃ§Ã£o */}
+                {/* Informa��es da Integra��o */}
                 <div className="space-y-4">
                   <Separator />
                   <div>
-                    <h4 className="font-medium mb-3">Sobre a IntegraÃ§Ã£o GetIn</h4>
+                    <h4 className="font-medium mb-3">Sobre a Integra��o GetIn</h4>
                     <div className="space-y-3 text-sm text-gray-600">
-                      <p>â€¢ <strong>SincronizaÃ§Ã£o automÃ¡tica</strong> de reservas do sistema GetIn</p>
-                      <p>â€¢ <strong>Dados em tempo real</strong> sobre ocupaÃ§Ã£o e disponibilidade</p>
-                      <p>â€¢ <strong>GestÃ£o centralizada</strong> de todas as reservas</p>
-                      <p>â€¢ <strong>RelatÃ³rios integrados</strong> com outros sistemas</p>
+                      <p>�� <strong>Sincroniza��o autom�tica</strong> de reservas do sistema GetIn</p>
+                      <p>�� <strong>Dados em tempo real</strong> sobre ocupa��o e disponibilidade</p>
+                      <p>�� <strong>Gest�o centralizada</strong> de todas as reservas</p>
+                      <p>�� <strong>Relat�rios integrados</strong> com outros sistemas</p>
                     </div>
                   </div>
                 </div>
@@ -1055,11 +1055,11 @@ export default function IntegracoesPage() {
                     </div>
                     <div>
                       <CardTitle className="text-lg">WhatsApp Business API</CardTitle>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Evolution API â€¢ AWS sa-east-1</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Evolution API �� AWS sa-east-1</p>
                     </div>
                   </div>
                   <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                    âœ… Conectado
+                    �� Conectado
                   </Badge>
                 </div>
               </CardHeader>
@@ -1069,7 +1069,7 @@ export default function IntegracoesPage() {
                   <div className="card-dark p-4">
                     <div className="flex items-center gap-3 mb-2">
                       <Smartphone className="w-5 h-5 text-green-600 dark:text-green-400" />
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">NÃºmero</span>
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">N�mero</span>
                     </div>
                     <p className="text-lg font-semibold text-gray-900 dark:text-white">+55 61 9 9848-3434</p>
                   </div>
@@ -1085,7 +1085,7 @@ export default function IntegracoesPage() {
                   <div className="card-dark p-4">
                     <div className="flex items-center gap-3 mb-2">
                       <BarChart3 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Mensagens/mÃªs</span>
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Mensagens/m�s</span>
                     </div>
                     <p className="text-lg font-semibold text-gray-900 dark:text-white">1,247</p>
                   </div>
@@ -1099,16 +1099,16 @@ export default function IntegracoesPage() {
                   </div>
                 </div>
 
-                {/* InformaÃ§Ãµes TÃ©cnicas */}
+                {/* Informa��es T�cnicas */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="card-dark p-6">
                     <h3 className="card-title-dark mb-4 flex items-center gap-2">
                       <Settings className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                      ConfiguraÃ§Ã£o Evolution API
+                      Configura��o Evolution API
                     </h3>
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">InstÃ¢ncia:</span>
+                        <span className="text-gray-600 dark:text-gray-400">Inst�ncia:</span>
                         <span className="text-gray-900 dark:text-white font-medium">SGB_Instance</span>
                       </div>
                       <div className="flex justify-between">
@@ -1116,7 +1116,7 @@ export default function IntegracoesPage() {
                         <span className="text-gray-900 dark:text-white font-medium">evolution-api.sgb.aws.com</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">VersÃ£o:</span>
+                        <span className="text-gray-600 dark:text-gray-400">Vers�o:</span>
                         <span className="text-gray-900 dark:text-white font-medium">v2.1.0</span>
                       </div>
                       <div className="flex justify-between">
@@ -1128,7 +1128,7 @@ export default function IntegracoesPage() {
                       <div className="flex justify-between">
                         <span className="text-gray-600 dark:text-gray-400">SSL:</span>
                         <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
-                          VÃ¡lido atÃ© 2024
+                          V�lido at� 2024
                         </Badge>
                       </div>
                     </div>
@@ -1141,7 +1141,7 @@ export default function IntegracoesPage() {
                     </h3>
                     <div className="space-y-3 text-sm">
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-700 dark:text-gray-300">NotificaÃ§Ãµes reservas</span>
+                        <span className="text-gray-700 dark:text-gray-300">Notifica��es reservas</span>
                         <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
                           Ativo
                         </Badge>
@@ -1159,13 +1159,13 @@ export default function IntegracoesPage() {
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-700 dark:text-gray-300">RelatÃ³rios automÃ¡ticos</span>
+                        <span className="text-gray-700 dark:text-gray-300">Relat�rios autom�ticos</span>
                         <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
                           Ativo
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-700 dark:text-gray-300">Resposta automÃ¡tica</span>
+                        <span className="text-gray-700 dark:text-gray-300">Resposta autom�tica</span>
                         <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 text-xs">
                           Config
                         </Badge>
@@ -1182,28 +1182,28 @@ export default function IntegracoesPage() {
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <p className="text-gray-600 dark:text-gray-400 mb-1">RegiÃ£o</p>
-                      <p className="font-semibold text-gray-900 dark:text-white">sa-east-1 (SÃ£o Paulo)</p>
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">Regi�o</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">sa-east-1 (S�o Paulo)</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <p className="text-gray-600 dark:text-gray-400 mb-1">LatÃªncia</p>
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">Lat�ncia</p>
                       <p className="font-semibold text-green-600 dark:text-green-400">&lt; 50ms</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <p className="text-gray-600 dark:text-gray-400 mb-1">Ãšltima atualizaÃ§Ã£o</p>
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">�ltima atualiza��o</p>
                       <p className="font-semibold text-gray-900 dark:text-white">Hoje, 14:23</p>
                     </div>
                   </div>
                 </div>
 
-                {/* AÃ§Ãµes */}
+                {/* A��es */}
                 <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <Button
                     onClick={() => window.location.href = '/configuracoes/whatsapp'}
                     className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
                   >
                     <Settings className="w-4 h-4" />
-                    ConfiguraÃ§Ãµes AvanÃ§adas
+                    Configura��es Avan�adas
                   </Button>
                   
                   <Button
@@ -1238,11 +1238,11 @@ export default function IntegracoesPage() {
                     </div>
                     <div>
                       <CardTitle className="text-lg">ContaAzul Integration</CardTitle>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">OAuth 2.0 â€¢ PgCron Sync â€¢ API v2</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">OAuth 2.0 �� PgCron Sync �� API v2</p>
                     </div>
                   </div>
                   <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                    âœ… Conectado
+                    �� Conectado
                   </Badge>
                 </div>
               </CardHeader>
@@ -1252,7 +1252,7 @@ export default function IntegracoesPage() {
                   <div className="card-dark p-4">
                     <div className="flex items-center gap-3 mb-2">
                       <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Ãšltima Sync</span>
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">�ltima Sync</span>
                     </div>
                     <p className="text-lg font-semibold text-gray-900 dark:text-white">Hoje, 15:30</p>
                   </div>
@@ -1276,24 +1276,24 @@ export default function IntegracoesPage() {
                   <div className="card-dark p-4">
                     <div className="flex items-center gap-3 mb-2">
                       <TrendingUp className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Receitas/mÃªs</span>
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Receitas/m�s</span>
                     </div>
                     <p className="text-lg font-semibold text-green-600 dark:text-green-400">R$ 45.230</p>
                   </div>
                 </div>
 
-                {/* InformaÃ§Ãµes TÃ©cnicas */}
+                {/* Informa��es T�cnicas */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="card-dark p-6">
                     <h3 className="card-title-dark mb-4 flex items-center gap-2">
                       <Settings className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                      ConfiguraÃ§Ã£o OAuth & API
+                      Configura��o OAuth & API
                     </h3>
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-600 dark:text-gray-400">Token OAuth:</span>
                         <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
-                          VÃ¡lido
+                          V�lido
                         </Badge>
                       </div>
                       <div className="flex justify-between">
@@ -1305,11 +1305,11 @@ export default function IntegracoesPage() {
                         <span className="text-gray-900 dark:text-white font-medium">api-v2.contaazul.com</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">VersÃ£o:</span>
+                        <span className="text-gray-600 dark:text-gray-400">Vers�o:</span>
                         <span className="text-gray-900 dark:text-white font-medium">v2.0</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Refresh automÃ¡tico:</span>
+                        <span className="text-gray-600 dark:text-gray-400">Refresh autom�tico:</span>
                         <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
                           Ativo
                         </Badge>
@@ -1347,29 +1347,29 @@ export default function IntegracoesPage() {
                   </div>
                 </div>
 
-                {/* PgCron & AutomaÃ§Ã£o */}
+                {/* PgCron & Automa��o */}
                 <div className="card-dark p-6">
                   <h3 className="card-title-dark mb-4 flex items-center gap-2">
                     <Clock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                    AutomaÃ§Ã£o PgCron
+                    Automa��o PgCron
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <p className="text-gray-600 dark:text-gray-400 mb-1">FrequÃªncia</p>
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">Frequ�ncia</p>
                       <p className="font-semibold text-gray-900 dark:text-white">A cada 4 horas</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <p className="text-gray-600 dark:text-gray-400 mb-1">PrÃ³xima execuÃ§Ã£o</p>
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">Pr�xima execu��o</p>
                       <p className="font-semibold text-blue-600 dark:text-blue-400">19:00 hoje</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <p className="text-gray-600 dark:text-gray-400 mb-1">Ãšltima execuÃ§Ã£o</p>
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">�ltima execu��o</p>
                       <p className="font-semibold text-green-600 dark:text-green-400">15:30 (sucesso)</p>
                     </div>
                   </div>
                 </div>
 
-                {/* EstatÃ­sticas Financeiras */}
+                {/* Estat�sticas Financeiras */}
                 <div className="card-dark p-6">
                   <h3 className="card-title-dark mb-4 flex items-center gap-2">
                     <BarChart3 className="w-5 h-5 text-green-600 dark:text-green-400" />
@@ -1389,13 +1389,13 @@ export default function IntegracoesPage() {
                       <p className="font-bold text-blue-700 dark:text-blue-300 text-lg">R$ 21.780</p>
                     </div>
                     <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                      <p className="text-purple-600 dark:text-purple-400 mb-1">TransaÃ§Ãµes</p>
+                      <p className="text-purple-600 dark:text-purple-400 mb-1">Transa��es</p>
                       <p className="font-bold text-purple-700 dark:text-purple-300 text-lg">2,547</p>
                     </div>
                   </div>
                 </div>
 
-                {/* AÃ§Ãµes */}
+                {/* A��es */}
                 <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <Button
                     onClick={() => window.location.href = '/configuracoes/contaazul-pgcron'}
@@ -1428,7 +1428,7 @@ export default function IntegracoesPage() {
                     className="flex items-center gap-2"
                   >
                     <BarChart3 className="w-4 h-4" />
-                    Ver RelatÃ³rios
+                    Ver Relat�rios
                   </Button>
                 </div>
               </CardContent>
@@ -1446,11 +1446,11 @@ export default function IntegracoesPage() {
                     </div>
                     <div>
                       <CardTitle className="text-lg">Meta Business APIs</CardTitle>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Facebook â€¢ Instagram â€¢ Graph API v18.0</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Facebook �� Instagram �� Graph API v18.0</p>
                     </div>
                   </div>
                   <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                    âœ… Conectado
+                    �� Conectado
                   </Badge>
                 </div>
               </CardHeader>
@@ -1460,7 +1460,7 @@ export default function IntegracoesPage() {
                   <div className="card-dark p-4">
                     <div className="flex items-center gap-3 mb-2">
                       <Calendar className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Ãšltima Coleta</span>
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">�ltima Coleta</span>
                     </div>
                     <p className="text-lg font-semibold text-gray-900 dark:text-white">Hoje, 14:15</p>
                   </div>
@@ -1490,18 +1490,18 @@ export default function IntegracoesPage() {
                   </div>
                 </div>
 
-                {/* InformaÃ§Ãµes TÃ©cnicas */}
+                {/* Informa��es T�cnicas */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="card-dark p-6">
                     <h3 className="card-title-dark mb-4 flex items-center gap-2">
                       <Settings className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                      ConfiguraÃ§Ã£o API & Tokens
+                      Configura��o API & Tokens
                     </h3>
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-600 dark:text-gray-400">Access Token:</span>
                         <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
-                          VÃ¡lido
+                          V�lido
                         </Badge>
                       </div>
                       <div className="flex justify-between">
@@ -1550,7 +1550,7 @@ export default function IntegracoesPage() {
                         <span className="text-gray-900 dark:text-white font-medium">5,471</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-700 dark:text-gray-300">AnÃ¡lises Content</span>
+                        <span className="text-gray-700 dark:text-gray-300">An�lises Content</span>
                         <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 text-xs">
                           Ativo
                         </Badge>
@@ -1559,33 +1559,33 @@ export default function IntegracoesPage() {
                   </div>
                 </div>
 
-                {/* PgCron & AutomaÃ§Ã£o */}
+                {/* PgCron & Automa��o */}
                 <div className="card-dark p-6">
                   <h3 className="card-title-dark mb-4 flex items-center gap-2">
                     <Clock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                    AutomaÃ§Ã£o PgCron Meta
+                    Automa��o PgCron Meta
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <p className="text-gray-600 dark:text-gray-400 mb-1">FrequÃªncia</p>
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">Frequ�ncia</p>
                       <p className="font-semibold text-gray-900 dark:text-white">A cada 6 horas</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <p className="text-gray-600 dark:text-gray-400 mb-1">PrÃ³xima coleta</p>
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">Pr�xima coleta</p>
                       <p className="font-semibold text-purple-600 dark:text-purple-400">20:00 hoje</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <p className="text-gray-600 dark:text-gray-400 mb-1">Ãšltima coleta</p>
+                      <p className="text-gray-600 dark:text-gray-400 mb-1">�ltima coleta</p>
                       <p className="font-semibold text-green-600 dark:text-green-400">14:15 (sucesso)</p>
                     </div>
                   </div>
                 </div>
 
-                {/* EstatÃ­sticas de Engajamento */}
+                {/* Estat�sticas de Engajamento */}
                 <div className="card-dark p-6">
                   <h3 className="card-title-dark mb-4 flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-pink-600 dark:text-pink-400" />
-                    MÃ©tricas de Engajamento (Ãšltimos 30 dias)
+                    M�tricas de Engajamento (�ltimos 30 dias)
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
                     <div className="text-center p-4 bg-pink-50 dark:bg-pink-900/20 rounded-lg border border-pink-200 dark:border-pink-800">
@@ -1597,7 +1597,7 @@ export default function IntegracoesPage() {
                       <p className="font-bold text-blue-700 dark:text-blue-300 text-lg">12.4K</p>
                     </div>
                     <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                      <p className="text-green-600 dark:text-green-400 mb-1">ComentÃ¡rios</p>
+                      <p className="text-green-600 dark:text-green-400 mb-1">Coment�rios</p>
                       <p className="font-bold text-green-700 dark:text-green-300 text-lg">1.2K</p>
                     </div>
                     <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
@@ -1607,14 +1607,14 @@ export default function IntegracoesPage() {
                   </div>
                 </div>
 
-                {/* AÃ§Ãµes */}
+                {/* A��es */}
                 <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <Button
                     variant="outline"
                     className="flex items-center gap-2"
                   >
                     <Settings className="w-4 h-4" />
-                    ConfiguraÃ§Ãµes AvanÃ§adas
+                    Configura��es Avan�adas
                   </Button>
                   
                   <Button
@@ -1640,7 +1640,7 @@ export default function IntegracoesPage() {
                     className="flex items-center gap-2"
                   >
                     <BarChart3 className="w-4 h-4" />
-                    Marketing 360Â°
+                    Marketing 360�
                   </Button>
 
                   <Button
@@ -1650,7 +1650,7 @@ export default function IntegracoesPage() {
                     disabled={googleLoading}
                   >
                     <Star className="w-4 h-4 text-yellow-500" />
-                    {googleLoading ? 'Coletando Google...' : 'Coletar Google AvaliaÃ§Ãµes (ontem)'}
+                    {googleLoading ? 'Coletando Google...' : 'Coletar Google Avalia��es (ontem)'}
                   </Button>
                 </div>
 
@@ -1686,11 +1686,11 @@ export default function IntegracoesPage() {
                         </div>
                       </div>
                       <p className="text-sm text-gray-600 mb-4">
-                        Envio de newsletters, promoÃ§Ãµes especiais e acompanhamento de eventos
+                        Envio de newsletters, promo��es especiais e acompanhamento de eventos
                       </p>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                        <span className="text-xs text-gray-500">PrÃ³xima versÃ£o</span>
+                        <span className="text-xs text-gray-500">Pr�xima vers�o</span>
                       </div>
                     </div>
                     
@@ -1705,11 +1705,11 @@ export default function IntegracoesPage() {
                         </div>
                       </div>
                       <p className="text-sm text-gray-600 mb-4">
-                        ConfirmaÃ§Ãµes de reserva, lembretes e notificaÃ§Ãµes importantes via SMS
+                        Confirma��es de reserva, lembretes e notifica��es importantes via SMS
                       </p>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                        <span className="text-xs text-gray-500">PrÃ³xima versÃ£o</span>
+                        <span className="text-xs text-gray-500">Pr�xima vers�o</span>
                       </div>
                     </div>
                   </div>
@@ -1720,10 +1720,10 @@ export default function IntegracoesPage() {
                     </div>
                     <h3 className="text-lg font-semibold text-gray-700 mb-2">Em Desenvolvimento</h3>
                     <p className="text-gray-600 mb-4">
-                      Estamos trabalhando nas integraÃ§Ãµes de email e SMS para oferecer a melhor experiÃªncia de comunicaÃ§Ã£o
+                      Estamos trabalhando nas integra��es de email e SMS para oferecer a melhor experi�ncia de comunica��o
                     </p>
                     <Badge variant="secondary" className="text-xs">
-                      LanÃ§amento previsto para prÃ³xima versÃ£o
+                      Lan�amento previsto para pr�xima vers�o
                     </Badge>
                   </div>
                 </div>
@@ -1752,11 +1752,11 @@ export default function IntegracoesPage() {
                         </div>
                         <div>
                           <h4 className="font-semibold text-gray-800">Sympla</h4>
-                          <p className="text-sm text-gray-600">GestÃ£o de eventos</p>
+                          <p className="text-sm text-gray-600">Gest�o de eventos</p>
                         </div>
                       </div>
                       <p className="text-sm text-gray-600 mb-4">
-                        SincronizaÃ§Ã£o automÃ¡tica de eventos, vendas de ingressos e controle de participantes
+                        Sincroniza��o autom�tica de eventos, vendas de ingressos e controle de participantes
                       </p>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
@@ -1775,7 +1775,7 @@ export default function IntegracoesPage() {
                         </div>
                       </div>
                       <p className="text-sm text-gray-600 mb-4">
-                        IntegraÃ§Ã£o para gestÃ£o de lista de convidados e controle de acesso a eventos
+                        Integra��o para gest�o de lista de convidados e controle de acesso a eventos
                       </p>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
@@ -1788,7 +1788,7 @@ export default function IntegracoesPage() {
                     <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                       <Calendar className="w-8 h-8 text-purple-600" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-700 mb-2">IntegraÃ§Ãµes de Eventos</h3>
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Integra��es de Eventos</h3>
                     <p className="text-gray-600 mb-4">
                       Conecte seu estabelecimento com as principais plataformas de eventos do Brasil
                     </p>
@@ -1822,11 +1822,11 @@ export default function IntegracoesPage() {
                         </div>
                         <div>
                           <h4 className="font-semibold text-gray-800">ContaHub</h4>
-                          <p className="text-sm text-gray-600">AnÃ¡lise avanÃ§ada</p>
+                          <p className="text-sm text-gray-600">An�lise avan�ada</p>
                         </div>
                       </div>
                       <p className="text-sm text-gray-600 mb-4">
-                        AnÃ¡lise avanÃ§ada de dados financeiros e operacionais com insights automÃ¡ticos
+                        An�lise avan�ada de dados financeiros e operacionais com insights autom�ticos
                       </p>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -1841,11 +1841,11 @@ export default function IntegracoesPage() {
                         </div>
                         <div>
                           <h4 className="font-semibold text-gray-800">Power BI</h4>
-                          <p className="text-sm text-gray-600">Dashboards avanÃ§ados</p>
+                          <p className="text-sm text-gray-600">Dashboards avan�ados</p>
                         </div>
                       </div>
                       <p className="text-sm text-gray-600 mb-4">
-                        Dashboards interativos e relatÃ³rios personalizados com Microsoft Power BI
+                        Dashboards interativos e relat�rios personalizados com Microsoft Power BI
                       </p>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
@@ -1859,7 +1859,7 @@ export default function IntegracoesPage() {
                       onClick={() => window.location.href = '/relatorios/contahub-teste'}
                       className="bg-orange-500 hover:bg-orange-600 text-white"
                     >
-                      ðŸ“Š Acessar ContaHub Analytics
+                      📊 Acessar ContaHub Analytics
                     </Button>
                   </div>
                 </div>
@@ -1868,7 +1868,7 @@ export default function IntegracoesPage() {
           </TabsContent> */}
         </Tabs>
         
-        {/* EspaÃ§amento final para evitar corte da pÃ¡gina */}
+        {/* Espa�amento final para evitar corte da p�gina */}
         <div className="h-16"></div>
       </div>
     </div>

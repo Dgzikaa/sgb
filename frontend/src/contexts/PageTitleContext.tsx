@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { createContext, useContext, useState, ReactNode } from 'react'
 
@@ -37,7 +37,7 @@ export function PageTitleProvider({ children }: { children: ReactNode }) {
 export function usePageTitle() {
   const context = useContext(PageTitleContext)
   if (context === undefined) {
-    // Durante SSG/pre-rendering, retornar funÃ§Ãµes vazias em vez de lanÃ§ar erro
+    // Durante SSG/pre-rendering, retornar fun��es vazias em vez de lan�ar erro
     return {
       pageTitle: null,
       pageDescription: null,

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect } from 'react'
 import { usePageTitle } from '@/contexts/PageTitleContext'
@@ -23,7 +23,7 @@ export default function HomePage() {
   const { selectedBar } = useBar()
 
   useEffect(() => {
-    setPageTitle('ðŸ  Home')
+    setPageTitle('🏠 Home')
   }, [setPageTitle])
 
   const stats = [
@@ -44,7 +44,7 @@ export default function HomePage() {
       color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
     },
     {
-      label: 'Ticket MÃ©dio',
+      label: 'Ticket M�dio',
       value: 'R$ 72,06',
       change: '+5%',
       positive: true,
@@ -70,15 +70,15 @@ export default function HomePage() {
       color: 'bg-green-500'
     },
     {
-      title: 'RelatÃ³rios',
-      description: 'Ver relatÃ³rios financeiros',
+      title: 'Relat�rios',
+      description: 'Ver relat�rios financeiros',
       href: '/relatorios',
       icon: BarChart3,
       color: 'bg-blue-500'
     },
     {
-      title: 'ConfiguraÃ§Ãµes',
-      description: 'Gerenciar configuraÃ§Ãµes',
+      title: 'Configura��es',
+      description: 'Gerenciar configura��es',
       href: '/configuracoes',
       icon: AlertCircle,
       color: 'bg-gray-500'
@@ -87,20 +87,20 @@ export default function HomePage() {
 
   const recentActivity = [
     {
-      title: 'Checklist de Abertura ConcluÃ­do',
-      time: '2 horas atrÃ¡s',
-      user: 'JoÃ£o Silva',
+      title: 'Checklist de Abertura Conclu�do',
+      time: '2 horas atr�s',
+      user: 'Jo�o Silva',
       type: 'success'
     },
     {
-      title: 'SincronizaÃ§Ã£o ContaAzul',
-      time: '4 horas atrÃ¡s',
+      title: 'Sincroniza��o ContaAzul',
+      time: '4 horas atr�s',
       user: 'Sistema',
       type: 'info'
     },
     {
       title: 'Nova Reserva Cadastrada',
-      time: '6 horas atrÃ¡s',
+      time: '6 horas atr�s',
       user: 'Maria Santos',
       type: 'success'
     }
@@ -113,10 +113,10 @@ export default function HomePage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="welcome-header text-2xl font-bold text-gray-900 dark:text-white mb-1">
-              Bem-vindo de volta! ðŸ‘‹
+              Bem-vindo de volta! 👋
             </h1>
             <p className="text-gray-500 dark:text-gray-400">
-              VisÃ£o geral do <strong className="text-gray-700 dark:text-gray-200">{selectedBar?.nome}</strong> - {new Date().toLocaleDateString('pt-BR')}
+              Vis�o geral do <strong className="text-gray-700 dark:text-gray-200">{selectedBar?.nome}</strong> - {new Date().toLocaleDateString('pt-BR')}
             </p>
           </div>
           <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
@@ -147,8 +147,8 @@ export default function HomePage() {
         {/* Quick Actions */}
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm transition-colors duration-300">
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">AÃ§Ãµes RÃ¡pidas</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Acesso rÃ¡pido Ã s principais funcionalidades</p>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">A��es R�pidas</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Acesso r�pido �s principais funcionalidades</p>
           </div>
           <div className="space-y-3">
             {quickActions.map((action, index) => (
@@ -175,7 +175,7 @@ export default function HomePage() {
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm transition-colors duration-300">
           <div className="mb-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Atividade Recente</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Ãšltimas aÃ§Ãµes realizadas no sistema</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">�ltimas a��es realizadas no sistema</p>
           </div>
           <div className="space-y-4">
             {recentActivity.map((activity, index) => (
@@ -188,7 +188,7 @@ export default function HomePage() {
                     {activity.title}
                   </h4>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {activity.user} â€¢ {activity.time}
+                    {activity.user} �� {activity.time}
                   </p>
                 </div>
               </div>
@@ -236,7 +236,7 @@ export default function HomePage() {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-              Pronto para comeÃ§ar o dia?
+              Pronto para come�ar o dia?
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Execute o checklist de abertura e mantenha tudo organizado.

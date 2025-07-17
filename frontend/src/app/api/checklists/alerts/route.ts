@@ -1,10 +1,10 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import DiscordChecklistService from '@/lib/discord-checklist-service'
 
 // =====================================================
-// ðŸš¨ API PARA DETECTAR E GERENCIAR ALERTAS DE ATRASO
+// 🚨 API PARA DETECTAR E GERENCIAR ALERTAS DE ATRASO
 // =====================================================
 
 interface Schedule {
@@ -35,10 +35,10 @@ export async function GET(req: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies })
     
-    // Verificar autenticaÃ§Ã£o
+    // Verificar autentica��o
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'N�o autorizado' }, { status: 401 })
     }
 
     // Buscar agendamentos ativos
@@ -59,41 +59,41 @@ export async function GET(req: NextRequest) {
       }, { status: 500 })
     }
 
-    // Buscar execuÃ§Ãµes recentes
+    // Buscar execu��es recentes
     const { data: executions, error: executionsError } = await supabase
       .from('checklist_executions')
       .select('checklist_id, executed_at, status')
       .eq('user_id', user.id)
-      .gte('executed_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()) // Ãšltimos 7 dias
+      .gte('executed_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()) // �ltimos 7 dias
       .order('executed_at', { ascending: false })
 
     if (executionsError) {
-      console.error('Erro ao buscar execuÃ§Ãµes:', executionsError)
+      console.error('Erro ao buscar execu��es:', executionsError)
     }
 
     const alerts = await generateAlerts(schedules || [], executions || [])
 
-    // ðŸ”¥ ENVIAR ALERTAS CRÃTICOS PARA DISCORD
+    // 🔥 ENVIAR ALERTAS CR�TICOS PARA DISCORD
     const criticalAlerts = alerts.filter((a: any) => a.nivel === 'critico')
     const urgentAlerts = alerts.filter((a: any) => a.nivel === 'alto')
     
-    // Enviar alertas crÃ­ticos imediatamente para Discord
+    // Enviar alertas cr�ticos imediatamente para Discord
     for (const criticalAlert of criticalAlerts) {
       try {
         await DiscordChecklistService.sendCriticalAlert(criticalAlert)
-        console.log(`ðŸ”´ Alerta crÃ­tico enviado para Discord: ${criticalAlert.titulo}`)
+        console.log(`🔴 Alerta cr�tico enviado para Discord: ${criticalAlert.titulo}`)
       } catch (error) {
-        console.error('âŒ Erro ao enviar alerta crÃ­tico para Discord:', error)
+        console.error('�� Erro ao enviar alerta cr�tico para Discord:', error)
       }
     }
 
-    // Enviar alertas urgentes tambÃ©m para Discord
+    // Enviar alertas urgentes tamb�m para Discord
     for (const urgentAlert of urgentAlerts) {
       try {
         await DiscordChecklistService.sendAlert(urgentAlert)
-        console.log(`ðŸŸ  Alerta urgente enviado para Discord: ${urgentAlert.titulo}`)
+        console.log(`🟠 Alerta urgente enviado para Discord: ${urgentAlert.titulo}`)
       } catch (error) {
-        console.error('âŒ Erro ao enviar alerta urgente para Discord:', error)
+        console.error('�� Erro ao enviar alerta urgente para Discord:', error)
       }
     }
 
@@ -118,7 +118,7 @@ export async function GET(req: NextRequest) {
 }
 
 // =====================================================
-// ðŸŽ¯ FUNÃ‡ÃƒO PARA GERAR ALERTAS AUTOMATICAMENTE
+// 🎯 FUN��O PARA GERAR ALERTAS AUTOMATICAMENTE
 // =====================================================
 
 async function generateAlerts(schedules: Schedule[], executions: ChecklistExecution[]) {
@@ -134,17 +134,17 @@ async function generateAlerts(schedules: Schedule[], executions: ChecklistExecut
     const shouldExecuteToday = shouldScheduleExecuteToday(schedule, today, todayDate)
     if (!shouldExecuteToday) continue
 
-    // Verificar Ãºltima execuÃ§Ã£o
+    // Verificar �ltima execu��o
     const lastExecution = executions
       .filter((exec: any) => exec.checklist_id === schedule.checklist_id)
       .sort((a, b) => new Date(b.executed_at).getTime() - new Date(a.executed_at).getTime())[0]
 
-    // Calcular horÃ¡rio esperado de hoje
+    // Calcular hor�rio esperado de hoje
     const expectedTime = new Date()
     const [hours, minutes] = schedule.horario.split(':').map(Number)
     expectedTime.setHours(hours, minutes, 0, 0)
 
-    // Se jÃ¡ passou do horÃ¡rio e nÃ£o foi executado hoje
+    // Se j� passou do hor�rio e n�o foi executado hoje
     if (now > expectedTime) {
       const isExecutedToday = lastExecution && 
         new Date(lastExecution.executed_at).toDateString() === now.toDateString()
@@ -178,7 +178,7 @@ async function generateAlerts(schedules: Schedule[], executions: ChecklistExecut
 }
 
 // =====================================================
-// ðŸŽ¯ FUNÃ‡Ã•ES AUXILIARES
+// 🎯 FUN��ES AUXILIARES
 // =====================================================
 
 function shouldScheduleExecuteToday(schedule: Schedule, today: number, todayDate: number): boolean {
@@ -217,44 +217,44 @@ function generateAlertMessage(checklistTitulo: string, delayMinutes: number): st
     : `${Math.floor(delayMinutes / 60)} horas`
 
   if (delayMinutes > 480) {
-    return `âš ï¸ CRÃTICO: "${checklistTitulo}" estÃ¡ atrasado hÃ¡ ${delayText}! VerificaÃ§Ã£o urgente necessÃ¡ria.`
+    return `��️ CR�TICO: "${checklistTitulo}" est� atrasado h� ${delayText}! Verifica��o urgente necess�ria.`
   }
   
   if (delayMinutes > 240) {
-    return `ðŸš¨ URGENTE: "${checklistTitulo}" nÃ£o foi executado hÃ¡ ${delayText}. AÃ§Ã£o imediata requerida.`
+    return `🚨 URGENTE: "${checklistTitulo}" n�o foi executado h� ${delayText}. A��o imediata requerida.`
   }
   
   if (delayMinutes > 60) {
-    return `â° ATENÃ‡ÃƒO: "${checklistTitulo}" estÃ¡ ${delayText} atrasado. Execute assim que possÃ­vel.`
+    return `�� ATEN��O: "${checklistTitulo}" est� ${delayText} atrasado. Execute assim que poss�vel.`
   }
   
-  return `ðŸ”” LEMBRETE: "${checklistTitulo}" deveria ter sido executado hÃ¡ ${delayText}.`
+  return `🔔 LEMBRETE: "${checklistTitulo}" deveria ter sido executado h� ${delayText}.`
 }
 
 // =====================================================
-// ðŸ”§ CRIAR ALERTAS MANUALMENTE (POST)
+// 🔧 CRIAR ALERTAS MANUALMENTE (POST)
 // =====================================================
 
 export async function POST(req: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies })
     
-    // Verificar autenticaÃ§Ã£o
+    // Verificar autentica��o
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'N�o autorizado' }, { status: 401 })
     }
 
     const alertData = await req.json()
 
     if (!alertData.checklistId || !alertData.scheduleId) {
       return NextResponse.json({ 
-        error: 'Dados obrigatÃ³rios nÃ£o fornecidos' 
+        error: 'Dados obrigat�rios n�o fornecidos' 
       }, { status: 400 })
     }
 
-    // Aqui vocÃª poderia salvar alertas customizados no banco
-    // Por enquanto, vamos apenas simular a criaÃ§Ã£o
+    // Aqui voc� poderia salvar alertas customizados no banco
+    // Por enquanto, vamos apenas simular a cria��o
 
     return NextResponse.json({
       success: true,

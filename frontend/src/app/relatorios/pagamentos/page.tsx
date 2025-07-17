@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import EmConstrucao from '@/components/EmConstrucao'
@@ -7,8 +7,8 @@ export default function PagamentosPage() {
   return (
     <ProtectedRoute requiredModule="relatorio_pagamentos">
       <EmConstrucao 
-        titulo="GestÃ£o de Pagamentos"
-        descricao="Controle de pagamentos, recebimentos, formas de pagamento e conciliaÃ§Ã£o financeira."
+        titulo="Gest�o de Pagamentos"
+        descricao="Controle de pagamentos, recebimentos, formas de pagamento e concilia��o financeira."
         prioridade="alta"
         previsao="1-2 semanas"
       />

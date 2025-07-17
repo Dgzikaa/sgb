@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -94,7 +94,7 @@ export default function AdminChecklists() {
     responsavel_padrao: ''
   })
 
-  // ConfiguraÃ§Ã£o dos setores
+  // Configura��o dos setores
   const setores: Setor[] = [
     {
       id: 'cozinha',
@@ -112,21 +112,21 @@ export default function AdminChecklists() {
     },
     {
       id: 'salao',
-      nome: 'SalÃ£o',
+      nome: 'Sal�o',
       icon: Utensils,
       cor: 'bg-green-500',
-      responsavel_padrao: 'Gerente de SalÃ£o'
+      responsavel_padrao: 'Gerente de Sal�o'
     },
     {
       id: 'recebimento',
       nome: 'Recebimento',
       icon: Truck,
       cor: 'bg-purple-500',
-      responsavel_padrao: 'ResponsÃ¡vel Estoque'
+      responsavel_padrao: 'Respons�vel Estoque'
     },
     {
       id: 'seguranca',
-      nome: 'SeguranÃ§a',
+      nome: 'Seguran�a',
       icon: Shield,
       cor: 'bg-red-500',
       responsavel_padrao: 'Gerente Geral'
@@ -146,7 +146,7 @@ export default function AdminChecklists() {
       id: '1',
       nome: 'Checklist de Abertura Geral',
       setor: 'administrativo',
-      descricao: 'VerificaÃ§Ãµes gerais para abertura do estabelecimento',
+      descricao: 'Verifica��es gerais para abertura do estabelecimento',
       tipo: 'abertura',
       frequencia: 'diaria',
       tempo_estimado: 45,
@@ -161,7 +161,7 @@ export default function AdminChecklists() {
       id: '2',
       nome: 'Limpeza Profunda Cozinha',
       setor: 'cozinha',
-      descricao: 'Procedimentos de sanitizaÃ§Ã£o e limpeza da cozinha',
+      descricao: 'Procedimentos de sanitiza��o e limpeza da cozinha',
       tipo: 'qualidade',
       frequencia: 'semanal',
       tempo_estimado: 90,
@@ -174,9 +174,9 @@ export default function AdminChecklists() {
     },
     {
       id: '3',
-      nome: 'SeguranÃ§a do Bar',
+      nome: 'Seguran�a do Bar',
       setor: 'bar',
-      descricao: 'VerificaÃ§Ãµes de seguranÃ§a especÃ­ficas do bar',
+      descricao: 'Verifica��es de seguran�a espec�ficas do bar',
       tipo: 'seguranca',
       frequencia: 'diaria',
       tempo_estimado: 20,
@@ -194,7 +194,7 @@ export default function AdminChecklists() {
   }, [selectedBar?.id])
 
   useEffect(() => {
-    setPageTitle('GestÃ£o de Checklists')
+    setPageTitle('Gest�o de Checklists')
     return () => setPageTitle('')
   }, [setPageTitle])
 
@@ -231,7 +231,7 @@ export default function AdminChecklists() {
   // Bulk selection
   const bulkSelection = useBulkSelection(checklistsFiltrados, {
     onSelectionChange: (selectedItems) => {
-      console.log('SeleÃ§Ã£o alterada:', selectedItems)
+      console.log('Sele��o alterada:', selectedItems)
     }
   })
 
@@ -381,7 +381,7 @@ export default function AdminChecklists() {
       })
 
       if (response.ok) {
-        console.log('âœ… Checklist criado com sucesso')
+        console.log('�� Checklist criado com sucesso')
         setModalNovoChecklist(false)
         // Recarregar lista
         carregarChecklists()
@@ -397,12 +397,12 @@ export default function AdminChecklists() {
         })
       } else {
         const errorData = await response.json()
-        console.error('âŒ Erro ao salvar checklist:', errorData)
+        console.error('�� Erro ao salvar checklist:', errorData)
         alert('Erro ao salvar checklist. Tente novamente.')
       }
     } catch (error) {
-      console.error('ðŸ’¥ Erro ao salvar checklist:', error)
-      alert('Erro ao salvar checklist. Verifique sua conexÃ£o.')
+      console.error('💥 Erro ao salvar checklist:', error)
+      alert('Erro ao salvar checklist. Verifique sua conex�o.')
     }
   }
 
@@ -413,7 +413,7 @@ export default function AdminChecklists() {
 
   const handleCopiarChecklist = (checklist: ChecklistTemplate) => {
     setNovoChecklist({
-      nome: `${checklist.nome} (CÃ³pia)`,
+      nome: `${checklist.nome} (C�pia)`,
       setor: checklist.setor,
       descricao: checklist.descricao,
       tipo: checklist.tipo,
@@ -426,7 +426,7 @@ export default function AdminChecklists() {
 
   const handleExcluirChecklist = async (id: string) => {
     if (confirm('Tem certeza que deseja excluir este checklist?')) {
-      // TODO: Implementar exclusÃ£o no banco
+      // TODO: Implementar exclus�o no banco
       console.log('Excluindo checklist:', id)
       carregarChecklists()
     }
@@ -458,15 +458,15 @@ export default function AdminChecklists() {
             </div>
           </div>
 
-          {/* AÃ§Ãµes e Filtros */}
+          {/* A��es e Filtros */}
           <div className="flex flex-col lg:flex-row gap-4 mb-6">
             <div className="flex-1">
               <div className="relative max-w-md">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-gray-400 text-lg">ðŸ”</span>
+                  <span className="text-gray-400 text-lg">🔍</span>
                 </div>
                 <Input
-                  placeholder="Buscar por nome ou descriÃ§Ã£o..."
+                  placeholder="Buscar por nome ou descri��o..."
                   value={busca}
                   onChange={(e) => setBusca(e.target.value)}
                   className="h-11 pl-10 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-700 shadow-sm focus:border-green-500 focus:ring-green-500"
@@ -522,7 +522,7 @@ export default function AdminChecklists() {
                   <SelectItem value="manutencao" className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                      <span className="font-medium">ManutenÃ§Ã£o</span>
+                      <span className="font-medium">Manuten��o</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="qualidade" className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100">
@@ -534,7 +534,7 @@ export default function AdminChecklists() {
                   <SelectItem value="seguranca" className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                      <span className="font-medium">SeguranÃ§a</span>
+                      <span className="font-medium">Seguran�a</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="limpeza" className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100">
@@ -566,7 +566,7 @@ export default function AdminChecklists() {
             className="mb-4"
           />
 
-          {/* Header da Lista com SeleÃ§Ã£o */}
+          {/* Header da Lista com Sele��o */}
           {checklistsFiltrados.length > 0 && (
             <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <Checkbox
@@ -717,11 +717,11 @@ export default function AdminChecklists() {
                   Editar Checklist
                 </DialogTitle>
                 <p className="text-gray-600 dark:text-gray-400">
-                  {checklistSelecionado ? `Editando: ${checklistSelecionado.nome}` : 'Editar informaÃ§Ãµes do checklist'}
+                  {checklistSelecionado ? `Editando: ${checklistSelecionado.nome}` : 'Editar informa��es do checklist'}
                 </p>
               </DialogHeader>
               
-              {/* ConteÃºdo do Modal */}
+              {/* Conte�do do Modal */}
               <div className="p-6 space-y-6">
                 {checklistSelecionado && (
                   <div className="modal-form-grid">
@@ -775,22 +775,22 @@ export default function AdminChecklists() {
                       </Select>
                     </div>
 
-                    {/* DescriÃ§Ã£o */}
+                    {/* Descri��o */}
                     <div className="space-y-2">
                       <Label htmlFor="editDescricao" className="text-sm font-semibold text-gray-800 flex items-center gap-2">
                         <FileText className="w-4 h-4 text-green-600" />
-                        DescriÃ§Ã£o
+                        Descri��o
                       </Label>
                       <Input
                         id="editDescricao"
                         value={checklistSelecionado.descricao}
                         onChange={(e) => setChecklistSelecionado({...checklistSelecionado, descricao: e.target.value})}
-                        placeholder="Breve descriÃ§Ã£o do que serÃ¡ verificado"
+                        placeholder="Breve descri��o do que ser� verificado"
                         className="h-11 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
 
-                    {/* Tipo e FrequÃªncia */}
+                    {/* Tipo e Frequ�ncia */}
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="editTipo" className="text-sm font-semibold text-gray-800 flex items-center gap-2">
@@ -817,7 +817,7 @@ export default function AdminChecklists() {
                             <SelectItem value="manutencao" className="cursor-pointer hover:bg-gray-50">
                               <div className="flex items-center gap-2">
                                 <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                                ManutenÃ§Ã£o
+                                Manuten��o
                               </div>
                             </SelectItem>
                             <SelectItem value="qualidade" className="cursor-pointer hover:bg-gray-50">
@@ -829,7 +829,7 @@ export default function AdminChecklists() {
                             <SelectItem value="seguranca" className="cursor-pointer hover:bg-gray-50">
                               <div className="flex items-center gap-2">
                                 <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                                SeguranÃ§a
+                                Seguran�a
                               </div>
                             </SelectItem>
                             <SelectItem value="limpeza" className="cursor-pointer hover:bg-gray-50">
@@ -845,23 +845,23 @@ export default function AdminChecklists() {
                       <div className="space-y-2">
                         <Label htmlFor="editFrequencia" className="text-sm font-semibold text-gray-800 flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-indigo-600" />
-                          FrequÃªncia *
+                          Frequ�ncia *
                         </Label>
                         <Select value={checklistSelecionado.frequencia} onValueChange={(value: any) => setChecklistSelecionado({...checklistSelecionado, frequencia: value})}>
                           <SelectTrigger className="h-11 border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                            <SelectItem value="diaria" className="cursor-pointer hover:bg-gray-50">DiÃ¡ria</SelectItem>
+                            <SelectItem value="diaria" className="cursor-pointer hover:bg-gray-50">Di�ria</SelectItem>
                             <SelectItem value="semanal" className="cursor-pointer hover:bg-gray-50">Semanal</SelectItem>
                             <SelectItem value="mensal" className="cursor-pointer hover:bg-gray-50">Mensal</SelectItem>
-                            <SelectItem value="conforme_necessario" className="cursor-pointer hover:bg-gray-50">Conforme necessÃ¡rio</SelectItem>
+                            <SelectItem value="conforme_necessario" className="cursor-pointer hover:bg-gray-50">Conforme necess�rio</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                     </div>
 
-                    {/* Tempo e ResponsÃ¡vel */}
+                    {/* Tempo e Respons�vel */}
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="editTempo" className="text-sm font-semibold text-gray-800 flex items-center gap-2">
@@ -888,7 +888,7 @@ export default function AdminChecklists() {
                       <div className="space-y-2">
                         <Label htmlFor="editResponsavel" className="text-sm font-semibold text-gray-800 flex items-center gap-2">
                           <Users className="w-4 h-4 text-teal-600" />
-                          ResponsÃ¡vel PadrÃ£o
+                          Respons�vel Padr�o
                         </Label>
                         <Input
                           id="editResponsavel"
@@ -927,16 +927,16 @@ export default function AdminChecklists() {
                       </Select>
                     </div>
 
-                    {/* InformaÃ§Ãµes adicionais */}
+                    {/* Informa��es adicionais */}
                     <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                       <div className="flex items-start gap-3">
                         <div className="w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                           <span className="text-white text-xs font-bold">!</span>
                         </div>
                         <div>
-                          <h4 className="text-sm font-semibold text-amber-900 mb-1">PrÃ³ximos Passos</h4>
+                          <h4 className="text-sm font-semibold text-amber-900 mb-1">Pr�ximos Passos</h4>
                           <p className="text-sm text-amber-700">
-                            ApÃ³s salvar, vocÃª poderÃ¡ editar as seÃ§Ãµes e itens especÃ­ficos deste checklist.
+                            Ap�s salvar, voc� poder� editar as se��es e itens espec�ficos deste checklist.
                           </p>
                         </div>
                       </div>
@@ -958,8 +958,8 @@ export default function AdminChecklists() {
                   </Button>
                   <Button 
                     onClick={() => {
-                      console.log('ðŸ’¾ Salvando alteraÃ§Ãµes do checklist:', checklistSelecionado)
-                      alert('âœ… Checklist atualizado com sucesso!')
+                      console.log('💾 Salvando altera��es do checklist:', checklistSelecionado)
+                      alert('�� Checklist atualizado com sucesso!')
                       setModalEditarChecklist(false)
                       carregarChecklists()
                     }}
@@ -967,7 +967,7 @@ export default function AdminChecklists() {
                     className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Edit className="w-4 h-4 mr-2" />
-                    Salvar AlteraÃ§Ãµes
+                    Salvar Altera��es
                   </Button>
                 </DialogFooter>
               </div>
@@ -987,12 +987,12 @@ export default function AdminChecklists() {
                     Novo Checklist
                   </DialogTitle>
                   <p className="text-green-50 text-sm mt-1">
-                    Preencha as informaÃ§Ãµes bÃ¡sicas do checklist
+                    Preencha as informa��es b�sicas do checklist
                   </p>
                 </DialogHeader>
               </div>
               
-              {/* ConteÃºdo do Modal */}
+              {/* Conte�do do Modal */}
               <div className="p-6 space-y-6">
                 {/* Nome do Checklist */}
                 <div className="space-y-2">
@@ -1044,22 +1044,22 @@ export default function AdminChecklists() {
                   </Select>
                 </div>
 
-                {/* DescriÃ§Ã£o */}
+                {/* Descri��o */}
                 <div className="space-y-2">
                   <Label htmlFor="descricao" className="text-sm font-semibold text-gray-800 flex items-center gap-2">
                     <FileText className="w-4 h-4 text-purple-600" />
-                    DescriÃ§Ã£o
+                    Descri��o
                   </Label>
                   <Input
                     id="descricao"
                     value={novoChecklist.descricao}
                     onChange={(e) => setNovoChecklist({...novoChecklist, descricao: e.target.value})}
-                    placeholder="Breve descriÃ§Ã£o do que serÃ¡ verificado"
+                    placeholder="Breve descri��o do que ser� verificado"
                     className="h-11 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500"
                   />
                 </div>
 
-                {/* Tipo e FrequÃªncia */}
+                {/* Tipo e Frequ�ncia */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="tipo" className="text-sm font-semibold text-gray-800 flex items-center gap-2">
@@ -1086,7 +1086,7 @@ export default function AdminChecklists() {
                         <SelectItem value="manutencao" className="cursor-pointer hover:bg-gray-50">
                           <div className="flex items-center gap-2">
                             <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                            ManutenÃ§Ã£o
+                            Manuten��o
                           </div>
                         </SelectItem>
                         <SelectItem value="qualidade" className="cursor-pointer hover:bg-gray-50">
@@ -1098,7 +1098,7 @@ export default function AdminChecklists() {
                         <SelectItem value="seguranca" className="cursor-pointer hover:bg-gray-50">
                           <div className="flex items-center gap-2">
                             <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                            SeguranÃ§a
+                            Seguran�a
                           </div>
                         </SelectItem>
                         <SelectItem value="limpeza" className="cursor-pointer hover:bg-gray-50">
@@ -1114,23 +1114,23 @@ export default function AdminChecklists() {
                   <div className="space-y-2">
                     <Label htmlFor="frequencia" className="text-sm font-semibold text-gray-800 flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-indigo-600" />
-                      FrequÃªncia *
+                      Frequ�ncia *
                     </Label>
                     <Select value={novoChecklist.frequencia} onValueChange={(value: any) => setNovoChecklist({...novoChecklist, frequencia: value})}>
                       <SelectTrigger className="h-11 border-gray-300 text-gray-900 focus:border-green-500 focus:ring-green-500">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                        <SelectItem value="diaria" className="cursor-pointer hover:bg-gray-50">DiÃ¡ria</SelectItem>
+                        <SelectItem value="diaria" className="cursor-pointer hover:bg-gray-50">Di�ria</SelectItem>
                         <SelectItem value="semanal" className="cursor-pointer hover:bg-gray-50">Semanal</SelectItem>
                         <SelectItem value="mensal" className="cursor-pointer hover:bg-gray-50">Mensal</SelectItem>
-                        <SelectItem value="conforme_necessario" className="cursor-pointer hover:bg-gray-50">Conforme necessÃ¡rio</SelectItem>
+                        <SelectItem value="conforme_necessario" className="cursor-pointer hover:bg-gray-50">Conforme necess�rio</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
 
-                {/* Tempo e ResponsÃ¡vel */}
+                {/* Tempo e Respons�vel */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="tempo" className="text-sm font-semibold text-gray-800 flex items-center gap-2">
@@ -1157,7 +1157,7 @@ export default function AdminChecklists() {
                   <div className="space-y-2">
                     <Label htmlFor="responsavel" className="text-sm font-semibold text-gray-800 flex items-center gap-2">
                       <Users className="w-4 h-4 text-teal-600" />
-                      ResponsÃ¡vel PadrÃ£o
+                      Respons�vel Padr�o
                     </Label>
                     <Input
                       id="responsavel"
@@ -1169,16 +1169,16 @@ export default function AdminChecklists() {
                   </div>
                 </div>
 
-                {/* InformaÃ§Ãµes adicionais */}
+                {/* Informa��es adicionais */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <div className="flex items-start gap-3">
                     <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                       <span className="text-white text-xs font-bold">i</span>
                     </div>
                     <div>
-                      <h4 className="text-sm font-semibold text-blue-900 mb-1">PrÃ³ximo Passo</h4>
+                      <h4 className="text-sm font-semibold text-blue-900 mb-1">Pr�ximo Passo</h4>
                       <p className="text-sm text-blue-700">
-                        ApÃ³s criar o checklist, vocÃª poderÃ¡ adicionar seÃ§Ãµes e itens especÃ­ficos para cada verificaÃ§Ã£o.
+                        Ap�s criar o checklist, voc� poder� adicionar se��es e itens espec�ficos para cada verifica��o.
                       </p>
                     </div>
                   </div>

@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -8,9 +8,9 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('ðŸ—ºï¸ Customer Journey - Mapeando jornada do cliente...')
+    console.log('🗺️ Customer Journey - Mapeando jornada do cliente...')
 
-    // Obter dados do usuÃ¡rio para pegar o bar_id
+    // Obter dados do usu�rio para pegar o bar_id
     const userData = request.headers.get('x-user-data')
     let barId = 3 // fallback para desenvolvimento
     
@@ -18,15 +18,15 @@ export async function GET(request: NextRequest) {
       try {
         const parsedUser = JSON.parse(decodeURIComponent(userData))
         barId = parsedUser.bar_id || 3
-        console.log(`ðŸ‘¤ Customer Journey - Usando bar_id: ${barId}`)
+        console.log(`👤 Customer Journey - Usando bar_id: ${barId}`)
       } catch (e) {
-        console.warn('âš ï¸ Erro ao parsear dados do usuÃ¡rio, usando bar_id padrÃ£o')
+        console.warn('��️ Erro ao parsear dados do usu�rio, usando bar_id padr�o')
       }
     }
 
-    console.log('ðŸ—ºï¸ Customer Journey - Mapeando jornada para bar:', barId)
+    console.log('🗺️ Customer Journey - Mapeando jornada para bar:', barId)
 
-    // 1. COLETAR DADOS DE ENGAJAMENTO E CONVERSÃƒO
+    // 1. COLETAR DADOS DE ENGAJAMENTO E CONVERS�O
     const etapasJornada = [
       {
         id: 'discovery',
@@ -37,22 +37,22 @@ export async function GET(request: NextRequest) {
       },
       {
         id: 'awareness',
-        nome: 'ConsciÃªncia',
+        nome: 'Consci�ncia',
         descricao: 'Cliente demonstra interesse inicial',
         metricas: ['follows', 'likes', 'comments'],
         canais: ['instagram', 'facebook']
       },
       {
         id: 'consideration',
-        nome: 'ConsideraÃ§Ã£o',
+        nome: 'Considera��o',
         descricao: 'Cliente avalia a marca e competitors',
         metricas: ['saves', 'shares', 'story_views'],
         canais: ['instagram', 'facebook', 'whatsapp']
       },
       {
         id: 'intent',
-        nome: 'IntenÃ§Ã£o',
-        descricao: 'Cliente demonstra intenÃ§Ã£o de compra',
+        nome: 'Inten��o',
+        descricao: 'Cliente demonstra inten��o de compra',
         metricas: ['clicks', 'messages', 'calls'],
         canais: ['whatsapp', 'direct', 'phone']
       },
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
       },
       {
         id: 'retention',
-        nome: 'RetenÃ§Ã£o',
+        nome: 'Reten��o',
         descricao: 'Cliente se torna recorrente',
         metricas: ['repeat_visits', 'loyalty_program'],
         canais: ['app', 'whatsapp', 'presencial']
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
       .order('updated_at', { ascending: false })
       .limit(50)
 
-    // 3. SIMULAR DADOS DE CONVERSÃƒO (normalmente viriam de outras fontes)
+    // 3. SIMULAR DADOS DE CONVERS�O (normalmente viriam de outras fontes)
     const simularDadosConversao = () => {
       const baseConversions = Math.floor(Math.random() * 100) + 50
       
@@ -174,42 +174,42 @@ export async function GET(request: NextRequest) {
       return pontosAbandono
     }
 
-    // 5. GERAR RECOMENDAÃ‡Ã•ES POR PONTO DE ABANDONO
+    // 5. GERAR RECOMENDA��ES POR PONTO DE ABANDONO
     const gerarRecomendacoesAbandono = (etapa: string, taxaAbandono: number) => {
       const recomendacoes: any = {
         discovery: [
-          'Melhore a qualidade do conteÃºdo para aumentar o interesse',
-          'Aumente a frequÃªncia de postagens',
+          'Melhore a qualidade do conte�do para aumentar o interesse',
+          'Aumente a frequ�ncia de postagens',
           'Use hashtags mais relevantes'
         ],
         awareness: [
-          'Crie conteÃºdo mais engajante',
-          'Responda comentÃ¡rios mais rapidamente',
-          'FaÃ§a parcerias com influenciadores'
+          'Crie conte�do mais engajante',
+          'Responda coment�rios mais rapidamente',
+          'Fa�a parcerias com influenciadores'
         ],
         consideration: [
-          'Mostre mais sobre o ambiente e experiÃªncia',
+          'Mostre mais sobre o ambiente e experi�ncia',
           'Compartilhe depoimentos de clientes',
-          'Crie conteÃºdo comparativo'
+          'Crie conte�do comparativo'
         ],
         intent: [
           'Facilite o processo de reserva',
           'Responda mensagens mais rapidamente',
-          'OfereÃ§a promoÃ§Ãµes especiais'
+          'Ofere�a promo��es especiais'
         ],
         purchase: [
           'Melhore o atendimento presencial',
-          'OfereÃ§a facilidades de pagamento',
+          'Ofere�a facilidades de pagamento',
           'Crie ambiente mais acolhedor'
         ],
         retention: [
           'Implemente programa de fidelidade',
           'Envie lembretes personalizados',
-          'OfereÃ§a descontos para clientes recorrentes'
+          'Ofere�a descontos para clientes recorrentes'
         ],
         advocacy: [
-          'Incentive avaliaÃ§Ãµes e reviews',
-          'Recompense indicaÃ§Ãµes',
+          'Incentive avalia��es e reviews',
+          'Recompense indica��es',
           'Crie campanhas de UGC'
         ]
       }
@@ -217,7 +217,7 @@ export async function GET(request: NextRequest) {
       return recomendacoes[etapa] || []
     }
 
-    // 6. CALCULAR MÃ‰TRICAS CHAVE
+    // 6. CALCULAR M�TRICAS CHAVE
     const calcularMetricasChave = (dadosConversao: any) => {
       const discovery = dadosConversao.discovery
       const purchase = dadosConversao.purchase
@@ -226,8 +226,8 @@ export async function GET(request: NextRequest) {
       return {
         taxa_conversao_geral: ((purchase.usuarios / discovery.usuarios) * 100).toFixed(1),
         tempo_ciclo_medio: '7 dias',
-        ltv_estimado: purchase.usuarios * 85, // R$ 85 por compra mÃ©dia
-        cac_estimado: discovery.usuarios * 2.5, // R$ 2,50 por usuÃ¡rio alcanÃ§ado
+        ltv_estimado: purchase.usuarios * 85, // R$ 85 por compra m�dia
+        cac_estimado: discovery.usuarios * 2.5, // R$ 2,50 por usu�rio alcan�ado
         roi_marketing: (((purchase.usuarios * 85) / (discovery.usuarios * 2.5)) * 100).toFixed(1),
         taxa_advocacy: ((advocacy.usuarios / purchase.usuarios) * 100).toFixed(1),
         pontos_criticos: 2,
@@ -244,8 +244,8 @@ export async function GET(request: NextRequest) {
         if (ponto.severidade === 'critica') {
           oportunidades.push({
             tipo: 'critica',
-            titulo: `CrÃ­tico: ${ponto.taxa_abandono}% abandonam em ${ponto.etapa}`,
-            descricao: `${ponto.usuarios_perdidos} usuÃ¡rios perdidos`,
+            titulo: `Cr�tico: ${ponto.taxa_abandono}% abandonam em ${ponto.etapa}`,
+            descricao: `${ponto.usuarios_perdidos} usu�rios perdidos`,
             impacto: 'Alto',
             esforco: 'Medio',
             prioridade: 1
@@ -253,12 +253,12 @@ export async function GET(request: NextRequest) {
         }
       })
       
-      // Oportunidades baseadas em mÃ©tricas
+      // Oportunidades baseadas em m�tricas
       if (parseFloat(metricas.taxa_conversao_geral) < 15) {
         oportunidades.push({
           tipo: 'melhoria',
-          titulo: 'Taxa de conversÃ£o baixa',
-          descricao: `${metricas.taxa_conversao_geral}% de conversÃ£o geral`,
+          titulo: 'Taxa de convers�o baixa',
+          descricao: `${metricas.taxa_conversao_geral}% de convers�o geral`,
           impacto: 'Alto',
           esforco: 'Alto',
           prioridade: 2
@@ -336,7 +336,7 @@ export async function GET(request: NextRequest) {
       ]
     }
 
-    console.log('âœ… Customer Journey Map processado:', {
+    console.log('�� Customer Journey Map processado:', {
       etapas: jornadaVisual.length,
       pontosAbandono: pontosAbandono.length,
       oportunidades: oportunidades.length,
@@ -346,7 +346,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(resultado)
 
   } catch (error) {
-    console.error('âŒ Erro no Customer Journey Map:', error)
+    console.error('�� Erro no Customer Journey Map:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor',

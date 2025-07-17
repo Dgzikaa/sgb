@@ -1,4 +1,4 @@
-﻿const isDevelopment = process.env.NODE_ENV === 'development';
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 export const logger = {
   log: (message: string, ...args: any[]) => {
@@ -23,7 +23,7 @@ export const logger = {
   }
 };
 
-// Para substituir console.log em produÃ§Ã£o
+// Para substituir console.log em produ��o
 export const devLog = isDevelopment ? console.log : () => {};
 export const devError = isDevelopment ? console.error : () => {};
 export const devWarn = isDevelopment ? console.warn : () => {}; 

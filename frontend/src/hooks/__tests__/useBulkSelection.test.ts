@@ -1,4 +1,4 @@
-﻿import { renderHook, act } from '@testing-library/react'
+import { renderHook, act } from '@testing-library/react'
 import { useBulkSelection } from '../useBulkSelection'
 
 describe('useBulkSelection', () => {

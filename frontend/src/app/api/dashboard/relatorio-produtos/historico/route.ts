@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic'
@@ -17,15 +17,15 @@ export async function GET(request: NextRequest) {
     const barId = parseInt(searchParams.get('bar_id') || '1');
 
     if (!dataEspecifica) {
-      return NextResponse.json({ error: 'Data especÃ­fica Ã© obrigatÃ³ria' }, { status: 400 });
+      return NextResponse.json({ error: 'Data espec�fica � obrigat�ria' }, { status: 400 });
     }
 
-    // Calcular perÃ­odo para histÃ³rico (Ãºltimos 30 dias)
+    // Calcular per�odo para hist�rico (�ltimos 30 dias)
     const dataFim = new Date(dataEspecifica);
     const dataInicio = new Date(dataFim);
     dataInicio.setDate(dataFim.getDate() - 30);
 
-    console.log(`ðŸ“ˆ Buscando histÃ³rico de ${dataInicio.toISOString().split('T')[0]} atÃ© ${dataFim.toISOString().split('T')[0]}`);
+    console.log(`📈 Buscando hist�rico de ${dataInicio.toISOString().split('T')[0]} at� ${dataFim.toISOString().split('T')[0]}`);
 
     // Query base
     let query = supabase
@@ -53,8 +53,8 @@ export async function GET(request: NextRequest) {
     const { data: dadosHistorico, error } = await query;
 
     if (error) {
-      console.error('Erro ao buscar histÃ³rico:', error);
-      return NextResponse.json({ error: 'Erro ao buscar histÃ³rico' }, { status: 500 });
+      console.error('Erro ao buscar hist�rico:', error);
+      return NextResponse.json({ error: 'Erro ao buscar hist�rico' }, { status: 500 });
     }
 
     // Agrupar dados por data
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // Calcular estatÃ­sticas por dia
+    // Calcular estat�sticas por dia
     const historico = Array.from(dadosPorData.values()).map((dia: any) => {
       const tempoMedio = dia.tempos.length > 0 
         ? dia.tempos.reduce((a: number, b: number) => a + b, 0) / dia.tempos.length 
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Erro interno na API de histÃ³rico:', error);
+    console.error('Erro interno na API de hist�rico:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 } 

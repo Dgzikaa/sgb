@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -24,7 +24,7 @@ import {
 } from 'lucide-react'
 
 // =====================================================
-// ðŸ“± COPIAR ITENS ENTRE CHECKLISTS (MOBILE-FRIENDLY)
+// 📱 COPIAR ITENS ENTRE CHECKLISTS (MOBILE-FRIENDLY)
 // =====================================================
 
 interface ChecklistItem {
@@ -127,15 +127,15 @@ export default function CopyItemsDialog({
 
   const getItemIcon = (tipo: string) => {
     switch (tipo) {
-      case 'sim_nao': return 'âœ…'
-      case 'texto': return 'ðŸ“'
-      case 'numero': return 'ðŸ”¢'
-      case 'data': return 'ðŸ“…'
-      case 'foto_camera': return 'ðŸ“·'
-      case 'foto_upload': return 'ðŸ–¼ï¸'
-      case 'avaliacao': return 'â­'
-      case 'assinatura': return 'âœï¸'
-      default: return 'ðŸ“‹'
+      case 'sim_nao': return '��'
+      case 'texto': return '📝'
+      case 'numero': return '🔢'
+      case 'data': return '📅'
+      case 'foto_camera': return '📷'
+      case 'foto_upload': return '🖼️'
+      case 'avaliacao': return '��'
+      case 'assinatura': return '��️'
+      default: return '📋'
     }
   }
 
@@ -162,7 +162,7 @@ export default function CopyItemsDialog({
                   onChange={(e) => setFilterBySection(e.target.value)}
                   className="px-3 py-2 border rounded-lg text-sm"
                 >
-                  <option value="">Todas as seÃ§Ãµes</option>
+                  <option value="">Todas as se��es</option>
                   {sections.map((section: any) => (
                     <option key={section} value={section}>{section}</option>
                   ))}
@@ -175,13 +175,13 @@ export default function CopyItemsDialog({
                     onCheckedChange={setOnlyRequired}
                   />
                   <Label htmlFor="only-required" className="text-sm">
-                    Apenas obrigatÃ³rios
+                    Apenas obrigat�rios
                   </Label>
                 </div>
               </div>
             </div>
 
-            {/* BotÃ£o Selecionar Todos */}
+            {/* Bot�o Selecionar Todos */}
             <div className="flex justify-between items-center">
               <div className="text-sm text-gray-600">
                 {selectedItems.length} de {filteredItems.length} itens selecionados
@@ -235,7 +235,7 @@ export default function CopyItemsDialog({
                           </Badge>
                           {item.obrigatorio && (
                             <Badge className="bg-red-100 text-red-800 text-xs">
-                              ObrigatÃ³rio
+                              Obrigat�rio
                             </Badge>
                           )}
                           {item.secao && (
@@ -264,7 +264,7 @@ export default function CopyItemsDialog({
         return (
           <div className="space-y-4">
             <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <div className="text-2xl mb-2">ðŸ“‹</div>
+              <div className="text-2xl mb-2">📋</div>
               <div className="text-sm font-medium">
                 {selectedItems.length} {selectedItems.length === 1 ? 'item selecionado' : 'itens selecionados'}
               </div>
@@ -329,9 +329,9 @@ export default function CopyItemsDialog({
         return (
           <div className="space-y-4">
             <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl mb-2">âœ…</div>
+              <div className="text-2xl mb-2">��</div>
               <div className="text-sm font-medium">
-                Confirmar cÃ³pia de itens
+                Confirmar c�pia de itens
               </div>
             </div>
 
@@ -364,7 +364,7 @@ export default function CopyItemsDialog({
 
               {/* Lista de Itens a Copiar */}
               <div>
-                <Label className="text-sm font-medium text-gray-700">Itens que serÃ£o copiados:</Label>
+                <Label className="text-sm font-medium text-gray-700">Itens que ser�o copiados:</Label>
                 <div className="mt-2 space-y-1 max-h-32 overflow-y-auto">
                   {selectedItemsData.map((item) => (
                     <div key={item.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded text-sm">
@@ -404,7 +404,7 @@ export default function CopyItemsDialog({
               disabled={selectedItems.length === 0}
               className="flex-1 touch-manipulation"
             >
-              PrÃ³ximo
+              Pr�ximo
               <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
@@ -425,7 +425,7 @@ export default function CopyItemsDialog({
               disabled={!targetChecklistId}
               className="flex-1 touch-manipulation"
             >
-              PrÃ³ximo
+              Pr�ximo
               <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
@@ -506,7 +506,7 @@ export default function CopyItemsDialog({
 }
 
 // =====================================================
-// ðŸŽ¯ HOOK PARA GERENCIAR CÃ“PIA DE ITENS
+// 🎯 HOOK PARA GERENCIAR C�PIA DE ITENS
 // =====================================================
 
 export function useCopyItems() {
@@ -531,7 +531,7 @@ export function useCopyItems() {
           items: items.map((item: any) => ({
             ...item,
             id: undefined, // Remove ID para criar novo
-            ordem: undefined // SerÃ¡ definido automaticamente
+            ordem: undefined // Ser� definido automaticamente
           }))
         }),
       })

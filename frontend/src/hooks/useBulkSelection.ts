@@ -1,4 +1,4 @@
-﻿import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 
 export interface BulkSelectionItem {
   id: string | number

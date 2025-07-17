@@ -1,4 +1,4 @@
-﻿// Layout Components
+// Layout Components
 export { default as StandardPageLayout } from './StandardPageLayout'
 export { default as StandardPageWrapper } from './StandardPageWrapper'
 export { DarkSidebarLayout } from './DarkSidebarLayout'

@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -12,14 +12,14 @@ export async function POST(request: NextRequest) {
 
     if (!credentialId || !publicKey || !userEmail || !barId) {
       return NextResponse.json(
-        { error: 'Dados obrigatÃ³rios nÃ£o fornecidos' },
+        { error: 'Dados obrigat�rios n�o fornecidos' },
         { status: 400 }
       )
     }
 
-    console.log('ðŸ“ Registrando credencial biomÃ©trica para:', userEmail)
+    console.log('📝 Registrando credencial biom�trica para:', userEmail)
 
-    // Buscar usuÃ¡rio na tabela usuarios_bar
+    // Buscar usu�rio na tabela usuarios_bar
     const { data: usuario, error: userError } = await supabase
       .from('usuarios_bar')
       .select('id, biometric_credentials')
@@ -28,9 +28,9 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (userError || !usuario) {
-      console.error('âŒ UsuÃ¡rio nÃ£o encontrado:', userError)
+      console.error('�� Usu�rio n�o encontrado:', userError)
       return NextResponse.json(
-        { error: 'UsuÃ¡rio nÃ£o encontrado' },
+        { error: 'Usu�rio n�o encontrado' },
         { status: 404 }
       )
     }
@@ -50,11 +50,11 @@ export async function POST(request: NextRequest) {
     // Pegar credenciais existentes ou criar array vazio
     const existingCredentials = usuario.biometric_credentials || []
     
-    // Verificar se credencial jÃ¡ existe
+    // Verificar se credencial j� existe
     const credentialExists = existingCredentials.some((cred: any) => cred.id === credentialId)
     if (credentialExists) {
       return NextResponse.json(
-        { error: 'Credencial biomÃ©trica jÃ¡ estÃ¡ registrada' },
+        { error: 'Credencial biom�trica j� est� registrada' },
         { status: 409 }
       )
     }
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     // Adicionar nova credencial ao array
     const updatedCredentials = [...existingCredentials, newCredential]
 
-    // Atualizar usuÃ¡rio com nova credencial
+    // Atualizar usu�rio com nova credencial
     const { data, error } = await supabase
       .from('usuarios_bar')
       .update({ 
@@ -74,14 +74,14 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('âŒ Erro ao salvar credencial:', error)
+      console.error('�� Erro ao salvar credencial:', error)
       return NextResponse.json(
-        { error: 'Erro ao salvar credencial biomÃ©trica' },
+        { error: 'Erro ao salvar credencial biom�trica' },
         { status: 500 }
       )
     }
 
-    console.log('âœ… Credencial biomÃ©trica registrada com sucesso para usuÃ¡rio:', data.id)
+    console.log('�� Credencial biom�trica registrada com sucesso para usu�rio:', data.id)
 
     return NextResponse.json({
       success: true,
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('âŒ Erro na API de registro biomÃ©trico:', error)
+    console.error('�� Erro na API de registro biom�trico:', error)
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

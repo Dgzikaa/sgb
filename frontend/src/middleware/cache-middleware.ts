@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { cacheService } from '../lib/redis-cache'
 
 // Rotas que devem ser cacheadas automaticamente
@@ -15,7 +15,7 @@ const CACHEABLE_ROUTES = {
   '/api/contaazul': { type: 'contaazul' as const, ttl: 600 }
 } as const
 
-// Rotas que invalidam cache quando hÃ¡ mutaÃ§Ã£o
+// Rotas que invalidam cache quando h� muta��o
 const CACHE_INVALIDATION_MAP = {
   '/api/usuarios': ['usuarios'],
   '/api/bars': ['bars', 'dashboard'],
@@ -54,10 +54,10 @@ export class CacheMiddleware {
   private shouldCache(request: NextRequest): boolean {
     const pathname = new URL(request.url).pathname
     
-    // SÃ³ cachear mÃ©todos GET
+    // S� cachear m�todos GET
     if (request.method !== 'GET') return false
     
-    // Verificar se a rota estÃ¡ na lista de cacheÃ¡veis
+    // Verificar se a rota est� na lista de cache�veis
     return Object.keys(CACHEABLE_ROUTES).some(route => 
       pathname.startsWith(route)
     )
@@ -75,14 +75,14 @@ export class CacheMiddleware {
   private shouldInvalidateCache(request: NextRequest): string[] {
     const pathname = new URL(request.url).pathname
     
-    // Invalidar cache em mÃ©todos de mutaÃ§Ã£o
+    // Invalidar cache em m�todos de muta��o
     if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
       return []
     }
 
     for (const [route, types] of Object.entries(CACHE_INVALIDATION_MAP)) {
       if (pathname.startsWith(route)) {
-        return [...types] // Converter para array mutÃ¡vel
+        return [...types] // Converter para array mut�vel
       }
     }
 
@@ -92,10 +92,10 @@ export class CacheMiddleware {
   async handleRequest(request: NextRequest): Promise<NextResponse | null> {
     const pathname = new URL(request.url).pathname
     
-    // Processar invalidaÃ§Ã£o de cache para mÃ©todos de mutaÃ§Ã£o
+    // Processar invalida��o de cache para m�todos de muta��o
     const typesToInvalidate = this.shouldInvalidateCache(request)
     if (typesToInvalidate.length > 0) {
-      // NÃ£o bloqueamos a request, apenas agendamos a invalidaÃ§Ã£o
+      // N�o bloqueamos a request, apenas agendamos a invalida��o
       this.invalidateCache(typesToInvalidate)
     }
 
@@ -156,7 +156,7 @@ export class CacheMiddleware {
   ): Promise<NextResponse> {
     const pathname = new URL(request.url).pathname
 
-    // SÃ³ processar respostas de GET que devem ser cacheadas
+    // S� processar respostas de GET que devem ser cacheadas
     if (!this.shouldCache(request)) {
       return response
     }
@@ -166,7 +166,7 @@ export class CacheMiddleware {
       return response
     }
 
-    // SÃ³ cachear respostas de sucesso
+    // S� cachear respostas de sucesso
     if (!response.ok) {
       return response
     }
@@ -228,18 +228,18 @@ export class CacheMiddleware {
     }
   }
 
-  // MÃ©todo para invalidaÃ§Ã£o manual
+  // M�todo para invalida��o manual
   async invalidateCacheManual(patterns: string[]): Promise<void> {
     try {
       for (const pattern of patterns) {
         await cacheService.invalidatePattern(pattern)
       }
     } catch (error) {
-      console.error('Erro na invalidaÃ§Ã£o manual:', error)
+      console.error('Erro na invalida��o manual:', error)
     }
   }
 
-  // MÃ©todo para warmup de cache
+  // M�todo para warmup de cache
   async warmupCache(): Promise<void> {
     try {
       await cacheService.warmup()
@@ -248,16 +248,16 @@ export class CacheMiddleware {
     }
   }
 
-  // MÃ©tricas de cache
+  // M�tricas de cache
   getCacheStats() {
     return cacheService.getStats()
   }
 }
 
-// InstÃ¢ncia singleton
+// Inst�ncia singleton
 export const cacheMiddleware = new CacheMiddleware()
 
-// FunÃ§Ãµes utilitÃ¡rias para uso em API routes
+// Fun��es utilit�rias para uso em API routes
 export async function withCache<T>(
   cacheType: keyof typeof CACHEABLE_ROUTES,
   identifier: string,

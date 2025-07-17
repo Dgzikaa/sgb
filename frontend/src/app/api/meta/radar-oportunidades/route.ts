@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -8,9 +8,9 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('ðŸŽ¯ Radar de Oportunidades - Analisando mercado...')
+    console.log('🎯 Radar de Oportunidades - Analisando mercado...')
 
-    // Obter dados do usuÃ¡rio para pegar o bar_id
+    // Obter dados do usu�rio para pegar o bar_id
     const userData = request.headers.get('x-user-data')
     let barId = 3 // fallback para desenvolvimento
     
@@ -18,15 +18,15 @@ export async function GET(request: NextRequest) {
       try {
         const parsedUser = JSON.parse(decodeURIComponent(userData))
         barId = parsedUser.bar_id || 3
-        console.log(`ðŸ‘¤ Radar de Oportunidades - Usando bar_id: ${barId}`)
+        console.log(`👤 Radar de Oportunidades - Usando bar_id: ${barId}`)
       } catch (e) {
-        console.warn('âš ï¸ Erro ao parsear dados do usuÃ¡rio, usando bar_id padrÃ£o')
+        console.warn('��️ Erro ao parsear dados do usu�rio, usando bar_id padr�o')
       }
     }
 
-    console.log('ðŸŽ¯ Radar de Oportunidades - Analisando mercado para bar:', barId)
+    console.log('🎯 Radar de Oportunidades - Analisando mercado para bar:', barId)
 
-    // 1. ANÃLISE DE ATIVIDADE ATUAL
+    // 1. AN�LISE DE ATIVIDADE ATUAL
     const { data: instagramData } = await supabase
       .from('meta_instagram_insights')
       .select('*')
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
       const agora = new Date()
       const gaps = []
       
-      // Verificar Ãºltimo post
+      // Verificar �ltimo post
       if (dados.length > 0) {
         const ultimoPost = new Date(dados[0].updated_at)
         const horasSemPost = (agora.getTime() - ultimoPost.getTime()) / (1000 * 60 * 60)
@@ -56,12 +56,12 @@ export async function GET(request: NextRequest) {
             tipo: 'inatividade',
             urgencia: horasSemPost > 48 ? 'alta' : 'media',
             descricao: `${Math.floor(horasSemPost)} horas sem postagem`,
-            acao: 'Publique conteÃºdo para manter engajamento'
+            acao: 'Publique conte�do para manter engajamento'
           })
         }
       }
       
-      // Verificar padrÃµes de horÃ¡rio
+      // Verificar padr�es de hor�rio
       const postsRecentes = dados.slice(0, 10)
       const horarios = postsRecentes.map((post: any) => {
         const hora = new Date(post.updated_at).getHours()
@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
         gaps.push({
           tipo: 'horario_otimo',
           urgencia: 'media',
-          descricao: `HorÃ¡rios de alta audiÃªncia nÃ£o explorados: ${horariosLivres.join(', ')}h`,
+          descricao: `Hor�rios de alta audi�ncia n�o explorados: ${horariosLivres.join(', ')}h`,
           acao: `Poste entre ${horariosLivres[0]}h-${horariosLivres[0]+1}h para melhor alcance`
         })
       }
@@ -84,12 +84,12 @@ export async function GET(request: NextRequest) {
       return gaps
     }
 
-    // 3. ANÃLISE DE CONCORRÃŠNCIA (SIMULADA)
+    // 3. AN�LISE DE CONCORR�NCIA (SIMULADA)
     const analiseConcorrencia = () => {
       const concorrentes = [
-        { nome: 'Bar A', atividade: 'baixa', ultima_campanha: '3 dias atrÃ¡s' },
-        { nome: 'Bar B', atividade: 'alta', ultima_campanha: '1 dia atrÃ¡s' },
-        { nome: 'Bar C', atividade: 'media', ultima_campanha: '2 dias atrÃ¡s' }
+        { nome: 'Bar A', atividade: 'baixa', ultima_campanha: '3 dias atr�s' },
+        { nome: 'Bar B', atividade: 'alta', ultima_campanha: '1 dia atr�s' },
+        { nome: 'Bar C', atividade: 'media', ultima_campanha: '2 dias atr�s' }
       ]
       
       const oportunidades: any[] = []
@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
             tipo: 'gap_concorrencia',
             urgencia: 'alta',
             descricao: `${concorrente.nome} com baixa atividade`,
-            acao: 'Aproveite para aumentar sua presenÃ§a no mercado'
+            acao: 'Aproveite para aumentar sua presen�a no mercado'
           })
         }
       })
@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
       return oportunidades
     }
 
-    // 4. ANÃLISE TEMPORAL INTELIGENTE
+    // 4. AN�LISE TEMPORAL INTELIGENTE
     const analiseTemporal = () => {
       const agora = new Date()
       const diaSemana = agora.getDay()
@@ -116,8 +116,8 @@ export async function GET(request: NextRequest) {
       
       const oportunidades: any[] = []
       
-      // AnÃ¡lise por dia da semana
-      if (diaSemana === 5 || diaSemana === 6) { // Sexta ou SÃ¡bado
+      // An�lise por dia da semana
+      if (diaSemana === 5 || diaSemana === 6) { // Sexta ou S�bado
         oportunidades.push({
           tipo: 'momento_ideal',
           urgencia: 'alta',
@@ -126,33 +126,33 @@ export async function GET(request: NextRequest) {
         })
       }
       
-      // AnÃ¡lise por horÃ¡rio
+      // An�lise por hor�rio
       if (hora >= 17 && hora <= 20) {
         oportunidades.push({
           tipo: 'horario_prime',
           urgencia: 'media',
-          descricao: 'HorÃ¡rio de pico de audiÃªncia (17h-20h)',
-          acao: 'Poste conteÃºdo de happy hour e promoÃ§Ãµes'
+          descricao: 'Hor�rio de pico de audi�ncia (17h-20h)',
+          acao: 'Poste conte�do de happy hour e promo��es'
         })
       }
       
       return oportunidades
     }
 
-    // 5. ANÃLISE DE TENDÃŠNCIAS
+    // 5. AN�LISE DE TEND�NCIAS
     const analiseTendencias = () => {
       const tendencias = [
         {
           tipo: 'tendencia_sazonal',
           urgencia: 'media',
-          descricao: 'Janeiro - perÃ­odo de "Dry January" e vida saudÃ¡vel',
-          acao: 'Promova drinks sem Ã¡lcool e opÃ§Ãµes saudÃ¡veis'
+          descricao: 'Janeiro - per�odo de "Dry January" e vida saud�vel',
+          acao: 'Promova drinks sem �lcool e op��es saud�veis'
         },
         {
           tipo: 'tendencia_social',
           urgencia: 'baixa',
-          descricao: 'Reels sÃ£o 67% mais engajados que posts normais',
-          acao: 'Crie mais conteÃºdo em formato de vÃ­deo curto'
+          descricao: 'Reels s�o 67% mais engajados que posts normais',
+          acao: 'Crie mais conte�do em formato de v�deo curto'
         }
       ]
       
@@ -168,7 +168,7 @@ export async function GET(request: NextRequest) {
       return maximo > 0 ? Math.round((total / maximo) * 100) : 0
     }
 
-    // COMPILAR TODAS AS ANÃLISES
+    // COMPILAR TODAS AS AN�LISES
     const gapsInstagram = detectarGapsAtividade(instagramData || [])
     const gapsFacebook = detectarGapsAtividade(facebookData || [])
     const oportunidadesConcorrencia = analiseConcorrencia()
@@ -185,7 +185,7 @@ export async function GET(request: NextRequest) {
 
     const score = calcularScore(todasOportunidades)
 
-    // 7. RECOMENDAÃ‡Ã•ES PRIORIZADAS
+    // 7. RECOMENDA��ES PRIORIZADAS
     const recomendacoesPriorizadas = todasOportunidades
       .sort((a, b) => {
         const prioridade = { alta: 3, media: 2, baixa: 1 }
@@ -193,7 +193,7 @@ export async function GET(request: NextRequest) {
       })
       .slice(0, 5)
 
-    // 8. ALERTAS CRÃTICOS
+    // 8. ALERTAS CR�TICOS
     const alertasCriticos = todasOportunidades
       .filter((opp: any) => opp.urgencia === 'alta')
       .map((opp: any) => ({
@@ -238,7 +238,7 @@ export async function GET(request: NextRequest) {
       ]
     }
 
-    console.log('âœ… Radar de Oportunidades processado:', {
+    console.log('�� Radar de Oportunidades processado:', {
       score: score,
       oportunidades: todasOportunidades.length,
       alertas: alertasCriticos.length
@@ -247,7 +247,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(resultado)
 
   } catch (error) {
-    console.error('âŒ Erro no Radar de Oportunidades:', error)
+    console.error('�� Erro no Radar de Oportunidades:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor',

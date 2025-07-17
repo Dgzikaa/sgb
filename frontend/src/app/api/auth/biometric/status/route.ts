@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -12,12 +12,12 @@ export async function POST(request: NextRequest) {
 
     if (!email || !barId) {
       return NextResponse.json(
-        { error: 'Email e barId sÃ£o obrigatÃ³rios' },
+        { error: 'Email e barId s�o obrigat�rios' },
         { status: 400 }
       )
     }
 
-    // Buscar usuÃ¡rio na tabela usuarios_bar
+    // Buscar usu�rio na tabela usuarios_bar
     const { data: usuario, error } = await supabase
       .from('usuarios_bar')
       .select('biometric_credentials')
@@ -27,12 +27,12 @@ export async function POST(request: NextRequest) {
 
     if (error || !usuario) {
       return NextResponse.json(
-        { error: 'UsuÃ¡rio nÃ£o encontrado' },
+        { error: 'Usu�rio n�o encontrado' },
         { status: 404 }
       )
     }
 
-    // Verificar se tem credenciais biomÃ©tricas
+    // Verificar se tem credenciais biom�tricas
     const credentials = usuario.biometric_credentials || []
     const hasBiometric = Array.isArray(credentials) && credentials.length > 0
 
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('âŒ Erro ao verificar status biomÃ©trico:', error)
+    console.error('�� Erro ao verificar status biom�trico:', error)
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

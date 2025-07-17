@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import * as React from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './dialog'
@@ -90,7 +90,7 @@ export function ModernModal({
   )
 }
 
-// Componente de campo de formulÃ¡rio para modais
+// Componente de campo de formul�rio para modais
 interface ModalFieldProps {
   label: string
   required?: boolean
@@ -173,13 +173,13 @@ export function ChecklistModal({
       onOpenChange={onOpenChange}
       title={mode === 'create' ? 'Novo Checklist' : 'Editar Checklist'}
       description={mode === 'create' 
-        ? 'Preencha as informaÃ§Ãµes bÃ¡sicas do checklist' 
+        ? 'Preencha as informa��es b�sicas do checklist' 
         : `Editando: ${checklist?.nome}`
       }
       icon={mode === 'create' ? Settings : AlertCircle}
       onSave={handleSave}
       saveDisabled={!isValid}
-      saveText={mode === 'create' ? 'Criar Checklist' : 'Salvar AlteraÃ§Ãµes'}
+      saveText={mode === 'create' ? 'Criar Checklist' : 'Salvar Altera��es'}
     >
       <div className="modal-form-grid">
         <ModalField 
@@ -234,7 +234,7 @@ export function ChecklistModal({
                 Fechamento
               </SelectItem>
               <SelectItem value="manutencao" className="modal-select-item">
-                ManutenÃ§Ã£o
+                Manuten��o
               </SelectItem>
             </SelectContent>
           </Select>
@@ -243,7 +243,7 @@ export function ChecklistModal({
         <ModalField 
           label="Tempo Estimado (min)" 
           icon={Settings}
-          description="Tempo mÃ©dio para completar o checklist"
+          description="Tempo m�dio para completar o checklist"
         >
           <Input
             type="number"
@@ -256,15 +256,15 @@ export function ChecklistModal({
         </ModalField>
 
         <ModalField 
-          label="DescriÃ§Ã£o" 
+          label="Descri��o" 
           fullWidth 
           icon={Settings}
-          description="Breve descriÃ§Ã£o do checklist"
+          description="Breve descri��o do checklist"
         >
           <Textarea
             value={formData.descricao}
             onChange={(e) => setFormData({...formData, descricao: e.target.value})}
-            placeholder="Descreva o propÃ³sito e objetivos deste checklist..."
+            placeholder="Descreva o prop�sito e objetivos deste checklist..."
             className="modal-textarea"
           />
         </ModalField>
