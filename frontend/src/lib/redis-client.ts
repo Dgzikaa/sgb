@@ -1,8 +1,8 @@
-ï»¿import Redis, { Cluster } from 'ioredis';
+import Redis, { Cluster } from 'ioredis';
 
-// ConfiguraÃ¡Â§Ã¡Â£o do Redis
+// Configuraá§á£o do Redis
 const REDIS_CONFIG = {
-  // ConfiguraÃ¡Â§Ã¡Â£o para desenvolvimento local
+  // Configuraá§á£o para desenvolvimento local
   development: {
     host: 'localhost',
     port: 6379,
@@ -14,7 +14,7 @@ const REDIS_CONFIG = {
     commandTimeout: 5000,
   },
   
-  // ConfiguraÃ¡Â§Ã¡Â£o para produÃ¡Â§Ã¡Â£o com clustering
+  // Configuraá§á£o para produá§á£o com clustering
   production: {
     enableAutoPipelining: true,
     maxRetriesPerRequest: 3,
@@ -23,7 +23,7 @@ const REDIS_CONFIG = {
     keyPrefix: 'sgb_v2:',
     connectTimeout: 10000,
     commandTimeout: 5000,
-    // ConfiguraÃ¡Â§Ã¡Â£o para Redis Cluster (se usando)
+    // Configuraá§á£o para Redis Cluster (se usando)
     enableReadyCheck: true,
     enableOfflineQueue: false,
   }
@@ -51,7 +51,7 @@ class RedisClient {
         return { host, port: parseInt(port) };
       });
 
-      this.cluster = new Cluster(clusterNodes, {
+      this.cluster = new Cluster(clusterNodes: any, {
         redisOptions: config,
         enableOfflineQueue: false,
       });
@@ -62,7 +62,7 @@ class RedisClient {
       const redisUrl = process.env.REDIS_URL;
       
       if (redisUrl) {
-        this.client = new Redis(redisUrl, config);
+        this.client = new Redis(redisUrl: any, config);
       } else {
         this.client = new Redis(config);
       }
@@ -80,27 +80,27 @@ class RedisClient {
 
   private setupEventListeners() {
     this.client.on('connect', () => {
-      console.log('Å“â€¦ Redis conectado');
+      console.log('œ… Redis conectado');
       this.isConnected = true;
     });
 
-    this.client.on('error', (error) => {
-      console.error('ÂÅ’ Redis erro:', error);
+    this.client.on('error', (error: any) => {
+      console.error('Œ Redis erro:', error);
       this.isConnected = false;
     });
 
     this.client.on('close', () => {
-      console.log('Ã°Å¸â€Å’ Redis desconectado');
+      console.log('ğŸ”Œ Redis desconectado');
       this.isConnected = false;
     });
 
     this.client.on('reconnecting', () => {
-      console.log('Ã°Å¸â€â€ Redis reconectando...');
+      console.log('ğŸ”„ Redis reconectando...');
     });
 
     if (this.useCluster && this.cluster) {
-      this.cluster.on('node error', (error, node) => {
-        console.error(`ÂÅ’ Redis cluster node erro (${node.options.host}:${node.options.port}):`, error);
+      this.cluster.on('node error', (error: any, node: any) => {
+        console.error(`Œ Redis cluster node erro (${node.options.host}:${node.options.port}):`, error);
       });
     }
   }
@@ -110,9 +110,9 @@ class RedisClient {
 
     try {
       await this.client.connect();
-      console.log('Å“â€¦ Redis client conectado com sucesso');
+      console.log('œ… Redis client conectado com sucesso');
     } catch (error) {
-      console.error('ÂÅ’ Erro ao conectar Redis:', error);
+      console.error('Œ Erro ao conectar Redis:', error);
       throw error;
     }
   }
@@ -122,9 +122,9 @@ class RedisClient {
 
     try {
       await this.client.disconnect();
-      console.log('Å“â€¦ Redis client desconectado');
+      console.log('œ… Redis client desconectado');
     } catch (error) {
-      console.error('ÂÅ’ Erro ao desconectar Redis:', error);
+      console.error('Œ Erro ao desconectar Redis:', error);
     }
   }
 
@@ -137,12 +137,12 @@ class RedisClient {
       const result = await this.client.ping();
       return result === 'PONG';
     } catch (error) {
-      console.error('ÂÅ’ Redis health check falhou:', error);
+      console.error('Œ Redis health check falhou:', error);
       return false;
     }
   }
 
-  // MÃ¡Â©todos especÃ¡Â­ficos para rate limiting
+  // Má©todos especá­ficos para rate limiting
   public async rateLimit(key: string, limit: number, windowMs: number): Promise<{
     success: boolean;
     count: number;
@@ -155,9 +155,9 @@ class RedisClient {
     const rateLimitKey = `rate_limit:${key}:${window}`;
 
     try {
-      // Usar pipeline para operaÃ¡Â§Ã¡Âµes atÃ¡Â´micas
+      // Usar pipeline para operaá§áµes atá´micas
       pipeline.incr(rateLimitKey);
-      pipeline.expire(rateLimitKey, Math.ceil(windowMs / 1000));
+      pipeline.expire(rateLimitKey: any, Math.ceil(windowMs / 1000));
       
       const results = await pipeline.exec();
       
@@ -168,7 +168,7 @@ class RedisClient {
       const [incrResult, expireResult] = results;
       
       if (incrResult[0] || expireResult[0]) {
-        throw new Error('Erro nas operaÃ¡Â§Ã¡Âµes Redis');
+        throw new Error('Erro nas operaá§áµes Redis');
       }
 
       const count = incrResult[1] as number;
@@ -182,7 +182,7 @@ class RedisClient {
         resetTime
       };
     } catch (error) {
-      console.error('ÂÅ’ Erro no rate limiting:', error);
+      console.error('Œ Erro no rate limiting:', error);
       // Fallback: permitir em caso de erro Redis
       return {
         success: true,
@@ -193,17 +193,17 @@ class RedisClient {
     }
   }
 
-  // MÃ¡Â©todos para cache geral
+  // Má©todos para cache geral
   public async set(key: string, value: string, ttlSeconds?: number): Promise<boolean> {
     try {
       if (ttlSeconds) {
-        await this.client.setex(key, ttlSeconds, value);
+        await this.client.setex(key: any, ttlSeconds, value);
       } else {
-        await this.client.set(key, value);
+        await this.client.set(key: any, value);
       }
       return true;
     } catch (error) {
-      console.error('ÂÅ’ Erro ao definir cache:', error);
+      console.error('Œ Erro ao definir cache:', error);
       return false;
     }
   }
@@ -212,7 +212,7 @@ class RedisClient {
     try {
       return await this.client.get(key);
     } catch (error) {
-      console.error('ÂÅ’ Erro ao obter cache:', error);
+      console.error('Œ Erro ao obter cache:', error);
       return null;
     }
   }
@@ -222,7 +222,7 @@ class RedisClient {
       const result = await this.client.del(key);
       return result > 0;
     } catch (error) {
-      console.error('ÂÅ’ Erro ao deletar cache:', error);
+      console.error('Œ Erro ao deletar cache:', error);
       return false;
     }
   }
@@ -232,12 +232,12 @@ class RedisClient {
       const result = await this.client.exists(key);
       return result === 1;
     } catch (error) {
-      console.error('ÂÅ’ Erro ao verificar existÃ¡Âªncia:', error);
+      console.error('Œ Erro ao verificar existáªncia:', error);
       return false;
     }
   }
 
-  // MÃ¡Â©todo para limpeza de chaves expiradas
+  // Má©todo para limpeza de chaves expiradas
   public async cleanup(): Promise<void> {
     try {
       const keys = await this.client.keys('rate_limit:*');
@@ -245,10 +245,10 @@ class RedisClient {
         const pipeline = this.client.pipeline();
         keys.forEach(key => pipeline.del(key));
         await pipeline.exec();
-        console.log(`Ã°Å¸Â§Â¹ Limpeza Redis: ${keys.length} chaves removidas`);
+        console.log(`ğŸ§¹ Limpeza Redis: ${keys.length} chaves removidas`);
       }
     } catch (error) {
-      console.error('ÂÅ’ Erro na limpeza Redis:', error);
+      console.error('Œ Erro na limpeza Redis:', error);
     }
   }
 }

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { ReactNode } from 'react'
 
@@ -53,9 +53,9 @@ export function DashboardCard({
   }
 
   const changeIcons = {
-    positive: '†—',
-    negative: '†˜',
-    neutral: '†’'
+    positive: '��',
+    negative: '��',
+    neutral: '��'
   }
 
   return (
@@ -189,7 +189,7 @@ export function DashboardGrid({
   )
 }
 
-// Componente de má©trica simples
+// Componente de m�trica simples
 interface MetricCardProps {
   label: string
   value: string | number
@@ -229,7 +229,7 @@ export function MetricCard({
   )
 }
 
-// Componente de estatá­stica com grá¡fico simples
+// Componente de estat�stica com gr�fico simples
 interface StatCardProps {
   title: string
   value: string | number
@@ -252,9 +252,9 @@ export function StatCard({
   }
 
   const trendIcons = {
-    up: 'ðŸ“ˆ',
-    down: 'ðŸ“‰',
-    stable: 'ðŸ“Š'
+    up: '📈',
+    down: '📉',
+    stable: '📊'
   }
 
   return (
@@ -268,7 +268,7 @@ export function StatCard({
       {data.length > 0 && (
         <div className="mt-4">
           <div className="flex items-end space-x-1 h-16">
-            {data.map((point, index) => (
+            {data.map((point: any, index: any) => (
               <div
                 key={index}
                 className="bg-gradient-to-t from-indigo-500 to-purple-600 rounded-sm flex-1 transition-all duration-300 hover:from-indigo-600 hover:to-purple-700"

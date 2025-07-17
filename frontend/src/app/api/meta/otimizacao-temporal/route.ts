@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -8,9 +8,9 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('° Otimizaá§á£o Temporal - Analisando padráµes temporais...')
+    console.log('�� Otimiza��o Temporal - Analisando padr�es temporais...')
 
-    // Obter dados do usuá¡rio para pegar o bar_id
+    // Obter dados do usu�rio para pegar o bar_id
     const userData = request.headers.get('x-user-data')
     let barId = 3 // fallback para desenvolvimento
     
@@ -18,18 +18,18 @@ export async function GET(request: NextRequest) {
       try {
         const parsedUser = JSON.parse(decodeURIComponent(userData))
         barId = parsedUser.bar_id || 3
-        console.log(`ðŸ‘¤ Otimizaá§á£o Temporal - Usando bar_id: ${barId}`)
+        console.log(`👤 Otimiza��o Temporal - Usando bar_id: ${barId}`)
       } catch (e) {
-        console.warn('š ï¸ Erro ao parsear dados do usuá¡rio, usando bar_id padrá£o')
+        console.warn('��️ Erro ao parsear dados do usu�rio, usando bar_id padr�o')
       }
     }
 
     const { searchParams } = new URL(request.url)
     const plataforma = searchParams.get('plataforma') || 'all' // 'instagram', 'facebook', 'all'
     
-    console.log('° Otimizaá§á£o Temporal - Analisando para bar:', barId, 'plataforma:', plataforma)
+    console.log('�� Otimiza��o Temporal - Analisando para bar:', barId: any, 'plataforma:', plataforma)
 
-    // 1. COLETAR DADOS HISTá“RICOS - CORRIGIR NOMES DAS TABELAS
+    // 1. COLETAR DADOS HIST�RICOS - CORRIGIR NOMES DAS TABELAS
     const { data: instagramData } = await supabase
       .from('instagram_metrics')
       .select('*')
@@ -44,21 +44,21 @@ export async function GET(request: NextRequest) {
       .order('data_referencia', { ascending: false })
       .limit(200)
 
-    // 2. ANALISAR PADRá•ES TEMPORAIS
+    // 2. ANALISAR PADR�ES TEMPORAIS
     const analisarPadroesTemporais = (dados: any[], nomePlataforma: string) => {
       if (!dados || dados.length === 0) return null
       
-      // Aná¡lise por hora do dia
+      // An�lise por hora do dia
       const engajamentoPorHora = new Array(24).fill(0)
       const postsPorHora = new Array(24).fill(0)
       const alcancePorHora = new Array(24).fill(0)
       
-      // Aná¡lise por dia da semana
+      // An�lise por dia da semana
       const engajamentoPorDia = new Array(7).fill(0)
       const postsPorDia = new Array(7).fill(0)
       const alcancePorDia = new Array(7).fill(0)
       
-      // Aná¡lise por perá­odo do dia
+      // An�lise por per�odo do dia
       const periodos = {
         manha: { engajamento: 0, posts: 0, alcance: 0 }, // 6-12h
         tarde: { engajamento: 0, posts: 0, alcance: 0 }, // 12-18h
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
         postsPorDia[dia] += 1
         alcancePorDia[dia] += alcance
         
-        // Por perá­odo
+        // Por per�odo
         if (hora >= 6 && hora < 12) {
           periodos.manha.engajamento += engajamento
           periodos.manha.posts += 1
@@ -108,8 +108,8 @@ export async function GET(request: NextRequest) {
         }
       })
       
-      // Calcular má©dias por hora
-      const mediasPorHora = engajamentoPorHora.map((eng, hora) => ({
+      // Calcular m�dias por hora
+      const mediasPorHora = engajamentoPorHora.map((eng: any, hora: any) => ({
         hora,
         engajamento_medio: postsPorHora[hora] > 0 ? eng / postsPorHora[hora] : 0,
         alcance_medio: postsPorHora[hora] > 0 ? alcancePorHora[hora] / postsPorHora[hora] : 0,
@@ -118,9 +118,9 @@ export async function GET(request: NextRequest) {
           ((eng / postsPorHora[hora]) * 0.6) + ((alcancePorHora[hora] / postsPorHora[hora]) * 0.4) : 0
       }))
       
-      // Calcular má©dias por dia
-      const nomesDias = ['Domingo', 'Segunda', 'Terá§a', 'Quarta', 'Quinta', 'Sexta', 'Sá¡bado']
-      const mediasPorDia = engajamentoPorDia.map((eng, dia) => ({
+      // Calcular m�dias por dia
+      const nomesDias = ['Domingo', 'Segunda', 'Ter�a', 'Quarta', 'Quinta', 'Sexta', 'S�bado']
+      const mediasPorDia = engajamentoPorDia.map((eng: any, dia: any) => ({
         dia,
         nome: nomesDias[dia],
         engajamento_medio: postsPorDia[dia] > 0 ? eng / postsPorDia[dia] : 0,
@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
           ((eng / postsPorDia[dia]) * 0.6) + ((alcancePorDia[dia] / postsPorDia[dia]) * 0.4) : 0
       }))
       
-      // Calcular má©dias por perá­odo
+      // Calcular m�dias por per�odo
       const mediasPorPeriodo = Object.entries(periodos).map(([nome, dados]) => ({
         periodo: nome,
         engajamento_medio: dados.posts > 0 ? dados.engajamento / dados.posts : 0,
@@ -146,19 +146,19 @@ export async function GET(request: NextRequest) {
         por_hora: mediasPorHora,
         por_dia: mediasPorDia,
         por_periodo: mediasPorPeriodo,
-        melhor_hora: mediasPorHora.reduce((prev, curr) => 
+        melhor_hora: mediasPorHora.reduce((prev: any, curr: any) => 
           prev.score_combinado > curr.score_combinado ? prev : curr
         ),
-        melhor_dia: mediasPorDia.reduce((prev, curr) => 
+        melhor_dia: mediasPorDia.reduce((prev: any, curr: any) => 
           prev.score_combinado > curr.score_combinado ? prev : curr
         ),
-        melhor_periodo: mediasPorPeriodo.reduce((prev, curr) => 
+        melhor_periodo: mediasPorPeriodo.reduce((prev: any, curr: any) => 
           prev.score_combinado > curr.score_combinado ? prev : curr
         )
       }
     }
 
-    // 3. GERAR RECOMENDAá‡á•ES INTELIGENTES
+    // 3. GERAR RECOMENDA��ES INTELIGENTES
     const gerarRecomendacoes = (padroes: any) => {
       const recomendacoes = []
       
@@ -166,8 +166,8 @@ export async function GET(request: NextRequest) {
         recomendacoes.push({
           tipo: 'horario',
           prioridade: 'alta',
-          titulo: `Melhor horá¡rio: ${padroes.melhor_hora.hora}h`,
-          descricao: `Posts á s ${padroes.melhor_hora.hora}h táªm ${padroes.melhor_hora.engajamento_medio.toFixed(0)} engajamentos em má©dia`,
+          titulo: `Melhor hor�rio: ${padroes.melhor_hora.hora}h`,
+          descricao: `Posts �s ${padroes.melhor_hora.hora}h t�m ${padroes.melhor_hora.engajamento_medio.toFixed(0)} engajamentos em m�dia`,
           impacto: `+${((padroes.melhor_hora.score_combinado / (padroes.por_hora.reduce((sum: number, h: any) => sum + h.score_combinado, 0) / padroes.por_hora.length) - 1) * 100).toFixed(0)}% performance`,
           acao: `Programe posts para ${padroes.melhor_hora.hora}h`
         })
@@ -178,7 +178,7 @@ export async function GET(request: NextRequest) {
           tipo: 'dia',
           prioridade: 'alta',
           titulo: `Melhor dia: ${padroes.melhor_dia.nome}`,
-          descricao: `Posts em ${padroes.melhor_dia.nome} táªm ${padroes.melhor_dia.engajamento_medio.toFixed(0)} engajamentos em má©dia`,
+          descricao: `Posts em ${padroes.melhor_dia.nome} t�m ${padroes.melhor_dia.engajamento_medio.toFixed(0)} engajamentos em m�dia`,
           impacto: `+${((padroes.melhor_dia.score_combinado / (padroes.por_dia.reduce((sum: number, d: any) => sum + d.score_combinado, 0) / padroes.por_dia.length) - 1) * 100).toFixed(0)}% performance`,
           acao: `Priorize postagens em ${padroes.melhor_dia.nome}`
         })
@@ -187,20 +187,20 @@ export async function GET(request: NextRequest) {
       recomendacoes.push({
         tipo: 'periodo',
         prioridade: 'media',
-        titulo: `Melhor perá­odo: ${padroes.melhor_periodo.periodo}`,
-        descricao: `Perá­odo de ${padroes.melhor_periodo.periodo} tem melhor performance geral`,
+        titulo: `Melhor per�odo: ${padroes.melhor_periodo.periodo}`,
+        descricao: `Per�odo de ${padroes.melhor_periodo.periodo} tem melhor performance geral`,
         impacto: `Score: ${padroes.melhor_periodo.score_combinado.toFixed(0)}`,
-        acao: `Concentre posts no perá­odo da ${padroes.melhor_periodo.periodo}`
+        acao: `Concentre posts no per�odo da ${padroes.melhor_periodo.periodo}`
       })
       
       return recomendacoes
     }
 
-    // 4. DETECTAR PADRá•ES SAZONAIS
+    // 4. DETECTAR PADR�ES SAZONAIS
     const detectarPadroesSazonais = (dados: any[]) => {
       if (!dados || dados.length < 30) return null
       
-      // Agrupar por máªs
+      // Agrupar por m�s
       const dadosPorMes = new Map()
       
       dados.forEach(post => {
@@ -209,7 +209,7 @@ export async function GET(request: NextRequest) {
         const chave = `${mes}`
         
         if (!dadosPorMes.has(chave)) {
-          dadosPorMes.set(chave, {
+          dadosPorMes.set(chave: any, {
             mes,
             engajamento: 0,
             alcance: 0,
@@ -227,7 +227,7 @@ export async function GET(request: NextRequest) {
       })
       
       const nomesMeses = [
-        'Janeiro', 'Fevereiro', 'Mará§o', 'Abril', 'Maio', 'Junho',
+        'Janeiro', 'Fevereiro', 'Mar�o', 'Abril', 'Maio', 'Junho',
         'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
       ]
       
@@ -239,18 +239,18 @@ export async function GET(request: NextRequest) {
         posts_count: dados.posts
       }))
       
-      return padroesSazonais.sort((a, b) => a.mes - b.mes)
+      return padroesSazonais.sort((a: any, b: any) => a.mes - b.mes)
     }
 
     // 5. SUGERIR CRONOGRAMA OTIMIZADO
     const sugerirCronograma = (padroes: any) => {
       const cronograma = []
-      const nomesDias = ['Domingo', 'Segunda', 'Terá§a', 'Quarta', 'Quinta', 'Sexta', 'Sá¡bado']
+      const nomesDias = ['Domingo', 'Segunda', 'Ter�a', 'Quarta', 'Quinta', 'Sexta', 'S�bado']
       
       // Ordenar dias por performance
-      const diasOrdenados = [...padroes.por_dia].sort((a, b) => b.score_combinado - a.score_combinado)
+      const diasOrdenados = [...padroes.por_dia].sort((a: any, b: any) => b.score_combinado - a.score_combinado)
       
-      // Sugerir cronograma para os prá³ximos 7 dias
+      // Sugerir cronograma para os pr�ximos 7 dias
       for (let i = 0; i < 7; i++) {
         const hoje = new Date()
         const data = new Date(hoje)
@@ -265,21 +265,21 @@ export async function GET(request: NextRequest) {
             dia_semana: nomesDias[diaAtual],
             recomendacao: dadosDia.score_combinado > 100 ? 'Poste hoje' : 'Considere postar',
             melhor_horario: padroes.melhor_hora.hora,
-            performance_esperada: dadosDia.score_combinado > 100 ? 'Alta' : 'Má©dia',
+            performance_esperada: dadosDia.score_combinado > 100 ? 'Alta' : 'M�dia',
             engajamento_esperado: Math.round(dadosDia.engajamento_medio),
             prioridade: diasOrdenados.findIndex(d => d.dia === diaAtual) + 1
           })
         }
       }
       
-      return cronograma.sort((a, b) => a.prioridade - b.prioridade)
+      return cronograma.sort((a: any, b: any) => a.prioridade - b.prioridade)
     }
 
     // PROCESSAR DADOS
     const padroesInstagram = analisarPadroesTemporais(instagramData || [], 'instagram')
     const padroesFacebook = analisarPadroesTemporais(facebookData || [], 'facebook')
     
-    // Escolher qual padrá£o usar baseado na plataforma solicitada
+    // Escolher qual padr�o usar baseado na plataforma solicitada
     let padroesPrincipais = null
     if (plataforma === 'instagram' && padroesInstagram) {
       padroesPrincipais = padroesInstagram
@@ -295,7 +295,7 @@ export async function GET(request: NextRequest) {
     if (!padroesPrincipais) {
       return NextResponse.json({
         success: false,
-        error: 'Dados insuficientes para aná¡lise temporal'
+        error: 'Dados insuficientes para an�lise temporal'
       }, { status: 400 })
     }
 
@@ -328,13 +328,13 @@ export async function GET(request: NextRequest) {
       insights: {
         total_posts_analisados: padroesPrincipais.total_posts,
         confiabilidade: padroesPrincipais.total_posts > 50 ? 'Alta' : 
-                        padroesPrincipais.total_posts > 20 ? 'Má©dia' : 'Baixa',
-        proxima_atualizacao: 'Apá³s 10 novos posts',
-        tendencia: 'Crescimento no perá­odo noturno'
+                        padroesPrincipais.total_posts > 20 ? 'M�dia' : 'Baixa',
+        proxima_atualizacao: 'Ap�s 10 novos posts',
+        tendencia: 'Crescimento no per�odo noturno'
       }
     }
 
-    console.log('œ… Otimizaá§á£o Temporal processada:', {
+    console.log('�� Otimiza��o Temporal processada:', {
       plataforma: plataforma,
       postsAnalisados: padroesPrincipais.total_posts,
       melhorHorario: padroesPrincipais.melhor_hora.hora,
@@ -345,7 +345,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(resultado)
 
   } catch (error) {
-    console.error('Œ Erro na Otimizaá§á£o Temporal:', error)
+    console.error('�� Erro na Otimiza��o Temporal:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor',

@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -6,10 +6,10 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// ðŸ›¡ï¸ CONFIGURAá‡á•ES DE SEGURANá‡A ANTI-BAN
+// 🛡️ CONFIGURA��ES DE SEGURAN�A ANTI-BAN
 const SECURITY_CONFIG = {
-  MAX_MESSAGES_PER_DAY: 50, // Má¡ximo de mensagens por dia
-  MIN_INTERVAL_SECONDS: 30, // Má­nimo 30 segundos entre mensagens
+  MAX_MESSAGES_PER_DAY: 50, // M�ximo de mensagens por dia
+  MIN_INTERVAL_SECONDS: 30, // M�nimo 30 segundos entre mensagens
   BUSINESS_HOURS: {
     START: 8, // 8h
     END: 18   // 18h
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
   try {
     const body: NotificationRequest = await req.json()
     
-    // ðŸ” VALIDAá‡á•ES DE SEGURANá‡A
+    // 🔐 VALIDA��ES DE SEGURAN�A
     const securityCheck = await validateSecurityLimits(body.responsavelNumero)
     if (!securityCheck.allowed) {
       return NextResponse.json({
@@ -39,13 +39,13 @@ export async function POST(req: NextRequest) {
       }, { status: 429 })
     }
 
-    // ðŸ“± ENVIAR NOTIFICAá‡áƒO
+    // 📱 ENVIAR NOTIFICA��O
     const result = await sendSecureNotification(body)
     
     return NextResponse.json(result)
 
   } catch (error) {
-    console.error('Œ Erro ao enviar notificaá§á£o:', error)
+    console.error('�� Erro ao enviar notifica��o:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno' },
       { status: 500 }
@@ -57,7 +57,7 @@ async function validateSecurityLimits(phoneNumber: string) {
   const today = new Date().toISOString().split('T')[0]
   const currentHour = new Date().getHours()
   
-  // ° VERIFICAR HORáRIO COMERCIAL
+  // �� VERIFICAR HOR�RIO COMERCIAL
   if (currentHour < SECURITY_CONFIG.BUSINESS_HOURS.START || 
       currentHour > SECURITY_CONFIG.BUSINESS_HOURS.END) {
     const nextBusinessHour = currentHour < SECURITY_CONFIG.BUSINESS_HOURS.START 
@@ -66,12 +66,12 @@ async function validateSecurityLimits(phoneNumber: string) {
     
     return {
       allowed: false,
-      reason: 'Fora do horá¡rio comercial (8h á s 18h)',
+      reason: 'Fora do hor�rio comercial (8h �s 18h)',
       nextAvailableAt: `${nextBusinessHour}:00`
     }
   }
 
-  // ðŸ“Š VERIFICAR LIMITE DIáRIO
+  // 📊 VERIFICAR LIMITE DI�RIO
   const { data: todayMessages } = await supabase
     .from('whatsapp_messages')
     .select('id')
@@ -82,12 +82,12 @@ async function validateSecurityLimits(phoneNumber: string) {
   if (todayMessages && todayMessages.length >= SECURITY_CONFIG.MAX_MESSAGES_PER_DAY) {
     return {
       allowed: false,
-      reason: `Limite diá¡rio atingido (${SECURITY_CONFIG.MAX_MESSAGES_PER_DAY} mensagens)`,
-      nextAvailableAt: 'Amanhá£ 08:00'
+      reason: `Limite di�rio atingido (${SECURITY_CONFIG.MAX_MESSAGES_PER_DAY} mensagens)`,
+      nextAvailableAt: 'Amanh� 08:00'
     }
   }
 
-  // ±ï¸ VERIFICAR INTERVALO MáNIMO
+  // ��️ VERIFICAR INTERVALO M�NIMO
   const { data: lastMessage } = await supabase
     .from('whatsapp_messages')
     .select('sent_at')
@@ -105,7 +105,7 @@ async function validateSecurityLimits(phoneNumber: string) {
       const waitTime = SECURITY_CONFIG.MIN_INTERVAL_SECONDS - diffSeconds
       return {
         allowed: false,
-        reason: `Aguarde ${Math.ceil(waitTime)}s antes da prá³xima mensagem`,
+        reason: `Aguarde ${Math.ceil(waitTime)}s antes da pr�xima mensagem`,
         nextAvailableAt: new Date(now.getTime() + waitTime * 1000).toLocaleTimeString()
       }
     }
@@ -115,43 +115,43 @@ async function validateSecurityLimits(phoneNumber: string) {
 }
 
 async function sendSecureNotification(data: NotificationRequest) {
-  const { checklistId, responsavelNumero, titulo, prazo, tipo = 'novo' } = data
+  const { checklistId, responsavelNumero: any, titulo, prazo: any, tipo = 'novo' } = data
   
-  // ðŸŽ¯ MENSAGEM PERSONALIZADA ANTI-SPAM
+  // 🎯 MENSAGEM PERSONALIZADA ANTI-SPAM
   const emojis = {
-    novo: 'ðŸ“‹',
-    lembrete: '°', 
-    urgente: 'ðŸš¨'
+    novo: '📋',
+    lembrete: '��', 
+    urgente: '🚨'
   }
   
   const saudacoes = [
-    'Olá¡!', 'Oi!', 'Bom dia!', 'Boa tarde!'
+    'Ol�!', 'Oi!', 'Bom dia!', 'Boa tarde!'
   ]
   
   const saudacao = saudacoes[Math.floor(Math.random() * saudacoes.length)]
   
-  // ðŸ†” Cá“DIGO ášNICO PARA IDENTIFICAá‡áƒO
+  // 🆔 C�DIGO �NICO PARA IDENTIFICA��O
   const codigoChecklist = checklistId.slice(-8).toUpperCase()
   
   const message = `${saudacao} ${emojis[tipo]}
 
-ðŸ“‹ *${titulo}*
-ðŸ• Prazo: ${new Date(prazo).toLocaleDateString('pt-BR', { 
+📋 *${titulo}*
+🕐 Prazo: ${new Date(prazo).toLocaleDateString('pt-BR', { 
   day: '2-digit', 
   month: '2-digit',
   hour: '2-digit',
   minute: '2-digit'
 })}
 
-ðŸ†” Cá³digo: *${codigoChecklist}*
+🆔 C�digo: *${codigoChecklist}*
 
-Para marcar como concluá­do, responda com:
-œ… "*ok ${codigoChecklist}*" ou "*pronto ${codigoChecklist}*"
+Para marcar como conclu�do, responda com:
+�� "*ok ${codigoChecklist}*" ou "*pronto ${codigoChecklist}*"
 
 _Sistema SGB - Bar Management_`
 
   try {
-    // ðŸ“¤ ENVIAR VIA EVOLUTION API
+    // 📤 ENVIAR VIA EVOLUTION API
     const evolutionResponse = await fetch(`${process.env.EVOLUTION_API_URL}/message/sendText/${process.env.EVOLUTION_INSTANCE_NAME}`, {
       method: 'POST',
       headers: {
@@ -170,7 +170,7 @@ _Sistema SGB - Bar Management_`
       throw new Error(`Evolution API error: ${evolutionResult.message}`)
     }
 
-    // ðŸ’¾ SALVAR NO BANCO
+    // 💾 SALVAR NO BANCO
     await supabase
       .from('whatsapp_messages')
       .insert({
@@ -196,9 +196,9 @@ _Sistema SGB - Bar Management_`
     }
 
   } catch (error) {
-    console.error('Œ Erro ao enviar via Evolution:', error)
+    console.error('�� Erro ao enviar via Evolution:', error)
     
-    // ðŸ“ SALVAR FALHA NO BANCO
+    // 📝 SALVAR FALHA NO BANCO
     await supabase
       .from('whatsapp_messages')
       .insert({
@@ -219,7 +219,7 @@ _Sistema SGB - Bar Management_`
   }
 }
 
-// GET - Status do sistema de notificaá§áµes
+// GET - Status do sistema de notifica��es
 export async function GET() {
   const today = new Date().toISOString().split('T')[0]
   

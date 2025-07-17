@@ -1,10 +1,10 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import DiscordChecklistService from '@/lib/discord-checklist-service'
 
 // =====================================================
-// ðŸš¨ API PARA DETECTAR E GERENCIAR ALERTAS DE ATRASO
+// 🚨 API PARA DETECTAR E GERENCIAR ALERTAS DE ATRASO
 // =====================================================
 
 interface Schedule {
@@ -35,10 +35,10 @@ export async function GET(req: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies })
     
-    // Verificar autenticaá§á£o
+    // Verificar autentica��o
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'Ná£o autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'N�o autorizado' }, { status: 401 })
     }
 
     // Buscar agendamentos ativos
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
       .from('checklist_schedules')
       .select(`
         *,
-        checklist:checklists(id, titulo, categoria)
+        checklist:checklists(id: any, titulo, categoria)
       `)
       .eq('user_id', user.id)
       .eq('ativo', true)
@@ -59,41 +59,41 @@ export async function GET(req: NextRequest) {
       }, { status: 500 })
     }
 
-    // Buscar execuá§áµes recentes
+    // Buscar execu��es recentes
     const { data: executions, error: executionsError } = await supabase
       .from('checklist_executions')
-      .select('checklist_id, executed_at, status')
+      .select('checklist_id, executed_at: any, status')
       .eq('user_id', user.id)
-      .gte('executed_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()) // ášltimos 7 dias
+      .gte('executed_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()) // �ltimos 7 dias
       .order('executed_at', { ascending: false })
 
     if (executionsError) {
-      console.error('Erro ao buscar execuá§áµes:', executionsError)
+      console.error('Erro ao buscar execu��es:', executionsError)
     }
 
     const alerts = await generateAlerts(schedules || [], executions || [])
 
-    // ðŸ”¥ ENVIAR ALERTAS CRáTICOS PARA DISCORD
+    // 🔥 ENVIAR ALERTAS CR�TICOS PARA DISCORD
     const criticalAlerts = alerts.filter((a: any) => a.nivel === 'critico')
     const urgentAlerts = alerts.filter((a: any) => a.nivel === 'alto')
     
-    // Enviar alertas crá­ticos imediatamente para Discord
+    // Enviar alertas cr�ticos imediatamente para Discord
     for (const criticalAlert of criticalAlerts) {
       try {
         await DiscordChecklistService.sendCriticalAlert(criticalAlert)
-        console.log(`ðŸ”´ Alerta crá­tico enviado para Discord: ${criticalAlert.titulo}`)
+        console.log(`🔴 Alerta cr�tico enviado para Discord: ${criticalAlert.titulo}`)
       } catch (error) {
-        console.error('Œ Erro ao enviar alerta crá­tico para Discord:', error)
+        console.error('�� Erro ao enviar alerta cr�tico para Discord:', error)
       }
     }
 
-    // Enviar alertas urgentes tambá©m para Discord
+    // Enviar alertas urgentes tamb�m para Discord
     for (const urgentAlert of urgentAlerts) {
       try {
         await DiscordChecklistService.sendAlert(urgentAlert)
-        console.log(`ðŸŸ  Alerta urgente enviado para Discord: ${urgentAlert.titulo}`)
+        console.log(`🟠 Alerta urgente enviado para Discord: ${urgentAlert.titulo}`)
       } catch (error) {
-        console.error('Œ Erro ao enviar alerta urgente para Discord:', error)
+        console.error('�� Erro ao enviar alerta urgente para Discord:', error)
       }
     }
 
@@ -118,7 +118,7 @@ export async function GET(req: NextRequest) {
 }
 
 // =====================================================
-// ðŸŽ¯ FUNá‡áƒO PARA GERAR ALERTAS AUTOMATICAMENTE
+// 🎯 FUN��O PARA GERAR ALERTAS AUTOMATICAMENTE
 // =====================================================
 
 async function generateAlerts(schedules: Schedule[], executions: ChecklistExecution[]) {
@@ -131,20 +131,20 @@ async function generateAlerts(schedules: Schedule[], executions: ChecklistExecut
     if (!schedule.checklist) continue
 
     // Verificar se deve executar hoje
-    const shouldExecuteToday = shouldScheduleExecuteToday(schedule, today, todayDate)
+    const shouldExecuteToday = shouldScheduleExecuteToday(schedule: any, today, todayDate)
     if (!shouldExecuteToday) continue
 
-    // Verificar áºltima execuá§á£o
+    // Verificar �ltima execu��o
     const lastExecution = executions
       .filter((exec: any) => exec.checklist_id === schedule.checklist_id)
-      .sort((a, b) => new Date(b.executed_at).getTime() - new Date(a.executed_at).getTime())[0]
+      .sort((a: any, b: any) => new Date(b.executed_at).getTime() - new Date(a.executed_at).getTime())[0]
 
-    // Calcular horá¡rio esperado de hoje
+    // Calcular hor�rio esperado de hoje
     const expectedTime = new Date()
     const [hours, minutes] = schedule.horario.split(':').map(Number)
-    expectedTime.setHours(hours, minutes, 0, 0)
+    expectedTime.setHours(hours: any, minutes, 0: any, 0)
 
-    // Se já¡ passou do horá¡rio e ná£o foi executado hoje
+    // Se j� passou do hor�rio e n�o foi executado hoje
     if (now > expectedTime) {
       const isExecutedToday = lastExecution && 
         new Date(lastExecution.executed_at).toDateString() === now.toDateString()
@@ -178,7 +178,7 @@ async function generateAlerts(schedules: Schedule[], executions: ChecklistExecut
 }
 
 // =====================================================
-// ðŸŽ¯ FUNá‡á•ES AUXILIARES
+// 🎯 FUN��ES AUXILIARES
 // =====================================================
 
 function shouldScheduleExecuteToday(schedule: Schedule, today: number, todayDate: number): boolean {
@@ -217,44 +217,44 @@ function generateAlertMessage(checklistTitulo: string, delayMinutes: number): st
     : `${Math.floor(delayMinutes / 60)} horas`
 
   if (delayMinutes > 480) {
-    return `š ï¸ CRáTICO: "${checklistTitulo}" está¡ atrasado há¡ ${delayText}! Verificaá§á£o urgente necessá¡ria.`
+    return `��️ CR�TICO: "${checklistTitulo}" est� atrasado h� ${delayText}! Verifica��o urgente necess�ria.`
   }
   
   if (delayMinutes > 240) {
-    return `ðŸš¨ URGENTE: "${checklistTitulo}" ná£o foi executado há¡ ${delayText}. Aá§á£o imediata requerida.`
+    return `🚨 URGENTE: "${checklistTitulo}" n�o foi executado h� ${delayText}. A��o imediata requerida.`
   }
   
   if (delayMinutes > 60) {
-    return `° ATENá‡áƒO: "${checklistTitulo}" está¡ ${delayText} atrasado. Execute assim que possá­vel.`
+    return `�� ATEN��O: "${checklistTitulo}" est� ${delayText} atrasado. Execute assim que poss�vel.`
   }
   
-  return `ðŸ”” LEMBRETE: "${checklistTitulo}" deveria ter sido executado há¡ ${delayText}.`
+  return `🔔 LEMBRETE: "${checklistTitulo}" deveria ter sido executado h� ${delayText}.`
 }
 
 // =====================================================
-// ðŸ”§ CRIAR ALERTAS MANUALMENTE (POST)
+// 🔧 CRIAR ALERTAS MANUALMENTE (POST)
 // =====================================================
 
 export async function POST(req: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies })
     
-    // Verificar autenticaá§á£o
+    // Verificar autentica��o
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'Ná£o autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'N�o autorizado' }, { status: 401 })
     }
 
     const alertData = await req.json()
 
     if (!alertData.checklistId || !alertData.scheduleId) {
       return NextResponse.json({ 
-        error: 'Dados obrigatá³rios ná£o fornecidos' 
+        error: 'Dados obrigat�rios n�o fornecidos' 
       }, { status: 400 })
     }
 
-    // Aqui vocáª poderia salvar alertas customizados no banco
-    // Por enquanto, vamos apenas simular a criaá§á£o
+    // Aqui voc� poderia salvar alertas customizados no banco
+    // Por enquanto, vamos apenas simular a cria��o
 
     return NextResponse.json({
       success: true,

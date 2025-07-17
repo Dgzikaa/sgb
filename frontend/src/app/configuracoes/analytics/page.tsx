@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { DashboardCard } from '@/components/ui/dashboard-card'
@@ -108,7 +108,7 @@ export default function AnalyticsPage() {
     try {
       setRefreshing(true)
       
-      // Primeiro atualizar má©tricas via POST
+      // Primeiro atualizar m�tricas via POST
       await fetch('/api/analytics/dashboard', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -118,7 +118,7 @@ export default function AnalyticsPage() {
       // Depois buscar dados atualizados
       await fetchAnalytics(false)
     } catch (error) {
-      console.error('Erro ao atualizar má©tricas:', error)
+      console.error('Erro ao atualizar m�tricas:', error)
     }
   }
 
@@ -151,7 +151,7 @@ export default function AnalyticsPage() {
           <div className="animate-pulse space-y-6">
             <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[...Array(8)].map((_, i) => (
+              {[...Array(8)].map((_: any, i: any) => (
                 <div key={i} className="h-32 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
               ))}
             </div>
@@ -177,16 +177,16 @@ export default function AnalyticsPage() {
           </div>
           
           <div className="flex items-center gap-4">
-            {/* Seletor de perá­odo */}
+            {/* Seletor de per�odo */}
             <select 
               value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value)}
+              onChange={(e: any) => setSelectedPeriod(e.target.value)}
               className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
-              <option value="1">ášltimo dia</option>
-              <option value="7">ášltimos 7 dias</option>
-              <option value="30">ášltimos 30 dias</option>
-              <option value="90">ášltimos 90 dias</option>
+              <option value="1">�ltimo dia</option>
+              <option value="7">�ltimos 7 dias</option>
+              <option value="30">�ltimos 30 dias</option>
+              <option value="90">�ltimos 90 dias</option>
             </select>
             
             <Button 
@@ -201,10 +201,10 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        {/* Cards de Má©tricas Principais */}
+        {/* Cards de M�tricas Principais */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <DashboardCard
-            title="Usuá¡rios Ativos Hoje"
+            title="Usu�rios Ativos Hoje"
             value={data?.metricas_resumo.usuarios_ativos_hoje || 0}
             icon={<Users className="w-6 h-6" />}
             iconBg="bg-gradient-to-br from-blue-500 to-indigo-600"
@@ -212,7 +212,7 @@ export default function AnalyticsPage() {
           />
           
           <DashboardCard
-            title="Sessáµes Hoje"
+            title="Sess�es Hoje"
             value={data?.metricas_resumo.sessoes_hoje || 0}
             icon={<Activity className="w-6 h-6" />}
             iconBg="bg-gradient-to-br from-green-500 to-emerald-600"
@@ -220,7 +220,7 @@ export default function AnalyticsPage() {
           />
           
           <DashboardCard
-            title="Tempo Má©dio/Sessá£o"
+            title="Tempo M�dio/Sess�o"
             value={`${Math.floor((data?.metricas_resumo.tempo_medio_sessao || 0) / 60)}min`}
             icon={<Clock className="w-6 h-6" />}
             iconBg="bg-gradient-to-br from-purple-500 to-violet-600"
@@ -249,7 +249,7 @@ export default function AnalyticsPage() {
           />
           
           <DashboardCard
-            title="Tempo Resposta Má©dio"
+            title="Tempo Resposta M�dio"
             value={`${data?.performance_resumo.tempo_resposta_medio || 0}ms`}
             subtitle={`${data?.performance_resumo.total_requests || 0} requests`}
             icon={<Zap className="w-6 h-6" />}
@@ -270,7 +270,7 @@ export default function AnalyticsPage() {
           <DashboardCard
             title="Alertas Ativos"
             value={data?.alertas_resumo.total_ativos || 0}
-            subtitle={`${data?.alertas_resumo.criticos || 0} crá­ticos`}
+            subtitle={`${data?.alertas_resumo.criticos || 0} cr�ticos`}
             icon={<AlertCircle className="w-6 h-6" />}
             iconBg="bg-gradient-to-br from-red-500 to-rose-600"
             variant="gradient"
@@ -278,7 +278,7 @@ export default function AnalyticsPage() {
           />
         </div>
 
-        {/* Seá§á£o de KPIs Detalhados */}
+        {/* Se��o de KPIs Detalhados */}
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex items-center gap-3 mb-6">
             <Target className="w-6 h-6 text-blue-600" />
@@ -288,7 +288,7 @@ export default function AnalyticsPage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data?.kpis.map((kpi) => (
+            {data?.kpis.map((kpi: any) => (
               <div key={kpi.id} className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
@@ -330,19 +330,19 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        {/* Top Pá¡ginas e Eventos */}
+        {/* Top P�ginas e Eventos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Top Pá¡ginas */}
+          {/* Top P�ginas */}
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center gap-3 mb-6">
               <Eye className="w-6 h-6 text-green-600" />
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                Pá¡ginas Mais Visitadas
+                P�ginas Mais Visitadas
               </h2>
             </div>
             
             <div className="space-y-3">
-              {data?.top_paginas.slice(0, 5).map((pagina, index) => (
+              {data?.top_paginas.slice(0: any, 5).map((pagina: any, index: any) => (
                 <div key={index} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
                   <span className="text-sm text-gray-900 dark:text-white font-medium">
                     {pagina.pagina}
@@ -379,18 +379,18 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        {/* Alertas Crá­ticos */}
+        {/* Alertas Cr�ticos */}
         {data?.alertas_criticos && data.alertas_criticos.length > 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-red-200 dark:border-red-700 p-6">
             <div className="flex items-center gap-3 mb-6">
               <AlertTriangle className="w-6 h-6 text-red-600" />
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                Alertas Crá­ticos
+                Alertas Cr�ticos
               </h2>
             </div>
             
             <div className="space-y-3">
-              {data.alertas_criticos.map((alerta) => (
+              {data.alertas_criticos.map((alerta: any) => (
                 <div key={alerta.id} className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
                   <div className="flex items-start justify-between">
                     <div>
@@ -411,9 +411,9 @@ export default function AnalyticsPage() {
           </div>
         )}
 
-        {/* Footer com áºltima atualizaá§á£o */}
+        {/* Footer com �ltima atualiza��o */}
         <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-          ášltima atualizaá§á£o: {data?.data_ultima_atualizacao ? 
+          �ltima atualiza��o: {data?.data_ultima_atualizacao ? 
             new Date(data.data_ultima_atualizacao).toLocaleString('pt-BR') : 'Nunca'
           }
         </div>

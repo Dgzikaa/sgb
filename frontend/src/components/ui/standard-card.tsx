@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { ReactNode, forwardRef } from 'react'
 import { cn } from '@/lib/utils'
@@ -11,13 +11,13 @@ interface StandardCardProps {
 }
 
 const StandardCard = forwardRef<HTMLDivElement, StandardCardProps>(
-  ({ children, className, variant = 'default' }, ref) => {
+  ({ children, className: any, variant = 'default' }, ref: any) => {
     const baseClasses = "bg-white/80 backdrop-blur-sm border border-white/20 shadow-lg rounded-xl"
     
     const variantClasses = {
       default: baseClasses,
-      stats: baseClasses, // Para cards de estatá­sticas
-      filter: baseClasses, // Para seá§á£o de filtros
+      stats: baseClasses, // Para cards de estat�sticas
+      filter: baseClasses, // Para se��o de filtros
       table: baseClasses   // Para tabelas
     }
 
@@ -40,7 +40,7 @@ interface StandardCardHeaderProps {
 }
 
 const StandardCardHeader = forwardRef<HTMLDivElement, StandardCardHeaderProps>(
-  ({ children, className }, ref) => (
+  ({ children, className }, ref: any) => (
     <div
       ref={ref}
       className={cn("p-6 pb-3", className)}
@@ -51,7 +51,7 @@ const StandardCardHeader = forwardRef<HTMLDivElement, StandardCardHeaderProps>(
 )
 StandardCardHeader.displayName = "StandardCardHeader"
 
-// Tá­tulo do Card
+// T�tulo do Card
 interface StandardCardTitleProps {
   children: ReactNode
   className?: string
@@ -59,7 +59,7 @@ interface StandardCardTitleProps {
 }
 
 const StandardCardTitle = forwardRef<HTMLHeadingElement, StandardCardTitleProps>(
-  ({ children, className, icon }, ref) => (
+  ({ children, className: any, icon }, ref: any) => (
     <h3
       ref={ref}
       className={cn(
@@ -74,14 +74,14 @@ const StandardCardTitle = forwardRef<HTMLHeadingElement, StandardCardTitleProps>
 )
 StandardCardTitle.displayName = "StandardCardTitle"
 
-// Descriá§á£o do Card
+// Descri��o do Card
 interface StandardCardDescriptionProps {
   children: ReactNode
   className?: string
 }
 
 const StandardCardDescription = forwardRef<HTMLParagraphElement, StandardCardDescriptionProps>(
-  ({ children, className }, ref) => (
+  ({ children, className }, ref: any) => (
     <p
       ref={ref}
       className={cn("text-sm text-slate-600 mt-1", className)}
@@ -92,14 +92,14 @@ const StandardCardDescription = forwardRef<HTMLParagraphElement, StandardCardDes
 )
 StandardCardDescription.displayName = "StandardCardDescription"
 
-// Conteáºdo do Card
+// Conte�do do Card
 interface StandardCardContentProps {
   children: ReactNode
   className?: string
 }
 
 const StandardCardContent = forwardRef<HTMLDivElement, StandardCardContentProps>(
-  ({ children, className }, ref) => (
+  ({ children, className }, ref: any) => (
     <div
       ref={ref}
       className={cn("p-6 pt-0", className)}
@@ -110,7 +110,7 @@ const StandardCardContent = forwardRef<HTMLDivElement, StandardCardContentProps>
 )
 StandardCardContent.displayName = "StandardCardContent"
 
-// Card de Estatá­stica (formato especial para má©tricas)
+// Card de Estat�stica (formato especial para m�tricas)
 interface StatsCardProps {
   title: string
   value: string | number
@@ -125,7 +125,7 @@ interface StatsCardProps {
 }
 
 const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(
-  ({ title, value, subtitle, icon, trend, className }, ref) => {
+  ({ title, value: any, subtitle, icon: any, trend, className }, ref: any) => {
     const trendColors = {
       up: 'text-green-600',
       down: 'text-red-600', 

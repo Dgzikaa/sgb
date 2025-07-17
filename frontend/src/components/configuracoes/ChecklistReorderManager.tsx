@@ -1,7 +1,7 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -51,12 +51,12 @@ export function ChecklistReorderManager({
     if (initialChecklists.length > 0 && !isLoading) {
       setChecklists(initialChecklists)
     }
-  }, [initialChecklists, isLoading, setChecklists])
+  }, [initialChecklists, isLoading: any, setChecklists])
 
   // Handle reorder
   const handleReorder = (newChecklists: ChecklistTemplate[]) => {
     // Update ordem field based on new position
-    const updatedChecklists = newChecklists.map((checklist, index) => ({
+    const updatedChecklists = newChecklists.map((checklist: any, index: any) => ({
       ...checklist,
       ordem: index + 1
     }))
@@ -101,7 +101,7 @@ export function ChecklistReorderManager({
     } catch (error) {
       toast({
         title: 'Erro ao salvar',
-        description: 'Ná£o foi possá­vel salvar a nova ordem. Tente novamente.',
+        description: 'N�o foi poss�vel salvar a nova ordem. Tente novamente.',
         variant: 'destructive'
       })
     }
@@ -114,7 +114,7 @@ export function ChecklistReorderManager({
     
     toast({
       title: 'Ordem resetada',
-      description: 'A ordem foi restaurada para o padrá£o original.'
+      description: 'A ordem foi restaurada para o padr�o original.'
     })
   }
 
@@ -149,7 +149,7 @@ export function ChecklistReorderManager({
           <div className="animate-pulse space-y-4">
             <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
             <div className="space-y-3">
-              {Array.from({ length: 4 }).map((_, i) => (
+              {Array.from({ length: 4 }).map((_: any, i: any) => (
                 <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
               ))}
             </div>
@@ -164,16 +164,16 @@ export function ChecklistReorderManager({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="card-title-dark">ðŸ”„ Reordenar Checklists</CardTitle>
+            <CardTitle className="card-title-dark">🔄 Reordenar Checklists</CardTitle>
             <p className="card-description-dark mt-2">
-              Arraste os checklists para reorganizar a ordem de execuá§á£o.
+              Arraste os checklists para reorganizar a ordem de execu��o.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             {hasChanges && (
               <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300">
-                Alteraá§áµes pendentes
+                Altera��es pendentes
               </Badge>
             )}
             
@@ -191,7 +191,7 @@ export function ChecklistReorderManager({
         <Alert>
           <AlertDescription>
             <strong>Como usar:</strong> Arraste os checklists para reorganizar a ordem.
-            No desktop, use <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs">Ctrl + †‘/†“</kbd> para mover via teclado.
+            No desktop, use <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs">Ctrl + ��/��</kbd> para mover via teclado.
           </AlertDescription>
         </Alert>
 
@@ -200,7 +200,7 @@ export function ChecklistReorderManager({
           items={checklists}
           onReorder={handleReorder}
           disabled={disabled}
-          renderItem={(checklist, index) => (
+          renderItem={(checklist: any, index: any) => (
             <div className="space-y-3">
               {/* Header */}
               <div className="flex items-center justify-between">
@@ -241,7 +241,7 @@ export function ChecklistReorderManager({
               </div>
             </div>
           )}
-          getId={(checklist) => checklist.id}
+          getId={(checklist: any) => checklist.id}
           gap="md"
           itemClassName="hover:bg-gray-50 dark:hover:bg-gray-800/50"
         />
@@ -254,7 +254,7 @@ export function ChecklistReorderManager({
               disabled={!hasChanges || disabled}
               className="btn-primary-dark"
             >
-              ðŸ’¾ Salvar Ordem
+              💾 Salvar Ordem
             </Button>
 
             <Button
@@ -263,7 +263,7 @@ export function ChecklistReorderManager({
               disabled={!hasChanges || disabled}
               className="btn-secondary-dark"
             >
-              ðŸ”„ Resetar
+              🔄 Resetar
             </Button>
           </div>
 

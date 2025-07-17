@@ -1,11 +1,11 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 import {
   TrendingUp,
@@ -92,7 +92,7 @@ export default function InstagramTrackingPage() {
   const loadInstagramData = async () => {
     try {
       setLoading(true)
-      console.log('ðŸ“¸ Carregando dados de tracking Instagram...')
+      console.log('📸 Carregando dados de tracking Instagram...')
       
       const response = await fetch(`/api/meta/daily-analysis?days=${selectedPeriod}&platform=instagram`)
       
@@ -103,7 +103,7 @@ export default function InstagramTrackingPage() {
       const result = await response.json()
       
       if (result.success && result.data) {
-        // Transformar dados para formato especá­fico do Instagram
+        // Transformar dados para formato espec�fico do Instagram
         const instagramAnalysis = result.data.platform_analysis.instagram
         const variations = result.data.daily_variations
         const trends = result.data.trends_and_insights
@@ -130,7 +130,7 @@ export default function InstagramTrackingPage() {
             followers_change_percent: variations.follower_growth_total > 0 ? 
               Math.round((variations.follower_growth_total / 36390) * 100 * 100) / 100 : 0,
             engagement_change: variations.daily_changes ? 
-              (Object.values(variations.daily_changes).slice(0, 1)[0] as any)?.total_interactions || 125 : 125,
+              (Object.values(variations.daily_changes).slice(0: any, 1)[0] as any)?.total_interactions || 125 : 125,
             reach_change: 0,
             trend_direction: variations.follower_growth_total > 0 ? 'growing' : 
                             variations.follower_growth_total < 0 ? 'declining' : 'stable'
@@ -147,7 +147,7 @@ export default function InstagramTrackingPage() {
               engagement_rate: dayData.engagement_rate || 0,
               followers_change: 0 // Seria calculado comparando com dia anterior
             }
-          }).slice(0, 7), // ášltimos 7 dias
+          }).slice(0: any, 7), // �ltimos 7 dias
           trends: {
             growth_rate_7d: trends.find((t: any) => t.category === 'followers')?.value || 0.85,
             followers_growth_7d: variations.follower_growth_total || 31,
@@ -158,24 +158,24 @@ export default function InstagramTrackingPage() {
           }
         }
         
-        console.log('œ… Dados Instagram transformados:', transformedData.summary)
+        console.log('�� Dados Instagram transformados:', transformedData.summary)
         setData(transformedData)
       } else {
         throw new Error(result.error || 'Erro ao carregar dados')
       }
       
     } catch (error) {
-      console.error('Œ Erro ao carregar dados Instagram:', error)
+      console.error('�� Erro ao carregar dados Instagram:', error)
       
       // Fallback com dados baseados no exemplo fornecido
-      console.log('š ï¸ Usando dados de fallback baseados nos logs reais')
+      console.log('��️ Usando dados de fallback baseados nos logs reais')
       const fallbackData: InstagramData = {
         summary: {
           followers: 36421, // Do log: 36421 seguidores
           following: 0,
           posts_count: 80, // Do log: 80 posts totais
           total_likes: 2428, // Do log: 2428 likes recentes
-          total_comments: 193, // Do log: 193 comentá¡rios
+          total_comments: 193, // Do log: 193 coment�rios
           total_shares: 0,
           reach: 28500,
           impressions: 45200,
@@ -204,7 +204,7 @@ export default function InstagramTrackingPage() {
           growth_rate_7d: 0.42, // +173 seguidores em 7 dias
           followers_growth_7d: 140, // 36421 - 36281 = 140
           engagement_growth_7d: 86, // 2428 - 2342 = 86
-          avg_daily_followers_change: 20, // Má©dia de crescimento diá¡rio
+          avg_daily_followers_change: 20, // M�dia de crescimento di�rio
           best_performing_day: '2025-01-09',
           worst_performing_day: '2025-01-13'
         }
@@ -285,7 +285,7 @@ export default function InstagramTrackingPage() {
                   Instagram Tracking
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Aná¡lise detalhada e variaá§áµes diá¡rias €¢ ášltimos {selectedPeriod} dias
+                  An�lise detalhada e varia��es di�rias �� �ltimos {selectedPeriod} dias
                 </p>
               </div>
             </div>
@@ -360,7 +360,7 @@ export default function InstagramTrackingPage() {
                     {data.variations.engagement_change > 0 ? '+' : ''}{data.variations.engagement_change}
                   </Badge>
                   <span className="text-xs text-gray-500">
-                    perá­odo
+                    per�odo
                   </span>
                 </div>
               </CardContent>
@@ -404,7 +404,7 @@ export default function InstagramTrackingPage() {
             </Card>
           </div>
 
-          {/* Má©tricas Detalhadas */}
+          {/* M�tricas Detalhadas */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Engagement Breakdown */}
             <Card>
@@ -427,7 +427,7 @@ export default function InstagramTrackingPage() {
                   </div>
                   
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Comentá¡rios</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Coment�rios</span>
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{formatNumber(data.summary.total_comments)}</span>
                       <div className="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -449,18 +449,18 @@ export default function InstagramTrackingPage() {
               </CardContent>
             </Card>
 
-            {/* Aná¡lise de Trá¡fego */}
+            {/* An�lise de Tr�fego */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="w-5 h-5 text-blue-500" />
-                  Trá¡fego & Visitas
+                  Tr�fego & Visitas
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Impressáµes</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Impress�es</span>
                     <span className="font-medium">{formatNumber(data.summary.impressions)}</span>
                   </div>
                   
@@ -476,7 +476,7 @@ export default function InstagramTrackingPage() {
                   
                   <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Taxa Conversá£o</span>
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Taxa Convers�o</span>
                       <span className="font-bold text-green-600 dark:text-green-400">
                         {data.summary.profile_visits > 0 ? 
                           ((data.summary.website_clicks / data.summary.profile_visits) * 100).toFixed(1) : 0}%
@@ -488,17 +488,17 @@ export default function InstagramTrackingPage() {
             </Card>
           </div>
 
-          {/* Histá³rico Diá¡rio */}
+          {/* Hist�rico Di�rio */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-purple-500" />
-                Histá³rico dos ášltimos 7 Dias
+                Hist�rico dos �ltimos 7 Dias
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {data.daily_data.map((day, index) => (
+                {data.daily_data.map((day: any, index: any) => (
                   <div key={day.date} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 bg-pink-500 rounded-full"></div>
@@ -522,7 +522,7 @@ export default function InstagramTrackingPage() {
                           {day.likes} likes
                         </p>
                         <p className="text-xs text-gray-600 dark:text-gray-400">
-                          {day.comments} comentá¡rios
+                          {day.comments} coment�rios
                         </p>
                       </div>
                       
@@ -542,12 +542,12 @@ export default function InstagramTrackingPage() {
           <div className="flex justify-center gap-4">
             <Link href="/visao-geral">
               <Button variant="outline">
-                Voltar á  Visá£o Geral
+                Voltar � Vis�o Geral
               </Button>
             </Link>
             <Link href="/visao-geral/marketing-360">
               <Button variant="outline">
-                Marketing 360°
+                Marketing 360�
               </Button>
             </Link>
           </div>

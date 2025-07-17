@@ -1,13 +1,13 @@
-Ôªø'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select'
 import { 
   ArrowLeft,
   Plus, 
@@ -100,7 +100,7 @@ export default function TemplatesPage() {
 
   useEffect(() => {
     carregarTemplates()
-  }, [busca, categoriaFiltro, tipoFiltro, publicoFiltro, predefinidoFiltro])
+  }, [busca, categoriaFiltro: any, tipoFiltro, publicoFiltro: any, predefinidoFiltro])
 
   const carregarTemplates = async () => {
     try {
@@ -131,7 +131,7 @@ export default function TemplatesPage() {
       console.error('Erro ao carregar templates:', err)
       setError('Erro ao conectar com o servidor')
       toast({
-        title: "¬ù≈í Erro",
+        title: "ùå Erro",
         description: "Erro ao carregar templates",
         variant: "destructive"
       })
@@ -151,12 +151,12 @@ export default function TemplatesPage() {
       if (response.success) {
         await carregarTemplates()
         toast({
-          title: "≈ì‚Ä¶ Sucesso",
+          title: "úÖ Sucesso",
           description: response.message || "Templates predefinidos instalados!",
         })
       } else {
         toast({
-          title: "¬ù≈í Erro",
+          title: "ùå Erro",
           description: response.error || "Erro ao instalar templates",
           variant: "destructive"
         })
@@ -164,7 +164,7 @@ export default function TemplatesPage() {
     } catch (err: any) {
       console.error('Erro ao instalar templates:', err)
       toast({
-        title: "¬ù≈í Erro",
+        title: "ùå Erro",
         description: "Erro ao instalar templates predefinidos",
         variant: "destructive"
       })
@@ -184,12 +184,12 @@ export default function TemplatesPage() {
       if (response.success) {
         await carregarTemplates()
         toast({
-          title: "≈ì‚Ä¶ Sucesso",
+          title: "úÖ Sucesso",
           description: "Template deletado com sucesso!",
         })
       } else {
         toast({
-          title: "¬ù≈í Erro",
+          title: "ùå Erro",
           description: response.error || "Erro ao deletar template",
           variant: "destructive"
         })
@@ -197,7 +197,7 @@ export default function TemplatesPage() {
     } catch (err: any) {
       console.error('Erro ao deletar template:', err)
       toast({
-        title: "¬ù≈í Erro",
+        title: "ùå Erro",
         description: "Erro ao deletar template",
         variant: "destructive"
       })
@@ -282,7 +282,7 @@ export default function TemplatesPage() {
                     </div>
                     <div>
                       <h1 className="text-3xl font-bold">Templates de Checklists</h1>
-                      <p className="text-indigo-100 mt-1">Gerencie e organize templates reutiliz√°¬°veis</p>
+                      <p className="text-indigo-100 mt-1">Gerencie e organize templates reutiliz·°veis</p>
                     </div>
                   </div>
                 </div>
@@ -321,7 +321,7 @@ export default function TemplatesPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">P√°¬∫blicos</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">P·∫blicos</p>
                     <p className="text-3xl font-bold text-gray-900 dark:text-white">{estatisticas.publicos}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Compartilhados</p>
                   </div>
@@ -412,7 +412,7 @@ export default function TemplatesPage() {
                     <Input
                       placeholder="Buscar templates..."
                       value={busca}
-                      onChange={(e) => setBusca(e.target.value)}
+                      onChange={(e: any) => setBusca(e.target.value)}
                       className="pl-10 bg-white dark:bg-gray-700"
                     />
                   </div>
@@ -426,8 +426,8 @@ export default function TemplatesPage() {
                     <SelectItem value="all">Todas</SelectItem>
                     <SelectItem value="operacional">Operacional</SelectItem>
                     <SelectItem value="qualidade">Qualidade</SelectItem>
-                    <SelectItem value="seguranca">Seguran√°¬ßa</SelectItem>
-                    <SelectItem value="manutencao">Manuten√°¬ß√°¬£o</SelectItem>
+                    <SelectItem value="seguranca">Seguran·ßa</SelectItem>
+                    <SelectItem value="manutencao">Manuten·ß·£o</SelectItem>
                     <SelectItem value="atendimento">Atendimento</SelectItem>
                     <SelectItem value="administrativo">Administrativo</SelectItem>
                   </SelectContent>
@@ -441,7 +441,7 @@ export default function TemplatesPage() {
                     <SelectItem value="all">Todos</SelectItem>
                     <SelectItem value="abertura">Abertura</SelectItem>
                     <SelectItem value="fechamento">Fechamento</SelectItem>
-                    <SelectItem value="diario">Di√°¬°rio</SelectItem>
+                    <SelectItem value="diario">Di·°rio</SelectItem>
                     <SelectItem value="semanal">Semanal</SelectItem>
                     <SelectItem value="mensal">Mensal</SelectItem>
                   </SelectContent>
@@ -453,7 +453,7 @@ export default function TemplatesPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="true">P√°¬∫blicos</SelectItem>
+                    <SelectItem value="true">P·∫blicos</SelectItem>
                     <SelectItem value="false">Privados</SelectItem>
                   </SelectContent>
                 </Select>
@@ -529,7 +529,7 @@ export default function TemplatesPage() {
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Nenhum Template Encontrado</h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  N√°¬£o h√°¬° templates que correspondem aos filtros aplicados
+                  N·£o h·° templates que correspondem aos filtros aplicados
                 </p>
                 <div className="flex items-center gap-3 justify-center">
                   <Button onClick={limparFiltros} variant="outline">
@@ -548,7 +548,7 @@ export default function TemplatesPage() {
                 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
                 : 'grid-cols-1'
             }`}>
-              {templates.map((template) => (
+              {templates.map((template: any) => (
                 <Card key={template.id} className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
                   <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
                     <div className="flex items-start justify-between">
@@ -569,7 +569,7 @@ export default function TemplatesPage() {
                             </Badge>
                             {template.publico && (
                               <Badge className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
-                                P√°¬∫blico
+                                P·∫blico
                               </Badge>
                             )}
                             {template.predefinido && (

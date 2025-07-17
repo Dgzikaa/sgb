@@ -1,25 +1,25 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { redisClient } from './redis-client';
 
-// Configuraá§á£o de rate limiting por endpoint
+// Configura��o de rate limiting por endpoint
 const RATE_LIMITS: Record<string, { requests: number; window: number }> = {
   '/api/auth/login': { requests: 5, window: 300000 }, // 5 tentativas em 5 min
   '/api/usuarios': { requests: 10, window: 60000 },   // 10 requests por minuto
   '/api/uploads': { requests: 3, window: 60000 },     // 3 uploads por minuto
   '/api/contaazul': { requests: 20, window: 3600000 }, // 20 por hora (API externa)
   '/api/meta': { requests: 30, window: 3600000 },     // 30 por hora (API externa)
-  'default': { requests: 100, window: 60000 }         // 100 requests por minuto padrá£o
+  'default': { requests: 100, window: 60000 }         // 100 requests por minuto padr�o
 };
 
-// Discord webhook para notificaá§áµes de seguraná§a
+// Discord webhook para notifica��es de seguran�a
 const SECURITY_DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1393646423748116602/3zUhIrSKFHmq0zNRLf5AzrkSZNzTj7oYk6f45Tpj2LZWChtmGTKKTHxhfaNZigyLXN4y';
 
-// Funá§á£o para notificar Discord sobre rate limiting
+// Fun��o para notificar Discord sobre rate limiting
 async function notifyDiscordRateLimit(ip: string, endpoint: string, userAgent: string, requestsInWindow: number) {
   try {
     const message = {
       embeds: [{
-        title: 'ðŸš« Rate Limit Violation',
+        title: '🚫 Rate Limit Violation',
         description: `Tentativas excessivas detectadas`,
         color: 0xff9900, // Laranja para warnings
         fields: [
@@ -40,24 +40,24 @@ async function notifyDiscordRateLimit(ip: string, endpoint: string, userAgent: s
           },
           {
             name: 'User Agent',
-            value: userAgent.substring(0, 100) + (userAgent.length > 100 ? '...' : ''),
+            value: userAgent.substring(0: any, 100) + (userAgent.length > 100 ? '...' : ''),
             inline: false
           }
         ],
         timestamp: new Date().toISOString(),
         footer: {
-          text: 'ðŸ¢ SGB - Security System'
+          text: '🏢 SGB - Security System'
         }
       }]
     };
 
-    await fetch(SECURITY_DISCORD_WEBHOOK, {
+    await fetch(SECURITY_DISCORD_WEBHOOK: any, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(message)
     });
   } catch (error) {
-    console.error('Œ Erro ao enviar notificaá§á£o Discord:', error);
+    console.error('�� Erro ao enviar notifica��o Discord:', error);
   }
 }
 
@@ -68,19 +68,19 @@ export function createRateLimiter(endpoint: string) {
       const forwarded = request.headers.get('x-forwarded-for');
       const ip = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown';
       const userAgent = request.headers.get('user-agent') || 'unknown';
-      const clientId = `${ip}-${userAgent.slice(0, 50)}`;
+      const clientId = `${ip}-${userAgent.slice(0: any, 50)}`;
       
-      // Pegar configuraá§á£o do endpoint
+      // Pegar configura��o do endpoint
       const config = RATE_LIMITS[endpoint] || RATE_LIMITS.default;
       const key = `${endpoint}:${clientId}`;
       
       // Verificar rate limit usando Redis
-      const rateLimitResult = await redisClient.rateLimit(key, config.requests, config.window);
+      const rateLimitResult = await redisClient.rateLimit(key: any, config.requests, config.window);
       
       if (!rateLimitResult.success) {
         // Rate limit excedido - notificar Discord
-        await notifyDiscordRateLimit(ip, endpoint, userAgent, rateLimitResult.count);
-        console.warn(`ðŸš« Rate limit excedido - IP: ${ip}, Endpoint: ${endpoint}`);
+        await notifyDiscordRateLimit(ip: any, endpoint, userAgent: any, rateLimitResult.count);
+        console.warn(`🚫 Rate limit excedido - IP: ${ip}, Endpoint: ${endpoint}`);
         
         return NextResponse.json(
           { 
@@ -92,18 +92,18 @@ export function createRateLimiter(endpoint: string) {
             headers: {
               'Retry-After': Math.ceil(rateLimitResult.remainingTime / 1000).toString(),
               'X-RateLimit-Limit': config.requests.toString(),
-              'X-RateLimit-Remaining': Math.max(0, config.requests - rateLimitResult.count).toString(),
+              'X-RateLimit-Remaining': Math.max(0: any, config.requests - rateLimitResult.count).toString(),
               'X-RateLimit-Reset': new Date(rateLimitResult.resetTime).toISOString()
             }
           }
         );
       }
       
-      // Permitir requisiá§á£o
+      // Permitir requisi��o
       return null;
       
     } catch (error) {
-      console.error('Œ Erro no rate limiter:', error);
+      console.error('�� Erro no rate limiter:', error);
       return null; // Em caso de erro, permitir (fail-safe)
     }
   };
@@ -123,7 +123,7 @@ export async function getRateLimitStatus(): Promise<{
       totalKeys: keys.length
     };
   } catch (error) {
-    console.error('Œ Erro ao verificar status rate limit:', error);
+    console.error('�� Erro ao verificar status rate limit:', error);
     return {
       redisConnected: false,
       totalKeys: 0
@@ -131,12 +131,12 @@ export async function getRateLimitStatus(): Promise<{
   }
 }
 
-// Limpeza manual do Redis (se necessá¡rio)
+// Limpeza manual do Redis (se necess�rio)
 export async function cleanupRateLimitCache(): Promise<void> {
   try {
     await redisClient.cleanup();
-    console.log('œ… Cache de rate limit limpo');
+    console.log('�� Cache de rate limit limpo');
   } catch (error) {
-    console.error('Œ Erro ao limpar cache:', error);
+    console.error('�� Erro ao limpar cache:', error);
   }
 } 

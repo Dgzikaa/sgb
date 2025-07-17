@@ -1,14 +1,14 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select'
+import { Tabs, TabsContent: any, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import ProfilePhotoUpload from '@/components/uploads/ProfilePhotoUpload'
 import { 
@@ -78,7 +78,7 @@ export default function MinhaContaPage() {
   const [carregando, setCarregando] = useState(true)
   const [mensagem, setMensagem] = useState<{ tipo: 'success' | 'error', texto: string } | null>(null)
 
-  // Estados para ediá§á£o de perfil
+  // Estados para edi��o de perfil
   const [dadosEdicao, setDadosEdicao] = useState<Partial<PerfilUsuario>>({})
 
   // Estados para troca de senha
@@ -184,7 +184,7 @@ export default function MinhaContaPage() {
         setNovaSenha('')
         setConfirmarSenha('')
         
-        // Se requer relogin, redirecionar apá³s um tempo
+        // Se requer relogin, redirecionar ap�s um tempo
         if (data.require_relogin) {
           setTimeout(() => {
             localStorage.clear()
@@ -232,7 +232,7 @@ export default function MinhaContaPage() {
     return cleaned
   }
 
-  // Nova funá§á£o para buscar CEP automaticamente
+  // Nova fun��o para buscar CEP automaticamente
   const buscarCEP = async (cep: string) => {
     const cepLimpo = cep.replace(/\D/g, '')
     
@@ -252,10 +252,10 @@ export default function MinhaContaPage() {
           
           setMensagem({ 
             tipo: 'success', 
-            texto: `Endereá§o encontrado: ${data.localidade}/${data.uf}` 
+            texto: `Endere�o encontrado: ${data.localidade}/${data.uf}` 
           })
           
-          // Limpar mensagem apá³s 3 segundos
+          // Limpar mensagem ap�s 3 segundos
           setTimeout(() => setMensagem(null), 3000)
         }
       } catch (error) {
@@ -264,59 +264,59 @@ export default function MinhaContaPage() {
     }
   }
 
-  // Funá§á£o para formatar CPF enquanto digita
+  // Fun��o para formatar CPF enquanto digita
   const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
-    const cleaned = value.replace(/\D/g, '').slice(0, 11) // Limitar a 11 dá­gitos
+    const cleaned = value.replace(/\D/g, '').slice(0: any, 11) // Limitar a 11 d�gitos
     let formatted = cleaned
     
     if (cleaned.length >= 4) {
-      formatted = cleaned.slice(0, 3) + '.' + cleaned.slice(3)
+      formatted = cleaned.slice(0: any, 3) + '.' + cleaned.slice(3)
     }
     if (cleaned.length >= 7) {
-      formatted = formatted.slice(0, 7) + '.' + formatted.slice(7)
+      formatted = formatted.slice(0: any, 7) + '.' + formatted.slice(7)
     }
     if (cleaned.length >= 10) {
-      formatted = formatted.slice(0, 11) + '-' + formatted.slice(11)
+      formatted = formatted.slice(0: any, 11) + '-' + formatted.slice(11)
     }
     
     setDadosEdicao(prev => ({ ...prev, cpf: formatted }))
   }
 
-  // Funá§á£o para formatar telefone enquanto digita
+  // Fun��o para formatar telefone enquanto digita
   const handleTelefoneChange = (value: string, tipo: 'celular' | 'telefone') => {
-    const cleaned = value.replace(/\D/g, '').slice(0, 11) // Limitar a 11 dá­gitos
+    const cleaned = value.replace(/\D/g, '').slice(0: any, 11) // Limitar a 11 d�gitos
     let formatted = cleaned
     
     if (cleaned.length >= 3) {
-      formatted = '(' + cleaned.slice(0, 2) + ')' + cleaned.slice(2)
+      formatted = '(' + cleaned.slice(0: any, 2) + ')' + cleaned.slice(2)
     }
     if (cleaned.length >= 7) {
       if (cleaned.length === 11) {
         // Celular: (61)99848-3434
-        formatted = formatted.slice(0, 4) + formatted.slice(4, 9) + '-' + formatted.slice(9)
+        formatted = formatted.slice(0: any, 4) + formatted.slice(4: any, 9) + '-' + formatted.slice(9)
       } else {
         // Fixo: (61)3848-3434
-        formatted = formatted.slice(0, 4) + formatted.slice(4, 8) + '-' + formatted.slice(8)
+        formatted = formatted.slice(0: any, 4) + formatted.slice(4: any, 8) + '-' + formatted.slice(8)
       }
     }
     
     setDadosEdicao(prev => ({ ...prev, [tipo]: formatted }))
   }
 
-  // Funá§á£o para formatar CEP e buscar endereá§o
+  // Fun��o para formatar CEP e buscar endere�o
   const handleCEPChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
-    const cleaned = value.replace(/\D/g, '').slice(0, 8) // Limitar a 8 dá­gitos
+    const cleaned = value.replace(/\D/g, '').slice(0: any, 8) // Limitar a 8 d�gitos
     let formatted = cleaned
     
     if (cleaned.length >= 6) {
-      formatted = cleaned.slice(0, 5) + '-' + cleaned.slice(5)
+      formatted = cleaned.slice(0: any, 5) + '-' + cleaned.slice(5)
     }
     
     setDadosEdicao(prev => ({ ...prev, cep: formatted }))
     
-    // Buscar CEP automaticamente quando tiver 8 dá­gitos
+    // Buscar CEP automaticamente quando tiver 8 d�gitos
     if (cleaned.length === 8) {
       buscarCEP(cleaned)
     }
@@ -358,7 +358,7 @@ export default function MinhaContaPage() {
     switch(role) {
       case 'admin': return 'Administrador'
       case 'manager': return 'Gerente'
-      default: return 'Funcioná¡rio'
+      default: return 'Funcion�rio'
     }
   }
 
@@ -375,7 +375,7 @@ export default function MinhaContaPage() {
       <div className="text-center py-8">
         <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Erro ao carregar perfil</h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-4">Ná£o foi possá­vel carregar os dados do seu perfil.</p>
+        <p className="text-gray-600 dark:text-gray-400 mb-4">N�o foi poss�vel carregar os dados do seu perfil.</p>
         <Button onClick={carregarPerfil}>Tentar novamente</Button>
       </div>
     )
@@ -481,7 +481,7 @@ export default function MinhaContaPage() {
         </div>
       )}
 
-      {/* Cards de estatá­sticas */}
+      {/* Cards de estat�sticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200">
           <CardContent className="p-6">
@@ -523,7 +523,7 @@ export default function MinhaContaPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">ášltima Atividade</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">�ltima Atividade</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {calcularDiasDesdeUltimaAtividade() === 0 ? 'Hoje' : `${calcularDiasDesdeUltimaAtividade()} dias`}
                 </p>
@@ -566,7 +566,7 @@ export default function MinhaContaPage() {
             className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white dark:text-gray-300"
           >
             <Shield className="h-4 w-4 mr-2" />
-            Seguraná§a
+            Seguran�a
           </TabsTrigger>
         </TabsList>
 
@@ -578,10 +578,10 @@ export default function MinhaContaPage() {
                 <div>
                   <CardTitle className="text-gray-900 dark:text-white flex items-center space-x-2">
                     <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                    <span>Informaá§áµes Pessoais</span>
+                    <span>Informa��es Pessoais</span>
                   </CardTitle>
                   <CardDescription className="text-gray-600 dark:text-gray-400">
-                    Gerencie suas informaá§áµes pessoais e foto de perfil
+                    Gerencie suas informa��es pessoais e foto de perfil
                   </CardDescription>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -599,28 +599,28 @@ export default function MinhaContaPage() {
               <div className="flex flex-col items-center space-y-4">
                 <ProfilePhotoUpload
                   currentPhoto={editandoPerfil ? dadosEdicao.foto_perfil : perfil.foto_perfil}
-                  onPhotoChange={(foto) => {
+                  onPhotoChange={(foto: any) => {
                     setDadosEdicao(prev => ({ ...prev, foto_perfil: foto }))
-                    // Se ná£o está¡ em modo de ediá§á£o, salvar a foto imediatamente
+                    // Se n�o est� em modo de edi��o, salvar a foto imediatamente
                     if (!editandoPerfil) {
                       salvarFotoPerfil(foto)
                     }
                   }}
-                  disabled={false} // Sempre permitir alteraá§á£o da foto
+                  disabled={false} // Sempre permitir altera��o da foto
                 />
                 <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                  Recomendado: imagem quadrada, má¡ximo 5MB<br />
-                  Formatos aceitos: JPG, PNG, GIF
+                  Recomendado: imagem quadrada, m�ximo 5MB<br />
+                  Formatos aceitos: JPG, PNG: any, GIF
                 </p>
               </div>
 
               <Separator className="bg-gray-200 dark:bg-gray-700" />
 
-              {/* Informaá§áµes bá¡sicas */}
+              {/* Informa��es b�sicas */}
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center space-x-2">
                   <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  <span>Dados Bá¡sicos</span>
+                  <span>Dados B�sicos</span>
                 </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -629,7 +629,7 @@ export default function MinhaContaPage() {
                     <Input
                       id="nome"
                       value={editandoPerfil ? dadosEdicao.nome || '' : perfil.nome}
-                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, nome: e.target.value }))}
+                      onChange={(e: any) => setDadosEdicao(prev => ({ ...prev, nome: e.target.value }))}
                       disabled={!editandoPerfil}
                       placeholder="Seu nome completo"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
@@ -644,7 +644,7 @@ export default function MinhaContaPage() {
                       disabled
                       className="bg-gray-50 dark:bg-gray-600 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                     />
-                    <p className="text-xs text-gray-500 dark:text-gray-400">O e-mail ná£o pode ser alterado</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">O e-mail n�o pode ser alterado</p>
                   </div>
 
                   <div className="space-y-2">
@@ -652,7 +652,7 @@ export default function MinhaContaPage() {
                     <Input
                       id="celular"
                       value={editandoPerfil ? dadosEdicao.celular || '' : formatarTelefone(perfil.celular || '')}
-                      onChange={(e) => handleTelefoneChange(e.target.value, 'celular')}
+                      onChange={(e: any) => handleTelefoneChange(e.target.value, 'celular')}
                       disabled={!editandoPerfil}
                       placeholder="(61)99999-9999"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
@@ -664,7 +664,7 @@ export default function MinhaContaPage() {
                     <Input
                       id="telefone"
                       value={editandoPerfil ? dadosEdicao.telefone || '' : formatarTelefone(perfil.telefone || '')}
-                      onChange={(e) => handleTelefoneChange(e.target.value, 'telefone')}
+                      onChange={(e: any) => handleTelefoneChange(e.target.value, 'telefone')}
                       disabled={!editandoPerfil}
                       placeholder="(61)3333-4444"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
@@ -689,7 +689,7 @@ export default function MinhaContaPage() {
                       id="data_nascimento"
                       type="date"
                       value={editandoPerfil ? dadosEdicao.data_nascimento || '' : perfil.data_nascimento || ''}
-                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, data_nascimento: e.target.value }))}
+                      onChange={(e: any) => setDadosEdicao(prev => ({ ...prev, data_nascimento: e.target.value }))}
                       disabled={!editandoPerfil}
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                     />
@@ -699,11 +699,11 @@ export default function MinhaContaPage() {
 
               <Separator className="bg-gray-200 dark:bg-gray-700" />
 
-              {/* Endereá§o */}
+              {/* Endere�o */}
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center space-x-2">
                   <MapPin className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  <span>Endereá§o</span>
+                  <span>Endere�o</span>
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -721,13 +721,13 @@ export default function MinhaContaPage() {
                   </div>
 
                   <div className="md:col-span-2 space-y-2">
-                    <Label htmlFor="endereco" className="text-gray-700 dark:text-gray-300">Endereá§o completo</Label>
+                    <Label htmlFor="endereco" className="text-gray-700 dark:text-gray-300">Endere�o completo</Label>
                     <Input
                       id="endereco"
                       value={editandoPerfil ? dadosEdicao.endereco || '' : perfil.endereco || ''}
-                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, endereco: e.target.value }))}
+                      onChange={(e: any) => setDadosEdicao(prev => ({ ...prev, endereco: e.target.value }))}
                       disabled={!editandoPerfil}
-                      placeholder="Rua, náºmero, complemento"
+                      placeholder="Rua, n�mero, complemento"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
                   </div>
@@ -737,7 +737,7 @@ export default function MinhaContaPage() {
                     <Input
                       id="cidade"
                       value={editandoPerfil ? dadosEdicao.cidade || '' : perfil.cidade || ''}
-                      onChange={(e) => setDadosEdicao(prev => ({ ...prev, cidade: e.target.value }))}
+                      onChange={(e: any) => setDadosEdicao(prev => ({ ...prev, cidade: e.target.value }))}
                       disabled={!editandoPerfil}
                       placeholder="Sua cidade"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
@@ -748,7 +748,7 @@ export default function MinhaContaPage() {
                     <Label htmlFor="estado" className="text-gray-700 dark:text-gray-300">Estado</Label>
                     <Select
                       value={editandoPerfil ? dadosEdicao.estado || '' : perfil.estado || ''}
-                      onValueChange={(value) => setDadosEdicao(prev => ({ ...prev, estado: value }))}
+                      onValueChange={(value: any) => setDadosEdicao(prev => ({ ...prev, estado: value }))}
                       disabled={!editandoPerfil}
                     >
                       <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
@@ -766,7 +766,7 @@ export default function MinhaContaPage() {
                 </div>
               </div>
 
-              {/* Botáµes de aá§á£o */}
+              {/* Bot�es de a��o */}
               <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
                 {editandoPerfil ? (
                   <>
@@ -791,7 +791,7 @@ export default function MinhaContaPage() {
                       ) : (
                         <Save className="h-4 w-4" />
                       )}
-                      <span>{salvandoPerfil ? 'Salvando...' : 'Salvar alteraá§áµes'}</span>
+                      <span>{salvandoPerfil ? 'Salvando...' : 'Salvar altera��es'}</span>
                     </Button>
                   </>
                 ) : (
@@ -808,16 +808,16 @@ export default function MinhaContaPage() {
           </Card>
         </TabsContent>
 
-        {/* Tab de Seguraná§a */}
+        {/* Tab de Seguran�a */}
         <TabsContent value="seguranca" className="space-y-6">
           <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader className="border-b border-gray-200 dark:border-gray-700">
               <CardTitle className="text-gray-900 dark:text-white flex items-center space-x-2">
                 <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                <span>Seguraná§a da Conta</span>
+                <span>Seguran�a da Conta</span>
               </CardTitle>
               <CardDescription className="text-gray-600 dark:text-gray-400">
-                Gerencie sua senha e configuraá§áµes de seguraná§a
+                Gerencie sua senha e configura��es de seguran�a
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8 p-8">
@@ -835,7 +835,7 @@ export default function MinhaContaPage() {
                       id="senhaAtual"
                       type="password"
                       value={senhaAtual}
-                      onChange={(e) => setSenhaAtual(e.target.value)}
+                      onChange={(e: any) => setSenhaAtual(e.target.value)}
                       placeholder="Sua senha atual"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
@@ -847,7 +847,7 @@ export default function MinhaContaPage() {
                       id="novaSenha"
                       type="password"
                       value={novaSenha}
-                      onChange={(e) => setNovaSenha(e.target.value)}
+                      onChange={(e: any) => setNovaSenha(e.target.value)}
                       placeholder="Nova senha"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
@@ -859,7 +859,7 @@ export default function MinhaContaPage() {
                       id="confirmarSenha"
                       type="password"
                       value={confirmarSenha}
-                      onChange={(e) => setConfirmarSenha(e.target.value)}
+                      onChange={(e: any) => setConfirmarSenha(e.target.value)}
                       placeholder="Confirme a nova senha"
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
@@ -884,9 +884,9 @@ export default function MinhaContaPage() {
 
               <Separator className="bg-gray-200 dark:bg-gray-700" />
 
-              {/* Informaá§áµes da conta */}
+              {/* Informa��es da conta */}
               <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Informaá§áµes da conta</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Informa��es da conta</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
                     <div className="flex items-center justify-between">
@@ -900,7 +900,7 @@ export default function MinhaContaPage() {
                   {perfil.ultima_atividade && (
                     <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-600 dark:text-gray-400 font-medium">ášltima atividade:</span>
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">�ltima atividade:</span>
                         <span className="text-gray-900 dark:text-white font-semibold">
                           {new Date(perfil.ultima_atividade).toLocaleDateString('pt-BR')}
                         </span>
@@ -912,14 +912,14 @@ export default function MinhaContaPage() {
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600 dark:text-gray-400 font-medium">Status da conta:</span>
                       <Badge variant={perfil.conta_verificada ? "default" : "secondary"} className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
-                        {perfil.conta_verificada ? "Verificada" : "Ná£o verificada"}
+                        {perfil.conta_verificada ? "Verificada" : "N�o verificada"}
                       </Badge>
                     </div>
                   </div>
 
                   <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-600 dark:text-gray-400 font-medium">Ná­vel de acesso:</span>
+                      <span className="text-gray-600 dark:text-gray-400 font-medium">N�vel de acesso:</span>
                       <div className={`px-3 py-1 rounded-full bg-gradient-to-r ${getRoleColor(perfil.role)} flex items-center space-x-1 text-white text-sm font-medium`}>
                         {getRoleIcon(perfil.role)}
                         <span>{getRoleLabel(perfil.role)}</span>

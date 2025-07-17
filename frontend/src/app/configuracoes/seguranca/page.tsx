@@ -1,10 +1,10 @@
-ï»¿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { 
   ArrowLeft, 
@@ -78,7 +78,7 @@ export default function SecurityPage() {
     
     let interval: NodeJS.Timeout
     if (autoRefresh) {
-      interval = setInterval(loadSecurityData, 30000) // Atualizar a cada 30 segundos
+      interval = setInterval(loadSecurityData: any, 30000) // Atualizar a cada 30 segundos
     }
     
     return () => {
@@ -90,8 +90,8 @@ export default function SecurityPage() {
     try {
       setLoading(true)
       
-      // Carregar mÃ¡Â©tricas, eventos e logs em paralelo
-      const [metricsResponse, eventsResponse, auditResponse] = await Promise.all([
+      // Carregar má©tricas, eventos e logs em paralelo
+      const [metricsResponse, eventsResponse: any, auditResponse] = await Promise.all([
         fetch('/api/security/metrics'),
         fetch('/api/security/events'),
         fetch('/api/security/audit')
@@ -119,10 +119,10 @@ export default function SecurityPage() {
       }
 
     } catch (error) {
-      console.error('Erro ao carregar dados de seguranÃ¡Â§a:', error)
+      console.error('Erro ao carregar dados de seguraná§a:', error)
       toast({
-        title: "ÂÅ’ Erro",
-        description: "Erro ao carregar dados de seguranÃ¡Â§a",
+        title: "Œ Erro",
+        description: "Erro ao carregar dados de seguraná§a",
         variant: "destructive"
       })
     } finally {
@@ -148,9 +148,9 @@ export default function SecurityPage() {
 
   const getRiskScoreLabel = (score: number) => {
     if (score >= 80) return 'ALTO'
-    if (score >= 50) return 'MÃ¡â€°DIO'
+    if (score >= 50) return 'Má‰DIO'
     if (score >= 20) return 'BAIXO'
-    return 'MÃ¡ÂNIMO'
+    return 'MáNIMO'
   }
 
   const formatTimestamp = (timestamp: string) => {
@@ -179,8 +179,8 @@ export default function SecurityPage() {
                     <Shield className="w-8 h-8" />
                   </div>
                   <div>
-                    <h1 className="text-3xl font-bold">Dashboard de SeguranÃ¡Â§a</h1>
-                    <p className="text-blue-100 mt-1">Monitore eventos de seguranÃ¡Â§a e auditoria em tempo real</p>
+                    <h1 className="text-3xl font-bold">Dashboard de Seguraná§a</h1>
+                    <p className="text-blue-100 mt-1">Monitore eventos de seguraná§a e auditoria em tempo real</p>
                   </div>
                 </div>
               </div>
@@ -224,7 +224,7 @@ export default function SecurityPage() {
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-2 flex items-center gap-1">
                     <TrendingUp className="w-3 h-3" />
-                    Ã¡Å¡ltimas 24 horas
+                    ášltimas 24 horas
                   </p>
                 </div>
                 <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
@@ -238,13 +238,13 @@ export default function SecurityPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Eventos CrÃ¡Â­ticos</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Eventos Crá­ticos</p>
                   <p className="text-3xl font-bold text-red-600 dark:text-red-400">
                     {metrics?.critical_events || 0}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-2 flex items-center gap-1">
                     <CheckCircle className="w-3 h-3 text-green-500" />
-                    Ã¡Å¡ltimas 24 horas
+                    ášltimas 24 horas
                   </p>
                 </div>
                 <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-xl">
@@ -258,13 +258,13 @@ export default function SecurityPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">IPs Ã¡Å¡nicos</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">IPs ášnicos</p>
                   <p className="text-3xl font-bold text-gray-900 dark:text-white">
                     {metrics?.unique_ips || 2}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-2 flex items-center gap-1">
                     <Globe className="w-3 h-3" />
-                    Ã¡Å¡ltimas 24 horas
+                    ášltimas 24 horas
                   </p>
                 </div>
                 <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
@@ -312,7 +312,7 @@ export default function SecurityPage() {
                 <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800 hover:shadow-md transition-all duration-200">
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="font-medium text-blue-900 dark:text-blue-100">AutenticaÃ¡Â§Ã¡Â£o</span>
+                    <span className="font-medium text-blue-900 dark:text-blue-100">Autenticaá§á£o</span>
                   </div>
                   <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 font-semibold">
                     {metrics?.auth_events || 4}
@@ -362,14 +362,14 @@ export default function SecurityPage() {
             </CardContent>
           </Card>
 
-          {/* EstatÃ¡Â­sticas de SeguranÃ¡Â§a */}
+          {/* Estatá­sticas de Seguraná§a */}
           <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
             <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
               <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
                 <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
                   <Lock className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                 </div>
-                EstatÃ¡Â­sticas de SeguranÃ¡Â§a
+                Estatá­sticas de Seguraná§a
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
@@ -377,7 +377,7 @@ export default function SecurityPage() {
                 <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600 hover:shadow-md transition-all duration-200">
                   <div>
                     <p className="font-semibold text-gray-900 dark:text-white">Login Falhados</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Ã¡Å¡ltimas 24h</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">ášltimas 24h</p>
                   </div>
                   <div className="text-right">
                     <span className="text-2xl font-bold text-red-600 dark:text-red-400">{metrics?.failed_logins || 0}</span>
@@ -391,13 +391,13 @@ export default function SecurityPage() {
                 <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600 hover:shadow-md transition-all duration-200">
                   <div>
                     <p className="font-semibold text-gray-900 dark:text-white">IPs Bloqueados</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Ã¡Å¡ltimas 24h</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">ášltimas 24h</p>
                   </div>
                   <div className="text-right">
                     <span className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{metrics?.blocked_ips || 0}</span>
                     <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
                       <Shield className="w-3 h-3" />
-                      EndereÃ¡Â§os
+                      Endereá§os
                     </div>
                   </div>
                 </div>
@@ -405,13 +405,13 @@ export default function SecurityPage() {
                 <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600 hover:shadow-md transition-all duration-200">
                   <div>
                     <p className="font-semibold text-gray-900 dark:text-white">Abuso de API</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Ã¡Å¡ltimas 24h</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">ášltimas 24h</p>
                   </div>
                   <div className="text-right">
                     <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{metrics?.api_abuse_events || 0}</span>
                     <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
                       <Server className="w-3 h-3" />
-                      RequisiÃ¡Â§Ã¡Âµes
+                      Requisiá§áµes
                     </div>
                   </div>
                 </div>
@@ -420,14 +420,14 @@ export default function SecurityPage() {
           </Card>
         </div>
 
-        {/* Eventos de SeguranÃ¡Â§a */}
+        {/* Eventos de Seguraná§a */}
         <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
           <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
             <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
               <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
                 <Eye className="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
-              Eventos de SeguranÃ¡Â§a Recentes
+              Eventos de Seguraná§a Recentes
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -438,11 +438,11 @@ export default function SecurityPage() {
                     <Shield className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Sistema Seguro</h3>
-                  <p className="text-gray-600 dark:text-gray-400">Nenhum evento de seguranÃ¡Â§a encontrado</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">Os eventos aparecerÃ¡Â£o aqui quando forem registrados no sistema</p>
+                  <p className="text-gray-600 dark:text-gray-400">Nenhum evento de seguraná§a encontrado</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">Os eventos aparecerá£o aqui quando forem registrados no sistema</p>
                 </div>
               ) : (
-                events.slice(0, 10).map((event) => (
+                events.slice(0: any, 10).map((event: any) => (
                   <div key={event.id} className="p-6 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600 hover:shadow-lg transition-all duration-300">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -469,7 +469,7 @@ export default function SecurityPage() {
                           </div>
                           
                           <div className="flex items-start gap-3">
-                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-20">DescriÃ¡Â§Ã¡Â£o:</span>
+                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-20">Descriá§á£o:</span>
                             <span className="text-sm text-gray-900 dark:text-white">
                               {event.message}
                             </span>
@@ -488,7 +488,7 @@ export default function SecurityPage() {
                             <div className="flex items-start gap-3">
                               <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-20">Detalhes:</span>
                               <div className="text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 p-3 rounded-lg border font-mono max-w-md overflow-auto">
-                                {JSON.stringify(event.details, null, 2)}
+                                {JSON.stringify(event.details, null: any, 2)}
                               </div>
                             </div>
                           )}
@@ -530,10 +530,10 @@ export default function SecurityPage() {
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Sem Atividade</h3>
                   <p className="text-gray-600 dark:text-gray-400">Nenhum log de auditoria encontrado</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">Os logs de auditoria aparecerÃ¡Â£o aqui quando aÃ¡Â§Ã¡Âµes forem registradas</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">Os logs de auditoria aparecerá£o aqui quando aá§áµes forem registradas</p>
                 </div>
               ) : (
-                auditLogs.slice(0, 10).map((log) => (
+                auditLogs.slice(0: any, 10).map((log: any) => (
                   <div key={log.id} className="p-6 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600 hover:shadow-lg transition-all duration-300">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-4 flex-1">
@@ -543,7 +543,7 @@ export default function SecurityPage() {
                         <div className="flex-1">
                           <div className="space-y-3">
                             <div className="flex items-start gap-3">
-                              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-16">AÃ¡Â§Ã¡Â£o:</span>
+                              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-16">Aá§á£o:</span>
                               <span className="text-sm text-gray-900 dark:text-white font-mono bg-white dark:bg-gray-800 px-3 py-1 rounded-lg border">
                                 {log.action}
                               </span>
@@ -557,7 +557,7 @@ export default function SecurityPage() {
                             </div>
                             
                             <div className="flex items-start gap-3">
-                              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-16">UsuÃ¡Â¡rio:</span>
+                              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-16">Usuá¡rio:</span>
                               <span className="text-sm text-gray-900 dark:text-white font-mono bg-white dark:bg-gray-800 px-3 py-1 rounded-lg border">
                                 {log.user_id}
                               </span>
@@ -596,7 +596,7 @@ export default function SecurityPage() {
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
             <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl flex items-center gap-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="text-lg font-medium text-gray-900 dark:text-white">Carregando dados de seguranÃ¡Â§a...</span>
+              <span className="text-lg font-medium text-gray-900 dark:text-white">Carregando dados de seguraná§a...</span>
             </div>
           </div>
         )}

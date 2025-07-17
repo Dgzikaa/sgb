@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 interface AssistantButtonProps {
   onClick: () => void
@@ -24,31 +24,31 @@ export default function AssistantButton({ onClick, hasNewMessages = false, isOpe
       `}
       title="SGB Assistant"
     >
-      {/* ácone principal */}
+      {/* �cone principal */}
       <div className={`
         transition-all duration-300
         ${isOpen ? 'opacity-0 scale-0' : 'opacity-100 scale-100'}
       `}>
-        ðŸ¤–
+        🤖
       </div>
       
-      {/* ácone quando aberto */}
+      {/* �cone quando aberto */}
       <div className={`
         absolute inset-0 flex items-center justify-center
         transition-all duration-300
         ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}
       `}>
-        œ–ï¸
+        ��️
       </div>
 
-      {/* Indicador de notificaá§á£o */}
+      {/* Indicador de notifica��o */}
       {hasNewMessages && !isOpen && (
         <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full border-2 border-white animate-pulse">
           <div className="absolute inset-0 bg-red-500 rounded-full animate-ping"></div>
         </div>
       )}
 
-      {/* Pulse ring quando há¡ mensagens */}
+      {/* Pulse ring quando h� mensagens */}
       {hasNewMessages && !isOpen && (
         <div className="absolute inset-0 rounded-2xl border-2 border-red-400 animate-ping"></div>
       )}

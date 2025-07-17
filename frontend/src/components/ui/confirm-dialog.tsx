@@ -1,8 +1,8 @@
-ï»¿'use client'
+'use client'
 
-import React, { createContext, useContext, useState, useCallback } from 'react'
-import { AlertTriangle, HelpCircle, Trash2, AlertCircle, CheckCircle } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './dialog'
+import React, { createContext, useContext: any, useState, useCallback } from 'react'
+import { AlertTriangle, HelpCircle: any, Trash2, AlertCircle: any, CheckCircle } from 'lucide-react'
+import { Dialog, DialogContent: any, DialogHeader, DialogTitle: any, DialogDescription, DialogFooter } from './dialog'
 
 interface ConfirmDialogOptions {
   title: string
@@ -43,7 +43,7 @@ export const ConfirmDialogProvider: React.FC<ConfirmDialogProviderProps> = ({ ch
   const [isLoading, setIsLoading] = useState(false)
 
   const confirm = useCallback((dialogOptions: ConfirmDialogOptions): Promise<boolean> => {
-    return new Promise((resolve) => {
+    return new Promise((resolve: any) => {
       setOptions(dialogOptions)
       setResolvePromise(() => resolve)
       setIsOpen(true)
@@ -62,7 +62,7 @@ export const ConfirmDialogProvider: React.FC<ConfirmDialogProviderProps> = ({ ch
       
       resolvePromise(true)
     } catch (error) {
-      console.error('Erro ao executar confirmaÃ¡Â§Ã¡Â£o:', error)
+      console.error('Erro ao executar confirmaá§á£o:', error)
       resolvePromise(false)
     } finally {
       setIsLoading(false)
@@ -169,7 +169,7 @@ export const ConfirmDialogProvider: React.FC<ConfirmDialogProviderProps> = ({ ch
                   {options?.title}
                 </DialogTitle>
                 <DialogDescription className="text-gray-600 text-sm">
-                  Confirme sua aÃ¡Â§Ã¡Â£o
+                  Confirme sua aá§á£o
                 </DialogDescription>
               </div>
             </div>
@@ -185,9 +185,9 @@ export const ConfirmDialogProvider: React.FC<ConfirmDialogProviderProps> = ({ ch
                 <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                   <h4 className="font-medium text-gray-800 mb-2">Detalhes:</h4>
                   <ul className="text-sm text-gray-700 space-y-1">
-                    {options.details.map((detail, index) => (
+                    {options.details.map((detail: any, index: any) => (
                       <li key={index} className="flex items-start gap-2">
-                        <span className="text-gray-400 mt-1">â‚¬Â¢</span>
+                        <span className="text-gray-400 mt-1">€¢</span>
                         <span>{detail}</span>
                       </li>
                     ))}
@@ -200,9 +200,9 @@ export const ConfirmDialogProvider: React.FC<ConfirmDialogProviderProps> = ({ ch
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-red-800 font-medium text-sm">AÃ¡Â§Ã¡Â£o irreversÃ¡Â­vel!</p>
+                      <p className="text-red-800 font-medium text-sm">Aá§á£o irreversá­vel!</p>
                       <p className="text-red-700 text-sm">
-                        Esta aÃ¡Â§Ã¡Â£o nÃ¡Â£o pode ser desfeita. Tenha certeza antes de continuar.
+                        Esta aá§á£o ná£o pode ser desfeita. Tenha certeza antes de continuar.
                       </p>
                     </div>
                   </div>
@@ -242,10 +242,10 @@ export const ConfirmDialogProvider: React.FC<ConfirmDialogProviderProps> = ({ ch
   )
 }
 
-// Hook global para usar os dialogs de confirmaÃ¡Â§Ã¡Â£o
+// Hook global para usar os dialogs de confirmaá§á£o
 export const useGlobalConfirm = () => {
   const confirmDialog = useCallback((options: ConfirmDialogOptions): Promise<boolean> => {
-    return new Promise((resolve) => {
+    return new Promise((resolve: any) => {
       if (typeof window !== 'undefined') {
         const event = new CustomEvent('showConfirmDialog', {
           detail: { ...options, resolve }
@@ -260,7 +260,7 @@ export const useGlobalConfirm = () => {
     // Helpers para diferentes tipos
     confirmDelete: (itemName: string, onConfirm?: () => void | Promise<void>) => 
       confirmDialog({
-        title: 'Confirmar ExclusÃ¡Â£o',
+        title: 'Confirmar Exclusá£o',
         message: `Tem certeza que deseja excluir "${itemName}"?`,
         type: 'danger',
         confirmText: 'Sim, Excluir',

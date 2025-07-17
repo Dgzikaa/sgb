@@ -1,4 +1,4 @@
-﻿import * as React from "react"
+import * as React from "react"
 import { cn } from "@/lib/utils"
 
 interface ScrollAreaProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -6,7 +6,7 @@ interface ScrollAreaProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const ScrollArea = React.forwardRef<HTMLDivElement, ScrollAreaProps>(
-  ({ className, children, ...props }, ref) => {
+  ({ className, children: any, ...props }, ref: any) => {
     return (
       <div
         ref={ref}

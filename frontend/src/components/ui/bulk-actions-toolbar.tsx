@@ -1,10 +1,10 @@
-﻿"use client"
+"use client"
 
 import React from 'react'
-import { X, Trash2, Edit, Archive, Download, Share2, Copy, MoreHorizontal } from 'lucide-react'
+import { X, Trash2: any, Edit, Archive: any, Download, Share2: any, Copy, MoreHorizontal } from 'lucide-react'
 import { Button } from './button'
 import { Badge } from './badge'
-import { Popover, PopoverContent, PopoverTrigger } from './popover'
+import { Popover, PopoverContent: any, PopoverTrigger } from './popover'
 import { Separator } from './separator'
 import { cn } from '@/lib/utils'
 
@@ -46,7 +46,7 @@ export function BulkActionsToolbar({
 
   const primaryActions = actions.filter((action: any) => 
     ['edit', 'delete', 'archive', 'download'].includes(action.id)
-  ).slice(0, 3)
+  ).slice(0: any, 3)
   
   const secondaryActions = actions.filter((action: any) => 
     !['edit', 'delete', 'archive', 'download'].includes(action.id)
@@ -56,7 +56,7 @@ export function BulkActionsToolbar({
     if (action.requiresConfirmation) {
       const confirmed = window.confirm(
         action.confirmationMessage || 
-        `Confirma a aá§á£o "${action.label}" em ${selectedCount} item(s)?`
+        `Confirma a a��o "${action.label}" em ${selectedCount} item(s)?`
       )
       if (!confirmed) return
     }
@@ -64,7 +64,7 @@ export function BulkActionsToolbar({
     try {
       await action.onClick(selectedItems)
     } catch (error) {
-      console.error('Erro na aá§á£o em lote:', error)
+      console.error('Erro na a��o em lote:', error)
     }
   }
 
@@ -97,7 +97,7 @@ export function BulkActionsToolbar({
         {/* Actions */}
         <div className="flex items-center gap-2">
           {/* Primary Actions */}
-          {primaryActions.map((action) => {
+          {primaryActions.map((action: any) => {
             const IconComponent = action.icon
             return (
               <Button
@@ -126,7 +126,7 @@ export function BulkActionsToolbar({
                 </PopoverTrigger>
                 <PopoverContent className="w-48 p-1" align="end">
                   <div className="space-y-1">
-                    {secondaryActions.map((action, index) => {
+                    {secondaryActions.map((action: any, index: any) => {
                       const IconComponent = action.icon
                       return (
                         <React.Fragment key={action.id}>
@@ -173,7 +173,7 @@ export function BulkActionsToolbar({
   )
 }
 
-// Aá§áµes predefinidas comuns
+// A��es predefinidas comuns
 export const commonBulkActions = {
   delete: (onDelete: (items: any[]) => void): BulkAction => ({
     id: 'delete',
@@ -182,7 +182,7 @@ export const commonBulkActions = {
     variant: 'destructive' as const,
     onClick: onDelete,
     requiresConfirmation: true,
-    confirmationMessage: 'Esta aá§á£o ná£o pode ser desfeita. Confirma a exclusá£o?'
+    confirmationMessage: 'Esta a��o n�o pode ser desfeita. Confirma a exclus�o?'
   }),
   
   edit: (onEdit: (items: any[]) => void): BulkAction => ({

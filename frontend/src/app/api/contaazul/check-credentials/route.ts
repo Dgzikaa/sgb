@@ -1,4 +1,4 @@
-ï»¿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -34,12 +34,12 @@ export async function GET(request: NextRequest) {
 
     if (!credentials) {
       return NextResponse.json({ 
-        error: 'Credenciais nÃ¡Â£o encontradas',
+        error: 'Credenciais ná£o encontradas',
         bar_id: parseInt(barId)
       }, { status: 404 })
     }
 
-    // Verificar se token estÃ¡Â¡ expirado
+    // Verificar se token está¡ expirado
     const agora = new Date()
     const expiraEm = new Date(credentials.expires_at)
     const isExpired = expiraEm.getTime() <= agora.getTime()
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('ÂÅ’ Erro ao verificar credenciais:', error)
+    console.error('Œ Erro ao verificar credenciais:', error)
     return NextResponse.json({ 
       error: 'Erro interno',
       details: error instanceof Error ? error.message : 'Erro desconhecido'

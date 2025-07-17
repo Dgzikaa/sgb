@@ -1,11 +1,11 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 import {
@@ -75,7 +75,7 @@ export default function DiarioPage() {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
 
-  // Inicializar datas padrá£o
+  // Inicializar datas padr�o
   useEffect(() => {
     const today = new Date()
     const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
@@ -85,18 +85,18 @@ export default function DiarioPage() {
   }, [])
 
   useEffect(() => {
-    setPageTitle('Aná¡lise Diá¡ria - Meta')
+    setPageTitle('An�lise Di�ria - Meta')
     return () => setPageTitle('')
   }, [setPageTitle])
 
   useEffect(() => {
     loadDailyAnalysis()
-  }, [selectedDays, selectedPlatform, startDate, endDate, filterType])
+  }, [selectedDays, selectedPlatform: any, startDate, endDate: any, filterType])
 
   const loadDailyAnalysis = async () => {
     try {
       setLoading(true)
-      console.log('ðŸ“Š Carregando aná¡lise diá¡ria Meta...')
+      console.log('📊 Carregando an�lise di�ria Meta...')
       
       let apiUrl = ''
       if (filterType === 'custom' && startDate && endDate) {
@@ -114,14 +114,14 @@ export default function DiarioPage() {
       const result = await response.json()
       
       if (result.success && result.data) {
-        console.log('œ… Aná¡lise diá¡ria carregada:', result.debug)
+        console.log('�� An�lise di�ria carregada:', result.debug)
         setData(result.data)
       } else {
         throw new Error(result.error || 'Erro ao carregar dados')
       }
       
     } catch (error) {
-      console.error('Œ Erro ao carregar aná¡lise diá¡ria:', error)
+      console.error('�� Erro ao carregar an�lise di�ria:', error)
     } finally {
       setLoading(false)
     }
@@ -189,7 +189,7 @@ export default function DiarioPage() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex justify-center items-center py-8">
             <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
-            <span className="ml-3 text-gray-600 dark:text-gray-400">Analisando dados diá¡rios...</span>
+            <span className="ml-3 text-gray-600 dark:text-gray-400">Analisando dados di�rios...</span>
           </div>
         </div>
       </div>
@@ -208,10 +208,10 @@ export default function DiarioPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Aná¡lise Diá¡ria Meta
+                  An�lise Di�ria Meta
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Variaá§áµes diá¡rias e tendáªncias de Instagram e Facebook
+                  Varia��es di�rias e tend�ncias de Instagram e Facebook
                 </p>
               </div>
             </div>
@@ -241,7 +241,7 @@ export default function DiarioPage() {
               {filterType === 'preset' ? (
                 <Select value={selectedDays} onValueChange={setSelectedDays}>
                   <SelectTrigger className="w-32">
-                    <SelectValue placeholder="Perá­odo" />
+                    <SelectValue placeholder="Per�odo" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="7">7 dias</SelectItem>
@@ -256,20 +256,20 @@ export default function DiarioPage() {
                   <Input
                     type="date"
                     value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
+                    onChange={(e: any) => setStartDate(e.target.value)}
                     className="w-36"
                     placeholder="Data inicial"
                   />
-                  <span className="text-gray-400">atá©</span>
+                  <span className="text-gray-400">at�</span>
                   <Input
                     type="date"
                     value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
+                    onChange={(e: any) => setEndDate(e.target.value)}
                     className="w-36"
                     placeholder="Data final"
                   />
                   <span className="text-sm text-gray-500 dark:text-gray-400">
-                    ({calculateDaysDifference(startDate, endDate)} dias)
+                    ({calculateDaysDifference(startDate: any, endDate)} dias)
                   </span>
                 </div>
               )}
@@ -339,7 +339,7 @@ export default function DiarioPage() {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Engagement Má©dio</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Engagement M�dio</p>
                         <p className="text-2xl font-bold text-gray-900 dark:text-white">
                           {data.summary.avg_daily_engagement.toFixed(1)}%
                         </p>
@@ -371,7 +371,7 @@ export default function DiarioPage() {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Perá­odo Analisado</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Per�odo Analisado</p>
                         <p className="text-2xl font-bold text-gray-900 dark:text-white">
                           {data.period.days_analyzed} dias
                         </p>
@@ -384,18 +384,18 @@ export default function DiarioPage() {
                 </Card>
               </div>
 
-              {/* Tendáªncias e Insights */}
+              {/* Tend�ncias e Insights */}
               {data.trends_and_insights && data.trends_and_insights.length > 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Target className="w-5 h-5" />
-                      Tendáªncias e Insights
+                      Tend�ncias e Insights
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {data.trends_and_insights.map((trend, index) => (
+                      {data.trends_and_insights.map((trend: any, index: any) => (
                         <div 
                           key={index} 
                           className={`p-4 border rounded-lg ${getTrendColor(trend.type)}`}
@@ -410,7 +410,7 @@ export default function DiarioPage() {
                                 {trend.description}
                               </p>
                               <p className="text-xs text-gray-500 dark:text-gray-500 italic">
-                                ðŸ’¡ {trend.recommendation}
+                                💡 {trend.recommendation}
                               </p>
                             </div>
                           </div>
@@ -421,19 +421,19 @@ export default function DiarioPage() {
                 </Card>
               )}
 
-              {/* Variaá§áµes Diá¡rias */}
+              {/* Varia��es Di�rias */}
               {data.daily_variations.daily_changes && Object.keys(data.daily_variations.daily_changes).length > 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Activity className="w-5 h-5" />
-                      Variaá§áµes Diá¡rias
+                      Varia��es Di�rias
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
                       {Object.entries(data.daily_variations.daily_changes)
-                        .slice(-10) // Mostrar áºltimos 10 dias
+                        .slice(-10) // Mostrar �ltimos 10 dias
                         .reverse()
                         .map(([date, changes]: [string, any]) => (
                         <div key={date} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
@@ -464,7 +464,7 @@ export default function DiarioPage() {
                           </div>
                           <div className="text-right">
                             <div className="text-sm text-gray-600 dark:text-gray-400">
-                              {changes.total_interactions} interaá§áµes
+                              {changes.total_interactions} intera��es
                             </div>
                           </div>
                         </div>

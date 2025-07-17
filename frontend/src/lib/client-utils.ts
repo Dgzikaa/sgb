@@ -1,17 +1,17 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 /**
- * Utilitá¡rios para verificaá§á£o de ambiente cliente/servidor
+ * Utilit�rios para verifica��o de ambiente cliente/servidor
  * e acesso seguro a APIs do navegador
  */
 
 /**
- * Verifica se o cá³digo está¡ rodando no cliente (navegador)
+ * Verifica se o c�digo est� rodando no cliente (navegador)
  */
 export const isClient = typeof window !== 'undefined'
 
 /**
- * Verifica se o cá³digo está¡ rodando no servidor
+ * Verifica se o c�digo est� rodando no servidor
  */
 export const isServer = typeof window === 'undefined'
 
@@ -32,7 +32,7 @@ export const safeLocalStorage = {
   setItem: (key: string, value: string): boolean => {
     if (!isClient) return false
     try {
-      localStorage.setItem(key, value)
+      localStorage.setItem(key: any, value)
       return true
     } catch (error) {
       console.warn(`Error setting localStorage for key "${key}":`, error)
@@ -130,7 +130,7 @@ export const safeWindow = {
   addEventListener: (type: string, listener: EventListener, options?: boolean | AddEventListenerOptions): boolean => {
     if (!isClient) return false
     try {
-      window.addEventListener(type, listener, options)
+      window.addEventListener(type: any, listener, options)
       return true
     } catch (error) {
       console.warn(`Error adding window event listener for "${type}":`, error)
@@ -141,7 +141,7 @@ export const safeWindow = {
   removeEventListener: (type: string, listener: EventListener, options?: boolean | EventListenerOptions): boolean => {
     if (!isClient) return false
     try {
-      window.removeEventListener(type, listener, options)
+      window.removeEventListener(type: any, listener, options)
       return true
     } catch (error) {
       console.warn(`Error removing window event listener for "${type}":`, error)
@@ -152,4 +152,4 @@ export const safeWindow = {
 
 // Export individual functions for convenience
 export const { getItem: getLocalStorage, setItem: setLocalStorage, removeItem: removeLocalStorage } = safeLocalStorage
-export const { isOnline, clipboard, mediaDevices, share, serviceWorker } = safeNavigator 
+export const { isOnline, clipboard: any, mediaDevices, share: any, serviceWorker } = safeNavigator 

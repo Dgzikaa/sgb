@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -16,24 +16,24 @@ function createSupabaseClient() {
   )
 }
 
-// œ… MAPEAMENTO ORIGINAL ESPECIFICADO PELO USUáRIO
+// �� MAPEAMENTO ORIGINAL ESPECIFICADO PELO USU�RIO
 const CATEGORIAS_ESPECIFICADAS = {
-  // ðŸ“Š CMO - CUSTO DE MáƒO DE OBRA
+  // 📊 CMO - CUSTO DE M�O DE OBRA
   cmo: [
     'SALARIO FUNCIONARIOS',
     'VALE TRANSPORTE', 
-    'ALIMENTAá‡áƒO',
+    'ALIMENTA��O',
     'ADICIONAIS',
     'FREELA ATENDIMENTO',
     'FREELA BAR',
     'FREELA COZINHA',
     'FREELA LIMPEZA',
-    'FREELA SEGURANá‡A',
+    'FREELA SEGURAN�A',
     'PRO LABORE',
-    'PROVISáƒO TRABALHISTA'
+    'PROVIS�O TRABALHISTA'
   ],
   
-  // ðŸª CMV - CUSTO DE MERCADORIA VENDIDA
+  // 🏪 CMV - CUSTO DE MERCADORIA VENDIDA
   cmv: [
     'Custo Drinks',
     'Custo Bebidas', 
@@ -41,52 +41,52 @@ const CATEGORIAS_ESPECIFICADAS = {
     'Custo Outros'
   ],
   
-  // ðŸ’° CUSTOS VARIáVEIS
+  // 💰 CUSTOS VARI�VEIS
   custos_variaveis: [
     'IMPOSTO',
-    'COMISSáƒO 10%',
+    'COMISS�O 10%',
     'TAXA MAQUININHA'
   ],
   
-  // ðŸ“ˆ DESPESAS COMERCIAIS
+  // 📈 DESPESAS COMERCIAIS
   despesas_comerciais: [
     'Marketing',
-    'Atraá§áµes Programaá§á£o',
-    'Produá§á£o Eventos'
+    'Atra��es Programa��o',
+    'Produ��o Eventos'
   ],
   
-  // ðŸ¢ DESPESAS ADMINISTRATIVAS
+  // 🏢 DESPESAS ADMINISTRATIVAS
   despesas_administrativas: [
-    'Administrativo Ordiná¡rio',
-    'Escritá³rio Central',
+    'Administrativo Ordin�rio',
+    'Escrit�rio Central',
     'Recursos Humanos'
   ],
   
-  // š™ï¸ DESPESAS OPERACIONAIS
+  // ��️ DESPESAS OPERACIONAIS
   despesas_operacionais: [
-    'Materiais Operaá§á£o',
-    'Materiais de Limpeza e Descartá¡veis',
-    'Utensá­lios',
+    'Materiais Opera��o',
+    'Materiais de Limpeza e Descart�veis',
+    'Utens�lios',
     'Estorno',
-    'Outros Operaá§á£o'
+    'Outros Opera��o'
   ],
   
-  // ðŸ  DESPESAS DE OCUPAá‡áƒO
+  // 🏠 DESPESAS DE OCUPA��O
   despesas_ocupacao: [
-    'ALUGUEL/CONDOMáNIO/IPTU',
-    'áGUA',
-    'MANUTENá‡áƒO',
+    'ALUGUEL/CONDOM�NIO/IPTU',
+    '�GUA',
+    'MANUTEN��O',
     'INTERNET',
-    'GáS',
+    'G�S',
     'LUZ'
   ],
   
-  // Œ NáƒO OPERACIONAIS
+  // �� N�O OPERACIONAIS
   nao_operacionais: [
     'Contratos'
   ],
   
-  // ðŸ“Š INVESTIMENTOS
+  // 📊 INVESTIMENTOS
   investimentos: [
     'Despesas Financeiras',
     'Obras',
@@ -95,10 +95,10 @@ const CATEGORIAS_ESPECIFICADAS = {
     'Equipamentos'
   ],
   
-  // ðŸ’µ RECEITAS
+  // 💵 RECEITAS
   receitas: [
-    'Stone Crá©dito',
-    'Stone Dá©bito',
+    'Stone Cr�dito',
+    'Stone D�bito',
     'Stone Pix',
     'Pix Direto na Conta',
     'Dinheiro',
@@ -107,7 +107,7 @@ const CATEGORIAS_ESPECIFICADAS = {
   ]
 }
 
-// œ… FUNá‡áƒO PARA MAPEAR CATEGORIA PARA GRUPO DRE
+// �� FUN��O PARA MAPEAR CATEGORIA PARA GRUPO DRE
 function mapearCategoriaParaGrupo(nomeCategoria: string): string | null {
   for (const [grupo, categorias] of Object.entries(CATEGORIAS_ESPECIFICADAS)) {
     // Busca exata e busca parcial (case-insensitive)
@@ -122,7 +122,7 @@ function mapearCategoriaParaGrupo(nomeCategoria: string): string | null {
   return null
 }
 
-// œ… FUNá‡áƒO PARA ENCONTRAR MELHOR MATCH
+// �� FUN��O PARA ENCONTRAR MELHOR MATCH
 function encontrarMelhorMatch(nomeCategoriaBanco: string): { grupo: string | null, categoria_especificada: string | null, similaridade: number } {
   let melhorMatch = { grupo: null as string | null, categoria_especificada: null as string | null, similaridade: 0 }
   
@@ -135,11 +135,11 @@ function encontrarMelhorMatch(nomeCategoriaBanco: string): { grupo: string | nul
       if (catEspecificada.toLowerCase() === nomeCategoriaBanco.toLowerCase()) {
         similaridade = 100
       }
-      // Match parcial - categoria banco contá©m especificada
+      // Match parcial - categoria banco cont�m especificada
       else if (nomeCategoriaBanco.toLowerCase().includes(catEspecificada.toLowerCase())) {
         similaridade = 80
       }
-      // Match parcial - categoria especificada contá©m banco
+      // Match parcial - categoria especificada cont�m banco
       else if (catEspecificada.toLowerCase().includes(nomeCategoriaBanco.toLowerCase())) {
         similaridade = 70
       }
@@ -169,22 +169,22 @@ export async function GET(request: NextRequest) {
 
     const supabase = createSupabaseClient()
 
-    console.log(`ðŸ” ANáLISE COMPLETA DE MAPEAMENTO PARA BAR ${barId}`)
+    console.log(`🔍 AN�LISE COMPLETA DE MAPEAMENTO PARA BAR ${barId}`)
 
     // 1. Buscar todas as categorias
     const { data: categorias, error: errorCategorias } = await supabase
       .from('contaazul_categorias')
-      .select('id, nome, tipo')
+      .select('id, nome: any, tipo')
       .eq('bar_id', parseInt(barId))
       .order('nome')
 
     if (errorCategorias) {
-      console.error('Œ Erro ao buscar categorias:', errorCategorias)
+      console.error('�� Erro ao buscar categorias:', errorCategorias)
       return NextResponse.json({ error: 'Erro ao buscar categorias' }, { status: 500 })
     }
 
-    // 2. Buscar eventos financeiros (TODO o perá­odo disponá­vel) - COM PAGINAá‡áƒO
-    console.log('ðŸ”„ Buscando TODOS os eventos financeiros com paginaá§á£o...')
+    // 2. Buscar eventos financeiros (TODO o per�odo dispon�vel) - COM PAGINA��O
+    console.log('🔄 Buscando TODOS os eventos financeiros com pagina��o...')
     
     let todosEventos: any[] = []
     let pagina = 0
@@ -194,26 +194,26 @@ export async function GET(request: NextRequest) {
     while (temMaisDados) {
       const offset = pagina * limite
       
-      console.log(`ðŸ“„ Buscando pá¡gina ${pagina + 1} (offset: ${offset})...`)
+      console.log(`📄 Buscando p�gina ${pagina + 1} (offset: ${offset})...`)
       
       const { data: eventosPagina, error: errorEventos } = await supabase
         .from('contaazul_eventos_financeiros')
-        .select('tipo, categoria_id, valor, data_competencia')
+        .select('tipo, categoria_id: any, valor, data_competencia')
         .eq('bar_id', parseInt(barId))
         .not('categoria_id', 'is', null)
-        .range(offset, offset + limite - 1)
+        .range(offset: any, offset + limite - 1)
         .order('data_competencia', { ascending: false })
 
       if (errorEventos) {
-        console.error('Œ Erro ao buscar eventos:', errorEventos)
+        console.error('�� Erro ao buscar eventos:', errorEventos)
         return NextResponse.json({ error: 'Erro ao buscar eventos financeiros' }, { status: 500 })
       }
 
       if (eventosPagina && eventosPagina.length > 0) {
         todosEventos = [...todosEventos, ...eventosPagina]
-        console.log(`œ… Pá¡gina ${pagina + 1}: ${eventosPagina.length} eventos | Total acumulado: ${todosEventos.length}`)
+        console.log(`�� P�gina ${pagina + 1}: ${eventosPagina.length} eventos | Total acumulado: ${todosEventos.length}`)
         
-        // Se retornou menos que o limite, á© a áºltima pá¡gina
+        // Se retornou menos que o limite, � a �ltima p�gina
         if (eventosPagina.length < limite) {
           temMaisDados = false
         } else {
@@ -224,10 +224,10 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    console.log(`ðŸŽ‰ BUSCA COMPLETA: ${todosEventos.length} eventos encontrados em ${pagina + 1} pá¡ginas`)
+    console.log(`🎉 BUSCA COMPLETA: ${todosEventos.length} eventos encontrados em ${pagina + 1} p�ginas`)
     const eventos = todosEventos
 
-    // 3. Aná¡lise detalhada por categoria
+    // 3. An�lise detalhada por categoria
     const analiseDetalhada = categorias?.map((categoria: any) => {
       const melhorMatch = encontrarMelhorMatch(categoria.nome)
       const grupoMapeado = mapearCategoriaParaGrupo(categoria.nome)
@@ -235,13 +235,13 @@ export async function GET(request: NextRequest) {
       // Contar eventos desta categoria
       const eventosCategoria = eventos?.filter((e: any) => e.categoria_id === categoria.id) || []
       const totalEventos = eventosCategoria.length
-      const valorTotal = eventosCategoria.reduce((sum, e) => sum + parseFloat(e.valor || '0'), 0)
-      const eventosPorTipo = eventosCategoria.reduce((acc: any, e) => {
+      const valorTotal = eventosCategoria.reduce((sum: any, e: any) => sum + parseFloat(e.valor || '0'), 0)
+      const eventosPorTipo = eventosCategoria.reduce((acc: any, e: any) => {
         acc[e.tipo] = (acc[e.tipo] || 0) + 1
         return acc
       }, {})
       
-      // Perá­odo dos dados
+      // Per�odo dos dados
       const datasEventos = eventosCategoria.map((e: any) => e.data_competencia).filter(Boolean).sort()
       const periodoInicio = datasEventos[0] || null
       const periodoFim = datasEventos[datasEventos.length - 1] || null
@@ -268,7 +268,7 @@ export async function GET(request: NextRequest) {
       }
     }) || []
 
-    // 4. Estatá­sticas gerais
+    // 4. Estat�sticas gerais
     const estatisticasGerais = {
       total_categorias: categorias?.length || 0,
       categorias_mapeadas: analiseDetalhada.filter((c: any) => c.mapeamento.esta_mapeado).length,
@@ -293,10 +293,10 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // 6. Categorias ná£o mapeadas com sugestáµes
+    // 6. Categorias n�o mapeadas com sugest�es
     const categoriasNaoMapeadas = analiseDetalhada
       .filter((c: any) => !c.mapeamento.esta_mapeado)
-      .sort((a, b) => b.estatisticas.valor_total - a.estatisticas.valor_total)
+      .sort((a: any, b: any) => b.estatisticas.valor_total - a.estatisticas.valor_total)
 
     // 7. Problemas identificados
     const problemasIdentificados = []
@@ -310,13 +310,13 @@ export async function GET(request: NextRequest) {
     
     if (despesasComoReceita.length > 0) {
       problemasIdentificados.push({
-        tipo: 'Classificaá§á£o incorreta',
+        tipo: 'Classifica��o incorreta',
         descricao: 'Categorias de despesa marcadas como RECEITA no banco',
         categorias: despesasComoReceita.map((c: any) => ({ nome: c.nome_banco, deveria_ser: 'DESPESA' }))
       })
     }
 
-    // 8. Listar TODAS as categorias ná£o mapeadas de forma clara
+    // 8. Listar TODAS as categorias n�o mapeadas de forma clara
     const todasCategoriasNaoMapeadas = analiseDetalhada
       .filter((c: any) => !c.mapeamento.esta_mapeado)
       .map((c: any) => ({
@@ -326,16 +326,16 @@ export async function GET(request: NextRequest) {
         valor_total: c.estatisticas.valor_total,
         total_eventos: c.estatisticas.total_eventos,
         periodo: c.estatisticas.tem_dados ? `${c.estatisticas.periodo_inicio} a ${c.estatisticas.periodo_fim}` : 'Sem dados',
-        sugestao: c.mapeamento.categoria_especificada_mais_proxima || 'Nenhuma sugestá£o',
+        sugestao: c.mapeamento.categoria_especificada_mais_proxima || 'Nenhuma sugest�o',
         similaridade: c.mapeamento.similaridade
       }))
-      .sort((a, b) => b.valor_total - a.valor_total) // Ordenar por valor (mais importantes primeiro)
+      .sort((a: any, b: any) => b.valor_total - a.valor_total) // Ordenar por valor (mais importantes primeiro)
 
-    console.log(`ðŸ“Š RESUMO FINAL:`)
+    console.log(`📊 RESUMO FINAL:`)
     console.log(`   Total de eventos processados: ${eventos.length}`)
     console.log(`   Categorias mapeadas: ${estatisticasGerais.categorias_mapeadas}/${estatisticasGerais.total_categorias}`)
     console.log(`   Categorias com dados: ${estatisticasGerais.categorias_com_dados}`)
-    console.log(`   Categorias ná£o mapeadas: ${todasCategoriasNaoMapeadas.length}`)
+    console.log(`   Categorias n�o mapeadas: ${todasCategoriasNaoMapeadas.length}`)
 
     return NextResponse.json({
       estatisticas_gerais: estatisticasGerais,
@@ -348,8 +348,8 @@ export async function GET(request: NextRequest) {
         total_categorias_especificadas: Object.values(CATEGORIAS_ESPECIFICADAS).flat().length,
         grupos_especificados: Object.keys(CATEGORIAS_ESPECIFICADAS),
         exemplo_mapeamento: {
-          'ALUGUEL/CONDOMáNIO/IPTU': encontrarMelhorMatch('ALUGUEL/CONDOMáNIO/IPTU'),
-          'Stone Crá©dito': encontrarMelhorMatch('Stone Cráƒ©dito'),
+          'ALUGUEL/CONDOM�NIO/IPTU': encontrarMelhorMatch('ALUGUEL/CONDOM�NIO/IPTU'),
+          'Stone Cr�dito': encontrarMelhorMatch('Stone Crჩdito'),
           'Marketing': encontrarMelhorMatch('Marketing')
         },
         total_eventos_processados: eventos.length,
@@ -358,7 +358,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Œ Erro interno na API Aná¡lise:', error)
+    console.error('�� Erro interno na API An�lise:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
       details: error instanceof Error ? error.message : 'Erro desconhecido'

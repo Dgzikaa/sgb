@@ -1,15 +1,15 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 
-// Configuraá§á£o do Supabase
+// Configura��o do Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Schema de validaá§á£o para filtros
+// Schema de valida��o para filtros
 const FilterMetricsSchema = z.object({
   nome_metrica: z.string().optional(),
   categoria: z.enum(['produtividade', 'qualidade', 'eficiencia', 'engagement']).optional(),
@@ -25,7 +25,7 @@ const FilterMetricsSchema = z.object({
 });
 
 // ========================================
-// ðŸ“Š GET /api/ai/metrics
+// 📊 GET /api/ai/metrics
 // ========================================
 export async function GET(request: NextRequest) {
   try {
@@ -33,17 +33,17 @@ export async function GET(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usuá¡rio ná£o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
-    // Verificar permissáµes
+    // Verificar permiss�es
     if (!['funcionario', 'financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissá£o para acessar má©tricas' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permiss�o para acessar m�tricas' }, { status: 403 });
     }
 
-    // Parse dos pará¢metros de query
+    // Parse dos par�metros de query
     const url = new URL(request.url);
     const rawParams = Object.fromEntries(url.searchParams.entries());
     
@@ -108,28 +108,28 @@ export async function GET(request: NextRequest) {
       query = query.eq('ativa', params.ativa);
     }
 
-    // Paginaá§á£o
+    // Pagina��o
     const offset = (params.page - 1) * params.limit;
-    query = query.range(offset, offset + params.limit - 1);
+    query = query.range(offset: any, offset + params.limit - 1);
 
     const { data: metrics, error } = await query;
 
     if (error) {
-      console.error('Erro ao buscar má©tricas:', error);
-      return NextResponse.json({ error: 'Erro ao buscar má©tricas' }, { status: 500 });
+      console.error('Erro ao buscar m�tricas:', error);
+      return NextResponse.json({ error: 'Erro ao buscar m�tricas' }, { status: 500 });
     }
 
-    // Buscar estatá­sticas gerais
+    // Buscar estat�sticas gerais
     const { data: stats } = await supabase
       .from('ai_metrics')
-      .select('nome_metrica, categoria, performance, tendencia, alerta_ativado, valor')
+      .select('nome_metrica, categoria: any, performance, tendencia: any, alerta_ativado, valor')
       .eq('bar_id', bar_id)
       .eq('ativa', true);
 
     const estatisticas = {
       total_metricas: stats?.length || 0,
       alertas_ativos: stats?.filter((s: any) => s.alerta_ativado).length || 0,
-      por_categoria: stats?.reduce((acc, s) => {
+      por_categoria: stats?.reduce((acc: any, s: any) => {
         acc[s.categoria] = (acc[s.categoria] || 0) + 1;
         return acc;
       }, {} as Record<string, number>) || {},
@@ -147,29 +147,29 @@ export async function GET(request: NextRequest) {
       }
     };
 
-    // Buscar má©tricas com alertas crá­ticos
+    // Buscar m�tricas com alertas cr�ticos
     const { data: alertas } = await supabase
       .from('ai_metrics')
-      .select('nome_metrica, valor, meta_valor, performance')
+      .select('nome_metrica, valor: any, meta_valor, performance')
       .eq('bar_id', bar_id)
       .eq('alerta_ativado', true)
       .in('performance', ['ruim', 'critico'])
       .order('data_referencia', { ascending: false })
       .limit(5);
 
-    // Calcular KPIs principais (má©tricas mais recentes)
+    // Calcular KPIs principais (m�tricas mais recentes)
     const kpiMap = {
-      'taxa_conclusao_checklists': 'Taxa de Conclusá£o',
-      'tempo_medio_execucao': 'Tempo Má©dio',
+      'taxa_conclusao_checklists': 'Taxa de Conclus�o',
+      'tempo_medio_execucao': 'Tempo M�dio',
       'score_medio_qualidade': 'Score de Qualidade',
       'whatsapp_engagement': 'Engagement WhatsApp',
       'produtividade_funcionarios': 'Produtividade'
     };
 
-    const kpisPromises = Object.keys(kpiMap).map(async (metrica) => {
+    const kpisPromises = Object.keys(kpiMap).map(async (metrica: any) => {
       const { data } = await supabase
         .from('ai_metrics')
-        .select('nome_metrica, valor, meta_valor, variacao_percentual, performance, tendencia')
+        .select('nome_metrica, valor: any, meta_valor, variacao_percentual: any, performance, tendencia')
         .eq('bar_id', bar_id)
         .eq('nome_metrica', metrica)
         .eq('ativa', true)
@@ -206,18 +206,18 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({
-        error: 'Pará¢metros invá¡lidos',
+        error: 'Par�metros inv�lidos',
         details: error.errors
       }, { status: 400 });
     }
 
-    console.error('Erro na API de má©tricas:', error);
+    console.error('Erro na API de m�tricas:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }
 
 // ========================================
-// ðŸ“Š GET /api/ai/metrics/trends (Tendáªncias histá³ricas)
+// 📊 GET /api/ai/metrics/trends (Tend�ncias hist�ricas)
 // ========================================
 export async function POST(request: NextRequest) {
   try {
@@ -225,26 +225,26 @@ export async function POST(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usuá¡rio ná£o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
     if (!['funcionario', 'financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissá£o para acessar tendáªncias' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permiss�o para acessar tend�ncias' }, { status: 403 });
     }
 
     const body = await request.json();
     const { metrica, periodo_dias = 30, granularidade = 'daily' } = body;
 
     if (!metrica) {
-      return NextResponse.json({ error: 'Nome da má©trica á© obrigatá³rio' }, { status: 400 });
+      return NextResponse.json({ error: 'Nome da m�trica � obrigat�rio' }, { status: 400 });
     }
 
     const dataInicio = new Date();
     dataInicio.setDate(dataInicio.getDate() - periodo_dias);
 
-    // Buscar dados histá³ricos
+    // Buscar dados hist�ricos
     const { data: historico, error } = await supabase
       .from('ai_metrics')
       .select(`
@@ -262,11 +262,11 @@ export async function POST(request: NextRequest) {
       .order('data_referencia', { ascending: true });
 
     if (error) {
-      console.error('Erro ao buscar tendáªncias:', error);
-      return NextResponse.json({ error: 'Erro ao buscar tendáªncias' }, { status: 500 });
+      console.error('Erro ao buscar tend�ncias:', error);
+      return NextResponse.json({ error: 'Erro ao buscar tend�ncias' }, { status: 500 });
     }
 
-    // Calcular estatá­sticas da sá©rie
+    // Calcular estat�sticas da s�rie
     if (!historico || historico.length === 0) {
       return NextResponse.json({
         success: true,
@@ -290,13 +290,13 @@ export async function POST(request: NextRequest) {
     const valorAnterior = valores[0];
     const valorMaximo = Math.max(...valores);
     const valorMinimo = Math.min(...valores);
-    const media = valores.reduce((a, b) => a + b, 0) / valores.length;
+    const media = valores.reduce((a: any, b: any) => a + b, 0) / valores.length;
     
-    // Calcular desvio padrá£o
-    const variance = valores.reduce((a, b) => a + Math.pow(b - media, 2), 0) / valores.length;
+    // Calcular desvio padr�o
+    const variance = valores.reduce((a: any, b: any) => a + Math.pow(b - media, 2), 0) / valores.length;
     const desvioPadrao = Math.sqrt(variance);
 
-    // Determinar tendáªncia geral
+    // Determinar tend�ncia geral
     const variacaoTotal = ((valorAtual - valorAnterior) / valorAnterior) * 100;
     let tendenciaGeral = 'estavel';
     if (variacaoTotal > 5) tendenciaGeral = 'crescente';
@@ -305,7 +305,7 @@ export async function POST(request: NextRequest) {
     // Calcular quantas vezes atingiu a meta
     const atingiuMeta = historico.filter((h: any) => h.meta_valor && h.valor >= h.meta_valor).length;
 
-    // Preparar dados para grá¡fico (agrupamento se necessá¡rio)
+    // Preparar dados para gr�fico (agrupamento se necess�rio)
     let dadosGrafico = historico;
     
     if (granularidade === 'weekly' && historico.length > 7) {
@@ -345,7 +345,7 @@ export async function POST(request: NextRequest) {
         tendencia_geral: tendenciaGeral,
         atingiu_meta: atingiuMeta,
         variacao_total: parseFloat(variacaoTotal.toFixed(2)),
-        performance_distribuicao: historico.reduce((acc, h) => {
+        performance_distribuicao: historico.reduce((acc: any, h: any) => {
           acc[h.performance] = (acc[h.performance] || 0) + 1;
           return acc;
         }, {} as Record<string, number>)
@@ -353,7 +353,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Erro na API de tendáªncias:', error);
+    console.error('Erro na API de tend�ncias:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 } 

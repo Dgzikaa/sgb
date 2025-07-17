@@ -1,8 +1,8 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { usePageTitle } from '@/contexts/PageTitleContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -56,7 +56,7 @@ export default function ContaAzulV3Page() {
 
   const verificarStatus = async () => {
     try {
-      addLog('INFO', 'ðŸ” Verificando status da API V3...');
+      addLog('INFO', '🔍 Verificando status da API V3...');
       
       const response = await fetch('/api/contaazul/playwright-v3', {
         method: 'GET'
@@ -66,14 +66,14 @@ export default function ContaAzulV3Page() {
       setStatusAPI(data);
       
       if (data.success) {
-        addLog('SUCCESS', 'œ… API V3 funcionando corretamente');
-        addLog('INFO', `ðŸ“Š Versá£o: ${data.versao}`);
-        addLog('INFO', `ðŸ”§ Script disponá­vel: ${data.script_v3_disponivel ? 'SIM' : 'NáƒO'}`);
+        addLog('SUCCESS', '�� API V3 funcionando corretamente');
+        addLog('INFO', `📊 Vers�o: ${data.versao}`);
+        addLog('INFO', `🔧 Script dispon�vel: ${data.script_v3_disponivel ? 'SIM' : 'N�O'}`);
       } else {
-        addLog('ERROR', `Œ Erro no status: ${data.error}`);
+        addLog('ERROR', `�� Erro no status: ${data.error}`);
       }
     } catch (error) {
-      addLog('ERROR', `ðŸ’¥ Erro de conexá£o: ${error}`);
+      addLog('ERROR', `💥 Erro de conex�o: ${error}`);
     }
   };
 
@@ -84,10 +84,10 @@ export default function ContaAzulV3Page() {
     setResult(null);
 
     try {
-      addLog('INFO', 'ðŸš€ Iniciando coleta ContaAzul V3 (Versá£o Final Robusta)...');
-      addLog('INFO', 'ðŸ”§ Melhorias: Unicode, DateTime, Retry, Screenshots');
-      addLog('INFO', 'š¡ Performance: ~1 minuto para coleta completa');
-      addLog('INFO', 'ðŸ›¡ï¸ Sistema: Anti-detecá§á£o e timeouts inteligentes');
+      addLog('INFO', '🚀 Iniciando coleta ContaAzul V3 (Vers�o Final Robusta)...');
+      addLog('INFO', '🔧 Melhorias: Unicode, DateTime: any, Retry, Screenshots');
+      addLog('INFO', '�� Performance: ~1 minuto para coleta completa');
+      addLog('INFO', '🛡️ Sistema: Anti-detec��o e timeouts inteligentes');
 
       const response = await fetch('/api/contaazul/playwright-v3', {
         method: 'POST',
@@ -106,20 +106,20 @@ export default function ContaAzulV3Page() {
 
       if (data.success) {
         setResult(data);
-        addLog('SUCCESS', `ðŸŽ‰ Coleta V3 concluá­da com sucesso!`);
-        addLog('SUCCESS', `ðŸ“Š ${data.dados.total_registros} registros coletados`);
-        addLog('SUCCESS', `±ï¸ Duraá§á£o: ${data.dados.duracao_total}`);
-        addLog('SUCCESS', `ðŸ“¸ ${data.dados.screenshots_salvos?.length || 0} screenshots salvos`);
-        addLog('SUCCESS', `ðŸ’¾ ${data.dados.registros_inseridos} registros inseridos no banco`);
+        addLog('SUCCESS', `🎉 Coleta V3 conclu�da com sucesso!`);
+        addLog('SUCCESS', `📊 ${data.dados.total_registros} registros coletados`);
+        addLog('SUCCESS', `��️ Dura��o: ${data.dados.duracao_total}`);
+        addLog('SUCCESS', `📸 ${data.dados.screenshots_salvos?.length || 0} screenshots salvos`);
+        addLog('SUCCESS', `💾 ${data.dados.registros_inseridos} registros inseridos no banco`);
       } else {
-        addLog('ERROR', `Œ Erro: ${data.error}`);
+        addLog('ERROR', `�� Erro: ${data.error}`);
         if (data.details) {
-          addLog('ERROR', `ðŸ“‹ Detalhes: ${data.details}`);
+          addLog('ERROR', `📋 Detalhes: ${data.details}`);
         }
       }
     } catch (error) {
       console.error('Erro:', error);
-      addLog('ERROR', `ðŸ’¥ Erro de conexá£o: ${error}`);
+      addLog('ERROR', `💥 Erro de conex�o: ${error}`);
     } finally {
       setIsLoading(false);
     }
@@ -127,10 +127,10 @@ export default function ContaAzulV3Page() {
 
   const getLogIcon = (type: LogEntry['type']) => {
     switch (type) {
-      case 'SUCCESS': return 'œ…';
-      case 'WARNING': return 'š ï¸';
-      case 'ERROR': return 'Œ';
-      default: return '„¹ï¸';
+      case 'SUCCESS': return '��';
+      case 'WARNING': return '��️';
+      case 'ERROR': return '��';
+      default: return '��️';
     }
   };
 
@@ -144,7 +144,7 @@ export default function ContaAzulV3Page() {
   };
 
   useEffect(() => {
-    setPageTitle('ðŸš€ ContaAzul V3 - Sistema Final Robusto');
+    setPageTitle('🚀 ContaAzul V3 - Sistema Final Robusto');
     return () => setPageTitle('');
   }, [setPageTitle]);
 
@@ -153,51 +153,51 @@ export default function ContaAzulV3Page() {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-muted-foreground">
-            Versá£o final com todas as correá§áµes e melhorias implementadas
+            Vers�o final com todas as corre��es e melhorias implementadas
           </p>
         </div>
         <div className="flex gap-2">
           <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-            œ… V3 Final
+            �� V3 Final
           </Badge>
           <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-            ðŸ›¡ï¸ Robusto
+            🛡️ Robusto
           </Badge>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Configuraá§á£o */}
+        {/* Configura��o */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-black">
-              ðŸ” Configuraá§áµes V3
+              🔐 Configura��es V3
             </CardTitle>
             <CardDescription>
-              Sistema com retry automá¡tico, screenshots e logs otimizados
+              Sistema com retry autom�tico, screenshots e logs otimizados
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-black">ðŸ“§ Email</Label>
+                <Label htmlFor="email" className="text-black">📧 Email</Label>
                 <Input
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e: any) => setEmail(e.target.value)}
                   placeholder="seu@email.com"
                   className="text-black"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="senha" className="text-black">ðŸ”‘ Senha</Label>
+                <Label htmlFor="senha" className="text-black">🔑 Senha</Label>
                 <Input
                   id="senha"
                   type="password"
                   value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
+                  onChange={(e: any) => setSenha(e.target.value)}
                   placeholder="Sua senha"
                   className="text-black"
                 />
@@ -207,20 +207,20 @@ export default function ContaAzulV3Page() {
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     checked={headless}
-                    onCheckedChange={(checked) => setHeadless(checked as boolean)}
+                    onCheckedChange={(checked: any) => setHeadless(checked as boolean)}
                   />
                   <label className="text-sm cursor-pointer text-black">
-                    ðŸ‘» Modo invisá­vel (headless)
+                    👻 Modo invis�vel (headless)
                   </label>
                 </div>
 
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     checked={forcarProcessamento}
-                    onCheckedChange={(checked) => setForcarProcessamento(checked as boolean)}
+                    onCheckedChange={(checked: any) => setForcarProcessamento(checked as boolean)}
                   />
                   <label className="text-sm cursor-pointer text-black">
-                    ðŸ”„ Forá§ar processamento automá¡tico
+                    🔄 For�ar processamento autom�tico
                   </label>
                 </div>
               </div>
@@ -236,10 +236,10 @@ export default function ContaAzulV3Page() {
                   {isLoading ? (
                     <div className="flex items-center gap-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      ðŸš€ Executando V3 Robusto...
+                      🚀 Executando V3 Robusto...
                     </div>
                   ) : (
-                    'ðŸš€ Iniciar Coleta V3 Final'
+                    '🚀 Iniciar Coleta V3 Final'
                   )}
                 </Button>
 
@@ -250,7 +250,7 @@ export default function ContaAzulV3Page() {
                   disabled={isLoading}
                   className="w-full"
                 >
-                  ðŸ” Verificar Status API V3
+                  🔍 Verificar Status API V3
                 </Button>
               </div>
             </form>
@@ -261,7 +261,7 @@ export default function ContaAzulV3Page() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-black">
-              ðŸ“Š Resultado V3
+              📊 Resultado V3
             </CardTitle>
             <CardDescription>
               Dados coletados com sistema robusto
@@ -272,25 +272,25 @@ export default function ContaAzulV3Page() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <div className="font-semibold text-black">ðŸ“Š Registros</div>
+                    <div className="font-semibold text-black">📊 Registros</div>
                     <div className="text-2xl font-bold text-green-600">
                       {result.dados.total_registros.toLocaleString()}
                     </div>
                   </div>
                   <div>
-                    <div className="font-semibold text-black">±ï¸ Duraá§á£o</div>
+                    <div className="font-semibold text-black">��️ Dura��o</div>
                     <div className="text-lg font-semibold text-blue-600">
                       {result.dados.duracao_total}
                     </div>
                   </div>
                   <div>
-                    <div className="font-semibold text-black">ðŸ“¸ Screenshots</div>
+                    <div className="font-semibold text-black">📸 Screenshots</div>
                     <div className="text-lg font-semibold text-purple-600">
                       {result.dados.screenshots_salvos?.length || 0}
                     </div>
                   </div>
                   <div>
-                    <div className="font-semibold text-black">ðŸ’¾ Inseridos</div>
+                    <div className="font-semibold text-black">💾 Inseridos</div>
                     <div className="text-lg font-semibold text-orange-600">
                       {result.dados.registros_inseridos}
                     </div>
@@ -300,18 +300,18 @@ export default function ContaAzulV3Page() {
                 <Separator />
 
                 <div>
-                  <h4 className="font-semibold text-black mb-2">ðŸ”§ Melhorias V3</h4>
+                  <h4 className="font-semibold text-black mb-2">🔧 Melhorias V3</h4>
                   <div className="grid grid-cols-1 gap-1">
-                    {result.dados.melhorias_v3?.map((melhoria, idx) => (
+                    {result.dados.melhorias_v3?.map((melhoria: any, idx: any) => (
                       <div key={idx} className="text-xs text-green-700 bg-green-50 p-1 rounded">
-                        œ… {melhoria}
+                        �� {melhoria}
                       </div>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="font-semibold text-black mb-2">ðŸ“‹ Arquivos Gerados</h4>
+                  <h4 className="font-semibold text-black mb-2">📋 Arquivos Gerados</h4>
                   <div className="space-y-1 text-xs">
                     <div className="text-gray-600">Excel: {result.dados.arquivo_excel?.split('\\').pop()}</div>
                     <div className="text-gray-600">JSON: {result.dados.arquivo_json?.split('\\').pop()}</div>
@@ -320,7 +320,7 @@ export default function ContaAzulV3Page() {
               </div>
             ) : (
               <div className="text-center text-gray-500 py-8">
-                <div className="text-4xl mb-2">ðŸš€</div>
+                <div className="text-4xl mb-2">🚀</div>
                 <div className="text-black">Execute a coleta para ver os resultados</div>
               </div>
             )}
@@ -332,22 +332,22 @@ export default function ContaAzulV3Page() {
       {statusAPI && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-black">ðŸ” Status da API V3</CardTitle>
+            <CardTitle className="text-black">🔍 Status da API V3</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
-                <div className="font-semibold text-black">ðŸ“Š Versá£o</div>
+                <div className="font-semibold text-black">📊 Vers�o</div>
                 <div className="text-blue-600">{statusAPI.versao}</div>
               </div>
               <div>
-                <div className="font-semibold text-black">ðŸ”§ Script V3</div>
+                <div className="font-semibold text-black">🔧 Script V3</div>
                 <div className={statusAPI.script_v3_disponivel ? 'text-green-600' : 'text-red-600'}>
-                  {statusAPI.script_v3_disponivel ? 'œ… Disponá­vel' : 'Œ Ná£o encontrado'}
+                  {statusAPI.script_v3_disponivel ? '�� Dispon�vel' : '�� N�o encontrado'}
                 </div>
               </div>
               <div className="md:col-span-2">
-                <div className="font-semibold text-black mb-2">ðŸš€ Melhorias V3</div>
+                <div className="font-semibold text-black mb-2">🚀 Melhorias V3</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
                   {statusAPI.melhorias_v3?.map((melhoria: string, idx: number) => (
                     <div key={idx} className="text-xs text-blue-700 bg-blue-50 p-1 rounded">
@@ -365,7 +365,7 @@ export default function ContaAzulV3Page() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between text-black">
-            ðŸ“‹ Logs do Sistema V3
+            📋 Logs do Sistema V3
             <Badge variant="outline">{logs.length} entradas</Badge>
           </CardTitle>
         </CardHeader>
@@ -373,11 +373,11 @@ export default function ContaAzulV3Page() {
           <div className="space-y-2 max-h-60 overflow-y-auto">
             {logs.length === 0 ? (
               <div className="text-center text-gray-500 py-4">
-                <div className="text-2xl mb-2">ðŸ“‹</div>
-                <div className="text-black">Logs aparecerá£o aqui durante a execuá§á£o</div>
+                <div className="text-2xl mb-2">📋</div>
+                <div className="text-black">Logs aparecer�o aqui durante a execu��o</div>
               </div>
             ) : (
-              logs.map((log, index) => (
+              logs.map((log: any, index: any) => (
                 <div
                   key={index}
                   className={`text-sm p-2 rounded-lg border ${getLogColor(log.type)}`}
@@ -395,43 +395,43 @@ export default function ContaAzulV3Page() {
         </CardContent>
       </Card>
 
-      {/* Informaá§áµes Tá©cnicas */}
+      {/* Informa��es T�cnicas */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-black">
-            ðŸ”§ Informaá§áµes Tá©cnicas V3
+            🔧 Informa��es T�cnicas V3
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div className="space-y-2">
-              <h4 className="font-semibold text-green-700">œ… Correá§áµes V3</h4>
+              <h4 className="font-semibold text-green-700">�� Corre��es V3</h4>
               <ul className="space-y-1 text-gray-600">
-                <li>ðŸ”§ Unicode/emojis Windows</li>
-                <li>ðŸ“… DateTime JSON serialization</li>
-                <li>ðŸ“‹ Logs otimizados</li>
-                <li>ðŸ”„ Sistema de retry (3x)</li>
-                <li>ðŸ“¸ Screenshots automá¡ticos</li>
+                <li>🔧 Unicode/emojis Windows</li>
+                <li>📅 DateTime JSON serialization</li>
+                <li>📋 Logs otimizados</li>
+                <li>🔄 Sistema de retry (3x)</li>
+                <li>📸 Screenshots autom�ticos</li>
               </ul>
             </div>
             <div className="space-y-2">
-              <h4 className="font-semibold text-blue-700">ðŸš€ Performance</h4>
+              <h4 className="font-semibold text-blue-700">🚀 Performance</h4>
               <ul className="space-y-1 text-gray-600">
-                <li>š¡ ~1 minuto para coleta</li>
-                <li>ðŸ›¡ï¸ Anti-detecá§á£o avaná§ada</li>
-                <li>° Timeouts inteligentes</li>
-                <li>ðŸ’¾ Processamento otimizado</li>
-                <li>ðŸ” Debug completo</li>
+                <li>�� ~1 minuto para coleta</li>
+                <li>🛡️ Anti-detec��o avan�ada</li>
+                <li>�� Timeouts inteligentes</li>
+                <li>💾 Processamento otimizado</li>
+                <li>🔍 Debug completo</li>
               </ul>
             </div>
             <div className="space-y-2">
-              <h4 className="font-semibold text-purple-700">ðŸŽ¯ Recursos</h4>
+              <h4 className="font-semibold text-purple-700">🎯 Recursos</h4>
               <ul className="space-y-1 text-gray-600">
-                <li>ðŸ” 2FA automá¡tico (TOTP)</li>
-                <li>ðŸ“Š 8.460+ registros</li>
-                <li>ðŸ’¾ Inserá§á£o automá¡tica BD</li>
-                <li>ðŸ”„ Trigger processamento</li>
-                <li>ðŸ“± API REST completa</li>
+                <li>🔐 2FA autom�tico (TOTP)</li>
+                <li>📊 8.460+ registros</li>
+                <li>💾 Inser��o autom�tica BD</li>
+                <li>🔄 Trigger processamento</li>
+                <li>📱 API REST completa</li>
               </ul>
             </div>
           </div>

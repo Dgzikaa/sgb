@@ -1,18 +1,18 @@
-﻿'use client'
+'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect: any, useCallback, useMemo } from 'react'
 import { useBar } from '@/contexts/BarContext'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 import { useForceDarkMode } from '@/hooks/useForceDarkMode'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Tabs, TabsContent: any, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent: any, DialogHeader, DialogTitle: any, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { toast } from '@/components/ui/toast'
 import { useGlobalConfirm } from '@/components/ui/confirm-dialog'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
@@ -111,7 +111,7 @@ export default function ReceitasPage() {
   // Estados para Insumos
   const [insumos, setInsumos] = useState<Insumo[]>([])
   const [novoInsumo, setNovoInsumo] = useState<NovoInsumo>({
-    codigo: 'i0001', // Cá³digo padrá£o inicial
+    codigo: 'i0001', // C�digo padr�o inicial
     nome: '',
     unidade_medida: 'g',
     categoria: 'cozinha',
@@ -128,7 +128,7 @@ export default function ReceitasPage() {
   // Estados para Receitas
   const [receitas, setReceitas] = useState<Receita[]>([])
   const [novaReceita, setNovaReceita] = useState<NovaReceita>({
-    receita_codigo: 'r0001', // Cá³digo padrá£o inicial
+    receita_codigo: 'r0001', // C�digo padr�o inicial
     receita_nome: '',
     receita_categoria: '',
     tipo_local: 'cozinha',
@@ -144,7 +144,7 @@ export default function ReceitasPage() {
   const [modalEditarReceita, setModalEditarReceita] = useState(false)
   const [modalVisualizarReceita, setModalVisualizarReceita] = useState(false)
 
-  // Estados para criaá§á£o de receitas
+  // Estados para cria��o de receitas
   const [insumosReceita, setInsumosReceita] = useState<{
     insumo_id: number
     quantidade_necessaria: number
@@ -157,7 +157,7 @@ export default function ReceitasPage() {
   const [syncLoading, setSyncLoading] = useState(false)
   const [syncLog, setSyncLog] = useState<string | null>(null)
 
-  // Sincronizar tipo_local dos formulá¡rios com o tipo selecionado
+  // Sincronizar tipo_local dos formul�rios com o tipo selecionado
   useEffect(() => {
     setNovoInsumo(prev => ({ ...prev, tipo_local: tipoLocalInsumos }))
   }, [tipoLocalInsumos])
@@ -167,16 +167,16 @@ export default function ReceitasPage() {
   }, [tipoLocalReceitas])
 
   useEffect(() => {
-    setPageTitle('ðŸ“‹ Receitas e Insumos')
+    setPageTitle('📋 Receitas e Insumos')
     return () => setPageTitle('')
   }, [setPageTitle])
 
-  // CARREGAR DADOS REAIS DO BANCO - Funá§á£o para buscar insumos
+  // CARREGAR DADOS REAIS DO BANCO - Fun��o para buscar insumos
   const carregarInsumos = useCallback(async () => {
     if (!selectedBar) return
     
     try {
-      console.log('ðŸ”„ Carregando insumos do banco...')
+      console.log('🔄 Carregando insumos do banco...')
       const response = await fetch(`/api/receitas/insumos?ativo=true`)
       
       if (!response.ok) {
@@ -200,27 +200,27 @@ export default function ReceitasPage() {
         
         setInsumos(insumosFormatados)
         
-        // Debug: verificar distribuiá§á£o por tipo_local
+        // Debug: verificar distribui��o por tipo_local
         const cozinhaCount = insumosFormatados.filter((i: any) => i.tipo_local === 'cozinha').length
         const barCount = insumosFormatados.filter((i: any) => i.tipo_local === 'bar').length
-        console.log(`œ… ${insumosFormatados.length} insumos carregados - Cozinha: ${cozinhaCount}, Bar: ${barCount}`)
+        console.log(`�� ${insumosFormatados.length} insumos carregados - Cozinha: ${cozinhaCount}, Bar: ${barCount}`)
       } else {
-        console.error('Œ Erro na resposta da API insumos:', data)
+        console.error('�� Erro na resposta da API insumos:', data)
         setInsumos([])
       }
     } catch (error) {
-      console.error('Œ Erro ao carregar insumos:', error)
+      console.error('�� Erro ao carregar insumos:', error)
       toast.error('Erro', 'Falha ao carregar insumos do banco de dados')
       setInsumos([])
     }
   }, [selectedBar])
 
-  // CARREGAR DADOS REAIS DO BANCO - Funá§á£o para buscar receitas
+  // CARREGAR DADOS REAIS DO BANCO - Fun��o para buscar receitas
   const carregarReceitas = useCallback(async () => {
     if (!selectedBar) return
     
     try {
-      console.log('ðŸ”„ Carregando receitas do banco...')
+      console.log('🔄 Carregando receitas do banco...')
       const response = await fetch(`/api/receitas/todas?bar_id=${selectedBar.id}`)
       
       if (!response.ok) {
@@ -231,19 +231,19 @@ export default function ReceitasPage() {
       
       if (data.success && data.receitas) {
         setReceitas(data.receitas)
-        console.log(`œ… ${data.receitas.length} receitas carregadas`)
+        console.log(`�� ${data.receitas.length} receitas carregadas`)
       } else {
-        console.error('Œ Erro na resposta da API receitas:', data)
+        console.error('�� Erro na resposta da API receitas:', data)
         setReceitas([])
       }
     } catch (error) {
-      console.error('Œ Erro ao carregar receitas:', error)
+      console.error('�� Erro ao carregar receitas:', error)
       toast.error('Erro', 'Falha ao carregar receitas do banco de dados')
       setReceitas([])
     }
   }, [selectedBar])
 
-  // Funá§á£o para verificar se um insumo á© chefe em alguma receita
+  // Fun��o para verificar se um insumo � chefe em alguma receita
   const isInsumoChefe = useCallback((insumoId: number) => {
     return receitas.some(receita => 
       receita.insumos?.some(insumo => 
@@ -252,7 +252,7 @@ export default function ReceitasPage() {
     )
   }, [receitas])
 
-  // Funá§á£o para obter receitas onde o insumo á© chefe
+  // Fun��o para obter receitas onde o insumo � chefe
   const getReceitasOndeEChefe = useCallback((insumoId: number) => {
     return receitas.filter((receita: any) => 
       receita.insumos?.some(insumo => 
@@ -278,7 +278,7 @@ export default function ReceitasPage() {
       
       carregarDados()
     }
-  }, [selectedBar, carregarInsumos, carregarReceitas])
+  }, [selectedBar, carregarInsumos: any, carregarReceitas])
 
   const insumosFiltrados = useMemo(() => {
     // Filtrar por tipo_local primeiro
@@ -291,7 +291,7 @@ export default function ReceitasPage() {
       insumo.codigo.toLowerCase().includes(buscaInsumos.toLowerCase()) ||
       insumo.categoria.toLowerCase().includes(buscaInsumos.toLowerCase())
     )
-  }, [insumos, buscaInsumos, tipoLocalInsumos])
+  }, [insumos, buscaInsumos: any, tipoLocalInsumos])
 
   const receitasFiltradas = useMemo(() => {
     // Filtrar por tipo_local primeiro
@@ -304,9 +304,9 @@ export default function ReceitasPage() {
       receita.receita_codigo.toLowerCase().includes(buscaReceitas.toLowerCase()) ||
       receita.receita_categoria.toLowerCase().includes(buscaReceitas.toLowerCase())
     )
-  }, [receitas, buscaReceitas, tipoLocalReceitas])
+  }, [receitas, buscaReceitas: any, tipoLocalReceitas])
 
-  // Otimizaá§á£o: calcular insumos chefes uma vez
+  // Otimiza��o: calcular insumos chefes uma vez
   const insumosChefes = useMemo(() => {
     return insumos.filter((insumo: any) => isInsumoChefe(insumo.id))
   }, [insumos, isInsumoChefe])
@@ -319,11 +319,11 @@ export default function ReceitasPage() {
     )
   }, [insumos, buscaInsumoReceita])
 
-  // Funá§á£o para gerar prá³ximo cá³digo de insumo
+  // Fun��o para gerar pr�ximo c�digo de insumo
   const gerarProximoCodigoInsumo = useCallback(() => {
     if (insumos.length === 0) return 'i0001'
     
-    // Buscar cá³digos que seguem o padrá£o i0000
+    // Buscar c�digos que seguem o padr�o i0000
     const codigosNumericos = insumos
       .map((insumo: any) => insumo.codigo)
       .filter((codigo: any) => /^i\d+$/.test(codigo))
@@ -335,16 +335,16 @@ export default function ReceitasPage() {
     const maiorNumero = Math.max(...codigosNumericos)
     const proximoNumero = maiorNumero + 1
     
-    return `i${proximoNumero.toString().padStart(4, '0')}`
+    return `i${proximoNumero.toString().padStart(4: any, '0')}`
   }, [insumos])
 
-  // Funá§á£o para gerar prá³ximo cá³digo de receita baseado no tipo local
+  // Fun��o para gerar pr�ximo c�digo de receita baseado no tipo local
   const gerarProximoCodigoReceita = useCallback((tipoLocal: 'cozinha' | 'bar') => {
     const prefixo = tipoLocal === 'cozinha' ? 'pc' : 'pd'
     
     if (receitas.length === 0) return `${prefixo}001`
     
-    // Buscar cá³digos que seguem o padrá£o pc000 ou pd000
+    // Buscar c�digos que seguem o padr�o pc000 ou pd000
     const codigosNumericos = receitas
       .filter((receita: any) => receita.tipo_local === tipoLocal)
       .map((receita: any) => receita.receita_codigo)
@@ -357,10 +357,10 @@ export default function ReceitasPage() {
     const maiorNumero = Math.max(...codigosNumericos)
     const proximoNumero = maiorNumero + 1
     
-    return `${prefixo}${proximoNumero.toString().padStart(3, '0')}`
+    return `${prefixo}${proximoNumero.toString().padStart(3: any, '0')}`
   }, [receitas])
 
-  // Atualizar cá³digo do insumo quando os dados carregarem
+  // Atualizar c�digo do insumo quando os dados carregarem
   useEffect(() => {
     if (insumos.length >= 0) { // Sempre atualizar quando os dados carregarem
       const novoCodigo = gerarProximoCodigoInsumo()
@@ -371,7 +371,7 @@ export default function ReceitasPage() {
     }
   }, [insumos, gerarProximoCodigoInsumo])
 
-  // Gerar cá³digo automaticamente quando tipo_local da receita mudar
+  // Gerar c�digo automaticamente quando tipo_local da receita mudar
   useEffect(() => {
     if (novaReceita.tipo_local && modalCriarReceita) {
       const novoCodigo = gerarProximoCodigoReceita(novaReceita.tipo_local)
@@ -380,7 +380,7 @@ export default function ReceitasPage() {
         receita_codigo: novoCodigo
       }))
     }
-  }, [novaReceita.tipo_local, modalCriarReceita, gerarProximoCodigoReceita])
+  }, [novaReceita.tipo_local, modalCriarReceita: any, gerarProximoCodigoReceita])
 
 
 
@@ -393,7 +393,7 @@ export default function ReceitasPage() {
 
   const salvarEdicaoInsumo = async () => {
     if (!insumoEditando || !insumoEditando.nome.trim()) {
-      toast.error('Nome do insumo á© obrigatá³rio')
+      toast.error('Nome do insumo � obrigat�rio')
       return
     }
 
@@ -435,7 +435,7 @@ export default function ReceitasPage() {
       setInsumoEditando(null)
       
     } catch (error) {
-      console.error('Erro ao salvar ediá§á£o do insumo:', error)
+      console.error('Erro ao salvar edi��o do insumo:', error)
       toast.error('Erro ao atualizar insumo. Tente novamente.')
     } finally {
       setIsLoading(false)
@@ -444,7 +444,7 @@ export default function ReceitasPage() {
 
   const salvarCriacaoInsumo = async () => {
     if (!novoInsumo.codigo || !novoInsumo.nome.trim()) {
-      toast.error('Cá³digo e nome sá£o obrigatá³rios')
+      toast.error('C�digo e nome s�o obrigat�rios')
       return
     }
 
@@ -483,7 +483,7 @@ export default function ReceitasPage() {
         // Fechar modal
         setModalCriarInsumo(false)
         
-        // Reset form para prá³ximo uso
+        // Reset form para pr�ximo uso
         setNovoInsumo({
           codigo: gerarProximoCodigoInsumo(),
           nome: '',
@@ -511,7 +511,7 @@ export default function ReceitasPage() {
 
   const salvarEdicaoReceita = async () => {
     if (!receitaEditando || !receitaEditando.receita_nome.trim()) {
-      toast.error('Nome da receita á© obrigatá³rio')
+      toast.error('Nome da receita � obrigat�rio')
       return
     }
 
@@ -525,7 +525,7 @@ export default function ReceitasPage() {
         is_chefe: insumo.is_chefe || false
       }))
 
-      console.log('ðŸ“¤ Dados enviados para API:', {
+      console.log('📤 Dados enviados para API:', {
         receita_codigo: receitaEditando.receita_codigo,
         receita_nome: receitaEditando.receita_nome.trim(),
         receita_categoria: receitaEditando.receita_categoria,
@@ -555,14 +555,14 @@ export default function ReceitasPage() {
 
       if (!response.ok) {
         const errorData = await response.text()
-        console.error('Œ Erro HTTP:', response.status, errorData)
+        console.error('�� Erro HTTP:', response.status, errorData)
         throw new Error(`Erro ${response.status}: ${errorData}`)
       }
 
       const result = await response.json()
-      console.log('œ… Resposta da API:', result)
+      console.log('�� Resposta da API:', result)
 
-      // Recarregar as receitas do servidor para garantir consistáªncia
+      // Recarregar as receitas do servidor para garantir consist�ncia
       await carregarReceitas()
 
       toast.success('Receita atualizada com sucesso!')
@@ -570,7 +570,7 @@ export default function ReceitasPage() {
       setReceitaEditando(null)
       
     } catch (error) {
-      console.error('Œ Erro ao salvar ediá§á£o da receita:', error)
+      console.error('�� Erro ao salvar edi��o da receita:', error)
       toast.error(`Erro ao atualizar receita: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
     } finally {
       setIsLoading(false)
@@ -582,10 +582,10 @@ export default function ReceitasPage() {
       insumo.nome,
       async () => {
         try {
-          // TODO: Implementar API de exclusá£o
+          // TODO: Implementar API de exclus�o
           // Por enquanto, remover localmente
           setInsumos(prev => prev.filter((i: any) => i.id !== insumo.id))
-          toast.success('Sucesso!', 'Insumo excluá­do com sucesso')
+          toast.success('Sucesso!', 'Insumo exclu�do com sucesso')
         } catch (error) {
           toast.error('Erro', 'Falha ao excluir insumo')
         }
@@ -593,11 +593,11 @@ export default function ReceitasPage() {
     )
   }
 
-  // FUNá‡á•ES PARA INSUMOS
+  // FUN��ES PARA INSUMOS
 
   const abrirModalCriarInsumo = () => {
     setNovoInsumo({
-      codigo: gerarProximoCodigoInsumo(), // Gerar prá³ximo cá³digo automaticamente
+      codigo: gerarProximoCodigoInsumo(), // Gerar pr�ximo c�digo automaticamente
       nome: '',
       unidade_medida: 'g',
       categoria: 'cozinha',
@@ -607,12 +607,12 @@ export default function ReceitasPage() {
     setModalCriarInsumo(true)
   }
 
-  // FUNá‡á•ES PARA RECEITAS
+  // FUN��ES PARA RECEITAS
 
   const abrirModalCriarReceita = () => {
     const tipoLocalPadrao: 'cozinha' | 'bar' = 'cozinha'
     setNovaReceita({
-      receita_codigo: gerarProximoCodigoReceita(tipoLocalPadrao), // Gerar cá³digo baseado no tipo padrá£o
+      receita_codigo: gerarProximoCodigoReceita(tipoLocalPadrao), // Gerar c�digo baseado no tipo padr�o
       receita_nome: '',
       receita_categoria: '',
       tipo_local: tipoLocalPadrao,
@@ -638,16 +638,16 @@ export default function ReceitasPage() {
     const insumoId = parseInt(insumoSelecionado)
     const quantidade = parseFloat(quantidadeInsumo)
 
-    // Verificar se insumo já¡ foi adicionado
+    // Verificar se insumo j� foi adicionado
     if (insumosReceita.some(i => i.insumo_id === insumoId)) {
-      toast.error('Erro', 'Este insumo já¡ foi adicionado á  receita')
+      toast.error('Erro', 'Este insumo j� foi adicionado � receita')
       return
     }
 
     const novoInsumoReceita = {
       insumo_id: insumoId,
       quantidade_necessaria: quantidade,
-      is_chefe: false // Por padrá£o ná£o á© chefe
+      is_chefe: false // Por padr�o n�o � chefe
     }
 
     setInsumosReceita(prev => [...prev, novoInsumoReceita])
@@ -665,14 +665,14 @@ export default function ReceitasPage() {
       const insumoClicado = prev.find((i: any) => i.insumo_id === insumoId)
       
       if (insumoClicado?.is_chefe) {
-        // Se já¡ á© chefe, desmarcar
+        // Se j� � chefe, desmarcar
         return prev.map((i: any) => 
           i.insumo_id === insumoId 
             ? { ...i, is_chefe: false }
             : i
         )
       } else {
-        // Se ná£o á© chefe, marcar como chefe e desmarcar todos os outros
+        // Se n�o � chefe, marcar como chefe e desmarcar todos os outros
         return prev.map((i: any) => ({
           ...i,
           is_chefe: i.insumo_id === insumoId
@@ -683,12 +683,12 @@ export default function ReceitasPage() {
 
   const salvarReceita = async () => {
     if (!novaReceita.receita_codigo || !novaReceita.receita_nome) {
-      toast.error('Erro', 'Cá³digo e nome da receita sá£o obrigatá³rios')
+      toast.error('Erro', 'C�digo e nome da receita s�o obrigat�rios')
       return
     }
 
     if (insumosReceita.length === 0) {
-      toast.error('Erro', 'Adicione pelo menos um insumo á  receita')
+      toast.error('Erro', 'Adicione pelo menos um insumo � receita')
       return
     }
 
@@ -723,7 +723,7 @@ export default function ReceitasPage() {
         toast.success('Sucesso!', 'Receita criada com sucesso')
         setModalCriarReceita(false)
         
-        // Resetar form com cá³digo baseado no tipo padrá£o
+        // Resetar form com c�digo baseado no tipo padr�o
         const tipoLocalPadrao: 'cozinha' | 'bar' = 'cozinha'
         setNovaReceita({
           receita_codigo: gerarProximoCodigoReceita(tipoLocalPadrao),
@@ -743,7 +743,7 @@ export default function ReceitasPage() {
         toast.error('Erro', data.error || 'Falha ao criar receita')
       }
     } catch (error) {
-      console.error('Œ Erro ao criar receita:', error)
+      console.error('�� Erro ao criar receita:', error)
       toast.error('Erro', 'Falha ao criar receita')
     } finally {
       setIsLoading(false)
@@ -762,9 +762,9 @@ export default function ReceitasPage() {
       receita.receita_nome,
       async () => {
         try {
-          // TODO: Implementar API de exclusá£o de receitas
+          // TODO: Implementar API de exclus�o de receitas
           setReceitas(prev => prev.filter((r: any) => r.receita_codigo !== receita.receita_codigo))
-          toast.success('Sucesso!', 'Receita excluá­da com sucesso')
+          toast.success('Sucesso!', 'Receita exclu�da com sucesso')
         } catch (error) {
           toast.error('Erro', 'Falha ao excluir receita')
         }
@@ -789,19 +789,19 @@ export default function ReceitasPage() {
     }
   }
 
-  // Funá§á£o para obter nome do insumo por ID
+  // Fun��o para obter nome do insumo por ID
   const obterNomeInsumo = (insumoId: number) => {
     const insumo = insumos.find((i: any) => i.id === insumoId)
     return insumo ? insumo.nome : `Insumo #${insumoId}`
   }
 
-  // Funá§á£o para obter insumo chefe de uma receita
+  // Fun��o para obter insumo chefe de uma receita
   const obterInsumoChefe = (receita: Receita) => {
     if (!receita.insumos) return null
     return receita.insumos.find((i: any) => i.is_chefe)
   }
 
-  // Funá§á£o para sincronizar receitas/insumos do Google Sheets
+  // Fun��o para sincronizar receitas/insumos do Google Sheets
   const syncReceitasFromSheets = async () => {
     setSyncLoading(true)
     setSyncLog(null)
@@ -809,11 +809,11 @@ export default function ReceitasPage() {
       const res = await fetch('/api/receitas/sync')
       const data = await res.json()
       if (data.success) {
-        setSyncLog('Sincronizaá§á£o concluá­da!')
+        setSyncLog('Sincroniza��o conclu�da!')
         toast.success('Receitas e insumos atualizados do Google Sheets!')
         await recarregarDados()
       } else {
-        setSyncLog(data.error || 'Erro desconhecido na sincronizaá§á£o')
+        setSyncLog(data.error || 'Erro desconhecido na sincroniza��o')
         toast.error('Erro ao sincronizar do Google Sheets')
       }
     } catch (e) {
@@ -828,8 +828,8 @@ export default function ReceitasPage() {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">š ï¸ Selecione um Bar</h1>
-          <p className="text-gray-600 dark:text-gray-400">Vocáª precisa selecionar um bar para gerenciar receitas e insumos.</p>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">��️ Selecione um Bar</h1>
+          <p className="text-gray-600 dark:text-gray-400">Voc� precisa selecionar um bar para gerenciar receitas e insumos.</p>
         </div>
       </div>
     )
@@ -913,14 +913,14 @@ export default function ReceitasPage() {
                     onClick={() => setTipoLocalInsumos('cozinha')}
                     className="flex items-center justify-center gap-1 sm:gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
-                    ðŸ‘¨€ðŸ³ Cozinha ({insumos.filter((i: any) => i.tipo_local === 'cozinha').length})
+                    👨��🍳 Cozinha ({insumos.filter((i: any) => i.tipo_local === 'cozinha').length})
                   </Button>
                   <Button
                     variant={tipoLocalInsumos === 'bar' ? 'default' : 'outline'}
                     onClick={() => setTipoLocalInsumos('bar')}
                     className="flex items-center justify-center gap-1 sm:gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
-                    ðŸº Bar ({insumos.filter((i: any) => i.tipo_local === 'bar').length})
+                    🍺 Bar ({insumos.filter((i: any) => i.tipo_local === 'bar').length})
                   </Button>
                 </div>
               </div>
@@ -956,7 +956,7 @@ export default function ReceitasPage() {
                   <Input
                     type="text"
                     value={buscaInsumos}
-                    onChange={(e) => setBuscaInsumos(e.target.value)}
+                    onChange={(e: any) => setBuscaInsumos(e.target.value)}
                     placeholder="Buscar insumo..."
                     className="pl-10 sm:pl-12 h-12 text-base bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
@@ -975,7 +975,7 @@ export default function ReceitasPage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                    {insumosFiltrados.map((insumo) => {
+                    {insumosFiltrados.map((insumo: any) => {
                       const ehChefe = isInsumoChefe(insumo.id)
                       const receitasChefe = getReceitasOndeEChefe(insumo.id)
                       
@@ -1056,7 +1056,7 @@ export default function ReceitasPage() {
                                   Insumo chefe em:
                                 </span>
                                 <div className="mt-1 flex flex-wrap gap-1">
-                                  {receitasChefe.slice(0, 2).map((nomeReceita, index) => (
+                                  {receitasChefe.slice(0: any, 2).map((nomeReceita: any, index: any) => (
                                     <Badge 
                                       key={index} 
                                       variant="secondary" 
@@ -1079,7 +1079,7 @@ export default function ReceitasPage() {
 
                             {insumo.observacoes && (
                               <div className="pt-2 border-t border-gray-200 dark:border-gray-600">
-                                <span className="text-gray-600 dark:text-gray-400">Observaá§áµes:</span>
+                                <span className="text-gray-600 dark:text-gray-400">Observa��es:</span>
                                 <p className="text-gray-700 dark:text-gray-300 text-xs mt-1 leading-relaxed">
                                   {insumo.observacoes}
                                 </p>
@@ -1106,26 +1106,26 @@ export default function ReceitasPage() {
                     onClick={() => setTipoLocalReceitas('cozinha')}
                     className="flex items-center justify-center gap-1 sm:gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
-                    ðŸ‘¨€ðŸ³ Cozinha ({receitas.filter((r: any) => r.tipo_local === 'cozinha').length})
+                    👨��🍳 Cozinha ({receitas.filter((r: any) => r.tipo_local === 'cozinha').length})
                   </Button>
                   <Button
                     variant={tipoLocalReceitas === 'bar' ? 'default' : 'outline'}
                     onClick={() => setTipoLocalReceitas('bar')}
                     className="flex items-center justify-center gap-1 sm:gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
-                    ðŸº Bar ({receitas.filter((r: any) => r.tipo_local === 'bar').length})
+                    🍺 Bar ({receitas.filter((r: any) => r.tipo_local === 'bar').length})
                   </Button>
                 </div>
               </div>
             </div>
             
-            {/* Botá£o para criar nova receita */}
+            {/* Bot�o para criar nova receita */}
             <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                     <ChefHat className="w-5 h-5" />
-                    Receitas ({tipoLocalReceitas === 'bar' ? 'ðŸº Bar' : 'ðŸ‘¨€ðŸ³ Cozinha'})
+                    Receitas ({tipoLocalReceitas === 'bar' ? '🍺 Bar' : '👨��🍳 Cozinha'})
                   </CardTitle>
                   <Button
                     onClick={abrirModalCriarReceita}
@@ -1141,7 +1141,7 @@ export default function ReceitasPage() {
                   <Input
                     type="text"
                     value={buscaReceitas}
-                    onChange={(e) => setBuscaReceitas(e.target.value)}
+                    onChange={(e: any) => setBuscaReceitas(e.target.value)}
                     placeholder="Buscar receita..."
                     className="pl-10 sm:pl-12 h-12 text-base bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
@@ -1155,12 +1155,12 @@ export default function ReceitasPage() {
                       {buscaReceitas ? 'Nenhuma receita encontrada' : 'Nenhuma receita cadastrada'}
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400">
-                      {buscaReceitas ? `Busca por: "${buscaReceitas}"` : 'Clique em "Nova Receita" para comeá§ar'}
+                      {buscaReceitas ? `Busca por: "${buscaReceitas}"` : 'Clique em "Nova Receita" para come�ar'}
                     </p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                    {receitasFiltradas.map((receita) => {
+                    {receitasFiltradas.map((receita: any) => {
                       const insumoChefe = obterInsumoChefe(receita)
                       
                       return (
@@ -1283,17 +1283,17 @@ export default function ReceitasPage() {
             </DialogHeader>
 
             <div className="space-y-6 flex-1 overflow-y-auto">
-              {/* Dados bá¡sicos da receita */}
+              {/* Dados b�sicos da receita */}
               <div className="grid grid-cols-1 gap-4 sm:gap-6">
                 <div>
                   <Label className="text-gray-700 dark:text-gray-300">
-                    Cá³digo <span className="text-red-500">*</span>
+                    C�digo <span className="text-red-500">*</span>
                     <span className="text-xs text-blue-600 dark:text-blue-400 ml-1">(auto)</span>
                   </Label>
                   <div className="flex gap-2">
                     <Input
                       value={novaReceita.receita_codigo}
-                      onChange={(e) => setNovaReceita(prev => ({ ...prev, receita_codigo: e.target.value }))}
+                      onChange={(e: any) => setNovaReceita(prev => ({ ...prev, receita_codigo: e.target.value }))}
                       placeholder="Ex: r0001"
                       disabled={true}
                       className="bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-300 cursor-not-allowed"
@@ -1307,7 +1307,7 @@ export default function ReceitasPage() {
                         receita_codigo: prev.tipo_local ? gerarProximoCodigoReceita(prev.tipo_local) : ''
                       }))}
                       className="px-3 shrink-0"
-                      title="Gerar prá³ximo cá³digo"
+                      title="Gerar pr�ximo c�digo"
                     >
                       <RefreshCw className="w-4 h-4" />
                     </Button>
@@ -1318,8 +1318,8 @@ export default function ReceitasPage() {
                   <Label className="text-gray-700 dark:text-gray-300">Nome <span className="text-red-500">*</span></Label>
                   <Input
                     value={novaReceita.receita_nome}
-                    onChange={(e) => setNovaReceita(prev => ({ ...prev, receita_nome: e.target.value }))}
-                    placeholder="Ex: Frango á  Passarinho"
+                    onChange={(e: any) => setNovaReceita(prev => ({ ...prev, receita_nome: e.target.value }))}
+                    placeholder="Ex: Frango � Passarinho"
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
                 </div>
@@ -1328,7 +1328,7 @@ export default function ReceitasPage() {
                   <Label className="text-gray-700 dark:text-gray-300">Categoria</Label>
                   <Input
                     value={novaReceita.receita_categoria}
-                    onChange={(e) => setNovaReceita(prev => ({ ...prev, receita_categoria: e.target.value }))}
+                    onChange={(e: any) => setNovaReceita(prev => ({ ...prev, receita_categoria: e.target.value }))}
                     placeholder="Ex: Petiscos"
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
@@ -1355,14 +1355,14 @@ export default function ReceitasPage() {
                   <Input
                     type="number"
                     value={novaReceita.rendimento_esperado}
-                    onChange={(e) => setNovaReceita(prev => ({ ...prev, rendimento_esperado: parseInt(e.target.value) || 0 }))}
+                    onChange={(e: any) => setNovaReceita(prev => ({ ...prev, rendimento_esperado: parseInt(e.target.value) || 0 }))}
                     placeholder="1000"
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
                 </div>
               </div>
 
-              {/* Seá§á£o de insumos */}
+              {/* Se��o de insumos */}
               <div className="flex items-center gap-2">
                 <Utensils className="w-5 h-5 text-blue-600" />
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Insumos da Receita</h3>
@@ -1376,9 +1376,9 @@ export default function ReceitasPage() {
                       <Input
                         type="text"
                         value={buscaInsumoReceita}
-                        onChange={(e) => {
+                        onChange={(e: any) => {
                           setBuscaInsumoReceita(e.target.value)
-                          setInsumoSelecionado('') // Limpar seleá§á£o ao digitar
+                          setInsumoSelecionado('') // Limpar sele��o ao digitar
                         }}
                         placeholder="Digite para buscar insumo..."
                         className="bg-white dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-900 dark:text-white h-12 text-base"
@@ -1389,7 +1389,7 @@ export default function ReceitasPage() {
                     {/* Dropdown de resultados */}
                     {buscaInsumoReceita && insumosParaReceita.length > 0 && (
                       <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                        {insumosParaReceita.slice(0, 10).map((insumo) => (
+                        {insumosParaReceita.slice(0: any, 10).map((insumo: any) => (
                           <button
                             key={insumo.id}
                             type="button"
@@ -1401,7 +1401,7 @@ export default function ReceitasPage() {
                           >
                             <div className="font-medium">{insumo.nome}</div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">
-                              {insumo.codigo} €¢ {insumo.categoria}
+                              {insumo.codigo} �� {insumo.categoria}
                             </div>
                           </button>
                         ))}
@@ -1423,7 +1423,7 @@ export default function ReceitasPage() {
                       inputMode="decimal"
                       step="0.1"
                       value={quantidadeInsumo}
-                      onChange={(e) => setQuantidadeInsumo(e.target.value)}
+                      onChange={(e: any) => setQuantidadeInsumo(e.target.value)}
                       placeholder="100"
                       className="bg-white dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-900 dark:text-white h-12 text-base"
                     />
@@ -1444,7 +1444,7 @@ export default function ReceitasPage() {
                 {insumosReceita.length > 0 && (
                   <div className="space-y-2">
                     <Label className="text-gray-700 dark:text-gray-300">Insumos Adicionados:</Label>
-                    {insumosReceita.map((insumoReceita) => {
+                    {insumosReceita.map((insumoReceita: any) => {
                       const insumo = insumos.find((i: any) => i.id === insumoReceita.insumo_id)
                       if (!insumo) return null
 
@@ -1539,10 +1539,10 @@ export default function ReceitasPage() {
 
             {receitaEditando && (
               <div className="space-y-6 flex-1 overflow-y-auto">
-                {/* Informaá§áµes bá¡sicas */}
+                {/* Informa��es b�sicas */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-gray-600 dark:text-gray-400">Cá³digo:</Label>
+                    <Label className="text-gray-600 dark:text-gray-400">C�digo:</Label>
                     <p className="font-semibold text-gray-900 dark:text-white">{receitaEditando.receita_codigo}</p>
                   </div>
                   <div>
@@ -1579,7 +1579,7 @@ export default function ReceitasPage() {
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Insumos</h3>
                     </div>
                     <div className="space-y-2">
-                      {receitaEditando.insumos.map((insumo) => (
+                      {receitaEditando.insumos.map((insumo: any) => (
                         <div 
                           key={insumo.id}
                           className={`p-3 rounded-lg border ${
@@ -1640,7 +1640,7 @@ export default function ReceitasPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Modal de Ediá§á£o de Insumo */}
+        {/* Modal de Edi��o de Insumo */}
         <Dialog open={modalEditarInsumo} onOpenChange={setModalEditarInsumo}>
           <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 flex flex-col">
             <DialogHeader className="flex-shrink-0">
@@ -1649,7 +1649,7 @@ export default function ReceitasPage() {
                 Editar Insumo
               </DialogTitle>
               <DialogDescription className="text-gray-600 dark:text-gray-400">
-                Modifique as informaá§áµes do insumo selecionado.
+                Modifique as informa��es do insumo selecionado.
               </DialogDescription>
             </DialogHeader>
 
@@ -1658,12 +1658,12 @@ export default function ReceitasPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="edit-codigo" className="text-gray-700 dark:text-gray-300">
-                      Cá³digo
+                      C�digo
                     </Label>
                     <Input
                       id="edit-codigo"
                       value={insumoEditando.codigo}
-                      onChange={(e) => setInsumoEditando({...insumoEditando, codigo: e.target.value})}
+                      onChange={(e: any) => setInsumoEditando({...insumoEditando, codigo: e.target.value})}
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                       placeholder="Ex: i0001"
                     />
@@ -1676,7 +1676,7 @@ export default function ReceitasPage() {
                     <Input
                       id="edit-nome"
                       value={insumoEditando.nome}
-                      onChange={(e) => setInsumoEditando({...insumoEditando, nome: e.target.value})}
+                      onChange={(e: any) => setInsumoEditando({...insumoEditando, nome: e.target.value})}
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                       placeholder="Nome do insumo"
                       required
@@ -1689,7 +1689,7 @@ export default function ReceitasPage() {
                     </Label>
                     <Select 
                       value={insumoEditando.categoria} 
-                      onValueChange={(value) => setInsumoEditando({...insumoEditando, categoria: value})}
+                      onValueChange={(value: any) => setInsumoEditando({...insumoEditando, categoria: value})}
                     >
                       <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                         <SelectValue placeholder="Selecione a categoria" />
@@ -1698,7 +1698,7 @@ export default function ReceitasPage() {
                         <SelectItem value="cozinha">Cozinha</SelectItem>
                         <SelectItem value="bar">Bar</SelectItem>
                         <SelectItem value="bebidas">Bebidas</SelectItem>
-                        <SelectItem value="descartaveis">Descartá¡veis</SelectItem>
+                        <SelectItem value="descartaveis">Descart�veis</SelectItem>
                         <SelectItem value="limpeza">Limpeza</SelectItem>
                         <SelectItem value="outros">Outros</SelectItem>
                       </SelectContent>
@@ -1711,14 +1711,14 @@ export default function ReceitasPage() {
                     </Label>
                     <Select 
                       value={insumoEditando.tipo_local} 
-                      onValueChange={(value) => setInsumoEditando({...insumoEditando, tipo_local: value as 'bar' | 'cozinha'})}
+                      onValueChange={(value: any) => setInsumoEditando({...insumoEditando, tipo_local: value as 'bar' | 'cozinha'})}
                     >
                       <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                         <SelectValue placeholder="Selecione o tipo local" />
                       </SelectTrigger>
                       <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                        <SelectItem value="cozinha">ðŸ‘¨€ðŸ³ Cozinha</SelectItem>
-                        <SelectItem value="bar">ðŸº Bar</SelectItem>
+                        <SelectItem value="cozinha">👨��🍳 Cozinha</SelectItem>
+                        <SelectItem value="bar">🍺 Bar</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1729,7 +1729,7 @@ export default function ReceitasPage() {
                     </Label>
                     <Select 
                       value={insumoEditando.unidade_medida} 
-                      onValueChange={(value) => setInsumoEditando({...insumoEditando, unidade_medida: value})}
+                      onValueChange={(value: any) => setInsumoEditando({...insumoEditando, unidade_medida: value})}
                     >
                       <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                         <SelectValue placeholder="Selecione a unidade" />
@@ -1748,7 +1748,7 @@ export default function ReceitasPage() {
 
                   <div className="md:col-span-1">
                     <Label htmlFor="edit-custo" className="text-gray-700 dark:text-gray-300">
-                      Custo Unitá¡rio (R$)
+                      Custo Unit�rio (R$)
                     </Label>
                     <Input
                       id="edit-custo"
@@ -1756,7 +1756,7 @@ export default function ReceitasPage() {
                       step="0.01"
                       min="0"
                       value={insumoEditando.custo_unitario || ''}
-                      onChange={(e) => setInsumoEditando({
+                      onChange={(e: any) => setInsumoEditando({
                         ...insumoEditando, 
                         custo_unitario: e.target.value ? parseFloat(e.target.value) : undefined
                       })}
@@ -1768,14 +1768,14 @@ export default function ReceitasPage() {
 
                 <div>
                   <Label htmlFor="edit-observacoes" className="text-gray-700 dark:text-gray-300">
-                    Observaá§áµes
+                    Observa��es
                   </Label>
                   <Textarea
                     id="edit-observacoes"
                     value={insumoEditando.observacoes || ''}
-                    onChange={(e) => setInsumoEditando({...insumoEditando, observacoes: e.target.value})}
+                    onChange={(e: any) => setInsumoEditando({...insumoEditando, observacoes: e.target.value})}
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                    placeholder="Observaá§áµes adicionais sobre o insumo..."
+                    placeholder="Observa��es adicionais sobre o insumo..."
                     rows={3}
                   />
                 </div>
@@ -1799,13 +1799,13 @@ export default function ReceitasPage() {
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Save className="w-4 h-4 mr-2" />
-                Salvar Alteraá§áµes
+                Salvar Altera��es
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* Modal de Ediá§á£o de Receita */}
+        {/* Modal de Edi��o de Receita */}
         <Dialog open={modalEditarReceita} onOpenChange={setModalEditarReceita}>
           <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 flex flex-col">
             <DialogHeader className="flex-shrink-0">
@@ -1814,22 +1814,22 @@ export default function ReceitasPage() {
                 Editar Receita
               </DialogTitle>
               <DialogDescription className="text-gray-600 dark:text-gray-400">
-                Modifique as informaá§áµes da receita selecionada.
+                Modifique as informa��es da receita selecionada.
               </DialogDescription>
             </DialogHeader>
 
             {receitaEditando && (
               <div className="space-y-6 flex-1 overflow-y-auto">
-                {/* Informaá§áµes bá¡sicas */}
+                {/* Informa��es b�sicas */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="edit-receita-codigo" className="text-gray-700 dark:text-gray-300">
-                      Cá³digo
+                      C�digo
                     </Label>
                     <Input
                       id="edit-receita-codigo"
                       value={receitaEditando.receita_codigo}
-                      onChange={(e) => setReceitaEditando({...receitaEditando, receita_codigo: e.target.value})}
+                      onChange={(e: any) => setReceitaEditando({...receitaEditando, receita_codigo: e.target.value})}
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                       placeholder="Ex: r0001"
                     />
@@ -1842,7 +1842,7 @@ export default function ReceitasPage() {
                     <Input
                       id="edit-receita-nome"
                       value={receitaEditando.receita_nome}
-                      onChange={(e) => setReceitaEditando({...receitaEditando, receita_nome: e.target.value})}
+                      onChange={(e: any) => setReceitaEditando({...receitaEditando, receita_nome: e.target.value})}
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                       placeholder="Nome da receita"
                       required
@@ -1856,9 +1856,9 @@ export default function ReceitasPage() {
                     <Input
                       id="edit-receita-categoria"
                       value={receitaEditando.receita_categoria}
-                      onChange={(e) => setReceitaEditando({...receitaEditando, receita_categoria: e.target.value})}
+                      onChange={(e: any) => setReceitaEditando({...receitaEditando, receita_categoria: e.target.value})}
                       className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                      placeholder="Ex: Pratos principais, Bebidas, Sobremesas"
+                      placeholder="Ex: Pratos principais, Bebidas: any, Sobremesas"
                     />
                   </div>
 
@@ -1889,7 +1889,7 @@ export default function ReceitasPage() {
                       type="number"
                       min="0"
                       value={receitaEditando.rendimento_esperado || ''}
-                      onChange={(e) => setReceitaEditando({
+                      onChange={(e: any) => setReceitaEditando({
                         ...receitaEditando, 
                         rendimento_esperado: e.target.value ? parseInt(e.target.value) : undefined
                       })}
@@ -1904,7 +1904,7 @@ export default function ReceitasPage() {
                     </Label>
                     <Select 
                       value={receitaEditando.ativo !== false ? 'true' : 'false'} 
-                      onValueChange={(value) => setReceitaEditando({...receitaEditando, ativo: value === 'true'})}
+                      onValueChange={(value: any) => setReceitaEditando({...receitaEditando, ativo: value === 'true'})}
                     >
                       <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                         <SelectValue />
@@ -1919,19 +1919,19 @@ export default function ReceitasPage() {
 
                 <div>
                   <Label htmlFor="edit-observacoes-receita" className="text-gray-700 dark:text-gray-300">
-                    Observaá§áµes
+                    Observa��es
                   </Label>
                   <Textarea
                     id="edit-observacoes-receita"
                     value={receitaEditando.observacoes || ''}
-                    onChange={(e) => setReceitaEditando({...receitaEditando, observacoes: e.target.value})}
+                    onChange={(e: any) => setReceitaEditando({...receitaEditando, observacoes: e.target.value})}
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                    placeholder="Observaá§áµes adicionais sobre a receita..."
+                    placeholder="Observa��es adicionais sobre a receita..."
                     rows={3}
                   />
                 </div>
 
-                {/* Ediá§á£o de insumos da receita */}
+                {/* Edi��o de insumos da receita */}
                 {receitaEditando.insumos && receitaEditando.insumos.length > 0 && (
                   <>
                     <div className="flex items-center justify-between">
@@ -1946,7 +1946,7 @@ export default function ReceitasPage() {
                     
                     <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 max-h-80 overflow-y-auto">
                       <div className="space-y-3">
-                        {receitaEditando.insumos.map((insumo, index) => (
+                        {receitaEditando.insumos.map((insumo: any, index: any) => (
                           <div 
                             key={insumo.id}
                             className={`p-4 rounded-lg border-2 transition-all ${
@@ -1981,7 +1981,7 @@ export default function ReceitasPage() {
                                       step="0.1"
                                       min="0"
                                       value={insumo.quantidade_necessaria || ''}
-                                      onChange={(e) => {
+                                      onChange={(e: any) => {
                                         const newInsumos = [...receitaEditando.insumos!]
                                         newInsumos[index] = {
                                           ...newInsumos[index],
@@ -2001,11 +2001,11 @@ export default function ReceitasPage() {
                                   <div className="flex items-center space-x-2 pt-4">
                                     <Checkbox
                                       checked={insumo.is_chefe || false}
-                                      onCheckedChange={(checked) => {
+                                      onCheckedChange={(checked: any) => {
                                         const newInsumos = [...receitaEditando.insumos!]
                                         // Se marcando como chefe, desmarcar todos os outros
                                         if (checked) {
-                                          newInsumos.forEach((item, i) => {
+                                          newInsumos.forEach((item: any, i: any) => {
                                             item.is_chefe = i === index
                                           })
                                         } else {
@@ -2028,10 +2028,10 @@ export default function ReceitasPage() {
                                 </div>
                               </div>
 
-                              {/* Botá£o remover */}
+                              {/* Bot�o remover */}
                               <Button
                                 onClick={() => {
-                                  const newInsumos = receitaEditando.insumos!.filter((_, i) => i !== index)
+                                  const newInsumos = receitaEditando.insumos!.filter((_: any, i: any) => i !== index)
                                   setReceitaEditando({
                                     ...receitaEditando,
                                     insumos: newInsumos
@@ -2057,7 +2057,7 @@ export default function ReceitasPage() {
                           </div>
                         ))}
 
-                        {/* Mensagem se ná£o tem insumo chefe */}
+                        {/* Mensagem se n�o tem insumo chefe */}
                         {receitaEditando.insumos.length > 0 && !receitaEditando.insumos.some(i => i.is_chefe) && (
                           <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
                             <Crown className="w-4 h-4 text-amber-600" />
@@ -2095,14 +2095,14 @@ export default function ReceitasPage() {
                   className="flex-1 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Save className="w-4 h-4 mr-2" />
-                  Salvar Alteraá§áµes
+                  Salvar Altera��es
                 </Button>
               </div>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* Modal de Criaá§á£o de Insumo */}
+        {/* Modal de Cria��o de Insumo */}
         <Dialog open={modalCriarInsumo} onOpenChange={setModalCriarInsumo}>
           <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 flex flex-col">
             <DialogHeader className="flex-shrink-0">
@@ -2119,13 +2119,13 @@ export default function ReceitasPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-gray-700 dark:text-gray-300">
-                    Cá³digo <span className="text-red-500">*</span>
+                    C�digo <span className="text-red-500">*</span>
                     <span className="text-xs text-blue-600 dark:text-blue-400 ml-1">(auto)</span>
                   </Label>
                   <div className="flex gap-2">
                     <Input
                       value={novoInsumo.codigo}
-                      onChange={(e) => setNovoInsumo(prev => ({ ...prev, codigo: e.target.value }))}
+                      onChange={(e: any) => setNovoInsumo(prev => ({ ...prev, codigo: e.target.value }))}
                       placeholder="Ex: i0001"
                       disabled={true}
                       className="bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-300 cursor-not-allowed"
@@ -2146,8 +2146,8 @@ export default function ReceitasPage() {
                   <Label className="text-gray-700 dark:text-gray-300">Nome <span className="text-red-500">*</span></Label>
                   <Input
                     value={novoInsumo.nome}
-                    onChange={(e) => setNovoInsumo(prev => ({ ...prev, nome: e.target.value }))}
-                    placeholder="Ex: Frango á  passarinho"
+                    onChange={(e: any) => setNovoInsumo(prev => ({ ...prev, nome: e.target.value }))}
+                    placeholder="Ex: Frango � passarinho"
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
                 </div>
@@ -2156,7 +2156,7 @@ export default function ReceitasPage() {
                   <Label className="text-gray-700 dark:text-gray-300">Categoria</Label>
                   <Select 
                     value={novoInsumo.categoria} 
-                    onValueChange={(value) => setNovoInsumo(prev => ({ ...prev, categoria: value }))}
+                    onValueChange={(value: any) => setNovoInsumo(prev => ({ ...prev, categoria: value }))}
                   >
                     <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                       <SelectValue />
@@ -2172,14 +2172,14 @@ export default function ReceitasPage() {
                   <Label className="text-gray-700 dark:text-gray-300">Tipo Local</Label>
                   <Select 
                     value={novoInsumo.tipo_local} 
-                    onValueChange={(value) => setNovoInsumo(prev => ({ ...prev, tipo_local: value as 'bar' | 'cozinha' }))}
+                    onValueChange={(value: any) => setNovoInsumo(prev => ({ ...prev, tipo_local: value as 'bar' | 'cozinha' }))}
                   >
                     <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                      <SelectItem value="cozinha">ðŸ‘¨€ðŸ³ Cozinha</SelectItem>
-                      <SelectItem value="bar">ðŸº Bar</SelectItem>
+                      <SelectItem value="cozinha">👨��🍳 Cozinha</SelectItem>
+                      <SelectItem value="bar">🍺 Bar</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -2188,7 +2188,7 @@ export default function ReceitasPage() {
                   <Label className="text-gray-700 dark:text-gray-300">Unidade de Medida</Label>
                   <Select 
                     value={novoInsumo.unidade_medida} 
-                    onValueChange={(value) => setNovoInsumo(prev => ({ ...prev, unidade_medida: value }))}
+                    onValueChange={(value: any) => setNovoInsumo(prev => ({ ...prev, unidade_medida: value }))}
                   >
                     <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                       <SelectValue />
@@ -2205,13 +2205,13 @@ export default function ReceitasPage() {
                 </div>
 
                 <div>
-                  <Label className="text-gray-700 dark:text-gray-300">Custo Unitá¡rio (R$)</Label>
+                  <Label className="text-gray-700 dark:text-gray-300">Custo Unit�rio (R$)</Label>
                   <Input
                     type="number"
                     step="0.01"
                     min="0"
                     value={novoInsumo.custo_unitario || ''}
-                    onChange={(e) => setNovoInsumo(prev => ({ ...prev, custo_unitario: parseFloat(e.target.value) || 0 }))}
+                    onChange={(e: any) => setNovoInsumo(prev => ({ ...prev, custo_unitario: parseFloat(e.target.value) || 0 }))}
                     placeholder="0,00"
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
@@ -2219,11 +2219,11 @@ export default function ReceitasPage() {
               </div>
 
               <div>
-                <Label className="text-gray-700 dark:text-gray-300">Observaá§áµes</Label>
+                <Label className="text-gray-700 dark:text-gray-300">Observa��es</Label>
                 <Textarea
                   value={novoInsumo.observacoes}
-                  onChange={(e) => setNovoInsumo(prev => ({ ...prev, observacoes: e.target.value }))}
-                  placeholder="Observaá§áµes adicionais..."
+                  onChange={(e: any) => setNovoInsumo(prev => ({ ...prev, observacoes: e.target.value }))}
+                  placeholder="Observa��es adicionais..."
                   className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                 />
               </div>

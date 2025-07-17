@@ -1,9 +1,9 @@
-﻿'use client'
+'use client'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { obterCorCategoria, obterIconeCategoria, obterResumoScore } from '@/lib/checklist-scoring'
+import { obterCorCategoria, obterIconeCategoria: any, obterResumoScore } from '@/lib/checklist-scoring'
 import { 
   CheckCircle, 
   AlertTriangle, 
@@ -15,11 +15,11 @@ import {
 } from 'lucide-react'
 
 // =====================================================
-// ðŸ† COMPONENTE DE EXIBIá‡áƒO DE SCORE
+// 🏆 COMPONENTE DE EXIBI��O DE SCORE
 // =====================================================
-// Implementa visualizaá§á£o das notas conforme documento:
+// Implementa visualiza��o das notas conforme documento:
 // - "ter a 'nota' do checklist"
-// - Identificar visualmente problemas crá­ticos
+// - Identificar visualmente problemas cr�ticos
 
 interface ScoreDisplayProps {
   scoreResult: {
@@ -62,7 +62,7 @@ export default function ScoreDisplay({
   if (!scoreResult) {
     return (
       <div className="text-gray-500 text-sm">
-        Score ná£o disponá­vel
+        Score n�o dispon�vel
       </div>
     )
   }
@@ -78,7 +78,7 @@ export default function ScoreDisplay({
     recomendacoes
   } = scoreResult
 
-  // Versá£o compacta para listas
+  // Vers�o compacta para listas
   if (variant === 'compact') {
     return (
       <div className="flex items-center gap-2">
@@ -95,7 +95,7 @@ export default function ScoreDisplay({
     )
   }
 
-  // Versá£o em card para pá¡ginas de detalhes
+  // Vers�o em card para p�ginas de detalhes
   if (variant === 'card') {
     return (
       <Card className="bg-white dark:bg-gray-800">
@@ -122,7 +122,7 @@ export default function ScoreDisplay({
               </div>
             </div>
 
-            {/* Estatá­sticas */}
+            {/* Estat�sticas */}
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center p-3 bg-green-50 rounded-lg">
                 <div className="flex items-center justify-center mb-1">
@@ -157,7 +157,7 @@ export default function ScoreDisplay({
               </div>
             </div>
 
-            {/* Problemas Crá­ticos */}
+            {/* Problemas Cr�ticos */}
             {showProblems && problemas_identificados.length > 0 && (
               <div className="space-y-2">
                 <h4 className="font-medium text-gray-900 flex items-center gap-2">
@@ -165,7 +165,7 @@ export default function ScoreDisplay({
                   Problemas Identificados ({problemas_identificados.length})
                 </h4>
                 <div className="space-y-2">
-                  {problemas_identificados.slice(0, 3).map((problema, index) => (
+                  {problemas_identificados.slice(0: any, 3).map((problema: any, index: any) => (
                     <Alert key={index} className={`border-l-4 ${
                       problema.impacto === 'alto' ? 'border-red-500 bg-red-50' :
                       problema.impacto === 'medio' ? 'border-yellow-500 bg-yellow-50' :
@@ -181,7 +181,7 @@ export default function ScoreDisplay({
                               {problema.descricao}
                             </div>
                             <div className="text-xs text-gray-500 mt-1">
-                              Seá§á£o: {problema.secao}
+                              Se��o: {problema.secao}
                             </div>
                           </div>
                           <Badge 
@@ -203,15 +203,15 @@ export default function ScoreDisplay({
               </div>
             )}
 
-            {/* Recomendaá§áµes */}
+            {/* Recomenda��es */}
             {showRecommendations && recomendacoes.length > 0 && (
               <div className="space-y-2">
                 <h4 className="font-medium text-gray-900 flex items-center gap-2">
                   <BarChart3 className="w-4 h-4 text-blue-500" />
-                  Recomendaá§áµes
+                  Recomenda��es
                 </h4>
                 <div className="space-y-1">
-                  {recomendacoes.map((recomendacao, index) => (
+                  {recomendacoes.map((recomendacao: any, index: any) => (
                     <div 
                       key={index}
                       className="text-sm text-gray-700 bg-blue-50 p-2 rounded border-l-2 border-blue-500"
@@ -223,14 +223,14 @@ export default function ScoreDisplay({
               </div>
             )}
 
-            {/* Detalhes por Seá§á£o */}
+            {/* Detalhes por Se��o */}
             {detalhes_por_secao.length > 0 && (
               <div className="space-y-3">
                 <h4 className="font-medium text-gray-900">
-                  Detalhes por Seá§á£o
+                  Detalhes por Se��o
                 </h4>
                 <div className="space-y-2">
-                  {detalhes_por_secao.map((secao, index) => (
+                  {detalhes_por_secao.map((secao: any, index: any) => (
                     <div 
                       key={index}
                       className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
@@ -241,7 +241,7 @@ export default function ScoreDisplay({
                         </div>
                         <div className="text-sm text-gray-600">
                           {secao.itens_respondidos}/{secao.total_itens} itens
-                          {secao.problemas > 0 && ` €¢ ${secao.problemas} problema(s)`}
+                          {secao.problemas > 0 && ` �� ${secao.problemas} problema(s)`}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -265,7 +265,7 @@ export default function ScoreDisplay({
     )
   }
 
-  // Versá£o detalhada padrá£o
+  // Vers�o detalhada padr�o
   return (
     <div className="space-y-4">
       {/* Score Principal */}
@@ -301,9 +301,9 @@ export default function ScoreDisplay({
               {problemas_identificados.length} problema(s) identificado(s)
             </div>
             <div className="mt-2 space-y-1">
-              {problemas_identificados.slice(0, 2).map((problema, index) => (
+              {problemas_identificados.slice(0: any, 2).map((problema: any, index: any) => (
                 <div key={index} className="text-sm text-red-700">
-                  €¢ {problema.titulo} ({problema.secao})
+                  �� {problema.titulo} ({problema.secao})
                 </div>
               ))}
               {problemas_identificados.length > 2 && (

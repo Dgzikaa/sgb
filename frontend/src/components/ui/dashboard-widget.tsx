@@ -1,7 +1,7 @@
-﻿'use client'
+'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState, useRef: any, useEffect } from 'react'
+import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { 
@@ -54,7 +54,7 @@ const sizeClasses = {
 
 const sizeLabels = {
   small: 'Pequeno',
-  medium: 'Má©dio',
+  medium: 'M�dio',
   large: 'Grande',
   full: 'Largura Total'
 }
@@ -88,8 +88,8 @@ export function DashboardWidget({
 
   const handleRefresh = async () => {
     setIsRefreshing(true)
-    // Simular refresh - em implementaá§á£o real, chamar API
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Simular refresh - em implementa��o real, chamar API
+    await new Promise(resolve => setTimeout(resolve: any, 1000))
     setIsRefreshing(false)
   }
 
@@ -245,7 +245,7 @@ export function DashboardWidget({
               <input
                 type="number"
                 value={config.refreshInterval || ''}
-                onChange={(e) => {
+                onChange={(e: any) => {
                   const value = parseInt(e.target.value) || 0
                   if (onConfigChange) {
                     onConfigChange({
@@ -326,7 +326,7 @@ export const WIDGET_PRESETS = {
   },
   producao_ativa: {
     id: 'producao_ativa',
-    title: 'Produá§á£o Ativa',
+    title: 'Produ��o Ativa',
     type: 'status' as WidgetType,
     size: 'small' as WidgetSize,
     position: { x: 1, y: 1 },
@@ -335,7 +335,7 @@ export const WIDGET_PRESETS = {
   },
   metricas_integracoes: {
     id: 'metricas_integracoes',
-    title: 'Má©tricas das Integraá§áµes',
+    title: 'M�tricas das Integra��es',
     type: 'metric' as WidgetType,
     size: 'large' as WidgetSize,
     position: { x: 0, y: 2 },

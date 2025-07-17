@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { api } from '@/lib/api-client'
 
 // =====================================================
@@ -82,7 +82,7 @@ interface UseTemplatesResult {
     total: number
     pages: number
   } | null
-  // Aá§áµes
+  // A��es
   setFiltros: (filtros: Partial<TemplateFilters>) => void
   carregarTemplates: () => Promise<void>
   instalarPredefinidos: () => Promise<boolean>
@@ -116,7 +116,7 @@ export function useTemplates(filtrosIniciais: TemplateFilters = {}): UseTemplate
   }, [filtros])
 
   // =====================================================
-  // FUNá‡á•ES PRINCIPAIS
+  // FUN��ES PRINCIPAIS
   // =====================================================
 
   const carregarTemplates = async () => {
@@ -128,7 +128,7 @@ export function useTemplates(filtrosIniciais: TemplateFilters = {}): UseTemplate
       
       Object.entries(filtros).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
-          params.append(key, String(value))
+          params.append(key: any, String(value))
         }
       })
 
@@ -247,7 +247,7 @@ export function useTemplate(id?: string): UseTemplateResult {
   }, [id])
 
   // =====================================================
-  // FUNá‡á•ES
+  // FUN��ES
   // =====================================================
 
   const carregarTemplate = async () => {
@@ -262,7 +262,7 @@ export function useTemplate(id?: string): UseTemplateResult {
       if (response.success) {
         setTemplate(response.data)
       } else {
-        setError(response.error || 'Template ná£o encontrado')
+        setError(response.error || 'Template n�o encontrado')
       }
     } catch (err: any) {
       console.error('Erro ao carregar template:', err)
@@ -320,7 +320,7 @@ export function useTemplate(id?: string): UseTemplateResult {
 }
 
 // =====================================================
-// UTILITáRIOS
+// UTILIT�RIOS
 // =====================================================
 
 export const templateUtils = {
@@ -339,46 +339,46 @@ export const templateUtils = {
     return colors[categoria] || 'bg-gray-100 text-gray-800'
   },
 
-  // Obter á­cone do tipo
+  // Obter �cone do tipo
   getTipoIcon: (tipo: string): string => {
     const icons: Record<string, string> = {
-      abertura: 'ðŸŒ…',
-      fechamento: 'ðŸŒ™',
-      manutencao: 'ðŸ”§',
-      qualidade: 'œ…',
-      seguranca: 'ðŸ›¡ï¸',
-      limpeza: 'ðŸ§¹',
-      auditoria: 'ðŸ“‹'
+      abertura: '🌅',
+      fechamento: '🌙',
+      manutencao: '🔧',
+      qualidade: '��',
+      seguranca: '🛡️',
+      limpeza: '🧹',
+      auditoria: '📋'
     }
-    return icons[tipo] || 'ðŸ“‹'
+    return icons[tipo] || '📋'
   },
 
-  // Obter á­cone do tipo de campo
+  // Obter �cone do tipo de campo
   getCampoIcon: (tipo: string): string => {
     const icons: Record<string, string> = {
-      texto: 'ðŸ“',
-      numero: 'ðŸ”¢',
-      sim_nao: 'œ…',
-      data: 'ðŸ“…',
-      assinatura: 'œï¸',
-      foto_camera: 'ðŸ“·',
-      foto_upload: 'ðŸ–¼ï¸',
-      avaliacao: '­'
+      texto: '📝',
+      numero: '🔢',
+      sim_nao: '��',
+      data: '📅',
+      assinatura: '��️',
+      foto_camera: '📷',
+      foto_upload: '🖼️',
+      avaliacao: '��'
     }
-    return icons[tipo] || 'ðŸ“‹'
+    return icons[tipo] || '📋'
   },
 
   // Obter label do tipo de campo
   getCampoLabel: (tipo: string): string => {
     const labels: Record<string, string> = {
       texto: 'Texto',
-      numero: 'Náºmero',
-      sim_nao: 'Sim/Ná£o',
+      numero: 'N�mero',
+      sim_nao: 'Sim/N�o',
       data: 'Data',
       assinatura: 'Assinatura',
-      foto_camera: 'Foto (Cá¢mera)',
+      foto_camera: 'Foto (C�mera)',
       foto_upload: 'Foto (Upload)',
-      avaliacao: 'Avaliaá§á£o'
+      avaliacao: 'Avalia��o'
     }
     return labels[tipo] || tipo
   },
@@ -388,39 +388,39 @@ export const templateUtils = {
     const erros: string[] = []
 
     if (!template.nome?.trim()) {
-      erros.push('Nome á© obrigatá³rio')
+      erros.push('Nome � obrigat�rio')
     }
 
     if (!template.setor?.trim()) {
-      erros.push('Setor á© obrigatá³rio')
+      erros.push('Setor � obrigat�rio')
     }
 
     if (!template.categoria) {
-      erros.push('Categoria á© obrigatá³ria')
+      erros.push('Categoria � obrigat�ria')
     }
 
     if (!template.tipo) {
-      erros.push('Tipo á© obrigatá³rio')
+      erros.push('Tipo � obrigat�rio')
     }
 
     if (!template.estrutura?.secoes?.length) {
-      erros.push('Pelo menos uma seá§á£o á© obrigatá³ria')
+      erros.push('Pelo menos uma se��o � obrigat�ria')
     }
 
-    // Validar seá§áµes
-    template.estrutura?.secoes?.forEach((secao, index) => {
+    // Validar se��es
+    template.estrutura?.secoes?.forEach((secao: any, index: any) => {
       if (!secao.nome?.trim()) {
-        erros.push(`Nome da seá§á£o ${index + 1} á© obrigatá³rio`)
+        erros.push(`Nome da se��o ${index + 1} � obrigat�rio`)
       }
 
       if (!secao.itens?.length) {
-        erros.push(`Seá§á£o "${secao.nome}" deve ter pelo menos um item`)
+        erros.push(`Se��o "${secao.nome}" deve ter pelo menos um item`)
       }
 
       // Validar itens
-      secao.itens?.forEach((item, itemIndex) => {
+      secao.itens?.forEach((item: any, itemIndex: any) => {
         if (!item.titulo?.trim()) {
-          erros.push(`Tá­tulo do item ${itemIndex + 1} na seá§á£o "${secao.nome}" á© obrigatá³rio`)
+          erros.push(`T�tulo do item ${itemIndex + 1} na se��o "${secao.nome}" � obrigat�rio`)
         }
       })
     })

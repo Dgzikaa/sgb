@@ -1,8 +1,8 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { LogIn, Eye, EyeOff, Fingerprint } from 'lucide-react'
+import { LogIn, Eye: any, EyeOff, Fingerprint } from 'lucide-react'
 import BiometricAuth from '@/components/auth/BiometricAuth'
 
 export default function LoginPage() {
@@ -19,7 +19,7 @@ export default function LoginPage() {
   const [isHydrated, setIsHydrated] = useState(false)
   const [logoError, setLogoError] = useState(false)
   
-  // Estado para controlar o má©todo de login
+  // Estado para controlar o m�todo de login
   const [loginMethod, setLoginMethod] = useState<'traditional' | 'biometric'>('traditional')
   const [showBiometricRegistration, setShowBiometricRegistration] = useState(false)
   const [lastLoginData, setLastLoginData] = useState<any>(null)
@@ -28,14 +28,14 @@ export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   
-  // Capturar URL de retorno se houver (sá³ no cliente)
+  // Capturar URL de retorno se houver (s� no cliente)
   const returnUrl = isHydrated ? searchParams.get('returnUrl') : null
 
-  // Controlar hidrataá§á£o - sá³ executa apá³s componente montar
+  // Controlar hidrata��o - s� executa ap�s componente montar
   useEffect(() => {
     setIsHydrated(true)
     
-    // Detectar dispositivo má³vel
+    // Detectar dispositivo m�vel
     const checkMobileDevice = () => {
       const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera
       const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
@@ -47,7 +47,7 @@ export default function LoginPage() {
     checkMobileDevice()
   }, [])
 
-  // Verificar se usuá¡rio já¡ está¡ logado
+  // Verificar se usu�rio j� est� logado
   useEffect(() => {
     const checkAuthStatus = () => {
       // Verificar se estamos no cliente antes de acessar localStorage
@@ -56,23 +56,23 @@ export default function LoginPage() {
       try {
         const userData = localStorage.getItem('sgb_user')
         if (userData) {
-          // Validar se os dados sá£o vá¡lidos (ná£o apenas se existem)
+          // Validar se os dados s�o v�lidos (n�o apenas se existem)
           const user = JSON.parse(userData)
           if (user && user.email && user.nome) {
-            console.log('œ… Usuá¡rio já¡ logado, redirecionando...', user.nome)
+            console.log('�� Usu�rio j� logado, redirecionando...', user.nome)
             const destination = returnUrl ? decodeURIComponent(returnUrl) : '/home'
-            setSuccess(`Usuá¡rio já¡ logado! Redirecionando para ${destination}...`)
+            setSuccess(`Usu�rio j� logado! Redirecionando para ${destination}...`)
             setTimeout(() => {
               router.push(destination)
             }, 1000)
           } else {
-            // Dados invá¡lidos, limpar localStorage
-            console.log('š ï¸ Dados de usuá¡rio invá¡lidos, limpando...')
+            // Dados inv�lidos, limpar localStorage
+            console.log('��️ Dados de usu�rio inv�lidos, limpando...')
             localStorage.removeItem('sgb_user')
           }
         }
       } catch (error) {
-        console.log('ðŸ” Verificaá§á£o de auth falhou, limpando dados:', error)
+        console.log('🔍 Verifica��o de auth falhou, limpando dados:', error)
         // Se houver erro ao parsear, limpar dados corrompidos
         localStorage.removeItem('sgb_user')
       }
@@ -81,7 +81,7 @@ export default function LoginPage() {
     checkAuthStatus()
   }, [router, returnUrl])
 
-  // Auto-fechar modal de recuperaá§á£o apá³s sucesso
+  // Auto-fechar modal de recupera��o ap�s sucesso
   useEffect(() => {
     if (forgotSuccess) {
       const timer = setTimeout(() => {
@@ -100,14 +100,14 @@ export default function LoginPage() {
     setError(null)
     
     try {
-      // Simulaá§á£o de envio de email de recuperaá§á£o
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Simula��o de envio de email de recupera��o
+      await new Promise(resolve => setTimeout(resolve: any, 2000))
       
-      console.log('Solicitation para recuperaá§á£o de senha:', forgotEmail)
+      console.log('Solicitation para recupera��o de senha:', forgotEmail)
       setForgotSuccess(true)
       
     } catch (error: any) {
-      setError('Erro ao enviar email de recuperaá§á£o: ' + error.message)
+      setError('Erro ao enviar email de recupera��o: ' + error.message)
     } finally {
       setForgotLoading(false)
     }
@@ -135,9 +135,9 @@ export default function LoginPage() {
       const result = await response.json()
 
       if (!result.success) {
-        // Verificar se á© redirecionamento para redefiniá§á£o de senha
+        // Verificar se � redirecionamento para redefini��o de senha
         if (result.requirePasswordReset && result.redirectUrl) {
-          setSuccess(`Olá¡ ${result.user?.nome}! Redirecionando para redefiniá§á£o de senha...`)
+          setSuccess(`Ol� ${result.user?.nome}! Redirecionando para redefini��o de senha...`)
           setTimeout(() => {
             if (typeof window !== 'undefined') {
               router.push(result.redirectUrl)
@@ -150,11 +150,11 @@ export default function LoginPage() {
         return
       }
 
-      // Salvar dados do usuá¡rio no localStorage e cookie
+      // Salvar dados do usu�rio no localStorage e cookie
       const { syncAuthData } = await import('@/lib/cookies')
       syncAuthData(result.user)
       
-      // Verificar se o usuá¡rio tem biometria registrada
+      // Verificar se o usu�rio tem biometria registrada
       try {
         const biometricStatusResponse = await fetch('/api/auth/biometric/status', {
           method: 'POST',
@@ -168,55 +168,55 @@ export default function LoginPage() {
         const biometricStatus = await biometricStatusResponse.json()
         
         if (biometricStatus.success && !biometricStatus.biometricRegistered) {
-          // Usuá¡rio ná£o tem biometria registrada - oferecer registro
+          // Usu�rio n�o tem biometria registrada - oferecer registro
           setLastLoginData(result.user)
           setShowBiometricRegistration(true)
-          setSuccess(`œ… Login realizado! Quer configurar biometria para prá³ximos logins?`)
+          setSuccess(`�� Login realizado! Quer configurar biometria para pr�ximos logins?`)
           return
         }
       } catch (error) {
-        console.warn('Erro ao verificar status biomá©trico:', error)
+        console.warn('Erro ao verificar status biom�trico:', error)
       }
       
       // Redirecionar normalmente
       const destination = returnUrl ? decodeURIComponent(returnUrl) : '/home'
-      setSuccess(`œ… Login realizado com sucesso! Redirecionando...`)
+      setSuccess(`�� Login realizado com sucesso! Redirecionando...`)
       setTimeout(() => {
         router.push(destination)
       }, 1500)
       
     } catch (error: any) {
-      setError('Erro na conexá£o: ' + error.message)
+      setError('Erro na conex�o: ' + error.message)
     } finally {
       setIsLoading(false)
     }
   }
 
-  // Funá§á£o para lidar com sucesso do login biomá©trico
+  // Fun��o para lidar com sucesso do login biom�trico
   const handleBiometricLoginSuccess = async (userData?: any) => {
     if (userData) {
-      // Salvar dados do usuá¡rio no localStorage e cookie
+      // Salvar dados do usu�rio no localStorage e cookie
       const { syncAuthData } = await import('@/lib/cookies')
       syncAuthData(userData)
       
       const destination = returnUrl ? decodeURIComponent(returnUrl) : '/home'
-      setSuccess(`ðŸŽ‰ Login biomá©trico realizado com sucesso! Bem-vindo(a), ${userData.nome}! Redirecionando...`)
+      setSuccess(`🎉 Login biom�trico realizado com sucesso! Bem-vindo(a), ${userData.nome}! Redirecionando...`)
       setTimeout(() => {
         router.push(destination)
       }, 2000)
     }
   }
 
-  // Funá§á£o para lidar com erro do login biomá©trico
+  // Fun��o para lidar com erro do login biom�trico
   const handleBiometricLoginError = (errorMessage: string) => {
     setError(errorMessage)
   }
 
-  // Funá§á£o para lidar com sucesso do registro biomá©trico apá³s login
+  // Fun��o para lidar com sucesso do registro biom�trico ap�s login
   const handlePostLoginBiometricRegister = async (userData?: any) => {
     if (lastLoginData) {
       setShowBiometricRegistration(false)
-      setSuccess(`ðŸŽ‰ Biometria configurada! Agora vocáª pode fazer login rapidamente!`)
+      setSuccess(`🎉 Biometria configurada! Agora voc� pode fazer login rapidamente!`)
       
       const destination = returnUrl ? decodeURIComponent(returnUrl) : '/home'
       setTimeout(() => {
@@ -225,17 +225,17 @@ export default function LoginPage() {
     }
   }
 
-  // Funá§á£o para pular registro biomá©trico
+  // Fun��o para pular registro biom�trico
   const skipBiometricRegistration = () => {
     setShowBiometricRegistration(false)
     const destination = returnUrl ? decodeURIComponent(returnUrl) : '/home'
-    setSuccess(`œ… Login concluá­do! Redirecionando...`)
+    setSuccess(`�� Login conclu�do! Redirecionando...`)
     setTimeout(() => {
       router.push(destination)
     }, 1000)
   }
 
-  // Ná£o renderizar nada atá© hidrataá§á£o completa para evitar mismatch
+  // N�o renderizar nada at� hidrata��o completa para evitar mismatch
   if (!isHydrated) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
@@ -265,13 +265,13 @@ export default function LoginPage() {
               />
             ) : (
               <div className="w-52 h-52 lg:w-72 lg:h-72 bg-indigo-600 flex items-center justify-center" suppressHydrationWarning>
-                <span className="text-8xl lg:text-9xl text-white">ðŸª</span>
+                <span className="text-8xl lg:text-9xl text-white">🏪</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Configuraá§á£o de biometria pá³s-login */}
+        {/* Configura��o de biometria p�s-login */}
         {showBiometricRegistration && lastLoginData && (
           <div className="mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-lg" suppressHydrationWarning>
             <div className="text-center mb-4" suppressHydrationWarning>
@@ -282,7 +282,7 @@ export default function LoginPage() {
                 Configurar Biometria
               </h3>
               <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-                Quer configurar biometria para prá³ximos logins?
+                Quer configurar biometria para pr�ximos logins?
               </p>
             </div>
             
@@ -300,22 +300,22 @@ export default function LoginPage() {
                 onClick={skipBiometricRegistration}
                 className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
               >
-                Agora Ná£o
+                Agora N�o
               </button>
             </div>
           </div>
         )}
 
-        {/* Notificaá§áµes */}
+        {/* Notifica��es */}
         {returnUrl && !showBiometricRegistration && (
           <div className="mb-6 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-xl p-4" suppressHydrationWarning>
             <div className="flex items-center space-x-3" suppressHydrationWarning>
               <div className="w-8 h-8 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center" suppressHydrationWarning>
-                <span className="text-blue-600 dark:text-blue-400 text-sm">ðŸ”’</span>
+                <span className="text-blue-600 dark:text-blue-400 text-sm">🔒</span>
               </div>
               <div>
                 <p className="text-blue-700 dark:text-blue-300 text-sm font-medium">Acesso protegido</p>
-                <p className="text-blue-600 dark:text-blue-400 text-xs mt-1">Faá§a login para acessar a pá¡gina solicitada</p>
+                <p className="text-blue-600 dark:text-blue-400 text-xs mt-1">Fa�a login para acessar a p�gina solicitada</p>
               </div>
             </div>
           </div>
@@ -336,14 +336,14 @@ export default function LoginPage() {
           <div className="mb-6 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-xl p-4" suppressHydrationWarning>
             <div className="flex items-center space-x-3" suppressHydrationWarning>
               <div className="w-8 h-8 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center" suppressHydrationWarning>
-                <span className="text-green-600 dark:text-green-400 text-sm animate-pulse">œ“</span>
+                <span className="text-green-600 dark:text-green-400 text-sm animate-pulse">��</span>
               </div>
               <p className="text-green-700 dark:text-green-300 text-sm font-medium">{success}</p>
             </div>
           </div>
         )}
 
-        {/* Seletor de Má©todo de Login */}
+        {/* Seletor de M�todo de Login */}
         {!showBiometricRegistration && (
           <div className="mb-6">
             {isMobileDevice ? (
@@ -368,7 +368,7 @@ export default function LoginPage() {
                   }`}
                 >
                   <Fingerprint className="w-4 h-4" />
-                  Biomá©trico
+                  Biom�trico
                 </button>
               </div>
             ) : (
@@ -382,11 +382,11 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* Conteáºdo baseado no má©todo escolhido */}
+        {/* Conte�do baseado no m�todo escolhido */}
         {!showBiometricRegistration && (
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
           {loginMethod === 'traditional' ? (
-            /* Formulá¡rio de Login Tradicional */
+            /* Formul�rio de Login Tradicional */
             <>
               <form onSubmit={handleLogin} className="space-y-6">
                 <div>
@@ -398,7 +398,7 @@ export default function LoginPage() {
                       id="email"
                       type="email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e: any) => setEmail(e.target.value)}
                       className="elegant-input w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                       placeholder="seu@email.com"
                       required
@@ -415,9 +415,9 @@ export default function LoginPage() {
                       id="password"
                       type={showPassword ? 'text' : 'password'}
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e: any) => setPassword(e.target.value)}
                       className="elegant-input w-full pr-12 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                      placeholder="€¢€¢€¢€¢€¢€¢€¢€¢"
+                      placeholder="����������������"
                       required
                     />
                     <button
@@ -458,17 +458,17 @@ export default function LoginPage() {
               </div>
             </>
           ) : (
-            /* Login Biomá©trico */
+            /* Login Biom�trico */
             <div className="space-y-6">
               <div className="text-center">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 rounded-full mb-4">
                   <Fingerprint className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-2">
-                  Login Biomá©trico
+                  Login Biom�trico
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-gray-400">
-                  Use seu rosto para fazer login de forma rá¡pida e segura
+                  Use seu rosto para fazer login de forma r�pida e segura
                 </p>
               </div>
 
@@ -476,7 +476,7 @@ export default function LoginPage() {
                 mode="login"
                 onSuccess={handleBiometricLoginSuccess}
                 onError={handleBiometricLoginError}
-                barId="1" // Vocáª pode pegar isso de algum contexto ou seleá§á£o
+                barId="1" // Voc� pode pegar isso de algum contexto ou sele��o
                 className="border-0 shadow-none p-0 bg-transparent"
               />
 
@@ -498,7 +498,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <div className="text-center mt-12 text-slate-400 dark:text-gray-500 text-sm">
-          <p>© 2025 Sistema de Gestá£o de Bares - Todos os direitos reservados</p>
+          <p>� 2025 Sistema de Gest�o de Bares - Todos os direitos reservados</p>
         </div>
       </div>
 
@@ -508,29 +508,29 @@ export default function LoginPage() {
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 w-full max-w-md shadow-2xl" suppressHydrationWarning>
             <div className="text-center mb-6" suppressHydrationWarning>
               <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900/50 rounded-full mb-4" suppressHydrationWarning>
-                <span className="text-2xl">ðŸ”‘</span>
+                <span className="text-2xl">🔑</span>
               </div>
               <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
                 Recuperar Senha
               </h2>
               <p className="text-slate-600 dark:text-gray-400">
-                Digite seu e-mail para receber as instruá§áµes de recuperaá§á£o
+                Digite seu e-mail para receber as instru��es de recupera��o
               </p>
             </div>
 
             {forgotSuccess ? (
               <div className="text-center" suppressHydrationWarning>
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/50 rounded-full mb-4" suppressHydrationWarning>
-                  <span className="text-2xl text-green-600 dark:text-green-400">œ“</span>
+                  <span className="text-2xl text-green-600 dark:text-green-400">��</span>
                 </div>
                 <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-2">
                   E-mail Enviado!
                 </h3>
                 <p className="text-slate-600 dark:text-gray-400 mb-4">
-                  Verifique sua caixa de entrada e siga as instruá§áµes para redefinir sua senha.
+                  Verifique sua caixa de entrada e siga as instru��es para redefinir sua senha.
                 </p>
                 <div className="text-sm text-slate-500 dark:text-gray-500">
-                  Este modal será¡ fechado automaticamente...
+                  Este modal ser� fechado automaticamente...
                 </div>
               </div>
             ) : (
@@ -542,7 +542,7 @@ export default function LoginPage() {
                   <input
                     type="email"
                     value={forgotEmail}
-                    onChange={(e) => setForgotEmail(e.target.value)}
+                    onChange={(e: any) => setForgotEmail(e.target.value)}
                     className="elegant-input w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                     placeholder="seu@email.com"
                     required

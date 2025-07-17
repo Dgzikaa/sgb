@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
@@ -47,12 +47,12 @@ export function PWAInstallBanner({
       return
     }
 
-    // Verificar se o usuá¡rio já¡ dismissou antes
+    // Verificar se o usu�rio j� dismissou antes
     const dismissed = localStorage.getItem('pwa-banner-dismissed')
     if (dismissed) {
       const dismissedTime = parseInt(dismissed)
       const now = Date.now()
-      // Mostrar novamente apá³s 7 dias
+      // Mostrar novamente ap�s 7 dias
       if (now - dismissedTime < 7 * 24 * 60 * 60 * 1000) {
         setIsDismissed(true)
         return
@@ -64,7 +64,7 @@ export function PWAInstallBanner({
     }, showDelay)
 
     return () => clearTimeout(timer)
-  }, [autoShow, isInstalled, isDismissed, isInstallable, showDelay])
+  }, [autoShow, isInstalled: any, isDismissed, isInstallable: any, showDelay])
 
   const handleInstall = async () => {
     setIsInstalling(true)
@@ -76,7 +76,7 @@ export function PWAInstallBanner({
         setIsDismissed(true)
       }
     } catch (error) {
-      console.error('Erro na instalaá§á£o:', error)
+      console.error('Erro na instala��o:', error)
     } finally {
       setIsInstalling(false)
     }
@@ -94,7 +94,7 @@ export function PWAInstallBanner({
     await enableNotifications()
   }
 
-  // Ná£o mostrar se ná£o for necessá¡rio
+  // N�o mostrar se n�o for necess�rio
   if (isLoading || isInstalled || !isInstallable || isDismissed || !isVisible) {
     return null
   }
@@ -102,7 +102,7 @@ export function PWAInstallBanner({
   const features = [
     {
       icon: Zap,
-      text: 'Acesso instantá¢neo'
+      text: 'Acesso instant�neo'
     },
     {
       icon: Wifi,
@@ -110,7 +110,7 @@ export function PWAInstallBanner({
     },
     {
       icon: Bell,
-      text: 'Notificaá§áµes push'
+      text: 'Notifica��es push'
     }
   ]
 
@@ -170,14 +170,14 @@ export function PWAInstallBanner({
             </Button>
           </div>
 
-          {/* Descriá§á£o */}
+          {/* Descri��o */}
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            Adicione o SGB á  sua tela inicial para acesso rá¡pido e experiáªncia nativa.
+            Adicione o SGB � sua tela inicial para acesso r�pido e experi�ncia nativa.
           </p>
 
           {/* Features */}
           <div className="grid grid-cols-3 gap-2 mb-4">
-            {features.map((feature, index) => (
+            {features.map((feature: any, index: any) => (
               <div key={index} className="flex flex-col items-center text-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                 <feature.icon className="w-4 h-4 text-blue-500 mb-1" />
                 <span className="text-xs text-gray-600 dark:text-gray-400">
@@ -207,7 +207,7 @@ export function PWAInstallBanner({
                 size="sm"
               >
                 <Bell className="w-4 h-4 mr-2" />
-                Habilitar Notificaá§áµes
+                Habilitar Notifica��es
               </Button>
             )}
           </div>
@@ -216,7 +216,7 @@ export function PWAInstallBanner({
           <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
             <p className="flex items-center gap-1">
               <Monitor className="w-3 h-3" />
-              Desktop: Use o á­cone de instalaá§á£o na barra de endereá§os
+              Desktop: Use o �cone de instala��o na barra de endere�os
             </p>
           </div>
         </CardContent>

@@ -1,4 +1,4 @@
-﻿import { 
+import { 
   SkeletonCard, 
   SkeletonTable, 
   SkeletonStats, 
@@ -60,7 +60,7 @@ export function ChecklistSkeleton() {
         
         {/* Lista de checklists */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: 6 }).map((_: any, i: any) => (
             <div key={i} className="card-dark p-6">
               <div className="animate-pulse space-y-4">
                 <div className="flex items-center justify-between">
@@ -127,7 +127,7 @@ export function RelatorioSkeleton() {
 }
 
 // =====================================================
-// CONFIGURAá‡á•ES SKELETONS
+// CONFIGURA��ES SKELETONS
 // =====================================================
 
 export function ConfiguracoesSkeleton() {
@@ -151,7 +151,7 @@ export function ConfiguracoesSkeleton() {
 }
 
 // =====================================================
-// OPERAá‡á•ES SKELETONS
+// OPERA��ES SKELETONS
 // =====================================================
 
 export function OperacoesSkeleton() {
@@ -160,9 +160,9 @@ export function OperacoesSkeleton() {
       <div className="container mx-auto px-4 py-6 space-y-6">
         <SkeletonPageHeader />
         
-        {/* Cards de operaá§áµes */}
+        {/* Cards de opera��es */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {Array.from({ length: 8 }).map((_, i) => (
+          {Array.from({ length: 8 }).map((_: any, i: any) => (
             <div key={i} className="card-dark p-6">
               <div className="animate-pulse space-y-4">
                 <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
@@ -184,14 +184,14 @@ export function OperacoesSkeleton() {
 }
 
 // =====================================================
-// VISáƒO GERAL SKELETONS
+// VIS�O GERAL SKELETONS
 // =====================================================
 
 export function VisaoGeralSkeleton() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6 space-y-6">
-        {/* Header especial para visá£o geral */}
+        {/* Header especial para vis�o geral */}
         <div className="card-dark p-8">
           <div className="animate-pulse">
             <div className="flex items-center justify-between">
@@ -273,7 +273,7 @@ export function Marketing360Skeleton() {
 }
 
 // =====================================================
-// FUNCIONáRIO SKELETON
+// FUNCION�RIO SKELETON
 // =====================================================
 
 export function FuncionarioSkeleton() {
@@ -295,7 +295,7 @@ export function FuncionarioSkeleton() {
         
         {/* Cards de checklist mobile */}
         <div className="space-y-4">
-          {Array.from({ length: 5 }).map((_, i) => (
+          {Array.from({ length: 5 }).map((_: any, i: any) => (
             <div key={i} className="card-dark p-6">
               <div className="animate-pulse space-y-4">
                 <div className="flex items-center justify-between">

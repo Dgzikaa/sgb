@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -15,12 +15,12 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const barId = searchParams.get('barId') || '3'
     
-    console.log('ðŸ§ª TESTANDO API v2 DO CONTAAZUL (igual sync-dados-brutos)...')
+    console.log('🧪 TESTANDO API v2 DO CONTAAZUL (igual sync-dados-brutos)...')
 
     const supabase = createSupabaseClient()
 
     // 1. Buscar credenciais (igual sync-dados-brutos)
-    console.log('ðŸ” Verificando credenciais ContaAzul...')
+    console.log('🔍 Verificando credenciais ContaAzul...')
     const { data: credentials, error: credError } = await supabase
       .from('api_credentials')
       .select('*')
@@ -31,24 +31,24 @@ export async function GET(request: NextRequest) {
 
     if (credError || !credentials) {
       return NextResponse.json({ 
-        error: 'Credenciais ContaAzul ná£o encontradas',
+        error: 'Credenciais ContaAzul n�o encontradas',
         details: credError?.message 
       }, { status: 404 })
     }
 
-    // 2. Verificar token (igual sync-dados-brutos - SEM renovaá§á£o automá¡tica)
+    // 2. Verificar token (igual sync-dados-brutos - SEM renova��o autom�tica)
     const agora = new Date()
     const expiraEm = new Date(credentials.expires_at)
     
     if (expiraEm <= agora) {
       return NextResponse.json({ 
-        error: 'Token ContaAzul expirado. Renovaá§á£o necessá¡ria.',
+        error: 'Token ContaAzul expirado. Renova��o necess�ria.',
         expires_at: credentials.expires_at,
         agora: agora.toISOString() 
       }, { status: 401 })
     }
 
-    console.log('œ… Token vá¡lido atá©:', expiraEm.toLocaleString())
+    console.log('�� Token v�lido at�:', expiraEm.toLocaleString())
 
     const headers = {
       'Authorization': `Bearer ${credentials.access_token}`,
@@ -61,10 +61,10 @@ export async function GET(request: NextRequest) {
     const testes = []
 
     // TESTE 1: Categorias (igual sync-dados-brutos)
-    console.log('ðŸ§ª TESTE 1: Categorias v2...')
+    console.log('🧪 TESTE 1: Categorias v2...')
     try {
       const urlCategorias = `${baseUrl}/v1/categorias?pagina=1&tamanho_pagina=10`
-      const respCategorias = await fetch(urlCategorias, { headers })
+      const respCategorias = await fetch(urlCategorias: any, { headers })
       
       const categoriasData = await respCategorias.json()
       
@@ -84,10 +84,10 @@ export async function GET(request: NextRequest) {
     }
 
     // TESTE 2: Receitas v2
-    console.log('ðŸ§ª TESTE 2: Receitas v2...')
+    console.log('🧪 TESTE 2: Receitas v2...')
     try {
       const urlReceitas = `${baseUrl}/v1/receitas?pagina=1&tamanho_pagina=5`
-      const respReceitas = await fetch(urlReceitas, { headers })
+      const respReceitas = await fetch(urlReceitas: any, { headers })
       
       const receitasData = await respReceitas.json()
       
@@ -107,10 +107,10 @@ export async function GET(request: NextRequest) {
     }
 
     // TESTE 3: Despesas v2
-    console.log('ðŸ§ª TESTE 3: Despesas v2...')
+    console.log('🧪 TESTE 3: Despesas v2...')
     try {
       const urlDespesas = `${baseUrl}/v1/despesas?pagina=1&tamanho_pagina=5`
-      const respDespesas = await fetch(urlDespesas, { headers })
+      const respDespesas = await fetch(urlDespesas: any, { headers })
       
       const despesasData = await respDespesas.json()
       
@@ -131,7 +131,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       sucesso: true,
-      message: 'Teste API v2 ContaAzul concluá­do',
+      message: 'Teste API v2 ContaAzul conclu�do',
       credenciais: {
         bar_id: credentials.bar_id,
         expires_at: credentials.expires_at,
@@ -147,7 +147,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Œ Erro interno:', error)
+    console.error('�� Erro interno:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
       details: error instanceof Error ? error.message : 'Erro desconhecido'

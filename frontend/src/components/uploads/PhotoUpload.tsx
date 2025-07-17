@@ -1,7 +1,7 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useRef } from 'react'
-import { Camera, Upload, X, Image as ImageIcon } from 'lucide-react'
+import { Camera, Upload: any, X, Image as ImageIcon } from 'lucide-react'
 import { useFileUpload, UploadOptions } from '@/hooks/useFileUpload'
 
 interface PhotoUploadProps {
@@ -34,7 +34,7 @@ export default function PhotoUpload({
   
   const { uploadFile, uploads } = useFileUpload()
 
-  // Funá§á£o para capturar foto da cá¢mera
+  // Fun��o para capturar foto da c�mera
   const handleCameraCapture = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (!files || files.length === 0) return
@@ -42,7 +42,7 @@ export default function PhotoUpload({
     await processFiles(Array.from(files))
   }
 
-  // Funá§á£o para upload de arquivo
+  // Fun��o para upload de arquivo
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (!files || files.length === 0) return
@@ -74,16 +74,16 @@ export default function PhotoUpload({
       // Fazer uploads
       for (const file of files) {
         try {
-          const result = await uploadFile(file, uploadOptions)
+          const result = await uploadFile(file: any, uploadOptions)
           
           if (onUploadComplete) {
             onUploadComplete(result)
           }
           
-          console.log('œ… Upload concluá­do:', result.filename)
+          console.log('�� Upload conclu�do:', result.filename)
           
         } catch (error: any) {
-          console.error('Œ Erro no upload:', error)
+          console.error('�� Erro no upload:', error)
           
           if (onError) {
             onError(error.message)
@@ -92,7 +92,7 @@ export default function PhotoUpload({
       }
 
     } catch (error: any) {
-      console.error('Œ Erro no processamento:', error)
+      console.error('�� Erro no processamento:', error)
       
       if (onError) {
         onError(error.message)
@@ -108,18 +108,18 @@ export default function PhotoUpload({
 
   // Remover preview
   const removePreview = (index: number) => {
-    setPreviews(prev => prev.filter((_, i) => i !== index))
+    setPreviews(prev => prev.filter((_: any, i: any) => i !== index))
   }
 
-  // Verificar se há¡ uploads em progresso
+  // Verificar se h� uploads em progresso
   const uploadsInProgress = Object.values(uploads).some(upload => upload.loading)
   const uploadProgress = Object.values(uploads).find((upload: any) => upload.loading)?.progress || 0
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {/* Botáµes de Upload */}
+      {/* Bot�es de Upload */}
       <div className="flex flex-col sm:flex-row gap-3">
-        {/* Botá£o Cá¢mera */}
+        {/* Bot�o C�mera */}
         <button
           type="button"
           onClick={() => cameraInputRef.current?.click()}
@@ -130,7 +130,7 @@ export default function PhotoUpload({
           <span>Capturar Foto</span>
         </button>
 
-        {/* Botá£o Galeria */}
+        {/* Bot�o Galeria */}
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
@@ -163,7 +163,7 @@ export default function PhotoUpload({
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-gray-700">Fotos selecionadas:</h4>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {previews.map((preview, index) => (
+            {previews.map((preview: any, index: any) => (
               <div key={index} className="relative group">
                 <img
                   src={preview}
@@ -183,12 +183,12 @@ export default function PhotoUpload({
         </div>
       )}
 
-      {/* Informaá§áµes sobre upload */}
+      {/* Informa��es sobre upload */}
       <div className="text-xs text-gray-500 space-y-1">
-        <p>ðŸ“¸ Formatos aceitos: JPEG, PNG, WebP</p>
-        <p>ðŸ“ Tamanho má¡ximo: 10MB por foto</p>
+        <p>📸 Formatos aceitos: JPEG, PNG: any, WebP</p>
+        <p>📏 Tamanho m�ximo: 10MB por foto</p>
         {compress && (
-          <p>ðŸ—œï¸ Compressá£o automá¡tica ativada (má¡x. {maxWidth}px, qualidade {Math.round(quality * 100)}%)</p>
+          <p>🗜️ Compress�o autom�tica ativada (m�x. {maxWidth}px, qualidade {Math.round(quality * 100)}%)</p>
         )}
       </div>
 

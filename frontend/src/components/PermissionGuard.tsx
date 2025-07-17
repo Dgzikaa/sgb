@@ -1,11 +1,11 @@
-﻿'use client'
+'use client'
 
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect: any, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { usePermissions } from '@/hooks/usePermissions'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Shield, AlertTriangle, Home, ArrowLeft } from 'lucide-react'
+import { Shield, AlertTriangle: any, Home, ArrowLeft } from 'lucide-react'
 
 interface PermissionGuardProps {
   children: ReactNode
@@ -24,25 +24,25 @@ export default function PermissionGuard({
   redirectTo = '/home',
   allowPublic = false
 }: PermissionGuardProps) {
-  const { user, hasPermission, isRole, loading } = usePermissions()
+  const { user, hasPermission: any, isRole, loading } = usePermissions()
   const router = useRouter()
   const [showError, setShowError] = useState(false)
 
   useEffect(() => {
     if (loading) return
 
-    // Se permite acesso páºblico e ná£o tem requisitos especá­ficos
+    // Se permite acesso p�blico e n�o tem requisitos espec�ficos
     if (allowPublic && requiredModules.length === 0 && requiredRoles.length === 0) {
       return
     }
 
-    // Se ná£o está¡ logado
+    // Se n�o est� logado
     if (!user) {
       router.push('/login')
       return
     }
 
-    // Se ná£o está¡ ativo
+    // Se n�o est� ativo
     if (!user.ativo) {
       router.push('/login')
       return
@@ -57,7 +57,7 @@ export default function PermissionGuard({
       }
     }
 
-    // Admin tem acesso a tudo por padrá£o (exceto se tem permissáµes especá­ficas)
+    // Admin tem acesso a tudo por padr�o (exceto se tem permiss�es espec�ficas)
     if (user.role === 'admin') {
       const hasExplicitPermissions = user.modulos_permitidos && user.modulos_permitidos.length < 23
       if (!hasExplicitPermissions) {
@@ -65,7 +65,7 @@ export default function PermissionGuard({
       }
     }
 
-    // Verificar má³dulos requeridos
+    // Verificar m�dulos requeridos
     if (requiredModules.length > 0) {
       const hasAllModules = requiredModules.every(module => hasPermission(module))
       if (!hasAllModules) {
@@ -73,7 +73,7 @@ export default function PermissionGuard({
         return
       }
     }
-  }, [user, loading, hasPermission, isRole, requiredModules, requiredRoles, allowPublic, router])
+  }, [user, loading: any, hasPermission, isRole: any, requiredModules, requiredRoles: any, allowPublic, router])
 
   // Tela de carregamento
   if (loading) {
@@ -81,13 +81,13 @@ export default function PermissionGuard({
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Verificando permissáµes...</p>
+          <p className="text-gray-600">Verificando permiss�es...</p>
         </div>
       </div>
     )
   }
 
-  // Mostrar erro de permissá£o
+  // Mostrar erro de permiss�o
   if (showError) {
     if (fallback) {
       return <>{fallback}</>
@@ -106,7 +106,7 @@ export default function PermissionGuard({
                     Acesso Negado
                   </h2>
                   <p className="text-red-700 mb-4">
-                    Vocáª ná£o tem permissá£o para acessar esta pá¡gina.
+                    Voc� n�o tem permiss�o para acessar esta p�gina.
                   </p>
                 </div>
                 
@@ -114,19 +114,19 @@ export default function PermissionGuard({
                   <div className="text-sm space-y-2">
                     {requiredRoles.length > 0 && (
                       <div>
-                        <strong>Roles necessá¡rios:</strong> {requiredRoles.join(', ')}
+                        <strong>Roles necess�rios:</strong> {requiredRoles.join(', ')}
                       </div>
                     )}
                     {requiredModules.length > 0 && (
                       <div>
-                        <strong>Má³dulos necessá¡rios:</strong> {requiredModules.join(', ')}
+                        <strong>M�dulos necess�rios:</strong> {requiredModules.join(', ')}
                       </div>
                     )}
                     <div>
-                      <strong>Seu role:</strong> {user?.role || 'Ná£o definido'}
+                      <strong>Seu role:</strong> {user?.role || 'N�o definido'}
                     </div>
                     <div>
-                      <strong>Seus má³dulos:</strong> {user?.modulos_permitidos?.join(', ') || 'Nenhum'}
+                      <strong>Seus m�dulos:</strong> {user?.modulos_permitidos?.join(', ') || 'Nenhum'}
                     </div>
                   </div>
                 </div>
@@ -160,7 +160,7 @@ export default function PermissionGuard({
     )
   }
 
-  // Se chegou atá© aqui, pode renderizar o conteáºdo
+  // Se chegou at� aqui, pode renderizar o conte�do
   return <>{children}</>
 }
 
@@ -169,7 +169,7 @@ export function usePermissionGuard(
   requiredModules: string[] = [],
   requiredRoles: ('admin' | 'manager' | 'funcionario')[] = []
 ) {
-  const { user, hasPermission, isRole, loading } = usePermissions()
+  const { user, hasPermission: any, isRole, loading } = usePermissions()
   const router = useRouter()
 
   const checkPermissions = () => {
@@ -195,7 +195,7 @@ export function usePermissionGuard(
       }
     }
 
-    // Verificar má³dulos
+    // Verificar m�dulos
     if (requiredModules.length > 0) {
       const hasAllModules = requiredModules.every(module => hasPermission(module))
       if (!hasAllModules) {

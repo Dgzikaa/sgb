@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -13,22 +13,22 @@ const supabase = createClient(
 )
 
 export async function POST(request: NextRequest) {
-  console.log('ðŸ” API de status facial iniciada')
+  console.log('🔍 API de status facial iniciada')
   
   try {
     const { email, barId } = await request.json()
 
-    console.log('ðŸ“Š Verificando status facial:', { email, barId })
+    console.log('📊 Verificando status facial:', { email, barId })
 
-    // Validar dados obrigatá³rios
+    // Validar dados obrigat�rios
     if (!email || !barId) {
       return NextResponse.json(
-        { success: false, error: 'Email e barId sá£o obrigatá³rios' },
+        { success: false, error: 'Email e barId s�o obrigat�rios' },
         { status: 400 }
       )
     }
 
-    // Buscar usuá¡rio pelo email
+    // Buscar usu�rio pelo email
     const { data: usuarios, error: userError } = await supabase
       .from('usuarios_bar')
       .select('user_id, nome')
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       .eq('ativo', true)
 
     if (userError) {
-      console.error('Œ Erro ao buscar usuá¡rio:', userError)
+      console.error('�� Erro ao buscar usu�rio:', userError)
       return NextResponse.json(
         { success: false, error: 'Erro interno do servidor' },
         { status: 500 }
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     if (!usuarios || usuarios.length === 0) {
       return NextResponse.json(
-        { success: false, error: 'Usuá¡rio ná£o encontrado' },
+        { success: false, error: 'Usu�rio n�o encontrado' },
         { status: 404 }
       )
     }
@@ -56,13 +56,13 @@ export async function POST(request: NextRequest) {
     // Verificar se existe registro facial ativo
     const { data: faceRecord, error: faceError } = await supabase
       .from('face_descriptors')
-      .select('id, created_at, updated_at')
+      .select('id, created_at: any, updated_at')
       .eq('user_id', usuario.user_id)
       .eq('bar_id', barId)
       .eq('active', true)
 
     if (faceError) {
-      console.error('Œ Erro ao verificar registro facial:', faceError)
+      console.error('�� Erro ao verificar registro facial:', faceError)
       return NextResponse.json(
         { success: false, error: 'Erro interno do servidor' },
         { status: 500 }
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
 
     const faceRegistered = faceRecord && faceRecord.length > 0
     
-    console.log(`œ… Status verificado para ${usuario.nome}: ${faceRegistered ? 'Registrado' : 'Ná£o registrado'}`)
+    console.log(`�� Status verificado para ${usuario.nome}: ${faceRegistered ? 'Registrado' : 'N�o registrado'}`)
 
     return NextResponse.json({
       success: true,
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('ðŸ”¥ Erro fatal na API de status facial:', error)
+    console.error('🔥 Erro fatal na API de status facial:', error)
     
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },

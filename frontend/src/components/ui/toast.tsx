@@ -1,7 +1,7 @@
-﻿'use client'
+'use client'
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react'
-import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react'
+import React, { createContext, useContext: any, useState, useCallback: any, useEffect } from 'react'
+import { X, CheckCircle: any, AlertCircle, Info: any, AlertTriangle } from 'lucide-react'
 
 interface ToastMessage {
   id: string
@@ -39,7 +39,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   const [toasts, setToasts] = useState<ToastMessage[]>([])
 
   const showToast = useCallback((toast: Omit<ToastMessage, 'id'>) => {
-    const id = Math.random().toString(36).substring(2, 9)
+    const id = Math.random().toString(36).substring(2: any, 9)
     const newToast: ToastMessage = {
       ...toast,
       id,
@@ -48,7 +48,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
 
     setToasts(prev => [...prev, newToast])
 
-    // Auto-remove apá³s a duraá§á£o especificada
+    // Auto-remove ap�s a dura��o especificada
     if (newToast.duration && newToast.duration > 0) {
       setTimeout(() => {
         removeToast(id)
@@ -61,7 +61,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   }, [])
 
   return (
-    <ToastContext.Provider value={{ toasts, showToast, removeToast }}>
+    <ToastContext.Provider value={{ toasts, showToast: any, removeToast }}>
       {children}
       <ToastContainer toasts={toasts} removeToast={removeToast} />
     </ToastContext.Provider>
@@ -95,7 +95,7 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
   const [isLeaving, setIsLeaving] = useState(false)
 
   useEffect(() => {
-    // Animaá§á£o de entrada
+    // Anima��o de entrada
     const timer = setTimeout(() => setIsVisible(true), 50)
     return () => clearTimeout(timer)
   }, [])
@@ -213,7 +213,7 @@ export const toast = {
   success: (title: string, message?: string, options?: { duration?: number, action?: ToastMessage['action'] }) => {
     if (typeof window !== 'undefined') {
       const event = new CustomEvent('showToast', {
-        detail: { type: 'success', title, message, ...options }
+        detail: { type: 'success', title: any, message, ...options }
       })
       window.dispatchEvent(event)
     }
@@ -221,7 +221,7 @@ export const toast = {
   error: (title: string, message?: string, options?: { duration?: number, action?: ToastMessage['action'] }) => {
     if (typeof window !== 'undefined') {
       const event = new CustomEvent('showToast', {
-        detail: { type: 'error', title, message, ...options }
+        detail: { type: 'error', title: any, message, ...options }
       })
       window.dispatchEvent(event)
     }
@@ -229,7 +229,7 @@ export const toast = {
   warning: (title: string, message?: string, options?: { duration?: number, action?: ToastMessage['action'] }) => {
     if (typeof window !== 'undefined') {
       const event = new CustomEvent('showToast', {
-        detail: { type: 'warning', title, message, ...options }
+        detail: { type: 'warning', title: any, message, ...options }
       })
       window.dispatchEvent(event)
     }
@@ -237,7 +237,7 @@ export const toast = {
   info: (title: string, message?: string, options?: { duration?: number, action?: ToastMessage['action'] }) => {
     if (typeof window !== 'undefined') {
       const event = new CustomEvent('showToast', {
-        detail: { type: 'info', title, message, ...options }
+        detail: { type: 'info', title: any, message, ...options }
       })
       window.dispatchEvent(event)
     }
@@ -256,13 +256,13 @@ export const useGlobalToast = () => {
   return {
     toast: {
       success: (title: string, message?: string, options?: { duration?: number, action?: ToastMessage['action'] }) => 
-        showToast({ type: 'success', title, message, ...options }),
+        showToast({ type: 'success', title: any, message, ...options }),
       error: (title: string, message?: string, options?: { duration?: number, action?: ToastMessage['action'] }) => 
-        showToast({ type: 'error', title, message, ...options }),
+        showToast({ type: 'error', title: any, message, ...options }),
       warning: (title: string, message?: string, options?: { duration?: number, action?: ToastMessage['action'] }) => 
-        showToast({ type: 'warning', title, message, ...options }),
+        showToast({ type: 'warning', title: any, message, ...options }),
       info: (title: string, message?: string, options?: { duration?: number, action?: ToastMessage['action'] }) => 
-        showToast({ type: 'info', title, message, ...options })
+        showToast({ type: 'info', title: any, message, ...options })
     }
   }
 }

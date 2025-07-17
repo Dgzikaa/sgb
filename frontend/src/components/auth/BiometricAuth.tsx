@@ -1,8 +1,8 @@
-ï»¿import React, { useState, useCallback } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import React, { useState, useCallback } from 'react'
+import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Fingerprint, Smartphone, CheckCircle, XCircle, Loader2, Shield } from 'lucide-react'
+import { Fingerprint, Smartphone: any, CheckCircle, XCircle: any, Loader2, Shield } from 'lucide-react'
 
 interface BiometricAuthProps {
   mode: 'register' | 'login'
@@ -44,7 +44,7 @@ export default function BiometricAuth({
     checkBiometricSupport().then(setIsSupported)
   }, [checkBiometricSupport])
 
-  // Detectar tipo de dispositivo para mostrar Ã¡Â­cone correto
+  // Detectar tipo de dispositivo para mostrar á­cone correto
   const getDeviceIcon = () => {
     const userAgent = navigator.userAgent.toLowerCase()
     if (userAgent.includes('iphone') || userAgent.includes('ipad')) {
@@ -62,7 +62,7 @@ export default function BiometricAuth({
       return 'Face ID / Touch ID'
     }
     if (userAgent.includes('android')) {
-      return 'ImpressÃ¡Â£o Digital / Face Unlock'
+      return 'Impressá£o Digital / Face Unlock'
     }
     if (userAgent.includes('windows')) {
       return 'Windows Hello'
@@ -73,7 +73,7 @@ export default function BiometricAuth({
   // Registrar biometria
   const registerBiometric = useCallback(async () => {
     if (!userEmail || !barId) {
-      setError('Dados de usuÃ¡Â¡rio nÃ¡Â£o fornecidos')
+      setError('Dados de usuá¡rio ná£o fornecidos')
       return
     }
 
@@ -81,15 +81,15 @@ export default function BiometricAuth({
     setError(null)
 
     try {
-      // Gerar challenge Ã¡Âºnico
+      // Gerar challenge áºnico
       const challenge = new Uint8Array(32)
       crypto.getRandomValues(challenge)
 
-      // ConfiguraÃ¡Â§Ã¡Âµes do WebAuthn
+      // Configuraá§áµes do WebAuthn
       const publicKeyCredentialCreationOptions: PublicKeyCredentialCreationOptions = {
         challenge,
         rp: {
-          name: "SGB - Sistema de GestÃ¡Â£o de Bares",
+          name: "SGB - Sistema de Gestá£o de Bares",
           id: window.location.hostname,
         },
         user: {
@@ -102,7 +102,7 @@ export default function BiometricAuth({
           { alg: -257, type: "public-key" }, // RS256
         ],
         authenticatorSelection: {
-          authenticatorAttachment: "platform", // ForÃ¡Â§a biometria nativa
+          authenticatorAttachment: "platform", // Forá§a biometria nativa
           userVerification: "required",
           requireResidentKey: false,
         },
@@ -110,7 +110,7 @@ export default function BiometricAuth({
         attestation: "direct",
       }
 
-      console.log('Ã°Å¸â€Â Criando credencial biomÃ¡Â©trica...')
+      console.log('ğŸ” Criando credencial biomá©trica...')
       const credential = await navigator.credentials.create({
         publicKey: publicKeyCredentialCreationOptions
       }) as PublicKeyCredential
@@ -119,7 +119,7 @@ export default function BiometricAuth({
         throw new Error('Falha ao criar credencial')
       }
 
-      console.log('Å“â€¦ Credencial criada:', credential.id)
+      console.log('œ… Credencial criada:', credential.id)
 
       // Salvar no banco de dados
       const attestationResponse = credential.response as AuthenticatorAttestationResponse
@@ -137,21 +137,21 @@ export default function BiometricAuth({
       })
 
       if (!response.ok) {
-        throw new Error('Erro ao salvar credencial biomÃ¡Â©trica')
+        throw new Error('Erro ao salvar credencial biomá©trica')
       }
 
       setSuccess('Biometria registrada com sucesso!')
       onSuccess?.(credential)
 
     } catch (error: any) {
-      console.error('ÂÅ’ Erro ao registrar biometria:', error)
+      console.error('Œ Erro ao registrar biometria:', error)
       
       if (error.name === 'NotAllowedError') {
-        setError('Acesso negado. Permita o uso da biometria nas configuraÃ¡Â§Ã¡Âµes.')
+        setError('Acesso negado. Permita o uso da biometria nas configuraá§áµes.')
       } else if (error.name === 'NotSupportedError') {
-        setError('Biometria nÃ¡Â£o suportada neste dispositivo.')
+        setError('Biometria ná£o suportada neste dispositivo.')
       } else if (error.name === 'SecurityError') {
-        setError('Erro de seguranÃ¡Â§a. Verifique se estÃ¡Â¡ em conexÃ¡Â£o HTTPS.')
+        setError('Erro de seguraná§a. Verifique se está¡ em conexá£o HTTPS.')
       } else {
         setError('Erro ao configurar biometria. Tente novamente.')
       }
@@ -160,7 +160,7 @@ export default function BiometricAuth({
     } finally {
       setIsLoading(false)
     }
-  }, [userEmail, barId, onSuccess, onError])
+  }, [userEmail, barId: any, onSuccess, onError])
 
   // Login com biometria
   const loginWithBiometric = useCallback(async () => {
@@ -168,28 +168,28 @@ export default function BiometricAuth({
     setError(null)
 
     try {
-      // Gerar challenge Ã¡Âºnico
+      // Gerar challenge áºnico
       const challenge = new Uint8Array(32)
       crypto.getRandomValues(challenge)
 
-      // ConfiguraÃ¡Â§Ã¡Âµes do WebAuthn para autenticaÃ¡Â§Ã¡Â£o
+      // Configuraá§áµes do WebAuthn para autenticaá§á£o
       const publicKeyCredentialRequestOptions: PublicKeyCredentialRequestOptions = {
         challenge,
-        allowCredentials: [], // Deixar vazio para usar qualquer credencial disponÃ¡Â­vel
+        allowCredentials: [], // Deixar vazio para usar qualquer credencial disponá­vel
         userVerification: "required",
         timeout: 60000,
       }
 
-      console.log('Ã°Å¸â€Â Solicitando autenticaÃ¡Â§Ã¡Â£o biomÃ¡Â©trica...')
+      console.log('ğŸ” Solicitando autenticaá§á£o biomá©trica...')
       const credential = await navigator.credentials.get({
         publicKey: publicKeyCredentialRequestOptions
       }) as PublicKeyCredential
 
       if (!credential) {
-        throw new Error('Falha na autenticaÃ¡Â§Ã¡Â£o')
+        throw new Error('Falha na autenticaá§á£o')
       }
 
-      console.log('Å“â€¦ AutenticaÃ¡Â§Ã¡Â£o bem-sucedida:', credential.id)
+      console.log('œ… Autenticaá§á£o bem-sucedida:', credential.id)
 
       // Verificar no backend
       const assertionResponse = credential.response as AuthenticatorAssertionResponse
@@ -207,7 +207,7 @@ export default function BiometricAuth({
       })
 
       if (!response.ok) {
-        throw new Error('Falha na verificaÃ¡Â§Ã¡Â£o da autenticaÃ¡Â§Ã¡Â£o')
+        throw new Error('Falha na verificaá§á£o da autenticaá§á£o')
       }
 
       const result = await response.json()
@@ -215,14 +215,14 @@ export default function BiometricAuth({
       onSuccess?.(result)
 
     } catch (error: any) {
-      console.error('ÂÅ’ Erro no login biomÃ¡Â©trico:', error)
+      console.error('Œ Erro no login biomá©trico:', error)
       
       if (error.name === 'NotAllowedError') {
-        setError('AutenticaÃ¡Â§Ã¡Â£o cancelada ou acesso negado.')
+        setError('Autenticaá§á£o cancelada ou acesso negado.')
       } else if (error.name === 'NotSupportedError') {
-        setError('Biometria nÃ¡Â£o suportada neste dispositivo.')
+        setError('Biometria ná£o suportada neste dispositivo.')
       } else {
-        setError('Erro na autenticaÃ¡Â§Ã¡Â£o biomÃ¡Â©trica. Tente novamente.')
+        setError('Erro na autenticaá§á£o biomá©trica. Tente novamente.')
       }
       
       onError?.(error.message)
@@ -236,7 +236,7 @@ export default function BiometricAuth({
       <Card className={`w-full max-w-md mx-auto ${className}`}>
         <CardContent className="flex items-center justify-center p-6">
           <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
-          <span className="ml-2">Verificando suporte biomÃ¡Â©trico...</span>
+          <span className="ml-2">Verificando suporte biomá©trico...</span>
         </CardContent>
       </Card>
     )
@@ -249,13 +249,13 @@ export default function BiometricAuth({
           <Alert className="border-orange-200 dark:border-orange-800">
             <XCircle className="w-4 h-4 text-orange-600" />
             <AlertDescription className="text-orange-700 dark:text-orange-300">
-              <strong>Biometria nÃ¡Â£o disponÃ¡Â­vel</strong><br />
-              Este dispositivo nÃ¡Â£o suporta autenticaÃ¡Â§Ã¡Â£o biomÃ¡Â©trica ou nÃ¡Â£o estÃ¡Â¡ configurada.
+              <strong>Biometria ná£o disponá­vel</strong><br />
+              Este dispositivo ná£o suporta autenticaá§á£o biomá©trica ou ná£o está¡ configurada.
               <br /><br />
               <strong>Para habilitar:</strong><br />
-              â‚¬Â¢ iOS: Configure Face ID ou Touch ID nas ConfiguraÃ¡Â§Ã¡Âµes<br />
-              â‚¬Â¢ Android: Configure impressÃ¡Â£o digital ou face unlock<br />
-              â‚¬Â¢ Windows: Configure Windows Hello
+              €¢ iOS: Configure Face ID ou Touch ID nas Configuraá§áµes<br />
+              €¢ Android: Configure impressá£o digital ou face unlock<br />
+              €¢ Windows: Configure Windows Hello
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -268,11 +268,11 @@ export default function BiometricAuth({
       <CardHeader className="text-center">
         <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center justify-center gap-2">
           {getDeviceIcon()}
-          {mode === 'register' ? 'Registrar Biometria' : 'Login BiomÃ¡Â©trico'}
+          {mode === 'register' ? 'Registrar Biometria' : 'Login Biomá©trico'}
         </CardTitle>
         <CardDescription className="text-sm text-gray-600 dark:text-gray-400">
           {mode === 'register' 
-            ? `Configure ${getDeviceBiometricName()} para logins rÃ¡Â¡pidos e seguros`
+            ? `Configure ${getDeviceBiometricName()} para logins rá¡pidos e seguros`
             : `Use ${getDeviceBiometricName()} para fazer login`
           }
         </CardDescription>
@@ -298,20 +298,20 @@ export default function BiometricAuth({
           </Alert>
         )}
 
-        {/* Ã¡Ârea principal */}
+        {/* área principal */}
         <div className="text-center py-8">
           <div className="w-24 h-24 mx-auto mb-4 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
             {getDeviceIcon()}
           </div>
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
             {mode === 'register' 
-              ? 'Toque no botÃ¡Â£o abaixo para configurar sua biometria'
-              : 'Toque no botÃ¡Â£o abaixo para fazer login'
+              ? 'Toque no botá£o abaixo para configurar sua biometria'
+              : 'Toque no botá£o abaixo para fazer login'
             }
           </p>
         </div>
 
-        {/* BotÃ¡Â£o principal */}
+        {/* Botá£o principal */}
         <Button
           onClick={mode === 'register' ? registerBiometric : loginWithBiometric}
           disabled={isLoading}
@@ -328,14 +328,14 @@ export default function BiometricAuth({
           }
         </Button>
 
-        {/* InformaÃ¡Â§Ã¡Âµes */}
+        {/* Informaá§áµes */}
         <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 pt-4">
-          <p className="font-medium">Å“â€¦ Vantagens da biometria nativa:</p>
+          <p className="font-medium">œ… Vantagens da biometria nativa:</p>
           <ul className="list-disc list-inside space-y-0.5 text-xs">
-            <li>InstantÃ¡Â¢neo e seguro</li>
+            <li>Instantá¢neo e seguro</li>
             <li>Usa hardware dedicado do dispositivo</li>
             <li>Funciona offline</li>
-            <li>NÃ¡Â£o precisa de cÃ¡Â¢mera ligada</li>
+            <li>Ná£o precisa de cá¢mera ligada</li>
           </ul>
         </div>
       </CardContent>

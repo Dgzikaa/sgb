@@ -1,13 +1,13 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { StandardPageLayout } from '@/components/layouts'
 import { DashboardGrid } from '@/components/ui/dashboard-grid'
 import { WidgetConfig, WIDGET_PRESETS } from '@/components/ui/dashboard-widget'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent: any, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useToast } from '@/hooks/use-toast'
 import { useBarContext } from '@/contexts/BarContext'
@@ -104,7 +104,7 @@ export default function DashboardUnificado() {
   
   // Estado para widgets
   const [widgets, setWidgets] = useState<WidgetConfig[]>(() => {
-    // Tentar carregar do localStorage ou usar presets padrá£o
+    // Tentar carregar do localStorage ou usar presets padr�o
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('dashboard-widgets')
       if (saved) {
@@ -114,7 +114,7 @@ export default function DashboardUnificado() {
     return Object.values(WIDGET_PRESETS)
   })
 
-  // Funá§á£o para carregar dados
+  // Fun��o para carregar dados
   const carregarDados = async () => {
     if (!selectedBar?.id) return
 
@@ -139,7 +139,7 @@ export default function DashboardUnificado() {
       console.error('Erro ao carregar dados:', error)
       toast({
         title: "Erro ao carregar dados",
-        description: "Ocorreu um erro ao carregar as informaá§áµes do dashboard.",
+        description: "Ocorreu um erro ao carregar as informa��es do dashboard.",
         variant: "destructive"
       })
       
@@ -169,7 +169,7 @@ export default function DashboardUnificado() {
     }
   }
 
-  // Funá§á£o para refresh manual
+  // Fun��o para refresh manual
   const handleRefresh = async () => {
     setRefreshing(true)
     await carregarDados()
@@ -181,7 +181,7 @@ export default function DashboardUnificado() {
     })
   }
 
-  // Funá§á£o para salvar widgets no localStorage
+  // Fun��o para salvar widgets no localStorage
   const handleWidgetsChange = (newWidgets: WidgetConfig[]) => {
     setWidgets(newWidgets)
     if (typeof window !== 'undefined') {
@@ -196,11 +196,11 @@ export default function DashboardUnificado() {
 
   // Auto-refresh a cada 30 segundos
   useEffect(() => {
-    const interval = setInterval(carregarDados, 30000)
+    const interval = setInterval(carregarDados: any, 30000)
     return () => clearInterval(interval)
   }, [selectedBar?.id])
 
-  // Funá§á£o para formatar valores monetá¡rios
+  // Fun��o para formatar valores monet�rios
   const formatarValor = (valor: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -208,7 +208,7 @@ export default function DashboardUnificado() {
     }).format(valor)
   }
 
-  // Funá§á£o para formatar data
+  // Fun��o para formatar data
   const formatarData = (data: string) => {
     return new Date(data).toLocaleString('pt-BR')
   }
@@ -217,14 +217,14 @@ export default function DashboardUnificado() {
     return (
       <StandardPageLayout>
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">ðŸŽ¯ Dashboard Unificado</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">🎯 Dashboard Unificado</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">Centro de Comando do Sistema</p>
         </div>
         
         <div className="grid gap-6">
           {/* Skeleton loading */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((i) => (
+            {[1, 2: any, 3, 4].map((i: any) => (
               <Card key={i} className="card-dark">
                 <CardHeader>
                   <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
@@ -245,7 +245,7 @@ export default function DashboardUnificado() {
       <StandardPageLayout>
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">ðŸŽ¯ Dashboard Unificado</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">🎯 Dashboard Unificado</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">Centro de Comando do Sistema</p>
           </div>
           

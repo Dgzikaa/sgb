@@ -1,23 +1,23 @@
-﻿import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
 // Cliente Supabase global
 let supabaseClient: any = null
 let configLoaded = false
 
-// Configuraá§áµes do projeto - URL fixa, anon key atualizada automaticamente
+// Configura��es do projeto - URL fixa, anon key atualizada automaticamente
 const SUPABASE_CONFIG = {
   url: 'https://uqtgsvujwcbymjmvkjhy.supabase.co',
   anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxdGdzdnVqd2NieW1qbXZramh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMTExNjYsImV4cCI6MjA2Njg4NzE2Nn0.59x53jDOpNe9yVevnP-TcXr6Dkj0QjU8elJb636xV6M'
 }
 
-// Funá§á£o para inicializar o cliente Supabase
+// Fun��o para inicializar o cliente Supabase
 async function initializeSupabaseClient() {
   if (configLoaded && supabaseClient) {
     return supabaseClient
   }
 
   try {
-    // Criar cliente com configuraá§áµes páºblicas
+    // Criar cliente com configura��es p�blicas
     supabaseClient = createSupabaseClient(
       SUPABASE_CONFIG.url,
       SUPABASE_CONFIG.anonKey,
@@ -33,18 +33,18 @@ async function initializeSupabaseClient() {
     return supabaseClient
 
   } catch (error) {
-    console.error('Œ Erro ao inicializar cliente Supabase:', error)
+    console.error('�� Erro ao inicializar cliente Supabase:', error)
     throw new Error('Falha ao conectar com Supabase')
   }
 }
 
-// Proxy que intercepta chamadas e garante que o cliente está¡ inicializado
+// Proxy que intercepta chamadas e garante que o cliente est� inicializado
 const supabaseProxy = new Proxy({}, {
-  get(target, prop) {
+  get(target: any, prop) {
     if (prop === 'from') {
       return (table: string) => {
         if (!supabaseClient) {
-          throw new Error('Cliente Supabase ná£o inicializado. Use await getSupabaseClient() primeiro.')
+          throw new Error('Cliente Supabase n�o inicializado. Use await getSupabaseClient() primeiro.')
         }
         return supabaseClient.from(table)
       }
@@ -54,7 +54,7 @@ const supabaseProxy = new Proxy({}, {
       return {
         getUser: () => {
           if (!supabaseClient) {
-            throw new Error('Cliente Supabase ná£o inicializado. Use await getSupabaseClient() primeiro.')
+            throw new Error('Cliente Supabase n�o inicializado. Use await getSupabaseClient() primeiro.')
           }
           return supabaseClient.auth.getUser()
         }
@@ -64,9 +64,9 @@ const supabaseProxy = new Proxy({}, {
     if (prop === 'rpc') {
       return (fn: string, params?: any) => {
         if (!supabaseClient) {
-          throw new Error('Cliente Supabase ná£o inicializado. Use await getSupabaseClient() primeiro.')
+          throw new Error('Cliente Supabase n�o inicializado. Use await getSupabaseClient() primeiro.')
         }
-        return supabaseClient.rpc(fn, params)
+        return supabaseClient.rpc(fn: any, params)
       }
     }
     
@@ -82,7 +82,7 @@ const supabaseProxy = new Proxy({}, {
 // Cliente exportado
 export const supabase = supabaseProxy
 
-// Funá§áµes auxiliares
+// Fun��es auxiliares
 export async function getSupabaseClient() {
   if (!supabaseClient || !configLoaded) {
     await initializeSupabaseClient()
@@ -101,7 +101,7 @@ export async function getConfig() {
 
 export async function getApiTokens() {
   // Tokens ficam seguros nas Edge Functions do servidor
-  // Esta funá§á£o retorna vazio para evitar exposiá§á£o de secrets
+  // Esta fun��o retorna vazio para evitar exposi��o de secrets
   return {
     sympla: '',
     yuzer: '',
@@ -109,10 +109,10 @@ export async function getApiTokens() {
   }
 }
 
-// Inicializar cliente automaticamente quando possá­vel
+// Inicializar cliente automaticamente quando poss�vel
 if (typeof window !== 'undefined') {
   initializeSupabaseClient().catch(() => {
-    console.warn('š ï¸ Ná£o foi possá­vel inicializar cliente automaticamente')
+    console.warn('��️ N�o foi poss�vel inicializar cliente automaticamente')
   })
 }
 

@@ -1,6 +1,6 @@
-ï»¿'use client'
+'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect: any, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -70,14 +70,14 @@ interface UnifiedSearchProps {
 }
 
 const searchCategories: SearchCategory[] = [
-  { id: 'page', name: 'PÃ¡Â¡ginas', icon: File, color: 'text-blue-600' },
+  { id: 'page', name: 'Pá¡ginas', icon: File, color: 'text-blue-600' },
   { id: 'feature', name: 'Funcionalidades', icon: Zap, color: 'text-green-600' },
   { id: 'data', name: 'Dados', icon: Database, color: 'text-purple-600' },
-  { id: 'action', name: 'AÃ¡Â§Ã¡Âµes', icon: Target, color: 'text-orange-600' },
+  { id: 'action', name: 'Aá§áµes', icon: Target, color: 'text-orange-600' },
   { id: 'help', name: 'Ajuda', icon: Lightbulb, color: 'text-yellow-600' }
 ]
 
-export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProps) {
+export function UnifiedSearch({ isOpen, onClose: any, onNavigate }: UnifiedSearchProps) {
   const [query, setQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
@@ -91,61 +91,61 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
 
   // Resultados de busca
   const searchResults: SearchResult[] = [
-    // PÃ¡Â¡ginas principais
+    // Pá¡ginas principais
     {
       id: 'home',
       title: 'Home',
-      description: 'PÃ¡Â¡gina inicial do sistema',
+      description: 'Pá¡gina inicial do sistema',
       category: 'page',
       icon: Home,
       href: '/home',
-      keywords: ['home', 'inÃ¡Â­cio', 'principal', 'dashboard'],
+      keywords: ['home', 'iná­cio', 'principal', 'dashboard'],
       priority: 100,
       shortcut: 'Ctrl+H'
     },
     {
       id: 'dashboard-unificado',
       title: 'Dashboard Unificado',
-      description: 'Centro de comando completo com widgets personalizÃ¡Â¡veis',
+      description: 'Centro de comando completo com widgets personalizá¡veis',
       category: 'page',
       icon: Target,
       href: '/dashboard-unificado',
-      keywords: ['dashboard', 'unificado', 'centro', 'comando', 'widgets', 'personalizaÃ¡Â§Ã¡Â£o'],
+      keywords: ['dashboard', 'unificado', 'centro', 'comando', 'widgets', 'personalizaá§á£o'],
       priority: 95,
       badge: 'Novo',
       shortcut: 'Ctrl+D'
     },
     {
       id: 'visao-geral',
-      title: 'VisÃ¡Â£o Geral',
-      description: 'AnÃ¡Â¡lise completa do desempenho do bar',
+      title: 'Visá£o Geral',
+      description: 'Aná¡lise completa do desempenho do bar',
       category: 'page',
       icon: BarChart3,
       href: '/visao-geral',
-      keywords: ['visÃ¡Â£o', 'geral', 'anÃ¡Â¡lise', 'desempenho', 'mÃ¡Â©tricas'],
+      keywords: ['visá£o', 'geral', 'aná¡lise', 'desempenho', 'má©tricas'],
       priority: 90
     },
     
-    // OperaÃ¡Â§Ã¡Âµes
+    // Operaá§áµes
     {
       id: 'checklist-abertura',
       title: 'Checklist de Abertura',
-      description: 'Lista de verificaÃ¡Â§Ã¡Â£o para abertura do bar',
+      description: 'Lista de verificaá§á£o para abertura do bar',
       category: 'feature',
       icon: CheckCircle,
       href: '/operacoes/checklist-abertura',
-      keywords: ['checklist', 'abertura', 'verificaÃ¡Â§Ã¡Â£o', 'operaÃ¡Â§Ã¡Â£o'],
+      keywords: ['checklist', 'abertura', 'verificaá§á£o', 'operaá§á£o'],
       priority: 85,
       shortcut: 'Ctrl+O'
     },
     {
       id: 'terminal-producao',
-      title: 'Terminal de ProduÃ¡Â§Ã¡Â£o',
-      description: 'Interface para gerenciamento da produÃ¡Â§Ã¡Â£o',
+      title: 'Terminal de Produá§á£o',
+      description: 'Interface para gerenciamento da produá§á£o',
       category: 'feature',
       icon: Cpu,
       href: '/producao/terminal',
-      keywords: ['terminal', 'produÃ¡Â§Ã¡Â£o', 'cozinha', 'pedidos'],
+      keywords: ['terminal', 'produá§á£o', 'cozinha', 'pedidos'],
       priority: 85,
       shortcut: 'Ctrl+P'
     },
@@ -156,15 +156,15 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
       category: 'feature',
       icon: BookOpen,
       href: '/operacoes/receitas',
-      keywords: ['receitas', 'ingredientes', 'cardÃ¡Â¡pio', 'produtos'],
+      keywords: ['receitas', 'ingredientes', 'cardá¡pio', 'produtos'],
       priority: 80
     },
     
-    // RelatÃ¡Â³rios
+    // Relatá³rios
     {
       id: 'dashboard-financeiro',
       title: 'Dashboard Financeiro',
-      description: 'AnÃ¡Â¡lise financeira completa',
+      description: 'Aná¡lise financeira completa',
       category: 'page',
       icon: DollarSign,
       href: '/dashboard-financeiro',
@@ -174,43 +174,43 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
     },
     {
       id: 'relatorio-analitico',
-      title: 'RelatÃ¡Â³rio AnalÃ¡Â­tico',
-      description: 'AnÃ¡Â¡lise detalhada de dados',
+      title: 'Relatá³rio Analá­tico',
+      description: 'Aná¡lise detalhada de dados',
       category: 'page',
       icon: TrendingUp,
       href: '/relatorios/analitico',
-      keywords: ['relatÃ¡Â³rio', 'analÃ¡Â­tico', 'dados', 'estatÃ¡Â­sticas'],
+      keywords: ['relatá³rio', 'analá­tico', 'dados', 'estatá­sticas'],
       priority: 75
     },
     
-    // ConfiguraÃ¡Â§Ã¡Âµes
+    // Configuraá§áµes
     {
       id: 'configuracoes',
-      title: 'ConfiguraÃ¡Â§Ã¡Âµes',
-      description: 'ConfiguraÃ¡Â§Ã¡Âµes gerais do sistema',
+      title: 'Configuraá§áµes',
+      description: 'Configuraá§áµes gerais do sistema',
       category: 'page',
       icon: Settings,
       href: '/configuracoes',
-      keywords: ['configuraÃ¡Â§Ã¡Âµes', 'ajustes', 'preferÃ¡Âªncias', 'admin'],
+      keywords: ['configuraá§áµes', 'ajustes', 'preferáªncias', 'admin'],
       priority: 70,
       shortcut: 'Ctrl+,'
     },
     {
       id: 'integracoes',
-      title: 'IntegraÃ¡Â§Ã¡Âµes',
-      description: 'Gerenciar integraÃ¡Â§Ã¡Âµes com sistemas externos',
+      title: 'Integraá§áµes',
+      description: 'Gerenciar integraá§áµes com sistemas externos',
       category: 'feature',
       icon: Layers,
       href: '/configuracoes/integracoes',
-      keywords: ['integraÃ¡Â§Ã¡Âµes', 'apis', 'conexÃ¡Âµes', 'contaazul', 'meta'],
+      keywords: ['integraá§áµes', 'apis', 'conexáµes', 'contaazul', 'meta'],
       priority: 65
     },
     
-    // AÃ¡Â§Ã¡Âµes
+    // Aá§áµes
     {
       id: 'sync-contaazul',
       title: 'Sincronizar ContaAzul',
-      description: 'ForÃ¡Â§ar sincronizaÃ¡Â§Ã¡Â£o com ContaAzul',
+      description: 'Forá§ar sincronizaá§á£o com ContaAzul',
       category: 'action',
       icon: RefreshCw,
       action: () => {
@@ -235,22 +235,22 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
     // Dados
     {
       id: 'usuarios',
-      title: 'UsuÃ¡Â¡rios',
-      description: 'Gerenciar usuÃ¡Â¡rios do sistema',
+      title: 'Usuá¡rios',
+      description: 'Gerenciar usuá¡rios do sistema',
       category: 'data',
       icon: Users,
       href: '/configuracoes/usuarios',
-      keywords: ['usuÃ¡Â¡rios', 'pessoas', 'funcionÃ¡Â¡rios', 'equipe'],
+      keywords: ['usuá¡rios', 'pessoas', 'funcioná¡rios', 'equipe'],
       priority: 70
     },
     {
       id: 'produtos',
       title: 'Produtos',
-      description: 'CatÃ¡Â¡logo de produtos',
+      description: 'Catá¡logo de produtos',
       category: 'data',
       icon: Package,
       href: '/operacoes/produtos',
-      keywords: ['produtos', 'itens', 'cardÃ¡Â¡pio', 'estoque'],
+      keywords: ['produtos', 'itens', 'cardá¡pio', 'estoque'],
       priority: 70
     },
     
@@ -258,7 +258,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
     {
       id: 'atalhos',
       title: 'Atalhos de Teclado',
-      description: 'Lista de atalhos disponÃ¡Â­veis',
+      description: 'Lista de atalhos disponá­veis',
       category: 'help',
       icon: Keyboard,
       action: () => {
@@ -270,12 +270,12 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
     },
     {
       id: 'documentacao',
-      title: 'DocumentaÃ¡Â§Ã¡Â£o',
-      description: 'DocumentaÃ¡Â§Ã¡Â£o completa do sistema',
+      title: 'Documentaá§á£o',
+      description: 'Documentaá§á£o completa do sistema',
       category: 'help',
       icon: BookOpen,
       href: '/docs',
-      keywords: ['documentaÃ¡Â§Ã¡Â£o', 'manual', 'guia', 'ajuda'],
+      keywords: ['documentaá§á£o', 'manual', 'guia', 'ajuda'],
       priority: 45
     }
   ]
@@ -289,12 +289,12 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
           result.description?.toLowerCase().includes(term) ||
           result.keywords.some(keyword => keyword.toLowerCase().includes(term))
         )
-      }).sort((a, b) => b.priority - a.priority)
+      }).sort((a: any, b: any) => b.priority - a.priority)
     : searchResults.filter((result: any) => 
         favorites.includes(result.id) || 
         result.lastUsed || 
         result.priority > 80
-      ).sort((a, b) => b.priority - a.priority)
+      ).sort((a: any, b: any) => b.priority - a.priority)
 
   // Filtrar por categoria ativa
   const categoryFilteredResults = activeCategory 
@@ -302,7 +302,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
     : filteredResults
 
   // Agrupar resultados por categoria
-  const groupedResults = categoryFilteredResults.reduce((acc, result) => {
+  const groupedResults = categoryFilteredResults.reduce((acc: any, result: any) => {
     if (!acc[result.category]) {
       acc[result.category] = []
     }
@@ -314,7 +314,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.ctrlKey && e.key === 'k') {
       e.preventDefault()
-      // SerÃ¡Â¡ controlado pelo componente pai
+      // Será¡ controlado pelo componente pai
     }
     
     if (!isOpen) return
@@ -338,12 +338,12 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
         }
         break
     }
-  }, [isOpen, selectedIndex, categoryFilteredResults, onClose])
+  }, [isOpen, selectedIndex: any, categoryFilteredResults, onClose])
 
   const handleResultSelect = (result: SearchResult) => {
     // Adicionar aos recentes
     setRecentSearches(prev => {
-      const newRecent = [result.title, ...prev.filter((r: any) => r !== result.title)].slice(0, 5)
+      const newRecent = [result.title, ...prev.filter((r: any) => r !== result.title)].slice(0: any, 5)
       return newRecent
     })
     
@@ -399,9 +399,9 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
             <input
               ref={inputRef}
               type="text"
-              placeholder="Buscar pÃ¡Â¡ginas, funcionalidades, dados..."
+              placeholder="Buscar pá¡ginas, funcionalidades: any, dados..."
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e: any) => setQuery(e.target.value)}
               className="flex-1 text-lg bg-transparent border-none outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
             <div className="flex items-center gap-2">
@@ -453,7 +453,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
                   Recentes
                 </div>
                 <div className="space-y-1">
-                  {recentSearches.map((search, index) => (
+                  {recentSearches.map((search: any, index: any) => (
                     <div key={index} className="flex items-center gap-2 px-2 py-1 text-sm text-gray-700 dark:text-gray-300">
                       <History className="h-3 w-3" />
                       {search}
@@ -477,7 +477,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
                   </div>
                   
                   <div className="space-y-0">
-                    {results.map((result) => {
+                    {results.map((result: any) => {
                       const globalIndex = categoryFilteredResults.indexOf(result)
                       const isSelected = globalIndex === selectedIndex
                       const isFav = favorites.includes(result.id)
@@ -532,7 +532,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
                           
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={(e) => {
+                              onClick={(e: any) => {
                                 e.stopPropagation()
                                 toggleFavorite(result.id)
                               }}
@@ -559,11 +559,11 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
           <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
             <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400">
               <div className="flex items-center gap-1">
-                <Badge variant="outline" className="text-xs">â€ â€˜â€ â€œ</Badge>
+                <Badge variant="outline" className="text-xs">†‘†“</Badge>
                 <span>Navegar</span>
               </div>
               <div className="flex items-center gap-1">
-                <Badge variant="outline" className="text-xs">â€ Âµ</Badge>
+                <Badge variant="outline" className="text-xs">†µ</Badge>
                 <span>Selecionar</span>
               </div>
               <div className="flex items-center gap-1">

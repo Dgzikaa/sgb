@@ -1,9 +1,9 @@
-﻿// =====================================================
-// ðŸ† SISTEMA DE SCORING INTELIGENTE - CHECKLISTS
+// =====================================================
+// 🏆 SISTEMA DE SCORING INTELIGENTE - CHECKLISTS
 // =====================================================
 // Implementa o sistema de notas conforme documento Word:
 // - "ter a 'nota' do checklist"  
-// - "se alguma era pra marcar sim e marcaram ná£o, ficar claro"
+// - "se alguma era pra marcar sim e marcaram n�o, ficar claro"
 
 interface ItemResposta {
   item_id: string
@@ -49,7 +49,7 @@ interface ScoreSecao {
 }
 
 // =====================================================
-// ðŸŽ¯ FUNá‡áƒO PRINCIPAL DE CáLCULO
+// 🎯 FUN��O PRINCIPAL DE C�LCULO
 // =====================================================
 
 export function calcularScoreFinal(execucao: any): ScoreResult {
@@ -70,11 +70,11 @@ export function calcularScoreFinal(execucao: any): ScoreResult {
   let itensNa = 0
   let somaScores = 0
 
-  // Calcular score por seá§á£o
+  // Calcular score por se��o
   estrutura.secoes.forEach((secao: any, secaoIndex: number) => {
     if (!secao.itens || !Array.isArray(secao.itens)) return
 
-    const scoreSecao = calcularScoreSecao(secao, respostas, problemas)
+    const scoreSecao = calcularScoreSecao(secao: any, respostas, problemas)
     detalhesSecoes.push(scoreSecao)
     
     totalItens += scoreSecao.total_itens
@@ -84,16 +84,16 @@ export function calcularScoreFinal(execucao: any): ScoreResult {
     somaScores += scoreSecao.score_secao
   })
 
-  // Calcular score total (má©dia ponderada)
+  // Calcular score total (m�dia ponderada)
   const scoreTotal = detalhesSecoes.length > 0 
     ? Math.round((somaScores / detalhesSecoes.length) * 10) / 10
     : 0
 
   // Determinar categoria
-  const categoria = determinarCategoria(scoreTotal, problemas)
+  const categoria = determinarCategoria(scoreTotal: any, problemas)
 
-  // Gerar recomendaá§áµes
-  const recomendacoes = gerarRecomendacoes(problemas, scoreTotal)
+  // Gerar recomenda��es
+  const recomendacoes = gerarRecomendacoes(problemas: any, scoreTotal)
 
   return {
     score_total: scoreTotal,
@@ -110,7 +110,7 @@ export function calcularScoreFinal(execucao: any): ScoreResult {
 }
 
 // =====================================================
-// ðŸ“Š CáLCULO POR SEá‡áƒO
+// 📊 C�LCULO POR SE��O
 // =====================================================
 
 function calcularScoreSecao(
@@ -118,7 +118,7 @@ function calcularScoreSecao(
   respostas: any, 
   problemas: ProblemIdenticado[]
 ): ScoreSecao {
-  const nomeSecao = secao.nome || 'Seá§á£o sem nome'
+  const nomeSecao = secao.nome || 'Se��o sem nome'
   const itens = secao.itens || []
   
   let totalItens = itens.length
@@ -127,8 +127,8 @@ function calcularScoreSecao(
   let somaScoreItens = 0
 
   itens.forEach((item: any) => {
-    const resposta = encontrarResposta(item, respostas)
-    const scoreItem = calcularScoreItem(item, resposta, nomeSecao, problemas)
+    const resposta = encontrarResposta(item: any, respostas)
+    const scoreItem = calcularScoreItem(item: any, resposta, nomeSecao: any, problemas)
     
     if (resposta?.respondido) {
       itensRespondidos++
@@ -140,7 +140,7 @@ function calcularScoreSecao(
     }
   })
 
-  // Score da seá§á£o (0-100)
+  // Score da se��o (0-100)
   const scoreSecao = totalItens > 0 
     ? Math.round((somaScoreItens / totalItens) * 10) / 10
     : 0
@@ -151,12 +151,12 @@ function calcularScoreSecao(
     total_itens: totalItens,
     itens_respondidos: itensRespondidos,
     problemas: problemasSecao,
-    categoria: determinarCategoriaSecao(scoreSecao, problemasSecao)
+    categoria: determinarCategoriaSecao(scoreSecao: any, problemasSecao)
   }
 }
 
 // =====================================================
-// ðŸ” CáLCULO POR ITEM
+// 🔍 C�LCULO POR ITEM
 // =====================================================
 
 function calcularScoreItem(
@@ -167,24 +167,24 @@ function calcularScoreItem(
 ): { score: number, tem_problema: boolean } {
   
   if (!resposta?.respondido) {
-    // Item ná£o respondido
+    // Item n�o respondido
     if (item.obrigatorio) {
       problemas.push({
         item_id: item.id || item.titulo,
         titulo: item.titulo,
         secao: nomeSecao,
         tipo_problema: 'obrigatorio_nao_preenchido',
-        descricao: `Item obrigatá³rio ná£o foi preenchido: ${item.titulo}`,
+        descricao: `Item obrigat�rio n�o foi preenchido: ${item.titulo}`,
         impacto: 'alto',
         requer_acao: true
       })
       return { score: 0, tem_problema: true }
     }
-    return { score: 50, tem_problema: false } // Item opcional ná£o respondido
+    return { score: 50, tem_problema: false } // Item opcional n�o respondido
   }
 
   // Item respondido - calcular score baseado no tipo e valor
-  return calcularScorePorTipo(item, resposta, nomeSecao, problemas)
+  return calcularScorePorTipo(item: any, resposta, nomeSecao: any, problemas)
 }
 
 function calcularScorePorTipo(
@@ -198,26 +198,26 @@ function calcularScorePorTipo(
 
   switch (item.tipo) {
     case 'sim_nao':
-      return calcularScoreSimNao(item, valor, nomeSecao, problemas)
+      return calcularScoreSimNao(item: any, valor, nomeSecao: any, problemas)
     
     case 'avaliacao':
-      return calcularScoreAvaliacao(item, valor, nomeSecao, problemas)
+      return calcularScoreAvaliacao(item: any, valor, nomeSecao: any, problemas)
     
     case 'numero':
-      return calcularScoreNumero(item, valor, nomeSecao, problemas)
+      return calcularScoreNumero(item: any, valor, nomeSecao: any, problemas)
     
     case 'texto':
-      return calcularScoreTexto(item, valor, nomeSecao, problemas)
+      return calcularScoreTexto(item: any, valor, nomeSecao: any, problemas)
     
     case 'data':
-      return calcularScoreData(item, valor, nomeSecao, problemas)
+      return calcularScoreData(item: any, valor, nomeSecao: any, problemas)
     
     case 'foto_camera':
     case 'foto_upload':
-      return calcularScoreFoto(item, valor, nomeSecao, problemas)
+      return calcularScoreFoto(item: any, valor, nomeSecao: any, problemas)
     
     case 'assinatura':
-      return calcularScoreAssinatura(item, valor, nomeSecao, problemas)
+      return calcularScoreAssinatura(item: any, valor, nomeSecao: any, problemas)
     
     default:
       return { score: 100, tem_problema: false }
@@ -225,7 +225,7 @@ function calcularScorePorTipo(
 }
 
 // =====================================================
-// ðŸŽ¯ CáLCULOS ESPECáFICOS POR TIPO
+// 🎯 C�LCULOS ESPEC�FICOS POR TIPO
 // =====================================================
 
 function calcularScoreSimNao(
@@ -238,17 +238,17 @@ function calcularScoreSimNao(
   const titulo = item.titulo?.toLowerCase() || ''
   const valorBoolean = valor === true || valor === 'sim' || valor === 'yes'
   
-  // Identificar se á© um item que deveria ser "sim" (positivo)
+  // Identificar se � um item que deveria ser "sim" (positivo)
   const esperaPositivo = identificarItemPositivo(titulo)
   
   if (esperaPositivo && !valorBoolean) {
-    // Era pra ser SIM mas foi marcado NáƒO - PROBLEMA!
+    // Era pra ser SIM mas foi marcado N�O - PROBLEMA!
     problemas.push({
       item_id: item.id || item.titulo,
       titulo: item.titulo,
       secao: nomeSecao,
       tipo_problema: 'esperado_sim_marcado_nao',
-      descricao: `Item crá­tico marcado como "NáƒO": ${item.titulo}`,
+      descricao: `Item cr�tico marcado como "N�O": ${item.titulo}`,
       impacto: 'alto',
       requer_acao: true
     })
@@ -256,7 +256,7 @@ function calcularScoreSimNao(
   }
   
   if (!esperaPositivo && valorBoolean) {
-    // Era pra ser NáƒO mas foi marcado SIM (pode indicar problema)
+    // Era pra ser N�O mas foi marcado SIM (pode indicar problema)
     const ehProblemaSerio = identificarItemNegativo(titulo)
     if (ehProblemaSerio) {
       problemas.push({
@@ -264,7 +264,7 @@ function calcularScoreSimNao(
         titulo: item.titulo,
         secao: nomeSecao,
         tipo_problema: 'valor_critico',
-        descricao: `Possá­vel problema identificado: ${item.titulo}`,
+        descricao: `Poss�vel problema identificado: ${item.titulo}`,
         impacto: 'medio',
         requer_acao: true
       })
@@ -290,7 +290,7 @@ function calcularScoreAvaliacao(
       titulo: item.titulo,
       secao: nomeSecao,
       tipo_problema: 'valor_critico',
-      descricao: `Avaliaá§á£o baixa (${nota}/5): ${item.titulo}`,
+      descricao: `Avalia��o baixa (${nota}/5): ${item.titulo}`,
       impacto: 'alto',
       requer_acao: true
     })
@@ -320,7 +320,7 @@ function calcularScoreNumero(
       titulo: item.titulo,
       secao: nomeSecao,
       tipo_problema: 'valor_critico',
-      descricao: `Valor abaixo do má­nimo (${numero} < ${opcoes.min}): ${item.titulo}`,
+      descricao: `Valor abaixo do m�nimo (${numero} < ${opcoes.min}): ${item.titulo}`,
       impacto: 'alto',
       requer_acao: true
     })
@@ -333,7 +333,7 @@ function calcularScoreNumero(
       titulo: item.titulo,
       secao: nomeSecao,
       tipo_problema: 'valor_critico',
-      descricao: `Valor acima do má¡ximo (${numero} > ${opcoes.max}): ${item.titulo}`,
+      descricao: `Valor acima do m�ximo (${numero} > ${opcoes.max}): ${item.titulo}`,
       impacto: 'alto',
       requer_acao: true
     })
@@ -417,13 +417,13 @@ function calcularScoreAssinatura(
 }
 
 // =====================================================
-// ðŸ” FUNá‡á•ES DE IDENTIFICAá‡áƒO
+// 🔍 FUN��ES DE IDENTIFICA��O
 // =====================================================
 
 function identificarItemPositivo(titulo: string): boolean {
   const palavrasPositivas = [
     'limpo', 'funcionando', 'organizado', 'adequado', 'suficiente',
-    'disponá­vel', 'operante', 'em bom estado', 'verificado', 'conferido',
+    'dispon�vel', 'operante', 'em bom estado', 'verificado', 'conferido',
     'abastecido', 'higienizado', 'calibrado', 'teste ok', 'normal',
     'dentro do prazo', 'em ordem', 'completo', 'atualizado'
   ]
@@ -434,15 +434,15 @@ function identificarItemPositivo(titulo: string): boolean {
 function identificarItemNegativo(titulo: string): boolean {
   const palavrasNegativas = [
     'vazamento', 'quebrado', 'sujo', 'vencido', 'defeito', 'problema',
-    'ruá­do', 'odor', 'mancha', 'rachadura', 'ferimento', 'acidente',
-    'contaminaá§á£o', 'pragas', 'roedores', 'insetos'
+    'ru�do', 'odor', 'mancha', 'rachadura', 'ferimento', 'acidente',
+    'contamina��o', 'pragas', 'roedores', 'insetos'
   ]
   
   return palavrasNegativas.some(palavra => titulo.includes(palavra))
 }
 
 // =====================================================
-// ðŸ·ï¸ CATEGORIZAá‡áƒO
+// 🏷️ CATEGORIZA��O
 // =====================================================
 
 function determinarCategoria(score: number, problemas: ProblemIdenticado[]): 'excelente' | 'bom' | 'atencao' | 'critico' {
@@ -472,7 +472,7 @@ function determinarCategoriaSecao(score: number, problemas: number): 'excelente'
 }
 
 // =====================================================
-// ðŸ’¡ RECOMENDAá‡á•ES
+// 💡 RECOMENDA��ES
 // =====================================================
 
 function gerarRecomendacoes(problemas: ProblemIdenticado[], score: number): string[] {
@@ -480,27 +480,27 @@ function gerarRecomendacoes(problemas: ProblemIdenticado[], score: number): stri
   
   const problemasCriticos = problemas.filter((p: any) => p.tipo_problema === 'esperado_sim_marcado_nao')
   if (problemasCriticos.length > 0) {
-    recomendacoes.push(`ðŸš¨ Aá‡áƒO IMEDIATA: ${problemasCriticos.length} item(ns) crá­tico(s) identificado(s)`)
+    recomendacoes.push(`🚨 A��O IMEDIATA: ${problemasCriticos.length} item(ns) cr�tico(s) identificado(s)`)
   }
   
   const itensObrigatorios = problemas.filter((p: any) => p.tipo_problema === 'obrigatorio_nao_preenchido')
   if (itensObrigatorios.length > 0) {
-    recomendacoes.push(`ðŸ“ Completar ${itensObrigatorios.length} item(ns) obrigatá³rio(s) pendente(s)`)
+    recomendacoes.push(`📝 Completar ${itensObrigatorios.length} item(ns) obrigat�rio(s) pendente(s)`)
   }
   
   if (score < 60) {
-    recomendacoes.push('ðŸ“Š Score baixo - revisar procedimentos e treinamento')
+    recomendacoes.push('📊 Score baixo - revisar procedimentos e treinamento')
   }
   
   if (score >= 90) {
-    recomendacoes.push('ðŸŽ‰ Excelente execuá§á£o! Parabá©ns pela qualidade!')
+    recomendacoes.push('🎉 Excelente execu��o! Parab�ns pela qualidade!')
   }
   
   return recomendacoes
 }
 
 // =====================================================
-// ðŸ”§ FUNá‡á•ES UTILITáRIAS
+// 🔧 FUN��ES UTILIT�RIAS
 // =====================================================
 
 function encontrarResposta(item: any, respostas: any): any {
@@ -529,12 +529,12 @@ function criarScoreVazio(): ScoreResult {
     itens_na: 0,
     problemas_identificados: [],
     detalhes_por_secao: [],
-    recomendacoes: ['Estrutura do checklist ná£o encontrada']
+    recomendacoes: ['Estrutura do checklist n�o encontrada']
   }
 }
 
 // =====================================================
-// ðŸ“ˆ FUNá‡á•ES DE ANáLISE ADICIONAL
+// 📈 FUN��ES DE AN�LISE ADICIONAL
 // =====================================================
 
 export function obterCorCategoria(categoria: string): string {
@@ -549,24 +549,24 @@ export function obterCorCategoria(categoria: string): string {
 
 export function obterIconeCategoria(categoria: string): string {
   switch (categoria) {
-    case 'excelente': return 'ðŸ†'
-    case 'bom': return 'œ…'
-    case 'atencao': return 'š ï¸'
-    case 'critico': return 'ðŸš¨'
-    default: return 'ðŸ“‹'
+    case 'excelente': return '🏆'
+    case 'bom': return '��'
+    case 'atencao': return '��️'
+    case 'critico': return '🚨'
+    default: return '📋'
   }
 }
 
 export function obterResumoScore(scoreResult: ScoreResult): string {
-  const { score_total, categoria, problemas_identificados } = scoreResult
+  const { score_total, categoria: any, problemas_identificados } = scoreResult
   const problemasCriticos = problemas_identificados.filter((p: any) => p.impacto === 'alto').length
   
   if (categoria === 'excelente') {
-    return `Score excelente: ${score_total}/100 ðŸ†`
+    return `Score excelente: ${score_total}/100 🏆`
   }
   
   if (categoria === 'critico') {
-    return `Atená§á£o necessá¡ria: ${score_total}/100 (${problemasCriticos} problema(s) crá­tico(s)) ðŸš¨`
+    return `Aten��o necess�ria: ${score_total}/100 (${problemasCriticos} problema(s) cr�tico(s)) 🚨`
   }
   
   return `Score: ${score_total}/100 - ${categoria} ${obterIconeCategoria(categoria)}`

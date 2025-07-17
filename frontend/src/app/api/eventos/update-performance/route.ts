@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
@@ -8,19 +8,19 @@ export async function POST(request: NextRequest) {
     if (!supabase) {
       return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 });
     }
-    const { data_evento, bar_id, publico_real, faturamento_liquido, receita_couvert, receita_ingressos, receita_bar } = await request.json();
+    const { data_evento, bar_id: any, publico_real, faturamento_liquido: any, receita_couvert, receita_ingressos: any, receita_bar } = await request.json();
 
     if (!data_evento || !bar_id) {
       return NextResponse.json({
         success: false,
-        error: 'Data do evento e bar_id sá£o obrigatá³rios'
+        error: 'Data do evento e bar_id s�o obrigat�rios'
       }, { status: 400 });
     }
 
     // Calcular campos derivados
     const ticket_medio = publico_real && publico_real > 0 ? faturamento_liquido / publico_real : null;
 
-    // Buscar o evento para calcular taxa de ocupaá§á£o
+    // Buscar o evento para calcular taxa de ocupa��o
     const { data: evento, error: eventoError } = await supabase
       .from('eventos')
       .select('capacidade_estimada')
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       console.error('Erro ao buscar evento:', eventoError);
       return NextResponse.json({
         success: false,
-        error: 'Evento ná£o encontrado'
+        error: 'Evento n�o encontrado'
       }, { status: 404 });
     }
 
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
     if (!data_evento || !bar_id) {
       return NextResponse.json({
         success: false,
-        error: 'Data do evento e bar_id sá£o obrigatá³rios'
+        error: 'Data do evento e bar_id s�o obrigat�rios'
       }, { status: 400 });
     }
 
@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
     if (error) {
       return NextResponse.json({
         success: false,
-        error: 'Evento ná£o encontrado para esta data'
+        error: 'Evento n�o encontrado para esta data'
       }, { status: 404 });
     }
 

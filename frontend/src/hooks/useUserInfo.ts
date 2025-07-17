@@ -1,4 +1,4 @@
-ï»¿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { getSupabaseClient } from '@/lib/supabase'
@@ -42,11 +42,11 @@ export function useUserInfo() {
           }
         }
         
-        // Se chegou atÃ¡Â© aqui, nÃ¡Â£o hÃ¡Â¡ dados vÃ¡Â¡lidos no localStorage
-        throw new Error('UsuÃ¡Â¡rio nÃ¡Â£o logado - faÃ¡Â§a login novamente')
+        // Se chegou atá© aqui, ná£o há¡ dados vá¡lidos no localStorage
+        throw new Error('Usuá¡rio ná£o logado - faá§a login novamente')
 
       } catch (err) {
-        console.error('ÂÅ’ Erro ao carregar informaÃ¡Â§Ã¡Âµes do usuÃ¡Â¡rio:', err)
+        console.error('Œ Erro ao carregar informaá§áµes do usuá¡rio:', err)
         setError(err instanceof Error ? err.message : 'Erro desconhecido')
       } finally {
         if (mounted) {
@@ -69,7 +69,7 @@ export function useUserInfo() {
       case 'financeiro':
         return 'Financeiro'
       case 'funcionario':
-        return 'FuncionÃ¡Â¡rio'
+        return 'Funcioná¡rio'
       default:
         return role
     }

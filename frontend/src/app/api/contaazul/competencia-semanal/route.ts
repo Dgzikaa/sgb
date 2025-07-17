@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { mapearCategoria } from '@/lib/contaazul-categoria-mapper';
 
@@ -9,29 +9,29 @@ const supabase = createClient(
 
 // Adiciona index signature para evitar erro TS
 const MAPEAMENTO_CATEGORIAS: Record<string, string> = {
-  'Stone Crá©dito': 'Stone Crá©dito',
-  'Stone Dá©bito': 'Stone Dá©bito',
+  'Stone Cr�dito': 'Stone Cr�dito',
+  'Stone D�bito': 'Stone D�bito',
   'Stone Pix': 'Stone Pix',
   'Pix Direto na Conta': 'Pix Direto na Conta',
   'Dinheiro': 'Dinheiro',
   'Receita de Eventos': 'Receita de Eventos',
   'Outras Receitas': 'Outras Receitas',
   'Ifood': 'Outras Receitas',
-  'Receitas de Serviá§os': 'Outras Receitas',
+  'Receitas de Servi�os': 'Outras Receitas',
   'Fretes recebidos': 'Outras Receitas',
   'PERSE': 'Outras Receitas',
   'Descontos incondicionais obtidos': 'Outras Receitas',
   'Descontos financeiros obtidos': 'Outras Receitas',
-  'Emprá©stimos de Sá³cios': 'Outras Receitas',
-  'Outros Sá³cios': 'Outras Receitas',
+  'Empr�stimos de S�cios': 'Outras Receitas',
+  'Outros S�cios': 'Outras Receitas',
   'Dividendos': 'Outras Receitas',
   'Outros Investimentos': 'Outras Receitas',
   'Consultoria': 'Outras Receitas',
-  'Produá§á£o Eventos': 'Produá§á£o Eventos',
+  'Produ��o Eventos': 'Produ��o Eventos',
   'Marketing': 'Marketing',
-  'Atraá§áµes Programaá§á£o': 'Atraá§áµes Programaá§á£o',
+  'Atra��es Programa��o': 'Atra��es Programa��o',
   'IMPOSTO': 'IMPOSTO',
-  'COMISSáƒO 10%': 'COMISSáƒO 10%',
+  'COMISS�O 10%': 'COMISS�O 10%',
   'TAXA MAQUININHA': 'TAXA MAQUININHA',
   'Custo Drinks': 'Custo Drinks',
   'Custo Bebidas': 'Custo Bebidas',
@@ -39,28 +39,28 @@ const MAPEAMENTO_CATEGORIAS: Record<string, string> = {
   'Custo Outros': 'Custo Outros',
   'SALARIO FUNCIONARIOS': 'SALARIO FUNCIONARIOS',
   'VALE TRANSPORTE': 'VALE TRANSPORTE',
-  'ALIMENTAá‡áƒO': 'ALIMENTAá‡áƒO',
+  'ALIMENTA��O': 'ALIMENTA��O',
   'ADICIONAIS': 'ADICIONAIS',
   'FREELA ATENDIMENTO': 'FREELA ATENDIMENTO',
   'FREELA BAR': 'FREELA BAR',
   'FREELA COZINHA': 'FREELA COZINHA',
   'FREELA LIMPEZA': 'FREELA LIMPEZA',
-  'FREELA SEGURANá‡A': 'FREELA SEGURANá‡A',
+  'FREELA SEGURAN�A': 'FREELA SEGURAN�A',
   'PRO LABORE': 'PRO LABORE',
-  'PROVISáƒO TRABALHISTA': 'PROVISáƒO TRABALHISTA',
-  'Administrativo Ordiná¡rio': 'Administrativo Ordiná¡rio',
-  'Escritá³rio Central': 'Escritá³rio Central',
+  'PROVIS�O TRABALHISTA': 'PROVIS�O TRABALHISTA',
+  'Administrativo Ordin�rio': 'Administrativo Ordin�rio',
+  'Escrit�rio Central': 'Escrit�rio Central',
   'Recursos Humanos': 'Recursos Humanos',
-  'Materiais Operaá§á£o': 'Materiais Operaá§á£o',
-  'Materiais de Limpeza e Descartá¡veis': 'Materiais de Limpeza e Descartá¡veis',
-  'Utensá­lios': 'Utensá­lios',
+  'Materiais Opera��o': 'Materiais Opera��o',
+  'Materiais de Limpeza e Descart�veis': 'Materiais de Limpeza e Descart�veis',
+  'Utens�lios': 'Utens�lios',
   'Estorno': 'Estorno',
-  'Outros Operaá§á£o': 'Outros Operaá§á£o',
-  'ALUGUEL/CONDOMáNIO/IPTU': 'ALUGUEL/CONDOMáNIO/IPTU',
-  'áGUA': 'áGUA',
-  'MANUTENá‡áƒO': 'MANUTENá‡áƒO',
+  'Outros Opera��o': 'Outros Opera��o',
+  'ALUGUEL/CONDOM�NIO/IPTU': 'ALUGUEL/CONDOM�NIO/IPTU',
+  '�GUA': '�GUA',
+  'MANUTEN��O': 'MANUTEN��O',
   'INTERNET': 'INTERNET',
-  'GáS': 'GáS',
+  'G�S': 'G�S',
   'LUZ': 'LUZ',
   'Contratos': 'Contratos',
 };
@@ -95,12 +95,12 @@ export async function GET(req: NextRequest) {
     for (const cat of categorias || []) {
       categoriasDict[cat.id] = cat.nome;
     }
-    // Agrupar por máªs e categoria
+    // Agrupar por m�s e categoria
     const meses: Record<string, any> = {};
     for (const evento of eventos || []) {
       if (!evento.data_competencia) continue;
       const { mes, ano } = getMonthYear(evento.data_competencia);
-      const key = `${ano}-${mes.toString().padStart(2, '0')}`;
+      const key = `${ano}-${mes.toString().padStart(2: any, '0')}`;
       if (!meses[key]) {
         meses[key] = {
           mes,
@@ -117,11 +117,11 @@ export async function GET(req: NextRequest) {
       if (nomeCategoria) {
         categoriaMapeada = MAPEAMENTO_CATEGORIAS[nomeCategoria];
         if (!categoriaMapeada) {
-          categoriaMapeada = evento.tipo === 'receita' ? 'Outras Receitas' : 'Outros Operaá§á£o';
+          categoriaMapeada = evento.tipo === 'receita' ? 'Outras Receitas' : 'Outros Opera��o';
         }
       } else {
         const mapeado = mapearCategoria(evento.descricao, evento.tipo === 'receita' ? 'RECEITA' : 'DESPESA', evento.valor);
-        categoriaMapeada = MAPEAMENTO_CATEGORIAS[mapeado.categoria_sugerida] || (evento.tipo === 'receita' ? 'Outras Receitas' : 'Outros Operaá§á£o');
+        categoriaMapeada = MAPEAMENTO_CATEGORIAS[mapeado.categoria_sugerida] || (evento.tipo === 'receita' ? 'Outras Receitas' : 'Outros Opera��o');
       }
       if (!meses[key].categorias[categoriaMapeada]) {
         meses[key].categorias[categoriaMapeada] = 0;
@@ -134,7 +134,7 @@ export async function GET(req: NextRequest) {
       }
       meses[key].resultado = meses[key].total_receitas - meses[key].total_despesas;
     }
-    // Converter para array e ordenar por ano/máªs
+    // Converter para array e ordenar por ano/m�s
     const resultado = Object.values(meses).sort((a: any, b: any) => {
       if (a.ano !== b.ano) return a.ano - b.ano;
       return a.mes - b.mes;

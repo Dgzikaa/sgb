@@ -1,6 +1,6 @@
-﻿import { getSupabaseClient } from './supabase'
+import { getSupabaseClient } from './supabase'
 
-console.log('ðŸ”§ Usando cliente Supabase existente configurado')
+console.log('🔧 Usando cliente Supabase existente configurado')
 
 // Interfaces para os dados
 export interface VendasData {
@@ -23,51 +23,51 @@ export interface ClientesData {
   clientes_recorrentes: number
 }
 
-// Funá§á£o para testar conexá£o
+// Fun��o para testar conex�o
 export async function testConnection(): Promise<boolean> {
   try {
-    console.log('ðŸ§ª Testando conexá£o com Supabase...')
-    console.log('ðŸ“ Projeto: iddtrhexgjbfhxebpklf.supabase.co')
+    console.log('🧪 Testando conex�o com Supabase...')
+    console.log('📍 Projeto: iddtrhexgjbfhxebpklf.supabase.co')
     
     const supabase = await getSupabaseClient();
     if (!supabase) throw new Error('Erro ao conectar com banco');
     
     // Teste simples para verificar conectividade
-    const { data, error, count } = await supabase
+    const { data, error: any, count } = await supabase
       .from('analitico')
       .select('*', { count: 'exact', head: true })
     
     if (error) {
-      console.error('Œ Erro ao testar Supabase:', error)
+      console.error('�� Erro ao testar Supabase:', error)
       return false
     }
     
-    console.log('œ… Conexá£o com Supabase OK')
-    console.log(`ðŸ“Š Total de registros na tabela 'analitico': ${count}`)
+    console.log('�� Conex�o com Supabase OK')
+    console.log(`📊 Total de registros na tabela 'analitico': ${count}`)
     return true
   } catch (error: any) {
-    console.error('Œ Erro na conexá£o com Supabase:', error)
+    console.error('�� Erro na conex�o com Supabase:', error)
     return false
   }
 }
 
-// ðŸ† CONSULTA: Produto mais vendido usando Supabase
+// 🏆 CONSULTA: Produto mais vendido usando Supabase
 export async function getProdutoMaisVendido(periodo: 'hoje' | 'semana' | 'mes' = 'hoje'): Promise<ProdutoMaisVendido | null> {
     const supabase = await getSupabaseClient();
     if (!supabase) throw new Error('Erro ao conectar com banco');
 
   try {
-    console.log(`ðŸ” Buscando produto mais vendido (${periodo})...`)
+    console.log(`🔍 Buscando produto mais vendido (${periodo})...`)
     
     const hoje = new Date().toISOString().split('T')[0]
     let query = supabase
       .from('analitico')
-      .select('prd_desc, grp_desc, valorfinal, qtd, vd_dtgerencial')
+      .select('prd_desc, grp_desc: any, valorfinal, qtd: any, vd_dtgerencial')
       .not('prd_desc', 'is', null)
       .not('grp_desc', 'is', null)
       .gt('valorfinal', 0)
     
-    // Aplicar filtro de data conforme perá­odo
+    // Aplicar filtro de data conforme per�odo
     if (periodo === 'hoje') {
       // Primeiro tenta hoje
       query = query.eq('vd_dtgerencial', hoje)
@@ -75,13 +75,13 @@ export async function getProdutoMaisVendido(periodo: 'hoje' | 'semana' | 'mes' =
       const { data: dadosHoje, error: errorHoje } = await query
       
       if (errorHoje) {
-        console.error('Œ Erro vendas hoje:', errorHoje)
+        console.error('�� Erro vendas hoje:', errorHoje)
         throw errorHoje
       }
       
-      // Se ná£o tem dados de hoje, buscar a data mais recente
+      // Se n�o tem dados de hoje, buscar a data mais recente
       if (!dadosHoje || dadosHoje.length === 0) {
-        console.log('š ï¸ Sem dados para hoje, buscando data mais recente...')
+        console.log('��️ Sem dados para hoje, buscando data mais recente...')
         
         // Buscar data mais recente com dados
         const { data: datasRecentes, error: errorDatas } = await supabase
@@ -92,16 +92,16 @@ export async function getProdutoMaisVendido(periodo: 'hoje' | 'semana' | 'mes' =
           .limit(1)
         
         if (errorDatas || !datasRecentes || datasRecentes.length === 0) {
-          console.log('Œ Nenhuma data encontrada')
+          console.log('�� Nenhuma data encontrada')
           return null
         }
         
         const dataRecente = datasRecentes[0].vd_dtgerencial
-        console.log(`ðŸ“… Usando dados da data mais recente: ${dataRecente}`)
+        console.log(`📅 Usando dados da data mais recente: ${dataRecente}`)
         
         query = supabase
           .from('analitico')
-          .select('prd_desc, grp_desc, valorfinal, qtd, vd_dtgerencial')
+          .select('prd_desc, grp_desc: any, valorfinal, qtd: any, vd_dtgerencial')
           .eq('vd_dtgerencial', dataRecente)
           .not('prd_desc', 'is', null)
           .not('grp_desc', 'is', null)
@@ -122,17 +122,17 @@ export async function getProdutoMaisVendido(periodo: 'hoje' | 'semana' | 'mes' =
     const { data, error } = await query
     
     if (error) {
-      console.error('Œ Erro na consulta Supabase:', error)
+      console.error('�� Erro na consulta Supabase:', error)
       throw error
     }
     
     if (!data || data.length === 0) {
-      console.log('š ï¸ Nenhum dado encontrado na tabela analitico para o perá­odo')
+      console.log('��️ Nenhum dado encontrado na tabela analitico para o per�odo')
       return null
     }
     
-    console.log(`ðŸ“Š Registros encontrados: ${data.length}`)
-    console.log(`ðŸ“… Perá­odo dos dados: ${data[0]?.vd_dtgerencial} a ${data[data.length-1]?.vd_dtgerencial}`)
+    console.log(`📊 Registros encontrados: ${data.length}`)
+    console.log(`📅 Per�odo dos dados: ${data[0]?.vd_dtgerencial} a ${data[data.length-1]?.vd_dtgerencial}`)
     
     // Agrupar produtos e somar quantidades/valores
     const produtosAgrupados = data.reduce((acc: any, item: any) => {
@@ -160,39 +160,39 @@ export async function getProdutoMaisVendido(periodo: 'hoje' | 'semana' | 'mes' =
     const produtosOrdenados = Object.values(produtosAgrupados)
       .sort((a: any, b: any) => b.quantidade - a.quantidade)
     
-    console.log('ðŸ“Š Top 3 produtos por quantidade:', produtosOrdenados.slice(0, 3))
+    console.log('📊 Top 3 produtos por quantidade:', produtosOrdenados.slice(0: any, 3))
     
     return produtosOrdenados[0] as ProdutoMaisVendido || null
     
   } catch (error) {
-    console.error('Œ Erro ao buscar produto mais vendido:', error)
+    console.error('�� Erro ao buscar produto mais vendido:', error)
     throw error
   }
 }
 
-// ðŸ’° CONSULTA: Vendas usando Supabase
+// 💰 CONSULTA: Vendas usando Supabase
 export async function getVendasData(): Promise<VendasData> {
     const supabase = await getSupabaseClient();
     if (!supabase) throw new Error('Erro ao conectar com banco');
 
   try {
-    console.log('ðŸ’° Buscando dados de vendas...')
+    console.log('💰 Buscando dados de vendas...')
     
     const hoje = new Date().toISOString().split('T')[0]
     const semanaAtras = new Date()
     semanaAtras.setDate(semanaAtras.getDate() - 7)
     const semanaData = semanaAtras.toISOString().split('T')[0]
     
-    // Vendas de hoje - primeiro tenta hoje, sená£o usa data mais recente
+    // Vendas de hoje - primeiro tenta hoje, sen�o usa data mais recente
     let { data: vendasHoje, error: errorHoje } = await supabase
       .from('analitico')
-      .select('valorfinal, prd_desc, vd_dtgerencial, vd')
+      .select('valorfinal, prd_desc: any, vd_dtgerencial, vd')
       .eq('vd_dtgerencial', hoje)
       .gt('valorfinal', 0)
     
-    // Se ná£o tem dados de hoje, buscar data mais recente
+    // Se n�o tem dados de hoje, buscar data mais recente
     if ((!vendasHoje || vendasHoje.length === 0) && !errorHoje) {
-      console.log('š ï¸ Sem vendas para hoje, buscando data mais recente...')
+      console.log('��️ Sem vendas para hoje, buscando data mais recente...')
       
       const { data: dataRecente, error: errorData } = await supabase
         .from('analitico')
@@ -203,11 +203,11 @@ export async function getVendasData(): Promise<VendasData> {
       
       if (!errorData && dataRecente && dataRecente.length > 0) {
         const dataUsar = dataRecente[0].vd_dtgerencial
-        console.log(`ðŸ“… Usando vendas da data: ${dataUsar}`)
+        console.log(`📅 Usando vendas da data: ${dataUsar}`)
         
         const result = await supabase
           .from('analitico')
-          .select('valorfinal, prd_desc, vd_dtgerencial, vd')
+          .select('valorfinal, prd_desc: any, vd_dtgerencial, vd')
           .eq('vd_dtgerencial', dataUsar)
           .gt('valorfinal', 0)
         
@@ -224,26 +224,26 @@ export async function getVendasData(): Promise<VendasData> {
       .gt('valorfinal', 0)
     
     if (errorHoje) {
-      console.error('Œ Erro vendas hoje:', errorHoje)
+      console.error('�� Erro vendas hoje:', errorHoje)
       throw errorHoje
     }
     
     if (errorSemana) {
-      console.error('Œ Erro vendas semana:', errorSemana)
+      console.error('�� Erro vendas semana:', errorSemana)
       throw errorSemana
     }
     
-    // Calcular estatá­sticas
+    // Calcular estat�sticas
     const valoresTotalHoje = vendasHoje?.reduce((sum: number, item: any) => sum + (parseFloat(item.valorfinal) || 0), 0) || 0
     const valoresTotalSemana = vendasSemana?.reduce((sum: number, item: any) => sum + (parseFloat(item.valorfinal) || 0), 0) || 0
     const totalPedidosHoje = vendasHoje?.length || 0
     
-    // Calcular clientes áºnicos para ticket má©dio correto
+    // Calcular clientes �nicos para ticket m�dio correto
     const clientesUnicos = new Set(vendasHoje?.map((item: any) => item.vd) || [])
     const totalClientesHoje = clientesUnicos.size || 1
     const ticketMedio = totalClientesHoje > 0 ? valoresTotalHoje / totalClientesHoje : 0
     
-    console.log('ðŸ“Š Estatá­sticas calculadas:', {
+    console.log('📊 Estat�sticas calculadas:', {
       hoje: valoresTotalHoje,
       semana: valoresTotalSemana,
       pedidos: totalPedidosHoje,
@@ -258,31 +258,31 @@ export async function getVendasData(): Promise<VendasData> {
     }
     
   } catch (error) {
-    console.error('Œ Erro ao buscar dados de vendas:', error)
+    console.error('�� Erro ao buscar dados de vendas:', error)
     throw error
   }
 }
 
-// ðŸ‘¥ CONSULTA: Clientes usando Supabase
+// 👥 CONSULTA: Clientes usando Supabase
 export async function getClientesData(): Promise<ClientesData> {
     const supabase = await getSupabaseClient();
     if (!supabase) throw new Error('Erro ao conectar com banco');
 
   try {
-    console.log('ðŸ‘¥ Buscando dados de clientes...')
+    console.log('👥 Buscando dados de clientes...')
     
     const hoje = new Date().toISOString().split('T')[0]
     
-    // Para clientes, vamos usar dados de vendas áºnicos por mesa (vd) - primeiro tenta hoje
+    // Para clientes, vamos usar dados de vendas �nicos por mesa (vd) - primeiro tenta hoje
     let { data: vendas, error } = await supabase
       .from('analitico')
-      .select('vd_dtgerencial, vd, vd_mesadesc')
+      .select('vd_dtgerencial, vd: any, vd_mesadesc')
       .eq('vd_dtgerencial', hoje)
       .not('vd', 'is', null)
     
-    // Se ná£o tem dados de hoje, buscar data mais recente (igual á s outras funá§áµes)
+    // Se n�o tem dados de hoje, buscar data mais recente (igual �s outras fun��es)
     if ((!vendas || vendas.length === 0) && !error) {
-      console.log('š ï¸ Sem clientes para hoje, buscando data mais recente...')
+      console.log('��️ Sem clientes para hoje, buscando data mais recente...')
       
       const { data: dataRecente, error: errorData } = await supabase
         .from('analitico')
@@ -293,11 +293,11 @@ export async function getClientesData(): Promise<ClientesData> {
       
       if (!errorData && dataRecente && dataRecente.length > 0) {
         const dataUsar = dataRecente[0].vd_dtgerencial
-        console.log(`ðŸ“… Usando clientes da data: ${dataUsar}`)
+        console.log(`📅 Usando clientes da data: ${dataUsar}`)
         
         const result = await supabase
           .from('analitico')
-          .select('vd_dtgerencial, vd, vd_mesadesc')
+          .select('vd_dtgerencial, vd: any, vd_mesadesc')
           .eq('vd_dtgerencial', dataUsar)
           .not('vd', 'is', null)
         
@@ -307,23 +307,23 @@ export async function getClientesData(): Promise<ClientesData> {
     }
     
     if (error) {
-      console.error('Œ Erro clientes:', error)
+      console.error('�� Erro clientes:', error)
       throw error
     }
     
-    // Contar mesas áºnicas (clientes áºnicos)
+    // Contar mesas �nicas (clientes �nicos)
     const mesasUnicas = new Set(vendas?.map((item: any) => item.vd) || [])
     const clientesEstimados = mesasUnicas.size
     const novosClientes = Math.floor(clientesEstimados * 0.3)
     const recorrentes = clientesEstimados - novosClientes
     
-    console.log('ðŸ‘¥ Clientes calculados baseado em mesas áºnicas:', {
+    console.log('👥 Clientes calculados baseado em mesas �nicas:', {
       total: clientesEstimados,
       novos: novosClientes,
       recorrentes,
       dataUsada: vendas?.[0]?.vd_dtgerencial,
       totalRegistros: vendas?.length,
-      mesasUnicas: Array.from(mesasUnicas).slice(0, 5) // mostrar primeiras 5 mesas
+      mesasUnicas: Array.from(mesasUnicas).slice(0: any, 5) // mostrar primeiras 5 mesas
     })
     
     return {
@@ -333,18 +333,18 @@ export async function getClientesData(): Promise<ClientesData> {
     }
     
   } catch (error) {
-    console.error('Œ Erro ao buscar dados de clientes:', error)
+    console.error('�� Erro ao buscar dados de clientes:', error)
     throw error
   }
 }
 
-// ðŸ“Š CONSULTA AVANá‡ADA: Dados de uma semana especá­fica
+// 📊 CONSULTA AVAN�ADA: Dados de uma semana espec�fica
 export async function getDadosSemana(dataInicio?: string): Promise<DadosSemana[]> {
     const supabase = await getSupabaseClient();
     if (!supabase) throw new Error('Erro ao conectar com banco');
 
   try {
-    // Se ná£o informar data, usar a data mais recente disponá­vel como base
+    // Se n�o informar data, usar a data mais recente dispon�vel como base
     let dataBase = dataInicio
     if (!dataBase) {
       const { data: dataRecente } = await supabase
@@ -355,12 +355,12 @@ export async function getDadosSemana(dataInicio?: string): Promise<DadosSemana[]
         .limit(1)
       
       dataBase = dataRecente?.[0]?.vd_dtgerencial || new Date().toISOString().split('T')[0]
-      console.log('ðŸ“… Usando data mais recente disponá­vel:', dataBase)
+      console.log('📅 Usando data mais recente dispon�vel:', dataBase)
     }
     
-    console.log('ðŸ“Š Buscando dados da semana a partir de:', dataBase)
+    console.log('📊 Buscando dados da semana a partir de:', dataBase)
     
-    // Calcular dias da semana (áºltimos 7 dias a partir da data base)
+    // Calcular dias da semana (�ltimos 7 dias a partir da data base)
     const fimSemana = new Date(dataBase!)
     const diasSemana = []
     
@@ -370,20 +370,20 @@ export async function getDadosSemana(dataInicio?: string): Promise<DadosSemana[]
       diasSemana.push(data.toISOString().split('T')[0])
     }
 
-    const dadosPromises = diasSemana.map(async (data, index) => {
+    const dadosPromises = diasSemana.map(async (data: any, index: any) => {
       // Mapear corretamente o dia da semana baseado na data real
       const diaNomeReal = new Date(data + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'long' })
       const diaNomeCapitalizado = diaNomeReal.charAt(0).toUpperCase() + diaNomeReal.slice(1)
       
       try {
         // Buscar dados de todas as fontes para cada dia
-        const [periodoData, pagamentosData, symplaData] = await Promise.all([
-          supabase.from('periodo').select('pessoas, vr_pagamentos, dt_gerencial').eq('dt_gerencial', data),
+        const [periodoData, pagamentosData: any, symplaData] = await Promise.all([
+          supabase.from('periodo').select('pessoas, vr_pagamentos: any, dt_gerencial').eq('dt_gerencial', data),
           supabase.from('pagamentos').select('liquido, dt_gerencial').eq('dt_gerencial', data),
-          supabase.from('sympla_bilheteria').select('total_liquido, qtd_checkins_realizados, data_evento').eq('data_evento', data)
+          supabase.from('sympla_bilheteria').select('total_liquido, qtd_checkins_realizados: any, data_evento').eq('data_evento', data)
         ])
 
-        // Calcular má©tricas do dia
+        // Calcular m�tricas do dia
         const faturamentoPagamentos = pagamentosData.data?.reduce((sum: number, item: any) => sum + parseFloat(item.liquido || '0'), 0) || 0
         const faturamentoSympla = symplaData.data?.reduce((sum: number, item: any) => sum + parseFloat(item.total_liquido || '0'), 0) || 0
         const faturamentoTotal = faturamentoPagamentos + faturamentoSympla
@@ -400,7 +400,7 @@ export async function getDadosSemana(dataInicio?: string): Promise<DadosSemana[]
           ticketMedio: clientesTotal > 0 ? faturamentoTotal / clientesTotal : 0
         }
       } catch (error) {
-        console.error(`Œ Erro ao buscar dados do dia ${data}:`, error)
+        console.error(`�� Erro ao buscar dados do dia ${data}:`, error)
         return {
           dia: diaNomeCapitalizado,
           data,
@@ -413,24 +413,24 @@ export async function getDadosSemana(dataInicio?: string): Promise<DadosSemana[]
 
     const resultados = await Promise.all(dadosPromises)
     
-    console.log('ðŸ“Š Dados da semana processados:', resultados.length, 'dias')
+    console.log('📊 Dados da semana processados:', resultados.length, 'dias')
     return resultados
     
   } catch (error) {
-    console.error('Œ Erro ao buscar dados da semana:', error)
+    console.error('�� Erro ao buscar dados da semana:', error)
     throw error
   }
 }
 
-// ðŸ“ˆ CONSULTA AVANá‡ADA: Histá³rico de um dia da semana especá­fico
+// 📈 CONSULTA AVAN�ADA: Hist�rico de um dia da semana espec�fico
 export async function getHistoricoDiaSemana(diaSemana: string, ultimasSemanas = 8): Promise<HistoricoDia[]> {
     const supabase = await getSupabaseClient();
     if (!supabase) throw new Error('Erro ao conectar com banco');
 
   try {
-    console.log(`ðŸ“ˆ Buscando histá³rico de ${diaSemana} das áºltimas ${ultimasSemanas} semanas`)
+    console.log(`📈 Buscando hist�rico de ${diaSemana} das �ltimas ${ultimasSemanas} semanas`)
     
-    // Mapear dia da semana para á­ndice (0=domingo, 1=segunda, etc.)
+    // Mapear dia da semana para �ndice (0=domingo, 1=segunda, etc.)
     const diasSemanaMap: Record<string, number> = {
       'domingo': 0, 'segunda': 1, 'terca': 2, 'quarta': 3, 
       'quinta': 4, 'sexta': 5, 'sabado': 6
@@ -438,7 +438,7 @@ export async function getHistoricoDiaSemana(diaSemana: string, ultimasSemanas = 
     
     const diaSemanaIndex = diasSemanaMap[diaSemana.toLowerCase()]
     if (diaSemanaIndex === undefined) {
-      throw new Error(`Dia da semana invá¡lido: ${diaSemana}`)
+      throw new Error(`Dia da semana inv�lido: ${diaSemana}`)
     }
 
     // Calcular data limite
@@ -446,13 +446,13 @@ export async function getHistoricoDiaSemana(diaSemana: string, ultimasSemanas = 
     const dataLimite = new Date(hoje)
     dataLimite.setDate(hoje.getDate() - (ultimasSemanas * 7))
     
-    // Buscar dados histá³ricos
+    // Buscar dados hist�ricos
     const [pagamentosData, periodoData] = await Promise.all([
       supabase.from('pagamentos').select('dt_gerencial, liquido').gte('dt_gerencial', dataLimite.toISOString().split('T')[0]),
       supabase.from('periodo').select('dt_gerencial, pessoas').gte('dt_gerencial', dataLimite.toISOString().split('T')[0])
     ])
 
-    // Filtrar apenas o dia da semana especá­fico e agrupar por data
+    // Filtrar apenas o dia da semana espec�fico e agrupar por data
     const dadosFiltratos: Record<string, any> = {}
     
     pagamentosData.data?.forEach((item: any) => {
@@ -477,40 +477,40 @@ export async function getHistoricoDiaSemana(diaSemana: string, ultimasSemanas = 
       }
     })
 
-    // Calcular ticket má©dio e ordenar
+    // Calcular ticket m�dio e ordenar
     const resultados = Object.values(dadosFiltratos)
       .map((item: any) => ({
         ...item,
         ticketMedio: item.clientes > 0 ? item.faturamento / item.clientes : 0
       }))
-      .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
-      .slice(0, ultimasSemanas)
+      .sort((a: any, b: any) => new Date(b.data).getTime() - new Date(a.data).getTime())
+      .slice(0: any, ultimasSemanas)
 
-    console.log(`ðŸ“ˆ Histá³rico de ${diaSemana}:`, resultados.length, 'registros encontrados')
+    console.log(`📈 Hist�rico de ${diaSemana}:`, resultados.length, 'registros encontrados')
     return resultados
     
   } catch (error) {
-    console.error(`Œ Erro ao buscar histá³rico de ${diaSemana}:`, error)
+    console.error(`�� Erro ao buscar hist�rico de ${diaSemana}:`, error)
     throw error
   }
 }
 
-// ðŸŽ¯ CONSULTA AVANá‡ADA: Comparaá§á£o de perá­odos
+// 🎯 CONSULTA AVAN�ADA: Compara��o de per�odos
 export async function getComparacaoPeriodos(periodo1: [string, string], periodo2: [string, string]): Promise<ComparacaoPeriodos> {
     const supabase = await getSupabaseClient();
     if (!supabase) throw new Error('Erro ao conectar com banco');
 
   try {
-    console.log('ðŸŽ¯ Comparando perá­odos:', periodo1, 'vs', periodo2)
+    console.log('🎯 Comparando per�odos:', periodo1: any, 'vs', periodo2)
     
     const calcularPeriodo = async ([inicio, fim]: [string, string]) => {
       const supabase = await getSupabaseClient();
       if (!supabase) throw new Error('Erro ao conectar com banco');
 
-      const [pagamentos, periodo, sympla] = await Promise.all([
+      const [pagamentos, periodo: any, sympla] = await Promise.all([
         supabase.from('pagamentos').select('liquido, dt_gerencial').gte('dt_gerencial', inicio).lte('dt_gerencial', fim),
         supabase.from('periodo').select('pessoas, dt_gerencial').gte('dt_gerencial', inicio).lte('dt_gerencial', fim),
-        supabase.from('sympla_bilheteria').select('total_liquido, qtd_checkins_realizados, data_evento').gte('data_evento', inicio).lte('data_evento', fim)
+        supabase.from('sympla_bilheteria').select('total_liquido, qtd_checkins_realizados: any, data_evento').gte('data_evento', inicio).lte('data_evento', fim)
       ])
 
       const faturamentoPagamentos = pagamentos.data?.reduce((sum: number, item: any) => sum + parseFloat(item.liquido || '0'), 0) || 0
@@ -555,18 +555,18 @@ export async function getComparacaoPeriodos(periodo1: [string, string], periodo2
     }
     
   } catch (error) {
-    console.error('Œ Erro ao comparar perá­odos:', error)
+    console.error('�� Erro ao comparar per�odos:', error)
     throw error
   }
 }
 
-// ðŸ† CONSULTA AVANá‡ADA: Top produtos e aná¡lises
+// 🏆 CONSULTA AVAN�ADA: Top produtos e an�lises
 export async function getAnaliseCompleta(periodo: 'hoje' | 'semana' | 'mes' = 'semana'): Promise<AnaliseCompleta> {
     const supabase = await getSupabaseClient();
     if (!supabase) throw new Error('Erro ao conectar com banco');
 
   try {
-    console.log('ðŸ† Fazendo aná¡lise completa para perá­odo:', periodo)
+    console.log('🏆 Fazendo an�lise completa para per�odo:', periodo)
     
     let dataInicio = ''
     const hoje = new Date().toISOString().split('T')[0]
@@ -587,24 +587,24 @@ export async function getAnaliseCompleta(periodo: 'hoje' | 'semana' | 'mes' = 's
         break
     }
 
-    // Buscar dados bá¡sicos
-    const [vendasData, clientesData, produtoTop] = await Promise.all([
+    // Buscar dados b�sicos
+    const [vendasData, clientesData: any, produtoTop] = await Promise.all([
       getVendasData(),
       getClientesData(), 
       getProdutoMaisVendido(periodo)
     ])
 
-    // Buscar dados da semana para comparaá§á£o (usa data mais recente automaticamente)
+    // Buscar dados da semana para compara��o (usa data mais recente automaticamente)
     const dadosSemana = await getDadosSemana()
     
     // Encontrar melhor dia da semana
-    const melhorDia = dadosSemana.reduce((melhor, dia) => 
+    const melhorDia = dadosSemana.reduce((melhor: any, dia: any) => 
       dia.faturamento > melhor.faturamento ? dia : melhor
     )
 
-    // Calcular má©dias
-    const mediaFaturamento = dadosSemana.reduce((sum, dia) => sum + dia.faturamento, 0) / dadosSemana.length
-    const mediaClientes = dadosSemana.reduce((sum, dia) => sum + dia.clientes, 0) / dadosSemana.length
+    // Calcular m�dias
+    const mediaFaturamento = dadosSemana.reduce((sum: any, dia: any) => sum + dia.faturamento, 0) / dadosSemana.length
+    const mediaClientes = dadosSemana.reduce((sum: any, dia: any) => sum + dia.clientes, 0) / dadosSemana.length
 
     return {
       vendas: vendasData,
@@ -625,12 +625,12 @@ export async function getAnaliseCompleta(periodo: 'hoje' | 'semana' | 'mes' = 's
     }
     
   } catch (error) {
-    console.error('Œ Erro na aná¡lise completa:', error)
+    console.error('�� Erro na an�lise completa:', error)
     throw error
   }
 }
 
-// ðŸª TIPOS PARA AS NOVAS FUNá‡á•ES
+// 🏪 TIPOS PARA AS NOVAS FUN��ES
 export interface DadosSemana {
   dia: string
   data: string

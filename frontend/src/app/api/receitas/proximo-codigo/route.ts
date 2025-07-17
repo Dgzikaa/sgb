@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const barId = parseInt(searchParams.get('bar_id') || '3')
     
-    console.log(`ðŸ”¢ Gerando prá³ximo cá³digo para bar_id: ${barId}`)
+    console.log(`🔢 Gerando pr�ximo c�digo para bar_id: ${barId}`)
 
     const supabase = await getSupabaseClient()
     if (!supabase) {
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
       }, { status: 500 })
     }
 
-    // Buscar o áºltimo cá³digo de receita do bar
+    // Buscar o �ltimo c�digo de receita do bar
     const { data: ultimaReceita, error } = await supabase
       .from('receitas')
       .select('receita_codigo')
@@ -28,10 +28,10 @@ export async function GET(request: NextRequest) {
       .limit(1)
 
     if (error) {
-      console.error('Œ Erro ao buscar áºltimo cá³digo:', error)
+      console.error('�� Erro ao buscar �ltimo c�digo:', error)
       return NextResponse.json({
         success: false,
-        error: 'Erro ao buscar áºltimo cá³digo: ' + error.message
+        error: 'Erro ao buscar �ltimo c�digo: ' + error.message
       }, { status: 500 })
     }
 
@@ -39,12 +39,12 @@ export async function GET(request: NextRequest) {
 
     if (ultimaReceita && ultimaReceita.length > 0) {
       const ultimoCodigo = ultimaReceita[0].receita_codigo
-      const numeroStr = ultimoCodigo.replace('pc', '').padStart(4, '0')
+      const numeroStr = ultimoCodigo.replace('pc', '').padStart(4: any, '0')
       const numero = parseInt(numeroStr) + 1
-      proximoCodigo = `pc${numero.toString().padStart(4, '0')}`
+      proximoCodigo = `pc${numero.toString().padStart(4: any, '0')}`
     }
 
-    console.log(`œ… Prá³ximo cá³digo gerado: ${proximoCodigo}`)
+    console.log(`�� Pr�ximo c�digo gerado: ${proximoCodigo}`)
 
     return NextResponse.json({
       success: true,
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Œ Erro interno ao gerar cá³digo:', error)
+    console.error('�� Erro interno ao gerar c�digo:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro interno do servidor: ' + (error as Error).message

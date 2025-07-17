@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -7,14 +7,14 @@ const supabase = createClient(
 )
 
 // ========================================
-// ðŸ“± GET /api/meta/post-management
-// Buscar posts recentes para gestá£o
+// 📱 GET /api/meta/post-management
+// Buscar posts recentes para gest�o
 // ========================================
 export async function GET(request: NextRequest) {
   try {
-    console.log('ðŸ“± Gestá£o de posts Meta...')
+    console.log('📱 Gest�o de posts Meta...')
 
-    // Obter dados do usuá¡rio para pegar o bar_id
+    // Obter dados do usu�rio para pegar o bar_id
     const userData = request.headers.get('x-user-data')
     let barId = 3 // fallback para desenvolvimento
     
@@ -22,13 +22,13 @@ export async function GET(request: NextRequest) {
       try {
         const parsedUser = JSON.parse(decodeURIComponent(userData))
         barId = parsedUser.bar_id || 3
-        console.log(`ðŸ‘¤ Usando bar_id: ${barId}`)
+        console.log(`👤 Usando bar_id: ${barId}`)
       } catch (e) {
-        console.warn('š ï¸ Erro ao parsear dados do usuá¡rio, usando bar_id padrá£o')
+        console.warn('��️ Erro ao parsear dados do usu�rio, usando bar_id padr�o')
       }
     }
 
-    // Buscar configuraá§á£o da Meta
+    // Buscar configura��o da Meta
     const { data: config, error: configError } = await supabase
       .from('api_credentials')
       .select('*')
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     if (configError || !config) {
       return NextResponse.json({
         success: false,
-        error: 'Configuraá§á£o Meta ná£o encontrada',
+        error: 'Configura��o Meta n�o encontrada',
         posts: []
       }, { status: 404 })
     }
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
 
       // 1. BUSCAR POSTS RECENTES DO FACEBOOK
       if (pageId) {
-        console.log('ðŸ“˜ Buscando posts do Facebook para gestá£o...')
+        console.log('📘 Buscando posts do Facebook para gest�o...')
         
         const facebookPostsResponse = await fetch(
           `https://graph.facebook.com/v18.0/${pageId}/posts?fields=id,message,created_time,type,story,link,picture,full_picture,likes.summary(true),comments.limit(10){id,message,created_time,from,parent},shares,reactions.summary(true),is_published&limit=20&access_token=${accessToken}`
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
                 shares: post.shares?.count || 0,
                 reactions: post.reactions?.summary?.total_count || 0
               },
-              comments: comments.slice(0, 5).map((comment: any) => ({
+              comments: comments.slice(0: any, 5).map((comment: any) => ({
                 id: comment.id,
                 message: comment.message,
                 created_time: comment.created_time,
@@ -102,7 +102,7 @@ export async function GET(request: NextRequest) {
                 needs_response: !comment.parent && comment.message.includes('?')
               })),
               engagement_level: comments.length > 10 ? 'high' : comments.length > 3 ? 'medium' : 'low',
-              needs_attention: pendingComments.some((c: any) => c.message.includes('?') || c.message.includes('dáºvida') || c.message.includes('problema'))
+              needs_attention: pendingComments.some((c: any) => c.message.includes('?') || c.message.includes('d�vida') || c.message.includes('problema'))
             }
           })
         }
@@ -110,10 +110,10 @@ export async function GET(request: NextRequest) {
 
       // 2. BUSCAR POSTS RECENTES DO INSTAGRAM
       if (instagramId) {
-        console.log('ðŸ“· Buscando posts do Instagram para gestá£o...')
+        console.log('📷 Buscando posts do Instagram para gest�o...')
         
         const instagramPostsResponse = await fetch(
-          `https://graph.facebook.com/v18.0/${instagramId}/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count,comments.limit(10){id,text,timestamp,from,replies},insights.metric(impressions,reach,engagement)&limit=20&access_token=${accessToken}`
+          `https://graph.facebook.com/v18.0/${instagramId}/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count,comments.limit(10){id,text,timestamp,from,replies},insights.metric(impressions: any,reach,engagement)&limit=20&access_token=${accessToken}`
         )
         const instagramPostsData = await instagramPostsResponse.json()
 
@@ -142,7 +142,7 @@ export async function GET(request: NextRequest) {
                 engagement,
                 engagement_rate: impressions > 0 ? (engagement / impressions) * 100 : 0
               },
-              comments: comments.slice(0, 5).map((comment: any) => ({
+              comments: comments.slice(0: any, 5).map((comment: any) => ({
                 id: comment.id,
                 text: comment.text,
                 timestamp: comment.timestamp,
@@ -157,17 +157,17 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      // 3. CONSOLIDAR COMENTáRIOS PENDENTES
+      // 3. CONSOLIDAR COMENT�RIOS PENDENTES
       const allPosts = [...managementData.facebook_posts, ...managementData.instagram_posts]
       
       allPosts.forEach((post: any) => {
         post.comments?.forEach((comment: any) => {
           if ((comment.needs_response && !comment.has_response && !comment.has_replies) || 
-              comment.message?.includes('dáºvida') || comment.text?.includes('dáºvida')) {
+              comment.message?.includes('d�vida') || comment.text?.includes('d�vida')) {
             managementData.pending_responses.push({
               post_id: post.id,
               post_platform: post.platform,
-              post_preview: post.message?.substring(0, 50) || post.caption?.substring(0, 50) || '',
+              post_preview: post.message?.substring(0: any, 50) || post.caption?.substring(0: any, 50) || '',
               comment_id: comment.id,
               comment_text: comment.message || comment.text,
               comment_from: comment.from,
@@ -178,35 +178,35 @@ export async function GET(request: NextRequest) {
         })
       })
 
-      // 4. BUSCAR COMENTáRIOS RECENTES GERAIS
+      // 4. BUSCAR COMENT�RIOS RECENTES GERAIS
       managementData.recent_comments = allPosts
         .flatMap(post => post.comments.map((comment: any) => ({
           ...comment,
           post_id: post.id,
           post_platform: post.platform,
-          post_preview: post.message?.substring(0, 30) || post.caption?.substring(0, 30) || ''
+          post_preview: post.message?.substring(0: any, 30) || post.caption?.substring(0: any, 30) || ''
         })))
-        .sort((a, b) => new Date(b.created_time || b.timestamp).getTime() - new Date(a.created_time || a.timestamp).getTime())
-        .slice(0, 10)
+        .sort((a: any, b: any) => new Date(b.created_time || b.timestamp).getTime() - new Date(a.created_time || a.timestamp).getTime())
+        .slice(0: any, 10)
 
       // 5. CALCULAR RESUMO DE ENGAJAMENTO
       managementData.engagement_summary = {
         total_posts: allPosts.length,
-        total_comments: allPosts.reduce((sum, post) => sum + post.comments.length, 0),
+        total_comments: allPosts.reduce((sum: any, post: any) => sum + post.comments.length, 0),
         pending_comments: managementData.pending_responses.length,
         response_rate: managementData.pending_responses.length > 0 ? 
           ((managementData.engagement_summary.total_comments - managementData.pending_responses.length) / managementData.engagement_summary.total_comments) * 100 : 100
       }
 
-      // 6. GERAR INSIGHTS DE GESTáƒO
+      // 6. GERAR INSIGHTS DE GEST�O
       const managementInsights = [] as any[]
 
       if (managementData.pending_responses.length > 5) {
         managementInsights.push({
           type: 'urgent',
-          title: 'Muitos Comentá¡rios Pendentes',
-          description: `${managementData.pending_responses.length} comentá¡rios aguardando resposta`,
-          action: 'Priorize responder comentá¡rios com perguntas e mená§áµes'
+          title: 'Muitos Coment�rios Pendentes',
+          description: `${managementData.pending_responses.length} coment�rios aguardando resposta`,
+          action: 'Priorize responder coment�rios com perguntas e men��es'
         })
       }
 
@@ -215,8 +215,8 @@ export async function GET(request: NextRequest) {
         managementInsights.push({
           type: 'opportunity',
           title: 'Posts com Alto Engajamento',
-          description: `${highEngagementPosts.length} posts com alto engajamento merecem atená§á£o`,
-          action: 'Responda comentá¡rios e impulsione a conversa'
+          description: `${highEngagementPosts.length} posts com alto engajamento merecem aten��o`,
+          action: 'Responda coment�rios e impulsione a conversa'
         })
       }
 
@@ -224,9 +224,9 @@ export async function GET(request: NextRequest) {
       if (postsNeedingAttention.length > 0) {
         managementInsights.push({
           type: 'attention',
-          title: 'Posts Precisam de Atená§á£o',
-          description: `${postsNeedingAttention.length} posts táªm comentá¡rios importantes`,
-          action: 'Verifique comentá¡rios com dáºvidas ou problemas'
+          title: 'Posts Precisam de Aten��o',
+          description: `${postsNeedingAttention.length} posts t�m coment�rios importantes`,
+          action: 'Verifique coment�rios com d�vidas ou problemas'
         })
       }
 
@@ -244,7 +244,7 @@ export async function GET(request: NextRequest) {
       })
 
     } catch (metaError: any) {
-      console.log(`š ï¸ Erro ao buscar dados de gestá£o: ${metaError.message}`)
+      console.log(`��️ Erro ao buscar dados de gest�o: ${metaError.message}`)
       
       return NextResponse.json({
         success: true,
@@ -259,31 +259,31 @@ export async function GET(request: NextRequest) {
         metadata: {
           data_type: 'no_management_data',
           error: metaError.message,
-          note: 'Para gestá£o de posts, á© necessá¡rio ter posts recentes e permissáµes de comentá¡rios.'
+          note: 'Para gest�o de posts, � necess�rio ter posts recentes e permiss�es de coment�rios.'
         },
         timestamp: new Date().toISOString()
       })
     }
 
   } catch (error: any) {
-    console.error('Œ Erro na gestá£o de posts:', error)
+    console.error('�� Erro na gest�o de posts:', error)
     return NextResponse.json({ 
       success: false,
-      error: 'Erro na gestá£o de posts',
+      error: 'Erro na gest�o de posts',
       details: error.message
     }, { status: 500 })
   }
 }
 
 // ========================================
-// ðŸ’¬ POST /api/meta/post-management
-// Responder comentá¡rio
+// 💬 POST /api/meta/post-management
+// Responder coment�rio
 // ========================================
 export async function POST(request: NextRequest) {
   try {
-    console.log('ðŸ’¬ Respondendo comentá¡rio Meta...')
+    console.log('💬 Respondendo coment�rio Meta...')
 
-    // Obter dados do usuá¡rio para pegar o bar_id
+    // Obter dados do usu�rio para pegar o bar_id
     const userData = request.headers.get('x-user-data')
     let barId = 3 // fallback para desenvolvimento
     
@@ -291,22 +291,22 @@ export async function POST(request: NextRequest) {
       try {
         const parsedUser = JSON.parse(decodeURIComponent(userData))
         barId = parsedUser.bar_id || 3
-        console.log(`ðŸ‘¤ Usando bar_id: ${barId}`)
+        console.log(`👤 Usando bar_id: ${barId}`)
       } catch (e) {
-        console.warn('š ï¸ Erro ao parsear dados do usuá¡rio, usando bar_id padrá£o')
+        console.warn('��️ Erro ao parsear dados do usu�rio, usando bar_id padr�o')
       }
     }
 
-    const { comment_id, response_text, platform } = await request.json()
+    const { comment_id, response_text: any, platform } = await request.json()
 
     if (!comment_id || !response_text) {
       return NextResponse.json({
         success: false,
-        error: 'ID do comentá¡rio e texto da resposta sá£o obrigatá³rios'
+        error: 'ID do coment�rio e texto da resposta s�o obrigat�rios'
       }, { status: 400 })
     }
 
-    // Buscar configuraá§á£o da Meta
+    // Buscar configura��o da Meta
     const { data: config, error: configError } = await supabase
       .from('api_credentials')
       .select('*')
@@ -318,7 +318,7 @@ export async function POST(request: NextRequest) {
     if (configError || !config) {
       return NextResponse.json({
         success: false,
-        error: 'Configuraá§á£o Meta ná£o encontrada'
+        error: 'Configura��o Meta n�o encontrada'
       }, { status: 404 })
     }
 
@@ -328,7 +328,7 @@ export async function POST(request: NextRequest) {
       let responseResult
 
       if (platform === 'facebook') {
-        // Responder comentá¡rio do Facebook
+        // Responder coment�rio do Facebook
         const facebookResponse = await fetch(
           `https://graph.facebook.com/v18.0/${comment_id}/comments`,
           {
@@ -348,7 +348,7 @@ export async function POST(request: NextRequest) {
           throw new Error(`Erro Facebook: ${responseResult.error?.message}`)
         }
       } else if (platform === 'instagram') {
-        // Responder comentá¡rio do Instagram
+        // Responder coment�rio do Instagram
         const instagramResponse = await fetch(
           `https://graph.facebook.com/v18.0/${comment_id}/replies`,
           {
@@ -368,14 +368,14 @@ export async function POST(request: NextRequest) {
           throw new Error(`Erro Instagram: ${responseResult.error?.message}`)
         }
       } else {
-        throw new Error('Plataforma ná£o suportada')
+        throw new Error('Plataforma n�o suportada')
       }
 
       // Log da resposta enviada
-      console.log(`œ… Resposta enviada para ${platform}:`, {
+      console.log(`�� Resposta enviada para ${platform}:`, {
         comment_id,
         response_id: responseResult.id,
-        response_text: response_text.substring(0, 50) + '...'
+        response_text: response_text.substring(0: any, 50) + '...'
       })
 
       return NextResponse.json({
@@ -387,18 +387,18 @@ export async function POST(request: NextRequest) {
       })
 
     } catch (metaError: any) {
-      console.error(`Œ Erro ao responder comentá¡rio: ${metaError.message}`)
+      console.error(`�� Erro ao responder coment�rio: ${metaError.message}`)
       
       return NextResponse.json({
         success: false,
         error: 'Erro ao enviar resposta',
         details: metaError.message,
-        note: 'Verifique se vocáª tem permissáµes para responder comentá¡rios nesta plataforma.'
+        note: 'Verifique se voc� tem permiss�es para responder coment�rios nesta plataforma.'
       }, { status: 400 })
     }
 
   } catch (error: any) {
-    console.error('Œ Erro ao processar resposta:', error)
+    console.error('�� Erro ao processar resposta:', error)
     return NextResponse.json({ 
       success: false,
       error: 'Erro ao processar resposta',

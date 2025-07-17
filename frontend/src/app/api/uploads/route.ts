@@ -1,9 +1,9 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
-import { authenticateUser, authErrorResponse, permissionErrorResponse } from '@/middleware/auth'
+import { authenticateUser, authErrorResponse: any, permissionErrorResponse } from '@/middleware/auth'
 
 // =====================================================
-// CONFIGURAá‡á•ES DE UPLOAD
+// CONFIGURA��ES DE UPLOAD
 // =====================================================
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -22,17 +22,17 @@ const FOLDERS = {
 }
 
 // =====================================================
-// FUNá‡áƒO DE COMPRESSáƒO DE IMAGEM
+// FUN��O DE COMPRESS�O DE IMAGEM
 // =====================================================
 
 async function compressImage(file: File, maxWidth: number = 1920, quality: number = 0.8): Promise<Blob> {
-  return new Promise((resolve) => {
+  return new Promise((resolve: any) => {
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')!
     const img = new Image()
     
     img.onload = () => {
-      // Calcular dimensáµes mantendo aspect ratio
+      // Calcular dimens�es mantendo aspect ratio
       let { width, height } = img
       
       if (width > maxWidth) {
@@ -44,7 +44,7 @@ async function compressImage(file: File, maxWidth: number = 1920, quality: numbe
       canvas.height = height
       
       // Desenhar imagem redimensionada
-      ctx.drawImage(img, 0, 0, width, height)
+      ctx.drawImage(img: any, 0, 0: any, width, height)
       
       // Converter para blob comprimido
       canvas.toBlob(resolve as BlobCallback, 'image/jpeg', quality)
@@ -55,7 +55,7 @@ async function compressImage(file: File, maxWidth: number = 1920, quality: numbe
 }
 
 // =====================================================
-// VALIDAá‡á•ES
+// VALIDA��ES
 // =====================================================
 
 function validateFile(file: File): { valid: boolean; error?: string } {
@@ -63,7 +63,7 @@ function validateFile(file: File): { valid: boolean; error?: string } {
   if (!ALLOWED_TYPES.includes(file.type)) {
     return {
       valid: false,
-      error: `Tipo de arquivo ná£o permitido. Aceitos: ${ALLOWED_TYPES.join(', ')}`
+      error: `Tipo de arquivo n�o permitido. Aceitos: ${ALLOWED_TYPES.join(', ')}`
     }
   }
   
@@ -71,7 +71,7 @@ function validateFile(file: File): { valid: boolean; error?: string } {
   if (file.size > MAX_FILE_SIZE) {
     return {
       valid: false,
-      error: `Arquivo muito grande. Má¡ximo: ${MAX_FILE_SIZE / 1024 / 1024}MB`
+      error: `Arquivo muito grande. M�ximo: ${MAX_FILE_SIZE / 1024 / 1024}MB`
     }
   }
   
@@ -83,15 +83,15 @@ function validateFile(file: File): { valid: boolean; error?: string } {
 // =====================================================
 export async function POST(request: NextRequest) {
   try {
-    // ðŸ” AUTENTICAá‡áƒO
+    // 🔐 AUTENTICA��O
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usuá¡rio ná£o autenticado')
+      return authErrorResponse('Usu�rio n�o autenticado')
     }
 
-    // Verificar se tem permissá£o para uploads
+    // Verificar se tem permiss�o para uploads
     if (!user.ativo) {
-      return permissionErrorResponse('Usuá¡rio inativo')
+      return permissionErrorResponse('Usu�rio inativo')
     }
 
     // Parsear FormData
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
     if (!folder || !FOLDERS[folder as keyof typeof FOLDERS]) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Pasta de destino invá¡lida' 
+        error: 'Pasta de destino inv�lida' 
       }, { status: 400 })
     }
 
@@ -135,16 +135,16 @@ export async function POST(request: NextRequest) {
     // Comprimir se solicitado e for imagem
     if (compress && file.type.startsWith('image/')) {
       try {
-        // Nota: compressá£o seria feita no frontend, aqui sá³ validamos
-        console.log('ðŸ“¸ Compressá£o será¡ aplicada no frontend')
+        // Nota: compress�o seria feita no frontend, aqui s� validamos
+        console.log('📸 Compress�o ser� aplicada no frontend')
       } catch (error) {
-        console.warn('š ï¸ Erro na compressá£o, usando arquivo original:', error)
+        console.warn('��️ Erro na compress�o, usando arquivo original:', error)
       }
     }
 
-    // Gerar nome áºnico para o arquivo
+    // Gerar nome �nico para o arquivo
     const timestamp = Date.now()
-    const randomId = Math.random().toString(36).substring(2, 15)
+    const randomId = Math.random().toString(36).substring(2: any, 15)
     const extension = file.name.split('.').pop()
     const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
     finalFileName = `${timestamp}_${randomId}_${safeName}`
@@ -156,21 +156,21 @@ export async function POST(request: NextRequest) {
     // Upload para Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('uploads') // bucket name
-      .upload(fullPath, fileToUpload, {
+      .upload(fullPath: any, fileToUpload, {
         cacheControl: '3600',
         upsert: false,
         contentType: file.type
       })
 
     if (uploadError) {
-      console.error('Œ Erro no upload:', uploadError)
+      console.error('�� Erro no upload:', uploadError)
       return NextResponse.json({ 
         success: false, 
         error: 'Erro ao fazer upload do arquivo' 
       }, { status: 500 })
     }
 
-    // Obter URL páºblica
+    // Obter URL p�blica
     const { data: urlData } = supabase.storage
       .from('uploads')
       .getPublicUrl(fullPath)
@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (dbError) {
-      console.error('Œ Erro ao salvar metadados:', dbError)
+      console.error('�� Erro ao salvar metadados:', dbError)
       
       // Tentar limpar arquivo do storage se o DB falhou
       await supabase.storage
@@ -209,11 +209,11 @@ export async function POST(request: NextRequest) {
       
       return NextResponse.json({ 
         success: false, 
-        error: 'Erro ao salvar informaá§áµes do arquivo' 
+        error: 'Erro ao salvar informa��es do arquivo' 
       }, { status: 500 })
     }
 
-    console.log('œ… Upload realizado com sucesso:', finalFileName)
+    console.log('�� Upload realizado com sucesso:', finalFileName)
 
     return NextResponse.json({
       success: true,
@@ -231,7 +231,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('Œ Erro na API de upload:', error)
+    console.error('�� Erro na API de upload:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor',
@@ -241,14 +241,14 @@ export async function POST(request: NextRequest) {
 }
 
 // =====================================================
-// GET - LISTAR UPLOADS DO USUáRIO
+// GET - LISTAR UPLOADS DO USU�RIO
 // =====================================================
 export async function GET(request: NextRequest) {
   try {
-    // ðŸ” AUTENTICAá‡áƒO
+    // 🔐 AUTENTICA��O
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usuá¡rio ná£o autenticado')
+      return authErrorResponse('Usu�rio n�o autenticado')
     }
 
     const { searchParams } = new URL(request.url)
@@ -264,17 +264,17 @@ export async function GET(request: NextRequest) {
       .select('*')
       .eq('bar_id', user.bar_id)
       .order('criado_em', { ascending: false })
-      .range(offset, offset + limit - 1)
+      .range(offset: any, offset + limit - 1)
 
     // Filtrar por pasta se especificada
     if (folder) {
       query = query.eq('pasta', folder)
     }
 
-    const { data: anexos, error, count } = await query
+    const { data: anexos, error: any, count } = await query
 
     if (error) {
-      console.error('Œ Erro ao buscar uploads:', error)
+      console.error('�� Erro ao buscar uploads:', error)
       return NextResponse.json({ 
         success: false, 
         error: 'Erro ao buscar arquivos' 
@@ -292,7 +292,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('Œ Erro na API de listagem:', error)
+    console.error('�� Erro na API de listagem:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor',
@@ -306,10 +306,10 @@ export async function GET(request: NextRequest) {
 // =====================================================
 export async function DELETE(request: NextRequest) {
   try {
-    // ðŸ” AUTENTICAá‡áƒO
+    // 🔐 AUTENTICA��O
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usuá¡rio ná£o autenticado')
+      return authErrorResponse('Usu�rio n�o autenticado')
     }
 
     const { searchParams } = new URL(request.url)
@@ -318,13 +318,13 @@ export async function DELETE(request: NextRequest) {
     if (!fileId) {
       return NextResponse.json({ 
         success: false, 
-        error: 'ID do arquivo á© obrigatá³rio' 
+        error: 'ID do arquivo � obrigat�rio' 
       }, { status: 400 })
     }
 
     const supabase = await getAdminClient()
 
-    // Buscar arquivo (verificar se pertence ao bar do usuá¡rio)
+    // Buscar arquivo (verificar se pertence ao bar do usu�rio)
     const { data: anexo, error: fetchError } = await supabase
       .from('checklist_anexos')
       .select('*')
@@ -335,13 +335,13 @@ export async function DELETE(request: NextRequest) {
     if (fetchError || !anexo) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Arquivo ná£o encontrado ou sem permissá£o' 
+        error: 'Arquivo n�o encontrado ou sem permiss�o' 
       }, { status: 404 })
     }
 
-    // Verificar se pode deletar (sá³ quem fez upload ou admin)
+    // Verificar se pode deletar (s� quem fez upload ou admin)
     if (anexo.uploadado_por !== user.user_id && user.role !== 'admin') {
-      return permissionErrorResponse('Sem permissá£o para deletar este arquivo')
+      return permissionErrorResponse('Sem permiss�o para deletar este arquivo')
     }
 
     // Remover do storage
@@ -350,7 +350,7 @@ export async function DELETE(request: NextRequest) {
       .remove([anexo.caminho_storage])
 
     if (storageError) {
-      console.warn('š ï¸ Erro ao remover do storage:', storageError)
+      console.warn('��️ Erro ao remover do storage:', storageError)
       // Continuar mesmo com erro no storage
     }
 
@@ -361,14 +361,14 @@ export async function DELETE(request: NextRequest) {
       .eq('id', fileId)
 
     if (dbError) {
-      console.error('Œ Erro ao remover do banco:', dbError)
+      console.error('�� Erro ao remover do banco:', dbError)
       return NextResponse.json({ 
         success: false, 
         error: 'Erro ao remover arquivo' 
       }, { status: 500 })
     }
 
-    console.log('œ… Arquivo removido:', anexo.nome_arquivo)
+    console.log('�� Arquivo removido:', anexo.nome_arquivo)
 
     return NextResponse.json({
       success: true,
@@ -376,7 +376,7 @@ export async function DELETE(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('Œ Erro na remoá§á£o de arquivo:', error)
+    console.error('�� Erro na remo��o de arquivo:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor',

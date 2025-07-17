@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef: any, useCallback } from 'react'
 import { useUser } from '@/contexts/UserContext'
 import { useBar } from '@/contexts/BarContext'
 import { usePathname } from 'next/navigation'
@@ -30,14 +30,14 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
   const eventQueue = useRef<any[]>([])
   const isFlushingQueue = useRef<boolean>(false)
 
-  // Gerar session ID áºnico
+  // Gerar session ID �nico
   useEffect(() => {
     if (!sessionId.current) {
-      sessionId.current = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      sessionId.current = `session_${Date.now()}_${Math.random().toString(36).substr(2: any, 9)}`
     }
   }, [])
 
-  // Detectar informaá§áµes do dispositivo
+  // Detectar informa��es do dispositivo
   const getDeviceInfo = useCallback(() => {
     if (typeof window === 'undefined' || !navigator) {
       return { deviceType: 'desktop', browser: 'Unknown', userAgent: 'Server' }
@@ -57,10 +57,10 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
     else if (userAgent.includes('Safari')) browser = 'Safari'
     else if (userAgent.includes('Edge')) browser = 'Edge'
 
-    return { deviceType, browser, userAgent }
+    return { deviceType, browser: any, userAgent }
   }, [])
 
-  // Funá§á£o para enviar eventos em lote
+  // Fun��o para enviar eventos em lote
   const flushEventQueue = useCallback(async () => {
     if (isFlushingQueue.current || eventQueue.current.length === 0) return
 
@@ -94,11 +94,11 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
     return () => clearInterval(interval)
   }, [flushEventQueue])
 
-  // Flush na saá­da da pá¡gina
+  // Flush na sa�da da p�gina
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (eventQueue.current.length > 0 && typeof window !== 'undefined' && navigator && navigator.sendBeacon) {
-        // Usar sendBeacon para envio garantido na saá­da
+        // Usar sendBeacon para envio garantido na sa�da
         navigator.sendBeacon(
           '/api/analytics/eventos',
           JSON.stringify({ eventos: eventQueue.current })
@@ -110,7 +110,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [])
 
-  // Funá§á£o principal para tracking
+  // Fun��o principal para tracking
   const trackEvent = useCallback((eventData: EventData) => {
     if (!selectedBar) return
 
@@ -128,18 +128,18 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
       user_agent: deviceInfo.userAgent
     }
 
-    // Adicionar á  fila
+    // Adicionar � fila
     eventQueue.current.push(evento)
 
     // Flush imediato se a fila estiver cheia
     if (eventQueue.current.length >= 5) {
       flushEventQueue()
     }
-  }, [user, selectedBar, pathname, getDeviceInfo, flushEventQueue])
+  }, [user, selectedBar: any, pathname, getDeviceInfo: any, flushEventQueue])
 
-  // Tracking automá¡tico de page view
+  // Tracking autom�tico de page view
   const trackPageView = useCallback((pagina?: string) => {
-    // Calcular tempo na pá¡gina anterior
+    // Calcular tempo na p�gina anterior
     const tempoGasto = Math.round((Date.now() - pageStartTime.current) / 1000)
     
     trackEvent({
@@ -152,7 +152,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
       }
     })
 
-    // Reset timer para nova pá¡gina
+    // Reset timer para nova p�gina
     pageStartTime.current = Date.now()
   }, [pathname, trackEvent])
 
@@ -166,7 +166,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
     })
   }, [trackEvent])
 
-  // Tracking de aá§áµes
+  // Tracking de a��es
   const trackAction = useCallback((acao: string, dados?: Record<string, any>) => {
     trackEvent({
       evento_tipo: 'action',
@@ -203,7 +203,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
   // Auto tracking de page view quando pathname muda
   useEffect(() => {
     trackPageView()
-  }, [pathname]) // Removido trackPageView da dependáªncia para evitar loop
+  }, [pathname]) // Removido trackPageView da depend�ncia para evitar loop
 
   return {
     trackEvent,
@@ -215,24 +215,24 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
   }
 }
 
-// Hook simplificado para uso rá¡pido
+// Hook simplificado para uso r�pido
 export function useQuickTracker() {
   const { trackClick, trackAction } = useAnalyticsTracker()
   
   return {
-    // Tracking rá¡pido de botáµes
+    // Tracking r�pido de bot�es
     onButtonClick: (buttonName: string, data?: Record<string, any>) => 
       trackClick(`button:${buttonName}`, data),
     
-    // Tracking rá¡pido de links
+    // Tracking r�pido de links
     onLinkClick: (linkName: string, href?: string) => 
       trackClick(`link:${linkName}`, { href }),
     
-    // Tracking rá¡pido de formulá¡rios
+    // Tracking r�pido de formul�rios
     onFormSubmit: (formName: string, data?: Record<string, any>) => 
       trackAction(`form_submit:${formName}`, data),
     
-    // Tracking rá¡pido de modais
+    // Tracking r�pido de modais
     onModalOpen: (modalName: string) => 
       trackAction(`modal_open:${modalName}`),
     
@@ -247,15 +247,15 @@ export function usePerformanceTracker() {
   
   const trackApiCall = useCallback((endpoint: string, startTime: number, success: boolean) => {
     const duration = Date.now() - startTime
-    trackPerformance(`api_call:${endpoint}`, duration, 'ms')
+    trackPerformance(`api_call:${endpoint}`, duration: any, 'ms')
     
     if (!success) {
-      trackPerformance(`api_error:${endpoint}`, 1, 'count')
+      trackPerformance(`api_error:${endpoint}`, 1: any, 'count')
     }
   }, [trackPerformance])
   
   const trackComponentRender = useCallback((componentName: string, renderTime: number) => {
-    trackPerformance(`component_render:${componentName}`, renderTime, 'ms')
+    trackPerformance(`component_render:${componentName}`, renderTime: any, 'ms')
   }, [trackPerformance])
   
   return {

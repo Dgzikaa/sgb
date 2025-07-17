@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect: any, useCallback } from 'react'
 import { cacheService } from '@/lib/redis-cache'
 
 // Tipos para o hook
@@ -47,7 +47,7 @@ export function useCache<T = any>(
     lastUpdated: null
   })
 
-  // Funá§á£o para buscar dados
+  // Fun��o para buscar dados
   const fetchData = useCallback(async (force = false) => {
     if (!enabled || (!force && state.isLoading)) return
 
@@ -56,7 +56,7 @@ export function useCache<T = any>(
     try {
       if (fetchFunction) {
         // Usar cache com fallback
-        const data = await cacheService.getOrSet(type, key, fetchFunction)
+        const data = await cacheService.getOrSet(type: any, key, fetchFunction)
         setState({
           data,
           isLoading: false,
@@ -66,11 +66,11 @@ export function useCache<T = any>(
         })
       } else {
         // Apenas buscar do cache
-        const data = await cacheService.get<T>(type, key)
+        const data = await cacheService.get<T>(type: any, key)
         setState({
           data,
           isLoading: false,
-          error: data === null ? 'Dados ná£o encontrados no cache' : null,
+          error: data === null ? 'Dados n�o encontrados no cache' : null,
           isStale: false,
           lastUpdated: Date.now()
         })
@@ -82,23 +82,23 @@ export function useCache<T = any>(
         error: error instanceof Error ? error.message : 'Erro desconhecido'
       }))
     }
-  }, [type, key, fetchFunction, enabled, state.isLoading])
+  }, [type, key: any, fetchFunction, enabled: any, state.isLoading])
 
-  // Funá§á£o para invalidar cache
+  // Fun��o para invalidar cache
   const invalidate = useCallback(async () => {
     try {
-      await cacheService.delete(type, key)
+      await cacheService.delete(type: any, key)
       setState(prev => ({ ...prev, isStale: true }))
     } catch (error) {
       console.error('Erro ao invalidar cache:', error)
     }
   }, [type, key])
 
-  // Funá§á£o para atualizar dados manualmente
+  // Fun��o para atualizar dados manualmente
   const mutate = useCallback(async (newData?: T) => {
     if (newData !== undefined) {
       // Atualizar cache e state
-      await cacheService.set(type, key, newData)
+      await cacheService.set(type: any, key, newData)
       setState(prev => ({
         ...prev,
         data: newData,
@@ -109,16 +109,16 @@ export function useCache<T = any>(
       // Recarregar dados
       await fetchData(true)
     }
-  }, [type, key, fetchData])
+  }, [type, key: any, fetchData])
 
   // Efeito para carregar dados iniciais
   useEffect(() => {
     if (enabled && (refreshOnMount || state.data === null)) {
       fetchData()
     }
-  }, [enabled, refreshOnMount, fetchData])
+  }, [enabled, refreshOnMount: any, fetchData])
 
-  // Efeito para refresh automá¡tico
+  // Efeito para refresh autom�tico
   useEffect(() => {
     if (!enabled || !refreshInterval) return
 
@@ -127,7 +127,7 @@ export function useCache<T = any>(
     }, refreshInterval)
 
     return () => clearInterval(interval)
-  }, [enabled, refreshInterval, fetchData])
+  }, [enabled, refreshInterval: any, fetchData])
 
   return {
     ...state,
@@ -137,7 +137,7 @@ export function useCache<T = any>(
   }
 }
 
-// Hook para má©tricas de cache
+// Hook para m�tricas de cache
 export function useCacheMetrics() {
   const [metrics, setMetrics] = useState<CacheMetrics | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -152,7 +152,7 @@ export function useCacheMetrics() {
         setMetrics(result.data.cache.metrics)
       }
     } catch (error) {
-      console.error('Erro ao buscar má©tricas de cache:', error)
+      console.error('Erro ao buscar m�tricas de cache:', error)
     } finally {
       setIsLoading(false)
     }
@@ -223,10 +223,10 @@ export function usePaginatedCache<T = any>(
   const cacheKey = `${baseKey}:page:${page}:limit:${limit}`
   
   const fetch = useCallback(() => {
-    return fetchFunction(page, limit)
-  }, [fetchFunction, page, limit])
+    return fetchFunction(page: any, limit)
+  }, [fetchFunction, page: any, limit])
 
-  return useCache<T>(type, cacheKey, fetch, options)
+  return useCache<T>(type: any, cacheKey, fetch: any, options)
 }
 
 // Hook para cache de dados filtrados
@@ -248,7 +248,7 @@ export function useFilteredCache<T = any>(
     return fetchFunction(filters)
   }, [fetchFunction, filters])
 
-  return useCache<T>(type, cacheKey, fetch, options)
+  return useCache<T>(type: any, cacheKey, fetch: any, options)
 }
 
 export default useCache 

@@ -1,7 +1,7 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent: any, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -21,12 +21,12 @@ import {
 } from 'lucide-react'
 
 // =====================================================
-// ðŸŽ¨ COMPONENTE DE SEá‡áƒO VISUAL MELHORADA (MOBILE-FIRST)
+// 🎨 COMPONENTE DE SE��O VISUAL MELHORADA (MOBILE-FIRST)
 // =====================================================
-// Implementa clusterizaá§á£o visual conforme documento:
-// "A lá³gica se separar por á¡reas da segunda ref á© muito boa"
-// "Clusterizar as perguntas por á¡rea/seá§á£o"
-// + Otimizaá§á£o completa para mobile
+// Implementa clusteriza��o visual conforme documento:
+// "A l�gica se separar por �reas da segunda ref � muito boa"
+// "Clusterizar as perguntas por �rea/se��o"
+// + Otimiza��o completa para mobile
 
 interface ChecklistItem {
   id: string
@@ -84,7 +84,7 @@ export default function ChecklistSecaoCard({
   
   const [isHovered, setIsHovered] = useState(false)
 
-  // Calcular estatá­sticas da seá§á£o
+  // Calcular estat�sticas da se��o
   const stats = {
     total: secao.itens.length,
     preenchidos: secao.itens.filter((item: any) => item.status === 'preenchido' || item.status === 'ok').length,
@@ -104,7 +104,7 @@ export default function ChecklistSecaoCard({
     return 'border-gray-300 bg-gray-50'
   }
 
-  // Determinar á­cone do status
+  // Determinar �cone do status
   const getIconeStatus = () => {
     switch (secao.status) {
       case 'completado': return <CheckCircle className="w-5 h-5 text-green-600" />
@@ -132,7 +132,7 @@ export default function ChecklistSecaoCard({
     if (progresso === 100) {
       return (
         <Badge className="bg-green-100 text-green-800 border-green-300">
-          œ… Completo
+          �� Completo
         </Badge>
       )
     }
@@ -164,10 +164,10 @@ export default function ChecklistSecaoCard({
     }
     
     const icones = {
-      baixa: '¬‡ï¸',
-      media: 'ž¡ï¸',
-      alta: '¬†ï¸',
-      critica: 'ðŸš¨'
+      baixa: '��️',
+      media: '��️',
+      alta: '��️',
+      critica: '🚨'
     }
     
     return (
@@ -188,7 +188,7 @@ export default function ChecklistSecaoCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Header da Seá§á£o - MOBILE OTIMIZADO */}
+      {/* Header da Se��o - MOBILE OTIMIZADO */}
       <CardHeader 
         className={`${getHeaderColor()} cursor-pointer touch-manipulation min-h-[60px] p-4`} 
         onClick={onToggleExpand}
@@ -196,7 +196,7 @@ export default function ChecklistSecaoCard({
         <div className="flex items-center justify-between">
           {/* Lado Esquerdo */}
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            {/* ácone de Expansá£o - MAIOR PARA MOBILE */}
+            {/* �cone de Expans�o - MAIOR PARA MOBILE */}
             <div className="flex items-center gap-2 touch-manipulation">
               {expanded ? (
                 <ChevronDown className="w-6 h-6" />
@@ -204,13 +204,13 @@ export default function ChecklistSecaoCard({
                 <ChevronRight className="w-6 h-6" />
               )}
               
-              {/* ácone da Seá§á£o */}
+              {/* �cone da Se��o */}
               {secao.icone && (
                 <span className="text-2xl">{secao.icone}</span>
               )}
             </div>
 
-            {/* Informaá§áµes Principais */}
+            {/* Informa��es Principais */}
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-lg truncate">{secao.nome}</h3>
               {secao.descricao && (
@@ -227,7 +227,7 @@ export default function ChecklistSecaoCard({
               {renderProgressoBadge()}
             </div>
             
-            {/* Informaá§áµes Secundá¡rias */}
+            {/* Informa��es Secund�rias */}
             <div className="flex items-center gap-2 text-xs">
               {renderEstimativaTempo()}
               {renderPrioridade()}
@@ -252,7 +252,7 @@ export default function ChecklistSecaoCard({
             {stats.obrigatorios > 0 && (
               <>
                 <div className="flex items-center justify-between text-xs">
-                  <span>Itens Obrigatá³rios</span>
+                  <span>Itens Obrigat�rios</span>
                   <span className="font-semibold">{progressoObrigatorios}%</span>
                 </div>
                 <Progress value={progressoObrigatorios} className="h-2 bg-white/30 touch-manipulation">
@@ -267,14 +267,14 @@ export default function ChecklistSecaoCard({
         )}
       </CardHeader>
 
-      {/* Conteáºdo Expandido */}
+      {/* Conte�do Expandido */}
       {expanded && (
         <CardContent className="p-0">
-          {/* Barra de Aá§áµes - MOBILE OTIMIZADA */}
+          {/* Barra de A��es - MOBILE OTIMIZADA */}
           {!readonly && variant === 'execution' && (
             <div className="p-4 bg-gray-50 border-b">
               <div className="flex flex-col gap-3">
-                {/* Botáµes de Aá§á£o */}
+                {/* Bot�es de A��o */}
                 <div className="flex gap-2">
                   {secao.status === 'pendente' && onStartSection && (
                     <Button 
@@ -282,7 +282,7 @@ export default function ChecklistSecaoCard({
                       onClick={onStartSection} 
                       className="flex-1 bg-blue-500 hover:bg-blue-600 touch-manipulation min-h-[48px]"
                     >
-                      –¶ï¸ Iniciar Seá§á£o
+                      ��️ Iniciar Se��o
                     </Button>
                   )}
                   {secao.status === 'em_andamento' && onCompleteSection && (
@@ -291,21 +291,21 @@ export default function ChecklistSecaoCard({
                       onClick={onCompleteSection} 
                       className="flex-1 bg-green-500 hover:bg-green-600 touch-manipulation min-h-[48px]"
                     >
-                      œ… Finalizar Seá§á£o
+                      �� Finalizar Se��o
                     </Button>
                   )}
                 </div>
                 
-                {/* Informaá§áµes da Seá§á£o */}
+                {/* Informa��es da Se��o */}
                 <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600">
                   {secao.responsavel && (
                     <Badge variant="outline" className="bg-white">
-                      ðŸ‘¤ {secao.responsavel}
+                      👤 {secao.responsavel}
                     </Badge>
                   )}
                   {secao.iniciadoEm && (
                     <Badge variant="outline" className="bg-white">
-                      ðŸ• {new Date(secao.iniciadoEm).toLocaleTimeString()}
+                      🕐 {new Date(secao.iniciadoEm).toLocaleTimeString()}
                     </Badge>
                   )}
                 </div>
@@ -315,7 +315,7 @@ export default function ChecklistSecaoCard({
 
           {/* Lista de Itens - MOBILE OTIMIZADA */}
           <div className="p-4 space-y-4">
-            {secao.itens.map((item, index) => (
+            {secao.itens.map((item: any, index: any) => (
               <div 
                 key={item.id}
                 className={`
@@ -338,7 +338,7 @@ export default function ChecklistSecaoCard({
                         </span>
                         {item.obrigatorio && (
                           <Badge className="bg-red-100 text-red-800 text-xs">
-                            Obrigatá³rio
+                            Obrigat�rio
                           </Badge>
                         )}
                       </div>
@@ -358,21 +358,21 @@ export default function ChecklistSecaoCard({
                   
                   {/* Renderizar campo baseado no tipo */}
                   <div className="w-full">
-                    {renderCampoItem(item, onItemChange, readonly)}
+                    {renderCampoItem(item: any, onItemChange, readonly)}
                   </div>
                   
-                  {/* Observaá§áµes */}
+                  {/* Observa��es */}
                   {item.observacoes && (
                     <div className="p-3 bg-white rounded border">
-                      <p className="text-xs text-gray-600 font-medium mb-1">Observaá§áµes:</p>
+                      <p className="text-xs text-gray-600 font-medium mb-1">Observa��es:</p>
                       <p className="text-sm text-gray-700">{item.observacoes}</p>
                     </div>
                   )}
                   
-                  {/* Validaá§á£o */}
+                  {/* Valida��o */}
                   {item.validacao && !item.validacao.valido && (
                     <div className="p-3 bg-red-50 rounded border border-red-200">
-                      <p className="text-xs text-red-600 font-medium">š ï¸ {item.validacao.erro}</p>
+                      <p className="text-xs text-red-600 font-medium">��️ {item.validacao.erro}</p>
                     </div>
                   )}
                 </div>
@@ -386,7 +386,7 @@ export default function ChecklistSecaoCard({
 }
 
 // =====================================================
-// ðŸ”§ FUNá‡áƒO PARA RENDERIZAR CAMPOS POR TIPO (MOBILE-FIRST)
+// 🔧 FUN��O PARA RENDERIZAR CAMPOS POR TIPO (MOBILE-FIRST)
 // =====================================================
 
 function renderCampoItem(
@@ -412,7 +412,7 @@ function renderCampoItem(
             disabled={readonly}
             className="flex-1 min-h-[48px] touch-manipulation text-base"
           >
-            œ… Sim
+            �� Sim
           </Button>
           <Button
             size="lg"
@@ -421,7 +421,7 @@ function renderCampoItem(
             disabled={readonly}
             className="flex-1 min-h-[48px] touch-manipulation text-base"
           >
-            Œ Ná£o
+            �� N�o
           </Button>
         </div>
       )
@@ -430,7 +430,7 @@ function renderCampoItem(
       return (
         <div className="space-y-2">
           <div className="flex justify-center gap-2">
-            {[1, 2, 3, 4, 5].map((nota: any) => (
+            {[1, 2: any, 3, 4: any, 5].map((nota: any) => (
               <Button
                 key={nota}
                 size="lg"
@@ -463,7 +463,7 @@ function renderCampoItem(
       return (
         <textarea
           value={item.valor || ''}
-          onChange={(e) => handleChange(e.target.value)}
+          onChange={(e: any) => handleChange(e.target.value)}
           disabled={readonly}
           rows={3}
           className="w-full p-3 border rounded-lg text-base touch-manipulation resize-none"
@@ -476,10 +476,10 @@ function renderCampoItem(
         <input
           type="number"
           value={item.valor || ''}
-          onChange={(e) => handleChange(parseFloat(e.target.value))}
+          onChange={(e: any) => handleChange(parseFloat(e.target.value))}
           disabled={readonly}
           className="w-full p-3 border rounded-lg text-base touch-manipulation"
-          placeholder="Digite um náºmero"
+          placeholder="Digite um n�mero"
         />
       )
     
@@ -488,7 +488,7 @@ function renderCampoItem(
         <input
           type="date"
           value={item.valor || ''}
-          onChange={(e) => handleChange(e.target.value)}
+          onChange={(e: any) => handleChange(e.target.value)}
           disabled={readonly}
           className="w-full p-3 border rounded-lg text-base touch-manipulation"
         />
@@ -511,12 +511,12 @@ function renderCampoItem(
               {item.tipo === 'foto_camera' ? (
                 <>
                   <Camera className="w-5 h-5 mr-2" />
-                  ðŸ“· Tirar Foto
+                  📷 Tirar Foto
                 </>
               ) : (
                 <>
                   <Upload className="w-5 h-5 mr-2" />
-                  ðŸ“ Escolher Foto
+                  📁 Escolher Foto
                 </>
               )}
             </Button>
@@ -545,12 +545,12 @@ function renderCampoItem(
                 console.log('Assinatura digital')
               }}
             >
-              œï¸ Assinar Digitalmente
+              ��️ Assinar Digitalmente
             </Button>
           )}
           {item.valor && (
             <div className="w-full h-24 bg-gray-200 rounded-lg border flex items-center justify-center">
-              <span className="text-sm text-gray-600">œ“ Assinado</span>
+              <span className="text-sm text-gray-600">�� Assinado</span>
             </div>
           )}
         </div>

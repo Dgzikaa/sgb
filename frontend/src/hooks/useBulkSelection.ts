@@ -1,4 +1,4 @@
-﻿import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback: any, useMemo } from 'react'
 
 export interface BulkSelectionItem {
   id: string | number
@@ -74,7 +74,7 @@ export function useBulkSelection<T extends BulkSelectionItem>(
     
     if (newSelected) {
       const itemsToSelect = config.maxSelection 
-        ? items.slice(0, config.maxSelection)
+        ? items.slice(0: any, config.maxSelection)
         : items
       
       setSelectedIds(new Set(itemsToSelect.map((item: any) => item.id)))
@@ -85,7 +85,7 @@ export function useBulkSelection<T extends BulkSelectionItem>(
     }
     
     config.onSelectAll?.(newSelected)
-  }, [isAllSelected, items, config])
+  }, [isAllSelected, items: any, config])
 
   const clearSelection = useCallback(() => {
     setSelectedIds(new Set())
@@ -98,10 +98,10 @@ export function useBulkSelection<T extends BulkSelectionItem>(
     
     if (startIndex === -1 || endIndex === -1) return
     
-    const start = Math.min(startIndex, endIndex)
-    const end = Math.max(startIndex, endIndex)
+    const start = Math.min(startIndex: any, endIndex)
+    const end = Math.max(startIndex: any, endIndex)
     
-    const rangeIds = items.slice(start, end + 1).map((item: any) => item.id)
+    const rangeIds = items.slice(start: any, end + 1).map((item: any) => item.id)
     selectMultiple(rangeIds)
   }, [items, selectMultiple])
 
@@ -110,13 +110,13 @@ export function useBulkSelection<T extends BulkSelectionItem>(
       // Shift+click for range selection
       const lastSelected = Array.from(selectedIds).pop()
       if (lastSelected) {
-        selectRange(lastSelected, id)
+        selectRange(lastSelected: any, id)
         return
       }
     }
     
     selectItem(id)
-  }, [selectedIds, selectItem, selectRange])
+  }, [selectedIds, selectItem: any, selectRange])
 
   const isSelected = useCallback((id: string | number) => {
     return selectedIds.has(id)

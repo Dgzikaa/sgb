@@ -1,25 +1,25 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { StandardPageLayout } from '@/components/layouts'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useRef } from 'react'
 import { AdvancedDataTable } from '@/components/ui/advanced-datatable'
 
-// Grupos DRE conforme regras do usuá¡rio
+// Grupos DRE conforme regras do usu�rio
 const GRUPOS_DRE = [
   {
     nome: 'Receita',
     categorias: [
-      'Stone Crá©dito', 'Stone Dá©bito', 'Stone Pix', 'Pix Direto na Conta', 'Dinheiro', 'Receita de Eventos', 'Outras Receitas'
+      'Stone Cr�dito', 'Stone D�bito', 'Stone Pix', 'Pix Direto na Conta', 'Dinheiro', 'Receita de Eventos', 'Outras Receitas'
     ],
     cor: 'text-green-600 dark:text-green-400'
   },
   {
-    nome: 'Custos Variá¡veis',
-    categorias: ['IMPOSTO', 'COMISSáƒO 10%', 'TAXA MAQUININHA'],
+    nome: 'Custos Vari�veis',
+    categorias: ['IMPOSTO', 'COMISS�O 10%', 'TAXA MAQUININHA'],
     cor: 'text-red-600 dark:text-red-400'
   },
   {
@@ -28,34 +28,34 @@ const GRUPOS_DRE = [
     cor: 'text-red-600 dark:text-red-400'
   },
   {
-    nome: 'Má£o-de-Obra',
+    nome: 'M�o-de-Obra',
     categorias: [
-      'SALARIO FUNCIONARIOS', 'VALE TRANSPORTE', 'ALIMENTAá‡áƒO', 'ADICIONAIS', 'FREELA ATENDIMENTO', 'FREELA BAR', 'FREELA COZINHA', 'FREELA LIMPEZA', 'FREELA SEGURANá‡A', 'PRO LABORE', 'PROVISáƒO TRABALHISTA'
+      'SALARIO FUNCIONARIOS', 'VALE TRANSPORTE', 'ALIMENTA��O', 'ADICIONAIS', 'FREELA ATENDIMENTO', 'FREELA BAR', 'FREELA COZINHA', 'FREELA LIMPEZA', 'FREELA SEGURAN�A', 'PRO LABORE', 'PROVIS�O TRABALHISTA'
     ],
     cor: 'text-red-600 dark:text-red-400'
   },
   {
     nome: 'Despesas Comerciais',
-    categorias: ['Marketing', 'Atraá§áµes Programaá§á£o', 'Produá§á£o Eventos'],
+    categorias: ['Marketing', 'Atra��es Programa��o', 'Produ��o Eventos'],
     cor: 'text-red-600 dark:text-red-400'
   },
   {
     nome: 'Despesas Administrativas',
-    categorias: ['Administrativo Ordiná¡rio', 'Escritá³rio Central', 'Recursos Humanos'],
+    categorias: ['Administrativo Ordin�rio', 'Escrit�rio Central', 'Recursos Humanos'],
     cor: 'text-red-600 dark:text-red-400'
   },
   {
     nome: 'Despesas Operacionais',
-    categorias: ['Materiais Operaá§á£o', 'Materiais de Limpeza e Descartá¡veis', 'Utensá­lios', 'Estorno', 'Outros Operaá§á£o'],
+    categorias: ['Materiais Opera��o', 'Materiais de Limpeza e Descart�veis', 'Utens�lios', 'Estorno', 'Outros Opera��o'],
     cor: 'text-red-600 dark:text-red-400'
   },
   {
-    nome: 'Despesas de Ocupaá§á£o (Contas)',
-    categorias: ['ALUGUEL/CONDOMáNIO/IPTU', 'áGUA', 'MANUTENá‡áƒO', 'INTERNET', 'GáS', 'LUZ'],
+    nome: 'Despesas de Ocupa��o (Contas)',
+    categorias: ['ALUGUEL/CONDOM�NIO/IPTU', '�GUA', 'MANUTEN��O', 'INTERNET', 'G�S', 'LUZ'],
     cor: 'text-red-600 dark:text-red-400'
   },
   {
-    nome: 'Ná£o Operacionais',
+    nome: 'N�o Operacionais',
     categorias: ['Contratos'],
     cor: 'text-red-600 dark:text-red-400'
   }
@@ -70,7 +70,7 @@ function totalReceitas(mes: any) {
 }
 function totalCustos(mes: any) {
   // Soma todos os grupos exceto Receita
-  return GRUPOS_DRE.slice(1).reduce((acc: number, grupo: any) => acc + totalGrupo(mes, grupo), 0);
+  return GRUPOS_DRE.slice(1).reduce((acc: number, grupo: any) => acc + totalGrupo(mes: any, grupo), 0);
 }
 
 function formatarValor(valor: number) {
@@ -112,7 +112,7 @@ export default function DREOrdinarioPage() {
     <StandardPageLayout>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 py-6">
-          <h1 className="card-title-dark mb-6">DRE Ordiná¡rio</h1>
+          <h1 className="card-title-dark mb-6">DRE Ordin�rio</h1>
           <div ref={scrollRef} className="w-full overflow-x-auto">
             <table className="table-dark w-full border-collapse">
               <thead>
@@ -137,7 +137,7 @@ export default function DREOrdinarioPage() {
                         {grupo.nome} TOTAL
                       </td>
                       {dadosMensais.map((mes: any) => (
-                        <td key={mes.ano + '-' + mes.mes} className={`table-cell-dark text-right font-mono font-bold ${grupo.cor}`}>{formatarValor(totalGrupo(mes, grupo))}</td>
+                        <td key={mes.ano + '-' + mes.mes} className={`table-cell-dark text-right font-mono font-bold ${grupo.cor}`}>{formatarValor(totalGrupo(mes: any, grupo))}</td>
                       ))}
                     </tr>
                     {/* Linhas detalhadas do grupo */}

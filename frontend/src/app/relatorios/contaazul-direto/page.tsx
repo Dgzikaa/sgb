@@ -1,4 +1,4 @@
-Ôªø'use client';
+'use client';
 
 import React, { useState } from 'react';
 
@@ -20,7 +20,7 @@ export default function ContaAzulDiretoPage() {
       const data = await response.json();
       setResultado(data);
     } catch (error) {
-      setResultado({ erro: 'Falha na conex√°o' });
+      setResultado({ erro: 'Falha na conex·o' });
     } finally {
       setTestando(false);
     }
@@ -34,7 +34,7 @@ export default function ContaAzulDiretoPage() {
         <p className="text-gray-600 mb-8">
           Vamos testar <strong>diretamente</strong> o que funciona no ContaAzul.
           <br />
-          <strong>Sem enrola√ß√°o, sem diagn√≥sticos complexos.</strong>
+          <strong>Sem enrolaÁ·o, sem diagnÛsticos complexos.</strong>
         </p>
 
         <button
@@ -57,14 +57,14 @@ export default function ContaAzulDiretoPage() {
                   <div className="bg-white p-3 rounded border">
                     <strong>Dados obtidos:</strong>
                     <pre className="text-xs mt-2 overflow-auto max-h-32">
-                      {typeof resultado.dados === 'string' ? resultado.dados : JSON.stringify(resultado.dados, null, 2)}
+                      {typeof resultado.dados === 'string' ? resultado.dados : JSON.stringify(resultado.dados, null: any, 2)}
                     </pre>
                   </div>
                 )}
               </div>
             ) : (
               <div>
-                <h3 className="font-bold text-red-800 mb-2">? N√°o funcionou ainda</h3>
+                <h3 className="font-bold text-red-800 mb-2">? N·o funcionou ainda</h3>
                 <p className="text-red-700 mb-3">{resultado.problema}</p>
                 {resultado.status && (
                   <div className="text-sm text-gray-600">
@@ -76,9 +76,9 @@ export default function ContaAzulDiretoPage() {
                     ))}
                   </div>
                 )}
-                {resultado.pr√≥ximo && (
+                {resultado.prÛximo && (
                   <div className="mt-3 p-2 bg-blue-100 rounded">
-                    <strong>Pr√≥ximo passo:</strong> {resultado.pr√≥ximo}
+                    <strong>PrÛximo passo:</strong> {resultado.prÛximo}
                   </div>
                 )}
               </div>

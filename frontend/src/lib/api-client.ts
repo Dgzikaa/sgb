@@ -1,5 +1,5 @@
-﻿/**
- * Cliente API que adiciona automaticamente headers de autenticaá§á£o
+/**
+ * Cliente API que adiciona automaticamente headers de autentica��o
  */
 
 export interface ApiOptions {
@@ -13,13 +13,13 @@ export interface ApiOptions {
  */
 export async function apiCall(endpoint: string, options: ApiOptions = {}) {
   try {
-    // Headers padrá£o
+    // Headers padr�o
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers || {})
     }
     
-    // Pegar apenas dados essenciais do usuá¡rio
+    // Pegar apenas dados essenciais do usu�rio
     const userData = localStorage.getItem('sgb_user')
     if (userData) {
       try {
@@ -28,25 +28,25 @@ export async function apiCall(endpoint: string, options: ApiOptions = {}) {
         if (user.id) headers['x-user-id'] = user.id
         if (user.email) headers['x-user-email'] = user.email
       } catch (e) {
-        console.warn('Erro ao parsear dados do usuá¡rio:', e)
+        console.warn('Erro ao parsear dados do usu�rio:', e)
       }
     }
     
-    // Configuraá§á£o da requisiá§á£o
+    // Configura��o da requisi��o
     const fetchOptions: RequestInit = {
       method: options.method || 'GET',
       headers
     }
     
-    // Adicionar body se necessá¡rio
+    // Adicionar body se necess�rio
     if (options.body && options.method !== 'GET') {
       fetchOptions.body = JSON.stringify(options.body)
     }
     
-    // Fazer a requisiá§á£o
-    const response = await fetch(endpoint, fetchOptions)
+    // Fazer a requisi��o
+    const response = await fetch(endpoint: any, fetchOptions)
     
-    // Verificar se a resposta á© OK
+    // Verificar se a resposta � OK
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
       throw new Error(errorData.error || `HTTP ${response.status}`)
@@ -62,24 +62,24 @@ export async function apiCall(endpoint: string, options: ApiOptions = {}) {
 }
 
 /**
- * Funá§áµes de conveniáªncia para cada má©todo HTTP
+ * Fun��es de conveni�ncia para cada m�todo HTTP
  */
 export const api = {
   get: (endpoint: string, headers?: Record<string, string>) => 
-    apiCall(endpoint, { method: 'GET', headers }),
+    apiCall(endpoint: any, { method: 'GET', headers }),
     
   post: (endpoint: string, body?: any, headers?: Record<string, string>) => 
-    apiCall(endpoint, { method: 'POST', body, headers }),
+    apiCall(endpoint: any, { method: 'POST', body: any, headers }),
     
   put: (endpoint: string, body?: any, headers?: Record<string, string>) => 
-    apiCall(endpoint, { method: 'PUT', body, headers }),
+    apiCall(endpoint: any, { method: 'PUT', body: any, headers }),
     
   delete: (endpoint: string, headers?: Record<string, string>) => 
-    apiCall(endpoint, { method: 'DELETE', headers })
+    apiCall(endpoint: any, { method: 'DELETE', headers })
 }
 
 /**
- * Cliente especá­fico para checklists
+ * Cliente espec�fico para checklists
  */
 export const checklistsApi = {
   // Listar checklists
@@ -87,7 +87,7 @@ export const checklistsApi = {
     const searchParams = new URLSearchParams()
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
-        if (value) searchParams.append(key, value)
+        if (value) searchParams.append(key: any, value)
       })
     }
     
@@ -106,7 +106,7 @@ export const checklistsApi = {
 }
 
 /**
- * Cliente especá­fico para uploads
+ * Cliente espec�fico para uploads
  */
 export const uploadsApi = {
   // Fazer upload de arquivo (com FormData)
@@ -143,7 +143,7 @@ export const uploadsApi = {
     const searchParams = new URLSearchParams()
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) searchParams.append(key, String(value))
+        if (value !== undefined) searchParams.append(key: any, String(value))
       })
     }
     

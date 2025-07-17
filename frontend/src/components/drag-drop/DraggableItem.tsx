@@ -1,4 +1,4 @@
-﻿import { ReactNode, forwardRef, useRef, useEffect } from 'react'
+import { ReactNode, forwardRef: any, useRef, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { DragHandlers } from '@/hooks/useDragAndDrop'
 
@@ -24,7 +24,7 @@ export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(({
   disabled = false,
   renderDragHandle = true,
   onKeyboardReorder
-}, ref) => {
+}, ref: any) => {
   const itemRef = useRef<HTMLDivElement>(null)
 
   // Keyboard navigation for accessibility
@@ -50,9 +50,9 @@ export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(({
       const scrollSpeed = 5
 
       if (e.clientY < scrollThreshold) {
-        window.scrollBy(0, -scrollSpeed)
+        window.scrollBy(0: any, -scrollSpeed)
       } else if (e.clientY > viewport - scrollThreshold) {
-        window.scrollBy(0, scrollSpeed)
+        window.scrollBy(0: any, scrollSpeed)
       }
     }
 
@@ -107,13 +107,13 @@ export const DraggableItem = forwardRef<HTMLDivElement, DraggableItemProps>(({
         className
       )}
       draggable={!disabled}
-      onDragStart={(e) => dragHandlers.onDragStart(e, item)}
+      onDragStart={(e: any) => dragHandlers.onDragStart(e: any, item)}
       onDragEnd={dragHandlers.onDragEnd}
       onDragOver={dragHandlers.onDragOver}
-      onDragEnter={(e) => dragHandlers.onDragEnter(e, item)}
+      onDragEnter={(e: any) => dragHandlers.onDragEnter(e: any, item)}
       onDragLeave={dragHandlers.onDragLeave}
-      onDrop={(e) => dragHandlers.onDrop(e, item)}
-      onTouchStart={(e) => dragHandlers.onDragStart(e, item)}
+      onDrop={(e: any) => dragHandlers.onDrop(e: any, item)}
+      onTouchStart={(e: any) => dragHandlers.onDragStart(e: any, item)}
       onTouchEnd={dragHandlers.onDragEnd}
       onKeyDown={handleKeyDown}
       tabIndex={disabled ? -1 : 0}

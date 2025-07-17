@@ -1,26 +1,26 @@
-Ôªøimport { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('√∞≈∏‚Äù¬ç Testando configura√°¬ß√°¬£o do Supabase...')
+    console.log('üîç Testando configura·ß·£o do Supabase...')
     
-    // Verificar vari√°¬°veis de ambiente
+    // Verificar vari·°veis de ambiente
     const envCheck = {
-      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Configurada' : 'N√°¬£o configurada',
-      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Configurada' : 'N√°¬£o configurada',
-      SERVICE_ROLE_KEY: process.env.SERVICE_ROLE_KEY ? 'Configurada' : 'N√°¬£o configurada'
+      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Configurada' : 'N·£o configurada',
+      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Configurada' : 'N·£o configurada',
+      SERVICE_ROLE_KEY: process.env.SERVICE_ROLE_KEY ? 'Configurada' : 'N·£o configurada'
     }
     
-    console.log('√∞≈∏‚Äù¬ç Vari√°¬°veis de ambiente:', envCheck)
+    console.log('üîç Vari·°veis de ambiente:', envCheck)
     
     // Testar cliente administrativo
     let adminClient
     try {
       adminClient = await getAdminClient()
-      console.log('≈ì‚Ä¶ Cliente administrativo criado com sucesso')
+      console.log('úÖ Cliente administrativo criado com sucesso')
     } catch (adminError) {
-      console.error('¬ù≈í Erro ao criar cliente administrativo:', adminError)
+      console.error('ùå Erro ao criar cliente administrativo:', adminError)
       return NextResponse.json({
         success: false,
         error: 'Erro ao criar cliente administrativo',
@@ -29,15 +29,15 @@ export async function GET(request: NextRequest) {
       }, { status: 500 })
     }
     
-    // Testar conex√°¬£o com banco
+    // Testar conex·£o com banco
     try {
       const { data, error } = await adminClient
         .from('usuarios_bar')
-        .select('id, nome, email')
+        .select('id, nome: any, email')
         .limit(1)
       
       if (error) {
-        console.error('¬ù≈í Erro ao conectar com banco:', error)
+        console.error('ùå Erro ao conectar com banco:', error)
         return NextResponse.json({
           success: false,
           error: 'Erro ao conectar com banco',
@@ -46,11 +46,11 @@ export async function GET(request: NextRequest) {
         }, { status: 500 })
       }
       
-      console.log('≈ì‚Ä¶ Conex√°¬£o com banco funcionando')
+      console.log('úÖ Conex·£o com banco funcionando')
       
       return NextResponse.json({
         success: true,
-        message: 'Configura√°¬ß√°¬£o do Supabase est√°¬° funcionando corretamente',
+        message: 'Configura·ß·£o do Supabase est·° funcionando corretamente',
         envCheck,
         testQuery: {
           success: true,
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
       })
       
     } catch (dbError) {
-      console.error('¬ù≈í Erro na query de teste:', dbError)
+      console.error('ùå Erro na query de teste:', dbError)
       return NextResponse.json({
         success: false,
         error: 'Erro na query de teste',
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
     }
     
   } catch (error) {
-    console.error('¬ù≈í Erro geral no teste:', error)
+    console.error('ùå Erro geral no teste:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro geral no teste',

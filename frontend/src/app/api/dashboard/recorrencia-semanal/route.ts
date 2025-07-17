@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
@@ -12,12 +12,12 @@ export async function GET(request: NextRequest) {
 
     if (!data_inicio || !data_fim || !bar_id) {
       return NextResponse.json(
-        { success: false, error: 'Pará¢metros obrigatá³rios: data_inicio, data_fim, bar_id' },
+        { success: false, error: 'Par�metros obrigat�rios: data_inicio, data_fim: any, bar_id' },
         { status: 400 }
       )
     }
 
-    console.log('ðŸ“± API Recorráªncia Semanal - Pará¢metros recebidos:', {
+    console.log('📱 API Recorr�ncia Semanal - Par�metros recebidos:', {
       data_inicio,
       data_fim,
       bar_id
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     // Inicializar cliente Supabase
     const supabase = await getSupabaseClient()
     if (!supabase) {
-      console.error('Œ Erro ao conectar com banco')
+      console.error('�� Erro ao conectar com banco')
       return NextResponse.json(
         { success: false, error: 'Erro ao conectar com banco' },
         { status: 500 }
@@ -34,13 +34,13 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-      // Buscar dados de reservas com telefone/celular do perá­odo atual
-      console.log('ðŸ” Buscando reservas com telefones...')
+      // Buscar dados de reservas com telefone/celular do per�odo atual
+      console.log('🔍 Buscando reservas com telefones...')
       
       // Primeira tentativa: buscar da tabela getin_reservas se existir
       let reservasQuery = supabase
         .from('getin_reservas')
-        .select('phone, name, date, people')
+        .select('phone, name: any, date, people')
         .gte('date', data_inicio)
         .lte('date', data_fim)
         .not('phone', 'is', null)
@@ -51,12 +51,12 @@ export async function GET(request: NextRequest) {
       let dadosReservas = reservasGetin || []
 
       if (errorGetin || !reservasGetin || reservasGetin.length === 0) {
-        console.log('š ï¸ Tabela getin_reservas ná£o encontrada ou sem dados, tentando outras fontes...')
+        console.log('��️ Tabela getin_reservas n�o encontrada ou sem dados, tentando outras fontes...')
         
         // Tentar buscar da tabela contahub se tiver campos de telefone
         const { data: contahubData, error: contahubError } = await supabase
           .from('analitico')
-          .select('vd_dtgerencial, tel_cli, nm_cli')
+          .select('vd_dtgerencial, tel_cli: any, nm_cli')
           .eq('bar_id', parseInt(bar_id))
           .gte('vd_dtgerencial', data_inicio)
           .lte('vd_dtgerencial', data_fim)
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
           .limit(1000)
 
         if (!contahubError && contahubData && contahubData.length > 0) {
-          console.log(`ðŸ“ž Dados ContaHub encontrados: ${contahubData.length}`)
+          console.log(`📞 Dados ContaHub encontrados: ${contahubData.length}`)
           dadosReservas = contahubData.map((item: any) => ({
             phone: item.tel_cli,
             name: item.nm_cli,
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      console.log(`ðŸ“Š Total de registros com telefone: ${dadosReservas.length}`)
+      console.log(`📊 Total de registros com telefone: ${dadosReservas.length}`)
 
       if (dadosReservas.length === 0) {
         return NextResponse.json({
@@ -91,20 +91,20 @@ export async function GET(request: NextRequest) {
           meta: {
             periodo: `${data_inicio} a ${data_fim}`,
             bar_id: parseInt(bar_id),
-            observacao: 'Nenhum dado com telefone encontrado para aná¡lise'
+            observacao: 'Nenhum dado com telefone encontrado para an�lise'
           }
         })
       }
 
-      // Analisar recorráªncia por telefone
+      // Analisar recorr�ncia por telefone
       const clientesPorTelefone = new Map()
 
       dadosReservas.forEach((reserva: any) => {
-        const telefone = String(reserva.phone).replace(/\D/g, '') // remover caracteres ná£o numá©ricos
+        const telefone = String(reserva.phone).replace(/\D/g, '') // remover caracteres n�o num�ricos
         
-        if (telefone.length >= 8) { // telefone vá¡lido
+        if (telefone.length >= 8) { // telefone v�lido
           if (!clientesPorTelefone.has(telefone)) {
-            clientesPorTelefone.set(telefone, {
+            clientesPorTelefone.set(telefone: any, {
               telefone,
               nome: reserva.name || 'Cliente',
               visitas: [],
@@ -123,13 +123,13 @@ export async function GET(request: NextRequest) {
         }
       })
 
-      // Analisar padráµes de recorráªncia
+      // Analisar padr�es de recorr�ncia
       const clientesArray = Array.from(clientesPorTelefone.values())
       const clientesUnicos = clientesArray.length
       const clientesRecorrentes = clientesArray.filter((cliente: any) => cliente.total_visitas > 1).length
       const taxaRecorrencia = clientesUnicos > 0 ? (clientesRecorrentes / clientesUnicos) * 100 : 0
 
-      // Agrupar por náºmero de visitas
+      // Agrupar por n�mero de visitas
       const visitasPorCliente = {
         '1_visita': 0,
         '2_visitas': 0,
@@ -152,8 +152,8 @@ export async function GET(request: NextRequest) {
       // Detalhar clientes mais recorrentes (top 10)
       const clientesRecorrentesDetalhados = clientesArray
         .filter((cliente: any) => cliente.total_visitas > 1)
-        .sort((a, b) => b.total_visitas - a.total_visitas)
-        .slice(0, 10)
+        .sort((a: any, b: any) => b.total_visitas - a.total_visitas)
+        .slice(0: any, 10)
         .map((cliente: any) => ({
           nome: cliente.nome,
           telefone: cliente.telefone.replace(/(\d{2})(\d{4,5})(\d{4})/, '($1) $2-$3'), // formatar telefone
@@ -173,7 +173,7 @@ export async function GET(request: NextRequest) {
         detalhes_recorrentes: clientesRecorrentesDetalhados
       }
 
-      console.log('ðŸ“± Aná¡lise de recorráªncia concluá­da:', {
+      console.log('📱 An�lise de recorr�ncia conclu�da:', {
         clientes_unicos: clientesUnicos,
         clientes_recorrentes: clientesRecorrentes,
         taxa_recorrencia: `${recorrencia.taxa_recorrencia}%`
@@ -185,13 +185,13 @@ export async function GET(request: NextRequest) {
         meta: {
           periodo: `${data_inicio} a ${data_fim}`,
           bar_id: parseInt(bar_id),
-          criterio: 'Agrupamento por náºmero de telefone',
+          criterio: 'Agrupamento por n�mero de telefone',
           fonte_dados: reservasGetin && reservasGetin.length > 0 ? 'getin_reservas' : 'analitico'
         }
       })
 
     } catch (dbError) {
-      console.error('Œ Erro ao buscar dados de recorráªncia:', dbError)
+      console.error('�� Erro ao buscar dados de recorr�ncia:', dbError)
       return NextResponse.json(
         { success: false, error: 'Erro ao buscar dados: ' + (dbError as Error).message },
         { status: 500 }
@@ -199,7 +199,7 @@ export async function GET(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('Œ Erro na API Recorráªncia Semanal:', error)
+    console.error('�� Erro na API Recorr�ncia Semanal:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor: ' + (error as Error).message },
       { status: 500 }

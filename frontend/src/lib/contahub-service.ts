@@ -1,6 +1,6 @@
-﻿/**
+/**
  * ContaHub Service Helper
- * Gerencia integraá§á£o com ContaHub e detecta quando está¡ em modo manutená§á£o
+ * Gerencia integra��o com ContaHub e detecta quando est� em modo manuten��o
  */
 
 export interface ContaHubStatus {
@@ -21,7 +21,7 @@ export interface ContaHubResponse<T = any> {
 }
 
 /**
- * Verifica se o ContaHub está¡ disponá­vel (variá¡veis de ambiente configuradas)
+ * Verifica se o ContaHub est� dispon�vel (vari�veis de ambiente configuradas)
  */
 export function verificarStatusContaHub(): ContaHubStatus {
   const email = process.env.CONTAHUB_EMAIL;
@@ -33,7 +33,7 @@ export function verificarStatusContaHub(): ContaHubStatus {
   
   return {
     disponivel,
-    motivo: !disponivel ? 'Credenciais do ContaHub temporariamente indisponá­veis' : undefined,
+    motivo: !disponivel ? 'Credenciais do ContaHub temporariamente indispon�veis' : undefined,
     detalhes: {
       email_configurado: emailConfigurado,
       senha_configurada: senhaConfigurada
@@ -42,14 +42,14 @@ export function verificarStatusContaHub(): ContaHubStatus {
 }
 
 /**
- * Cria uma resposta padrá£o para quando ContaHub está¡ em manutená§á£o
+ * Cria uma resposta padr�o para quando ContaHub est� em manuten��o
  */
 export function criarRespostaManutencao<T = any>(acao: string): ContaHubResponse<T> {
   const status = verificarStatusContaHub();
   
   return {
     success: false,
-    message: `${acao} temporariamente indisponá­vel - ContaHub em manutená§á£o`,
+    message: `${acao} temporariamente indispon�vel - ContaHub em manuten��o`,
     manutencao: true,
     status
   };
@@ -68,7 +68,7 @@ export function criarRespostaSucesso<T>(data: T, message: string): ContaHubRespo
 }
 
 /**
- * Verifica se deve executar operaá§á£o ContaHub ou retornar modo manutená§á£o
+ * Verifica se deve executar opera��o ContaHub ou retornar modo manuten��o
  */
 export function verificarDisponibilidadeContaHub(acao: string): ContaHubResponse | null {
   const status = verificarStatusContaHub();
@@ -77,5 +77,5 @@ export function verificarDisponibilidadeContaHub(acao: string): ContaHubResponse
     return criarRespostaManutencao(acao);
   }
   
-  return null; // ContaHub disponá­vel, pode prosseguir
+  return null; // ContaHub dispon�vel, pode prosseguir
 } 

@@ -1,4 +1,4 @@
-ï»¿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -23,10 +23,10 @@ export async function POST(request: NextRequest) {
     const { barId } = await request.json()
 
     if (!barId) {
-      return NextResponse.json({ error: 'barId Ã¡Â© obrigatÃ¡Â³rio' }, { status: 400 })
+      return NextResponse.json({ error: 'barId á© obrigatá³rio' }, { status: 400 })
     }
 
-    console.log(`Ã°Å¸â€â€ RENOVAÃ¡â€¡Ã¡Æ’O TOKEN - Iniciando para bar ${barId}`)
+    console.log(`ğŸ”„ RENOVAá‡áƒO TOKEN - Iniciando para bar ${barId}`)
 
     const supabase = createSupabaseClient()
 
@@ -40,44 +40,44 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (dbError || !credentials) {
-      console.error('ÂÅ’ Credenciais nÃ¡Â£o encontradas:', dbError)
+      console.error('Œ Credenciais ná£o encontradas:', dbError)
       return NextResponse.json({ 
         success: false, 
-        error: 'Credenciais nÃ¡Â£o encontradas' 
+        error: 'Credenciais ná£o encontradas' 
       }, { status: 404 })
     }
 
     // 2. Verificar se temos refresh token
     if (!credentials.refresh_token) {
-      console.error('ÂÅ’ Refresh token nÃ¡Â£o disponÃ¡Â­vel')
+      console.error('Œ Refresh token ná£o disponá­vel')
       return NextResponse.json({ 
         success: false, 
-        error: 'Refresh token nÃ¡Â£o disponÃ¡Â­vel. Ã¡â€° necessÃ¡Â¡rio fazer nova autorizaÃ¡Â§Ã¡Â£o.' 
+        error: 'Refresh token ná£o disponá­vel. á‰ necessá¡rio fazer nova autorizaá§á£o.' 
       }, { status: 400 })
     }
 
-    // 3. Verificar se jÃ¡Â¡ temos um token vÃ¡Â¡lido
+    // 3. Verificar se já¡ temos um token vá¡lido
     const agora = new Date()
     const expiraEm = new Date(credentials.expires_at)
     const tokenValido = expiraEm > agora
 
     if (tokenValido) {
-      console.log('Å“â€¦ Token ainda vÃ¡Â¡lido, retornando sucesso')
+      console.log('œ… Token ainda vá¡lido, retornando sucesso')
       return NextResponse.json({
         success: true,
-        message: 'Token jÃ¡Â¡ estÃ¡Â¡ vÃ¡Â¡lido',
+        message: 'Token já¡ está¡ vá¡lido',
         conectado: true,
         expires_at: credentials.expires_at,
         empresa_id: credentials.empresa_id
       })
     }
 
-    console.log('Ã°Å¸â€â€ Token expirado, renovando...')
+    console.log('ğŸ”„ Token expirado, renovando...')
 
     // 4. Renovar token usando refresh token
     const basicAuth = Buffer.from(`${credentials.client_id}:${credentials.client_secret}`).toString('base64')
     
-    const response = await fetch(CONTAAZUL_TOKEN_URL, {
+    const response = await fetch(CONTAAZUL_TOKEN_URL: any, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -92,10 +92,10 @@ export async function POST(request: NextRequest) {
     const data = await response.json()
     
     if (!response.ok) {
-      console.error('ÂÅ’ Erro na renovaÃ¡Â§Ã¡Â£o:', data)
+      console.error('Œ Erro na renovaá§á£o:', data)
       return NextResponse.json({ 
         success: false, 
-        error: data.error || 'Erro ao renovar token. Pode ser necessÃ¡Â¡rio fazer nova autorizaÃ¡Â§Ã¡Â£o.' 
+        error: data.error || 'Erro ao renovar token. Pode ser necessá¡rio fazer nova autorizaá§á£o.' 
       }, { status: 400 })
     }
 
@@ -115,14 +115,14 @@ export async function POST(request: NextRequest) {
       .eq('id', credentials.id)
 
     if (updateError) {
-      console.error('ÂÅ’ Erro ao salvar token renovado:', updateError)
+      console.error('Œ Erro ao salvar token renovado:', updateError)
       return NextResponse.json({ 
         success: false, 
         error: 'Erro ao salvar token renovado' 
       }, { status: 500 })
     }
 
-    console.log('Å“â€¦ Token renovado com sucesso!')
+    console.log('œ… Token renovado com sucesso!')
 
     return NextResponse.json({
       success: true,
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('ÂÅ’ Erro interno na renovaÃ¡Â§Ã¡Â£o:', error)
+    console.error('Œ Erro interno na renovaá§á£o:', error)
     return NextResponse.json({ 
       success: false,
       error: 'Erro interno do servidor',

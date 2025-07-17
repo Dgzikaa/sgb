@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic'
@@ -16,12 +16,12 @@ export async function GET(request: NextRequest) {
     const barId = parseInt(searchParams.get('bar_id') || '1');
 
     if (!dataInicio || !dataFim) {
-      return NextResponse.json({ error: 'Datas de iná­cio e fim sá£o obrigatá³rias' }, { status: 400 });
+      return NextResponse.json({ error: 'Datas de in�cio e fim s�o obrigat�rias' }, { status: 400 });
     }
 
-    console.log(`ðŸ‘¨€ðŸ³ Analisando gará§ons de ${dataInicio} atá© ${dataFim} para bar ${barId}`);
+    console.log(`👨��🍳 Analisando gar�ons de ${dataInicio} at� ${dataFim} para bar ${barId}`);
 
-    // Buscar dados de vendas por gará§om da tabela analá­tico
+    // Buscar dados de vendas por gar�om da tabela anal�tico
     const { data: vendasData, error: vendasError } = await supabase
       .from('analitico')
       .select(`
@@ -60,23 +60,23 @@ export async function GET(request: NextRequest) {
       .not('usr_lancou', 'is', null)
       .not('t1_t2', 'is', null)
       .gt('t1_t2', 0)
-      .lt('t1_t2', 3600); // Filtrar tempos vá¡lidos
+      .lt('t1_t2', 3600); // Filtrar tempos v�lidos
 
     if (temposError) {
       console.error('Erro ao buscar dados de tempo:', temposError);
       return NextResponse.json({ error: 'Erro ao buscar dados de tempo' }, { status: 500 });
     }
 
-    console.log(`ðŸ“Š Dados encontrados - Vendas: ${vendasData?.length || 0}, Tempos: ${temposData?.length || 0}`);
+    console.log(`📊 Dados encontrados - Vendas: ${vendasData?.length || 0}, Tempos: ${temposData?.length || 0}`);
 
-    // Processar dados por gará§om
+    // Processar dados por gar�om
     const garconsMap = new Map();
 
     // Processar vendas
     vendasData?.forEach((venda: any) => {
       const garcom = venda.usr_lancou;
       if (!garconsMap.has(garcom)) {
-        garconsMap.set(garcom, {
+        garconsMap.set(garcom: any, {
           nome: garcom,
           vendas_periodo: 0,
           produtos_vendidos: 0,
@@ -100,9 +100,9 @@ export async function GET(request: NextRequest) {
       // Vendas por dia
       const data = venda.vd_dtgerencial;
       if (!dadosGarcom.vendas_por_dia.has(data)) {
-        dadosGarcom.vendas_por_dia.set(data, 0);
+        dadosGarcom.vendas_por_dia.set(data: any, 0);
       }
-      dadosGarcom.vendas_por_dia.set(data, dadosGarcom.vendas_por_dia.get(data) + parseFloat(venda.valorfinal || '0'));
+      dadosGarcom.vendas_por_dia.set(data: any, dadosGarcom.vendas_por_dia.get(data) + parseFloat(venda.valorfinal || '0'));
     });
 
     // Processar tempos de atendimento
@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // Calcular estatá­sticas finais
+    // Calcular estat�sticas finais
     const garcons = Array.from(garconsMap.values()).map((garcom: any, index: number) => {
       const clientes_atendidos = garcom.mesas_atendidas.size;
       const dias_trabalhados = garcom.dias_trabalhados.size;
@@ -143,14 +143,14 @@ export async function GET(request: NextRequest) {
     });
 
     // Ordenar por vendas (maior para menor)
-    garcons.sort((a, b) => b.vendas_periodo - a.vendas_periodo);
+    garcons.sort((a: any, b: any) => b.vendas_periodo - a.vendas_periodo);
 
-    // Atualizar posiá§áµes do ranking
-    garcons.forEach((garcom, index) => {
+    // Atualizar posi��es do ranking
+    garcons.forEach((garcom: any, index: any) => {
       garcom.ranking_posicao = index + 1;
     });
 
-    console.log(`ðŸ‘¨€ðŸ³ Aná¡lise concluá­da: ${garcons.length} gará§ons encontrados`);
+    console.log(`👨��🍳 An�lise conclu�da: ${garcons.length} gar�ons encontrados`);
 
     return NextResponse.json({
       success: true,
@@ -159,13 +159,13 @@ export async function GET(request: NextRequest) {
         data_inicio: dataInicio,
         data_fim: dataFim,
         total_garcons: garcons.length,
-        total_vendas: garcons.reduce((sum, g) => sum + g.vendas_periodo, 0),
-        total_clientes: garcons.reduce((sum, g) => sum + g.clientes_atendidos, 0)
+        total_vendas: garcons.reduce((sum: any, g: any) => sum + g.vendas_periodo, 0),
+        total_clientes: garcons.reduce((sum: any, g: any) => sum + g.clientes_atendidos, 0)
       }
     });
 
   } catch (error) {
-    console.error('Erro interno na API de gará§ons:', error);
+    console.error('Erro interno na API de gar�ons:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 } 

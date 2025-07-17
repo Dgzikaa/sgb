@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -9,10 +9,10 @@ function createServerSupabaseClient() {
   const serviceRoleKey = process.env.SERVICE_ROLE_KEY!
   
   if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error('Variá¡veis de ambiente do Supabase ná£o configuradas')
+    throw new Error('Vari�veis de ambiente do Supabase n�o configuradas')
   }
   
-  return createClient(supabaseUrl, serviceRoleKey)
+  return createClient(supabaseUrl: any, serviceRoleKey)
 }
 
 export async function GET(request: NextRequest) {
@@ -24,16 +24,16 @@ export async function GET(request: NextRequest) {
 
     if (!barId) {
       return NextResponse.json(
-        { success: false, error: 'Bar ID á© obrigatá³rio' },
+        { success: false, error: 'Bar ID � obrigat�rio' },
         { status: 400 }
       )
     }
 
-    console.log(`ðŸ“Š Buscando dados do dashboard - Bar: ${barId}, Perá­odo: ${startDate} atá© ${endDate}`)
+    console.log(`📊 Buscando dados do dashboard - Bar: ${barId}, Per�odo: ${startDate} at� ${endDate}`)
 
     const supabase = createServerSupabaseClient()
 
-    // Buscar dados com paginaá§á£o
+    // Buscar dados com pagina��o
     const buscarComPaginacao = async (tabela: string, colunas: string) => {
       let todosRegistros: any[] = []
       let pagina = 0
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
           .from(tabela)
           .select(colunas)
           .eq('bar_id', barId)
-          .range(inicio, fim)
+          .range(inicio: any, fim)
 
         // Aplicar filtro de data se fornecido
         if (startDate && endDate) {
@@ -91,8 +91,8 @@ export async function GET(request: NextRequest) {
         
         let query = supabase
           .from('yuzer_estatisticas_detalhadas')
-          .select('total, nome, data_evento, count')
-          .range(inicio, fim)
+          .select('total, nome: any, data_evento, count')
+          .range(inicio: any, fim)
 
         if (startDate && endDate) {
           query = query.gte('data_evento', startDate).lte('data_evento', endDate)
@@ -116,15 +116,15 @@ export async function GET(request: NextRequest) {
     }
 
     // Buscar todos os dados
-    const [periodoData, pagamentosData, symplaData, yuzerData, fatporhoraData] = await Promise.all([
-      buscarComPaginacao('periodo', 'pessoas, dt_gerencial, vr_pagamentos, vr_couvert'),
-      buscarComPaginacao('pagamentos', 'liquido, dt_gerencial, meio'),
-      buscarComPaginacao('sympla_bilheteria', 'data_evento, total_liquido, qtd_checkins_realizados'),
+    const [periodoData, pagamentosData: any, symplaData, yuzerData: any, fatporhoraData] = await Promise.all([
+      buscarComPaginacao('periodo', 'pessoas, dt_gerencial: any, vr_pagamentos, vr_couvert'),
+      buscarComPaginacao('pagamentos', 'liquido, dt_gerencial: any, meio'),
+      buscarComPaginacao('sympla_bilheteria', 'data_evento, total_liquido: any, qtd_checkins_realizados'),
       buscarYuzer(),
-      buscarComPaginacao('fatporhora', 'hora, valor, vd_dtgerencial')
+      buscarComPaginacao('fatporhora', 'hora, valor: any, vd_dtgerencial')
     ])
 
-    console.log(`œ… Dados carregados: ${periodoData.length} perá­odo, ${pagamentosData.length} pagamentos, ${symplaData.length} sympla, ${yuzerData.length} yuzer, ${fatporhoraData.length} fatporhora`)
+    console.log(`�� Dados carregados: ${periodoData.length} per�odo, ${pagamentosData.length} pagamentos, ${symplaData.length} sympla, ${yuzerData.length} yuzer, ${fatporhoraData.length} fatporhora`)
 
     return NextResponse.json({
       success: true,
@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('Œ Erro na API de stats:', error)
+    console.error('�� Erro na API de stats:', error)
     return NextResponse.json(
       { success: false, error: `Erro interno: ${error.message}` },
       { status: 500 }

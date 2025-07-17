@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -8,11 +8,11 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const { action, checklistIds, data = {} } = await request.json()
+    const { action, checklistIds: any, data = {} } = await request.json()
 
     if (!action || !checklistIds || !Array.isArray(checklistIds) || checklistIds.length === 0) {
       return NextResponse.json({ 
-        error: 'Aá§á£o e IDs dos checklists sá£o obrigatá³rios' 
+        error: 'A��o e IDs dos checklists s�o obrigat�rios' 
       }, { status: 400 })
     }
 
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       case 'delete':
         for (const checklistId of checklistIds) {
           try {
-            // Verificar se há¡ execuá§áµes pendentes
+            // Verificar se h� execu��es pendentes
             const { data: execucoes, error: execError } = await supabase
               .from('checklist_execucoes')
               .select('id')
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
               results.push({ 
                 id: checklistId, 
                 success: false, 
-                error: 'Checklist possui execuá§áµes em andamento' 
+                error: 'Checklist possui execu��es em andamento' 
               })
               errorCount++
               continue
@@ -130,16 +130,16 @@ export async function POST(request: NextRequest) {
 
             if (fetchError) throw fetchError
 
-            // Criar cá³pia
+            // Criar c�pia
             const { data: newChecklist, error: createError } = await supabase
               .from('checklists')
               .insert({
-                nome: `${originalChecklist.nome} (Cá³pia)`,
+                nome: `${originalChecklist.nome} (C�pia)`,
                 descricao: originalChecklist.descricao,
                 tipo: originalChecklist.tipo,
                 bar_id: originalChecklist.bar_id,
                 agendamento_config: originalChecklist.agendamento_config,
-                ativo: false // Comeá§ar desativado
+                ativo: false // Come�ar desativado
               })
               .select()
               .single()
@@ -186,7 +186,7 @@ export async function POST(request: NextRequest) {
       case 'update_bar':
         if (!data.bar_id) {
           return NextResponse.json({ 
-            error: 'ID do bar á© obrigatá³rio para esta aá§á£o' 
+            error: 'ID do bar � obrigat�rio para esta a��o' 
           }, { status: 400 })
         }
 
@@ -237,12 +237,12 @@ export async function POST(request: NextRequest) {
           const exportData = checklists.map((checklist: any) => ({
             'ID': checklist.id,
             'Nome': checklist.nome,
-            'Descriá§á£o': checklist.descricao,
+            'Descri��o': checklist.descricao,
             'Tipo': checklist.tipo,
-            'Ativo': checklist.ativo ? 'Sim' : 'Ná£o',
+            'Ativo': checklist.ativo ? 'Sim' : 'N�o',
             'Bar': checklist.bars?.nome || 'N/A',
             'Total de Itens': checklist.checklist_items?.length || 0,
-            'Itens Obrigatá³rios': checklist.checklist_items?.filter((item: any) => item.obrigatorio).length || 0,
+            'Itens Obrigat�rios': checklist.checklist_items?.filter((item: any) => item.obrigatorio).length || 0,
             'Criado em': new Date(checklist.created_at).toLocaleDateString('pt-BR')
           }))
 
@@ -259,7 +259,7 @@ export async function POST(request: NextRequest) {
 
       default:
         return NextResponse.json({ 
-          error: `Aá§á£o '${action}' ná£o suportada` 
+          error: `A��o '${action}' n�o suportada` 
         }, { status: 400 })
     }
 
@@ -282,7 +282,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Erro na operaá§á£o em lote de checklists:', error)
+    console.error('Erro na opera��o em lote de checklists:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor' 
     }, { status: 500 })
@@ -314,7 +314,7 @@ export async function GET() {
       {
         id: 'duplicate',
         label: 'Duplicar checklists',
-        description: 'Cria cá³pias dos checklists selecionados',
+        description: 'Cria c�pias dos checklists selecionados',
         requiresConfirmation: true
       },
       {

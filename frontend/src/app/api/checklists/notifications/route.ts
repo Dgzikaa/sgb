@@ -1,14 +1,14 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser, authErrorResponse } from '@/middleware/auth'
 import { z } from 'zod'
 
 // =====================================================
-// SCHEMAS DE VALIDAá‡áƒO
+// SCHEMAS DE VALIDA��O
 // =====================================================
 
 const NotificacaoChecklistSchema = z.object({
-  checklist_execucao_id: z.string().uuid('ID da execuá§á£o invá¡lido'),
+  checklist_execucao_id: z.string().uuid('ID da execu��o inv�lido'),
   tipo_notificacao: z.enum(['completado', 'atrasado', 'iniciado', 'problema']),
   destinatarios_customizados: z.array(z.string()).optional(),
   observacoes_extras: z.string().optional(),
@@ -17,13 +17,13 @@ const NotificacaoChecklistSchema = z.object({
 })
 
 // =====================================================
-// POST - ENVIAR NOTIFICAá‡áƒO DE CHECKLIST
+// POST - ENVIAR NOTIFICA��O DE CHECKLIST
 // =====================================================
 export async function POST(request: NextRequest) {
   try {
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usuá¡rio ná£o autenticado')
+      return authErrorResponse('Usu�rio n�o autenticado')
     }
 
     const body = await request.json()
@@ -31,22 +31,22 @@ export async function POST(request: NextRequest) {
 
     const supabase = await getAdminClient()
 
-    // Buscar execuá§á£o do checklist com dados completos
+    // Buscar execu��o do checklist com dados completos
     const { data: execucao, error: execucaoError } = await supabase
       .from('checklist_execucoes')
       .select(`
         *,
         checklist:checklists (
-          id, nome, setor, tipo,
+          id, nome: any, setor, tipo: any,
           checklist_schedules (
-            titulo, responsaveis_whatsapp, notificacoes_ativas
+            titulo, responsaveis_whatsapp: any, notificacoes_ativas
           )
         ),
         funcionario:usuarios_bar!funcionario_id (
-          nome, email, telefone
+          nome, email: any, telefone
         ),
         agendamento:checklist_schedules (
-          titulo, responsaveis_whatsapp, notificacoes_ativas
+          titulo, responsaveis_whatsapp: any, notificacoes_ativas
         )
       `)
       .eq('id', data.checklist_execucao_id)
@@ -54,10 +54,10 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (execucaoError || !execucao) {
-      return NextResponse.json({ error: 'Execuá§á£o de checklist ná£o encontrada' }, { status: 404 })
+      return NextResponse.json({ error: 'Execu��o de checklist n�o encontrada' }, { status: 404 })
     }
 
-    // Verificar se notificaá§áµes está£o ativas
+    // Verificar se notifica��es est�o ativas
     const notificacoesAtivas = execucao.agendamento?.notificacoes_ativas || 
                                execucao.checklist.checklist_schedules?.[0]?.notificacoes_ativas || 
                                true
@@ -65,11 +65,11 @@ export async function POST(request: NextRequest) {
     if (!notificacoesAtivas) {
       return NextResponse.json({ 
         success: true, 
-        message: 'Notificaá§áµes desabilitadas para este checklist' 
+        message: 'Notifica��es desabilitadas para este checklist' 
       })
     }
 
-    // Determinar destinatá¡rios
+    // Determinar destinat�rios
     const destinatarios = await determinarDestinatarios(
       supabase, 
       execucao, 
@@ -80,14 +80,14 @@ export async function POST(request: NextRequest) {
     if (destinatarios.length === 0) {
       return NextResponse.json({ 
         success: true, 
-        message: 'Nenhum destinatá¡rio configurado' 
+        message: 'Nenhum destinat�rio configurado' 
       })
     }
 
     // Gerar mensagem personalizada
-    const mensagem = await gerarMensagemWhatsApp(execucao, data, user.bar_id)
+    const mensagem = await gerarMensagemWhatsApp(execucao: any, data, user.bar_id)
 
-    // Enviar notificaá§áµes
+    // Enviar notifica��es
     const resultados = await enviarNotificacoesWhatsApp(
       supabase, 
       destinatarios, 
@@ -96,8 +96,8 @@ export async function POST(request: NextRequest) {
       data.incluir_relatorio
     )
 
-    // Registrar log da notificaá§á£o
-    await registrarLogNotificacao(supabase, {
+    // Registrar log da notifica��o
+    await registrarLogNotificacao(supabase: any, {
       checklist_execucao_id: data.checklist_execucao_id,
       tipo_notificacao: data.tipo_notificacao,
       destinatarios_enviados: resultados.sucessos,
@@ -107,11 +107,11 @@ export async function POST(request: NextRequest) {
       bar_id: user.bar_id
     })
 
-    console.log(`ðŸ“± Notificaá§áµes enviadas para checklist ${execucao.checklist.nome}: ${resultados.sucessos.length} sucessos, ${resultados.falhas.length} falhas`)
+    console.log(`📱 Notifica��es enviadas para checklist ${execucao.checklist.nome}: ${resultados.sucessos.length} sucessos, ${resultados.falhas.length} falhas`)
 
     return NextResponse.json({
       success: true,
-      message: 'Notificaá§áµes processadas',
+      message: 'Notifica��es processadas',
       resultados: {
         total_enviados: resultados.sucessos.length,
         total_falhas: resultados.falhas.length,
@@ -120,11 +120,11 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('Erro na API de notificaá§áµes:', error)
+    console.error('Erro na API de notifica��es:', error)
     
     if (error instanceof z.ZodError) {
       return NextResponse.json({ 
-        error: 'Dados invá¡lidos',
+        error: 'Dados inv�lidos',
         details: error.errors 
       }, { status: 400 })
     }
@@ -137,13 +137,13 @@ export async function POST(request: NextRequest) {
 }
 
 // =====================================================
-// GET - HISTá“RICO DE NOTIFICAá‡á•ES
+// GET - HIST�RICO DE NOTIFICA��ES
 // =====================================================
 export async function GET(request: NextRequest) {
   try {
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usuá¡rio ná£o autenticado')
+      return authErrorResponse('Usu�rio n�o autenticado')
     }
 
     const { searchParams } = new URL(request.url)
@@ -160,9 +160,9 @@ export async function GET(request: NextRequest) {
       .select(`
         *,
         checklist_execucao:checklist_execucoes (
-          checklist:checklists (nome, setor)
+          checklist:checklists (nome: any, setor)
         ),
-        enviado_por_usuario:usuarios_bar!enviado_por (nome, email)
+        enviado_por_usuario:usuarios_bar!enviado_por (nome: any, email)
       `)
       .eq('bar_id', user.bar_id)
       .order('created_at', { ascending: false })
@@ -182,8 +182,8 @@ export async function GET(request: NextRequest) {
     const { data: logs, error } = await query
 
     if (error) {
-      console.error('Erro ao buscar logs de notificaá§á£o:', error)
-      return NextResponse.json({ error: 'Erro ao buscar histá³rico' }, { status: 500 })
+      console.error('Erro ao buscar logs de notifica��o:', error)
+      return NextResponse.json({ error: 'Erro ao buscar hist�rico' }, { status: 500 })
     }
 
     return NextResponse.json({
@@ -193,7 +193,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('Erro na API de histá³rico de notificaá§áµes:', error)
+    console.error('Erro na API de hist�rico de notifica��es:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
       details: error.message 
@@ -202,29 +202,29 @@ export async function GET(request: NextRequest) {
 }
 
 // =====================================================
-// FUNá‡á•ES AUXILIARES
+// FUN��ES AUXILIARES
 // =====================================================
 
 async function determinarDestinatarios(supabase: any, execucao: any, customizados?: string[], barId?: number) {
   const destinatarios: any[] = []
 
-  // 1. Destinatá¡rios do agendamento
+  // 1. Destinat�rios do agendamento
   if (execucao.agendamento?.responsaveis_whatsapp) {
     destinatarios.push(...execucao.agendamento.responsaveis_whatsapp)
   }
 
-  // 2. Destinatá¡rios customizados (náºmeros diretos)
+  // 2. Destinat�rios customizados (n�meros diretos)
   if (customizados && customizados.length > 0) {
     customizados.forEach(numero => {
       destinatarios.push({
-        nome: 'Destinatá¡rio customizado',
+        nome: 'Destinat�rio customizado',
         numero: numero,
         cargo: 'N/A'
       })
     })
   }
 
-  // 3. Destinatá¡rios padrá£o do sistema (administradores)
+  // 3. Destinat�rios padr�o do sistema (administradores)
   if (destinatarios.length === 0 && barId) {
     const { data: admins } = await supabase
               .from('usuarios_bar')
@@ -246,7 +246,7 @@ async function determinarDestinatarios(supabase: any, execucao: any, customizado
     }
   }
 
-  // Remover duplicatas por náºmero
+  // Remover duplicatas por n�mero
   const numerosUnicos = new Set()
   return destinatarios.filter((dest: any) => {
     if (numerosUnicos.has(dest.numero)) {
@@ -261,58 +261,58 @@ async function gerarMensagemWhatsApp(execucao: any, dados: any, barId: number) {
   const checklist = execucao.checklist
   const funcionario = execucao.funcionario
   
-  // Calcular estatá­sticas da execuá§á£o
+  // Calcular estat�sticas da execu��o
   const stats = calcularEstatisticasExecucao(execucao)
   
   const emojis = {
-    completado: 'œ…',
-    atrasado: 'ðŸš¨', 
-    iniciado: 'ðŸš€',
-    problema: 'š ï¸'
+    completado: '��',
+    atrasado: '🚨', 
+    iniciado: '🚀',
+    problema: '��️'
   }
 
-  const emoji = emojis[dados.tipo_notificacao as keyof typeof emojis] || 'ðŸ“‹'
+  const emoji = emojis[dados.tipo_notificacao as keyof typeof emojis] || '📋'
 
   let mensagem = `${emoji} *SGB - Checklist ${dados.tipo_notificacao.toUpperCase()}*
 
-ðŸ“‹ *Checklist:* ${checklist.nome}
-ðŸ¢ *Setor:* ${checklist.setor}
-ðŸ‘¤ *Executado por:* ${funcionario?.nome || 'N/A'}
-° *Data/Hora:* ${new Date(execucao.iniciado_em).toLocaleString('pt-BR')}
+📋 *Checklist:* ${checklist.nome}
+🏢 *Setor:* ${checklist.setor}
+👤 *Executado por:* ${funcionario?.nome || 'N/A'}
+�� *Data/Hora:* ${new Date(execucao.iniciado_em).toLocaleString('pt-BR')}
 
-ðŸ“Š *Resultados:*`
+📊 *Resultados:*`
 
   if (dados.tipo_notificacao === 'completado') {
     mensagem += `
-œ… *Status:* Concluá­do com sucesso
-ðŸ“ˆ *Progresso:* ${stats.percentual_completo}%
-±ï¸ *Tempo total:* ${stats.tempo_execucao}
-­ *Score:* ${stats.score_qualidade}/100`
+�� *Status:* Conclu�do com sucesso
+📈 *Progresso:* ${stats.percentual_completo}%
+��️ *Tempo total:* ${stats.tempo_execucao}
+�� *Score:* ${stats.score_qualidade}/100`
 
     if (stats.problemas_encontrados > 0) {
       mensagem += `
-š ï¸ *Problemas:* ${stats.problemas_encontrados} item(s) com observaá§áµes`
+��️ *Problemas:* ${stats.problemas_encontrados} item(s) com observa��es`
     }
   } else if (dados.tipo_notificacao === 'atrasado') {
     const horasAtraso = Math.round(
       (new Date().getTime() - new Date(execucao.prazo_conclusao).getTime()) / (1000 * 60 * 60)
     )
     mensagem += `
-ðŸ”¥ *Situaá§á£o:* Atrasado há¡ ${horasAtraso}h
-° *Prazo era:* ${new Date(execucao.prazo_conclusao).toLocaleString('pt-BR')}
-ðŸ“ˆ *Progresso:* ${stats.percentual_completo}%`
+🔥 *Situa��o:* Atrasado h� ${horasAtraso}h
+�� *Prazo era:* ${new Date(execucao.prazo_conclusao).toLocaleString('pt-BR')}
+📈 *Progresso:* ${stats.percentual_completo}%`
   }
 
   if (dados.observacoes_extras) {
     mensagem += `
 
-ðŸ’¬ *Observaá§áµes:*
+💬 *Observa��es:*
 ${dados.observacoes_extras}`
   }
 
   mensagem += `
 
-_Sistema de Gestá£o de Bares_`
+_Sistema de Gest�o de Bares_`
 
   return mensagem
 }
@@ -341,13 +341,13 @@ async function enviarNotificacoesWhatsApp(supabase: any, destinatarios: any[], m
       } else {
         sucessos.push({ destinatario, resultado })
         
-        // Se incluir relatá³rio, enviar link adicional
+        // Se incluir relat�rio, enviar link adicional
         if (incluirRelatorio) {
           const linkRelatorio = `${process.env.NEXT_PUBLIC_APP_URL}/relatorios/checklist/${execucao.id}`
           await supabase.functions.invoke('whatsapp-send', {
             body: {
               to: destinatario.numero,
-              message: `ðŸ“„ *Relatá³rio Completo:* ${linkRelatorio}`,
+              message: `📄 *Relat�rio Completo:* ${linkRelatorio}`,
               type: 'text',
               modulo: 'checklists'
             }
@@ -392,7 +392,7 @@ function calcularEstatisticasExecucao(execucao: any) {
   return {
     percentual_completo: totalItens > 0 ? Math.round((itensRespondidos / totalItens) * 100) : 0,
     tempo_execucao: `${Math.floor(tempoExecucao / 60)}h ${tempoExecucao % 60}min`,
-    score_qualidade: Math.max(scoreQualidade, 0),
+    score_qualidade: Math.max(scoreQualidade: any, 0),
     problemas_encontrados: problemasEncontrados
   }
 }
@@ -406,6 +406,6 @@ async function registrarLogNotificacao(supabase: any, dados: any) {
     })
 
   if (error) {
-    console.error('Erro ao registrar log de notificaá§á£o:', error)
+    console.error('Erro ao registrar log de notifica��o:', error)
   }
 } 

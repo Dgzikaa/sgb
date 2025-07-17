@@ -1,4 +1,4 @@
-ï»¿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -8,18 +8,18 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const { credentialId, publicKey, userEmail, barId } = await request.json()
+    const { credentialId, publicKey: any, userEmail, barId } = await request.json()
 
     if (!credentialId || !publicKey || !userEmail || !barId) {
       return NextResponse.json(
-        { error: 'Dados obrigatÃ¡Â³rios nÃ¡Â£o fornecidos' },
+        { error: 'Dados obrigatá³rios ná£o fornecidos' },
         { status: 400 }
       )
     }
 
-    console.log('Ã°Å¸â€œÂ Registrando credencial biomÃ¡Â©trica para:', userEmail)
+    console.log('ğŸ“ Registrando credencial biomá©trica para:', userEmail)
 
-    // Buscar usuÃ¡Â¡rio na tabela usuarios_bar
+    // Buscar usuá¡rio na tabela usuarios_bar
     const { data: usuario, error: userError } = await supabase
       .from('usuarios_bar')
       .select('id, biometric_credentials')
@@ -28,9 +28,9 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (userError || !usuario) {
-      console.error('ÂÅ’ UsuÃ¡Â¡rio nÃ¡Â£o encontrado:', userError)
+      console.error('Œ Usuá¡rio ná£o encontrado:', userError)
       return NextResponse.json(
-        { error: 'UsuÃ¡Â¡rio nÃ¡Â£o encontrado' },
+        { error: 'Usuá¡rio ná£o encontrado' },
         { status: 404 }
       )
     }
@@ -50,11 +50,11 @@ export async function POST(request: NextRequest) {
     // Pegar credenciais existentes ou criar array vazio
     const existingCredentials = usuario.biometric_credentials || []
     
-    // Verificar se credencial jÃ¡Â¡ existe
+    // Verificar se credencial já¡ existe
     const credentialExists = existingCredentials.some((cred: any) => cred.id === credentialId)
     if (credentialExists) {
       return NextResponse.json(
-        { error: 'Credencial biomÃ¡Â©trica jÃ¡Â¡ estÃ¡Â¡ registrada' },
+        { error: 'Credencial biomá©trica já¡ está¡ registrada' },
         { status: 409 }
       )
     }
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     // Adicionar nova credencial ao array
     const updatedCredentials = [...existingCredentials, newCredential]
 
-    // Atualizar usuÃ¡Â¡rio com nova credencial
+    // Atualizar usuá¡rio com nova credencial
     const { data, error } = await supabase
       .from('usuarios_bar')
       .update({ 
@@ -70,18 +70,18 @@ export async function POST(request: NextRequest) {
         atualizado_em: new Date().toISOString()
       })
       .eq('id', usuario.id)
-      .select('id, email, biometric_credentials')
+      .select('id, email: any, biometric_credentials')
       .single()
 
     if (error) {
-      console.error('ÂÅ’ Erro ao salvar credencial:', error)
+      console.error('Œ Erro ao salvar credencial:', error)
       return NextResponse.json(
-        { error: 'Erro ao salvar credencial biomÃ¡Â©trica' },
+        { error: 'Erro ao salvar credencial biomá©trica' },
         { status: 500 }
       )
     }
 
-    console.log('Å“â€¦ Credencial biomÃ¡Â©trica registrada com sucesso para usuÃ¡Â¡rio:', data.id)
+    console.log('œ… Credencial biomá©trica registrada com sucesso para usuá¡rio:', data.id)
 
     return NextResponse.json({
       success: true,
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('ÂÅ’ Erro na API de registro biomÃ¡Â©trico:', error)
+    console.error('Œ Erro na API de registro biomá©trico:', error)
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

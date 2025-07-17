@@ -1,8 +1,8 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Eye, EyeOff, Lock, User, ArrowRight } from 'lucide-react'
+import { Eye, EyeOff: any, Lock, User: any, ArrowRight } from 'lucide-react'
 
 export default function RedefinirSenhaPage() {
   const router = useRouter()
@@ -20,7 +20,7 @@ export default function RedefinirSenhaPage() {
 
   const validarSenha = () => {
     if (!novaSenha) {
-      setErro('Nova senha á© obrigatá³ria')
+      setErro('Nova senha � obrigat�ria')
       return false
     }
     if (novaSenha.length < 6) {
@@ -28,7 +28,7 @@ export default function RedefinirSenhaPage() {
       return false
     }
     if (novaSenha !== confirmarSenha) {
-      setErro('As senhas ná£o coincidem')
+      setErro('As senhas n�o coincidem')
       return false
     }
     setErro('')
@@ -67,7 +67,7 @@ export default function RedefinirSenhaPage() {
         setErro(data.error || 'Erro ao redefinir senha')
       }
     } catch (error) {
-      setErro('Erro de conexá£o. Tente novamente.')
+      setErro('Erro de conex�o. Tente novamente.')
     } finally {
       setCarregando(false)
     }
@@ -84,7 +84,7 @@ export default function RedefinirSenhaPage() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Senha Redefinida!</h1>
           <p className="text-gray-600 mb-4">
-            Sua senha foi atualizada com sucesso. Vocáª será¡ redirecionado para a pá¡gina de login.
+            Sua senha foi atualizada com sucesso. Voc� ser� redirecionado para a p�gina de login.
           </p>
           <div className="animate-pulse text-blue-600 font-medium">
             Redirecionando em 3 segundos...
@@ -106,7 +106,7 @@ export default function RedefinirSenhaPage() {
             Defina sua Nova Senha
           </h1>
           <p className="text-gray-600">
-            Como á© seu primeiro acesso, vocáª precisa criar uma nova senha para sua conta.
+            Como � seu primeiro acesso, voc� precisa criar uma nova senha para sua conta.
           </p>
         </div>
 
@@ -132,7 +132,7 @@ export default function RedefinirSenhaPage() {
               <input
                 type={mostrarSenha ? 'text' : 'password'}
                 value={novaSenha}
-                onChange={(e) => setNovaSenha(e.target.value)}
+                onChange={(e: any) => setNovaSenha(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                 placeholder="Digite sua nova senha"
                 required
@@ -146,7 +146,7 @@ export default function RedefinirSenhaPage() {
               </button>
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              Má­nimo de 6 caracteres
+              M�nimo de 6 caracteres
             </p>
           </div>
 
@@ -159,7 +159,7 @@ export default function RedefinirSenhaPage() {
               <input
                 type={mostrarConfirmar ? 'text' : 'password'}
                 value={confirmarSenha}
-                onChange={(e) => setConfirmarSenha(e.target.value)}
+                onChange={(e: any) => setConfirmarSenha(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                 placeholder="Confirme sua nova senha"
                 required
@@ -181,7 +181,7 @@ export default function RedefinirSenhaPage() {
             </div>
           )}
 
-          {/* Botá£o */}
+          {/* Bot�o */}
           <button
             type="submit"
             disabled={carregando}
@@ -207,7 +207,7 @@ export default function RedefinirSenhaPage() {
         {/* Footer */}
         <div className="mt-8 text-center">
           <p className="text-xs text-gray-500">
-            Apá³s redefinir, vocáª será¡ redirecionado para fazer login com sua nova senha.
+            Ap�s redefinir, voc� ser� redirecionado para fazer login com sua nova senha.
           </p>
         </div>
       </div>

@@ -1,5 +1,5 @@
-﻿    import React, { useState, useRef, useEffect } from 'react'
-import { Search, ChevronDown, User } from 'lucide-react'
+    import React, { useState, useRef: any, useEffect } from 'react'
+import { Search, ChevronDown: any, User } from 'lucide-react'
 
 interface Option {
   value: string
@@ -23,7 +23,7 @@ export function SelectWithSearch({
   options,
   value,
   onValueChange,
-  placeholder = "Selecione uma opá§á£o",
+  placeholder = "Selecione uma op��o",
   searchPlaceholder = "Pesquisar...",
   disabled = false,
   className = ""
@@ -34,13 +34,13 @@ export function SelectWithSearch({
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Filtrar opá§áµes baseado no termo de busca
+  // Filtrar op��es baseado no termo de busca
   const filteredOptions = options.filter((option: any) =>
     option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
     option.email?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  // Encontrar a opá§á£o selecionada
+  // Encontrar a op��o selecionada
   const selectedOption = options.find((option: any) => option.value === value)
 
   // Fechar dropdown quando clicar fora
@@ -64,7 +64,7 @@ export function SelectWithSearch({
     }
   }, [isOpen])
 
-  // Navegaá§á£o por teclado
+  // Navega��o por teclado
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!isOpen) {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -165,7 +165,7 @@ export function SelectWithSearch({
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder={searchPlaceholder}
                 value={searchTerm}
-                onChange={(e) => {
+                onChange={(e: any) => {
                   setSearchTerm(e.target.value)
                   setHighlightedIndex(-1)
                 }}
@@ -181,7 +181,7 @@ export function SelectWithSearch({
                 Nenhum resultado encontrado
               </div>
             ) : (
-              filteredOptions.map((option, index) => (
+              filteredOptions.map((option: any, index: any) => (
                 <button
                   key={option.value}
                   type="button"
@@ -214,7 +214,7 @@ export function SelectWithSearch({
                           'bg-green-100 text-green-800'}
                       `}>
                         {option.role === 'admin' ? 'Administrador' : 
-                         option.role === 'manager' ? 'Gerente' : 'Funcioná¡rio'}
+                         option.role === 'manager' ? 'Gerente' : 'Funcion�rio'}
                       </span>
                     )}
                   </div>

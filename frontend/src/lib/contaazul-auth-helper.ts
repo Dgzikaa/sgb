@@ -1,4 +1,4 @@
-﻿// Utilitá¡rio para gerenciar tokens do ContaAzul automaticamente
+// Utilit�rio para gerenciar tokens do ContaAzul automaticamente
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -21,7 +21,7 @@ interface ContaAzulCredentials {
 
 export async function getValidContaAzulToken(barId: number): Promise<string | null> {
   try {
-    console.log(`ðŸ”‘ Verificando token vá¡lido para bar_id: ${barId}`);
+    console.log(`🔑 Verificando token v�lido para bar_id: ${barId}`);
     
     // Buscar credenciais
     const { data: credentials } = await supabase
@@ -32,34 +32,34 @@ export async function getValidContaAzulToken(barId: number): Promise<string | nu
       .single() as { data: ContaAzulCredentials | null };
 
     if (!credentials?.access_token) {
-      console.error('Œ Credenciais ná£o encontradas');
+      console.error('�� Credenciais n�o encontradas');
       return null;
     }
 
-    // Verificar se token expira em menos de 5 minutos (margem de seguraná§a)
+    // Verificar se token expira em menos de 5 minutos (margem de seguran�a)
     const agora = new Date();
     const expiraEm = new Date(credentials.expires_at);
     const margemSeguranca = 5 * 60 * 1000; // 5 minutos em ms
     
     if (expiraEm.getTime() - agora.getTime() > margemSeguranca) {
-      console.log(`œ… Token vá¡lido atá©: ${expiraEm.toLocaleString()}`);
+      console.log(`�� Token v�lido at�: ${expiraEm.toLocaleString()}`);
       return credentials.access_token;
     }
 
-    // Token expirando em breve ou já¡ expirado - renovar
-    console.log(`š ï¸ Token expira em: ${expiraEm.toLocaleString()}, renovando...`);
+    // Token expirando em breve ou j� expirado - renovar
+    console.log(`��️ Token expira em: ${expiraEm.toLocaleString()}, renovando...`);
     
     const newToken = await renewContaAzulToken(credentials);
     if (newToken) {
-      console.log('œ… Token renovado com sucesso!');
+      console.log('�� Token renovado com sucesso!');
       return newToken;
     }
 
-    console.error('Œ Falha ao renovar token');
+    console.error('�� Falha ao renovar token');
     return null;
 
   } catch (error) {
-    console.error('Œ Erro ao verificar/renovar token:', error);
+    console.error('�� Erro ao verificar/renovar token:', error);
     return null;
   }
 }
@@ -67,12 +67,12 @@ export async function getValidContaAzulToken(barId: number): Promise<string | nu
 async function renewContaAzulToken(credentials: ContaAzulCredentials): Promise<string | null> {
   try {
     if (!credentials.refresh_token) {
-      throw new Error('Refresh token ná£o disponá­vel');
+      throw new Error('Refresh token n�o dispon�vel');
     }
 
     const basicAuth = Buffer.from(`${credentials.client_id}:${credentials.client_secret}`).toString('base64');
     
-    const response = await fetch(CONTAAZUL_TOKEN_URL, {
+    const response = await fetch(CONTAAZUL_TOKEN_URL: any, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -90,7 +90,7 @@ async function renewContaAzulToken(credentials: ContaAzulCredentials): Promise<s
       throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
     }
 
-    // Calcular nova data de expiraá§á£o
+    // Calcular nova data de expira��o
     const expiresAt = new Date(Date.now() + (data.expires_in * 1000));
     
     // Salvar novo token no banco
@@ -105,11 +105,11 @@ async function renewContaAzulToken(credentials: ContaAzulCredentials): Promise<s
       })
       .eq('id', credentials.id);
 
-    console.log(`ðŸ”„ Token renovado - novo expira em: ${expiresAt.toLocaleString()}`);
+    console.log(`🔄 Token renovado - novo expira em: ${expiresAt.toLocaleString()}`);
     return data.access_token;
 
   } catch (error) {
-    console.error('Œ Erro ao renovar token:', error);
+    console.error('�� Erro ao renovar token:', error);
     
     // Se refresh falhou, marcar credenciais como inativas
     await supabase
@@ -125,7 +125,7 @@ async function renewContaAzulToken(credentials: ContaAzulCredentials): Promise<s
   }
 }
 
-// Funá§á£o para APIs que fazem chamadas para ContaAzul
+// Fun��o para APIs que fazem chamadas para ContaAzul
 export async function makeContaAzulRequest(
   barId: number, 
   url: string, 
@@ -134,10 +134,10 @@ export async function makeContaAzulRequest(
   const token = await getValidContaAzulToken(barId);
   
   if (!token) {
-    throw new Error('Token do ContaAzul ná£o disponá­vel ou ná£o foi possá­vel renovar');
+    throw new Error('Token do ContaAzul n�o dispon�vel ou n�o foi poss�vel renovar');
   }
 
-  return fetch(url, {
+  return fetch(url: any, {
     ...options,
     headers: {
       'Authorization': `Bearer ${token}`,

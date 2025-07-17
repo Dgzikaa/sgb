@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { authenticateUser, authErrorResponse } from '@/middleware/auth';
 
@@ -7,12 +7,12 @@ export async function GET(request: NextRequest) {
   try {
     const user = await authenticateUser(request);
     if (!user) {
-      return authErrorResponse('Usuá¡rio ná£o autenticado');
+      return authErrorResponse('Usu�rio n�o autenticado');
     }
     const { searchParams } = new URL(request.url);
     const bar_id = searchParams.get('bar_id') || user.bar_id;
     if (!bar_id) {
-      return NextResponse.json({ error: 'bar_id obrigatá³rio' }, { status: 400 });
+      return NextResponse.json({ error: 'bar_id obrigat�rio' }, { status: 400 });
     }
     const supabase = await getAdminClient();
     const { data, error } = await supabase
@@ -34,17 +34,17 @@ export async function PUT(request: NextRequest) {
   try {
     const user = await authenticateUser(request);
     if (!user) {
-      return authErrorResponse('Usuá¡rio ná£o autenticado');
+      return authErrorResponse('Usu�rio n�o autenticado');
     }
     const { searchParams } = new URL(request.url);
     const bar_id = searchParams.get('bar_id') || user.bar_id;
     if (!bar_id) {
-      return NextResponse.json({ error: 'bar_id obrigatá³rio' }, { status: 400 });
+      return NextResponse.json({ error: 'bar_id obrigat�rio' }, { status: 400 });
     }
     const body = await request.json();
     const { metas } = body;
     if (!metas || typeof metas !== 'object') {
-      return NextResponse.json({ error: 'Campo metas obrigatá³rio' }, { status: 400 });
+      return NextResponse.json({ error: 'Campo metas obrigat�rio' }, { status: 400 });
     }
     const supabase = await getAdminClient();
     const { error } = await supabase

@@ -1,10 +1,10 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('ðŸ” Testando API de funá§áµes...')
+    console.log('🔍 Testando API de fun��es...')
     
-    // Fazer requisiá§á£o para a API de funá§áµes
+    // Fazer requisi��o para a API de fun��es
     const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/usuarios/funcoes`, {
       method: 'GET',
       headers: {
@@ -12,33 +12,33 @@ export async function GET(request: NextRequest) {
       }
     })
     
-    console.log('ðŸ“¡ Status da resposta:', response.status)
+    console.log('📡 Status da resposta:', response.status)
     
     if (!response.ok) {
       return NextResponse.json({
         success: false,
-        error: 'Erro na API de funá§áµes',
+        error: 'Erro na API de fun��es',
         status: response.status,
         statusText: response.statusText
       }, { status: 500 })
     }
     
     const data = await response.json()
-    console.log('ðŸ“Š Dados recebidos:', data)
+    console.log('📊 Dados recebidos:', data)
     
     return NextResponse.json({
       success: true,
-      message: 'API de funá§áµes funcionando corretamente',
+      message: 'API de fun��es funcionando corretamente',
       data: data,
       funcoes: data.funcoes || [],
       total: data.total || 0
     })
     
   } catch (error) {
-    console.error('Œ Erro no teste da API de funá§áµes:', error)
+    console.error('�� Erro no teste da API de fun��es:', error)
     return NextResponse.json({
       success: false,
-      error: 'Erro no teste da API de funá§áµes',
+      error: 'Erro no teste da API de fun��es',
       details: error instanceof Error ? error.message : 'Erro desconhecido'
     }, { status: 500 })
   }

@@ -1,4 +1,4 @@
-﻿import * as React from "react"
+import * as React from "react"
 import { cn } from "@/lib/utils"
 
 interface PopoverProps {
@@ -56,7 +56,7 @@ const PopoverTrigger: React.FC<PopoverTriggerProps> = ({
   }
   
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children, { 
+    return React.cloneElement(children: any, { 
       onClick: handleClick,
       ...children.props 
     } as any)
@@ -126,4 +126,4 @@ const PopoverContent: React.FC<PopoverContentProps> = ({
   )
 }
 
-export { Popover, PopoverTrigger, PopoverContent } 
+export { Popover, PopoverTrigger: any, PopoverContent } 

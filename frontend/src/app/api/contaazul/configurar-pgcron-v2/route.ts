@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export async function POST(request: NextRequest) {
@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
     const { barId, action = 'configure' } = await request.json()
 
     if (!barId) {
-      return NextResponse.json({ error: 'barId á© obrigatá³rio' }, { status: 400 })
+      return NextResponse.json({ error: 'barId � obrigat�rio' }, { status: 400 })
     }
 
     const supabase = createClient(
@@ -14,23 +14,23 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    console.log(`ðŸ¤– Configurando pgcron V2 - Bar: ${barId}, Aá§á£o: ${action}`)
+    console.log(`🤖 Configurando pgcron V2 - Bar: ${barId}, A��o: ${action}`)
 
     switch (action) {
       case 'configure':
-        return await configurarCronJob(supabase, barId)
+        return await configurarCronJob(supabase: any, barId)
       case 'status':
-        return await verificarStatus(supabase, barId)
+        return await verificarStatus(supabase: any, barId)
       case 'remove':
-        return await removerCronJob(supabase, barId)
+        return await removerCronJob(supabase: any, barId)
       case 'test':
-        return await testarSyncManual(supabase, barId)
+        return await testarSyncManual(supabase: any, barId)
       default:
-        return NextResponse.json({ error: 'Aá§á£o ná£o reconhecida' }, { status: 400 })
+        return NextResponse.json({ error: 'A��o n�o reconhecida' }, { status: 400 })
     }
 
   } catch (error) {
-    console.error('Œ Erro na configuraá§á£o pgcron V2:', error)
+    console.error('�� Erro na configura��o pgcron V2:', error)
     return NextResponse.json({ 
       error: error instanceof Error ? error.message : 'Erro interno' 
     }, { status: 500 })
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
 async function configurarCronJob(supabase: any, barId: string) {
   try {
-    console.log(`ðŸ”§ Configurando cron job para bar ${barId}`)
+    console.log(`🔧 Configurando cron job para bar ${barId}`)
 
     // 1. Remover jobs existentes
     const { error: removeError } = await supabase.rpc('cron_unschedule_by_name', {
@@ -47,10 +47,10 @@ async function configurarCronJob(supabase: any, barId: string) {
     })
 
     if (removeError) {
-      console.warn('š ï¸ Job anterior ná£o encontrado ou já¡ removido:', removeError)
+      console.warn('��️ Job anterior n�o encontrado ou j� removido:', removeError)
     }
 
-    // 2. Criar novo job - executa a cada 4 horas (4h, 8h, 12h, 16h, 20h, 0h)
+    // 2. Criar novo job - executa a cada 4 horas (4h: any, 8h, 12h: any, 16h, 20h: any, 0h)
     const cronExpression = '0 0,4,8,12,16,20 * * *'  // A cada 4 horas
     const jobName = `contaazul_sync_bar_${barId}`
 
@@ -78,7 +78,7 @@ async function configurarCronJob(supabase: any, barId: string) {
       throw new Error(`Erro ao criar cron job: ${error.message}`)
     }
 
-    console.log(`œ… Cron job criado: ${jobName}`)
+    console.log(`�� Cron job criado: ${jobName}`)
 
     return NextResponse.json({
       success: true,
@@ -87,9 +87,9 @@ async function configurarCronJob(supabase: any, barId: string) {
       schedule: cronExpression,
       command: comando,
       nextRuns: [
-        'Prá³xima execuá§á£o: conforme cronograma',
-        'Horá¡rios: 00:00, 04:00, 08:00, 12:00, 16:00, 20:00',
-        'Timezone: UTC (ajustar conforme necessá¡rio)'
+        'Pr�xima execu��o: conforme cronograma',
+        'Hor�rios: 00:00, 04:00, 08:00, 12:00, 16:00, 20:00',
+        'Timezone: UTC (ajustar conforme necess�rio)'
       ]
     })
 
@@ -100,7 +100,7 @@ async function configurarCronJob(supabase: any, barId: string) {
 
 async function verificarStatus(supabase: any, barId: string) {
   try {
-    console.log(`ðŸ” Verificando status para bar ${barId}`)
+    console.log(`🔍 Verificando status para bar ${barId}`)
 
     // 1. Verificar jobs ativos
     const { data: jobs, error: jobsError } = await supabase
@@ -109,10 +109,10 @@ async function verificarStatus(supabase: any, barId: string) {
       .ilike('jobname', `%contaazul_sync_bar_${barId}%`)
 
     if (jobsError) {
-      console.warn('š ï¸ Erro ao buscar jobs:', jobsError)
+      console.warn('��️ Erro ao buscar jobs:', jobsError)
     }
 
-    // 2. Verificar áºltimas execuá§áµes
+    // 2. Verificar �ltimas execu��es
     const { data: runs, error: runsError } = await supabase
       .from('cron.job_run_details')
       .select('*')
@@ -120,7 +120,7 @@ async function verificarStatus(supabase: any, barId: string) {
       .limit(5)
 
     if (runsError) {
-      console.warn('š ï¸ Erro ao buscar execuá§áµes:', runsError)
+      console.warn('��️ Erro ao buscar execu��es:', runsError)
     }
 
     // 3. Status da edge function
@@ -146,7 +146,7 @@ async function verificarStatus(supabase: any, barId: string) {
 
 async function removerCronJob(supabase: any, barId: string) {
   try {
-    console.log(`ðŸ—‘ï¸ Removendo cron job para bar ${barId}`)
+    console.log(`🗑️ Removendo cron job para bar ${barId}`)
 
     const jobName = `contaazul_sync_bar_${barId}`
 
@@ -158,7 +158,7 @@ async function removerCronJob(supabase: any, barId: string) {
       throw new Error(`Erro ao remover cron job: ${error.message}`)
     }
 
-    console.log(`œ… Cron job removido: ${jobName}`)
+    console.log(`�� Cron job removido: ${jobName}`)
 
     return NextResponse.json({
       success: true,
@@ -173,7 +173,7 @@ async function removerCronJob(supabase: any, barId: string) {
 
 async function testarSyncManual(supabase: any, barId: string) {
   try {
-    console.log(`ðŸ§ª Testando sync manual para bar ${barId}`)
+    console.log(`🧪 Testando sync manual para bar ${barId}`)
 
     // Chamar edge function diretamente para teste
     const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/contaazul-sync-automatico`, {
@@ -236,7 +236,7 @@ export async function GET(request: NextRequest) {
   const action = searchParams.get('action') || 'status'
 
   if (!barId) {
-    return NextResponse.json({ error: 'barId á© obrigatá³rio' }, { status: 400 })
+    return NextResponse.json({ error: 'barId � obrigat�rio' }, { status: 400 })
   }
 
   return POST(new NextRequest(request.url, {

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -65,7 +65,7 @@ export function ModernSidebar() {
   const { isRole } = usePermissions()
   const { badges } = useMenuBadges()
   
-  // Funá§á£o para obter itens da sidebar com badges diná¢micos
+  // Fun��o para obter itens da sidebar com badges din�micos
   const getSidebarItems = (): SidebarItem[] => [
     { 
       icon: Home, 
@@ -84,7 +84,7 @@ export function ModernSidebar() {
           icon: CheckSquare, 
           label: 'Checklists', 
           href: '/checklists/abertura', 
-          description: 'Checklist de abertura diá¡ria'
+          description: 'Checklist de abertura di�ria'
         },
         { 
           icon: Users, 
@@ -96,7 +96,7 @@ export function ModernSidebar() {
     },
     { 
       icon: ChefHat, 
-      label: 'Produá§á£o', 
+      label: 'Produ��o', 
       color: 'text-orange-600 dark:text-orange-400',
       badge: badges.producao > 0 ? badges.producao : undefined,
       subItems: [
@@ -107,7 +107,7 @@ export function ModernSidebar() {
         },
         { 
           icon: Zap, 
-          label: 'Terminal de Produá§á£o', 
+          label: 'Terminal de Produ��o', 
           href: '/producao/terminal'
         },
       ]
@@ -120,12 +120,12 @@ export function ModernSidebar() {
       subItems: [
         { 
           icon: FileText, 
-          label: 'Competáªncia', 
+          label: 'Compet�ncia', 
           href: '/relatorios/financeiro-competencia'
         },
         { 
           icon: FileText, 
-          label: 'DRE Ordiná¡rio', 
+          label: 'DRE Ordin�rio', 
           href: '/relatorios/contaazul-competencia'
         },
       ]
@@ -145,17 +145,17 @@ export function ModernSidebar() {
     },
     // { 
     //   icon: BarChart3, 
-    //   label: 'Visá£o Geral', 
+    //   label: 'Vis�o Geral', 
     //   href: '/visao-geral', 
     //   color: 'text-purple-600 dark:text-purple-400',
     //   badge: badges.visaoGeral > 0 ? badges.visaoGeral : undefined
     // },
   ]
 
-  // Funá§á£o para obter configuraá§áµes com badges
+  // Fun��o para obter configura��es com badges
   const getConfiguracoesItems = (): SidebarItem => ({ 
     icon: Settings, 
-    label: 'Configuraá§áµes', 
+    label: 'Configura��es', 
     color: 'text-gray-600 dark:text-gray-400',
     badge: badges.configuracoes > 0 ? badges.configuracoes : undefined,
     subItems: [
@@ -171,12 +171,12 @@ export function ModernSidebar() {
       },
       { 
         icon: Database, 
-        label: 'Integraá§áµes', 
+        label: 'Integra��es', 
         href: '/configuracoes/integracoes'
       },
       { 
         icon: Shield, 
-        label: 'Seguraná§a', 
+        label: 'Seguran�a', 
         href: '/configuracoes/seguranca'
       },
       { 
@@ -211,7 +211,7 @@ export function ModernSidebar() {
   // Obter itens da sidebar com badges
   const sidebarItems = getSidebarItems()
   
-  // Combinar itens da sidebar com configuraá§áµes se for admin
+  // Combinar itens da sidebar com configura��es se for admin
   const allSidebarItems = [...sidebarItems]
   if (isRole('admin')) {
     allSidebarItems.push(getConfiguracoesItems())
@@ -248,7 +248,7 @@ export function ModernSidebar() {
       return result
     }
     
-    // Se ná£o foi manipulado manualmente, pode usar expansá£o automá¡tica por hover
+    // Se n�o foi manipulado manualmente, pode usar expans�o autom�tica por hover
     if (isHovered && hasActiveSubItem(allSidebarItems.find((item: any) => item.label === label)?.subItems)) {
       return true
     }
@@ -294,7 +294,7 @@ export function ModernSidebar() {
           <div className="space-y-1">
             {/* Command Palette Search Button removido da sidebar */}
             
-            {allSidebarItems.map((item) => {
+            {allSidebarItems.map((item: any) => {
               const isItemActive = item.href ? isActive(item.href) : hasActiveSubItem(item.subItems)
               const itemExpanded = isExpanded(item.label)
               
@@ -340,7 +340,7 @@ export function ModernSidebar() {
                   {/* Sub-items */}
                   {item.subItems && isHovered && itemExpanded && (
                     <div className="ml-6 mt-1 space-y-1 animate-slide-in-from-top">
-                      {item.subItems.map((subItem) => {
+                      {item.subItems.map((subItem: any) => {
                         const isSubActive = isActive(subItem.href)
                         
                         return (
@@ -398,7 +398,7 @@ export function ModernSidebar() {
   )
 }
 
-// Componente auxiliar para renderizar o conteáºdo do item
+// Componente auxiliar para renderizar o conte�do do item
 function ItemContent({ 
   item, 
   isItemActive, 

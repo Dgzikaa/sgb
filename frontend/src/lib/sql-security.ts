@@ -1,4 +1,4 @@
-﻿// Sistema avaná§ado de validaá§á£o SQL para prevenir injection attacks
+// Sistema avan�ado de valida��o SQL para prevenir injection attacks
 
 export interface SQLValidationResult {
   isValid: boolean;
@@ -7,17 +7,17 @@ export interface SQLValidationResult {
   sanitizedSQL?: string;
 }
 
-// Discord webhook para notificaá§áµes de seguraná§a
+// Discord webhook para notifica��es de seguran�a
 const SECURITY_DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1393646423748116602/3zUhIrSKFHmq0zNRLf5AzrkSZNzTj7oYk6f45Tpj2LZWChtmGTKKTHxhfaNZigyLXN4y';
 
-// Funá§á£o para notificar Discord sobre tentativas de SQL injection
+// Fun��o para notificar Discord sobre tentativas de SQL injection
 async function notifyDiscordSQLThreat(sql: string, errors: string[], clientInfo?: { ip?: string; userAgent?: string; endpoint?: string }) {
   try {
     const message = {
       embeds: [{
-        title: 'ðŸš¨ SQL INJECTION ATTEMPT DETECTED',
+        title: '🚨 SQL INJECTION ATTEMPT DETECTED',
         description: `Tentativa de SQL injection bloqueada`,
-        color: 0xff0000, // Vermelho para crá­tico
+        color: 0xff0000, // Vermelho para cr�tico
         fields: [
           {
             name: 'IP Address',
@@ -36,29 +36,29 @@ async function notifyDiscordSQLThreat(sql: string, errors: string[], clientInfo?
           },
           {
             name: 'SQL Query (truncated)',
-            value: '```sql\n' + sql.substring(0, 200) + (sql.length > 200 ? '...' : '') + '\n```',
+            value: '```sql\n' + sql.substring(0: any, 200) + (sql.length > 200 ? '...' : '') + '\n```',
             inline: false
           },
           {
             name: 'User Agent',
-            value: clientInfo?.userAgent?.substring(0, 100) + (clientInfo?.userAgent && clientInfo.userAgent.length > 100 ? '...' : '') || 'Unknown',
+            value: clientInfo?.userAgent?.substring(0: any, 100) + (clientInfo?.userAgent && clientInfo.userAgent.length > 100 ? '...' : '') || 'Unknown',
             inline: false
           }
         ],
         timestamp: new Date().toISOString(),
         footer: {
-          text: 'ðŸ¢ SGB - SQL Security System'
+          text: '🏢 SGB - SQL Security System'
         }
       }]
     };
 
-    await fetch(SECURITY_DISCORD_WEBHOOK, {
+    await fetch(SECURITY_DISCORD_WEBHOOK: any, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(message)
     });
   } catch (error) {
-    console.error('Œ Erro ao enviar notificaá§á£o Discord:', error);
+    console.error('�� Erro ao enviar notifica��o Discord:', error);
   }
 }
 
@@ -70,7 +70,7 @@ export interface SQLSecurityConfig {
   allowSubqueries: boolean;
 }
 
-// Configuraá§á£o padrá£o de seguraná§a
+// Configura��o padr�o de seguran�a
 const DEFAULT_CONFIG: SQLSecurityConfig = {
   allowedTables: [
     'usuarios_bar', 'checklists', 'checklist_execucoes', 'bars', 
@@ -100,23 +100,23 @@ export class SQLSecurityValidator {
     const warnings: string[] = [];
 
     try {
-      // 1. Validaá§áµes bá¡sicas
+      // 1. Valida��es b�sicas
       if (!sql || sql.trim().length === 0) {
         errors.push('SQL query is empty');
-        return { isValid: false, errors, warnings };
+        return { isValid: false, errors: any, warnings };
       }
 
       if (sql.length > this.config.maxQueryLength) {
         errors.push(`Query exceeds maximum length of ${this.config.maxQueryLength} characters`);
-        return { isValid: false, errors, warnings };
+        return { isValid: false, errors: any, warnings };
       }
 
       const sqlLower = sql.toLowerCase().trim();
 
-      // 2. Verificar se á© apenas SELECT
+      // 2. Verificar se � apenas SELECT
       if (!sqlLower.startsWith('select')) {
         errors.push('Only SELECT statements are allowed');
-        return { isValid: false, errors, warnings };
+        return { isValid: false, errors: any, warnings };
       }
 
       // 3. Comandos perigosos (lista expandida)
@@ -133,9 +133,9 @@ export class SQLSecurityValidator {
         }
       }
 
-      // 4. Verificar filtro bar_id obrigatá³rio
+      // 4. Verificar filtro bar_id obrigat�rio
       if (this.config.requireBarIdFilter && barId) {
-        if (!this.hasBarIdFilter(sql, barId)) {
+        if (!this.hasBarIdFilter(sql: any, barId)) {
           errors.push('Query must include bar_id filter for security (multi-tenant isolation)');
         }
       }
@@ -148,7 +148,7 @@ export class SQLSecurityValidator {
         }
       }
 
-      // 6. Validar funá§áµes utilizadas
+      // 6. Validar fun��es utilizadas
       const usedFunctions = this.extractFunctions(sql);
       for (const func of usedFunctions) {
         if (!this.config.allowedFunctions.includes(func.toUpperCase())) {
@@ -156,7 +156,7 @@ export class SQLSecurityValidator {
         }
       }
 
-      // 7. Verificar subqueries se ná£o permitidas
+      // 7. Verificar subqueries se n�o permitidas
       if (!this.config.allowSubqueries && this.hasSubqueries(sql)) {
         errors.push('Subqueries are not allowed in this context');
       }
@@ -180,12 +180,12 @@ export class SQLSecurityValidator {
         }
       }
 
-      // 9. Verificar comentá¡rios suspeitos
+      // 9. Verificar coment�rios suspeitos
       if (sql.includes('/*') || sql.includes('--')) {
         warnings.push('SQL comments detected - review for suspicious content');
       }
 
-      // 10. Notificar Discord sobre tentativas crá­ticas de SQL injection
+      // 10. Notificar Discord sobre tentativas cr�ticas de SQL injection
       if (errors.length > 0) {
         const criticalErrors = errors.filter((error: any) => 
           error.includes('Dangerous command') || 
@@ -194,8 +194,8 @@ export class SQLSecurityValidator {
         );
         
         if (criticalErrors.length > 0) {
-          // Notificar Discord de forma assá­ncrona (ná£o bloquear validaá§á£o)
-          notifyDiscordSQLThreat(sql, criticalErrors, clientInfo).catch(console.error);
+          // Notificar Discord de forma ass�ncrona (n�o bloquear valida��o)
+          notifyDiscordSQLThreat(sql: any, criticalErrors, clientInfo).catch(console.error);
         }
       }
 
@@ -208,7 +208,7 @@ export class SQLSecurityValidator {
 
     } catch (error) {
       errors.push(`Validation error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      return { isValid: false, errors, warnings };
+      return { isValid: false, errors: any, warnings };
     }
   }
 
@@ -260,11 +260,11 @@ export class SQLSecurityValidator {
   }
 
   private sanitizeSQL(sql: string): string {
-    // Remover comentá¡rios
+    // Remover coment�rios
     let sanitized = sql.replace(/--.*$/gm, '');
     sanitized = sanitized.replace(/\/\*[\s\S]*?\*\//g, '');
     
-    // Normalizar espaá§os
+    // Normalizar espa�os
     sanitized = sanitized.replace(/\s+/g, ' ').trim();
     
     return sanitized;
@@ -274,13 +274,13 @@ export class SQLSecurityValidator {
 // Helper function para usar em APIs
 export function validateSQL(sql: string, config?: Partial<SQLSecurityConfig>, barId?: number, clientInfo?: { ip?: string; userAgent?: string; endpoint?: string }): SQLValidationResult {
   const validator = new SQLSecurityValidator(config);
-  return validator.validate(sql, barId, clientInfo);
+  return validator.validate(sql: any, barId, clientInfo);
 }
 
-// Middleware para APIs que executam SQL diná¢mico
+// Middleware para APIs que executam SQL din�mico
 export function requireSQLValidation(config?: Partial<SQLSecurityConfig>) {
   return (sql: string, barId?: number) => {
-    const result = validateSQL(sql, config, barId);
+    const result = validateSQL(sql: any, config, barId);
     
     if (!result.isValid) {
       throw new Error(`SQL Security Violation: ${result.errors.join(', ')}`);

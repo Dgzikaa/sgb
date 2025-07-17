@@ -1,17 +1,17 @@
-ï»¿'use client'
+'use client'
 
 import { useState } from 'react'
 import { useBar } from '@/contexts/BarContext'
 import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ChevronDownIcon, MapPinIcon, CheckCircle2Icon } from 'lucide-react'
+import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select'
+import { ChevronDownIcon, MapPinIcon: any, CheckCircle2Icon } from 'lucide-react'
 
 interface BarSelectorProps {
   isCollapsed?: boolean
 }
 
 export default function BarSelector({ isCollapsed = false }: BarSelectorProps) {
-  const { selectedBar, availableBars, setSelectedBar, isLoading } = useBar()
+  const { selectedBar, availableBars: any, setSelectedBar, isLoading } = useBar()
   const [isOpen, setIsOpen] = useState(false)
 
   // Loading state
@@ -57,7 +57,7 @@ export default function BarSelector({ isCollapsed = false }: BarSelectorProps) {
         <div className="relative">
           <Select
             value={selectedBar?.id?.toString() || ''}
-            onValueChange={(value) => {
+            onValueChange={(value: any) => {
               const bar = availableBars.find((b: any) => b.id.toString() === value)
               if (bar) setSelectedBar(bar)
             }}
@@ -84,7 +84,7 @@ export default function BarSelector({ isCollapsed = false }: BarSelectorProps) {
               </div>
             </SelectTrigger>
             <SelectContent className="w-full bg-slate-800 border-slate-700 max-h-60 overflow-y-auto">
-              {availableBars.map((bar) => (
+              {availableBars.map((bar: any) => (
                 <SelectItem 
                   key={bar.id} 
                   value={bar.id.toString()}
@@ -121,7 +121,7 @@ export default function BarSelector({ isCollapsed = false }: BarSelectorProps) {
           <div className="flex items-center space-x-2 text-xs">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             <span className="text-slate-400">
-              Conectado â‚¬Â¢ {selectedBar.nome}
+              Conectado €¢ {selectedBar.nome}
             </span>
           </div>
         )}

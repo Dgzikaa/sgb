@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -28,7 +28,7 @@ interface MobileHamburgerMenuProps {
   onClose: () => void
 }
 
-// Menu hambáºrguer overlay para funcionalidades avaná§adas
+// Menu hamb�rguer overlay para funcionalidades avan�adas
 function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
   const pathname = usePathname()
   const { isRole } = usePermissions()
@@ -42,21 +42,21 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
   const advancedItems = [
     { 
       icon: CheckSquare, 
-      label: 'Funcioná¡rio Checklists', 
+      label: 'Funcion�rio Checklists', 
       href: '/funcionario/checklists',
       description: 'Meus checklists pessoais'
     },
     { 
       icon: ChefHat, 
-      label: 'Terminal Produá§á£o', 
+      label: 'Terminal Produ��o', 
       href: '/producao/terminal',
-      description: 'Terminal de produá§á£o'
+      description: 'Terminal de produ��o'
     },
     { 
       icon: BarChart3, 
-      label: 'Relatá³rios Financeiros', 
+      label: 'Relat�rios Financeiros', 
       href: '/relatorios/financeiro-competencia',
-      description: 'ContaAzul relatá³rios'
+      description: 'ContaAzul relat�rios'
     },
   ]
 
@@ -69,9 +69,9 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
     },
     { 
       icon: BarChart3, 
-      label: 'Integraá§áµes', 
+      label: 'Integra��es', 
       href: '/configuracoes/integracoes',
-      description: 'Configurar integraá§áµes'
+      description: 'Configurar integra��es'
     },
   ] : []
 
@@ -107,13 +107,13 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
 
         {/* Menu items */}
         <div className="p-4 space-y-6">
-          {/* Funcionalidades Avaná§adas */}
+          {/* Funcionalidades Avan�adas */}
           <div>
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
               Funcionalidades
             </h3>
             <div className="space-y-2">
-              {advancedItems.map((item) => {
+              {advancedItems.map((item: any) => {
                 const active = isActive(item.href)
                 return (
                   <Link
@@ -139,14 +139,14 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
             </div>
           </div>
 
-          {/* Configuraá§áµes (apenas admin) */}
+          {/* Configura��es (apenas admin) */}
           {configItems.length > 0 && (
             <div>
               <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
-                Configuraá§áµes
+                Configura��es
               </h3>
               <div className="space-y-2">
-                {configItems.map((item) => {
+                {configItems.map((item: any) => {
                   const active = isActive(item.href)
                   return (
                     <Link
@@ -221,7 +221,7 @@ export function BottomNavigation() {
     },
     { 
       icon: ChefHat, 
-      label: 'Produá§á£o', 
+      label: 'Produ��o', 
       href: '/producao/receitas',
       color: 'text-orange-600 dark:text-orange-400',
       badge: badges.producao > 0 ? badges.producao : undefined
@@ -235,7 +235,7 @@ export function BottomNavigation() {
     },
     { 
       icon: BarChart3, 
-      label: 'Visá£o Geral', 
+      label: 'Vis�o Geral', 
       href: '/visao-geral',
       color: 'text-purple-600 dark:text-purple-400',
       badge: badges.visaoGeral > 0 ? badges.visaoGeral : undefined
@@ -252,7 +252,7 @@ export function BottomNavigation() {
         {/* Navigation bar */}
         <div className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 px-2 py-2">
           <div className="flex items-center justify-around">
-            {bottomNavItems.map((item) => {
+            {bottomNavItems.map((item: any) => {
               const active = isActive(item.href)
               return (
                 <Link

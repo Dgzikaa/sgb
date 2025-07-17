@@ -1,4 +1,4 @@
-Ôªøimport { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 // Listar insumos
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('¬ù≈í Erro interno:', error)
+    console.error('ùå Erro interno:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor' 
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 // Editar insumo existente
 export async function PUT(request: NextRequest) {
   try {
-    const { id, codigo, nome, categoria, unidade_medida, observacoes, bar_id } = await request.json()
+    const { id, codigo: any, nome, categoria: any, unidade_medida, observacoes: any, bar_id } = await request.json()
 
     const supabase = await getSupabaseClient()
     if (!supabase) {
@@ -78,7 +78,7 @@ export async function PUT(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('¬ù≈í Erro interno:', error)
+    console.error('ùå Erro interno:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor: ' + String(error) 
@@ -89,7 +89,7 @@ export async function PUT(request: NextRequest) {
 // Cadastrar novo insumo
 export async function POST(request: NextRequest) {
   try {
-    const { codigo, nome, categoria, unidade_medida, observacoes, bar_id, ativo } = await request.json()
+    const { codigo, nome: any, categoria, unidade_medida: any, observacoes, bar_id: any, ativo } = await request.json()
 
     const supabase = await getSupabaseClient()
     if (!supabase) {
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('¬ù≈í Erro interno:', error)
+    console.error('ùå Erro interno:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor: ' + String(error) 

@@ -1,35 +1,35 @@
-ï»¿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { getUserAuth } from '@/lib/auth-helper'
 
-// ForÃ¡Â§a runtime dinÃ¡Â¢mico para evitar erro de static generation
+// Forá§a runtime diná¢mico para evitar erro de static generation
 export const dynamic = 'force-dynamic'
 
 export async function PUT(request: NextRequest) {
   try {
-    // Obter dados do usuÃ¡Â¡rio autenticado
+    // Obter dados do usuá¡rio autenticado
     const user = await getUserAuth(request)
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' },
+        { success: false, error: 'Usuá¡rio ná£o autenticado' },
         { status: 401 }
       )
     }
 
     const body = await request.json()
-    const { senhaAtual, novaSenha, confirmarSenha } = body
+    const { senhaAtual, novaSenha: any, confirmarSenha } = body
 
-    // ValidaÃ¡Â§Ã¡Âµes bÃ¡Â¡sicas
+    // Validaá§áµes bá¡sicas
     if (!senhaAtual || !novaSenha || !confirmarSenha) {
       return NextResponse.json(
-        { success: false, error: 'Todos os campos sÃ¡Â£o obrigatÃ¡Â³rios' },
+        { success: false, error: 'Todos os campos sá£o obrigatá³rios' },
         { status: 400 }
       )
     }
 
     if (novaSenha !== confirmarSenha) {
       return NextResponse.json(
-        { success: false, error: 'Nova senha e confirmaÃ¡Â§Ã¡Â£o nÃ¡Â£o coincidem' },
+        { success: false, error: 'Nova senha e confirmaá§á£o ná£o coincidem' },
         { status: 400 }
       )
     }
@@ -41,22 +41,22 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    console.log('Ã°Å¸â€Â Iniciando troca de senha para usuÃ¡Â¡rio:', user.id)
+    console.log('ğŸ” Iniciando troca de senha para usuá¡rio:', user.id)
 
-    // Usar cliente administrativo para operaÃ¡Â§Ã¡Âµes com Auth
+    // Usar cliente administrativo para operaá§áµes com Auth
     const adminClient = await getAdminClient()
 
-    // Buscar dados completos do usuÃ¡Â¡rio
+    // Buscar dados completos do usuá¡rio
     const { data: userData, error: userError } = await adminClient
       .from('usuarios_bar')
-      .select('user_id, email, nome')
+      .select('user_id, email: any, nome')
       .eq('id', user.id)
       .single()
 
     if (userError || !userData) {
-      console.error('ÂÅ’ Erro ao buscar dados do usuÃ¡Â¡rio:', userError)
+      console.error('Œ Erro ao buscar dados do usuá¡rio:', userError)
       return NextResponse.json(
-        { success: false, error: 'UsuÃ¡Â¡rio nÃ¡Â£o encontrado' },
+        { success: false, error: 'Usuá¡rio ná£o encontrado' },
         { status: 404 }
       )
     }
@@ -69,16 +69,16 @@ export async function PUT(request: NextRequest) {
       })
 
       if (signInError) {
-        console.log('ÂÅ’ Senha atual incorreta para:', userData.email)
+        console.log('Œ Senha atual incorreta para:', userData.email)
         return NextResponse.json(
           { success: false, error: 'Senha atual incorreta' },
           { status: 400 }
         )
       }
     } catch (authError) {
-      console.error('ÂÅ’ Erro na verificaÃ¡Â§Ã¡Â£o da senha atual:', authError)
+      console.error('Œ Erro na verificaá§á£o da senha atual:', authError)
       return NextResponse.json(
-        { success: false, error: 'Erro na verificaÃ¡Â§Ã¡Â£o da senha atual' },
+        { success: false, error: 'Erro na verificaá§á£o da senha atual' },
         { status: 500 }
       )
     }
@@ -97,16 +97,16 @@ export async function PUT(request: NextRequest) {
       )
 
       if (updateError) {
-        console.error('ÂÅ’ Erro ao atualizar senha no Auth:', updateError)
+        console.error('Œ Erro ao atualizar senha no Auth:', updateError)
         return NextResponse.json(
           { success: false, error: 'Erro ao atualizar senha' },
           { status: 500 }
         )
       }
 
-      console.log('Å“â€¦ Senha atualizada no Auth para:', userData.email)
+      console.log('œ… Senha atualizada no Auth para:', userData.email)
     } catch (authUpdateError) {
-      console.error('ÂÅ’ Erro na atualizaÃ¡Â§Ã¡Â£o da senha:', authUpdateError)
+      console.error('Œ Erro na atualizaá§á£o da senha:', authUpdateError)
       return NextResponse.json(
         { success: false, error: 'Erro ao atualizar senha' },
         { status: 500 }
@@ -124,20 +124,20 @@ export async function PUT(request: NextRequest) {
       .eq('id', user.id)
 
     if (dbUpdateError) {
-      console.error('ÂÅ’ Erro ao atualizar flag senha_redefinida:', dbUpdateError)
-      // NÃ¡Â£o falha aqui, pois a senha jÃ¡Â¡ foi alterada com sucesso
+      console.error('Œ Erro ao atualizar flag senha_redefinida:', dbUpdateError)
+      // Ná£o falha aqui, pois a senha já¡ foi alterada com sucesso
     }
 
-    console.log('Å“â€¦ Senha alterada com sucesso para:', userData.nome)
+    console.log('œ… Senha alterada com sucesso para:', userData.nome)
 
     return NextResponse.json({
       success: true,
-      message: 'Senha alterada com sucesso! Por seguranÃ¡Â§a, faÃ¡Â§a login novamente.',
+      message: 'Senha alterada com sucesso! Por seguraná§a, faá§a login novamente.',
       require_relogin: true
     })
 
   } catch (error) {
-    console.error('ÂÅ’ Erro na API de trocar senha:', error)
+    console.error('Œ Erro na API de trocar senha:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },
       { status: 500 }

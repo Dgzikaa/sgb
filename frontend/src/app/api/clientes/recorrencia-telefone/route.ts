@@ -1,89 +1,89 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic'
 
-// Funá§á£o para normalizar telefone
+// Fun��o para normalizar telefone
 function normalizarTelefone(telefone: string): string {
   if (!telefone) return '';
   
-  // Remove todos os caracteres ná£o numá©ricos
+  // Remove todos os caracteres n�o num�ricos
   const numeros = telefone.replace(/\D/g, '');
   
-  // Debug: log do náºmero original e processado
+  // Debug: log do n�mero original e processado
   if (numeros.length >= 10) {
-    console.log(`ðŸ“± Normalizando: "${telefone}" -> "${numeros}" (${numeros.length} dá­gitos)`);
+    console.log(`📱 Normalizando: "${telefone}" -> "${numeros}" (${numeros.length} d�gitos)`);
   }
   
-  // Se tem 13 dá­gitos e comeá§a com 55, remover o cá³digo do paá­s
+  // Se tem 13 d�gitos e come�a com 55, remover o c�digo do pa�s
   if (numeros.length === 13 && numeros.startsWith('55')) {
     const resultado = numeros.substring(2);
-    console.log(`ðŸ“± Removendo cá³digo 55 (13 dá­gitos): ${numeros} -> ${resultado}`);
+    console.log(`📱 Removendo c�digo 55 (13 d�gitos): ${numeros} -> ${resultado}`);
     return resultado;
   }
   
-  // Se tem 12 dá­gitos e comeá§a com 55, remover o cá³digo do paá­s
+  // Se tem 12 d�gitos e come�a com 55, remover o c�digo do pa�s
   if (numeros.length === 12 && numeros.startsWith('55')) {
     const resultado = numeros.substring(2);
-    console.log(`ðŸ“± Removendo cá³digo 55 (12 dá­gitos): ${numeros} -> ${resultado}`);
+    console.log(`📱 Removendo c�digo 55 (12 d�gitos): ${numeros} -> ${resultado}`);
     return resultado;
   }
   
-  // Se tem 14 dá­gitos e comeá§a com 5511, remover cá³digo do paá­s + á¡rea duplicada
+  // Se tem 14 d�gitos e come�a com 5511, remover c�digo do pa�s + �rea duplicada
   if (numeros.length === 14 && numeros.startsWith('5511')) {
     const resultado = numeros.substring(4);
-    console.log(`ðŸ“± Removendo cá³digo 5511 (14 dá­gitos): ${numeros} -> ${resultado}`);
+    console.log(`📱 Removendo c�digo 5511 (14 d�gitos): ${numeros} -> ${resultado}`);
     return resultado;
   }
   
-  // Se tem 13 dá­gitos e comeá§a com 5561, remover cá³digo do paá­s + á¡rea
+  // Se tem 13 d�gitos e come�a com 5561, remover c�digo do pa�s + �rea
   if (numeros.length === 13 && (numeros.startsWith('5561') || numeros.startsWith('5511'))) {
     const resultado = numeros.substring(4);
-    console.log(`ðŸ“± Removendo cá³digo 55XX (13 dá­gitos): ${numeros} -> ${resultado}`);
+    console.log(`📱 Removendo c�digo 55XX (13 d�gitos): ${numeros} -> ${resultado}`);
     return resultado;
   }
   
-  // Retornar o náºmero como está¡ se já¡ tem 10 ou 11 dá­gitos
+  // Retornar o n�mero como est� se j� tem 10 ou 11 d�gitos
   if (numeros.length >= 10 && numeros.length <= 11) {
-    console.log(`ðŸ“± Náºmero já¡ normalizado: ${numeros}`);
+    console.log(`📱 N�mero j� normalizado: ${numeros}`);
     return numeros;
   }
   
-  // Se tem 9 dá­gitos, pode ser celular sem DDD - adicionar DDD padrá£o 61 (Brasá­lia)
+  // Se tem 9 d�gitos, pode ser celular sem DDD - adicionar DDD padr�o 61 (Bras�lia)
   if (numeros.length === 9 && numeros.startsWith('9')) {
     const resultado = '61' + numeros;
-    console.log(`ðŸ“± Adicionando DDD 61 para celular: ${numeros} -> ${resultado}`);
+    console.log(`📱 Adicionando DDD 61 para celular: ${numeros} -> ${resultado}`);
     return resultado;
   }
   
-  // Se tem 8 dá­gitos, pode ser fixo sem DDD - adicionar DDD padrá£o 61
+  // Se tem 8 d�gitos, pode ser fixo sem DDD - adicionar DDD padr�o 61
   if (numeros.length === 8) {
     const resultado = '61' + numeros;
-    console.log(`ðŸ“± Adicionando DDD 61 para fixo: ${numeros} -> ${resultado}`);
+    console.log(`📱 Adicionando DDD 61 para fixo: ${numeros} -> ${resultado}`);
     return resultado;
   }
   
-  console.log(`š ï¸ Telefone ná£o normalizado: ${telefone} -> ${numeros} (${numeros.length} dá­gitos)`);
+  console.log(`��️ Telefone n�o normalizado: ${telefone} -> ${numeros} (${numeros.length} d�gitos)`);
   return numeros;
 }
 
-// Funá§á£o para formatar telefone para exibiá§á£o
+// Fun��o para formatar telefone para exibi��o
 function formatarTelefone(telefone: string): string {
   if (!telefone) return '';
   
   const numeros = telefone.replace(/\D/g, '');
   
-  // Celular com 11 dá­gitos: (XX) 9XXXX-XXXX
+  // Celular com 11 d�gitos: (XX) 9XXXX-XXXX
   if (numeros.length === 11) {
-    return `(${numeros.substring(0, 2)}) ${numeros.substring(2, 7)}-${numeros.substring(7)}`;
+    return `(${numeros.substring(0: any, 2)}) ${numeros.substring(2: any, 7)}-${numeros.substring(7)}`;
   }
   
-  // Telefone fixo com 10 dá­gitos: (XX) XXXX-XXXX
+  // Telefone fixo com 10 d�gitos: (XX) XXXX-XXXX
   if (numeros.length === 10) {
-    return `(${numeros.substring(0, 2)}) ${numeros.substring(2, 6)}-${numeros.substring(6)}`;
+    return `(${numeros.substring(0: any, 2)}) ${numeros.substring(2: any, 6)}-${numeros.substring(6)}`;
   }
   
-  // Se ná£o conseguir formatar, retornar como está¡
+  // Se n�o conseguir formatar, retornar como est�
   return telefone;
 }
 
@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
     const categoriaRecorrencia = searchParams.get('categoria_recorrencia');
     const barId = parseInt(searchParams.get('bar_id') || '1');
 
-    console.log('ðŸ“± Buscando dados de recorráªncia por telefone:', {
+    console.log('📱 Buscando dados de recorr�ncia por telefone:', {
       eventoId,
       dataInicio,
       dataFim,
@@ -115,8 +115,8 @@ export async function GET(request: NextRequest) {
       barId
     });
 
-    // Nova abordagem: buscar telefones áºnicos primeiro
-    console.log('ðŸ“± Buscando telefones áºnicos do perá­odo...');
+    // Nova abordagem: buscar telefones �nicos primeiro
+    console.log('📱 Buscando telefones �nicos do per�odo...');
     const { data: telefonesPeriodo, error: errorTelefones } = await supabase
       .from('periodo')
       .select(`
@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
       .eq('bar_id', barId)
       .or('cli_telefone.not.is.null,cli_fone.not.is.null');
 
-    console.log('ðŸ“± Buscando telefones áºnicos do Getin...');
+    console.log('📱 Buscando telefones �nicos do Getin...');
     const { data: telefonesGetin, error: errorGetin } = await supabase
       .from('getin_reservas')
       .select(`
@@ -139,14 +139,14 @@ export async function GET(request: NextRequest) {
       .not('mobile', 'is', null);
 
     if (errorTelefones || errorGetin) {
-      console.error('Œ Erro ao buscar telefones:', { errorTelefones, errorGetin });
+      console.error('�� Erro ao buscar telefones:', { errorTelefones, errorGetin });
       return NextResponse.json({ error: 'Erro ao buscar dados de telefone' }, { status: 500 });
     }
 
-    // Criar mapa de telefones áºnicos com informaá§áµes do cliente
+    // Criar mapa de telefones �nicos com informa��es do cliente
     const telefoneMap = new Map();
 
-    // Processar telefones do perá­odo
+    // Processar telefones do per�odo
     telefonesPeriodo?.forEach((item: any) => {
       const telefone = item.cli_telefone || item.cli_fone;
       if (!telefone || telefone.length < 10) return;
@@ -155,7 +155,7 @@ export async function GET(request: NextRequest) {
       if (telefoneNormalizado.length < 10) return;
 
       if (!telefoneMap.has(telefoneNormalizado)) {
-        telefoneMap.set(telefoneNormalizado, {
+        telefoneMap.set(telefoneNormalizado: any, {
           telefone: telefoneNormalizado,
           nome: item.cli_nome || 'Cliente',
           datas_atividade: new Set(),
@@ -183,7 +183,7 @@ export async function GET(request: NextRequest) {
       if (telefoneNormalizado.length < 10) return;
 
       if (!telefoneMap.has(telefoneNormalizado)) {
-        telefoneMap.set(telefoneNormalizado, {
+        telefoneMap.set(telefoneNormalizado: any, {
           telefone: telefoneNormalizado,
           nome: item.name || 'Cliente Sympla',
           datas_atividade: new Set(),
@@ -202,13 +202,13 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    console.log(`ðŸ“Š Telefones áºnicos encontrados: ${telefoneMap.size}`);
+    console.log(`📊 Telefones �nicos encontrados: ${telefoneMap.size}`);
 
           // Debug: mostrar alguns telefones processados
     let debugCount = 0;
     for (const [telefoneNormalizado, dadosTelefone] of telefoneMap.entries()) {
       if (debugCount < 5) {
-        console.log(`ðŸ“± Debug telefone ${debugCount + 1}: ${telefoneNormalizado} -> ${formatarTelefone(telefoneNormalizado)} (${dadosTelefone.nome})`);
+        console.log(`📱 Debug telefone ${debugCount + 1}: ${telefoneNormalizado} -> ${formatarTelefone(telefoneNormalizado)} (${dadosTelefone.nome})`);
         debugCount++;
       }
     }
@@ -222,12 +222,12 @@ export async function GET(request: NextRequest) {
       if (datasAtividade.length === 0) continue;
 
       // Buscar visitas de duas formas:
-      // 1. Por data de atividade (má©todo atual)
+      // 1. Por data de atividade (m�todo atual)
       // 2. Por telefone do cliente (se existir na tabela clientes)
       
       let visitasCliente: any[] = [];
       
-      // Má©todo 1: Buscar por data de atividade
+      // M�todo 1: Buscar por data de atividade
       const { data: visitasPorData, error: errorVisitasData } = await supabase
         .from('cliente_visitas')
         .select(`
@@ -245,7 +245,7 @@ export async function GET(request: NextRequest) {
         visitasCliente = [...visitasCliente, ...visitasPorData];
       }
 
-      // Má©todo 2: Buscar por telefone na tabela clientes
+      // M�todo 2: Buscar por telefone na tabela clientes
       const { data: clientesPorTelefone, error: errorClientes } = await supabase
         .from('clientes')
         .select('id')
@@ -284,7 +284,7 @@ export async function GET(request: NextRequest) {
           return array.findIndex((v: any) => `${v.cliente_id}-${v.data_visita}` === key) === index;
         })
         .sort((a: any, b: any) => new Date(a.data_visita).getTime() - new Date(b.data_visita).getTime())
-        .slice(0, 100); // Má¡ximo de 100 visitas por telefone
+        .slice(0: any, 100); // M�ximo de 100 visitas por telefone
 
       if (visitasUnicas.length === 0) continue;
 
@@ -323,7 +323,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Filtrar por náºmero má­nimo de visitas
+    // Filtrar por n�mero m�nimo de visitas
     let clientesFiltrados = clientesTelefone.filter((cliente: any) => cliente.total_visitas >= minVisitas);
 
     // Aplicar filtros adicionais
@@ -335,14 +335,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Ordenar por total de visitas e valor gasto
-    clientesFiltrados.sort((a, b) => {
+    clientesFiltrados.sort((a: any, b: any) => {
       if (a.total_visitas !== b.total_visitas) {
         return b.total_visitas - a.total_visitas;
       }
       return b.valor_total_gasto - a.valor_total_gasto;
     });
 
-    // Se evento especá­fico, buscar clientes que visitaram esse evento
+    // Se evento espec�fico, buscar clientes que visitaram esse evento
     let clientesEvento = [];
     if (eventoId) {
       const { data: visitasEvento, error: errorEvento } = await supabase
@@ -361,7 +361,7 @@ export async function GET(request: NextRequest) {
         .not('clientes.telefone', 'is', null);
 
       if (!errorEvento && visitasEvento) {
-        // Mapear dados do evento para formato compatá­vel
+        // Mapear dados do evento para formato compat�vel
         clientesEvento = visitasEvento.map((visita: any) => ({
           telefone: visita.clientes.telefone,
           nome: visita.clientes.nome,
@@ -375,7 +375,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Se gáªnero musical especá­fico, buscar atravá©s de eventos
+    // Se g�nero musical espec�fico, buscar atrav�s de eventos
     if (generoMusical && generoMusical !== 'todos') {
       const { data: eventosGenero, error: errorGenero } = await supabase
         .from('eventos')
@@ -413,7 +413,7 @@ export async function GET(request: NextRequest) {
                                   visita.clientes.total_visitas >= 2 ? 'Regular' : 'Novo'
           }));
 
-          // Filtrar clientes principais pelos que visitaram eventos do gáªnero
+          // Filtrar clientes principais pelos que visitaram eventos do g�nero
           const telefonesFiltrados = new Set(clientesGenero.map((c: any) => c.telefone));
           clientesFiltrados = clientesFiltrados.filter((cliente: any) => 
             telefonesFiltrados.has(cliente.telefone)
@@ -422,7 +422,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Calcular estatá­sticas
+    // Calcular estat�sticas
     const totalClientes = clientesFiltrados.length;
     const clientesVIP = clientesFiltrados.filter((c: any) => c.categoria_recorrencia === 'VIP').length;
     const clientesFrequentes = clientesFiltrados.filter((c: any) => c.categoria_recorrencia === 'Frequente').length;
@@ -430,13 +430,13 @@ export async function GET(request: NextRequest) {
     const receitaTotal = clientesFiltrados.reduce((sum: number, c: any) => sum + parseFloat(c.valor_total_gasto || 0), 0);
     const ticketMedio = totalClientes > 0 ? receitaTotal / totalClientes : 0;
 
-    // Top clientes para diferentes má©tricas
-    const topPorVisitas = clientesFiltrados.slice(0, 10).map((cliente: any) => ({
+    // Top clientes para diferentes m�tricas
+    const topPorVisitas = clientesFiltrados.slice(0: any, 10).map((cliente: any) => ({
       ...cliente,
       telefone: formatarTelefone(cliente.telefone_normalizado || cliente.telefone)
     }));
     
-    console.log('ðŸ† TOP POR VISITAS (primeiros 3):', topPorVisitas.slice(0, 3).map((c: any) => ({
+    console.log('🏆 TOP POR VISITAS (primeiros 3):', topPorVisitas.slice(0: any, 3).map((c: any) => ({
       nome: c.nome,
       telefone: c.telefone,
       total_visitas: c.total_visitas,
@@ -446,13 +446,13 @@ export async function GET(request: NextRequest) {
     
     const topPorTicket = [...clientesFiltrados]
       .sort((a: any, b: any) => parseFloat(b.ticket_medio || 0) - parseFloat(a.ticket_medio || 0))
-      .slice(0, 10)
+      .slice(0: any, 10)
       .map((cliente: any) => ({
         ...cliente,
         telefone: formatarTelefone(cliente.telefone_normalizado || cliente.telefone)
       }));
       
-    console.log('ðŸ’° TOP POR TICKET Má‰DIO (primeiros 3):', topPorTicket.slice(0, 3).map((c: any) => ({
+    console.log('💰 TOP POR TICKET M�DIO (primeiros 3):', topPorTicket.slice(0: any, 3).map((c: any) => ({
       nome: c.nome,
       telefone: c.telefone,
       total_visitas: c.total_visitas,
@@ -462,13 +462,13 @@ export async function GET(request: NextRequest) {
       
     const topPorReceita = [...clientesFiltrados]
       .sort((a: any, b: any) => parseFloat(b.valor_total_gasto || 0) - parseFloat(a.valor_total_gasto || 0))
-      .slice(0, 10)
+      .slice(0: any, 10)
       .map((cliente: any) => ({
         ...cliente,
         telefone: formatarTelefone(cliente.telefone_normalizado || cliente.telefone)
       }));
 
-    console.log('ðŸ’Ž TOP POR FATURAMENTO (primeiros 3):', topPorReceita.slice(0, 3).map((c: any) => ({
+    console.log('💎 TOP POR FATURAMENTO (primeiros 3):', topPorReceita.slice(0: any, 3).map((c: any) => ({
       nome: c.nome,
       telefone: c.telefone,
       total_visitas: c.total_visitas,
@@ -506,12 +506,12 @@ export async function GET(request: NextRequest) {
       }
     };
 
-    console.log('œ… Dados de telefone carregados (corrigidos):', {
+    console.log('�� Dados de telefone carregados (corrigidos):', {
       total: totalClientes,
       vip: clientesVIP,
       campanha: clientesCampanha.length,
       telefones_processados: telefoneMap.size,
-      top_visitas_sample: topPorVisitas.slice(0, 3).map((c: any) => ({
+      top_visitas_sample: topPorVisitas.slice(0: any, 3).map((c: any) => ({
         nome: c.nome,
         telefone: c.telefone,
         telefone_normalizado: c.telefone_normalizado,
@@ -522,7 +522,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(resultado);
 
   } catch (error) {
-    console.error('Œ Erro interno na API de recorráªncia por telefone:', error);
+    console.error('�� Erro interno na API de recorr�ncia por telefone:', error);
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
       details: error instanceof Error ? error.message : 'Erro desconhecido'

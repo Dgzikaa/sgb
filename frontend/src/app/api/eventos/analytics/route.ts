@@ -1,4 +1,4 @@
-ï»¿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic'
@@ -13,12 +13,12 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const bar_id = searchParams.get('bar_id');
-    const tipo_analise = searchParams.get('tipo') || 'artistas'; // artistas, generos, periodo
+    const tipo_analise = searchParams.get('tipo') || 'artistas'; // artistas, generos: any, periodo
 
     if (!bar_id) {
       return NextResponse.json({
         success: false,
-        error: 'bar_id Ã© obrigatÃ³rio'
+        error: 'bar_id é obrigatório'
       }, { status: 400 });
     }
 
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
     switch (tipo_analise) {
       case 'artistas':
-        // AnÃ¡lise por artista/banda
+        // Análise por artista/banda
         const { data: eventosPorArtista, error: errorArtistas } = await supabase
           .from('eventos')
           .select(`
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
         // Agrupar por artista
         const artistasStats: Record<string, any> = {};
         eventosPorArtista?.forEach((evento: any) => {
-          const artista = evento.nome_artista || evento.nome_banda || 'NÃ¡o informado';
+          const artista = evento.nome_artista || evento.nome_banda || 'Náo informado';
           
           if (!artistasStats[artista]) {
             artistasStats[artista] = {
@@ -76,25 +76,25 @@ export async function GET(request: NextRequest) {
             stats.melhor_evento = evento;
           }
 
-          // Ãšltimo evento
+          // Último evento
           if (!stats.ultimo_evento || evento.data_evento > stats.ultimo_evento.data_evento) {
             stats.ultimo_evento = evento;
           }
         });
 
-        // Calcular mÃ©dias e converter Set para Array
+        // Calcular médias e converter Set para Array
         dados = Object.values(artistasStats).map((stats: any) => ({
           ...stats,
           publico_medio: stats.total_eventos > 0 ? stats.publico_total / stats.total_eventos : 0,
           faturamento_medio: stats.total_eventos > 0 ? stats.faturamento_total / stats.total_eventos : 0,
           ticket_medio_geral: stats.publico_total > 0 ? stats.faturamento_total / stats.publico_total : 0,
           generos: Array.from(stats.generos)
-        })).sort((a, b) => b.faturamento_total - a.faturamento_total);
+        })).sort((a: any, b: any) => b.faturamento_total - a.faturamento_total);
 
         break;
 
       case 'generos':
-        // AnÃ¡lise por gÃªnero musical
+        // Análise por gênero musical
         const { data: eventosPorGenero, error: errorGeneros } = await supabase
           .from('eventos')
           .select(`
@@ -113,10 +113,10 @@ export async function GET(request: NextRequest) {
 
         if (errorGeneros) throw errorGeneros;
 
-        // Agrupar por gÃªnero
+        // Agrupar por gênero
         const generosStats: Record<string, any> = {};
         eventosPorGenero?.forEach((evento: any) => {
-          const genero = evento.genero_musical || 'NÃ¡o informado';
+          const genero = evento.genero_musical || 'Náo informado';
           
           if (!generosStats[genero]) {
             generosStats[genero] = {
@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
           stats.total_eventos++;
           stats.publico_total += evento.publico_real || 0;
           stats.faturamento_total += evento.receita_total || 0;
-          const artista = evento.nome_artista || evento.nome_banda || 'NÃ¡o informado';
+          const artista = evento.nome_artista || evento.nome_banda || 'Náo informado';
           stats.artistas_unicos.add(artista);
           stats.eventos.push(evento);
 
@@ -150,12 +150,12 @@ export async function GET(request: NextRequest) {
           ticket_medio_geral: stats.publico_total > 0 ? stats.faturamento_total / stats.publico_total : 0,
           total_artistas: stats.artistas_unicos.size,
           artistas_unicos: Array.from(stats.artistas_unicos)
-        })).sort((a, b) => b.faturamento_total - a.faturamento_total);
+        })).sort((a: any, b: any) => b.faturamento_total - a.faturamento_total);
 
         break;
 
       case 'periodo':
-        // AnÃ¡lise por perÃ­odo (mensal)
+        // Análise por período (mensal)
         const { data: eventosPorPeriodo, error: errorPeriodo } = await supabase
           .from('eventos')
           .select(`
@@ -174,11 +174,11 @@ export async function GET(request: NextRequest) {
 
         if (errorPeriodo) throw errorPeriodo;
 
-        // Agrupar por mÃªs
+        // Agrupar por mês
         const periodosStats: Record<string, any> = {};
         eventosPorPeriodo?.forEach((evento: any) => {
           const data = new Date(evento.data_evento);
-          const mesAno = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`;
+          const mesAno = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2: any, '0')}`;
           const mesLabel = data.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long' });
           
           if (!periodosStats[mesAno]) {
@@ -212,14 +212,14 @@ export async function GET(request: NextRequest) {
           faturamento_medio: stats.total_eventos > 0 ? stats.faturamento_total / stats.total_eventos : 0,
           ticket_medio_geral: stats.publico_total > 0 ? stats.faturamento_total / stats.publico_total : 0,
           generos: Array.from(stats.generos)
-        })).sort((a, b) => b.periodo.localeCompare(a.periodo));
+        })).sort((a: any, b: any) => b.periodo.localeCompare(a.periodo));
 
         break;
 
       default:
         return NextResponse.json({
           success: false,
-          error: 'Tipo de anÃ¡lise invÃ¡lido'
+          error: 'Tipo de análise inválido'
         }, { status: 400 });
     }
 

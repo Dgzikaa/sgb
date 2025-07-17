@@ -1,14 +1,14 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+const supabase = createClient(supabaseUrl: any, supabaseServiceKey)
 
 export async function GET(req: NextRequest) {
   try {
-    // Buscar checklists com suas seá§áµes e itens
+    // Buscar checklists com suas se��es e itens
     const { data: checklists, error: checklistsError } = await supabase
       .from('checklists')
       .select(`
@@ -36,11 +36,11 @@ export async function GET(req: NextRequest) {
           )
         )
       `)
-      .eq('bar_id', 3) // Ordiná¡rio Bar
+      .eq('bar_id', 3) // Ordin�rio Bar
       .order('criado_em', { ascending: false })
 
     if (checklistsError) {
-      console.error('Œ Erro ao buscar checklists:', checklistsError)
+      console.error('�� Erro ao buscar checklists:', checklistsError)
       return NextResponse.json({ error: 'Erro ao buscar checklists' }, { status: 500 })
     }
 
@@ -60,20 +60,20 @@ export async function GET(req: NextRequest) {
         frequencia: checklist.frequencia,
         tempo_estimado: checklist.tempo_estimado || 30,
         itens_total: totalItens,
-        responsavel_padrao: checklist.responsavel_padrao || 'Ná£o definido',
+        responsavel_padrao: checklist.responsavel_padrao || 'N�o definido',
         ativo: checklist.status === 'ativo',
         ultima_edicao: new Date(checklist.atualizado_em).toISOString().split('T')[0],
-        criado_por: 'Sistema', // TODO: Buscar nome real do usuá¡rio
-        usado_recentemente: false // TODO: Implementar lá³gica de uso recente
+        criado_por: 'Sistema', // TODO: Buscar nome real do usu�rio
+        usado_recentemente: false // TODO: Implementar l�gica de uso recente
       }
     }) || []
 
-    console.log(`œ… Checklists carregados: ${checklistsFormatados.length}`)
+    console.log(`�� Checklists carregados: ${checklistsFormatados.length}`)
 
     return NextResponse.json(checklistsFormatados)
 
   } catch (error) {
-    console.error('ðŸ’¥ Erro na API de checklists:', error)
+    console.error('💥 Erro na API de checklists:', error)
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
   }
 }
@@ -82,16 +82,16 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     
-    console.log('ðŸ“¦ Dados recebidos:', body)
+    console.log('📦 Dados recebidos:', body)
 
-    // Validaá§á£o bá¡sica
+    // Valida��o b�sica
     if (!body.nome || !body.setor || !body.tipo) {
       return NextResponse.json({ 
-        error: 'Campos obrigatá³rios: nome, setor e tipo' 
+        error: 'Campos obrigat�rios: nome, setor e tipo' 
       }, { status: 400 })
     }
 
-    // Buscar usuá¡rio admin
+    // Buscar usu�rio admin
     const { data: adminUser } = await supabase
               .from('usuarios_bar')
       .select('id')
@@ -106,12 +106,12 @@ export async function POST(req: NextRequest) {
       frequencia: body.frequencia || 'diaria',
       tempo_estimado: body.tempo_estimado || 30,
       responsavel_padrao: body.responsavel_padrao || '',
-      bar_id: 3, // Ordiná¡rio Bar
+      bar_id: 3, // Ordin�rio Bar
       criado_por: adminUser?.id || null,
       status: 'ativo'
     }
 
-    console.log('ðŸ’¾ Dados para inserá§á£o:', checklistData)
+    console.log('💾 Dados para inser��o:', checklistData)
 
     const { data: novoChecklist, error } = await supabase
       .from('checklists')
@@ -120,18 +120,18 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Œ Erro ao criar checklist:', error)
+      console.error('�� Erro ao criar checklist:', error)
       return NextResponse.json({ 
         error: 'Erro ao criar checklist',
         details: error.message 
       }, { status: 500 })
     }
 
-    console.log('œ… Checklist criado:', novoChecklist.nome)
+    console.log('�� Checklist criado:', novoChecklist.nome)
     return NextResponse.json(novoChecklist)
 
   } catch (error) {
-    console.error('ðŸ’¥ Erro ao criar checklist:', error)
+    console.error('💥 Erro ao criar checklist:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
       details: error instanceof Error ? error.message : 'Erro desconhecido'

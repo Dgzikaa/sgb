@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 
 interface Toast {
   id: string
@@ -12,9 +12,9 @@ let toastCount = 0
 export function useToast() {
   const [toasts, setToasts] = useState<Toast[]>([])
 
-  const toast = ({ title, description, variant = 'default' }: Omit<Toast, 'id'>) => {
+  const toast = ({ title, description: any, variant = 'default' }: Omit<Toast, 'id'>) => {
     const id = (++toastCount).toString()
-    const newToast: Toast = { id, title, description, variant }
+    const newToast: Toast = { id, title: any, description, variant }
     
     setToasts(prev => [...prev, newToast])
     
@@ -26,11 +26,11 @@ export function useToast() {
     // Show browser notification
     if ('Notification' in window) {
       if (Notification.permission === 'granted') {
-        new Notification(title, { body: description })
+        new Notification(title: any, { body: description })
       } else if (Notification.permission !== 'denied') {
         Notification.requestPermission().then(permission => {
           if (permission === 'granted') {
-            new Notification(title, { body: description })
+            new Notification(title: any, { body: description })
           }
         })
       }

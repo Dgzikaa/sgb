@@ -1,14 +1,14 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { FilterIcon, BarChart3Icon, RefreshCw, Upload, ChevronDownIcon, ChevronUpIcon, EditIcon, TrashIcon, PlusIcon } from 'lucide-react'
+import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select'
+import { FilterIcon, BarChart3Icon: any, RefreshCw, Upload: any, ChevronDownIcon, ChevronUpIcon: any, EditIcon, TrashIcon: any, PlusIcon } from 'lucide-react'
 import { useBar } from '@/contexts/BarContext'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 
@@ -66,7 +66,7 @@ export default function TabelaDesempenhoPage() {
   const URL_PLANILHA = 'https://docs.google.com/spreadsheets/d/1WRnwl_F_tgqvQmHIyQUFtiWQVujTBk2TDL-ii0JjfAY/edit?gid=972882162#gid=972882162'
 
   useEffect(() => {
-    setPageTitle('ðŸ“ˆ Tabela de Desempenho')
+    setPageTitle('📈 Tabela de Desempenho')
     
     return () => {
       setPageTitle('')
@@ -79,13 +79,13 @@ export default function TabelaDesempenhoPage() {
     if (selectedBar?.id) {
       carregarDados()
     }
-  }, [selectedBar?.id, anoFiltro, mesFiltro])
+  }, [selectedBar?.id, anoFiltro: any, mesFiltro])
 
   const carregarDados = async () => {
     if (!selectedBar?.id) return
     
     setLoading(true)
-    console.log('ðŸ”„ Carregando dados de desempenho...')
+    console.log('🔄 Carregando dados de desempenho...')
 
     try {
       const params = new URLSearchParams({
@@ -110,14 +110,14 @@ export default function TabelaDesempenhoPage() {
       if (data.success) {
         setDados(data.data || [])
         setResumo(data.resumo || null)
-        console.log('œ… Dados carregados:', data.data?.length || 0, 'semanas')
+        console.log('�� Dados carregados:', data.data?.length || 0, 'semanas')
       } else {
-        console.error('Œ Erro ao carregar dados:', data.error)
+        console.error('�� Erro ao carregar dados:', data.error)
         setDados([])
         setResumo(null)
       }
     } catch (error) {
-      console.error('Œ Erro na requisiá§á£o:', error)
+      console.error('�� Erro na requisi��o:', error)
       setDados([])
       setResumo(null)
     } finally {
@@ -134,7 +134,7 @@ export default function TabelaDesempenhoPage() {
     setSyncing(true)
     
     try {
-      console.log('ðŸ”„ Iniciando sincronizaá§á£o com Google Sheets...')
+      console.log('🔄 Iniciando sincroniza��o com Google Sheets...')
       
       const response = await fetch('/api/desempenho/sync-sheets-service', {
         method: 'POST',
@@ -154,20 +154,20 @@ export default function TabelaDesempenhoPage() {
       const result = await response.json()
 
       if (result.success) {
-        alert(`œ… Sincronizaá§á£o concluá­da!\n\n` +
-              `ðŸ“¥ Importados: ${result.resultados.dados_importados}\n` +
-              `ðŸ”„ Atualizados: ${result.resultados.dados_atualizados}\n` +
-              `ðŸ“Š Total processados: ${result.resultados.total_processados}\n` +
-              `Œ Erros: ${result.resultados.erros}`)
+        alert(`�� Sincroniza��o conclu�da!\n\n` +
+              `📥 Importados: ${result.resultados.dados_importados}\n` +
+              `🔄 Atualizados: ${result.resultados.dados_atualizados}\n` +
+              `📊 Total processados: ${result.resultados.total_processados}\n` +
+              `�� Erros: ${result.resultados.erros}`)
         
-        // Recarregar dados apá³s sincronizaá§á£o
+        // Recarregar dados ap�s sincroniza��o
         await carregarDados()
       } else {
-        alert(`Œ Erro na sincronizaá§á£o:\n\n${result.error}`)
+        alert(`�� Erro na sincroniza��o:\n\n${result.error}`)
       }
     } catch (error: any) {
-      console.error('Œ Erro na sincronizaá§á£o:', error)
-      alert(`Œ Erro na sincronizaá§á£o:\n\n${error.message}`)
+      console.error('�� Erro na sincroniza��o:', error)
+      alert(`�� Erro na sincroniza��o:\n\n${error.message}`)
     } finally {
       setSyncing(false)
     }
@@ -192,19 +192,19 @@ export default function TabelaDesempenhoPage() {
       const result = await response.json()
 
       if (result.success) {
-        alert('œ… Semana excluá­da com sucesso!')
+        alert('�� Semana exclu�da com sucesso!')
         await carregarDados()
       } else {
-        alert(`Œ Erro ao excluir: ${result.error}`)
+        alert(`�� Erro ao excluir: ${result.error}`)
       }
     } catch (error: any) {
-      console.error('Œ Erro ao excluir:', error)
-      alert(`Œ Erro ao excluir: ${error.message}`)
+      console.error('�� Erro ao excluir:', error)
+      alert(`�� Erro ao excluir: ${error.message}`)
     }
   }
 
   const limparTodosDados = async () => {
-    if (!confirm('š ï¸ ATENá‡áƒO: Isso irá¡ excluir TODOS os dados de desempenho deste bar. Esta aá§á£o ná£o pode ser desfeita!\n\nTem certeza que deseja continuar?')) {
+    if (!confirm('��️ ATEN��O: Isso ir� excluir TODOS os dados de desempenho deste bar. Esta a��o n�o pode ser desfeita!\n\nTem certeza que deseja continuar?')) {
       return
     }
 
@@ -223,14 +223,14 @@ export default function TabelaDesempenhoPage() {
       const result = await response.json()
 
       if (result.success) {
-        alert('œ… Todos os dados foram excluá­dos!')
+        alert('�� Todos os dados foram exclu�dos!')
         await carregarDados()
       } else {
-        alert(`Œ Erro ao limpar dados: ${result.error}`)
+        alert(`�� Erro ao limpar dados: ${result.error}`)
       }
     } catch (error: any) {
-      console.error('Œ Erro ao limpar dados:', error)
-      alert(`Œ Erro ao limpar dados: ${error.message}`)
+      console.error('�� Erro ao limpar dados:', error)
+      alert(`�� Erro ao limpar dados: ${error.message}`)
     }
   }
 
@@ -241,7 +241,7 @@ export default function TabelaDesempenhoPage() {
       item.observacoes?.toLowerCase().includes(filtroTexto.toLowerCase())
     
     return matchTexto
-  }).sort((a, b) => b.numero_semana - a.numero_semana) // Ordenaá§á£o decrescente por semana
+  }).sort((a: any, b: any) => b.numero_semana - a.numero_semana) // Ordena��o decrescente por semana
 
   const formatarMoeda = (valor: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -276,7 +276,7 @@ export default function TabelaDesempenhoPage() {
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i: any) => (
+          {[1, 2: any, 3, 4].map((i: any) => (
             <div key={i} className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-white/20 shadow-lg">
               <div className="animate-pulse space-y-3">
                 <div className="h-4 bg-gray-200 rounded w-1/2"></div>
@@ -302,7 +302,7 @@ export default function TabelaDesempenhoPage() {
             <div>
               <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
                 <FilterIcon className="h-5 w-5" />
-                Filtros & Configuraá§áµes
+                Filtros & Configura��es
               </CardTitle>
               <CardDescription>
                 {filtrosExpanded ? 'Clique para minimizar filtros' : 'Clique para expandir filtros de busca'}
@@ -351,7 +351,7 @@ export default function TabelaDesempenhoPage() {
                   Limpar Tudo
                 </Button>
                 <Button 
-                  onClick={() => alert('ðŸš§ Funcionalidade de criaá§á£o em desenvolvimento')}
+                  onClick={() => alert('🚧 Funcionalidade de cria��o em desenvolvimento')}
                   className="bg-blue-600 hover:bg-blue-700 text-white"
                   size="sm"
                 >
@@ -377,7 +377,7 @@ export default function TabelaDesempenhoPage() {
                 <Input
                   placeholder="Pesquisar..."
                   value={filtroTexto}
-                  onChange={(e) => setFiltroTexto(e.target.value)}
+                  onChange={(e: any) => setFiltroTexto(e.target.value)}
                   className="bg-white border-gray-300 text-gray-900 shadow-sm"
                   style={{ colorScheme: 'light' }}
                 />
@@ -401,7 +401,7 @@ export default function TabelaDesempenhoPage() {
               
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Máªs
+                  M�s
                 </label>
                 <Select value={mesFiltro} onValueChange={setMesFiltro}>
                   <SelectTrigger className="bg-white border-gray-300 text-gray-900 shadow-sm">
@@ -411,7 +411,7 @@ export default function TabelaDesempenhoPage() {
                     <SelectItem value="todos">Todos os meses</SelectItem>
                     <SelectItem value="1">Janeiro</SelectItem>
                     <SelectItem value="2">Fevereiro</SelectItem>
-                    <SelectItem value="3">Mará§o</SelectItem>
+                    <SelectItem value="3">Mar�o</SelectItem>
                     <SelectItem value="4">Abril</SelectItem>
                     <SelectItem value="5">Maio</SelectItem>
                     <SelectItem value="6">Junho</SelectItem>
@@ -439,7 +439,7 @@ export default function TabelaDesempenhoPage() {
         )}
       </Card>
 
-      {/* Tabela com Aá§áµes */}
+      {/* Tabela com A��es */}
       <Card className="bg-white/80 backdrop-blur-sm border border-white/20 shadow-lg">
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-slate-800">
@@ -452,18 +452,18 @@ export default function TabelaDesempenhoPage() {
               <thead>
                 <tr className="border-b border-slate-200">
                   <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm">Semana</th>
-                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm hidden-mobile">Perá­odo</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm hidden-mobile">Per�odo</th>
                   <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm">Faturamento</th>
                   <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm hidden-mobile">Clientes</th>
-                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm hidden-mobile">Ticket Má©dio</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm hidden-mobile">Ticket M�dio</th>
                   <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm hidden-mobile">Reservas</th>
                   <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm hidden-mobile">Meta</th>
                   <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm">Atingimento</th>
-                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm">Aá§áµes</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-700 text-xs sm:text-sm">A��es</th>
                 </tr>
               </thead>
               <tbody>
-                {dadosFiltrados.map((item) => {
+                {dadosFiltrados.map((item: any) => {
                   const atingimento = item.meta_semanal > 0 ? (item.faturamento_total / item.meta_semanal) * 100 : 0
                   
                   return (
@@ -479,7 +479,7 @@ export default function TabelaDesempenhoPage() {
                       <td className="py-3 px-2 sm:px-4 text-slate-800 hidden-mobile">
                         <div className="text-sm">
                           <div>{item.data_inicio}</div>
-                          <div className="text-gray-500">atá© {item.data_fim}</div>
+                          <div className="text-gray-500">at� {item.data_fim}</div>
                         </div>
                       </td>
                       <td className="py-3 px-2 sm:px-4 text-slate-800">
@@ -518,7 +518,7 @@ export default function TabelaDesempenhoPage() {
                       <td className="py-3 px-2 sm:px-4">
                         <div className="flex flex-col gap-1 sm:flex-row sm:gap-2">
                           <Button
-                            onClick={() => alert('ðŸš§ Modal de ediá§á£o em desenvolvimento')}
+                            onClick={() => alert('🚧 Modal de edi��o em desenvolvimento')}
                             variant="outline"
                             size="sm"
                             className="btn-icon-touch sm:h-8 sm:w-8 sm:p-0"

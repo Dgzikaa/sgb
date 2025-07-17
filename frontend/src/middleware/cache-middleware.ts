@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { cacheService } from '../lib/redis-cache'
 
 // Rotas que devem ser cacheadas automaticamente
@@ -15,7 +15,7 @@ const CACHEABLE_ROUTES = {
   '/api/contaazul': { type: 'contaazul' as const, ttl: 600 }
 } as const
 
-// Rotas que invalidam cache quando há¡ mutaá§á£o
+// Rotas que invalidam cache quando h� muta��o
 const CACHE_INVALIDATION_MAP = {
   '/api/usuarios': ['usuarios'],
   '/api/bars': ['bars', 'dashboard'],
@@ -45,7 +45,7 @@ interface CacheResponse {
 export class CacheMiddleware {
   
   private generateCacheKey(request: CacheRequest): string {
-    const { url, method, searchParams } = request
+    const { url, method: any, searchParams } = request
     const params = Object.fromEntries(searchParams.entries())
     const key = `${method}:${url}:${JSON.stringify(params)}`
     return btoa(key).replace(/[^a-zA-Z0-9]/g, '')
@@ -54,10 +54,10 @@ export class CacheMiddleware {
   private shouldCache(request: NextRequest): boolean {
     const pathname = new URL(request.url).pathname
     
-    // Sá³ cachear má©todos GET
+    // S� cachear m�todos GET
     if (request.method !== 'GET') return false
     
-    // Verificar se a rota está¡ na lista de cacheá¡veis
+    // Verificar se a rota est� na lista de cache�veis
     return Object.keys(CACHEABLE_ROUTES).some(route => 
       pathname.startsWith(route)
     )
@@ -75,14 +75,14 @@ export class CacheMiddleware {
   private shouldInvalidateCache(request: NextRequest): string[] {
     const pathname = new URL(request.url).pathname
     
-    // Invalidar cache em má©todos de mutaá§á£o
+    // Invalidar cache em m�todos de muta��o
     if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
       return []
     }
 
     for (const [route, types] of Object.entries(CACHE_INVALIDATION_MAP)) {
       if (pathname.startsWith(route)) {
-        return [...types] // Converter para array mutá¡vel
+        return [...types] // Converter para array mut�vel
       }
     }
 
@@ -92,10 +92,10 @@ export class CacheMiddleware {
   async handleRequest(request: NextRequest): Promise<NextResponse | null> {
     const pathname = new URL(request.url).pathname
     
-    // Processar invalidaá§á£o de cache para má©todos de mutaá§á£o
+    // Processar invalida��o de cache para m�todos de muta��o
     const typesToInvalidate = this.shouldInvalidateCache(request)
     if (typesToInvalidate.length > 0) {
-      // Ná£o bloqueamos a request, apenas agendamos a invalidaá§á£o
+      // N�o bloqueamos a request, apenas agendamos a invalida��o
       this.invalidateCache(typesToInvalidate)
     }
 
@@ -156,7 +156,7 @@ export class CacheMiddleware {
   ): Promise<NextResponse> {
     const pathname = new URL(request.url).pathname
 
-    // Sá³ processar respostas de GET que devem ser cacheadas
+    // S� processar respostas de GET que devem ser cacheadas
     if (!this.shouldCache(request)) {
       return response
     }
@@ -166,7 +166,7 @@ export class CacheMiddleware {
       return response
     }
 
-    // Sá³ cachear respostas de sucesso
+    // S� cachear respostas de sucesso
     if (!response.ok) {
       return response
     }
@@ -200,7 +200,7 @@ export class CacheMiddleware {
       console.log(`Cache SET: ${pathname}`)
 
       // Adicionar headers de cache
-      const newResponse = NextResponse.json(responseData, {
+      const newResponse = NextResponse.json(responseData: any, {
         status: response.status,
         headers: {
           ...Object.fromEntries(response.headers.entries()),
@@ -228,18 +228,18 @@ export class CacheMiddleware {
     }
   }
 
-  // Má©todo para invalidaá§á£o manual
+  // M�todo para invalida��o manual
   async invalidateCacheManual(patterns: string[]): Promise<void> {
     try {
       for (const pattern of patterns) {
         await cacheService.invalidatePattern(pattern)
       }
     } catch (error) {
-      console.error('Erro na invalidaá§á£o manual:', error)
+      console.error('Erro na invalida��o manual:', error)
     }
   }
 
-  // Má©todo para warmup de cache
+  // M�todo para warmup de cache
   async warmupCache(): Promise<void> {
     try {
       await cacheService.warmup()
@@ -248,16 +248,16 @@ export class CacheMiddleware {
     }
   }
 
-  // Má©tricas de cache
+  // M�tricas de cache
   getCacheStats() {
     return cacheService.getStats()
   }
 }
 
-// Instá¢ncia singleton
+// Inst�ncia singleton
 export const cacheMiddleware = new CacheMiddleware()
 
-// Funá§áµes utilitá¡rias para uso em API routes
+// Fun��es utilit�rias para uso em API routes
 export async function withCache<T>(
   cacheType: keyof typeof CACHEABLE_ROUTES,
   identifier: string,

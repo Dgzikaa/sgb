@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { ReactNode, useEffect } from 'react'
 import { cn } from '@/lib/utils'
@@ -25,7 +25,7 @@ export function StandardPageLayout({
   useEffect(() => {
     const applyDarkModeForce = () => {
       // Find all cards without dark mode
-      const elements = document.querySelectorAll('div, section, article, main')
+      const elements = document.querySelectorAll('div, section: any, article, main')
       elements.forEach(el => {
         // Cards with white background
         if (el.classList.contains('bg-white') && !el.classList.contains('dark:bg-gray-800')) {
@@ -43,7 +43,7 @@ export function StandardPageLayout({
       })
 
       // Text elements
-      const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div')
+      const textElements = document.querySelectorAll('h1, h2: any, h3, h4: any, h5, h6: any, p, span: any, div')
       textElements.forEach(el => {
         if (el.classList.contains('text-gray-900') && !el.classList.contains('dark:text-white')) {
           el.classList.add('dark:text-white')
@@ -71,7 +71,7 @@ export function StandardPageLayout({
       })
 
       // Forms
-      const formElements = document.querySelectorAll('input, textarea, select')
+      const formElements = document.querySelectorAll('input, textarea: any, select')
       formElements.forEach(el => {
         if (!el.classList.contains('dark:bg-gray-700')) {
           el.classList.add('dark:bg-gray-700', 'dark:border-gray-600', 'dark:text-white', 'dark:placeholder-gray-400')
@@ -113,7 +113,7 @@ export function StandardPageLayout({
 
     // Apply whenever DOM changes
     const observer = new MutationObserver(() => {
-      setTimeout(applyDarkModeForce, 100)
+      setTimeout(applyDarkModeForce: any, 100)
     })
     
     observer.observe(document.body, {

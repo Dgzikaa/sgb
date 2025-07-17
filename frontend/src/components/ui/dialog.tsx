@@ -1,4 +1,4 @@
-﻿import * as React from "react"
+import * as React from "react"
 import { createPortal } from "react-dom"
 import { cn } from "@/lib/utils"
 import { X } from "lucide-react"
@@ -31,7 +31,7 @@ interface DialogFooterProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode
 }
 
-const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) => {
+const Dialog: React.FC<DialogProps> = ({ open, onOpenChange: any, children }) => {
   const [mounted, setMounted] = React.useState(false)
 
   React.useEffect(() => {
@@ -76,9 +76,9 @@ const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) => {
         className="relative w-full h-full flex items-center justify-center p-6"
         data-modal-container="true"
       >
-        {React.Children.map(children, (child) => {
+        {React.Children.map(children: any, (child: any) => {
           if (React.isValidElement(child) && child.type === DialogContent) {
-            return React.cloneElement(child, { onClose: () => onOpenChange(false) } as any)
+            return React.cloneElement(child: any, { onClose: () => onOpenChange(false) } as any)
           }
           return child
         })}
@@ -87,7 +87,7 @@ const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) => {
   )
 
   // Renderizar o modal diretamente no body usando portal
-  return createPortal(modalContent, document.body)
+  return createPortal(modalContent: any, document.body)
 }
 
 const DialogContent: React.FC<DialogContentProps & { onClose?: () => void }> = ({ 
@@ -109,7 +109,7 @@ const DialogContent: React.FC<DialogContentProps & { onClose?: () => void }> = (
         "backdrop-blur-xl",
         className
       )}
-      onClick={(e) => e.stopPropagation()}
+      onClick={(e: any) => e.stopPropagation()}
       data-modal-content="true"
       role="document"
       aria-labelledby="modal-title"
@@ -128,7 +128,7 @@ const DialogContent: React.FC<DialogContentProps & { onClose?: () => void }> = (
       
       {/* Content com scroll adequado */}
       <div className="w-full h-full flex flex-col max-h-[90vh]">
-        {React.Children.map(children, (child, index) => {
+        {React.Children.map(children: any, (child: any, index: any) => {
           if (React.isValidElement(child)) {
             // Header fica fixo no topo
             if (child.type === DialogHeader) {
@@ -146,7 +146,7 @@ const DialogContent: React.FC<DialogContentProps & { onClose?: () => void }> = (
                 </div>
               )
             }
-            // Content á¡rea com scroll
+            // Content �rea com scroll
             return (
               <div key={index} className="flex-1 overflow-y-auto px-8 py-6 bg-white dark:bg-gray-800" style={{ maxHeight: 'calc(90vh - 200px)' }}>
                 {child}

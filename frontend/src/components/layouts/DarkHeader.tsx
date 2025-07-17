@@ -1,10 +1,10 @@
-﻿'use client'
+'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef: any, useEffect } from 'react'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 import { useBar } from '@/contexts/BarContext'
 import { useUser } from '@/contexts/UserContext'
-import { ChevronDown, User, Settings, LogOut, Moon, Sun, Bell, Check, Building2, ChevronRight, Home } from 'lucide-react'
+import { ChevronDown, User: any, Settings, LogOut: any, Moon, Sun: any, Bell, Check: any, Building2, ChevronRight: any, Home } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -19,33 +19,33 @@ const routeMapping: Record<string, { name: string; icon?: React.ComponentType<{ 
   '/checklists': { name: 'Checklist' },
   '/checklists/abertura': { name: 'Checklists' },
   
-  // Produá§á£o
-  '/producao': { name: 'Produá§á£o' },
+  // Produ��o
+  '/producao': { name: 'Produ��o' },
   '/producao/receitas': { name: 'Receitas e Insumos' },
-  '/producao/terminal': { name: 'Terminal de Produá§á£o' },
+  '/producao/terminal': { name: 'Terminal de Produ��o' },
   
   // ContaAzul
-  '/relatorios/financeiro-competencia': { name: 'Competáªncia' },
+  '/relatorios/financeiro-competencia': { name: 'Compet�ncia' },
   
   // Marketing
   '/visao-geral/marketing-360': { name: 'Marketing 360' },
   
-  // Funcioná¡rio
-  '/funcionario': { name: 'Funcioná¡rio' },
+  // Funcion�rio
+  '/funcionario': { name: 'Funcion�rio' },
   '/funcionario/checklists': { name: 'Meus Checklists' },
   
-  // Configuraá§áµes (apenas admin)
-  '/configuracoes': { name: 'Configuraá§áµes' },
+  // Configura��es (apenas admin)
+  '/configuracoes': { name: 'Configura��es' },
   '/configuracoes/checklists': { name: 'Checklists' },
   '/configuracoes/metas': { name: 'Metas' },
-  '/configuracoes/integracoes': { name: 'Integraá§áµes' },
-  '/configuracoes/seguranca': { name: 'Seguraná§a' },
+  '/configuracoes/integracoes': { name: 'Integra��es' },
+  '/configuracoes/seguranca': { name: 'Seguran�a' },
   '/configuracoes/whatsapp': { name: 'WhatsApp' },
   '/configuracoes/contahub-automatico': { name: 'ContaHub Auto' },
   
   '/configuracoes/templates': { name: 'Templates' },
   
-  // Outras pá¡ginas
+  // Outras p�ginas
   '/minha-conta': { name: 'Minha Conta' },
   '/login': { name: 'Login' },
 }
@@ -68,7 +68,7 @@ function generateBreadcrumbs(pathname: string) {
   
   // Build progressive paths
   let currentPath = ''
-  segments.forEach((segment, index) => {
+  segments.forEach((segment: any, index: any) => {
     currentPath += `/${segment}`
     const route = routeMapping[currentPath]
     
@@ -87,7 +87,7 @@ function generateBreadcrumbs(pathname: string) {
 
 export function DarkHeader() {
   const { pageTitle } = usePageTitle()
-  const { selectedBar, availableBars, setSelectedBar } = useBar()
+  const { selectedBar, availableBars: any, setSelectedBar } = useBar()
   const { user, logout } = useUser()
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()  // Usando o contexto global
@@ -100,7 +100,7 @@ export function DarkHeader() {
 
   const breadcrumbs = generateBreadcrumbs(pathname)
 
-  // Removendo o useEffect local para dark mode, pois agora á© gerenciado pelo contexto
+  // Removendo o useEffect local para dark mode, pois agora � gerenciado pelo contexto
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -139,22 +139,22 @@ export function DarkHeader() {
   //   {
   //     id: 1,
   //     title: 'Checklist de Abertura',
-  //     message: 'Aguardando preenchimento por Joá£o Silva',
-  //     time: '5 min atrá¡s',
+  //     message: 'Aguardando preenchimento por Jo�o Silva',
+  //     time: '5 min atr�s',
   //     unread: true
   //   },
   //   {
   //     id: 2,
-  //     title: 'Sincronizaá§á£o ContaAzul',
+  //     title: 'Sincroniza��o ContaAzul',
   //     message: 'Dados atualizados com sucesso',
-  //     time: '1 hora atrá¡s',
+  //     time: '1 hora atr�s',
   //     unread: false
   //   },
   //   {
   //     id: 3,
   //     title: 'Nova Reserva',
-  //     message: 'Mesa para 4 pessoas á s 20:00',
-  //     time: '2 horas atrá¡s',
+  //     message: 'Mesa para 4 pessoas �s 20:00',
+  //     time: '2 horas atr�s',
   //     unread: true
   //   }
   // ]
@@ -166,7 +166,7 @@ export function DarkHeader() {
       <div className="flex items-center justify-between h-12 px-2 sm:px-4">
         {/* Breadcrumb Navigation - estilo Notion */}
         <div className="flex items-center gap-1 flex-1 min-w-0">
-          {breadcrumbs.map((crumb, index) => (
+          {breadcrumbs.map((crumb: any, index: any) => (
             <div key={`${crumb.href}-${index}`} className="flex items-center gap-1">
               {/* Separador */}
               {index > 0 && (
@@ -206,7 +206,7 @@ export function DarkHeader() {
             <CommandPaletteIconTrigger className="mr-1" />
           </div>
           
-          {/* Notificaá§áµes */}
+          {/* Notifica��es */}
           <div className="relative">
             <NotificationCenter />
           </div>
@@ -230,7 +230,7 @@ export function DarkHeader() {
                     Estabelecimentos
                   </span>
                 </div>
-                {availableBars.map((bar) => (
+                {availableBars.map((bar: any) => (
                   <button
                     key={bar.id}
                     onClick={() => handleBarSelect(bar)}
@@ -247,7 +247,7 @@ export function DarkHeader() {
             )}
           </div>
 
-          {/* Menu do Usuá¡rio */}
+          {/* Menu do Usu�rio */}
           <div className="relative" ref={userMenuRef}>
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
@@ -262,7 +262,7 @@ export function DarkHeader() {
               <ChevronDown className="w-3 h-3 text-gray-400 dark:text-gray-500" />
             </button>
 
-            {/* Dropdown do Usuá¡rio */}
+            {/* Dropdown do Usu�rio */}
             {showUserMenu && (
               <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 animate-slide-in-from-top">
                 {/* User Info */}

@@ -1,6 +1,6 @@
-﻿'use client'
+'use client'
 
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect: any, useState } from 'react'
 import { DarkHeader } from './DarkHeader'
 import { ModernSidebar } from './ModernSidebar'
 import { BottomNavigation } from './BottomNavigation'
@@ -85,7 +85,7 @@ function GlobalPageWrapper({ children }: { children: ReactNode }) {
     // Aplicar na carga inicial
     applyDarkModeClasses()
 
-    // Observar mudaná§as no DOM e aplicar automaticamente
+    // Observar mudan�as no DOM e aplicar automaticamente
     const observer = new MutationObserver(applyDarkModeClasses)
     observer.observe(document.body, {
       childList: true,

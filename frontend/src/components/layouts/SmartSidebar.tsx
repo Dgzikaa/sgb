@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
@@ -108,7 +108,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
       href: '/home',
       category: 'main',
       importance: 'high',
-      keywords: ['iná­cio', 'principal', 'dashboard']
+      keywords: ['in�cio', 'principal', 'dashboard']
     },
     {
       id: 'dashboard-unificado',
@@ -125,12 +125,12 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
     },
     // {
     //   id: 'visao-geral',
-    //   title: 'Visá£o Geral',
+    //   title: 'Vis�o Geral',
     //   icon: BarChart3,
     //   href: '/visao-geral',
     //   category: 'main',
     //   importance: 'high',
-    //   keywords: ['visá£o', 'geral', 'overview', 'má©tricas']
+    //   keywords: ['vis�o', 'geral', 'overview', 'm�tricas']
     // },
     
     // Checklists
@@ -141,7 +141,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
       href: '/checklists',
       category: 'main',
       importance: 'high',
-      keywords: ['checklists', 'verificaá§á£o', 'templates'],
+      keywords: ['checklists', 'verifica��o', 'templates'],
       subItems: [
         {
           id: 'checklist-abertura-main',
@@ -150,7 +150,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
           href: '/checklists/abertura',
           category: 'main',
           importance: 'high',
-          keywords: ['checklist', 'abertura', 'verificaá§á£o']
+          keywords: ['checklist', 'abertura', 'verifica��o']
         },
         {
           id: 'templates-main',
@@ -167,12 +167,12 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
     // Operations
     {
       id: 'operacoes',
-      title: 'Operaá§áµes',
+      title: 'Opera��es',
       icon: Zap,
       href: '/operacoes',
       category: 'operations',
       importance: 'high',
-      keywords: ['operaá§áµes', 'operacional', 'gestá£o'],
+      keywords: ['opera��es', 'operacional', 'gest�o'],
       subItems: [
         {
           id: 'checklist-abertura',
@@ -181,7 +181,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
           href: '/operacoes/checklist-abertura',
           category: 'operations',
           importance: 'high',
-          keywords: ['checklist', 'abertura', 'verificaá§á£o']
+          keywords: ['checklist', 'abertura', 'verifica��o']
         },
         {
           id: 'receitas',
@@ -190,16 +190,16 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
           href: '/operacoes/receitas',
           category: 'operations',
           importance: 'medium',
-          keywords: ['receitas', 'produtos', 'cardá¡pio']
+          keywords: ['receitas', 'produtos', 'card�pio']
         },
         {
           id: 'tempo',
-          title: 'Gestá£o de Tempo',
+          title: 'Gest�o de Tempo',
           icon: Clock,
           href: '/operacoes/tempo',
           category: 'operations',
           importance: 'medium',
-          keywords: ['tempo', 'croná´metro', 'produtividade']
+          keywords: ['tempo', 'cron�metro', 'produtividade']
         }
       ]
     },
@@ -207,21 +207,21 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
     // Production
     {
       id: 'producao',
-      title: 'Produá§á£o',
+      title: 'Produ��o',
       icon: Cpu,
       href: '/producao',
       category: 'operations',
       importance: 'high',
-      keywords: ['produá§á£o', 'terminal', 'cozinha'],
+      keywords: ['produ��o', 'terminal', 'cozinha'],
       subItems: [
         {
           id: 'terminal',
-          title: 'Terminal de Produá§á£o',
+          title: 'Terminal de Produ��o',
           icon: Gauge,
           href: '/producao/terminal',
           category: 'operations',
           importance: 'high',
-          keywords: ['terminal', 'produá§á£o', 'cozinha']
+          keywords: ['terminal', 'produ��o', 'cozinha']
         },
         {
           id: 'receitas-producao',
@@ -238,12 +238,12 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
     // Reports
     {
       id: 'relatorios',
-      title: 'Relatá³rios',
+      title: 'Relat�rios',
       icon: FileText,
       href: '/relatorios',
       category: 'reports',
       importance: 'high',
-      keywords: ['relatá³rios', 'reports', 'aná¡lise'],
+      keywords: ['relat�rios', 'reports', 'an�lise'],
       subItems: [
         {
           id: 'dashboard-financeiro',
@@ -256,12 +256,12 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
         },
         {
           id: 'analitico',
-          title: 'Analá­tico',
+          title: 'Anal�tico',
           icon: TrendingUp,
           href: '/relatorios/analitico',
           category: 'reports',
           importance: 'medium',
-          keywords: ['analá­tico', 'aná¡lise', 'detalhado']
+          keywords: ['anal�tico', 'an�lise', 'detalhado']
         }
       ]
     },
@@ -269,13 +269,13 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
     // Configuration
     {
       id: 'configuracoes',
-      title: 'Configuraá§áµes',
+      title: 'Configura��es',
       icon: Settings,
       href: '/configuracoes',
       category: 'config',
       importance: 'medium',
       requiredRole: 'admin',
-      keywords: ['configuraá§áµes', 'config', 'admin'],
+      keywords: ['configura��es', 'config', 'admin'],
       subItems: [
         {
           id: 'checklists-config',
@@ -288,12 +288,12 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
         },
         {
           id: 'integracoes',
-          title: 'Integraá§áµes',
+          title: 'Integra��es',
           icon: Layers,
           href: '/configuracoes/integracoes',
           category: 'config',
           importance: 'medium',
-          keywords: ['integraá§áµes', 'apis', 'conexáµes']
+          keywords: ['integra��es', 'apis', 'conex�es']
         },
         {
           id: 'analytics',
@@ -302,7 +302,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
           href: '/configuracoes/analytics',
           category: 'config',
           importance: 'medium',
-          keywords: ['analytics', 'má©tricas', 'dashboard', 'performance']
+          keywords: ['analytics', 'm�tricas', 'dashboard', 'performance']
         },
         {
           id: 'cache',
@@ -311,22 +311,22 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
           href: '/configuracoes/cache',
           category: 'config',
           importance: 'medium',
-          keywords: ['cache', 'redis', 'performance', 'memá³ria']
+          keywords: ['cache', 'redis', 'performance', 'mem�ria']
         },
         {
           id: 'seguranca',
-          title: 'Seguraná§a',
+          title: 'Seguran�a',
           icon: Shield,
           href: '/configuracoes/seguranca',
           category: 'config',
           importance: 'high',
-          keywords: ['seguraná§a', 'proteá§á£o', 'acesso']
+          keywords: ['seguran�a', 'prote��o', 'acesso']
         }
       ]
     }
   ]
 
-  // Detectar contexto de navegaá§á£o
+  // Detectar contexto de navega��o
   const getNavigationContext = (): NavigationContext => {
     const currentHour = new Date().getHours()
     let detectedWorkflow: 'opening' | 'production' | 'closing' | 'reports' | 'normal' = 'normal'
@@ -372,7 +372,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
     })
 
     // Priorizar baseado no contexto de workflow
-    filtered = filtered.sort((a, b) => {
+    filtered = filtered.sort((a: any, b: any) => {
       const getWorkflowScore = (item: MenuItem) => {
         switch (context.workflowState) {
           case 'opening':
@@ -401,7 +401,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
       
       if (scoreA !== scoreB) return scoreB - scoreA
       
-      // Ordenar por importá¢ncia
+      // Ordenar por import�ncia
       const importanceOrder = { high: 3, medium: 2, low: 1 }
       return importanceOrder[b.importance || 'medium'] - importanceOrder[a.importance || 'medium']
     })
@@ -409,7 +409,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
     return filtered
   }
 
-  // Adicionar á  lista de favoritos
+  // Adicionar � lista de favoritos
   const toggleFavorite = (itemId: string) => {
     setFavorites(prev => 
       prev.includes(itemId) 
@@ -427,7 +427,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
     )
   }
 
-  // Detectar pá¡gina atual
+  // Detectar p�gina atual
   const isCurrentPage = (href: string) => {
     return pathname === href || pathname.startsWith(href + '/')
   }
@@ -436,7 +436,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
   const contextualItems = getContextualItems(context)
 
   // Agrupar itens por categoria
-  const groupedItems = contextualItems.reduce((acc, item) => {
+  const groupedItems = contextualItems.reduce((acc: any, item: any) => {
     const category = item.category
     if (!acc[category]) acc[category] = []
     acc[category].push(item)
@@ -445,10 +445,10 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
 
   const categoryLabels = {
     main: 'Principal',
-    operations: 'Operaá§áµes',
-    reports: 'Relatá³rios',
-    config: 'Configuraá§áµes',
-    admin: 'Administraá§á£o'
+    operations: 'Opera��es',
+    reports: 'Relat�rios',
+    config: 'Configura��es',
+    admin: 'Administra��o'
   }
 
   const categoryIcons = {
@@ -470,7 +470,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
           <div className="flex items-center gap-2">
             <Navigation className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             <span className="font-semibold text-gray-900 dark:text-white">
-              Navegaá§á£o
+              Navega��o
             </span>
           </div>
         )}
@@ -494,7 +494,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
               type="text"
               placeholder="Buscar..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: any) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -515,9 +515,9 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
             )} />
             <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
               {context.workflowState === 'opening' && 'Abertura'}
-              {context.workflowState === 'production' && 'Produá§á£o'}
+              {context.workflowState === 'production' && 'Produ��o'}
               {context.workflowState === 'closing' && 'Fechamento'}
-              {context.workflowState === 'reports' && 'Relatá³rios'}
+              {context.workflowState === 'reports' && 'Relat�rios'}
               {context.workflowState === 'normal' && 'Normal'}
             </span>
           </div>
@@ -547,7 +547,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
               {/* Category Items */}
               {(isCollapsed || expandedCategories.includes(category)) && (
                 <div className="space-y-1">
-                  {items.map((item) => (
+                  {items.map((item: any) => (
                     <NavItem
                       key={item.id}
                       item={item}
@@ -570,7 +570,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
           <div className="text-xs text-gray-500 dark:text-gray-400">
             <div className="flex items-center gap-1">
               <Compass className="h-3 w-3" />
-              <span>Navegaá§á£o Inteligente</span>
+              <span>Navega��o Inteligente</span>
             </div>
             <div className="mt-1">
               {selectedBar?.nome || 'Nenhum bar selecionado'}
@@ -582,7 +582,7 @@ export function SmartSidebar({ isCollapsed = false, onToggle }: SmartSidebarProp
   )
 }
 
-// Componente para item de navegaá§á£o
+// Componente para item de navega��o
 function NavItem({ 
   item, 
   isCollapsed, 
@@ -626,7 +626,7 @@ function NavItem({
             )}
             
             <button
-              onClick={(e) => {
+              onClick={(e: any) => {
                 e.preventDefault()
                 onToggleFavorite(item.id)
               }}

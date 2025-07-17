@@ -1,6 +1,6 @@
-ï»¿'use client'
+'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext: any, useState, useEffect: any, ReactNode } from 'react'
 import { getSupabaseClient } from '@/lib/supabase'
 import { useUser } from '@/contexts/UserContext'
 
@@ -55,7 +55,7 @@ export function BarProvider({ children }: { children: ReactNode }) {
           return
         }
         
-        // Se hÃ¡Â¡ usuÃ¡Â¡rio no contexto, buscar os bares do localStorage
+        // Se há¡ usuá¡rio no contexto, buscar os bares do localStorage
         if (user && user.email) {
           
           // Buscar dados completos do localStorage que podem conter availableBars
@@ -68,7 +68,7 @@ export function BarProvider({ children }: { children: ReactNode }) {
                 if (mounted) {
                   setAvailableBars(userData.availableBars)
                   
-                  // Verificar se hÃ¡Â¡ um bar selecionado no localStorage
+                  // Verificar se há¡ um bar selecionado no localStorage
                   const selectedBarId = localStorage.getItem('sgb_selected_bar_id')
                   if (selectedBarId) {
                     const selectedBar = userData.availableBars.find((bar: Bar) => bar.id === parseInt(selectedBarId))
@@ -86,12 +86,12 @@ export function BarProvider({ children }: { children: ReactNode }) {
                 }
               }
             } catch (e) {
-              console.error('ÂÅ’ BarContext: Erro ao parsear dados do localStorage:', e)
+              console.error('Œ BarContext: Erro ao parsear dados do localStorage:', e)
             }
           }
         }
         
-        // Se nÃ¡Â£o hÃ¡Â¡ usuÃ¡Â¡rio, verificar localStorage como fallback
+        // Se ná£o há¡ usuá¡rio, verificar localStorage como fallback
         const storedUser = localStorage.getItem('sgb_user')
         let userEmail = null
         
@@ -100,12 +100,12 @@ export function BarProvider({ children }: { children: ReactNode }) {
             const userData = JSON.parse(storedUser)
             userEmail = userData.email
             
-            // Verificar se jÃ¡Â¡ temos os bares no localStorage
+            // Verificar se já¡ temos os bares no localStorage
             if (userData.availableBars && Array.isArray(userData.availableBars) && userData.availableBars.length > 0) {
               if (mounted) {
                 setAvailableBars(userData.availableBars)
                 
-                // Verificar se hÃ¡Â¡ um bar selecionado no localStorage
+                // Verificar se há¡ um bar selecionado no localStorage
                 const selectedBarId = localStorage.getItem('sgb_selected_bar_id')
                 if (selectedBarId) {
                   const selectedBar = userData.availableBars.find((bar: Bar) => bar.id === parseInt(selectedBarId))
@@ -123,11 +123,11 @@ export function BarProvider({ children }: { children: ReactNode }) {
               }
             }
           } catch (e) {
-            console.error('ÂÅ’ BarContext: Erro ao parsear dados do usuÃ¡Â¡rio:', e)
+            console.error('Œ BarContext: Erro ao parsear dados do usuá¡rio:', e)
           }
         }
 
-        // Se nÃ¡Â£o conseguiu do localStorage, tentar buscar da sessÃ¡Â£o do Supabase
+        // Se ná£o conseguiu do localStorage, tentar buscar da sessá£o do Supabase
         const { data: { session } } = await supabase.auth.getSession()
         
         if (session?.user?.email) {
@@ -139,26 +139,26 @@ export function BarProvider({ children }: { children: ReactNode }) {
           return
         }
 
-        // Buscar os bares do usuÃ¡Â¡rio no banco
+        // Buscar os bares do usuá¡rio no banco
         const { data: userData, error: userError } = await supabase
           .from('usuarios_bar')
-          .select('id, email, nome, role, bar_id')
+          .select('id, email: any, nome, role: any, bar_id')
           .eq('email', userEmail)
           .eq('ativo', true)
 
         if (userError) {
-          console.error('Erro ao buscar dados do usuÃ¡Â¡rio:', userError)
+          console.error('Erro ao buscar dados do usuá¡rio:', userError)
           if (mounted) setIsLoading(false)
           return
         }
 
         if (!userData || userData.length === 0) {
-          console.log('UsuÃ¡Â¡rio nÃ¡Â£o tem acesso a nenhum bar')
+          console.log('Usuá¡rio ná£o tem acesso a nenhum bar')
           if (mounted) setIsLoading(false)
           return
         }
 
-        // Extrair IDs Ã¡Âºnicos dos bares (caso usuÃ¡Â¡rio tenha acesso a mÃ¡Âºltiplos bares)
+        // Extrair IDs áºnicos dos bares (caso usuá¡rio tenha acesso a máºltiplos bares)
         const barIds = [...new Set(userData.map((user: any) => user.bar_id))]
         
         // Buscar detalhes dos bares
@@ -177,7 +177,7 @@ export function BarProvider({ children }: { children: ReactNode }) {
         if (mounted) {
           setAvailableBars(barsData || [])
           
-                     // Verificar se hÃ¡Â¡ um bar selecionado no localStorage
+                     // Verificar se há¡ um bar selecionado no localStorage
            const selectedBarId = localStorage.getItem('sgb_selected_bar_id')
            if (selectedBarId && barsData) {
              const selectedBar = barsData.find((bar: Bar) => bar.id === parseInt(selectedBarId))
@@ -198,7 +198,7 @@ export function BarProvider({ children }: { children: ReactNode }) {
           setIsLoading(false)
         }
       } catch (error) {
-        console.error('Erro ao carregar bares do usuÃ¡Â¡rio:', error)
+        console.error('Erro ao carregar bares do usuá¡rio:', error)
         if (mounted) setIsLoading(false)
       }
     }
@@ -210,13 +210,13 @@ export function BarProvider({ children }: { children: ReactNode }) {
     }
   }, [user, userInitialized])
 
-  // Listener para mudanÃ¡Â§as no usuÃ¡Â¡rio
+  // Listener para mudaná§as no usuá¡rio
   useEffect(() => {
     if (typeof window === 'undefined') return
 
     const handleUserDataUpdated = () => {
       setIsLoading(true)
-      // O useEffect principal vai recarregar com as novas dependÃ¡Âªncias
+      // O useEffect principal vai recarregar com as novas dependáªncias
     }
 
     window.addEventListener('userDataUpdated', handleUserDataUpdated)
@@ -226,7 +226,7 @@ export function BarProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  // FunÃ¡Â§Ã¡Â£o para atualizar favicon baseado no bar
+  // Funá§á£o para atualizar favicon baseado no bar
   const updateFavicon = (barName?: string) => {
     if (typeof window === 'undefined') return
     
@@ -263,7 +263,7 @@ export function BarProvider({ children }: { children: ReactNode }) {
     appleIcon.href = appleTouchPath
   }
 
-  // FunÃ¡Â§Ã¡Â£o para alterar o bar selecionado
+  // Funá§á£o para alterar o bar selecionado
   const handleSetSelectedBar = (bar: Bar) => {
     setSelectedBar(bar)
     // Salvar no localStorage apenas se estamos no cliente
@@ -297,5 +297,5 @@ export function useBar() {
   return context
 }
 
-// Alias para compatibilidade com cÃ¡Â³digo existente
+// Alias para compatibilidade com cá³digo existente
 export const useBarContext = useBar 

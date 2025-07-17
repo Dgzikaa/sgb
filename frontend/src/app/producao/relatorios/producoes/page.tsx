@@ -1,9 +1,9 @@
-﻿'use client'
+'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect: any, useCallback } from 'react'
 import { useBar } from '@/contexts/BarContext'
 import { usePageTitle } from '@/contexts/PageTitleContext'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -54,7 +54,7 @@ export default function RelatorioProducoesPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [executandoMigration, setExecutandoMigration] = useState(false)
 
-  // NOVA FUNá‡áƒO: Executar migration
+  // NOVA FUN��O: Executar migration
   const executarMigration = async () => {
     setExecutandoMigration(true)
     try {
@@ -66,20 +66,20 @@ export default function RelatorioProducoesPage() {
       const result = await response.json()
       
       if (result.success) {
-        alert(`œ… Migration executada com sucesso!\n\n` +
-              `ðŸ“Š Detalhes:\n` +
-              `€¢ Campo na tabela produá§áµes: ${result.detalhes.campo_producoes}\n` +
-              `€¢ Atualizaá§á£o tabela insumos: ${result.detalhes.tabela_insumos}\n` +
-              `€¢ Criaá§á£o de á­ndices: ${result.detalhes.indices}\n\n` +
-              `ðŸŽ¯ Agora o sistema pode calcular o percentual de aderáªncia á  receita!`)
+        alert(`�� Migration executada com sucesso!\n\n` +
+              `📊 Detalhes:\n` +
+              `�� Campo na tabela produ��es: ${result.detalhes.campo_producoes}\n` +
+              `�� Atualiza��o tabela insumos: ${result.detalhes.tabela_insumos}\n` +
+              `�� Cria��o de �ndices: ${result.detalhes.indices}\n\n` +
+              `🎯 Agora o sistema pode calcular o percentual de ader�ncia � receita!`)
         
-        // Recarregar produá§áµes para pegar os novos campos
+        // Recarregar produ��es para pegar os novos campos
         carregarProducoes()
       } else {
-        alert(`Œ Erro na migration: ${result.error}`)
+        alert(`�� Erro na migration: ${result.error}`)
       }
     } catch (error) {
-      alert('Œ Erro ao executar migration de campos')
+      alert('�� Erro ao executar migration de campos')
     } finally {
       setExecutandoMigration(false)
     }
@@ -126,7 +126,7 @@ export default function RelatorioProducoesPage() {
   }, [selectedBar?.id, carregarProducoes])
 
   useEffect(() => {
-    setPageTitle('ðŸ­ Relatá³rio de Produá§áµes')
+    setPageTitle('🏭 Relat�rio de Produ��es')
     return () => setPageTitle('')
   }, [setPageTitle])
 
@@ -135,19 +135,19 @@ export default function RelatorioProducoesPage() {
     return Math.round((real / esperado) * 100)
   }
 
-  // NOVA FUNá‡áƒO: Calcular desvio percentual
+  // NOVA FUN��O: Calcular desvio percentual
   const calcularDesvio = (real: number, esperado: number): number => {
     if (!esperado || esperado === 0) return 0
     return Math.round(Math.abs((real - esperado) / esperado) * 100)
   }
 
-  // NOVA FUNá‡áƒO: Calcular fator de correá§á£o
+  // NOVA FUN��O: Calcular fator de corre��o
   const calcularFatorCorrecao = (real: number, esperado: number): number => {
     if (!real || real === 0) return 0
     return Math.round((esperado / real) * 100) / 100
   }
 
-  // NOVA FUNá‡áƒO: Cor do status de aderáªncia
+  // NOVA FUN��O: Cor do status de ader�ncia
   const getAdherenciaColor = (aderencia: number | undefined) => {
     if (!aderencia) return 'bg-gray-100 border-gray-300 text-gray-600'
     if (aderencia >= 95) return 'bg-green-100 border-green-300 text-green-800'
@@ -156,13 +156,13 @@ export default function RelatorioProducoesPage() {
     return 'bg-red-100 border-red-300 text-red-800'
   }
 
-  // NOVA FUNá‡áƒO: Texto do status de aderáªncia
+  // NOVA FUN��O: Texto do status de ader�ncia
   const getAdherenciaText = (aderencia: number | undefined) => {
-    if (!aderencia) return '“ Sem dados'
-    if (aderencia >= 95) return 'ðŸ† Excelente'
-    if (aderencia >= 85) return 'ðŸ‘ Bom'
-    if (aderencia >= 75) return 'š ï¸ Regular'
-    return 'ðŸ”´ Ruim'
+    if (!aderencia) return '�� Sem dados'
+    if (aderencia >= 95) return '🏆 Excelente'
+    if (aderencia >= 85) return '👍 Bom'
+    if (aderencia >= 75) return '��️ Regular'
+    return '🔴 Ruim'
   }
 
   const getStatusColor = (eficiencia: number) => {
@@ -173,10 +173,10 @@ export default function RelatorioProducoesPage() {
   }
 
   const getStatusText = (eficiencia: number) => {
-    if (eficiencia >= 95) return 'œ… Excelente'
-    if (eficiencia >= 85) return 'ðŸ‘ Boa'
-    if (eficiencia >= 75) return 'š ï¸ Regular'
-    return 'Œ Ruim'
+    if (eficiencia >= 95) return '�� Excelente'
+    if (eficiencia >= 85) return '👍 Boa'
+    if (eficiencia >= 75) return '��️ Regular'
+    return '�� Ruim'
   }
 
   const formatarTempo = (tempoString: string) => {
@@ -184,7 +184,7 @@ export default function RelatorioProducoesPage() {
     // Se for formato PostgreSQL interval (00:05:30)
     const match = tempoString.match(/(\d{2}):(\d{2}):(\d{2})/)
     if (match) {
-      const [, horas, minutos, segundos] = match
+      const [, horas: any, minutos, segundos] = match
       if (parseInt(horas) > 0) {
         return `${parseInt(horas)}h ${parseInt(minutos)}m`
       }
@@ -206,7 +206,7 @@ export default function RelatorioProducoesPage() {
     return (
       <div className="p-6">
         <div className="text-center">
-          <p className="text-red-600 font-medium">š ï¸ Selecione um bar primeiro</p>
+          <p className="text-red-600 font-medium">��️ Selecione um bar primeiro</p>
         </div>
       </div>
     )
@@ -216,19 +216,19 @@ export default function RelatorioProducoesPage() {
       <ProtectedRoute requiredModule="relatorio_producoes">
         <div className="p-6 max-w-7xl mx-auto">
         <div className="mb-6">
-          <p className="text-gray-700">Aná¡lise de desempenho da produá§á£o por data</p>
+          <p className="text-gray-700">An�lise de desempenho da produ��o por data</p>
         </div>
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-black">ðŸ“… Selecionar Data</CardTitle>
+            <CardTitle className="text-black">📅 Selecionar Data</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
               <Input
                 type="date"
                 value={dataInput}
-                onChange={(e) => setDataInput(e.target.value)}
+                onChange={(e: any) => setDataInput(e.target.value)}
                 className="w-auto max-w-48 text-black font-medium border-2 border-gray-300"
               />
               <Button 
@@ -236,15 +236,15 @@ export default function RelatorioProducoesPage() {
                 disabled={isLoading}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
-                {isLoading ? '³ Carregando...' : 'ðŸ”„ Atualizar'}
+                {isLoading ? '�� Carregando...' : '🔄 Atualizar'}
               </Button>
               <Button 
                 onClick={executarMigration} 
                 disabled={executandoMigration}
                 className="bg-orange-600 hover:bg-orange-700 text-white"
-                title="Executar migration para habilitar aná¡lise de aderáªncia á  receita"
+                title="Executar migration para habilitar an�lise de ader�ncia � receita"
               >
-                {executandoMigration ? 'ï¿½ï¿½ Executando...' : 'ðŸ“Š Migrar Campos'}
+                {executandoMigration ? '�� Executando...' : '📊 Migrar Campos'}
               </Button>
             </div>
           </CardContent>
@@ -253,18 +253,18 @@ export default function RelatorioProducoesPage() {
         {producoes.length > 0 && (
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle className="text-black">ðŸ“ˆ Estatá­sticas do Dia</CardTitle>
+              <CardTitle className="text-black">📈 Estat�sticas do Dia</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center p-3 bg-blue-50 rounded-lg">
                   <div className="text-2xl font-bold text-blue-600">{estatisticas.total_producoes || producoes.length}</div>
-                  <div className="text-sm text-blue-700">Total Produá§áµes</div>
+                  <div className="text-sm text-blue-700">Total Produ��es</div>
                 </div>
                 
                 <div className="text-center p-3 bg-green-50 rounded-lg">
                   <div className="text-2xl font-bold text-green-600">{estatisticas.eficiencia_excelente || 0}</div>
-                  <div className="text-sm text-green-700">Excelentes (‰¥95%)</div>
+                  <div className="text-sm text-green-700">Excelentes (��95%)</div>
                 </div>
                 
                 <div className="text-center p-3 bg-yellow-50 rounded-lg">
@@ -277,30 +277,30 @@ export default function RelatorioProducoesPage() {
                   <div className="text-sm text-red-700">Ruins (&lt;75%)</div>
                 </div>
                 
-                {/* NOVA SEá‡áƒO: Estatá­sticas de Aderáªncia */}
+                {/* NOVA SE��O: Estat�sticas de Ader�ncia */}
                 {producoes.some(p => p.percentual_aderencia_receita !== undefined) && (
                   <>
                     <div className="text-center p-3 bg-purple-50 rounded-lg">
                       <div className="text-2xl font-bold text-purple-600">
                         {producoes.filter((p: any) => p.percentual_aderencia_receita && p.percentual_aderencia_receita >= 95).length}
                       </div>
-                      <div className="text-sm text-purple-700">Aderáªncia Excelente</div>
+                      <div className="text-sm text-purple-700">Ader�ncia Excelente</div>
                     </div>
                     
                     <div className="text-center p-3 bg-indigo-50 rounded-lg">
                       <div className="text-2xl font-bold text-indigo-600">
                         {producoes.some(p => p.percentual_aderencia_receita) 
-                          ? Math.round(producoes.filter((p: any) => p.percentual_aderencia_receita).reduce((acc, p) => acc + (p.percentual_aderencia_receita || 0), 0) / producoes.filter((p: any) => p.percentual_aderencia_receita).length)
+                          ? Math.round(producoes.filter((p: any) => p.percentual_aderencia_receita).reduce((acc: any, p: any) => acc + (p.percentual_aderencia_receita || 0), 0) / producoes.filter((p: any) => p.percentual_aderencia_receita).length)
                           : 0}%
                       </div>
-                      <div className="text-sm text-indigo-700">Aderáªncia Má©dia</div>
+                      <div className="text-sm text-indigo-700">Ader�ncia M�dia</div>
                     </div>
                     
                     <div className="text-center p-3 bg-pink-50 rounded-lg">
                       <div className="text-2xl font-bold text-pink-600">
                         {producoes.filter((p: any) => p.percentual_aderencia_receita && p.percentual_aderencia_receita < 75).length}
                       </div>
-                      <div className="text-sm text-pink-700">Aderáªncia Ruim</div>
+                      <div className="text-sm text-pink-700">Ader�ncia Ruim</div>
                     </div>
                     
                     <div className="text-center p-3 bg-gray-50 rounded-lg">
@@ -319,17 +319,17 @@ export default function RelatorioProducoesPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-black">
-              <span className="text-orange-600">ðŸ­</span> Produá§áµes
+              <span className="text-orange-600">🏭</span> Produ��es
             </CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <div className="text-center py-8">
-                <div className="text-blue-600 text-lg">³ Carregando produá§áµes...</div>
+                <div className="text-blue-600 text-lg">�� Carregando produ��es...</div>
               </div>
             ) : producoes.length === 0 ? (
               <div className="text-center py-8">
-                <div className="text-gray-500 text-lg">ðŸ“­ Nenhuma produá§á£o encontrada</div>
+                <div className="text-gray-500 text-lg">📭 Nenhuma produ��o encontrada</div>
                 <p className="text-gray-400 text-sm mt-2">
                   Data selecionada: {new Date(dataInput).toLocaleDateString('pt-BR')}
                 </p>
@@ -337,28 +337,28 @@ export default function RelatorioProducoesPage() {
             ) : (
               <div className="space-y-4">
                 <div className="text-gray-600 text-sm">
-                  Total: <strong className="text-black">{producoes.length} produá§áµes</strong> em {new Date(dataInput).toLocaleDateString('pt-BR')}
+                  Total: <strong className="text-black">{producoes.length} produ��es</strong> em {new Date(dataInput).toLocaleDateString('pt-BR')}
                 </div>
 
-                {/* AVISO: Migration necessá¡ria */}
+                {/* AVISO: Migration necess�ria */}
                 {producoes.length > 0 && !producoes.some(p => p.percentual_aderencia_receita !== undefined) && (
                   <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-orange-600 text-xl">š ï¸</span>
-                      <h3 className="font-bold text-orange-800">Dados de Aderáªncia Ná£o Disponá­veis</h3>
+                      <span className="text-orange-600 text-xl">��️</span>
+                      <h3 className="font-bold text-orange-800">Dados de Ader�ncia N�o Dispon�veis</h3>
                     </div>
                     <p className="text-orange-700 text-sm mb-3">
-                      Para ver as má©tricas de aderáªncia á  receita, desvio e fator de correá§á£o, 
-                      execute a migration clicando no botá£o <strong>"ðŸ“Š Migrar Campos"</strong> acima.
+                      Para ver as m�tricas de ader�ncia � receita, desvio e fator de corre��o, 
+                      execute a migration clicando no bot�o <strong>"📊 Migrar Campos"</strong> acima.
                     </p>
                     <p className="text-orange-600 text-xs">
-                      ðŸ’¡ A migration adiciona campos no banco para aná¡lise avaná§ada das produá§áµes.
+                      💡 A migration adiciona campos no banco para an�lise avan�ada das produ��es.
                     </p>
                   </div>
                 )}
 
                 <div className="space-y-3">
-                  {producoes.map((producao) => {
+                  {producoes.map((producao: any) => {
                     const eficiencia = calcularEficiencia(producao.rendimento_real, producao.rendimento_esperado)
                     const desvio = calcularDesvio(producao.rendimento_real, producao.rendimento_esperado)
                     const fatorCorrecao = calcularFatorCorrecao(producao.rendimento_real, producao.rendimento_esperado)
@@ -400,7 +400,7 @@ export default function RelatorioProducoesPage() {
                                   <strong className="text-black">Peso Bruto:</strong> {producao.peso_bruto_proteina}g
                                 </p>
                                 <p className="text-gray-600">
-                                  <strong className="text-black">Peso Lá­quido:</strong> {producao.peso_limpo_proteina}g
+                                  <strong className="text-black">Peso L�quido:</strong> {producao.peso_limpo_proteina}g
                                 </p>
                                 <p className="text-gray-600">
                                   <strong className="text-black">Insumo Chefe:</strong> {producao.insumo_chefe_nome} ({producao.peso_insumo_chefe}g)
@@ -419,21 +419,21 @@ export default function RelatorioProducoesPage() {
                                 </p>
                               </div>
 
-                              {/* NOVA COLUNA: Má©tricas de Aná¡lise */}
+                              {/* NOVA COLUNA: M�tricas de An�lise */}
                               <div className="bg-gray-50 p-3 rounded-lg">
                                 <p className="text-gray-600">
-                                  <strong className="text-black">ðŸ“Š Desvio:</strong> {desvio}%
+                                  <strong className="text-black">📊 Desvio:</strong> {desvio}%
                                 </p>
                                 <p className="text-gray-600">
-                                  <strong className="text-black">š–ï¸ Fator Correá§á£o:</strong> {fatorCorrecao}x
+                                  <strong className="text-black">��️ Fator Corre��o:</strong> {fatorCorrecao}x
                                 </p>
                                 {aderencia !== undefined ? (
                                   <p className="text-gray-600">
-                                    <strong className="text-black">ðŸŽ¯ Aderáªncia:</strong> {aderencia.toFixed(1)}%
+                                    <strong className="text-black">🎯 Ader�ncia:</strong> {aderencia.toFixed(1)}%
                                   </p>
                                 ) : (
                                   <p className="text-gray-400 text-xs">
-                                    Execute migration para ver aderáªncia
+                                    Execute migration para ver ader�ncia
                                   </p>
                                 )}
                               </div>
@@ -441,12 +441,12 @@ export default function RelatorioProducoesPage() {
 
                             {producao.observacoes && (
                               <div className="mt-3 p-2 bg-gray-100 rounded text-sm">
-                                <strong className="text-black">Observaá§áµes:</strong> {producao.observacoes}
+                                <strong className="text-black">Observa��es:</strong> {producao.observacoes}
                               </div>
                             )}
 
                             <div className="mt-2 text-xs text-gray-500">
-                              Iná­cio: {formatarData(producao.inicio_producao)} | 
+                              In�cio: {formatarData(producao.inicio_producao)} | 
                               Fim: {formatarData(producao.fim_producao)}
                             </div>
                           </div>

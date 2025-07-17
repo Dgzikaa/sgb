@@ -1,7 +1,7 @@
-﻿'use client'
+'use client'
 
 import { useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { usePageTitle } from '@/contexts/PageTitleContext'
 import { 
@@ -31,8 +31,8 @@ interface VisaoGeralItem {
 const visaoGeralItems: VisaoGeralItem[] = [
   {
     id: 'marketing-360',
-    title: 'Marketing 360°',
-    description: 'Visá£o completa das campanhas e má©tricas de marketing digital',
+    title: 'Marketing 360�',
+    description: 'Vis�o completa das campanhas e m�tricas de marketing digital',
     icon: Target,
     href: '/visao-geral/marketing-360',
     status: 'active',
@@ -42,7 +42,7 @@ const visaoGeralItems: VisaoGeralItem[] = [
   {
     id: 'financeiro-mensal',
     title: 'Financeiro Mensal',
-    description: 'Aná¡lise detalhada do desempenho financeiro mensal',
+    description: 'An�lise detalhada do desempenho financeiro mensal',
     icon: DollarSign,
     href: '/visao-geral/financeiro-mensal',
     status: 'active',
@@ -50,8 +50,8 @@ const visaoGeralItems: VisaoGeralItem[] = [
   },
   {
     id: 'comparativo',
-    title: 'Aná¡lise Comparativa',
-    description: 'Compare perá­odos e identifique tendáªncias de crescimento',
+    title: 'An�lise Comparativa',
+    description: 'Compare per�odos e identifique tend�ncias de crescimento',
     icon: PieChart,
     href: '/visao-geral/comparativo',
     status: 'active',
@@ -59,8 +59,8 @@ const visaoGeralItems: VisaoGeralItem[] = [
   },
   {
     id: 'metrica-evolucao',
-    title: 'Evoluá§á£o de Má©tricas',
-    description: 'Acompanhe a evoluá§á£o das principais má©tricas ao longo do tempo',
+    title: 'Evolu��o de M�tricas',
+    description: 'Acompanhe a evolu��o das principais m�tricas ao longo do tempo',
     icon: TrendingUp,
     href: '/visao-geral/metrica-evolucao',
     status: 'active',
@@ -68,8 +68,8 @@ const visaoGeralItems: VisaoGeralItem[] = [
   },
   {
     id: 'diario',
-    title: 'Visá£o Diá¡ria',
-    description: 'Aná¡lise detalhada do desempenho diá¡rio do negá³cio',
+    title: 'Vis�o Di�ria',
+    description: 'An�lise detalhada do desempenho di�rio do neg�cio',
     icon: Calendar,
     href: '/visao-geral/diario',
     status: 'active',
@@ -77,8 +77,8 @@ const visaoGeralItems: VisaoGeralItem[] = [
   },
   {
     id: 'semanal',
-    title: 'Relatá³rio Semanal',
-    description: 'Consolidado semanal com insights e recomendaá§áµes',
+    title: 'Relat�rio Semanal',
+    description: 'Consolidado semanal com insights e recomenda��es',
     icon: PieChart,
     href: '/visao-geral/semanal',
     status: 'active',
@@ -86,8 +86,8 @@ const visaoGeralItems: VisaoGeralItem[] = [
   },
   {
     id: 'garcons',
-    title: 'Performance Gará§ons',
-    description: 'Aná¡lise de desempenho e produtividade dos gará§ons',
+    title: 'Performance Gar�ons',
+    description: 'An�lise de desempenho e produtividade dos gar�ons',
     icon: Users,
     href: '/visao-geral/garcons',
     status: 'active',
@@ -95,8 +95,8 @@ const visaoGeralItems: VisaoGeralItem[] = [
   },
   {
     id: 'metricas-barras',
-    title: 'Má©tricas em Barras',
-    description: 'Visualizaá§á£o em grá¡ficos de barras das principais má©tricas',
+    title: 'M�tricas em Barras',
+    description: 'Visualiza��o em gr�ficos de barras das principais m�tricas',
     icon: Activity,
     href: '/visao-geral/metricas-barras',
     status: 'active',
@@ -105,7 +105,7 @@ const visaoGeralItems: VisaoGeralItem[] = [
   {
     id: 'instagram-tracking',
     title: 'Instagram Tracking',
-    description: 'Aná¡lise detalhada e variaá§áµes diá¡rias do Instagram',
+    description: 'An�lise detalhada e varia��es di�rias do Instagram',
     icon: Users,
     href: '/visao-geral/instagram-tracking',
     status: 'active',
@@ -118,7 +118,7 @@ export default function VisaoGeralPage() {
   const { setPageTitle } = usePageTitle()
 
   useEffect(() => {
-    setPageTitle('Visá£o Geral')
+    setPageTitle('Vis�o Geral')
     return () => setPageTitle('')
   }, [setPageTitle])
 
@@ -159,19 +159,19 @@ export default function VisaoGeralPage() {
               <Eye className="w-8 h-8 text-white" />
             </div>
             <h1 className="card-title-dark text-3xl mb-2">
-              Visá£o Geral
+              Vis�o Geral
             </h1>
             <p className="card-description-dark text-lg max-w-2xl mx-auto">
-              Acesse relatá³rios detalhados, aná¡lises comparativas e insights estratá©gicos 
-              para tomada de decisáµes baseada em dados
+              Acesse relat�rios detalhados, an�lises comparativas e insights estrat�gicos 
+              para tomada de decis�es baseada em dados
             </p>
           </div>
 
 
 
-          {/* Relatá³rios Grid */}
+          {/* Relat�rios Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {visaoGeralItems.map((item) => {
+            {visaoGeralItems.map((item: any) => {
               const IconComponent = item.icon
               return (
                 <div key={item.id} className="card-dark hover:shadow-lg transition-shadow duration-300 group">
@@ -203,7 +203,7 @@ export default function VisaoGeralPage() {
                         variant="outline"
                         disabled={item.status === 'coming_soon'}
                       >
-                        <span>Acessar Relatá³rio</span>
+                        <span>Acessar Relat�rio</span>
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </Link>
@@ -217,12 +217,12 @@ export default function VisaoGeralPage() {
           <div className="card-dark p-6">
             <div className="text-center">
               <h3 className="card-title-dark text-lg mb-2">
-                ðŸ“Š Aná¡lises Inteligentes
+                📊 An�lises Inteligentes
               </h3>
               <p className="card-description-dark max-w-2xl mx-auto">
-                Todos os relatá³rios sá£o atualizados em tempo real e conectados 
-                á s suas integraá§áµes ativas (ContaAzul, Meta, WhatsApp). 
-                Use os filtros de perá­odo para aná¡lises customizadas.
+                Todos os relat�rios s�o atualizados em tempo real e conectados 
+                �s suas integra��es ativas (ContaAzul: any, Meta, WhatsApp). 
+                Use os filtros de per�odo para an�lises customizadas.
               </p>
             </div>
           </div>

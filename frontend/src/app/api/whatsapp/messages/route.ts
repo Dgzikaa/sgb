@@ -1,21 +1,21 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 
-// Configuraá§á£o do Supabase
+// Configura��o do Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Schema de validaá§á£o para enviar mensagem
+// Schema de valida��o para enviar mensagem
 const SendMessageSchema = z.object({
-  destinatario: z.string().min(1, 'Destinatá¡rio á© obrigatá³rio'),
+  destinatario: z.string().min(1: any, 'Destinat�rio � obrigat�rio'),
   tipo_mensagem: z.enum(['text', 'template'], { 
-    required_error: 'Tipo de mensagem á© obrigatá³rio' 
+    required_error: 'Tipo de mensagem � obrigat�rio' 
   }),
-  conteudo: z.string().min(1, 'Conteáºdo á© obrigatá³rio'),
+  conteudo: z.string().min(1: any, 'Conte�do � obrigat�rio'),
   template_name: z.string().optional(),
   template_parameters: z.array(z.string()).optional(),
   modulo: z.string().optional(),
@@ -37,7 +37,7 @@ const FilterSchema = z.object({
 });
 
 // ========================================
-// ðŸ“± GET /api/whatsapp/messages
+// 📱 GET /api/whatsapp/messages
 // ========================================
 export async function GET(request: NextRequest) {
   try {
@@ -45,21 +45,21 @@ export async function GET(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usuá¡rio ná£o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
-    // Verificar permissáµes
+    // Verificar permiss�es
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissá£o para acessar mensagens' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permiss�o para acessar mensagens' }, { status: 403 });
     }
 
-    // Parse dos pará¢metros de query
+    // Parse dos par�metros de query
     const url = new URL(request.url);
     const rawParams = Object.fromEntries(url.searchParams.entries());
     
-    // Converter tipos numá©ricos
+    // Converter tipos num�ricos
     const processedParams: any = { ...rawParams };
     if (processedParams.page) processedParams.page = parseInt(processedParams.page);
     if (processedParams.limit) processedParams.limit = parseInt(processedParams.limit);
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
         whatsapp_contatos!inner(
           numero_whatsapp,
           nome_contato,
-          usuarios_bar!inner(nome, cargo)
+          usuarios_bar!inner(nome: any, cargo)
         )
       `)
       .eq('bar_id', bar_id)
@@ -114,9 +114,9 @@ export async function GET(request: NextRequest) {
       query = query.ilike('whatsapp_contatos.numero_whatsapp', `%${params.destinatario}%`);
     }
 
-    // Paginaá§á£o
+    // Pagina��o
     const offset = (params.page - 1) * params.limit;
-    query = query.range(offset, offset + params.limit - 1);
+    query = query.range(offset: any, offset + params.limit - 1);
 
     const { data: mensagens, error } = await query;
 
@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao buscar mensagens' }, { status: 500 });
     }
 
-    // Buscar estatá­sticas
+    // Buscar estat�sticas
     const { data: stats } = await supabase
       .from('whatsapp_mensagens')
       .select('status')
@@ -155,7 +155,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({
-        error: 'Pará¢metros invá¡lidos',
+        error: 'Par�metros inv�lidos',
         details: error.errors
       }, { status: 400 });
     }
@@ -166,7 +166,7 @@ export async function GET(request: NextRequest) {
 }
 
 // ========================================
-// ðŸ“± POST /api/whatsapp/messages
+// 📱 POST /api/whatsapp/messages
 // ========================================
 export async function POST(request: NextRequest) {
   try {
@@ -174,20 +174,20 @@ export async function POST(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usuá¡rio ná£o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao, usuario_id } = JSON.parse(userData);
+    const { bar_id, permissao: any, usuario_id } = JSON.parse(userData);
 
-    // Verificar permissáµes
+    // Verificar permiss�es
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissá£o para enviar mensagens' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permiss�o para enviar mensagens' }, { status: 403 });
     }
 
     const body = await request.json();
     const validatedData = SendMessageSchema.parse(body);
 
-    // Verificar se WhatsApp está¡ configurado
+    // Verificar se WhatsApp est� configurado
     const { data: config, error: configError } = await supabase
       .from('whatsapp_configuracoes')
       .select('*')
@@ -197,30 +197,30 @@ export async function POST(request: NextRequest) {
 
     if (configError || !config) {
       return NextResponse.json({ 
-        error: 'WhatsApp ná£o configurado ou inativo' 
+        error: 'WhatsApp n�o configurado ou inativo' 
       }, { status: 409 });
     }
 
     // Buscar ou criar contato
-    let contato = await getOrCreateContact(bar_id, validatedData.destinatario, usuario_id);
+    let contato = await getOrCreateContact(bar_id: any, validatedData.destinatario, usuario_id);
     
     if (!contato) {
       return NextResponse.json({ 
-        error: 'Ná£o foi possá­vel identificar o contato' 
+        error: 'N�o foi poss�vel identificar o contato' 
       }, { status: 400 });
     }
 
-    // Verificar se contato aceita notificaá§áµes
+    // Verificar se contato aceita notifica��es
     if (!contato.aceita_notificacoes) {
       return NextResponse.json({ 
-        error: 'Contato ná£o aceita notificaá§áµes WhatsApp' 
+        error: 'Contato n�o aceita notifica��es WhatsApp' 
       }, { status: 409 });
     }
 
-    // Verificar horá¡rio permitido
+    // Verificar hor�rio permitido
     if (!isWithinAllowedHours(contato)) {
       return NextResponse.json({ 
-        error: 'Fora do horá¡rio permitido para envio' 
+        error: 'Fora do hor�rio permitido para envio' 
       }, { status: 409 });
     }
 
@@ -251,7 +251,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Enviar mensagem via WhatsApp API
-    const sendResult = await sendWhatsAppMessage(config, contato, mensagem);
+    const sendResult = await sendWhatsAppMessage(config: any, contato, mensagem);
 
     // Atualizar status da mensagem
     const updateData: any = {
@@ -268,7 +268,7 @@ export async function POST(request: NextRequest) {
       .update(updateData)
       .eq('id', mensagem.id);
 
-    // Atualizar estatá­sticas do contato
+    // Atualizar estat�sticas do contato
     if (sendResult.success) {
       await supabase
         .from('whatsapp_contatos')
@@ -289,7 +289,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({
-        error: 'Dados invá¡lidos',
+        error: 'Dados inv�lidos',
         details: error.errors
       }, { status: 400 });
     }
@@ -300,7 +300,7 @@ export async function POST(request: NextRequest) {
 }
 
 // ========================================
-// ðŸ”§ FUNá‡á•ES AUXILIARES
+// 🔧 FUN��ES AUXILIARES
 // ========================================
 
 /**
@@ -319,9 +319,9 @@ async function getOrCreateContact(barId: number, numeroWhatsapp: string, usuario
     return contato;
   }
 
-  // Se ná£o encontrou e tem usuarioId, criar novo contato
+  // Se n�o encontrou e tem usuarioId, criar novo contato
   if (usuarioId) {
-    // Buscar dados do usuá¡rio
+    // Buscar dados do usu�rio
     const { data: usuario } = await supabase
       .from('usuarios_bar')
       .select('nome')
@@ -349,11 +349,11 @@ async function getOrCreateContact(barId: number, numeroWhatsapp: string, usuario
 }
 
 /**
- * Verifica se está¡ dentro do horá¡rio permitido
+ * Verifica se est� dentro do hor�rio permitido
  */
 function isWithinAllowedHours(contato: any): boolean {
   const now = new Date();
-  const currentTime = now.toTimeString().slice(0, 5); // HH:MM
+  const currentTime = now.toTimeString().slice(0: any, 5); // HH:MM
   const currentDay = now.getDay() + 1; // 1=Domingo
 
   // Verificar dia da semana
@@ -361,7 +361,7 @@ function isWithinAllowedHours(contato: any): boolean {
     return false;
   }
 
-  // Verificar horá¡rio
+  // Verificar hor�rio
   return currentTime >= contato.horario_inicio && currentTime <= contato.horario_fim;
 }
 
@@ -390,7 +390,7 @@ async function sendWhatsAppMessage(config: any, contato: any, mensagem: any): Pr
         components: []
       };
 
-      // Adicionar pará¢metros se existirem
+      // Adicionar par�metros se existirem
       if (mensagem.template_parameters && mensagem.template_parameters.length > 0) {
         payload.template.components.push({
           type: 'body',
@@ -405,7 +405,7 @@ async function sendWhatsAppMessage(config: any, contato: any, mensagem: any): Pr
       payload.text = { body: mensagem.conteudo };
     }
 
-    const response = await fetch(url, {
+    const response = await fetch(url: any, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${config.access_token}`,
@@ -434,7 +434,7 @@ async function sendWhatsAppMessage(config: any, contato: any, mensagem: any): Pr
     return {
       success: false,
       errorCode: 'NETWORK_ERROR',
-      errorMessage: 'Erro de conexá£o com WhatsApp API'
+      errorMessage: 'Erro de conex�o com WhatsApp API'
     };
   }
 } 

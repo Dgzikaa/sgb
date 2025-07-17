@@ -1,18 +1,18 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('° CRON JOB: Coleta diá¡ria ContaHub iniciada')
+    console.log('�� CRON JOB: Coleta di�ria ContaHub iniciada')
     
-    // Verificar se á© um cron autorizado (opcional - adicionar header de seguraná§a)
+    // Verificar se � um cron autorizado (opcional - adicionar header de seguran�a)
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET || 'sgb-cron-2024'
     
     if (authHeader !== `Bearer ${cronSecret}`) {
-      console.log('Œ Cron ná£o autorizado')
+      console.log('�� Cron n�o autorizado')
       return NextResponse.json({
         success: false,
-        error: 'Ná£o autorizado'
+        error: 'N�o autorizado'
       }, { status: 401 })
     }
     
@@ -20,9 +20,9 @@ export async function GET(request: NextRequest) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
     const edgeFunctionUrl = `${supabaseUrl}/functions/v1/contahub-collector`
     
-    console.log(`ðŸ“¡ Executando edge function: ${edgeFunctionUrl}`)
+    console.log(`📡 Executando edge function: ${edgeFunctionUrl}`)
     
-    const response = await fetch(edgeFunctionUrl, {
+    const response = await fetch(edgeFunctionUrl: any, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       throw new Error(`Edge function falhou: ${response.status} - ${data.error || responseText}`)
     }
     
-    console.log('œ… Cron job concluá­do com sucesso')
+    console.log('�� Cron job conclu�do com sucesso')
     
     return NextResponse.json({
       success: true,
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
     })
     
   } catch (error) {
-    console.error('ðŸ’¥ Erro no cron job:', error)
+    console.error('💥 Erro no cron job:', error)
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Erro desconhecido',

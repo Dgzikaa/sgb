@@ -1,14 +1,14 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Dialog, DialogContent: any, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Select, SelectContent: any, SelectItem, SelectTrigger: any, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
 import { useBar } from '@/contexts/BarContext'
 import { usePageTitle } from '@/contexts/PageTitleContext'
@@ -27,7 +27,7 @@ import {
   Search,
   Eye
 } from 'lucide-react'
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday } from 'date-fns'
+import { format, addMonths: any, subMonths, startOfMonth: any, endOfMonth, eachDayOfInterval: any, isSameMonth, isSameDay: any, isToday } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 interface Evento {
@@ -55,14 +55,14 @@ interface CategoriaEvento {
 }
 
 const categoriasPadrao: CategoriaEvento[] = [
-  { id: 'show', nome: 'Show/Máºsica', cor: 'bg-purple-500', icon: 'ðŸŽµ' },
-  { id: 'festa', nome: 'Festa Temá¡tica', cor: 'bg-pink-500', icon: 'ðŸŽ‰' },
-  { id: 'happy-hour', nome: 'Happy Hour', cor: 'bg-orange-500', icon: 'ðŸ»' },
-  { id: 'esporte', nome: 'Evento Esportivo', cor: 'bg-green-500', icon: 'š½' },
-  { id: 'gastronomia', nome: 'Gastronomia', cor: 'bg-yellow-500', icon: 'ðŸ½ï¸' },
-  { id: 'networking', nome: 'Networking', cor: 'bg-blue-500', icon: 'ðŸ¤' },
-  { id: 'promocao', nome: 'Promoá§á£o', cor: 'bg-red-500', icon: 'ðŸ·ï¸' },
-  { id: 'especial', nome: 'Data Especial', cor: 'bg-indigo-500', icon: 'ðŸŒŸ' }
+  { id: 'show', nome: 'Show/M�sica', cor: 'bg-purple-500', icon: '🎵' },
+  { id: 'festa', nome: 'Festa Tem�tica', cor: 'bg-pink-500', icon: '🎉' },
+  { id: 'happy-hour', nome: 'Happy Hour', cor: 'bg-orange-500', icon: '🍻' },
+  { id: 'esporte', nome: 'Evento Esportivo', cor: 'bg-green-500', icon: '��' },
+  { id: 'gastronomia', nome: 'Gastronomia', cor: 'bg-yellow-500', icon: '🍽️' },
+  { id: 'networking', nome: 'Networking', cor: 'bg-blue-500', icon: '🤝' },
+  { id: 'promocao', nome: 'Promo��o', cor: 'bg-red-500', icon: '🏷️' },
+  { id: 'especial', nome: 'Data Especial', cor: 'bg-indigo-500', icon: '🌟' }
 ]
 
 export default function EventosPage() {
@@ -104,7 +104,7 @@ export default function EventosPage() {
       } else {
         console.error('Erro ao carregar eventos:', data.error)
         toast({
-          title: 'Œ Erro',
+          title: '�� Erro',
           description: 'Falha ao carregar eventos',
           variant: 'destructive'
         })
@@ -112,7 +112,7 @@ export default function EventosPage() {
     } catch (error) {
       console.error('Erro ao carregar eventos:', error)
       toast({
-        title: 'Œ Erro',
+        title: '�� Erro',
         description: 'Falha ao carregar eventos',
         variant: 'destructive'
       })
@@ -142,7 +142,7 @@ export default function EventosPage() {
       
       if (result.success) {
         toast({
-          title: 'œ… Sucesso',
+          title: '�� Sucesso',
           description: editingEvent ? 'Evento atualizado!' : 'Evento criado!'
         })
         setShowEventModal(false)
@@ -154,7 +154,7 @@ export default function EventosPage() {
     } catch (error) {
       console.error('Erro ao salvar evento:', error)
       toast({
-        title: 'Œ Erro',
+        title: '�� Erro',
         description: 'Falha ao salvar evento',
         variant: 'destructive'
       })
@@ -176,7 +176,7 @@ export default function EventosPage() {
       
       if (result.success) {
         toast({
-          title: 'œ… Sucesso',
+          title: '�� Sucesso',
           description: 'Evento deletado!'
         })
         loadEventos()
@@ -186,7 +186,7 @@ export default function EventosPage() {
     } catch (error) {
       console.error('Erro ao deletar evento:', error)
       toast({
-        title: 'Œ Erro',
+        title: '�� Erro',
         description: 'Falha ao deletar evento',
         variant: 'destructive'
       })
@@ -225,7 +225,7 @@ export default function EventosPage() {
   })
 
   const navigateMonth = (direction: 'prev' | 'next') => {
-    setCurrentDate(direction === 'prev' ? subMonths(currentDate, 1) : addMonths(currentDate, 1))
+    setCurrentDate(direction === 'prev' ? subMonths(currentDate: any, 1) : addMonths(currentDate: any, 1))
   }
 
   return (
@@ -255,7 +255,7 @@ export default function EventosPage() {
                   className="text-xs"
                 >
                   <Calendar className="w-4 h-4 mr-1" />
-                  Calendá¡rio
+                  Calend�rio
                 </Button>
                 <Button
                   variant={viewMode === 'list' ? 'default' : 'ghost'}
@@ -310,9 +310,9 @@ export default function EventosPage() {
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input
-                      placeholder="Nome, descriá§á£o..."
+                      placeholder="Nome, descri��o..."
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onChange={(e: any) => setSearchTerm(e.target.value)}
                       className="pl-10"
                     />
                   </div>
@@ -346,7 +346,7 @@ export default function EventosPage() {
                       <SelectItem value="planejado">Planejado</SelectItem>
                       <SelectItem value="confirmado">Confirmado</SelectItem>
                       <SelectItem value="cancelado">Cancelado</SelectItem>
-                      <SelectItem value="concluido">Concluá­do</SelectItem>
+                      <SelectItem value="concluido">Conclu�do</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -369,13 +369,13 @@ export default function EventosPage() {
             </CardContent>
           </Card>
 
-          {/* Calendá¡rio ou Lista */}
+          {/* Calend�rio ou Lista */}
           {viewMode === 'calendar' ? (
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl">
-                    {format(currentDate, 'MMMM yyyy', { locale: ptBR })}
+                    {format(currentDate: any, 'MMMM yyyy', { locale: ptBR })}
                   </CardTitle>
                   <div className="flex gap-2">
                     <Button
@@ -406,7 +406,7 @@ export default function EventosPage() {
                 <CalendarView
                   currentDate={currentDate}
                   eventos={filteredEventos}
-                  onEditEvent={(evento) => {
+                  onEditEvent={(evento: any) => {
                     setEditingEvent(evento)
                     setShowEventModal(true)
                   }}
@@ -423,7 +423,7 @@ export default function EventosPage() {
               <CardContent>
                 <EventList
                   eventos={filteredEventos}
-                  onEditEvent={(evento) => {
+                  onEditEvent={(evento: any) => {
                     setEditingEvent(evento)
                     setShowEventModal(true)
                   }}
@@ -444,7 +444,7 @@ export default function EventosPage() {
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {eventos.length}
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total do Máªs</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Total do M�s</p>
               </CardContent>
             </Card>
             
@@ -490,7 +490,7 @@ export default function EventosPage() {
   )
 }
 
-// Componente do formulá¡rio de evento
+// Componente do formul�rio de evento
 function EventForm({ 
   evento, 
   onSave, 
@@ -541,18 +541,18 @@ function EventForm({
           <Input
             id="nome_evento"
             value={formData.nome_evento}
-            onChange={(e) => setFormData({ ...formData, nome_evento: e.target.value })}
+            onChange={(e: any) => setFormData({ ...formData, nome_evento: e.target.value })}
             placeholder="Ex: Show de Rock, Happy Hour..."
             required
           />
         </div>
 
         <div className="md:col-span-2">
-          <Label htmlFor="descricao">Descriá§á£o</Label>
+          <Label htmlFor="descricao">Descri��o</Label>
           <Textarea
             id="descricao"
             value={formData.descricao}
-            onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+            onChange={(e: any) => setFormData({ ...formData, descricao: e.target.value })}
             placeholder="Descreva o evento..."
             rows={3}
           />
@@ -564,14 +564,14 @@ function EventForm({
             id="data_evento"
             type="date"
             value={formData.data_evento}
-            onChange={(e) => setFormData({ ...formData, data_evento: e.target.value })}
+            onChange={(e: any) => setFormData({ ...formData, data_evento: e.target.value })}
             required
           />
         </div>
 
         <div>
           <Label htmlFor="categoria">Categoria *</Label>
-          <Select value={formData.categoria} onValueChange={(value) => setFormData({ ...formData, categoria: value })}>
+          <Select value={formData.categoria} onValueChange={(value: any) => setFormData({ ...formData, categoria: value })}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -586,12 +586,12 @@ function EventForm({
         </div>
 
         <div>
-          <Label htmlFor="hora_inicio">Hora de Iná­cio</Label>
+          <Label htmlFor="hora_inicio">Hora de In�cio</Label>
           <Input
             id="hora_inicio"
             type="time"
             value={formData.hora_inicio}
-            onChange={(e) => setFormData({ ...formData, hora_inicio: e.target.value })}
+            onChange={(e: any) => setFormData({ ...formData, hora_inicio: e.target.value })}
           />
         </div>
 
@@ -601,7 +601,7 @@ function EventForm({
             id="hora_fim"
             type="time"
             value={formData.hora_fim}
-            onChange={(e) => setFormData({ ...formData, hora_fim: e.target.value })}
+            onChange={(e: any) => setFormData({ ...formData, hora_fim: e.target.value })}
           />
         </div>
 
@@ -615,7 +615,7 @@ function EventForm({
               <SelectItem value="planejado">Planejado</SelectItem>
               <SelectItem value="confirmado">Confirmado</SelectItem>
               <SelectItem value="cancelado">Cancelado</SelectItem>
-              <SelectItem value="concluido">Concluá­do</SelectItem>
+              <SelectItem value="concluido">Conclu�do</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -625,8 +625,8 @@ function EventForm({
           <Input
             id="local"
             value={formData.local}
-            onChange={(e) => setFormData({ ...formData, local: e.target.value })}
-            placeholder="Ex: Salá£o Principal..."
+            onChange={(e: any) => setFormData({ ...formData, local: e.target.value })}
+            placeholder="Ex: Sal�o Principal..."
           />
         </div>
       </div>
@@ -643,7 +643,7 @@ function EventForm({
   )
 }
 
-// Componente do calendá¡rio
+// Componente do calend�rio
 function CalendarView({ 
   currentDate, 
   eventos, 
@@ -672,17 +672,17 @@ function CalendarView({
 
   return (
     <div className="grid grid-cols-7 gap-1">
-      {/* Cabeá§alho dos dias da semana */}
-      {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sá¡b'].map((day: any) => (
+      {/* Cabe�alho dos dias da semana */}
+      {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'S�b'].map((day: any) => (
         <div key={day} className="p-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
           {day}
         </div>
       ))}
       
-      {/* Dias do máªs */}
+      {/* Dias do m�s */}
       {days.map((day: any) => {
         const dayEvents = getEventosForDay(day)
-        const isCurrentMonth = isSameMonth(day, currentDate)
+        const isCurrentMonth = isSameMonth(day: any, currentDate)
         const isCurrentDay = isToday(day)
         
         return (
@@ -699,11 +699,11 @@ function CalendarView({
               ${isCurrentMonth ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-600'}
               ${isCurrentDay ? 'text-purple-600 dark:text-purple-400' : ''}
             `}>
-              {format(day, 'd')}
+              {format(day: any, 'd')}
             </div>
             
             <div className="space-y-1">
-              {dayEvents.slice(0, 2).map((evento: any) => {
+              {dayEvents.slice(0: any, 2).map((evento: any) => {
                 const categoria = getCategoria(evento.categoria)
                 return (
                   <div

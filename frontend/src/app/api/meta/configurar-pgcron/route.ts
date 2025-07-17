@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -11,10 +11,10 @@ export async function POST(request: NextRequest) {
     const { barId, action = 'configure' } = await request.json()
 
     if (!barId) {
-      return NextResponse.json({ error: 'barId á© obrigatá³rio' }, { status: 400 })
+      return NextResponse.json({ error: 'barId � obrigat�rio' }, { status: 400 })
     }
 
-    console.log(`ðŸ¤– Configurando pgcron META - Bar: ${barId}, Aá§á£o: ${action}`)
+    console.log(`🤖 Configurando pgcron META - Bar: ${barId}, A��o: ${action}`)
 
     switch (action) {
       case 'configure':
@@ -26,11 +26,11 @@ export async function POST(request: NextRequest) {
       case 'test':
         return await testarColetaMeta(barId)
       default:
-        return NextResponse.json({ error: 'Aá§á£o ná£o reconhecida' }, { status: 400 })
+        return NextResponse.json({ error: 'A��o n�o reconhecida' }, { status: 400 })
     }
 
   } catch (error) {
-    console.error('Œ Erro na configuraá§á£o pgcron META:', error)
+    console.error('�� Erro na configura��o pgcron META:', error)
     return NextResponse.json({ 
       error: error instanceof Error ? error.message : 'Erro interno' 
     }, { status: 500 })
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
 async function configurarCronJobMeta(barId: string) {
   try {
-    console.log(`ðŸ”§ Configurando cron job META para bar ${barId}`)
+    console.log(`🔧 Configurando cron job META para bar ${barId}`)
 
     // 1. Remover jobs existentes
     const jobName = `meta_sync_bar_${barId}`
@@ -48,13 +48,13 @@ async function configurarCronJobMeta(barId: string) {
     })
 
     if (removeError) {
-      console.warn('š ï¸ Job anterior ná£o encontrado ou já¡ removido:', removeError)
+      console.warn('��️ Job anterior n�o encontrado ou j� removido:', removeError)
     }
 
     // 2. Criar novo job - executa 2x por dia (8h e 20h) para economia de recursos
     const cronExpression = '0 8,20 * * *'  // 8h e 20h todos os dias
     
-    // 3. Comando SQL que chama a API de coleta automá¡tica
+    // 3. Comando SQL que chama a API de coleta autom�tica
     const comando = `
     SELECT net.http_post(
       url := '${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'}/api/meta/auto-collect',
@@ -63,7 +63,7 @@ async function configurarCronJobMeta(barId: string) {
         'Authorization', 'Bearer sgb-meta-cron-2025'
       ),
       body := jsonb_build_object(
-        'automatic', true,
+        'automatic', true: any,
         'source', 'pgcron',
         'bar_id', ${barId},
         'timestamp', now()
@@ -80,7 +80,7 @@ async function configurarCronJobMeta(barId: string) {
       throw new Error(`Erro ao criar cron job META: ${error.message}`)
     }
 
-    console.log(`œ… Cron job META criado: ${jobName}`)
+    console.log(`�� Cron job META criado: ${jobName}`)
 
     // 4. Verificar se existem credenciais Meta ativas
     const { data: metaConfig, error: metaError } = await supabase
@@ -98,11 +98,11 @@ async function configurarCronJobMeta(barId: string) {
       message: 'Cron job META configurado com sucesso',
       jobName,
       schedule: cronExpression,
-      schedule_description: 'Executa 2x por dia: 8h e 20h (manhá£ e noite)',
-      api_calls_per_day: 10, // 2 execuá§áµes á— 5 calls cada
+      schedule_description: 'Executa 2x por dia: 8h e 20h (manh� e noite)',
+      api_calls_per_day: 10, // 2 execu��es � 5 calls cada
       next_runs: [
-        'Prá³xima execuá§á£o: 8:00 (manhá£) e 20:00 (noite)',
-        'Timezone: UTC (ajustar conforme necessá¡rio)'
+        'Pr�xima execu��o: 8:00 (manh�) e 20:00 (noite)',
+        'Timezone: UTC (ajustar conforme necess�rio)'
       ],
       meta_config_status: hasValidConfig ? 'Configurado' : 'Pendente',
       warning: hasValidConfig ? null : 'Configure primeiro as credenciais Meta em /configuracoes/meta-configuracao'
@@ -115,7 +115,7 @@ async function configurarCronJobMeta(barId: string) {
 
 async function verificarStatusMeta(barId: string) {
   try {
-    console.log(`ðŸ” Verificando status do cron job META para bar ${barId}`)
+    console.log(`🔍 Verificando status do cron job META para bar ${barId}`)
 
     const jobName = `meta_sync_bar_${barId}`
 
@@ -129,12 +129,12 @@ async function verificarStatusMeta(barId: string) {
     if (error) {
       return NextResponse.json({
         success: false,
-        error: 'Job ná£o encontrado',
+        error: 'Job n�o encontrado',
         hasActiveJob: false
       })
     }
 
-    // Verificar áºltimas execuá§áµes
+    // Verificar �ltimas execu��es
     const { data: lastRuns } = await supabase
       .from('cron_job_run_details')
       .select('*')
@@ -142,7 +142,7 @@ async function verificarStatusMeta(barId: string) {
       .order('start_time', { ascending: false })
       .limit(5)
 
-    // Verificar configuraá§á£o Meta
+    // Verificar configura��o Meta
     const { data: metaConfig } = await supabase
       .from('api_credentials')
       .select('*')
@@ -173,7 +173,7 @@ async function verificarStatusMeta(barId: string) {
 
 async function removerCronJobMeta(barId: string) {
   try {
-    console.log(`ðŸ—‘ï¸ Removendo cron job META para bar ${barId}`)
+    console.log(`🗑️ Removendo cron job META para bar ${barId}`)
 
     const jobName = `meta_sync_bar_${barId}`
 
@@ -185,7 +185,7 @@ async function removerCronJobMeta(barId: string) {
       throw new Error(`Erro ao remover cron job META: ${error.message}`)
     }
 
-    console.log(`œ… Cron job META removido: ${jobName}`)
+    console.log(`�� Cron job META removido: ${jobName}`)
 
     return NextResponse.json({
       success: true,
@@ -199,7 +199,7 @@ async function removerCronJobMeta(barId: string) {
 
 async function testarColetaMeta(barId: string) {
   try {
-    console.log(`ðŸ§ª Testando coleta META para bar ${barId}`)
+    console.log(`🧪 Testando coleta META para bar ${barId}`)
 
     // Chamar a API de coleta manualmente
     const response = await fetch('https://sgbv2.vercel.app/api/meta/auto-collect', {
@@ -238,7 +238,7 @@ function getNextExecutionTime() {
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   
-  // Prá³ximas execuá§áµes: 8h e 20h
+  // Pr�ximas execu��es: 8h e 20h
   const morning = new Date(today.getTime() + 8 * 60 * 60 * 1000) // 8h
   const evening = new Date(today.getTime() + 20 * 60 * 60 * 1000) // 20h
   
@@ -247,7 +247,7 @@ function getNextExecutionTime() {
   } else if (now < evening) {
     return evening.toISOString()
   } else {
-    // Prá³xima execuá§á£o á© amanhá£ á s 8h
+    // Pr�xima execu��o � amanh� �s 8h
     const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000)
     return new Date(tomorrow.getTime() + 8 * 60 * 60 * 1000).toISOString()
   }
@@ -260,13 +260,13 @@ export async function GET(request: NextRequest) {
     const barId = searchParams.get('bar_id')
     
     if (!barId) {
-      return NextResponse.json({ error: 'bar_id á© obrigatá³rio' }, { status: 400 })
+      return NextResponse.json({ error: 'bar_id � obrigat�rio' }, { status: 400 })
     }
 
     return await verificarStatusMeta(barId)
 
   } catch (error) {
-    console.error('Œ Erro na verificaá§á£o de status META:', error)
+    console.error('�� Erro na verifica��o de status META:', error)
     return NextResponse.json({ 
       error: error instanceof Error ? error.message : 'Erro interno' 
     }, { status: 500 })

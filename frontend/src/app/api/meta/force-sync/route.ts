@@ -1,8 +1,8 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
 export async function POST() {
   try {
-    console.log('ðŸ”„ Forá§ando execuá§á£o manual do Meta Sync...')
+    console.log('🔄 For�ando execu��o manual do Meta Sync...')
     
     const response = await fetch('https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1/meta-sync-automatico', {
       method: 'POST',
@@ -21,7 +21,7 @@ export async function POST() {
     
     return NextResponse.json({
       success: true,
-      message: 'œ… Meta Analytics atualizado com sucesso!',
+      message: '�� Meta Analytics atualizado com sucesso!',
       data: {
         timestamp: new Date().toISOString(),
         facebook_saved: result.resultado_salvamento?.facebook_saved || false,
@@ -34,10 +34,10 @@ export async function POST() {
     })
     
   } catch (error: any) {
-    console.error('Œ Erro ao forá§ar sync:', error)
+    console.error('�� Erro ao for�ar sync:', error)
     return NextResponse.json({
       success: false,
-      message: 'Œ Falha ao atualizar dados do Meta',
+      message: '�� Falha ao atualizar dados do Meta',
       error: error.message
     }, { status: 500 })
   }

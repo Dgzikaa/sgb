@@ -1,4 +1,4 @@
-ï»¿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     const hoje = new Date();
     const inicioPeriodo = new Date(hoje.getTime() - daysBack * 24 * 60 * 60 * 1000);
 
-    console.log(`?? Periodo: ${inicioPeriodo.toISOString().split('T')[0]} atÃ© ${hoje.toISOString().split('T')[0]}`);
+    console.log(`?? Periodo: ${inicioPeriodo.toISOString().split('T')[0]} até ${hoje.toISOString().split('T')[0]}`);
 
     // 1. Buscar dados existentes do Facebook por dia
     const { data: facebookData, error: fbError } = await supabase
@@ -80,23 +80,23 @@ export async function POST(request: NextRequest) {
       campaignsByDate.get(row.data_coleta).push(row)
     })
 
-    // 5. Obter todas as datas Ãºnicas
+    // 5. Obter todas as datas únicas
     const allDates = new Set([
       ...Array.from(fbByDate.keys()),
       ...Array.from(igByDate.keys()),
       ...Array.from(campaignsByDate.keys())
     ])
 
-    console.log(`?? Datas Ãºnicas encontradas: ${allDates.size}`)
+    console.log(`?? Datas únicas encontradas: ${allDates.size}`)
 
-    // 6. Preparar dados para inserÃ§Ã¡o
+    // 6. Preparar dados para inserçáo
     const dailySummaryRecords = []
     let processedDates = 0
     let skippedDates = 0
 
     for (const date of Array.from(allDates).sort().reverse()) {
       try {
-        // Verificar se jÃ¡ existe registro para esta data (se nÃ¡o forÃ§ar)
+        // Verificar se já existe registro para esta data (se náo forçar)
         if (!force) {
           const { data: existingRecord } = await supabase
             .from('meta_daily_summary')
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
             .single()
 
           if (existingRecord) {
-            console.log(`?? Pulando ${date} - jÃ¡ existe`)
+            console.log(`?? Pulando ${date} - já existe`)
             skippedDates++
             continue
           }
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
           
           // Facebook
           facebook_followers: fbDay?.page_fans || 0,
-          facebook_posts_count: 0, // NÃ¡o temos na tabela atual
+          facebook_posts_count: 0, // Náo temos na tabela atual
           facebook_total_reactions: fbDay?.post_likes || 0,
           facebook_total_comments: fbDay?.post_comments || 0,
           facebook_total_shares: fbDay?.post_shares || 0,
@@ -139,15 +139,15 @@ export async function POST(request: NextRequest) {
           // Instagram
           instagram_followers: igDay?.follower_count || 0,
           instagram_following: igDay?.following_count || 0,
-          instagram_posts_count: 0, // NÃ¡o temos na tabela atual
+          instagram_posts_count: 0, // Náo temos na tabela atual
           instagram_total_likes: igDay?.posts_likes || 0,
           instagram_total_comments: igDay?.posts_comments || 0,
-          instagram_total_shares: 0, // NÃ¡o temos na tabela atual
+          instagram_total_shares: 0, // Náo temos na tabela atual
           instagram_reach: igDay?.reach || 0,
           instagram_impressions: igDay?.impressions || 0,
-          instagram_saves: 0, // NÃ¡o temos na tabela atual
-          instagram_profile_visits: 0, // NÃ¡o temos na tabela atual
-          instagram_website_clicks: 0, // NÃ¡o temos na tabela atual
+          instagram_saves: 0, // Náo temos na tabela atual
+          instagram_profile_visits: 0, // Náo temos na tabela atual
+          instagram_website_clicks: 0, // Náo temos na tabela atual
           
           // Campanhas
           campaigns_active: campaignsActive,
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
       // Inserir em lotes de 50 para evitar timeout
       const batchSize = 50
       for (let i = 0; i < dailySummaryRecords.length; i += batchSize) {
-        const batch = dailySummaryRecords.slice(i, i + batchSize)
+        const batch = dailySummaryRecords.slice(i: any, i + batchSize)
         
         try {
           const { data: insertedData, error: insertError } = await supabase
@@ -221,7 +221,7 @@ export async function POST(request: NextRequest) {
 
     const responseData = {
       success: true,
-      message: 'PopulaÃ§Ã¡o da meta_daily_summary concluÃ­da',
+      message: 'Populaçáo da meta_daily_summary concluída',
       stats: {
         bar_id: barId,
         period: {
@@ -247,7 +247,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('? PopulaÃ§Ã¡o concluÃ­da:', {
+    console.log('? Populaçáo concluída:', {
       inserted: insertedCount,
       errors: errorCount,
       total_records: finalCount?.length || 0
@@ -256,7 +256,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(responseData)
 
   } catch (error) {
-    console.error('? Erro na populaÃ§Ã¡o da meta_daily_summary:', error)
+    console.error('? Erro na populaçáo da meta_daily_summary:', error)
     
     return NextResponse.json({
       success: false,

@@ -1,4 +1,4 @@
-﻿import * as React from "react"
+import * as React from "react"
 import { cn } from "@/lib/utils"
 
 interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -6,7 +6,7 @@ interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
-  ({ className, variant = 'default', ...props }, ref) => {
+  ({ className, variant = 'default', ...props }, ref: any) => {
     const variantClasses = {
       default: "bg-blue-600 text-white hover:bg-blue-700",
       secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200",

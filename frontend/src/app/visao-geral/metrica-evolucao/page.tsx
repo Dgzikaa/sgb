@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useBar } from '@/contexts/BarContext'
@@ -25,8 +25,8 @@ export default function MetricaEvolucaoPage() {
   
   const [metricaSelecionada, setMetricaSelecionada] = useState('faturamento')
   const [periodoInicio, setPeriodoInicio] = useState(() => {
-    // Perá­odo padrá£o baseado na má©trica com dados mais recentes
-    return '2025-02-01'  // Faturamento sempre comeá§a em 01/02
+    // Per�odo padr�o baseado na m�trica com dados mais recentes
+    return '2025-02-01'  // Faturamento sempre come�a em 01/02
   })
   const [periodoFim, setPeriodoFim] = useState(() => {
     // Data fim sempre hoje - 1 dia
@@ -48,12 +48,12 @@ export default function MetricaEvolucaoPage() {
   })
 
   const metricas = [
-    { value: 'faturamento', label: 'Faturamento', icon: 'ðŸ’°', unit: 'R$', color: 'blue', dataInicio: '2025-02-01' },
-    { value: 'clientes', label: 'Clientes', icon: 'ðŸ‘¥', unit: '', color: 'green', dataInicio: '2025-01-31' },
-    { value: 'ticket_medio', label: 'Ticket Má©dio', icon: 'ðŸŽ¯', unit: 'R$', color: 'purple', dataInicio: '2025-02-01' },
-    { value: 'reservas', label: 'Reservas', icon: 'ðŸ“…', unit: 'pessoas', color: 'orange', dataInicio: '2025-02-06' },
-    { value: 'tempo_cozinha', label: 'Tempo Cozinha', icon: 'ðŸ‘¨€ðŸ³', unit: 'min', color: 'red', dataInicio: '2025-02-01' },
-    { value: 'tempo_bar', label: 'Tempo Bar', icon: 'ðŸ¹', unit: 'min', color: 'cyan', dataInicio: '2025-02-01' }
+    { value: 'faturamento', label: 'Faturamento', icon: '💰', unit: 'R$', color: 'blue', dataInicio: '2025-02-01' },
+    { value: 'clientes', label: 'Clientes', icon: '👥', unit: '', color: 'green', dataInicio: '2025-01-31' },
+    { value: 'ticket_medio', label: 'Ticket M�dio', icon: '🎯', unit: 'R$', color: 'purple', dataInicio: '2025-02-01' },
+    { value: 'reservas', label: 'Reservas', icon: '📅', unit: 'pessoas', color: 'orange', dataInicio: '2025-02-06' },
+    { value: 'tempo_cozinha', label: 'Tempo Cozinha', icon: '👨��🍳', unit: 'min', color: 'red', dataInicio: '2025-02-01' },
+    { value: 'tempo_bar', label: 'Tempo Bar', icon: '🍹', unit: 'min', color: 'cyan', dataInicio: '2025-02-01' }
   ]
 
   // Carregar metas do Supabase quando o bar mudar
@@ -63,27 +63,27 @@ export default function MetricaEvolucaoPage() {
     }
   }, [selectedBar])
 
-  // **CORREá‡áƒO: Ajustar perá­odo APENAS na primeira seleá§á£o da má©trica**
+  // **CORRE��O: Ajustar per�odo APENAS na primeira sele��o da m�trica**
   const [jaAjustouPeriodo, setJaAjustouPeriodo] = useState(false)
   
   useEffect(() => {
-    // Sá³ ajustar automaticamente se ainda ná£o foi feito para esta má©trica
+    // S� ajustar automaticamente se ainda n�o foi feito para esta m�trica
     if (!jaAjustouPeriodo) {
       const metricaInfo = metricas.find((m: any) => m.value === metricaSelecionada)
       if (metricaInfo?.dataInicio) {
-        console.log(`ðŸ“… Ajustando perá­odo inicial para má©trica ${metricaSelecionada}: iná­cio em ${metricaInfo.dataInicio}`)
+        console.log(`📅 Ajustando per�odo inicial para m�trica ${metricaSelecionada}: in�cio em ${metricaInfo.dataInicio}`)
         setPeriodoInicio(metricaInfo.dataInicio)
         
-        // CORREá‡áƒO ESPECIAL: Faturamento e Ticket Má©dio SEMPRE comeá§am em 01/02 (dados da tabela pagamentos)
+        // CORRE��O ESPECIAL: Faturamento e Ticket M�dio SEMPRE come�am em 01/02 (dados da tabela pagamentos)
         if (metricaSelecionada === 'faturamento' || metricaSelecionada === 'ticket_medio') {
-          console.log('ðŸ’° Forá§ando data inicial para 01/02/2025 (dados de pagamentos) para', metricaSelecionada)
+          console.log('💰 For�ando data inicial para 01/02/2025 (dados de pagamentos) para', metricaSelecionada)
           setPeriodoInicio('2025-02-01')
         }
         
-        setJaAjustouPeriodo(true) // Marcar que já¡ ajustou
+        setJaAjustouPeriodo(true) // Marcar que j� ajustou
       }
     }
-  }, [metricaSelecionada, metricas, jaAjustouPeriodo])
+  }, [metricaSelecionada, metricas: any, jaAjustouPeriodo])
 
   const carregarMetasDoSupabase = async () => {
     if (!selectedBar) return
@@ -91,7 +91,7 @@ export default function MetricaEvolucaoPage() {
     // Inicializar cliente Supabase
     const supabase = await getSupabaseClient();
     if (!supabase) {
-      console.error('Œ Erro ao conectar com banco');
+      console.error('�� Erro ao conectar com banco');
       return;
     }
 
@@ -118,9 +118,9 @@ export default function MetricaEvolucaoPage() {
           tempoSaidaCozinha: metasData.tempo_cozinha || 12,
           tempoSaidaBar: metasData.tempo_bar || 4
         }))
-        console.log('œ… Metas carregadas do Supabase para Evoluá§á£o:', metasData)
+        console.log('�� Metas carregadas do Supabase para Evolu��o:', metasData)
       } else {
-        console.log('š ï¸ Nenhuma meta encontrada no Supabase, usando padráµes')
+        console.log('��️ Nenhuma meta encontrada no Supabase, usando padr�es')
       }
     } catch (error) {
       console.error('Erro ao carregar metas:', error)
@@ -140,33 +140,33 @@ export default function MetricaEvolucaoPage() {
     // Inicializar cliente Supabase
     const supabase = await getSupabaseClient();
     if (!supabase) {
-      console.error('Œ Erro ao conectar com banco');
+      console.error('�� Erro ao conectar com banco');
       setLoading(false);
       return;
     }
     
     try {
-      console.log('ðŸ“Š Buscando evoluá§á£o da má©trica:', metricaSelecionada)
-      console.log('ðŸ“… Perá­odo solicitado:', periodoInicio, 'atá©', periodoFim)
-      console.log('ðŸ¢ Bar ID:', selectedBar.id, '- Nome:', selectedBar.nome)
+      console.log('📊 Buscando evolu��o da m�trica:', metricaSelecionada)
+      console.log('📅 Per�odo solicitado:', periodoInicio: any, 'at�', periodoFim)
+      console.log('🏢 Bar ID:', selectedBar.id, '- Nome:', selectedBar.nome)
       
-      // CORREá‡áƒO FORá‡ADA: Se for faturamento e data for antes de 01/02, corrigir
+      // CORRE��O FOR�ADA: Se for faturamento e data for antes de 01/02, corrigir
       let dataInicioCorrigida = periodoInicio
       if (metricaSelecionada === 'faturamento' && periodoInicio < '2025-02-01') {
         dataInicioCorrigida = '2025-02-01'
-        console.log('ðŸ”§ CORRIGINDO data inicial de', periodoInicio, 'para', dataInicioCorrigida)
-        setPeriodoInicio('2025-02-01')  // Atualizar o estado tambá©m
+        console.log('🔧 CORRIGINDO data inicial de', periodoInicio: any, 'para', dataInicioCorrigida)
+        setPeriodoInicio('2025-02-01')  // Atualizar o estado tamb�m
       }
       
       let dados: DadosMetrica[] = []
       
       if (metricaSelecionada === 'faturamento') {
-        // ESTRATá‰GIA FINAL: Query SQL agregada para contornar limites do Supabase
-        console.log('ðŸ” Buscando faturamento COMPLETO (ContaHub + Yuzer + Sympla) de', dataInicioCorrigida, 'atá©', periodoFim)
+        // ESTRAT�GIA FINAL: Query SQL agregada para contornar limites do Supabase
+        console.log('🔍 Buscando faturamento COMPLETO (ContaHub + Yuzer + Sympla) de', dataInicioCorrigida: any, 'at�', periodoFim)
         
         try {
-          // CORREá‡áƒO: Buscar dados de TODAS as fontes (ContaHub + Yuzer + Sympla)
-          console.log('ðŸ’° Buscando faturamento de máºltiplas fontes...')
+          // CORRE��O: Buscar dados de TODAS as fontes (ContaHub + Yuzer + Sympla)
+          console.log('💰 Buscando faturamento de m�ltiplas fontes...')
           
           // 1. FATURAMENTO CONTAHUB (tabela pagamentos)
           const { data: pagamentosData, error: pagamentosError } = await supabase
@@ -178,7 +178,7 @@ export default function MetricaEvolucaoPage() {
             .not('liquido', 'is', null)
             .order('dt_gerencial')
 
-          console.log('ðŸ’° ContaHub:', pagamentosData?.length || 0, 'registros')
+          console.log('💰 ContaHub:', pagamentosData?.length || 0, 'registros')
 
           // 2. FATURAMENTO YUZER (tabela yuzer_analitico)
           const { data: yuzerData, error: yuzerError } = await supabase
@@ -189,7 +189,7 @@ export default function MetricaEvolucaoPage() {
             .lte('data_pedido', periodoFim)
             .order('data_pedido')
 
-          console.log('ðŸŽª Yuzer:', yuzerData?.length || 0, 'registros')
+          console.log('🎪 Yuzer:', yuzerData?.length || 0, 'registros')
 
           // 3. FATURAMENTO SYMPLA (estimativa baseada em check-ins)
           const { data: symplaData, error: symplaError } = await supabase
@@ -201,7 +201,7 @@ export default function MetricaEvolucaoPage() {
             .lte('data_visita', periodoFim)
             .order('data_visita')
 
-          console.log('ðŸŽ« Sympla:', symplaData?.length || 0, 'registros')
+          console.log('🎫 Sympla:', symplaData?.length || 0, 'registros')
 
           // PROCESSAR FATURAMENTO CONSOLIDADO
           const faturamentoPorDia: {[key: string]: number} = {}
@@ -234,26 +234,26 @@ export default function MetricaEvolucaoPage() {
               valor,
               meta: metas.faturamentoDiario
             }))
-            .sort((a, b) => a.data.localeCompare(b.data))
+            .sort((a: any, b: any) => a.data.localeCompare(b.data))
 
-          console.log('œ… Faturamento COMPLETO (ContaHub + Yuzer + Sympla):', dados.length, 'dias')
-          console.log('ðŸ“… Perá­odo:', dados[0]?.data, 'atá©', dados[dados.length - 1]?.data)
-          console.log('ðŸ’° Amostra valores:', dados.slice(0, 5).map((d: any) => ({ 
+          console.log('�� Faturamento COMPLETO (ContaHub + Yuzer + Sympla):', dados.length, 'dias')
+          console.log('📅 Per�odo:', dados[0]?.data, 'at�', dados[dados.length - 1]?.data)
+          console.log('💰 Amostra valores:', dados.slice(0: any, 5).map((d: any) => ({ 
             data: d.data, 
             valor: `R$ ${d.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` 
           })))
 
         } catch (error) {
-          console.error('Œ Erro ao buscar faturamento completo:', error)
+          console.error('�� Erro ao buscar faturamento completo:', error)
           dados = []
         }
       } 
       else if (metricaSelecionada === 'clientes') {
-        // NOVA ESTRATá‰GIA: Buscar clientes de TODAS as fontes (ContaHub + Sympla + Yuzer)
-        console.log('ðŸ” Buscando clientes COMPLETOS (ContaHub + Sympla + Yuzer) de', periodoInicio, 'atá©', periodoFim)
+        // NOVA ESTRAT�GIA: Buscar clientes de TODAS as fontes (ContaHub + Sympla + Yuzer)
+        console.log('🔍 Buscando clientes COMPLETOS (ContaHub + Sympla + Yuzer) de', periodoInicio: any, 'at�', periodoFim)
         
         try {
-          console.log('ðŸ‘¥ Buscando clientes de máºltiplas fontes...')
+          console.log('👥 Buscando clientes de m�ltiplas fontes...')
           
           // 1. CLIENTES CONTAHUB (tabela periodo)
           const { data: periodoData, error: periodoError } = await supabase
@@ -264,7 +264,7 @@ export default function MetricaEvolucaoPage() {
             .lte('dt_gerencial', periodoFim)
             .order('dt_gerencial')
 
-          console.log('ðŸ¢ ContaHub:', periodoData?.length || 0, 'registros')
+          console.log('🏢 ContaHub:', periodoData?.length || 0, 'registros')
 
           // 2. CLIENTES YUZER (tabela yuzer_analitico - ingressos)
           const { data: yuzerData, error: yuzerError } = await supabase
@@ -276,7 +276,7 @@ export default function MetricaEvolucaoPage() {
             .ilike('produto_nome', '%ingresso%')
             .order('data_pedido')
 
-          console.log('ðŸŽª Yuzer ingressos:', yuzerData?.length || 0, 'registros')
+          console.log('🎪 Yuzer ingressos:', yuzerData?.length || 0, 'registros')
 
           // 3. CLIENTES SYMPLA (tabela cliente_visitas)
           const { data: symplaData, error: symplaError } = await supabase
@@ -288,7 +288,7 @@ export default function MetricaEvolucaoPage() {
             .lte('data_visita', periodoFim)
             .order('data_visita')
 
-          console.log('ðŸŽ« Sympla:', symplaData?.length || 0, 'registros')
+          console.log('🎫 Sympla:', symplaData?.length || 0, 'registros')
 
           // PROCESSAR CLIENTES CONSOLIDADOS
           const clientesPorDia: {[key: string]: number} = {}
@@ -320,35 +320,35 @@ export default function MetricaEvolucaoPage() {
               valor,
               meta: metas.clientesDiario
             }))
-            .sort((a, b) => a.data.localeCompare(b.data))
+            .sort((a: any, b: any) => a.data.localeCompare(b.data))
 
-          console.log('œ… Clientes COMPLETOS (ContaHub + Sympla + Yuzer):', dados.length, 'dias')
-          console.log('ðŸ“… Perá­odo:', dados[0]?.data, 'atá©', dados[dados.length - 1]?.data)
-          console.log('ðŸ‘¥ Amostra valores:', dados.slice(0, 5).map((d: any) => ({ 
+          console.log('�� Clientes COMPLETOS (ContaHub + Sympla + Yuzer):', dados.length, 'dias')
+          console.log('📅 Per�odo:', dados[0]?.data, 'at�', dados[dados.length - 1]?.data)
+          console.log('👥 Amostra valores:', dados.slice(0: any, 5).map((d: any) => ({ 
             data: d.data, 
             valor: `${d.valor} clientes` 
           })))
 
         } catch (error) {
-          console.error('Œ Erro ao buscar clientes completos:', error)
+          console.error('�� Erro ao buscar clientes completos:', error)
           dados = []
         }
       }
       else if (metricaSelecionada === 'ticket_medio') {
-        // ESTRATá‰GIA APRIMORADA: Usar chunking para faturamento + dados agregados para clientes
-        console.log('ðŸ” Buscando dados para ticket má©dio de', periodoInicio, 'atá©', periodoFim)
+        // ESTRAT�GIA APRIMORADA: Usar chunking para faturamento + dados agregados para clientes
+        console.log('🔍 Buscando dados para ticket m�dio de', periodoInicio: any, 'at�', periodoFim)
         
-        // CORREá‡áƒO FORá‡ADA: Ticket má©dio segue faturamento - sá³ tem dados a partir de 01/02
+        // CORRE��O FOR�ADA: Ticket m�dio segue faturamento - s� tem dados a partir de 01/02
         let dataInicioCorrigida = periodoInicio
         if (periodoInicio < '2025-02-01') {
           dataInicioCorrigida = '2025-02-01'
-          console.log('ðŸ”§ CORRIGINDO ticket má©dio data inicial de', periodoInicio, 'para', dataInicioCorrigida)
-          setPeriodoInicio('2025-02-01')  // Atualizar o estado tambá©m
+          console.log('🔧 CORRIGINDO ticket m�dio data inicial de', periodoInicio: any, 'para', dataInicioCorrigida)
+          setPeriodoInicio('2025-02-01')  // Atualizar o estado tamb�m
         }
         
         try {
-          // ESTRATá‰GIA FINAL: Usar RPC SQL agregada para ticket má©dio
-          console.log('ðŸ” Buscando ticket má©dio com RPC SQL agregada de', dataInicioCorrigida, 'atá©', periodoFim)
+          // ESTRAT�GIA FINAL: Usar RPC SQL agregada para ticket m�dio
+          console.log('🔍 Buscando ticket m�dio com RPC SQL agregada de', dataInicioCorrigida: any, 'at�', periodoFim)
           
           try {
             // Usar RPC para fazer query SQL direta agregada COMPLETA (Yuzer + ContaHub + Sympla)
@@ -359,9 +359,9 @@ export default function MetricaEvolucaoPage() {
             })
 
             if (!error && data) {
-              console.log('ðŸ“Š Dados de ticket má©dio COMPLETO SQL agregados:', data.length, 'dias áºnicos')
-              console.log('ðŸ“‹ Amostra:', data.slice(0, 3))
-              console.log('ðŸ“‹ ášltimos:', data.slice(-3))
+              console.log('📊 Dados de ticket m�dio COMPLETO SQL agregados:', data.length, 'dias �nicos')
+              console.log('📋 Amostra:', data.slice(0: any, 3))
+              console.log('📋 �ltimos:', data.slice(-3))
               
               dados = data.map((item: any) => ({
                 data: item.dt_gerencial,
@@ -369,28 +369,28 @@ export default function MetricaEvolucaoPage() {
                 meta: metas.ticketMedioTarget
               }))
               
-              console.log('œ… Ticket má©dio COMPLETO via RPC (Yuzer + ContaHub + Sympla):', dados.length, 'dias')
-              console.log('ðŸ“… Perá­odo:', dados[0]?.data, 'atá©', dados[dados.length - 1]?.data)
-              console.log('ðŸŽ¯ Amostra valores:', dados.slice(0, 5).map((d: any) => ({ 
+              console.log('�� Ticket m�dio COMPLETO via RPC (Yuzer + ContaHub + Sympla):', dados.length, 'dias')
+              console.log('📅 Per�odo:', dados[0]?.data, 'at�', dados[dados.length - 1]?.data)
+              console.log('🎯 Amostra valores:', dados.slice(0: any, 5).map((d: any) => ({ 
                 data: d.data, 
                 valor: `R$ ${Math.round(d.valor * 100) / 100}` 
               })))
             } else {
-              console.error('Œ RPC COMPLETO de ticket má©dio falhou, usando fallback:', error)
-              throw new Error('RPC ná£o disponá­vel')
+              console.error('�� RPC COMPLETO de ticket m�dio falhou, usando fallback:', error)
+              throw new Error('RPC n�o dispon�vel')
             }
           } catch (rpcError) {
-            console.log('ðŸ”„ Fallback: Processamento JavaScript para ticket má©dio')
+            console.log('🔄 Fallback: Processamento JavaScript para ticket m�dio')
             
             // Fallback: Usar chunking para faturamento + dados agregados para clientes
-            console.log('ðŸ’° Buscando faturamento com chunking para ticket má©dio...')
+            console.log('💰 Buscando faturamento com chunking para ticket m�dio...')
             const CHUNK_SIZE = 1000
             let allFaturamentoData: any[] = []
             let offset = 0
             let hasMore = true
             
             while (hasMore) {
-              console.log(`ðŸ“Š Buscando chunk ${offset/CHUNK_SIZE + 1} de faturamento (offset: ${offset})`)
+              console.log(`📊 Buscando chunk ${offset/CHUNK_SIZE + 1} de faturamento (offset: ${offset})`)
               
               const { data: chunk, error } = await supabase
                 .from('pagamentos')
@@ -400,19 +400,19 @@ export default function MetricaEvolucaoPage() {
                 .lte('dt_gerencial', periodoFim)
                 .not('liquido', 'is', null)
                 .order('dt_gerencial')
-                .range(offset, offset + CHUNK_SIZE - 1)
+                .range(offset: any, offset + CHUNK_SIZE - 1)
 
               if (error) {
-                console.error('Œ Erro no chunk de faturamento:', error)
+                console.error('�� Erro no chunk de faturamento:', error)
                 break
               }
 
               if (chunk && chunk.length > 0) {
                 allFaturamentoData = allFaturamentoData.concat(chunk)
-                console.log(`œ… Chunk ${offset/CHUNK_SIZE + 1}: ${chunk.length} registros (total: ${allFaturamentoData.length})`)
+                console.log(`�� Chunk ${offset/CHUNK_SIZE + 1}: ${chunk.length} registros (total: ${allFaturamentoData.length})`)
                 
                 if (chunk.length < CHUNK_SIZE) {
-                  hasMore = false // ášltimo chunk
+                  hasMore = false // �ltimo chunk
                 } else {
                   offset += CHUNK_SIZE
                 }
@@ -421,35 +421,35 @@ export default function MetricaEvolucaoPage() {
               }
             }
             
-            console.log('ðŸ’° TOTAL de registros de faturamento coletados:', allFaturamentoData.length)
+            console.log('💰 TOTAL de registros de faturamento coletados:', allFaturamentoData.length)
             
-            // 2. BUSCAR CLIENTES DOS DADOS DA TABELA PERIODO (que tem correlaá§á£o com faturamento)
-            console.log('ðŸ‘¥ Buscando clientes da tabela periodo (fonte principal)...')
+            // 2. BUSCAR CLIENTES DOS DADOS DA TABELA PERIODO (que tem correla��o com faturamento)
+            console.log('👥 Buscando clientes da tabela periodo (fonte principal)...')
             const { data: clientesData, error: clientesError } = await supabase
               .from('periodo')
-              .select('dt_gerencial, pessoas, vr_pagamentos')
+              .select('dt_gerencial, pessoas: any, vr_pagamentos')
               .eq('bar_id', selectedBar.id)
               .gte('dt_gerencial', dataInicioCorrigida)
               .lte('dt_gerencial', periodoFim)
               .order('dt_gerencial')
 
             if (clientesError) {
-              console.error('Œ Erro ao buscar clientes da tabela periodo:', clientesError)
+              console.error('�� Erro ao buscar clientes da tabela periodo:', clientesError)
               throw clientesError
             }
             
-            console.log('ðŸ‘¥ Clientes da tabela periodo encontrados:', clientesData?.length || 0, 'registros')
+            console.log('👥 Clientes da tabela periodo encontrados:', clientesData?.length || 0, 'registros')
             
             if (allFaturamentoData.length > 0 && clientesData && clientesData.length > 0) {
               // 3. PROCESSAR FATURAMENTO POR DIA
-              const faturamentoPorDia = allFaturamentoData.reduce((acc: {[key: string]: number}, item) => {
+              const faturamentoPorDia = allFaturamentoData.reduce((acc: {[key: string]: number}, item: any) => {
                 const data_str = item.dt_gerencial
                 if (!acc[data_str]) acc[data_str] = 0
                 acc[data_str] += parseFloat(item.liquido || '0')
                 return acc
               }, {})
               
-              console.log('ðŸ’° Dias áºnicos de faturamento processados:', Object.keys(faturamentoPorDia).length)
+              console.log('💰 Dias �nicos de faturamento processados:', Object.keys(faturamentoPorDia).length)
               
               // 4. PROCESSAR CLIENTES POR DIA (agrupar pessoas da tabela periodo)
               const clientesPorDia = clientesData.reduce((acc: {[key: string]: number}, item: any) => {
@@ -461,32 +461,32 @@ export default function MetricaEvolucaoPage() {
                 return acc
               }, {})
               
-              console.log('ðŸ‘¥ Dias áºnicos de clientes processados:', Object.keys(clientesPorDia).length)
-              console.log('ðŸ‘¥ DEBUG - Clientes por dia:', clientesPorDia)
+              console.log('👥 Dias �nicos de clientes processados:', Object.keys(clientesPorDia).length)
+              console.log('👥 DEBUG - Clientes por dia:', clientesPorDia)
               
-              // 5. CALCULAR TICKET Má‰DIO POR DIA
-              console.log('ðŸ’° DEBUG - Faturamento por dia:', faturamentoPorDia)
-              console.log('ðŸ‘¥ DEBUG - Clientes por dia antes do filtro:', clientesPorDia)
+              // 5. CALCULAR TICKET M�DIO POR DIA
+              console.log('💰 DEBUG - Faturamento por dia:', faturamentoPorDia)
+              console.log('👥 DEBUG - Clientes por dia antes do filtro:', clientesPorDia)
               
-              // Verificar se há¡ dados para o perá­odo especá­fico de mará§o
+              // Verificar se h� dados para o per�odo espec�fico de mar�o
               const diasComDados = Object.keys(faturamentoPorDia).filter((data: any) => data >= '2025-03-01' && data <= '2025-03-04')
-              console.log('ðŸ“… DEBUG - Dias com dados em mará§o (01-04):', diasComDados)
+              console.log('📅 DEBUG - Dias com dados em mar�o (01-04):', diasComDados)
               
               dados = Object.keys(faturamentoPorDia)
                 .filter((data: any) => {
                   const temClientes = clientesPorDia[data] > 0
                   const temFaturamento = faturamentoPorDia[data] > 0
                   
-                  console.log(`ðŸ“Š DEBUG - ${data}: faturamento R$ ${faturamentoPorDia[data]?.toFixed(2) || '0.00'}, clientes ${clientesPorDia[data] || 0}, incluir: ${temClientes && temFaturamento}`)
+                  console.log(`📊 DEBUG - ${data}: faturamento R$ ${faturamentoPorDia[data]?.toFixed(2) || '0.00'}, clientes ${clientesPorDia[data] || 0}, incluir: ${temClientes && temFaturamento}`)
                   
-                  return temClientes && temFaturamento // Sá³ dias com clientes E faturamento
+                  return temClientes && temFaturamento // S� dias com clientes E faturamento
                 })
                 .map((data: any) => {
                   const faturamento = faturamentoPorDia[data]
                   const clientes = clientesPorDia[data]
                   const ticketCalculado = faturamento / clientes
                   
-                  console.log(`ðŸŽ¯ TICKET Má‰DIO ${data}: R$ ${faturamento.toFixed(2)} á· ${clientes} = R$ ${ticketCalculado.toFixed(2)}`)
+                  console.log(`🎯 TICKET M�DIO ${data}: R$ ${faturamento.toFixed(2)} � ${clientes} = R$ ${ticketCalculado.toFixed(2)}`)
                   
                   return {
                     data,
@@ -494,28 +494,28 @@ export default function MetricaEvolucaoPage() {
                     meta: metas.ticketMedioTarget
                   }
                 })
-                .sort((a, b) => a.data.localeCompare(b.data))
+                .sort((a: any, b: any) => a.data.localeCompare(b.data))
               
-              console.log('ðŸŽ¯ Ticket má©dio FINAL processado (fallback):', dados.length, 'dias com clientes pagantes')
-              console.log('ðŸ“… Perá­odo:', dados[0]?.data, 'atá©', dados[dados.length - 1]?.data)
-              console.log('ðŸ“Š Amostra valores:', dados.slice(0, 5).map((d: any) => ({ 
+              console.log('🎯 Ticket m�dio FINAL processado (fallback):', dados.length, 'dias com clientes pagantes')
+              console.log('📅 Per�odo:', dados[0]?.data, 'at�', dados[dados.length - 1]?.data)
+              console.log('📊 Amostra valores:', dados.slice(0: any, 5).map((d: any) => ({ 
                 data: d.data, 
                 valor: Math.round(d.valor * 100) / 100 
               })))
             } else {
-              console.warn('š ï¸ Dados insuficientes para calcular ticket má©dio')
+              console.warn('��️ Dados insuficientes para calcular ticket m�dio')
               console.warn('   - Faturamento:', allFaturamentoData.length, 'registros')
               console.warn('   - Clientes:', clientesData?.length || 0, 'dias')
             }
           }
         } catch (error) {
-          console.error('Œ Erro ao processar ticket má©dio:', error)
+          console.error('�� Erro ao processar ticket m�dio:', error)
           dados = []
         }
       }
       else if (metricaSelecionada === 'reservas') {
         // Buscar reservas do Getin por dia
-        console.log('ðŸ” Buscando reservas do Getin de', periodoInicio, 'atá©', periodoFim)
+        console.log('🔍 Buscando reservas do Getin de', periodoInicio: any, 'at�', periodoFim)
         
         const diasArray = []
         const dataAtual = new Date(periodoInicio + 'T00:00:00.000Z')
@@ -526,20 +526,20 @@ export default function MetricaEvolucaoPage() {
           dataAtual.setDate(dataAtual.getDate() + 1)
         }
 
-        console.log('ðŸ“… Perá­odo de reservas:', periodoInicio, 'atá©', periodoFim)
-        console.log('ðŸ“… Dias a consultar:', diasArray.length)
-        console.log('ðŸ“… Primeiro dia:', diasArray[0])
-        console.log('ðŸ“… ášltimo dia:', diasArray[diasArray.length - 1])
+        console.log('📅 Per�odo de reservas:', periodoInicio: any, 'at�', periodoFim)
+        console.log('📅 Dias a consultar:', diasArray.length)
+        console.log('📅 Primeiro dia:', diasArray[0])
+        console.log('📅 �ltimo dia:', diasArray[diasArray.length - 1])
 
         const reservasPorDia = await Promise.all(
-          diasArray.map(async (data) => {
+          diasArray.map(async (data: any) => {
             try {
               const response = await fetch(`/api/dashboard/reservas-getin?data_inicio=${data}&data_fim=${data}&tipo=periodo`)
               const result = await response.json()
               const pessoas = result.success ? (result.data?.estatisticas?.total_pessoas || 0) : 0
               
               if (pessoas > 0) {
-                console.log(`ðŸ“… ${data}: ${pessoas} pessoas reservadas (${result.data?.estatisticas?.total_reservas || 0} reservas)`)
+                console.log(`📅 ${data}: ${pessoas} pessoas reservadas (${result.data?.estatisticas?.total_reservas || 0} reservas)`)
               }
               
               return {
@@ -548,17 +548,17 @@ export default function MetricaEvolucaoPage() {
                 meta: metas.reservasDiarias
               }
             } catch (error) {
-              console.error(`Œ Erro ao buscar reservas para ${data}:`, error)
+              console.error(`�� Erro ao buscar reservas para ${data}:`, error)
               return { data, valor: 0, meta: metas.reservasDiarias }
             }
           })
         )
 
         dados = reservasPorDia.filter((item: any) => item.valor > 0)
-        console.log('ðŸŽ¯ Dias com reservas:', dados.length)
+        console.log('🎯 Dias com reservas:', dados.length)
       }
       else if (metricaSelecionada === 'tempo_cozinha' || metricaSelecionada === 'tempo_bar') {
-        // ESTRATá‰GIA APRIMORADA: Chunking para tempos com melhor tratamento
+        // ESTRAT�GIA APRIMORADA: Chunking para tempos com melhor tratamento
         const campoTempo = metricaSelecionada === 'tempo_cozinha' ? 't0_t2' : 't0_t3'
         const metaTempo = metricaSelecionada === 'tempo_cozinha' ? metas.tempoSaidaCozinha : metas.tempoSaidaBar
         
@@ -566,12 +566,12 @@ export default function MetricaEvolucaoPage() {
         const dataInicioInt = parseInt(periodoInicio.replace(/-/g, ''))
         const dataFimInt = parseInt(periodoFim.replace(/-/g, ''))
 
-        console.log('ðŸ” Buscando tempos', metricaSelecionada, 'de', dataInicioInt, 'atá©', dataFimInt)
-        console.log('ðŸ“Š Campo tempo:', campoTempo, '- Meta:', metaTempo, 'minutos')
+        console.log('🔍 Buscando tempos', metricaSelecionada: any, 'de', dataInicioInt: any, 'at�', dataFimInt)
+        console.log('📊 Campo tempo:', campoTempo: any, '- Meta:', metaTempo: any, 'minutos')
 
         try {
-          // ESTRATá‰GIA FINAL: Usar RPC SQL agregada para tempos
-          console.log('ðŸ” Buscando tempos com RPC SQL agregada de', periodoInicio, 'atá©', periodoFim)
+          // ESTRAT�GIA FINAL: Usar RPC SQL agregada para tempos
+          console.log('🔍 Buscando tempos com RPC SQL agregada de', periodoInicio: any, 'at�', periodoFim)
           
           try {
             // Usar RPC para fazer query SQL direta agregada
@@ -583,9 +583,9 @@ export default function MetricaEvolucaoPage() {
             })
 
             if (!error && data) {
-              console.log('ðŸ“Š Dados de tempos SQL agregados:', data.length, 'dias áºnicos')
-              console.log('ðŸ“‹ Amostra:', data.slice(0, 3))
-              console.log('ðŸ“‹ ášltimos:', data.slice(-3))
+              console.log('📊 Dados de tempos SQL agregados:', data.length, 'dias �nicos')
+              console.log('📋 Amostra:', data.slice(0: any, 3))
+              console.log('📋 �ltimos:', data.slice(-3))
               
               dados = data.map((item: any) => ({
                 data: item.dt_gerencial,
@@ -593,18 +593,18 @@ export default function MetricaEvolucaoPage() {
                 meta: metaTempo
               }))
               
-              console.log('œ… Tempos via RPC:', dados.length, 'dias')
-              console.log('ðŸ“… Perá­odo:', dados[0]?.data, 'atá©', dados[dados.length - 1]?.data)
-              console.log('ðŸ“Š Amostra valores:', dados.slice(0, 5).map((d: any) => ({ 
+              console.log('�� Tempos via RPC:', dados.length, 'dias')
+              console.log('📅 Per�odo:', dados[0]?.data, 'at�', dados[dados.length - 1]?.data)
+              console.log('📊 Amostra valores:', dados.slice(0: any, 5).map((d: any) => ({ 
                 data: d.data, 
                 valor: d.valor + ' min'
               })))
             } else {
-              console.error('Œ RPC de tempos falhou, usando fallback:', error)
-              throw new Error('RPC ná£o disponá­vel')
+              console.error('�� RPC de tempos falhou, usando fallback:', error)
+              throw new Error('RPC n�o dispon�vel')
             }
           } catch (rpcError) {
-            console.log('ðŸ”„ Fallback: Processamento JavaScript para tempos')
+            console.log('🔄 Fallback: Processamento JavaScript para tempos')
             
             // Fallback: CHUNKING PARA TEMPOS
             const CHUNK_SIZE = 1000
@@ -613,7 +613,7 @@ export default function MetricaEvolucaoPage() {
             let hasMore = true
             
             while (hasMore) {
-              console.log(`±ï¸ Buscando chunk ${offset/CHUNK_SIZE + 1} de tempos (offset: ${offset})`)
+              console.log(`��️ Buscando chunk ${offset/CHUNK_SIZE + 1} de tempos (offset: ${offset})`)
               
               const { data: chunk, error } = await supabase
                 .from('tempo')
@@ -621,23 +621,23 @@ export default function MetricaEvolucaoPage() {
                 .eq('bar_id', selectedBar.id)
                 .gte('dia', dataInicioInt)
                 .lte('dia', dataFimInt)
-                .not(campoTempo, 'is', null)
-                .gt(campoTempo, 0)
-                .lt(campoTempo, 14400) // Filtrar outliers extremos (4 horas = 14400 segundos)
+                .not(campoTempo: any, 'is', null)
+                .gt(campoTempo: any, 0)
+                .lt(campoTempo: any, 14400) // Filtrar outliers extremos (4 horas = 14400 segundos)
                 .order('dia')
-                .range(offset, offset + CHUNK_SIZE - 1)
+                .range(offset: any, offset + CHUNK_SIZE - 1)
 
               if (error) {
-                console.error('Œ Erro no chunk de tempos:', error)
+                console.error('�� Erro no chunk de tempos:', error)
                 break
               }
 
               if (chunk && chunk.length > 0) {
                 allTempoData = allTempoData.concat(chunk)
-                console.log(`œ… Chunk ${offset/CHUNK_SIZE + 1}: ${chunk.length} registros (total: ${allTempoData.length})`)
+                console.log(`�� Chunk ${offset/CHUNK_SIZE + 1}: ${chunk.length} registros (total: ${allTempoData.length})`)
                 
                 if (chunk.length < CHUNK_SIZE) {
-                  hasMore = false // ášltimo chunk
+                  hasMore = false // �ltimo chunk
                 } else {
                   offset += CHUNK_SIZE
                 }
@@ -646,20 +646,20 @@ export default function MetricaEvolucaoPage() {
               }
             }
 
-            console.log('±ï¸ TOTAL de registros de tempo coletados:', allTempoData.length)
+            console.log('��️ TOTAL de registros de tempo coletados:', allTempoData.length)
 
             if (allTempoData.length > 0) {
               // Processar todos os dados no JavaScript
-              const temposPorDia = allTempoData.reduce((acc: {[key: string]: number[]}, item) => {
+              const temposPorDia = allTempoData.reduce((acc: {[key: string]: number[]}, item: any) => {
                 const diaStr = item.dia.toString()
-                const dataFormatada = `${diaStr.substring(0,4)}-${diaStr.substring(4,6)}-${diaStr.substring(6,8)}`
+                const dataFormatada = `${diaStr.substring(0: any,4)}-${diaStr.substring(4: any,6)}-${diaStr.substring(6: any,8)}`
                 
                 if (!acc[dataFormatada]) acc[dataFormatada] = []
                 
                 // Converter segundos para minutos e filtrar outliers adicionais
                 const tempoMinutos = parseInt((item as any)[campoTempo]) / 60
                 
-                // Filtros adicionais baseados na má©trica
+                // Filtros adicionais baseados na m�trica
                 let tempoValido = false
                 if (metricaSelecionada === 'tempo_cozinha') {
                   // Tempo cozinha: entre 1 e 45 minutos
@@ -676,21 +676,21 @@ export default function MetricaEvolucaoPage() {
                 return acc
               }, {})
 
-              console.log('ðŸ“… Dias áºnicos de tempo processados:', Object.keys(temposPorDia).length)
-              console.log('ðŸ“… Primeira data:', Object.keys(temposPorDia).sort()[0])
-              console.log('ðŸ“… ášltima data:', Object.keys(temposPorDia).sort().slice(-1)[0])
+              console.log('📅 Dias �nicos de tempo processados:', Object.keys(temposPorDia).length)
+              console.log('📅 Primeira data:', Object.keys(temposPorDia).sort()[0])
+              console.log('📅 �ltima data:', Object.keys(temposPorDia).sort().slice(-1)[0])
 
-              // Calcular má©dias por dia (filtrar dias com poucos registros)
+              // Calcular m�dias por dia (filtrar dias com poucos registros)
               dados = Object.entries(temposPorDia)
-                .filter(([data, tempos]) => tempos.length >= 3) // Má­nimo 3 registros por dia
+                .filter(([data, tempos]) => tempos.length >= 3) // M�nimo 3 registros por dia
                 .map(([data, tempos]) => {
-                  // Calcular má©dia removendo outliers extremos
-                  const temposOrdenados = tempos.sort((a, b) => a - b)
+                  // Calcular m�dia removendo outliers extremos
+                  const temposOrdenados = tempos.sort((a: any, b: any) => a - b)
                   const q1Index = Math.floor(temposOrdenados.length * 0.25)
                   const q3Index = Math.floor(temposOrdenados.length * 0.75)
-                  const temposFiltrados = temposOrdenados.slice(q1Index, q3Index + 1)
+                  const temposFiltrados = temposOrdenados.slice(q1Index: any, q3Index + 1)
                   
-                  const media = temposFiltrados.reduce((sum, tempo) => sum + tempo, 0) / temposFiltrados.length
+                  const media = temposFiltrados.reduce((sum: any, tempo: any) => sum + tempo, 0) / temposFiltrados.length
                   
                   return {
                     data,
@@ -698,23 +698,23 @@ export default function MetricaEvolucaoPage() {
                     meta: metaTempo
                   }
                 })
-                .sort((a, b) => a.data.localeCompare(b.data))
+                .sort((a: any, b: any) => a.data.localeCompare(b.data))
               
-              console.log('±ï¸ Tempos FINAL processados (fallback):', dados.length, 'dias com dados vá¡lidos')
-              console.log('ðŸ“… Perá­odo:', dados[0]?.data, 'atá©', dados[dados.length - 1]?.data)
-              console.log('ðŸ“Š Amostra valores:', dados.slice(0, 5).map((d: any) => ({ 
+              console.log('��️ Tempos FINAL processados (fallback):', dados.length, 'dias com dados v�lidos')
+              console.log('📅 Per�odo:', dados[0]?.data, 'at�', dados[dados.length - 1]?.data)
+              console.log('📊 Amostra valores:', dados.slice(0: any, 5).map((d: any) => ({ 
                 data: d.data, 
                 valor: d.valor + ' min'
               })))
             } else {
-              console.warn('š ï¸ Nenhum registro de tempo encontrado no perá­odo')
+              console.warn('��️ Nenhum registro de tempo encontrado no per�odo')
               dados = []
             }
           }
         } catch (error) {
-          console.error('Œ Erro ao processar tempos:', error)
+          console.error('�� Erro ao processar tempos:', error)
           
-          // Verificar se há¡ dados disponá­veis em perá­odo mais amplo
+          // Verificar se h� dados dispon�veis em per�odo mais amplo
           try {
             const { data: verificacao, error: verError } = await supabase
               .from('tempo')
@@ -724,51 +724,51 @@ export default function MetricaEvolucaoPage() {
               .limit(10)
             
             if (!verError && verificacao && verificacao.length > 0) {
-              console.log('ðŸ” Verificaá§á£o: Dados disponá­veis na tabela tempo:', verificacao.map((d: any) => d.dia))
-              console.log('ðŸ’¡ Sugestá£o: Perá­odo disponá­vel aproximadamente de', verificacao[0].dia, 'atá©', verificacao[verificacao.length - 1].dia)
+              console.log('🔍 Verifica��o: Dados dispon�veis na tabela tempo:', verificacao.map((d: any) => d.dia))
+              console.log('💡 Sugest�o: Per�odo dispon�vel aproximadamente de', verificacao[0].dia, 'at�', verificacao[verificacao.length - 1].dia)
             } else {
-              console.log('Œ Tabela tempo parece estar vazia ou inacessá­vel')
+              console.log('�� Tabela tempo parece estar vazia ou inacess�vel')
             }
           } catch (verError) {
-            console.error('Œ Erro na verificaá§á£o:', verError)
+            console.error('�� Erro na verifica��o:', verError)
           }
           
           dados = []
         }
       }
 
-      console.log('œ… Resultado bruto:', dados.length, 'dias encontrados')
-      console.log('ðŸ“Š Perá­odo exato solicitado:', periodoInicio, 'atá©', periodoFim)
+      console.log('�� Resultado bruto:', dados.length, 'dias encontrados')
+      console.log('📊 Per�odo exato solicitado:', periodoInicio: any, 'at�', periodoFim)
       
       if (dados.length === 0) {
-        console.warn('š ï¸ ATENá‡áƒO: Nenhum dado encontrado para o perá­odo solicitado!')
-        console.warn('ðŸ’¡ Perá­odo EXATO solicitado:', periodoInicio, 'atá©', periodoFim)
-        console.warn('ðŸ’¡ Má©trica:', metricaSelecionada)
-        console.warn('ðŸ’¡ Sugestá£o: Tente um perá­odo anterior ou verifique se há¡ dados disponá­veis')
+        console.warn('��️ ATEN��O: Nenhum dado encontrado para o per�odo solicitado!')
+        console.warn('💡 Per�odo EXATO solicitado:', periodoInicio: any, 'at�', periodoFim)
+        console.warn('💡 M�trica:', metricaSelecionada)
+        console.warn('💡 Sugest�o: Tente um per�odo anterior ou verifique se h� dados dispon�veis')
         
-        // Mostrar perá­odos com dados disponá­veis
+        // Mostrar per�odos com dados dispon�veis
         if (metricaSelecionada === 'faturamento') {
-          console.warn('ðŸ’¡ Faturamento disponá­vel: 2025-02-01 atá© 2025-06-12')
+          console.warn('💡 Faturamento dispon�vel: 2025-02-01 at� 2025-06-12')
         } else if (metricaSelecionada === 'clientes') {
-          console.warn('ðŸ’¡ Clientes disponá­vel: 2025-01-31 atá© 2025-06-12')
+          console.warn('💡 Clientes dispon�vel: 2025-01-31 at� 2025-06-12')
         } else if (metricaSelecionada === 'reservas') {
-          console.warn('ðŸ’¡ Reservas disponá­vel: 2025-02-06 atá© 2025-07-18')
+          console.warn('💡 Reservas dispon�vel: 2025-02-06 at� 2025-07-18')
         } else if (metricaSelecionada.includes('tempo')) {
-          console.warn('ðŸ’¡ Tempos disponá­vel: 2025-02-01 atá© 2025-06-12')
+          console.warn('💡 Tempos dispon�vel: 2025-02-01 at� 2025-06-12')
         }
       }
 
-      // Ordenar dados (já¡ foram filtrados nas consultas especá­ficas)
-      dados.sort((a, b) => a.data.localeCompare(b.data))
+      // Ordenar dados (j� foram filtrados nas consultas espec�ficas)
+      dados.sort((a: any, b: any) => a.data.localeCompare(b.data))
       
-      console.log('ðŸ“… Dados finais:', dados.length, 'dias')
-      console.log('ðŸ“… Primeiro dia final:', dados[0]?.data)
-      console.log('ðŸ“… ášltimo dia final:', dados[dados.length - 1]?.data)
+      console.log('📅 Dados finais:', dados.length, 'dias')
+      console.log('📅 Primeiro dia final:', dados[0]?.data)
+      console.log('📅 �ltimo dia final:', dados[dados.length - 1]?.data)
       
       setDadosEvolucao(dados)
       
     } catch (error) {
-      console.error('Œ Erro ao buscar dados da má©trica:', error)
+      console.error('�� Erro ao buscar dados da m�trica:', error)
       setDadosEvolucao([])
     } finally {
       setLoading(false)
@@ -788,33 +788,33 @@ export default function MetricaEvolucaoPage() {
         <div className="space-y-6">
         {/* Header */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h1 className="text-2xl font-bold text-slate-800 mb-2">ðŸ“ˆ Dashboard - Evoluá§á£o por Má©trica</h1>
-          <p className="text-slate-600">Aná¡lise temporal detalhada de má©tricas especá­ficas do {selectedBar?.nome}</p>
+          <h1 className="text-2xl font-bold text-slate-800 mb-2">📈 Dashboard - Evolu��o por M�trica</h1>
+          <p className="text-slate-600">An�lise temporal detalhada de m�tricas espec�ficas do {selectedBar?.nome}</p>
         </div>
 
         {/* Controles */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h3 className="text-lg font-bold text-slate-800 mb-4">ðŸŽ¯ Configuraá§áµes da Aná¡lise</h3>
+          <h3 className="text-lg font-bold text-slate-800 mb-4">🎯 Configura��es da An�lise</h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Má©trica</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">M�trica</label>
               <select
                 value={metricaSelecionada}
-                onChange={(e) => {
+                onChange={(e: any) => {
                   setMetricaSelecionada(e.target.value)
                   
-                  // **CORREá‡áƒO: Permitir novo ajuste quando trocar má©trica manualmente**
+                  // **CORRE��O: Permitir novo ajuste quando trocar m�trica manualmente**
                   setJaAjustouPeriodo(false)
                   
-                  // Ajustar perá­odo baseado na má©trica selecionada
+                  // Ajustar per�odo baseado na m�trica selecionada
                   const metricaSelecionadaInfo = metricas.find((m: any) => m.value === e.target.value)
                   if (metricaSelecionadaInfo?.dataInicio) {
-                    console.log(`ðŸ”§ Usuá¡rio selecionou ${e.target.value} - ajustando data para ${metricaSelecionadaInfo.dataInicio}`)
+                    console.log(`🔧 Usu�rio selecionou ${e.target.value} - ajustando data para ${metricaSelecionadaInfo.dataInicio}`)
                     setPeriodoInicio(metricaSelecionadaInfo.dataInicio)
                     
-                    // FORá‡A IMEDIATA: Se for faturamento ou ticket má©dio, ajustar data
+                    // FOR�A IMEDIATA: Se for faturamento ou ticket m�dio, ajustar data
                     if (e.target.value === 'faturamento' || e.target.value === 'ticket_medio') {
-                      console.log('ðŸ’° Forá§ando data inicial para 01/02/2025 (dados de pagamentos)')
+                      console.log('💰 For�ando data inicial para 01/02/2025 (dados de pagamentos)')
                       setPeriodoInicio('2025-02-01')
                     }
                   }
@@ -829,13 +829,13 @@ export default function MetricaEvolucaoPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Data Iná­cio</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Data In�cio</label>
               <input
                 type="date"
                 value={periodoInicio}
-                onChange={(e) => {
+                onChange={(e: any) => {
                   setPeriodoInicio(e.target.value)
-                  console.log('ðŸ“… Usuá¡rio alterou data de iná­cio manualmente para:', e.target.value)
+                  console.log('📅 Usu�rio alterou data de in�cio manualmente para:', e.target.value)
                 }}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 bg-white"
               />
@@ -845,9 +845,9 @@ export default function MetricaEvolucaoPage() {
               <input
                 type="date"
                 value={periodoFim}
-                onChange={(e) => {
+                onChange={(e: any) => {
                   setPeriodoFim(e.target.value)
-                  console.log('ðŸ“… Usuá¡rio alterou data de fim manualmente para:', e.target.value)
+                  console.log('📅 Usu�rio alterou data de fim manualmente para:', e.target.value)
                 }}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 bg-white"
               />
@@ -858,7 +858,7 @@ export default function MetricaEvolucaoPage() {
                 disabled={loading || !selectedBar}
                 className="w-full px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Carregando...' : 'ðŸ” Analisar'}
+                {loading ? 'Carregando...' : '🔍 Analisar'}
               </button>
             </div>
           </div>
@@ -873,7 +873,7 @@ export default function MetricaEvolucaoPage() {
           </div>
         ) : dadosEvolucao.length > 0 ? (
           <>
-            {/* Resumo da Má©trica */}
+            {/* Resumo da M�trica */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className={`bg-gradient-to-br from-${metricaInfo?.color}-50 to-${metricaInfo?.color}-100 rounded-xl p-6 border border-${metricaInfo?.color}-200`}>
                 <div className="flex items-center justify-between mb-2">
@@ -882,7 +882,7 @@ export default function MetricaEvolucaoPage() {
                     {percentualMeta.toFixed(1)}%
                   </span>
                 </div>
-                <h4 className={`text-sm font-medium text-${metricaInfo?.color}-700 mb-1`}>Má©dia do Perá­odo</h4>
+                <h4 className={`text-sm font-medium text-${metricaInfo?.color}-700 mb-1`}>M�dia do Per�odo</h4>
                 <p className={`text-2xl font-bold text-${metricaInfo?.color}-800`}>
                   {metricaInfo?.unit === 'R$' ? 'R$ ' : ''}{valorMedio.toLocaleString('pt-BR', { minimumFractionDigits: metricaInfo?.unit === 'R$' ? 2 : 1 })} {metricaInfo?.unit !== 'R$' ? metricaInfo?.unit : ''}
                 </p>
@@ -902,10 +902,10 @@ export default function MetricaEvolucaoPage() {
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                 <h4 className="text-sm font-medium text-slate-600 mb-1">Melhor Dia</h4>
                 {(() => {
-                  // CORREá‡áƒO: Para tempos (cozinha/bar), menor á© melhor. Para outras má©tricas, maior á© melhor.
+                  // CORRE��O: Para tempos (cozinha/bar), menor � melhor. Para outras m�tricas, maior � melhor.
                   const melhorDia = (metricaSelecionada === 'tempo_cozinha' || metricaSelecionada === 'tempo_bar') 
-                    ? dadosEvolucao.reduce((min, item) => item.valor < min.valor ? item : min, dadosEvolucao[0])
-                    : dadosEvolucao.reduce((max, item) => item.valor > max.valor ? item : max, dadosEvolucao[0])
+                    ? dadosEvolucao.reduce((min: any, item: any) => item.valor < min.valor ? item : min, dadosEvolucao[0])
+                    : dadosEvolucao.reduce((max: any, item: any) => item.valor > max.valor ? item : max, dadosEvolucao[0])
                   
                   return (
                     <div>
@@ -950,17 +950,17 @@ export default function MetricaEvolucaoPage() {
               </div>
             </div>
 
-            {/* Grá¡fico Simples de Barras */}
+            {/* Gr�fico Simples de Barras */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100" key={`grafico-${metricaSelecionada}-${periodoInicio}-${periodoFim}`}>
-              <h3 className="text-lg font-bold text-slate-800 mb-6">ðŸ“Š Evoluá§á£o Temporal - {metricaInfo?.label}</h3>
+              <h3 className="text-lg font-bold text-slate-800 mb-6">📊 Evolu��o Temporal - {metricaInfo?.label}</h3>
               
               <div className="space-y-3">
                 {dadosEvolucao.map((item: any, index: any) => {
-                  // DEBUG: Log para verificar quais dados está£o sendo renderizados
+                  // DEBUG: Log para verificar quais dados est�o sendo renderizados
                   if (index === 0) {
-                    console.log('ðŸŽ¨ RENDERIZANDO GRáFICO:', {
+                    console.log('🎨 RENDERIZANDO GR�FICO:', {
                       metrica: metricaSelecionada,
-                      periodo: `${periodoInicio} atá© ${periodoFim}`,
+                      periodo: `${periodoInicio} at� ${periodoFim}`,
                       primeiroItem: item,
                       totalItens: dadosEvolucao.length,
                       todasAsDatas: dadosEvolucao.map((d: any) => d.data),
@@ -970,7 +970,7 @@ export default function MetricaEvolucaoPage() {
                   
                   const maxValor = Math.max(...dadosEvolucao.map((d: any) => d.valor), metaMedia || 0)
                   const largura = (item.valor / maxValor) * 100
-                  // Para tempos (cozinha e bar), menor á© melhor - inverter lá³gica
+                  // Para tempos (cozinha e bar), menor � melhor - inverter l�gica
                   const acimaMeta = item.meta && (
                     (metricaSelecionada === 'tempo_cozinha' || metricaSelecionada === 'tempo_bar') 
                       ? item.valor <= item.meta 
@@ -981,8 +981,8 @@ export default function MetricaEvolucaoPage() {
                     <div key={`${metricaSelecionada}-${item.data}-${index}`} className="flex items-center space-x-3 relative">
                       <div className="w-20 text-xs text-slate-600 font-medium">
                         {(() => {
-                          // Formataá§á£o manual para evitar problemas de timezone
-                          const [ano, mes, dia] = item.data.split('T')[0].split('-')
+                          // Formata��o manual para evitar problemas de timezone
+                          const [ano, mes: any, dia] = item.data.split('T')[0].split('-')
                           return `${dia}/${mes}`
                         })()}
                       </div>
@@ -1013,8 +1013,8 @@ export default function MetricaEvolucaoPage() {
                             <div className="text-xs">
                               <div className="font-semibold">
                                 {(() => {
-                                  // Formataá§á£o manual para evitar problemas de timezone
-                                  const [ano, mes, dia] = item.data.split('T')[0].split('-')
+                                  // Formata��o manual para evitar problemas de timezone
+                                  const [ano, mes: any, dia] = item.data.split('T')[0].split('-')
                                   const dataFormatada = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia))
                                   return dataFormatada.toLocaleDateString('pt-BR', { 
                                     weekday: 'long', 
@@ -1045,8 +1045,8 @@ export default function MetricaEvolucaoPage() {
                               <div className="mt-1 pt-1 border-t border-gray-600">
                                 <span className={`font-semibold ${acimaMeta ? 'text-green-300' : 'text-red-300'}`}>
                                   {(metricaSelecionada === 'tempo_cozinha' || metricaSelecionada === 'tempo_bar') 
-                                    ? (acimaMeta ? 'œ… Dentro da meta' : 'Œ Fora da meta')
-                                    : (acimaMeta ? 'œ… Acima da meta' : 'Œ Abaixo da meta')
+                                    ? (acimaMeta ? '�� Dentro da meta' : '�� Fora da meta')
+                                    : (acimaMeta ? '�� Acima da meta' : '�� Abaixo da meta')
                                   }
                                   {item.meta && (
                                     <span className="ml-1">
@@ -1067,7 +1067,7 @@ export default function MetricaEvolucaoPage() {
                         })} {metricaInfo?.unit !== 'R$' ? metricaInfo?.unit : ''}
                       </div>
                       <div className="w-8">
-                        {acimaMeta ? 'œ…' : 'Œ'}
+                        {acimaMeta ? '��' : '��'}
                       </div>
                     </div>
                   )
@@ -1101,16 +1101,16 @@ export default function MetricaEvolucaoPage() {
               </div>
             </div>
 
-            {/* Insights e Aná¡lises */}
+            {/* Insights e An�lises */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <h3 className="text-lg font-bold text-slate-800 mb-4">ðŸ” Insights e Aná¡lises</h3>
+              <h3 className="text-lg font-bold text-slate-800 mb-4">🔍 Insights e An�lises</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <h4 className="font-semibold text-slate-700">ðŸ“ˆ Tendáªncia</h4>
+                  <h4 className="font-semibold text-slate-700">📈 Tend�ncia</h4>
                   {(() => {
-                    if (dadosEvolucao.length < 2) return <p className="text-sm text-slate-600">Dados insuficientes para aná¡lise de tendáªncia</p>
+                    if (dadosEvolucao.length < 2) return <p className="text-sm text-slate-600">Dados insuficientes para an�lise de tend�ncia</p>
                     
-                    const primeirosValores = dadosEvolucao.slice(0, Math.ceil(dadosEvolucao.length / 3))
+                    const primeirosValores = dadosEvolucao.slice(0: any, Math.ceil(dadosEvolucao.length / 3))
                     const ultimosValores = dadosEvolucao.slice(-Math.ceil(dadosEvolucao.length / 3))
                     
                     const mediaPrimeiros = primeirosValores.reduce((sum: number, item: any) => sum + item.valor, 0) / primeirosValores.length
@@ -1121,10 +1121,10 @@ export default function MetricaEvolucaoPage() {
                     return (
                       <div className="space-y-2">
                         <p className={`text-sm font-medium ${crescimento > 0 ? 'text-green-600' : crescimento < 0 ? 'text-red-600' : 'text-slate-600'}`}>
-                          {crescimento > 0 ? 'ðŸ“ˆ Tendáªncia de crescimento' : crescimento < 0 ? 'ðŸ“‰ Tendáªncia de queda' : 'ž¡ï¸ Tendáªncia está¡vel'}
+                          {crescimento > 0 ? '📈 Tend�ncia de crescimento' : crescimento < 0 ? '📉 Tend�ncia de queda' : '��️ Tend�ncia est�vel'}
                         </p>
                         <p className="text-sm text-slate-600">
-                          Variaá§á£o de {crescimento.toFixed(1)}% entre o iná­cio e fim do perá­odo
+                          Varia��o de {crescimento.toFixed(1)}% entre o in�cio e fim do per�odo
                         </p>
                       </div>
                     )
@@ -1132,7 +1132,7 @@ export default function MetricaEvolucaoPage() {
                 </div>
                 
                 <div className="space-y-4">
-                  <h4 className="font-semibold text-slate-700">ðŸŽ¯ Performance vs Meta</h4>
+                  <h4 className="font-semibold text-slate-700">🎯 Performance vs Meta</h4>
                   {(() => {
                     const diasAcimaMeta = dadosEvolucao.filter((item: any) => 
                       item.meta && (
@@ -1146,7 +1146,7 @@ export default function MetricaEvolucaoPage() {
                     return (
                       <div className="space-y-2">
                         <p className={`text-sm font-medium ${percentualDias >= 70 ? 'text-green-600' : percentualDias >= 50 ? 'text-yellow-600' : 'text-red-600'}`}>
-                          {percentualDias >= 70 ? 'œ… Excelente performance' : percentualDias >= 50 ? 'š ï¸ Performance moderada' : 'Œ Performance abaixo do esperado'}
+                          {percentualDias >= 70 ? '�� Excelente performance' : percentualDias >= 50 ? '��️ Performance moderada' : '�� Performance abaixo do esperado'}
                         </p>
                         <p className="text-sm text-slate-600">
                           Meta atingida em {diasAcimaMeta} de {dadosEvolucao.length} dias ({percentualDias.toFixed(1)}%)
@@ -1160,42 +1160,42 @@ export default function MetricaEvolucaoPage() {
           </>
         ) : (
           <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-100 text-center">
-            <div className="text-6xl mb-4">ðŸ“Š</div>
+            <div className="text-6xl mb-4">📊</div>
             <h3 className="text-lg font-semibold text-slate-800 mb-2">
               {dadosEvolucao.length === 0 && (metricaSelecionada && periodoInicio && periodoFim) ? 
-                'Nenhum dado encontrado para o perá­odo' : 
-                'Selecione uma má©trica e perá­odo'
+                'Nenhum dado encontrado para o per�odo' : 
+                'Selecione uma m�trica e per�odo'
               }
             </h3>
             <div className="text-slate-500 space-y-2">
               {dadosEvolucao.length === 0 && (metricaSelecionada && periodoInicio && periodoFim) ? (
                 <>
                   <p>
-                    Ná£o foram encontrados dados para <strong>{metricas.find((m: any) => m.value === metricaSelecionada)?.label}</strong> 
-                    no perá­odo de <strong>{new Date(periodoInicio).toLocaleDateString('pt-BR')}</strong> atá© <strong>{new Date(periodoFim).toLocaleDateString('pt-BR')}</strong>.
+                    N�o foram encontrados dados para <strong>{metricas.find((m: any) => m.value === metricaSelecionada)?.label}</strong> 
+                    no per�odo de <strong>{new Date(periodoInicio).toLocaleDateString('pt-BR')}</strong> at� <strong>{new Date(periodoFim).toLocaleDateString('pt-BR')}</strong>.
                   </p>
                   <div className="mt-4 p-4 bg-blue-50 rounded-lg text-left">
-                    <h4 className="font-semibold text-blue-800 mb-2">ðŸ’¡ Sugestáµes:</h4>
+                    <h4 className="font-semibold text-blue-800 mb-2">💡 Sugest�es:</h4>
                     <ul className="text-sm text-blue-700 space-y-1">
-                      <li>€¢ Tente um perá­odo anterior (dados disponá­veis atá© aproximadamente 11/06/2025)</li>
-                      <li>€¢ Verifique se o bar selecionado está¡ correto</li>
-                      <li>€¢ Para reservas, verifique se há¡ reservas cadastradas no GetIN para o perá­odo</li>
-                      <li>€¢ Consulte os logs do console (F12) para mais detalhes sobre a busca</li>
+                      <li>�� Tente um per�odo anterior (dados dispon�veis at� aproximadamente 11/06/2025)</li>
+                      <li>�� Verifique se o bar selecionado est� correto</li>
+                      <li>�� Para reservas, verifique se h� reservas cadastradas no GetIN para o per�odo</li>
+                      <li>�� Consulte os logs do console (F12) para mais detalhes sobre a busca</li>
                     </ul>
                   </div>
                   <div className="mt-4 p-4 bg-gray-50 rounded-lg text-left">
-                    <h4 className="font-semibold text-gray-800 mb-2">ðŸ” Perá­odos com dados disponá­veis:</h4>
+                    <h4 className="font-semibold text-gray-800 mb-2">🔍 Per�odos com dados dispon�veis:</h4>
                     <ul className="text-sm text-gray-700 space-y-1">
-                      <li>€¢ <strong>Faturamento:</strong> 01/02/2025 a 11/06/2025 (dados corrigidos - sem Conta Assinada)</li>
-                      <li>€¢ <strong>Clientes:</strong> 31/01/2025 a 11/06/2025</li>
-                      <li>€¢ <strong>Reservas:</strong> 31/01/2025 a 18/07/2025</li>
-                      <li>€¢ <strong>Tempos:</strong> Dados desde sempre atá© 11/06/2025</li>
+                      <li>�� <strong>Faturamento:</strong> 01/02/2025 a 11/06/2025 (dados corrigidos - sem Conta Assinada)</li>
+                      <li>�� <strong>Clientes:</strong> 31/01/2025 a 11/06/2025</li>
+                      <li>�� <strong>Reservas:</strong> 31/01/2025 a 18/07/2025</li>
+                      <li>�� <strong>Tempos:</strong> Dados desde sempre at� 11/06/2025</li>
                     </ul>
                   </div>
                 </>
               ) : (
                 <p>
-                  Escolha a má©trica que deseja analisar e clique em "Analisar" para visualizar a evoluá§á£o temporal.
+                  Escolha a m�trica que deseja analisar e clique em "Analisar" para visualizar a evolu��o temporal.
                 </p>
               )}
             </div>

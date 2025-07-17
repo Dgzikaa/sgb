@@ -1,4 +1,4 @@
-﻿import * as React from "react"
+import * as React from "react"
 import { cn } from "@/lib/utils"
 
 interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -8,7 +8,7 @@ interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
 interface AlertDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {}
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
-  ({ className, variant = 'default', ...props }, ref) => {
+  ({ className, variant = 'default', ...props }, ref: any) => {
     const variantStyles = {
       default: 'bg-blue-50 border-blue-200 text-blue-800',
       destructive: 'bg-red-50 border-red-200 text-red-800',
@@ -33,7 +33,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
 Alert.displayName = "Alert"
 
 const AlertDescription = React.forwardRef<HTMLParagraphElement, AlertDescriptionProps>(
-  ({ className, ...props }, ref) => (
+  ({ className, ...props }, ref: any) => (
     <div
       ref={ref}
       className={cn("text-sm [&_p]:leading-relaxed", className)}

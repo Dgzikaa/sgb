@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 
 export async function GET(request: NextRequest) {
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       throw error
     }
 
-    // Calcular estatá­sticas resumidas
+    // Calcular estat�sticas resumidas
     const resumo = {
       total_kpis: kpis?.length || 0,
       kpis_atingidos: kpis?.filter((kpi: any) => kpi.status_meta === 'atingido').length || 0,
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Œ Erro ao buscar KPIs:', error)
+    console.error('�� Erro ao buscar KPIs:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro ao buscar KPIs do sistema',
@@ -78,11 +78,11 @@ export async function POST(request: NextRequest) {
       data_referencia
     } = body
 
-    // Validaá§á£o bá¡sica
+    // Valida��o b�sica
     if (!bar_id || !categoria_kpi || !nome_kpi || valor_atual === undefined || valor_meta === undefined) {
       return NextResponse.json({
         success: false,
-        error: 'Campos obrigatá³rios: bar_id, categoria_kpi, nome_kpi, valor_atual, valor_meta'
+        error: 'Campos obrigat�rios: bar_id, categoria_kpi: any, nome_kpi, valor_atual: any, valor_meta'
       }, { status: 400 })
     }
 
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Œ Erro ao registrar KPI:', error)
+    console.error('�� Erro ao registrar KPI:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro ao registrar KPI',
@@ -138,7 +138,7 @@ export async function PUT(request: NextRequest) {
     if (!id || valor_atual === undefined) {
       return NextResponse.json({
         success: false,
-        error: 'Campos obrigatá³rios: id, valor_atual'
+        error: 'Campos obrigat�rios: id, valor_atual'
       }, { status: 400 })
     }
 
@@ -166,7 +166,7 @@ export async function PUT(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Œ Erro ao atualizar KPI:', error)
+    console.error('�� Erro ao atualizar KPI:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro ao atualizar KPI',

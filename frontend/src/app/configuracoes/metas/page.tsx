@@ -1,12 +1,12 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent: any, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -32,10 +32,10 @@ import {
 import { useBar } from '@/contexts/BarContext';
 import { Separator } from '@/components/ui/separator';
 import { NumericFormat, NumericFormatProps } from 'react-number-format';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent: any, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const CATEGORIAS = [
-  { key: 'indicadores_estrategicos', label: 'Indicadores Estratá©gicos' },
+  { key: 'indicadores_estrategicos', label: 'Indicadores Estrat�gicos' },
   { key: 'cockpit_financeiro', label: 'Cockpit Financeiro' },
   { key: 'indicadores_qualidade', label: 'Indicadores de Qualidade' },
   { key: 'cockpit_produtos', label: 'Cockpit Produtos' },
@@ -87,7 +87,7 @@ const formatarValor = (valor: number | null, tipo: string): string => {
   }
 };
 
-const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
+const MetaCard = ({ meta, isEditing: any, onEdit, onSave: any, onCancel, isSaving }: {
   meta: Meta;
   isEditing: boolean;
   onEdit: () => void;
@@ -210,20 +210,20 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
 
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
            {[
-             { key: 'diario', label: 'Diá¡rio', valor: meta.valor_diario },
+             { key: 'diario', label: 'Di�rio', valor: meta.valor_diario },
              { key: 'semanal', label: 'Semanal', valor: meta.valor_semanal },
              { key: 'mensal', label: 'Mensal', valor: meta.valor_mensal },
-             { key: 'unico', label: 'ášnico', valor: meta.valor_unico }
+             { key: 'unico', label: '�nico', valor: meta.valor_unico }
            ]
            .filter((periodo: any) => {
              // Filtro inteligente baseado no tipo_valor
              if (meta.tipo_valor === 'unico') {
                return periodo.key === 'unico';
              } else {
-               return periodo.key !== 'unico'; // Mostra diá¡rio, semanal e mensal
+               return periodo.key !== 'unico'; // Mostra di�rio, semanal e mensal
              }
            })
-           .map((periodo) => {
+           .map((periodo: any) => {
              const chaveValor = `valor_${periodo.key}` as keyof typeof valores;
              
              return (
@@ -236,7 +236,7 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
                      type="number"
                      step="0.01"
                      value={valores[chaveValor]}
-                     onChange={(e) => setValores(prev => ({
+                     onChange={(e: any) => setValores(prev => ({
                        ...prev,
                        [chaveValor]: e.target.value
                      }))}
@@ -262,7 +262,7 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
   );
 };
 
-// Adicionar index signature em METAS_BASE para acesso diná¢mico
+// Adicionar index signature em METAS_BASE para acesso din�mico
 const METAS_BASE: Record<string, Record<string, any>> = {
   indicadores_estrategicos: {
     faturamento_total: 222000,
@@ -365,7 +365,7 @@ function formatInputValue(key: string, value: any) {
   return value ?? '';
 }
 
-// Funá§á£o para transformar snake_case em label amigá¡vel
+// Fun��o para transformar snake_case em label amig�vel
 function toLabel(str: string) {
   return str
     .replace(/_/g, ' ')
@@ -373,7 +373,7 @@ function toLabel(str: string) {
     .replace(/\b(rs|cmv|nps|tm|qtde|o|m)\b/gi, (m: string) => m.toUpperCase());
 }
 
-// Funá§á£o para sugerir tipo de input
+// Fun��o para sugerir tipo de input
 function getInputType(key: string) {
   if (key.includes('percent') || key.includes('cmv') || key.includes('nps')) return 'number';
   if (key.includes('valor') || key.includes('faturamento') || key.includes('rs') || key.includes('ticket') || key.includes('lucro')) return 'number';
@@ -382,7 +382,7 @@ function getInputType(key: string) {
   return 'number';
 }
 
-// Funá§á£o para placeholder
+// Fun��o para placeholder
 function getPlaceholder(key: string) {
   if (key.includes('percent') || key.includes('cmv') || key.includes('nps')) return '%';
   if (key.includes('valor') || key.includes('faturamento') || key.includes('rs') || key.includes('ticket') || key.includes('lucro')) return 'R$';
@@ -393,31 +393,31 @@ function getPlaceholder(key: string) {
   return '';
 }
 
-// Dicioná¡rio de tooltips para cada má©trica (exemplo, pode expandir)
+// Dicion�rio de tooltips para cada m�trica (exemplo: any, pode expandir)
 const METRIC_TOOLTIPS: Record<string, string> = {
-  faturamento_total: 'Faturamento bruto total do perá­odo.',
-  faturamento_couvert: 'Faturamento apenas de couvert artá­stico.',
+  faturamento_total: 'Faturamento bruto total do per�odo.',
+  faturamento_couvert: 'Faturamento apenas de couvert art�stico.',
   faturamento_bar: 'Faturamento apenas do bar.',
-  faturamento_cmovel: 'Faturamento de vendas má³veis.',
+  faturamento_cmovel: 'Faturamento de vendas m�veis.',
   cmv_rs: 'Custo de mercadoria vendida em reais.',
-  ticket_medio_contahub: 'Ticket má©dio calculado pelo ContaHub.',
-  tm_entrada: 'Ticket má©dio de entrada.',
-  tm_bar: 'Ticket má©dio do bar.',
+  ticket_medio_contahub: 'Ticket m�dio calculado pelo ContaHub.',
+  tm_entrada: 'Ticket m�dio de entrada.',
+  tm_bar: 'Ticket m�dio do bar.',
   cmv_global_real: 'CMV global realizado (%).',
   cmo_percent: 'CMO percentual.',
-  atracao_faturamento: 'Percentual de faturamento vindo de atraá§áµes.',
-  retencao: 'Percentual de retená§á£o de clientes.',
+  atracao_faturamento: 'Percentual de faturamento vindo de atra��es.',
+  retencao: 'Percentual de reten��o de clientes.',
   clientes_atendidos: 'Total de clientes atendidos.',
   clientes_ativos: 'Total de clientes ativos.',
   reservas_totais: 'Total de reservas realizadas.',
   reservas_presentes: 'Total de reservas presentes.'
-  // ...adicione mais tooltips conforme necessá¡rio
+  // ...adicione mais tooltips conforme necess�rio
 };
 
 function getBadgeUnit(key: string) {
   if (key.includes('percent') || key.includes('cmv') || key.includes('nps')) return '%';
   if (key.includes('valor') || key.includes('faturamento') || key.includes('rs') || key.includes('ticket') || key.includes('lucro')) return 'R$';
-  if (key.includes('media')) return 'Má©dia';
+  if (key.includes('media')) return 'M�dia';
   if (key.includes('tempo')) return 'min';
   if (key.includes('qtde')) return 'Qtd.';
   return '';
@@ -459,7 +459,7 @@ export default function MetasPage() {
     }
   };
 
-  // Má¡scara e parse para moeda/percentual
+  // M�scara e parse para moeda/percentual
   function getFormatProps(key: string) {
     if (key.includes('percent') || key.includes('cmv') || key.includes('nps')) {
       return { suffix: '%', decimalScale: 2, fixedDecimalScale: true, allowNegative: false };
@@ -489,7 +489,7 @@ export default function MetasPage() {
       const data = await res.json();
       if (data.success) {
         setMetas(newMetas);
-        setEditKey((prev) => ({ ...prev, [cat]: null }));
+        setEditKey((prev: any) => ({ ...prev, [cat]: null }));
         toast({ title: 'Meta salva!', description: toLabel(key), variant: 'default' });
       } else {
         toast({ title: 'Erro ao salvar meta', description: data.error, variant: 'destructive' });
@@ -504,12 +504,12 @@ export default function MetasPage() {
 
   // Editar individual
   const handleEditField = (cat: string, key: string) => {
-    setEditKey((prev) => ({ ...prev, [cat]: key }));
+    setEditKey((prev: any) => ({ ...prev, [cat]: key }));
   };
 
-  // Cancelar ediá§á£o
+  // Cancelar edi��o
   const handleCancelEdit = (cat: string) => {
-    setEditKey((prev) => ({ ...prev, [cat]: null }));
+    setEditKey((prev: any) => ({ ...prev, [cat]: null }));
     setEditState((prev: any) => ({ ...prev, [cat]: { ...metas[cat] } }));
   };
 
@@ -561,10 +561,10 @@ export default function MetasPage() {
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    Configuraá§á£o de Metas
+                    Configura��o de Metas
                   </h1>
                   <p className="text-gray-600 dark:text-gray-400 text-lg">
-                    Edite as metas base do seu bar. Todos os campos sá£o editá¡veis.
+                    Edite as metas base do seu bar. Todos os campos s�o edit�veis.
                   </p>
                 </div>
               </div>
@@ -605,7 +605,7 @@ export default function MetasPage() {
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {campos.map((key) => {
+                        {campos.map((key: any) => {
                           const isEditing = editKey[cat.key] === key;
                           const value = editState?.[cat.key]?.[key];
                           const displayValue = metas?.[cat.key]?.[key];
@@ -622,7 +622,7 @@ export default function MetasPage() {
                                   </TooltipTrigger>
                                   <TooltipContent side="top">
                                     <span className="font-semibold">{toLabel(key)}</span><br />
-                                    <span className="text-xs text-gray-500">{METRIC_TOOLTIPS[key] || 'Meta configurá¡vel.'}</span>
+                                    <span className="text-xs text-gray-500">{METRIC_TOOLTIPS[key] || 'Meta configur�vel.'}</span>
                                   </TooltipContent>
                                 </Tooltip>
                               </div>

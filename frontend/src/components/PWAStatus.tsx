@@ -1,7 +1,7 @@
-ï»¿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { usePWA } from '@/hooks/usePWA'
@@ -70,7 +70,7 @@ export function PWAStatus({
     setIsClearingCache(true)
     try {
       await clearCache()
-      // Recarregar apÃ¡Â³s limpar cache
+      // Recarregar apá³s limpar cache
       setTimeout(() => {
         window.location.reload()
       }, 1000)
@@ -86,8 +86,8 @@ export function PWAStatus({
       setLastUpdateCheck(new Date())
       
       if (hasUpdate) {
-        // Mostrar notificaÃ¡Â§Ã¡Â£o de atualizaÃ¡Â§Ã¡Â£o disponÃ¡Â­vel
-        console.log('Nova atualizaÃ¡Â§Ã¡Â£o disponÃ¡Â­vel')
+        // Mostrar notificaá§á£o de atualizaá§á£o disponá­vel
+        console.log('Nova atualizaá§á£o disponá­vel')
       }
     } finally {
       setIsUpdating(false)
@@ -97,7 +97,7 @@ export function PWAStatus({
   const getStatusItems = () => [
     {
       label: 'PWA Status',
-      value: isInstalled ? 'Instalada' : 'DisponÃ¡Â­vel',
+      value: isInstalled ? 'Instalada' : 'Disponá­vel',
       icon: isInstalled ? CheckCircle : Smartphone,
       status: isInstalled ? 'success' : 'warning',
       action: !isInstalled && isInstallable ? {
@@ -113,7 +113,7 @@ export function PWAStatus({
       status: isOnline ? 'success' : 'error'
     },
     {
-      label: 'NotificaÃ¡Â§Ã¡Âµes',
+      label: 'Notificaá§áµes',
       value: notificationPermission === 'granted' ? 'Habilitadas' : 
              notificationPermission === 'denied' ? 'Negadas' : 'Pendente',
       icon: notificationPermission === 'granted' ? Bell : BellOff,
@@ -135,7 +135,7 @@ export function PWAStatus({
   if (compact) {
     return (
       <div className={`flex items-center gap-2 ${className}`}>
-        {/* Status compacto apenas com Ã¡Â­cones */}
+        {/* Status compacto apenas com á­cones */}
         <div className="flex items-center gap-1">
           <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`} />
           <span className="text-xs text-gray-600 dark:text-gray-400">
@@ -165,7 +165,7 @@ export function PWAStatus({
       <CardContent className="space-y-4">
         {/* Status items */}
         <div className="space-y-3">
-          {getStatusItems().map((item, index) => (
+          {getStatusItems().map((item: any, index: any) => (
             <div key={index} className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <item.icon className={`w-4 h-4 ${
@@ -210,7 +210,7 @@ export function PWAStatus({
                 className="flex-1"
               >
                 <RefreshCw className={`w-4 h-4 mr-2 ${isUpdating ? 'animate-spin' : ''}`} />
-                {isUpdating ? 'Verificando...' : 'Verificar AtualizaÃ¡Â§Ã¡Âµes'}
+                {isUpdating ? 'Verificando...' : 'Verificar Atualizaá§áµes'}
               </Button>
               
               <Button
@@ -227,7 +227,7 @@ export function PWAStatus({
             
             {lastUpdateCheck && (
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
-                Ã¡Å¡ltima verificaÃ¡Â§Ã¡Â£o: {lastUpdateCheck.toLocaleTimeString('pt-BR')}
+                ášltima verificaá§á£o: {lastUpdateCheck.toLocaleTimeString('pt-BR')}
               </p>
             )}
           </div>
@@ -235,9 +235,9 @@ export function PWAStatus({
 
         {/* Info adicional */}
         <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 pt-2 border-t border-gray-200 dark:border-gray-700">
-          <p>â‚¬Â¢ PWA permite instalaÃ¡Â§Ã¡Â£o como app nativo</p>
-          <p>â‚¬Â¢ Service Worker possibilita funcionamento offline</p>
-          <p>â‚¬Â¢ Cache local melhora performance significativamente</p>
+          <p>€¢ PWA permite instalaá§á£o como app nativo</p>
+          <p>€¢ Service Worker possibilita funcionamento offline</p>
+          <p>€¢ Cache local melhora performance significativamente</p>
         </div>
       </CardContent>
     </Card>

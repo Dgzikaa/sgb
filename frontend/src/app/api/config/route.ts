@@ -1,15 +1,15 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-// Cache das configuraá§áµes para evitar máºltiplas chamadas
+// Cache das configura��es para evitar m�ltiplas chamadas
 let configCache: any = null
 let cacheTimestamp = 0
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutos
 
 async function fetchSupabaseSecrets() {
   try {
-    // Buscar secrets diretamente do Supabase usando edge function com autenticaá§á£o
+    // Buscar secrets diretamente do Supabase usando edge function com autentica��o
     const response = await fetch('https://iddtrhexgjbfhxebpklf.supabase.co/functions/v1/get-config', {
       method: 'POST',
       headers: {
@@ -20,16 +20,16 @@ async function fetchSupabaseSecrets() {
     })
 
     if (!response.ok) {
-      throw new Error('Falha ao buscar configuraá§áµes')
+      throw new Error('Falha ao buscar configura��es')
     }
 
     const config = await response.json()
     return config
   } catch (error) {
-    console.error('Œ Erro ao buscar secrets:', error)
+    console.error('�� Erro ao buscar secrets:', error)
     
-    // Secrets sá£o obrigatá³rios
-    throw new Error('Configuraá§áµes dos secrets ná£o disponá­veis - verificar edge function get-config')
+    // Secrets s�o obrigat�rios
+    throw new Error('Configura��es dos secrets n�o dispon�veis - verificar edge function get-config')
   }
 }
 
@@ -37,12 +37,12 @@ export async function GET() {
   try {
     const now = Date.now()
     
-    // Verificar se o cache ainda á© vá¡lido
+    // Verificar se o cache ainda � v�lido
     if (configCache && (now - cacheTimestamp) < CACHE_DURATION) {
       return NextResponse.json(configCache)
     }
 
-    // Buscar novas configuraá§áµes
+    // Buscar novas configura��es
     const config = await fetchSupabaseSecrets()
     
     // Atualizar cache
@@ -51,9 +51,9 @@ export async function GET() {
 
     return NextResponse.json(config)
   } catch (error) {
-    console.error('Œ Erro na API de configuraá§á£o:', error)
+    console.error('�� Erro na API de configura��o:', error)
     return NextResponse.json(
-      { error: 'Erro ao buscar configuraá§áµes' },
+      { error: 'Erro ao buscar configura��es' },
       { status: 500 }
     )
   }

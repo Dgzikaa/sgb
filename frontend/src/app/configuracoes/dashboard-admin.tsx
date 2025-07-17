@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import './admin.css';
@@ -49,10 +49,10 @@ export default function AdminPage() {
   const [editingEvent, setEditingEvent] = useState<any>(null);
   const [showEventModal, setShowEventModal] = useState(false);
   
-  // Estados para configuraá§áµes de APIs por bar
+  // Estados para configura��es de APIs por bar
   const [barConfigs, setBarConfigs] = useState<Record<number, any>>({});
   
-  // Estados para configuraá§áµes gerais do sistema
+  // Estados para configura��es gerais do sistema
   const [configs, setConfigs] = useState({
     // ContaHub
     contahub_username: '',
@@ -69,7 +69,7 @@ export default function AdminPage() {
     email_api_key: '',
     email_from: '',
     
-    // Seguraná§a
+    // Seguran�a
     admin_password: '',
     jwt_secret: '',
     
@@ -80,7 +80,7 @@ export default function AdminPage() {
     notifications_enabled: true
   });
 
-  // Estados para verificaá§á£o de receitas
+  // Estados para verifica��o de receitas
   const [verificandoReceitas, setVerificandoReceitas] = useState(false);
   const [resultadoVerificacao, setResultadoVerificacao] = useState<any>(null);
 
@@ -93,37 +93,37 @@ export default function AdminPage() {
     if (currentTab === 'planejamento') {
       loadEventos();
     }
-  }, [currentTab, currentMonth, currentYear, selectedBarId]);
+  }, [currentTab, currentMonth: any, currentYear, selectedBarId]);
 
   const loadBars = async () => {
     setLoading(true);
     try {
-      console.log('ðŸ” Carregando bares do banco de dados...');
+      console.log('🔍 Carregando bares do banco de dados...');
       const response = await fetch('/api/bars');
-      console.log('ðŸ“¡ Response status:', response.status);
+      console.log('📡 Response status:', response.status);
       
       const result = await response.json();
-      console.log('ðŸ“Š Resultado da API:', result);
+      console.log('📊 Resultado da API:', result);
       
       if (result.success) {
         setBars(result.data);
         
-        // Selecionar automaticamente o Bar Ordiná¡rio (ID 1) por padrá£o
+        // Selecionar automaticamente o Bar Ordin�rio (ID 1) por padr�o
         const barOrdinario = result.data.find((bar: Bar) => bar.id === 1);
         if (barOrdinario && !selectedBarId) {
           setSelectedBarId(1);
         }
         
-        setMessage(`œ… ${result.data.length} bares carregados com sucesso!`);
-        console.log(`œ… ${result.data.length} bares carregados:`, result.data);
+        setMessage(`�� ${result.data.length} bares carregados com sucesso!`);
+        console.log(`�� ${result.data.length} bares carregados:`, result.data);
       } else {
-        setMessage(`Œ Erro ao carregar bares: ${result.error}`);
-        console.error('Œ Erro da API:', result.error);
+        setMessage(`�� Erro ao carregar bares: ${result.error}`);
+        console.error('�� Erro da API:', result.error);
         setBars([]);
       }
     } catch (error) {
-      console.error('ðŸ’¥ Erro ao carregar bares:', error);
-      setMessage(`ðŸ’¥ Erro de conexá£o: ${error}`);
+      console.error('💥 Erro ao carregar bares:', error);
+      setMessage(`💥 Erro de conex�o: ${error}`);
       setBars([]);
     } finally {
       setLoading(false);
@@ -138,13 +138,13 @@ export default function AdminPage() {
         setConfigs({ ...configs, ...JSON.parse(saved) });
       }
 
-      // Carregar configuraá§áµes dos bares
+      // Carregar configura��es dos bares
       const savedBarConfigs = localStorage.getItem('sgb-bar-configs');
       if (savedBarConfigs) {
         setBarConfigs(JSON.parse(savedBarConfigs));
       }
     } catch (error) {
-      console.error('Erro ao carregar configuraá§áµes:', error);
+      console.error('Erro ao carregar configura��es:', error);
     }
   };
 
@@ -152,19 +152,19 @@ export default function AdminPage() {
     setLoading(true);
     try {
       localStorage.setItem('sgb-admin-configs', JSON.stringify(configs));
-      setMessage('Configuraá§áµes salvas com sucesso!');
+      setMessage('Configura��es salvas com sucesso!');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
-      console.error('Erro ao salvar configuraá§áµes:', error);
-      setMessage('Erro ao salvar configuraá§áµes');
+      console.error('Erro ao salvar configura��es:', error);
+      setMessage('Erro ao salvar configura��es');
     } finally {
       setLoading(false);
     }
   };
 
-  // Funá§áµes para Planejamento Comercial
+  // Fun��es para Planejamento Comercial
   const loadEventos = async () => {
-    // Ná£o carregar eventos se nenhum bar estiver selecionado
+    // N�o carregar eventos se nenhum bar estiver selecionado
     if (!selectedBarId) {
       setEventos([]);
       return;
@@ -247,32 +247,32 @@ export default function AdminPage() {
   };
 
   const importarEventosHistoricos = async () => {
-    // Encontrar o bar ordiná¡rio pelo nome
+    // Encontrar o bar ordin�rio pelo nome
     const barOrdinario = bars.find((bar: any) => 
-      bar.nome.toLowerCase().includes('ordiná¡rio') || 
+      bar.nome.toLowerCase().includes('ordin�rio') || 
       bar.nome.toLowerCase().includes('ordinario')
     );
     
     if (!barOrdinario) {
-      setMessage('Œ Bar Ordiná¡rio ná£o encontrado na lista de bares');
+      setMessage('�� Bar Ordin�rio n�o encontrado na lista de bares');
       return;
     }
     
     const confirmacao = confirm(
-      `ðŸš€ Deseja importar os dados histá³ricos de Fevereiro a Junho 2025 para o ${barOrdinario.nome}?\n\n` +
-      'ðŸ“Š Isso incluirá¡:\n' +
-      '€¢ ~150 eventos de diferentes gáªneros\n' +
-      '€¢ Informaá§áµes de artistas e capacidade\n' +
-      '€¢ Eventos recorrentes (Quarta de Bamba, Pagode Vira-lata, etc.)\n' +
-      '€¢ Eventos especiais (Carnaval, Homenagens, Festival Junino)\n\n' +
-      'š ï¸ Se já¡ existirem eventos no perá­odo, eles será£o substituá­dos.'
+      `🚀 Deseja importar os dados hist�ricos de Fevereiro a Junho 2025 para o ${barOrdinario.nome}?\n\n` +
+      '📊 Isso incluir�:\n' +
+      '�� ~150 eventos de diferentes g�neros\n' +
+      '�� Informa��es de artistas e capacidade\n' +
+      '�� Eventos recorrentes (Quarta de Bamba, Pagode Vira-lata, etc.)\n' +
+      '�� Eventos especiais (Carnaval: any, Homenagens, Festival Junino)\n\n' +
+      '��️ Se j� existirem eventos no per�odo, eles ser�o substitu�dos.'
     );
     
     if (!confirmacao) return;
     
     setLoading(true);
     try {
-      console.log(`ðŸ“Š Importando eventos para bar: ${barOrdinario.nome} (ID: ${barOrdinario.id})`);
+      console.log(`📊 Importando eventos para bar: ${barOrdinario.nome} (ID: ${barOrdinario.id})`);
       
       // Primeira tentativa - verificar se existem eventos
               const response1 = await fetch('/api/eventos/import', {
@@ -289,10 +289,10 @@ export default function AdminPage() {
       
       if (result1.requer_confirmacao) {
         const confirmarSubstituicao = confirm(
-          `š ï¸ Atená§á£o: Já¡ existem ${result1.eventos_existentes} eventos no perá­odo!\n\n` +
-          `ðŸ“¥ Eventos para importar: ${result1.eventos_para_importar}\n` +
-          `ðŸ—‘ï¸ Eventos existentes: ${result1.eventos_existentes}\n\n` +
-          'Deseja SUBSTITUIR os eventos existentes pelos dados histá³ricos?'
+          `��️ Aten��o: J� existem ${result1.eventos_existentes} eventos no per�odo!\n\n` +
+          `📥 Eventos para importar: ${result1.eventos_para_importar}\n` +
+          `🗑️ Eventos existentes: ${result1.eventos_existentes}\n\n` +
+          'Deseja SUBSTITUIR os eventos existentes pelos dados hist�ricos?'
         );
         
         if (!confirmarSubstituicao) {
@@ -300,7 +300,7 @@ export default function AdminPage() {
           return;
         }
         
-        // Segunda tentativa - confirmar substituiá§á£o
+        // Segunda tentativa - confirmar substitui��o
         const response2 = await fetch('/api/eventos/import', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -315,37 +315,37 @@ export default function AdminPage() {
         
         if (result2.success) {
           setMessage(
-            `ðŸŽ‰ ${result2.eventos_importados} eventos importados com sucesso!\n\n` +
-            `ðŸ“… Resumo por máªs:\n` +
-            `€¢ Fevereiro: ${result2.resumo.fevereiro} eventos\n` +
-            `€¢ Mará§o: ${result2.resumo.marco} eventos\n` +
-            `€¢ Abril: ${result2.resumo.abril} eventos\n` +
-            `€¢ Maio: ${result2.resumo.maio} eventos\n` +
-            `€¢ Junho: ${result2.resumo.junho} eventos\n\n` +
-            `ðŸŽµ Gáªneros: ${result2.generos_detectados.join(', ')}`
+            `🎉 ${result2.eventos_importados} eventos importados com sucesso!\n\n` +
+            `📅 Resumo por m�s:\n` +
+            `�� Fevereiro: ${result2.resumo.fevereiro} eventos\n` +
+            `�� Mar�o: ${result2.resumo.marco} eventos\n` +
+            `�� Abril: ${result2.resumo.abril} eventos\n` +
+            `�� Maio: ${result2.resumo.maio} eventos\n` +
+            `�� Junho: ${result2.resumo.junho} eventos\n\n` +
+            `🎵 G�neros: ${result2.generos_detectados.join(', ')}`
           );
           loadEventos();
         } else {
-          setMessage(`Œ Erro na importaá§á£o: ${result2.error}`);
+          setMessage(`�� Erro na importa��o: ${result2.error}`);
         }
       } else if (result1.success) {
         setMessage(
-          `ðŸŽ‰ ${result1.eventos_importados} eventos importados com sucesso!\n\n` +
-          `ðŸ“… Resumo por máªs:\n` +
-          `€¢ Fevereiro: ${result1.resumo.fevereiro} eventos\n` +
-          `€¢ Mará§o: ${result1.resumo.marco} eventos\n` +
-          `€¢ Abril: ${result1.resumo.abril} eventos\n` +
-          `€¢ Maio: ${result1.resumo.maio} eventos\n` +
-          `€¢ Junho: ${result1.resumo.junho} eventos\n\n` +
-          `ðŸŽµ Gáªneros: ${result1.generos_detectados.join(', ')}`
+          `🎉 ${result1.eventos_importados} eventos importados com sucesso!\n\n` +
+          `📅 Resumo por m�s:\n` +
+          `�� Fevereiro: ${result1.resumo.fevereiro} eventos\n` +
+          `�� Mar�o: ${result1.resumo.marco} eventos\n` +
+          `�� Abril: ${result1.resumo.abril} eventos\n` +
+          `�� Maio: ${result1.resumo.maio} eventos\n` +
+          `�� Junho: ${result1.resumo.junho} eventos\n\n` +
+          `🎵 G�neros: ${result1.generos_detectados.join(', ')}`
         );
         loadEventos();
       } else {
-        setMessage(`Œ Erro na importaá§á£o: ${result1.error}`);
+        setMessage(`�� Erro na importa��o: ${result1.error}`);
       }
     } catch (error) {
-      console.error('Erro ao importar eventos histá³ricos:', error);
-      setMessage('Œ Erro ao importar eventos histá³ricos');
+      console.error('Erro ao importar eventos hist�ricos:', error);
+      setMessage('�� Erro ao importar eventos hist�ricos');
     } finally {
       setLoading(false);
       setTimeout(() => setMessage(''), 10000); // Mensagem mais longa para mostrar o resumo
@@ -366,9 +366,9 @@ export default function AdminPage() {
       const result = await response.json();
       
       if (result.success) {
-        const { migratedConfigs, migrationLog, summary } = result.data;
+        const { migratedConfigs, migrationLog: any, summary } = result.data;
         
-        // Atualizar estado local com as configuraá§áµes migradas
+        // Atualizar estado local com as configura��es migradas
         setBarConfigs({
           ...barConfigs,
           [barId]: {
@@ -377,16 +377,16 @@ export default function AdminPage() {
           }
         });
         
-        setMessage(`œ… Migraá§á£o concluá­da! ${summary.successful}/${summary.total} APIs migradas com sucesso`);
+        setMessage(`�� Migra��o conclu�da! ${summary.successful}/${summary.total} APIs migradas com sucesso`);
         
         // Log detalhado
-        console.log('ðŸ“‹ Migraá§á£o detalhada:', migrationLog);
+        console.log('📋 Migra��o detalhada:', migrationLog);
       } else {
-        setMessage(`Œ Erro na migraá§á£o: ${result.error}`);
+        setMessage(`�� Erro na migra��o: ${result.error}`);
       }
     } catch (error) {
-      console.error('Erro ao migrar configuraá§áµes:', error);
-      setMessage('Œ Erro ao migrar configuraá§áµes existentes');
+      console.error('Erro ao migrar configura��es:', error);
+      setMessage('�� Erro ao migrar configura��es existentes');
     } finally {
       setMigrating(false);
       setTimeout(() => setMessage(''), 5000);
@@ -404,13 +404,13 @@ export default function AdminPage() {
       localStorage.setItem('sgb-bar-configs', JSON.stringify(savedBarConfigs));
       
       const barName = bars.find((b: any) => b.id === barId)?.nome || 'Bar';
-      setMessage(`œ… Configuraá§áµes do ${barName} salvas com sucesso!`);
+      setMessage(`�� Configura��es do ${barName} salvas com sucesso!`);
       setTimeout(() => setMessage(''), 3000);
       
-      console.log(`ðŸ’¾ Configuraá§áµes salvas para bar ${barId}:`, currentBarConfig);
+      console.log(`💾 Configura��es salvas para bar ${barId}:`, currentBarConfig);
     } catch (error) {
-      console.error('Erro ao salvar configuraá§áµes do bar:', error);
-      setMessage('Erro ao salvar configuraá§áµes do bar');
+      console.error('Erro ao salvar configura��es do bar:', error);
+      setMessage('Erro ao salvar configura��es do bar');
     } finally {
       setLoading(false);
     }
@@ -436,7 +436,7 @@ export default function AdminPage() {
 
   const testSystemConnection = async (barId: number) => {
     if (!barConfigs[barId]?.contahub_enabled) {
-      setMessage('Œ Sistema ContaHub ná£o está¡ habilitado para este bar');
+      setMessage('�� Sistema ContaHub n�o est� habilitado para este bar');
       return;
     }
 
@@ -448,7 +448,7 @@ export default function AdminPage() {
     };
 
     if (!credentials.username || !credentials.password) {
-      setMessage('Œ Credenciais incompletas. Login e senha sá£o obrigatá³rios.');
+      setMessage('�� Credenciais incompletas. Login e senha s�o obrigat�rios.');
       return;
     }
 
@@ -467,9 +467,9 @@ export default function AdminPage() {
       const result = await response.json();
       
       if (result.success && result.data.success) {
-        setMessage(`œ… Conexá£o bem-sucedida! Tempo de resposta: ${result.data.responseTime}ms`);
+        setMessage(`�� Conex�o bem-sucedida! Tempo de resposta: ${result.data.responseTime}ms`);
         
-        // Atualizar configuraá§á£o com sucesso
+        // Atualizar configura��o com sucesso
         setBarConfigs({
           ...barConfigs,
           [barId]: {
@@ -481,9 +481,9 @@ export default function AdminPage() {
         });
       } else {
         const errorMsg = result.data?.message || result.error || 'Erro desconhecido';
-        setMessage(`Œ Falha na conexá£o: ${errorMsg}`);
+        setMessage(`�� Falha na conex�o: ${errorMsg}`);
         
-        // Atualizar configuraá§á£o com erro
+        // Atualizar configura��o com erro
         setBarConfigs({
           ...barConfigs,
           [barId]: {
@@ -495,11 +495,11 @@ export default function AdminPage() {
         });
       }
     } catch (error) {
-      console.error('Erro ao testar conexá£o:', error);
-      const errorMsg = 'Erro de comunicaá§á£o com o servidor';
-      setMessage(`Œ ${errorMsg}`);
+      console.error('Erro ao testar conex�o:', error);
+      const errorMsg = 'Erro de comunica��o com o servidor';
+      setMessage(`�� ${errorMsg}`);
       
-      // Atualizar configuraá§á£o com erro
+      // Atualizar configura��o com erro
       setBarConfigs({
         ...barConfigs,
         [barId]: {
@@ -517,7 +517,7 @@ export default function AdminPage() {
 
   const addBar = async () => {
     if (!newBar.nome || !newBar.endereco) {
-      setMessage('Nome e endereá§o sá£o obrigatá³rios');
+      setMessage('Nome e endere�o s�o obrigat�rios');
       return;
     }
 
@@ -586,13 +586,13 @@ export default function AdminPage() {
 
   const verificarReceitasProblematicas = async () => {
     if (!selectedBarId) {
-      setMessage('Œ Selecione um bar primeiro');
+      setMessage('�� Selecione um bar primeiro');
       return;
     }
 
     setVerificandoReceitas(true);
     try {
-      console.log(`ðŸ” Verificando receitas problemá¡ticas para bar ${selectedBarId}...`);
+      console.log(`🔍 Verificando receitas problem�ticas para bar ${selectedBarId}...`);
       
               const response = await fetch(`/api/receitas/verificar-sem-nome?bar_id=${selectedBarId}`);
       const result = await response.json();
@@ -601,40 +601,40 @@ export default function AdminPage() {
         setResultadoVerificacao(result.data);
         
         const { estatisticas } = result.data;
-        let mensagem = `œ… Verificaá§á£o concluá­da!\n\n`;
-        mensagem += `ðŸ“Š ESTATáSTICAS:\n`;
-        mensagem += `€¢ Total de receitas: ${estatisticas.total_receitas}\n`;
-        mensagem += `€¢ Total de problemas: ${estatisticas.total_problemas}\n\n`;
+        let mensagem = `�� Verifica��o conclu�da!\n\n`;
+        mensagem += `📊 ESTAT�STICAS:\n`;
+        mensagem += `�� Total de receitas: ${estatisticas.total_receitas}\n`;
+        mensagem += `�� Total de problemas: ${estatisticas.total_problemas}\n\n`;
         
         if (estatisticas.total_problemas > 0) {
-          mensagem += `Œ PROBLEMAS ENCONTRADOS:\n`;
+          mensagem += `�� PROBLEMAS ENCONTRADOS:\n`;
           if (estatisticas.codigo_sem_nome > 0) {
-            mensagem += `€¢ ${estatisticas.codigo_sem_nome} insumos com cá³digo mas sem nome\n`;
+            mensagem += `�� ${estatisticas.codigo_sem_nome} insumos com c�digo mas sem nome\n`;
           }
           if (estatisticas.nome_sem_codigo > 0) {
-            mensagem += `€¢ ${estatisticas.nome_sem_codigo} insumos com nome mas sem cá³digo\n`;
+            mensagem += `�� ${estatisticas.nome_sem_codigo} insumos com nome mas sem c�digo\n`;
           }
           if (estatisticas.sem_codigo_e_nome > 0) {
-            mensagem += `€¢ ${estatisticas.sem_codigo_e_nome} insumos sem cá³digo e sem nome\n`;
+            mensagem += `�� ${estatisticas.sem_codigo_e_nome} insumos sem c�digo e sem nome\n`;
           }
-          mensagem += `\nðŸ“‹ Verifique o console para mais detalhes.`;
+          mensagem += `\n📋 Verifique o console para mais detalhes.`;
         } else {
-          mensagem += `œ… Nenhum problema encontrado! Todas as receitas está£o OK.`;
+          mensagem += `�� Nenhum problema encontrado! Todas as receitas est�o OK.`;
         }
         
         setMessage(mensagem);
         
         // Log detalhado no console
         if (result.data.problemas.length > 0) {
-          console.log(`š ï¸ PROBLEMAS ENCONTRADOS:`, result.data.problemas);
-          console.log(`ðŸ“‹ RECEITAS COM PROBLEMAS:`, result.data.receitas_com_problemas);
+          console.log(`��️ PROBLEMAS ENCONTRADOS:`, result.data.problemas);
+          console.log(`📋 RECEITAS COM PROBLEMAS:`, result.data.receitas_com_problemas);
         }
       } else {
-        setMessage(`Œ Erro na verificaá§á£o: ${result.error}`);
+        setMessage(`�� Erro na verifica��o: ${result.error}`);
       }
     } catch (error) {
       console.error('Erro ao verificar receitas:', error);
-      setMessage('Œ Erro ao verificar receitas problemá¡ticas');
+      setMessage('�� Erro ao verificar receitas problem�ticas');
     } finally {
       setVerificandoReceitas(false);
       setTimeout(() => setMessage(''), 10000); // Mensagem mais longa
@@ -644,7 +644,7 @@ export default function AdminPage() {
   const adicionarCamposProducao = async () => {
     setLoading(true);
     try {
-      console.log('ðŸ”§ Executando migration para campos de aderáªncia á  receita...');
+      console.log('🔧 Executando migration para campos de ader�ncia � receita...');
       
               const response = await fetch('/api/producoes/adicionar-campos', {
         method: 'POST',
@@ -654,18 +654,18 @@ export default function AdminPage() {
       const result = await response.json();
       
       if (result.success) {
-        setMessage(`œ… Migration executada com sucesso!\n\n` +
-                  `ðŸ“Š Detalhes:\n` +
-                  `€¢ Campo na tabela produá§áµes: ${result.detalhes.campo_producoes}\n` +
-                  `€¢ Atualizaá§á£o tabela insumos: ${result.detalhes.tabela_insumos}\n` +
-                  `€¢ Criaá§á£o de á­ndices: ${result.detalhes.indices}\n\n` +
-                  `ðŸŽ¯ Agora o sistema pode calcular o percentual de aderáªncia á  receita!`);
+        setMessage(`�� Migration executada com sucesso!\n\n` +
+                  `📊 Detalhes:\n` +
+                  `�� Campo na tabela produ��es: ${result.detalhes.campo_producoes}\n` +
+                  `�� Atualiza��o tabela insumos: ${result.detalhes.tabela_insumos}\n` +
+                  `�� Cria��o de �ndices: ${result.detalhes.indices}\n\n` +
+                  `🎯 Agora o sistema pode calcular o percentual de ader�ncia � receita!`);
       } else {
-        setMessage(`Œ Erro na migration: ${result.error}`);
+        setMessage(`�� Erro na migration: ${result.error}`);
       }
     } catch (error) {
       console.error('Erro ao executar migration:', error);
-      setMessage('Œ Erro ao executar migration de campos');
+      setMessage('�� Erro ao executar migration de campos');
     } finally {
       setLoading(false);
       setTimeout(() => setMessage(''), 10000);
@@ -677,7 +677,7 @@ export default function AdminPage() {
       <div className="admin-header">
         <div>
           <h1>Painel Administrativo</h1>
-          <p>Gerencie todas as configuraá§áµes do sistema SGB</p>
+          <p>Gerencie todas as configura��es do sistema SGB</p>
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           {/* Seletor de Bar Global */}
@@ -688,7 +688,7 @@ export default function AdminPage() {
             <select
               id="global-bar-selector"
               value={selectedBarId || ''}
-              onChange={(e) => setSelectedBarId(e.target.value ? Number(e.target.value) : null)}
+              onChange={(e: any) => setSelectedBarId(e.target.value ? Number(e.target.value) : null)}
               className="form-input"
               style={{ padding: '8px 12px', fontSize: '0.9rem' }}
             >
@@ -705,7 +705,7 @@ export default function AdminPage() {
             disabled={loading}
             className="btn btn-primary"
           >
-            ðŸ’¾ Salvar Configuraá§áµes
+            💾 Salvar Configura��es
           </button>
         </div>
       </div>
@@ -716,18 +716,18 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Informaá§áµes do Bar Selecionado */}
+      {/* Informa��es do Bar Selecionado */}
       {selectedBarId && (
         <div className="card" style={{ marginBottom: '24px' }}>
           <div className="card-content">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <h3 style={{ margin: 0, color: '#1e293b', fontSize: '1.2rem' }}>
-                  ðŸª {bars.find((b: any) => b.id === selectedBarId)?.nome}
+                  🏪 {bars.find((b: any) => b.id === selectedBarId)?.nome}
                 </h3>
                 <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.9rem' }}>
-                  ðŸ“ {bars.find((b: any) => b.id === selectedBarId)?.endereco} | 
-                  ðŸ“ž {bars.find((b: any) => b.id === selectedBarId)?.telefone}
+                  📍 {bars.find((b: any) => b.id === selectedBarId)?.endereco} | 
+                  📞 {bars.find((b: any) => b.id === selectedBarId)?.telefone}
                 </p>
               </div>
               <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -747,70 +747,70 @@ export default function AdminPage() {
             className={`tab-button ${currentTab === 'overview' ? 'active' : ''}`}
             onClick={() => setCurrentTab('overview')}
           >
-            ðŸ“Š Visá£o Geral
+            📊 Vis�o Geral
           </button>
           <button 
             className={`tab-button ${currentTab === 'apis' ? 'active' : ''}`}
             onClick={() => setCurrentTab('apis')}
           >
-            ðŸ“¡ APIs
+            📡 APIs
           </button>
           <button 
             className={`tab-button ${currentTab === 'bars' ? 'active' : ''}`}
             onClick={() => setCurrentTab('bars')}
           >
-            ðŸº Bares
+            🍺 Bares
           </button>
           <button 
             className={`tab-button ${currentTab === 'services' ? 'active' : ''}`}
             onClick={() => setCurrentTab('services')}
           >
-            š™ï¸ Serviá§os
+            ��️ Servi�os
           </button>
           <button 
             className={`tab-button ${currentTab === 'sistemas' ? 'active' : ''}`}
             onClick={() => setCurrentTab('sistemas')}
           >
-            ðŸ–¥ï¸ Sistemas
+            🖥️ Sistemas
           </button>
           <button 
             className={`tab-button ${currentTab === 'security' ? 'active' : ''}`}
             onClick={() => setCurrentTab('security')}
           >
-            ðŸ”’ Seguraná§a
+            🔒 Seguran�a
           </button>
           <button 
             className={`tab-button ${currentTab === 'monitoring' ? 'active' : ''}`}
             onClick={() => setCurrentTab('monitoring')}
           >
-            ðŸ“ˆ Monitoramento
+            📈 Monitoramento
           </button>
           <button 
             className={`tab-button ${currentTab === 'planejamento' ? 'active' : ''}`}
             onClick={() => setCurrentTab('planejamento')}
           >
-            ðŸŽµ Planejamento
+            🎵 Planejamento
           </button>
           <button 
             className={`tab-button ${currentTab === 'analytics' ? 'active' : ''}`}
             onClick={() => setCurrentTab('analytics')}
           >
-            ðŸ“ˆ Analytics
+            📈 Analytics
           </button>
         </div>
 
-        {/* Visá£o Geral */}
+        {/* Vis�o Geral */}
         {currentTab === 'overview' && (
           <div className="tab-content">
             {selectedBarId && (
               <div className="alert alert-info" style={{ marginBottom: '20px' }}>
-                ðŸ“Š Visualizando dados especá­ficos de: <strong>{bars.find((b: any) => b.id === selectedBarId)?.nome}</strong>
+                📊 Visualizando dados espec�ficos de: <strong>{bars.find((b: any) => b.id === selectedBarId)?.nome}</strong>
               </div>
             )}
             <div className="grid grid-3">
               <div className="card">
                 <div className="card-header">
-                  <h3>ðŸ“Š Status do Sistema</h3>
+                  <h3>📊 Status do Sistema</h3>
                 </div>
                 <div className="card-content">
                   <div className="stat-row">
@@ -845,8 +845,8 @@ export default function AdminPage() {
                         <span>Sistema Integrado:</span>
                         <span className="stat-value">
                           {barConfigs[selectedBarId]?.contahub_login ? 
-                            <span className="text-green">œ… ContaHub</span> : 
-                            <span className="text-red">Œ Nenhum</span>
+                            <span className="text-green">�� ContaHub</span> : 
+                            <span className="text-red">�� Nenhum</span>
                           }
                         </span>
                       </div>
@@ -857,7 +857,7 @@ export default function AdminPage() {
 
               <div className="card">
                 <div className="card-header">
-                  <h3>ðŸ” Monitoramento</h3>
+                  <h3>🔍 Monitoramento</h3>
                 </div>
                 <div className="card-content">
                   <button 
@@ -865,12 +865,12 @@ export default function AdminPage() {
                     disabled={loading}
                     className="btn btn-primary btn-full"
                   >
-                    {loading ? 'ðŸ”„ Verificando...' : '–¶ï¸ Verificar APIs'}
+                    {loading ? '🔄 Verificando...' : '��️ Verificar APIs'}
                   </button>
                   
                   {monitoringResult && (
                     <div className="last-check">
-                      ášltima verificaá§á£o: {new Date(monitoringResult.timestamp).toLocaleString('pt-BR')}
+                      �ltima verifica��o: {new Date(monitoringResult.timestamp).toLocaleString('pt-BR')}
                     </div>
                   )}
                 </div>
@@ -878,33 +878,33 @@ export default function AdminPage() {
 
               <div className="card">
                 <div className="card-header">
-                  <h3>š¡ Aá§áµes Rá¡pidas</h3>
+                  <h3>�� A��es R�pidas</h3>
                 </div>
                 <div className="card-content">
                   <button className="btn btn-outline btn-full">
-                    ðŸ’¾ Backup do Banco
+                    💾 Backup do Banco
                   </button>
                   <button className="btn btn-outline btn-full">
-                    ðŸ”„ Sincronizar Dados
+                    🔄 Sincronizar Dados
                   </button>
                   <button className="btn btn-outline btn-full">
-                    ðŸ”‘ Gerar Nova API Key
+                    🔑 Gerar Nova API Key
                   </button>
                   <button 
                     onClick={verificarReceitasProblematicas}
                     disabled={verificandoReceitas || !selectedBarId}
                     className="btn btn-outline btn-full"
-                    title={!selectedBarId ? 'Selecione um bar primeiro' : 'Verificar receitas com insumos problemá¡ticos'}
+                    title={!selectedBarId ? 'Selecione um bar primeiro' : 'Verificar receitas com insumos problem�ticos'}
                   >
-                    {verificandoReceitas ? 'ðŸ” Verificando...' : 'ðŸ§ª Verificar Receitas'}
+                    {verificandoReceitas ? '🔍 Verificando...' : '🧪 Verificar Receitas'}
                   </button>
                   <button 
                     onClick={adicionarCamposProducao}
                     disabled={loading}
                     className="btn btn-outline btn-full"
-                    title="Adicionar campos para controle de aderáªncia á  receita"
+                    title="Adicionar campos para controle de ader�ncia � receita"
                   >
-                    {loading ? 'ðŸ”§ Executando...' : 'ðŸ“Š Migrar Campos Produá§á£o'}
+                    {loading ? '🔧 Executando...' : '📊 Migrar Campos Produ��o'}
                   </button>
                 </div>
               </div>
@@ -914,7 +914,7 @@ export default function AdminPage() {
             {monitoringResult && (
               <div className="card mt-20">
                 <div className="card-header">
-                  <h3>ðŸ“ˆ Status das APIs</h3>
+                  <h3>📈 Status das APIs</h3>
                 </div>
                 <div className="card-content">
                   <div className="grid grid-4">
@@ -943,38 +943,38 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Configuraá§á£o de APIs por Bar */}
+        {/* Configura��o de APIs por Bar */}
         {currentTab === 'apis' && (
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>ðŸ”Œ APIs Conectadas{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>🔌 APIs Conectadas{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
                 <p>
                   {selectedBarId 
-                    ? `Configure as APIs especá­ficas para ${bars.find((b: any) => b.id === selectedBarId)?.nome}`
-                    : 'Selecione um bar no cabeá§alho para ver suas APIs especá­ficas'
+                    ? `Configure as APIs espec�ficas para ${bars.find((b: any) => b.id === selectedBarId)?.nome}`
+                    : 'Selecione um bar no cabe�alho para ver suas APIs espec�ficas'
                   }
                 </p>
               </div>
               <div className="card-content">
                 {!selectedBarId && (
                   <div className="alert alert-info">
-                    ðŸ‘† Selecione um bar no seletor do cabeá§alho para configurar suas APIs especá­ficas
+                    👆 Selecione um bar no seletor do cabe�alho para configurar suas APIs espec�ficas
                   </div>
                 )}
 
-                {/* Configuraá§áµes de APIs (sá³ aparece quando um bar for selecionado) */}
+                {/* Configura��es de APIs (s� aparece quando um bar for selecionado) */}
                 {selectedBarId && (
                   <div className="form-section">
                     <div style={{ marginBottom: '20px' }}>
-                      <h4>ðŸ“‹ Status das APIs Configuradas</h4>
+                      <h4>📋 Status das APIs Configuradas</h4>
                       <div className="grid grid-2" style={{ marginBottom: '20px' }}>
                         <div className="api-status-card">
                           <div className="api-header">
                             <span className="api-name">Sympla</span>
                             {barConfigs[selectedBarId]?.sympla_enabled ? 
-                              <span className="status-badge status-online">œ… Ativa</span> : 
-                              <span className="status-badge status-offline">Œ Inativa</span>
+                              <span className="status-badge status-online">�� Ativa</span> : 
+                              <span className="status-badge status-offline">�� Inativa</span>
                             }
                           </div>
                           {barConfigs[selectedBarId]?.sympla_token && (
@@ -985,8 +985,8 @@ export default function AdminPage() {
                           <div className="api-header">
                             <span className="api-name">Yuzer</span>
                             {barConfigs[selectedBarId]?.yuzer_enabled ? 
-                              <span className="status-badge status-online">œ… Ativa</span> : 
-                              <span className="status-badge status-offline">Œ Inativa</span>
+                              <span className="status-badge status-online">�� Ativa</span> : 
+                              <span className="status-badge status-offline">�� Inativa</span>
                             }
                           </div>
                           {barConfigs[selectedBarId]?.yuzer_token && (
@@ -997,8 +997,8 @@ export default function AdminPage() {
                           <div className="api-header">
                             <span className="api-name">Google Places</span>
                             {barConfigs[selectedBarId]?.google_places_enabled ? 
-                              <span className="status-badge status-online">œ… Ativa</span> : 
-                              <span className="status-badge status-offline">Œ Inativa</span>
+                              <span className="status-badge status-online">�� Ativa</span> : 
+                              <span className="status-badge status-offline">�� Inativa</span>
                             }
                           </div>
                           {barConfigs[selectedBarId]?.google_places_key && (
@@ -1009,8 +1009,8 @@ export default function AdminPage() {
                           <div className="api-header">
                             <span className="api-name">OpenAI</span>
                             {barConfigs[selectedBarId]?.openai_enabled ? 
-                              <span className="status-badge status-online">œ… Ativa</span> : 
-                              <span className="status-badge status-offline">Œ Inativa</span>
+                              <span className="status-badge status-online">�� Ativa</span> : 
+                              <span className="status-badge status-offline">�� Inativa</span>
                             }
                           </div>
                           {barConfigs[selectedBarId]?.openai_key && (
@@ -1020,11 +1020,11 @@ export default function AdminPage() {
                       </div>
                     </div>
                     
-                    <h4>š™ï¸ Configurar APIs</h4>
+                    <h4>��️ Configurar APIs</h4>
                     
                     <div className="grid grid-2">
                       <div>
-                        <h5>ðŸ­ APIs de Produá§á£o</h5>
+                        <h5>🏭 APIs de Produ��o</h5>
                         
                         <div className="api-config-item">
                           <div className="form-group">
@@ -1032,7 +1032,7 @@ export default function AdminPage() {
                               <input
                                 type="checkbox"
                                 checked={barConfigs[selectedBarId]?.sympla_enabled || false}
-                                onChange={(e) => setBarConfigs({
+                                onChange={(e: any) => setBarConfigs({
                                   ...barConfigs,
                                   [selectedBarId]: {
                                     ...barConfigs[selectedBarId],
@@ -1051,7 +1051,7 @@ export default function AdminPage() {
                                 id="sympla_token"
                                 type="password"
                                 value={barConfigs[selectedBarId]?.sympla_token || ''}
-                                onChange={(e) => setBarConfigs({
+                                onChange={(e: any) => setBarConfigs({
                                   ...barConfigs,
                                   [selectedBarId]: {
                                     ...barConfigs[selectedBarId],
@@ -1071,7 +1071,7 @@ export default function AdminPage() {
                               <input
                                 type="checkbox"
                                 checked={barConfigs[selectedBarId]?.yuzer_enabled || false}
-                                onChange={(e) => setBarConfigs({
+                                onChange={(e: any) => setBarConfigs({
                                   ...barConfigs,
                                   [selectedBarId]: {
                                     ...barConfigs[selectedBarId],
@@ -1090,7 +1090,7 @@ export default function AdminPage() {
                                 id="yuzer_token"
                                 type="password"
                                 value={barConfigs[selectedBarId]?.yuzer_token || ''}
-                                onChange={(e) => setBarConfigs({
+                                onChange={(e: any) => setBarConfigs({
                                   ...barConfigs,
                                   [selectedBarId]: {
                                     ...barConfigs[selectedBarId],
@@ -1110,7 +1110,7 @@ export default function AdminPage() {
                               <input
                                 type="checkbox"
                                 checked={barConfigs[selectedBarId]?.google_places_enabled || false}
-                                onChange={(e) => setBarConfigs({
+                                onChange={(e: any) => setBarConfigs({
                                   ...barConfigs,
                                   [selectedBarId]: {
                                     ...barConfigs[selectedBarId],
@@ -1129,7 +1129,7 @@ export default function AdminPage() {
                                 id="google_places_key"
                                 type="password"
                                 value={barConfigs[selectedBarId]?.google_places_key || ''}
-                                onChange={(e) => setBarConfigs({
+                                onChange={(e: any) => setBarConfigs({
                                   ...barConfigs,
                                   [selectedBarId]: {
                                     ...barConfigs[selectedBarId],
@@ -1149,7 +1149,7 @@ export default function AdminPage() {
                               <input
                                 type="checkbox"
                                 checked={barConfigs[selectedBarId]?.openai_enabled || false}
-                                onChange={(e) => setBarConfigs({
+                                onChange={(e: any) => setBarConfigs({
                                   ...barConfigs,
                                   [selectedBarId]: {
                                     ...barConfigs[selectedBarId],
@@ -1168,7 +1168,7 @@ export default function AdminPage() {
                                 id="openai_key"
                                 type="password"
                                 value={barConfigs[selectedBarId]?.openai_key || ''}
-                                onChange={(e) => setBarConfigs({
+                                onChange={(e: any) => setBarConfigs({
                                   ...barConfigs,
                                   [selectedBarId]: {
                                     ...barConfigs[selectedBarId],
@@ -1184,13 +1184,13 @@ export default function AdminPage() {
                       </div>
 
                       <div>
-                        <h5>³ APIs Futuras</h5>
+                        <h5>�� APIs Futuras</h5>
                         
                                         <div className="alert alert-info">
-                  š ï¸ Essas APIs será£o integradas em breve. Configure antecipadamente.
+                  ��️ Essas APIs ser�o integradas em breve. Configure antecipadamente.
                 </div>
                 
-                {/* Botá£o de Migraá§á£o */}
+                {/* Bot�o de Migra��o */}
                 <div className="form-group">
                   <button 
                     onClick={() => migrateExistingConfigs(selectedBarId)}
@@ -1198,10 +1198,10 @@ export default function AdminPage() {
                     className="btn btn-outline"
                     style={{ marginBottom: '10px' }}
                   >
-                    {migrating ? 'ðŸ”„ Migrando...' : 'ðŸ“¥ Migrar APIs Existentes'}
+                    {migrating ? '🔄 Migrando...' : '📥 Migrar APIs Existentes'}
                   </button>
                   <p style={{ fontSize: '12px', color: '#666', margin: '5px 0 0 0' }}>
-                    ðŸ’¡ Importa as configuraá§áµes de APIs já¡ funcionando no sistema (Sympla, Yuzer, Google Places, OpenAI)
+                    💡 Importa as configura��es de APIs j� funcionando no sistema (Sympla: any, Yuzer, Google Places, OpenAI)
                   </p>
                 </div>
                         
@@ -1240,7 +1240,7 @@ export default function AdminPage() {
                         disabled={loading}
                         className="btn btn-primary"
                       >
-                        ðŸ’¾ Salvar Configuraá§áµes do Bar
+                        💾 Salvar Configura��es do Bar
                       </button>
                     </div>
                   </div>
@@ -1248,7 +1248,7 @@ export default function AdminPage() {
 
                 {!selectedBarId && (
                   <div className="alert alert-info">
-                    ðŸ‘† Selecione um bar acima para configurar suas APIs especá­ficas
+                    👆 Selecione um bar acima para configurar suas APIs espec�ficas
                   </div>
                 )}
               </div>
@@ -1261,10 +1261,10 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>ðŸº Gerenciar Bares{selectedBarId ? ` - Foco: ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>🍺 Gerenciar Bares{selectedBarId ? ` - Foco: ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
                 <p>
                   {selectedBarId 
-                    ? `Visualizando detalhes e configuraá§áµes de ${bars.find((b: any) => b.id === selectedBarId)?.nome}`
+                    ? `Visualizando detalhes e configura��es de ${bars.find((b: any) => b.id === selectedBarId)?.nome}`
                     : 'Adicione, edite ou remova bares do sistema'
                   }
                 </p>
@@ -1279,17 +1279,17 @@ export default function AdminPage() {
                       <input
                         id="bar_nome"
                         value={newBar.nome}
-                        onChange={(e) => setNewBar({...newBar, nome: e.target.value})}
-                        placeholder="Ex: Bar do Joá£o"
+                        onChange={(e: any) => setNewBar({...newBar, nome: e.target.value})}
+                        placeholder="Ex: Bar do Jo�o"
                         className="form-input"
                       />
                     </div>
                     <div className="form-group">
-                      <label htmlFor="bar_endereco">Endereá§o</label>
+                      <label htmlFor="bar_endereco">Endere�o</label>
                       <input
                         id="bar_endereco"
                         value={newBar.endereco}
-                        onChange={(e) => setNewBar({...newBar, endereco: e.target.value})}
+                        onChange={(e: any) => setNewBar({...newBar, endereco: e.target.value})}
                         placeholder="Rua A, 123 - Centro"
                         className="form-input"
                       />
@@ -1299,14 +1299,14 @@ export default function AdminPage() {
                       <input
                         id="bar_telefone"
                         value={newBar.telefone}
-                        onChange={(e) => setNewBar({...newBar, telefone: e.target.value})}
+                        onChange={(e: any) => setNewBar({...newBar, telefone: e.target.value})}
                         placeholder="(11) 99999-9999"
                         className="form-input"
                       />
                     </div>
                   </div>
                   <button onClick={addBar} disabled={loading} className="btn btn-primary">
-                    ž• Adicionar Bar
+                    �� Adicionar Bar
                   </button>
                 </div>
 
@@ -1319,11 +1319,11 @@ export default function AdminPage() {
                       disabled={loading}
                       className="btn btn-outline btn-small"
                     >
-                      {loading ? 'ðŸ”„ Carregando...' : 'ðŸ”„ Recarregar'}
+                      {loading ? '🔄 Carregando...' : '🔄 Recarregar'}
                     </button>
                   </div>
                   <div className="bars-list">
-                    {bars.map((bar) => (
+                    {bars.map((bar: any) => (
                       <div key={bar.id} className="bar-item">
                         <div className="bar-info">
                           <h5>{bar.nome}</h5>
@@ -1333,13 +1333,13 @@ export default function AdminPage() {
                         <div className="bar-actions">
                           {getStatusBadge(bar.status)}
                           <button className="btn btn-small btn-outline">
-                            œï¸ Editar
+                            ��️ Editar
                           </button>
                           <button 
                             className="btn btn-small btn-outline btn-danger"
                             onClick={() => deleteBar(bar.id)}
                           >
-                            ðŸ—‘ï¸ Excluir
+                            🗑️ Excluir
                           </button>
                         </div>
                       </div>
@@ -1351,25 +1351,25 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Serviá§os Externos */}
+        {/* Servi�os Externos */}
         {currentTab === 'services' && (
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>š™ï¸ Serviá§os Externos</h3>
-                <p>Configure integraá§áµes com serviá§os externos</p>
+                <h3>��️ Servi�os Externos</h3>
+                <p>Configure integra��es com servi�os externos</p>
               </div>
               <div className="card-content">
                 <div className="grid grid-2">
                   {/* ContaHub */}
                   <div>
-                    <h4>ðŸ¢ ContaHub</h4>
+                    <h4>🏢 ContaHub</h4>
                     <div className="form-group">
-                      <label htmlFor="contahub_username">Usuá¡rio</label>
+                      <label htmlFor="contahub_username">Usu�rio</label>
                       <input
                         id="contahub_username"
                         value={configs.contahub_username}
-                        onChange={(e) => setConfigs({...configs, contahub_username: e.target.value})}
+                        onChange={(e: any) => setConfigs({...configs, contahub_username: e.target.value})}
                         className="form-input"
                       />
                     </div>
@@ -1379,7 +1379,7 @@ export default function AdminPage() {
                         id="contahub_password"
                         type="password"
                         value={configs.contahub_password}
-                        onChange={(e) => setConfigs({...configs, contahub_password: e.target.value})}
+                        onChange={(e: any) => setConfigs({...configs, contahub_password: e.target.value})}
                         className="form-input"
                       />
                     </div>
@@ -1388,7 +1388,7 @@ export default function AdminPage() {
                       <input
                         id="contahub_url"
                         value={configs.contahub_url}
-                        onChange={(e) => setConfigs({...configs, contahub_url: e.target.value})}
+                        onChange={(e: any) => setConfigs({...configs, contahub_url: e.target.value})}
                         placeholder="https://api.contahub.com.br"
                         className="form-input"
                       />
@@ -1397,14 +1397,14 @@ export default function AdminPage() {
 
                   {/* Discord */}
                   <div>
-                    <h4>ðŸ’¬ Discord</h4>
+                    <h4>💬 Discord</h4>
                     <div className="form-group">
                       <label htmlFor="discord_webhook">Webhook URL</label>
                       <input
                         id="discord_webhook"
                         type="password"
                         value={configs.discord_webhook}
-                        onChange={(e) => setConfigs({...configs, discord_webhook: e.target.value})}
+                        onChange={(e: any) => setConfigs({...configs, discord_webhook: e.target.value})}
                         className="form-input"
                       />
                     </div>
@@ -1414,7 +1414,7 @@ export default function AdminPage() {
                         id="discord_bot_token"
                         type="password"
                         value={configs.discord_bot_token}
-                        onChange={(e) => setConfigs({...configs, discord_bot_token: e.target.value})}
+                        onChange={(e: any) => setConfigs({...configs, discord_bot_token: e.target.value})}
                         className="form-input"
                       />
                     </div>
@@ -1423,7 +1423,7 @@ export default function AdminPage() {
                       <input
                         id="discord_channel_alerts"
                         value={configs.discord_channel_alerts}
-                        onChange={(e) => setConfigs({...configs, discord_channel_alerts: e.target.value})}
+                        onChange={(e: any) => setConfigs({...configs, discord_channel_alerts: e.target.value})}
                         className="form-input"
                       />
                     </div>
@@ -1439,23 +1439,23 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>ðŸ–¥ï¸ Sistemas de Bar{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>🖥️ Sistemas de Bar{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
                 <p>
                   {selectedBarId 
-                    ? `Configure sistemas de gestá£o para ${bars.find((b: any) => b.id === selectedBarId)?.nome} (ContaHub, etc.)`
-                    : 'Configure e gerencie sistemas de gestá£o para cada bar (ContaHub, etc.)'
+                    ? `Configure sistemas de gest�o para ${bars.find((b: any) => b.id === selectedBarId)?.nome} (ContaHub: any, etc.)`
+                    : 'Configure e gerencie sistemas de gest�o para cada bar (ContaHub: any, etc.)'
                   }
                 </p>
               </div>
               <div className="card-content">
                 <div className="form-section">
-                  <h4>ðŸ“‹ Sistemas Disponá­veis</h4>
+                  <h4>📋 Sistemas Dispon�veis</h4>
                   <div className="bars-list">
                     <div className="bar-item">
                       <div className="bar-info">
                         <h5>ContaHub</h5>
-                        <p>Sistema de gestá£o para bares e restaurantes</p>
-                        <p><strong>Campos obrigatá³rios:</strong> Login e Senha</p>
+                        <p>Sistema de gest�o para bares e restaurantes</p>
+                        <p><strong>Campos obrigat�rios:</strong> Login e Senha</p>
                       </div>
                       <div className="bar-actions">
                         <span className="status-badge status-online">Ativo</span>
@@ -1465,7 +1465,7 @@ export default function AdminPage() {
                 </div>
 
                 <div className="form-section">
-                  <h4>š™ï¸ Configurar Sistema por Bar</h4>
+                  <h4>��️ Configurar Sistema por Bar</h4>
                   
                   {/* Seletor de Bar */}
                   <div className="form-group">
@@ -1473,7 +1473,7 @@ export default function AdminPage() {
                     <select
                       id="sistema-bar-selector"
                       value={selectedBarId || ''}
-                      onChange={(e) => setSelectedBarId(e.target.value ? Number(e.target.value) : null)}
+                      onChange={(e: any) => setSelectedBarId(e.target.value ? Number(e.target.value) : null)}
                       className="form-input"
                     >
                       <option value="">-- Selecione um bar --</option>
@@ -1485,17 +1485,17 @@ export default function AdminPage() {
                     </select>
                   </div>
 
-                  {/* Configuraá§áµes quando um bar á© selecionado */}
+                  {/* Configura��es quando um bar � selecionado */}
                   {selectedBarId && (
                     <div className="api-config-item">
-                      <h5>ðŸ–¥ï¸ ContaHub - {bars.find((b: any) => b.id === selectedBarId)?.nome}</h5>
+                      <h5>🖥️ ContaHub - {bars.find((b: any) => b.id === selectedBarId)?.nome}</h5>
                       
                       <div className="form-group">
                         <label>
                           <input
                             type="checkbox"
                             checked={barConfigs[selectedBarId]?.contahub_enabled || false}
-                            onChange={(e) => setBarConfigs({
+                            onChange={(e: any) => setBarConfigs({
                               ...barConfigs,
                               [selectedBarId]: {
                                 ...barConfigs[selectedBarId],
@@ -1515,7 +1515,7 @@ export default function AdminPage() {
                               id={`contahub_login_${selectedBarId}`}
                               type="text"
                               value={barConfigs[selectedBarId]?.contahub_login || ''}
-                              onChange={(e) => setBarConfigs({
+                              onChange={(e: any) => setBarConfigs({
                                 ...barConfigs,
                                 [selectedBarId]: {
                                   ...barConfigs[selectedBarId],
@@ -1533,14 +1533,14 @@ export default function AdminPage() {
                               id={`contahub_password_${selectedBarId}`}
                               type="password"
                               value={barConfigs[selectedBarId]?.contahub_password || ''}
-                              onChange={(e) => setBarConfigs({
+                              onChange={(e: any) => setBarConfigs({
                                 ...barConfigs,
                                 [selectedBarId]: {
                                   ...barConfigs[selectedBarId],
                                   contahub_password: e.target.value
                                 }
                               })}
-                              placeholder="€¢€¢€¢€¢€¢€¢€¢€¢"
+                              placeholder="����������������"
                               className="form-input"
                             />
                           </div>
@@ -1551,7 +1551,7 @@ export default function AdminPage() {
                               id={`contahub_url_${selectedBarId}`}
                               type="url"
                               value={barConfigs[selectedBarId]?.contahub_url || 'https://api.contahub.com.br'}
-                              onChange={(e) => setBarConfigs({
+                              onChange={(e: any) => setBarConfigs({
                                 ...barConfigs,
                                 [selectedBarId]: {
                                   ...barConfigs[selectedBarId],
@@ -1568,14 +1568,14 @@ export default function AdminPage() {
                               id={`contahub_empresa_id_${selectedBarId}`}
                               type="text"
                               value={barConfigs[selectedBarId]?.contahub_empresa_id || ''}
-                              onChange={(e) => setBarConfigs({
+                              onChange={(e: any) => setBarConfigs({
                                 ...barConfigs,
                                 [selectedBarId]: {
                                   ...barConfigs[selectedBarId],
                                   contahub_empresa_id: e.target.value
                                 }
                               })}
-                              placeholder="ID áºnico da empresa no ContaHub (opcional)"
+                              placeholder="ID �nico da empresa no ContaHub (opcional)"
                               className="form-input"
                             />
                           </div>
@@ -1588,7 +1588,7 @@ export default function AdminPage() {
                           disabled={loading}
                           className="btn btn-primary"
                         >
-                          {loading ? 'ðŸ’¾ Salvando...' : 'ðŸ’¾ Salvar Configuraá§áµes'}
+                          {loading ? '💾 Salvando...' : '💾 Salvar Configura��es'}
                         </button>
                         
                         {barConfigs[selectedBarId]?.contahub_enabled && (
@@ -1597,15 +1597,15 @@ export default function AdminPage() {
                             disabled={loading || testingConnection}
                             className="btn btn-outline"
                           >
-                            {testingConnection ? 'ðŸ”„ Testando...' : 'ðŸ” Testar Conexá£o'}
+                            {testingConnection ? '🔄 Testando...' : '🔍 Testar Conex�o'}
                           </button>
                         )}
                       </div>
 
-                      {/* Status do áºltimo teste */}
+                      {/* Status do �ltimo teste */}
                       {barConfigs[selectedBarId]?.last_test_time && (
                         <div className="api-config-item">
-                          <h5>ðŸ“Š Status da ášltima Conexá£o</h5>
+                          <h5>📊 Status da �ltima Conex�o</h5>
                           <div className="form-group">
                             <div className="stat-row">
                               <span>Status:</span>
@@ -1614,11 +1614,11 @@ export default function AdminPage() {
                                   ? 'status-online' 
                                   : 'status-offline'
                               }`}>
-                                {barConfigs[selectedBarId]?.last_test_status === 'success' ? 'œ… Online' : 'Œ Offline'}
+                                {barConfigs[selectedBarId]?.last_test_status === 'success' ? '�� Online' : '�� Offline'}
                               </span>
                             </div>
                             <div className="stat-row">
-                              <span>ášltimo teste:</span>
+                              <span>�ltimo teste:</span>
                               <span>{new Date(barConfigs[selectedBarId]?.last_test_time).toLocaleString('pt-BR')}</span>
                             </div>
                             {barConfigs[selectedBarId]?.last_error && (
@@ -1635,7 +1635,7 @@ export default function AdminPage() {
                   
                   {!selectedBarId && (
                     <div className="alert alert-info">
-                      ðŸ‘† Selecione um bar acima para configurar seus sistemas de gestá£o
+                      👆 Selecione um bar acima para configurar seus sistemas de gest�o
                     </div>
                   )}
                 </div>
@@ -1644,13 +1644,13 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Seguraná§a */}
+        {/* Seguran�a */}
         {currentTab === 'security' && (
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>ðŸ”’ Configuraá§áµes de Seguraná§a</h3>
-                <p>Configure senhas e chaves de seguraná§a do sistema</p>
+                <h3>🔒 Configura��es de Seguran�a</h3>
+                <p>Configure senhas e chaves de seguran�a do sistema</p>
               </div>
               <div className="card-content">
                 <div className="form-group">
@@ -1659,7 +1659,7 @@ export default function AdminPage() {
                     id="admin_password"
                     type="password"
                     value={configs.admin_password}
-                    onChange={(e) => setConfigs({...configs, admin_password: e.target.value})}
+                    onChange={(e: any) => setConfigs({...configs, admin_password: e.target.value})}
                     className="form-input"
                   />
                 </div>
@@ -1670,14 +1670,14 @@ export default function AdminPage() {
                     id="jwt_secret"
                     type="password"
                     value={configs.jwt_secret}
-                    onChange={(e) => setConfigs({...configs, jwt_secret: e.target.value})}
+                    onChange={(e: any) => setConfigs({...configs, jwt_secret: e.target.value})}
                     className="form-input"
                   />
                 </div>
                 
                 <div className="alert alert-warning">
-                  ðŸ›¡ï¸ Essas configuraá§áµes sá£o crá­ticas para a seguraná§a do sistema. 
-                  Altere apenas se necessá¡rio e mantenha em local seguro.
+                  🛡️ Essas configura��es s�o cr�ticas para a seguran�a do sistema. 
+                  Altere apenas se necess�rio e mantenha em local seguro.
                 </div>
               </div>
             </div>
@@ -1689,8 +1689,8 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>ðŸ“ˆ Configuraá§áµes de Monitoramento</h3>
-                <p>Configure alertas, notificaá§áµes e recursos de monitoramento</p>
+                <h3>📈 Configura��es de Monitoramento</h3>
+                <p>Configure alertas, notifica��es e recursos de monitoramento</p>
               </div>
               <div className="card-content">
                 <div className="form-section">
@@ -1699,7 +1699,7 @@ export default function AdminPage() {
                       <input
                         type="checkbox"
                         checked={configs.monitoring_enabled}
-                        onChange={(e) => setConfigs({...configs, monitoring_enabled: e.target.checked})}
+                        onChange={(e: any) => setConfigs({...configs, monitoring_enabled: e.target.checked})}
                       />
                       <span>Habilitar Monitoramento de APIs</span>
                     </label>
@@ -1708,25 +1708,25 @@ export default function AdminPage() {
                       <input
                         type="checkbox"
                         checked={configs.notifications_enabled}
-                        onChange={(e) => setConfigs({...configs, notifications_enabled: e.target.checked})}
+                        onChange={(e: any) => setConfigs({...configs, notifications_enabled: e.target.checked})}
                       />
-                      <span>Habilitar Notificaá§áµes</span>
+                      <span>Habilitar Notifica��es</span>
                     </label>
                     
                     <label className="checkbox-label">
                       <input
                         type="checkbox"
                         checked={configs.auto_sync_enabled}
-                        onChange={(e) => setConfigs({...configs, auto_sync_enabled: e.target.checked})}
+                        onChange={(e: any) => setConfigs({...configs, auto_sync_enabled: e.target.checked})}
                       />
-                      <span>Sincronizaá§á£o Automá¡tica</span>
+                      <span>Sincroniza��o Autom�tica</span>
                     </label>
                     
                     <label className="checkbox-label">
                       <input
                         type="checkbox"
                         checked={configs.debug_enabled}
-                        onChange={(e) => setConfigs({...configs, debug_enabled: e.target.checked})}
+                        onChange={(e: any) => setConfigs({...configs, debug_enabled: e.target.checked})}
                       />
                       <span>Modo Debug (Desenvolvimento)</span>
                     </label>
@@ -1734,14 +1734,14 @@ export default function AdminPage() {
                 </div>
                 
                 <div className="form-section">
-                  <h4>ðŸ“§ Email de Notificaá§áµes</h4>
+                  <h4>📧 Email de Notifica��es</h4>
                   <div className="form-group">
                     <label htmlFor="email_api_key">API Key de Email</label>
                     <input
                       id="email_api_key"
                       type="password"
                       value={configs.email_api_key}
-                      onChange={(e) => setConfigs({...configs, email_api_key: e.target.value})}
+                      onChange={(e: any) => setConfigs({...configs, email_api_key: e.target.value})}
                       className="form-input"
                     />
                   </div>
@@ -1750,7 +1750,7 @@ export default function AdminPage() {
                     <input
                       id="email_from"
                       value={configs.email_from}
-                      onChange={(e) => setConfigs({...configs, email_from: e.target.value})}
+                      onChange={(e: any) => setConfigs({...configs, email_from: e.target.value})}
                       placeholder="noreply@seubar.com.br"
                       className="form-input"
                     />
@@ -1766,35 +1766,35 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>ðŸŽµ Planejamento Comercial{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>🎵 Planejamento Comercial{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
                 <p>
                   {selectedBarId 
-                    ? `Gerencie as atraá§áµes e eventos de ${bars.find((b: any) => b.id === selectedBarId)?.nome} para todos os dias do máªs`
-                    : 'Gerencie as atraá§áµes e eventos de todos os bares para todos os dias do máªs'
+                    ? `Gerencie as atra��es e eventos de ${bars.find((b: any) => b.id === selectedBarId)?.nome} para todos os dias do m�s`
+                    : 'Gerencie as atra��es e eventos de todos os bares para todos os dias do m�s'
                   }
                 </p>
               </div>
               <div className="card-content">
                 {!selectedBarId && (
                   <div className="alert alert-info" style={{ marginBottom: '20px' }}>
-                    „¹ï¸ Selecione um bar no cabeá§alho para focar no planejamento especá­fico, ou continue vendo todos os eventos
+                    ��️ Selecione um bar no cabe�alho para focar no planejamento espec�fico, ou continue vendo todos os eventos
                   </div>
                 )}
                 
-                {/* Controles do Calendá¡rio */}
+                {/* Controles do Calend�rio */}
                 <div className="form-section">
                   <div className="grid grid-2">
                     <div className="form-group">
-                      <label htmlFor="month-selector">Máªs:</label>
+                      <label htmlFor="month-selector">M�s:</label>
                       <select
                         id="month-selector"
                         value={currentMonth}
-                        onChange={(e) => setCurrentMonth(Number(e.target.value))}
+                        onChange={(e: any) => setCurrentMonth(Number(e.target.value))}
                         className="form-input"
                       >
-                        {Array.from({ length: 12 }, (_, i) => (
+                        {Array.from({ length: 12 }, (_: any, i: any) => (
                           <option key={i + 1} value={i + 1}>
-                            {new Date(0, i).toLocaleString('pt-BR', { month: 'long' })}
+                            {new Date(0: any, i).toLocaleString('pt-BR', { month: 'long' })}
                           </option>
                         ))}
                       </select>
@@ -1805,10 +1805,10 @@ export default function AdminPage() {
                       <select
                         id="year-selector"
                         value={currentYear}
-                        onChange={(e) => setCurrentYear(Number(e.target.value))}
+                        onChange={(e: any) => setCurrentYear(Number(e.target.value))}
                         className="form-input"
                       >
-                        {Array.from({ length: 5 }, (_, i) => {
+                        {Array.from({ length: 5 }, (_: any, i: any) => {
                           const year = new Date().getFullYear() - 2 + i;
                           return (
                             <option key={year} value={year}>
@@ -1839,7 +1839,7 @@ export default function AdminPage() {
                       }}
                       className="btn btn-primary"
                     >
-                      ž• Adicionar Evento
+                      �� Adicionar Evento
                     </button>
                     
                     <button 
@@ -1847,7 +1847,7 @@ export default function AdminPage() {
                       disabled={loading}
                       className="btn btn-outline"
                     >
-                      {loading ? 'ðŸ”„ Carregando...' : 'ðŸ”„ Recarregar'}
+                      {loading ? '🔄 Carregando...' : '🔄 Recarregar'}
                     </button>
                     
                     <button 
@@ -1856,17 +1856,17 @@ export default function AdminPage() {
                       className="btn btn-outline"
                       style={{ backgroundColor: '#e67e22', color: 'white' }}
                     >
-                      ðŸ“Š Importar Dados Histá³ricos
+                      📊 Importar Dados Hist�ricos
                     </button>
                   </div>
                 </div>
 
-                {/* Calendá¡rio do Máªs */}
+                {/* Calend�rio do M�s */}
                 <div className="form-section">
-                  <h4>ðŸ“… Eventos de {new Date(currentYear, currentMonth - 1).toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}</h4>
+                  <h4>📅 Eventos de {new Date(currentYear: any, currentMonth - 1).toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}</h4>
                   
                   <div className="calendar-grid">
-                    {/* Cabeá§alho dos dias da semana */}
+                    {/* Cabe�alho dos dias da semana */}
                     <div className="calendar-header">
                       <div className="calendar-day-header">Dom</div>
                       <div className="calendar-day-header">Seg</div>
@@ -1874,14 +1874,14 @@ export default function AdminPage() {
                       <div className="calendar-day-header">Qua</div>
                       <div className="calendar-day-header">Qui</div>
                       <div className="calendar-day-header">Sex</div>
-                      <div className="calendar-day-header">Sá¡b</div>
+                      <div className="calendar-day-header">S�b</div>
                     </div>
                     
-                    {/* Dias do máªs */}
+                    {/* Dias do m�s */}
                     <div className="calendar-body">
                       {(() => {
-                        const firstDay = new Date(currentYear, currentMonth - 1, 1);
-                        const lastDay = new Date(currentYear, currentMonth, 0);
+                        const firstDay = new Date(currentYear: any, currentMonth - 1, 1);
+                        const lastDay = new Date(currentYear: any, currentMonth, 0);
                         const startDate = new Date(firstDay);
                         startDate.setDate(startDate.getDate() - firstDay.getDay());
                         
@@ -1906,7 +1906,7 @@ export default function AdminPage() {
                             >
                               <div className="calendar-day-number">{date.getDate()}</div>
                               <div className="calendar-day-events">
-                                {dayEvents.slice(0, 2).map((evento: any, idx: any) => (
+                                {dayEvents.slice(0: any, 2).map((evento: any, idx: any) => (
                                   <div
                                     key={evento.id}
                                     className="calendar-event"
@@ -1914,7 +1914,7 @@ export default function AdminPage() {
                                       setEditingEvent(evento);
                                       setShowEventModal(true);
                                     }}
-                                    title={`${evento.nome} - ${evento.descricao || 'Sem descriá§á£o'}`}
+                                    title={`${evento.nome} - ${evento.descricao || 'Sem descri��o'}`}
                                   >
                                     <span className="event-name">{evento.nome}</span>
                                     <span className="event-genre">{evento.genero_musical}</span>
@@ -1944,7 +1944,7 @@ export default function AdminPage() {
                                       setShowEventModal(true);
                                     }}
                                   >
-                                    ž•
+                                    ��
                                   </button>
                                 )}
                               </div>
@@ -1959,17 +1959,17 @@ export default function AdminPage() {
 
                 {/* Lista detalhada dos eventos */}
                 <div className="form-section">
-                  <h4>ðŸ“‹ Lista de Eventos</h4>
+                  <h4>📋 Lista de Eventos</h4>
                   <div className="events-table">
                     <table>
                       <thead>
                         <tr>
                           <th>Data</th>
                           <th>Nome</th>
-                          <th>Gáªnero</th>
+                          <th>G�nero</th>
                           <th>Artista/Banda</th>
-                          <th>Horá¡rio</th>
-                          <th>Aá§áµes</th>
+                          <th>Hor�rio</th>
+                          <th>A��es</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1997,13 +1997,13 @@ export default function AdminPage() {
                                   }}
                                   className="btn btn-small btn-outline"
                                 >
-                                  œï¸
+                                  ��️
                                 </button>
                                 <button
                                   onClick={() => deleteEvento(evento.id)}
                                   className="btn btn-small btn-outline btn-danger"
                                 >
-                                  ðŸ—‘ï¸
+                                  🗑️
                                 </button>
                               </div>
                             </td>
@@ -2012,7 +2012,7 @@ export default function AdminPage() {
                         {eventos.length === 0 && (
                           <tr>
                             <td colSpan={6} style={{ textAlign: 'center', padding: '32px' }}>
-                              ðŸ“… Nenhum evento encontrado para este perá­odo
+                              📅 Nenhum evento encontrado para este per�odo
                             </td>
                           </tr>
                         )}
@@ -2028,14 +2028,14 @@ export default function AdminPage() {
         {/* Modal de Evento */}
         {showEventModal && editingEvent && (
           <div className="modal-overlay" onClick={() => setShowEventModal(false)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content" onClick={(e: any) => e.stopPropagation()}>
               <div className="modal-header">
-                <h3>{editingEvent.id ? 'œï¸ Editar Evento' : 'ž• Novo Evento'}</h3>
+                <h3>{editingEvent.id ? '��️ Editar Evento' : '�� Novo Evento'}</h3>
                 <button 
                   onClick={() => setShowEventModal(false)}
                   className="modal-close"
                 >
-                  œ•
+                  ��
                 </button>
               </div>
               
@@ -2045,7 +2045,7 @@ export default function AdminPage() {
                     <label>Bar:</label>
                     <select
                       value={editingEvent.bar_id || ''}
-                      onChange={(e) => setEditingEvent({
+                      onChange={(e: any) => setEditingEvent({
                         ...editingEvent,
                         bar_id: Number(e.target.value)
                       })}
@@ -2064,7 +2064,7 @@ export default function AdminPage() {
                     <input
                       type="date"
                       value={editingEvent.data_evento}
-                      onChange={(e) => setEditingEvent({
+                      onChange={(e: any) => setEditingEvent({
                         ...editingEvent,
                         data_evento: e.target.value
                       })}
@@ -2078,7 +2078,7 @@ export default function AdminPage() {
                   <input
                     type="text"
                     value={editingEvent.nome}
-                    onChange={(e) => setEditingEvent({
+                    onChange={(e: any) => setEditingEvent({
                       ...editingEvent,
                       nome: e.target.value
                     })}
@@ -2088,14 +2088,14 @@ export default function AdminPage() {
                 </div>
                 
                 <div className="form-group">
-                  <label>Descriá§á£o:</label>
+                  <label>Descri��o:</label>
                   <textarea
                     value={editingEvent.descricao || ''}
-                    onChange={(e) => setEditingEvent({
+                    onChange={(e: any) => setEditingEvent({
                       ...editingEvent,
                       descricao: e.target.value
                     })}
-                    placeholder="Descriá§á£o do evento..."
+                    placeholder="Descri��o do evento..."
                     className="form-input"
                     rows={3}
                   />
@@ -2103,10 +2103,10 @@ export default function AdminPage() {
                 
                 <div className="grid grid-2">
                   <div className="form-group">
-                    <label>Gáªnero Musical:</label>
+                    <label>G�nero Musical:</label>
                     <select
                       value={editingEvent.genero_musical || ''}
-                      onChange={(e) => setEditingEvent({
+                      onChange={(e: any) => setEditingEvent({
                         ...editingEvent,
                         genero_musical: e.target.value
                       })}
@@ -2118,11 +2118,11 @@ export default function AdminPage() {
                       <option value="sertanejo">Sertanejo</option>
                       <option value="rock">Rock</option>
                       <option value="pop">Pop</option>
-                      <option value="eletronica">Eletrá´nica</option>
+                      <option value="eletronica">Eletr�nica</option>
                       <option value="funk">Funk</option>
                       <option value="rap">Rap</option>
                       <option value="reggae">Reggae</option>
-                      <option value="karaoke">Karaokáª</option>
+                      <option value="karaoke">Karaok�</option>
                       <option value="dj_set">DJ Set</option>
                       <option value="outro">Outro</option>
                     </select>
@@ -2133,7 +2133,7 @@ export default function AdminPage() {
                     <input
                       type="text"
                       value={editingEvent.artistas_bandas || ''}
-                      onChange={(e) => setEditingEvent({
+                      onChange={(e: any) => setEditingEvent({
                         ...editingEvent,
                         artistas_bandas: e.target.value
                       })}
@@ -2145,11 +2145,11 @@ export default function AdminPage() {
                 
                 <div className="grid grid-2">
                   <div className="form-group">
-                    <label>Horá¡rio Iná­cio:</label>
+                    <label>Hor�rio In�cio:</label>
                     <input
                       type="time"
                       value={editingEvent.horario_inicio || ''}
-                      onChange={(e) => setEditingEvent({
+                      onChange={(e: any) => setEditingEvent({
                         ...editingEvent,
                         horario_inicio: e.target.value
                       })}
@@ -2158,11 +2158,11 @@ export default function AdminPage() {
                   </div>
                   
                   <div className="form-group">
-                    <label>Horá¡rio Fim:</label>
+                    <label>Hor�rio Fim:</label>
                     <input
                       type="time"
                       value={editingEvent.horario_fim || ''}
-                      onChange={(e) => setEditingEvent({
+                      onChange={(e: any) => setEditingEvent({
                         ...editingEvent,
                         horario_fim: e.target.value
                       })}
@@ -2178,7 +2178,7 @@ export default function AdminPage() {
                       type="number"
                       step="0.01"
                       value={editingEvent.valor_cover || ''}
-                      onChange={(e) => setEditingEvent({
+                      onChange={(e: any) => setEditingEvent({
                         ...editingEvent,
                         valor_cover: e.target.value ? parseFloat(e.target.value) : null
                       })}
@@ -2193,7 +2193,7 @@ export default function AdminPage() {
                       type="number"
                       step="0.01"
                       value={editingEvent.valor_show || ''}
-                      onChange={(e) => setEditingEvent({
+                      onChange={(e: any) => setEditingEvent({
                         ...editingEvent,
                         valor_show: e.target.value ? parseFloat(e.target.value) : null
                       })}
@@ -2207,7 +2207,7 @@ export default function AdminPage() {
                     <input
                       type="number"
                       value={editingEvent.capacidade_estimada || ''}
-                      onChange={(e) => setEditingEvent({
+                      onChange={(e: any) => setEditingEvent({
                         ...editingEvent,
                         capacidade_estimada: e.target.value ? parseInt(e.target.value) : null
                       })}
@@ -2242,18 +2242,18 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>ðŸ“ˆ Analytics de Performance{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>📈 Analytics de Performance{selectedBarId ? ` - ${bars.find((b: any) => b.id === selectedBarId)?.nome}` : ''}</h3>
                 <p>
                   {selectedBarId 
-                    ? `Aná¡lise de performance dos artistas e eventos de ${bars.find((b: any) => b.id === selectedBarId)?.nome} por dados reais de faturamento`
-                    : 'Aná¡lise de performance dos artistas e eventos por dados reais de faturamento'
+                    ? `An�lise de performance dos artistas e eventos de ${bars.find((b: any) => b.id === selectedBarId)?.nome} por dados reais de faturamento`
+                    : 'An�lise de performance dos artistas e eventos por dados reais de faturamento'
                   }
                 </p>
               </div>
               <div className="card-content">
                 {!selectedBarId && (
                   <div className="alert alert-warning">
-                    ðŸ“Š Selecione um bar no cabeá§alho para visualizar suas aná¡lises de performance
+                    📊 Selecione um bar no cabe�alho para visualizar suas an�lises de performance
                   </div>
                 )}
 
@@ -2303,39 +2303,39 @@ function AnalyticsContent({ barId }: { barId: number }) {
 
   return (
     <div className="analytics-content">
-      {/* Selector de Tipo de Aná¡lise */}
+      {/* Selector de Tipo de An�lise */}
       <div className="form-group">
-        <label>Tipo de Aná¡lise:</label>
+        <label>Tipo de An�lise:</label>
         <select
           value={tipoAnalise}
-          onChange={(e) => setTipoAnalise(e.target.value)}
+          onChange={(e: any) => setTipoAnalise(e.target.value)}
           className="form-input"
         >
-          <option value="artistas">ðŸ“Š Por Artista/Banda</option>
-          <option value="generos">ðŸŽµ Por Gáªnero Musical</option>
-          <option value="periodo">ðŸ“… Por Perá­odo (Mensal)</option>
+          <option value="artistas">📊 Por Artista/Banda</option>
+          <option value="generos">🎵 Por G�nero Musical</option>
+          <option value="periodo">📅 Por Per�odo (Mensal)</option>
         </select>
       </div>
 
       {loading ? (
         <div className="loading-analytics">
-          <div>ðŸ”„ Carregando aná¡lises...</div>
+          <div>🔄 Carregando an�lises...</div>
         </div>
       ) : dadosAnalytics.length > 0 ? (
         <div className="analytics-results">
           {tipoAnalise === 'artistas' && (
             <div className="analytics-table">
-              <h4>ðŸŽ¤ Performance por Artista</h4>
+              <h4>🎤 Performance por Artista</h4>
               <table>
                 <thead>
                   <tr>
                     <th>Artista/Banda</th>
                     <th>Total Eventos</th>
-                    <th>Páºblico Total</th>
+                    <th>P�blico Total</th>
                     <th>Faturamento Total</th>
-                    <th>Ticket Má©dio</th>
-                    <th>Páºblico Má©dio</th>
-                    <th>ášltimo Evento</th>
+                    <th>Ticket M�dio</th>
+                    <th>P�blico M�dio</th>
+                    <th>�ltimo Evento</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2344,7 +2344,7 @@ function AnalyticsContent({ barId }: { barId: number }) {
                       <td>
                         <strong>{item.nome}</strong>
                         <div className="genres">
-                          {item.generos.slice(0, 2).map((genero: string) => (
+                          {item.generos.slice(0: any, 2).map((genero: string) => (
                             <span key={genero} className="genre-tag">{genero}</span>
                           ))}
                         </div>
@@ -2364,16 +2364,16 @@ function AnalyticsContent({ barId }: { barId: number }) {
 
           {tipoAnalise === 'generos' && (
             <div className="analytics-table">
-              <h4>ðŸŽµ Performance por Gáªnero Musical</h4>
+              <h4>🎵 Performance por G�nero Musical</h4>
               <table>
                 <thead>
                   <tr>
-                    <th>Gáªnero</th>
+                    <th>G�nero</th>
                     <th>Total Eventos</th>
-                    <th>Artistas ášnicos</th>
-                    <th>Páºblico Total</th>
+                    <th>Artistas �nicos</th>
+                    <th>P�blico Total</th>
                     <th>Faturamento Total</th>
-                    <th>Ticket Má©dio</th>
+                    <th>Ticket M�dio</th>
                     <th>Melhor Evento</th>
                   </tr>
                 </thead>
@@ -2404,17 +2404,17 @@ function AnalyticsContent({ barId }: { barId: number }) {
 
           {tipoAnalise === 'periodo' && (
             <div className="analytics-table">
-              <h4>ðŸ“… Performance por Perá­odo</h4>
+              <h4>📅 Performance por Per�odo</h4>
               <table>
                 <thead>
                   <tr>
-                    <th>Perá­odo</th>
+                    <th>Per�odo</th>
                     <th>Total Eventos</th>
-                    <th>Páºblico Total</th>
+                    <th>P�blico Total</th>
                     <th>Faturamento Total</th>
-                    <th>Ticket Má©dio</th>
-                    <th>Páºblico Má©dio/Evento</th>
-                    <th>Gáªneros</th>
+                    <th>Ticket M�dio</th>
+                    <th>P�blico M�dio/Evento</th>
+                    <th>G�neros</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2428,7 +2428,7 @@ function AnalyticsContent({ barId }: { barId: number }) {
                       <td>{Math.round(item.publico_medio)}</td>
                       <td>
                         <div className="genres">
-                          {item.generos.slice(0, 3).map((genero: string) => (
+                          {item.generos.slice(0: any, 3).map((genero: string) => (
                             <span key={genero} className="genre-tag">{genero}</span>
                           ))}
                         </div>
@@ -2442,8 +2442,8 @@ function AnalyticsContent({ barId }: { barId: number }) {
         </div>
       ) : (
         <div className="no-data">
-          <div>ðŸ“Š Nenhum dado de performance encontrado</div>
-          <p>Os eventos precisam ter dados de páºblico e faturamento sincronizados para aparecer nas aná¡lises.</p>
+          <div>📊 Nenhum dado de performance encontrado</div>
+          <p>Os eventos precisam ter dados de p�blico e faturamento sincronizados para aparecer nas an�lises.</p>
         </div>
       )}
     </div>

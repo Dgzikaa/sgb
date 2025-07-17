@@ -1,11 +1,11 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { AlertCircle, CheckCircle, XCircle, Search, Target, BarChart3, Building2 } from 'lucide-react';
+import { AlertCircle, CheckCircle: any, XCircle, Search: any, Target, BarChart3: any, Building2 } from 'lucide-react';
 import ContaAzulOAuth from '@/components/configuracoes/ContaAzulOAuth';
 
 export default function ContaAzulInvestigacaoCompleta() {
@@ -23,7 +23,7 @@ export default function ContaAzulInvestigacaoCompleta() {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.error || 'Erro na investigaá§á£o');
+        throw new Error(data.error || 'Erro na investiga��o');
       }
 
       setResultado(data);
@@ -44,7 +44,7 @@ export default function ContaAzulInvestigacaoCompleta() {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.error || 'Erro na investigaá§á£o de categorias');
+        throw new Error(data.error || 'Erro na investiga��o de categorias');
       }
 
       setResultado(data);
@@ -74,9 +74,9 @@ export default function ContaAzulInvestigacaoCompleta() {
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold mb-2">ðŸ” Investigaá§á£o Completa ContaAzul</h1>
+          <h1 className="text-3xl font-bold mb-2">🔍 Investiga��o Completa ContaAzul</h1>
           <p className="text-gray-600">
-            Testando TODOS os endpoints possá­veis para encontrar dados de categorizaá§á£o
+            Testando TODOS os endpoints poss�veis para encontrar dados de categoriza��o
           </p>
         </div>
 
@@ -94,12 +94,12 @@ export default function ContaAzulInvestigacaoCompleta() {
             {loading ? (
               <>
                 <Search className="w-4 h-4 mr-2 animate-spin" />
-                Investigando... (pode demorar atá© 30 segundos)
+                Investigando... (pode demorar at� 30 segundos)
               </>
             ) : (
               <>
                 <Search className="w-4 h-4 mr-2" />
-                ðŸš€ Iniciar Investigaá§á£o Completa
+                🚀 Iniciar Investiga��o Completa
               </>
             )}
           </Button>
@@ -119,7 +119,7 @@ export default function ContaAzulInvestigacaoCompleta() {
             ) : (
               <>
                 <BarChart3 className="w-4 h-4 mr-2" />
-                ðŸŽ¯ Investigar Categorias Especá­ficas
+                🎯 Investigar Categorias Espec�ficas
               </>
             )}
           </Button>
@@ -141,12 +141,12 @@ export default function ContaAzulInvestigacaoCompleta() {
 
         {resultado && (
           <div className="space-y-6">
-            {/* Resumo da Aná¡lise */}
+            {/* Resumo da An�lise */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <BarChart3 className="w-5 h-5 mr-2" />
-                  ðŸ“Š Resumo da Aná¡lise
+                  📊 Resumo da An�lise
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -167,7 +167,7 @@ export default function ContaAzulInvestigacaoCompleta() {
 
                 {/* Endpoints com Sucesso */}
                 <div className="mt-6">
-                  <h3 className="font-semibold mb-3">ðŸŽ¯ Endpoints com Sucesso</h3>
+                  <h3 className="font-semibold mb-3">🎯 Endpoints com Sucesso</h3>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                     {Object.entries(resultado.analise.endpoints_com_sucesso).map(([endpoint, sucessos]) => {
                       const numSucessos = Number(sucessos);
@@ -188,7 +188,7 @@ export default function ContaAzulInvestigacaoCompleta() {
                 <CardHeader>
                   <CardTitle className="text-green-800 flex items-center">
                     <Target className="w-5 h-5 mr-2" />
-                    ðŸŽ‰ Descobertas Importantes
+                    🎉 Descobertas Importantes
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -204,19 +204,19 @@ export default function ContaAzulInvestigacaoCompleta() {
               </Card>
             )}
 
-            {/* Recomendaá§áµes */}
+            {/* Recomenda��es */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <AlertCircle className="w-5 h-5 mr-2" />
-                  ðŸ’¡ Recomendaá§áµes
+                  💡 Recomenda��es
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   {resultado.recomendacoes.map((recomendacao: string, index: number) => (
                     <div key={index} className="flex items-start space-x-2">
-                      <span className="text-blue-500">€¢</span>
+                      <span className="text-blue-500">��</span>
                       <span>{recomendacao}</span>
                     </div>
                   ))}
@@ -229,10 +229,10 @@ export default function ContaAzulInvestigacaoCompleta() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Search className="w-5 h-5 mr-2" />
-                  ðŸ” Resultados Detalhados
+                  🔍 Resultados Detalhados
                 </CardTitle>
                 <CardDescription>
-                  Aná¡lise completa de cada evento testado
+                  An�lise completa de cada evento testado
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -241,7 +241,7 @@ export default function ContaAzulInvestigacaoCompleta() {
                     <div key={index} className="border rounded-lg p-4">
                       <div className="mb-3">
                         <h4 className="font-semibold">
-                          ðŸ“‹ Evento: {evento.evento_id}
+                          📋 Evento: {evento.evento_id}
                         </h4>
                         <p className="text-sm text-gray-600">
                           {evento.tipo} - {evento.descricao}
@@ -267,17 +267,17 @@ export default function ContaAzulInvestigacaoCompleta() {
                                 <div className="space-y-1 text-sm">
                                   {t.tem_rateio && (
                                     <Badge variant="outline" className="text-blue-600">
-                                      ðŸŽ¯ Rateio
+                                      🎯 Rateio
                                     </Badge>
                                   )}
                                   {t.tem_categorias && (
                                     <Badge variant="outline" className="text-purple-600">
-                                      ðŸ“Š Categorias
+                                      📊 Categorias
                                     </Badge>
                                   )}
                                   {t.tem_centros_custo && (
                                     <Badge variant="outline" className="text-orange-600">
-                                      ðŸ¢ Centros de Custo
+                                      🏢 Centros de Custo
                                     </Badge>
                                   )}
                                   {t.campos_primeiro_nivel && (
@@ -307,14 +307,14 @@ export default function ContaAzulInvestigacaoCompleta() {
             {/* JSON Completo */}
             <Card>
               <CardHeader>
-                <CardTitle>ðŸ“ JSON Completo</CardTitle>
+                <CardTitle>📝 JSON Completo</CardTitle>
                 <CardDescription>
-                  Dados completos da investigaá§á£o para aná¡lise tá©cnica
+                  Dados completos da investiga��o para an�lise t�cnica
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Textarea
-                  value={JSON.stringify(resultado, null, 2)}
+                  value={JSON.stringify(resultado: any, null, 2)}
                   readOnly
                   rows={20}
                   className="font-mono text-xs"

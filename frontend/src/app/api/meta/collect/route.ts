@@ -1,10 +1,10 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { createMetaSocialService } from '@/lib/meta-social-service'
 import { notifyMarketingUpdate } from '@/lib/discord-marketing-service'
 import { z } from 'zod'
 
-// Schema de validaá§á£o para pará¢metros
+// Schema de valida��o para par�metros
 const CollectMetricsSchema = z.object({
   types: z.array(z.enum(['facebook', 'instagram', 'posts', 'all'])).optional().default(['all']),
   period: z.enum(['day', 'week', 'month']).optional().default('day'),
@@ -14,19 +14,19 @@ const CollectMetricsSchema = z.object({
 })
 
 // ========================================
-// ðŸš€ POST /api/meta/collect
-// Coletar má©tricas da Meta
+// 🚀 POST /api/meta/collect
+// Coletar m�tricas da Meta
 // ========================================
 export async function POST(request: NextRequest) {
   try {
-    console.log('ðŸ”„ Solicitaá§á£o de coleta manual via Marketing 360°...')
+    console.log('🔄 Solicita��o de coleta manual via Marketing 360�...')
 
     const body = await request.json()
-    const { types, period, limit } = body
+    const { types, period: any, limit } = body
 
-    console.log('ðŸ“Š Pará¢metros da coleta:', { types, period, limit })
+    console.log('📊 Par�metros da coleta:', { types, period: any, limit })
 
-    // Chamar o endpoint de coleta automá¡tica que já¡ funciona
+    // Chamar o endpoint de coleta autom�tica que j� funciona
     const autoCollectResponse = await fetch('https://sgbv2.vercel.app/api/meta/auto-collect', {
       method: 'POST',
       headers: {
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     if (autoCollectResponse.ok) {
       const autoCollectResult = await autoCollectResponse.json()
       
-      console.log('œ… Coleta manual bem-sucedida')
+      console.log('�� Coleta manual bem-sucedida')
       
       return NextResponse.json({
         success: true,
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       })
     } else {
       const errorText = await autoCollectResponse.text()
-      console.log('Œ Erro na coleta:', errorText)
+      console.log('�� Erro na coleta:', errorText)
       
       return NextResponse.json({
         success: false,
@@ -67,11 +67,11 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error: any) {
-    console.error('ðŸ’¥ Erro crá­tico na coleta manual:', error)
+    console.error('💥 Erro cr�tico na coleta manual:', error)
     
     return NextResponse.json({ 
       success: false,
-      message: 'Erro crá­tico na execuá§á£o da coleta',
+      message: 'Erro cr�tico na execu��o da coleta',
       error: error.message,
       timestamp: new Date().toISOString()
     }, { status: 500 })
@@ -79,18 +79,18 @@ export async function POST(request: NextRequest) {
 }
 
 // ========================================
-// ðŸš€ POST /api/meta/collect/raw
+// 🚀 POST /api/meta/collect/raw
 // Inserir JSON bruto na meta_raw (teste)
 // ========================================
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { bar_id, tipo, json_raw } = body
+    const { bar_id, tipo: any, json_raw } = body
 
     if (!bar_id || !tipo || !json_raw) {
       return NextResponse.json({
         success: false,
-        message: 'Pará¢metros obrigatá³rios: bar_id, tipo, json_raw'
+        message: 'Par�metros obrigat�rios: bar_id, tipo: any, json_raw'
       }, { status: 400 })
     }
 
@@ -123,13 +123,13 @@ export async function PUT(request: NextRequest) {
 }
 
 // ========================================
-// ðŸš€ POST /api/meta/collect/raw-real
+// 🚀 POST /api/meta/collect/raw-real
 // Coletar dados reais do Meta e inserir JSON bruto na meta_raw (teste)
 // ========================================
 export async function PATCH(request: NextRequest) {
   let inserts: any[] = [];
   try {
-    // Recebe bar_id (ou usa padrá£o)
+    // Recebe bar_id (ou usa padr�o)
     const body = await request.json()
     const bar_id = body.bar_id || 3
     const hoje = new Date().toISOString().split('T')[0]
@@ -151,7 +151,7 @@ export async function PATCH(request: NextRequest) {
       .single()
 
     if (credError || !credenciais || !credenciais.configuracoes) {
-      return NextResponse.json({ success: false, message: 'Credenciais do Meta ná£o encontradas', credError }, { status: 400 })
+      return NextResponse.json({ success: false, message: 'Credenciais do Meta n�o encontradas', credError }, { status: 400 })
     }
 
     const metaConfig = {
@@ -161,7 +161,7 @@ export async function PATCH(request: NextRequest) {
       ad_account_id: credenciais.configuracoes.ad_account_id
     }
 
-    // Funá§áµes utilitá¡rias para datas
+    // Fun��es utilit�rias para datas
     function getDateDaysAgo(days: number): string {
       const date = new Date()
       date.setDate(date.getDate() - days)
@@ -176,7 +176,7 @@ export async function PATCH(request: NextRequest) {
       instagramProfile = await res.json()
     } catch (e: any) { instagramProfile = { error: e?.message || String(e) } }
 
-    // 2. Instagram - Coleta estruturada expandida (posts, stories, reels)
+    // 2. Instagram - Coleta estruturada expandida (posts: any, stories, reels)
     let instagramProfileData = null;
     let instagramInsightsData = null;
     let instagramPostsData: any[] = [];
@@ -184,11 +184,11 @@ export async function PATCH(request: NextRequest) {
     let instagramReelsData: any[] = [];
     let estimativasData = { engagement_total: 0, views_total: 0 };
     let limitacoesData: string[] = [
-      'Ná£o há¡ variaá§á£o de seguidores por perá­odo',
-      'Ná£o há¡ segmentaá§á£o seguidores/ná£o seguidores',
+      'N�o h� varia��o de seguidores por per�odo',
+      'N�o h� segmenta��o seguidores/n�o seguidores',
       'Stories expiram em 24h',
-      'Views agregados de stories sá³ disponá­veis se coletar logo apá³s publicaá§á£o',
-      'Stories e reels sá³ aparecem se disponá­veis via API no momento da coleta'
+      'Views agregados de stories s� dispon�veis se coletar logo ap�s publica��o',
+      'Stories e reels s� aparecem se dispon�veis via API no momento da coleta'
     ];
     try {
       // 1. Coleta do perfil
@@ -201,7 +201,7 @@ export async function PATCH(request: NextRequest) {
         media_count: profileJson.media_count,
         username: profileJson.username
       };
-      // 2. Coleta de má©tricas de perfil (impressions, reach, profile_views, website_clicks)
+      // 2. Coleta de m�tricas de perfil (impressions: any, reach, profile_views: any, website_clicks)
       const urlInsights = `https://graph.facebook.com/v19.0/${metaConfig.instagram_account_id}/insights?metric=impressions,reach,profile_views,website_clicks&period=day&access_token=${metaConfig.access_token}`;
       const resInsights = await fetch(urlInsights);
       const insightsJson = await resInsights.json();
@@ -217,7 +217,7 @@ export async function PATCH(request: NextRequest) {
       const mediaList = await resMedia.json();
       if (mediaList.data && Array.isArray(mediaList.data)) {
         for (const media of mediaList.data) {
-          // Determinar tipo de conteáºdo
+          // Determinar tipo de conte�do
           const isStory = media.media_type === 'STORY';
           const isReel = media.media_type === 'REEL';
           const isVideo = media.media_type === 'VIDEO';
@@ -286,10 +286,10 @@ export async function PATCH(request: NextRequest) {
       }
     } catch (e: any) { 
       facebookProfile = { error: e?.message || String(e) }
-      console.error('[Facebook] Exceá§á£o perfil:', facebookProfile.error)
+      console.error('[Facebook] Exce��o perfil:', facebookProfile.error)
     }
 
-    // 5. Facebook - Insights da Pá¡gina
+    // 5. Facebook - Insights da P�gina
     let facebookInsights = null
     try {
       const url = `https://graph.facebook.com/v18.0/${metaConfig.page_id}/insights?metric=page_impressions,page_engaged_users,page_views_total,page_fans,page_fan_adds,page_fan_removes&period=day&access_token=${metaConfig.access_token}`
@@ -301,7 +301,7 @@ export async function PATCH(request: NextRequest) {
       }
     } catch (e: any) { 
       facebookInsights = { error: e?.message || String(e) }
-      console.error('[Facebook] Exceá§á£o insights:', facebookInsights.error)
+      console.error('[Facebook] Exce��o insights:', facebookInsights.error)
     }
 
     // 6. Facebook - Posts
@@ -328,16 +328,16 @@ export async function PATCH(request: NextRequest) {
             facebookPostInsights.push({ post_id: post.id, insights: insightsJson.data || [] })
           } catch (e: any) {
             facebookPostInsights.push({ post_id: post.id, insights: [{ error: e?.message || String(e) }] })
-            console.error('[Facebook] Exceá§á£o post insights:', e?.message || String(e))
+            console.error('[Facebook] Exce��o post insights:', e?.message || String(e))
           }
         }
       }
     } catch (e: any) { 
       facebookPosts = { error: e?.message || String(e) }
-      console.error('[Facebook] Exceá§á£o posts:', facebookPosts.error)
+      console.error('[Facebook] Exce��o posts:', facebookPosts.error)
     }
 
-    // 7. Ads - Campanhas e Insights (já¡ estava avaná§ado)
+    // 7. Ads - Campanhas e Insights (j� estava avan�ado)
     let adsData = null
     let adsDetailed = []
     try {
@@ -363,20 +363,20 @@ export async function PATCH(request: NextRequest) {
             adsDetailed.push({ ...campaign, insights: insightsJson.data?.[0] || null })
           } catch (e: any) {
             adsDetailed.push({ ...campaign, insights: { error: e?.message || String(e) } })
-            console.error('[Ads] Exceá§á£o insights campanha:', e?.message || String(e))
+            console.error('[Ads] Exce��o insights campanha:', e?.message || String(e))
           }
         }
       }
     } catch (e: any) { 
       adsData = { error: e?.message || String(e) }
-      console.error('[Ads] Exceá§á£o campanhas:', adsData.error)
+      console.error('[Ads] Exce��o campanhas:', adsData.error)
     }
 
-    // Certificar que o array 'inserts' está¡ declarado
+    // Certificar que o array 'inserts' est� declarado
     if (instagramProfile) {
       inserts.push({ bar_id, data_coleta: hoje, tipo: 'instagram_profile', json_raw: instagramProfile })
     }
-    // Inserá§á£o dos dados coletados
+    // Inser��o dos dados coletados
     try {
       console.log('[Instagram] Salvando follower_count_day...');
       if (instagramProfileData?.follower_count) {
@@ -426,7 +426,7 @@ export async function PATCH(request: NextRequest) {
       .select()
 
     if (insertError) {
-      return NextResponse.json({ success: false, insertError, inserts }, { status: 500 })
+      return NextResponse.json({ success: false, insertError: any, inserts }, { status: 500 })
     }
 
     // Retornar resposta simples
@@ -437,8 +437,8 @@ export async function PATCH(request: NextRequest) {
 }
 
 // ========================================
-// ðŸ” GET /api/meta/collect/status
-// Verificar status da áºltima coleta
+// 🔍 GET /api/meta/collect/status
+// Verificar status da �ltima coleta
 // ========================================
 export async function GET(request: NextRequest) {
   try {
@@ -446,12 +446,12 @@ export async function GET(request: NextRequest) {
     const userData = headersList.get('x-user-data')
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usuá¡rio ná£o autenticado' }, { status: 401 })
+      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 })
     }
 
     const { bar_id } = JSON.parse(userData)
 
-    // Buscar áºltimas coletas
+    // Buscar �ltimas coletas
     const supabase = await import('@supabase/supabase-js').then(m => 
       m.createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -467,7 +467,7 @@ export async function GET(request: NextRequest) {
       .limit(10)
 
     if (error) {
-      console.error('Œ Erro ao buscar status das coletas:', error)
+      console.error('�� Erro ao buscar status das coletas:', error)
       return NextResponse.json({ error: 'Erro ao buscar status' }, { status: 500 })
     }
 
@@ -493,13 +493,13 @@ export async function GET(request: NextRequest) {
         new Date(c.iniciada_em).toDateString() === new Date().toDateString()
       ).length || 0,
       por_tipo: statusByType,
-      configuracao_ativa: true // TODO: verificar se config está¡ ativa
+      configuracao_ativa: true // TODO: verificar se config est� ativa
     }
 
     return NextResponse.json(resumo)
 
   } catch (error: any) {
-    console.error('Œ Erro ao buscar status das coletas:', error)
+    console.error('�� Erro ao buscar status das coletas:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
       details: error.message 

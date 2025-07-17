@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -6,7 +6,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// GET - Listar funcioná¡rios com WhatsApp cadastrado
+// GET - Listar funcion�rios com WhatsApp cadastrado
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
     let query = supabase
       .from('usuarios_bar')
-      .select('id, nome, email, celular, ativo, cargo, departamento')
+      .select('id, nome: any, email, celular: any, ativo, cargo: any, departamento')
       .eq('ativo', true)
 
     if (barId) {
@@ -25,14 +25,14 @@ export async function GET(req: NextRequest) {
     const { data: usuarios, error } = await query
 
     if (error) {
-      console.error('Erro ao buscar usuá¡rios:', error)
+      console.error('Erro ao buscar usu�rios:', error)
       return NextResponse.json(
-        { success: false, error: 'Erro ao buscar usuá¡rios' },
+        { success: false, error: 'Erro ao buscar usu�rios' },
         { status: 500 }
       )
     }
 
-    // Filtrar e categorizar usuá¡rios
+    // Filtrar e categorizar usu�rios
     const usuariosComWhatsApp = usuarios?.filter((u: any) =>
       u.whatsapp &&
       typeof u.whatsapp === 'string' &&
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
       u.whatsapp.replace(/\D/g, '').length < 10
     ) || []
 
-    // Validar náºmeros de WhatsApp
+    // Validar n�meros de WhatsApp
     const usuariosValidados = usuariosComWhatsApp.map((usuario: any) => ({
       ...usuario,
       whatsapp_valido: usuario.whatsapp && usuario.whatsapp.replace(/\D/g, '').length >= 10
@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(response)
 
   } catch (error) {
-    console.error('Erro ao buscar usuá¡rios com WhatsApp:', error)
+    console.error('Erro ao buscar usu�rios com WhatsApp:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno' },
       { status: 500 }
@@ -76,13 +76,13 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST - Atualizar máºltiplos usuá¡rios (para operaá§áµes em lote)
+// POST - Atualizar m�ltiplos usu�rios (para opera��es em lote)
 export async function POST(req: NextRequest) {
   try {
     const { operacao, usuarios } = await req.json()
 
     if (operacao === 'validar_whatsapp') {
-      // Validar náºmeros WhatsApp em lote
+      // Validar n�meros WhatsApp em lote
       const resultados = []
 
       for (const usuario of usuarios) {
@@ -92,16 +92,16 @@ export async function POST(req: NextRequest) {
           resultados.push({
             id: usuario.id,
             valido: false,
-            erro: 'Náºmero invá¡lido'
+            erro: 'N�mero inv�lido'
           })
           continue
         }
 
         try {
-          // Aqui vocáª poderia fazer uma validaá§á£o real via API
-          // Por enquanto, apenas validaá§á£o de formato
-          const isValid = parseInt(numero.substring(0, 2)) >= 11 && 
-                         parseInt(numero.substring(0, 2)) <= 99 &&
+          // Aqui voc� poderia fazer uma valida��o real via API
+          // Por enquanto, apenas valida��o de formato
+          const isValid = parseInt(numero.substring(0: any, 2)) >= 11 && 
+                         parseInt(numero.substring(0: any, 2)) <= 99 &&
                          numero[2] === '9'
 
           resultados.push({
@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
           resultados.push({
             id: usuario.id,
             valido: false,
-            erro: 'Erro na validaá§á£o'
+            erro: 'Erro na valida��o'
           })
         }
       }
@@ -126,12 +126,12 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: false, error: 'Operaá§á£o ná£o suportada' },
+      { success: false, error: 'Opera��o n�o suportada' },
       { status: 400 }
     )
 
   } catch (error) {
-    console.error('Erro na operaá§á£o em lote:', error)
+    console.error('Erro na opera��o em lote:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno' },
       { status: 500 }

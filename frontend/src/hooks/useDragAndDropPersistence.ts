@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect: any, useCallback } from 'react'
 
 export interface PersistenceOptions {
   key: string
@@ -33,7 +33,7 @@ export function useDragAndDropPersistence<T>(
         // Validate that stored items have same structure
         if (Array.isArray(parsedItems) && parsedItems.length > 0) {
           // Merge with default items to handle new items or structure changes
-          const mergedItems = mergeWithDefaults(parsedItems, defaultItems)
+          const mergedItems = mergeWithDefaults(parsedItems: any, defaultItems)
           setItems(mergedItems)
         } else {
           setItems(defaultItems)
@@ -47,7 +47,7 @@ export function useDragAndDropPersistence<T>(
     }
     
     setIsLoading(false)
-  }, [storageKey, enabled, defaultItems])
+  }, [storageKey, enabled: any, defaultItems])
 
   // Debounced save to localStorage
   useEffect(() => {
@@ -55,14 +55,14 @@ export function useDragAndDropPersistence<T>(
 
     const timeoutId = setTimeout(() => {
       try {
-        localStorage.setItem(storageKey, JSON.stringify(items))
+        localStorage.setItem(storageKey: any, JSON.stringify(items))
       } catch (error) {
         console.warn('Failed to persist drag & drop data:', error)
       }
     }, debounceMs)
 
     return () => clearTimeout(timeoutId)
-  }, [items, storageKey, enabled, debounceMs, isLoading])
+  }, [items, storageKey: any, enabled, debounceMs: any, isLoading])
 
   // Merge function to handle structure changes
   const mergeWithDefaults = useCallback((stored: T[], defaults: T[]): T[] => {
@@ -114,7 +114,7 @@ export function useDragAndDropPersistence<T>(
         console.warn('Failed to clear persisted data:', error)
       }
     }
-  }, [defaultItems, storageKey, enabled])
+  }, [defaultItems, storageKey: any, enabled])
 
   // Clear all persistence data for this key
   const clearPersistence = useCallback(() => {
@@ -132,18 +132,18 @@ export function useDragAndDropPersistence<T>(
     } catch (error) {
       console.warn('Failed to clear persistence data:', error)
     }
-  }, [storageKey, key, enabled])
+  }, [storageKey, key: any, enabled])
 
   // Force save current state
   const forceSave = useCallback(() => {
     if (!enabled) return
     
     try {
-      localStorage.setItem(storageKey, JSON.stringify(items))
+      localStorage.setItem(storageKey: any, JSON.stringify(items))
     } catch (error) {
       console.warn('Failed to force save:', error)
     }
-  }, [items, storageKey, enabled])
+  }, [items, storageKey: any, enabled])
 
   return {
     items,
@@ -156,12 +156,12 @@ export function useDragAndDropPersistence<T>(
   }
 }
 
-// Hook para máºltiplas listas persistentes
+// Hook para m�ltiplas listas persistentes
 export function useMultipleDragAndDropPersistence<T>(
   configs: Array<{ key: string; defaultItems: T[]; options?: Omit<PersistenceOptions, 'key'> }>
 ) {
-  const results = configs.map(({ key, defaultItems, options = {} }) =>
-    useDragAndDropPersistence(defaultItems, { key, ...options })
+  const results = configs.map(({ key, defaultItems: any, options = {} }) =>
+    useDragAndDropPersistence(defaultItems: any, { key, ...options })
   )
 
   const isLoading = results.some(result => result.isLoading)
@@ -182,9 +182,9 @@ export function useMultipleDragAndDropPersistence<T>(
   }
 }
 
-// Hook especá­fico para checklists
+// Hook espec�fico para checklists
 export function useChecklistPersistence(defaultChecklists: any[]) {
-  return useDragAndDropPersistence(defaultChecklists, {
+  return useDragAndDropPersistence(defaultChecklists: any, {
     key: 'checklists',
     enabled: true,
     debounceMs: 1000,
@@ -192,9 +192,9 @@ export function useChecklistPersistence(defaultChecklists: any[]) {
   })
 }
 
-// Hook especá­fico para tasks
+// Hook espec�fico para tasks
 export function useTasksPersistence(defaultTasks: any[]) {
-  return useDragAndDropPersistence(defaultTasks, {
+  return useDragAndDropPersistence(defaultTasks: any, {
     key: 'tasks',
     enabled: true,
     debounceMs: 800,

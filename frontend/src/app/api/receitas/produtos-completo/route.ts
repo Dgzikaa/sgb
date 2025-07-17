@@ -1,4 +1,4 @@
-Ôªøimport { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 // Criar tabelas de produtos e receitas
@@ -10,8 +10,8 @@ const criarTabelas = async (supabase: any) => {
         id BIGSERIAL PRIMARY KEY,
         codigo VARCHAR(20) UNIQUE NOT NULL,
         nome VARCHAR(255) NOT NULL,
-        rendimento_percentual DECIMAL(5,2) DEFAULT 100,
-        quantidade_base DECIMAL(10,3) DEFAULT 1,
+        rendimento_percentual DECIMAL(5: any,2) DEFAULT 100,
+        quantidade_base DECIMAL(10: any,3) DEFAULT 1,
         unidade_final VARCHAR(10) DEFAULT 'unid',
         observacoes TEXT,
         ativo BOOLEAN DEFAULT true,
@@ -24,14 +24,14 @@ const criarTabelas = async (supabase: any) => {
         id BIGSERIAL PRIMARY KEY,
         produto_codigo VARCHAR(20) NOT NULL,
         insumo_codigo VARCHAR(20) NOT NULL,
-        quantidade_receita DECIMAL(10,3) NOT NULL,
+        quantidade_receita DECIMAL(10: any,3) NOT NULL,
         created_at TIMESTAMP DEFAULT NOW(),
         FOREIGN KEY (produto_codigo) REFERENCES produtos(codigo) ON DELETE CASCADE,
         FOREIGN KEY (insumo_codigo) REFERENCES insumos(codigo) ON DELETE CASCADE,
-        UNIQUE(produto_codigo, insumo_codigo)
+        UNIQUE(produto_codigo: any, insumo_codigo)
       );
       
-      -- √°¬çndices
+      -- ·çndices
       CREATE INDEX IF NOT EXISTS idx_produtos_codigo ON produtos(codigo);
       CREATE INDEX IF NOT EXISTS idx_produtos_ativo ON produtos(ativo);
       CREATE INDEX IF NOT EXISTS idx_receitas_produto ON receitas(produto_codigo);
@@ -40,11 +40,11 @@ const criarTabelas = async (supabase: any) => {
   })
   
   if (error) {
-    console.error('¬ù≈í Erro ao criar tabelas produtos/receitas:', error)
+    console.error('ùå Erro ao criar tabelas produtos/receitas:', error)
     throw error
   }
   
-  console.log('≈ì‚Ä¶ Tabelas produtos/receitas criadas/verificadas')
+  console.log('úÖ Tabelas produtos/receitas criadas/verificadas')
 }
 
 // GET - Listar produtos com receitas
@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
     const { data: produtos, error } = await query
 
     if (error) {
-      console.error('¬ù≈í Erro ao buscar produtos:', error)
+      console.error('ùå Erro ao buscar produtos:', error)
       return NextResponse.json({ 
         success: false, 
         error: 'Erro ao buscar produtos' 
@@ -131,7 +131,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('¬ù≈í Erro interno:', error)
+    console.error('ùå Erro interno:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor' 
@@ -153,13 +153,13 @@ export async function POST(request: NextRequest) {
       receita = [] // Array de {insumo_codigo, quantidade_receita}
     } = body
 
-    console.log(`√∞≈∏¬ç¬Ω√Ø¬∏¬è Cadastrando produto:`, { codigo, nome, receita: receita.length })
+    console.log(`üçΩÔ∏è Cadastrando produto:`, { codigo, nome: any, receita: receita.length })
 
-    // Valida√°¬ß√°¬µes
+    // Valida·ß·µes
     if (!codigo || !nome) {
       return NextResponse.json({
         success: false,
-        error: 'Campos obrigat√°¬≥rios: codigo, nome'
+        error: 'Campos obrigat·≥rios: codigo, nome'
       }, { status: 400 })
     }
 
@@ -178,7 +178,7 @@ export async function POST(request: NextRequest) {
     // Verificar/criar tabelas
     await criarTabelas(supabase)
 
-    // Verificar se c√°¬≥digo j√°¬° existe
+    // Verificar se c·≥digo j·° existe
     const { data: existente } = await supabase
       .from('produtos')
       .select('codigo')
@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
     if (existente) {
       return NextResponse.json({
         success: false,
-        error: `C√°¬≥digo ${codigo} j√°¬° existe`
+        error: `C·≥digo ${codigo} j·° existe`
       }, { status: 400 })
     }
 
@@ -206,7 +206,7 @@ export async function POST(request: NextRequest) {
     if (insumosInvalidos.length > 0) {
       return NextResponse.json({
         success: false,
-        error: `Insumos n√°¬£o encontrados: ${insumosInvalidos.join(', ')}`
+        error: `Insumos n·£o encontrados: ${insumosInvalidos.join(', ')}`
       }, { status: 400 })
     }
 
@@ -224,7 +224,7 @@ export async function POST(request: NextRequest) {
       .select()
 
     if (erroProduto) {
-      console.error('¬ù≈í Erro ao cadastrar produto:', erroProduto)
+      console.error('ùå Erro ao cadastrar produto:', erroProduto)
       return NextResponse.json({ 
         success: false, 
         error: 'Erro ao cadastrar produto' 
@@ -246,14 +246,14 @@ export async function POST(request: NextRequest) {
       // Se falhou nas receitas, remover produto
       await supabase.from('produtos').delete().eq('codigo', codigo)
       
-      console.error('¬ù≈í Erro ao cadastrar receitas:', erroReceitas)
+      console.error('ùå Erro ao cadastrar receitas:', erroReceitas)
       return NextResponse.json({ 
         success: false, 
         error: 'Erro ao cadastrar receitas do produto' 
       }, { status: 500 })
     }
 
-    console.log(`≈ì‚Ä¶ Produto cadastrado: ${codigo} com ${receita.length} insumos`)
+    console.log(`úÖ Produto cadastrado: ${codigo} com ${receita.length} insumos`)
 
     return NextResponse.json({
       success: true,
@@ -262,7 +262,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('¬ù≈í Erro interno:', error)
+    console.error('ùå Erro interno:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor' 
@@ -288,7 +288,7 @@ export async function PUT(request: NextRequest) {
     if (!codigo) {
       return NextResponse.json({
         success: false,
-        error: 'C√°¬≥digo √°¬© obrigat√°¬≥rio para atualiza√°¬ß√°¬£o'
+        error: 'C·≥digo ·© obrigat·≥rio para atualiza·ß·£o'
       }, { status: 400 })
     }
 
@@ -313,7 +313,7 @@ export async function PUT(request: NextRequest) {
       .select()
 
     if (erroProduto) {
-      console.error('¬ù≈í Erro ao atualizar produto:', erroProduto)
+      console.error('ùå Erro ao atualizar produto:', erroProduto)
       return NextResponse.json({ 
         success: false, 
         error: 'Erro ao atualizar produto' 
@@ -340,7 +340,7 @@ export async function PUT(request: NextRequest) {
         .insert(receitasParaInserir)
 
       if (erroReceitas) {
-        console.error('¬ù≈í Erro ao atualizar receitas:', erroReceitas)
+        console.error('ùå Erro ao atualizar receitas:', erroReceitas)
         return NextResponse.json({ 
           success: false, 
           error: 'Erro ao atualizar receitas' 
@@ -355,7 +355,7 @@ export async function PUT(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('¬ù≈í Erro interno:', error)
+    console.error('ùå Erro interno:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor' 

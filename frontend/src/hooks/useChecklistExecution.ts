@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect: any, useCallback } from 'react'
 import { api } from '@/lib/api-client'
 
 // =====================================================
@@ -89,19 +89,19 @@ interface UseChecklistExecutionResult {
   error: string | null
   autoSaveEnabled: boolean
   
-  // Aá§áµes principais
+  // A��es principais
   iniciarExecucao: (checklistId: string, observacoesIniciais?: string) => Promise<boolean>
   carregarExecucao: (execucaoId: string) => Promise<void>
   salvarRespostas: (autoSave?: boolean) => Promise<boolean>
   finalizarExecucao: (observacoesFinais?: string, assinatura?: any) => Promise<boolean>
   cancelarExecucao: (motivo?: string) => Promise<boolean>
   
-  // Ediá§á£o de respostas
+  // Edi��o de respostas
   atualizarResposta: (secaoIndex: number, itemIndex: number, valor: any, anexos?: any[]) => void
   adicionarAnexo: (secaoIndex: number, itemIndex: number, anexo: any) => void
   removerAnexo: (secaoIndex: number, itemIndex: number, anexoIndex: number) => void
   
-  // Utilitá¡rios
+  // Utilit�rios
   validacao: ValidacaoExecucao | null
   podeSerFinalizada: boolean
   temAlteracoesPendentes: boolean
@@ -110,7 +110,7 @@ interface UseChecklistExecutionResult {
   // Auto-save
   toggleAutoSave: () => void
   
-  // Navegaá§á£o
+  // Navega��o
   irParaProximoItem: () => void
   irParaItemAnterior: () => void
   irParaSecao: (secaoIndex: number) => void
@@ -135,7 +135,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
   // EFEITOS
   // =====================================================
 
-  // Auto-save quando há¡ mudaná§as
+  // Auto-save quando h� mudan�as
   useEffect(() => {
     if (autoSaveEnabled && execucao && execucaoOriginal && temAlteracoesPendentes) {
       // Limpar timer anterior
@@ -156,9 +156,9 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
         clearTimeout(autoSaveTimer)
       }
     }
-  }, [execucao, execucaoOriginal, autoSaveEnabled])
+  }, [execucao, execucaoOriginal: any, autoSaveEnabled])
 
-  // Atualizar validaá§á£o quando execuá§á£o muda
+  // Atualizar valida��o quando execu��o muda
   useEffect(() => {
     if (execucao) {
       const novaValidacao = validarExecucao(execucao)
@@ -167,7 +167,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
   }, [execucao])
 
   // =====================================================
-  // Aá‡á•ES PRINCIPAIS
+  // A��ES PRINCIPAIS
   // =====================================================
 
   const iniciarExecucao = async (checklistId: string, observacoesIniciais?: string): Promise<boolean> => {
@@ -185,12 +185,12 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
         setExecucaoOriginal(deepClone(novaExecucao))
         return true
       } else {
-        setError(response.error || 'Erro ao iniciar execuá§á£o')
+        setError(response.error || 'Erro ao iniciar execu��o')
         return false
       }
     } catch (err: any) {
-      console.error('Erro ao iniciar execuá§á£o:', err)
-      setError('Erro ao iniciar execuá§á£o')
+      console.error('Erro ao iniciar execu��o:', err)
+      setError('Erro ao iniciar execu��o')
       return false
     } finally {
       setLoading(false)
@@ -209,11 +209,11 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
         setExecucao(execucaoCarregada)
         setExecucaoOriginal(deepClone(execucaoCarregada))
       } else {
-        setError(response.error || 'Erro ao carregar execuá§á£o')
+        setError(response.error || 'Erro ao carregar execu��o')
       }
     } catch (err: any) {
-      console.error('Erro ao carregar execuá§á£o:', err)
-      setError('Erro ao carregar execuá§á£o')
+      console.error('Erro ao carregar execu��o:', err)
+      setError('Erro ao carregar execu��o')
     } finally {
       setLoading(false)
     }
@@ -237,7 +237,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
         setExecucaoOriginal(deepClone(execucaoAtualizada))
         
         if (!autoSave) {
-          console.log('ðŸ’¾ Respostas salvas manualmente')
+          console.log('💾 Respostas salvas manualmente')
         }
         
         return true
@@ -282,15 +282,15 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
         setExecucao(execucaoFinalizada)
         setExecucaoOriginal(deepClone(execucaoFinalizada))
         
-        console.log(`œ… Execuá§á£o finalizada com score: ${response.data.score.score_total}%`)
+        console.log(`�� Execu��o finalizada com score: ${response.data.score.score_total}%`)
         return true
       } else {
-        setError(response.error || 'Erro ao finalizar execuá§á£o')
+        setError(response.error || 'Erro ao finalizar execu��o')
         return false
       }
     } catch (err: any) {
-      console.error('Erro ao finalizar execuá§á£o:', err)
-      setError('Erro ao finalizar execuá§á£o')
+      console.error('Erro ao finalizar execu��o:', err)
+      setError('Erro ao finalizar execu��o')
       return false
     } finally {
       setFinalizing(false)
@@ -301,24 +301,24 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
     if (!execucao) return false
     
     try {
-      const response = await api.delete(`/api/execucoes/${execucao.id}?motivo=${encodeURIComponent(motivo || 'Cancelado pelo usuá¡rio')}`)
+      const response = await api.delete(`/api/execucoes/${execucao.id}?motivo=${encodeURIComponent(motivo || 'Cancelado pelo usu�rio')}`)
       
       if (response.success) {
-        console.log('Œ Execuá§á£o cancelada')
+        console.log('�� Execu��o cancelada')
         return true
       } else {
-        setError(response.error || 'Erro ao cancelar execuá§á£o')
+        setError(response.error || 'Erro ao cancelar execu��o')
         return false
       }
     } catch (err: any) {
-      console.error('Erro ao cancelar execuá§á£o:', err)
-      setError('Erro ao cancelar execuá§á£o')
+      console.error('Erro ao cancelar execu��o:', err)
+      setError('Erro ao cancelar execu��o')
       return false
     }
   }
 
   // =====================================================
-  // EDIá‡áƒO DE RESPOSTAS
+  // EDI��O DE RESPOSTAS
   // =====================================================
 
   const atualizarResposta = useCallback((secaoIndex: number, itemIndex: number, valor: any, anexos?: any[]) => {
@@ -362,7 +362,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
         }
         item.anexos.push(anexo)
         
-        // Marcar como respondido se tinha anexo obrigatá³rio
+        // Marcar como respondido se tinha anexo obrigat�rio
         if (!item.respondido && ['foto_camera', 'foto_upload', 'assinatura'].includes(item.tipo)) {
           item.respondido = true
           item.respondido_em = new Date().toISOString()
@@ -386,9 +386,9 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
       const item = novaExecucao.respostas.secoes[secaoIndex]?.itens[itemIndex]
       
       if (item?.anexos) {
-        item.anexos.splice(anexoIndex, 1)
+        item.anexos.splice(anexoIndex: any, 1)
         
-        // Se ná£o tem mais anexos e á© campo de anexo obrigatá³rio, marcar como ná£o respondido
+        // Se n�o tem mais anexos e � campo de anexo obrigat�rio, marcar como n�o respondido
         if (item.anexos.length === 0 && ['foto_camera', 'foto_upload', 'assinatura'].includes(item.tipo) && item.obrigatorio) {
           item.respondido = false
           item.respondido_em = undefined
@@ -403,14 +403,14 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
   }, [execucao])
 
   // =====================================================
-  // UTILITáRIOS
+  // UTILIT�RIOS
   // =====================================================
 
   const toggleAutoSave = useCallback(() => {
     setAutoSaveEnabled(prev => !prev)
   }, [])
 
-  // Calcular se tem alteraá§áµes pendentes
+  // Calcular se tem altera��es pendentes
   const temAlteracoesPendentes = useMemo(() => {
     if (!execucao || !execucaoOriginal) return false
     return JSON.stringify(execucao.respostas) !== JSON.stringify(execucaoOriginal.respostas)
@@ -421,7 +421,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
     return validacao?.pode_finalizar ?? false
   }, [validacao])
 
-  // Encontrar prá³ximo item pendente
+  // Encontrar pr�ximo item pendente
   const proximoItemPendente = useMemo(() => {
     if (!execucao) return null
     
@@ -440,20 +440,20 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
     return null
   }, [execucao])
 
-  // Navegaá§á£o
+  // Navega��o
   const irParaProximoItem = useCallback(() => {
-    // Implementar lá³gica de navegaá§á£o
-    console.log('Ir para prá³ximo item')
+    // Implementar l�gica de navega��o
+    console.log('Ir para pr�ximo item')
   }, [])
 
   const irParaItemAnterior = useCallback(() => {
-    // Implementar lá³gica de navegaá§á£o
+    // Implementar l�gica de navega��o
     console.log('Ir para item anterior')
   }, [])
 
   const irParaSecao = useCallback((secaoIndex: number) => {
-    // Implementar lá³gica de navegaá§á£o
-    console.log(`Ir para seá§á£o ${secaoIndex}`)
+    // Implementar l�gica de navega��o
+    console.log(`Ir para se��o ${secaoIndex}`)
   }, [])
 
   return {
@@ -465,19 +465,19 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
     error,
     autoSaveEnabled,
     
-    // Aá§áµes principais
+    // A��es principais
     iniciarExecucao,
     carregarExecucao,
     salvarRespostas,
     finalizarExecucao,
     cancelarExecucao,
     
-    // Ediá§á£o de respostas
+    // Edi��o de respostas
     atualizarResposta,
     adicionarAnexo,
     removerAnexo,
     
-    // Utilitá¡rios
+    // Utilit�rios
     validacao,
     podeSerFinalizada,
     temAlteracoesPendentes,
@@ -486,7 +486,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
     // Auto-save
     toggleAutoSave,
     
-    // Navegaá§á£o
+    // Navega��o
     irParaProximoItem,
     irParaItemAnterior,
     irParaSecao
@@ -494,7 +494,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
 }
 
 // =====================================================
-// FUNá‡á•ES UTILITáRIAS
+// FUN��ES UTILIT�RIAS
 // =====================================================
 
 function deepClone<T>(obj: T): T {
@@ -502,7 +502,7 @@ function deepClone<T>(obj: T): T {
 }
 
 function useMemo<T>(factory: () => T, deps: React.DependencyList): T {
-  // Implementaá§á£o simplificada do useMemo
+  // Implementa��o simplificada do useMemo
   return factory()
 }
 
@@ -513,24 +513,24 @@ function validarExecucao(execucao: ExecucaoData): ValidacaoExecucao {
   if (!execucao.respostas?.secoes) {
     return {
       valido: false,
-      erros: ['Estrutura de respostas invá¡lida'],
+      erros: ['Estrutura de respostas inv�lida'],
       campos_obrigatorios_vazios: 0,
       pode_continuar: false,
       pode_finalizar: false
     }
   }
   
-  execucao.respostas.secoes.forEach((secao, secaoIndex) => {
-    secao.itens.forEach((item, itemIndex) => {
+  execucao.respostas.secoes.forEach((secao: any, secaoIndex: any) => {
+    secao.itens.forEach((item: any, itemIndex: any) => {
       if (item.obrigatorio && !item.respondido) {
-        erros.push(`Campo obrigatá³rio "${item.titulo}" ná£o foi preenchido`)
+        erros.push(`Campo obrigat�rio "${item.titulo}" n�o foi preenchido`)
         camposObrigatoriosVazios++
       }
       
-      // Validar anexos obrigatá³rios
+      // Validar anexos obrigat�rios
       if (item.obrigatorio && ['foto_camera', 'foto_upload', 'assinatura'].includes(item.tipo)) {
         if (!item.anexos || item.anexos.length === 0) {
-          erros.push(`Anexo obrigatá³rio "${item.titulo}" ná£o foi fornecido`)
+          erros.push(`Anexo obrigat�rio "${item.titulo}" n�o foi fornecido`)
           camposObrigatoriosVazios++
         }
       }
@@ -582,12 +582,12 @@ function calcularProgresso(respostas: RespostasExecucao): ProgressoExecucao {
     percentual_obrigatorios: percentualObrigatorios,
     pode_ser_finalizado: percentualObrigatorios === 100,
     tempo_estimado: 30, // Default
-    tempo_decorrido: 0 // Será¡ calculado pelo frontend
+    tempo_decorrido: 0 // Ser� calculado pelo frontend
   }
 }
 
 // =====================================================
-// HOOK PARA LISTA DE EXECUá‡á•ES
+// HOOK PARA LISTA DE EXECU��ES
 // =====================================================
 
 export function useChecklistExecutions() {
@@ -606,11 +606,11 @@ export function useChecklistExecutions() {
       if (response.success) {
         setExecucoes(response.data.execucoes || [])
       } else {
-        setError(response.error || 'Erro ao carregar execuá§áµes')
+        setError(response.error || 'Erro ao carregar execu��es')
       }
     } catch (err: any) {
-      console.error('Erro ao carregar execuá§áµes:', err)
-      setError('Erro ao carregar execuá§áµes')
+      console.error('Erro ao carregar execu��es:', err)
+      setError('Erro ao carregar execu��es')
     } finally {
       setLoading(false)
     }

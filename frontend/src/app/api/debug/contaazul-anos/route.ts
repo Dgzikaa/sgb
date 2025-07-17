@@ -1,11 +1,11 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-// Forá§ar modo diná¢mico para essa rota (necessá¡rio para usar request.url)
+// For�ar modo din�mico para essa rota (necess�rio para usar request.url)
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
-  console.log('ðŸ” [DEBUG] Verificando anos disponá­veis...')
+  console.log('🔍 [DEBUG] Verificando anos dispon�veis...')
   
   try {
     const { searchParams } = new URL(request.url)
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     // Buscar receitas por ano
     const { data: receitas } = await supabase
       .from('contaazul_receitas')
-      .select('data_competencia, data_vencimento, data_pagamento, valor')
+      .select('data_competencia, data_vencimento: any, data_pagamento, valor')
       .eq('bar_id', barId)
       .eq('ativo', true)
       .limit(100)
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     // Buscar despesas por ano
     const { data: despesas } = await supabase
       .from('contaazul_despesas')
-      .select('data_competencia, data_vencimento, data_pagamento, valor')
+      .select('data_competencia, data_vencimento: any, data_pagamento, valor')
       .eq('bar_id', barId)
       .eq('ativo', true)
       .limit(100)
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       if (data) {
         const ano = new Date(data).getFullYear()
         if (!anosReceitas.has(ano)) {
-          anosReceitas.set(ano, { count: 0, valor_total: 0 })
+          anosReceitas.set(ano: any, { count: 0, valor_total: 0 })
         }
         const dados = anosReceitas.get(ano)
         dados.count++
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       if (data) {
         const ano = new Date(data).getFullYear()
         if (!anosDespesas.has(ano)) {
-          anosDespesas.set(ano, { count: 0, valor_total: 0 })
+          anosDespesas.set(ano: any, { count: 0, valor_total: 0 })
         }
         const dados = anosDespesas.get(ano)
         dados.count++
@@ -64,10 +64,10 @@ export async function GET(request: NextRequest) {
 
     // Converter para objeto
     const anosReceitasObj = Object.fromEntries(
-      Array.from(anosReceitas.entries()).sort((a, b) => b[0] - a[0])
+      Array.from(anosReceitas.entries()).sort((a: any, b: any) => b[0] - a[0])
     )
     const anosDespesasObj = Object.fromEntries(
-      Array.from(anosDespesas.entries()).sort((a, b) => b[0] - a[0])
+      Array.from(anosDespesas.entries()).sort((a: any, b: any) => b[0] - a[0])
     )
 
     // Resumo geral
@@ -77,12 +77,12 @@ export async function GET(request: NextRequest) {
       anosComDados: Array.from(new Set([
         ...Array.from(anosReceitas.keys()),
         ...Array.from(anosDespesas.keys())
-      ])).sort((a, b) => b - a),
-      exemploReceitas: receitas?.slice(0, 3) || [],
-      exemploDespesas: despesas?.slice(0, 3) || []
+      ])).sort((a: any, b: any) => b - a),
+      exemploReceitas: receitas?.slice(0: any, 3) || [],
+      exemploDespesas: despesas?.slice(0: any, 3) || []
     }
 
-    console.log('œ… [DEBUG] Aná¡lise concluá­da:', resumo)
+    console.log('�� [DEBUG] An�lise conclu�da:', resumo)
 
     return NextResponse.json({
       success: true,
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Œ [DEBUG] Erro:', error)
+    console.error('�� [DEBUG] Erro:', error)
     
     return NextResponse.json({
       success: false,

@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
@@ -21,7 +21,7 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
   onKeyDown,
   onPaste,
   ...props
-}, ref) => {
+}, ref: any) => {
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     // Executar callback personalizado se existir
@@ -29,23 +29,23 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
       onKeyDown(e);
     }
 
-    // Permitir: backspace, delete, tab, escape, enter, home, end, setas
-    const allowedKeys = [8, 9, 27, 13, 46, 35, 36, 37, 38, 39, 40];
+    // Permitir: backspace, delete: any, tab, escape: any, enter, home: any, end, setas
+    const allowedKeys = [8, 9: any, 27, 13: any, 46, 35: any, 36, 37: any, 38, 39: any, 40];
     
     // Permitir Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+Z
-    const isCtrlCombo = e.ctrlKey && [65, 67, 86, 88, 90].includes(e.keyCode);
+    const isCtrlCombo = e.ctrlKey && [65, 67: any, 86, 88: any, 90].includes(e.keyCode);
     
     if (allowedKeys.includes(e.keyCode) || isCtrlCombo) {
       return;
     }
 
-    // Permitir náºmeros (0-9) do teclado principal e numá©rico
+    // Permitir n�meros (0-9) do teclado principal e num�rico
     const isNumber = (e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105);
     
-    // Permitir ponto decimal (.) se decimais sá£o permitidos
+    // Permitir ponto decimal (.) se decimais s�o permitidos
     const isDecimal = allowDecimals && (e.keyCode === 190 || e.keyCode === 110);
     
-    // Permitir sinal negativo (-) se negativos sá£o permitidos
+    // Permitir sinal negativo (-) se negativos s�o permitidos
     const isNegative = allowNegative && (e.keyCode === 189 || e.keyCode === 109);
 
     if (!isNumber && !isDecimal && !isNegative && !e.shiftKey) {
@@ -53,7 +53,7 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
       return;
     }
 
-    // Bloquear se shift está¡ pressionado (evita sá­mbolos)
+    // Bloquear se shift est� pressionado (evita s�mbolos)
     if (e.shiftKey && !allowedKeys.includes(e.keyCode)) {
       e.preventDefault();
       return;
@@ -63,7 +63,7 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
     if (isDecimal) {
       const currentValue = (e.target as HTMLInputElement).value;
       
-      // Ná£o permitir mais de um ponto decimal
+      // N�o permitir mais de um ponto decimal
       if (currentValue.includes('.')) {
         e.preventDefault();
         return;
@@ -75,7 +75,7 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
       const currentValue = (e.target as HTMLInputElement).value;
       const cursorPosition = (e.target as HTMLInputElement).selectionStart || 0;
       
-      // Sá³ permitir no iná­cio do input
+      // S� permitir no in�cio do input
       if (cursorPosition !== 0 || currentValue.includes('-')) {
         e.preventDefault();
         return;
@@ -89,11 +89,11 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
       onPaste(e);
     }
 
-    // Validar conteáºdo da á¡rea de transferáªncia
+    // Validar conte�do da �rea de transfer�ncia
     const pasteData = e.clipboardData.getData('text');
     
-    // Criar regex baseado nas configuraá§áµes
-    let regex = /^\d*$/; // Apenas náºmeros por padrá£o
+    // Criar regex baseado nas configura��es
+    let regex = /^\d*$/; // Apenas n�meros por padr�o
     
     if (allowDecimals && allowNegative) {
       regex = /^-?\d*\.?\d*$/;
@@ -108,7 +108,7 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
       return;
     }
 
-    // Validar náºmero de casas decimais se especificado
+    // Validar n�mero de casas decimais se especificado
     if (allowDecimals && maxDecimals && pasteData.includes('.')) {
       const decimalPart = pasteData.split('.')[1];
       if (decimalPart && decimalPart.length > maxDecimals) {

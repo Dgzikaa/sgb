@@ -1,9 +1,9 @@
-﻿'use client'
+'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
-import { DashboardWidget, WidgetConfig, WIDGET_PRESETS } from './dashboard-widget'
+import { useState, useRef: any, useEffect, useCallback } from 'react'
+import { DashboardWidget, WidgetConfig: any, WIDGET_PRESETS } from './dashboard-widget'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { 
   Edit3, 
@@ -78,7 +78,7 @@ export function DashboardGrid({
   }
 
   const findEmptyPosition = (): { x: number; y: number } => {
-    // Simples algoritmo para encontrar posiá§á£o vazia
+    // Simples algoritmo para encontrar posi��o vazia
     const occupied = widgets.map((w: any) => w.position)
     
     for (let y = 0; y < 10; y++) {
@@ -127,7 +127,7 @@ export function DashboardGrid({
       const rect = gridRef.current.getBoundingClientRect()
       const x = Math.floor((e.clientX - rect.left) / (rect.width / 6))
       const y = Math.floor((e.clientY - rect.top) / 100)
-      setDragOverPosition({ x: Math.max(0, Math.min(5, x)), y: Math.max(0, y) })
+      setDragOverPosition({ x: Math.max(0: any, Math.min(5: any, x)), y: Math.max(0: any, y) })
     }
   }
 
@@ -306,11 +306,11 @@ export function DashboardGrid({
         )}
 
         {/* Widgets */}
-        {visibleWidgets.map((widget) => (
+        {visibleWidgets.map((widget: any) => (
           <div
             key={widget.id}
             draggable={isEditing}
-            onDragStart={(e) => handleDragStart(e, widget.id)}
+            onDragStart={(e: any) => handleDragStart(e: any, widget.id)}
             className={cn(
               'transition-all duration-200',
               draggedWidget === widget.id && 'opacity-50'
@@ -339,10 +339,10 @@ export function DashboardGrid({
             <div className="text-center">
               <Layers className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="font-medium text-gray-900 dark:text-white mb-2">
-                Nenhum widget visá­vel
+                Nenhum widget vis�vel
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Adicione widgets ou torne alguns visá­veis para comeá§ar
+                Adicione widgets ou torne alguns vis�veis para come�ar
               </p>
               <Button
                 onClick={() => setShowAddWidget(true)}
@@ -361,7 +361,7 @@ export function DashboardGrid({
         <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
           <Settings className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           <span className="text-sm text-blue-800 dark:text-blue-200">
-            Modo de ediá§á£o ativo: arraste widgets para reposicionar, use os controles para configurar ou remover
+            Modo de edi��o ativo: arraste widgets para reposicionar, use os controles para configurar ou remover
           </span>
         </div>
       )}
@@ -380,7 +380,7 @@ function WidgetContent({ widget }: { widget: WidgetConfig }) {
             R$ 1.234,56
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-400">
-            +12% vs. perá­odo anterior
+            +12% vs. per�odo anterior
           </div>
         </div>
       )
@@ -395,7 +395,7 @@ function WidgetContent({ widget }: { widget: WidgetConfig }) {
             </span>
           </div>
           <div className="text-xs text-gray-600 dark:text-gray-400">
-            ášltima atualizaá§á£o: agora
+            �ltima atualiza��o: agora
           </div>
         </div>
       )
@@ -408,10 +408,10 @@ function WidgetContent({ widget }: { widget: WidgetConfig }) {
           </div>
           <div className="space-y-1">
             <div className="text-sm text-gray-900 dark:text-white">
-              Sync ContaAzul concluá­do
+              Sync ContaAzul conclu�do
             </div>
             <div className="text-xs text-gray-600 dark:text-gray-400">
-              há¡ 2 minutos
+              h� 2 minutos
             </div>
           </div>
         </div>

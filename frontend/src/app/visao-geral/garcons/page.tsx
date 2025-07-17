@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useBar } from '@/contexts/BarContext'
@@ -10,8 +10,8 @@ export default function DashboardGarconsPage() {
   return (
     <ProtectedRoute requiredModule="dashboard_garcons">
       <EmConstrucao 
-      titulo="Dashboard de Gará§ons"
-      descricao="Performance individual dos gará§ons, vendas por atendente e sistema de comissáµes."
+      titulo="Dashboard de Gar�ons"
+      descricao="Performance individual dos gar�ons, vendas por atendente e sistema de comiss�es."
       prioridade="media"
       previsao="3-4 semanas"
       />

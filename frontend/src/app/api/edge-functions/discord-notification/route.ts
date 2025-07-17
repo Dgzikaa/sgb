@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseAdmin = createClient(
@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     
-    console.log('ðŸ”„ Discord Notification API - Dados recebidos:', {
+    console.log('🔄 Discord Notification API - Dados recebidos:', {
       bar_id: body.bar_id,
       title: body.title,
       webhook_type: body.webhook_type,
@@ -20,16 +20,16 @@ export async function POST(request: NextRequest) {
     
     // Validar se bar_id foi fornecido
     if (!body.bar_id || !body.title) {
-      console.error('Œ Validaá§á£o falhou:', { bar_id: body.bar_id, title: body.title })
+      console.error('�� Valida��o falhou:', { bar_id: body.bar_id, title: body.title })
       return NextResponse.json(
-        { success: false, error: 'bar_id e title sá£o obrigatá³rios' },
+        { success: false, error: 'bar_id e title s�o obrigat�rios' },
         { status: 400 }
       )
     }
 
     // Usar service role para bypass RLS
 
-    // Buscar webhook especá­fico do sistema
+    // Buscar webhook espec�fico do sistema
     const webhookMapping = {
       sistema: 'sistema',
       contaazul: 'contaazul',
@@ -44,17 +44,17 @@ export async function POST(request: NextRequest) {
     const webhookType = body.webhook_type || 'sistema'
     const sistema = webhookMapping[webhookType as keyof typeof webhookMapping]
 
-    console.log('ðŸŽ¯ Buscando webhook:', { webhookType, sistema })
+    console.log('🎯 Buscando webhook:', { webhookType, sistema })
 
     if (!sistema) {
-      console.error('Œ Tipo de webhook ná£o mapeado:', webhookType)
+      console.error('�� Tipo de webhook n�o mapeado:', webhookType)
       return NextResponse.json(
-        { success: false, error: `Tipo de webhook ná£o suportado: ${webhookType}` },
+        { success: false, error: `Tipo de webhook n�o suportado: ${webhookType}` },
         { status: 400 }
       )
     }
 
-    // Buscar webhook no sistema especá­fico
+    // Buscar webhook no sistema espec�fico
     const { data: webhookData, error: webhookError } = await supabaseAdmin
       .from('api_credentials')
       .select('configuracoes')
@@ -63,26 +63,26 @@ export async function POST(request: NextRequest) {
       .eq('ambiente', 'producao')
       .maybeSingle()
 
-    console.log('ðŸ“Š Webhook do banco:', { webhookData, webhookError })
+    console.log('📊 Webhook do banco:', { webhookData, webhookError })
 
     let webhookUrl = ''
     if (!webhookError && webhookData && webhookData.configuracoes?.webhook_url) {
       webhookUrl = webhookData.configuracoes.webhook_url
-      console.log(`œ… Webhook ${webhookType} encontrado no sistema ${sistema}`)
+      console.log(`�� Webhook ${webhookType} encontrado no sistema ${sistema}`)
     } else {
-      console.log(`š ï¸ Webhook ${webhookType} ná£o encontrado no sistema ${sistema}`)
+      console.log(`��️ Webhook ${webhookType} n�o encontrado no sistema ${sistema}`)
     }
 
-    console.log('ðŸŽ¯ Webhook selecionado:', { 
+    console.log('🎯 Webhook selecionado:', { 
       webhookType, 
-      webhookUrl: webhookUrl ? webhookUrl.substring(0, 50) + '...' : 'VAZIO',
+      webhookUrl: webhookUrl ? webhookUrl.substring(0: any, 50) + '...' : 'VAZIO',
       hasUrl: !!webhookUrl 
     })
 
     if (!webhookUrl || webhookUrl === '') {
-      console.error('Œ Webhook ná£o configurado:', { webhookType, sistema })
+      console.error('�� Webhook n�o configurado:', { webhookType, sistema })
       return NextResponse.json(
-        { success: false, error: `Webhook ${webhookType} ná£o configurado` },
+        { success: false, error: `Webhook ${webhookType} n�o configurado` },
         { status: 400 }
       )
     }
@@ -94,13 +94,13 @@ export async function POST(request: NextRequest) {
       color: body.color || 0x00D084,
       fields: body.fields || [],
       footer: {
-        text: `SGB Analytics €¢ Bar ${body.bar_id} €¢ ${new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`
+        text: `SGB Analytics �� Bar ${body.bar_id} �� ${new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`
       },
       timestamp: new Date().toISOString()
     }
 
     // Enviar para Discord
-    const discordResponse = await fetch(webhookUrl, {
+    const discordResponse = await fetch(webhookUrl: any, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -115,11 +115,11 @@ export async function POST(request: NextRequest) {
 
     if (!discordResponse.ok) {
       const errorText = await discordResponse.text()
-      console.error('Œ Erro Discord:', {
+      console.error('�� Erro Discord:', {
         status: discordResponse.status,
         error: errorText,
         webhook_type: webhookType,
-        webhook_url: webhookUrl.substring(0, 50) + '...'
+        webhook_url: webhookUrl.substring(0: any, 50) + '...'
       })
       return NextResponse.json(
         { success: false, error: `Erro Discord: ${discordResponse.status} - ${errorText}` },
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`œ… Webhook ${webhookType} enviado com sucesso para Discord`)
+    console.log(`�� Webhook ${webhookType} enviado com sucesso para Discord`)
     return NextResponse.json({ 
       success: true, 
       message: `Webhook ${webhookType} enviado com sucesso`,
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Œ Erro no webhook Discord:', error)
+    console.error('�� Erro no webhook Discord:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }

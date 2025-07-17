@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -8,9 +8,9 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('ðŸ“± Aná¡lise AVANá‡ADA de conteáºdo Meta...')
+    console.log('📱 An�lise AVAN�ADA de conte�do Meta...')
 
-    // Obter dados do usuá¡rio para pegar o bar_id
+    // Obter dados do usu�rio para pegar o bar_id
     const userData = request.headers.get('x-user-data')
     let barId = 3 // fallback para desenvolvimento
     
@@ -18,13 +18,13 @@ export async function GET(request: NextRequest) {
       try {
         const parsedUser = JSON.parse(decodeURIComponent(userData))
         barId = parsedUser.bar_id || 3
-        console.log(`ðŸ‘¤ Usando bar_id: ${barId}`)
+        console.log(`👤 Usando bar_id: ${barId}`)
       } catch (e) {
-        console.warn('š ï¸ Erro ao parsear dados do usuá¡rio, usando bar_id padrá£o')
+        console.warn('��️ Erro ao parsear dados do usu�rio, usando bar_id padr�o')
       }
     }
 
-    // Buscar configuraá§á£o da Meta
+    // Buscar configura��o da Meta
     const { data: config, error: configError } = await supabase
       .from('api_credentials')
       .select('*')
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     if (configError || !config) {
       return NextResponse.json({
         success: false,
-        error: 'Configuraá§á£o Meta ná£o encontrada',
+        error: 'Configura��o Meta n�o encontrada',
         posts: []
       }, { status: 404 })
     }
@@ -81,12 +81,12 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      // 1. ANáLISE DE POSTS DO INSTAGRAM
+      // 1. AN�LISE DE POSTS DO INSTAGRAM
       if (instagramId) {
-        console.log('ðŸ“· Analisando posts do Instagram...')
+        console.log('📷 Analisando posts do Instagram...')
         
         const instagramPostsResponse = await fetch(
-          `https://graph.facebook.com/v18.0/${instagramId}/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count,insights.metric(impressions,reach,engagement,saves,video_views)&limit=50&access_token=${accessToken}`
+          `https://graph.facebook.com/v18.0/${instagramId}/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count,insights.metric(impressions: any,reach,engagement,saves,video_views)&limit=50&access_token=${accessToken}`
         )
         const instagramPostsData = await instagramPostsResponse.json()
 
@@ -102,10 +102,10 @@ export async function GET(request: NextRequest) {
             const engagementRate = impressions > 0 ? (engagement / impressions) * 100 : 0
             const saveRate = impressions > 0 ? (saves / impressions) * 100 : 0
             
-            // Aná¡lise de hashtags
+            // An�lise de hashtags
             const hashtags = post.caption ? (post.caption.match(/#\w+/g) || []) : []
             
-            // Aná¡lise de horá¡rio
+            // An�lise de hor�rio
             const postDate = new Date(post.timestamp)
             const hourOfDay = postDate.getHours()
             const dayOfWeek = postDate.getDay()
@@ -141,7 +141,7 @@ export async function GET(request: NextRequest) {
 
           contentAnalysis.instagram.posts = posts
 
-          // Calcular má©tricas agregadas
+          // Calcular m�tricas agregadas
           if (posts.length > 0) {
             contentAnalysis.instagram.metrics.total_posts = posts.length
             contentAnalysis.instagram.metrics.avg_engagement_rate = 
@@ -156,7 +156,7 @@ export async function GET(request: NextRequest) {
               posts.reduce((worst: any, current: any) => 
                 current.analysis.performance_score < worst.analysis.performance_score ? current : worst)
 
-            // Aná¡lise por tipo de conteáºdo
+            // An�lise por tipo de conte�do
             const typePerformance: any = {}
             posts.forEach((post: any) => {
               if (!typePerformance[post.media_type]) {
@@ -177,7 +177,7 @@ export async function GET(request: NextRequest) {
 
             contentAnalysis.instagram.metrics.engagement_by_type = typePerformance
 
-            // Aná¡lise de horá¡rios á³timos
+            // An�lise de hor�rios �timos
             const hourPerformance: any = {}
             posts.forEach((post: any) => {
               const hour = post.analysis.hour_posted
@@ -197,17 +197,17 @@ export async function GET(request: NextRequest) {
                 hourPerformance[hour].total_engagement / hourPerformance[hour].count
             })
 
-            // Top 3 horá¡rios
+            // Top 3 hor�rios
             contentAnalysis.insights.optimal_posting_times = Object.entries(hourPerformance)
               .sort(([,a]: any, [,b]: any) => b.avg_engagement - a.avg_engagement)
-              .slice(0, 3)
+              .slice(0: any, 3)
               .map(([hour, data]: any) => ({
                 hour: parseInt(hour),
                 avg_engagement: data.avg_engagement,
                 posts_count: data.count
               }))
 
-            // Aná¡lise de hashtags
+            // An�lise de hashtags
             const hashtagPerformance: any = {}
             posts.forEach((post: any) => {
               post.analysis.hashtags.forEach((hashtag: string) => {
@@ -231,7 +231,7 @@ export async function GET(request: NextRequest) {
             // Top 10 hashtags
             contentAnalysis.insights.hashtag_performance = Object.entries(hashtagPerformance)
               .sort(([,a]: any, [,b]: any) => b.avg_engagement - a.avg_engagement)
-              .slice(0, 10)
+              .slice(0: any, 10)
               .map(([hashtag, data]: any) => ({
                 tag: hashtag,
                 avg_engagement: data.avg_engagement,
@@ -240,11 +240,11 @@ export async function GET(request: NextRequest) {
           }
         }
 
-        // 2. BUSCAR STORIES (áºltimas 24h)
+        // 2. BUSCAR STORIES (�ltimas 24h)
         try {
-          console.log('ðŸ“– Analisando Instagram Stories...')
+          console.log('📖 Analisando Instagram Stories...')
           const storiesResponse = await fetch(
-            `https://graph.facebook.com/v18.0/${instagramId}/stories?fields=id,media_type,media_url,timestamp,insights.metric(impressions,reach,replies,exits)&access_token=${accessToken}`
+            `https://graph.facebook.com/v18.0/${instagramId}/stories?fields=id,media_type,media_url,timestamp,insights.metric(impressions: any,reach,replies,exits)&access_token=${accessToken}`
           )
           const storiesData = await storiesResponse.json()
 
@@ -272,16 +272,16 @@ export async function GET(request: NextRequest) {
             })
           }
         } catch (storiesError) {
-          console.warn('š ï¸ Erro ao buscar stories:', storiesError)
+          console.warn('��️ Erro ao buscar stories:', storiesError)
         }
       }
 
-      // 3. ANáLISE DE POSTS DO FACEBOOK
+      // 3. AN�LISE DE POSTS DO FACEBOOK
       if (pageId) {
-        console.log('ðŸ“˜ Analisando posts do Facebook...')
+        console.log('📘 Analisando posts do Facebook...')
         
         const facebookPostsResponse = await fetch(
-          `https://graph.facebook.com/v18.0/${pageId}/posts?fields=id,message,created_time,type,link,picture,full_picture,likes.summary(true),comments.summary(true),shares,insights.metric(post_impressions,post_engaged_users,post_clicks,post_reactions_by_type_total)&limit=50&access_token=${accessToken}`
+          `https://graph.facebook.com/v18.0/${pageId}/posts?fields=id,message,created_time,type,link,picture,full_picture,likes.summary(true),comments.summary(true),shares,insights.metric(post_impressions: any,post_engaged_users,post_clicks,post_reactions_by_type_total)&limit=50&access_token=${accessToken}`
         )
         const facebookPostsData = await facebookPostsResponse.json()
 
@@ -320,7 +320,7 @@ export async function GET(request: NextRequest) {
 
           contentAnalysis.facebook.posts = posts
 
-          // Calcular má©tricas agregadas do Facebook
+          // Calcular m�tricas agregadas do Facebook
           if (posts.length > 0) {
             contentAnalysis.facebook.metrics.total_posts = posts.length
             contentAnalysis.facebook.metrics.avg_engagement_rate = 
@@ -337,7 +337,7 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      // 4. RECOMENDAá‡á•ES BASEADAS EM IA
+      // 4. RECOMENDA��ES BASEADAS EM IA
       const recommendations = []
 
       if (contentAnalysis.instagram.metrics.avg_engagement_rate < 3) {
@@ -345,7 +345,7 @@ export async function GET(request: NextRequest) {
           type: 'content',
           priority: 'high',
           title: 'Baixo Engajamento no Instagram',
-          description: 'Taxa de engajamento abaixo de 3%. Melhore a qualidade do conteáºdo.',
+          description: 'Taxa de engajamento abaixo de 3%. Melhore a qualidade do conte�do.',
           action: 'Poste mais reels, use trending sounds e hashtags relevantes'
         })
       }
@@ -355,8 +355,8 @@ export async function GET(request: NextRequest) {
         recommendations.push({
           type: 'timing',
           priority: 'medium',
-          title: 'Horá¡rio á“timo Identificado',
-          description: `Poste á s ${bestTime.hour}h para melhor engajamento`,
+          title: 'Hor�rio �timo Identificado',
+          description: `Poste �s ${bestTime.hour}h para melhor engajamento`,
           action: `Agende posts para ${bestTime.hour}:00 - ${bestTime.hour + 1}:00`
         })
       }
@@ -370,8 +370,8 @@ export async function GET(request: NextRequest) {
             type: 'content_type',
             priority: 'medium',
             title: `${topType[0]} Performance Melhor`,
-            description: `Posts do tipo ${topType[0]} táªm melhor engajamento`,
-            action: `Crie mais conteáºdo do tipo ${topType[0]}`
+            description: `Posts do tipo ${topType[0]} t�m melhor engajamento`,
+            action: `Crie mais conte�do do tipo ${topType[0]}`
           })
         }
       }
@@ -385,14 +385,14 @@ export async function GET(request: NextRequest) {
           total_facebook_posts: contentAnalysis.facebook.metrics.total_posts,
           avg_instagram_engagement: contentAnalysis.instagram.metrics.avg_engagement_rate,
           avg_facebook_engagement: contentAnalysis.facebook.metrics.avg_engagement_rate,
-          top_hashtags: contentAnalysis.insights.hashtag_performance.slice(0, 3),
+          top_hashtags: contentAnalysis.insights.hashtag_performance.slice(0: any, 3),
           optimal_times: contentAnalysis.insights.optimal_posting_times
         },
         timestamp: new Date().toISOString()
       })
 
     } catch (metaError: any) {
-      console.log(`š ï¸ Erro ao analisar conteáºdo: ${metaError.message}`)
+      console.log(`��️ Erro ao analisar conte�do: ${metaError.message}`)
       
       return NextResponse.json({
         success: true,
@@ -405,17 +405,17 @@ export async function GET(request: NextRequest) {
         metadata: {
           data_type: 'no_content_data',
           error: metaError.message,
-          note: 'Para aná¡lise de conteáºdo, á© necessá¡rio ter posts publicados nas áºltimas semanas.'
+          note: 'Para an�lise de conte�do, � necess�rio ter posts publicados nas �ltimas semanas.'
         },
         timestamp: new Date().toISOString()
       })
     }
 
   } catch (error: any) {
-    console.error('Œ Erro ao analisar conteáºdo:', error)
+    console.error('�� Erro ao analisar conte�do:', error)
     return NextResponse.json({ 
       success: false,
-      error: 'Erro ao analisar conteáºdo',
+      error: 'Erro ao analisar conte�do',
       details: error.message
     }, { status: 500 })
   }

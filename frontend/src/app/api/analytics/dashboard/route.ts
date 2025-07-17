@@ -1,4 +1,4 @@
-ï»¿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 
 export async function GET(request: NextRequest) {
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const dataInicio = new Date(agora.getTime() - parseInt(periodo) * 24 * 60 * 60 * 1000)
     const dataHoje = new Date().toISOString().split('T')[0]
 
-    // 1. BUSCAR MÃ¡â€°TRICAS PRINCIPAIS
+    // 1. BUSCAR Má‰TRICAS PRINCIPAIS
     const { data: metricas, error: metricasError } = await supabase
       .from('sistema_metricas')
       .select('*')
@@ -29,10 +29,10 @@ export async function GET(request: NextRequest) {
       .eq('bar_id', parseInt(barId))
       .eq('data_referencia', dataHoje)
 
-    // 3. BUSCAR EVENTOS DE USUÃ¡ÂRIO (resumo)
+    // 3. BUSCAR EVENTOS DE USUáRIO (resumo)
     const { data: eventos, error: eventosError } = await supabase
       .from('usuario_eventos')
-      .select('evento_tipo, evento_nome, user_id, timestamp_evento, tempo_gasto_segundos, dispositivo_tipo')
+      .select('evento_tipo, evento_nome: any, user_id, timestamp_evento: any, tempo_gasto_segundos, dispositivo_tipo')
       .eq('bar_id', parseInt(barId))
       .gte('timestamp_evento', dataInicio.toISOString())
 
@@ -45,10 +45,10 @@ export async function GET(request: NextRequest) {
       .order('criado_em', { ascending: false })
       .limit(10)
 
-    // 5. BUSCAR PERFORMANCE (Ã¡Âºltimas 24h)
+    // 5. BUSCAR PERFORMANCE (áºltimas 24h)
     const { data: performance, error: performanceError } = await supabase
       .from('sistema_performance')
-      .select('tempo_resposta_ms, status_code, endpoint_ou_pagina, componente, timestamp_request')
+      .select('tempo_resposta_ms, status_code: any, endpoint_ou_pagina, componente: any, timestamp_request')
       .eq('bar_id', parseInt(barId))
       .gte('timestamp_request', new Date(agora.getTime() - 24 * 60 * 60 * 1000).toISOString())
 
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
 
     // PROCESSAR DADOS PARA DASHBOARD
 
-    // === MÃ¡â€°TRICAS RESUMIDAS ===
+    // === Má‰TRICAS RESUMIDAS ===
     const metricasResumo = {
       usuarios_ativos_hoje: eventos?.filter((e: any) => 
         e.timestamp_evento >= new Date().toISOString().split('T')[0] && e.user_id
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
       
       endpoints_mais_lentos: performance
         ?.sort((a: any, b: any) => b.tempo_resposta_ms - a.tempo_resposta_ms)
-        .slice(0, 5)
+        .slice(0: any, 5)
         .map((p: any) => ({
           endpoint: p.endpoint_ou_pagina,
           tempo_ms: p.tempo_resposta_ms,
@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
       return acc
     }, {}) || {}
 
-    // === PÃ¡ÂGINAS MAIS VISITADAS ===
+    // === PáGINAS MAIS VISITADAS ===
     const paginasVisitadas = eventos
       ?.filter((e: any) => e.evento_tipo === 'page_view')
       ?.reduce((acc: any, evento: any) => {
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
 
     const topPaginas = Object.entries(paginasVisitadas)
       .sort(([,a]: any, [,b]: any) => b - a)
-      .slice(0, 10)
+      .slice(0: any, 10)
       .map(([pagina, visitas]) => ({ pagina, visitas }))
 
     // === ALERTAS RESUMIDOS ===
@@ -161,7 +161,7 @@ export async function GET(request: NextRequest) {
         eventos_por_tipo: eventosPorTipo,
         top_paginas: topPaginas,
         
-        alertas_criticos: alertas?.filter((a: any) => a.severidade === 'critical').slice(0, 5) || [],
+        alertas_criticos: alertas?.filter((a: any) => a.severidade === 'critical').slice(0: any, 5) || [],
         
         performance_trends: performance?.map((p: any) => ({
           timestamp: p.timestamp_request,
@@ -170,13 +170,13 @@ export async function GET(request: NextRequest) {
           status: p.status_code
         })) || [],
         
-        // Dados brutos para grÃ¡Â¡ficos (Ã¡Âºltimos 7 dias)
-        metricas_historico: metricas?.slice(0, 50) || []
+        // Dados brutos para grá¡ficos (áºltimos 7 dias)
+        metricas_historico: metricas?.slice(0: any, 50) || []
       }
     })
 
   } catch (error) {
-    console.error('ÂÅ’ Erro ao buscar dashboard analytics:', error)
+    console.error('Œ Erro ao buscar dashboard analytics:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro ao carregar dashboard de analytics',
@@ -185,7 +185,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Endpoint para atualizar mÃ¡Â©tricas em tempo real
+// Endpoint para atualizar má©tricas em tempo real
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -193,7 +193,7 @@ export async function POST(request: NextRequest) {
 
     const supabase = await getAdminClient()
 
-    // Executar funÃ¡Â§Ã¡Â£o de cÃ¡Â¡lculo de mÃ¡Â©tricas automÃ¡Â¡ticas
+    // Executar funá§á£o de cá¡lculo de má©tricas automá¡ticas
     const { data: resultado, error } = await supabase
       .rpc('calcular_metricas_automaticas', { 
         target_bar_id: bar_id ? parseInt(bar_id) : null 
@@ -206,14 +206,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: resultado,
-      message: 'MÃ¡Â©tricas atualizadas com sucesso'
+      message: 'Má©tricas atualizadas com sucesso'
     })
 
   } catch (error) {
-    console.error('ÂÅ’ Erro ao atualizar mÃ¡Â©tricas:', error)
+    console.error('Œ Erro ao atualizar má©tricas:', error)
     return NextResponse.json({
       success: false,
-      error: 'Erro ao atualizar mÃ¡Â©tricas automÃ¡Â¡ticas',
+      error: 'Erro ao atualizar má©tricas automá¡ticas',
       details: error instanceof Error ? error.message : 'Erro desconhecido'
     }, { status: 500 })
   }

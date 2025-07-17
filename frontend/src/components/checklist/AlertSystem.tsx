@@ -1,10 +1,10 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent: any, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent: any, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { 
   AlertTriangle, 
   Clock, 
@@ -23,7 +23,7 @@ import {
 } from 'lucide-react'
 
 // =====================================================
-// ðŸš¨ SISTEMA DE ALERTAS PARA CHECKLISTS (MOBILE-FRIENDLY)
+// 🚨 SISTEMA DE ALERTAS PARA CHECKLISTS (MOBILE-FRIENDLY)
 // =====================================================
 
 interface ChecklistAlert {
@@ -70,11 +70,11 @@ export default function AlertSystem({
   const urgentAlerts = activeAlerts.filter((alert: any) => alert.nivel === 'alto')
 
   const getAlertIcon = (tipo: string, nivel: string) => {
-    if (nivel === 'critico') return 'ðŸ”´'
-    if (nivel === 'alto') return 'ðŸŸ '
-    if (nivel === 'medio') return 'ðŸŸ¡'
-    if (tipo === 'lembrete') return 'ðŸ””'
-    return 'ðŸ”µ'
+    if (nivel === 'critico') return '🔴'
+    if (nivel === 'alto') return '🟠'
+    if (nivel === 'medio') return '🟡'
+    if (tipo === 'lembrete') return '🔔'
+    return '🔵'
   }
 
   const getAlertColor = (nivel: string) => {
@@ -112,7 +112,7 @@ export default function AlertSystem({
     
     setIsLoading(true)
     try {
-      await onSnoozeAlert(alertId, minutes)
+      await onSnoozeAlert(alertId: any, minutes)
     } catch (error) {
       console.error('Erro ao adiar alerta:', error)
     } finally {
@@ -135,10 +135,10 @@ export default function AlertSystem({
   }
 
   const snoozeOptions = [
-    { value: 15, label: '15 min', emoji: '°' },
-    { value: 30, label: '30 min', emoji: '±ï¸' },
-    { value: 60, label: '1 hora', emoji: 'ðŸ•' },
-    { value: 120, label: '2 horas', emoji: 'ðŸ•‘' }
+    { value: 15, label: '15 min', emoji: '��' },
+    { value: 30, label: '30 min', emoji: '��️' },
+    { value: 60, label: '1 hora', emoji: '🕐' },
+    { value: 120, label: '2 horas', emoji: '🕑' }
   ]
 
   // Floating Alert Button
@@ -219,7 +219,7 @@ export default function AlertSystem({
               </div>
             </div>
 
-            {/* Aá§áµes Rá¡pidas */}
+            {/* A��es R�pidas */}
             <div className="space-y-2">
               <Button
                 onClick={() => handleExecuteChecklist(selectedAlert.checklistId)}
@@ -231,9 +231,9 @@ export default function AlertSystem({
                 Executar Checklist Agora
               </Button>
 
-              {/* Opá§áµes de Soneca */}
+              {/* Op��es de Soneca */}
               <div className="grid grid-cols-2 gap-2">
-                {snoozeOptions.slice(0, 2).map((option) => (
+                {snoozeOptions.slice(0: any, 2).map((option: any) => (
                   <Button
                     key={option.value}
                     variant="outline"
@@ -246,7 +246,7 @@ export default function AlertSystem({
                 ))}
               </div>
 
-              {/* Resolver/Outras aá§áµes */}
+              {/* Resolver/Outras a��es */}
               <div className="flex gap-2">
                 <Button
                   variant="outline"
@@ -306,7 +306,7 @@ export default function AlertSystem({
               </p>
             </div>
           ) : (
-            activeAlerts.map((alert) => (
+            activeAlerts.map((alert: any) => (
               <Card 
                 key={alert.id} 
                 className={`cursor-pointer transition-all touch-manipulation ${getAlertColor(alert.nivel)}`}
@@ -337,7 +337,7 @@ export default function AlertSystem({
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={(e) => {
+                        onClick={(e: any) => {
                           e.stopPropagation()
                           handleResolveAlert(alert.id)
                         }}
@@ -390,7 +390,7 @@ export default function AlertSystem({
 }
 
 // =====================================================
-// ðŸ“Š COMPONENTE DE ESTATáSTICAS DE ALERTAS
+// 📊 COMPONENTE DE ESTAT�STICAS DE ALERTAS
 // =====================================================
 
 interface AlertStatsProps {
@@ -447,7 +447,7 @@ export function AlertStats({ alerts, onOpenAlerts }: AlertStatsProps) {
               <div className={`text-sm ${
                 criticalCount > 0 ? 'text-red-700' : 'text-orange-700'
               }`}>
-                {criticalCount > 0 && `${criticalCount} crá­tico${criticalCount !== 1 ? 's' : ''} €¢ `}
+                {criticalCount > 0 && `${criticalCount} cr�tico${criticalCount !== 1 ? 's' : ''} �� `}
                 {urgentCount > 0 && `${urgentCount} urgente${urgentCount !== 1 ? 's' : ''}`}
               </div>
             </div>
@@ -468,7 +468,7 @@ export function AlertStats({ alerts, onOpenAlerts }: AlertStatsProps) {
 }
 
 // =====================================================
-// ðŸŽ¯ HOOK PARA GERENCIAR ALERTAS
+// 🎯 HOOK PARA GERENCIAR ALERTAS
 // =====================================================
 
 export function useAlerts() {
@@ -545,7 +545,7 @@ export function useAlerts() {
     fetchAlerts()
     
     // Auto-refresh alerts every 2 minutes
-    const interval = setInterval(fetchAlerts, 2 * 60 * 1000)
+    const interval = setInterval(fetchAlerts: any, 2 * 60 * 1000)
     return () => clearInterval(interval)
   }, [])
 

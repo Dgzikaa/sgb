@@ -1,12 +1,12 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent: any, CardDescription, CardHeader: any, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Phone, Check, X, AlertTriangle } from 'lucide-react'
+import { Phone, Check: any, X, AlertTriangle } from 'lucide-react'
 
 interface Usuario {
   id: number
@@ -49,12 +49,12 @@ export default function UsuarioCelularForm({
         setCelular(data.usuario.celular || '')
       }
     } catch (error) {
-      console.error('Erro ao carregar usuá¡rio:', error)
+      console.error('Erro ao carregar usu�rio:', error)
     }
   }
 
   const formatCelular = (value: string) => {
-    // Remove tudo que ná£o á© náºmero
+    // Remove tudo que n�o � n�mero
     const numbers = value.replace(/\D/g, '')
     
     // Formatar: +55 (XX) 9XXXX-XXXX
@@ -71,14 +71,14 @@ export default function UsuarioCelularForm({
   const validateCelular = (cel: string) => {
     const numbers = cel.replace(/\D/g, '')
     
-    // Deve ter 11 dá­gitos: DD9XXXXXXXX
+    // Deve ter 11 d�gitos: DD9XXXXXXXX
     if (numbers.length !== 11) return false
     
-    // Deve comeá§ar com DDD vá¡lido (11-99)
-    const ddd = parseInt(numbers.substring(0, 2))
+    // Deve come�ar com DDD v�lido (11-99)
+    const ddd = parseInt(numbers.substring(0: any, 2))
     if (ddd < 11 || ddd > 99) return false
     
-    // Terceiro dá­gito deve ser 9 (celular)
+    // Terceiro d�gito deve ser 9 (celular)
     if (numbers[2] !== '9') return false
     
     return true
@@ -98,7 +98,7 @@ export default function UsuarioCelularForm({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           numero: numbers,
-          mensagem: `ðŸ“± Teste de WhatsApp - SGB\n\nOlá¡! Este á© um teste de conectividade.\n\nSe vocáª recebeu esta mensagem, seu náºmero está¡ funcionando perfeitamente para receber notificaá§áµes do sistema!\n\nœ… Náºmero validado: +${numbers}\n\n_Sistema SGB - ${new Date().toLocaleString('pt-BR')}_`
+          mensagem: `📱 Teste de WhatsApp - SGB\n\nOl�! Este � um teste de conectividade.\n\nSe voc� recebeu esta mensagem, seu n�mero est� funcionando perfeitamente para receber notifica��es do sistema!\n\n�� N�mero validado: +${numbers}\n\n_Sistema SGB - ${new Date().toLocaleString('pt-BR')}_`
         })
       })
       
@@ -120,7 +120,7 @@ export default function UsuarioCelularForm({
 
   const handleSave = async () => {
     if (!validateCelular(celular)) {
-      alert('Náºmero de celular invá¡lido! Use o formato: +55 (XX) 9XXXX-XXXX')
+      alert('N�mero de celular inv�lido! Use o formato: +55 (XX) 9XXXX-XXXX')
       return
     }
 
@@ -133,7 +133,7 @@ export default function UsuarioCelularForm({
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          celular: numbers // Salvar apenas náºmeros
+          celular: numbers // Salvar apenas n�meros
         })
       })
       
@@ -163,10 +163,10 @@ export default function UsuarioCelularForm({
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
           <Phone className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-          WhatsApp do Funcioná¡rio
+          WhatsApp do Funcion�rio
         </CardTitle>
         <CardDescription className="text-gray-600 dark:text-gray-400">
-          {usuario ? `Configure o WhatsApp de ${usuario.nome}` : 'Configure o náºmero para receber notificaá§áµes'}
+          {usuario ? `Configure o WhatsApp de ${usuario.nome}` : 'Configure o n�mero para receber notifica��es'}
         </CardDescription>
       </CardHeader>
       
@@ -174,12 +174,12 @@ export default function UsuarioCelularForm({
         {/* Campo de Celular */}
         <div className="space-y-2">
           <Label className="text-gray-700 dark:text-gray-300">
-            Náºmero do WhatsApp
+            N�mero do WhatsApp
           </Label>
           <div className="relative">
             <Input
               value={celular}
-              onChange={(e) => setCelular(formatCelular(e.target.value))}
+              onChange={(e: any) => setCelular(formatCelular(e.target.value))}
               placeholder="+55 (61) 99999-9999"
               className={`bg-white dark:bg-gray-700 border ${
                 celular && !isValid 
@@ -189,7 +189,7 @@ export default function UsuarioCelularForm({
               maxLength={18}
             />
             
-            {/* Status de Validaá§á£o */}
+            {/* Status de Valida��o */}
             {celular && (
               <div className="absolute right-3 top-3">
                 {isValid ? (
@@ -201,11 +201,11 @@ export default function UsuarioCelularForm({
             )}
           </div>
           
-          {/* Mensagem de Validaá§á£o */}
+          {/* Mensagem de Valida��o */}
           {celular && !isValid && (
             <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
               <AlertTriangle className="h-4 w-4" />
-              Formato invá¡lido. Use: +55 (XX) 9XXXX-XXXX
+              Formato inv�lido. Use: +55 (XX) 9XXXX-XXXX
             </div>
           )}
         </div>
@@ -219,18 +219,18 @@ export default function UsuarioCelularForm({
             <div className="flex items-center gap-2">
               {whatsappStatus === 'valid' ? (
                 <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                  œ… WhatsApp Funcionando
+                  �� WhatsApp Funcionando
                 </Badge>
               ) : (
                 <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-                  Œ WhatsApp Indisponá­vel
+                  �� WhatsApp Indispon�vel
                 </Badge>
               )}
             </div>
           </div>
         )}
 
-        {/* Botáµes */}
+        {/* Bot�es */}
         <div className="flex gap-3 pt-4">
           {showValidation && (
             <Button
@@ -252,16 +252,16 @@ export default function UsuarioCelularForm({
           </Button>
         </div>
 
-        {/* Informaá§áµes de Seguraná§a */}
+        {/* Informa��es de Seguran�a */}
         <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
           <h4 className="font-medium text-blue-900 dark:text-blue-200 mb-2">
-            ðŸ›¡ï¸ Informaá§áµes de Seguraná§a
+            🛡️ Informa��es de Seguran�a
           </h4>
           <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-            <li>€¢ Má¡ximo 50 mensagens por dia por náºmero</li>
-            <li>€¢ Intervalo má­nimo de 30 segundos entre mensagens</li>
-            <li>€¢ Funcionamento apenas em horá¡rio comercial (8h á s 18h)</li>
-            <li>€¢ Mensagens personalizadas para evitar spam</li>
+            <li>�� M�ximo 50 mensagens por dia por n�mero</li>
+            <li>�� Intervalo m�nimo de 30 segundos entre mensagens</li>
+            <li>�� Funcionamento apenas em hor�rio comercial (8h �s 18h)</li>
+            <li>�� Mensagens personalizadas para evitar spam</li>
           </ul>
         </div>
       </CardContent>
