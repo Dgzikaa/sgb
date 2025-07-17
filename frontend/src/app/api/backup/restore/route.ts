@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { backupSystem } from '@/lib/backup-system';
 
 export async function POST(request: NextRequest) {
@@ -7,12 +7,12 @@ export async function POST(request: NextRequest) {
 
     if (!backupId) {
       return NextResponse.json(
-        { error: 'backupId � obrigat�rio' },
+        { error: 'backupId Ã¡Â© obrigatÃ¡Â³rio' },
         { status: 400 }
       );
     }
 
-    console.log(`🔄 Iniciando restore do backup ${backupId}${barId ? ` para bar ${barId}` : ''}...`);
+    console.log(`Ã°Å¸â€â€ž Iniciando restore do backup ${backupId}${barId ? ` para bar ${barId}` : ''}...`);
 
     // Restaurar backup
     const success = await backupSystem.restoreBackup(backupId, barId ? parseInt(barId) : undefined);
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('�� Erro ao restaurar backup:', error);
+    console.error('ÂÅ’ Erro ao restaurar backup:', error);
     return NextResponse.json(
       { 
         error: 'Erro interno do servidor',
@@ -40,3 +40,4 @@ export async function POST(request: NextRequest) {
     );
   }
 } 
+

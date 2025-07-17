@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser } from '@/middleware/auth'
 
@@ -7,11 +7,11 @@ import { authenticateUser } from '@/middleware/auth'
 // =====================================================
 export async function GET(request: NextRequest) {
   try {
-    // 🔐 AUTENTICA��O
+    // Ã°Å¸â€Â AUTENTICAÃ¡â€¡Ã¡Æ’O
     const user = await authenticateUser(request)
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'Usu�rio n�o autenticado' },
+        { success: false, error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' },
         { status: 401 }
       )
     }
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const hoje = new Date()
     const hojeStr = hoje.toISOString().split('T')[0]
     
-    // Buscar execu��es pendentes
+    // Buscar execuÃ§Ãµes pendentes
     const { data: execucoesPendentes, error: execucoesError } = await supabase
       .from('checklist_execucoes')
       .select(`
@@ -41,10 +41,10 @@ export async function GET(request: NextRequest) {
       .in('status', ['em_andamento', 'pausado', 'agendado'])
 
     if (execucoesError) {
-      console.error('Erro ao buscar execu��es pendentes:', execucoesError)
+      console.error('Erro ao buscar execuÃ§Ãµes pendentes:', execucoesError)
     }
 
-    // Buscar agendamentos ativos que deveriam ter execu��es hoje
+    // Buscar agendamentos ativos que deveriam ter execuÃ§Ãµes hoje
     const { data: agendamentos, error: agendamentosError } = await supabase
       .from('checklist_schedules')
       .select(`
@@ -68,20 +68,20 @@ export async function GET(request: NextRequest) {
     let pendentes = 0
     let atrasados = 0
     
-    // Contar execu��es em andamento como pendentes
-    const execucoesPendentesCount = execucoesPendentes?.filter((exec) => 
+    // Contar execuÃ§Ãµes em andamento como pendentes
+    const execucoesPendentesCount = execucoesPendentes?.filter((exec: any) => 
       exec.status === 'em_andamento' || exec.status === 'pausado'
     ).length || 0
     
-    // Contar execu��es atrasadas (com prazo vencido)
-    const execucoesAtrasadas = execucoesPendentes?.filter((exec) => {
+    // Contar execuÃ§Ãµes atrasadas (com prazo vencido)
+    const execucoesAtrasadas = execucoesPendentes?.filter((exec: any) => {
       if (!exec.prazo_execucao) return false
       const prazo = new Date(exec.prazo_execucao)
       return prazo < hoje
     }).length || 0
 
-    // Contar agendamentos que deveriam ter execu��es hoje mas n�o t�m
-    const agendamentosHoje = agendamentos?.filter((agendamento) => {
+    // Contar agendamentos que deveriam ter execuÃ§Ãµes hoje mas nÃ£o tÃªm
+    const agendamentosHoje = agendamentos?.filter((agendamento: any) => {
       if (!agendamento.proximo_agendamento) return false
       const proximoAgendamento = new Date(agendamento.proximo_agendamento)
       return proximoAgendamento.toISOString().split('T')[0] <= hojeStr
@@ -114,7 +114,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: false,
       error: 'Erro interno do servidor',
-      details: error.message
+      details: (error as any).message
     }, { status: 500 })
   }
 } 
+

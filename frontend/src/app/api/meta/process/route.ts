@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -7,6 +7,51 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
+
+// Tipos auxiliares para dados de Facebook, Instagram, campanhas e valores
+interface FacebookPost {
+  reactions?: { summary?: { total_count?: number } };
+  comments?: { summary?: { total_count?: number } };
+  shares?: { count?: number };
+}
+
+interface InstagramMedia {
+  like_count?: number;
+  comments_count?: number;
+  saved_count?: number;
+}
+
+interface ReachValue {
+  value: string;
+}
+
+interface Campaign {
+  id?: string;
+  name?: string;
+  ad_account_id?: string;
+  status?: string;
+  effective_status?: string;
+  objective?: string;
+  platform?: string;
+  start_time?: string;
+  stop_time?: string;
+  daily_budget?: number;
+  lifetime_budget?: number;
+  budget_remaining?: number;
+  impressions?: number;
+  reach?: number;
+  clicks?: number;
+  ctr?: number;
+  cpc?: number;
+  spend?: number;
+  actions_count?: number;
+  conversions?: number;
+  cost_per_conversion?: number;
+  post_engagements?: number;
+  page_likes?: number;
+  page_follows?: number;
+  [key: string]: any;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,23 +69,35 @@ export async function POST(request: NextRequest) {
       .limit(1)
       .single()
     if (rawError || !metaRaw) {
-      console.error('[meta-process] meta_raw n�o encontrado:', rawError)
-      return NextResponse.json({ success: false, error: 'meta_raw n�o encontrado', details: rawError }, { status: 404 })
+      console.error('[meta-process] meta_raw nÃ¡Â£o encontrado:', rawError)
+      return NextResponse.json({ success: false, error: 'meta_raw nÃ¡Â£o encontrado', details: rawError }, { status: 404 })
     }
-    let rawJson
+    let rawJson: any;
     try {
       rawJson = typeof metaRaw.json_raw === 'string' ? JSON.parse(metaRaw.json_raw) : metaRaw.json_raw
-    } catch (e) {
+    } catch (e: unknown) {
       console.error('[meta-process] Erro ao parsear json_raw:', e)
       return NextResponse.json({ success: false, error: 'Erro ao parsear json_raw', details: e }, { status: 500 })
     }
 
     // Processar e popular tabelas normalizadas
     try {
-      const logs[] = []
+      const logs: Array<{ table: string; insertData?: Record<string, unknown>; error?: unknown; info?: string }> = [];
       // Facebook
       if (rawJson.facebook) {
-        const fb = rawJson.facebook
+        const fb = rawJson.facebook as {
+          page_info?: {
+            fan_count?: number;
+            talking_about_count?: number;
+            engaged_users?: number;
+            page_views?: number;
+            page_impressions?: number;
+            checkins?: number;
+            overall_star_rating?: number;
+            rating_count?: number;
+          };
+          posts?: FacebookPost[];
+        };
         const insertData = {
           bar_id,
           data_coleta,
@@ -53,9 +110,9 @@ export async function POST(request: NextRequest) {
           overall_star_rating: fb.page_info?.overall_star_rating || 0,
           rating_count: fb.page_info?.rating_count || 0,
           total_posts: fb.posts?.length || 0,
-          total_likes: fb.posts?.reduce((sum: number, p) => sum + (p.reactions?.summary?.total_count || 0), 0),
-          total_comments: fb.posts?.reduce((sum: number, p) => sum + (p.comments?.summary?.total_count || 0), 0),
-          total_shares: fb.posts?.reduce((sum: number, p) => sum + (p.shares?.count || 0), 0),
+          total_likes: fb.posts?.reduce((sum: number, p: FacebookPost) => sum + (p.reactions?.summary?.total_count || 0), 0),
+          total_comments: fb.posts?.reduce((sum: number, p: FacebookPost) => sum + (p.comments?.summary?.total_count || 0), 0),
+          total_shares: fb.posts?.reduce((sum: number, p: FacebookPost) => sum + (p.shares?.count || 0), 0),
           raw_json: fb
         }
         logs.push({ table: 'facebook_daily', insertData })
@@ -66,7 +123,18 @@ export async function POST(request: NextRequest) {
       }
       // Instagram
       if (rawJson.instagram) {
-        const ig = rawJson.instagram
+        const ig = rawJson.instagram as {
+          account_info?: {
+            followers_count?: number;
+            follows_count?: number;
+            media_count?: number;
+          };
+          media?: InstagramMedia[];
+          insights?: {
+            engagement?: number;
+            reach?: { data?: Array<{ values?: ReachValue[] }> };
+          };
+        };
         const insertData = {
           bar_id,
           data_coleta,
@@ -74,12 +142,12 @@ export async function POST(request: NextRequest) {
           follows_count: ig.account_info?.follows_count || 0,
           media_count: ig.account_info?.media_count || 0,
           total_posts: ig.media?.length || 0,
-          total_likes: ig.media?.reduce((sum: number, m) => sum + (m.like_count || 0), 0),
-          total_comments: ig.media?.reduce((sum: number, m) => sum + (m.comments_count || 0), 0),
+          total_likes: ig.media?.reduce((sum: number, m: InstagramMedia) => sum + (m.like_count || 0), 0),
+          total_comments: ig.media?.reduce((sum: number, m: InstagramMedia) => sum + (m.comments_count || 0), 0),
           engagement: ig.insights?.engagement || 0,
-          impressions: ig.insights?.reach?.data?.[0]?.values?.reduce((sum: number, v) => sum + (parseInt(v.value) || 0), 0),
-          reach: ig.insights?.reach?.data?.[0]?.values?.reduce((sum: number, v) => sum + (parseInt(v.value) || 0), 0),
-          saves: ig.media?.reduce((sum: number, m) => sum + (m.saved_count || 0), 0),
+          impressions: ig.insights?.reach?.data?.[0]?.values?.reduce((sum: number, v: ReachValue) => sum + (parseInt(v.value) || 0), 0),
+          reach: ig.insights?.reach?.data?.[0]?.values?.reduce((sum: number, v: ReachValue) => sum + (parseInt(v.value) || 0), 0),
+          saves: ig.media?.reduce((sum: number, m: InstagramMedia) => sum + (m.saved_count || 0), 0),
           raw_json: ig
         }
         logs.push({ table: 'instagram_daily', insertData })
@@ -90,35 +158,35 @@ export async function POST(request: NextRequest) {
       }
       // Meta Campaigns
       if (rawJson.campaigns) {
-        for (const camp of rawJson.campaigns.campaigns || []) {
+        for (const camp of (rawJson.campaigns.campaigns || []) as Campaign[]) {
           const insertData = {
             bar_id,
             data_coleta,
             criado_em: new Date(),
-            campaign_id: camp.id,
-            campaign_name: camp.name,
-            ad_account_id: camp.ad_account_id,
-            status: camp.status,
-            effective_status: camp.effective_status,
-            objective: camp.objective,
-            platform: camp.platform,
-            start_time: camp.start_time,
-            stop_time: camp.stop_time,
-            daily_budget: camp.daily_budget,
-            lifetime_budget: camp.lifetime_budget,
-            budget_remaining: camp.budget_remaining,
-            impressions: camp.impressions,
-            reach: camp.reach,
-            clicks: camp.clicks,
-            ctr: camp.ctr,
-            cpc: camp.cpc,
-            spend: camp.spend,
-            actions_count: camp.actions_count,
-            conversions: camp.conversions,
-            cost_per_conversion: camp.cost_per_conversion,
-            post_engagements: camp.post_engagements,
-            page_likes: camp.page_likes,
-            page_follows: camp.page_follows,
+            campaign_id: camp.id as string,
+            campaign_name: camp.name as string,
+            ad_account_id: camp.ad_account_id as string,
+            status: camp.status as string,
+            effective_status: camp.effective_status as string,
+            objective: camp.objective as string,
+            platform: camp.platform as string,
+            start_time: camp.start_time as string,
+            stop_time: camp.stop_time as string,
+            daily_budget: camp.daily_budget as number,
+            lifetime_budget: camp.lifetime_budget as number,
+            budget_remaining: camp.budget_remaining as number,
+            impressions: camp.impressions as number,
+            reach: camp.reach as number,
+            clicks: camp.clicks as number,
+            ctr: camp.ctr as number,
+            cpc: camp.cpc as number,
+            spend: camp.spend as number,
+            actions_count: camp.actions_count as number,
+            conversions: camp.conversions as number,
+            cost_per_conversion: camp.cost_per_conversion as number,
+            post_engagements: camp.post_engagements as number,
+            page_likes: camp.page_likes as number,
+            page_follows: camp.page_follows as number,
             raw_data: camp
           }
           logs.push({ table: 'meta_campaigns_history', insertData })
@@ -149,7 +217,7 @@ export async function POST(request: NextRequest) {
       const { error: sumError } = await supabase.from('meta_daily_summary').insert(insertSummary)
       if (sumError) logs.push({ table: 'meta_daily_summary', error: sumError })
       // Resposta final com logs detalhados
-      return NextResponse.json({ success: true, message: 'Processamento conclu�do e tabelas populadas.', meta_raw_id: metaRaw.id, logs }, { status: 200 })
+      return NextResponse.json({ success: true, message: 'Processamento concluÃ¡Â­do e tabelas populadas.', meta_raw_id: metaRaw.id, logs }, { status: 200 })
     } catch (procError) {
       console.error('[meta-process] Erro no processamento:', procError)
       const errorMsg = (procError && typeof procError === 'object' && 'message' in procError) ? (procError as any).message : JSON.stringify(procError)
@@ -157,6 +225,8 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (e) {
-    return NextResponse.json({ success: false, error: e.message || String(e) }, { status: 500 })
+    const errorMsg = (typeof e === 'object' && e !== null && 'message' in e) ? (e as { message: string }).message : String(e);
+    return NextResponse.json({ success: false, error: errorMsg }, { status: 500 })
   }
 } 
+

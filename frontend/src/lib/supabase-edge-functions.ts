@@ -1,15 +1,13 @@
-import { getSupabaseClient } from './supabase';
+﻿const EDGE_FUNCTION_URL = 'https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1';
 
-const EDGE_FUNCTION_URL = 'https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1';
-
-export async function callContaAzulEdgeFunction(action: string, params = {}) {
+export async function callContaAzulEdgeFunction(action: string, params: Record<string, unknown> = {}): Promise<unknown> {
   const url = `${EDGE_FUNCTION_URL}/contaazul-service/${action}`;
   
-  // Para GET requests, adicionar par�metros na URL
+  // Para GET requests, adicionar parâmetros na URL
   if (params.barId && (action === 'status' || action === 'authorize' || action === 'refresh')) {
     const urlWithParams = new URL(url);
     Object.keys(params).forEach(key => {
-      urlWithParams.searchParams.append(key, params[key]);
+      urlWithParams.searchParams.append(key, String(params[key]));
     });
     
     const response = await fetch(urlWithParams.toString(), {
@@ -44,3 +42,4 @@ export async function callContaAzulEdgeFunction(action: string, params = {}) {
   
   return response.json();
 } 
+

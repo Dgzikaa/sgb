@@ -1,4 +1,4 @@
-// P�gina de sincroniza��o de receitas/insumos via upload de Excel/CSV
+﻿// PÃ¡Â¡gina de sincronizaÃ¡Â§Ã¡Â£o de receitas/insumos via upload de Excel/CSV
 'use client'
 import React, { useState } from 'react'
 
@@ -30,7 +30,7 @@ export default function SyncReceitasInsumosPage() {
       setLog(data)
       if (!data.success) setError(data.error || 'Erro desconhecido')
     } catch (e) {
-      setError(e.message || String(e))
+      setError((e as any).message || String(e))
     } finally {
       setLoading(false)
     }
@@ -41,8 +41,8 @@ export default function SyncReceitasInsumosPage() {
       <div className="w-full max-w-md card-dark p-6 shadow-lg rounded-xl">
         <h1 className="card-title-dark mb-4 text-center text-xl sm:text-2xl">Sincronizar Receitas e Insumos</h1>
         <p className="card-description-dark mb-6 text-center text-base sm:text-lg">
-          Fa�a upload do arquivo Excel/CSV exportado do Google Sheets para atualizar receitas, insumos e v�nculos.<br />
-          <span className="font-semibold">Nenhum dado ser� apagado</span>, apenas atualizado ou inserido.
+          FaÃ¡Â§a upload do arquivo Excel/CSV exportado do Google Sheets para atualizar receitas, insumos e vÃ¡Â­nculos.<br />
+          <span className="font-semibold">Nenhum dado serÃ¡Â¡ apagado</span>, apenas atualizado ou inserido.
         </p>
         <div className="flex flex-col gap-4 w-full">
           <label className="block">
@@ -79,7 +79,7 @@ export default function SyncReceitasInsumosPage() {
           )}
           {log && (
             <div className="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-lg p-3 text-center font-semibold">
-              <span className="block mb-1">Sincroniza��o conclu�da!</span>
+              <span className="block mb-1">SincronizaÃ¡Â§Ã¡Â£o concluÃ¡Â­da!</span>
               <span className="block mb-1">{log.message}</span>
               <details className="mt-2 text-xs text-gray-600 dark:text-gray-400">
                 <summary>Ver detalhes do log</summary>
@@ -95,3 +95,4 @@ export default function SyncReceitasInsumosPage() {
     </div>
   )
 } 
+

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 
@@ -9,6 +9,7 @@ interface CheckboxProps {
   className?: string;
 }
 
+// Componente de checkbox
 const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
   ({ checked, onCheckedChange, disabled, className }, ref) => (
     <input
@@ -24,3 +25,4 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
 Checkbox.displayName = "Checkbox"
 
 export { Checkbox } 
+

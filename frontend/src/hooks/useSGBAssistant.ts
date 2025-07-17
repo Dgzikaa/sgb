@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 
@@ -45,7 +45,7 @@ export function useSGBAssistant() {
     setState(prev => ({
       ...prev,
       isOpen: !prev.isOpen,
-      hasNewMessages: prev.isOpen ? false : prev.hasNewMessages, // Limpar notifica��o ao abrir
+      hasNewMessages: prev.isOpen ? false : prev.hasNewMessages, // Limpar notificaÃ¡Â§Ã¡Â£o ao abrir
       lastInteraction: new Date()
     }))
   }
@@ -60,7 +60,7 @@ export function useSGBAssistant() {
   const addNotification = () => {
     setState(prev => ({
       ...prev,
-      hasNewMessages: !prev.isOpen // S� mostrar notifica��o se estiver fechado
+      hasNewMessages: !prev.isOpen // SÃ¡Â³ mostrar notificaÃ¡Â§Ã¡Â£o se estiver fechado
     }))
   }
 
@@ -73,3 +73,4 @@ export function useSGBAssistant() {
     addNotification
   }
 } 
+

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+Ôªøimport { NextRequest, NextResponse } from 'next/server'
 import { cacheService } from '../lib/redis-cache'
 
 // Rotas que devem ser cacheadas automaticamente
@@ -15,7 +15,7 @@ const CACHEABLE_ROUTES = {
   '/api/contaazul': { type: 'contaazul' as const, ttl: 600 }
 } as const
 
-// Rotas que invalidam cache quando h·° muta·ß·£o
+// Rotas que invalidam cache quando h√° muta√ß√£o
 const CACHE_INVALIDATION_MAP = {
   '/api/usuarios': ['usuarios'],
   '/api/bars': ['bars', 'dashboard'],
@@ -36,98 +36,107 @@ interface CacheRequest {
 }
 
 interface CacheResponse {
-  status: number
-  data
-  headers: Record<string, string>
-  timestamp: number
+  status: number;
+  data: unknown;
+  headers: Record<string, string>;
+  timestamp: number;
+}
+
+// Lista de tipos v√°lidos de cache (escopo global para utilit√°rio)
+const VALID_CACHE_TYPES = [
+  'usuarios',
+  'bars',
+  'checklists',
+  'eventos',
+  'dashboard',
+  'analytics',
+  'receitas',
+  'configuracoes',
+  'meta',
+  'contaazul',
+] as const;
+
+function isValidCacheType(type: string): type is (typeof VALID_CACHE_TYPES)[number] {
+  return (VALID_CACHE_TYPES as readonly string[]).includes(type);
 }
 
 export class CacheMiddleware {
-  
+  // Gera uma chave √∫nica para o cache baseada na request
   private generateCacheKey(request: CacheRequest): string {
-    const { url, method, searchParams } = request
-    const params = Object.fromEntries(searchParams.entries())
-    const key = `${method}:${url}:${JSON.stringify(params)}`
-    return btoa(key).replace(/[^a-zA-Z0-9]/g, '')
+    const { url, method, searchParams } = request;
+    const params = Object.fromEntries(searchParams.entries());
+    const key = `${method}:${url}:${JSON.stringify(params)}`;
+    return btoa(key).replace(/[^a-zA-Z0-9]/g, '');
   }
 
+  // Verifica se a request deve ser cacheada
   private shouldCache(request: NextRequest): boolean {
-    const pathname = new URL(request.url).pathname
-    
-    // S·≥ cachear m·©todos GET
-    if (request.method !== 'GET') return false
-    
-    // Verificar se a rota est·° na lista de cache·°veis
+    const pathname = new URL(request.url).pathname;
+    // S√≥ cachear m√©todos GET
+    if (request.method !== 'GET') return false;
+    // Verificar se a rota est√° na lista de cache√°veis
     return Object.keys(CACHEABLE_ROUTES).some(route => 
       pathname.startsWith(route)
-    )
+    );
   }
 
+  // Obt√©m a configura√ß√£o de cache para a rota
   private getCacheConfig(pathname: string) {
     for (const [route, config] of Object.entries(CACHEABLE_ROUTES)) {
       if (pathname.startsWith(route)) {
-        return config
+        return config;
       }
     }
-    return null
+    return null;
   }
 
+  // Verifica se a request deve invalidar o cache
   private shouldInvalidateCache(request: NextRequest): string[] {
-    const pathname = new URL(request.url).pathname
-    
-    // Invalidar cache em m·©todos de muta·ß·£o
+    const pathname = new URL(request.url).pathname;
+    // Invalidar cache em m√©todos de muta√ß√£o
     if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
-      return []
+      return [];
     }
-
     for (const [route, types] of Object.entries(CACHE_INVALIDATION_MAP)) {
       if (pathname.startsWith(route)) {
-        return [...types] // Converter para array mut·°vel
+        return [...types]; // Converter para array mut√°vel
       }
     }
-
-    return []
+    return [];
   }
 
+  // Lida com a request, retornando do cache se poss√≠vel
   async handleRequest(request: NextRequest): Promise<NextResponse | null> {
-    const pathname = new URL(request.url).pathname
-    
-    // Processar invalida·ß·£o de cache para m·©todos de muta·ß·£o
-    const typesToInvalidate = this.shouldInvalidateCache(request)
+    const pathname = new URL(request.url).pathname;
+    // Processar invalida√ß√£o de cache para m√©todos de muta√ß√£o
+    const typesToInvalidate = this.shouldInvalidateCache(request);
     if (typesToInvalidate.length > 0) {
-      // N·£o bloqueamos a request, apenas agendamos a invalida·ß·£o
-      this.invalidateCache(typesToInvalidate)
+      // N√£o bloqueamos a request, apenas agendamos a invalida√ß√£o
+      void this.invalidateCache(typesToInvalidate);
     }
-
     // Verificar se deve cachear (apenas GET)
     if (!this.shouldCache(request)) {
-      return null // Continuar com o processamento normal
+      return null; // Continuar com o processamento normal
     }
-
-    const cacheConfig = this.getCacheConfig(pathname)
+    const cacheConfig = this.getCacheConfig(pathname);
     if (!cacheConfig) {
-      return null
+      return null;
     }
-
     const cacheRequest: CacheRequest = {
       url: pathname,
       method: request.method,
       headers: request.headers,
       searchParams: new URL(request.url).searchParams
-    }
-
-    const cacheKey = this.generateCacheKey(cacheRequest)
-
+    };
+    const cacheKey = this.generateCacheKey(cacheRequest);
     try {
       // Tentar buscar no cache
       const cached = await cacheService.get<CacheResponse>(
         cacheConfig.type,
         cacheKey
-      )
-
+      );
       if (cached) {
-        console.log(`Cache HIT: ${pathname}`)
-        
+        console.log(`Cache HIT: ${pathname}`);
         // Retornar resposta cacheada
         const response = NextResponse.json(cached.data, {
           status: cached.status,
@@ -136,69 +145,57 @@ export class CacheMiddleware {
             'X-Cache': 'HIT',
             'X-Cache-Timestamp': cached.timestamp.toString()
           }
-        })
-
-        return response
+        });
+        return response;
       }
-
-      console.log(`Cache MISS: ${pathname}`)
-      return null // Continuar com processamento normal
-
+      console.log(`Cache MISS: ${pathname}`);
+      return null; // Continuar com processamento normal
     } catch (error) {
-      console.error('Erro ao acessar cache:', error)
-      return null // Em caso de erro, continuar normalmente
+      console.error('Erro ao acessar o cache:', error);
+      return null; // Em caso de erro, continuar normalmente
     }
   }
 
+  // Lida com a resposta, armazenando no cache se aplic√°vel
   async handleResponse(
     request: NextRequest, 
     response: NextResponse
   ): Promise<NextResponse> {
-    const pathname = new URL(request.url).pathname
-
-    // S·≥ processar respostas de GET que devem ser cacheadas
+    const pathname = new URL(request.url).pathname;
+    // S√≥ processar respostas de GET que devem ser cacheadas
     if (!this.shouldCache(request)) {
-      return response
+      return response;
     }
-
-    const cacheConfig = this.getCacheConfig(pathname)
+    const cacheConfig = this.getCacheConfig(pathname);
     if (!cacheConfig) {
-      return response
+      return response;
     }
-
-    // S·≥ cachear respostas de sucesso
+    // S√≥ cachear respostas de sucesso
     if (!response.ok) {
-      return response
+      return response;
     }
-
     try {
-      const responseData = await response.clone().json()
-      
+      const responseData = await response.clone().json();
       const cacheRequest: CacheRequest = {
         url: pathname,
         method: request.method,
         headers: request.headers,
         searchParams: new URL(request.url).searchParams
-      }
-
-      const cacheKey = this.generateCacheKey(cacheRequest)
-
+      };
+      const cacheKey = this.generateCacheKey(cacheRequest);
       const cacheResponse: CacheResponse = {
         status: response.status,
         data: responseData,
         headers: Object.fromEntries(response.headers.entries()),
         timestamp: Date.now()
-      }
-
+      };
       // Armazenar no cache
       await cacheService.set(
         cacheConfig.type,
         cacheKey,
         cacheResponse
-      )
-
-      console.log(`Cache SET: ${pathname}`)
-
+      );
+      console.log(`Cache SET: ${pathname}`);
       // Adicionar headers de cache
       const newResponse = NextResponse.json(responseData, {
         status: response.status,
@@ -207,39 +204,45 @@ export class CacheMiddleware {
           'X-Cache': 'MISS',
           'X-Cache-TTL': cacheConfig.ttl.toString()
         }
-      })
-
-      return newResponse
-
+      });
+      return newResponse;
     } catch (error) {
-      console.error('Erro ao cachear resposta:', error)
-      return response
+      console.error('Erro ao cachear a resposta:', error);
+      return response;
     }
   }
 
+  // Invalida o cache para os tipos informados
   private async invalidateCache(types: string[]): Promise<void> {
     try {
       for (const type of types) {
-        await cacheService.invalidateByType(type as any)
+        let cacheType: string | undefined;
+        const found = Object.entries(CACHEABLE_ROUTES).find(([route, config]) => config.type === type || route === type);
+        if (found) {
+          cacheType = found[1].type;
+        }
+        if (cacheType && isValidCacheType(cacheType)) {
+          await cacheService.invalidateByType(cacheType);
+        }
       }
-      console.log(`Cache invalidado para tipos: ${types.join(', ')}`)
+      console.log(`Cache invalidado para tipos: ${types.join(', ')}`);
     } catch (error) {
-      console.error('Erro ao invalidar cache:', error)
+      console.error('Erro ao invalidar o cache:', error);
     }
   }
 
-  // M·©todo para invalida·ß·£o manual
+  // M√©todo para invalida√ß√£o manual
   async invalidateCacheManual(patterns: string[]): Promise<void> {
     try {
       for (const pattern of patterns) {
         await cacheService.invalidatePattern(pattern)
       }
     } catch (error) {
-      console.error('Erro na invalida·ß·£o manual:', error)
+      console.error('Erro na invalida√ß√£o manual:', error)
     }
   }
 
-  // M·©todo para warmup de cache
+  // M√©todo para warmup de cache
   async warmupCache(): Promise<void> {
     try {
       await cacheService.warmup()
@@ -248,16 +251,16 @@ export class CacheMiddleware {
     }
   }
 
-  // M·©tricas de cache
+  // M√©tricas de cache
   getCacheStats() {
     return cacheService.getStats()
   }
 }
 
-// Inst·¢ncia singleton
+// Inst√¢ncia singleton
 export const cacheMiddleware = new CacheMiddleware()
 
-// Fun·ß·µes utilit·°rias para uso em API routes
+// Fun√ß√µes utilit√°rias para uso em API routes
 export async function withCache<T>(
   cacheType: keyof typeof CACHEABLE_ROUTES,
   identifier: string,
@@ -268,14 +271,21 @@ export async function withCache<T>(
     CACHEABLE_ROUTES[cacheType]?.type || 'default',
     identifier,
     fetchFunction
-  )
+  );
 }
 
 export async function invalidateApiCache(apiPath: string): Promise<void> {
-  const types = CACHE_INVALIDATION_MAP[apiPath as keyof typeof CACHE_INVALIDATION_MAP]
+  const types = CACHE_INVALIDATION_MAP[apiPath as keyof typeof CACHE_INVALIDATION_MAP];
   if (types) {
     for (const type of types) {
-      await cacheService.invalidateByType(type as any)
+      let cacheType: string | undefined;
+      const found = Object.entries(CACHEABLE_ROUTES).find(([route, config]) => config.type === type || route === type);
+      if (found) {
+        cacheType = found[1].type;
+      }
+      if (cacheType && isValidCacheType(cacheType)) {
+        await cacheService.invalidateByType(cacheType);
+      }
     }
   }
 }
@@ -285,3 +295,4 @@ export async function getCacheMetrics() {
 }
 
 export default cacheMiddleware 
+

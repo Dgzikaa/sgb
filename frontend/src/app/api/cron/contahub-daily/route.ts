@@ -1,18 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('�� CRON JOB: Coleta di�ria ContaHub iniciada')
+    console.log('ÂÂ° CRON JOB: Coleta diÃ¡Â¡ria ContaHub iniciada')
     
-    // Verificar se � um cron autorizado (opcional - adicionar header de seguran�a)
+    // Verificar se Ã¡Â© um cron autorizado (opcional - adicionar header de seguranÃ¡Â§a)
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET || 'sgb-cron-2024'
     
     if (authHeader !== `Bearer ${cronSecret}`) {
-      console.log('�� Cron n�o autorizado')
+      console.log('ÂÅ’ Cron nÃ¡Â£o autorizado')
       return NextResponse.json({
         success: false,
-        error: 'N�o autorizado'
+        error: 'NÃ¡Â£o autorizado'
       }, { status: 401 })
     }
     
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
     const edgeFunctionUrl = `${supabaseUrl}/functions/v1/contahub-collector`
     
-    console.log(`📡 Executando edge function: ${edgeFunctionUrl}`)
+    console.log(`Ã°Å¸â€œÂ¡ Executando edge function: ${edgeFunctionUrl}`)
     
     const response = await fetch(edgeFunctionUrl, {
       method: 'POST',
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       throw new Error(`Edge function falhou: ${response.status} - ${data.error || responseText}`)
     }
     
-    console.log('�� Cron job conclu�do com sucesso')
+    console.log('Å“â€¦ Cron job concluÃ¡Â­do com sucesso')
     
     return NextResponse.json({
       success: true,
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
     })
     
   } catch (error) {
-    console.error('💥 Erro no cron job:', error)
+    console.error('Ã°Å¸â€™Â¥ Erro no cron job:', error)
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -67,3 +67,4 @@ export async function POST(request: NextRequest) {
   // Suportar tanto GET quanto POST para flexibilidade de cron jobs
   return GET(request)
 } 
+

@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-// For�ar modo din�mico para essa rota (necess�rio para usar request.url)
+// ForÃ¡Â§ar modo dinÃ¡Â¢mico para essa rota (necessÃ¡Â¡rio para usar request.url)
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
-  console.log('🔍 [DEBUG] Verificando anos dispon�veis...')
+  console.log('Ã°Å¸â€Â [DEBUG] Verificando anos disponÃ¡Â­veis...')
   
   try {
     const { searchParams } = new URL(request.url)
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 
     // Processar anos das receitas
     const anosReceitas = new Map()
-    receitas?.forEach(item => {
+    receitas?.forEach((item: any) => {
       const data = item.data_competencia || item.data_vencimento || item.data_pagamento
       if (data) {
         const ano = new Date(data).getFullYear()
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
 
     // Processar anos das despesas
     const anosDespesas = new Map()
-    despesas?.forEach(item => {
+    despesas?.forEach((item: any) => {
       const data = item.data_competencia || item.data_vencimento || item.data_pagamento
       if (data) {
         const ano = new Date(data).getFullYear()
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
       exemploDespesas: despesas?.slice(0, 3) || []
     }
 
-    console.log('�� [DEBUG] An�lise conclu�da:', resumo)
+    console.log('Å“â€¦ [DEBUG] AnÃ¡Â¡lise concluÃ¡Â­da:', resumo)
 
     return NextResponse.json({
       success: true,
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� [DEBUG] Erro:', error)
+    console.error('ÂÅ’ [DEBUG] Erro:', error)
     
     return NextResponse.json({
       success: false,
@@ -101,3 +101,4 @@ export async function GET(request: NextRequest) {
     }, { status: 500 })
   }
 } 
+

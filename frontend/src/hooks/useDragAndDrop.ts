@@ -1,26 +1,26 @@
-import { useRef, useCallback, useState, useEffect } from 'react'
+﻿import { useRef, useCallback, useState, useEffect } from 'react'
 
 export interface DragState {
-  isDragging: boolean
-  draggedItem | null
-  dragOverItem | null
-  dropZone: string | null
+  isDragging: boolean;
+  draggedItem: any | null;
+  dragOverItem: any | null;
+  dropZone: string | null;
 }
 
 export interface DragHandlers {
-  onDragStart: (e: React.DragEvent | React.TouchEvent, item) => void
-  onDragEnd: (e: React.DragEvent | React.TouchEvent) => void
-  onDragOver: (e: React.DragEvent | React.TouchEvent) => void
-  onDragEnter: (e: React.DragEvent | React.TouchEvent, item) => void
-  onDragLeave: (e: React.DragEvent | React.TouchEvent) => void
-  onDrop: (e: React.DragEvent | React.TouchEvent, targetItem) => void
+  onDragStart: (e: React.DragEvent | React.TouchEvent, item: any) => void;
+  onDragEnd: (e: React.DragEvent | React.TouchEvent) => void;
+  onDragOver: (e: React.DragEvent | React.TouchEvent) => void;
+  onDragEnter: (e: React.DragEvent | React.TouchEvent, item: any) => void;
+  onDragLeave: (e: React.DragEvent | React.TouchEvent) => void;
+  onDrop: (e: React.DragEvent | React.TouchEvent, targetItem: any) => void;
 }
 
 export interface UseDragAndDropProps {
-  onReorder?: (fromIndex: number, toIndex: number, items[]) => void
-  onMove?: (item, targetZone: string) => void
-  disabled?: boolean
-  enableTouch?: boolean
+  onReorder?: (fromIndex: number, toIndex: number, items: any[]) => void;
+  onMove?: (item: any, targetZone: string) => void;
+  disabled?: boolean;
+  enableTouch?: boolean;
 }
 
 export interface UseDragAndDropReturn {
@@ -66,7 +66,7 @@ export function useDragAndDrop({
   }, [])
 
   // Drag start handler
-  const handleDragStart = useCallback((e: React.DragEvent | React.TouchEvent, item) => {
+  const handleDragStart = useCallback((e: React.DragEvent | React.TouchEvent, item: any) => {
     if (disabled) return
 
     if ('dataTransfer' in e) {
@@ -134,7 +134,7 @@ export function useDragAndDrop({
   }, [disabled])
 
   // Drag enter handler
-  const handleDragEnter = useCallback((e: React.DragEvent | React.TouchEvent, item) => {
+  const handleDragEnter = useCallback((e: React.DragEvent | React.TouchEvent, item: any) => {
     if (disabled) return
     
     e.preventDefault()
@@ -162,7 +162,7 @@ export function useDragAndDrop({
   }, [disabled])
 
   // Drop handler
-  const handleDrop = useCallback((e: React.DragEvent | React.TouchEvent, targetItem) => {
+  const handleDrop = useCallback((e: React.DragEvent | React.TouchEvent, targetItem: any) => {
     if (disabled) return
     
     e.preventDefault()
@@ -297,7 +297,7 @@ export function useDragAndDrop({
   }
 }
 
-// Hook espec�fico para listas orden�veis
+// Hook especÃ¡Â­fico para listas ordenÃ¡Â¡veis
 export interface UseSortableListProps<T> {
   items: T[]
   onReorder: (newItems: T[]) => void
@@ -345,3 +345,4 @@ export function useSortableList<T>({
     resetDrag
   }
 } 
+

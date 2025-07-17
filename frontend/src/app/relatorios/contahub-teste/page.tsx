@@ -1,4 +1,4 @@
-'use client'
+Ôªø'use client'
 
 import { useState, useEffect } from 'react'
 import { PageCard, PageText } from '@/components/ui/page-base'
@@ -98,7 +98,7 @@ export default function ContaHubTestePage() {
   const [contahubStatus, setContahubStatus] = useState<ContaHubStatus | null>(null)
   const [statusLoading, setStatusLoading] = useState(true)
 
-  // Verificar status do ContaHub ao carregar a p·°gina
+  // Verificar status do ContaHub ao carregar a p√°gina
   useEffect(() => {
     verificarStatusContaHub()
   }, [])
@@ -139,7 +139,7 @@ export default function ContaHubTestePage() {
     } catch (error) {
       setResult({
         success: false,
-        message: `Erro na requisi·ß·£o: ${error instanceof Error ? error.message : String(error)}`
+        message: `Erro na requisi√ß√£o: ${error instanceof Error ? error.message : String(error)}`
       })
     } finally {
       setLoading(false)
@@ -174,7 +174,7 @@ export default function ContaHubTestePage() {
       if (response.ok) {
         setResult({
           success: true,
-          message: data.message || 'Processamento conclu·≠do com sucesso!',
+          message: data.message || 'Processamento conclu√≠do com sucesso!',
           logs: Array.isArray(data.logs) ? data.logs : [],
           estatisticas: {
             totalRegistros: data.processados || 0,
@@ -183,7 +183,7 @@ export default function ContaHubTestePage() {
           }
         })
       } else {
-        const errorLogs = Array.isArray(data.logs) ? data.logs.filter((log: string) => log.includes('ùå')) : [];
+        const errorLogs = Array.isArray(data.logs) ? data.logs.filter((log: string) => log.includes('‚ùå')) : [];
         const allLogs = Array.isArray(data.logs) ? data.logs : [];
         
         setResult({
@@ -198,7 +198,7 @@ export default function ContaHubTestePage() {
       setResult({
         success: false,
         message: `Erro ao processar dados: ${error instanceof Error ? error.message : String(error)}`,
-        logs: [`ùå Erro de conex·£o: ${error}`]
+        logs: [`‚ùå Erro de conex√£o: ${error}`]
       })
     } finally {
       setProcessLoading(false)
@@ -211,13 +211,13 @@ export default function ContaHubTestePage() {
       const data = await response.json()
       setResult({
         success: true,
-        message: 'Debug das vari·°veis de ambiente',
+        message: 'Debug das vari√°veis de ambiente',
         debug_env: data
       })
     } catch (error) {
       setResult({
         success: false,
-        message: `Erro ao verificar vari·°veis: ${error instanceof Error ? error.message : String(error)}`
+        message: `Erro ao verificar vari√°veis: ${error instanceof Error ? error.message : String(error)}`
       })
     }
   }
@@ -410,47 +410,47 @@ export default function ContaHubTestePage() {
   const handleDebugDiscrepancias = async () => {
     try {
       setLoading(true);
-      console.log('üîç Iniciando debug de discrep·¢ncias...');
+      console.log('‚ùå Iniciando debug de discrep√¢ncias...');
       
       const response = await fetch('/api/contahub/processar-raw', {
         method: 'GET'
       });
       
-      console.log('üì° Response status:', response.status);
+      console.log('‚ùå Response status:', response.status);
       
       const result = await response.json();
-      console.log('üìä Resultado completo:', result);
+      console.log('‚ùå Resultado completo:', result);
       
       if (result.success) {
         setDebugData(result.debug_analysis);
-        console.log('úÖ Debug data set:', result.debug_analysis);
+        console.log('‚úîÔ∏è Debug data set:', result.debug_analysis);
         
-        // Definir como resultado tamb·©m para mostrar na interface
+        // Definir como resultado tamb√©m para mostrar na interface
         setResult({
           success: true,
-          message: 'úÖ An·°lise de discrep·¢ncias conclu·≠da',
+          message: '‚úîÔ∏è An√°lise de discrep√¢ncias conclu√≠da',
           logs: [
-            'üîç An·°lise de discrep·¢ncias conclu·≠da',
-            `üìä Clientes CPF: ${result.debug_analysis.clientes_cpf?.analise?.esperados || 0} esperados, ${result.debug_analysis.clientes_cpf?.analise?.inseridos || 0} inseridos`,
-            `üìä Per·≠odo: ${result.debug_analysis.periodo?.analise?.esperados || 0} esperados, ${result.debug_analysis.periodo?.analise?.inseridos || 0} inseridos`,
-            `üìä Tempo: ${result.debug_analysis.tempo?.analise?.inseridos || 0} registros inseridos`
+            '‚ùå An√°lise de discrep√¢ncias conclu√≠da',
+            `‚ùå Clientes CPF: ${result.debug_analysis.clientes_cpf?.analise?.esperados || 0} esperados, ${result.debug_analysis.clientes_cpf?.analise?.inseridos || 0} inseridos`,
+            `‚ùå Per√≠odo: ${result.debug_analysis.periodo?.analise?.esperados || 0} esperados, ${result.debug_analysis.periodo?.analise?.inseridos || 0} inseridos`,
+            `‚ùå Tempo: ${result.debug_analysis.tempo?.analise?.inseridos || 0} registros inseridos`
           ]
         });
       } else {
-        console.error('ùå Erro na an·°lise:', result.error);
+        console.error('‚ùå Erro na an√°lise:', result.error);
         setResult({
           success: false,
-          message: `ùå Erro na an·°lise: ${result.error}`,
-          logs: [`ùå Erro: ${result.error}`]
+          message: `‚ùå Erro na an√°lise: ${result.error}`,
+          logs: [`‚ùå Erro: ${result.error}`]
         });
       }
       
     } catch (error) {
-      console.error('Erro ao analisar discrep·¢ncias:', error);
+      console.error('Erro ao analisar discrep√¢ncias:', error);
       setResult({
         success: false,
-        message: `ùå Erro: ${error}`,
-        logs: [`ùå Erro de conex·£o: ${error}`]
+        message: `‚ùå Erro: ${error}`,
+        logs: [`‚ùå Erro de conex√£o: ${error}`]
       });
     } finally {
       setLoading(false);
@@ -458,1176 +458,1162 @@ export default function ContaHubTestePage() {
   };
 
   return (
-    <div className="space-y-6">
-      
-
-      
-        {/* Banner de Status do ContaHub */}
-        {statusLoading ? (
-          <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-            <div className="flex items-center space-x-2">
-              <div className="animate-spin w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full"></div>
-              <span className="text-gray-600">Verificando status do ContaHub...</span>
-            </div>
+    <div className="space-y-6 min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Banner de Status do ContaHub */}
+      {statusLoading ? (
+        <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+          <div className="flex items-center space-x-2">
+            <div className="animate-spin w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full"></div>
+            <span className="text-gray-600 dark:text-gray-300">Verificando status do ContaHub...</span>
           </div>
-        ) : contahubStatus?.contahub_disponivel === false ? (
-          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div className="flex items-start space-x-3">
-              <div className="text-yellow-500 text-xl">ö†Ô∏è</div>
-              <div>
-                <h3 className="font-semibold text-yellow-800 mb-1">ContaHub em Modo Manuten·ß·£o</h3>
-                <p className="text-yellow-700 text-sm mb-2">
-                  {contahubStatus?.contahub_status?.motivo || 'Integra·ß·£o temporariamente indispon·≠vel'}
-                </p>
-                <div className="text-xs text-yellow-600 space-y-1">
-                  <div>Email configurado: {contahubStatus?.contahub_status?.detalhes?.email_configurado ? 'úÖ' : 'ùå'}</div>
-                  <div>Senha configurada: {contahubStatus?.contahub_status?.detalhes?.senha_configurada ? 'úÖ' : 'ùå'}</div>
-                </div>
-                <div className="mt-3 flex space-x-2">
-                  <button
-                    onClick={verificarStatusContaHub}
-                    className="text-xs bg-yellow-100 text-yellow-800 px-3 py-1 rounded hover:bg-yellow-200"
-                  >
-                    üîÑ Verificar Novamente
-                  </button>
-                </div>
+        </div>
+      ) : contahubStatus?.contahub_disponivel === false ? (
+        <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+          <div className="flex items-start space-x-3">
+            <div className="text-yellow-500 text-xl">‚ùå</div>
+            <div>
+              <h3 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-1">ContaHub em Modo Manuten√ß√£o</h3>
+              <p className="text-yellow-700 dark:text-yellow-200 text-sm mb-2">
+                {contahubStatus?.contahub_status?.motivo || 'Integra√ß√£o temporariamente indispon√≠vel'}
+              </p>
+              <div className="text-xs text-yellow-600 dark:text-yellow-300 space-y-1">
+                <div>Email configurado: {contahubStatus?.contahub_status?.detalhes?.email_configurado ? '‚úîÔ∏è' : '‚ùå'}</div>
+                <div>Senha configurada: {contahubStatus?.contahub_status?.detalhes?.senha_configurada ? '‚úîÔ∏è' : '‚ùå'}</div>
+              </div>
+              <div className="mt-3 flex space-x-2">
+                <button
+                  onClick={verificarStatusContaHub}
+                  className="text-xs bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200 px-3 py-1 rounded hover:bg-yellow-200 dark:hover:bg-yellow-700"
+                >
+                  Verificar Novamente
+                </button>
               </div>
             </div>
           </div>
-        ) : (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <div className="flex items-center space-x-2">
-              <span className="text-green-500 text-xl">úÖ</span>
-              <span className="text-green-800 font-medium">ContaHub Operacional</span>
-              <span className="text-green-600 text-sm">- Todos os sistemas funcionando</span>
-            </div>
+        </div>
+      ) : (
+        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg">
+          <div className="flex items-center space-x-2">
+            <span className="text-green-500 text-xl">‚úîÔ∏è</span>
+            <span className="text-green-800 dark:text-green-200 font-medium">ContaHub Operacional</span>
+            <span className="text-green-600 dark:text-green-300 text-sm">- Todos os sistemas funcionando</span>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Controles */}
-        <PageCard>
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Testes B·°sicos</h3>
-              
-              <button
-                onClick={executarTeste}
-                disabled={loading || processLoading || debugDadosLoading || limparLoading || contahubStatus?.contahub_disponivel === false}
-                className="w-full bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 disabled:opacity-50 flex items-center justify-center space-x-2"
-                title={contahubStatus?.contahub_disponivel === false ? 'ContaHub em modo manuten·ß·£o' : ''}
-              >
-                {loading ? (
-                  <>
-                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    <span>Testando...</span>
-                  </>
-                ) : contahubStatus?.contahub_disponivel === false ? (
-                  <>
-                    <span>üîß</span>
-                    <span>Manuten·ß·£o</span>
-                  </>
-                ) : (
-                  <>
-                    <span>üîç</span>
-                    <span>Teste Simples</span>
-                  </>
-                )}
-              </button>
+      {/* Controles */}
+      <PageCard>
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold card-title-dark uppercase tracking-wide">Testes B√°sicos</h3>
+            
+            <button
+              onClick={executarTeste}
+              disabled={loading || processLoading || debugDadosLoading || limparLoading || contahubStatus?.contahub_disponivel === false}
+              className="w-full btn-secondary-dark px-6 py-2 rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50"
+              title={contahubStatus?.contahub_disponivel === false ? 'ContaHub em modo manuten√ß√£o' : ''}
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  <span>Testando...</span>
+                </>
+              ) : contahubStatus?.contahub_disponivel === false ? (
+                <>
+                  <span>‚ùå</span>
+                  <span>Manuten√ß√£o</span>
+                </>
+              ) : (
+                <>
+                  <span>‚ùå</span>
+                  <span>Teste Simples</span>
+                </>
+              )}
+            </button>
 
-              <button
-                onClick={executarTeste}
-                disabled={loading || processLoading || debugDadosLoading || limparLoading || contahubStatus?.contahub_disponivel === false}
-                className="w-full bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center space-x-2"
-                title={contahubStatus?.contahub_disponivel === false ? 'ContaHub em modo manuten·ß·£o' : ''}
-              >
-                {loading ? (
-                  <>
-                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    <span>Executando...</span>
-                  </>
-                ) : contahubStatus?.contahub_disponivel === false ? (
-                  <>
-                    <span>üîß</span>
-                    <span>Manuten·ß·£o</span>
-                  </>
-                ) : (
-                  <>
-                    <span>üöÄ</span>
-                    <span>Executar Teste</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Verifica·ß·µes</h3>
-              
-              <button
-                onClick={verificarStatus}
-                disabled={loading || processLoading || debugDadosLoading || limparLoading}
-                className="w-full bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 flex items-center justify-center space-x-2"
-              >
-                {loading ? (
-                  <>
-                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    <span>Verificando...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>üìä</span>
-                    <span>Verificar Status</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                onClick={debugRawData}
-                disabled={loading || processLoading || debugDadosLoading || limparLoading}
-                className="w-full bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center space-x-2"
-              >
-                {debugDadosLoading ? (
-                  <>
-                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    <span>Analisando...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>üî¨</span>
-                    <span>Debug Dados</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                onClick={handleDebugDiscrepancias}
-                disabled={loading || processLoading || debugDadosLoading || limparLoading}
-                className="w-full bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center justify-center space-x-2"
-              >
-                {loading ? (
-                  <>
-                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    <span>Analisando...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>üîç</span>
-                    <span>Debug Discrep·¢ncias</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                onClick={testFields}
-                disabled={loading || processLoading || debugDadosLoading || limparLoading}
-                className="w-full bg-cyan-600 text-white px-6 py-2 rounded-lg hover:bg-cyan-700 disabled:opacity-50 flex items-center justify-center space-x-2"
-              >
-                {debugDadosLoading ? (
-                  <>
-                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    <span>Testando...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>üß™</span>
-                    <span>Testar Campos</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                onClick={discoverFields}
-                disabled={loading || processLoading || debugDadosLoading || limparLoading}
-                className="w-full bg-amber-600 text-white px-6 py-2 rounded-lg hover:bg-amber-700 disabled:opacity-50 flex items-center justify-center space-x-2"
-              >
-                {debugDadosLoading ? (
-                  <>
-                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    <span>Descobrindo...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>üîç</span>
-                    <span>Descobrir Campos</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Processamento</h3>
-              
-              <button
-                onClick={processarDadosRaw}
-                disabled={loading || processLoading || debugDadosLoading || limparLoading || contahubStatus?.contahub_disponivel === false}
-                className="w-full bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center justify-center space-x-2"
-                title={contahubStatus?.contahub_disponivel === false ? 'ContaHub em modo manuten·ß·£o' : ''}
-              >
-                {processLoading ? (
-                  <>
-                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    <span>Processando...</span>
-                  </>
-                ) : contahubStatus?.contahub_disponivel === false ? (
-                  <>
-                    <span>üîß</span>
-                    <span>Manuten·ß·£o</span>
-                  </>
-                ) : (
-                  <>
-                    <span>öôÔ∏è</span>
-                    <span>Processar Dados</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                onClick={limparTodasTabelas}
-                disabled={loading || processLoading || debugDadosLoading || limparLoading}
-                className="w-full bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center justify-center space-x-2"
-              >
-                {limparLoading ? (
-                  <>
-                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    <span>Limpando...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>üóëÔ∏è</span>
-                    <span>Limpar Tudo</span>
-                  </>
-                )}
-              </button>
-            </div>
+            <button
+              onClick={executarTeste}
+              disabled={loading || processLoading || debugDadosLoading || limparLoading || contahubStatus?.contahub_disponivel === false}
+              className="w-full btn-primary-dark px-6 py-2 rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50"
+              title={contahubStatus?.contahub_disponivel === false ? 'ContaHub em modo manuten√ß√£o' : ''}
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  <span>Executando...</span>
+                </>
+              ) : contahubStatus?.contahub_disponivel === false ? (
+                <>
+                  <span>‚ùå</span>
+                  <span>Manuten√ß√£o</span>
+                </>
+              ) : (
+                <>
+                  <span>‚ùå</span>
+                  <span>Executar Teste</span>
+                </>
+              )}
+            </button>
           </div>
-        </PageCard>
 
-        {/* Resultados */}
-        {result && (
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-              {/* Header da resposta */}
-              <div className={`flex items-center space-x-2 mb-4 ${result.success ? 'text-green-600' : 'text-red-600'}`}>
-                <span className="text-lg">
-                  {result.success ? 'úÖ' : 'ùå'}
-                </span>
-                <span className="font-semibold">
-                  {result.success ? 'Sucesso' : 'Erro'}
-                </span>
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold card-title-dark uppercase tracking-wide">Verifica√ß√µes</h3>
+            
+            <button
+              onClick={verificarStatus}
+              disabled={loading || processLoading || debugDadosLoading || limparLoading}
+              className="w-full btn-outline-dark px-6 py-2 rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  <span>Verificando...</span>
+                </>
+              ) : (
+                <>
+                  <span>‚ùå</span>
+                  <span>Verificar Status</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={debugRawData}
+              disabled={loading || processLoading || debugDadosLoading || limparLoading}
+              className="w-full btn-secondary-dark px-6 py-2 rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50"
+            >
+              {debugDadosLoading ? (
+                <>
+                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  <span>Analisando...</span>
+                </>
+              ) : (
+                <>
+                  <span>‚ùå</span>
+                  <span>Debug Dados</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={handleDebugDiscrepancias}
+              disabled={loading || processLoading || debugDadosLoading || limparLoading}
+              className="w-full btn-danger-dark px-6 py-2 rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  <span>Analisando...</span>
+                </>
+              ) : (
+                <>
+                  <span>‚ùå</span>
+                  <span>Debug Discrep√¢ncias</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={testFields}
+              disabled={loading || processLoading || debugDadosLoading || limparLoading}
+              className="w-full btn-info-dark px-6 py-2 rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50"
+            >
+              {debugDadosLoading ? (
+                <>
+                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  <span>Testando...</span>
+                </>
+              ) : (
+                <>
+                  <span>‚ùå</span>
+                  <span>Testar Campos</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={discoverFields}
+              disabled={loading || processLoading || debugDadosLoading || limparLoading}
+              className="w-full btn-warning-dark px-6 py-2 rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50"
+            >
+              {debugDadosLoading ? (
+                <>
+                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  <span>Descobrindo...</span>
+                </>
+              ) : (
+                <>
+                  <span>‚ùå</span>
+                  <span>Descobrir Campos</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold card-title-dark uppercase tracking-wide">Processamento</h3>
+            
+            <button
+              onClick={processarDadosRaw}
+              disabled={loading || processLoading || debugDadosLoading || limparLoading || contahubStatus?.contahub_disponivel === false}
+              className="w-full btn-success-dark px-6 py-2 rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50"
+              title={contahubStatus?.contahub_disponivel === false ? 'ContaHub em modo manuten√ß√£o' : ''}
+            >
+              {processLoading ? (
+                <>
+                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  <span>Processando...</span>
+                </>
+              ) : contahubStatus?.contahub_disponivel === false ? (
+                <>
+                  <span>‚ùå</span>
+                  <span>Manuten√ß√£o</span>
+                </>
+              ) : (
+                <>
+                  <span>‚ùå</span>
+                  <span>Processar Dados</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={limparTodasTabelas}
+              disabled={loading || processLoading || debugDadosLoading || limparLoading}
+              className="w-full btn-danger-dark px-6 py-2 rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50"
+            >
+              {limparLoading ? (
+                <>
+                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  <span>Limpando...</span>
+                </>
+              ) : (
+                <>
+                  <span>‚ùå</span>
+                  <span>Limpar Tudo</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </PageCard>
+
+      {/* Resultados */}
+      {result && (
+        <div className="mt-6 p-4 card-dark rounded-lg">
+            {/* Header da resposta */}
+            <div className={`flex items-center space-x-2 mb-4 ${result.success ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}> 
+              <span className="text-lg">
+                {result.success ? '‚úîÔ∏è' : '‚ùå'}
+              </span>
+              <span className="font-semibold card-title-dark">
+                {result.success ? 'Sucesso' : 'Erro'}
+              </span>
+            </div>
+
+            {/* Mensagem principal */}
+            <p className="card-description-dark mb-4">{result.message}</p>
+
+            {/* Logs do servidor (se dispon√≠veis) */}
+            {result.logs && result.logs.length > 0 && (
+              <div className="mb-4">
+                <h3 className="font-semibold card-title-dark mb-2">‚ùå Logs do Servidor:</h3>
+                <div className="bg-gray-800 dark:bg-gray-900 text-green-400 dark:text-green-300 p-3 rounded text-sm font-mono max-h-96 overflow-y-auto">
+                  {result.logs.map((log: string, index: number) => (
+                    <div key={index} className="mb-1">{log}</div>
+                  ))}
+                </div>
               </div>
+            )}
 
-              {/* Mensagem principal */}
-              <p className="text-gray-700 mb-4">{result.message}</p>
+            {/* Erros do servidor (se houver) */}
+            {(result as any).errors && Array.isArray((result as any).errors) && (result as any).errors.length > 0 && (
+              <div className="mb-4">
+                <h3 className="font-semibold text-red-600 dark:text-red-400 mb-2">‚ùå Erros Detectados:</h3>
+                <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 p-3 rounded">
+                  {(result as any).errors.map((error: string, index: number) => (
+                    <div key={index} className="text-red-700 dark:text-red-300 mb-1 text-sm">{error}</div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-              {/* Logs do servidor (se dispon·≠veis) */}
-              {result.logs && result.logs.length > 0 && (
-                <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">üìù Logs do Servidor:</h3>
-                  <div className="bg-gray-800 text-green-400 p-3 rounded text-sm font-mono max-h-96 overflow-y-auto">
-                    {result.logs.map((log: string, index: number) => (
-                      <div key={index} className="mb-1">{log}</div>
-                    ))}
+            {/* Estat√≠sticas ou dados espec√≠ficos */}
+            {result.estatisticas && (
+              <div className="mb-4">
+                <h3 className="font-semibold card-title-dark mb-2">‚ùå Estat√≠sticas:</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="bg-blue-50 dark:bg-blue-900 p-3 rounded">
+                    <div className="text-sm text-blue-600 dark:text-blue-300">Total de Registros</div>
+                    <div className="font-bold text-blue-800 dark:text-blue-200">{result.estatisticas.totalRegistros}</div>
+                  </div>
+                  <div className="bg-green-50 dark:bg-green-900 p-3 rounded">
+                    <div className="text-sm text-green-600 dark:text-green-300">Sucessos</div>
+                    <div className="font-bold text-green-800 dark:text-green-200">{(result.estatisticas as any).sucessos || 0}</div>
+                  </div>
+                  <div className="bg-red-50 dark:bg-red-900 p-3 rounded">
+                    <div className="text-sm text-red-600 dark:text-red-300">Erros</div>
+                    <div className="font-bold text-red-800 dark:text-red-200">{Array.isArray(result.estatisticas.erros) ? result.estatisticas.erros.length : 0}</div>
                   </div>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Erros do servidor (se houver) */}
-              {(result as any).errors && Array.isArray((result as any).errors) && (result as any).errors.length > 0 && (
-                <div className="mb-4">
-                  <h3 className="font-semibold text-red-600 mb-2">ö†Ô∏è Erros Detectados:</h3>
-                  <div className="bg-red-50 border border-red-200 p-3 rounded">
-                    {(result as any).errors.map((error: string, index: number) => (
-                      <div key={index} className="text-red-700 mb-1 text-sm">{error}</div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Estat·≠sticas ou dados espec·≠ficos */}
-              {result.estatisticas && (
-                <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">üìä Estat·≠sticas:</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <div className="bg-blue-50 p-3 rounded">
-                      <div className="text-sm text-blue-600">Total de Registros</div>
-                      <div className="font-bold text-blue-800">{result.estatisticas.totalRegistros}</div>
+            {/* Resultados da limpeza */}
+            {result.resultados && (
+              <div className="mb-4">
+                <h3 className="font-semibold card-title-dark mb-2">‚ùå Resultados da Limpeza:</h3>
+                {/* Sistema Raw */}
+                {result.resultados.sistema_raw && (
+                  <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900 rounded">
+                    <div className="font-medium text-blue-800 dark:text-blue-200">sistema_raw</div>
+                    <div className="text-sm text-blue-600 dark:text-blue-300">
+                      {result.resultados.sistema_raw.antes} ‚Äì  {result.resultados.sistema_raw.depois} 
+                      ({result.resultados.sistema_raw.removidos} removidos)
                     </div>
-                                         <div className="bg-green-50 p-3 rounded">
-                       <div className="text-sm text-green-600">Sucessos</div>
-                       <div className="font-bold text-green-800">{(result.estatisticas as any).sucessos || 0}</div>
-                     </div>
-                     <div className="bg-red-50 p-3 rounded">
-                       <div className="text-sm text-red-600">Erros</div>
-                       <div className="font-bold text-red-800">{Array.isArray(result.estatisticas.erros) ? result.estatisticas.erros.length : 0}</div>
-                     </div>
                   </div>
-                </div>
-              )}
-
-              {/* Resultados da limpeza */}
-              {result.resultados && (
-                <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">üßπ Resultados da Limpeza:</h3>
-                  
-                  {/* Sistema Raw */}
-                  {result.resultados.sistema_raw && (
-                    <div className="mb-3 p-3 bg-blue-50 rounded">
-                      <div className="font-medium text-blue-800">sistema_raw</div>
-                      <div className="text-sm text-blue-600">
-                        {result.resultados.sistema_raw.antes} Üí {result.resultados.sistema_raw.depois} 
-                        ({result.resultados.sistema_raw.removidos} removidos)
+                )}
+                {/* Detalhes por Tabela */}
+                {result.resultados.tabelas_contahub && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium card-title-dark">‚ùå Detalhes por Tabela:</h4>
+                    {Object.entries(result.resultados.tabelas_contahub).map(([tabela, info]: [string, any]) => (
+                      <div key={tabela} className="flex justify-between items-center p-2 bg-gray-100 dark:bg-gray-800 rounded text-sm">
+                        <span className="font-mono card-description-dark">{tabela}</span>
+                        <span className={info.removidos > 0 ? 'text-green-600 dark:text-green-300' : 'text-gray-500 dark:text-gray-400'}>
+                          {info.antes} ‚Äì  {info.depois} ({info.removidos} removidos)
+                          {info.erro && <span className="text-red-500 dark:text-red-400 ml-2">‚ùå {info.erro}</span>}
+                        </span>
                       </div>
-                    </div>
-                  )}
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
-                  {/* Detalhes por Tabela */}
-                  {result.resultados.tabelas_contahub && (
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-gray-700">üìã Detalhes por Tabela:</h4>
-                      {Object.entries(result.resultados.tabelas_contahub).map(([tabela, info]: [string, any]) => (
-                        <div key={tabela} className="flex justify-between items-center p-2 bg-gray-100 rounded text-sm">
-                          <span className="font-mono">{tabela}</span>
-                          <span className={info.removidos > 0 ? 'text-green-600' : 'text-gray-500'}>
-                            {info.antes} Üí {info.depois} ({info.removidos} removidos)
-                            {info.erro && <span className="text-red-500 ml-2">ùå {info.erro}</span>}
-                          </span>
+            {/* Totais da limpeza */}
+            {result.totais && (
+              <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded">
+                <h3 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">‚ùå Resultados da Limpeza Completa</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-yellow-700 dark:text-yellow-200">Sistema Raw:</span>
+                    <span className="font-bold text-yellow-900 dark:text-yellow-100 ml-2">{result.totais.sistema_raw_removidos} removidos</span>
+                  </div>
+                  <div>
+                    <span className="text-yellow-700 dark:text-yellow-200">Tabelas ContaHub:</span>
+                    <span className="font-bold text-yellow-900 dark:text-yellow-100 ml-2">{result.totais.tabelas_contahub_removidos} removidos</span>
+                  </div>
+                  <div>
+                    <span className="text-yellow-700 dark:text-yellow-200">Total Geral:</span>
+                    <span className="font-bold text-yellow-900 dark:text-yellow-100 ml-2">{result.totais.total_removidos} removidos</span>
+                  </div>
+                  <div>
+                    <span className="text-yellow-700 dark:text-yellow-200">Tabelas Limpas:</span>
+                    <span className="font-bold text-yellow-900 dark:text-yellow-100 ml-2">{result.totais.tabelas_limpas} de {Object.keys(result.resultados?.tabelas_contahub || {}).length}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Debug de Logs */}
+            {result.amostra_estrutura && (
+              <div className="mb-4 card-dark">
+                <h3 className="font-semibold card-title-dark mb-2">‚ùå Debug de Logs e Status:</h3>
+                {/* Estat√≠sticas resumidas */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                  <div className="bg-blue-50 dark:bg-blue-900 p-3 rounded">
+                    <div className="text-sm text-blue-600 dark:text-blue-300">Total de Registros</div>
+                    <div className="font-bold text-blue-800 dark:text-blue-200">{result.estatisticas?.total_registros || 0}</div>
+                  </div>
+                  <div className="bg-green-50 dark:bg-green-900 p-3 rounded">
+                    <div className="text-sm text-green-600 dark:text-green-300">Processados</div>
+                    <div className="font-bold text-green-800 dark:text-green-200">{result.estatisticas?.processados || 0}</div>
+                  </div>
+                  <div className="bg-yellow-50 dark:bg-yellow-900 p-3 rounded">
+                    <div className="text-sm text-yellow-600 dark:text-yellow-200">N√£o Processados</div>
+                    <div className="font-bold text-yellow-800 dark:text-yellow-100">{result.estatisticas?.nao_processados || 0}</div>
+                  </div>
+                  <div className="bg-red-50 dark:bg-red-900 p-3 rounded">
+                    <div className="text-sm text-red-600 dark:text-red-300">Problem√°ticos</div>
+                    <div className="font-bold text-red-800 dark:text-red-200">{result.estatisticas?.registros_problematicos || 0}</div>
+                  </div>
+                </div>
+
+                {/* Estrutura da tabela */}
+                {result.estrutura_tabela && (
+                  <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                    <div className="font-medium card-title-dark mb-2">‚ùå Estrutura da Tabela sistema_raw:</div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {result.estrutura_tabela.colunas_disponiveis.map((coluna: string) => (
+                        <div key={coluna} className="bg-white dark:bg-gray-900 p-2 rounded text-sm">
+                          <span className="font-mono text-blue-600 dark:text-blue-300">{coluna}</span>
                         </div>
                       ))}
                     </div>
-                  )}
-                </div>
-              )}
-
-              {/* Totais da limpeza */}
-              {result.totais && (
-                <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded">
-                  <h3 className="font-semibold text-yellow-800 mb-2">üìä Resultados da Limpeza Completa</h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-yellow-700">Sistema Raw:</span>
-                      <span className="font-bold text-yellow-900 ml-2">{result.totais.sistema_raw_removidos} removidos</span>
-                    </div>
-                    <div>
-                      <span className="text-yellow-700">Tabelas ContaHub:</span>
-                      <span className="font-bold text-yellow-900 ml-2">{result.totais.tabelas_contahub_removidos} removidos</span>
-                    </div>
-                    <div>
-                      <span className="text-yellow-700">Total Geral:</span>
-                      <span className="font-bold text-yellow-900 ml-2">{result.totais.total_removidos} removidos</span>
-                    </div>
-                    <div>
-                      <span className="text-yellow-700">Tabelas Limpas:</span>
-                      <span className="font-bold text-yellow-900 ml-2">{result.totais.tabelas_limpas} de {Object.keys(result.resultados?.tabelas_contahub || {}).length}</span>
+                    <div className="mt-2 text-sm card-description-dark">
+                      Total de colunas: {result.estrutura_tabela.total_colunas}
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Debug de Logs */}
-              {result.amostra_estrutura && (
-                <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">üìù Debug de Logs e Status:</h3>
-                  
-                  {/* Estat·≠sticas resumidas */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    <div className="bg-blue-50 p-3 rounded">
-                      <div className="text-sm text-blue-600">Total de Registros</div>
-                      <div className="font-bold text-blue-800">{result.estatisticas?.total_registros || 0}</div>
-                    </div>
-                    <div className="bg-green-50 p-3 rounded">
-                      <div className="text-sm text-green-600">Processados</div>
-                      <div className="font-bold text-green-800">{result.estatisticas?.processados || 0}</div>
-                    </div>
-                    <div className="bg-yellow-50 p-3 rounded">
-                      <div className="text-sm text-yellow-600">N·£o Processados</div>
-                      <div className="font-bold text-yellow-800">{result.estatisticas?.nao_processados || 0}</div>
-                    </div>
-                    <div className="bg-red-50 p-3 rounded">
-                      <div className="text-sm text-red-600">Problem·°ticos</div>
-                      <div className="font-bold text-red-800">{result.estatisticas?.registros_problematicos || 0}</div>
+                {/* Contagem por tipo */}
+                {result.estatisticas?.contagem_por_tipo && (
+                  <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                    <div className="font-medium card-title-dark mb-2">‚ùå Contagem por Tipo:</div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {Object.entries(result.estatisticas.contagem_por_tipo).map(([tipo, quantidade]: [string, any]) => (
+                        <div key={tipo} className="bg-white dark:bg-gray-900 p-2 rounded text-sm">
+                          <span className="font-medium card-title-dark">{tipo}:</span> <span className="text-blue-600 dark:text-blue-300">{quantidade}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
+                )}
 
-                  {/* Estrutura da tabela */}
-                  {result.estrutura_tabela && (
-                    <div className="mb-4 p-3 bg-gray-50 rounded">
-                      <div className="font-medium text-gray-800 mb-2">üèóÔ∏è Estrutura da Tabela sistema_raw:</div>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        {result.estrutura_tabela.colunas_disponiveis.map((coluna: string) => (
-                          <div key={coluna} className="bg-white p-2 rounded text-sm">
-                            <span className="font-mono text-blue-600">{coluna}</span>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="mt-2 text-sm text-gray-600">
-                        Total de colunas: {result.estrutura_tabela.total_colunas}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Contagem por tipo */}
-                  {result.estatisticas?.contagem_por_tipo && (
-                    <div className="mb-4 p-3 bg-gray-50 rounded">
-                      <div className="font-medium text-gray-800 mb-2">üìä Contagem por Tipo:</div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                        {Object.entries(result.estatisticas.contagem_por_tipo).map(([tipo, quantidade]: [string, any]) => (
-                          <div key={tipo} className="bg-white p-2 rounded text-sm">
-                            <span className="font-medium">{tipo}:</span> <span className="text-blue-600">{quantidade}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* ·öltimos registros */}
-                  {result.ultimos_registros && result.ultimos_registros.length > 0 && (
-                    <div className="mb-4">
-                      <div className="font-medium text-gray-800 mb-2">üïê ·öltimos Registros:</div>
-                      <div className="space-y-2">
-                        {result.ultimos_registros.slice(0, 5).map((registro, index: number) => (
-                          <div key={index} className={`p-2 rounded text-sm ${registro.processado ? 'bg-green-50' : 'bg-yellow-50'}`}>
-                            <div className="flex justify-between items-center">
-                              <span>ID #{registro.id} - {registro.tipo_dados || registro.tipo || 'sem tipo'}</span>
-                              <div className="flex space-x-2">
-                                <span className={`px-2 py-1 rounded text-xs ${registro.processado ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}`}>
-                                  {registro.processado ? 'Processado' : 'Pendente'}
-                                </span>
-                                <span className={`px-2 py-1 rounded text-xs ${registro.tem_dados ? 'bg-blue-200 text-blue-800' : 'bg-red-200 text-red-800'}`}>
-                                  {registro.tem_dados ? 'Com Dados' : 'Sem Dados'}
-                                </span>
-                              </div>
-                            </div>
-                            {registro.data_referencia && (
-                              <div className="text-xs text-gray-500 mt-1">Data: {registro.data_referencia}</div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Exemplo de registro */}
-                  {result.estrutura_tabela?.exemplo_registro && (
-                    <div className="mb-4">
-                      <div className="font-medium text-gray-800 mb-2">üìÑ Exemplo de Registro:</div>
-                      <div className="bg-gray-800 text-green-400 p-3 rounded text-xs font-mono overflow-x-auto">
-                        {JSON.stringify(result.estrutura_tabela.exemplo_registro, null, 2)}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* An·°lise de dados (Debug Dados) */}
-              {result.analise && (
-                <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">üîç An·°lise da Estrutura dos Dados:</h3>
-                  
-                  <div className="mb-3 p-3 bg-blue-50 rounded">
-                    <div className="font-medium text-blue-800">Total de Registros Analisados: {result.analise.total_registros}</div>
-                  </div>
-
-                  {result.analise.amostras_por_tipo && Object.entries(result.analise.amostras_por_tipo).map(([tipo, amostra]: [string, any], index: number) => (
-                    <div key={index} className="mb-4 p-4 bg-white border rounded">
-                      <div className="mb-3 pb-2 border-b">
-                        <h4 className="font-semibold text-gray-800">Registro #{amostra.id} - {amostra.tipo_dados}</h4>
-                        <div className="text-sm text-gray-600">Data: {amostra.data_referencia}</div>
-                      </div>
-
-                      <div className="space-y-3">
-                        {/* Estrutura principal */}
-                        <div>
-                          <div className="font-medium text-gray-700 mb-1">üìã Estrutura Principal:</div>
-                          <div className="flex flex-wrap gap-1">
-                            {amostra.estrutura_json.keys_principais.map((key: string, idx: number) => (
-                              <span key={idx} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
-                                {key}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Status dos campos importantes */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                          <div className={`p-2 rounded text-sm ${amostra.estrutura_json.tem_metadados ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                            <div className="font-medium">Metadados</div>
-                            <div>{amostra.estrutura_json.tem_metadados ? 'úÖ Sim' : 'ùå N·£o'}</div>
-                          </div>
-                          <div className={`p-2 rounded text-sm ${amostra.estrutura_json.tem_list ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                            <div className="font-medium">Campo 'list'</div>
-                            <div>{amostra.estrutura_json.tem_list ? 'úÖ Sim' : 'ùå N·£o'}</div>
-                          </div>
-                          <div className={`p-2 rounded text-sm ${amostra.estrutura_json.list_e_array ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
-                            <div className="font-medium">·â Array</div>
-                            <div>{amostra.estrutura_json.list_e_array ? 'úÖ Sim' : 'ö†Ô∏è ' + amostra.estrutura_json.tipo_list}</div>
-                          </div>
-                          <div className="p-2 bg-blue-50 text-blue-700 rounded text-sm">
-                            <div className="font-medium">Length</div>
-                            <div>{amostra.estrutura_json.length_list || '0'}</div>
-                          </div>
-                        </div>
-
-                        {/* Metadados info */}
-                        {amostra.estrutura_json.metadados_info && (
-                          <div className="p-3 bg-blue-50 rounded">
-                            <div className="font-medium text-blue-800 mb-2">üè∑Ô∏è Informa·ß·µes dos Metadados:</div>
-                            <div className="text-sm text-blue-700">
-                              <div>Query ID: {amostra.estrutura_json.metadados_info.query_id}</div>
-                              <div>Query Nome: {amostra.estrutura_json.metadados_info.query_nome}</div>
-                              <div>Total Registros: {amostra.estrutura_json.metadados_info.total_registros}</div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* List info */}
-                        {amostra.estrutura_json.list_info && (
-                          <div className="p-3 bg-green-50 rounded">
-                            <div className="font-medium text-green-800 mb-2">üìã Informa·ß·µes da List:</div>
-                            <div className="text-sm text-green-700 space-y-1">
-                              <div>Tamanho: {amostra.estrutura_json.list_info.length} registros</div>
-                              
-                              {amostra.estrutura_json.list_info.primeiro_item_keys && (
-                                <div>
-                                  <div className="font-medium mt-2 mb-1">Campos do 1∫ item:</div>
-                                  <div className="flex flex-wrap gap-1">
-                                    {amostra.estrutura_json.list_info.primeiro_item_keys.map((key: string, idx: number) => (
-                                      <span key={idx} className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                                        {key}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {amostra.estrutura_json.list_info.primeiro_item_sample && (
-                                <div>
-                                  <div className="font-medium mt-2 mb-1">Amostra do 1∫ item:</div>
-                                  <pre className="bg-white p-2 rounded text-xs overflow-x-auto">
-{JSON.stringify(amostra.estrutura_json.list_info.primeiro_item_sample, null, 2)}
-                                  </pre>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Outros arrays encontrados */}
-                        {amostra.estrutura_json.outros_arrays && amostra.estrutura_json.outros_arrays.length > 0 && (
-                          <div className="p-3 bg-yellow-50 rounded">
-                            <div className="font-medium text-yellow-800 mb-2">üì¶ Outros Arrays Encontrados:</div>
-                            <div className="space-y-2">
-                              {amostra.estrutura_json.outros_arrays.map((arr, idx: number) => (
-                                <div key={idx} className="text-sm text-yellow-700">
-                                  <div className="font-medium">Campo: {arr.campo} ({arr.length} itens)</div>
-                                  {arr.primeiro_item_keys && (
-                                    <div className="flex flex-wrap gap-1 mt-1">
-                                      {arr.primeiro_item_keys.slice(0, 10).map((key: string, keyIdx: number) => (
-                                        <span key={keyIdx} className="bg-yellow-100 text-yellow-800 px-1 py-0.5 rounded text-xs">
-                                          {key}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Resultado (outras APIs) */}
-              {result.resultados && (
-                <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">üìä Resultado:</h3>
-                  <div className="bg-white p-3 rounded border">
-                    <pre className="text-sm text-gray-700 whitespace-pre-wrap">
-                      {JSON.stringify(result.resultados, null, 2)}
-                    </pre>
-                  </div>
-                </div>
-              )}
-
-              {/* Logs da execu·ß·£o (APIs antigas) */}
-              {result.logs && result.logs.length > 0 && (
-                <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">üìã Logs da Execu·ß·£o:</h3>
-                  <div className="bg-gray-800 text-green-400 p-3 rounded text-sm font-mono max-h-64 overflow-y-auto">
-                    {result.logs.map((line: string, index: number) => (
-                      <div key={index}>{line}</div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Erros da execu·ß·£o (APIs antigas) */}
-              {result.logs && result.logs.length > 0 && (
-                <div className="mb-4">
-                  <h3 className="font-semibold text-red-600 mb-2">ö†Ô∏è Erros da Execu·ß·£o:</h3>
-                  <div className="bg-red-50 border border-red-200 p-3 rounded text-sm">
-                    {result.logs.filter((log: string) => log.includes('ùå')).map((error: string, index: number) => (
-                      <div key={index} className="text-red-700">{error}</div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Status das tabelas */}
-              {result.status && (
-                <div>
-                  <h3 className="font-semibold text-gray-800 mb-2">üìä Status das Tabelas:</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Sistema Raw */}
-                    {result.status.sistema_raw && (
-                      <div className="bg-blue-50 p-3 rounded">
-                        <h4 className="font-medium text-blue-800">sistema_raw</h4>
-                        <div className="text-sm text-blue-600">
-                          {typeof result.status.sistema_raw === 'object' && (result.status.sistema_raw as any).existe ? 
-                            `${(result.status.sistema_raw as any).registros} registros` : 
-                            typeof result.status.sistema_raw === 'number' ? 
-                              `${result.status.sistema_raw} registros` : 
-                              'Tabela n·£o encontrada'
-                          }
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Tabelas ContaHub */}
-                    {(result.status as any).tabelas_contahub && Object.entries((result.status as any).tabelas_contahub).map(([tabela, info]: [string, any]) => (
-                      <div key={tabela} className="bg-gray-50 p-3 rounded">
-                        <h4 className="font-medium text-gray-800 font-mono text-sm">{tabela}</h4>
-                        <div className="text-sm text-gray-600">
-                          {info.existe ? 
-                            `${info.registros} registros` : 
-                            info.erro || 'Tabela n·£o existe'
-                          }
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Teste de Campos (nova funcionalidade) */}
-              {result.resultados && Object.keys(result.resultados).length > 0 && (
-                <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">üß™ Teste de Campos das Tabelas:</h3>
-                  
-                  {/* Resumo */}
-                  {result.resumo && (
-                    <div className="mb-4 p-3 bg-blue-50 rounded">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-green-600">{result.resumo.tabelas_com_sucesso}</div>
-                          <div className="text-sm text-green-700">Tabelas OK</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-red-600">{result.resumo.tabelas_com_erro}</div>
-                          <div className="text-sm text-red-700">Com Problemas</div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Detalhes por tabela */}
-                  <div className="space-y-3">
-                    {Object.entries(result.resultados).map(([tabela, info]: [string, any]) => (
-                      <div key={tabela} className={`p-4 rounded border ${info.status === 'sucesso' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-mono font-semibold text-gray-800">{tabela}</h4>
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${info.status === 'sucesso' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>
-                            {info.status === 'sucesso' ? 'úÖ OK' : 'ùå ERRO'}
-                          </span>
-                        </div>
-                        
-                        {info.status === 'sucesso' ? (
-                          <div>
-                            <div className="text-sm text-green-700 mb-2">
-                              Todos os {info.total_campos} campos foram aceitos pela tabela
-                            </div>
-                            <details className="text-xs">
-                              <summary className="cursor-pointer text-green-600 hover:text-green-800">Ver campos testados</summary>
-                              <div className="mt-2 grid grid-cols-3 gap-1">
-                                {info.campos_aceitos?.map((campo: string) => (
-                                  <span key={campo} className="bg-green-100 px-2 py-1 rounded font-mono text-green-800">{campo}</span>
-                                ))}
-                              </div>
-                            </details>
-                          </div>
-                        ) : (
-                          <div>
-                            <div className="text-sm text-red-700 mb-2">
-                              Erro ao inserir dados: {info.erro}
-                            </div>
-                            <details className="text-xs">
-                              <summary className="cursor-pointer text-red-600 hover:text-red-800">Ver campos testados ({info.total_campos})</summary>
-                              <div className="mt-2 grid grid-cols-3 gap-1">
-                                {info.campos_testados?.map((campo: string) => (
-                                  <span key={campo} className="bg-red-100 px-2 py-1 rounded font-mono text-red-800">{campo}</span>
-                                ))}
-                              </div>
-                            </details>
-                            {info.detalhes && (
-                              <details className="text-xs mt-2">
-                                <summary className="cursor-pointer text-red-600 hover:text-red-800">Ver detalhes do erro</summary>
-                                <pre className="mt-2 bg-red-100 p-2 rounded text-red-800 overflow-x-auto">
-                                  {JSON.stringify(info.detalhes, null, 2)}
-                                </pre>
-                              </details>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Debug de Discrep·¢ncias */}
-              {debugData && (
-                <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">üîç An·°lise de Discrep·¢ncias dos Dados</h3>
-                  
-                  {/* An·°lise Clientes CPF */}
-                  {debugData.clientes_cpf && (
-                    <div className="p-4 border border-gray-200 rounded-lg mb-4">
-                      <h4 className="font-semibold text-lg mb-3">üìã Clientes CPF:</h4>
-                      
-                      {/* Resumo da discrep·¢ncia */}
-                      <div className="grid grid-cols-3 gap-4 mb-4">
-                        <div className="text-center p-3 bg-blue-50 rounded">
-                          <div className="text-2xl font-bold text-blue-600">{debugData.clientes_cpf.analise?.esperados || 0}</div>
-                          <div className="text-sm text-blue-700">Esperados</div>
-                        </div>
-                        <div className="text-center p-3 bg-green-50 rounded">
-                          <div className="text-2xl font-bold text-green-600">{debugData.clientes_cpf.analise?.inseridos || 0}</div>
-                          <div className="text-sm text-green-700">Inseridos</div>
-                        </div>
-                        <div className={`text-center p-3 rounded ${(debugData.clientes_cpf.analise?.diferenca || 0) === 0 ? 'bg-green-50' : 'bg-red-50'}`}>
-                          <div className={`text-2xl font-bold ${(debugData.clientes_cpf.analise?.diferenca || 0) === 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {debugData.clientes_cpf.analise?.diferenca > 0 ? '+' : ''}{debugData.clientes_cpf.analise?.diferenca || 0}
-                          </div>
-                          <div className={`text-sm ${(debugData.clientes_cpf.analise?.diferenca || 0) === 0 ? 'text-green-700' : 'text-red-700'}`}>
-                            Diferen·ßa
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* CPFs Extras */}
-                      {debugData.clientes_cpf.analise?.cpfsExtras?.length > 0 && (
-                        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded">
-                          <h5 className="font-semibold text-red-800 mb-2">ùå CPFs Extras (n·£o deveriam estar no banco):</h5>
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                            {debugData.clientes_cpf.analise.cpfsExtras.map((cpf: string) => (
-                              <div key={cpf} className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-mono">
-                                {cpf}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* CPFs Faltando */}
-                      {debugData.clientes_cpf.analise?.cpfsFaltando?.length > 0 && (
-                        <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded">
-                          <h5 className="font-semibold text-orange-800 mb-2">ö†Ô∏è CPFs Faltando (deveriam estar no banco):</h5>
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                            {debugData.clientes_cpf.analise.cpfsFaltando.map((cpf: string) => (
-                              <div key={cpf} className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-sm font-mono">
-                                {cpf}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* CPFs Duplicados */}
-                      {debugData.clientes_cpf.duplicatas?.cpfs_duplicados?.length > 0 && (
-                        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
-                          <h5 className="font-semibold text-yellow-800 mb-2">üîÑ CPFs Duplicados:</h5>
-                          <div className="space-y-1">
-                            {debugData.clientes_cpf.duplicatas.cpfs_duplicados.map(([cpf, count]: [string, number]) => (
-                              <div key={cpf} className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-sm font-mono">
-                                {cpf} <span className="font-bold">({count} vezes)</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Raw IDs Duplicados */}
-                      {debugData.clientes_cpf.duplicatas?.raw_ids_duplicados?.length > 0 && (
-                        <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded">
-                          <h5 className="font-semibold text-purple-800 mb-2">üî¢ Raw IDs com M·∫ltiplos Registros:</h5>
-                          <div className="space-y-1">
-                            {debugData.clientes_cpf.duplicatas.raw_ids_duplicados.map(([rawId, count]: [string, number]) => (
-                              <div key={rawId} className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm font-mono">
-                                Raw ID {rawId} <span className="font-bold">({count} registros)</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Compara·ß·£o Detalhada */}
-                      <details className="mt-4">
-                        <summary className="cursor-pointer text-sm font-semibold text-gray-700 hover:text-gray-900">
-                          üìä Ver Compara·ß·£o Detalhada dos Dados
-                        </summary>
-                        <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-4">
-                          <div>
-                            <h6 className="font-semibold text-green-800 mb-2">úÖ Dados Esperados (ContaHub):</h6>
-                            <div className="bg-green-50 p-3 rounded max-h-60 overflow-y-auto">
-                              <pre className="text-xs text-green-800">
-                                {JSON.stringify(debugData.clientes_cpf.dados_esperados, null, 2)}
-                              </pre>
-                            </div>
-                          </div>
-                          <div>
-                            <h6 className="font-semibold text-blue-800 mb-2">üóÑÔ∏è Dados Reais (Banco):</h6>
-                            <div className="bg-blue-50 p-3 rounded max-h-60 overflow-y-auto">
-                              <pre className="text-xs text-blue-800">
-                                {JSON.stringify(debugData.clientes_cpf.dados_reais, null, 2)}
-                              </pre>
-                            </div>
-                          </div>
-                        </div>
-                      </details>
-                    </div>
-                  )}
-
-                  {/* An·°lise Per·≠odo */}
-                  {debugData.periodo && (
-                    <div className="p-4 border border-gray-200 rounded-lg mb-4">
-                      <h4 className="font-semibold text-lg mb-3">üìÖ Per·≠odo:</h4>
-                      
-                      {/* Resumo da discrep·¢ncia per·≠odo */}
-                      <div className="grid grid-cols-3 gap-4 mb-4">
-                        <div className="text-center p-3 bg-blue-50 rounded">
-                          <div className="text-2xl font-bold text-blue-600">{debugData.periodo.analise?.esperados || 0}</div>
-                          <div className="text-sm text-blue-700">Esperados (amostra)</div>
-                        </div>
-                        <div className="text-center p-3 bg-green-50 rounded">
-                          <div className="text-2xl font-bold text-green-600">{debugData.periodo.analise?.inseridos || 0}</div>
-                          <div className="text-sm text-green-700">Inseridos</div>
-                        </div>
-                        <div className={`text-center p-3 rounded ${(debugData.periodo.analise?.diferenca || 0) >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
-                          <div className={`text-2xl font-bold ${(debugData.periodo.analise?.diferenca || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {debugData.periodo.analise?.diferenca > 0 ? '+' : ''}{debugData.periodo.analise?.diferenca || 0}
-                          </div>
-                          <div className={`text-sm ${(debugData.periodo.analise?.diferenca || 0) >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                            Diferen·ßa
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* VDs Extras */}
-                      {debugData.periodo.analise?.vdsExtras?.length > 0 && (
-                        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded">
-                          <h5 className="font-semibold text-red-800 mb-2">ùå VDs Extras (n·£o esperados):</h5>
-                          <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
-                            {debugData.periodo.analise.vdsExtras.slice(0, 20).map((vd: number) => (
-                              <div key={vd} className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-mono text-center">
-                                {vd}
-                              </div>
-                            ))}
-                            {debugData.periodo.analise.vdsExtras.length > 20 && (
-                              <div className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-mono text-center">
-                                +{debugData.periodo.analise.vdsExtras.length - 20} mais
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* VDs Faltando */}
-                      {debugData.periodo.analise?.vdsFaltando?.length > 0 && (
-                        <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded">
-                          <h5 className="font-semibold text-orange-800 mb-2">ö†Ô∏è VDs Faltando:</h5>
-                          <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
-                            {debugData.periodo.analise.vdsFaltando.map((vd: number) => (
-                              <div key={vd} className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-sm font-mono text-center">
-                                {vd}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Dados Reais vs Esperados */}
-                      <details className="mt-4">
-                        <summary className="cursor-pointer text-sm font-semibold text-gray-700 hover:text-gray-900">
-                          üìä Ver Dados de Per·≠odo Detalhados
-                        </summary>
-                        <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-4">
-                          <div>
-                            <h6 className="font-semibold text-blue-800 mb-2">úÖ Primeiros 10 Esperados:</h6>
-                            <div className="bg-blue-50 p-3 rounded max-h-60 overflow-y-auto">
-                              <pre className="text-xs text-blue-800">
-                                {JSON.stringify(debugData.periodo.dados_esperados, null, 2)}
-                              </pre>
-                            </div>
-                          </div>
-                          <div>
-                            <h6 className="font-semibold text-green-800 mb-2">üóÑÔ∏è Primeiros 10 Reais:</h6>
-                            <div className="bg-green-50 p-3 rounded max-h-60 overflow-y-auto">
-                              <pre className="text-xs text-green-800">
-                                {JSON.stringify(debugData.periodo.dados_reais?.slice(0, 10), null, 2)}
-                              </pre>
-                            </div>
-                          </div>
-                        </div>
-                      </details>
-                    </div>
-                  )}
-
-                  {/* An·°lise Tempo */}
-                  {debugData.tempo && (
-                    <div className="p-4 border border-gray-200 rounded-lg">
-                      <h4 className="font-semibold text-lg mb-3">è±Ô∏è Tempo (Apenas Dados Reais):</h4>
-                      
-                      {/* Resumo tempo - APENAS DADOS REAIS */}
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className="text-center p-3 bg-blue-50 rounded">
-                          <div className="text-xl font-bold text-blue-600">{debugData.tempo.analise?.inseridos || 0}</div>
-                          <div className="text-sm text-blue-700">Total Inseridos</div>
-                        </div>
-                        <div className="text-center p-3 bg-green-50 rounded">
-                          <div className="text-xl font-bold text-green-600">{debugData.tempo.analise?.tipos_diferentes?.dados_reais_completos || 0}</div>
-                          <div className="text-sm text-green-700">Dados Reais Completos</div>
-                        </div>
-                      </div>
-                      
-                      <div className="text-sm text-gray-600 mb-4">
-                        üìù <strong>Pol·≠tica:</strong> Apenas registros com vd, itm e prd v·°lidos s·£o inseridos. Dados incompletos s·£o ignorados (n·£o geram erro).
-                      </div>
-                      
-                      {/* Dados de exemplo */}
-                      <details className="mt-4">
-                        <summary className="cursor-pointer text-sm font-semibold text-gray-700 hover:text-gray-900">
-                          üìä Ver Primeiros 10 Registros de Tempo
-                        </summary>
-                        <div className="mt-3">
-                          <div className="bg-gray-50 p-3 rounded max-h-60 overflow-y-auto">
-                            <pre className="text-xs text-gray-800">
-                              {JSON.stringify(debugData.tempo.analise?.primeiros_10, null, 2)}
-                            </pre>
-                          </div>
-                        </div>
-                      </details>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Descoberta de Campos (nova funcionalidade) */}
-              {result.resultados && Object.entries(result.resultados).some(([tabela, info]: [string, any]) => info.campos_existentes) && (
-                <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">üîç Descoberta de Campos Reais:</h3>
-                  
-                  <div className="space-y-4">
-                    {Object.entries(result.resultados).map(([tabela, info]: [string, any]) => {
-                      if (!info.campos_existentes) return null;
-                      
-                      return (
-                        <div key={tabela} className="p-4 border border-gray-200 rounded-lg">
-                          <div className="flex justify-between items-center mb-3">
-                            <h4 className="font-mono font-semibold text-gray-800">{tabela}</h4>
+                {/* √öltimos registros */}
+                {result.ultimos_registros && result.ultimos_registros.length > 0 && (
+                  <div className="mb-4">
+                    <div className="font-medium card-title-dark mb-2">‚ùå √öltimos Registros:</div>
+                    <div className="space-y-2">
+                      {result.ultimos_registros.slice(0, 5).map((registro, index: number) => (
+                        <div key={index} className={`p-2 rounded text-sm ${registro.processado ? 'bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-300' : 'bg-yellow-50 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-200'}`}> 
+                          <div className="flex justify-between items-center">
+                            <span>ID #{registro.id} - {registro.tipo_dados || registro.tipo || 'sem tipo'}</span>
                             <div className="flex space-x-2">
-                              <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-sm font-medium">
-                                úÖ {info.total_existentes} existem
+                              <span className={`px-2 py-1 rounded text-xs ${registro.processado ? 'bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200' : 'bg-yellow-200 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200'}`}>
+                                {registro.processado ? 'Processado' : 'Pendente'}
                               </span>
-                              <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-sm font-medium">
-                                ùå {info.total_inexistentes} faltam
-                              </span>
-                              <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium">
-                                {info.percentual_sucesso}% sucesso
+                              <span className={`px-2 py-1 rounded text-xs ${registro.tem_dados ? 'bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200' : 'bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200'}`}>
+                                {registro.tem_dados ? 'Com Dados' : 'Sem Dados'}
                               </span>
                             </div>
                           </div>
+                          {registro.data_referencia && (
+                            <div className="text-xs card-description-dark mt-1">Data: {registro.data_referencia}</div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            {/* Campos que existem */}
-                            <div>
-                              <h5 className="text-sm font-semibold text-green-700 mb-2">
-                                úÖ Campos que EXISTEM ({info.total_existentes}):
-                              </h5>
-                              <div className="grid grid-cols-2 gap-1 max-h-40 overflow-y-auto">
-                                {info.campos_existentes.map((campo: string) => (
-                                  <span key={campo} className="bg-green-50 text-green-800 px-2 py-1 rounded text-xs font-mono border border-green-200">
-                                    {campo}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
+                {/* Exemplo de registro */}
+                {result.estrutura_tabela?.exemplo_registro && (
+                  <div className="mb-4">
+                    <div className="font-medium card-title-dark mb-2">‚ùå Exemplo de Registro:</div>
+                    <div className="bg-gray-800 dark:bg-gray-900 text-green-400 dark:text-green-300 p-3 rounded text-xs font-mono overflow-x-auto">
+                      {JSON.stringify(result.estrutura_tabela.exemplo_registro, null, 2)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
-                            {/* Campos que N·ÉO existem */}
-                            {info.total_inexistentes > 0 && (
+            {/* An√°lise de dados (Debug Dados) */}
+            {result.analise && (
+              <div className="mb-4 card-dark">
+                <h3 className="font-semibold card-title-dark mb-2">‚ùå An√°lise da Estrutura dos Dados:</h3>
+                <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900 rounded">
+                  <div className="font-medium text-blue-800 dark:text-blue-200">Total de Registros Analisados: {result.analise.total_registros}</div>
+                </div>
+                {result.analise.amostras_por_tipo && Object.entries(result.analise.amostras_por_tipo).map(([tipo, amostra]: [string, any], index: number) => (
+                  <div key={index} className="mb-4 p-4 bg-white dark:bg-gray-900 border dark:border-gray-700 rounded">
+                    <div className="mb-3 pb-2 border-b dark:border-gray-700">
+                      <h4 className="font-semibold card-title-dark">Registro #{amostra.id} - {amostra.tipo_dados}</h4>
+                      <div className="text-sm card-description-dark">Data: {amostra.data_referencia}</div>
+                    </div>
+                    <div className="space-y-3">
+                      {/* Estrutura principal */}
+                      <div>
+                        <div className="font-medium card-title-dark mb-1">‚ùå Estrutura Principal:</div>
+                        <div className="flex flex-wrap gap-1">
+                          {amostra.estrutura_json.keys_principais.map((key: string, idx: number) => (
+                            <span key={idx} className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-xs">
+                              {key}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      {/* Status dos campos importantes */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div className={`p-2 rounded text-sm ${amostra.estrutura_json.tem_metadados ? 'bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900 text-red-700 dark:text-red-300'}`}>
+                          <div className="font-medium card-title-dark">Metadados</div>
+                          <div>{amostra.estrutura_json.tem_metadados ? '‚úîÔ∏è Sim' : '‚ùå N√£o'}</div>
+                        </div>
+                        <div className={`p-2 rounded text-sm ${amostra.estrutura_json.tem_list ? 'bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900 text-red-700 dark:text-red-300'}`}>
+                          <div className="font-medium card-title-dark">Campo 'list'</div>
+                          <div>{amostra.estrutura_json.tem_list ? '‚úîÔ∏è Sim' : '‚ùå N√£o'}</div>
+                        </div>
+                        <div className={`p-2 rounded text-sm ${amostra.estrutura_json.list_e_array ? 'bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-300' : 'bg-yellow-50 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-200'}`}>
+                          <div className="font-medium card-title-dark">‚úîÔ∏è Array</div>
+                          <div>{amostra.estrutura_json.list_e_array ? '‚úîÔ∏è Sim' : '‚ùå ' + amostra.estrutura_json.tipo_list}</div>
+                        </div>
+                        <div className="p-2 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded text-sm">
+                          <div className="font-medium card-title-dark">Length</div>
+                          <div>{amostra.estrutura_json.length_list || '0'}</div>
+                        </div>
+                      </div>
+                      {/* Metadados info */}
+                      {amostra.estrutura_json.metadados_info && (
+                        <div className="p-3 bg-blue-50 dark:bg-blue-900 rounded">
+                          <div className="font-medium text-blue-800 dark:text-blue-200 mb-2">‚ùå Informa√ß√µes dos Metadados:</div>
+                          <div className="text-sm text-blue-700 dark:text-blue-300">
+                            <div>Query ID: {amostra.estrutura_json.metadados_info.query_id}</div>
+                            <div>Query Nome: {amostra.estrutura_json.metadados_info.query_nome}</div>
+                            <div>Total Registros: {amostra.estrutura_json.metadados_info.total_registros}</div>
+                          </div>
+                        </div>
+                      )}
+                      {/* List info */}
+                      {amostra.estrutura_json.list_info && (
+                        <div className="p-3 bg-green-50 dark:bg-green-900 rounded">
+                          <div className="font-medium text-green-800 dark:text-green-200 mb-2">‚ùå Informa√ß√µes da List:</div>
+                          <div className="text-sm text-green-700 dark:text-green-300 space-y-1">
+                            <div>Tamanho: {amostra.estrutura_json.list_info.length} registros</div>
+                            {amostra.estrutura_json.list_info.primeiro_item_keys && (
                               <div>
-                                <h5 className="text-sm font-semibold text-red-700 mb-2">
-                                  ùå Campos que N·ÉO EXISTEM ({info.total_inexistentes}):
-                                </h5>
-                                <div className="grid grid-cols-2 gap-1 max-h-40 overflow-y-auto">
-                                  {info.campos_inexistentes.map((campo: string) => (
-                                    <span key={campo} className="bg-red-50 text-red-800 px-2 py-1 rounded text-xs font-mono border border-red-200">
-                                      {campo}
+                                <div className="font-medium mt-2 mb-1">Campos do 1¬∫ item:</div>
+                                <div className="flex flex-wrap gap-1">
+                                  {amostra.estrutura_json.list_info.primeiro_item_keys.map((key: string, idx: number) => (
+                                    <span key={idx} className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">
+                                      {key}
                                     </span>
                                   ))}
                                 </div>
                               </div>
                             )}
+                            {amostra.estrutura_json.list_info.primeiro_item_sample && (
+                              <div>
+                                <div className="font-medium mt-2 mb-1">Amostra do 1¬∫ item:</div>
+                                <pre className="bg-white dark:bg-gray-900 p-2 rounded text-xs overflow-x-auto">
+{JSON.stringify(amostra.estrutura_json.list_info.primeiro_item_sample, null, 2)}
+                                </pre>
+                              </div>
+                            )}
                           </div>
                         </div>
-                      );
-                    })}
+                      )}
+                      {/* Outros arrays encontrados */}
+                      {amostra.estrutura_json.outros_arrays && amostra.estrutura_json.outros_arrays.length > 0 && (
+                        <div className="p-3 bg-yellow-50 dark:bg-yellow-900 rounded">
+                          <div className="font-medium text-yellow-800 dark:text-yellow-200 mb-2">‚ùå Outros Arrays Encontrados:</div>
+                          <div className="space-y-2">
+                            {amostra.estrutura_json.outros_arrays.map((arr: any, idx: number) => (
+                              <div key={idx} className="text-sm text-yellow-700 dark:text-yellow-200">
+                                <div className="font-medium card-title-dark">Campo: {arr.campo} ({arr.length} itens)</div>
+                                {arr.primeiro_item_keys && (
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {arr.primeiro_item_keys.slice(0, 10).map((key: string, keyIdx: number) => (
+                                      <span key={keyIdx} className="bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200 px-1 py-0.5 rounded text-xs">
+                                        {key}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                ))}
+              </div>
+            )}
 
-              {/* Debug Raw Data (nova funcionalidade) */}
-              {result.analises && result.analises.length > 0 && (
-                <div className="mb-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">üî¨ An·°lise da Estrutura dos Dados:</h3>
-                  
-                  {/* Resumo geral */}
-                  {result.resumo && (
-                    <div className="mb-4 p-3 bg-blue-50 rounded">
-                      <h4 className="font-semibold text-blue-800 mb-2">üìä Resumo Geral:</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                        <div>
-                          <div className="font-medium text-blue-700">Tipos encontrados:</div>
-                          <div className="text-blue-600">{result.resumo.tipos_encontrados?.join(', ')}</div>
-                        </div>
-                        <div>
-                          <div className="font-medium text-blue-700">Datas de refer·™ncia:</div>
-                          <div className="text-blue-600">{result.resumo.datas_referencia?.join(', ')}</div>
-                        </div>
-                        <div>
-                          <div className="font-medium text-blue-700">Bar IDs:</div>
-                          <div className="text-blue-600">{result.resumo.bar_ids?.join(', ')}</div>
-                        </div>
+            {/* Resultado (outras APIs) */}
+            {result.resultados && (
+              <div className="mb-4">
+                <h3 className="font-semibold card-title-dark mb-2">‚ùå Resultado:</h3>
+                <div className="bg-white dark:bg-gray-900 p-3 rounded border dark:border-gray-700">
+                  <pre className="text-sm card-description-dark whitespace-pre-wrap">
+                    {JSON.stringify(result.resultados, null, 2)}
+                  </pre>
+                </div>
+              </div>
+            )}
+
+            {/* Logs da execu√ß√£o (APIs antigas) */}
+            {result.logs && result.logs.length > 0 && (
+              <div className="mb-4">
+                <h3 className="font-semibold card-title-dark mb-2">‚ùå Logs da Execu√ß√£o:</h3>
+                <div className="bg-gray-800 dark:bg-gray-900 text-green-400 dark:text-green-300 p-3 rounded text-sm font-mono max-h-64 overflow-y-auto">
+                  {result.logs.map((line: string, index: number) => (
+                    <div key={index}>{line}</div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Erros da execu√ß√£o (APIs antigas) */}
+            {result.logs && result.logs.length > 0 && (
+              <div className="mb-4">
+                <h3 className="font-semibold text-red-600 dark:text-red-400 mb-2">‚ùå Erros da Execu√ß√£o:</h3>
+                <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 p-3 rounded text-sm">
+                  {result.logs.filter((log: string) => log.includes('‚ùå')).map((error: string, index: number) => (
+                    <div key={index} className="text-red-700 dark:text-red-300">{error}</div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Status das tabelas */}
+            {result.status && (
+              <div>
+                <h3 className="font-semibold card-title-dark mb-2">‚ùå Status das Tabelas:</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Sistema Raw */}
+                  {result.status.sistema_raw && (
+                    <div className="bg-blue-50 dark:bg-blue-900 p-3 rounded">
+                      <h4 className="font-medium text-blue-800 dark:text-blue-200">sistema_raw</h4>
+                      <div className="text-sm text-blue-600 dark:text-blue-300">
+                        {typeof result.status.sistema_raw === 'object' && (result.status.sistema_raw as any).existe ? 
+                          `${(result.status.sistema_raw as any).registros} registros` : 
+                          typeof result.status.sistema_raw === 'number' ? 
+                            `${result.status.sistema_raw} registros` : 
+                            'Tabela n√£o encontrada'
+                        }
                       </div>
                     </div>
                   )}
 
-                  {/* An·°lises detalhadas */}
-                  <div className="space-y-4">
-                    {result.analises.map((analise, index: number) => (
-                      <div key={analise.id} className="p-4 border border-gray-200 rounded-lg">
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <h4 className="font-mono font-semibold text-gray-800">Registro #{analise.id}</h4>
-                            <div className="text-sm text-gray-600">
-                              Tipo: <span className="font-medium">{analise.tipo_dados}</span> | 
-                              Data: <span className="font-medium">{analise.data_referencia}</span> | 
-                              Bar ID: <span className="font-medium">{analise.bar_id}</span>
+                  {/* Tabelas ContaHub */}
+                  {(result.status as any).tabelas_contahub && Object.entries((result.status as any).tabelas_contahub).map(([tabela, info]: [string, any]) => (
+                    <div key={tabela} className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
+                      <h4 className="font-medium card-title-dark font-mono text-sm">{tabela}</h4>
+                      <div className="text-sm card-description-dark">
+                        {info.existe ? 
+                          `${info.registros} registros` : 
+                          info.erro || 'Tabela n√£o existe'
+                        }
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Teste de Campos (nova funcionalidade) */}
+            {result.resultados && Object.keys(result.resultados).length > 0 && (
+              <div className="mb-4">
+                <h3 className="font-semibold card-title-dark mb-2">‚ùå Teste de Campos das Tabelas:</h3>
+                
+                {/* Resumo */}
+                {result.resumo && (
+                  <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900 rounded">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">{result.resumo.tabelas_com_sucesso}</div>
+                        <div className="text-sm text-green-700 dark:text-green-300">Tabelas OK</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-red-600 dark:text-red-400">{result.resumo.tabelas_com_erro}</div>
+                        <div className="text-sm text-red-700 dark:text-red-300">Com Problemas</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Detalhes por tabela */}
+                <div className="space-y-3">
+                  {Object.entries(result.resultados).map(([tabela, info]: [string, any]) => (
+                    <div key={tabela} className={`p-4 rounded border ${info.status === 'sucesso' ? 'bg-green-50 dark:bg-green-900 border-green-200 dark:border-green-700' : 'bg-red-50 dark:bg-red-900 border-red-200 dark:border-red-700'}`}>
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="font-mono font-semibold card-title-dark">{tabela}</h4>
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${info.status === 'sucesso' ? 'bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200' : 'bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200'}`}>
+                          {info.status === 'sucesso' ? '‚úîÔ∏è OK' : '‚ùå ERRO'}
+                        </span>
+                      </div>
+                      
+                      {info.status === 'sucesso' ? (
+                        <div>
+                          <div className="text-sm text-green-700 dark:text-green-300 mb-2">
+                            Todos os {info.total_campos} campos foram aceitos pela tabela
+                          </div>
+                          <details className="text-xs">
+                            <summary className="cursor-pointer text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200">Ver campos testados</summary>
+                            <div className="mt-2 grid grid-cols-3 gap-1">
+                              {info.campos_aceitos?.map((campo: string) => (
+                                <span key={campo} className="bg-green-100 dark:bg-green-800 px-2 py-1 rounded font-mono text-green-800 dark:text-green-200">{campo}</span>
+                              ))}
                             </div>
-                          </div>
-                          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">
-                            An·°lise {index + 1}/5
-                          </span>
+                          </details>
                         </div>
-
-                        {/* Estrutura do registro */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-                          <div>
-                            <h5 className="text-sm font-semibold text-gray-700 mb-2">üèóÔ∏è Estrutura do Registro:</h5>
-                            <div className="bg-gray-50 p-2 rounded text-xs">
-                              <div><strong>Campos diretos:</strong> {analise.estrutura_registro?.campos_diretos?.join(', ')}</div>
-                              <div><strong>Tem dados:</strong> {analise.estrutura_registro?.tem_dados ? 'úÖ' : 'ùå'}</div>
-                              <div><strong>Tipo de dados:</strong> {analise.estrutura_registro?.tipo_dados_campo}</div>
-                              <div><strong>·â objeto:</strong> {analise.estrutura_registro?.dados_e_objeto ? 'úÖ' : 'ùå'}</div>
+                      ) : (
+                        <div>
+                          <div className="text-sm text-red-700 dark:text-red-300 mb-2">
+                            Erro ao inserir dados: {info.erro}
+                          </div>
+                          <details className="text-xs">
+                            <summary className="cursor-pointer text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200">Ver campos testados ({info.total_campos})</summary>
+                            <div className="mt-2 grid grid-cols-3 gap-1">
+                              {info.campos_testados?.map((campo: string) => (
+                                <span key={campo} className="bg-red-100 dark:bg-red-800 px-2 py-1 rounded font-mono text-red-800 dark:text-red-200">{campo}</span>
+                              ))}
                             </div>
-                          </div>
+                          </details>
+                          {info.detalhes && (
+                            <details className="text-xs mt-2">
+                              <summary className="cursor-pointer text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200">Ver detalhes do erro</summary>
+                              <pre className="mt-2 bg-red-100 dark:bg-red-800 p-2 rounded text-red-800 dark:text-red-200 overflow-x-auto">
+                                {JSON.stringify(info.detalhes, null, 2)}
+                              </pre>
+                            </details>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-                          <div>
-                            <h5 className="text-sm font-semibold text-gray-700 mb-2">üîç Campos de Identifica·ß·£o:</h5>
-                            <div className="bg-gray-50 p-2 rounded text-xs">
-                              {typeof analise.campos_identificacao === 'object' && analise.campos_identificacao !== null ? (
-                                <>
-                                  <div><strong>vd:</strong> {analise.campos_identificacao.tem_vd ? 'úÖ' : 'ùå'}</div>
-                                  <div><strong>trn:</strong> {analise.campos_identificacao.tem_trn ? 'úÖ' : 'ùå'}</div>
-                                  <div><strong>dt_gerencial:</strong> {analise.campos_identificacao.tem_dt_gerencial ? 'úÖ' : 'ùå'}</div>
-                                  <div><strong>pag:</strong> {analise.campos_identificacao.tem_pag ? 'úÖ' : 'ùå'}</div>
-                                  <div><strong>itm/prd:</strong> {analise.campos_identificacao.tem_itm ? 'úÖ' : 'ùå'} / {analise.campos_identificacao.tem_prd ? 'úÖ' : 'ùå'}</div>
-                                  <div><strong>hora/dds:</strong> {analise.campos_identificacao.tem_hora ? 'úÖ' : 'ùå'} / {analise.campos_identificacao.tem_dds ? 'úÖ' : 'ùå'}</div>
-                                  {analise.campos_identificacao.primeiros_campos && (
-                                    <div><strong>Primeiros campos:</strong> {analise.campos_identificacao.primeiros_campos.join(', ')}</div>
-                                  )}
-                                </>
-                              ) : (
-                                <div className="text-red-600">{String(analise.campos_identificacao)}</div>
-                              )}
+            {/* Debug de Discrep√¢ncias */}
+            {debugData && (
+              <div className="mb-4">
+                <h3 className="font-semibold card-title-dark mb-2">‚ùå An√°lise de Discrep√¢ncias dos Dados</h3>
+                
+                {/* An√°lise Clientes CPF */}
+                {debugData.clientes_cpf && (
+                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg mb-4">
+                    <h4 className="font-semibold text-lg mb-3 card-title-dark">‚ùå Clientes CPF:</h4>
+                    
+                    {/* Resumo da discrep√¢ncia */}
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-blue-50 dark:bg-blue-900 rounded">
+                        <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{debugData.clientes_cpf.analise?.esperados || 0}</div>
+                        <div className="text-sm text-blue-700 dark:text-blue-300">Esperados</div>
+                      </div>
+                      <div className="text-center p-3 bg-green-50 dark:bg-green-900 rounded">
+                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">{debugData.clientes_cpf.analise?.inseridos || 0}</div>
+                        <div className="text-sm text-green-700 dark:text-green-300">Inseridos</div>
+                      </div>
+                      <div className={`text-center p-3 rounded ${(debugData.clientes_cpf.analise?.diferenca || 0) === 0 ? 'bg-green-50 dark:bg-green-900' : 'bg-red-50 dark:bg-red-900'}`}>
+                        <div className={`text-2xl font-bold ${(debugData.clientes_cpf.analise?.diferenca || 0) === 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                          {debugData.clientes_cpf.analise?.diferenca > 0 ? '+' : ''}{debugData.clientes_cpf.analise?.diferenca || 0}
+                        </div>
+                        <div className={`text-sm ${(debugData.clientes_cpf.analise?.diferenca || 0) === 0 ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
+                          Diferen√ßa
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* CPFs Extras */}
+                    {debugData.clientes_cpf.analise?.cpfsExtras?.length > 0 && (
+                      <div className="mb-4 p-3 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded">
+                        <h5 className="font-semibold text-red-800 dark:text-red-200 mb-2">‚ùå CPFs Extras (n√£o deveriam estar no banco):</h5>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                          {debugData.clientes_cpf.analise.cpfsExtras.map((cpf: string) => (
+                            <div key={cpf} className="bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-200 px-2 py-1 rounded text-sm font-mono">
+                              {cpf}
                             </div>
-                          </div>
+                          ))}
                         </div>
+                      </div>
+                    )}
 
-                        {/* Wrapper format */}
-                        <div className="mb-4">
-                          <h5 className="text-sm font-semibold text-gray-700 mb-2">üì¶ Wrapper Format:</h5>
-                          <div className="bg-gray-50 p-2 rounded text-xs">
-                            <div><strong>Tem wrapper:</strong> {analise.tem_wrapper ? 'úÖ SIM' : 'ùå N·ÉO'}</div>
-                          </div>
+                    {/* CPFs Faltando */}
+                    {debugData.clientes_cpf.analise?.cpfsFaltando?.length > 0 && (
+                      <div className="mb-4 p-3 bg-orange-50 dark:bg-orange-900 border border-orange-200 dark:border-orange-700 rounded">
+                        <h5 className="font-semibold text-orange-800 dark:text-orange-200 mb-2">‚ùå CPFs Faltando (deveriam estar no banco):</h5>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                          {debugData.clientes_cpf.analise.cpfsFaltando.map((cpf: string) => (
+                            <div key={cpf} className="bg-orange-100 dark:bg-orange-800 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-sm font-mono">
+                              {cpf}
+                            </div>
+                          ))}
                         </div>
+                      </div>
+                    )}
 
-                        {/* Amostra dos dados */}
-                        <details className="mt-3">
-                          <summary className="cursor-pointer text-sm font-semibold text-gray-700 hover:text-gray-900">
-                            üìã Ver Amostra dos Dados
-                          </summary>
-                          <div className="mt-2 bg-gray-100 p-3 rounded overflow-x-auto">
-                            <pre className="text-xs text-gray-800">
-                              {JSON.stringify(analise.amostra_dados, null, 2)}
+                    {/* CPFs Duplicados */}
+                    {debugData.clientes_cpf.duplicatas?.cpfs_duplicados?.length > 0 && (
+                      <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded">
+                        <h5 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">‚ùå CPFs Duplicados:</h5>
+                        <div className="space-y-1">
+                          {debugData.clientes_cpf.duplicatas.cpfs_duplicados.map(([cpf, count]: [string, number]) => (
+                            <div key={cpf} className="bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-sm font-mono">
+                              {cpf} <span className="font-bold">({count} vezes)</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Raw IDs Duplicados */}
+                    {debugData.clientes_cpf.duplicatas?.raw_ids_duplicados?.length > 0 && (
+                      <div className="mb-4 p-3 bg-purple-50 dark:bg-purple-900 border border-purple-200 dark:border-purple-700 rounded">
+                        <h5 className="font-semibold text-purple-800 dark:text-purple-200 mb-2">‚ùå Raw IDs com M√∫ltiplos Registros:</h5>
+                        <div className="space-y-1">
+                          {debugData.clientes_cpf.duplicatas.raw_ids_duplicados.map(([rawId, count]: [string, number]) => (
+                            <div key={rawId} className="bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-200 px-2 py-1 rounded text-sm font-mono">
+                              Raw ID {rawId} <span className="font-bold">({count} registros)</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Compara√ß√£o Detalhada */}
+                    <details className="mt-4">
+                      <summary className="cursor-pointer text-sm font-semibold card-description-dark hover:text-gray-900 dark:hover:text-gray-100">
+                        ‚ùå Ver Compara√ß√£o Detalhada dos Dados
+                      </summary>
+                      <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div>
+                          <h6 className="font-semibold text-green-800 dark:text-green-200 mb-2">‚úîÔ∏è Dados Esperados (ContaHub):</h6>
+                          <div className="bg-green-50 dark:bg-green-900 p-3 rounded max-h-60 overflow-y-auto">
+                            <pre className="text-xs text-green-800 dark:text-green-200">
+                              {JSON.stringify(debugData.clientes_cpf.dados_esperados, null, 2)}
                             </pre>
                           </div>
-                        </details>
+                        </div>
+                        <div>
+                          <h6 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">‚ùå Dados Reais (Banco):</h6>
+                          <div className="bg-blue-50 dark:bg-blue-900 p-3 rounded max-h-60 overflow-y-auto">
+                            <pre className="text-xs text-blue-800 dark:text-blue-200">
+                              {JSON.stringify(debugData.clientes_cpf.dados_reais, null, 2)}
+                            </pre>
+                          </div>
+                        </div>
                       </div>
-                    ))}
+                    </details>
                   </div>
-                </div>
-              )}
-            </div>
-        )}
+                )}
 
-        {/* Informa·ß·µes */}
-        <PageCard>
-          <div className="space-y-3">
-            <PageText variant="subtitle">
-              ÑπÔ∏è Informa·ß·µes do Teste
-            </PageText>
-            <div className="space-y-2">
-              <PageText variant="body">
-                Ä¢ <strong>Per·≠odo:</strong> 31/01/2025 at·© 04/02/2025 (5 dias)
-              </PageText>
-              <PageText variant="body">
-                Ä¢ <strong>Objetivo:</strong> Verificar mapeamento completo dos dados do ContaHub
-              </PageText>
-              <PageText variant="body">
-                Ä¢ <strong>Tabelas:</strong> contahub_analitico, contahub_periodo, contahub_fatporhora, etc.
-              </PageText>
-              <PageText variant="body">
-                Ä¢ <strong>Sistema:</strong> Coleta automatizada via API do ContaHub
-              </PageText>
-              <PageText variant="body">
-                Ä¢ <strong>üöÄ Executar Teste:</strong> Coleta dados de 5 dias e salva na sistema_raw
-              </PageText>
-              <PageText variant="body">
-                Ä¢ <strong>öôÔ∏è Processar Dados:</strong> Processa dados da sistema_raw para tabelas espec·≠ficas
-              </PageText>
-              <PageText variant="body">
-                Ä¢ <strong>üìä Verificar Status:</strong> Mostra status das tabelas ContaHub
-              </PageText>
-              <PageText variant="body">
-                Ä¢ <strong>üîß Debug Dados:</strong> Analisa a estrutura dos dados salvos na sistema_raw para entender campos dispon·≠veis
-              </PageText>
-              <PageText variant="body">
-                Ä¢ <strong>üßπ Limpar Tudo:</strong> Remove TODOS os dados das tabelas contahub_* e sistema_raw do ContaHub
-              </PageText>
-            </div>
+                {/* An√°lise Per√≠odo */}
+                {debugData.periodo && (
+                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg mb-4">
+                    <h4 className="font-semibold text-lg mb-3 card-title-dark">‚ùå Per√≠odo:</h4>
+                    
+                    {/* Resumo da discrep√¢ncia per√≠odo */}
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-blue-50 dark:bg-blue-900 rounded">
+                        <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{debugData.periodo.analise?.esperados || 0}</div>
+                        <div className="text-sm text-blue-700 dark:text-blue-300">Esperados (amostra)</div>
+                      </div>
+                      <div className="text-center p-3 bg-green-50 dark:bg-green-900 rounded">
+                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">{debugData.periodo.analise?.inseridos || 0}</div>
+                        <div className="text-sm text-green-700 dark:text-green-300">Inseridos</div>
+                      </div>
+                      <div className={`text-center p-3 rounded ${(debugData.periodo.analise?.diferenca || 0) >= 0 ? 'bg-green-50 dark:bg-green-900' : 'bg-red-50 dark:bg-red-900'}`}>
+                        <div className={`text-2xl font-bold ${(debugData.periodo.analise?.diferenca || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                          {debugData.periodo.analise?.diferenca > 0 ? '+' : ''}{debugData.periodo.analise?.diferenca || 0}
+                        </div>
+                        <div className={`text-sm ${(debugData.periodo.analise?.diferenca || 0) >= 0 ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
+                          Diferen√ßa
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* VDs Extras */}
+                    {debugData.periodo.analise?.vdsExtras?.length > 0 && (
+                      <div className="mb-4 p-3 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded">
+                        <h5 className="font-semibold text-red-800 dark:text-red-200 mb-2">‚ùå VDs Extras (n√£o esperados):</h5>
+                        <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
+                          {debugData.periodo.analise.vdsExtras.slice(0, 20).map((vd: number) => (
+                            <div key={vd} className="bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-200 px-2 py-1 rounded text-sm font-mono text-center">
+                              {vd}
+                            </div>
+                          ))}
+                          {debugData.periodo.analise.vdsExtras.length > 20 && (
+                            <div className="bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-200 px-2 py-1 rounded text-sm font-mono text-center">
+                              +{debugData.periodo.analise.vdsExtras.length - 20} mais
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* VDs Faltando */}
+                    {debugData.periodo.analise?.vdsFaltando?.length > 0 && (
+                      <div className="mb-4 p-3 bg-orange-50 dark:bg-orange-900 border border-orange-200 dark:border-orange-700 rounded">
+                        <h5 className="font-semibold text-orange-800 dark:text-orange-200 mb-2">‚ùå VDs Faltando:</h5>
+                        <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
+                          {debugData.periodo.analise.vdsFaltando.map((vd: number) => (
+                            <div key={vd} className="bg-orange-100 dark:bg-orange-800 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-sm font-mono text-center">
+                              {vd}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Dados Reais vs Esperados */}
+                    <details className="mt-4">
+                      <summary className="cursor-pointer text-sm font-semibold card-description-dark hover:text-gray-900 dark:hover:text-gray-100">
+                        ‚ùå Ver Dados de Per√≠odo Detalhados
+                      </summary>
+                      <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div>
+                          <h6 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">‚úîÔ∏è Primeiros 10 Esperados:</h6>
+                          <div className="bg-blue-50 dark:bg-blue-900 p-3 rounded max-h-60 overflow-y-auto">
+                            <pre className="text-xs text-blue-800 dark:text-blue-200">
+                              {JSON.stringify(debugData.periodo.dados_esperados, null, 2)}
+                            </pre>
+                          </div>
+                        </div>
+                        <div>
+                          <h6 className="font-semibold text-green-800 dark:text-green-200 mb-2">‚ùå Primeiros 10 Reais:</h6>
+                          <div className="bg-green-50 dark:bg-green-900 p-3 rounded max-h-60 overflow-y-auto">
+                            <pre className="text-xs text-green-800 dark:text-green-200">
+                              {JSON.stringify(debugData.periodo.dados_reais?.slice(0, 10), null, 2)}
+                            </pre>
+                          </div>
+                        </div>
+                      </div>
+                    </details>
+                  </div>
+                )}
+
+                {/* An√°lise Tempo */}
+                {debugData.tempo && (
+                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <h4 className="font-semibold text-lg mb-3 card-title-dark">‚ùå Tempo (Apenas Dados Reais):</h4>
+                    
+                    {/* Resumo tempo - APENAS DADOS REAIS */}
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="text-center p-3 bg-blue-50 dark:bg-blue-900 rounded">
+                        <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{debugData.tempo.analise?.inseridos || 0}</div>
+                        <div className="text-sm text-blue-700 dark:text-blue-300">Total Inseridos</div>
+                      </div>
+                      <div className="text-center p-3 bg-green-50 dark:bg-green-900 rounded">
+                        <div className="text-xl font-bold text-green-600 dark:text-green-400">{debugData.tempo.analise?.tipos_diferentes?.dados_reais_completos || 0}</div>
+                        <div className="text-sm text-green-700 dark:text-green-300">Dados Reais Completos</div>
+                      </div>
+                    </div>
+                    
+                    <div className="text-sm card-description-dark mb-4">
+                      ‚ùå <strong>Pol√≠tica:</strong> Apenas registros com vd, itm e prd v√°lidos s√£o inseridos. Dados incompletos s√£o ignorados (n√£o geram erro).
+                    </div>
+                    
+                    {/* Dados de exemplo */}
+                    <details className="mt-4">
+                      <summary className="cursor-pointer text-sm font-semibold card-description-dark hover:text-gray-900 dark:hover:text-gray-100">
+                        ‚ùå Ver Primeiros 10 Registros de Tempo
+                      </summary>
+                      <div className="mt-3">
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded max-h-60 overflow-y-auto">
+                          <pre className="text-xs card-description-dark">
+                            {JSON.stringify(debugData.tempo.analise?.primeiros_10, null, 2)}
+                          </pre>
+                        </div>
+                      </div>
+                    </details>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Descoberta de Campos (nova funcionalidade) */}
+            {result.resultados && Object.entries(result.resultados).some(([tabela, info]: [string, any]) => info.campos_existentes) && (
+              <div className="mb-4">
+                <h3 className="font-semibold card-title-dark mb-2">‚ùå Descoberta de Campos Reais:</h3>
+                
+                <div className="space-y-4">
+                  {Object.entries(result.resultados).map(([tabela, info]: [string, any]) => {
+                    if (!info.campos_existentes) return null;
+                    
+                    return (
+                      <div key={tabela} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <div className="flex justify-between items-center mb-3">
+                          <h4 className="font-mono font-semibold card-title-dark">{tabela}</h4>
+                          <div className="flex space-x-2">
+                            <span className="px-2 py-1 bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200 rounded text-sm font-medium">
+                              ‚úîÔ∏è {info.total_existentes} existem
+                            </span>
+                            <span className="px-2 py-1 bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-200 rounded text-sm font-medium">
+                              ‚ùå {info.total_inexistentes} faltam
+                            </span>
+                            <span className="px-2 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded text-sm font-medium">
+                              {info.percentual_sucesso}% sucesso
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          {/* Campos que existem */}
+                          <div>
+                            <h5 className="text-sm font-semibold text-green-700 dark:text-green-300 mb-2">
+                              ‚úîÔ∏è Campos que EXISTEM ({info.total_existentes}):
+                            </h5>
+                            <div className="grid grid-cols-2 gap-1 max-h-40 overflow-y-auto">
+                              {info.campos_existentes.map((campo: string) => (
+                                <span key={campo} className="bg-green-50 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs font-mono border border-green-200 dark:border-green-700">
+                                  {campo}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Campos que N√ÉO existem */}
+                          {info.total_inexistentes > 0 && (
+                            <div>
+                              <h5 className="text-sm font-semibold text-red-700 dark:text-red-300 mb-2">
+                                ‚ùå Campos que N√ÉO EXISTEM ({info.total_inexistentes}):
+                              </h5>
+                              <div className="grid grid-cols-2 gap-1 max-h-40 overflow-y-auto">
+                                {info.campos_inexistentes.map((campo: string) => (
+                                  <span key={campo} className="bg-red-50 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs font-mono border border-red-200 dark:border-red-700">
+                                    {campo}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Debug Raw Data (nova funcionalidade) */}
+            {result.analises && result.analises.length > 0 && (
+              <div className="mb-4">
+                <h3 className="font-semibold card-title-dark mb-2">‚ùå An√°lise da Estrutura dos Dados:</h3>
+                
+                {/* Resumo geral */}
+                {result.resumo && (
+                  <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900 rounded">
+                    <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">‚ùå Resumo Geral:</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <div className="font-medium text-blue-700 dark:text-blue-300">Tipos encontrados:</div>
+                        <div className="text-blue-600 dark:text-blue-400">{result.resumo.tipos_encontrados?.join(', ')}</div>
+                      </div>
+                      <div>
+                        <div className="font-medium text-blue-700 dark:text-blue-300">Datas de refer√™ncia:</div>
+                        <div className="text-blue-600 dark:text-blue-400">{result.resumo.datas_referencia?.join(', ')}</div>
+                      </div>
+                      <div>
+                        <div className="font-medium text-blue-700 dark:text-blue-300">Bar IDs:</div>
+                        <div className="text-blue-600 dark:text-blue-400">{result.resumo.bar_ids?.join(', ')}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* An√°lises detalhadas */}
+                <div className="space-y-4">
+                  {result.analises.map((analise, index: number) => (
+                    <div key={analise.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h4 className="font-mono font-semibold card-title-dark">Registro #{analise.id}</h4>
+                          <div className="text-sm card-description-dark">
+                            Tipo: <span className="font-medium">{analise.tipo_dados}</span> | 
+                            Data: <span className="font-medium">{analise.data_referencia}</span> | 
+                            Bar ID: <span className="font-medium">{analise.bar_id}</span>
+                          </div>
+                        </div>
+                        <span className="px-2 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded text-xs font-medium">
+                          An√°lise {index + 1}/5
+                        </span>
+                      </div>
+
+                      {/* Estrutura do registro */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <h5 className="text-sm font-semibold card-description-dark mb-2">‚ùå Estrutura do Registro:</h5>
+                          <div className="bg-gray-50 dark:bg-gray-800 p-2 rounded text-xs">
+                            <div><strong>Campos diretos:</strong> {analise.estrutura_registro?.campos_diretos?.join(', ')}</div>
+                            <div><strong>Tem dados:</strong> {analise.estrutura_registro?.tem_dados ? '‚úîÔ∏è' : '‚ùå'}</div>
+                            <div><strong>Tipo de dados:</strong> {analise.estrutura_registro?.tipo_dados_campo}</div>
+                            <div><strong>‚úîÔ∏è objeto:</strong> {analise.estrutura_registro?.dados_e_objeto ? '‚úîÔ∏è' : '‚ùå'}</div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <h5 className="text-sm font-semibold card-description-dark mb-2">‚ùå Campos de Identifica√ß√£o:</h5>
+                          <div className="bg-gray-50 dark:bg-gray-800 p-2 rounded text-xs">
+                            {typeof analise.campos_identificacao === 'object' && analise.campos_identificacao !== null ? (
+                              <>
+                                <div><strong>vd:</strong> {analise.campos_identificacao.tem_vd ? '‚úîÔ∏è' : '‚ùå'}</div>
+                                <div><strong>trn:</strong> {analise.campos_identificacao.tem_trn ? '‚úîÔ∏è' : '‚ùå'}</div>
+                                <div><strong>dt_gerencial:</strong> {analise.campos_identificacao.tem_dt_gerencial ? '‚úîÔ∏è' : '‚ùå'}</div>
+                                <div><strong>pag:</strong> {analise.campos_identificacao.tem_pag ? '‚úîÔ∏è' : '‚ùå'}</div>
+                                <div><strong>itm/prd:</strong> {analise.campos_identificacao.tem_itm ? '‚úîÔ∏è' : '‚ùå'} / {analise.campos_identificacao.tem_prd ? '‚úîÔ∏è' : '‚ùå'}</div>
+                                <div><strong>hora/dds:</strong> {analise.campos_identificacao.tem_hora ? '‚úîÔ∏è' : '‚ùå'} / {analise.campos_identificacao.tem_dds ? '‚úîÔ∏è' : '‚ùå'}</div>
+                                {analise.campos_identificacao.primeiros_campos && (
+                                  <div><strong>Primeiros campos:</strong> {analise.campos_identificacao.primeiros_campos.join(', ')}</div>
+                                )}
+                              </>
+                            ) : (
+                              <div className="text-red-600 dark:text-red-400">{String(analise.campos_identificacao)}</div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Wrapper format */}
+                      <div className="mb-4">
+                        <h5 className="text-sm font-semibold card-description-dark mb-2">‚ùå Wrapper Format:</h5>
+                        <div className="bg-gray-50 dark:bg-gray-800 p-2 rounded text-xs">
+                          <div><strong>Tem wrapper:</strong> {analise.tem_wrapper ? '‚úîÔ∏è SIM' : '‚ùå N√ÉO'}</div>
+                        </div>
+                      </div>
+
+                      {/* Amostra dos dados */}
+                      <details className="mt-3">
+                        <summary className="cursor-pointer text-sm font-semibold card-description-dark hover:text-gray-900 dark:hover:text-gray-100">
+                          ‚ùå Ver Amostra dos Dados
+                        </summary>
+                        <div className="mt-2 bg-gray-100 dark:bg-gray-800 p-3 rounded overflow-x-auto">
+                          <pre className="text-xs card-description-dark">
+                            {JSON.stringify(analise.amostra_dados, null, 2)}
+                          </pre>
+                        </div>
+                      </details>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        </PageCard>
-      
-    </div>
-  )
+      )}
+
+      {/* Informa√ß√µes */}
+      <PageCard>
+        <div className="space-y-3">
+          <PageText variant="subtitle">
+            Informa√ß√µes do Teste
+          </PageText>
+          <div className="space-y-2">
+            <PageText variant="body">
+              Per√≠odo: 31/01/2025 at√© 04/02/2025 (5 dias)
+            </PageText>
+            <PageText variant="body">
+              Objetivo: Verificar mapeamento completo dos dados do ContaHub
+            </PageText>
+            <PageText variant="body">
+              Tabelas: contahub_analitico, contahub_periodo, contahub_fatporhora, etc.
+            </PageText>
+            <PageText variant="body">
+              Sistema: Coleta automatizada via API do ContaHub
+            </PageText>
+            <PageText variant="body">
+              Executar Teste: Coleta dados de 5 dias e salva na sistema_raw
+            </PageText>
+            <PageText variant="body">
+              Processar Dados: Processa dados da sistema_raw para tabelas espec√≠ficas
+            </PageText>
+            <PageText variant="body">
+              Verificar Status: Mostra status das tabelas ContaHub
+            </PageText>
+            <PageText variant="body">
+              Debug Dados: Analisa a estrutura dos dados salvos na sistema_raw para entender campos dispon√≠veis
+            </PageText>
+            <PageText variant="body">
+              Limpar Tudo: Remove TODOS os dados das tabelas contahub_* e sistema_raw do ContaHub
+            </PageText>
+          </div>
+        </div>
+      </PageCard>
+    
+  </div>
+)
 } 
+

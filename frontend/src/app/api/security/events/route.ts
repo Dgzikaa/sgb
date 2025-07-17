@@ -1,5 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase-admin'
+
+// Tipos auxiliares para eventos de seguranÃ§a
+interface SecurityEvent {
+  id: string;
+  level?: string;
+  category?: string;
+  event_type: string;
+  details?: {
+    message?: string;
+    [key: string]: any;
+  };
+  ip_address?: string;
+  user_id?: string;
+  timestamp: string;
+  risk_score?: number;
+  resolved?: boolean;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -35,13 +52,13 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error('Erro ao buscar eventos:', error)
       return NextResponse.json(
-        { success: false, error: 'Erro ao buscar eventos de seguran�a' },
+        { success: false, error: 'Erro ao buscar eventos de seguranÃ¡Â§a' },
         { status: 500 }
       )
     }
 
     // Formatar eventos para o frontend
-    const formattedEvents = events?.map((event) => ({
+    const formattedEvents = (events as SecurityEvent[] | undefined)?.map((event: SecurityEvent) => ({
       id: event.id,
       level: event.level,
       category: event.category,
@@ -74,3 +91,4 @@ export async function GET(request: NextRequest) {
     )
   }
 } 
+

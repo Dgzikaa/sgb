@@ -1,22 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 
-// Fun��es dispon�veis no sistema
+// FunÃ¡Â§Ã¡Âµes disponÃ¡Â­veis no sistema
 const FUNCOES_DISPONIVEL = [
   {
     id: 'funcionario',
-    nome: 'Funcion�rio',
-    descricao: 'Acesso b�sico �s funcionalidades operacionais',
+    nome: 'FuncionÃ¡Â¡rio',
+    descricao: 'Acesso bÃ¡Â¡sico Ã¡Â s funcionalidades operacionais',
     nivel: 1,
     cor: 'bg-blue-100 text-blue-800 border-blue-200',
-    icone: '👤'
+    icone: 'Ã°Å¸â€˜Â¤'
   },
   {
     id: 'gerente',
     nome: 'Gerente',
-    descricao: 'Acesso a relat�rios e gest�o de funcion�rios',
+    descricao: 'Acesso a relatÃ¡Â³rios e gestÃ¡Â£o de funcionÃ¡Â¡rios',
     nivel: 2,
     cor: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    icone: '👨��💼'
+    icone: 'Ã°Å¸â€˜Â¨â‚¬ÂÃ°Å¸â€™Â¼'
   },
   {
     id: 'admin',
@@ -24,16 +24,16 @@ const FUNCOES_DISPONIVEL = [
     descricao: 'Acesso completo a todas as funcionalidades',
     nivel: 3,
     cor: 'bg-red-100 text-red-800 border-red-200',
-    icone: '👑'
+    icone: 'Ã°Å¸â€˜â€˜'
   }
 ]
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('📊 GET /api/usuarios/funcoes - Buscando fun��es dispon�veis')
+    console.log('Ã°Å¸â€œÅ  GET /api/usuarios/funcoes - Buscando funÃ¡Â§Ã¡Âµes disponÃ¡Â­veis')
     
-    // Aqui voc� pode adicionar l�gica para buscar fun��es espec�ficas por bar
-    // ou implementar diferentes tipos de fun��es baseadas no plano do bar
+    // Aqui vocÃ¡Âª pode adicionar lÃ¡Â³gica para buscar funÃ¡Â§Ã¡Âµes especÃ¡Â­ficas por bar
+    // ou implementar diferentes tipos de funÃ¡Â§Ã¡Âµes baseadas no plano do bar
     
     return NextResponse.json({
       success: true,
@@ -42,10 +42,11 @@ export async function GET(request: NextRequest) {
     })
     
   } catch (error) {
-    console.error('�� Erro na API de fun��es:', error)
+    console.error('ÂÅ’ Erro na API de funÃ¡Â§Ã¡Âµes:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },
       { status: 500 }
     )
   }
 } 
+

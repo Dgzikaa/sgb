@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Button } from '@/components/ui/button'
 import { useCommandPalette } from '@/hooks/useCommandPalette'
@@ -64,7 +64,7 @@ export function CommandPaletteTrigger({
           {showShortcut && (
             <div className="flex items-center gap-1 text-xs opacity-60">
               <kbd className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs">
-                ��K
+                Å’ËœK
               </kbd>
             </div>
           )}
@@ -76,7 +76,7 @@ export function CommandPaletteTrigger({
           {showShortcut && (
             <div className="ml-2 flex items-center gap-1 text-xs opacity-60">
               <kbd className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs">
-                ��K
+                Å’ËœK
               </kbd>
             </div>
           )}
@@ -86,7 +86,7 @@ export function CommandPaletteTrigger({
   )
 }
 
-// Vers�o compacta apenas com �cone - otimizada para mobile
+// VersÃ¡Â£o compacta apenas com Ã¡Â­cone - otimizada para mobile
 export function CommandPaletteIconTrigger({ 
   className = '',
   title = "Buscar"
@@ -143,9 +143,10 @@ export function CommandPaletteSearchPlaceholder({
       </span>
       <div className="hidden lg:flex items-center gap-1 text-xs text-gray-400">
         <kbd className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-600 rounded text-xs">
-          ��K
+          Å’ËœK
         </kbd>
       </div>
     </div>
   )
 }
+

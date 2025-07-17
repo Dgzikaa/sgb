@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
 import { createServiceRoleClient } from '@/lib/supabase-admin';
 
-// Schema de valida��o para filtros
+// Schema de validaÃ¡Â§Ã¡Â£o para filtros
 const FilterAnomaliesSchema = z.object({
   tipo_anomalia: z.string().optional(),
   severidade: z.enum(['baixa', 'media', 'alta', 'critica']).optional(),
@@ -19,7 +19,7 @@ const FilterAnomaliesSchema = z.object({
   order_direction: z.enum(['asc', 'desc']).default('desc')
 });
 
-// Schema para atualiza��o de anomalia
+// Schema para atualizaÃ¡Â§Ã¡Â£o de anomalia
 const UpdateAnomalySchema = z.object({
   status: z.enum(['detectada', 'investigando', 'resolvendo', 'resolvida', 'falso_positivo']).optional(),
   causa_real: z.string().optional(),
@@ -31,7 +31,7 @@ const UpdateAnomalySchema = z.object({
 });
 
 // ========================================
-// 🚨 GET /api/ai/anomalies
+// Ã°Å¸Å¡Â¨ GET /api/ai/anomalies
 // ========================================
 export async function GET(request: NextRequest) {
   try {
@@ -39,26 +39,26 @@ export async function GET(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
-    // Verificar permiss�es
+    // Verificar permissÃ¡Âµes
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permiss�o para acessar anomalias' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permissÃ¡Â£o para acessar anomalias' }, { status: 403 });
     }
 
-    // Parse dos par�metros de query
+    // Parse dos parÃ¡Â¢metros de query
     const url = new URL(request.url);
     const rawParams = Object.fromEntries(url.searchParams.entries());
     
     // Converter tipos
-    const processedParams = { ...rawParams };
-    if (processedParams.page) processedParams.page = parseInt(processedParams.page);
-    if (processedParams.limit) processedParams.limit = parseInt(processedParams.limit);
-    if (processedParams.confianca_minima) processedParams.confianca_minima = parseFloat(processedParams.confianca_minima);
-    if (processedParams.ainda_ativa) processedParams.ainda_ativa = processedParams.ainda_ativa === 'true';
+    const processedParams: any = { ...rawParams };
+    if (processedParams.page !== undefined && processedParams.page !== '') processedParams.page = Number(processedParams.page);
+    if (processedParams.limit !== undefined && processedParams.limit !== '') processedParams.limit = Number(processedParams.limit);
+    if (processedParams.confianca_minima !== undefined && processedParams.confianca_minima !== '') processedParams.confianca_minima = parseFloat(processedParams.confianca_minima);
+    if (processedParams.ainda_ativa !== undefined && processedParams.ainda_ativa !== '') processedParams.ainda_ativa = processedParams.ainda_ativa === 'true';
 
     const params = FilterAnomaliesSchema.parse(processedParams);
 
@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
       query = query.gte('confianca_deteccao', params.confianca_minima);
     }
 
-    // Pagina��o
+    // PaginaÃ¡Â§Ã¡Â£o
     const offset = (params.page - 1) * params.limit;
     query = query.range(offset, offset + params.limit - 1);
 
@@ -139,7 +139,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao buscar anomalias' }, { status: 500 });
     }
 
-    // Buscar estat�sticas gerais
+    // Buscar estatÃ¡Â­sticas gerais
     const { data: stats } = await supabase
       .from('ai_anomalies')
       .select('severidade, status, tipo_anomalia, ainda_ativa, confianca_deteccao')
@@ -147,28 +147,28 @@ export async function GET(request: NextRequest) {
 
     const estatisticas = {
       total: stats?.length || 0,
-      ativas: stats?.filter((s) => s.ainda_ativa).length || 0,
-      resolvidas: stats?.filter((s) => s.status === 'resolvida').length || 0,
-      falsos_positivos: stats?.filter((s) => s.falso_positivo).length || 0,
+      ativas: stats?.filter((s: any) => s.ainda_ativa).length || 0,
+      resolvidas: stats?.filter((s: any) => s.status === 'resolvida').length || 0,
+      falsos_positivos: stats?.filter((s: any) => s.falso_positivo).length || 0,
       por_severidade: {
-        critica: stats?.filter((s) => s.severidade === 'critica').length || 0,
-        alta: stats?.filter((s) => s.severidade === 'alta').length || 0,
-        media: stats?.filter((s) => s.severidade === 'media').length || 0,
-        baixa: stats?.filter((s) => s.severidade === 'baixa').length || 0
+        critica: stats?.filter((s: any) => s.severidade === 'critica').length || 0,
+        alta: stats?.filter((s: any) => s.severidade === 'alta').length || 0,
+        media: stats?.filter((s: any) => s.severidade === 'media').length || 0,
+        baixa: stats?.filter((s: any) => s.severidade === 'baixa').length || 0
       },
-      por_tipo: stats?.reduce((acc, s) => {
+      por_tipo: stats?.reduce((acc: Record<string, number>, s: any) => {
         acc[s.tipo_anomalia] = (acc[s.tipo_anomalia] || 0) + 1;
         return acc;
       }, {} as Record<string, number>) || {},
-      por_status: stats?.reduce((acc, s) => {
+      por_status: stats?.reduce((acc: Record<string, number>, s: any) => {
         acc[s.status] = (acc[s.status] || 0) + 1;
         return acc;
       }, {} as Record<string, number>) || {},
       confianca_media: stats?.length ? 
-        stats.reduce((sum, s) => sum + s.confianca_deteccao, 0) / stats.length : 0
+        stats.reduce((sum: number, s: any) => sum + s.confianca_deteccao, 0) / stats.length : 0
     };
 
-    // Buscar anomalias cr�ticas ativas
+    // Buscar anomalias crÃ¡Â­ticas ativas
     const { data: criticas } = await supabase
       .from('ai_anomalies')
       .select('id, titulo, severidade, data_inicio')
@@ -178,7 +178,7 @@ export async function GET(request: NextRequest) {
       .order('data_inicio', { ascending: false })
       .limit(5);
 
-    // Calcular tend�ncias (�ltimos 7 vs 7 anteriores)
+    // Calcular tendÃ¡Âªncias (Ã¡Âºltimos 7 vs 7 anteriores)
     const hoje = new Date();
     const setedias = new Date(hoje.getTime() - 7 * 24 * 60 * 60 * 1000);
     const quatorzeDias = new Date(hoje.getTime() - 14 * 24 * 60 * 60 * 1000);
@@ -228,7 +228,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({
-        error: 'Par�metros inv�lidos',
+        error: 'ParÃ¡Â¢metros invÃ¡Â¡lidos',
         details: error.errors
       }, { status: 400 });
     }
@@ -239,7 +239,7 @@ export async function GET(request: NextRequest) {
 }
 
 // ========================================
-// 🚨 PUT /api/ai/anomalies
+// Ã°Å¸Å¡Â¨ PUT /api/ai/anomalies
 // ========================================
 export async function PUT(request: NextRequest) {
   try {
@@ -247,21 +247,21 @@ export async function PUT(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao, usuario_id } = JSON.parse(userData);
 
-    // Verificar permiss�es
+    // Verificar permissÃ¡Âµes
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permiss�o para atualizar anomalias' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permissÃ¡Â£o para atualizar anomalias' }, { status: 403 });
     }
 
     const body = await request.json();
     const { id, ...updateData } = body;
 
     if (!id) {
-      return NextResponse.json({ error: 'ID da anomalia � obrigat�rio' }, { status: 400 });
+      return NextResponse.json({ error: 'ID da anomalia Ã¡Â© obrigatÃ¡Â³rio' }, { status: 400 });
     }
 
     const validatedData = UpdateAnomalySchema.parse(updateData);
@@ -278,45 +278,45 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (fetchError || !existing) {
-      return NextResponse.json({ error: 'Anomalia n�o encontrada' }, { status: 404 });
+      return NextResponse.json({ error: 'Anomalia nÃ¡Â£o encontrada' }, { status: 404 });
     }
 
-    // Preparar dados para atualiza��o
+    // Preparar dados para atualizaÃ¡Â§Ã¡Â£o
     const updatePayload = { ...validatedData };
 
-    // L�gica de status autom�tico
+    // LÃ¡Â³gica de status automÃ¡Â¡tico
     if (validatedData.status === 'investigando' && existing.status === 'detectada') {
-      updatePayload.investigada_por = usuario_id;
-      updatePayload.investigada_em = new Date().toISOString();
+      (updatePayload as any).investigada_por = usuario_id;
+      (updatePayload as any).investigada_em = new Date().toISOString();
     }
 
     if (validatedData.status === 'resolvida') {
-      updatePayload.resolvida_em = new Date().toISOString();
-      updatePayload.ainda_ativa = false;
+      (updatePayload as any).resolvida_em = new Date().toISOString();
+      (updatePayload as any).ainda_ativa = false;
       
-      // Se n�o forneceu data_fim, usar agora
+      // Se nÃ¡Â£o forneceu data_fim, usar agora
       if (!validatedData.data_fim) {
-        updatePayload.data_fim = new Date().toISOString();
+        (updatePayload as any).data_fim = new Date().toISOString();
       }
       
-      // Calcular dura��o se poss�vel
+      // Calcular duraÃ¡Â§Ã¡Â£o se possÃ¡Â­vel
       const { data: original } = await supabase
         .from('ai_anomalies')
         .select('data_inicio')
         .eq('id', id)
         .single();
         
-      if (original?.data_inicio) {
+      if (original?.data_inicio && (updatePayload as any).data_fim) {
         const inicio = new Date(original.data_inicio);
-        const fim = new Date(updatePayload.data_fim);
-        updatePayload.duracao_minutos = Math.round((fim.getTime() - inicio.getTime()) / 60000);
+        const fim = new Date((updatePayload as any).data_fim);
+        (updatePayload as any).duracao_minutos = Math.round((fim.getTime() - inicio.getTime()) / 60000);
       }
     }
 
     if (validatedData.falso_positivo === true) {
-      updatePayload.status = 'falso_positivo';
-      updatePayload.ainda_ativa = false;
-      updatePayload.data_fim = new Date().toISOString();
+      (updatePayload as any).status = 'falso_positivo';
+      (updatePayload as any).ainda_ativa = false;
+      (updatePayload as any).data_fim = new Date().toISOString();
     }
 
     // Atualizar anomalia
@@ -345,7 +345,7 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({
-        error: 'Dados inv�lidos',
+        error: 'Dados invÃ¡Â¡lidos',
         details: error.errors
       }, { status: 400 });
     }
@@ -356,7 +356,7 @@ export async function PUT(request: NextRequest) {
 }
 
 // ========================================
-// 🚨 POST /api/ai/anomalies (A��es em lote)
+// Ã°Å¸Å¡Â¨ POST /api/ai/anomalies (AÃ¡Â§Ã¡Âµes em lote)
 // ========================================
 export async function POST(request: NextRequest) {
   try {
@@ -364,14 +364,14 @@ export async function POST(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao, usuario_id } = JSON.parse(userData);
 
-    // Verificar permiss�es
+    // Verificar permissÃ¡Âµes
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permiss�o para atualizar anomalias' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permissÃ¡Â£o para atualizar anomalias' }, { status: 403 });
     }
 
     const body = await request.json();
@@ -379,7 +379,7 @@ export async function POST(request: NextRequest) {
 
     if (!action || !Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json({ 
-        error: 'A��o e lista de IDs s�o obrigat�rios' 
+        error: 'AÃ¡Â§Ã¡Â£o e lista de IDs sÃ¡Â£o obrigatÃ¡Â³rios' 
       }, { status: 400 });
     }
 
@@ -393,7 +393,7 @@ export async function POST(request: NextRequest) {
           investigada_por: usuario_id,
           investigada_em: new Date().toISOString()
         };
-        successMessage = 'Anomalias marcadas como em investiga��o';
+        successMessage = 'Anomalias marcadas como em investigaÃ¡Â§Ã¡Â£o';
         break;
       
       case 'mark_resolved':
@@ -417,13 +417,13 @@ export async function POST(request: NextRequest) {
         break;
       
       default:
-        return NextResponse.json({ error: 'A��o inv�lida' }, { status: 400 });
+        return NextResponse.json({ error: 'AÃ¡Â§Ã¡Â£o invÃ¡Â¡lida' }, { status: 400 });
     }
 
     // Criar cliente Supabase
     const supabase = createServiceRoleClient();
 
-    // Atualizar m�ltiplas anomalias
+    // Atualizar mÃ¡Âºltiplas anomalias
     const { data, error } = await supabase
       .from('ai_anomalies')
       .update(updateData)
@@ -448,3 +448,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 } 
+

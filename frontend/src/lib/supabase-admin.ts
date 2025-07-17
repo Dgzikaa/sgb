@@ -1,19 +1,20 @@
-import { createClient } from '@supabase/supabase-js'
+ï»¿import { createClient } from '@supabase/supabase-js'
+import { SupabaseClient } from '@supabase/supabase-js';
 
 // Cliente administrativo do Supabase (usa service role key)
-let adminClient = null
+let adminClient: SupabaseClient | null = null;
 
-async function getAdminClient() {
+async function getAdminClient(): Promise<SupabaseClient> {
   if (adminClient) {
-    return adminClient
+    return adminClient;
   }
 
   // Usar valores dos secrets do sistema (fixos e seguros)
   const supabaseUrl = 'https://uqtgsvujwcbymjmvkjhy.supabase.co'
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SERVICE_ROLE_KEY
+  const serviceRoleKey: string | undefined = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SERVICE_ROLE_KEY
 
   if (!serviceRoleKey) {
-    throw new Error('SUPABASE_SERVICE_ROLE_KEY ná£o está¡ configurada nos secrets do sistema. Configure via MCP Supabase.')
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY nÃ£o estÃ¡ configurada nos secrets do sistema. Configure via MCP Supabase.')
   }
 
   try {
@@ -24,22 +25,22 @@ async function getAdminClient() {
       }
     })
 
-    console.log('œ… Cliente administrativo Supabase inicializado')
+    console.log('Cliente administrativo Supabase inicializado')
     return adminClient
 
   } catch (error) {
-    console.error('Œ Erro ao inicializar cliente administrativo:', error)
+    console.error('Erro ao inicializar cliente administrativo:', error)
     throw error
   }
 }
 
-// Funá§á£o helper para rotas API (evita inicializaá§á£o no má³dulo)
-function createServiceRoleClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SERVICE_ROLE_KEY
+// FunÃ§Ã£o helper para rotas API (evita inicializaÃ§Ã£o no mÃ³dulo)
+function createServiceRoleClient(): SupabaseClient {
+  const supabaseUrl: string | undefined = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey: string | undefined = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SERVICE_ROLE_KEY
 
   if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error('Variá¡veis de ambiente Supabase ná£o configuradas')
+    throw new Error('VariÃ¡veis de ambiente Supabase nÃ£o configuradas')
   }
 
   return createClient(supabaseUrl, serviceRoleKey, {
@@ -51,3 +52,4 @@ function createServiceRoleClient() {
 }
 
 export { getAdminClient, createServiceRoleClient } 
+

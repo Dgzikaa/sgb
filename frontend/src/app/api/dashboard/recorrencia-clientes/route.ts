@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic'
@@ -17,15 +17,15 @@ export async function GET(request: NextRequest) {
 
     if (!data1 || !data2 || !barId) {
       return NextResponse.json({ 
-        error: 'Par�metros obrigat�rios: data1, data2, bar_id' 
+        error: 'ParÃ¡Â¢metros obrigatÃ¡Â³rios: data1, data2, bar_id' 
       }, { status: 400 });
     }
 
-    console.log(`🔍 Analisando recorr�ncia entre ${data1} e ${data2} para bar ${barId}`);
+    console.log(`Ã°Å¸â€Â Analisando recorrÃ¡Âªncia entre ${data1} e ${data2} para bar ${barId}`);
 
     // Try multiple sources for customer data
-    let emailsData1[] = [];
-    let emailsData2[] = [];
+    let emailsData1: any[] = [];
+    let emailsData2: any[] = [];
 
     // First try the periodo table
     const { data: periodData1, error: periodError1 } = await supabase
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
       emailsData2 = periodData2;
     }
 
-    console.log(`📧 Emails encontrados - Data1: ${emailsData1.length}, Data2: ${emailsData2.length}`);
+    console.log(`Ã°Å¸â€œÂ§ Emails encontrados - Data1: ${emailsData1.length}, Data2: ${emailsData2.length}`);
 
     // If we have very little data, try to get from other sources
     if (emailsData1.length === 0 && emailsData2.length === 0) {
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         limitedData: true,
-        message: 'Dados de email limitados. An�lise baseada em estimativas.',
+        message: 'Dados de email limitados. AnÃ¡Â¡lise baseada em estimativas.',
         data: {
           data1,
           data2,
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
           insights: {
             fidelizacao: 'Dados insuficientes',
             captacao: 'Dados insuficientes',
-            tendencia: totalData2 > totalData1 ? 'Crescendo' : totalData2 < totalData1 ? 'Diminuindo' : 'Est�vel'
+            tendencia: totalData2 > totalData1 ? 'Crescendo' : totalData2 < totalData1 ? 'Diminuindo' : 'EstÃ¡Â¡vel'
           }
         }
       });
@@ -113,9 +113,9 @@ export async function GET(request: NextRequest) {
     const percentualNovos = totalData2 > 0 ? (novos / totalData2) * 100 : 0;
     const crescimento = totalData1 > 0 ? ((totalData2 - totalData1) / totalData1) * 100 : 0;
 
-    console.log(`📊 Resultados da recorr�ncia:`);
-    console.log(`   Data 1 (${data1}): ${totalData1} clientes �nicos`);
-    console.log(`   Data 2 (${data2}): ${totalData2} clientes �nicos`);
+    console.log(`Ã°Å¸â€œÅ  Resultados da recorrÃ¡Âªncia:`);
+    console.log(`   Data 1 (${data1}): ${totalData1} clientes Ã¡Âºnicos`);
+    console.log(`   Data 2 (${data2}): ${totalData2} clientes Ã¡Âºnicos`);
     console.log(`   Recorrentes: ${recorrentes} (${percentualRecorrencia.toFixed(1)}%)`);
     console.log(`   Novos: ${novos} (${percentualNovos.toFixed(1)}%)`);
     console.log(`   Crescimento: ${crescimento.toFixed(1)}%`);
@@ -134,18 +134,19 @@ export async function GET(request: NextRequest) {
         percentualNovos: parseFloat(percentualNovos.toFixed(1)),
         crescimento: parseFloat(crescimento.toFixed(1)),
         insights: {
-          fidelizacao: percentualRecorrencia >= 40 ? 'Alta' : percentualRecorrencia >= 25 ? 'M�dia' : 'Baixa',
+          fidelizacao: percentualRecorrencia >= 40 ? 'Alta' : percentualRecorrencia >= 25 ? 'MÃ¡Â©dia' : 'Baixa',
           captacao: percentualNovos >= 60 ? 'Excelente' : percentualNovos >= 40 ? 'Boa' : 'Regular',
-          tendencia: crescimento > 10 ? 'Crescendo' : crescimento < -10 ? 'Diminuindo' : 'Est�vel'
+          tendencia: crescimento > 10 ? 'Crescendo' : crescimento < -10 ? 'Diminuindo' : 'EstÃ¡Â¡vel'
         }
       }
     });
 
   } catch (error) {
-    console.error('�� Erro na an�lise de recorr�ncia:', error);
+    console.error('ÂÅ’ Erro na anÃ¡Â¡lise de recorrÃ¡Âªncia:', error);
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
       details: error instanceof Error ? error.message : 'Erro desconhecido'
     }, { status: 500 });
   }
 }
+

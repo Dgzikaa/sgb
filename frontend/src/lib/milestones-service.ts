@@ -1,16 +1,12 @@
-// ========================================
-// ğŸ¯ MILESTONES SERVICE - MARCOS IMPORTANTES
-// ========================================
-// Serviá§o para detectar marcos importantes em má©tricas sociais
-// e enviar notificaá§áµes automá¡ticas via Discord
+ï»¿// ğŸ¯ MILESTONES SERVICE - MARCOS IMPORTANTES
+// ServiÃ§o para detectar marcos importantes em mÃ©tricas sociais
+// e enviar notificaÃ§Ãµes automÃ¡ticas via Discord
 
 import { DiscordMarketingService, DiscordMarketingEmbed } from './discord-marketing-service'
 
 const discordMarketingService = new DiscordMarketingService()
 
-// ========================================
-// ğŸ† TIPOS DE MARCOS IMPORTANTES
-// ========================================
+// ğŸ¯ TIPOS DE MARCOS IMPORTANTES
 export interface Milestone {
   id: string
   type: 'followers' | 'engagement' | 'reach' | 'posts' | 'revenue'
@@ -23,11 +19,26 @@ export interface Milestone {
   celebration_message: string
 }
 
-// ========================================
-// ğŸ¯ CONFIGURAá‡áƒO DE MARCOS PADRáƒO
-// ========================================
+export interface SocialMetrics {
+  instagram?: {
+    followers_count?: number
+    reach?: number
+    max_likes_this_month?: number
+  }
+  facebook?: {
+    page_fans?: number
+    page_post_engagements?: number
+    max_likes_this_month?: number
+  }
+  consolidated?: {
+    engagement_rate?: number
+  }
+  // Futuro: revenue, outras plataformas
+}
+
+// ğŸ¯ CONFIGURAÃ‡ÃƒO DE MARCOS PADRÃƒO
 export const DEFAULT_MILESTONES: Milestone[] = [
-  // ğŸ“± Instagram Followers
+  // ğŸ‰ Instagram Followers
   {
     id: 'ig_followers_1000',
     type: 'followers',
@@ -35,7 +46,7 @@ export const DEFAULT_MILESTONES: Milestone[] = [
     threshold: 1000,
     description: '1K seguidores no Instagram',
     icon: 'ğŸ‰',
-    celebration_message: 'Ordiná¡rio Bar chegou aos 1.000 seguidores no Instagram!'
+    celebration_message: 'OrdinÃ¡rio Bar chegou aos 1.000 seguidores no Instagram!'
   },
   {
     id: 'ig_followers_5000',
@@ -43,8 +54,8 @@ export const DEFAULT_MILESTONES: Milestone[] = [
     platform: 'instagram',
     threshold: 5000,
     description: '5K seguidores no Instagram',
-    icon: 'ğŸš€',
-    celebration_message: 'MARCO INCRáVEL! 5.000 seguidores no Instagram do Ordiná¡rio!'
+    icon: 'ğŸ‰',
+    celebration_message: 'MARCO INCRÃVEL! 5.000 seguidores no Instagram do OrdinÃ¡rio!'
   },
   {
     id: 'ig_followers_10000',
@@ -53,18 +64,18 @@ export const DEFAULT_MILESTONES: Milestone[] = [
     threshold: 10000,
     description: '10K seguidores no Instagram',
     icon: 'ğŸ’',
-    celebration_message: 'DIAMANTE! 10.000 seguidores no Instagram - Ordiná¡rio Bar á© referáªncia!'
+    celebration_message: 'DIAMANTE! 10.000 seguidores no Instagram - OrdinÃ¡rio Bar Ã© referÃªncia!'
   },
 
-  // ğŸ“˜ Facebook Followers
+  // ğŸ‰ Facebook Followers
   {
     id: 'fb_followers_500',
     type: 'followers',
     platform: 'facebook',
     threshold: 500,
     description: '500 seguidores no Facebook',
-    icon: 'ğŸ“˜',
-    celebration_message: 'Meio milhar de fá£s no Facebook do Ordiná¡rio Bar!'
+    icon: 'ğŸ‰',
+    celebration_message: 'Meio milhar de fÃ£s no Facebook do OrdinÃ¡rio Bar!'
   },
   {
     id: 'fb_followers_2000',
@@ -72,19 +83,19 @@ export const DEFAULT_MILESTONES: Milestone[] = [
     platform: 'facebook', 
     threshold: 2000,
     description: '2K seguidores no Facebook',
-    icon: 'ğŸ”¥',
-    celebration_message: '2.000 pessoas curtem a pá¡gina do Ordiná¡rio no Facebook!'
+    icon: 'ğŸ’',
+    celebration_message: '2.000 pessoas curtem a pÃ¡gina do OrdinÃ¡rio no Facebook!'
   },
 
-  // ğŸ“Š Engagement Mensal
+  // ğŸ‰ Engagement Mensal
   {
     id: 'engagement_rate_5',
     type: 'engagement',
     platform: 'combined',
     threshold: 5.0,
     description: '5% de taxa de engajamento mensal',
-    icon: 'š¡',
-    celebration_message: 'Taxa de engajamento do Ordiná¡rio atingiu 5% - Audiáªncia super ativa!'
+    icon: 'ğŸ‰',
+    celebration_message: 'Taxa de engajamento do OrdinÃ¡rio atingiu 5% - AudiÃªncia super ativa!'
   },
   {
     id: 'engagement_rate_10',
@@ -92,39 +103,39 @@ export const DEFAULT_MILESTONES: Milestone[] = [
     platform: 'combined', 
     threshold: 10.0,
     description: '10% de taxa de engajamento mensal',
-    icon: 'ğŸ”¥',
-    celebration_message: 'ENGAJAMENTO EXPLOSIVO! 10% - Ordiná¡rio Bar viralizado!'
+    icon: 'ğŸ’',
+    celebration_message: 'ENGAJAMENTO EXPLOSIVO! 10% - OrdinÃ¡rio Bar viralizado!'
   },
 
-  // ğŸ“ˆ Alcance Mensal
+  // ğŸ‰ Alcance Mensal
   {
     id: 'reach_monthly_10k',
     type: 'reach',
     platform: 'combined',
     threshold: 10000,
-    description: '10K pessoas alcaná§adas no máªs',
-    icon: 'ğŸ“¢',
-    celebration_message: 'Ordiná¡rio Bar alcaná§ou 10.000 pessoas este máªs!'
+    description: '10K pessoas alcanÃ§adas no mÃªs',
+    icon: 'ğŸ‰',
+    celebration_message: 'OrdinÃ¡rio Bar alcanÃ§ou 10.000 pessoas este mÃªs!'
   },
   {
     id: 'reach_monthly_50k',
     type: 'reach',
     platform: 'combined',
     threshold: 50000,
-    description: '50K pessoas alcaná§adas no máªs', 
-    icon: 'ğŸŒŸ',
-    celebration_message: 'ALCANCE INCRáVEL! 50.000 pessoas conheceram o Ordiná¡rio este máªs!'
+    description: '50K pessoas alcanÃ§adas no mÃªs', 
+    icon: 'ğŸ’',
+    celebration_message: 'ALCANCE INCRÃVEL! 50.000 pessoas conheceram o OrdinÃ¡rio este mÃªs!'
   },
 
-  // ğŸ¯ Posts Performance
+  // ğŸ‰ Posts Performance
   {
     id: 'viral_post_1k_likes',
     type: 'posts',
     platform: 'combined',
     threshold: 1000,
     description: 'Post com 1K curtidas',
-    icon: '¤ï¸',
-    celebration_message: 'Post do Ordiná¡rio viralizou com mais de 1.000 curtidas!'
+    icon: 'ğŸ’',
+    celebration_message: 'Post do OrdinÃ¡rio viralizou com mais de 1.000 curtidas!'
   },
   {
     id: 'viral_post_5k_likes',
@@ -132,14 +143,12 @@ export const DEFAULT_MILESTONES: Milestone[] = [
     platform: 'combined', 
     threshold: 5000,
     description: 'Post com 5K curtidas',
-    icon: 'ğŸ’¥',
-    celebration_message: 'POST VIRAL! Mais de 5.000 curtidas - Ordiná¡rio Bar bombando!'
+    icon: 'ğŸ’',
+    celebration_message: 'POST VIRAL! Mais de 5.000 curtidas - OrdinÃ¡rio Bar bombando!'
   }
 ]
 
-// ========================================
-// ğŸ¯ CLASSE PRINCIPAL DO SERVIá‡O
-// ========================================
+// ğŸ¯ CLASSE PRINCIPAL DO SERVIÃ‡O
 export class MilestonesService {
   private achieved_milestones: Set<string> = new Set()
 
@@ -147,40 +156,36 @@ export class MilestonesService {
     this.loadAchievedMilestones()
   }
 
-  // ========================================
-  // ğŸ’¾ GERENCIAMENTO DE MARCOS ALCANá‡ADOS
-  // ========================================
-  private loadAchievedMilestones() {
+  // ğŸ¯ GERENCIAMENTO DE MARCOS ALCANÃ‡ADOS
+  private loadAchievedMilestones(): void {
     try {
       const stored = localStorage.getItem('sgb_achieved_milestones')
       if (stored) {
-        const milestones = JSON.parse(stored)
+        const milestones: string[] = JSON.parse(stored)
         this.achieved_milestones = new Set(milestones)
       }
     } catch (error) {
-      console.error('Erro ao carregar marcos alcaná§ados:', error)
+      console.error('Erro ao carregar marcos alcanÃ§ados:', error)
     }
   }
 
-  private saveAchievedMilestone(milestoneId: string) {
+  private saveAchievedMilestone(milestoneId: string): void {
     try {
       this.achieved_milestones.add(milestoneId)
       const milestonesArray = Array.from(this.achieved_milestones)
       localStorage.setItem('sgb_achieved_milestones', JSON.stringify(milestonesArray))
     } catch (error) {
-      console.error('Erro ao salvar marco alcaná§ado:', error)
+      console.error('Erro ao salvar marco alcanÃ§ado:', error)
     }
   }
 
-  // ========================================
-  // ğŸ” VERIFICAá‡áƒO DE MARCOS
-  // ========================================
-  async checkMilestones(metrics): Promise<Milestone[]> {
+  // ğŸ¯ VERIFICAÃ‡ÃƒO DE MARCOS
+  async checkMilestones(metrics: SocialMetrics): Promise<Milestone[]> {
     const newAchievements: Milestone[] = []
 
     try {
       for (const milestone of DEFAULT_MILESTONES) {
-        // Pular se já¡ foi alcaná§ado
+        // Pular se jÃ¡ foi alcanÃ§ado
         if (this.achieved_milestones.has(milestone.id)) {
           continue
         }
@@ -188,8 +193,8 @@ export class MilestonesService {
         const currentValue = this.extractCurrentValue(milestone, metrics)
         
         if (currentValue !== null && currentValue >= milestone.threshold) {
-          // Marco alcaná§ado!
-          const achievedMilestone = {
+          // Marco alcanÃ§ado!
+          const achievedMilestone: Milestone = {
             ...milestone,
             achieved_at: new Date().toISOString(),
             current_value: currentValue
@@ -198,7 +203,7 @@ export class MilestonesService {
           newAchievements.push(achievedMilestone)
           this.saveAchievedMilestone(milestone.id)
 
-          // Enviar notificaá§á£o Discord
+          // Enviar notificaÃ§Ã£o Discord
           await this.sendMilestoneNotification(achievedMilestone)
         }
       }
@@ -209,68 +214,64 @@ export class MilestonesService {
     return newAchievements
   }
 
-  // ========================================
-  // ğŸ“Š EXTRAá‡áƒO DE VALORES DAS Má‰TRICAS  
-  // ========================================
-  private extractCurrentValue(milestone: Milestone, metrics): number | null {
+  // ğŸ‰ EXTRAÃ‡ÃƒO DE VALORES DAS MÃ‰TRICAS  
+  private extractCurrentValue(milestone: Milestone, metrics: SocialMetrics): number | null {
     try {
       switch (milestone.type) {
         case 'followers':
           if (milestone.platform === 'instagram') {
-            return metrics.instagram?.followers_count || 0
+            return metrics.instagram?.followers_count ?? 0
           } else if (milestone.platform === 'facebook') {
-            return metrics.facebook?.page_fans || 0
+            return metrics.facebook?.page_fans ?? 0
           } else if (milestone.platform === 'combined') {
-            const ig = metrics.instagram?.followers_count || 0
-            const fb = metrics.facebook?.page_fans || 0
+            const ig = metrics.instagram?.followers_count ?? 0
+            const fb = metrics.facebook?.page_fans ?? 0
             return ig + fb
           }
           break
 
         case 'engagement':
           if (milestone.platform === 'combined') {
-            return metrics.consolidated?.engagement_rate || 0
+            return metrics.consolidated?.engagement_rate ?? 0
           }
           break
 
         case 'reach':
           if (milestone.platform === 'combined') {
-            const ig_reach = metrics.instagram?.reach || 0
-            const fb_reach = metrics.facebook?.page_post_engagements || 0
+            const ig_reach = metrics.instagram?.reach ?? 0
+            const fb_reach = metrics.facebook?.page_post_engagements ?? 0
             return ig_reach + fb_reach
           }
           break
 
         case 'posts':
           if (milestone.platform === 'combined') {
-            // Verificar posts mais curtidos do máªs
+            // Verificar posts mais curtidos do mÃªs
             const maxLikes = Math.max(
-              metrics.instagram?.max_likes_this_month || 0,
-              metrics.facebook?.max_likes_this_month || 0
+              metrics.instagram?.max_likes_this_month ?? 0,
+              metrics.facebook?.max_likes_this_month ?? 0
             )
             return maxLikes
           }
           break
 
         case 'revenue':
-          // Futuro: integraá§á£o com dados de revenue
+          // Futuro: integraÃ§Ã£o com dados de revenue
           return null
       }
 
       return null
     } catch (error) {
-      console.error('Erro ao extrair valor da má©trica:', error)
+      console.error('Erro ao extrair valor da mÃ©trica:', error)
       return null
     }
   }
 
-  // ========================================
-  // ğŸ”” NOTIFICAá‡áƒO DISCORD
-  // ========================================
-  private async sendMilestoneNotification(milestone: Milestone) {
+  // ğŸ‰ NOTIFICAÃ‡ÃƒO DISCORD
+  private async sendMilestoneNotification(milestone: Milestone): Promise<void> {
     try {
       const embed: DiscordMarketingEmbed = {
-        title: `ğŸ† Marco Alcaná§ado!`,
+        title: `ğŸ¯ Marco AlcanÃ§ado!`,
         description: milestone.celebration_message,
         color: 16766720, // Dourado
         fields: [
@@ -280,24 +281,24 @@ export class MilestonesService {
             inline: true
           },
           {
-            name: 'ğŸ“Š Valor Atingido',
+            name: 'ğŸ‰ Valor Atingido',
             value: milestone.current_value?.toLocaleString() || 'N/A',
             inline: true
           },
           {
-            name: 'ğŸ“… Data',
+            name: 'ğŸ‰ Data',
             value: new Date().toLocaleDateString('pt-BR'),
             inline: true
           },
           {
-            name: 'ğŸš€ Plataforma',
+            name: 'ğŸ‰ Plataforma',
             value: milestone.platform === 'combined' ? 'Facebook + Instagram' : 
                    milestone.platform === 'instagram' ? 'Instagram' : 'Facebook',
             inline: false
           }
         ],
         footer: {
-          text: 'SGB Marketing Bot €¢ Parabá©ns pela conquista!'
+          text: 'SGB Marketing Bot ğŸ‰ ParabÃ©ns pela conquista!'
         },
         timestamp: new Date().toISOString()
       }
@@ -306,39 +307,42 @@ export class MilestonesService {
 
       console.log(`ğŸ‰ Marco enviado para Discord: ${milestone.id}`)
     } catch (error) {
-      console.error('Erro ao enviar notificaá§á£o de marco:', error)
+      console.error('Erro ao enviar notificaÃ§Ã£o de marco:', error)
     }
   }
 
-  // ========================================
-  // ğŸ“‹ Má‰TODOS UTILITáRIOS
-  // ========================================
+  // ğŸ‰ MÃ‰TODOS UTILITÃRIOS
   
-  // Obter marcos ainda ná£o alcaná§ados
+  // Obter marcos ainda nÃ£o alcanÃ§ados
   getPendingMilestones(): Milestone[] {
     return DEFAULT_MILESTONES.filter(
-      milestone => !this.achieved_milestones.has(milestone.id)
+      (milestone: Milestone) => !this.achieved_milestones.has(milestone.id)
     )
   }
 
-  // Obter marcos já¡ alcaná§ados
+  // Obter marcos jÃ¡ alcanÃ§ados
   getAchievedMilestones(): string[] {
     return Array.from(this.achieved_milestones)
   }
 
   // Resetar marcos (para testes)
-  resetMilestones() {
+  resetMilestones(): void {
     this.achieved_milestones.clear()
     localStorage.removeItem('sgb_achieved_milestones')
   }
 
-  // Verificar progresso atá© prá³ximo marco
-  getProgressToNextMilestone(type: string, platform: string, currentValue: number) {
+  // Verificar progresso atÃ© prÃ³ximo marco
+  getProgressToNextMilestone(type: Milestone['type'], platform: Milestone['platform'], currentValue: number): {
+    milestone: Milestone
+    progress: number
+    remaining: number
+    percentage: string
+  } | null {
     const relevantMilestones = DEFAULT_MILESTONES
-      .filter((m) => m.type === type && m.platform === platform)
-      .filter((m) => !this.achieved_milestones.has(m.id))
-      .filter((m) => m.threshold > currentValue)
-      .sort((a, b) => a.threshold - b.threshold)
+      .filter((m: Milestone) => m.type === type && m.platform === platform)
+      .filter((m: Milestone) => !this.achieved_milestones.has(m.id))
+      .filter((m: Milestone) => m.threshold > currentValue)
+      .sort((a: Milestone, b: Milestone) => a.threshold - b.threshold)
 
     if (relevantMilestones.length === 0) return null
 
@@ -355,11 +359,11 @@ export class MilestonesService {
   }
 
   // Simular marco para testes
-  async simulateMilestone(milestoneId: string) {
-    const milestone = DEFAULT_MILESTONES.find((m) => m.id === milestoneId)
+  async simulateMilestone(milestoneId: string): Promise<boolean> {
+    const milestone = DEFAULT_MILESTONES.find((m: Milestone) => m.id === milestoneId)
     if (!milestone) return false
 
-    const simulatedMilestone = {
+    const simulatedMilestone: Milestone = {
       ...milestone,
       achieved_at: new Date().toISOString(),
       current_value: milestone.threshold
@@ -370,14 +374,10 @@ export class MilestonesService {
   }
 }
 
-// ========================================
-// ğŸ¯ INSTá‚NCIA GLOBAL DO SERVIá‡O
-// ========================================
+// ğŸ¯ INSTÃ‚NCIA GLOBAL DO SERVIÃ‡O
 export const milestonesService = new MilestonesService()
 
-// ========================================
-// ğŸ“ DOCUMENTAá‡áƒO E EXEMPLOS
-// ========================================
+// ğŸ¯ DOCUMENTAÃ‡ÃƒO E EXEMPLOS
 /*
 MILESTONES SERVICE - COMO USAR:
 
@@ -402,9 +402,10 @@ const pending = milestonesService.getPendingMilestones()
 5. RESETAR (DESENVOLVIMENTO):
 milestonesService.resetMilestones()
 
-INTEGRAá‡áƒO COM COLETA:
-- Chamar checkMilestones() apá³s cada coleta de má©tricas
-- Notificaá§áµes Discord automá¡ticas
-- Storage local para persistir marcos alcaná§ados
+INTEGRAÃ‡ÃƒO COM COLETA:
+- Chamar checkMilestones() apÃ³s cada coleta de mÃ©tricas
+- NotificaÃ§Ãµes Discord automÃ¡ticas
+- Storage local para persistir marcos alcanÃ§ados
 - Progress tracking para dashboards
 */ 
+

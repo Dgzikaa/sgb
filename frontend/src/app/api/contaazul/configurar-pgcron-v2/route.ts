@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export async function POST(request: NextRequest) {
@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
     const { barId, action = 'configure' } = await request.json()
 
     if (!barId) {
-      return NextResponse.json({ error: 'barId � obrigat�rio' }, { status: 400 })
+      return NextResponse.json({ error: 'barId Ã¡Â© obrigatÃ¡Â³rio' }, { status: 400 })
     }
 
     const supabase = createClient(
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    console.log(`🤖 Configurando pgcron V2 - Bar: ${barId}, A��o: ${action}`)
+    console.log(`Ã°Å¸Â¤â€“ Configurando pgcron V2 - Bar: ${barId}, AÃ¡Â§Ã¡Â£o: ${action}`)
 
     switch (action) {
       case 'configure':
@@ -26,20 +26,20 @@ export async function POST(request: NextRequest) {
       case 'test':
         return await testarSyncManual(supabase, barId)
       default:
-        return NextResponse.json({ error: 'A��o n�o reconhecida' }, { status: 400 })
+        return NextResponse.json({ error: 'AÃ¡Â§Ã¡Â£o nÃ¡Â£o reconhecida' }, { status: 400 })
     }
 
   } catch (error) {
-    console.error('�� Erro na configura��o pgcron V2:', error)
+    console.error('ÂÅ’ Erro na configuraÃ¡Â§Ã¡Â£o pgcron V2:', error)
     return NextResponse.json({ 
       error: error instanceof Error ? error.message : 'Erro interno' 
     }, { status: 500 })
   }
 }
 
-async function configurarCronJob(supabase, barId: string) {
+async function configurarCronJob(supabase: any, barId: string) {
   try {
-    console.log(`🔧 Configurando cron job para bar ${barId}`)
+    console.log(`Ã°Å¸â€Â§ Configurando cron job para bar ${barId}`)
 
     // 1. Remover jobs existentes
     const { error: removeError } = await supabase.rpc('cron_unschedule_by_name', {
@@ -47,7 +47,7 @@ async function configurarCronJob(supabase, barId: string) {
     })
 
     if (removeError) {
-      console.warn('��️ Job anterior n�o encontrado ou j� removido:', removeError)
+      console.warn('Å¡Â Ã¯Â¸Â Job anterior nÃ¡Â£o encontrado ou jÃ¡Â¡ removido:', removeError)
     }
 
     // 2. Criar novo job - executa a cada 4 horas (4h, 8h, 12h, 16h, 20h, 0h)
@@ -78,7 +78,7 @@ async function configurarCronJob(supabase, barId: string) {
       throw new Error(`Erro ao criar cron job: ${error.message}`)
     }
 
-    console.log(`�� Cron job criado: ${jobName}`)
+    console.log(`Å“â€¦ Cron job criado: ${jobName}`)
 
     return NextResponse.json({
       success: true,
@@ -87,9 +87,9 @@ async function configurarCronJob(supabase, barId: string) {
       schedule: cronExpression,
       command: comando,
       nextRuns: [
-        'Pr�xima execu��o: conforme cronograma',
-        'Hor�rios: 00:00, 04:00, 08:00, 12:00, 16:00, 20:00',
-        'Timezone: UTC (ajustar conforme necess�rio)'
+        'PrÃ¡Â³xima execuÃ¡Â§Ã¡Â£o: conforme cronograma',
+        'HorÃ¡Â¡rios: 00:00, 04:00, 08:00, 12:00, 16:00, 20:00',
+        'Timezone: UTC (ajustar conforme necessÃ¡Â¡rio)'
       ]
     })
 
@@ -98,9 +98,9 @@ async function configurarCronJob(supabase, barId: string) {
   }
 }
 
-async function verificarStatus(supabase, barId: string) {
+async function verificarStatus(supabase: any, barId: string) {
   try {
-    console.log(`🔍 Verificando status para bar ${barId}`)
+    console.log(`Ã°Å¸â€Â Verificando status para bar ${barId}`)
 
     // 1. Verificar jobs ativos
     const { data: jobs, error: jobsError } = await supabase
@@ -109,10 +109,10 @@ async function verificarStatus(supabase, barId: string) {
       .ilike('jobname', `%contaazul_sync_bar_${barId}%`)
 
     if (jobsError) {
-      console.warn('��️ Erro ao buscar jobs:', jobsError)
+      console.warn('Å¡Â Ã¯Â¸Â Erro ao buscar jobs:', jobsError)
     }
 
-    // 2. Verificar �ltimas execu��es
+    // 2. Verificar Ã¡Âºltimas execuÃ¡Â§Ã¡Âµes
     const { data: runs, error: runsError } = await supabase
       .from('cron.job_run_details')
       .select('*')
@@ -120,7 +120,7 @@ async function verificarStatus(supabase, barId: string) {
       .limit(5)
 
     if (runsError) {
-      console.warn('��️ Erro ao buscar execu��es:', runsError)
+      console.warn('Å¡Â Ã¯Â¸Â Erro ao buscar execuÃ¡Â§Ã¡Âµes:', runsError)
     }
 
     // 3. Status da edge function
@@ -144,9 +144,9 @@ async function verificarStatus(supabase, barId: string) {
   }
 }
 
-async function removerCronJob(supabase, barId: string) {
+async function removerCronJob(supabase: any, barId: string) {
   try {
-    console.log(`🗑️ Removendo cron job para bar ${barId}`)
+    console.log(`Ã°Å¸â€”â€˜Ã¯Â¸Â Removendo cron job para bar ${barId}`)
 
     const jobName = `contaazul_sync_bar_${barId}`
 
@@ -158,7 +158,7 @@ async function removerCronJob(supabase, barId: string) {
       throw new Error(`Erro ao remover cron job: ${error.message}`)
     }
 
-    console.log(`�� Cron job removido: ${jobName}`)
+    console.log(`Å“â€¦ Cron job removido: ${jobName}`)
 
     return NextResponse.json({
       success: true,
@@ -171,9 +171,9 @@ async function removerCronJob(supabase, barId: string) {
   }
 }
 
-async function testarSyncManual(supabase, barId: string) {
+async function testarSyncManual(supabase: any, barId: string) {
   try {
-    console.log(`🧪 Testando sync manual para bar ${barId}`)
+    console.log(`Ã°Å¸Â§Âª Testando sync manual para bar ${barId}`)
 
     // Chamar edge function diretamente para teste
     const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/contaazul-sync-automatico`, {
@@ -236,7 +236,7 @@ export async function GET(request: NextRequest) {
   const action = searchParams.get('action') || 'status'
 
   if (!barId) {
-    return NextResponse.json({ error: 'barId � obrigat�rio' }, { status: 400 })
+    return NextResponse.json({ error: 'barId Ã¡Â© obrigatÃ¡Â³rio' }, { status: 400 })
   }
 
   return POST(new NextRequest(request.url, {
@@ -245,3 +245,4 @@ export async function GET(request: NextRequest) {
     body: JSON.stringify({ barId, action })
   }))
 } 
+

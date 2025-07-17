@@ -1,4 +1,4 @@
-'use client'
+ï»¿'use client'
 
 import { useState } from 'react'
 import { useBar } from '@/contexts/BarContext'
@@ -121,7 +121,7 @@ export default function BarSelector({ isCollapsed = false }: BarSelectorProps) {
           <div className="flex items-center space-x-2 text-xs">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             <span className="text-slate-400">
-              Conectado €¢ {selectedBar.nome}
+              Conectado {selectedBar.nome}
             </span>
           </div>
         )}
@@ -129,3 +129,4 @@ export default function BarSelector({ isCollapsed = false }: BarSelectorProps) {
     </div>
   )
 } 
+

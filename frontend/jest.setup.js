@@ -167,3 +167,4 @@ afterEach(() => {
 
 // Definir timeout global para testes
 jest.setTimeout(10000) 
+

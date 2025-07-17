@@ -1,4 +1,4 @@
-'use client'
+ï»¿'use client'
 
 import { useState, useEffect } from 'react'
 import { getSupabaseClient } from '@/lib/supabase'
@@ -59,12 +59,12 @@ export default function TesteVisaoCompetenciaPage() {
   })
 
   useEffect(() => {
-    setPageTitle('ğŸ¯ Teste - Visá£o de Competáªncia com Categorias')
+    setPageTitle('Teste - VisÃ£o de CompetÃªncia com Categorias')
     return () => setPageTitle('')
   }, [setPageTitle])
 
   useEffect(() => {
-    // Definir máªs atual como padrá£o
+    // Definir mÃªs atual como padrÃ£o
     const agora = new Date()
     const mes = (agora.getMonth() + 1).toString().padStart(2, '0')
     const ano = agora.getFullYear()
@@ -98,7 +98,7 @@ export default function TesteVisaoCompetenciaPage() {
         .eq('bar_id', selectedBar.id)
         .gte('coletado_em', `${hoje}T00:00:00`)
 
-      // ášltima inserá§á£o
+      // Ãºltima inserÃ§Ã£o
       const { data: ultimaInsercao } = await supabase
         .from('contaazul_visao_competencia')
         .select('coletado_em')
@@ -130,11 +130,11 @@ export default function TesteVisaoCompetenciaPage() {
     try {
       const [ano, mes] = mesAno.split('-')
       const dataInicio = `${ano}-${mes}-01`
-      // Calcular áºltimo dia do máªs corretamente
+      // Calcular Ãºltimo dia do mÃªs corretamente
       const ultimoDia = new Date(parseInt(ano), parseInt(mes), 0).getDate()
       const dataFim = `${ano}-${mes}-${ultimoDia.toString().padStart(2, '0')}`
 
-      // Carregar dados da visá£o de competáªncia
+      // Carregar dados da visÃ£o de competÃªncia
       const { data: dadosVisao, error } = await supabase
         .from('contaazul_visao_competencia')
         .select('*')
@@ -151,14 +151,14 @@ export default function TesteVisaoCompetenciaPage() {
       setDados(dadosVisao || [])
 
       // Calcular resumo
-      const receitas = dadosVisao?.filter((d) => d.tipo === 'RECEITA') || []
-      const despesas = dadosVisao?.filter((d) => d.tipo === 'DESPESA') || []
+      const receitas = dadosVisao?.filter((d: any) => d.tipo === 'RECEITA') || []
+      const despesas = dadosVisao?.filter((d: any) => d.tipo === 'DESPESA') || []
       
-      const totalReceitas = receitas.reduce((sum: number, item) => sum + (item.valor || 0), 0)
-      const totalDespesas = despesas.reduce((sum: number, item) => sum + Math.abs(item.valor || 0), 0)
+      const totalReceitas = receitas.reduce((sum: number, item: any) => sum + (item.valor || 0), 0)
+      const totalDespesas = despesas.reduce((sum: number, item: any) => sum + Math.abs(item.valor || 0), 0)
       
-      const categorias = new Set(dadosVisao?.map((d) => d.categoria_id).filter(Boolean))
-      const centrosCusto = new Set(dadosVisao?.map((d) => d.centro_custo_id).filter(Boolean))
+      const categorias = new Set(dadosVisao?.map((d: any) => d.categoria_id).filter(Boolean))
+      const centrosCusto = new Set(dadosVisao?.map((d: any) => d.centro_custo_id).filter(Boolean))
 
       setResumo({
         total_receitas: totalReceitas,
@@ -169,7 +169,7 @@ export default function TesteVisaoCompetenciaPage() {
         centros_custo_distintos: centrosCusto.size
       })
 
-      // Verificar áºltima coleta
+      // Verificar Ãºltima coleta
       const { data: configData } = await supabase
         .from('api_credentials')
         .select('ultima_sincronizacao')
@@ -182,7 +182,7 @@ export default function TesteVisaoCompetenciaPage() {
         setUltimaColeta(new Date(configData.ultima_sincronizacao).toLocaleString('pt-BR'))
       }
 
-      // Verificar estatá­sticas de inserá§á£o
+      // Verificar estatÃ­sticas de inserÃ§Ã£o
       await verificarStatsInsercao()
 
     } catch (error) {
@@ -199,7 +199,7 @@ export default function TesteVisaoCompetenciaPage() {
     try {
       const [ano, mes] = mesAno.split('-')
       const dataInicio = `${ano}-${mes}-01`
-      // Calcular áºltimo dia do máªs corretamente
+      // Calcular Ãºltimo dia do mÃªs corretamente
       const ultimoDia = new Date(parseInt(ano), parseInt(mes), 0).getDate()
       const dataFim = `${ano}-${mes}-${ultimoDia.toString().padStart(2, '0')}`
 
@@ -221,9 +221,9 @@ export default function TesteVisaoCompetenciaPage() {
 
       const resultado = await response.json()
       
-      console.log('ğŸ¯ Resultado da coleta:', resultado)
+      console.log('Resultado da coleta:', resultado)
       
-      // Recarregar dados e stats apá³s a coleta
+      // Recarregar dados e stats apÃ³s a coleta
       setTimeout(() => {
         carregarDados()
         verificarStatsInsercao()
@@ -242,7 +242,7 @@ export default function TesteVisaoCompetenciaPage() {
 
     setColetando(true)
     try {
-      console.log('ğŸ“ Iniciando coleta JSON completa (3 anos)...')
+      console.log('Iniciando coleta JSON completa (3 anos)...')
       
       const response = await fetch('/api/contaazul/coletar-json-completo', {
         method: 'POST',
@@ -262,13 +262,13 @@ export default function TesteVisaoCompetenciaPage() {
 
       const resultado = await response.json()
       
-      console.log('ğŸ“ Resultado da coleta JSON:', resultado)
+      console.log('Resultado da coleta JSON:', resultado)
       
-      alert(`œ… Coleta JSON concluá­da!\n\n` +
-            `ğŸ“Š Receitas: ${resultado.resultado.receitas.total_parcelas} parcelas\n` +
-            `ğŸ’¸ Despesas: ${resultado.resultado.despesas.total_parcelas} parcelas\n` +
-            `ğŸ“ Arquivos: ${resultado.resultado.arquivos_gerados.length} salvos\n\n` +
-            `š™ï¸ Prá³ximo passo: Clique em "Processar JSONs Offline"`)
+      alert(`Coleta JSON concluÃ­da!\n\n` +
+            `Receitas: ${resultado.resultado.receitas.total_parcelas} parcelas\n` +
+            `Despesas: ${resultado.resultado.despesas.total_parcelas} parcelas\n` +
+            `Arquivos: ${resultado.resultado.arquivos_gerados.length} salvos\n\n` +
+            `PrÃ³ximo passo: Clique em "Processar JSONs Offline"`)
 
     } catch (error) {
       console.error('Erro na coleta JSON:', error)
@@ -281,18 +281,18 @@ export default function TesteVisaoCompetenciaPage() {
   const processarJsonsOffline = async () => {
     if (!selectedBar?.id) return
 
-    // Solicitar o storage_path do usuá¡rio
+    // Solicitar o storage_path do usuÃ¡rio
     const storagePath = prompt(
-      'ğŸ“ Digite o storage_path dos JSONs coletados:\n\n' +
+      'Digite o storage_path dos JSONs coletados:\n\n' +
       'Formato: contaazul-dados/3/2025-07-10T15-30-00-123Z/\n\n' +
-      'ğŸ’¡ Este path foi mostrado no resultado da coleta JSON anterior.'
+      'Este path foi mostrado no resultado da coleta JSON anterior.'
     )
 
     if (!storagePath) return
 
     setColetando(true)
     try {
-      console.log('š™ï¸ Iniciando processamento offline...')
+      console.log('Iniciando processamento offline...')
       
       const response = await fetch('/api/contaazul/processar-json-offline', {
         method: 'POST',
@@ -311,16 +311,16 @@ export default function TesteVisaoCompetenciaPage() {
 
       const resultado = await response.json()
       
-      console.log('š™ï¸ Resultado do processamento:', resultado)
+      console.log('Resultado do processamento:', resultado)
       
-      alert(`œ… Processamento offline concluá­do!\n\n` +
-            `ğŸ“Š Total inserido: ${resultado.resumo.total_geral} registros\n` +
-            `ğŸ’° Receitas: ${resultado.resumo.total_receitas}\n` +
-            `ğŸ’¸ Despesas: ${resultado.resumo.total_despesas}\n` +
-            `ğŸ“ Arquivos: ${resultado.resumo.arquivos_processados}\n\n` +
-            `ğŸ‰ Dados disponá­veis na tabela!`)
+      alert(`Processamento offline concluÃ­do!\n\n` +
+            `Total inserido: ${resultado.resumo.total_geral} registros\n` +
+            `Receitas: ${resultado.resumo.total_receitas}\n` +
+            `Despesas: ${resultado.resumo.total_despesas}\n` +
+            `Arquivos: ${resultado.resumo.arquivos_processados}\n\n` +
+            `Dados disponÃ­veis na tabela!`)
 
-      // Recarregar dados e stats apá³s o processamento
+      // Recarregar dados e stats apÃ³s o processamento
       setTimeout(() => {
         carregarDados()
         verificarStatsInsercao()
@@ -350,25 +350,25 @@ export default function TesteVisaoCompetenciaPage() {
   )
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-8 max-w-7xl mx-auto min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold text-gray-900">
-            ğŸ¯ Teste - Visá£o de Competáªncia com Categorias
+          <h1 className="text-3xl font-bold card-title-dark">
+            Teste - VisÃ£o de CompetÃªncia com Categorias
           </h1>
-          <div className="text-sm text-gray-600">
+          <div className="text-sm card-description-dark">
             Bar: {selectedBar?.nome || 'Nenhum selecionado'}
           </div>
         </div>
         
-        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-          <h3 className="font-semibold text-blue-800 mb-2">ğŸ“Š O que esta pá¡gina faz:</h3>
-          <ul className="text-sm text-blue-700 space-y-1">
-            <li>€¢ <strong>Busca dados:</strong> Consulta a tabela `contaazul_visao_competencia`</li>
-            <li>€¢ <strong>Mostra categorias:</strong> Cada transaá§á£o com sua categoria e centro de custo</li>
-            <li>€¢ <strong>Coleta mensal:</strong> API `/api/contaazul/coletar-com-detalhes-otimizado` (1 máªs)</li>
-            <li>€¢ <strong>Coleta completa:</strong> API `/api/contaazul/coletar-json-completo` (3 anos †’ JSONs)</li>
-            <li>€¢ <strong>Processamento offline:</strong> API `/api/contaazul/processar-json-offline` (JSONs †’ Banco)</li>
+        <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+          <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">O que esta pÃ¡gina faz:</h3>
+          <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+            <li>Busca dados: Consulta a tabela <code>contaazul_visao_competencia</code></li>
+            <li>Mostra categorias: Cada transaÃ§Ã£o com sua categoria e centro de custo</li>
+            <li>Coleta mensal: API <code>/api/contaazul/coletar-com-detalhes-otimizado</code> (1 mÃªs)</li>
+            <li>Coleta completa: API <code>/api/contaazul/coletar-json-completo</code> (3 anos â€“ JSONs)</li>
+            <li>Processamento offline: API <code>/api/contaazul/processar-json-offline</code> (JSONs â€“ Banco)</li>
           </ul>
         </div>
       </div>
@@ -376,25 +376,25 @@ export default function TesteVisaoCompetenciaPage() {
       {/* Controles */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Máªs/Ano (Competáªncia):
+          <label className="block text-sm font-medium card-title-dark mb-2">
+            MÃªs/Ano (CompetÃªncia):
           </label>
           <input
             type="month"
             value={mesAno}
             onChange={(e) => setMesAno(e.target.value)}
-            className="w-full border border-gray-300 rounded-md px-3 py-2"
+            className="w-full input-dark"
           />
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium card-title-dark mb-2">
             Filtro por Tipo:
           </label>
           <select
             value={filtroTipo}
             onChange={(e) => setFiltroTipo(e.target.value)}
-            className="w-full border border-gray-300 rounded-md px-3 py-2"
+            className="w-full select-dark"
           >
             <option value="TODOS">Todos</option>
             <option value="RECEITA">Receitas</option>
@@ -406,230 +406,230 @@ export default function TesteVisaoCompetenciaPage() {
           <Button
             onClick={carregarDados}
             disabled={loading}
-            className="bg-blue-500 hover:bg-blue-600"
+            className="btn-primary-dark"
           >
-            {loading ? 'ğŸ”„ Carregando...' : 'ğŸ”„ Recarregar'}
+            {loading ? 'Carregando...' : 'Recarregar'}
           </Button>
         </div>
         
-                 <div className="flex flex-col justify-end">
-           <Button
-             onClick={executarColetaComDetalhes}
-             disabled={coletando || !selectedBar?.id}
-             className="bg-green-500 hover:bg-green-600"
-           >
-             {coletando ? 'ğŸš€ Coletando...' : 'ğŸš€ Coletar Dados (Máªs)'}
-           </Button>
-         </div>
-         
-         <div className="flex flex-col justify-end">
-           <Button
-             onClick={verificarStatsInsercao}
-             disabled={loading}
-             className="bg-purple-500 hover:bg-purple-600"
-           >
-             ğŸ—„ï¸ Verificar Banco
-           </Button>
-         </div>
+        <div className="flex flex-col justify-end">
+          <Button
+            onClick={executarColetaComDetalhes}
+            disabled={coletando || !selectedBar?.id}
+            className="btn-success-dark"
+          >
+            {coletando ? 'Coletando...' : 'Coletar Dados (MÃªs)'}
+          </Button>
+        </div>
+        
+        <div className="flex flex-col justify-end">
+          <Button
+            onClick={verificarStatsInsercao}
+            disabled={loading}
+            className="btn-secondary-dark"
+          >
+            Verificar Banco
+          </Button>
+        </div>
       </div>
 
-      {/* Nova Seá§á£o: Estratá©gia Offline */}
-      <div className="mb-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
-        <h3 className="font-semibold text-orange-800 mb-3">ğŸ“ Estratá©gia Offline - 3 Anos Completos</h3>
-        <div className="mb-4 text-sm text-orange-700">
+      {/* Nova SeÃ§Ã£o: EstratÃ©gia Offline */}
+      <div className="mb-6 p-4 bg-orange-50 dark:bg-orange-900 rounded-lg border border-orange-200 dark:border-orange-700">
+        <h3 className="font-semibold text-orange-800 dark:text-orange-200 mb-3">EstratÃ©gia Offline - 3 Anos Completos</h3>
+        <div className="mb-4 text-sm text-orange-700 dark:text-orange-300">
           <p><strong>Vantagem:</strong> Coleta todos os dados de 2024-2027 de uma vez, salva em JSONs e processa offline (sem rate limits).</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Button
             onClick={executarColetaJsonCompleta}
             disabled={coletando || !selectedBar?.id}
-            className="bg-orange-500 hover:bg-orange-600"
+            className="btn-danger-dark"
           >
-            {coletando ? 'ğŸ“ Coletando...' : 'ğŸ“ Coletar JSONs (2024-2027)'}
+            {coletando ? 'Coletando...' : 'Coletar JSONs (2024-2027)'}
           </Button>
           <Button
             onClick={processarJsonsOffline}
             disabled={coletando || !selectedBar?.id}
-            className="bg-indigo-500 hover:bg-indigo-600"
+            className="btn-outline-dark"
           >
-            {coletando ? 'š™ï¸ Processando...' : 'š™ï¸ Processar JSONs Offline'}
+            {coletando ? 'Processando...' : 'Processar JSONs Offline'}
           </Button>
         </div>
       </div>
 
       {/* Resumo */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
-        <Card className="bg-green-50 border-green-200">
+        <Card className="bg-green-50 dark:bg-green-900 border-green-200 dark:border-green-700">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-green-800">ğŸ’° Receitas</CardTitle>
+            <CardTitle className="text-sm text-green-800 dark:text-green-200">Receitas</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
               {formatCurrency(resumo.total_receitas)}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-red-50 border-red-200">
+        <Card className="bg-red-50 dark:bg-red-900 border-red-200 dark:border-red-700">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-red-800">ğŸ’¸ Despesas</CardTitle>
+            <CardTitle className="text-sm text-red-800 dark:text-red-200">Despesas</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">
+            <div className="text-2xl font-bold text-red-600 dark:text-red-400">
               {formatCurrency(resumo.total_despesas)}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-blue-50 border-blue-200">
+        <Card className="bg-blue-50 dark:bg-blue-900 border-blue-200 dark:border-blue-700">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-blue-800">ğŸ“Š Resultado</CardTitle>
+            <CardTitle className="text-sm text-blue-800 dark:text-blue-200">Resultado</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${resumo.resultado_liquido >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <div className={`text-2xl font-bold ${resumo.resultado_liquido >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}> 
               {formatCurrency(resumo.resultado_liquido)}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-dark">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-gray-800">ğŸ“‹ Registros</CardTitle>
+            <CardTitle className="text-sm card-title-dark">Registros</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-600">
+            <div className="text-2xl font-bold card-description-dark">
               {resumo.total_registros}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-dark">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-gray-800">ğŸ·ï¸ Categorias</CardTitle>
+            <CardTitle className="text-sm card-title-dark">Categorias</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-600">
+            <div className="text-2xl font-bold card-description-dark">
               {resumo.categorias_distintas}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-dark">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-gray-800">ğŸ¯ Centros</CardTitle>
+            <CardTitle className="text-sm card-title-dark">Centros</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-600">
+            <div className="text-2xl font-bold card-description-dark">
               {resumo.centros_custo_distintos}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Status e Estatá­sticas de Inserá§á£o */}
+      {/* Status e EstatÃ­sticas de InserÃ§Ã£o */}
       <div className="mb-6 space-y-4">
-        <div className="p-4 bg-gray-50 rounded-lg">
+        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-sm font-medium text-gray-700">ášltima coleta:</span>
-              <span className="ml-2 text-sm text-gray-600">
+              <span className="text-sm font-medium card-title-dark">Ãšltima coleta:</span>
+              <span className="ml-2 text-sm card-description-dark">
                 {ultimaColeta || 'Nunca executada'}
               </span>
             </div>
             <div>
-              <span className="text-sm font-medium text-gray-700">Registros encontrados:</span>
-              <span className="ml-2 text-sm text-gray-600">{dadosFiltrados.length}</span>
+              <span className="text-sm font-medium card-title-dark">Registros encontrados:</span>
+              <span className="ml-2 text-sm card-description-dark">{dadosFiltrados.length}</span>
             </div>
           </div>
         </div>
 
-        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <h3 className="font-semibold text-blue-800 mb-3">ğŸ—„ï¸ Estatá­sticas de Inserá§á£o no Banco</h3>
+        <div className="p-4 bg-blue-50 dark:bg-blue-900 rounded-lg border border-blue-200 dark:border-blue-700">
+          <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-3">EstatÃ­sticas de InserÃ§Ã£o no Banco</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <span className="text-sm font-medium text-blue-700">Total no banco:</span>
-              <div className="text-2xl font-bold text-blue-600">{statsInsercao.total_registros_banco}</div>
+              <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Total no banco:</span>
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{statsInsercao.total_registros_banco}</div>
             </div>
             <div>
-              <span className="text-sm font-medium text-blue-700">Inseridos hoje:</span>
-              <div className="text-2xl font-bold text-green-600">{statsInsercao.registros_hoje}</div>
+              <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Inseridos hoje:</span>
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">{statsInsercao.registros_hoje}</div>
             </div>
             <div>
-              <span className="text-sm font-medium text-blue-700">ášltima inserá§á£o:</span>
-              <div className="text-sm text-blue-600">{statsInsercao.ultima_insercao}</div>
+              <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Ãšltima inserÃ§Ã£o:</span>
+              <div className="text-sm text-blue-600 dark:text-blue-400">{statsInsercao.ultima_insercao}</div>
             </div>
           </div>
-          <div className="mt-3 text-xs text-blue-600">
-            ğŸ’¡ Estes náºmeros mostram se a API está¡ realmente inserindo dados na tabela contaazul_visao_competencia
+          <div className="mt-3 text-xs text-blue-600 dark:text-blue-300">
+            Estes nÃºmeros mostram se a API estÃ¡ realmente inserindo dados na tabela contaazul_visao_competencia
           </div>
         </div>
       </div>
 
       {/* Tabela de Dados */}
-      <Card>
+      <Card className="card-dark">
         <CardHeader>
-          <CardTitle>
-            ğŸ“Š Visá£o de Competáªncia - {mesAno} ({dadosFiltrados.length} registros)
+          <CardTitle className="card-title-dark">
+            VisÃ£o de CompetÃªncia - {mesAno} ({dadosFiltrados.length} registros)
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead className="bg-gray-50">
+            <table className="min-w-full table-dark">
+              <thead className="table-header-dark">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descriá§á£o</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Valor</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoria</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Centro de Custo</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Competáªncia</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium table-cell-dark uppercase">Tipo</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium table-cell-dark uppercase">DescriÃ§Ã£o</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium table-cell-dark uppercase">Valor</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium table-cell-dark uppercase">Categoria</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium table-cell-dark uppercase">Centro de Custo</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium table-cell-dark uppercase">CompetÃªncia</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium table-cell-dark uppercase">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {dadosFiltrados.slice(0, 100).map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50">
+                  <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-4 py-3">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                         item.tipo === 'RECEITA' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
+                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
                       }`}>
-                        {item.tipo === 'RECEITA' ? 'ğŸ’°' : 'ğŸ’¸'} {item.tipo}
+                        {item.tipo === 'RECEITA' ? 'Receita' : 'Despesa'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-900 max-w-xs truncate">
+                    <td className="px-4 py-3 text-sm card-title-dark max-w-xs truncate">
                       {item.descricao}
                     </td>
                     <td className="px-4 py-3 text-sm font-medium">
-                      <span className={item.tipo === 'RECEITA' ? 'text-green-600' : 'text-red-600'}>
+                      <span className={item.tipo === 'RECEITA' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
                         {formatCurrency(Math.abs(item.valor))}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
+                    <td className="px-4 py-3 text-sm card-description-dark">
                       <div className="max-w-xs truncate">
                         {item.categoria_nome || '-'}
                       </div>
                       {item.categoria_valor && (
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
                           {formatCurrency(item.categoria_valor)}
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
+                    <td className="px-4 py-3 text-sm card-description-dark">
                       <div className="max-w-xs truncate">
                         {item.centro_custo_nome || '-'}
                       </div>
                       {item.centro_custo_valor && (
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
                           {formatCurrency(item.centro_custo_valor)}
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
+                    <td className="px-4 py-3 text-sm card-description-dark">
                       {formatDate(item.data_competencia)}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
+                    <td className="px-4 py-3 text-sm card-description-dark">
                       {item.status || '-'}
                     </td>
                   </tr>
@@ -639,18 +639,18 @@ export default function TesteVisaoCompetenciaPage() {
           </div>
           
           {dadosFiltrados.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              <div className="mb-2">ğŸ“­ Nenhum dado encontrado</div>
+            <div className="text-center py-8 card-description-dark">
+              <div className="mb-2">Nenhum dado encontrado</div>
               <div className="text-sm">
-                Clique em "ğŸš€ Coletar Dados" para buscar informaá§áµes do ContaAzul
+                Clique em "Coletar Dados" para buscar informaÃ§Ãµes do ContaAzul
               </div>
             </div>
           )}
           
           {dadosFiltrados.length > 100 && (
-            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-              <div className="text-sm text-yellow-800">
-                š ï¸ Mostrando apenas os primeiros 100 registros de {dadosFiltrados.length} encontrados.
+            <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-md">
+              <div className="text-sm text-yellow-800 dark:text-yellow-200">
+                Mostrando apenas os primeiros 100 registros de {dadosFiltrados.length} encontrados.
               </div>
             </div>
           )}
@@ -659,3 +659,4 @@ export default function TesteVisaoCompetenciaPage() {
     </div>
   )
 } 
+

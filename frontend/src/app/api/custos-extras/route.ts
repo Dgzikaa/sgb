@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 // ====================================================
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const action = searchParams.get('action')
 
     if (!bar_id) {
-      return NextResponse.json({ error: 'bar_id � obrigat�rio' }, { status: 400 })
+      return NextResponse.json({ error: 'bar_id Ã¡Â© obrigatÃ¡Â³rio' }, { status: 400 })
     }
 
     // ====================================================
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
       success: true,
       custos: custos || [],
       total_custos: custos?.length || 0,
-      total_valor: custos?.reduce((sum: number, custo) => sum + parseFloat(custo.valor || 0), 0) || 0
+      total_valor: custos?.reduce((sum: number, custo: any) => sum + parseFloat(custo.valor || 0), 0) || 0
     })
 
   } catch (error) {
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
       const { bar_id, nome, descricao, cor, icone } = body
 
       if (!bar_id || !nome) {
-        return NextResponse.json({ error: 'bar_id e nome s�o obrigat�rios' }, { status: 400 })
+        return NextResponse.json({ error: 'bar_id e nome sÃ¡Â£o obrigatÃ¡Â³rios' }, { status: 400 })
       }
 
       const { data: tipoExistente } = await supabase
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (tipoExistente) {
-        return NextResponse.json({ error: 'Tipo de custo j� existe' }, { status: 409 })
+        return NextResponse.json({ error: 'Tipo de custo jÃ¡Â¡ existe' }, { status: 409 })
       }
 
       const { data: novoTipo, error } = await supabase
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
           nome,
           descricao: descricao || '',
           cor: cor || '#6366f1',
-          icone: icone || '💰'
+          icone: icone || 'Ã°Å¸â€™Â°'
         })
         .select()
         .single()
@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
 
     if (!bar_id || !tipo_custo_id || !data_competencia || !valor) {
       return NextResponse.json({ 
-        error: 'Campos obrigat�rios: bar_id, tipo_custo_id, data_competencia, valor' 
+        error: 'Campos obrigatÃ¡Â³rios: bar_id, tipo_custo_id, data_competencia, valor' 
       }, { status: 400 })
     }
 
@@ -216,11 +216,11 @@ export async function PUT(request: NextRequest) {
     const { id, action } = body
 
     if (!id) {
-      return NextResponse.json({ error: 'ID � obrigat�rio' }, { status: 400 })
+      return NextResponse.json({ error: 'ID Ã¡Â© obrigatÃ¡Â³rio' }, { status: 400 })
     }
 
     // ====================================================
-    // MARCAR COMO PAGO/N�O PAGO
+    // MARCAR COMO PAGO/NÃ¡Æ’O PAGO
     // ====================================================
     if (action === 'toggle_pago') {
       const { pago, data_pagamento, forma_pagamento } = body
@@ -246,7 +246,7 @@ export async function PUT(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: `Custo ${pago ? 'marcado como pago' : 'marcado como n�o pago'}`,
+        message: `Custo ${pago ? 'marcado como pago' : 'marcado como nÃ¡Â£o pago'}`,
         custo: custoAtualizado
       })
     }
@@ -268,7 +268,7 @@ export async function PUT(request: NextRequest) {
       forma_pagamento
     } = body
 
-    const updateData = {
+    const updateData: any = {
       atualizado_em: new Date().toISOString()
     }
 
@@ -320,7 +320,7 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get('id')
 
     if (!id) {
-      return NextResponse.json({ error: 'ID � obrigat�rio' }, { status: 400 })
+      return NextResponse.json({ error: 'ID Ã¡Â© obrigatÃ¡Â³rio' }, { status: 400 })
     }
 
     const { error } = await supabase
@@ -342,3 +342,4 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
   }
 } 
+

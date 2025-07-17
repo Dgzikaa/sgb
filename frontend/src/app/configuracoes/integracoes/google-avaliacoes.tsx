@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 
 export default function GoogleAvaliacoesIntegracao() {
   const [loading, setLoading] = useState(false)
@@ -16,12 +16,13 @@ export default function GoogleAvaliacoesIntegracao() {
       })
       const data = await res.json()
       if (data.success) {
-        setResult('�� Coleta realizada com sucesso!')
+        setResult('Å“â€¦ Coleta realizada com sucesso!')
       } else {
-        setResult('�� Erro: ' + (data.error || 'Erro desconhecido'))
+        setResult('ÂÅ’ Erro: ' + (data.error || 'Erro desconhecido'))
       }
-    } catch (e) {
-      setResult('�� Erro: ' + e.message)
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setResult('\u009d\u0152 Erro: ' + msg);
     } finally {
       setLoading(false)
     }
@@ -31,10 +32,10 @@ export default function GoogleAvaliacoesIntegracao() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
         <div className="card-dark p-6">
-          <h1 className="card-title-dark mb-4">Google Avalia��es - Integra��o</h1>
-          <p className="card-description-dark mb-6">Clique no bot�o abaixo para rodar manualmente a coleta das avalia��es do Google para o dia anterior.</p>
+          <h1 className="card-title-dark mb-4">Google AvaliaÃ¡Â§Ã¡Âµes - IntegraÃ¡Â§Ã¡Â£o</h1>
+          <p className="card-description-dark mb-6">Clique no botÃ¡Â£o abaixo para rodar manualmente a coleta das avaliaÃ¡Â§Ã¡Âµes do Google para o dia anterior.</p>
           <button className="btn-primary-dark px-4 py-2" onClick={handleRun} disabled={loading}>
-            {loading ? 'Executando...' : 'Rodar coleta de avalia��es (ontem)'}
+            {loading ? 'Executando...' : 'Rodar coleta de avaliaÃ¡Â§Ã¡Âµes (ontem)'}
           </button>
           {result && <div className="mt-4 card-description-dark">{result}</div>}
         </div>
@@ -42,3 +43,4 @@ export default function GoogleAvaliacoesIntegracao() {
     </div>
   )
 } 
+

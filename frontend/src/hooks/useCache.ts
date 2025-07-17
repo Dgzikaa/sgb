@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+﻿import { useState, useEffect, useCallback } from 'react'
 import { cacheService } from '@/lib/redis-cache'
 
 // Tipos para o hook
@@ -47,7 +47,7 @@ export function useCache<T = any>(
     lastUpdated: null
   })
 
-  // Fun��o para buscar dados
+  // FunÃ¡Â§Ã¡Â£o para buscar dados
   const fetchData = useCallback(async (force = false) => {
     if (!enabled || (!force && state.isLoading)) return
 
@@ -70,7 +70,7 @@ export function useCache<T = any>(
         setState({
           data,
           isLoading: false,
-          error: data === null ? 'Dados n�o encontrados no cache' : null,
+          error: data === null ? 'Dados nÃ¡Â£o encontrados no cache' : null,
           isStale: false,
           lastUpdated: Date.now()
         })
@@ -84,7 +84,7 @@ export function useCache<T = any>(
     }
   }, [type, key, fetchFunction, enabled, state.isLoading])
 
-  // Fun��o para invalidar cache
+  // FunÃ¡Â§Ã¡Â£o para invalidar cache
   const invalidate = useCallback(async () => {
     try {
       await cacheService.delete(type, key)
@@ -94,7 +94,7 @@ export function useCache<T = any>(
     }
   }, [type, key])
 
-  // Fun��o para atualizar dados manualmente
+  // FunÃ¡Â§Ã¡Â£o para atualizar dados manualmente
   const mutate = useCallback(async (newData?: T) => {
     if (newData !== undefined) {
       // Atualizar cache e state
@@ -118,7 +118,7 @@ export function useCache<T = any>(
     }
   }, [enabled, refreshOnMount, fetchData])
 
-  // Efeito para refresh autom�tico
+  // Efeito para refresh automÃ¡Â¡tico
   useEffect(() => {
     if (!enabled || !refreshInterval) return
 
@@ -137,7 +137,7 @@ export function useCache<T = any>(
   }
 }
 
-// Hook para m�tricas de cache
+// Hook para mÃ¡Â©tricas de cache
 export function useCacheMetrics() {
   const [metrics, setMetrics] = useState<CacheMetrics | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -152,7 +152,7 @@ export function useCacheMetrics() {
         setMetrics(result.data.cache.metrics)
       }
     } catch (error) {
-      console.error('Erro ao buscar m�tricas de cache:', error)
+      console.error('Erro ao buscar mÃ¡Â©tricas de cache:', error)
     } finally {
       setIsLoading(false)
     }
@@ -216,8 +216,8 @@ export function usePaginatedCache<T = any>(
   type: CacheType,
   baseKey: string,
   fetchFunction: (page: number, limit: number) => Promise<T>,
-  page: number = 1,
-  limit: number = 10,
+  page = 1,
+  limit = 10,
   options: UseCacheOptions = {}
 ) {
   const cacheKey = `${baseKey}:page:${page}:limit:${limit}`
@@ -252,3 +252,4 @@ export function useFilteredCache<T = any>(
 }
 
 export default useCache 
+

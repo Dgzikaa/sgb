@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 
@@ -43,7 +43,7 @@ export function CommandPaletteProvider({ children }: { children: ReactNode }) {
         return
       }
 
-      // / para busca r�pida (quando n�o estiver em input)
+      // / para busca rÃ¡Â¡pida (quando nÃ¡Â£o estiver em input)
       if (
         event.key === '/' && 
         !isOpen &&
@@ -94,3 +94,4 @@ export function useCommandPalette() {
   }
   return context
 } 
+

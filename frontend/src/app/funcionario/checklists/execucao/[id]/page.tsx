@@ -55,14 +55,14 @@ interface CategoriaEvento {
 }
 
 const categoriasPadrao: CategoriaEvento[] = [
-  { id: 'show', nome: 'Show/Máºsica', cor: 'bg-purple-500', icon: 'ðŸŽµ' },
-  { id: 'festa', nome: 'Festa Temá¡tica', cor: 'bg-pink-500', icon: 'ðŸŽ‰' },
-  { id: 'happy-hour', nome: 'Happy Hour', cor: 'bg-orange-500', icon: 'ðŸ»' },
-  { id: 'esporte', nome: 'Evento Esportivo', cor: 'bg-green-500', icon: 'š½' },
-  { id: 'gastronomia', nome: 'Gastronomia', cor: 'bg-yellow-500', icon: 'ðŸ½ï¸' },
-  { id: 'networking', nome: 'Networking', cor: 'bg-blue-500', icon: 'ðŸ¤' },
-  { id: 'promocao', nome: 'Promoá§á£o', cor: 'bg-red-500', icon: 'ðŸ·ï¸' },
-  { id: 'especial', nome: 'Data Especial', cor: 'bg-indigo-500', icon: 'ðŸŒŸ' }
+  { id: 'show', nome: 'Show/MÃÂ¡ÃÂºsica', cor: 'bg-purple-500', icon: 'ÃÂ°ÃÂ¸ÃÂ½ÃÂµ' },
+  { id: 'festa', nome: 'Festa TemÃÂ¡ÃÂ¡tica', cor: 'bg-pink-500', icon: 'ÃÂ°ÃÂ¸ÃÂ½Ã¢â¬Â°' },
+  { id: 'happy-hour', nome: 'Happy Hour', cor: 'bg-orange-500', icon: 'ÃÂ°ÃÂ¸ÃÂÃÂ»' },
+  { id: 'esporte', nome: 'Evento Esportivo', cor: 'bg-green-500', icon: 'ÃÂ¡ÃÂ½' },
+  { id: 'gastronomia', nome: 'Gastronomia', cor: 'bg-yellow-500', icon: 'ÃÂ°ÃÂ¸ÃÂÃÂ½ÃÂ¯ÃÂ¸ÃÂ' },
+  { id: 'networking', nome: 'Networking', cor: 'bg-blue-500', icon: 'ÃÂ°ÃÂ¸ÃÂ¤ÃÂ' },
+  { id: 'promocao', nome: 'PromoÃÂ¡ÃÂ§ÃÂ¡ÃÂ£o', cor: 'bg-red-500', icon: 'ÃÂ°ÃÂ¸ÃÂÃÂ·ÃÂ¯ÃÂ¸ÃÂ' },
+  { id: 'especial', nome: 'Data Especial', cor: 'bg-indigo-500', icon: 'ÃÂ°ÃÂ¸ÃâÃÂ¸' }
 ]
 
 export default function EventosPage() {
@@ -104,7 +104,7 @@ export default function EventosPage() {
       } else {
         console.error('Erro ao carregar eventos:', data.error)
         toast({
-          title: 'Œ Erro',
+          title: 'ÃÂÃâ Erro',
           description: 'Falha ao carregar eventos',
           variant: 'destructive'
         })
@@ -112,7 +112,7 @@ export default function EventosPage() {
     } catch (error) {
       console.error('Erro ao carregar eventos:', error)
       toast({
-        title: 'Œ Erro',
+        title: 'ÃÂÃâ Erro',
         description: 'Falha ao carregar eventos',
         variant: 'destructive'
       })
@@ -142,7 +142,7 @@ export default function EventosPage() {
       
       if (result.success) {
         toast({
-          title: 'œ… Sucesso',
+          title: 'ÃâÃ¢â¬Â¦ Sucesso',
           description: editingEvent ? 'Evento atualizado!' : 'Evento criado!'
         })
         setShowEventModal(false)
@@ -154,7 +154,7 @@ export default function EventosPage() {
     } catch (error) {
       console.error('Erro ao salvar evento:', error)
       toast({
-        title: 'Œ Erro',
+        title: 'ÃÂÃâ Erro',
         description: 'Falha ao salvar evento',
         variant: 'destructive'
       })
@@ -176,7 +176,7 @@ export default function EventosPage() {
       
       if (result.success) {
         toast({
-          title: 'œ… Sucesso',
+          title: 'ÃâÃ¢â¬Â¦ Sucesso',
           description: 'Evento deletado!'
         })
         loadEventos()
@@ -186,7 +186,7 @@ export default function EventosPage() {
     } catch (error) {
       console.error('Erro ao deletar evento:', error)
       toast({
-        title: 'Œ Erro',
+        title: 'ÃÂÃâ Erro',
         description: 'Falha ao deletar evento',
         variant: 'destructive'
       })
@@ -196,7 +196,7 @@ export default function EventosPage() {
   }
 
   const getCategoria = (categoriaId: string) => {
-    return categoriasPadrao.find((cat: any) => cat.id === categoriaId) || categoriasPadrao[0]
+    return categoriasPadrao.find((cat) => cat.id === categoriaId) || categoriasPadrao[0]
   }
 
   const getStatusColor = (status: string) => {
@@ -214,7 +214,7 @@ export default function EventosPage() {
     }
   }
 
-  const filteredEventos = eventos.filter((evento: any) => {
+  const filteredEventos = eventos.filter((evento) => {
     const matchesCategoria = filtroCategoria === 'all' || evento.categoria === filtroCategoria
     const matchesStatus = filtroStatus === 'all' || evento.status === filtroStatus
     const matchesSearch = searchTerm === '' || 
@@ -255,7 +255,7 @@ export default function EventosPage() {
                   className="text-xs"
                 >
                   <Calendar className="w-4 h-4 mr-1" />
-                  Calendá¡rio
+                  CalendÃÂ¡ÃÂ¡rio
                 </Button>
                 <Button
                   variant={viewMode === 'list' ? 'default' : 'ghost'}
@@ -310,9 +310,9 @@ export default function EventosPage() {
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input
-                      placeholder="Nome, descriá§á£o..."
+                      placeholder="Nome, descriÃÂ¡ÃÂ§ÃÂ¡ÃÂ£o..."
                       value={searchTerm}
-                      onChange={(e: any) => setSearchTerm(e.target.value)}
+                      onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-10"
                     />
                   </div>
@@ -326,7 +326,7 @@ export default function EventosPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todas as categorias</SelectItem>
-                      {categoriasPadrao.map((categoria: any) => (
+                      {categoriasPadrao.map((categoria) => (
                         <SelectItem key={categoria.id} value={categoria.id}>
                           {categoria.icon} {categoria.nome}
                         </SelectItem>
@@ -346,7 +346,7 @@ export default function EventosPage() {
                       <SelectItem value="planejado">Planejado</SelectItem>
                       <SelectItem value="confirmado">Confirmado</SelectItem>
                       <SelectItem value="cancelado">Cancelado</SelectItem>
-                      <SelectItem value="concluido">Concluá­do</SelectItem>
+                      <SelectItem value="concluido">ConcluÃÂ¡ÃÂ­do</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -369,7 +369,7 @@ export default function EventosPage() {
             </CardContent>
           </Card>
 
-          {/* Calendá¡rio ou Lista */}
+          {/* CalendÃÂ¡ÃÂ¡rio ou Lista */}
           {viewMode === 'calendar' ? (
             <Card>
               <CardHeader>
@@ -406,7 +406,7 @@ export default function EventosPage() {
                 <CalendarView
                   currentDate={currentDate}
                   eventos={filteredEventos}
-                  onEditEvent={(evento: any) => {
+                  onEditEvent={(evento) => {
                     setEditingEvent(evento)
                     setShowEventModal(true)
                   }}
@@ -423,7 +423,7 @@ export default function EventosPage() {
               <CardContent>
                 <EventList
                   eventos={filteredEventos}
-                  onEditEvent={(evento: any) => {
+                  onEditEvent={(evento) => {
                     setEditingEvent(evento)
                     setShowEventModal(true)
                   }}
@@ -444,7 +444,7 @@ export default function EventosPage() {
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {eventos.length}
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total do Máªs</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Total do MÃÂ¡ÃÂªs</p>
               </CardContent>
             </Card>
             
@@ -454,7 +454,7 @@ export default function EventosPage() {
                   <Users className="w-4 h-4 text-green-600 dark:text-green-400" />
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {eventos.filter((e: any) => e.status === 'confirmado').length}
+                  {eventos.filter((e) => e.status === 'confirmado').length}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Confirmados</p>
               </CardContent>
@@ -466,7 +466,7 @@ export default function EventosPage() {
                   <Clock className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {eventos.filter((e: any) => e.status === 'planejado').length}
+                  {eventos.filter((e) => e.status === 'planejado').length}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Planejados</p>
               </CardContent>
@@ -478,7 +478,7 @@ export default function EventosPage() {
                   <Tag className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {new Set(eventos.map((e: any) => e.categoria)).size}
+                  {new Set(eventos.map((e) => e.categoria)).size}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Categorias</p>
               </CardContent>
@@ -490,7 +490,7 @@ export default function EventosPage() {
   )
 }
 
-// Componente do formulá¡rio de evento
+// Componente do formulÃÂ¡ÃÂ¡rio de evento
 function EventForm({ 
   evento, 
   onSave, 
@@ -541,18 +541,18 @@ function EventForm({
           <Input
             id="nome_evento"
             value={formData.nome_evento}
-            onChange={(e: any) => setFormData({ ...formData, nome_evento: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, nome_evento: e.target.value })}
             placeholder="Ex: Show de Rock, Happy Hour..."
             required
           />
         </div>
 
         <div className="md:col-span-2">
-          <Label htmlFor="descricao">Descriá§á£o</Label>
+          <Label htmlFor="descricao">DescriÃÂ¡ÃÂ§ÃÂ¡ÃÂ£o</Label>
           <Textarea
             id="descricao"
             value={formData.descricao}
-            onChange={(e: any) => setFormData({ ...formData, descricao: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
             placeholder="Descreva o evento..."
             rows={3}
           />
@@ -564,19 +564,19 @@ function EventForm({
             id="data_evento"
             type="date"
             value={formData.data_evento}
-            onChange={(e: any) => setFormData({ ...formData, data_evento: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, data_evento: e.target.value })}
             required
           />
         </div>
 
         <div>
           <Label htmlFor="categoria">Categoria *</Label>
-          <Select value={formData.categoria} onValueChange={(value: any) => setFormData({ ...formData, categoria: value })}>
+          <Select value={formData.categoria} onValueChange={(value) => setFormData({ ...formData, categoria: value })}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {categorias.map((categoria: any) => (
+              {categorias.map((categoria) => (
                 <SelectItem key={categoria.id} value={categoria.id}>
                   {categoria.icon} {categoria.nome}
                 </SelectItem>
@@ -586,12 +586,12 @@ function EventForm({
         </div>
 
         <div>
-          <Label htmlFor="hora_inicio">Hora de Iná­cio</Label>
+          <Label htmlFor="hora_inicio">Hora de InÃÂ¡ÃÂ­cio</Label>
           <Input
             id="hora_inicio"
             type="time"
             value={formData.hora_inicio}
-            onChange={(e: any) => setFormData({ ...formData, hora_inicio: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, hora_inicio: e.target.value })}
           />
         </div>
 
@@ -601,13 +601,13 @@ function EventForm({
             id="hora_fim"
             type="time"
             value={formData.hora_fim}
-            onChange={(e: any) => setFormData({ ...formData, hora_fim: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, hora_fim: e.target.value })}
           />
         </div>
 
         <div>
           <Label htmlFor="status">Status *</Label>
-          <Select value={formData.status} onValueChange={(value: any) => setFormData({ ...formData, status: value })}>
+          <Select value={formData.status as any} onValueChange={(value) => setFormData({ ...formData, status: value as any })}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -615,7 +615,7 @@ function EventForm({
               <SelectItem value="planejado">Planejado</SelectItem>
               <SelectItem value="confirmado">Confirmado</SelectItem>
               <SelectItem value="cancelado">Cancelado</SelectItem>
-              <SelectItem value="concluido">Concluá­do</SelectItem>
+              <SelectItem value="concluido">ConcluÃÂ¡ÃÂ­do</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -625,8 +625,8 @@ function EventForm({
           <Input
             id="local"
             value={formData.local}
-            onChange={(e: any) => setFormData({ ...formData, local: e.target.value })}
-            placeholder="Ex: Salá£o Principal..."
+            onChange={(e) => setFormData({ ...formData, local: e.target.value })}
+            placeholder="Ex: SalÃÂ¡ÃÂ£o Principal..."
           />
         </div>
       </div>
@@ -643,7 +643,7 @@ function EventForm({
   )
 }
 
-// Componente do calendá¡rio
+// Componente do calendÃÂ¡ÃÂ¡rio
 function CalendarView({ 
   currentDate, 
   eventos, 
@@ -663,24 +663,24 @@ function CalendarView({
   })
 
   const getEventosForDay = (day: Date) => {
-    return eventos.filter((evento: any) => isSameDay(new Date(evento.data_evento), day))
+    return eventos.filter((evento) => isSameDay(new Date(evento.data_evento), day))
   }
 
   const getCategoria = (categoriaId: string) => {
-    return categorias.find((cat: any) => cat.id === categoriaId) || categorias[0]
+    return categorias.find((cat) => cat.id === categoriaId) || categorias[0]
   }
 
   return (
     <div className="grid grid-cols-7 gap-1">
-      {/* Cabeá§alho dos dias da semana */}
-      {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sá¡b'].map((day: any) => (
+      {/* CabeÃÂ¡ÃÂ§alho dos dias da semana */}
+      {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'SÃÂ¡ÃÂ¡b'].map((day) => (
         <div key={day} className="p-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
           {day}
         </div>
       ))}
       
-      {/* Dias do máªs */}
-      {days.map((day: any) => {
+      {/* Dias do mÃÂ¡ÃÂªs */}
+      {days.map((day) => {
         const dayEvents = getEventosForDay(day)
         const isCurrentMonth = isSameMonth(day, currentDate)
         const isCurrentDay = isToday(day)
@@ -703,7 +703,7 @@ function CalendarView({
             </div>
             
             <div className="space-y-1">
-              {dayEvents.slice(0, 2).map((evento: any) => {
+              {dayEvents.slice(0, 2).map((evento) => {
                 const categoria = getCategoria(evento.categoria)
                 return (
                   <div
@@ -749,7 +749,7 @@ function EventList({
   categorias: CategoriaEvento[]
 }) {
   const getCategoria = (categoriaId: string) => {
-    return categorias.find((cat: any) => cat.id === categoriaId) || categorias[0]
+    return categorias.find((cat) => cat.id === categoriaId) || categorias[0]
   }
 
   const getStatusColor = (status: string) => {
@@ -778,7 +778,7 @@ function EventList({
 
   return (
     <div className="space-y-3">
-      {eventos.map((evento: any) => {
+      {eventos.map((evento) => {
         const categoria = getCategoria(evento.categoria)
         return (
           <div

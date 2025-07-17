@@ -402,3 +402,4 @@ self.addEventListener('offline', () => {
 
 // Log de instalaá§á£o completa
 console.log('ðŸš€ SGB_V2 Service Worker carregado - v1.0.1') 
+

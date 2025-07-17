@@ -1,5 +1,34 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase-admin'
+
+// Tipos auxiliares para eventos de auditoria
+interface SecurityEvent {
+  id: string;
+  user_id?: string;
+  event_type: string;
+  endpoint?: string;
+  details?: {
+    resource?: string;
+    [key: string]: any;
+  };
+  timestamp: string;
+  ip_address?: string;
+  level?: string;
+  category?: string;
+}
+
+interface AuditLogPostBody {
+  event_id?: string;
+  bar_id?: string | number | null;
+  action?: string;
+  user_id?: string | null;
+  ip_address?: string | null;
+  user_agent?: string | null;
+  resource?: string | null;
+  old_value?: any;
+  new_value?: any;
+  details?: Record<string, any>;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -44,7 +73,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Formatar eventos como logs de auditoria
-    const auditLogs = events?.map((event) => ({
+    const auditLogs = (events as SecurityEvent[] | undefined)?.map((event: SecurityEvent) => ({
       id: event.id,
       user_id: event.user_id || 'system',
       action: event.event_type,
@@ -79,7 +108,7 @@ export async function GET(request: NextRequest) {
 // Endpoint para registrar um log de auditoria
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body: AuditLogPostBody = await request.json();
     
     // Criar cliente Supabase
     const supabase = createServiceRoleClient()
@@ -102,7 +131,7 @@ export async function POST(request: NextRequest) {
           resource: body.resource,
           old_value: body.old_value,
           new_value: body.new_value,
-          ...body.details
+          ...(body.details || {})
         },
         risk_score: 1,
         resolved: true
@@ -131,3 +160,4 @@ export async function POST(request: NextRequest) {
     )
   }
 } 
+

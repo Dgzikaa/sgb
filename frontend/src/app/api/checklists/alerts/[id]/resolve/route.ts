@@ -1,28 +1,28 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
-import { authenticateUser, authErrorResponse: any, permissionErrorResponse } from '@/middleware/auth'
+import { authenticateUser, authErrorResponse, permissionErrorResponse } from '@/middleware/auth'
 import { z } from 'zod'
 
 // =====================================================
-// SCHEMAS DE VALIDAá‡áƒO
+// SCHEMAS DE VALIDAÃÂ¡Ã¢â¬Â¡ÃÂ¡ÃâO
 // =====================================================
 
 const AgendamentoSchema = z.object({
-  checklist_id: z.string().uuid('ID do checklist invá¡lido'),
+  checklist_id: z.string().uuid('ID do checklist invÃÂ¡ÃÂ¡lido'),
   titulo: z.string().min(1).max(255),
   frequencia: z.enum(['diaria', 'semanal', 'quinzenal', 'mensal', 'conforme_necessario']),
-  horario: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Horá¡rio deve estar no formato HH:MM'),
-  dias_semana: z.array(z.number().min(0).max(6)).optional(), // 0 = domingo, 6 = sá¡bado
+  horario: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'HorÃÂ¡ÃÂ¡rio deve estar no formato HH:MM'),
+  dias_semana: z.array(z.number().min(0).max(6)).optional(), // 0 = domingo, 6 = sÃÂ¡ÃÂ¡bado
   dia_mes: z.number().min(1).max(31).optional(),
   ativo: z.boolean().default(true),
   notificacoes_ativas: z.boolean().default(true),
-  tempo_limite_horas: z.number().int().min(1).max(168).default(24), // Má¡x 1 semana
+  tempo_limite_horas: z.number().int().min(1).max(168).default(24), // MÃÂ¡ÃÂ¡x 1 semana
   tempo_alerta_horas: z.number().int().min(1).max(48).default(2), // Alerta 2h antes do prazo
   prioridade: z.enum(['baixa', 'normal', 'alta', 'critica']).default('normal'),
   observacoes: z.string().optional(),
   responsaveis_whatsapp: z.array(z.object({
     nome: z.string(),
-    numero: z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Náºmero WhatsApp invá¡lido'),
+    numero: z.string().regex(/^\+?[1-9]\d{1,14}$/, 'NÃÂ¡ÃÂºmero WhatsApp invÃÂ¡ÃÂ¡lido'),
     cargo: z.string().optional()
   })).default([])
 })
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
   try {
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usuá¡rio ná£o autenticado')
+      return authErrorResponse('UsuÃÂ¡ÃÂ¡rio nÃÂ¡ÃÂ£o autenticado')
     }
 
     const { searchParams } = new URL(request.url)
@@ -56,13 +56,13 @@ export async function GET(request: NextRequest) {
       .select(`
         *,
         checklist:checklists (
-          id, nome: any, setor, tipo: any, tempo_estimado
+          id, nome, setor, tipo, tempo_estimado
         ),
         _count_execucoes:checklist_execucoes (count)
       `)
       .eq('bar_id', user.bar_id)
       .order('created_at', { ascending: false })
-      .range(offset: any, offset + limit - 1)
+      .range(offset, offset + limit - 1)
 
     // Aplicar filtros
     if (checklistId) {
@@ -82,17 +82,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao buscar agendamentos' }, { status: 500 })
     }
 
-    // Buscar prá³ximas execuá§áµes para cada agendamento
+    // Buscar prÃÂ¡ÃÂ³ximas execuÃÂ¡ÃÂ§ÃÂ¡ÃÂµes para cada agendamento
     const agendamentosComProximaExecucao = await Promise.all(
       (agendamentos || []).map(async (agendamento: any) => {
         const proximaExecucao = calcularProximaExecucao(agendamento)
-        const ultimaExecucao = await buscarUltimaExecucao(supabase: any, agendamento.id)
+        const ultimaExecucao = await buscarUltimaExecucao(supabase, agendamento.id)
         
         return {
           ...agendamento,
           proxima_execucao: proximaExecucao,
           ultima_execucao: ultimaExecucao,
-          status_atual: determinarStatusAtual(agendamento: any, proximaExecucao, ultimaExecucao)
+          status_atual: determinarStatusAtual(agendamento, proximaExecucao, ultimaExecucao)
         }
       })
     )
@@ -107,11 +107,11 @@ export async function GET(request: NextRequest) {
       }
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro na API de agendamentos GET:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
-      details: error.message 
+      details: (error as any).message 
     }, { status: 500 })
   }
 }
@@ -123,10 +123,10 @@ export async function POST(request: NextRequest) {
   try {
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usuá¡rio ná£o autenticado')
+      return authErrorResponse('UsuÃÂ¡ÃÂ¡rio nÃÂ¡ÃÂ£o autenticado')
     }
 
-    // Verificar permissáµes - apenas admin pode criar agendamentos
+    // Verificar permissÃÂ¡ÃÂµes - apenas admin pode criar agendamentos
     if (user.role !== 'admin') {
       return permissionErrorResponse('Apenas administradores podem criar agendamentos')
     }
@@ -139,20 +139,20 @@ export async function POST(request: NextRequest) {
     // Verificar se checklist existe
     const { data: checklist, error: checklistError } = await supabase
       .from('checklists')
-      .select('id, nome: any, setor')
+      .select('id, nome, setor')
       .eq('id', data.checklist_id)
       .eq('bar_id', user.bar_id)
       .single()
 
     if (checklistError || !checklist) {
-      return NextResponse.json({ error: 'Checklist ná£o encontrado' }, { status: 404 })
+      return NextResponse.json({ error: 'Checklist nÃÂ¡ÃÂ£o encontrado' }, { status: 404 })
     }
 
     // Verificar conflitos de agendamento
-    const conflito = await verificarConflitoAgendamento(supabase: any, data, user.bar_id)
+    const conflito = await verificarConflitoAgendamento(supabase, data, user.bar_id)
     if (conflito) {
       return NextResponse.json({ 
-        error: 'Já¡ existe um agendamento similar para este horá¡rio',
+        error: 'JÃÂ¡ÃÂ¡ existe um agendamento similar para este horÃÂ¡ÃÂ¡rio',
         conflito 
       }, { status: 409 })
     }
@@ -170,8 +170,8 @@ export async function POST(request: NextRequest) {
       .insert(agendamentoData)
       .select(`
         *,
-        checklist:checklists (nome: any, setor),
-        criado_por_usuario:usuarios_bar!criado_por (nome: any, email)
+        checklist:checklists (nome, setor),
+        criado_por_usuario:usuarios_bar!criado_por (nome, email)
       `)
       .single()
 
@@ -180,8 +180,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao criar agendamento' }, { status: 500 })
     }
 
-    // Log da criaá§á£o
-    console.log(`œ… Agendamento criado: ${novoAgendamento.titulo} para checklist ${checklist.nome}`)
+    // Log da criaÃÂ¡ÃÂ§ÃÂ¡ÃÂ£o
+    console.log(`ÃâÃ¢â¬Â¦ Agendamento criado: ${novoAgendamento.titulo} para checklist ${checklist.nome}`)
 
     return NextResponse.json({
       success: true,
@@ -189,25 +189,25 @@ export async function POST(request: NextRequest) {
       data: novoAgendamento
     }, { status: 201 })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Erro na API de agendamentos POST:', error)
     
     if (error instanceof z.ZodError) {
       return NextResponse.json({ 
-        error: 'Dados invá¡lidos',
+        error: 'Dados invÃÂ¡ÃÂ¡lidos',
         details: error.errors 
       }, { status: 400 })
     }
     
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
-      details: error.message 
+      details: (error as any).message 
     }, { status: 500 })
   }
 }
 
 // =====================================================
-// FUNá‡á•ES AUXILIARES
+// FUNÃÂ¡Ã¢â¬Â¡ÃÂ¡Ã¢â¬Â¢ES AUXILIARES
 // =====================================================
 
 function calcularProximaExecucao(agendamento: any): string | null {
@@ -216,10 +216,10 @@ function calcularProximaExecucao(agendamento: any): string | null {
   const agora = new Date()
   const [hora, minuto] = agendamento.horario.split(':').map(Number)
   
-  let proximaData = new Date()
-  proximaData.setHours(hora: any, minuto, 0: any, 0)
+  const proximaData = new Date()
+  proximaData.setHours(hora, minuto, 0, 0)
 
-  // Se já¡ passou da hora hoje, comeá§ar de amanhá£
+  // Se jÃÂ¡ÃÂ¡ passou da hora hoje, comeÃÂ¡ÃÂ§ar de amanhÃÂ¡ÃÂ£
   if (proximaData <= agora) {
     proximaData.setDate(proximaData.getDate() + 1)
   }
@@ -236,7 +236,7 @@ function calcularProximaExecucao(agendamento: any): string | null {
       return proximaData.toISOString()
     
     case 'quinzenal':
-      // Lá³gica para quinzenal (a cada 2 semanas nos dias especificados)
+      // LÃÂ¡ÃÂ³gica para quinzenal (a cada 2 semanas nos dias especificados)
       const diasQuinzenal = agendamento.dias_semana || []
       let encontrou = false
       let tentativas = 0
@@ -255,7 +255,7 @@ function calcularProximaExecucao(agendamento: any): string | null {
       const diaMes = agendamento.dia_mes || 1
       proximaData.setDate(diaMes)
       
-      // Se já¡ passou este máªs, prá³ximo máªs
+      // Se jÃÂ¡ÃÂ¡ passou este mÃÂ¡ÃÂªs, prÃÂ¡ÃÂ³ximo mÃÂ¡ÃÂªs
       if (proximaData <= agora) {
         proximaData.setMonth(proximaData.getMonth() + 1)
         proximaData.setDate(diaMes)
@@ -273,7 +273,7 @@ function calcularProximaExecucao(agendamento: any): string | null {
 async function buscarUltimaExecucao(supabase: any, agendamentoId: string) {
   const { data, error } = await supabase
     .from('checklist_execucoes')
-    .select('id, status: any, iniciado_em, concluido_em')
+    .select('id, status, iniciado_em, concluido_em')
     .eq('agendamento_id', agendamentoId)
     .order('iniciado_em', { ascending: false })
     .limit(1)
@@ -299,7 +299,7 @@ function determinarStatusAtual(agendamento: any, proximaExecucao: string | null,
 async function verificarConflitoAgendamento(supabase: any, data: any, barId: number) {
   const { data: conflitos, error } = await supabase
     .from('checklist_schedules')
-    .select('id, titulo: any, horario')
+    .select('id, titulo, horario')
     .eq('bar_id', barId)
     .eq('checklist_id', data.checklist_id)
     .eq('frequencia', data.frequencia)

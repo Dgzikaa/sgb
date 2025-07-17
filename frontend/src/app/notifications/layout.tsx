@@ -1,4 +1,4 @@
-import AuthGuard from '@/components/auth/AuthGuard'
+﻿import AuthGuard from '@/components/auth/AuthGuard'
 
 export default function NotificationsLayout({
   children,
@@ -11,3 +11,4 @@ export default function NotificationsLayout({
     </AuthGuard>
   )
 } 
+

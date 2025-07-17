@@ -29,13 +29,14 @@
     },
     "target": "ES2017",
     "forceConsistentCasingInFileNames": true,
-    "types": ["node", "react", "react-dom"]
+    "types": ["node", "react", "react-dom", "jest", "@testing-library/jest-dom"]
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "src/types/**/*.d.ts"
   ],
   "exclude": [
     "node_modules"

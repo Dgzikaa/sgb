@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -12,23 +12,23 @@ export async function POST(req: NextRequest) {
     
     if (!numero) {
       return NextResponse.json(
-        { success: false, error: 'N�mero � obrigat�rio' },
+        { success: false, error: 'NÃ¡Âºmero Ã¡Â© obrigatÃ¡Â³rio' },
         { status: 400 }
       )
     }
 
-    // Validar formato do n�mero
+    // Validar formato do nÃ¡Âºmero
     const numeroLimpo = numero.replace(/\D/g, '')
     if (numeroLimpo.length !== 11) {
       return NextResponse.json(
-        { success: false, error: 'N�mero deve ter 11 d�gitos' },
+        { success: false, error: 'NÃ¡Âºmero deve ter 11 dÃ¡Â­gitos' },
         { status: 400 }
       )
     }
 
-    // Verificar se est� em modo de simula��o
+    // Verificar se estÃ¡Â¡ em modo de simulaÃ¡Â§Ã¡Â£o
     if (process.env.WHATSAPP_SIMULATION_MODE === 'true') {
-      // Modo simula��o - simular sucesso
+      // Modo simulaÃ¡Â§Ã¡Â£o - simular sucesso
       await supabase
         .from('whatsapp_messages')
         .insert({
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
         },
         body: JSON.stringify({
           number: numeroLimpo,
-          text: mensagem || `📱 Teste de WhatsApp - SGB\n\n�� Seu n�mero est� funcionando!\n\n_${new Date().toLocaleString('pt-BR')}_`
+          text: mensagem || `Ã°Å¸â€œÂ± Teste de WhatsApp - SGB\n\nÅ“â€¦ Seu nÃ¡Âºmero estÃ¡Â¡ funcionando!\n\n_${new Date().toLocaleString('pt-BR')}_`
         })
       }
     )
@@ -115,10 +115,11 @@ export async function POST(req: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Erro ao testar n�mero:', error)
+    console.error('Erro ao testar nÃ¡Âºmero:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno' },
       { status: 500 }
     )
   }
 } 
+

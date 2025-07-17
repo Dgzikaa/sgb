@@ -6,7 +6,20 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// GET - Listar funcioná¡rios com WhatsApp cadastrado
+// Tipos auxiliares para usuÃÂ¡rio WhatsApp
+interface UsuarioWhatsapp {
+  id: string;
+  nome: string;
+  email: string;
+  celular?: string;
+  ativo: boolean;
+  cargo?: string;
+  departamento?: string;
+  whatsapp?: string;
+  whatsapp_valido?: boolean;
+}
+
+// GET - Listar funcionÃÂ¡ÃÂ¡rios com WhatsApp cadastrado
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
@@ -15,7 +28,7 @@ export async function GET(req: NextRequest) {
 
     let query = supabase
       .from('usuarios_bar')
-      .select('id, nome: any, email, celular: any, ativo, cargo: any, departamento')
+      .select('id, nome, email, celular, ativo, cargo, departamento')
       .eq('ativo', true)
 
     if (barId) {
@@ -25,38 +38,38 @@ export async function GET(req: NextRequest) {
     const { data: usuarios, error } = await query
 
     if (error) {
-      console.error('Erro ao buscar usuá¡rios:', error)
+      console.error('Erro ao buscar usuÃÂ¡ÃÂ¡rios:', error)
       return NextResponse.json(
-        { success: false, error: 'Erro ao buscar usuá¡rios' },
+        { success: false, error: 'Erro ao buscar usuÃÂ¡ÃÂ¡rios' },
         { status: 500 }
       )
     }
 
-    // Filtrar e categorizar usuá¡rios
-    const usuariosComWhatsApp = usuarios?.filter((u: any) =>
+    // Filtrar e categorizar usuÃÂ¡ÃÂ¡rios
+    const usuariosComWhatsApp = (usuarios as UsuarioWhatsapp[] | undefined)?.filter((u: UsuarioWhatsapp) =>
       u.whatsapp &&
       typeof u.whatsapp === 'string' &&
       u.whatsapp.replace(/\D/g, '').length >= 10
-    ) || []
+    ) || [];
 
-    const usuariosSemWhatsApp = usuarios?.filter((u: any) =>
+    const usuariosSemWhatsApp = (usuarios as UsuarioWhatsapp[] | undefined)?.filter((u: UsuarioWhatsapp) =>
       !u.whatsapp ||
       typeof u.whatsapp !== 'string' ||
       u.whatsapp.replace(/\D/g, '').length < 10
-    ) || []
+    ) || [];
 
-    // Validar náºmeros de WhatsApp
-    const usuariosValidados = usuariosComWhatsApp.map((usuario: any) => ({
+    // Validar nÃÂ¡ÃÂºmeros de WhatsApp
+    const usuariosValidados = usuariosComWhatsApp.map((usuario: UsuarioWhatsapp) => ({
       ...usuario,
       whatsapp_valido: usuario.whatsapp && usuario.whatsapp.replace(/\D/g, '').length >= 10
-    }))
+    }));
 
     const response: any = {
       success: true,
       com_whatsapp: usuariosValidados,
       total_com_whatsapp: usuariosValidados.length,
-      total_whatsapp_valido: usuariosValidados.filter((u: any) => u.whatsapp_valido).length
-    }
+      total_whatsapp_valido: usuariosValidados.filter((u) => u.whatsapp_valido).length
+    };
 
     if (includeWithout) {
       response.sem_whatsapp = usuariosSemWhatsApp
@@ -68,7 +81,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(response)
 
   } catch (error) {
-    console.error('Erro ao buscar usuá¡rios com WhatsApp:', error)
+    console.error('Erro ao buscar usuÃÂ¡ÃÂ¡rios com WhatsApp:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno' },
       { status: 500 }
@@ -76,46 +89,42 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST - Atualizar máºltiplos usuá¡rios (para operaá§áµes em lote)
+// POST - Atualizar mÃÂ¡ÃÂºltiplos usuÃÂ¡ÃÂ¡rios (para operaÃÂ¡ÃÂ§ÃÂ¡ÃÂµes em lote)
 export async function POST(req: NextRequest) {
   try {
     const { operacao, usuarios } = await req.json()
 
     if (operacao === 'validar_whatsapp') {
-      // Validar náºmeros WhatsApp em lote
+      // Validar nÃÂ¡ÃÂºmeros WhatsApp em lote
       const resultados = []
 
-      for (const usuario of usuarios) {
-        const numero = usuario.celular?.replace(/\D/g, '')
-        
+      for (const usuario of usuarios as UsuarioWhatsapp[]) {
+        const numero = usuario.celular?.replace(/\D/g, '');
         if (!numero || numero.length !== 11) {
           resultados.push({
             id: usuario.id,
             valido: false,
-            erro: 'Náºmero invá¡lido'
-          })
-          continue
+            erro: 'NÃÂ¡ÃÂºmero invÃÂ¡ÃÂ¡lido'
+          });
+          continue;
         }
-
         try {
-          // Aqui vocáª poderia fazer uma validaá§á£o real via API
-          // Por enquanto, apenas validaá§á£o de formato
-          const isValid = parseInt(numero.substring(0: any, 2)) >= 11 && 
-                         parseInt(numero.substring(0: any, 2)) <= 99 &&
-                         numero[2] === '9'
-
+          // Aqui vocÃÂ¡ÃÂª poderia fazer uma validaÃÂ¡ÃÂ§ÃÂ¡ÃÂ£o real via API
+          // Por enquanto, apenas validaÃÂ¡ÃÂ§ÃÂ¡ÃÂ£o de formato
+          const isValid = parseInt(numero.substring(0, 2)) >= 11 && 
+                         parseInt(numero.substring(0, 2)) <= 99 &&
+                         numero[2] === '9';
           resultados.push({
             id: usuario.id,
             valido: isValid,
             numero: numero
-          })
-
+          });
         } catch (error) {
           resultados.push({
             id: usuario.id,
             valido: false,
-            erro: 'Erro na validaá§á£o'
-          })
+            erro: 'Erro na validaÃÂ¡ÃÂ§ÃÂ¡ÃÂ£o'
+          });
         }
       }
 
@@ -126,12 +135,12 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: false, error: 'Operaá§á£o ná£o suportada' },
+      { success: false, error: 'OperaÃÂ¡ÃÂ§ÃÂ¡ÃÂ£o nÃÂ¡ÃÂ£o suportada' },
       { status: 400 }
     )
 
   } catch (error) {
-    console.error('Erro na operaá§á£o em lote:', error)
+    console.error('Erro na operaÃÂ¡ÃÂ§ÃÂ¡ÃÂ£o em lote:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno' },
       { status: 500 }

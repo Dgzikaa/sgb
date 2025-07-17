@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -43,9 +43,9 @@ interface DailyAnalysisData {
     worst_day: string | null
   }
   platform_analysis: {
-    instagram
-    facebook
-    insights
+    instagram: Record<string, any>
+    facebook: Record<string, any>
+    insights: Record<string, any>
   }
   trends_and_insights: Array<{
     type: string
@@ -75,7 +75,7 @@ export default function DiarioPage() {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
 
-  // Inicializar datas padr�o
+  // Inicializar datas padrÃ¡Â£o
   useEffect(() => {
     const today = new Date()
     const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
@@ -85,7 +85,7 @@ export default function DiarioPage() {
   }, [])
 
   useEffect(() => {
-    setPageTitle('An�lise Di�ria - Meta')
+    setPageTitle('AnÃ¡Â¡lise DiÃ¡Â¡ria - Meta')
     return () => setPageTitle('')
   }, [setPageTitle])
 
@@ -96,7 +96,7 @@ export default function DiarioPage() {
   const loadDailyAnalysis = async () => {
     try {
       setLoading(true)
-      console.log('📊 Carregando an�lise di�ria Meta...')
+      console.log('Ã°Å¸â€œÅ  Carregando anÃ¡Â¡lise diÃ¡Â¡ria Meta...')
       
       let apiUrl = ''
       if (filterType === 'custom' && startDate && endDate) {
@@ -114,14 +114,14 @@ export default function DiarioPage() {
       const result = await response.json()
       
       if (result.success && result.data) {
-        console.log('�� An�lise di�ria carregada:', result.debug)
+        console.log('Å“â€¦ AnÃ¡Â¡lise diÃ¡Â¡ria carregada:', result.debug)
         setData(result.data)
       } else {
         throw new Error(result.error || 'Erro ao carregar dados')
       }
       
     } catch (error) {
-      console.error('�� Erro ao carregar an�lise di�ria:', error)
+      console.error('ÂÅ’ Erro ao carregar anÃ¡Â¡lise diÃ¡Â¡ria:', error)
     } finally {
       setLoading(false)
     }
@@ -189,7 +189,7 @@ export default function DiarioPage() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex justify-center items-center py-8">
             <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
-            <span className="ml-3 text-gray-600 dark:text-gray-400">Analisando dados di�rios...</span>
+            <span className="ml-3 text-gray-600 dark:text-gray-400">Analisando dados diÃ¡Â¡rios...</span>
           </div>
         </div>
       </div>
@@ -208,10 +208,10 @@ export default function DiarioPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  An�lise Di�ria Meta
+                  AnÃ¡Â¡lise DiÃ¡Â¡ria Meta
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Varia��es di�rias e tend�ncias de Instagram e Facebook
+                  VariaÃ¡Â§Ã¡Âµes diÃ¡Â¡rias e tendÃ¡Âªncias de Instagram e Facebook
                 </p>
               </div>
             </div>
@@ -241,7 +241,7 @@ export default function DiarioPage() {
               {filterType === 'preset' ? (
                 <Select value={selectedDays} onValueChange={setSelectedDays}>
                   <SelectTrigger className="w-32">
-                    <SelectValue placeholder="Per�odo" />
+                    <SelectValue placeholder="PerÃ¡Â­odo" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="7">7 dias</SelectItem>
@@ -260,7 +260,7 @@ export default function DiarioPage() {
                     className="w-36"
                     placeholder="Data inicial"
                   />
-                  <span className="text-gray-400">at�</span>
+                  <span className="text-gray-400">atÃ¡Â©</span>
                   <Input
                     type="date"
                     value={endDate}
@@ -339,7 +339,7 @@ export default function DiarioPage() {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Engagement M�dio</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Engagement MÃ¡Â©dio</p>
                         <p className="text-2xl font-bold text-gray-900 dark:text-white">
                           {data.summary.avg_daily_engagement.toFixed(1)}%
                         </p>
@@ -371,7 +371,7 @@ export default function DiarioPage() {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Per�odo Analisado</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">PerÃ¡Â­odo Analisado</p>
                         <p className="text-2xl font-bold text-gray-900 dark:text-white">
                           {data.period.days_analyzed} dias
                         </p>
@@ -384,13 +384,13 @@ export default function DiarioPage() {
                 </Card>
               </div>
 
-              {/* Tend�ncias e Insights */}
+              {/* TendÃ¡Âªncias e Insights */}
               {data.trends_and_insights && data.trends_and_insights.length > 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Target className="w-5 h-5" />
-                      Tend�ncias e Insights
+                      TendÃ¡Âªncias e Insights
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -410,7 +410,7 @@ export default function DiarioPage() {
                                 {trend.description}
                               </p>
                               <p className="text-xs text-gray-500 dark:text-gray-500 italic">
-                                💡 {trend.recommendation}
+                                Ã°Å¸â€™Â¡ {trend.recommendation}
                               </p>
                             </div>
                           </div>
@@ -421,19 +421,19 @@ export default function DiarioPage() {
                 </Card>
               )}
 
-              {/* Varia��es Di�rias */}
+              {/* VariaÃ¡Â§Ã¡Âµes DiÃ¡Â¡rias */}
               {data.daily_variations.daily_changes && Object.keys(data.daily_variations.daily_changes).length > 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Activity className="w-5 h-5" />
-                      Varia��es Di�rias
+                      VariaÃ¡Â§Ã¡Âµes DiÃ¡Â¡rias
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
                       {Object.entries(data.daily_variations.daily_changes)
-                        .slice(-10) // Mostrar �ltimos 10 dias
+                        .slice(-10) // Mostrar Ã¡Âºltimos 10 dias
                         .reverse()
                         .map(([date, changes]: [string, any]) => (
                         <div key={date} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
@@ -464,7 +464,7 @@ export default function DiarioPage() {
                           </div>
                           <div className="text-right">
                             <div className="text-sm text-gray-600 dark:text-gray-400">
-                              {changes.total_interactions} intera��es
+                              {changes.total_interactions} interaÃ¡Â§Ã¡Âµes
                             </div>
                           </div>
                         </div>
@@ -525,3 +525,4 @@ export default function DiarioPage() {
     </div>
   )
 } 
+

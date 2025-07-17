@@ -1,6 +1,6 @@
-import { getSupabaseClient } from './supabase'
+Ôªøimport { getSupabaseClient } from './supabase'
 
-// Configura·ß·µes de cache por tipo
+// Configura√ß√µes de cache por tipo
 const CACHE_CONFIGS = {
   usuarios: { ttl: 300 }, // 5 minutos
   bars: { ttl: 600 }, // 10 minutos  
@@ -12,16 +12,16 @@ const CACHE_CONFIGS = {
   configuracoes: { ttl: 900 }, // 15 minutos
   meta: { ttl: 3600 }, // 1 hora
   contaazul: { ttl: 600 }, // 10 minutos
-  default: { ttl: 300 } // 5 minutos padr·£o
+  default: { ttl: 300 } // 5 minutos padr√£o
 } as const
 
 type CacheType = keyof typeof CACHE_CONFIGS
 
-interface CacheItem<T = any> {
-  data: T
-  timestamp: number
-  ttl: number
-  key: string
+interface CacheItem<T = unknown> {
+  data: T;
+  timestamp: number;
+  ttl: number;
+  key: string;
 }
 
 interface CacheMetrics {
@@ -45,7 +45,7 @@ class RedisCacheService {
   private cleanupInterval: NodeJS.Timeout | null = null
 
   constructor() {
-    // Limpeza autom·°tica a cada 5 minutos
+    // Limpeza autom√°tica a cada 5 minutos
     this.startCleanup()
   }
 
@@ -74,7 +74,7 @@ class RedisCacheService {
     console.log(`Cache cleanup: removidas ${keysToDelete.length} entradas expiradas`)
   }
 
-  private generateKey(type: CacheType, identifier: string, params?: Record<string, any>): string {
+  private generateKey(type: CacheType, identifier: string, params?: Record<string, unknown>): string {
     const paramString = params ? JSON.stringify(params) : ''
     return `${type}:${identifier}:${btoa(paramString)}`
   }
@@ -88,7 +88,7 @@ class RedisCacheService {
     this.metrics.hitRate = total > 0 ? (this.metrics.hits / total) * 100 : 0
   }
 
-  async get<T = any>(type: CacheType, identifier: string, params?: Record<string, any>): Promise<T | null> {
+  async get<T = unknown>(type: CacheType, identifier: string, params?: Record<string, unknown>): Promise<T | null> {
     const key = this.generateKey(type, identifier, params)
     const item = this.memoryCache.get(key)
 
@@ -111,7 +111,7 @@ class RedisCacheService {
     return item.data as T
   }
 
-  async set<T = any>(type: CacheType, identifier: string, data: T, params?: Record<string, any>): Promise<void> {
+  async set<T = unknown>(type: CacheType, identifier: string, data: T, params?: Record<string, unknown>): Promise<void> {
     const key = this.generateKey(type, identifier, params)
     const ttl = this.getTTL(type)
 
@@ -130,7 +130,7 @@ class RedisCacheService {
     console.log(`Cache SET: ${key} (TTL: ${ttl}s)`)
   }
 
-  async delete(type: CacheType, identifier: string, params?: Record<string, any>): Promise<void> {
+  async delete(type: CacheType, identifier: string, params?: Record<string, unknown>): Promise<void> {
     const key = this.generateKey(type, identifier, params)
     const deleted = this.memoryCache.delete(key)
     
@@ -157,7 +157,7 @@ class RedisCacheService {
     this.metrics.deletes += keysToDelete.length
     this.updateMetrics()
     
-    console.log(`Cache INVALIDATE: ${keysToDelete.length} chaves removidas com padr·£o '${pattern}'`)
+    console.log(`Cache INVALIDATE: ${keysToDelete.length} chaves removidas com padr√£o '${pattern}'`)
   }
 
   async invalidateByType(type: CacheType): Promise<void> {
@@ -192,20 +192,24 @@ class RedisCacheService {
     return { ...this.metrics }
   }
 
-  getStats() {
+  getStats(): {
+    size: number;
+    metrics: CacheMetrics;
+    memoryUsage: NodeJS.MemoryUsage | null;
+  } {
     return {
       size: this.memoryCache.size,
       metrics: this.getMetrics(),
-      memoryUsage: process.memoryUsage?.() || null
+      memoryUsage: typeof process !== 'undefined' && typeof process.memoryUsage === 'function' ? process.memoryUsage() : null
     }
   }
 
-  // Helper para cache com fun·ß·£o de fallback
-  async getOrSet<T = any>(
+  // Helper para cache com fun√ß√£o de fallback
+  async getOrSet<T = unknown>(
     type: CacheType,
     identifier: string,
     fetchFunction: () => Promise<T>,
-    params?: Record<string, any>
+    params?: Record<string, unknown>
   ): Promise<T> {
     // Tenta buscar no cache primeiro
     const cached = await this.get<T>(type, identifier, params)
@@ -213,7 +217,7 @@ class RedisCacheService {
       return cached
     }
 
-    // Se n·£o encontrou, executa a fun·ß·£o e armazena
+    // Se n√£o encontrou, executa a fun√ß√£o e armazena
     try {
       const data = await fetchFunction()
       await this.set(type, identifier, data, params)
@@ -224,26 +228,26 @@ class RedisCacheService {
     }
   }
 
-  // M·©todo para pr·©-aquecer cache cr·≠tico
+  // M√©todo para pr√©-aquecer cache cr√≠tico
   async warmup(): Promise<void> {
     try {
       console.log('Iniciando warmup do cache...')
 
       const supabase = await getSupabaseClient()
 
-      // Cache de configura·ß·µes cr·≠ticas
+      // Cache de configura√ß√µes cr√≠ticas
       const { data: bars } = await supabase.from('bars').select('*').eq('ativo', true)
       if (bars) {
         await this.set('bars', 'active', bars)
       }
 
-      // Cache de usu·°rios ativos
+      // Cache de usu√°rios ativos
       const { data: usuarios } = await supabase.from('usuarios').select('*').eq('ativo', true)
       if (usuarios) {
         await this.set('usuarios', 'active', usuarios)
       }
 
-      console.log('Cache warmup conclu·≠do')
+      console.log('Cache warmup conclu√≠do')
     } catch (error) {
       console.error('Erro durante cache warmup:', error)
     }
@@ -254,11 +258,11 @@ class RedisCacheService {
       clearInterval(this.cleanupInterval)
       this.cleanupInterval = null
     }
-    this.clear()
+    void this.clear();
   }
 }
 
-// Inst·¢ncia singleton
+// Inst√¢ncia singleton
 export const cacheService = new RedisCacheService()
 
 // Hook para facilitar uso no frontend
@@ -275,7 +279,7 @@ export function useCache() {
   }
 }
 
-// Utilit·°rios para cache de queries espec·≠ficas
+// Utilit√°rios para cache de queries espec√≠ficas
 export const cacheUtils = {
   // Cache para listas paginadas
   async getPagedData<T>(
@@ -297,7 +301,7 @@ export const cacheUtils = {
   async getFilteredData<T>(
     type: CacheType,
     baseKey: string,
-    filters: Record<string, any>,
+    filters: Record<string, unknown>,
     fetchFunction: () => Promise<T>
   ): Promise<T> {
     return cacheService.getOrSet(
@@ -308,7 +312,7 @@ export const cacheUtils = {
     )
   },
 
-  // Cache para dados de usu·°rio espec·≠fico
+  // Cache para dados de usu√°rio espec√≠fico
   async getUserData<T>(
     type: CacheType,
     userId: string,
@@ -324,3 +328,4 @@ export const cacheUtils = {
 }
 
 export default cacheService 
+

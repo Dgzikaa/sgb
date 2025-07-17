@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -16,14 +16,14 @@ function createSupabaseClient() {
   )
 }
 
-// Fun��o para buscar todos os dados com pagina��o
-async function buscarTodosEventosFinanceiros(supabase, barId: number) {
-  const todosEventos[] = []
+// FunÃ¡Â§Ã¡Â£o para buscar todos os dados com paginaÃ¡Â§Ã¡Â£o
+async function buscarTodosEventosFinanceiros(supabase: any, barId: number) {
+  const todosEventos: any[] = []
   let pagina = 0
   const LIMITE_POR_PAGINA = 1000
 
   while (true) {
-    console.log(`🔄 Buscando p�gina ${pagina + 1} dos eventos financeiros...`)
+    console.log(`Ã°Å¸â€â€ž Buscando pÃ¡Â¡gina ${pagina + 1} dos eventos financeiros...`)
     
     const { data: eventosPagina, error } = await supabase
       .from('contaazul_eventos_financeiros')
@@ -36,21 +36,21 @@ async function buscarTodosEventosFinanceiros(supabase, barId: number) {
       .range(pagina * LIMITE_POR_PAGINA, (pagina + 1) * LIMITE_POR_PAGINA - 1)
 
     if (error) {
-      console.error(`�� Erro na p�gina ${pagina + 1}:`, error)
+      console.error(`ÂÅ’ Erro na pÃ¡Â¡gina ${pagina + 1}:`, error)
       throw error
     }
 
     if (!eventosPagina || eventosPagina.length === 0) {
-      console.log(`�� Busca finalizada. Total de eventos: ${todosEventos.length}`)
+      console.log(`Å“â€¦ Busca finalizada. Total de eventos: ${todosEventos.length}`)
       break
     }
 
     todosEventos.push(...eventosPagina)
-    console.log(`📄 P�gina ${pagina + 1}: ${eventosPagina.length} eventos (Total acumulado: ${todosEventos.length})`)
+    console.log(`Ã°Å¸â€œâ€ž PÃ¡Â¡gina ${pagina + 1}: ${eventosPagina.length} eventos (Total acumulado: ${todosEventos.length})`)
 
-    // Se a p�gina retornou menos que o limite, � a �ltima p�gina
+    // Se a pÃ¡Â¡gina retornou menos que o limite, Ã¡Â© a Ã¡Âºltima pÃ¡Â¡gina
     if (eventosPagina.length < LIMITE_POR_PAGINA) {
-      console.log(`�� �ltima p�gina atingida. Total final: ${todosEventos.length} eventos`)
+      console.log(`Å“â€¦ Ã¡Å¡ltima pÃ¡Â¡gina atingida. Total final: ${todosEventos.length} eventos`)
       break
     }
 
@@ -66,14 +66,14 @@ export async function GET(request: NextRequest) {
     const barId = searchParams.get('barId')
     
     if (!barId) {
-      return NextResponse.json({ error: 'Bar ID � obrigat�rio' }, { status: 400 })
+      return NextResponse.json({ error: 'Bar ID Ã¡Â© obrigatÃ¡Â³rio' }, { status: 400 })
     }
 
     const supabase = createSupabaseClient()
 
-    console.log(`💰 BUSCANDO DADOS FINANCEIROS PARA BAR ${barId} - 2025 (COM PAGINA��O)`)
+    console.log(`Ã°Å¸â€™Â° BUSCANDO DADOS FINANCEIROS PARA BAR ${barId} - 2025 (COM PAGINAÃ¡â€¡Ã¡Æ’O)`)
 
-    // 1. BUSCAR TODOS OS EVENTOS COM PAGINA��O
+    // 1. BUSCAR TODOS OS EVENTOS COM PAGINAÃ¡â€¡Ã¡Æ’O
     const todosEventos = await buscarTodosEventosFinanceiros(supabase, parseInt(barId))
 
     // 2. BUSCAR CATEGORIAS
@@ -83,27 +83,27 @@ export async function GET(request: NextRequest) {
       .eq('bar_id', parseInt(barId))
 
     if (errorCategorias) {
-      console.error('�� Erro ao buscar categorias:', errorCategorias)
+      console.error('ÂÅ’ Erro ao buscar categorias:', errorCategorias)
       return NextResponse.json({ error: 'Erro ao buscar categorias' }, { status: 500 })
     }
 
     // 3. CALCULAR TOTAIS
-    const totalReceitas = todosEventos.filter((e) => e.tipo === 'receita').reduce((sum: number, e) => sum + (parseFloat(e.valor) || 0), 0)
-    const totalDespesas = todosEventos.filter((e) => e.tipo === 'despesa').reduce((sum: number, e) => sum + (parseFloat(e.valor) || 0), 0)
+    const totalReceitas = todosEventos.filter((e: any) => e.tipo === 'receita').reduce((sum: number, e: any) => sum + (parseFloat(e.valor) || 0), 0)
+    const totalDespesas = todosEventos.filter((e: any) => e.tipo === 'despesa').reduce((sum: number, e: any) => sum + (parseFloat(e.valor) || 0), 0)
     const saldoLiquido = totalReceitas - totalDespesas
 
     // 4. MAPEAR CATEGORIAS
-    const mapaCategorias = categorias?.reduce((acc, categoria) => {
+    const mapaCategorias = categorias?.reduce((acc: any, categoria: any) => {
       acc[categoria.id] = categoria
       return acc
     }, {}) || {}
 
     // 5. AGRUPAR EVENTOS POR CATEGORIA
-    const receitasAgrupadas = {}
-    const despesasAgrupadas = {}
+    const receitasAgrupadas: any = {}
+    const despesasAgrupadas: any = {}
 
-    todosEventos.forEach((evento) => {
-      const categoria = mapaCategorias[evento.categoria_id]
+    todosEventos.forEach((evento: any) => {
+      const categoria = (mapaCategorias as any)[evento.categoria_id]
       if (!categoria) return
 
       const valor = parseFloat(evento.valor) || 0
@@ -132,20 +132,20 @@ export async function GET(request: NextRequest) {
 
     // 6. TRANSFORMAR EM ARRAYS E ORDENAR
     const topReceitas = Object.values(receitasAgrupadas)
-      .sort((a, b) => b.total - a.total)
+      .sort((a: any, b: any) => b.total - a.total)
       .slice(0, 10)
 
     const topDespesas = Object.values(despesasAgrupadas)
-      .sort((a, b) => b.total - a.total)
+      .sort((a: any, b: any) => b.total - a.total)
       .slice(0, 10)
 
-    // 7. TRANSA��ES RECENTES (primeiras 20)
-    const transacoesRecentes = todosEventos.slice(0, 20).map((evento) => {
-      const categoria = mapaCategorias[evento.categoria_id]
+    // 7. TRANSAÃ¡â€¡Ã¡â€¢ES RECENTES (primeiras 20)
+    const transacoesRecentes = todosEventos.slice(0, 20).map((evento: any) => {
+      const categoria = (mapaCategorias as any)[evento.categoria_id]
       return {
         id: evento.evento_id,
         tipo: evento.tipo,
-        descricao: evento.descricao || 'Sem descri��o',
+        descricao: evento.descricao || 'Sem descriÃ¡Â§Ã¡Â£o',
         valor: parseFloat(evento.valor) || 0,
         data: evento.data_competencia,
         status: evento.status || 'N/A',
@@ -173,20 +173,21 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    console.log(`💰 Dados financeiros carregados (TODOS OS DADOS):`)
-    console.log(`   📊 Total de eventos processados: ${todosEventos.length}`)
-    console.log(`   📈 Receitas: R$ ${totalReceitas.toFixed(2)}`)
-    console.log(`   📉 Despesas: R$ ${totalDespesas.toFixed(2)}`)
-    console.log(`   💰 Saldo: R$ ${saldoLiquido.toFixed(2)}`)
+    console.log(`Ã°Å¸â€™Â° Dados financeiros carregados (TODOS OS DADOS):`)
+    console.log(`   Ã°Å¸â€œÅ  Total de eventos processados: ${todosEventos.length}`)
+    console.log(`   Ã°Å¸â€œË† Receitas: R$ ${totalReceitas.toFixed(2)}`)
+    console.log(`   Ã°Å¸â€œâ€° Despesas: R$ ${totalDespesas.toFixed(2)}`)
+    console.log(`   Ã°Å¸â€™Â° Saldo: R$ ${saldoLiquido.toFixed(2)}`)
 
     return NextResponse.json(resultado)
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
-    console.error('�� Erro ao buscar dados financeiros:', error)
+    console.error('ÂÅ’ Erro ao buscar dados financeiros:', error)
     return NextResponse.json(
       { error: 'Erro ao buscar dados financeiros: ' + errorMessage },
       { status: 500 }
     )
   }
 } 
+

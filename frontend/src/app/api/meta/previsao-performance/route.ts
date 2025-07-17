@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -6,11 +6,52 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+// Tipos explÃ­citos para padroes, contexto e previsao
+interface PadroesHistoricos {
+  media_engajamento: number;
+  media_alcance: number;
+  melhor_dia_semana: number;
+  melhor_horario: number;
+  trending_up: boolean;
+  fatores_sucesso: string[];
+}
+
+interface ContextoPrevisao {
+  plataforma: string;
+}
+
+interface PrevisaoPerformance {
+  score_predicao: number;
+  confianca: 'alta' | 'media' | 'baixa';
+  engajamento_esperado: number;
+  alcance_esperado: number;
+  roi_estimado: number;
+  fatores_positivos: string[];
+  melhor_momento: {
+    dia_semana: number;
+    horario: number;
+    dia_nome: string;
+  };
+}
+
+// Interface para dados histÃ³ricos de post
+interface PostHistorico {
+  data_referencia: string;
+  posts_likes?: number;
+  posts_comments?: number;
+  post_likes?: number;
+  post_comments?: number;
+  reach?: number;
+  impressions?: number;
+  page_reach?: number;
+  [key: string]: any;
+}
+
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔮 Previs�o de Performance - Analisando dados hist�ricos...')
+    console.log('Ã°Å¸â€Â® PrevisÃ¡Â£o de Performance - Analisando dados histÃ¡Â³ricos...')
 
-    // Obter dados do usu�rio para pegar o bar_id
+    // Obter dados do usuÃ¡Â¡rio para pegar o bar_id
     const userData = request.headers.get('x-user-data')
     let barId = 3 // fallback para desenvolvimento
     
@@ -18,18 +59,18 @@ export async function GET(request: NextRequest) {
       try {
         const parsedUser = JSON.parse(decodeURIComponent(userData))
         barId = parsedUser.bar_id || 3
-        console.log(`👤 Previs�o de Performance - Usando bar_id: ${barId}`)
+        console.log(`Ã°Å¸â€˜Â¤ PrevisÃ¡Â£o de Performance - Usando bar_id: ${barId}`)
       } catch (e) {
-        console.warn('��️ Erro ao parsear dados do usu�rio, usando bar_id padr�o')
+        console.warn('Å¡Â Ã¯Â¸Â Erro ao parsear dados do usuÃ¡Â¡rio, usando bar_id padrÃ¡Â£o')
       }
     }
 
     const { searchParams } = new URL(request.url)
     const tipo = searchParams.get('tipo') || 'geral' // 'post', 'campanha', 'geral'
     
-    console.log('🔮 Previs�o de Performance - Analisando para bar:', barId, 'tipo:', tipo)
+    console.log('Ã°Å¸â€Â® PrevisÃ¡Â£o de Performance - Analisando para bar:', barId, 'tipo:', tipo)
 
-    // 1. COLETAR DADOS HIST�RICOS - CORRIGIR NOMES DAS TABELAS
+    // 1. COLETAR DADOS HISTÃ¡â€œRICOS - CORRIGIR NOMES DAS TABELAS
     const { data: instagramHistorico } = await supabase
       .from('instagram_metrics')
       .select('*')
@@ -44,21 +85,21 @@ export async function GET(request: NextRequest) {
       .order('data_referencia', { ascending: false })
       .limit(100)
 
-    // 2. AN�LISE DE PADR�ES HIST�RICOS
-    const analisarPadroes = (dados[]) => {
+    // 2. ANÃLISE DE PADRÃ•ES HISTÃ“RICOS
+    const analisarPadroes = (dados: PostHistorico[]): PadroesHistoricos | null => {
       if (!dados || dados.length === 0) return null
       
-      const padroes = {
+      const padroes: PadroesHistoricos = {
         media_engajamento: 0,
         media_alcance: 0,
         melhor_dia_semana: 0,
         melhor_horario: 0,
         trending_up: false,
-        fatores_sucesso: [] as string[]
+        fatores_sucesso: []
       }
       
-      // Calcular m�dias - AJUSTAR CAMPOS PARA TABELA CORRETA
-      const totalEngajamento = dados.reduce((sum, item) => {
+      // Calcular mÃ©dias - AJUSTAR CAMPOS PARA TABELA CORRETA
+      const totalEngajamento = dados.reduce((sum: number, item: PostHistorico) => {
         // Para Instagram: posts_likes + posts_comments
         // Para Facebook: post_likes + post_comments
         const engagement = (item.posts_likes || item.post_likes || 0) + 
@@ -66,7 +107,7 @@ export async function GET(request: NextRequest) {
         return sum + engagement
       }, 0)
       
-      const totalAlcance = dados.reduce((sum, item) => {
+      const totalAlcance = dados.reduce((sum: number, item: PostHistorico) => {
         return sum + (item.reach || item.impressions || item.page_reach || 0)
       }, 0)
       
@@ -77,7 +118,7 @@ export async function GET(request: NextRequest) {
       const diasSemana = new Array(7).fill(0)
       const engajamentoPorDia = new Array(7).fill(0)
       
-      dados.forEach(item => {
+      dados.forEach((item: PostHistorico) => {
         const dia = new Date(item.data_referencia).getDay()
         diasSemana[dia]++
         
@@ -88,7 +129,7 @@ export async function GET(request: NextRequest) {
       
       let melhorDia = 0
       let melhorEngajamento = 0
-      diasSemana.forEach((count, dia) => {
+      diasSemana.forEach((count: number, dia: number) => {
         if (count > 0) {
           const mediaEngajamento = engajamentoPorDia[dia] / count
           if (mediaEngajamento > melhorEngajamento) {
@@ -100,11 +141,11 @@ export async function GET(request: NextRequest) {
       
       padroes.melhor_dia_semana = melhorDia
       
-      // Analisar hor�rios - USAR data_referencia (assumindo que est� no formato correto)
+      // Analisar horÃ¡Â¡rios - USAR data_referencia (assumindo que estÃ¡Â¡ no formato correto)
       const horarios = new Array(24).fill(0)
       const engajamentoPorHora = new Array(24).fill(0)
       
-      dados.forEach(item => {
+      dados.forEach((item: PostHistorico) => {
         const hora = new Date(item.data_referencia).getHours()
         horarios[hora]++
         
@@ -115,7 +156,7 @@ export async function GET(request: NextRequest) {
       
       let melhorHora = 0
       let melhorEngajamentoHora = 0
-      horarios.forEach((count, hora) => {
+      horarios.forEach((count: number, hora: number) => {
         if (count > 0) {
           const mediaEngajamento = engajamentoPorHora[hora] / count
           if (mediaEngajamento > melhorEngajamentoHora) {
@@ -127,12 +168,12 @@ export async function GET(request: NextRequest) {
       
       padroes.melhor_horario = melhorHora
       
-      // Detectar tend�ncia
+      // Detectar tendÃ¡Âªncia
       const recentes = dados.slice(0, 10)
       const antigos = dados.slice(-10)
       
-      const calcularEngajamento = (items[]) => {
-        return items.reduce((sum, item) => {
+      const calcularEngajamento = (items: PostHistorico[]) => {
+        return items.reduce((sum: number, item: PostHistorico) => {
           const engagement = (item.posts_likes || item.post_likes || 0) + 
                             (item.posts_comments || item.post_comments || 0)
           return sum + engagement
@@ -145,7 +186,7 @@ export async function GET(request: NextRequest) {
       padroes.trending_up = engajamentoRecente > engajamentoAntigo
       
       // Identificar fatores de sucesso
-      const topPosts = dados.sort((a, b) => {
+      const topPosts = dados.sort((a: PostHistorico, b: PostHistorico) => {
         const engA = (a.posts_likes || a.post_likes || 0) + (a.posts_comments || a.post_comments || 0)
         const engB = (b.posts_likes || b.post_likes || 0) + (b.posts_comments || b.post_comments || 0)
         return engB - engA
@@ -153,16 +194,16 @@ export async function GET(request: NextRequest) {
       
       const fatores = new Set<string>()
       
-      topPosts.forEach(post => {
+      topPosts.forEach((post: PostHistorico) => {
         const hora = new Date(post.data_referencia).getHours()
         const dia = new Date(post.data_referencia).getDay()
         
-        if (hora >= 18 && hora <= 22) fatores.add('Postar no hor�rio nobre (18h-22h)')
+        if (hora >= 18 && hora <= 22) fatores.add('Postar no horÃ¡rio nobre (18h-22h)')
         if (dia === 5 || dia === 6) fatores.add('Postar nos finais de semana')
         
         const engagement = (post.posts_likes || post.post_likes || 0) + 
                           (post.posts_comments || post.post_comments || 0)
-        if (engagement > padroes.media_engajamento * 1.5) fatores.add('Conte�do altamente engajante')
+        if (engagement > padroes.media_engajamento * 1.5) fatores.add('ConteÃºdo altamente engajante')
       })
       
       padroes.fatores_sucesso = Array.from(fatores)
@@ -170,8 +211,8 @@ export async function GET(request: NextRequest) {
       return padroes
     }
 
-    // 3. ALGORITMO DE PREVIS�O IA
-    const preverPerformance = (padroes, contexto) => {
+    // 3. ALGORITMO DE PREVISÃƒO IA
+    const preverPerformance = (padroes: PadroesHistoricos | null, contexto: ContextoPrevisao): PrevisaoPerformance | null => {
       if (!padroes) return null
       
       const agora = new Date()
@@ -188,14 +229,14 @@ export async function GET(request: NextRequest) {
         scoreBase += 10
       }
       
-      // Ajustes por hor�rio
+      // Ajustes por horÃ¡Â¡rio
       if (Math.abs(horaAtual - padroes.melhor_horario) <= 2) {
         scoreBase += 15
       } else if (horaAtual >= 18 && horaAtual <= 22) {
         scoreBase += 10
       }
       
-      // Ajustes por tend�ncia
+      // Ajustes por tendÃ¡Âªncia
       if (padroes.trending_up) {
         scoreBase += 10
       } else {
@@ -205,7 +246,7 @@ export async function GET(request: NextRequest) {
       // Ajustes sazonais
       const mes = agora.getMonth()
       if (mes === 11 || mes === 0) { // Dezembro/Janeiro
-        scoreBase += 5 // �poca festiva
+        scoreBase += 5 // Ã¡â€°poca festiva
       }
       
       // Normalizar score
@@ -221,13 +262,13 @@ export async function GET(request: NextRequest) {
         melhor_momento: {
           dia_semana: padroes.melhor_dia_semana,
           horario: padroes.melhor_horario,
-          dia_nome: ['Domingo', 'Segunda', 'Ter�a', 'Quarta', 'Quinta', 'Sexta', 'S�bado'][padroes.melhor_dia_semana]
+          dia_nome: ['Domingo', 'Segunda', 'TerÃ¡Â§a', 'Quarta', 'Quinta', 'Sexta', 'SÃ¡Â¡bado'][padroes.melhor_dia_semana]
         }
       }
     }
 
-    // 4. RECOMENDA��ES ESPEC�FICAS POR TIPO
-    const gerarRecomendacoes = (previsao, tipo: string) => {
+    // 4. RECOMENDAÃ‡Ã•ES ESPECÃFICAS POR TIPO
+    const gerarRecomendacoes = (previsao: PrevisaoPerformance, tipo: string): Array<{ categoria: string; prioridade: string; titulo: string; descricao: string; impacto_estimado: string }> => {
       const recomendacoes = []
       
       if (tipo === 'post' || tipo === 'geral') {
@@ -235,16 +276,16 @@ export async function GET(request: NextRequest) {
           categoria: 'Timing',
           prioridade: 'alta',
           titulo: 'Melhor momento para postar',
-          descricao: `Poste ${previsao.melhor_momento.dia_nome} �s ${previsao.melhor_momento.horario}h para m�ximo engajamento`,
+          descricao: `Poste ${previsao.melhor_momento.dia_nome} Ã¡Â s ${previsao.melhor_momento.horario}h para mÃ¡ximo engajamento`,
           impacto_estimado: '+25% engajamento'
         })
         
         if (previsao.score_predicao < 60) {
           recomendacoes.push({
-            categoria: 'Conte�do',
+            categoria: 'ConteÃ¡Âºdo',
             prioridade: 'media',
-            titulo: 'Melhore o conte�do',
-            descricao: 'Score baixo detectado. Experimente formatos mais engajantes como v�deos ou stories',
+            titulo: 'Melhore o conteÃ¡Âºdo',
+            descricao: 'Score baixo detectado. Experimente formatos mais engajantes como vÃ¡Â­deos ou stories',
             impacto_estimado: '+15% alcance'
           })
         }
@@ -252,20 +293,20 @@ export async function GET(request: NextRequest) {
       
       if (tipo === 'campanha' || tipo === 'geral') {
         recomendacoes.push({
-          categoria: 'Or�amento',
+          categoria: 'OrÃ¡Â§amento',
           prioridade: 'alta',
-          titulo: 'Otimiza��o de investimento',
-          descricao: `ROI estimado: ${previsao.roi_estimado.toFixed(1)}%. Recomendado investir em hor�rios de pico`,
+          titulo: 'OtimizaÃ¡Â§Ã¡Â£o de investimento',
+          descricao: `ROI estimado: ${previsao.roi_estimado.toFixed(1)}%. Recomendado investir em horÃ¡Â¡rios de pico`,
           impacto_estimado: `+${(previsao.roi_estimado * 0.3).toFixed(1)}% ROI`
         })
         
         if (previsao.confianca === 'baixa') {
           recomendacoes.push({
-            categoria: 'Estrat�gia',
+            categoria: 'EstratÃ¡Â©gia',
             prioridade: 'alta',
             titulo: 'Colete mais dados',
-            descricao: 'Precisamos de mais dados hist�ricos para previs�es precisas. Mantenha postagens consistentes',
-            impacto_estimado: 'Melhor precis�o'
+            descricao: 'Precisamos de mais dados histÃ¡Â³ricos para previsÃ¡Âµes precisas. Mantenha postagens consistentes',
+            impacto_estimado: 'Melhor precisÃ¡Â£o'
           })
         }
       }
@@ -274,15 +315,15 @@ export async function GET(request: NextRequest) {
     }
 
     // 5. ALERTAS INTELIGENTES
-    const gerarAlertas = (previsao) => {
+    const gerarAlertas = (previsao: PrevisaoPerformance): Array<{ tipo: string; titulo: string; descricao: string; acao: string }> => {
       const alertas = []
       
       if (previsao.confianca === 'baixa') {
         alertas.push({
           tipo: 'warning',
-          titulo: 'Baixa confian�a na previs�o',
+          titulo: 'Baixa confianÃ¡Â§a na previsÃ¡Â£o',
           descricao: 'Recomendamos aguardar mais dados antes de investimentos altos',
-          acao: 'Teste com or�amento reduzido primeiro'
+          acao: 'Teste com orÃ¡Â§amento reduzido primeiro'
         })
       }
       
@@ -290,7 +331,7 @@ export async function GET(request: NextRequest) {
         alertas.push({
           tipo: 'success',
           titulo: 'Momento ideal detectado!',
-          descricao: 'Condi��es �timas para maximizar resultados',
+          descricao: 'CondiÃ¡Â§Ã¡Âµes Ã¡Â³timas para maximizar resultados',
           acao: 'Aproveite para campanhas importantes'
         })
       }
@@ -298,9 +339,9 @@ export async function GET(request: NextRequest) {
       if (previsao.score_predicao < 30) {
         alertas.push({
           tipo: 'danger',
-          titulo: 'Momento desfavor�vel',
-          descricao: 'Previs�o indica baixa performance',
-          acao: 'Considere adiar ou ajustar estrat�gia'
+          titulo: 'Momento desfavorÃ¡Â¡vel',
+          descricao: 'PrevisÃ¡Â£o indica baixa performance',
+          acao: 'Considere adiar ou ajustar estratÃ¡Â©gia'
         })
       }
       
@@ -311,7 +352,7 @@ export async function GET(request: NextRequest) {
     const padroesInstagram = analisarPadroes(instagramHistorico || [])
     const padroesFacebook = analisarPadroes(facebookHistorico || [])
     
-    // Combinar padr�es se existirem dados de ambas as plataformas
+    // Combinar padrÃ¡Âµes se existirem dados de ambas as plataformas
     const padroesCombinados = padroesInstagram && padroesFacebook ? {
       media_engajamento: (padroesInstagram.media_engajamento + padroesFacebook.media_engajamento) / 2,
       media_alcance: (padroesInstagram.media_alcance + padroesFacebook.media_alcance) / 2,
@@ -335,21 +376,21 @@ export async function GET(request: NextRequest) {
         facebook: previsaoFacebook,
         geral: previsaoGeral
       },
-      recomendacoes: gerarRecomendacoes(previsaoGeral, tipo),
-      alertas: gerarAlertas(previsaoGeral),
+      recomendacoes: previsaoGeral ? gerarRecomendacoes(previsaoGeral, tipo) : [],
+      alertas: previsaoGeral ? gerarAlertas(previsaoGeral) : [],
       historico_analisado: {
         instagram_posts: instagramHistorico?.length || 0,
         facebook_posts: facebookHistorico?.length || 0,
-        periodo_analise: '100 �ltimos posts'
+        periodo_analise: '100 Ã¡Âºltimos posts'
       },
       proximos_passos: [
-        'Monitore as m�tricas ap�s implementar as recomenda��es',
-        'Ajuste estrat�gias baseado nos resultados reais',
-        'Colete mais dados para melhorar precis�o das previs�es'
+        'Monitore as mÃ¡Â©tricas apÃ¡Â³s implementar as recomendaÃ¡Â§Ã¡Âµes',
+        'Ajuste estratÃ¡Â©gias baseado nos resultados reais',
+        'Colete mais dados para melhorar precisÃ¡Â£o das previsÃ¡Âµes'
       ]
     }
 
-    console.log('�� Previs�o de Performance processada:', {
+    console.log('Å“â€¦ PrevisÃ¡Â£o de Performance processada:', {
       scoreGeral: previsaoGeral?.score_predicao || 0,
       confianca: previsaoGeral?.confianca || 'baixa',
       recomendacoes: resultado.recomendacoes.length,
@@ -359,7 +400,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(resultado)
 
   } catch (error) {
-    console.error('�� Erro na Previs�o de Performance:', error)
+    console.error('ÂÅ’ Erro na PrevisÃ¡Â£o de Performance:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor',
@@ -367,3 +408,4 @@ export async function GET(request: NextRequest) {
     }, { status: 500 })
   }
 } 
+

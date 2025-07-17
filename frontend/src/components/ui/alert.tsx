@@ -1,11 +1,13 @@
-import * as React from "react"
+﻿import * as React from "react"
 import { cn } from "@/lib/utils"
 
+// Componente de alerta para exibir mensagens de feedback
 interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: 'default' | 'destructive' | 'warning' | 'success'
 }
 
-interface AlertDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {}
+// Descrição do alerta
+type AlertDescriptionProps = React.HTMLAttributes<HTMLParagraphElement>
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
   ({ className, variant = 'default', ...props }, ref) => {
@@ -44,3 +46,4 @@ const AlertDescription = React.forwardRef<HTMLParagraphElement, AlertDescription
 AlertDescription.displayName = "AlertDescription"
 
 export { Alert, AlertDescription } 
+

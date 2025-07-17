@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -70,10 +70,10 @@ interface UnifiedSearchProps {
 }
 
 const searchCategories: SearchCategory[] = [
-  { id: 'page', name: 'P�ginas', icon: File, color: 'text-blue-600' },
+  { id: 'page', name: 'PÃ¡Â¡ginas', icon: File, color: 'text-blue-600' },
   { id: 'feature', name: 'Funcionalidades', icon: Zap, color: 'text-green-600' },
   { id: 'data', name: 'Dados', icon: Database, color: 'text-purple-600' },
-  { id: 'action', name: 'A��es', icon: Target, color: 'text-orange-600' },
+  { id: 'action', name: 'AÃ¡Â§Ã¡Âµes', icon: Target, color: 'text-orange-600' },
   { id: 'help', name: 'Ajuda', icon: Lightbulb, color: 'text-yellow-600' }
 ]
 
@@ -86,66 +86,67 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
   
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
-  const { selectedBar } = useBarContext()
-  const { user } = useUser()
+  // Remover variÃ¡veis nÃ£o usadas
+  // const { selectedBar } = useBarContext();
+  // const { user } = useUser();
 
   // Resultados de busca
   const searchResults: SearchResult[] = [
-    // P�ginas principais
+    // PÃ¡Â¡ginas principais
     {
       id: 'home',
       title: 'Home',
-      description: 'P�gina inicial do sistema',
+      description: 'PÃ¡Â¡gina inicial do sistema',
       category: 'page',
       icon: Home,
       href: '/home',
-      keywords: ['home', 'in�cio', 'principal', 'dashboard'],
+      keywords: ['home', 'inÃ¡Â­cio', 'principal', 'dashboard'],
       priority: 100,
       shortcut: 'Ctrl+H'
     },
     {
       id: 'dashboard-unificado',
       title: 'Dashboard Unificado',
-      description: 'Centro de comando completo com widgets personaliz�veis',
+      description: 'Centro de comando completo com widgets personalizÃ¡Â¡veis',
       category: 'page',
       icon: Target,
       href: '/dashboard-unificado',
-      keywords: ['dashboard', 'unificado', 'centro', 'comando', 'widgets', 'personaliza��o'],
+      keywords: ['dashboard', 'unificado', 'centro', 'comando', 'widgets', 'personalizaÃ¡Â§Ã¡Â£o'],
       priority: 95,
       badge: 'Novo',
       shortcut: 'Ctrl+D'
     },
     {
       id: 'visao-geral',
-      title: 'Vis�o Geral',
-      description: 'An�lise completa do desempenho do bar',
+      title: 'VisÃ¡Â£o Geral',
+      description: 'AnÃ¡Â¡lise completa do desempenho do bar',
       category: 'page',
       icon: BarChart3,
       href: '/visao-geral',
-      keywords: ['vis�o', 'geral', 'an�lise', 'desempenho', 'm�tricas'],
+      keywords: ['visÃ¡Â£o', 'geral', 'anÃ¡Â¡lise', 'desempenho', 'mÃ¡Â©tricas'],
       priority: 90
     },
     
-    // Opera��es
+    // OperaÃ¡Â§Ã¡Âµes
     {
       id: 'checklist-abertura',
       title: 'Checklist de Abertura',
-      description: 'Lista de verifica��o para abertura do bar',
+      description: 'Lista de verificaÃ¡Â§Ã¡Â£o para abertura do bar',
       category: 'feature',
       icon: CheckCircle,
       href: '/operacoes/checklist-abertura',
-      keywords: ['checklist', 'abertura', 'verifica��o', 'opera��o'],
+      keywords: ['checklist', 'abertura', 'verificaÃ¡Â§Ã¡Â£o', 'operaÃ¡Â§Ã¡Â£o'],
       priority: 85,
       shortcut: 'Ctrl+O'
     },
     {
       id: 'terminal-producao',
-      title: 'Terminal de Produ��o',
-      description: 'Interface para gerenciamento da produ��o',
+      title: 'Terminal de ProduÃ¡Â§Ã¡Â£o',
+      description: 'Interface para gerenciamento da produÃ¡Â§Ã¡Â£o',
       category: 'feature',
       icon: Cpu,
       href: '/producao/terminal',
-      keywords: ['terminal', 'produ��o', 'cozinha', 'pedidos'],
+      keywords: ['terminal', 'produÃ¡Â§Ã¡Â£o', 'cozinha', 'pedidos'],
       priority: 85,
       shortcut: 'Ctrl+P'
     },
@@ -156,15 +157,15 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
       category: 'feature',
       icon: BookOpen,
       href: '/operacoes/receitas',
-      keywords: ['receitas', 'ingredientes', 'card�pio', 'produtos'],
+      keywords: ['receitas', 'ingredientes', 'cardÃ¡Â¡pio', 'produtos'],
       priority: 80
     },
     
-    // Relat�rios
+    // RelatÃ¡Â³rios
     {
       id: 'dashboard-financeiro',
       title: 'Dashboard Financeiro',
-      description: 'An�lise financeira completa',
+      description: 'AnÃ¡Â¡lise financeira completa',
       category: 'page',
       icon: DollarSign,
       href: '/dashboard-financeiro',
@@ -174,43 +175,43 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
     },
     {
       id: 'relatorio-analitico',
-      title: 'Relat�rio Anal�tico',
-      description: 'An�lise detalhada de dados',
+      title: 'RelatÃ¡Â³rio AnalÃ¡Â­tico',
+      description: 'AnÃ¡Â¡lise detalhada de dados',
       category: 'page',
       icon: TrendingUp,
       href: '/relatorios/analitico',
-      keywords: ['relat�rio', 'anal�tico', 'dados', 'estat�sticas'],
+      keywords: ['relatÃ¡Â³rio', 'analÃ¡Â­tico', 'dados', 'estatÃ¡Â­sticas'],
       priority: 75
     },
     
-    // Configura��es
+    // ConfiguraÃ¡Â§Ã¡Âµes
     {
       id: 'configuracoes',
-      title: 'Configura��es',
-      description: 'Configura��es gerais do sistema',
+      title: 'ConfiguraÃ¡Â§Ã¡Âµes',
+      description: 'ConfiguraÃ¡Â§Ã¡Âµes gerais do sistema',
       category: 'page',
       icon: Settings,
       href: '/configuracoes',
-      keywords: ['configura��es', 'ajustes', 'prefer�ncias', 'admin'],
+      keywords: ['configuraÃ¡Â§Ã¡Âµes', 'ajustes', 'preferÃ¡Âªncias', 'admin'],
       priority: 70,
       shortcut: 'Ctrl+,'
     },
     {
       id: 'integracoes',
-      title: 'Integra��es',
-      description: 'Gerenciar integra��es com sistemas externos',
+      title: 'IntegraÃ¡Â§Ã¡Âµes',
+      description: 'Gerenciar integraÃ¡Â§Ã¡Âµes com sistemas externos',
       category: 'feature',
       icon: Layers,
       href: '/configuracoes/integracoes',
-      keywords: ['integra��es', 'apis', 'conex�es', 'contaazul', 'meta'],
+      keywords: ['integraÃ¡Â§Ã¡Âµes', 'apis', 'conexÃ¡Âµes', 'contaazul', 'meta'],
       priority: 65
     },
     
-    // A��es
+    // AÃ¡Â§Ã¡Âµes
     {
       id: 'sync-contaazul',
       title: 'Sincronizar ContaAzul',
-      description: 'For�ar sincroniza��o com ContaAzul',
+      description: 'ForÃ¡Â§ar sincronizaÃ¡Â§Ã¡Â£o com ContaAzul',
       category: 'action',
       icon: RefreshCw,
       action: () => {
@@ -235,22 +236,22 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
     // Dados
     {
       id: 'usuarios',
-      title: 'Usu�rios',
-      description: 'Gerenciar usu�rios do sistema',
+      title: 'UsuÃ¡Â¡rios',
+      description: 'Gerenciar usuÃ¡Â¡rios do sistema',
       category: 'data',
       icon: Users,
       href: '/configuracoes/usuarios',
-      keywords: ['usu�rios', 'pessoas', 'funcion�rios', 'equipe'],
+      keywords: ['usuÃ¡Â¡rios', 'pessoas', 'funcionÃ¡Â¡rios', 'equipe'],
       priority: 70
     },
     {
       id: 'produtos',
       title: 'Produtos',
-      description: 'Cat�logo de produtos',
+      description: 'CatÃ¡Â¡logo de produtos',
       category: 'data',
       icon: Package,
       href: '/operacoes/produtos',
-      keywords: ['produtos', 'itens', 'card�pio', 'estoque'],
+      keywords: ['produtos', 'itens', 'cardÃ¡Â¡pio', 'estoque'],
       priority: 70
     },
     
@@ -258,7 +259,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
     {
       id: 'atalhos',
       title: 'Atalhos de Teclado',
-      description: 'Lista de atalhos dispon�veis',
+      description: 'Lista de atalhos disponÃ¡Â­veis',
       category: 'help',
       icon: Keyboard,
       action: () => {
@@ -270,12 +271,12 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
     },
     {
       id: 'documentacao',
-      title: 'Documenta��o',
-      description: 'Documenta��o completa do sistema',
+      title: 'DocumentaÃ¡Â§Ã¡Â£o',
+      description: 'DocumentaÃ¡Â§Ã¡Â£o completa do sistema',
       category: 'help',
       icon: BookOpen,
       href: '/docs',
-      keywords: ['documenta��o', 'manual', 'guia', 'ajuda'],
+      keywords: ['documentaÃ¡Â§Ã¡Â£o', 'manual', 'guia', 'ajuda'],
       priority: 45
     }
   ]
@@ -314,7 +315,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.ctrlKey && e.key === 'k') {
       e.preventDefault()
-      // Ser� controlado pelo componente pai
+      // SerÃ¡Â¡ controlado pelo componente pai
     }
     
     if (!isOpen) return
@@ -340,7 +341,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
     }
   }, [isOpen, selectedIndex, categoryFilteredResults, onClose])
 
-  const handleResultSelect = (result: SearchResult) => {
+  const handleResultSelect = useCallback((result: SearchResult) => {
     // Adicionar aos recentes
     setRecentSearches(prev => {
       const newRecent = [result.title, ...prev.filter((r) => r !== result.title)].slice(0, 5)
@@ -361,7 +362,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
     }
     
     onClose()
-  }
+  }, [onNavigate, onClose, router])
 
   const toggleFavorite = (resultId: string) => {
     setFavorites(prev => 
@@ -399,7 +400,7 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
             <input
               ref={inputRef}
               type="text"
-              placeholder="Buscar p�ginas, funcionalidades, dados..."
+              placeholder="Buscar pÃ¡Â¡ginas, funcionalidades, dados..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="flex-1 text-lg bg-transparent border-none outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
@@ -559,11 +560,11 @@ export function UnifiedSearch({ isOpen, onClose, onNavigate }: UnifiedSearchProp
           <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
             <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400">
               <div className="flex items-center gap-1">
-                <Badge variant="outline" className="text-xs">����</Badge>
+                <Badge variant="outline" className="text-xs">â€ â€˜â€ â€œ</Badge>
                 <span>Navegar</span>
               </div>
               <div className="flex items-center gap-1">
-                <Badge variant="outline" className="text-xs">��</Badge>
+                <Badge variant="outline" className="text-xs">â€ Âµ</Badge>
                 <span>Selecionar</span>
               </div>
               <div className="flex items-center gap-1">
@@ -605,3 +606,4 @@ export function useUnifiedSearch() {
     close: () => setIsOpen(false)
   }
 } 
+

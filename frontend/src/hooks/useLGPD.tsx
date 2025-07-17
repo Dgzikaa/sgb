@@ -1,9 +1,9 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback, createContext, useContext } from 'react'
 import { ReactNode } from 'react'
 
-// Fun��o utilit�ria para acessar navigator com seguran�a
+// FunÃ¡Â§Ã¡Â£o utilitÃ¡Â¡ria para acessar navigator com seguranÃ¡Â§a
 const getSafeUserAgent = (): string => {
   if (typeof window === 'undefined' || !navigator) {
     return 'Server'
@@ -14,9 +14,9 @@ const getSafeUserAgent = (): string => {
 // Tipos de consentimento LGPD
 export type ConsentType = 
   | 'essential'      // Cookies essenciais (sempre ativo)
-  | 'analytics'      // Google Analytics, m�tricas
+  | 'analytics'      // Google Analytics, mÃ¡Â©tricas
   | 'marketing'      // Marketing, remarketing
-  | 'preferences'    // Prefer�ncias do usu�rio
+  | 'preferences'    // PreferÃ¡Âªncias do usuÃ¡Â¡rio
   | 'functional'     // Funcionalidades extras
 
 export interface LGPDConsent {
@@ -31,10 +31,10 @@ export interface LGPDConsent {
 export interface LGPDUserRights {
   accessData: () => Promise<any>           // Art. 15 - Acesso aos dados
   portabilityData: () => Promise<Blob>     // Art. 20 - Portabilidade
-  rectifyData: (data) => Promise<void> // Art. 16 - Retifica��o
-  deleteData: () => Promise<void>          // Art. 17 - Exclus�o
-  restrictProcessing: () => Promise<void>  // Art. 18 - Limita��o
-  objectProcessing: () => Promise<void>    // Art. 21 - Oposi��o
+  rectifyData: (data: any) => Promise<void> // Art. 16 - RetificaÃ¡Â§Ã¡Â£o
+  deleteData: () => Promise<void>          // Art. 17 - ExclusÃ¡Â£o
+  restrictProcessing: () => Promise<void>  // Art. 18 - LimitaÃ¡Â§Ã¡Â£o
+  objectProcessing: () => Promise<void>    // Art. 21 - OposiÃ¡Â§Ã¡Â£o
 }
 
 export interface LGPDSettings {
@@ -70,12 +70,12 @@ export function useLGPD(): LGPDContextType {
   return context
 }
 
-// Configura��es padr�o
+// ConfiguraÃ¡Â§Ã¡Âµes padrÃ¡Â£o
 const DEFAULT_SETTINGS: LGPDSettings = {
   consents: {
     essential: {
       type: 'essential',
-      granted: true, // Sempre obrigat�rio
+      granted: true, // Sempre obrigatÃ³rio
       timestamp: new Date(),
       version: '1.0'
     },
@@ -109,14 +109,14 @@ const DEFAULT_SETTINGS: LGPDSettings = {
   version: '1.0'
 }
 
-// Hook de implementa��o
+// Hook de implementaÃ¡Â§Ã¡Â£o
 export function useLGPDImplementation() {
   const [settings, setSettings] = useState<LGPDSettings>(DEFAULT_SETTINGS)
   const [showBanner, setShowBanner] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Carregar configura��es do localStorage/servidor
+  // Carregar configuraÃ¡Â§Ã¡Âµes do localStorage/servidor
   useEffect(() => {
     const loadSettings = async () => {
       try {
@@ -126,7 +126,7 @@ export function useLGPDImplementation() {
         const stored = localStorage.getItem('lgpd_settings')
         let localSettings = stored ? JSON.parse(stored) : null
 
-        // Verificar se h� configura��es no servidor (se usu�rio logado)
+        // Verificar se hÃ¡Â¡ configuraÃ¡Â§Ã¡Âµes no servidor (se usuÃ¡Â¡rio logado)
         const userId = localStorage.getItem('user_id')
         if (userId) {
           try {
@@ -140,12 +140,12 @@ export function useLGPDImplementation() {
               localSettings = serverSettings
             }
           } catch (serverError) {
-            console.warn('Erro ao carregar configura��es LGPD do servidor:', serverError)
+            console.warn('Erro ao carregar configuraÃ¡Â§Ã¡Âµes LGPD do servidor:', serverError)
           }
         }
 
         if (localSettings) {
-          // Verificar se vers�o mudou (necess�rio re-consentimento)
+          // Verificar se versÃ£o mudou (necessÃ¡Â¡rio re-consentimento)
           if (localSettings.version !== DEFAULT_SETTINGS.version) {
             setShowBanner(true)
           } else {
@@ -166,7 +166,7 @@ export function useLGPDImplementation() {
         }
 
       } catch (err) {
-        setError('Erro ao carregar configura��es de privacidade')
+        setError('Erro ao carregar configuraÃ¡Â§Ã¡Âµes de privacidade')
         console.error('Erro LGPD:', err)
         setShowBanner(true)
         setSettings(DEFAULT_SETTINGS)
@@ -178,13 +178,13 @@ export function useLGPDImplementation() {
     loadSettings()
   }, [])
 
-  // Salvar configura��es
+  // Salvar configuraÃ¡Â§Ã¡Âµes
   const saveSettings = useCallback(async (newSettings: LGPDSettings) => {
     try {
       // Salvar no localStorage
       localStorage.setItem('lgpd_settings', JSON.stringify(newSettings))
       
-      // Salvar no servidor se usu�rio logado
+      // Salvar no servidor se usuÃ¡Â¡rio logado
       const userId = localStorage.getItem('user_id')
       if (userId) {
         await fetch('/api/lgpd/settings', {
@@ -214,7 +214,7 @@ export function useLGPDImplementation() {
       })
 
     } catch (err) {
-      console.error('Erro ao salvar configura��es LGPD:', err)
+      console.error('Erro ao salvar configuraÃ¡Â§Ã¡Âµes LGPD:', err)
     }
   }, [])
 
@@ -251,7 +251,7 @@ export function useLGPDImplementation() {
 
   // Revogar consentimento
   const revokeConsent = useCallback(async (type: ConsentType) => {
-    // Essential n�o pode ser revogado
+    // Essential nÃ£o pode ser revogado
     if (type === 'essential') return
 
     const clientIP = await getClientIP()
@@ -277,11 +277,11 @@ export function useLGPDImplementation() {
     setSettings(newSettings)
     await saveSettings(newSettings)
 
-    // Limpar cookies espec�ficos do tipo revogado
+    // Limpar cookies especÃ­ficos do tipo revogado
     clearCookiesByType(type)
   }, [settings, saveSettings])
 
-  // Atualizar m�ltiplos consentimentos
+  // Atualizar mÃºltiplos consentimentos
   const updateConsents = useCallback(async (consents: Partial<Record<ConsentType, boolean>>) => {
     const newConsents = { ...settings.consents }
     const clientIP = await getClientIP()
@@ -322,7 +322,7 @@ export function useLGPDImplementation() {
     setShowBanner(false)
   }, [settings, saveSettings])
 
-  // Direitos do usu�rio (Art. 18 LGPD)
+  // Direitos do usuÃ¡Â¡rio (Art. 18 LGPD)
   const exerciseRights: LGPDUserRights = {
     // Direito de acesso (Art. 15)
     accessData: async () => {
@@ -340,8 +340,8 @@ export function useLGPDImplementation() {
       return await response.blob()
     },
 
-    // Retifica��o (Art. 16)
-    rectifyData: async (data) => {
+    // RetificaÃ§Ã£o (Art. 16)
+    rectifyData: async (data: any) => {
       await fetch('/api/lgpd/data-rectification', {
         method: 'POST',
         headers: {
@@ -352,7 +352,7 @@ export function useLGPDImplementation() {
       })
     },
 
-    // Exclus�o (Art. 17)
+    // ExclusÃ£o (Art. 17)
     deleteData: async () => {
       await fetch('/api/lgpd/data-deletion', {
         method: 'DELETE',
@@ -363,11 +363,11 @@ export function useLGPDImplementation() {
       localStorage.clear()
       sessionStorage.clear()
       
-      // Recarregar p�gina
+      // Recarregar pÃ¡Â¡gina
       window.location.reload()
     },
 
-    // Limita��o do tratamento (Art. 18)
+    // LimitaÃ§Ã£o do tratamento (Art. 18)
     restrictProcessing: async () => {
       await fetch('/api/lgpd/restrict-processing', {
         method: 'POST',
@@ -375,7 +375,7 @@ export function useLGPDImplementation() {
       })
     },
 
-    // Oposi��o ao tratamento (Art. 21)
+    // OposiÃ§Ã£o ao tratamento (Art. 21)
     objectProcessing: async () => {
       await fetch('/api/lgpd/object-processing', {
         method: 'POST',
@@ -398,7 +398,7 @@ export function useLGPDImplementation() {
   }
 }
 
-// Utilit�rios
+// UtilitÃ¡Â¡rios
 async function getClientIP(): Promise<string> {
   try {
     const response = await fetch('/api/utils/client-ip')
@@ -442,3 +442,4 @@ export function LGPDProvider({ children }: { children: ReactNode }) {
     </LGPDContext.Provider>
   )
 } 
+

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+Ôªøimport { useState, useEffect, useCallback, useRef } from 'react'
 import { api } from '@/lib/api-client'
 
 // =====================================================
@@ -13,7 +13,7 @@ interface Notificacao {
   categoria?: string
   titulo: string
   mensagem: string
-  dados_extras?: Record<string, any>
+  dados_extras?: Record<string, unknown>
   acoes?: Array<{
     label: string
     action: 'redirect' | 'callback' | 'download'
@@ -78,13 +78,13 @@ interface UseNotificationsResult {
   estatisticas: EstatisticasNotificacao | null
   paginacao: PaginacaoNotificacao | null
   
-  // A·ß·µes CRUD
+  // A√ß√µes CRUD
   carregarNotificacoes: (filtros?: FiltrosNotificacao) => Promise<void>
   marcarComoLida: (id: string) => Promise<boolean>
   marcarTodasComoLidas: () => Promise<boolean>
   excluirNotificacao: (id: string) => Promise<boolean>
   
-  // Utilit·°rios
+  // Utilit√°rios
   recarregar: () => Promise<void>
   limparErro: () => void
 }
@@ -105,11 +105,11 @@ export function useNotifications(): UseNotificationsResult {
   const [estatisticas, setEstatisticas] = useState<EstatisticasNotificacao | null>(null)
   const [paginacao, setPaginacao] = useState<PaginacaoNotificacao | null>(null)
   
-  // Ref para armazenar ·∫ltimos filtros usados
+  // Ref para armazenar √∫ltimos filtros usados
   const ultimosFiltrosRef = useRef<FiltrosNotificacao>({})
   
   // =====================================================
-  // CARREGAR NOTIFICA·á·ïES
+  // CARREGAR NOTIFICA√á√ïES
   // =====================================================
   
   const carregarNotificacoes = useCallback(async (filtros: FiltrosNotificacao = {}) => {
@@ -122,7 +122,7 @@ export function useNotifications(): UseNotificationsResult {
       
       const params = new URLSearchParams()
       
-      // Adicionar filtros como par·¢metros
+      // Adicionar filtros como par√¢metros
       if (filtros.status) params.append('status', filtros.status)
       if (filtros.modulo) params.append('modulo', filtros.modulo)
       if (filtros.tipo) params.append('tipo', filtros.tipo)
@@ -141,11 +141,11 @@ export function useNotifications(): UseNotificationsResult {
         setEstatisticas(response.data.estatisticas || null)
         setPaginacao(response.data.paginacao || null)
       } else {
-        setError(response.error || 'Erro ao carregar notifica·ß·µes')
+        setError(response.error || 'Erro ao carregar notifica√ß√µes')
       }
     } catch (err) {
-      console.error('Erro ao carregar notifica·ß·µes:', err)
-      setError('Erro ao carregar notifica·ß·µes')
+      console.error('Erro ao carregar notifica√ß√µes:', err)
+      setError('Erro ao carregar notifica√ß√µes')
     } finally {
       setLoading(false)
     }
@@ -169,7 +169,7 @@ export function useNotifications(): UseNotificationsResult {
           )
         )
         
-        // Atualizar estat·≠sticas
+        // Atualizar estat√≠sticas
         setEstatisticas(prev => prev ? {
           ...prev,
           nao_lidas: Math.max(0, prev.nao_lidas - 1)
@@ -193,7 +193,7 @@ export function useNotifications(): UseNotificationsResult {
   
   const marcarTodasComoLidas = useCallback(async (): Promise<boolean> => {
     try {
-      const response = await api.put('/api/notifications/read-all')
+      const response = await api.put('/api/notifications/read-all', {})
       
       if (response.success) {
         // Atualizar estado local
@@ -205,7 +205,7 @@ export function useNotifications(): UseNotificationsResult {
           )
         )
         
-        // Atualizar estat·≠sticas
+        // Atualizar estat√≠sticas
         setEstatisticas(prev => prev ? {
           ...prev,
           nao_lidas: 0
@@ -224,7 +224,7 @@ export function useNotifications(): UseNotificationsResult {
   }, [])
   
   // =====================================================
-  // EXCLUIR NOTIFICA·á·ÉO
+  // EXCLUIR NOTIFICA√á√ÉO
   // =====================================================
   
   const excluirNotificacao = useCallback(async (id: string): Promise<boolean> => {
@@ -235,7 +235,7 @@ export function useNotifications(): UseNotificationsResult {
         // Atualizar estado local
         setNotificacoes(prev => prev.filter((notif) => notif.id !== id))
         
-        // Atualizar estat·≠sticas se era n·£o lida
+        // Atualizar estat√≠sticas se era n√£o lida
         const notificacao = notificacoes.find((n) => n.id === id)
         if (notificacao && ['pendente', 'enviada'].includes(notificacao.status)) {
           setEstatisticas(prev => prev ? {
@@ -246,12 +246,12 @@ export function useNotifications(): UseNotificationsResult {
         
         return true
       } else {
-        setError(response.error || 'Erro ao excluir notifica·ß·£o')
+        setError(response.error || 'Erro ao excluir notifica√ß√£o')
         return false
       }
     } catch (err) {
-      console.error('Erro ao excluir notifica·ß·£o:', err)
-      setError('Erro ao excluir notifica·ß·£o')
+      console.error('Erro ao excluir notifica√ß√£o:', err)
+      setError('Erro ao excluir notifica√ß√£o')
       return false
     }
   }, [notificacoes])
@@ -286,20 +286,20 @@ export function useNotifications(): UseNotificationsResult {
     estatisticas,
     paginacao,
     
-    // A·ß·µes CRUD
+    // A√ß√µes CRUD
     carregarNotificacoes,
     marcarComoLida,
     marcarTodasComoLidas,
     excluirNotificacao,
     
-    // Utilit·°rios
+    // Utilit√°rios
     recarregar,
     limparErro
   }
 }
 
 // =====================================================
-// FUN·á·ïES UTILIT·ÅRIAS
+// FUN√á√ïES UTILIT√ÅRIAS
 // =====================================================
 
 export function getColorByType(tipo: string): string {
@@ -331,12 +331,13 @@ export function formatarTempo(timestamp: string): string {
     return 'agora'
   } else if (diffInSeconds < 3600) {
     const minutes = Math.floor(diffInSeconds / 60)
-    return `${minutes}m atr·°s`
+    return `${minutes}m atr√°s`
   } else if (diffInSeconds < 86400) {
     const hours = Math.floor(diffInSeconds / 3600)
-    return `${hours}h atr·°s`
+    return `${hours}h atr√°s`
   } else {
     const days = Math.floor(diffInSeconds / 86400)
-    return `${days}d atr·°s`
+    return `${days}d atr√°s`
   }
 } 
+

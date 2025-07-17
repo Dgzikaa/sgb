@@ -1,185 +1,175 @@
-import { NextRequest, NextResponse } from 'next/server'
+ï»¿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 
-// Tipos para o usuá¡rio autenticado
+// Tipos para o usuÃ¡rio autenticado
 export interface AuthenticatedUser {
-  id: number
-  user_id: string
-  email: string
-  nome: string
-  role: 'admin' | 'financeiro' | 'funcionario'
-  bar_id: number
-  modulos_permitidos: string[]
-  ativo: boolean
+  id: number;
+  user_id: string;
+  email: string;
+  nome: string;
+  role: 'admin' | 'financeiro' | 'funcionario'; // Garante que 'admin' estÃ¡ incluso
+  bar_id: number;
+  modulos_permitidos: string[];
+  ativo: boolean;
 }
 
-// Tipos para permissáµes
+// Tipos para checagem de permissÃµes
 export interface PermissionCheck {
-  module: string
-  action: 'read' | 'write' | 'delete' | 'admin'
-  resource?: string
+  module: string;
+  action: 'read' | 'write' | 'delete' | 'admin';
+  resource?: string;
 }
 
 /**
- * Middleware de autenticaá§á£o para APIs
- * Valida o usuá¡rio logado via cookie/header
+ * Middleware de autenticaÃ§Ã£o para APIs.
+ * Valida o usuÃ¡rio logado via cookie ou header.
  */
 export async function authenticateUser(request: NextRequest): Promise<AuthenticatedUser | null> {
   try {
-    // Tentar pegar token do header Authorization
-    let userToken = request.headers.get('authorization')?.replace('Bearer ', '')
-    
-    // Se ná£o tem no header, tentar no cookie
+    let userToken: string | undefined | null = request.headers.get('authorization')?.replace('Bearer ', '');
     if (!userToken) {
-      userToken = request.cookies.get('sgb_user')?.value
+      const cookie = request.cookies.get('sgb_user');
+      userToken = cookie ? cookie.value : undefined;
     }
-    
-    // Se ná£o tem token, tentar parsear dados do localStorage via cookie
     if (!userToken) {
-      // Buscar dados do usuá¡rio que o frontend envia via header customizado
-      const userDataHeader = request.headers.get('x-user-data')
+      const userDataHeader = request.headers.get('x-user-data');
       if (userDataHeader) {
         try {
-          const userData = JSON.parse(decodeURIComponent(userDataHeader))
-          if (userData && userData.email && userData.id) {
-            return userData as AuthenticatedUser
+          const userData: unknown = JSON.parse(decodeURIComponent(userDataHeader));
+          if (
+            typeof userData === 'object' &&
+            userData !== null &&
+            'email' in userData &&
+            'id' in userData
+          ) {
+            return userData as AuthenticatedUser;
           }
         } catch (e) {
-          console.log('Falha ao parsear x-user-data header')
+          console.log('Falha ao interpretar o header x-user-data');
         }
       }
     }
-    
     if (!userToken) {
-      console.log('ðŸš« Nenhum token de autenticaá§á£o encontrado')
-      return null
+      console.log('Nenhum token de autenticaÃ§Ã£o encontrado');
+      return null;
     }
-    
-    // Tentar parsear o token como JSON (dados do usuá¡rio)
     try {
-      const userData = JSON.parse(decodeURIComponent(userToken))
-      
-      if (!userData || !userData.email || !userData.id) {
-        console.log('ðŸš« Token invá¡lido - dados incompletos')
-        return null
+      const userData: unknown = JSON.parse(decodeURIComponent(userToken));
+      if (
+        typeof userData !== 'object' ||
+        userData === null ||
+        !('email' in userData) ||
+        !('id' in userData)
+      ) {
+        console.log('Token invÃ¡lido: dados incompletos');
+        return null;
       }
-      
-      // Validar se o usuá¡rio ainda existe e está¡ ativo
-      const supabase = await getAdminClient()
+      const supabase = await getAdminClient();
       const { data: usuario, error } = await supabase
         .from('usuarios_bar')
         .select('*')
-        .eq('id', userData.id)
+        .eq('id', (userData as { id: number }).id)
         .eq('ativo', true)
-        .single()
-      
+        .single();
       if (error || !usuario) {
-        console.log('ðŸš« Usuá¡rio ná£o encontrado ou inativo:', userData.email)
-        return null
+        console.log('UsuÃ¡rio nÃ£o encontrado ou inativo:', (userData as { email?: string }).email);
+        return null;
       }
-      
-      console.log('œ… Usuá¡rio autenticado:', usuario.nome)
-      return usuario as AuthenticatedUser
-      
+      console.log('UsuÃ¡rio autenticado:', usuario.nome);
+      return usuario as AuthenticatedUser;
     } catch (parseError) {
-      console.log('ðŸš« Erro ao parsear token de usuá¡rio:', parseError)
-      return null
+      console.log('Erro ao interpretar token de usuÃ¡rio:', parseError);
+      return null;
     }
-    
   } catch (error) {
-    console.error('Œ Erro na autenticaá§á£o:', error)
-    return null
+    console.error('Erro na autenticaÃ§Ã£o:', error);
+    return null;
   }
 }
 
 /**
- * Verificar permissáµes do usuá¡rio
+ * Checa se o usuÃ¡rio possui permissÃ£o para determinada aÃ§Ã£o.
  */
 export function checkPermission(user: AuthenticatedUser, permission: PermissionCheck): boolean {
-  // Admin pode tudo
-  if ((user.role as string) === 'admin') {
-    return true
+  if (user.role === 'admin') {
+    return true;
   }
-  
-  // Verificar permissáµes especá­ficas do má³dulo
-  const modulePermissions = user.modulos_permitidos || []
-  
+  const modulePermissions: string[] = user.modulos_permitidos || [];
   switch (permission.module) {
     case 'checklists':
       switch (permission.action) {
         case 'read':
-          // Todos podem ler checklists
-          return modulePermissions.includes('checklists') || 
-                 modulePermissions.includes('checklists_read') ||
-                 user.role === 'financeiro'
-        
+          return (
+            modulePermissions.includes('checklists') ||
+            modulePermissions.includes('checklists_read') ||
+            user.role === 'financeiro'
+          );
         case 'write':
-          // Financeiro e admin podem criar/editar
-          return user.role === 'financeiro' || 
-                 modulePermissions.includes('checklists_write') ||
-                 modulePermissions.includes('checklists_admin')
-        
+          return (
+            user.role === 'financeiro' ||
+            modulePermissions.includes('checklists_write') ||
+            modulePermissions.includes('checklists_admin')
+          );
         case 'delete':
-          // Sá³ admin pode deletar
-          return (user.role as string) === 'admin' || 
-                 modulePermissions.includes('checklists_admin')
-        
+          return modulePermissions.includes('checklists_admin');
         case 'admin':
-          // Sá³ admin tem acesso total
-          return (user.role as string) === 'admin'
-        
+          return modulePermissions.includes('checklists_admin');
         default:
-          return false
+          return false;
       }
-    
     default:
-      return false
+      return false;
   }
 }
 
 /**
- * Resposta de erro de autenticaá§á£o
+ * Retorna resposta de erro de autenticaÃ§Ã£o.
  */
-export function authErrorResponse(message: string = 'Ná£o autorizado', status: number = 401) {
-  return NextResponse.json({
-    success: false,
-    error: message,
-    code: 'AUTH_ERROR'
-  }, { status })
+export function authErrorResponse(message = 'NÃ£o autorizado', status = 401) {
+  return NextResponse.json(
+    {
+      success: false,
+      error: message,
+      code: 'AUTH_ERROR',
+    },
+    { status }
+  );
 }
 
 /**
- * Resposta de erro de permissá£o
+ * Retorna resposta de erro de permissÃ£o.
  */
-export function permissionErrorResponse(message: string = 'Permissá£o negada', status: number = 403) {
-  return NextResponse.json({
-    success: false,
-    error: message,
-    code: 'PERMISSION_DENIED'
-  }, { status })
+export function permissionErrorResponse(message = 'PermissÃ£o negada', status = 403) {
+  return NextResponse.json(
+    {
+      success: false,
+      error: message,
+      code: 'PERMISSION_DENIED',
+    },
+    { status }
+  );
 }
 
-// Lista de rotas que requerem autenticaá§á£o
-export const PROTECTED_ROUTES = [
+// Lista de rotas que requerem autenticaÃ§Ã£o
+export const PROTECTED_ROUTES: string[] = [
   '/api/admin',
   '/api/dashboard',
   '/api/contaazul-auth',
   '/api/contaazul-sync',
-  '/api/contaazul-automation'
-]
+  '/api/contaazul-automation',
+];
 
-// Lista de rotas páºblicas (podem ser acessadas sem auth)
-export const PUBLIC_ROUTES = [
-  '/api/config', // Temporariamente páºblico atá© implementar auth adequada
-  '/api/relatorios' // Dados agregados, sem informaá§áµes sensá­veis
-]
+// Lista de rotas pÃºblicas (podem ser acessadas sem autenticaÃ§Ã£o)
+export const PUBLIC_ROUTES: string[] = [
+  '/api/config',
+  '/api/relatorios',
+];
 
 export function requiresAuth(pathname: string): boolean {
-  // Verificar se á© uma rota protegida
-  return PROTECTED_ROUTES.some(route => pathname.startsWith(route))
+  return PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
 }
 
 export function isPublicRoute(pathname: string): boolean {
-  // Verificar se á© uma rota explicitamente páºblica
-  return PUBLIC_ROUTES.some(route => pathname.startsWith(route))
+  return PUBLIC_ROUTES.some((route) => pathname.startsWith(route));
 } 
+

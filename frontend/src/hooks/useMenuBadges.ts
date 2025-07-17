@@ -1,4 +1,4 @@
-'use client'
+ï»¿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { useUser } from '@/contexts/UserContext'
@@ -38,7 +38,7 @@ export function useMenuBadges() {
       setLoading(true)
       setError(null)
       
-      // ðŸŽ¯ UMA Sá“ REQUISIá‡áƒO para todos os badges
+      // UMA SÃ“ REQUISIÃ‡ÃƒO para todos os badges
       const response = await fetch('/api/badges', {
         method: 'POST',
         headers: {
@@ -59,7 +59,7 @@ export function useMenuBadges() {
       if (data.success && data.badges) {
         setBadges(data.badges)
       } else {
-        console.warn('Resposta invá¡lida da API badges:', data)
+        console.warn('Resposta invÃ¡lida da API badges:', data)
       }
     } catch (error) {
       console.error('Erro ao buscar badges:', error)
@@ -79,12 +79,12 @@ export function useMenuBadges() {
     return () => clearInterval(interval)
   }, [fetchBadges])
 
-  // Funá§á£o para forá§ar atualizaá§á£o manual
+  // FunÃ§Ã£o para forÃ§ar atualizaÃ§Ã£o manual
   const refresh = useCallback(() => {
     fetchBadges()
   }, [fetchBadges])
 
-  // Funá§á£o para limpar badges (áºtil ao trocar de bar)
+  // FunÃ§Ã£o para limpar badges (Ãºtil ao trocar de bar)
   const clear = useCallback(() => {
     setBadges({
       checklist: 0,
@@ -110,3 +110,4 @@ export function useMenuBadges() {
     criticalBadges: badges.visaoGeral + badges.notifications
   }
 } 
+

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -8,9 +8,9 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('📊 Funil de Convers�o - Analisando performance de convers�o...')
+    console.log('Ã°Å¸â€œÅ  Funil de ConversÃ¡Â£o - Analisando performance de conversÃ¡Â£o...')
 
-    // Obter dados do usu�rio para pegar o bar_id
+    // Obter dados do usuÃ¡Â¡rio para pegar o bar_id
     const userData = request.headers.get('x-user-data')
     let barId = 3 // fallback para desenvolvimento
     
@@ -18,36 +18,36 @@ export async function GET(request: NextRequest) {
       try {
         const parsedUser = JSON.parse(decodeURIComponent(userData))
         barId = parsedUser.bar_id || 3
-        console.log(`👤 Funil de Convers�o - Usando bar_id: ${barId}`)
+        console.log(`Ã°Å¸â€˜Â¤ Funil de ConversÃ¡Â£o - Usando bar_id: ${barId}`)
       } catch (e) {
-        console.warn('��️ Erro ao parsear dados do usu�rio, usando bar_id padr�o')
+        console.warn('Å¡Â Ã¯Â¸Â Erro ao parsear dados do usuÃ¡Â¡rio, usando bar_id padrÃ¡Â£o')
       }
     }
 
     const { searchParams } = new URL(request.url)
     const periodo = searchParams.get('periodo') || '30' // dias
     
-    console.log('📊 Funil de Convers�o - Analisando para bar:', barId, 'per�odo:', periodo, 'dias')
+    console.log('Ã°Å¸â€œÅ  Funil de ConversÃ¡Â£o - Analisando para bar:', barId, 'perÃ¡Â­odo:', periodo, 'dias')
 
     // 1. DEFINIR ETAPAS DO FUNIL
     const etapasFunil = [
       {
-        nome: 'Impress�es',
-        descricao: 'Quantas vezes o conte�do foi exibido',
+        nome: 'ImpressÃ¡Âµes',
+        descricao: 'Quantas vezes o conteÃ¡Âºdo foi exibido',
         tipo: 'awareness',
         meta_ideal: 10000,
         cor: '#e3f2fd'
       },
       {
         nome: 'Alcance',
-        descricao: 'Pessoas �nicas que viram o conte�do',
+        descricao: 'Pessoas Ã¡Âºnicas que viram o conteÃ¡Âºdo',
         tipo: 'reach',
         meta_ideal: 5000,
         cor: '#e8f5e8'
       },
       {
         nome: 'Engajamento',
-        descricao: 'Intera��es com o conte�do',
+        descricao: 'InteraÃ¡Â§Ã¡Âµes com o conteÃ¡Âºdo',
         tipo: 'engagement',
         meta_ideal: 500,
         cor: '#fff3e0'
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
         cor: '#f3e5f5'
       },
       {
-        nome: 'Convers�es',
+        nome: 'ConversÃ¡Âµes',
         descricao: 'Vendas/reservas efetivadas',
         tipo: 'conversions',
         meta_ideal: 10,
@@ -91,8 +91,8 @@ export async function GET(request: NextRequest) {
       .eq('bar_id', barId)
       .gte('updated_at', dataLimite.toISOString())
 
-    // 3. CALCULAR M�TRICAS DO FUNIL
-    const calcularMetricasFunil = (dadosIG[], dadosFB[]) => {
+    // 3. CALCULAR MÃ¡â€°TRICAS DO FUNIL
+    const calcularMetricasFunil = (dadosIG: any[], dadosFB: any[]) => {
       const todosOsDados = [...(dadosIG || []), ...(dadosFB || [])]
       
       if (todosOsDados.length === 0) {
@@ -141,7 +141,7 @@ export async function GET(request: NextRequest) {
         const taxaConversao = valorAnterior > 0 ? (valor / valorAnterior) * 100 : 0
         const custoPorAcao = valor > 0 ? custoEstimado / valor : 0
         const roi = index === etapasFunil.length - 1 ? 
-          ((valor * 85) / custoEstimado - 1) * 100 : 0 // R$ 85 por convers�o
+          ((valor * 85) / custoEstimado - 1) * 100 : 0 // R$ 85 por conversÃ¡Â£o
 
         return {
           ...etapa,
@@ -156,7 +156,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 4. ANALISAR PONTOS DE VAZAMENTO
-    const analisarVazamentos = (metricasFunil[]) => {
+    const analisarVazamentos = (metricasFunil: any[]) => {
       const vazamentos = []
       
       for (let i = 0; i < metricasFunil.length - 1; i++) {
@@ -182,44 +182,44 @@ export async function GET(request: NextRequest) {
       return vazamentos.sort((a, b) => b.oportunidade_receita - a.oportunidade_receita)
     }
 
-    // 5. GERAR A��ES POR VAZAMENTO
+    // 5. GERAR AÃ¡â€¡Ã¡â€¢ES POR VAZAMENTO
     const gerarAcoesPorVazamento = (etapaAtual: string, proximaEtapa: string) => {
       const acoesPorTransicao: { [key: string]: string[] } = {
-        'Impress�es->Alcance': [
-          'Melhore a segmenta��o do p�blico',
-          'Aumente o or�amento em hor�rios de pico',
-          'Teste novos formatos de conte�do'
+        'ImpressÃ¡Âµes->Alcance': [
+          'Melhore a segmentaÃ¡Â§Ã¡Â£o do pÃ¡Âºblico',
+          'Aumente o orÃ¡Â§amento em horÃ¡Â¡rios de pico',
+          'Teste novos formatos de conteÃ¡Âºdo'
         ],
         'Alcance->Engajamento': [
-          'Crie conte�do mais chamativo',
-          'Use mais v�deos e reels',
-          'Fa�a perguntas para gerar intera��o'
+          'Crie conteÃ¡Âºdo mais chamativo',
+          'Use mais vÃ¡Â­deos e reels',
+          'FaÃ¡Â§a perguntas para gerar interaÃ¡Â§Ã¡Â£o'
         ],
         'Engajamento->Cliques': [
           'Adicione CTAs mais claros',
-          'Crie senso de urg�ncia',
-          'Ofere�a incentivos para clique'
+          'Crie senso de urgÃ¡Âªncia',
+          'OfereÃ¡Â§a incentivos para clique'
         ],
         'Cliques->Leads': [
           'Simplifique o processo de cadastro',
-          'Ofere�a algo em troca do contato',
+          'OfereÃ¡Â§a algo em troca do contato',
           'Melhore a landing page'
         ],
-        'Leads->Convers�es': [
+        'Leads->ConversÃ¡Âµes': [
           'Agilize o follow-up',
           'Personalize o atendimento',
-          'Ofere�a facilidades de pagamento'
+          'OfereÃ¡Â§a facilidades de pagamento'
         ]
       }
       
       const chave = `${etapaAtual}->${proximaEtapa}`
-      return acoesPorTransicao[chave] || ['Analise o processo de transi��o']
+      return acoesPorTransicao[chave] || ['Analise o processo de transiÃ¡Â§Ã¡Â£o']
     }
 
     // 6. CALCULAR ROI DETALHADO
-    const calcularROIDetalhado = (metricasFunil[], custoTotal: number = 500) => {
+    const calcularROIDetalhado = (metricasFunil: any[], custoTotal = 500) => {
       const conversoes = metricasFunil[metricasFunil.length - 1].valor
-      const receitaTotal = conversoes * 85 // R$ 85 por convers�o
+      const receitaTotal = conversoes * 85 // R$ 85 por conversÃ¡Â£o
       const roi = ((receitaTotal - custoTotal) / custoTotal) * 100
       
       return {
@@ -230,42 +230,42 @@ export async function GET(request: NextRequest) {
         lucro_liquido: receitaTotal - custoTotal,
         custo_por_conversao: conversoes > 0 ? custoTotal / conversoes : 0,
         valor_por_conversao: 85,
-        break_even: custoTotal / 85, // Quantas convers�es para empatar
+        break_even: custoTotal / 85, // Quantas conversÃ¡Âµes para empatar
         status: roi > 100 ? 'excelente' : roi > 50 ? 'bom' : roi > 0 ? 'positivo' : 'negativo'
       }
     }
 
-    // 7. SUGERIR OTIMIZA��ES
-    const sugerirOtimizacoes = (metricasFunil[], vazamentos[], roi) => {
+    // 7. SUGERIR OTIMIZAÃ¡â€¡Ã¡â€¢ES
+    const sugerirOtimizacoes = (metricasFunil: any[], vazamentos: any[], roi: any) => {
       const otimizacoes = []
       
-      // Otimiza��es baseadas em ROI
+      // OtimizaÃ¡Â§Ã¡Âµes baseadas em ROI
       if (roi.roi_percentual < 50) {
         otimizacoes.push({
           categoria: 'ROI',
           prioridade: 'alta',
           titulo: 'ROI abaixo do esperado',
           descricao: `ROI atual: ${roi.roi_percentual.toFixed(1)}%. Meta: >50%`,
-          acao: 'Reduza custos ou aumente taxa de convers�o',
-          impacto_estimado: 'R$ 200-400 por m�s'
+          acao: 'Reduza custos ou aumente taxa de conversÃ¡Â£o',
+          impacto_estimado: 'R$ 200-400 por mÃ¡Âªs'
         })
       }
       
-      // Otimiza��es baseadas em vazamentos
+      // OtimizaÃ¡Â§Ã¡Âµes baseadas em vazamentos
       vazamentos.forEach(vazamento => {
         if (vazamento.severidade === 'critica') {
           otimizacoes.push({
             categoria: 'Vazamento',
             prioridade: 'critica',
-            titulo: `Vazamento cr�tico: ${vazamento.de} �� ${vazamento.para}`,
-            descricao: `${vazamento.taxa_vazamento.toFixed(1)}% perdidos na transi��o`,
+            titulo: `Vazamento crÃ¡Â­tico: ${vazamento.de} â€ â€™ ${vazamento.para}`,
+            descricao: `${vazamento.taxa_vazamento.toFixed(1)}% perdidos na transiÃ¡Â§Ã¡Â£o`,
             acao: vazamento.acoes_sugeridas[0],
             impacto_estimado: `R$ ${vazamento.oportunidade_receita.toFixed(0)} potencial`
           })
         }
       })
       
-      // Otimiza��es baseadas em metas
+      // OtimizaÃ¡Â§Ã¡Âµes baseadas em metas
       metricasFunil.forEach(etapa => {
         if (etapa.status === 'abaixo') {
           otimizacoes.push({
@@ -274,7 +274,7 @@ export async function GET(request: NextRequest) {
             titulo: `${etapa.nome} abaixo da meta`,
             descricao: `Atual: ${etapa.valor} | Meta: ${etapa.meta_ideal}`,
             acao: `Invista mais em ${etapa.nome.toLowerCase()}`,
-            impacto_estimado: `${((etapa.meta_ideal - etapa.valor) * 0.1).toFixed(0)} convers�es extras`
+            impacto_estimado: `${((etapa.meta_ideal - etapa.valor) * 0.1).toFixed(0)} conversÃ¡Âµes extras`
           })
         }
       })
@@ -291,8 +291,8 @@ export async function GET(request: NextRequest) {
     const roiDetalhado = calcularROIDetalhado(metricasFunil)
     const otimizacoes = sugerirOtimizacoes(metricasFunil, vazamentos, roiDetalhado)
 
-    // 8. CALCULAR PROJE��ES
-    const calcularProjecoes = (metricasFunil[], otimizacoes[]) => {
+    // 8. CALCULAR PROJEÃ¡â€¡Ã¡â€¢ES
+    const calcularProjecoes = (metricasFunil: any[], otimizacoes: any[]) => {
       const conversaoAtual = metricasFunil[metricasFunil.length - 1].valor
       const melhoriaEstimada = otimizacoes.reduce((acc, opt) => {
         if (opt.categoria === 'Vazamento') return acc + 0.15 // 15% melhoria
@@ -335,11 +335,11 @@ export async function GET(request: NextRequest) {
         ponto_mais_critico: vazamentos.length > 0 ? vazamentos[0].de : null,
         maior_oportunidade: vazamentos.length > 0 ? vazamentos[0].oportunidade_receita : 0,
         proxima_acao: otimizacoes.length > 0 ? otimizacoes[0].acao : 'Funil funcionando bem',
-        tempo_para_roi_positivo: roiDetalhado.roi_percentual < 0 ? '2-3 meses' : 'J� positivo'
+        tempo_para_roi_positivo: roiDetalhado.roi_percentual < 0 ? '2-3 meses' : 'JÃ¡Â¡ positivo'
       }
     }
 
-    console.log('�� Funil de Convers�o processado:', {
+    console.log('Å“â€¦ Funil de ConversÃ¡Â£o processado:', {
       conversoes: metricasFunil[metricasFunil.length - 1]?.valor || 0,
       roi: roiDetalhado.roi_percentual.toFixed(1),
       vazamentos: vazamentos.length,
@@ -349,7 +349,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(resultado)
 
   } catch (error) {
-    console.error('�� Erro no Funil de Convers�o:', error)
+    console.error('ÂÅ’ Erro no Funil de ConversÃ¡Â£o:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor',
@@ -357,3 +357,4 @@ export async function GET(request: NextRequest) {
     }, { status: 500 })
   }
 } 
+

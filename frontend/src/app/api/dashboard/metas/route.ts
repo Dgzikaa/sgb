@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 // GET - Buscar metas de um bar do banco de dados
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
 
     if (!bar_id) {
       return NextResponse.json(
-        { success: false, error: 'bar_id � obrigat�rio' },
+        { success: false, error: 'bar_id Ã¡Â© obrigatÃ¡Â³rio' },
         { status: 400 }
       )
     }
@@ -29,9 +29,9 @@ export async function GET(request: NextRequest) {
       .eq('bar_id', parseInt(bar_id))
 
     if (error) {
-      console.error('�� Erro ao buscar metas:', error)
+      console.error('ÂÅ’ Erro ao buscar metas:', error)
       
-      // Se n�o encontrou metas para o bar, retornar estrutura vazia
+      // Se nÃ¡Â£o encontrou metas para o bar, retornar estrutura vazia
       if (error.code === 'PGRST116') {
         return NextResponse.json({
           success: true,
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     
     if (!body.bar_id) {
       return NextResponse.json(
-        { success: false, error: 'bar_id � obrigat�rio' },
+        { success: false, error: 'bar_id Ã¡Â© obrigatÃ¡Â³rio' },
         { status: 400 }
       )
     }
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('�� Erro ao salvar metas:', error)
+      console.error('ÂÅ’ Erro ao salvar metas:', error)
       return NextResponse.json(
         { success: false, error: 'Erro ao salvar metas no banco' },
         { status: 500 }
@@ -113,3 +113,4 @@ export async function POST(request: NextRequest) {
     )
   }
 } 
+

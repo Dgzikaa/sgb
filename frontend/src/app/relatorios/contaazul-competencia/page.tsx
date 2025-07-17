@@ -1,4 +1,4 @@
-'use client'
+Ôªø'use client'
 
 import { useState, useEffect } from 'react'
 import { StandardPageLayout } from '@/components/layouts'
@@ -8,18 +8,18 @@ import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useRef } from 'react'
 import { AdvancedDataTable } from '@/components/ui/advanced-datatable'
 
-// Grupos DRE conforme regras do usu·°rio
+// Grupos DRE conforme regras do usu√°rio
 const GRUPOS_DRE = [
   {
     nome: 'Receita',
     categorias: [
-      'Stone Cr·©dito', 'Stone D·©bito', 'Stone Pix', 'Pix Direto na Conta', 'Dinheiro', 'Receita de Eventos', 'Outras Receitas'
+      'Stone Cr√©dito', 'Stone D√©bito', 'Stone Pix', 'Pix Direto na Conta', 'Dinheiro', 'Receita de Eventos', 'Outras Receitas'
     ],
     cor: 'text-green-600 dark:text-green-400'
   },
   {
-    nome: 'Custos Vari·°veis',
-    categorias: ['IMPOSTO', 'COMISS·ÉO 10%', 'TAXA MAQUININHA'],
+    nome: 'Custos Vari√°veis',
+    categorias: ['IMPOSTO', 'COMISS√ÉO 10%', 'TAXA MAQUININHA'],
     cor: 'text-red-600 dark:text-red-400'
   },
   {
@@ -28,47 +28,47 @@ const GRUPOS_DRE = [
     cor: 'text-red-600 dark:text-red-400'
   },
   {
-    nome: 'M·£o-de-Obra',
+    nome: 'M√£o-de-Obra',
     categorias: [
-      'SALARIO FUNCIONARIOS', 'VALE TRANSPORTE', 'ALIMENTA·á·ÉO', 'ADICIONAIS', 'FREELA ATENDIMENTO', 'FREELA BAR', 'FREELA COZINHA', 'FREELA LIMPEZA', 'FREELA SEGURAN·áA', 'PRO LABORE', 'PROVIS·ÉO TRABALHISTA'
+      'SALARIO FUNCIONARIOS', 'VALE TRANSPORTE', 'ALIMENTA√á√ÉO', 'ADICIONAIS', 'FREELA ATENDIMENTO', 'FREELA BAR', 'FREELA COZINHA', 'FREELA LIMPEZA', 'FREELA SEGURAN√áA', 'PRO LABORE', 'PROVIS√ÉO TRABALHISTA'
     ],
     cor: 'text-red-600 dark:text-red-400'
   },
   {
     nome: 'Despesas Comerciais',
-    categorias: ['Marketing', 'Atra·ß·µes Programa·ß·£o', 'Produ·ß·£o Eventos'],
+    categorias: ['Marketing', 'Atra√ß√µes Programa√ß√£o', 'Produ√ß√£o Eventos'],
     cor: 'text-red-600 dark:text-red-400'
   },
   {
     nome: 'Despesas Administrativas',
-    categorias: ['Administrativo Ordin·°rio', 'Escrit·≥rio Central', 'Recursos Humanos'],
+    categorias: ['Administrativo Ordin√°rio', 'Escrit√≥rio Central', 'Recursos Humanos'],
     cor: 'text-red-600 dark:text-red-400'
   },
   {
     nome: 'Despesas Operacionais',
-    categorias: ['Materiais Opera·ß·£o', 'Materiais de Limpeza e Descart·°veis', 'Utens·≠lios', 'Estorno', 'Outros Opera·ß·£o'],
+    categorias: ['Materiais Opera√ß√£o', 'Materiais de Limpeza e Descart√°veis', 'Utens√≠lios', 'Estorno', 'Outros Opera√ß√£o'],
     cor: 'text-red-600 dark:text-red-400'
   },
   {
-    nome: 'Despesas de Ocupa·ß·£o (Contas)',
-    categorias: ['ALUGUEL/CONDOM·çNIO/IPTU', '·ÅGUA', 'MANUTEN·á·ÉO', 'INTERNET', 'G·ÅS', 'LUZ'],
+    nome: 'Despesas de Ocupa√ß√£o (Contas)',
+    categorias: ['ALUGUEL/CONDOM√çNIO/IPTU', '√ÅGUA', 'MANUTEN√á√ÉO', 'INTERNET', 'G√ÅS', 'LUZ'],
     cor: 'text-red-600 dark:text-red-400'
   },
   {
-    nome: 'N·£o Operacionais',
+    nome: 'N√£o Operacionais',
     categorias: ['Contratos'],
     cor: 'text-red-600 dark:text-red-400'
   }
 ];
 
-function totalGrupo(mes, grupo) {
+function totalGrupo(mes: any, grupo: any) {
   return grupo.categorias.reduce((acc: number, cat: string) => acc + (mes.categorias[cat] || 0), 0);
 }
 
-function totalReceitas(mes) {
+function totalReceitas(mes: any) {
   return GRUPOS_DRE[0].categorias.reduce((acc: number, cat: string) => acc + (mes.categorias[cat] || 0), 0);
 }
-function totalCustos(mes) {
+function totalCustos(mes: any) {
   // Soma todos os grupos exceto Receita
   return GRUPOS_DRE.slice(1).reduce((acc: number, grupo) => acc + totalGrupo(mes, grupo), 0);
 }
@@ -91,7 +91,7 @@ export default function DREOrdinarioPage() {
       .then(res => {
         if (res.success) {
           // Filtrar meses a partir de fevereiro
-          const filtrados = (res.meses || []).filter((m) => m.mes >= 2)
+          const filtrados = (res.meses || []).filter((m: any) => m.mes >= 2)
           setDadosMensais(filtrados)
         }
         setLoading(false)
@@ -112,7 +112,7 @@ export default function DREOrdinarioPage() {
     <StandardPageLayout>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 py-6">
-          <h1 className="card-title-dark mb-6">DRE Ordin·°rio</h1>
+          <h1 className="card-title-dark mb-6">DRE Ordin√°rio</h1>
           <div ref={scrollRef} className="w-full overflow-x-auto">
             <table className="table-dark w-full border-collapse">
               <thead>
@@ -166,3 +166,4 @@ export default function DREOrdinarioPage() {
     </StandardPageLayout>
   )
 } 
+

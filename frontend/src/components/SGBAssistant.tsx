@@ -1,4 +1,4 @@
-'use client'
+ï»¿'use client'
 
 import { useState, useRef, useEffect } from 'react'
 import { getSupabaseClient } from '@/lib/supabase'
@@ -11,7 +11,7 @@ interface Message {
   timestamp: Date
   metadata?: {
     command?: string
-    data?: any
+    data?: unknown
     feedback?: 'positive' | 'negative'
   }
 }
@@ -30,7 +30,7 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
     {
       id: '1',
       type: 'assistant',
-      content: `Olá¡! Sou o SGB Assistant ğŸ¤–\n\nSou seu assistente inteligente para aná¡lise de dados do ${barInfo?.nome || 'bar'}. Posso te ajudar com:\n\n€¢ ğŸ“Š Aná¡lises de vendas e faturamento\n€¢ ğŸ” Detecá§á£o de padráµes e anomalias\n€¢ ğŸ’¡ Sugestáµes de melhorias\n€¢ “ Respostas sobre o negá³cio\n\nO que vocáª gostaria de saber?`,
+              content: `OlÃ¡! Sou o SGB Assistant ğŸ¤–\n\nSou seu assistente inteligente para anÃ¡lise de dados do ${barInfo?.nome || 'bar'}. Posso te ajudar com:\n\nâ€¢ ğŸ“Š AnÃ¡lises de vendas e faturamento\nâ€¢ ğŸ” DetecÃ§Ã£o de padrÃµes e anomalias\nâ€¢ ğŸ’¡ SugestÃµes de melhorias\nâ€¢ ğŸ’¬ Respostas sobre o negÃ³cio\n\nO que vocÃª gostaria de saber?`,
       timestamp: new Date()
     }
   ])
@@ -51,7 +51,7 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
     // Inicializar cliente Supabase
     const supabase = await getSupabaseClient();
     if (!supabase) {
-      console.error('Œ Erro ao conectar com banco');
+      console.error('âŒ Erro ao conectar com banco');
       return;
     }
 
@@ -68,7 +68,7 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
       timestamp: new Date()
     }
 
-    // Adicionar mensagem do usuá¡rio imediatamente
+    // Adicionar mensagem do usuÃ¡rio imediatamente
     setMessages(prev => {
       const newMessages = [...prev, userMessage]
       console.log('ğŸ“ Mensagens atualizadas:', newMessages)
@@ -80,7 +80,7 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
     setIsLoading(true)
 
     try {
-      // Processar comando do usuá¡rio
+      // Processar comando do usuÃ¡rio
       const response = await processUserInput(userInput, barInfo)
       
       const assistantMessage: Message = {
@@ -94,12 +94,12 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
       setMessages(prev => [...prev, assistantMessage])
       console.log('ğŸ¤– Resposta enviada:', response.content)
     } catch (error) {
-      console.error('Œ Erro no assistant:', error)
+      console.error('âŒ Erro no assistant:', error)
       
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: 'Desculpe, ocorreu um erro ao processar sua solicitaá§á£o. Tente novamente.',
+        content: 'Desculpe, ocorreu um erro ao processar sua solicitaÃ§Ã£o. Tente novamente.',
         timestamp: new Date()
       }
 
@@ -114,7 +114,7 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
     // Inicializar cliente Supabase
     const supabase = await getSupabaseClient();
     if (!supabase) {
-      console.error('Œ Erro ao conectar com banco');
+      console.error('âŒ Erro ao conectar com banco');
       return;
     }
 
@@ -133,7 +133,7 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
       {
         id: '1',
         type: 'assistant',
-        content: `Chat limpo! ğŸ§¹\n\nSou o SGB Assistant do ${barInfo?.nome || 'bar'}. Como posso te ajudar agora?`,
+                  content: `Chat limpo! âœ¨\n\nSou o SGB Assistant do ${barInfo?.nome || 'bar'}. Como posso te ajudar agora?`,
         timestamp: new Date()
       }
     ])
@@ -148,7 +148,7 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center">
-              <span className="text-white">ğŸ¤–</span>
+                             <span className="text-white">ğŸ¤–</span>
             </div>
             <div>
               <h3 className="font-bold text-white">SGB Assistant</h3>
@@ -204,7 +204,7 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
                           ? 'bg-green-100 text-green-600'
                           : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
                       }`}
-                      title="Resposta áºtil"
+                      title="Resposta Ãºtil"
                     >
                       ğŸ‘
                     </button>
@@ -215,7 +215,7 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
                           ? 'bg-red-100 text-red-600'
                           : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
                       }`}
-                      title="Resposta ná£o áºtil"
+                      title="Resposta nÃ£o Ãºtil"
                     >
                       ğŸ‘
                     </button>
@@ -269,7 +269,7 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
         
         {/* Quick Commands */}
         <div className="mt-2 flex flex-wrap gap-1">
-          {['ğŸ’° Vendas hoje', 'ğŸ“Š Aná¡lise semana', 'ğŸ” Anomalias', 'ğŸ’¡ Sugestáµes'].map((cmd) => (
+                     {['ğŸ’° Vendas hoje', 'ğŸ“Š AnÃ¡lise semana', 'ğŸ” Anomalias', 'ğŸ’¡ SugestÃµes'].map((cmd) => (
             <button
               key={cmd}
               onClick={() => setInput(cmd)}
@@ -284,12 +284,12 @@ export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistant
   )
 }
 
-// Funá§á£o para processar input do usuá¡rio
-async function processUserInput(input: string, barInfo): Promise<{ content: string; metadata?: any }> {
+// FunÃ§Ã£o para processar input do usuÃ¡rio
+async function processUserInput(input: string, barInfo: { nome: string; id?: number } | null): Promise<{ content: string; metadata?: { command?: string; data?: unknown; feedback?: 'positive' | 'negative' } }> {
   const lowercaseInput = input.toLowerCase()
 
-  // Comandos especá­ficos que usam aná¡lise local
-  if (lowercaseInput.includes('vendas hoje') || lowercaseInput.includes('ğŸ’° vendas hoje')) {
+  // Comandos especÃ­ficos que usam anÃ¡lise local
+        if (lowercaseInput.includes('vendas hoje') || lowercaseInput.includes('ğŸ’° vendas hoje')) {
     return await analyzeToday(barInfo)
   }
   
@@ -297,10 +297,10 @@ async function processUserInput(input: string, barInfo): Promise<{ content: stri
   try {
     console.log('ğŸ¤– Processando com ChatGPT:', input)
     
-    // Buscar dados contextuais se necessá¡rio
+    // Buscar dados contextuais se necessÃ¡rio
     let contextData = null
     if (lowercaseInput.includes('vendas') || lowercaseInput.includes('faturamento')) {
-      // Buscar dados bá¡sicos de vendas para contexto
+      // Buscar dados bÃ¡sicos de vendas para contexto
       contextData = await getBasicSalesData(barInfo)
     }
 
@@ -309,44 +309,42 @@ async function processUserInput(input: string, barInfo): Promise<{ content: stri
       context: {
         barName: barInfo?.nome || 'Bar',
         barId: barInfo?.id,
-        currentData: contextData
+        currentData: contextData ? salesDataToRecord(contextData) : undefined
       }
     })
 
     return {
       content: response.response,
       metadata: { 
-        command: 'chatgpt',
-        type: response.metadata?.type || 'openai',
-        tokens: response.metadata?.tokens || 0
+        command: 'chatgpt'
       }
     }
   } catch (error) {
-    console.error('Œ Erro ao processar com ChatGPT:', error)
+    console.error('âŒ Erro ao processar com ChatGPT:', error)
     
-    // Fallback para comandos especá­ficos em caso de erro
-    if (lowercaseInput.includes('aná¡lise semana') || lowercaseInput.includes('ğŸ“Š aná¡lise semana')) {
+    // Fallback para comandos especÃ­ficos em caso de erro
+          if (lowercaseInput.includes('anÃ¡lise semana') || lowercaseInput.includes('ğŸ“Š anÃ¡lise semana')) {
       return await analyzeWeek(barInfo)
     }
     
-    if (lowercaseInput.includes('anomalias') || lowercaseInput.includes('ğŸ” anomalias')) {
+          if (lowercaseInput.includes('anomalias') || lowercaseInput.includes('ğŸ” anomalias')) {
       return await detectAnomalies(barInfo)
     }
     
-    if (lowercaseInput.includes('sugestáµes') || lowercaseInput.includes('ğŸ’¡ sugestáµes')) {
+          if (lowercaseInput.includes('sugestÃµes') || lowercaseInput.includes('ğŸ’¡ sugestÃµes')) {
       return await generateSuggestions(barInfo)
     }
 
-    // Resposta de erro amigá¡vel
+    // Resposta de erro amigÃ¡vel
     return {
-      content: `Œ **Erro de Conexá£o**\n\nNá£o consegui processar sua pergunta: "${input}"\n\nğŸ”§ **Possá­veis soluá§áµes:**\n€¢ Verifique sua conexá£o com a internet\n€¢ Tente novamente em alguns segundos\n€¢ Use comandos bá¡sicos como "vendas hoje"\n\nğŸ’¡ **Comandos disponá­veis offline:**\n€¢ ğŸ’° Vendas hoje\n€¢ ğŸ“Š Aná¡lise semana\n€¢ ğŸ” Anomalias\n€¢ ğŸ’¡ Sugestáµes`,
-      metadata: { command: 'error', error: error instanceof Error ? error.message : 'Unknown error' }
+             content: `âŒ **Erro de ConexÃ£o**\n\nNÃ£o consegui processar sua pergunta: "${input}"\n\nğŸ”§ **PossÃ­veis soluÃ§Ãµes:**\nâ€¢ Verifique sua conexÃ£o com a internet\nâ€¢ Tente novamente em alguns segundos\nâ€¢ Use comandos bÃ¡sicos como "vendas hoje"\n\nğŸ“± **Comandos disponÃ­veis offline:**\nâ€¢ ğŸ’° Vendas hoje\nâ€¢ ğŸ“Š AnÃ¡lise semana\nâ€¢ ğŸ” Anomalias\nâ€¢ ğŸ’¡ SugestÃµes`,
+      metadata: { command: 'error' }
     }
   }
 }
 
-// Funá§á£o para buscar dados bá¡sicos de vendas para contexto
-async function getBasicSalesData(barInfo) {
+// FunÃ§Ã£o para buscar dados bÃ¡sicos de vendas para contexto
+async function getBasicSalesData(barInfo: { nome: string; id?: number } | null) {
   try {
     const today = new Date().toISOString().split('T')[0]
     const supabase = await getSupabaseClient();
@@ -357,9 +355,9 @@ async function getBasicSalesData(barInfo) {
       .gte('created_at', `${today}T00:00:00`)
       .lt('created_at', `${today}T23:59:59`)
       .eq('bar_id', barInfo?.id || 1)
-      .limit(10) // Limitar para ná£o sobrecarregar
+      .limit(10) // Limitar para nÃ£o sobrecarregar
 
-    const total = vendas?.reduce((sum: number, venda) => sum + parseFloat(venda.liquido || '0'), 0) || 0
+    const total = vendas?.reduce((sum: number, venda: { liquido: string; meio: string; created_at: string }) => sum + parseFloat(venda.liquido || '0'), 0) || 0
     const quantidade = vendas?.length || 0
 
     return {
@@ -368,24 +366,37 @@ async function getBasicSalesData(barInfo) {
         quantidade,
         ticketMedio: quantidade > 0 ? total / quantidade : 0
       },
-      ultimasVendas: vendas?.slice(0, 5) // ášltimas 5 vendas como contexto
+      ultimasVendas: vendas?.slice(0, 5) // Ãºltimas 5 vendas como contexto
     }
   } catch (error) {
-    console.warn('š ï¸ Erro ao buscar dados de contexto:', error)
+    console.warn('Ã…Â¡Ã‚Â ÃƒÂ¯Ã‚Â¸Ã‚Â Erro ao buscar dados de contexto:', error)
     return null
   }
 }
 
-// Funá§áµes de aná¡lise (comeá§ando simples, vá£o evoluir)
-async function analyzeToday(barInfo) {
+// FunÃ§Ã£o para converter dados de vendas para Record<string, string | number | boolean>
+function salesDataToRecord(data: any): Record<string, string | number | boolean> {
+  if (!data) return {};
+  return {
+    total: data.vendasHoje?.total ?? 0,
+    quantidade: data.vendasHoje?.quantidade ?? 0,
+    ticketMedio: data.vendasHoje?.ticketMedio ?? 0,
+    // Adicione outros campos relevantes se necessÃ¡rio
+  };
+}
+
+// FunÃ§Ãµes de anÃ¡lise (comeÃ§ando simples, vÃ£o evoluir)
+async function analyzeToday(barInfo: { nome: string; id?: number } | null) {
   const today = new Date().toISOString().split('T')[0]
   
   try {
     // Buscar dados do dia atual
     const supabase = await getSupabaseClient();
-    if (!supabase) return {
-      content: 'Œ Erro ao conectar com banco de dados.'
-    };
+    if (!supabase) {
+      return {
+        content: 'âŒ Erro ao conectar com banco de dados.'
+      };
+    }
     const { data: vendas, error } = await supabase
       .from('pagamentos')
       .select('liquido, meio, created_at')
@@ -395,37 +406,38 @@ async function analyzeToday(barInfo) {
 
     if (error) throw error
 
-    const total = vendas?.reduce((sum: number, venda) => sum + parseFloat(venda.liquido || '0'), 0) || 0
+    const total = vendas?.reduce((sum: number, venda: { liquido: string; meio: string; created_at: string }) => sum + parseFloat(venda.liquido || '0'), 0) || 0
     const quantidade = vendas?.length || 0
 
     return {
-      content: `ğŸ“Š **Vendas de Hoje (${new Date().toLocaleDateString()}):**\n\nğŸ’° **Faturamento:** R$ ${total.toFixed(2)}\nğŸ« **Transaá§áµes:** ${quantidade}\nğŸ’³ **Ticket Má©dio:** R$ ${quantidade > 0 ? (total / quantidade).toFixed(2) : '0.00'}\n\n${total > 1000 ? 'ğŸ‰ á“timo dia de vendas!' : total > 500 ? 'ğŸ‘ Dia normal de vendas' : 'ğŸ“ˆ Ainda há¡ tempo para melhorar!'}`,
+             content: `ğŸ“Š **Vendas de Hoje (${new Date().toLocaleDateString()}):**\n\nğŸ’° **Faturamento:** R$ ${total.toFixed(2)}\nğŸ’³ **TransaÃ§Ãµes:** ${quantidade}\nğŸ“ˆ **Ticket MÃ©dio:** R$ ${quantidade > 0 ? (total / quantidade).toFixed(2) : '0.00'}\n\n${total > 1000 ? 'ğŸ‰ Ã“timo dia de vendas!' : total > 500 ? 'ğŸ‘ Dia normal de vendas' : 'ğŸ“ˆ Ainda hÃ¡ tempo para melhorar!'}`,
       metadata: { command: 'vendas_hoje', data: { total, quantidade } }
     }
   } catch (error) {
     return {
-      content: 'Œ Erro ao buscar dados de vendas de hoje. Verifique a conexá£o com o banco de dados.'
+      content: 'âŒ Erro ao buscar dados de vendas de hoje. Verifique a conexÃ£o com o banco de dados.'
     }
   }
 }
 
-async function analyzeWeek(barInfo) {
+async function analyzeWeek(barInfo: { nome: string; id?: number } | null) {
   return {
-    content: `ğŸ“Š **Aná¡lise Semanal:**\n\nğŸš§ Esta funcionalidade está¡ sendo desenvolvida...\n\nEm breve vocáª terá¡:\n€¢ Comparativo com semana anterior\n€¢ Tendáªncias de crescimento\n€¢ Melhores dias da semana\n€¢ Projeá§áµes para prá³xima semana\n\n³ Aguarde as prá³ximas atualizaá§áµes!`,
+         content: `ğŸ“Š **AnÃ¡lise Semanal:**\n\nğŸ”§ Esta funcionalidade estÃ¡ sendo desenvolvida...\n\nEm breve vocÃª terÃ¡:\nâ€¢ Comparativo com semana anterior\nâ€¢ TendÃªncias de crescimento\nâ€¢ Melhores dias da semana\nâ€¢ ProjeÃ§Ãµes para prÃ³xima semana\n\nâ³ Aguarde as prÃ³ximas atualizaÃ§Ãµes!`,
     metadata: { command: 'analise_semana' }
   }
 }
 
-async function detectAnomalies(barInfo) {
+async function detectAnomalies(barInfo: { nome: string; id?: number } | null) {
   return {
-    content: `ğŸ” **Detecá§á£o de Anomalias:**\n\nğŸš§ Sistema de detecá§á£o em desenvolvimento...\n\nFuturas funcionalidades:\n€¢ Vendas muito baixas/altas\n€¢ Padráµes estranhos nos pagamentos\n€¢ Horá¡rios de pico diferentes\n€¢ Alertas automá¡ticos\n\nğŸ¤– O sistema está¡ aprendendo os padráµes do seu negá³cio!`,
+         content: `ğŸ” **DetecÃ§Ã£o de Anomalias:**\n\nğŸ”§ Sistema de detecÃ§Ã£o em desenvolvimento...\n\nFuturas funcionalidades:\nâ€¢ Vendas muito baixas/altas\nâ€¢ PadrÃµes estranhos nos pagamentos\nâ€¢ HorÃ¡rios de pico diferentes\nâ€¢ Alertas automÃ¡ticos\n\nğŸ¤– O sistema estÃ¡ aprendendo os padrÃµes do seu negÃ³cio!`,
     metadata: { command: 'anomalias' }
   }
 }
 
-async function generateSuggestions(barInfo) {
+async function generateSuggestions(barInfo: { nome: string; id?: number } | null): Promise<{ content: string; metadata?: { command?: string; data?: unknown; feedback?: 'positive' | 'negative' } }> {
   return {
-    content: `ğŸ’¡ **Sugestáµes de Melhoria:**\n\nğŸš§ Sistema de sugestáµes em treinamento...\n\nEm breve vocáª receberá¡:\n€¢ Recomendaá§áµes baseadas em dados\n€¢ Melhores horá¡rios para promoá§áµes\n€¢ Estratá©gias para aumentar vendas\n€¢ Otimizaá§áµes operacionais\n\nğŸ“ˆ Quanto mais vocáª usar, melhores será£o as sugestáµes!`,
+         content: `ğŸ’¡ **SugestÃµes de Melhoria:**\n\nğŸ”§ Sistema de sugestÃµes em treinamento...\n\nEm breve vocÃª receberÃ¡:\nâ€¢ RecomendaÃ§Ãµes baseadas em dados\nâ€¢ Melhores horÃ¡rios para promoÃ§Ãµes\nâ€¢ EstratÃ©gias para aumentar vendas\nâ€¢ OtimizaÃ§Ãµes operacionais\n\nğŸ“ˆ Quanto mais vocÃª usar, melhores serÃ£o as sugestÃµes!`,
     metadata: { command: 'sugestoes' }
   }
 } 
+

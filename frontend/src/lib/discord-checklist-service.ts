@@ -1,5 +1,5 @@
-// ========================================
-// ğŸ“‹ DISCORD CHECKLIST NOTIFICATION SERVICE
+ï»¿// ========================================
+// ğŸ¨ DISCORD CHECKLIST NOTIFICATION SERVICE
 // ========================================
 
 interface ChecklistAlert {
@@ -45,63 +45,63 @@ export class DiscordChecklistService {
   private static readonly WEBHOOK_URL = 'https://discord.com/api/webhooks/1392957511912525926/s0TR7ba9jCJxnGXJNwbiQzHMpWTjmm1NcOnWtfijXvQiFk0L4ze9Q1oZJkatGV6UeIN3'
   
   // ========================================
-  // ğŸš¨ NOTIFICAá‡á•ES DE ALERTAS
+  // ğŸ¨ NOTIFICAÃ‡Ã•ES de ALERTAS
   // ========================================
   
   /**
-   * Envia alerta crá­tico de checklist atrasado
+   * Envia alerta crÃ­tico de checklist atrasado
    */
   static async sendCriticalAlert(alert: ChecklistAlert): Promise<boolean> {
     const embed = {
-      title: "ğŸ”´ ALERTA CRáTICO - Checklist Atrasado",
-      description: `**${alert.titulo}** está¡ criticamente atrasado!`,
+      title: "ğŸš¨ ALERTA CRÃTICO - Checklist Atrasado",
+      description: `**${alert.titulo}** estÃ¡ criticamente atrasado!`,
       color: 0xFF0000, // Vermelho
       fields: [
         {
-          name: "ğŸ“‹ Checklist",
+          name: "ğŸ” Checklist",
           value: alert.titulo,
           inline: true
         },
         {
-          name: "ğŸ·ï¸ Categoria", 
+          name: "ğŸ¯ Categoria",
           value: alert.categoria,
           inline: true
         },
         {
-          name: "° Atraso",
+          name: "âš ï¸ Atraso",
           value: this.formatTempoAtraso(alert.tempoAtraso),
           inline: true
         },
         {
-          name: "ğŸ• Hora Esperada",
+          name: "ğŸ•’ Hora Esperada",
           value: alert.horaEsperada,
           inline: true
         },
         {
-          name: "ğŸ‘¤ Responsá¡vel",
-          value: alert.responsavel || "Ná£o definido",
+          name: "ğŸ‘¤ ResponsÃ¡vel",
+          value: alert.responsavel || "NÃ£o definido",
           inline: true
         },
         {
-          name: "ğŸ“ Setor",
-          value: alert.setor || "Ná£o definido", 
+          name: "ğŸ¢ Setor",
+          value: alert.setor || "NÃ£o definido",
           inline: true
         }
       ],
       footer: {
-        text: `SGB Analytics €¢ ${new Date().toLocaleString('pt-BR')}`
+        text: `SGB Analytics â€¢ ${new Date().toLocaleString('pt-BR')}`
       },
       timestamp: new Date().toISOString()
     }
 
     return this.sendWebhook({
-      content: "ğŸš¨ **Aá‡áƒO URGENTE NECESSáRIA** ğŸš¨",
+      content: "ğŸš¨ **AÃ‡ÃƒO URGENTE NECESSÃRIA** ğŸš¨",
       embeds: [embed]
     })
   }
 
   /**
-   * Envia alerta de checklist atrasado (ná£o crá­tico)
+   * Envia alerta de checklist atrasado (nÃ£o crÃ­tico)
    */
   static async sendAlert(alert: ChecklistAlert): Promise<boolean> {
     const colors = {
@@ -112,10 +112,10 @@ export class DiscordChecklistService {
     }
 
     const icons = {
-      critico: "ğŸ”´",
-      alto: "ğŸŸ ", 
-      medio: "ğŸŸ¡",
-      baixo: "ğŸ”µ"
+      critico: "ğŸš¨",
+      alto: "âš ï¸",
+      medio: "ğŸ’¡",
+      baixo: "ğŸ”"
     }
 
     const embed = {
@@ -124,23 +124,23 @@ export class DiscordChecklistService {
       color: colors[alert.nivel],
       fields: [
         {
-          name: "ğŸ“‹ Checklist",
+          name: "ğŸ” Checklist",
           value: alert.titulo,
           inline: true
         },
         {
-          name: "° Atraso",
+          name: "âš ï¸ Atraso",
           value: this.formatTempoAtraso(alert.tempoAtraso),
           inline: true
         },
         {
-          name: "ğŸ• Esperado",
+          name: "ğŸ•’ Esperado",
           value: alert.horaEsperada,
           inline: true
         }
       ],
       footer: {
-        text: `SGB Analytics €¢ ${new Date().toLocaleString('pt-BR')}`
+        text: `SGB Analytics â€¢ ${new Date().toLocaleString('pt-BR')}`
       },
       timestamp: new Date().toISOString()
     }
@@ -151,18 +151,18 @@ export class DiscordChecklistService {
   }
 
   // ========================================
-  // œ… NOTIFICAá‡á•ES DE EXECUá‡áƒO
+  // ğŸ“Š NOTIFICAÃ‡Ã•ES de EXECUÃ‡ÃƒO
   // ========================================
 
   /**
-   * Envia notificaá§á£o de checklist concluá­do
+   * Envia notificaÃ§Ã£o de checklist concluÃ­do
    */
   static async sendCompletion(execution: ChecklistExecution): Promise<boolean> {
     const scoreEmoji = this.getScoreEmoji(execution.pontuacao_final || 0)
-    const timeEmoji = execution.tempo_execucao <= 30 ? "š¡" : execution.tempo_execucao <= 60 ? "±ï¸" : "ğŸŒ"
+    const timeEmoji = execution.tempo_execucao <= 30 ? "âš¡ï¸" : execution.tempo_execucao <= 60 ? "ğŸ†" : "ğŸ‰"
     
     const embed = {
-      title: "œ… Checklist Concluá­do",
+      title: "âœ… Checklist ConcluÃ­do",
       description: `**${execution.titulo}** foi executado com sucesso!`,
       color: 0x00FF00, // Verde
       fields: [
@@ -172,7 +172,7 @@ export class DiscordChecklistService {
           inline: true
         },
         {
-          name: "ğŸ“ Setor",
+          name: "ğŸ¢ Setor",
           value: execution.setor,
           inline: true
         },
@@ -182,7 +182,7 @@ export class DiscordChecklistService {
           inline: true
         },
         {
-          name: "ğŸ“Š Itens",
+          name: "ğŸ‘ Itens",
           value: `${execution.itens_ok}/${execution.total_itens} OK`,
           inline: true
         },
@@ -192,20 +192,20 @@ export class DiscordChecklistService {
           inline: true
         },
         {
-          name: "ğŸ—“ï¸ Concluá­do",
+          name: "âœ… ConcluÃ­do",
           value: new Date(execution.concluido_em).toLocaleString('pt-BR'),
           inline: true
         }
       ],
       footer: {
-        text: `SGB Analytics €¢ Sistema de Checklists`
+        text: `SGB Analytics â€¢ Sistema de Checklists`
       },
       timestamp: new Date().toISOString()
     }
 
     if (execution.observacoes_gerais) {
       embed.fields.push({
-        name: "ğŸ“ Observaá§áµes",
+        name: "ğŸ’¡ ObservaÃ§Ãµes",
         value: execution.observacoes_gerais.substring(0, 1000),
         inline: false
       })
@@ -217,60 +217,60 @@ export class DiscordChecklistService {
   }
 
   // ========================================
-  // ğŸ“Š RELATá“RIOS AUTOMáTICOS
+  // ğŸ“Š RELATÃ“RIOS AUTOMÃTICOS
   // ========================================
 
   /**
-   * Envia relatá³rio diá¡rio de checklists (8h da manhá£)
+   * Envia relatÃ³rio diÃ¡rio de checklists (8h da manhÃ£)
    */
   static async sendDailyReport(stats: ChecklistStats): Promise<boolean> {
     const taxa_conclusao = (stats.execucoes_concluidas / stats.total_execucoes) * 100
-    const performance_emoji = taxa_conclusao >= 90 ? "ğŸ†" : taxa_conclusao >= 70 ? "ğŸ‘" : "š ï¸"
+    const performance_emoji = taxa_conclusao >= 90 ? "ğŸ†" : taxa_conclusao >= 70 ? "ğŸ‘" : "âš¡ï¸"
     
     const embed = {
-      title: "ğŸ“‹ Relatá³rio Diá¡rio - Checklists",
+      title: "ğŸ” RelatÃ³rio DiÃ¡rio - Checklists",
       description: `${performance_emoji} **Performance de Ontem**`,
       color: taxa_conclusao >= 90 ? 0x00FF00 : taxa_conclusao >= 70 ? 0xFFD700 : 0xFF8C00,
       fields: [
         {
-          name: "ğŸ“Š Execuá§áµes",
-          value: `**${stats.execucoes_concluidas}** de **${stats.total_execucoes}** concluá­das\n(${taxa_conclusao.toFixed(1)}%)`,
+          name: "ğŸ‘ ExecuÃ§Ãµes",
+          value: `**${stats.execucoes_concluidas}** de **${stats.total_execucoes}** concluÃ­das\n(${taxa_conclusao.toFixed(1)}%)`,
           inline: true
         },
         {
-          name: "±ï¸ Tempo Má©dio",
+          name: "ğŸ† Tempo MÃ©dio",
           value: `${stats.tempo_medio_execucao.toFixed(0)} minutos`,
           inline: true
         },
         {
-          name: "­ Score Má©dio",
+          name: "ğŸ‰ Score MÃ©dio",
           value: `${stats.score_medio.toFixed(1)}%`,
           inline: true
         },
         {
           name: "ğŸš¨ Alertas Ativos",
-          value: `${stats.alertas_ativos} alertas\n${stats.alertas_criticos} crá­ticos`,
+          value: `${stats.alertas_ativos} alertas\n${stats.alertas_criticos} crÃ­ticos`,
           inline: true
         },
         {
-          name: "ğŸ“ˆ Status Geral",
+          name: "ğŸ‘ Status Geral",
           value: this.getStatusGeral(taxa_conclusao, stats.alertas_criticos),
           inline: true
         },
         {
           name: "ğŸ¯ Meta",
-          value: "85% conclusá£o\n90% score má©dio",
+          value: "85% conclusÃ£o\n90% score mÃ©dio",
           inline: true
         }
       ],
       footer: {
-        text: `SGB Analytics €¢ Relatá³rio Automá¡tico ${new Date().toLocaleDateString('pt-BR')}`
+        text: `SGB Analytics â€¢ RelatÃ³rio AutomÃ¡tico ${new Date().toLocaleDateString('pt-BR')}`
       },
       timestamp: new Date().toISOString()
     }
 
     return this.sendWebhook({
-      content: "ğŸ“… **RELATá“RIO DIáRIO - CHECKLISTS**",
+      content: "ğŸ‘ **RELATÃ“RIO DIÃRIO - CHECKLISTS**",
       embeds: [embed]
     })
   }
@@ -278,63 +278,63 @@ export class DiscordChecklistService {
   /**
    * Envia resumo semanal de checklists
    */
-  static async sendWeeklyReport(weeklyStats): Promise<boolean> {
+  static async sendWeeklyReport(weeklyStats: Record<string, unknown>): Promise<boolean> {
     const embed = {
-      title: "ğŸ“Š Resumo Semanal - Checklists",
-      description: "ğŸ“… **Performance da Semana**",
+      title: "ğŸ‘ Resumo Semanal - Checklists",
+      description: "ğŸ‘€ **Performance da Semana**",
       color: 0x4169E1, // Azul royal
       fields: [
         {
-          name: "ğŸ“ˆ Tendáªncia",
-          value: weeklyStats.tendencia || "Está¡vel",
+          name: "ğŸ‘ TendÃªncia",
+          value: (weeklyStats.tendencia as string) || "EstÃ¡vel",
           inline: true
         },
         {
           name: "ğŸ† Melhor Dia",
-          value: weeklyStats.melhor_dia || "N/A",
+          value: (weeklyStats.melhor_dia as string) || "N/A",
           inline: true
         },
         {
-          name: "š ï¸ Pior Dia", 
-          value: weeklyStats.pior_dia || "N/A",
+          name: "âš¡ï¸ Pior Dia",
+          value: (weeklyStats.pior_dia as string) || "N/A",
           inline: true
         },
         {
-          name: "ğŸ‘‘ Top Funcioná¡rio",
-          value: weeklyStats.top_funcionario || "N/A",
+          name: "ğŸ‘ Top FuncionÃ¡rio",
+          value: (weeklyStats.top_funcionario as string) || "N/A",
           inline: true
         },
         {
-          name: "ğŸ“‹ Top Checklist",
-          value: weeklyStats.top_checklist || "N/A",
+          name: "ğŸ” Top Checklist",
+          value: (weeklyStats.top_checklist as string) || "N/A",
           inline: true
         },
         {
           name: "ğŸ¯ Meta Semanal",
-          value: weeklyStats.meta_atingida ? "œ… Atingida" : "Œ Ná£o atingida",
+          value: (weeklyStats.meta_atingida as boolean) ? "âœ… Atingida" : "âŒ NÃ£o atingida",
           inline: true
         }
       ],
       footer: {
-        text: `SGB Analytics €¢ Semana ${weeklyStats.semana || 'Atual'}`
+        text: `SGB Analytics â€¢ Semana ${(weeklyStats.semana as string) || 'Atual'}`
       },
       timestamp: new Date().toISOString()
     }
 
     return this.sendWebhook({
-      content: "ğŸ“Š **RESUMO SEMANAL - CHECKLISTS**",
+      content: "ğŸ‘ **RESUMO SEMANAL - CHECKLISTS**",
       embeds: [embed]
     })
   }
 
   // ========================================
-  // ğŸ¯ NOTIFICAá‡á•ES DE ANOMALIAS
+  // ğŸš¨ NOTIFICAÃ‡Ã•ES de ANOMALIAS
   // ========================================
 
   /**
    * Envia alerta de anomalia detectada pela IA
    */
-  static async sendAnomalyAlert(anomalia): Promise<boolean> {
+  static async sendAnomalyAlert(anomalia: Record<string, unknown>): Promise<boolean> {
     const severityColors = {
       critica: 0xFF0000,
       alta: 0xFF8C00,
@@ -344,64 +344,64 @@ export class DiscordChecklistService {
 
     const embed = {
       title: "ğŸ” Anomalia Detectada - IA Analytics",
-      description: `**${anomalia.titulo}**`,
+      description: `**${anomalia.titulo as string}**`,
       color: severityColors[anomalia.severidade as keyof typeof severityColors] || 0x808080,
       fields: [
         {
           name: "ğŸ¯ Tipo",
-          value: anomalia.tipo_anomalia,
+          value: (anomalia.tipo_anomalia as string) || "N/A",
           inline: true
         },
         {
-          name: "š ï¸ Severidade",
-          value: anomalia.severidade.toUpperCase(),
+          name: "âš ï¸ Severidade",
+          value: (anomalia.severidade as string).toUpperCase(),
           inline: true
         },
         {
-          name: "ğŸ“Š Confianá§a",
-          value: `${(anomalia.confianca_deteccao * 100).toFixed(1)}%`,
+          name: "ğŸ“Š ConfianÃ§a",
+          value: `${(anomalia.confianca_deteccao as number * 100).toFixed(1)}%`,
           inline: true
         },
         {
           name: "ğŸ“ˆ Valor Esperado",
-          value: anomalia.valor_esperado?.toString() || "N/A",
+          value: (anomalia.valor_esperado as string) || "N/A",
           inline: true
         },
         {
-          name: "ğŸ“‰ Valor Observado", 
-          value: anomalia.valor_observado?.toString() || "N/A",
+          name: "ğŸ“‰ Valor Observado",
+          value: (anomalia.valor_observado as string) || "N/A",
           inline: true
         },
         {
           name: "ğŸ“Š Desvio",
-          value: `${anomalia.desvio_percentual?.toFixed(1) || 0}%`,
+          value: `${(anomalia.desvio_percentual as number || 0).toFixed(1)}%`,
           inline: true
         },
         {
-          name: "ğŸ’¡ Possá­vel Causa",
-          value: anomalia.possivel_causa || "Investigar",
+          name: "ğŸ’¡ PossÃ­vel Causa",
+          value: (anomalia.possivel_causa as string) || "Investigar",
           inline: false
         },
         {
-          name: "ğŸ¯ Aá§áµes Sugeridas",
-          value: anomalia.acoes_sugeridas?.join('\n') || "Monitorar situaá§á£o",
+          name: "ğŸ¯ AÃ§Ãµes Sugeridas",
+          value: Array.isArray(anomalia.acoes_sugeridas) ? (anomalia.acoes_sugeridas as string[]).join(', ') : "Monitorar situaÃ§Ã£o",
           inline: false
         }
       ],
       footer: {
-        text: `SGB AI Analytics €¢ Detecá§á£o Automá¡tica`
+        text: `SGB AI Analytics â€¢ DetecÃ§Ã£o AutomÃ¡tica`
       },
       timestamp: new Date().toISOString()
     }
 
     return this.sendWebhook({
-      content: "ğŸ¤– **ANOMALIA DETECTADA PELA IA**",
+      content: "ğŸš¨ **ANOMALIA DETECTADA PELA IA**",
       embeds: [embed]
     })
   }
 
   // ========================================
-  // ğŸ”§ FUNá‡á•ES AUXILIARES
+  // ğŸ› ï¸ FUNÃ‡Ã•ES AUXILIARES
   // ========================================
 
   private static formatTempoAtraso(minutos: number): string {
@@ -417,7 +417,7 @@ export class DiscordChecklistService {
 
   private static getScoreEmoji(score: number): string {
     if (score >= 95) return "ğŸ†"
-    if (score >= 90) return "­"
+    if (score >= 90) return "ğŸ¥‡"
     if (score >= 80) return "ğŸ‘"
     if (score >= 70) return "ğŸ‘Œ"
     if (score >= 60) return "ğŸ˜"
@@ -425,17 +425,17 @@ export class DiscordChecklistService {
   }
 
   private static getStatusGeral(taxa_conclusao: number, alertas_criticos: number): string {
-    if (alertas_criticos > 0) return "ğŸ”´ Crá­tico"
-    if (taxa_conclusao >= 90) return "ğŸŸ¢ Excelente"
-    if (taxa_conclusao >= 80) return "ğŸŸ¡ Bom"
-    if (taxa_conclusao >= 70) return "ğŸŸ  Regular"
-    return "ğŸ”´ Ruim"
+    if (alertas_criticos > 0) return "ğŸš¨ CrÃ­tico"
+    if (taxa_conclusao >= 90) return "ğŸ’¯ Excelente"
+    if (taxa_conclusao >= 80) return "âœ… Bom"
+    if (taxa_conclusao >= 70) return "ğŸŸ¡ Regular"
+    return "ğŸš¨ Ruim"
   }
 
   /**
    * Envia webhook para Discord
    */
-  private static async sendWebhook(payload): Promise<boolean> {
+  private static async sendWebhook(payload: Record<string, unknown>): Promise<boolean> {
     try {
       const response = await fetch(this.WEBHOOK_URL, {
         method: 'POST',
@@ -450,50 +450,50 @@ export class DiscordChecklistService {
       })
 
       if (response.ok) {
-        console.log('œ… Notificaá§á£o Discord enviada com sucesso')
+        console.log('âœ… NotificaÃ§Ã£o Discord enviada com sucesso')
         return true
       } else {
-        console.error('Œ Erro ao enviar Discord webhook:', response.status, await response.text())
+        console.error('âŒ Erro ao enviar Discord webhook:', response.status, await response.text())
         return false
       }
     } catch (error) {
-      console.error('Œ Erro ao enviar Discord webhook:', error)
+      console.error('âŒ Erro ao enviar Discord webhook:', error)
       return false
     }
   }
 
   // ========================================
-  // ğŸ§ª FUNá‡áƒO DE TESTE
+  // ğŸ§ª FUNÃ‡Ã•ES de TESTE
   // ========================================
 
   /**
-   * Testa conexá£o com webhook Discord
+   * Testa conexÃ£o com webhook Discord
    */
   static async testConnection(): Promise<boolean> {
     const embed = {
-      title: "ğŸ§ª Teste de Conexá£o",
-      description: "Teste de integraá§á£o Discord + Checklists",
+      title: "ğŸ§ª Teste de ConexÃ£o",
+      description: "Teste de integraÃ§Ã£o Discord + Checklists",
       color: 0x00FF00,
       fields: [
         {
-          name: "œ… Status",
+          name: "âœ… Status",
           value: "Webhook funcionando!",
           inline: true
         },
         {
-          name: "ğŸ• Horá¡rio",
+          name: "ğŸ• HorÃ¡rio",
           value: new Date().toLocaleString('pt-BR'),
           inline: true
         }
       ],
       footer: {
-        text: "SGB Analytics €¢ Teste de Sistema"
+        text: "SGB Analytics â€¢ Teste de Sistema"
       },
       timestamp: new Date().toISOString()
     }
 
     return this.sendWebhook({
-      content: "ğŸ§ª **TESTE DE CONEXáƒO - CHECKLIST BOT**",
+      content: "ğŸ§ª **TESTE DE CONEXÃƒO - CHECKLIST BOT**",
       embeds: [embed]
     })
   }
@@ -529,3 +529,4 @@ export function useDiscordChecklist() {
 }
 
 export default DiscordChecklistService 
+

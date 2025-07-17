@@ -1,4 +1,4 @@
-'use client'
+Ôªø'use client'
 
 import { useState } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -21,19 +21,19 @@ import {
 } from 'lucide-react'
 
 // =====================================================
-// üé® COMPONENTE DE SE·á·ÉO VISUAL MELHORADA (MOBILE-FIRST)
+// üìã COMPONENTE DE SE√á√ÉO VISUAL MELHORADA (MOBILE-FIRST)
 // =====================================================
-// Implementa clusteriza·ß·£o visual conforme documento:
-// "A l·≥gica se separar por ·°reas da segunda ref ·© muito boa"
-// "Clusterizar as perguntas por ·°rea/se·ß·£o"
-// + Otimiza·ß·£o completa para mobile
+// Implementa clusteriza√ß√£o visual conforme documento:
+// "A l√≥gica de separar por √°reas da segunda ref √© muito boa"
+// "Clusterizar as perguntas por √°rea/se√ß√£o"
+// + Otimiza√ß√£o completa para mobile
 
 interface ChecklistItem {
   id: string
   titulo: string
   tipo: 'texto' | 'numero' | 'sim_nao' | 'data' | 'assinatura' | 'foto_camera' | 'foto_upload' | 'avaliacao'
   obrigatorio: boolean
-  valor?: any
+  valor?: unknown
   status: 'pendente' | 'preenchido' | 'problema' | 'ok'
   observacoes?: string
   validacao?: {
@@ -62,7 +62,7 @@ interface ChecklistSecaoCardProps {
   secao: ChecklistSecao
   expanded?: boolean
   onToggleExpand?: () => void
-  onItemChange?: (itemId: string, valor) => void
+  onItemChange?: (itemId: string, valor: unknown) => void
   onStartSection?: () => void
   onCompleteSection?: () => void
   readonly?: boolean
@@ -84,7 +84,7 @@ export default function ChecklistSecaoCard({
   
   const [isHovered, setIsHovered] = useState(false)
 
-  // Calcular estat·≠sticas da se·ß·£o
+  // Calcular estat√≠sticas da se√ß√£o
   const stats = {
     total: secao.itens.length,
     preenchidos: secao.itens.filter((item) => item.status === 'preenchido' || item.status === 'ok').length,
@@ -104,7 +104,7 @@ export default function ChecklistSecaoCard({
     return 'border-gray-300 bg-gray-50'
   }
 
-  // Determinar ·≠cone do status
+  // Determinar √≠cone do status
   const getIconeStatus = () => {
     switch (secao.status) {
       case 'completado': return <CheckCircle className="w-5 h-5 text-green-600" />
@@ -132,7 +132,7 @@ export default function ChecklistSecaoCard({
     if (progresso === 100) {
       return (
         <Badge className="bg-green-100 text-green-800 border-green-300">
-          úÖ Completo
+          Completo
         </Badge>
       )
     }
@@ -164,9 +164,9 @@ export default function ChecklistSecaoCard({
     }
     
     const icones = {
-      baixa: '¨áÔ∏è',
-      media: 'û°Ô∏è',
-      alta: '¨ÜÔ∏è',
+      baixa: 'üëç',
+      media: 'üëç',
+      alta: 'üëç',
       critica: 'üö®'
     }
     
@@ -188,7 +188,7 @@ export default function ChecklistSecaoCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Header da Se·ß·£o - MOBILE OTIMIZADO */}
+      {/* Header da Se√ß√£o - MOBILE OTIMIZADO */}
       <CardHeader 
         className={`${getHeaderColor()} cursor-pointer touch-manipulation min-h-[60px] p-4`} 
         onClick={onToggleExpand}
@@ -196,7 +196,7 @@ export default function ChecklistSecaoCard({
         <div className="flex items-center justify-between">
           {/* Lado Esquerdo */}
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            {/* ·çcone de Expans·£o - MAIOR PARA MOBILE */}
+            {/* √çcone de Expans√£o - MAIOR PARA MOBILE */}
             <div className="flex items-center gap-2 touch-manipulation">
               {expanded ? (
                 <ChevronDown className="w-6 h-6" />
@@ -204,13 +204,13 @@ export default function ChecklistSecaoCard({
                 <ChevronRight className="w-6 h-6" />
               )}
               
-              {/* ·çcone da Se·ß·£o */}
+              {/* √çcone da Se√ß√£o */}
               {secao.icone && (
                 <span className="text-2xl">{secao.icone}</span>
               )}
             </div>
 
-            {/* Informa·ß·µes Principais */}
+            {/* Informa√ß√µes Principais */}
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-lg truncate">{secao.nome}</h3>
               {secao.descricao && (
@@ -227,7 +227,7 @@ export default function ChecklistSecaoCard({
               {renderProgressoBadge()}
             </div>
             
-            {/* Informa·ß·µes Secund·°rias */}
+            {/* Informa√ß√µes Secund√°rias */}
             <div className="flex items-center gap-2 text-xs">
               {renderEstimativaTempo()}
               {renderPrioridade()}
@@ -252,7 +252,7 @@ export default function ChecklistSecaoCard({
             {stats.obrigatorios > 0 && (
               <>
                 <div className="flex items-center justify-between text-xs">
-                  <span>Itens Obrigat·≥rios</span>
+                  <span>Itens Obrigat√≥rios</span>
                   <span className="font-semibold">{progressoObrigatorios}%</span>
                 </div>
                 <Progress value={progressoObrigatorios} className="h-2 bg-white/30 touch-manipulation">
@@ -267,14 +267,14 @@ export default function ChecklistSecaoCard({
         )}
       </CardHeader>
 
-      {/* Conte·∫do Expandido */}
+      {/* Conte√∫do Expandido */}
       {expanded && (
         <CardContent className="p-0">
-          {/* Barra de A·ß·µes - MOBILE OTIMIZADA */}
+          {/* Barra de A√ß√µes - MOBILE OTIMIZADA */}
           {!readonly && variant === 'execution' && (
             <div className="p-4 bg-gray-50 border-b">
               <div className="flex flex-col gap-3">
-                {/* Bot·µes de A·ß·£o */}
+                {/* Bot√µes de A√ß√£o */}
                 <div className="flex gap-2">
                   {secao.status === 'pendente' && onStartSection && (
                     <Button 
@@ -282,7 +282,7 @@ export default function ChecklistSecaoCard({
                       onClick={onStartSection} 
                       className="flex-1 bg-blue-500 hover:bg-blue-600 touch-manipulation min-h-[48px]"
                     >
-                      ñ∂Ô∏è Iniciar Se·ß·£o
+                      Iniciar Se√ß√£o
                     </Button>
                   )}
                   {secao.status === 'em_andamento' && onCompleteSection && (
@@ -291,21 +291,21 @@ export default function ChecklistSecaoCard({
                       onClick={onCompleteSection} 
                       className="flex-1 bg-green-500 hover:bg-green-600 touch-manipulation min-h-[48px]"
                     >
-                      úÖ Finalizar Se·ß·£o
+                      Finalizar Se√ß√£o
                     </Button>
                   )}
                 </div>
                 
-                {/* Informa·ß·µes da Se·ß·£o */}
+                {/* Informa√ß√µes da Se√ß√£o */}
                 <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600">
                   {secao.responsavel && (
                     <Badge variant="outline" className="bg-white">
-                      üë§ {secao.responsavel}
+                      {secao.responsavel}
                     </Badge>
                   )}
                   {secao.iniciadoEm && (
                     <Badge variant="outline" className="bg-white">
-                      üïê {new Date(secao.iniciadoEm).toLocaleTimeString()}
+                      {new Date(secao.iniciadoEm).toLocaleTimeString()}
                     </Badge>
                   )}
                 </div>
@@ -338,7 +338,7 @@ export default function ChecklistSecaoCard({
                         </span>
                         {item.obrigatorio && (
                           <Badge className="bg-red-100 text-red-800 text-xs">
-                            Obrigat·≥rio
+                            Obrigat√≥rio
                           </Badge>
                         )}
                       </div>
@@ -361,18 +361,18 @@ export default function ChecklistSecaoCard({
                     {renderCampoItem(item, onItemChange, readonly)}
                   </div>
                   
-                  {/* Observa·ß·µes */}
+                  {/* Observa√ß√µes */}
                   {item.observacoes && (
                     <div className="p-3 bg-white rounded border">
-                      <p className="text-xs text-gray-600 font-medium mb-1">Observa·ß·µes:</p>
+                      <p className="text-xs text-gray-600 font-medium mb-1">Observa√ß√µes:</p>
                       <p className="text-sm text-gray-700">{item.observacoes}</p>
                     </div>
                   )}
                   
-                  {/* Valida·ß·£o */}
+                  {/* Valida√ß√£o */}
                   {item.validacao && !item.validacao.valido && (
                     <div className="p-3 bg-red-50 rounded border border-red-200">
-                      <p className="text-xs text-red-600 font-medium">ö†Ô∏è {item.validacao.erro}</p>
+                      <p className="text-xs text-red-600 font-medium">Erro: {item.validacao.erro}</p>
                     </div>
                   )}
                 </div>
@@ -386,16 +386,16 @@ export default function ChecklistSecaoCard({
 }
 
 // =====================================================
-// üîß FUN·á·ÉO PARA RENDERIZAR CAMPOS POR TIPO (MOBILE-FIRST)
+// üìã FUN√á√ÉO PARA RENDERIZAR CAMPOS POR TIPO (MOBILE-FIRST)
 // =====================================================
 
 function renderCampoItem(
   item: ChecklistItem, 
-  onItemChange?: (itemId: string, valor) => void,
-  readonly: boolean = false
+  onItemChange?: (itemId: string, valor: unknown) => void,
+  readonly = false
 ): React.ReactNode {
   
-  const handleChange = (valor) => {
+  const handleChange = (valor: unknown) => {
     if (!readonly && onItemChange) {
       onItemChange(item.id, valor)
     }
@@ -412,7 +412,7 @@ function renderCampoItem(
             disabled={readonly}
             className="flex-1 min-h-[48px] touch-manipulation text-base"
           >
-            úÖ Sim
+            Sim
           </Button>
           <Button
             size="lg"
@@ -421,7 +421,7 @@ function renderCampoItem(
             disabled={readonly}
             className="flex-1 min-h-[48px] touch-manipulation text-base"
           >
-            ùå N·£o
+            N√£o
           </Button>
         </div>
       )
@@ -441,7 +441,7 @@ function renderCampoItem(
               >
                 <Star 
                   className={`w-6 h-6 ${
-                    item.valor >= nota 
+                    typeof item.valor === 'number' && item.valor >= nota 
                       ? 'text-yellow-500 fill-yellow-500' 
                       : 'text-gray-300'
                   }`} 
@@ -449,7 +449,7 @@ function renderCampoItem(
               </Button>
             ))}
           </div>
-          {item.valor && (
+          {typeof item.valor === 'number' && (
             <div className="text-center">
               <span className="text-base font-medium text-gray-700">
                 {item.valor}/5 estrelas
@@ -462,7 +462,7 @@ function renderCampoItem(
     case 'texto':
       return (
         <textarea
-          value={item.valor || ''}
+          value={typeof item.valor === 'string' ? item.valor : ''}
           onChange={(e) => handleChange(e.target.value)}
           disabled={readonly}
           rows={3}
@@ -475,11 +475,11 @@ function renderCampoItem(
       return (
         <input
           type="number"
-          value={item.valor || ''}
+          value={typeof item.valor === 'number' ? item.valor : ''}
           onChange={(e) => handleChange(parseFloat(e.target.value))}
           disabled={readonly}
           className="w-full p-3 border rounded-lg text-base touch-manipulation"
-          placeholder="Digite um n·∫mero"
+          placeholder="Digite um n√∫mero"
         />
       )
     
@@ -487,7 +487,7 @@ function renderCampoItem(
       return (
         <input
           type="date"
-          value={item.valor || ''}
+          value={typeof item.valor === 'string' ? item.valor : ''}
           onChange={(e) => handleChange(e.target.value)}
           disabled={readonly}
           className="w-full p-3 border rounded-lg text-base touch-manipulation"
@@ -511,24 +511,25 @@ function renderCampoItem(
               {item.tipo === 'foto_camera' ? (
                 <>
                   <Camera className="w-5 h-5 mr-2" />
-                  üì∑ Tirar Foto
+                  Tirar Foto
                 </>
               ) : (
                 <>
                   <Upload className="w-5 h-5 mr-2" />
-                  üìÅ Escolher Foto
+                  Escolher Foto
                 </>
               )}
             </Button>
           )}
-          {item.valor && (
+          {typeof item.valor === 'string' || typeof item.valor === 'number' || typeof item.valor === 'boolean' ? (
             <div className="w-full h-32 bg-gray-200 rounded-lg border flex items-center justify-center">
               <div className="text-center">
                 <Camera className="w-8 h-8 mx-auto mb-2 text-gray-500" />
                 <span className="text-sm text-gray-600">Foto anexada</span>
+                <span className="text-xs text-gray-500">{String(item.valor)}</span>
               </div>
             </div>
-          )}
+          ) : null}
         </div>
       )
     
@@ -545,14 +546,15 @@ function renderCampoItem(
                 console.log('Assinatura digital')
               }}
             >
-              úèÔ∏è Assinar Digitalmente
+              üìù Assinar Digitalmente
             </Button>
           )}
-          {item.valor && (
+          {typeof item.valor === 'string' || typeof item.valor === 'number' || typeof item.valor === 'boolean' ? (
             <div className="w-full h-24 bg-gray-200 rounded-lg border flex items-center justify-center">
-              <span className="text-sm text-gray-600">úì Assinado</span>
+              <span className="text-sm text-gray-600">Assinado</span>
+              <span className="text-xs text-gray-500">{String(item.valor)}</span>
             </div>
-          )}
+          ) : null}
         </div>
       )
     
@@ -562,7 +564,7 @@ function renderCampoItem(
           <div className="text-sm text-gray-600 mb-1">
             Campo tipo: <span className="font-medium">{item.tipo}</span>
           </div>
-          {item.valor && (
+          {item.valor !== undefined && item.valor !== null && (
             <div className="text-sm text-gray-800">
               Valor: <span className="font-medium">{String(item.valor)}</span>
             </div>
@@ -571,3 +573,4 @@ function renderCampoItem(
       )
   }
 } 
+

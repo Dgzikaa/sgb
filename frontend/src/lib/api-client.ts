@@ -1,5 +1,5 @@
-/**
- * Cliente API que adiciona automaticamente headers de autentica��o
+﻿/**
+ * Cliente API que adiciona automaticamente headers de autenticaÃ§Ã£o
  */
 
 export interface ApiOptions {
@@ -13,13 +13,13 @@ export interface ApiOptions {
  */
 export async function apiCall(endpoint: string, options: ApiOptions = {}) {
   try {
-    // Headers padr�o
+    // Headers padrÃ£o
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers || {})
     }
     
-    // Pegar apenas dados essenciais do usu�rio
+    // Pegar apenas dados essenciais do usuÃ¡rio
     const userData = localStorage.getItem('sgb_user')
     if (userData) {
       try {
@@ -28,25 +28,25 @@ export async function apiCall(endpoint: string, options: ApiOptions = {}) {
         if (user.id) headers['x-user-id'] = user.id
         if (user.email) headers['x-user-email'] = user.email
       } catch (e) {
-        console.warn('Erro ao parsear dados do usu�rio:', e)
+        console.warn('Erro ao parsear dados do usuÃ¡rio:', e)
       }
     }
     
-    // Configura��o da requisi��o
+    // ConfiguraÃ§Ã£o da requisiÃ§Ã£o
     const fetchOptions: RequestInit = {
       method: options.method || 'GET',
       headers
     }
     
-    // Adicionar body se necess�rio
+    // Adicionar body se necessÃ¡rio
     if (options.body && options.method !== 'GET') {
       fetchOptions.body = JSON.stringify(options.body)
     }
     
-    // Fazer a requisi��o
+    // Fazer a requisiÃ§Ã£o
     const response = await fetch(endpoint, fetchOptions)
     
-    // Verificar se a resposta � OK
+    // Verificar se a resposta Ã© OK
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
       throw new Error(errorData.error || `HTTP ${response.status}`)
@@ -62,16 +62,16 @@ export async function apiCall(endpoint: string, options: ApiOptions = {}) {
 }
 
 /**
- * Fun��es de conveni�ncia para cada m�todo HTTP
+ * FunÃ§Ãµes de conveniÃªncia para cada mÃ©todo HTTP
  */
 export const api = {
   get: (endpoint: string, headers?: Record<string, string>) => 
     apiCall(endpoint, { method: 'GET', headers }),
     
-  post: (endpoint: string, body?: any, headers?: Record<string, string>) => 
+  post: (endpoint: string, body: unknown, headers?: Record<string, string>) => 
     apiCall(endpoint, { method: 'POST', body, headers }),
     
-  put: (endpoint: string, body?: any, headers?: Record<string, string>) => 
+  put: (endpoint: string, body: unknown, headers?: Record<string, string>) => 
     apiCall(endpoint, { method: 'PUT', body, headers }),
     
   delete: (endpoint: string, headers?: Record<string, string>) => 
@@ -79,7 +79,7 @@ export const api = {
 }
 
 /**
- * Cliente espec�fico para checklists
+ * Cliente especÃ­fico para checklists
  */
 export const checklistsApi = {
   // Listar checklists
@@ -96,17 +96,17 @@ export const checklistsApi = {
   },
   
   // Criar checklist
-  create: (checklist) => api.post('/api/checklists', checklist),
+  create: (checklist: any) => api.post('/api/checklists', checklist),
   
   // Atualizar checklist
-  update: (id: string, checklist) => api.put(`/api/checklists?id=${id}`, checklist),
+  update: (id: string, checklist: any) => api.put(`/api/checklists?id=${id}`, checklist),
   
   // Deletar checklist
   delete: (id: string) => api.delete(`/api/checklists?id=${id}`)
 }
 
 /**
- * Cliente espec�fico para uploads
+ * Cliente especÃ­fico para uploads
  */
 export const uploadsApi = {
   // Fazer upload de arquivo (com FormData)
@@ -154,3 +154,4 @@ export const uploadsApi = {
   // Deletar arquivo
   delete: (fileId: string) => api.delete(`/api/uploads?id=${fileId}`)
 } 
+

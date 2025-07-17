@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -65,16 +65,16 @@ export async function GET(request: NextRequest) {
     const barId = searchParams.get('barId')
 
     if (!barId) {
-      return NextResponse.json({ error: 'Bar ID � obrigat�rio' }, { status: 400 })
+      return NextResponse.json({ error: 'Bar ID Ã¡Â© obrigatÃ¡Â³rio' }, { status: 400 })
     }
 
     // Buscar dados financeiros (resumo executivo)
     const resumoExecutivo = await buscarResumoExecutivo(barId)
     
-    // Buscar dados de opera��es cr�ticas
+    // Buscar dados de operaÃ¡Â§Ã¡Âµes crÃ¡Â­ticas
     const operacoesCriticas = await buscarOperacoesCriticas(barId)
     
-    // Buscar m�tricas chave
+    // Buscar mÃ¡Â©tricas chave
     const metricasChave = await buscarMetricasChave(barId)
 
     const dashboardData: DashboardData = {
@@ -105,7 +105,7 @@ async function buscarResumoExecutivo(barId: string) {
       .gte('data_competencia', hoje)
       .lt('data_competencia', hoje + 'T23:59:59')
 
-    // Dados de ontem (para compara��o)
+    // Dados de ontem (para comparaÃ¡Â§Ã¡Â£o)
     const { data: dadosOntem } = await supabase
       .from('contaazul_eventos_financeiros')
       .select('valor, tipo')
@@ -114,17 +114,17 @@ async function buscarResumoExecutivo(barId: string) {
       .lt('data_competencia', ontem + 'T23:59:59')
 
     // Calcular totais de hoje
-    const receitasHoje = dadosHoje?.filter((d) => d.tipo === 'receita').reduce((acc, curr) => acc + curr.valor, 0) || 0
-    const despesasHoje = dadosHoje?.filter((d) => d.tipo === 'despesa').reduce((acc, curr) => acc + Math.abs(curr.valor), 0) || 0
+    const receitasHoje = dadosHoje?.filter((d: any) => d.tipo === 'receita').reduce((acc: any, curr: any) => acc + curr.valor, 0) || 0
+    const despesasHoje = dadosHoje?.filter((d: any) => d.tipo === 'despesa').reduce((acc: any, curr: any) => acc + Math.abs(curr.valor), 0) || 0
     
     // Calcular totais de ontem
-    const receitasOntem = dadosOntem?.filter((d) => d.tipo === 'receita').reduce((acc, curr) => acc + curr.valor, 0) || 0
-    const despesasOntem = dadosOntem?.filter((d) => d.tipo === 'despesa').reduce((acc, curr) => acc + Math.abs(curr.valor), 0) || 0
+    const receitasOntem = dadosOntem?.filter((d: any) => d.tipo === 'receita').reduce((acc: any, curr: any) => acc + curr.valor, 0) || 0
+    const despesasOntem = dadosOntem?.filter((d: any) => d.tipo === 'despesa').reduce((acc: any, curr: any) => acc + Math.abs(curr.valor), 0) || 0
 
     // Calcular margem
     const margem = receitasHoje > 0 ? ((receitasHoje - despesasHoje) / receitasHoje) * 100 : 0
 
-    // Calcular tend�ncias
+    // Calcular tendÃ¡Âªncias
     const tendenciaReceitas = receitasOntem > 0 ? ((receitasHoje - receitasOntem) / receitasOntem) * 100 : 0
     const tendenciaDespesas = despesasOntem > 0 ? ((despesasHoje - despesasOntem) / despesasOntem) * 100 : 0
 
@@ -169,12 +169,12 @@ async function buscarOperacoesCriticas(barId: string) {
 
     const checklistStats = {
       total: checklists?.length || 0,
-      concluidos: checklists?.filter((c) => c.status === 'completed').length || 0,
-      pendentes: checklists?.filter((c) => c.status === 'pending').length || 0,
-      problemas: checklists?.filter((c) => c.status === 'problem').length || 0
+      concluidos: checklists?.filter((c: any) => c.status === 'completed').length || 0,
+      pendentes: checklists?.filter((c: any) => c.status === 'pending').length || 0,
+      problemas: checklists?.filter((c: any) => c.status === 'problem').length || 0
     }
 
-    // Buscar dados de produ��o (simular por enquanto)
+    // Buscar dados de produÃ¡Â§Ã¡Â£o (simular por enquanto)
     const producao = {
       ativo: Math.random() > 0.3, // 70% de chance de estar ativo
       itens: Math.floor(Math.random() * 20) + 1,
@@ -203,7 +203,7 @@ async function buscarOperacoesCriticas(barId: string) {
     if (!producao.ativo) {
       alertas.push({
         tipo: 'importante' as const,
-        mensagem: 'Terminal de produ��o inativo',
+        mensagem: 'Terminal de produÃ¡Â§Ã¡Â£o inativo',
         timestamp: new Date().toISOString()
       })
     }
@@ -214,7 +214,7 @@ async function buscarOperacoesCriticas(barId: string) {
       alertas
     }
   } catch (error) {
-    console.error('Erro ao buscar opera��es cr�ticas:', error)
+    console.error('Erro ao buscar operaÃ¡Â§Ã¡Âµes crÃ¡Â­ticas:', error)
     return {
       checklist: { total: 0, concluidos: 0, pendentes: 0, problemas: 0 },
       producao: { ativo: false, itens: 0, tempo: '0h 0m' },
@@ -285,7 +285,7 @@ async function buscarMetricasChave(barId: string) {
       }
     }
   } catch (error) {
-    console.error('Erro ao buscar m�tricas chave:', error)
+    console.error('Erro ao buscar mÃ¡Â©tricas chave:', error)
     return {
       contaazul: { status: 'erro' as const, ultima_sync: new Date().toISOString(), registros: 0 },
       meta: { status: 'erro' as const, engagement: 0, impressoes: 0 },
@@ -294,3 +294,4 @@ async function buscarMetricasChave(barId: string) {
     }
   }
 } 
+

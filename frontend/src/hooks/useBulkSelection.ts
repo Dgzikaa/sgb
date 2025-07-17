@@ -1,8 +1,8 @@
-import { useState, useCallback, useMemo } from 'react'
+﻿import { useState, useCallback, useMemo } from 'react'
 
 export interface BulkSelectionItem {
-  id: string | number
-  [key: string]: any
+  id: string | number;
+  [key: string]: unknown;
 }
 
 export interface BulkSelectionConfig {
@@ -146,3 +146,4 @@ export function useBulkSelection<T extends BulkSelectionItem>(
     selectionCount: selectedIds.size
   }
 } 
+

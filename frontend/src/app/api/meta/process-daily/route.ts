@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Inserir em instagram_daily
-    const instagramRows = dailySummary.map((day) => ({
+    const instagramRows = dailySummary.map((day: any) => ({
       bar_id: barId,
       data_coleta: day.data_referencia,
       followers_count: day.instagram_followers ?? null,
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       .select()
 
     // Inserir em ads_daily (1 registro por campanha por dia)
-    let adsRows = []
+    const adsRows = []
     for (const day of dailySummary) {
       if (Array.isArray(day.campaigns)) {
         for (const camp of day.campaigns) {
@@ -93,6 +93,7 @@ export async function POST(request: NextRequest) {
       ads_error: adsError
     })
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: false, error: (error as any).message }, { status: 500 })
   }
 } 
+

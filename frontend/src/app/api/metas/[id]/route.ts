@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const userDataHeader = request.headers.get('x-user-data')
     
     if (!userDataHeader) {
-      return NextResponse.json({ error: 'Dados do usuá¡rio ná£o encontrados' }, { status: 401 })
+      return NextResponse.json({ error: 'Dados do usuÃÂ¡ÃÂ¡rio nÃÂ¡ÃÂ£o encontrados' }, { status: 401 })
     }
 
     const { bar_id } = JSON.parse(userDataHeader)
@@ -25,11 +25,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: false,
         connected: false,
-        error: 'Credenciais Meta ná£o encontradas'
+        error: 'Credenciais Meta nÃÂ¡ÃÂ£o encontradas'
       })
     }
 
-    // 2. Verificar se token está¡ vá¡lido
+    // 2. Verificar se token estÃÂ¡ÃÂ¡ vÃÂ¡lido
     const hasValidToken = !!credenciais.access_token
 
     // 3. Verificar dados coletados
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       .select('*', { count: 'exact', head: true })
       .eq('bar_id', bar_id)
 
-    // 4. ášltima coleta
+    // 4. ÃÂ¡ÃÂ¡ltima coleta
     const { data: ultimaColeta } = await supabase
       .from('meta_coletas_log')
       .select('*')
@@ -65,42 +65,42 @@ export async function GET(request: NextRequest) {
       job.jobname?.includes(`meta_sync_bar_${bar_id}`)
     )
 
-    // 6. Estatá­sticas recentes (áºltimos 30 dias)
+    // 6. EstatÃÂ¡ÃÂ­sticas recentes (ÃÂ¡ÃÂºltimos 30 dias)
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
     const { data: recentInstagramPosts } = await supabase
       .from('meta_instagram_posts')
-      .select('engagement_rate, likes_count: any, comments_count')
+      .select('engagement_rate, likes_count, comments_count')
       .eq('bar_id', bar_id)
       .gte('created_time', thirtyDaysAgo.toISOString())
 
     const { data: recentFacebookPosts } = await supabase
       .from('meta_facebook_posts')
-      .select('engagement_rate, likes_count: any, comments_count, shares_count')
+      .select('engagement_rate, likes_count, comments_count, shares_count')
       .eq('bar_id', bar_id)
       .gte('created_time', thirtyDaysAgo.toISOString())
 
-    // 7. Calcular má©tricas
+    // 7. Calcular mÃÂ¡ÃÂ©tricas
     const totalEngagement = [
       ...(recentInstagramPosts || []),
       ...(recentFacebookPosts || [])
-    ].reduce((sum: any, post: any) => sum + (post.engagement_rate || 0), 0)
+    ].reduce((sum, post) => sum + (post.engagement_rate || 0), 0)
 
     const totalLikes = [
       ...(recentInstagramPosts || []),
       ...(recentFacebookPosts || [])
-    ].reduce((sum: any, post: any) => sum + (post.likes_count || 0), 0)
+    ].reduce((sum, post) => sum + (post.likes_count || 0), 0)
 
     const totalComments = [
       ...(recentInstagramPosts || []),
       ...(recentFacebookPosts || [])
-    ].reduce((sum: any, post: any) => sum + (post.comments_count || 0), 0)
+    ].reduce((sum, post) => sum + (post.comments_count || 0), 0)
 
     const totalPosts = (recentInstagramPosts?.length || 0) + (recentFacebookPosts?.length || 0)
     const averageEngagement = totalPosts > 0 ? (totalEngagement / totalPosts).toFixed(2) : '0'
 
-    // 8. Informaá§áµes das pá¡ginas configuradas
+    // 8. InformaÃÂ¡ÃÂ§ÃÂ¡ÃÂµes das pÃÂ¡ÃÂ¡ginas configuradas
     let pageInfo = {}
     if (credenciais.configuracao_json) {
       try {
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
           appId: config.app_id
         }
       } catch (e) {
-        console.warn('Erro ao parsear configuraá§á£o Meta:', e)
+        console.warn('Erro ao parsear configuraÃÂ¡ÃÂ§ÃÂ¡ÃÂ£o Meta:', e)
       }
     }
 
@@ -147,7 +147,7 @@ export async function GET(request: NextRequest) {
         lastRun: metaJob?.last_run
       },
       statistics: {
-        period: 'ášltimos 30 dias',
+        period: 'ÃÂ¡ÃÂ¡ltimos 30 dias',
         totalPosts,
         totalLikes,
         totalComments,
@@ -163,7 +163,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Œ Erro ao buscar status Meta:', error)
+    console.error('ÃÂÃâ Erro ao buscar status Meta:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro interno do servidor'

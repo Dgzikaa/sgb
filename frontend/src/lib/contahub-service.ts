@@ -1,6 +1,6 @@
-/**
+Ôªø/**
  * ContaHub Service Helper
- * Gerencia integra·ß·£o com ContaHub e detecta quando est·° em modo manuten·ß·£o
+ * Gerencia integra√ß√£o com ContaHub e detecta quando est√° em modo manuten√ß√£o
  */
 
 export interface ContaHubStatus {
@@ -12,7 +12,7 @@ export interface ContaHubStatus {
   };
 }
 
-export interface ContaHubResponse<T = any> {
+export interface ContaHubResponse<T = unknown> {
   success: boolean;
   data?: T;
   message: string;
@@ -21,7 +21,7 @@ export interface ContaHubResponse<T = any> {
 }
 
 /**
- * Verifica se o ContaHub est·° dispon·≠vel (vari·°veis de ambiente configuradas)
+ * Verifica se o ContaHub est√° dispon√≠vel (vari√°veis de ambiente configuradas)
  */
 export function verificarStatusContaHub(): ContaHubStatus {
   const email = process.env.CONTAHUB_EMAIL;
@@ -33,7 +33,7 @@ export function verificarStatusContaHub(): ContaHubStatus {
   
   return {
     disponivel,
-    motivo: !disponivel ? 'Credenciais do ContaHub temporariamente indispon·≠veis' : undefined,
+    motivo: !disponivel ? 'Credenciais do ContaHub temporariamente indispon√≠veis' : undefined,
     detalhes: {
       email_configurado: emailConfigurado,
       senha_configurada: senhaConfigurada
@@ -42,14 +42,14 @@ export function verificarStatusContaHub(): ContaHubStatus {
 }
 
 /**
- * Cria uma resposta padr·£o para quando ContaHub est·° em manuten·ß·£o
+ * Cria uma resposta padr√£o para quando ContaHub est√° em manuten√ß√£o
  */
-export function criarRespostaManutencao<T = any>(acao: string): ContaHubResponse<T> {
+export function criarRespostaManutencao<T = unknown>(acao: string): ContaHubResponse<T> {
   const status = verificarStatusContaHub();
   
   return {
     success: false,
-    message: `${acao} temporariamente indispon·≠vel - ContaHub em manuten·ß·£o`,
+    message: `${acao} temporariamente indispon√≠vel - ContaHub em manuten√ß√£o`,
     manutencao: true,
     status
   };
@@ -68,14 +68,15 @@ export function criarRespostaSucesso<T>(data: T, message: string): ContaHubRespo
 }
 
 /**
- * Verifica se deve executar opera·ß·£o ContaHub ou retornar modo manuten·ß·£o
+ * Verifica se deve executar opera√ß√£o ContaHub ou retornar modo manuten√ß√£o
  */
-export function verificarDisponibilidadeContaHub(acao: string): ContaHubResponse | null {
+export function verificarDisponibilidadeContaHub(acao: string): ContaHubResponse<unknown> | null {
   const status = verificarStatusContaHub();
   
   if (!status.disponivel) {
     return criarRespostaManutencao(acao);
   }
   
-  return null; // ContaHub dispon·≠vel, pode prosseguir
+  return null; // ContaHub dispon√≠vel, pode prosseguir
 } 
+

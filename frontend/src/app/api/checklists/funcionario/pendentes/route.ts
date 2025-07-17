@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
@@ -10,14 +10,14 @@ export async function POST(request: NextRequest) {
 
     if (!bar_id || !user_id) {
       return NextResponse.json(
-        { error: 'bar_id e user_id s�o obrigat�rios' },
+        { error: 'bar_id e user_id sÃ¡Â£o obrigatÃ¡Â³rios' },
         { status: 400 }
       )
     }
 
     const supabase = await getSupabaseClient()
     
-    // Buscar checklists atribu�dos ao funcion�rio atual
+    // Buscar checklists atribuÃ¡Â­dos ao funcionÃ¡Â¡rio atual
     const { data: checklists, error } = await supabase
       .from('checklist_funcionario')
       .select('id, titulo, status, prazo, created_at')
@@ -27,22 +27,22 @@ export async function POST(request: NextRequest) {
       .order('prazo', { ascending: true })
 
     if (error) {
-      console.error('Erro ao buscar checklists de funcion�rio:', error)
+      console.error('Erro ao buscar checklists de funcionÃ¡Â¡rio:', error)
       return NextResponse.json({ meus_pendentes: 0 })
     }
 
     const meusPendentes = checklists?.length || 0
 
-    // Separar por urg�ncia baseado no prazo
+    // Separar por urgÃ¡Âªncia baseado no prazo
     const agora = new Date()
-    const urgentes = checklists?.filter((c) => {
+    const urgentes = checklists?.filter((c: any) => {
       if (!c.prazo) return false
       const prazo = new Date(c.prazo)
       const horasRestantes = (prazo.getTime() - agora.getTime()) / (1000 * 60 * 60)
       return horasRestantes <= 2 && horasRestantes > 0
     }) || []
 
-    const atrasados = checklists?.filter((c) => {
+    const atrasados = checklists?.filter((c: any) => {
       if (!c.prazo) return false
       const prazo = new Date(c.prazo)
       return prazo < agora
@@ -51,8 +51,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       meus_pendentes: meusPendentes,
       detalhes: {
-        pending: checklists?.filter((c) => c.status === 'pending').length || 0,
-        doing: checklists?.filter((c) => c.status === 'doing').length || 0,
+        pending: checklists?.filter((c: any) => c.status === 'pending').length || 0,
+        doing: checklists?.filter((c: any) => c.status === 'doing').length || 0,
         urgentes: urgentes.length,
         atrasados: atrasados.length,
         no_prazo: meusPendentes - urgentes.length - atrasados.length
@@ -60,7 +60,8 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Erro ao buscar checklists de funcion�rio pendentes:', error)
+    console.error('Erro ao buscar checklists de funcionÃ¡Â¡rio pendentes:', error)
     return NextResponse.json({ meus_pendentes: 0 })
   }
 } 
+

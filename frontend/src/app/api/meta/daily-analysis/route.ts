@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -10,13 +10,13 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('📊 Meta Daily Analysis - Iniciando an�lise di�ria...')
+    console.log('Ã°Å¸â€œÅ  Meta Daily Analysis - Iniciando anÃ¡Â¡lise diÃ¡Â¡ria...')
 
     const { searchParams } = new URL(request.url)
     const platform = searchParams.get('platform') || 'all' // all, instagram, facebook
     const days = parseInt(searchParams.get('days') || '30') // quantos dias analisar
 
-    // Obter dados do usu�rio para pegar o bar_id
+    // Obter dados do usuÃ¡Â¡rio para pegar o bar_id
     const userData = request.headers.get('x-user-data')
     let barId = 3 // fallback para desenvolvimento
 
@@ -24,9 +24,9 @@ export async function GET(request: NextRequest) {
       try {
         const parsedUser = JSON.parse(decodeURIComponent(userData))
         barId = parsedUser.bar_id || 3
-        console.log(`👤 Usando bar_id: ${barId}`)
+        console.log(`Ã°Å¸â€˜Â¤ Usando bar_id: ${barId}`)
       } catch (e) {
-        console.log('��️ Erro ao parsear userData, usando barId padr�o:', e)
+        console.log('Å¡Â Ã¯Â¸Â Erro ao parsear userData, usando barId padrÃ¡Â£o:', e)
       }
     }
 
@@ -35,10 +35,10 @@ export async function GET(request: NextRequest) {
     const ontem = new Date(hoje.getTime() - 24 * 60 * 60 * 1000)
     const inicioAnalise = new Date(hoje.getTime() - days * 24 * 60 * 60 * 1000)
 
-    console.log(`📅 Analisando per�odo: ${inicioAnalise.toISOString().split('T')[0]} at� ${hoje.toISOString().split('T')[0]}`)
+    console.log(`Ã°Å¸â€œâ€¦ Analisando perÃ¡Â­odo: ${inicioAnalise.toISOString().split('T')[0]} atÃ¡Â© ${hoje.toISOString().split('T')[0]}`)
 
     // 1. BUSCAR DADOS INSTAGRAM POR DIA
-    let instagramAnalysis = null
+    let instagramAnalysis: { daily_metrics: Record<string, InstagramDailyMetrics>; total_posts: number; date_range: { first: string | null; last: string | null } } = { daily_metrics: {}, total_posts: 0, date_range: { first: null, last: null } };
     if (platform === 'all' || platform === 'instagram') {
       const { data: instagramData, error: instagramError } = await supabase
         .from('meta_instagram_posts')
@@ -61,14 +61,14 @@ export async function GET(request: NextRequest) {
         .order('timestamp', { ascending: false })
 
       if (instagramError) {
-        console.error('�� Erro ao buscar Instagram:', instagramError)
+        console.error('ÂÅ’ Erro ao buscar Instagram:', instagramError)
       } else {
         instagramAnalysis = processInstagramDailyData(instagramData || [])
       }
     }
 
     // 2. BUSCAR DADOS FACEBOOK POR DIA
-    let facebookAnalysis = null
+    let facebookAnalysis: { daily_metrics: Record<string, FacebookDailyMetrics>; total_posts: number; date_range: { first: string | null; last: string | null } } = { daily_metrics: {}, total_posts: 0, date_range: { first: null, last: null } };
     if (platform === 'all' || platform === 'facebook') {
       const { data: facebookData, error: facebookError } = await supabase
         .from('meta_facebook_posts')
@@ -88,13 +88,13 @@ export async function GET(request: NextRequest) {
         .order('created_time', { ascending: false })
 
       if (facebookError) {
-        console.error('�� Erro ao buscar Facebook:', facebookError)
+        console.error('ÂÅ’ Erro ao buscar Facebook:', facebookError)
       } else {
         facebookAnalysis = processFacebookDailyData(facebookData || [])
       }
     }
 
-    // 3. BUSCAR INSIGHTS DI�RIOS (m�tricas de seguidores)
+    // 3. BUSCAR INSIGHTS DIÃ¡ÂRIOS (mÃ¡Â©tricas de seguidores)
     const { data: insightsData, error: insightsError } = await supabase
       .from('meta_insights')
       .select('*')
@@ -103,19 +103,19 @@ export async function GET(request: NextRequest) {
       .order('date', { ascending: false })
 
     if (insightsError) {
-      console.error('�� Erro ao buscar insights:', insightsError)
+      console.error('ÂÅ’ Erro ao buscar insights:', insightsError)
     }
 
     const insightsAnalysis = processInsightsDailyData(insightsData || [])
 
-    // 4. CALCULAR VARIA��ES GERAIS
+    // 4. CALCULAR VARIAÃ¡â€¡Ã¡â€¢ES GERAIS
     const dailyVariations = calculateDailyVariations({
       instagram: instagramAnalysis,
       facebook: facebookAnalysis,
       insights: insightsAnalysis
     })
 
-    // 5. IDENTIFICAR TEND�NCIAS E INSIGHTS
+    // 5. IDENTIFICAR TENDÃ¡Å NCIAS E INSIGHTS
     const trends = identifyTrends(dailyVariations, days)
 
     const responseData = {
@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    console.log('�� Meta Daily Analysis - An�lise conclu�da:', {
+    console.log('Å“â€¦ Meta Daily Analysis - AnÃ¡Â¡lise concluÃ¡Â­da:', {
       days_analyzed: days,
       variations_calculated: Object.keys(dailyVariations).length,
       trends_identified: trends.length
@@ -160,7 +160,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(responseData)
 
   } catch (error) {
-    console.error('�� Erro na an�lise di�ria Meta:', error)
+    console.error('ÂÅ’ Erro na anÃ¡Â¡lise diÃ¡Â¡ria Meta:', error)
     
     return NextResponse.json({
       success: false,
@@ -170,13 +170,104 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// Tipos auxiliares para posts e insights
+interface InstagramPost {
+  id: number;
+  timestamp: string;
+  like_count: number;
+  comments_count: number;
+  impressions_count: number;
+  reach_count: number;
+  saved_count: number;
+  shares_count: number;
+  profile_visits: number;
+  follows: number;
+  website_clicks: number;
+  coletado_em: string;
+}
+
+interface FacebookPost {
+  id: number;
+  created_time: string;
+  reactions_count: number;
+  comments_count: number;
+  shares_count: number;
+  impressions: number;
+  reach: number;
+  clicks: number;
+  coletado_em: string;
+}
+
+interface Insight {
+  date: string;
+  followers_count: number;
+  page_fans: number;
+  impressions: number;
+  reach: number;
+  profile_visits: number;
+  website_clicks: number;
+}
+
+interface InstagramDailyMetrics {
+  posts_count: number;
+  total_likes: number;
+  total_comments: number;
+  total_shares: number;
+  total_impressions: number;
+  total_reach: number;
+  total_saves: number;
+  total_profile_visits: number;
+  total_follows: number;
+  total_website_clicks: number;
+  engagement_rate?: number;
+}
+
+interface FacebookDailyMetrics {
+  posts_count: number;
+  total_reactions: number;
+  total_comments: number;
+  total_shares: number;
+  total_impressions: number;
+  total_reach: number;
+  total_clicks: number;
+  engagement_rate?: number;
+}
+
+interface DailyInsights {
+  followers_instagram: number;
+  followers_facebook: number;
+  impressions_instagram: number;
+  reach_instagram: number;
+  profile_visits: number;
+  website_clicks: number;
+}
+
+interface DailyVariation {
+  follower_change: { instagram: number; facebook: number };
+  total_follower_change: number;
+  engagement_rate: number;
+  posts_published: number;
+  total_interactions: number;
+  date?: string;
+}
+
+interface Variations {
+  daily_changes: Record<string, DailyVariation>;
+  avg_daily_engagement: number;
+  follower_growth_total: number;
+  best_day: string | null;
+  worst_day: string | null;
+}
+
 // Processar dados Instagram agrupados por dia
-function processInstagramDailyData(data[]) {
-  const dailyMetrics: Record<string, any> = {}
-  
-  data.forEach(post => {
-    const date = post.timestamp.split('T')[0]
-    
+function processInstagramDailyData(data: InstagramPost[]): {
+  daily_metrics: Record<string, InstagramDailyMetrics>;
+  total_posts: number;
+  date_range: { first: string | null; last: string | null };
+} {
+  const dailyMetrics: Record<string, InstagramDailyMetrics> = {};
+  data.forEach((post: InstagramPost) => {
+    const date = post.timestamp.split('T')[0];
     if (!dailyMetrics[date]) {
       dailyMetrics[date] = {
         posts_count: 0,
@@ -189,29 +280,25 @@ function processInstagramDailyData(data[]) {
         total_profile_visits: 0,
         total_follows: 0,
         total_website_clicks: 0
-      }
+      };
     }
-    
-    dailyMetrics[date].posts_count++
-    dailyMetrics[date].total_likes += post.like_count || 0
-    dailyMetrics[date].total_comments += post.comments_count || 0
-    dailyMetrics[date].total_shares += post.shares_count || 0
-    dailyMetrics[date].total_impressions += post.impressions_count || 0
-    dailyMetrics[date].total_reach += post.reach_count || 0
-    dailyMetrics[date].total_saves += post.saved_count || 0
-    dailyMetrics[date].total_profile_visits += post.profile_visits || 0
-    dailyMetrics[date].total_follows += post.follows || 0
-    dailyMetrics[date].total_website_clicks += post.website_clicks || 0
-  })
-
-  // Calcular engagement rate por dia
+    dailyMetrics[date].posts_count++;
+    dailyMetrics[date].total_likes += post.like_count || 0;
+    dailyMetrics[date].total_comments += post.comments_count || 0;
+    dailyMetrics[date].total_shares += post.shares_count || 0;
+    dailyMetrics[date].total_impressions += post.impressions_count || 0;
+    dailyMetrics[date].total_reach += post.reach_count || 0;
+    dailyMetrics[date].total_saves += post.saved_count || 0;
+    dailyMetrics[date].total_profile_visits += post.profile_visits || 0;
+    dailyMetrics[date].total_follows += post.follows || 0;
+    dailyMetrics[date].total_website_clicks += post.website_clicks || 0;
+  });
   Object.keys(dailyMetrics).forEach(date => {
-    const day = dailyMetrics[date]
-    day.engagement_rate = day.total_impressions > 0 
+    const day: InstagramDailyMetrics = dailyMetrics[date];
+    day.engagement_rate = day.total_impressions > 0
       ? ((day.total_likes + day.total_comments + day.total_shares) / day.total_impressions * 100)
-      : 0
-  })
-
+      : 0;
+  });
   return {
     daily_metrics: dailyMetrics,
     total_posts: data.length,
@@ -219,16 +306,18 @@ function processInstagramDailyData(data[]) {
       first: data.length > 0 ? data[data.length - 1].timestamp.split('T')[0] : null,
       last: data.length > 0 ? data[0].timestamp.split('T')[0] : null
     }
-  }
+  };
 }
 
 // Processar dados Facebook agrupados por dia
-function processFacebookDailyData(data[]) {
-  const dailyMetrics: Record<string, any> = {}
-  
-  data.forEach(post => {
-    const date = post.created_time.split('T')[0]
-    
+function processFacebookDailyData(data: FacebookPost[]): {
+  daily_metrics: Record<string, FacebookDailyMetrics>;
+  total_posts: number;
+  date_range: { first: string | null; last: string | null };
+} {
+  const dailyMetrics: Record<string, FacebookDailyMetrics> = {};
+  data.forEach((post: FacebookPost) => {
+    const date = post.created_time.split('T')[0];
     if (!dailyMetrics[date]) {
       dailyMetrics[date] = {
         posts_count: 0,
@@ -238,26 +327,22 @@ function processFacebookDailyData(data[]) {
         total_impressions: 0,
         total_reach: 0,
         total_clicks: 0
-      }
+      };
     }
-    
-    dailyMetrics[date].posts_count++
-    dailyMetrics[date].total_reactions += post.reactions_count || 0
-    dailyMetrics[date].total_comments += post.comments_count || 0
-    dailyMetrics[date].total_shares += post.shares_count || 0
-    dailyMetrics[date].total_impressions += post.impressions || 0
-    dailyMetrics[date].total_reach += post.reach || 0
-    dailyMetrics[date].total_clicks += post.clicks || 0
-  })
-
-  // Calcular engagement rate por dia
+    dailyMetrics[date].posts_count++;
+    dailyMetrics[date].total_reactions += post.reactions_count || 0;
+    dailyMetrics[date].total_comments += post.comments_count || 0;
+    dailyMetrics[date].total_shares += post.shares_count || 0;
+    dailyMetrics[date].total_impressions += post.impressions || 0;
+    dailyMetrics[date].total_reach += post.reach || 0;
+    dailyMetrics[date].total_clicks += post.clicks || 0;
+  });
   Object.keys(dailyMetrics).forEach(date => {
-    const day = dailyMetrics[date]
-    day.engagement_rate = day.total_impressions > 0 
+    const day: FacebookDailyMetrics = dailyMetrics[date];
+    day.engagement_rate = day.total_impressions > 0
       ? ((day.total_reactions + day.total_comments + day.total_shares) / day.total_impressions * 100)
-      : 0
-  })
-
+      : 0;
+  });
   return {
     daily_metrics: dailyMetrics,
     total_posts: data.length,
@@ -265,15 +350,17 @@ function processFacebookDailyData(data[]) {
       first: data.length > 0 ? data[data.length - 1].created_time.split('T')[0] : null,
       last: data.length > 0 ? data[0].created_time.split('T')[0] : null
     }
-  }
+  };
 }
 
 // Processar insights (dados de seguidores) por dia
-function processInsightsDailyData(data[]) {
-  const dailyInsights: Record<string, any> = {}
-  
-  data.forEach(insight => {
-    const date = insight.date
+function processInsightsDailyData(data: Insight[]): {
+  daily_insights: Record<string, DailyInsights>;
+  total_records: number;
+} {
+  const dailyInsights: Record<string, DailyInsights> = {};
+  data.forEach((insight: Insight) => {
+    const date = insight.date;
     dailyInsights[date] = {
       followers_instagram: insight.followers_count || 0,
       followers_facebook: insight.page_fans || 0,
@@ -281,139 +368,129 @@ function processInsightsDailyData(data[]) {
       reach_instagram: insight.reach || 0,
       profile_visits: insight.profile_visits || 0,
       website_clicks: insight.website_clicks || 0
-    }
-  })
-
+    };
+  });
   return {
     daily_insights: dailyInsights,
     total_records: data.length
-  }
+  };
 }
 
-// Calcular varia��es di�rias
-function calculateDailyVariations(data) {
-  const variations = {
+// Calcular variaÃ¡Â§Ã¡Âµes diÃ¡Â¡rias
+function calculateDailyVariations(data: {
+  instagram?: { daily_metrics: Record<string, InstagramDailyMetrics> };
+  facebook?: { daily_metrics: Record<string, FacebookDailyMetrics> };
+  insights?: { daily_insights: Record<string, DailyInsights> };
+}): Variations {
+  const variations: Variations = {
     daily_changes: {},
     avg_daily_engagement: 0,
     follower_growth_total: 0,
     best_day: null,
     worst_day: null
-  }
-
-  // Combinar todas as datas dispon�veis
-  const allDates = new Set<string>()
-  
+  };
+  const allDates = new Set<string>();
   if (data.instagram?.daily_metrics) {
-    Object.keys(data.instagram.daily_metrics).forEach(date => allDates.add(date))
+    Object.keys(data.instagram.daily_metrics).forEach(date => allDates.add(date));
   }
   if (data.facebook?.daily_metrics) {
-    Object.keys(data.facebook.daily_metrics).forEach(date => allDates.add(date))
+    Object.keys(data.facebook.daily_metrics).forEach(date => allDates.add(date));
   }
   if (data.insights?.daily_insights) {
-    Object.keys(data.insights.daily_insights).forEach(date => allDates.add(date))
+    Object.keys(data.insights.daily_insights).forEach(date => allDates.add(date));
   }
-
-  const sortedDates = Array.from(allDates).sort()
-
-  // Calcular varia��es dia a dia
+  const sortedDates = Array.from(allDates).sort();
   for (let i = 1; i < sortedDates.length; i++) {
-    const currentDate = sortedDates[i]
-    const previousDate = sortedDates[i - 1]
-
+    const currentDate = sortedDates[i];
+    const previousDate = sortedDates[i - 1];
     const currentDay = {
       date: currentDate,
-      instagram: data.instagram?.daily_metrics?.[currentDate] || {},
-      facebook: data.facebook?.daily_metrics?.[currentDate] || {},
-      insights: data.insights?.daily_insights?.[currentDate] || {}
-    }
-
+      instagram: (data.instagram?.daily_metrics?.[currentDate] ?? {}) as Partial<InstagramDailyMetrics>,
+      facebook: (data.facebook?.daily_metrics?.[currentDate] ?? {}) as Partial<FacebookDailyMetrics>,
+      insights: (data.insights?.daily_insights?.[currentDate] ?? {}) as Partial<DailyInsights>
+    };
     const previousDay = {
-      instagram: data.instagram?.daily_metrics?.[previousDate] || {},
-      facebook: data.facebook?.daily_metrics?.[previousDate] || {},
-      insights: data.insights?.daily_insights?.[previousDate] || {}
-    }
-
-    // Calcular varia��o de seguidores
+      instagram: (data.instagram?.daily_metrics?.[previousDate] ?? {}) as Partial<InstagramDailyMetrics>,
+      facebook: (data.facebook?.daily_metrics?.[previousDate] ?? {}) as Partial<FacebookDailyMetrics>,
+      insights: (data.insights?.daily_insights?.[previousDate] ?? {}) as Partial<DailyInsights>
+    };
     const followerChange = {
-      instagram: (currentDay.insights.followers_instagram || 0) - (previousDay.insights.followers_instagram || 0),
-      facebook: (currentDay.insights.followers_facebook || 0) - (previousDay.insights.followers_facebook || 0)
-    }
-
-    // Calcular engagement total do dia
-    const totalEngagement = (currentDay.instagram.engagement_rate || 0) + (currentDay.facebook.engagement_rate || 0)
-
+      instagram: (currentDay.insights.followers_instagram ?? 0) - (previousDay.insights.followers_instagram ?? 0),
+      facebook: (currentDay.insights.followers_facebook ?? 0) - (previousDay.insights.followers_facebook ?? 0)
+    };
+    const totalEngagement = (currentDay.instagram.engagement_rate ?? 0) + (currentDay.facebook.engagement_rate ?? 0);
     variations.daily_changes[currentDate] = {
       follower_change: followerChange,
       total_follower_change: followerChange.instagram + followerChange.facebook,
       engagement_rate: totalEngagement,
-      posts_published: (currentDay.instagram.posts_count || 0) + (currentDay.facebook.posts_count || 0),
-      total_interactions: (currentDay.instagram.total_likes || 0) + (currentDay.instagram.total_comments || 0) + 
-                          (currentDay.facebook.total_reactions || 0) + (currentDay.facebook.total_comments || 0)
-    }
+      posts_published: (currentDay.instagram.posts_count ?? 0) + (currentDay.facebook.posts_count ?? 0),
+      total_interactions: (currentDay.instagram.total_likes ?? 0) + (currentDay.instagram.total_comments ?? 0) +
+        (currentDay.facebook.total_reactions ?? 0) + (currentDay.facebook.total_comments ?? 0),
+      date: currentDate
+    };
   }
-
-  // Calcular m�tricas agregadas
-  const dailyChanges = Object.values(variations.daily_changes) as any[]
+  const dailyChanges: DailyVariation[] = Object.values(variations.daily_changes);
   if (dailyChanges.length > 0) {
-    variations.avg_daily_engagement = dailyChanges.reduce((sum: number, day) => sum + day.engagement_rate, 0) / dailyChanges.length
-    variations.follower_growth_total = dailyChanges.reduce((sum: number, day) => sum + day.total_follower_change, 0)
-    
-    // Melhor e pior dia (baseado em engagement + intera��es)
-    const sortedByPerformance = dailyChanges.sort((a, b) => 
+    variations.avg_daily_engagement = dailyChanges.reduce((sum: number, day: DailyVariation) => sum + day.engagement_rate, 0) / dailyChanges.length;
+    variations.follower_growth_total = dailyChanges.reduce((sum: number, day: DailyVariation) => sum + day.total_follower_change, 0);
+    const sortedByPerformance = dailyChanges.slice().sort((a: DailyVariation, b: DailyVariation) =>
       (b.engagement_rate + b.total_interactions) - (a.engagement_rate + a.total_interactions)
-    )
-    variations.best_day = sortedByPerformance[0]?.date
-    variations.worst_day = sortedByPerformance[sortedByPerformance.length - 1]?.date
+    );
+    variations.best_day = sortedByPerformance[0]?.date || null;
+    variations.worst_day = sortedByPerformance[sortedByPerformance.length - 1]?.date || null;
   }
-
-  return variations
+  return variations;
 }
 
-// Identificar tend�ncias
-function identifyTrends(variations, days: number): any[] {
-  const trends = []
+interface Trend {
+  type: 'positive' | 'negative' | 'warning';
+  category: string;
+  title: string;
+  description: string;
+  value: number;
+  recommendation: string;
+}
 
-  // Tend�ncia de crescimento de seguidores
+function identifyTrends(variations: Variations, days: number): Trend[] {
+  const trends: Trend[] = [];
   if (variations.follower_growth_total > 0) {
     trends.push({
       type: 'positive',
       category: 'followers',
       title: 'Crescimento de Seguidores',
-      description: `Ganhou ${variations.follower_growth_total} seguidores nos �ltimos ${days} dias`,
+      description: `Ganhou ${variations.follower_growth_total} seguidores nos Ãºltimos ${days} dias`,
       value: variations.follower_growth_total,
-      recommendation: 'Continue com a estrat�gia atual de conte�do'
-    })
+      recommendation: 'Continue com a estratÃ©gia atual de conteÃºdo'
+    });
   } else if (variations.follower_growth_total < 0) {
     trends.push({
       type: 'negative',
       category: 'followers',
       title: 'Perda de Seguidores',
-      description: `Perdeu ${Math.abs(variations.follower_growth_total)} seguidores nos �ltimos ${days} dias`,
+      description: `Perdeu ${Math.abs(variations.follower_growth_total)} seguidores nos Ãºltimos ${days} dias`,
       value: variations.follower_growth_total,
-      recommendation: 'Revisar estrat�gia de conte�do e engajamento'
-    })
+      recommendation: 'Revisar estratÃ©gia de conteÃºdo e engajamento'
+    });
   }
-
-  // Tend�ncia de engagement
   if (variations.avg_daily_engagement > 4) {
     trends.push({
       type: 'positive',
       category: 'engagement',
       title: 'Alto Engajamento',
-      description: `Taxa m�dia de engajamento de ${variations.avg_daily_engagement.toFixed(1)}%`,
+      description: `Taxa mÃ©dia de engajamento de ${variations.avg_daily_engagement.toFixed(1)}%`,
       value: variations.avg_daily_engagement,
-      recommendation: 'Excelente! Mantenha o tipo de conte�do que est� funcionando'
-    })
+      recommendation: 'Excelente! Mantenha o tipo de conteÃºdo que estÃ¡ funcionando'
+    });
   } else if (variations.avg_daily_engagement < 2) {
     trends.push({
       type: 'warning',
       category: 'engagement',
       title: 'Engajamento Baixo',
-      description: `Taxa m�dia de engajamento de apenas ${variations.avg_daily_engagement.toFixed(1)}%`,
+      description: `Taxa mÃ©dia de engajamento de apenas ${variations.avg_daily_engagement.toFixed(1)}%`,
       value: variations.avg_daily_engagement,
-      recommendation: 'Considere variar tipos de conte�do e hor�rios de postagem'
-    })
+      recommendation: 'Considere variar tipos de conteÃºdo e horÃ¡rios de postagem'
+    });
   }
-
-  return trends
+  return trends;
 } 
+

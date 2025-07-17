@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+Ôªøimport { useState, useEffect } from 'react'
 import { safeLocalStorage, isClient } from '@/lib/client-utils'
 
 interface Usuario {
@@ -27,7 +27,7 @@ export function usePermissions(): PermissionsHook {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Carregar dados do usu·°rio do localStorage
+    // Carregar dados do usu√°rio do localStorage
     const loadUserData = () => {
       if (!isClient) {
         setLoading(false)
@@ -39,10 +39,10 @@ export function usePermissions(): PermissionsHook {
         if (userData) {
           const parsedUser = JSON.parse(userData)
           setUser(parsedUser)
-          // console.log('üîÑ Dados do usu·°rio carregados:', parsedUser.nome, 'Permiss·µes:', parsedUser.modulos_permitidos)
+          // Dados do usu√°rio carregados:
         }
       } catch (error) {
-        console.error('Erro ao carregar dados do usu·°rio:', error)
+        console.error('Erro ao carregar dados do usu√°rio:', error)
       } finally {
         setLoading(false)
       }
@@ -51,14 +51,14 @@ export function usePermissions(): PermissionsHook {
     // Carregar dados iniciais
     loadUserData()
 
-    // Listener para detectar mudan·ßas no localStorage
+    // Listener para detectar mudan√ßas no localStorage
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'sgb_user' && e.newValue) {
         loadUserData()
       }
     }
 
-    // Listener customizado para mudan·ßas internas
+    // Listener customizado para mudan√ßas internas
     const handleCustomStorageChange = () => {
       loadUserData()
     }
@@ -81,26 +81,26 @@ export function usePermissions(): PermissionsHook {
       return false
     }
     
-    // Se admin tem permiss·µes espec·≠ficas configuradas, respeitar elas
-    // Caso contr·°rio, admin tem acesso a tudo (comportamento padr·£o)
+    // Se admin tem permiss√µes espec√≠ficas configuradas, respeitar elas
+    // Caso contr√°rio, admin tem acesso a tudo (comportamento padr√£o)
     if (user.role === 'admin') {
-      // Se o admin tem permiss·µes explicitamente configuradas (n·£o todas), usar elas
-      const hasExplicitPermissions = user.modulos_permitidos && user.modulos_permitidos.length < 23 // Total de m·≥dulos
+      // Se o admin tem permiss√µes explicitamente configuradas (n√£o todas), usar elas
+      const hasExplicitPermissions = user.modulos_permitidos && user.modulos_permitidos.length < 23 // Total de m√≥dulos
       if (hasExplicitPermissions) {
         return user.modulos_permitidos.includes(moduloId)
       }
-      // Admin sem permiss·µes espec·≠ficas = acesso total
+      // Admin sem permiss√µes espec√≠ficas = acesso total
       return true
     }
     
-    // Verificar se o m·≥dulo est·° na lista de permiss·µes
+    // Verificar se o m√≥dulo est√° na lista de permiss√µes
     return user.modulos_permitidos?.includes(moduloId) || false
   }
 
   const hasAnyPermission = (modulosIds: string[]): boolean => {
     if (!user || !user.ativo) return false
     
-    // Se admin tem permiss·µes espec·≠ficas configuradas, respeitar elas
+    // Se admin tem permiss√µes espec√≠ficas configuradas, respeitar elas
     if (user.role === 'admin') {
       const hasExplicitPermissions = user.modulos_permitidos && user.modulos_permitidos.length < 23
       if (hasExplicitPermissions) {
@@ -109,7 +109,7 @@ export function usePermissions(): PermissionsHook {
       return true
     }
     
-    // Verificar se tem pelo menos uma permiss·£o
+    // Verificar se tem pelo menos uma permiss√£o
     return modulosIds.some(modulo => user.modulos_permitidos?.includes(modulo))
   }
 
@@ -120,14 +120,14 @@ export function usePermissions(): PermissionsHook {
   const canAccessModule = (modulo: string): boolean => {
     if (!user || !user.ativo) return false
     
-    // Mapeamento 1:1 - cada item da sidebar ·© um m·≥dulo individual
+    // Mapeamento 1:1 - cada item da sidebar √© um m√≥dulo individual
     const modulosSidebar: Record<string, string> = {
-      // Navega·ß·£o Principal
+      // Navega√ß√£o Principal
       'home': 'home',
       'checklists': 'checklists',
       'checklists_abertura': 'checklists_abertura',
       
-      // Opera·ß·µes
+      // Opera√ß√µes
       'operacoes_checklist_abertura': 'operacoes_checklist_abertura', 
       'terminal_producao': 'terminal_producao',
       
@@ -151,17 +151,17 @@ export function usePermissions(): PermissionsHook {
       // Marketing
       'marketing_360': 'marketing_360',
       
-      // Vis·£o Geral  
+      // Vis√£o Geral  
       'visao_geral_diario': 'visao_geral_diario',
       'visao_geral_comparativo': 'visao_geral_comparativo',
       'visao_geral_garcons': 'visao_geral_garcons',
       'visao_geral_metricas': 'visao_geral_metricas',
       'visao_geral_financeiro_mensal': 'visao_geral_financeiro_mensal',
       
-      // Funcion·°rio
+      // Funcion√°rio
       'funcionario_checklists': 'funcionario_checklists',
       
-      // Configura·ß·µes
+      // Configura√ß√µes
       'configuracoes_checklists': 'configuracoes_checklists',
       'configuracoes_metas': 'configuracoes_metas',
       'configuracoes_integracoes': 'configuracoes_integracoes',
@@ -176,7 +176,7 @@ export function usePermissions(): PermissionsHook {
     return hasPermission(moduloId)
   }
 
-  // Fun·ß·£o para atualizar dados do usu·°rio do servidor
+  // Fun√ß√£o para atualizar dados do usu√°rio do servidor
   const refreshUserData = async (): Promise<void> => {
     if (!user) return
     
@@ -189,17 +189,17 @@ export function usePermissions(): PermissionsHook {
           // Atualizar localStorage
           safeLocalStorage.setItem('sgb_user', JSON.stringify(userData.user))
           setUser(userData.user)
-          console.log('úÖ Dados do usu·°rio atualizados:', userData.user.nome)
+          console.log('Dados do usu√°rio atualizados:', userData.user.nome)
         }
       }
     } catch (error) {
-      console.error('ùå Erro ao atualizar dados do usu·°rio:', error)
+      console.error('Erro ao atualizar dados do usu√°rio:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  // Fun·ß·£o para atualizar apenas as permiss·µes localmente
+  // Fun√ß√£o para atualizar apenas as permiss√µes localmente
   const updateUserPermissions = (newPermissions: string[]): void => {
     if (!user) return
     
@@ -220,7 +220,7 @@ export function usePermissions(): PermissionsHook {
     }
   }
 
-  // Fun·ß·£o para detectar se admin est·° usando permiss·µes espec·≠ficas
+  // Fun√ß√£o para detectar se admin est√° usando permiss√µes espec√≠ficas
   const isAdminWithSpecificPermissions = (): boolean => {
     if (!user || user.role !== 'admin') return false
     return user.modulos_permitidos && user.modulos_permitidos.length < 23
@@ -238,3 +238,4 @@ export function usePermissions(): PermissionsHook {
     isAdminWithSpecificPermissions
   }
 } 
+

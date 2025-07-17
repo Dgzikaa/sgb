@@ -1,9 +1,9 @@
-'use client'
+﻿'use client'
 
 // ========================================
-// 🔧 META API CONFIGURATION COMPONENT
+// Ã°Å¸â€Â§ META API CONFIGURATION COMPONENT
 // ========================================
-// Componente para configurar Meta API dentro da p�gina de configura��es
+// Componente para configurar Meta API dentro da pÃ¡Â¡gina de configuraÃ¡Â§Ã¡Âµes
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -30,14 +30,35 @@ import {
 } from 'lucide-react'
 
 interface MetaTestResults {
-  access_token_valid: boolean
-  user_info
-  accounts[]
-  pages[]
-  instagram_accounts[]
-  permissions[]
-  available_endpoints[]
-  error_details
+  access_token_valid: boolean;
+  user_info: any; // Defina um tipo mais especÃ­fico se possÃ­vel
+  accounts: any[]; // Defina um tipo mais especÃ­fico se possÃ­vel
+  pages: Array<{
+    id: string;
+    name: string;
+    category?: string;
+    access_token?: string;
+    instagram_business_account?: any;
+  }>;
+  instagram_accounts: Array<{
+    instagram_account: {
+      username: string;
+      id: string;
+      name?: string;
+      followers_count?: number;
+      media_count?: number;
+    };
+    page_name: string;
+  }>;
+  permissions: Array<{
+    permission: string;
+    status: string;
+  }>;
+  available_endpoints: Array<{
+    name: string;
+    status: string;
+  }>;
+  error_details: any; // Defina um tipo mais especÃ­fico se possÃ­vel
 }
 
 interface MetaConfig {
@@ -56,7 +77,7 @@ interface MetaConfig {
 
 export default function MetaAPIConfig() {
   // ========================================
-  // 🔧 ESTADOS
+  // Ã°Å¸â€Â§ ESTADOS
   // ========================================
   const [accessToken, setAccessToken] = useState('')
   const [appId, setAppId] = useState('')
@@ -69,7 +90,7 @@ export default function MetaAPIConfig() {
   const [activeTab, setActiveTab] = useState('configure')
 
   // ========================================
-  // 🚀 CARREGAR CONFIGURA��ES EXISTENTES
+  // Ã°Å¸Å¡â‚¬ CARREGAR CONFIGURAÃ¡â€¡Ã¡â€¢ES EXISTENTES
   // ========================================
   useEffect(() => {
     loadConfigurations()
@@ -79,7 +100,7 @@ export default function MetaAPIConfig() {
     try {
       const userData = localStorage.getItem('sgb_user')
       if (!userData) {
-        console.error('Usu�rio n�o logado')
+        console.error('UsuÃ¡Â¡rio nÃ¡Â£o logado')
         return
       }
 
@@ -91,7 +112,7 @@ export default function MetaAPIConfig() {
       
       const data = await response.json()
       if (data.exists && data.config) {
-        // Converter a configura��o �nica em array para compatibilidade
+        // Converter a configuraÃ¡Â§Ã¡Â£o Ã¡Âºnica em array para compatibilidade
         setConfigs([{
           id: data.config.id,
           access_token: data.config.access_token,
@@ -105,16 +126,16 @@ export default function MetaAPIConfig() {
         setConfigs([])
       }
     } catch (error) {
-      console.error('Erro ao carregar configura��es:', error)
+      console.error('Erro ao carregar configuraÃ¡Â§Ã¡Âµes:', error)
     }
   }
 
   // ========================================
-  // 🧪 TESTAR API META
+  // Ã°Å¸Â§Âª TESTAR API META
   // ========================================
   const testMetaAPI = async () => {
     if (!accessToken) {
-      setMessage({ type: 'error', text: 'Token de acesso � obrigat�rio' })
+      setMessage({ type: 'error', text: 'Token de acesso Ã¡Â© obrigatÃ¡Â³rio' })
       return
     }
 
@@ -125,7 +146,7 @@ export default function MetaAPIConfig() {
     try {
       const userData = localStorage.getItem('sgb_user')
       if (!userData) {
-        setMessage({ type: 'error', text: 'Usu�rio n�o logado' })
+        setMessage({ type: 'error', text: 'UsuÃ¡Â¡rio nÃ¡Â£o logado' })
         return
       }
 
@@ -170,7 +191,7 @@ export default function MetaAPIConfig() {
         setTestResults(testResults)
         setMessage({ 
           type: 'success', 
-          text: `Configura��o salva! ${data.accounts?.facebook_page_name || 'Token v�lido'}` 
+          text: `ConfiguraÃ¡Â§Ã¡Â£o salva! ${data.accounts?.facebook_page_name || 'Token vÃ¡Â¡lido'}` 
         })
         loadConfigurations() // Recarregar lista
         setActiveTab('results') // Ir para aba de resultados
@@ -186,14 +207,14 @@ export default function MetaAPIConfig() {
   }
 
   // ========================================
-  // 🔄 TESTAR CONFIGURA��O EXISTENTE
+  // Ã°Å¸â€â€ž TESTAR CONFIGURAÃ¡â€¡Ã¡Æ’O EXISTENTE
   // ========================================
   const retestExistingConfig = async () => {
     setLoading(true)
     try {
       const userData = localStorage.getItem('sgb_user')
       if (!userData) {
-        setMessage({ type: 'error', text: 'Usu�rio n�o logado' })
+        setMessage({ type: 'error', text: 'UsuÃ¡Â¡rio nÃ¡Â£o logado' })
         setLoading(false)
         return
       }
@@ -236,14 +257,14 @@ export default function MetaAPIConfig() {
         setMessage({ type: 'error', text: data.error })
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Erro ao testar configura��o' })
+      setMessage({ type: 'error', text: 'Erro ao testar configuraÃ¡Â§Ã¡Â£o' })
     } finally {
       setLoading(false)
     }
   }
 
   // ========================================
-  // 🎨 COMPONENTES DE RENDERIZA��O
+  // Ã°Å¸Å½Â¨ COMPONENTES DE RENDERIZAÃ¡â€¡Ã¡Æ’O
   // ========================================
   const renderPermissions = () => {
     if (!testResults?.permissions?.length) return null
@@ -253,7 +274,7 @@ export default function MetaAPIConfig() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
-            Permiss�es do Token
+            PermissÃ¡Âµes do Token
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -281,7 +302,7 @@ export default function MetaAPIConfig() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Facebook className="h-5 w-5 text-blue-600" />
-            P�ginas Facebook ({testResults.pages.length})
+            PÃ¡Â¡ginas Facebook ({testResults.pages.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -312,7 +333,7 @@ export default function MetaAPIConfig() {
                     <div className="flex items-center gap-2">
                       <Instagram className="w-4 h-4 text-pink-600" />
                       <p className="text-sm text-pink-800 font-medium">
-                        �� Instagram Business conectado
+                        Å“â€¦ Instagram Business conectado
                       </p>
                     </div>
                   </div>
@@ -357,7 +378,7 @@ export default function MetaAPIConfig() {
                           <p className="text-lg font-bold text-pink-900">
                             {ig.instagram_account.followers_count.toLocaleString()}
                           </p>
-                          <p className="text-xs text-pink-700 font-medium">👥 Seguidores</p>
+                          <p className="text-xs text-pink-700 font-medium">Ã°Å¸â€˜Â¥ Seguidores</p>
                         </div>
                       )}
                       
@@ -366,7 +387,7 @@ export default function MetaAPIConfig() {
                           <p className="text-lg font-bold text-pink-900">
                             {ig.instagram_account.media_count}
                           </p>
-                          <p className="text-xs text-pink-700 font-medium">📸 Posts</p>
+                          <p className="text-xs text-pink-700 font-medium">Ã°Å¸â€œÂ¸ Posts</p>
                         </div>
                       )}
                     </div>
@@ -379,7 +400,7 @@ export default function MetaAPIConfig() {
                 
                 <div className="mt-3 pt-3 border-t border-pink-200">
                   <p className="text-xs text-pink-700">
-                    <span className="font-medium">Vinculado � p�gina:</span> {ig.page_name}
+                    <span className="font-medium">Vinculado Ã¡Â  pÃ¡Â¡gina:</span> {ig.page_name}
                   </p>
                 </div>
               </div>
@@ -398,7 +419,7 @@ export default function MetaAPIConfig() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5" />
-            Endpoints Dispon�veis
+            Endpoints DisponÃ¡Â­veis
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -432,7 +453,7 @@ export default function MetaAPIConfig() {
   }
 
   // ========================================
-  // 🎨 RENDER PRINCIPAL
+  // Ã°Å¸Å½Â¨ RENDER PRINCIPAL
   // ========================================
   return (
     <div className="space-y-6">
@@ -440,9 +461,9 @@ export default function MetaAPIConfig() {
       <Alert className="border-blue-200 bg-blue-50">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription className="text-blue-800">
-          <strong>Apenas administradores podem modificar configura��es da Meta.</strong>
+          <strong>Apenas administradores podem modificar configuraÃ¡Â§Ã¡Âµes da Meta.</strong>
           <br />
-          Para visualizar as configura��es existentes, administradores e usu�rios financeiros t�m acesso.
+          Para visualizar as configuraÃ¡Â§Ã¡Âµes existentes, administradores e usuÃ¡Â¡rios financeiros tÃ¡Âªm acesso.
         </AlertDescription>
       </Alert>
 
@@ -458,18 +479,18 @@ export default function MetaAPIConfig() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="configure">🔧 Configurar</TabsTrigger>
-          <TabsTrigger value="results">🧪 Resultados</TabsTrigger>
-          <TabsTrigger value="existing">📋 Hist�rico</TabsTrigger>
+          <TabsTrigger value="configure">Ã°Å¸â€Â§ Configurar</TabsTrigger>
+          <TabsTrigger value="results">Ã°Å¸Â§Âª Resultados</TabsTrigger>
+          <TabsTrigger value="existing">Ã°Å¸â€œâ€¹ HistÃ¡Â³rico</TabsTrigger>
         </TabsList>
 
         {/* Tab: Configurar */}
         <TabsContent value="configure" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Configura��o Meta API</CardTitle>
+              <CardTitle>ConfiguraÃ¡Â§Ã¡Â£o Meta API</CardTitle>
               <CardDescription>
-                Configure suas credenciais Facebook/Instagram para coleta autom�tica de m�tricas
+                Configure suas credenciais Facebook/Instagram para coleta automÃ¡Â¡tica de mÃ¡Â©tricas
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -493,7 +514,7 @@ export default function MetaAPIConfig() {
                   </Button>
                 </div>
                 <p className="text-xs text-gray-500">
-                  Token obtido no Facebook Developers para acesso �s APIs (v�lido at� setembro 2025)
+                  Token obtido no Facebook Developers para acesso Ã¡Â s APIs (vÃ¡Â¡lido atÃ¡Â© setembro 2025)
                 </p>
               </div>
 
@@ -504,7 +525,7 @@ export default function MetaAPIConfig() {
                     id="app-id"
                     value={appId}
                     onChange={(e) => setAppId(e.target.value)}
-                    placeholder="ID da aplica��o Facebook"
+                    placeholder="ID da aplicaÃ¡Â§Ã¡Â£o Facebook"
                   />
                 </div>
                 <div className="space-y-2">
@@ -514,7 +535,7 @@ export default function MetaAPIConfig() {
                     type="password"
                     value={appSecret}
                     onChange={(e) => setAppSecret(e.target.value)}
-                    placeholder="Secret da aplica��o Facebook"
+                    placeholder="Secret da aplicaÃ¡Â§Ã¡Â£o Facebook"
                   />
                 </div>
               </div>
@@ -534,7 +555,7 @@ export default function MetaAPIConfig() {
                 ) : (
                   <>
                     <TestTube className="mr-2 h-4 w-4" />
-                    Testar e Salvar Configura��o
+                    Testar e Salvar ConfiguraÃ¡Â§Ã¡Â£o
                   </>
                 )}
               </Button>
@@ -563,12 +584,12 @@ export default function MetaAPIConfig() {
                     <div className="space-y-4">
                       <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg border border-green-200">
                         <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                        <span className="text-green-800 font-medium">Token v�lido e funcionando!</span>
+                        <span className="text-green-800 font-medium">Token vÃ¡Â¡lido e funcionando!</span>
                       </div>
                       
                       {testResults.user_info && (
                         <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                          <h4 className="font-semibold text-blue-900 mb-2">Informa��es da Conta</h4>
+                          <h4 className="font-semibold text-blue-900 mb-2">InformaÃ¡Â§Ã¡Âµes da Conta</h4>
                           <div className="space-y-1">
                             <p className="text-sm text-blue-800">
                               <span className="font-medium">Nome:</span> {testResults.user_info.name || 'Meta User'}
@@ -591,7 +612,7 @@ export default function MetaAPIConfig() {
                     <div className="space-y-4">
                       <div className="flex items-center gap-2 p-3 bg-red-50 rounded-lg border border-red-200">
                         <XCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-                        <span className="text-red-800 font-medium">Token inv�lido ou com problemas</span>
+                        <span className="text-red-800 font-medium">Token invÃ¡Â¡lido ou com problemas</span>
                       </div>
                       
                       {testResults.error_details && (
@@ -625,13 +646,13 @@ export default function MetaAPIConfig() {
           )}
         </TabsContent>
 
-        {/* Tab: Configura��es Existentes */}
+        {/* Tab: ConfiguraÃ¡Â§Ã¡Âµes Existentes */}
         <TabsContent value="existing" className="space-y-6">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Configura��es Salvas</h3>
+            <h3 className="text-lg font-semibold">ConfiguraÃ¡Â§Ã¡Âµes Salvas</h3>
             <Button onClick={retestExistingConfig} variant="outline" disabled={loading}>
               <RefreshCw className="mr-2 h-4 w-4" />
-              Testar Configura��o Ativa
+              Testar ConfiguraÃ¡Â§Ã¡Â£o Ativa
             </Button>
           </div>
 
@@ -660,7 +681,7 @@ export default function MetaAPIConfig() {
                           Criada: {new Date(config.criado_em).toLocaleString('pt-BR')}
                         </p>
                         <p className="text-xs text-gray-500">
-                          �ltima verifica��o: {new Date(config.ultima_verificacao).toLocaleString('pt-BR')}
+                          Ã¡Å¡ltima verificaÃ¡Â§Ã¡Â£o: {new Date(config.ultima_verificacao).toLocaleString('pt-BR')}
                         </p>
                       </div>
                     </div>
@@ -672,7 +693,7 @@ export default function MetaAPIConfig() {
                 <CardContent className="text-center py-8">
                   <Settings className="h-12 w-12 mx-auto text-gray-400 mb-4" />
                   <p className="text-gray-600">
-                    Nenhuma configura��o encontrada. Configure uma nova API Meta.
+                    Nenhuma configuraÃ¡Â§Ã¡Â£o encontrada. Configure uma nova API Meta.
                   </p>
                 </CardContent>
               </Card>
@@ -683,3 +704,4 @@ export default function MetaAPIConfig() {
     </div>
   )
 } 
+

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useMemo, ReactNode } from 'react'
 import { Input } from '@/components/ui/input'
@@ -116,10 +116,10 @@ export function AdvancedDataTable<T extends Record<string, any>>({
     return sortedData.slice(startIndex, startIndex + pageSize)
   }, [sortedData, currentPage, pageSize])
 
-  // Total de p�ginas
+  // Total de pÃ¡Â¡ginas
   const totalPages = Math.ceil(sortedData.length / pageSize)
 
-  // Lidar com ordena��o
+  // Lidar com ordenaÃ¡Â§Ã¡Â£o
   const handleSort = (key: string) => {
     if (!columns.find((col) => col.key === key)?.sortable) return
 
@@ -148,7 +148,7 @@ export function AdvancedDataTable<T extends Record<string, any>>({
     setCurrentPage(1)
   }
 
-  // Obter �cone de ordena��o
+  // Obter Ã¡Â­cone de ordenaÃ¡Â§Ã¡Â£o
   const getSortIcon = (key: string) => {
     if (sortConfig.key !== key) return <ArrowUpDown className="w-4 h-4 text-gray-400" />
     if (sortConfig.direction === 'asc') return <ChevronUp className="w-4 h-4 text-blue-600" />
@@ -156,7 +156,7 @@ export function AdvancedDataTable<T extends Record<string, any>>({
     return <ArrowUpDown className="w-4 h-4 text-gray-400" />
   }
 
-  // Calcular estat�sticas
+  // Calcular estatÃ¡Â­sticas
   const hasActiveFilters = globalFilter || Object.values(columnFilters).some(v => v)
   const showingResults = `${((currentPage - 1) * pageSize) + 1}-${Math.min(currentPage * pageSize, sortedData.length)} de ${sortedData.length}`
 
@@ -218,7 +218,7 @@ export function AdvancedDataTable<T extends Record<string, any>>({
             )}
           </div>
 
-          {/* Estat�sticas */}
+          {/* EstatÃ¡Â­sticas */}
           <div className="text-sm text-gray-600">
             Mostrando {showingResults} resultados
             {data.length !== sortedData.length && (
@@ -329,12 +329,12 @@ export function AdvancedDataTable<T extends Record<string, any>>({
         </table>
       </div>
 
-      {/* Pagina��o */}
+      {/* PaginaÃ¡Â§Ã¡Â£o */}
       {totalPages > 1 && (
         <div className="border-t border-gray-200 bg-gray-50 px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600">
-              P�gina {currentPage} de {totalPages}
+              PÃ¡Â¡gina {currentPage} de {totalPages}
             </div>
             <div className="flex items-center gap-2">
               <Button
@@ -359,7 +359,7 @@ export function AdvancedDataTable<T extends Record<string, any>>({
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
               >
-                Pr�xima
+                PrÃ¡Â³xima
               </Button>
               <Button
                 variant="outline"
@@ -367,7 +367,7 @@ export function AdvancedDataTable<T extends Record<string, any>>({
                 onClick={() => setCurrentPage(totalPages)}
                 disabled={currentPage === totalPages}
               >
-                �ltima
+                Ã¡Å¡ltima
               </Button>
             </div>
           </div>
@@ -376,3 +376,4 @@ export function AdvancedDataTable<T extends Record<string, any>>({
     </div>
   )
 } 
+

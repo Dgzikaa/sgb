@@ -1,8 +1,8 @@
-import Redis, { Cluster } from 'ioredis';
+Ôªøimport Redis, { Cluster } from 'ioredis';
 
-// Configura·ß·£o do Redis
+// Configura√ß√£o do Redis
 const REDIS_CONFIG = {
-  // Configura·ß·£o para desenvolvimento local
+  // Configura√ß√£o para desenvolvimento local
   development: {
     host: 'localhost',
     port: 6379,
@@ -14,7 +14,7 @@ const REDIS_CONFIG = {
     commandTimeout: 5000,
   },
   
-  // Configura·ß·£o para produ·ß·£o com clustering
+  // Configura√ß√£o para produ√ß√£o com clustering
   production: {
     enableAutoPipelining: true,
     maxRetriesPerRequest: 3,
@@ -23,7 +23,7 @@ const REDIS_CONFIG = {
     keyPrefix: 'sgb_v2:',
     connectTimeout: 10000,
     commandTimeout: 5000,
-    // Configura·ß·£o para Redis Cluster (se usando)
+    // Configura√ß√£o para Redis Cluster (se usando)
     enableReadyCheck: true,
     enableOfflineQueue: false,
   }
@@ -78,14 +78,14 @@ class RedisClient {
     return RedisClient.instance;
   }
 
-  private setupEventListeners() {
+  private setupEventListeners(): void {
     this.client.on('connect', () => {
-      console.log('úÖ Redis conectado');
+      console.log('‚úÖ Redis conectado');
       this.isConnected = true;
     });
 
-    this.client.on('error', (error) => {
-      console.error('ùå Redis erro:', error);
+    this.client.on('error', (error: Error) => {
+      console.error('‚ùå Redis erro:', error);
       this.isConnected = false;
     });
 
@@ -99,8 +99,8 @@ class RedisClient {
     });
 
     if (this.useCluster && this.cluster) {
-      this.cluster.on('node error', (error, node) => {
-        console.error(`ùå Redis cluster node erro (${node.options.host}:${node.options.port}):`, error);
+      this.cluster.on('node error', (error: Error, node: { options: { host: string; port: number } }) => {
+        console.error(`‚ùå Redis cluster node erro`);
       });
     }
   }
@@ -109,10 +109,17 @@ class RedisClient {
     if (this.isConnected) return;
 
     try {
-      await this.client.connect();
-      console.log('úÖ Redis client conectado com sucesso');
+      // Verificar se this.client.connect() retorna uma Promise
+      const maybePromise = this.client.connect();
+      if (typeof maybePromise === 'object' && maybePromise !== null && typeof (maybePromise as Promise<unknown>).then === 'function') {
+        await maybePromise;
+      } else {
+        // Se n√£o √© uma Promise, aguardar um pouco para garantir conex√£o
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      console.log('‚úÖ Redis client conectado com sucesso');
     } catch (error) {
-      console.error('ùå Erro ao conectar Redis:', error);
+      console.error('‚ùå Erro ao conectar Redis:', error);
       throw error;
     }
   }
@@ -121,10 +128,11 @@ class RedisClient {
     if (!this.isConnected) return;
 
     try {
-      await this.client.disconnect();
-      console.log('úÖ Redis client desconectado');
+      // this.client.disconnect() √© s√≠ncrono
+      this.client.disconnect();
+      console.log('‚úÖ Redis client desconectado');
     } catch (error) {
-      console.error('ùå Erro ao desconectar Redis:', error);
+      console.error('‚ùå Erro ao desconectar Redis:', error);
     }
   }
 
@@ -137,12 +145,12 @@ class RedisClient {
       const result = await this.client.ping();
       return result === 'PONG';
     } catch (error) {
-      console.error('ùå Redis health check falhou:', error);
+      console.error('‚ùå Redis health check falhou:', error);
       return false;
     }
   }
 
-  // M·©todos espec·≠ficos para rate limiting
+  // M√©todos espec√≠ficos para rate limiting
   public async rateLimit(key: string, limit: number, windowMs: number): Promise<{
     success: boolean;
     count: number;
@@ -155,7 +163,7 @@ class RedisClient {
     const rateLimitKey = `rate_limit:${key}:${window}`;
 
     try {
-      // Usar pipeline para opera·ß·µes at·¥micas
+      // Usar pipeline para opera√ß√µes at√¥micas
       pipeline.incr(rateLimitKey);
       pipeline.expire(rateLimitKey, Math.ceil(windowMs / 1000));
       
@@ -168,7 +176,7 @@ class RedisClient {
       const [incrResult, expireResult] = results;
       
       if (incrResult[0] || expireResult[0]) {
-        throw new Error('Erro nas opera·ß·µes Redis');
+        throw new Error('Erro nas opera√ß√µes Redis');
       }
 
       const count = incrResult[1] as number;
@@ -182,7 +190,7 @@ class RedisClient {
         resetTime
       };
     } catch (error) {
-      console.error('ùå Erro no rate limiting:', error);
+      console.error('‚ùå Erro no rate limiting:', error);
       // Fallback: permitir em caso de erro Redis
       return {
         success: true,
@@ -193,7 +201,7 @@ class RedisClient {
     }
   }
 
-  // M·©todos para cache geral
+  // M√©todos para cache geral
   public async set(key: string, value: string, ttlSeconds?: number): Promise<boolean> {
     try {
       if (ttlSeconds) {
@@ -203,7 +211,7 @@ class RedisClient {
       }
       return true;
     } catch (error) {
-      console.error('ùå Erro ao definir cache:', error);
+      console.error('‚ùå Erro ao definir cache:', error);
       return false;
     }
   }
@@ -212,7 +220,7 @@ class RedisClient {
     try {
       return await this.client.get(key);
     } catch (error) {
-      console.error('ùå Erro ao obter cache:', error);
+      console.error('‚ùå Erro ao obter cache:', error);
       return null;
     }
   }
@@ -222,7 +230,7 @@ class RedisClient {
       const result = await this.client.del(key);
       return result > 0;
     } catch (error) {
-      console.error('ùå Erro ao deletar cache:', error);
+      console.error('‚ùå Erro ao deletar cache:', error);
       return false;
     }
   }
@@ -232,12 +240,12 @@ class RedisClient {
       const result = await this.client.exists(key);
       return result === 1;
     } catch (error) {
-      console.error('ùå Erro ao verificar exist·™ncia:', error);
+      console.error('‚ùå Erro ao verificar exist√™ncia:', error);
       return false;
     }
   }
 
-  // M·©todo para limpeza de chaves expiradas
+  // M√©todo para limpeza de chaves expiradas
   public async cleanup(): Promise<void> {
     try {
       const keys = await this.client.keys('rate_limit:*');
@@ -248,7 +256,7 @@ class RedisClient {
         console.log(`üßπ Limpeza Redis: ${keys.length} chaves removidas`);
       }
     } catch (error) {
-      console.error('ùå Erro na limpeza Redis:', error);
+      console.error('‚ùå Erro na limpeza Redis:', error);
     }
   }
 }
@@ -268,3 +276,4 @@ export async function cleanupRedis(): Promise<void> {
 export async function isRedisHealthy(): Promise<boolean> {
   return redisClient.healthCheck();
 } 
+

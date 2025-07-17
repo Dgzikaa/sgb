@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { createServiceRoleClient } from '@/lib/supabase-admin'
 import { z } from 'zod'
 
-// Schema de valida��o para configura��o
+// Schema de validaÃ¡Â§Ã¡Â£o para configuraÃ¡Â§Ã¡Â£o
 const MetaConfigSchema = z.object({
-  access_token: z.string().min(10, 'Access token � obrigat�rio'),
+  access_token: z.string().min(10, 'Access token Ã¡Â© obrigatÃ¡Â³rio'),
   app_id: z.string().min(5, 'App ID deve ter pelo menos 5 caracteres').optional().or(z.literal(null)),
   app_secret: z.string().min(10, 'App Secret deve ter pelo menos 10 caracteres').optional().or(z.literal(null)),
   facebook_page_id: z.string().optional(),
@@ -18,63 +18,63 @@ const MetaConfigSchema = z.object({
 })
 
 // ========================================
-// 📊 GET /api/meta/config
+// Ã°Å¸â€œÅ  GET /api/meta/config
 // ========================================
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔍 GET /api/meta/config - Iniciando...')
+    console.log('Ã°Å¸â€Â GET /api/meta/config - Iniciando...')
     
     const headersList = headers();
     const userData = headersList.get('x-user-data');
     
-    console.log('📝 Headers recebidos:', {
+    console.log('Ã°Å¸â€œÂ Headers recebidos:', {
       hasUserData: !!userData,
       userDataLength: userData?.length || 0
     })
     
     if (!userData) {
-      console.log('�� Usu�rio n�o autenticado - header x-user-data n�o encontrado')
-      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
+      console.log('ÂÅ’ UsuÃ¡Â¡rio nÃ¡Â£o autenticado - header x-user-data nÃ¡Â£o encontrado')
+      return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
     let parsedUserData;
     try {
       // Primeiro decodificar URL encoding, depois parsear JSON
       const decodedUserData = decodeURIComponent(userData);
-      console.log('🔓 Dados decodificados:', decodedUserData)
+      console.log('Ã°Å¸â€â€œ Dados decodificados:', decodedUserData)
       
       parsedUserData = JSON.parse(decodedUserData);
-      console.log('�� Dados do usu�rio parseados:', {
+      console.log('Å“â€¦ Dados do usuÃ¡Â¡rio parseados:', {
         hasBarId: !!parsedUserData.bar_id,
         hasPermissao: !!parsedUserData.permissao,
         barId: parsedUserData.bar_id,
         permissao: parsedUserData.permissao
       })
     } catch (parseError) {
-      console.error('�� Erro ao parsear dados do usu�rio:', parseError)
+      console.error('ÂÅ’ Erro ao parsear dados do usuÃ¡Â¡rio:', parseError)
       return NextResponse.json({ 
-        error: 'Dados de usu�rio inv�lidos',
+        error: 'Dados de usuÃ¡Â¡rio invÃ¡Â¡lidos',
         details: parseError instanceof Error ? parseError.message : 'Erro desconhecido'
       }, { status: 400 });
     }
 
     const { bar_id, permissao } = parsedUserData;
 
-    // Verificar permiss�es - aceitar tanto 'role' quanto 'permissao'
+    // Verificar permissÃ¡Âµes - aceitar tanto 'role' quanto 'permissao'
     const userRole = parsedUserData.role || parsedUserData.permissao || 'funcionario';
-    console.log('🔑 Verificando permiss�es:', { userRole, permissao: parsedUserData.permissao, role: parsedUserData.role })
+    console.log('Ã°Å¸â€â€˜ Verificando permissÃ¡Âµes:', { userRole, permissao: parsedUserData.permissao, role: parsedUserData.role })
     
     if (!['admin', 'financeiro'].includes(userRole)) {
-      console.log('�� Permiss�o insuficiente:', userRole)
-      return NextResponse.json({ error: 'Sem permiss�o para acessar configura��es' }, { status: 403 });
+      console.log('ÂÅ’ PermissÃ¡Â£o insuficiente:', userRole)
+      return NextResponse.json({ error: 'Sem permissÃ¡Â£o para acessar configuraÃ¡Â§Ã¡Âµes' }, { status: 403 });
     }
 
     // Criar cliente Supabase
-    console.log('🔗 Criando cliente Supabase...')
+    console.log('Ã°Å¸â€â€” Criando cliente Supabase...')
     const supabase = createServiceRoleClient()
 
-    // Buscar configura��o existente na tabela api_credentials
-    console.log('🔍 Buscando configura��o para bar_id:', bar_id)
+    // Buscar configuraÃ¡Â§Ã¡Â£o existente na tabela api_credentials
+    console.log('Ã°Å¸â€Â Buscando configuraÃ¡Â§Ã¡Â£o para bar_id:', bar_id)
     const { data: config, error } = await supabase
       .from('api_credentials')
       .select('*')
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
       .eq('ativo', true)
       .single();
 
-    console.log('📊 Resultado da busca:', {
+    console.log('Ã°Å¸â€œÅ  Resultado da busca:', {
       hasConfig: !!config,
       error: error?.message,
       errorCode: error?.code
@@ -92,21 +92,21 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       if (error.code === 'PGRST116') {
-        // Nenhuma configura��o encontrada
-        console.log('��️ Nenhuma configura��o encontrada para o bar')
+        // Nenhuma configuraÃ¡Â§Ã¡Â£o encontrada
+        console.log('â€žÂ¹Ã¯Â¸Â Nenhuma configuraÃ¡Â§Ã¡Â£o encontrada para o bar')
         return NextResponse.json({ 
           success: true,
           exists: false,
           config: null,
-          message: 'Nenhuma configura��o encontrada'
+          message: 'Nenhuma configuraÃ¡Â§Ã¡Â£o encontrada'
         });
       }
       
-      console.error('�� Erro ao buscar configura��o:', error);
-      return NextResponse.json({ error: 'Erro ao buscar configura��o' }, { status: 500 });
+      console.error('ÂÅ’ Erro ao buscar configuraÃ¡Â§Ã¡Â£o:', error);
+      return NextResponse.json({ error: 'Erro ao buscar configuraÃ¡Â§Ã¡Â£o' }, { status: 500 });
     }
 
-    console.log('�� Configura��o encontrada, retornando dados mascarados')
+    console.log('Å“â€¦ ConfiguraÃ¡Â§Ã¡Â£o encontrada, retornando dados mascarados')
     
     // Retornar dados mascarados
     const maskedConfig = {
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('�� Erro cr�tico na API de configura��o Meta:', error);
+    console.error('ÂÅ’ Erro crÃ¡Â­tico na API de configuraÃ¡Â§Ã¡Â£o Meta:', error);
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
       details: error instanceof Error ? error.message : 'Erro desconhecido'
@@ -135,63 +135,63 @@ export async function GET(request: NextRequest) {
 }
 
 // ========================================
-// 💾 POST /api/meta/config
-// Salvar/atualizar configura��o
+// Ã°Å¸â€™Â¾ POST /api/meta/config
+// Salvar/atualizar configuraÃ¡Â§Ã¡Â£o
 // ========================================
 export async function POST(request: NextRequest) {
   try {
-    console.log('💾 POST /api/meta/config - Iniciando...')
+    console.log('Ã°Å¸â€™Â¾ POST /api/meta/config - Iniciando...')
     
     const headersList = headers()
     const userData = headersList.get('x-user-data')
     
-    console.log('📝 Headers recebidos:', {
+    console.log('Ã°Å¸â€œÂ Headers recebidos:', {
       hasUserData: !!userData,
       userDataLength: userData?.length || 0
     })
     
     if (!userData) {
-      console.log('�� Usu�rio n�o autenticado - header x-user-data n�o encontrado')
-      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 })
+      console.log('ÂÅ’ UsuÃ¡Â¡rio nÃ¡Â£o autenticado - header x-user-data nÃ¡Â£o encontrado')
+      return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 })
     }
 
     let parsedUserData;
     try {
       // Primeiro decodificar URL encoding, depois parsear JSON
       const decodedUserData = decodeURIComponent(userData);
-      console.log('🔓 Dados decodificados:', decodedUserData)
+      console.log('Ã°Å¸â€â€œ Dados decodificados:', decodedUserData)
       
       parsedUserData = JSON.parse(decodedUserData);
-      console.log('�� Dados do usu�rio parseados:', {
+      console.log('Å“â€¦ Dados do usuÃ¡Â¡rio parseados:', {
         hasBarId: !!parsedUserData.bar_id,
         hasPermissao: !!parsedUserData.permissao,
         barId: parsedUserData.bar_id,
         permissao: parsedUserData.permissao
       })
     } catch (parseError) {
-      console.error('�� Erro ao parsear dados do usu�rio:', parseError)
+      console.error('ÂÅ’ Erro ao parsear dados do usuÃ¡Â¡rio:', parseError)
       return NextResponse.json({ 
-        error: 'Dados de usu�rio inv�lidos',
+        error: 'Dados de usuÃ¡Â¡rio invÃ¡Â¡lidos',
         details: parseError instanceof Error ? parseError.message : 'Erro desconhecido'
       }, { status: 400 });
     }
 
     const { bar_id, permissao } = parsedUserData;
 
-    // Verificar permiss�es - aceitar tanto 'role' quanto 'permissao'
+    // Verificar permissÃ¡Âµes - aceitar tanto 'role' quanto 'permissao'
     const userRole = parsedUserData.role || parsedUserData.permissao || 'funcionario';
-    console.log('🔑 Verificando permiss�es:', { userRole, permissao: parsedUserData.permissao, role: parsedUserData.role })
+    console.log('Ã°Å¸â€â€˜ Verificando permissÃ¡Âµes:', { userRole, permissao: parsedUserData.permissao, role: parsedUserData.role })
     
     if (!['admin'].includes(userRole)) {
-      console.log('�� Permiss�o insuficiente:', userRole)
+      console.log('ÂÅ’ PermissÃ¡Â£o insuficiente:', userRole)
       return NextResponse.json({ 
-        error: 'Apenas administradores podem modificar configura��es da Meta' 
+        error: 'Apenas administradores podem modificar configuraÃ¡Â§Ã¡Âµes da Meta' 
       }, { status: 403 })
     }
 
-    // Parse e valida��o dos dados
+    // Parse e validaÃ¡Â§Ã¡Â£o dos dados
     const body = await request.json()
-    console.log('📊 Dados recebidos no body:', {
+    console.log('Ã°Å¸â€œÅ  Dados recebidos no body:', {
       hasAccessToken: !!body.access_token,
       hasAppId: !!body.app_id,
       hasAppSecret: !!body.app_secret
@@ -199,23 +199,23 @@ export async function POST(request: NextRequest) {
     
     const configData = MetaConfigSchema.parse(body)
 
-    console.log('💾 Salvando configura��o Meta para bar:', bar_id)
+    console.log('Ã°Å¸â€™Â¾ Salvando configuraÃ¡Â§Ã¡Â£o Meta para bar:', bar_id)
 
-    // Testar conex�o antes de salvar
-    console.log('🔍 Testando conex�o com Meta API...')
+    // Testar conexÃ¡Â£o antes de salvar
+    console.log('Ã°Å¸â€Â Testando conexÃ¡Â£o com Meta API...')
     const testResult = await testMetaConnection(configData)
     if (!testResult.success) {
-      console.error('�� Falha no teste de conex�o:', testResult.error)
+      console.error('ÂÅ’ Falha no teste de conexÃ¡Â£o:', testResult.error)
       return NextResponse.json({ 
         error: 'Falha ao conectar com a Meta API',
         details: testResult.error 
       }, { status: 400 })
     }
 
-    console.log('�� Teste de conex�o passou')
+    console.log('Å“â€¦ Teste de conexÃ¡Â£o passou')
 
-    // Buscar IDs das contas se n�o foram fornecidos
-    let enhancedConfig = { ...configData }
+    // Buscar IDs das contas se nÃ¡Â£o foram fornecidos
+    const enhancedConfig = { ...configData }
     if (testResult.accounts) {
       if (!enhancedConfig.facebook_page_id && testResult.accounts.facebook_page_id) {
         enhancedConfig.facebook_page_id = testResult.accounts.facebook_page_id
@@ -225,7 +225,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Calcular pr�xima coleta
+    // Calcular prÃ¡Â³xima coleta
     const proximaColeta = new Date()
     proximaColeta.setHours(
       parseInt(enhancedConfig.horario_coleta_preferido?.split(':')[0] || '9'),
@@ -233,16 +233,16 @@ export async function POST(request: NextRequest) {
       0, 0
     )
     
-    // Se o hor�rio j� passou hoje, agendar para amanh�
+    // Se o horÃ¡Â¡rio jÃ¡Â¡ passou hoje, agendar para amanhÃ¡Â£
     if (proximaColeta <= new Date()) {
       proximaColeta.setDate(proximaColeta.getDate() + 1)
     }
 
     // Salvar na tabela api_credentials com sistema 'meta'
-    console.log('🔗 Salvando na tabela api_credentials...')
+    console.log('Ã°Å¸â€â€” Salvando na tabela api_credentials...')
     const supabase = createServiceRoleClient()
     
-    // Verificar se j� existe configura��o
+    // Verificar se jÃ¡Â¡ existe configuraÃ¡Â§Ã¡Â£o
     const { data: existing } = await supabase
       .from('api_credentials')
       .select('id')
@@ -269,7 +269,7 @@ export async function POST(request: NextRequest) {
     
     if (existing) {
       // Atualizar existente
-      console.log('🔄 Atualizando configura��o existente...')
+      console.log('Ã°Å¸â€â€ž Atualizando configuraÃ¡Â§Ã¡Â£o existente...')
       const { data: updateData, error: updateError } = await supabase
         .from('api_credentials')
         .update(credentialsData)
@@ -281,7 +281,7 @@ export async function POST(request: NextRequest) {
       error = updateError
     } else {
       // Criar novo
-      console.log('🆕 Criando nova configura��o...')
+      console.log('Ã°Å¸â€ â€¢ Criando nova configuraÃ¡Â§Ã¡Â£o...')
       const { data: insertData, error: insertError } = await supabase
         .from('api_credentials')
         .insert({
@@ -296,14 +296,14 @@ export async function POST(request: NextRequest) {
     }
 
     if (error) {
-      console.error('�� Erro ao salvar configura��o Meta:', error)
+      console.error('ÂÅ’ Erro ao salvar configuraÃ¡Â§Ã¡Â£o Meta:', error)
       return NextResponse.json({ 
-        error: 'Erro ao salvar configura��o',
+        error: 'Erro ao salvar configuraÃ¡Â§Ã¡Â£o',
         details: error.message 
       }, { status: 500 })
     }
 
-    console.log('�� Configura��o Meta salva com sucesso na tabela api_credentials')
+    console.log('Å“â€¦ ConfiguraÃ¡Â§Ã¡Â£o Meta salva com sucesso na tabela api_credentials')
 
     // Retornar dados mascarados
           const responseSafe = {
@@ -315,7 +315,7 @@ export async function POST(request: NextRequest) {
       ativo: data.ativo,
       criado_em: data.criado_em,
       atualizado_em: data.atualizado_em,
-      // Dados espec�ficos do Meta
+      // Dados especÃ¡Â­ficos do Meta
       facebook_page_id: enhancedConfig.facebook_page_id,
       instagram_account_id: enhancedConfig.instagram_account_id,
       api_version: enhancedConfig.api_version || 'v18.0',
@@ -329,80 +329,80 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro cr�tico ao salvar configura��o Meta:', error)
+    console.error('ÂÅ’ Erro crÃ¡Â­tico ao salvar configuraÃ¡Â§Ã¡Â£o Meta:', error)
     
-    if (error.name === 'ZodError') {
+    if ((error as any).name === 'ZodError') {
       return NextResponse.json({ 
-        error: 'Dados inv�lidos',
-        details: error.errors 
+        error: 'Dados invÃ¡Â¡lidos',
+        details: (error as any).errors 
       }, { status: 400 })
     }
 
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
-      details: error.message 
+      details: (error as any).message 
     }, { status: 500 })
   }
 }
 
 // ========================================
-// 🔬 PUT /api/meta/config/test
-// Testar configura��o
+// Ã°Å¸â€Â¬ PUT /api/meta/config/test
+// Testar configuraÃ¡Â§Ã¡Â£o
 // ========================================
 export async function PUT(request: NextRequest) {
   try {
-    console.log('🔬 PUT /api/meta/config/test - Iniciando...')
+    console.log('Ã°Å¸â€Â¬ PUT /api/meta/config/test - Iniciando...')
     
     const headersList = headers()
     const userData = headersList.get('x-user-data')
     
-    console.log('📝 Headers recebidos:', {
+    console.log('Ã°Å¸â€œÂ Headers recebidos:', {
       hasUserData: !!userData,
       userDataLength: userData?.length || 0
     })
     
     if (!userData) {
-      console.log('�� Usu�rio n�o autenticado - header x-user-data n�o encontrado')
-      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 })
+      console.log('ÂÅ’ UsuÃ¡Â¡rio nÃ¡Â£o autenticado - header x-user-data nÃ¡Â£o encontrado')
+      return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 })
     }
 
     let parsedUserData;
     try {
       // Primeiro decodificar URL encoding, depois parsear JSON
       const decodedUserData = decodeURIComponent(userData);
-      console.log('🔓 Dados decodificados:', decodedUserData)
+      console.log('Ã°Å¸â€â€œ Dados decodificados:', decodedUserData)
       
       parsedUserData = JSON.parse(decodedUserData);
-      console.log('�� Dados do usu�rio parseados:', {
+      console.log('Å“â€¦ Dados do usuÃ¡Â¡rio parseados:', {
         hasBarId: !!parsedUserData.bar_id,
         hasPermissao: !!parsedUserData.permissao,
         barId: parsedUserData.bar_id,
         permissao: parsedUserData.permissao
       })
     } catch (parseError) {
-      console.error('�� Erro ao parsear dados do usu�rio:', parseError)
+      console.error('ÂÅ’ Erro ao parsear dados do usuÃ¡Â¡rio:', parseError)
       return NextResponse.json({ 
-        error: 'Dados de usu�rio inv�lidos',
+        error: 'Dados de usuÃ¡Â¡rio invÃ¡Â¡lidos',
         details: parseError instanceof Error ? parseError.message : 'Erro desconhecido'
       }, { status: 400 });
     }
 
     const { bar_id, permissao } = parsedUserData;
 
-    // Verificar permiss�es - aceitar tanto 'role' quanto 'permissao'
+    // Verificar permissÃ¡Âµes - aceitar tanto 'role' quanto 'permissao'
     const userRole = parsedUserData.role || parsedUserData.permissao || 'funcionario';
-    console.log('🔑 Verificando permiss�es:', { userRole, permissao: parsedUserData.permissao, role: parsedUserData.role })
+    console.log('Ã°Å¸â€â€˜ Verificando permissÃ¡Âµes:', { userRole, permissao: parsedUserData.permissao, role: parsedUserData.role })
     
     if (!['admin', 'financeiro'].includes(userRole)) {
-      console.log('�� Permiss�o insuficiente:', userRole)
+      console.log('ÂÅ’ PermissÃ¡Â£o insuficiente:', userRole)
       return NextResponse.json({ 
-        error: 'Sem permiss�o para testar configura��es da Meta' 
+        error: 'Sem permissÃ¡Â£o para testar configuraÃ¡Â§Ã¡Âµes da Meta' 
       }, { status: 403 })
     }
 
     // Parse dos dados de teste
     const body = await request.json()
-    console.log('📊 Dados recebidos no body:', {
+    console.log('Ã°Å¸â€œÅ  Dados recebidos no body:', {
       hasAccessToken: !!body.access_token,
       hasAppId: !!body.app_id,
       hasAppSecret: !!body.app_secret,
@@ -412,11 +412,11 @@ export async function PUT(request: NextRequest) {
     
     const testData = MetaConfigSchema.parse(body)
 
-    console.log('🔬 Testando configura��o Meta...')
+    console.log('Ã°Å¸â€Â¬ Testando configuraÃ¡Â§Ã¡Â£o Meta...')
 
     const testResult = await testMetaConnection(testData)
 
-    console.log('📊 Resultado do teste:', {
+    console.log('Ã°Å¸â€œÅ  Resultado do teste:', {
       success: testResult.success,
       hasAccounts: !!testResult.accounts,
       error: testResult.error
@@ -427,19 +427,19 @@ export async function PUT(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro cr�tico ao testar configura��o Meta:', error)
+    console.error('ÂÅ’ Erro crÃ¡Â­tico ao testar configuraÃ¡Â§Ã¡Â£o Meta:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
-      details: error.message 
+      details: (error as any).message 
     }, { status: 500 })
   }
 }
 
 // ========================================
-// 🛠️ FUN��ES AUXILIARES
+// Ã°Å¸â€ºÂ Ã¯Â¸Â FUNÃ¡â€¡Ã¡â€¢ES AUXILIARES
 // ========================================
 
-async function testMetaConnection(config): Promise<{
+async function testMetaConnection(config: any): Promise<{
   success: boolean
   error?: string
   accounts?: {
@@ -450,9 +450,9 @@ async function testMetaConnection(config): Promise<{
   }
 }> {
   try {
-    console.log('🔍 Testando acesso � Meta API...')
+    console.log('Ã°Å¸â€Â Testando acesso Ã¡Â  Meta API...')
 
-    // Testar token b�sico
+    // Testar token bÃ¡Â¡sico
     const meResponse = await fetch(
       `https://graph.facebook.com/${config.api_version}/me?access_token=${config.access_token}`,
       { method: 'GET' }
@@ -463,29 +463,29 @@ async function testMetaConnection(config): Promise<{
     if (!meResponse.ok) {
       return {
         success: false,
-        error: `Meta API Error: ${meData.error?.message || 'Token inv�lido'}`
+        error: `Meta API Error: ${meData.error?.message || 'Token invÃ¡Â¡lido'}`
       }
     }
 
-    console.log('�� Token v�lido, buscando contas conectadas...')
+    console.log('Å“â€¦ Token vÃ¡Â¡lido, buscando contas conectadas...')
 
-    // Buscar p�ginas do Facebook
+    // Buscar pÃ¡Â¡ginas do Facebook
     const pagesResponse = await fetch(
       `https://graph.facebook.com/${config.api_version}/me/accounts?access_token=${config.access_token}`,
       { method: 'GET' }
     )
 
     const pagesData = await pagesResponse.json()
-    const accounts = {}
+    const accounts: any = {};
 
     if (pagesResponse.ok && pagesData.data?.length > 0) {
       const firstPage = pagesData.data[0]
       accounts.facebook_page_id = firstPage.id
       accounts.facebook_page_name = firstPage.name
 
-      console.log(`📄 P�gina Facebook encontrada: ${firstPage.name} (${firstPage.id})`)
+      console.log(`Ã°Å¸â€œâ€ž PÃ¡Â¡gina Facebook encontrada: ${firstPage.name} (${firstPage.id})`)
 
-      // Buscar conta Instagram conectada � p�gina
+      // Buscar conta Instagram conectada Ã¡Â  pÃ¡Â¡gina
       try {
         const igResponse = await fetch(
           `https://graph.facebook.com/${config.api_version}/${firstPage.id}?fields=instagram_business_account&access_token=${config.access_token}`,
@@ -506,11 +506,11 @@ async function testMetaConnection(config): Promise<{
           const igProfileData = await igProfileResponse.json()
           if (igProfileResponse.ok) {
             accounts.instagram_username = igProfileData.username
-            console.log(`📸 Instagram encontrado: @${igProfileData.username} (${igData.instagram_business_account.id})`)
+            console.log(`Ã°Å¸â€œÂ¸ Instagram encontrado: @${igProfileData.username} (${igData.instagram_business_account.id})`)
           }
         }
       } catch (igError) {
-        console.warn('��️ N�o foi poss�vel buscar conta Instagram:', igError)
+        console.warn('Å¡Â Ã¯Â¸Â NÃ¡Â£o foi possÃ¡Â­vel buscar conta Instagram:', igError)
       }
     }
 
@@ -520,67 +520,67 @@ async function testMetaConnection(config): Promise<{
     }
 
   } catch (error) {
-    console.error('�� Erro ao testar conex�o Meta:', error)
+    console.error('ÂÅ’ Erro ao testar conexÃ¡Â£o Meta:', error)
     return {
       success: false,
-      error: error.message || 'Erro de conex�o'
+      error: (error as any).message || 'Erro de conexÃ¡Â£o'
     }
   }
 }
 
 // ========================================
-// �� DELETE /api/meta/config
-// Remover configura��o
+// ÂÅ’ DELETE /api/meta/config
+// Remover configuraÃ¡Â§Ã¡Â£o
 // ========================================
 export async function DELETE(request: NextRequest) {
   try {
-    console.log('�� DELETE /api/meta/config - Iniciando...')
+    console.log('ÂÅ’ DELETE /api/meta/config - Iniciando...')
     
     const headersList = headers()
     const userData = headersList.get('x-user-data')
     
-    console.log('📝 Headers recebidos:', {
+    console.log('Ã°Å¸â€œÂ Headers recebidos:', {
       hasUserData: !!userData,
       userDataLength: userData?.length || 0
     })
     
     if (!userData) {
-      console.log('�� Usu�rio n�o autenticado - header x-user-data n�o encontrado')
-      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 })
+      console.log('ÂÅ’ UsuÃ¡Â¡rio nÃ¡Â£o autenticado - header x-user-data nÃ¡Â£o encontrado')
+      return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 })
     }
 
     let parsedUserData;
     try {
       // Primeiro decodificar URL encoding, depois parsear JSON
       const decodedUserData = decodeURIComponent(userData);
-      console.log('🔓 Dados decodificados:', decodedUserData)
+      console.log('Ã°Å¸â€â€œ Dados decodificados:', decodedUserData)
       
       parsedUserData = JSON.parse(decodedUserData);
-      console.log('�� Dados do usu�rio parseados:', {
+      console.log('Å“â€¦ Dados do usuÃ¡Â¡rio parseados:', {
         hasBarId: !!parsedUserData.bar_id,
         hasPermissao: !!parsedUserData.permissao,
         barId: parsedUserData.bar_id,
         permissao: parsedUserData.permissao
       })
     } catch (parseError) {
-      console.error('�� Erro ao parsear dados do usu�rio:', parseError)
+      console.error('ÂÅ’ Erro ao parsear dados do usuÃ¡Â¡rio:', parseError)
       return NextResponse.json({ 
-        error: 'Dados de usu�rio inv�lidos',
+        error: 'Dados de usuÃ¡Â¡rio invÃ¡Â¡lidos',
         details: parseError instanceof Error ? parseError.message : 'Erro desconhecido'
       }, { status: 400 });
     }
 
     const { bar_id, permissao } = parsedUserData;
 
-    // Verificar permiss�es
+    // Verificar permissÃ¡Âµes
     if (!['admin'].includes(permissao)) {
-      console.log('�� Permiss�o insuficiente:', permissao)
+      console.log('ÂÅ’ PermissÃ¡Â£o insuficiente:', permissao)
       return NextResponse.json({ 
-        error: 'Apenas administradores podem remover configura��es da Meta' 
+        error: 'Apenas administradores podem remover configuraÃ¡Â§Ã¡Âµes da Meta' 
       }, { status: 403 })
     }
 
-    console.log('�� Removendo configura��o Meta para bar:', bar_id)
+    console.log('ÂÅ’ Removendo configuraÃ¡Â§Ã¡Â£o Meta para bar:', bar_id)
 
     const supabase = createServiceRoleClient()
     const { error } = await supabase
@@ -591,21 +591,22 @@ export async function DELETE(request: NextRequest) {
       .eq('ambiente', 'producao')
 
     if (error) {
-      console.error('�� Erro ao desativar configura��o Meta:', error)
+      console.error('ÂÅ’ Erro ao desativar configuraÃ¡Â§Ã¡Â£o Meta:', error)
       return NextResponse.json({ 
-        error: 'Erro ao remover configura��o',
+        error: 'Erro ao remover configuraÃ¡Â§Ã¡Â£o',
         details: error.message 
       }, { status: 500 })
     }
 
-    console.log('�� Configura��o Meta desativada')
+    console.log('Å“â€¦ ConfiguraÃ¡Â§Ã¡Â£o Meta desativada')
     return NextResponse.json({ success: true })
 
   } catch (error) {
-    console.error('�� Erro cr�tico ao remover configura��o Meta:', error)
+    console.error('ÂÅ’ Erro crÃ¡Â­tico ao remover configuraÃ¡Â§Ã¡Â£o Meta:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
-      details: error.message 
+      details: (error as any).message 
     }, { status: 500 })
   }
 } 
+

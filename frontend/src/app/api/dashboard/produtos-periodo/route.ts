@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
@@ -12,12 +12,12 @@ export async function GET(request: NextRequest) {
 
     if (!data_inicio || !data_fim || !bar_id) {
       return NextResponse.json(
-        { success: false, error: 'Par�metros obrigat�rios: data_inicio, data_fim, bar_id' },
+        { success: false, error: 'ParÃ¡Â¢metros obrigatÃ¡Â³rios: data_inicio, data_fim, bar_id' },
         { status: 400 }
       )
     }
 
-    console.log('🍕 API Produtos Per�odo - Par�metros recebidos:', {
+    console.log('Ã°Å¸Ââ€¢ API Produtos PerÃ¡Â­odo - ParÃ¡Â¢metros recebidos:', {
       data_inicio,
       data_fim,
       bar_id
@@ -26,14 +26,14 @@ export async function GET(request: NextRequest) {
     // Inicializar cliente Supabase
     const supabase = await getSupabaseClient()
     if (!supabase) {
-      console.error('�� Erro ao conectar com banco')
+      console.error('ÂÅ’ Erro ao conectar com banco')
       return NextResponse.json(
         { success: false, error: 'Erro ao conectar com banco' },
         { status: 500 }
       )
     }
 
-    // Gerar array de datas do per�odo
+    // Gerar array de datas do perÃ¡Â­odo
     const inicioData = new Date(data_inicio + 'T00:00:00')
     const fimData = new Date(data_fim + 'T00:00:00')
     const diasPeriodo: string[] = []
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       diasPeriodo.push(d.toISOString().split('T')[0])
     }
 
-    console.log('📅 Dias do per�odo:', diasPeriodo.join(', '))
+    console.log('Ã°Å¸â€œâ€¦ Dias do perÃ¡Â­odo:', diasPeriodo.join(', '))
 
     try {
       const produtosPorDia: { [key: string]: any } = {}
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
       })
 
       // Buscar produtos da tabela analitico (ContaHub)
-      console.log('🔍 Buscando produtos ContaHub...')
+      console.log('Ã°Å¸â€Â Buscando produtos ContaHub...')
       const { data: contahubData, error: contahubError } = await supabase
         .from('analitico')
         .select('vd_dtgerencial, prd_desc, qtd, valorfinal')
@@ -67,17 +67,17 @@ export async function GET(request: NextRequest) {
         .gt('qtd', 0)
 
       if (contahubError) {
-        console.error('�� Erro ao buscar produtos ContaHub:', contahubError)
+        console.error('ÂÅ’ Erro ao buscar produtos ContaHub:', contahubError)
       } else if (contahubData && contahubData.length > 0) {
-        console.log(`📊 Produtos ContaHub encontrados: ${contahubData.length}`)
+        console.log(`Ã°Å¸â€œÅ  Produtos ContaHub encontrados: ${contahubData.length}`)
         
         // Agrupar produtos ContaHub por dia
-        contahubData.forEach((item) => {
+        contahubData.forEach((item: any) => {
           const dia = item.vd_dtgerencial
           if (produtosPorDia[dia]) {
-            // Verificar se o produto j� existe para este dia
+            // Verificar se o produto jÃ¡Â¡ existe para este dia
             const produtoExistente = produtosPorDia[dia].contahub.find(
-              (p) => p.produto === item.prd_desc
+              (p: any) => p.produto === item.prd_desc
             )
             
             if (produtoExistente) {
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
       }
 
       // Buscar produtos da tabela yuzer_analitico (se existir)
-      console.log('🔍 Buscando produtos Yuzer...')
+      console.log('Ã°Å¸â€Â Buscando produtos Yuzer...')
       const { data: yuzerData, error: yuzerError } = await supabase
         .from('yuzer_analitico')
         .select('dt_gerencial, produto, quantidade, valor_unitario, valor_total')
@@ -106,17 +106,17 @@ export async function GET(request: NextRequest) {
         .gt('quantidade', 0)
 
       if (yuzerError) {
-        console.log('��️ Tabela yuzer_analitico n�o encontrada ou sem dados:', yuzerError.message)
+        console.log('Å¡Â Ã¯Â¸Â Tabela yuzer_analitico nÃ¡Â£o encontrada ou sem dados:', yuzerError.message)
       } else if (yuzerData && yuzerData.length > 0) {
-        console.log(`📊 Produtos Yuzer encontrados: ${yuzerData.length}`)
+        console.log(`Ã°Å¸â€œÅ  Produtos Yuzer encontrados: ${yuzerData.length}`)
         
         // Agrupar produtos Yuzer por dia
-        yuzerData.forEach((item) => {
+        yuzerData.forEach((item: any) => {
           const dia = item.dt_gerencial
           if (produtosPorDia[dia]) {
-            // Verificar se o produto j� existe para este dia
+            // Verificar se o produto jÃ¡Â¡ existe para este dia
             const produtoExistente = produtosPorDia[dia].yuzer.find(
-              (p) => p.produto === item.produto
+              (p: any) => p.produto === item.produto
             )
             
             if (produtoExistente) {
@@ -135,8 +135,8 @@ export async function GET(request: NextRequest) {
 
       // Ordenar produtos por quantidade em cada dia
       Object.keys(produtosPorDia).forEach(dia => {
-        produtosPorDia[dia].contahub.sort((a, b) => b.quantidade - a.quantidade)
-        produtosPorDia[dia].yuzer.sort((a, b) => b.quantidade - a.quantidade)
+        produtosPorDia[dia].contahub.sort((a: any, b: any) => b.quantidade - a.quantidade)
+        produtosPorDia[dia].yuzer.sort((a: any, b: any) => b.quantidade - a.quantidade)
       })
 
       // Log resumo
@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
         produtosPorDia[dia].contahub.length > 0 || produtosPorDia[dia].yuzer.length > 0
       ).length
 
-      console.log('📊 Resumo dos produtos por per�odo:', {
+      console.log('Ã°Å¸â€œÅ  Resumo dos produtos por perÃ¡Â­odo:', {
         total_dias: totalDias,
         dias_com_dados: diasComDados,
         primeiro_dia_com_dados: diasComDados > 0 ? Object.keys(produtosPorDia).find((dia) => 
@@ -166,7 +166,7 @@ export async function GET(request: NextRequest) {
       })
 
     } catch (dbError) {
-      console.error('�� Erro ao buscar produtos do banco:', dbError)
+      console.error('ÂÅ’ Erro ao buscar produtos do banco:', dbError)
       return NextResponse.json(
         { success: false, error: 'Erro ao buscar produtos: ' + (dbError as Error).message },
         { status: 500 }
@@ -174,10 +174,11 @@ export async function GET(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('�� Erro na API Produtos Per�odo:', error)
+    console.error('ÂÅ’ Erro na API Produtos PerÃ¡Â­odo:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor: ' + (error as Error).message },
       { status: 500 }
     )
   }
 } 
+

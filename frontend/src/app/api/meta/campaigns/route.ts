@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -32,3 +32,4 @@ export async function GET(request: NextRequest) {
   }
   return NextResponse.json({ success: true, data, count: data?.length })
 } 
+

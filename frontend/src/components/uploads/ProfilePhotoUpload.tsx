@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useRef } from 'react'
 import { Camera, Upload, X, User } from 'lucide-react'
@@ -23,9 +23,9 @@ export default function ProfilePhotoUpload({
     const file = event.target.files?.[0]
     if (!file) return
 
-    // Valida��es
+    // ValidaÃ¡Â§Ã¡Âµes
     if (!file.type.startsWith('image/')) {
-      alert('Por favor, selecione uma imagem v�lida')
+      alert('Por favor, selecione uma imagem vÃ¡Â¡lida')
       return
     }
 
@@ -83,7 +83,7 @@ export default function ProfilePhotoUpload({
           )}
         </div>
 
-        {/* Bot�o para remover foto */}
+        {/* BotÃ¡Â£o para remover foto */}
         {previewUrl && !disabled && (
           <button
             onClick={handleRemovePhoto}
@@ -112,7 +112,7 @@ export default function ProfilePhotoUpload({
         disabled={disabled}
       />
 
-      {/* Bot�es de a��o */}
+      {/* BotÃ¡Âµes de aÃ¡Â§Ã¡Â£o */}
       <div className="flex space-x-2">
         <Button
           onClick={openFileDialog}
@@ -125,7 +125,7 @@ export default function ProfilePhotoUpload({
           <span>Carregar foto</span>
         </Button>
 
-        {/* Futuramente pode adicionar c�mera */}
+        {/* Futuramente pode adicionar cÃ¡Â¢mera */}
         {/* 
         <Button
           onClick={openCamera}
@@ -135,16 +135,17 @@ export default function ProfilePhotoUpload({
           className="flex items-center space-x-2"
         >
           <Camera className="w-4 h-4" />
-          <span>C�mera</span>
+          <span>CÃ¡Â¢mera</span>
         </Button>
         */}
       </div>
 
       {/* Dicas */}
       <div className="text-xs text-slate-500 text-center max-w-xs">
-        <p>Recomendado: imagem quadrada, m�ximo 5MB</p>
+        <p>Recomendado: imagem quadrada, mÃ¡Â¡ximo 5MB</p>
         <p>Formatos aceitos: JPG, PNG, GIF</p>
       </div>
     </div>
   )
 } 
+

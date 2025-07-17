@@ -1,17 +1,31 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase-admin'
 import { securityMonitor } from '@/lib/security-monitor'
 
+// Tipos auxiliares para eventos de seguranÃ§a
+interface SecurityEvent {
+  id: string;
+  level?: string;
+  category?: string;
+  event_type: string;
+  details?: Record<string, any>;
+  ip_address?: string;
+  user_id?: string;
+  timestamp: string;
+  risk_score?: number;
+  resolved?: boolean;
+}
+
 export async function GET(request: NextRequest) {
   try {
-    // Buscar m�tricas das �ltimas 24 horas
+    // Buscar mÃ¡Â©tricas das Ã¡Âºltimas 24 horas
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
     const today = new Date()
     
     // Criar cliente Supabase
     const supabase = createServiceRoleClient()
     
-    // Buscar eventos de seguran�a das �ltimas 24 horas
+    // Buscar eventos de seguranÃ¡Â§a das Ã¡Âºltimas 24 horas
     const { data: events, error: eventsError } = await supabase
       .from('security_events')
       .select('*')
@@ -21,12 +35,12 @@ export async function GET(request: NextRequest) {
     if (eventsError) {
       console.error('Erro ao buscar eventos:', eventsError)
       return NextResponse.json(
-        { success: false, error: 'Erro ao buscar eventos de seguran�a' },
+        { success: false, error: 'Erro ao buscar eventos de seguranÃ¡Â§a' },
         { status: 500 }
       )
     }
 
-    // Buscar m�tricas do dia atual
+    // Buscar mÃ¡Â©tricas do dia atual
     const { data: todayMetrics, error: metricsError } = await supabase
       .from('security_metrics')
       .select('*')
@@ -34,30 +48,29 @@ export async function GET(request: NextRequest) {
       .single()
 
     if (metricsError && metricsError.code !== 'PGRST116') {
-      console.error('Erro ao buscar m�tricas:', metricsError)
+      console.error('Erro ao buscar mÃ¡Â©tricas:', metricsError)
       return NextResponse.json(
-        { success: false, error: 'Erro ao buscar m�tricas de seguran�a' },
+        { success: false, error: 'Erro ao buscar mÃ¡Â©tricas de seguranÃ¡Â§a' },
         { status: 500 }
       )
     }
 
-    // Calcular m�tricas em tempo real dos eventos
-    const totalEvents = events?.length || 0
-    const criticalEvents = events?.filter((e) => e.level === 'critical').length || 0
-    const warningEvents = events?.filter((e) => e.level === 'warning').length || 0
-    const infoEvents = events?.filter((e) => e.level === 'info').length || 0
-    const authEvents = events?.filter((e) => e.category === 'auth').length || 0
-    const accessEvents = events?.filter((e) => e.category === 'access').length || 0
-    const injectionEvents = events?.filter((e) => e.category === 'injection').length || 0
-    const rateLimitEvents = events?.filter((e) => e.category === 'rate_limit').length || 0
-    const apiAbuseEvents = events?.filter((e) => e.category === 'api_abuse').length || 0
-    const backupEvents = events?.filter((e) => e.category === 'backup').length || 0
-    const systemEvents = events?.filter((e) => e.category === 'system').length || 0
+    // Calcular mÃ¡Â©tricas em tempo real dos eventos
+    const totalEvents = (events as SecurityEvent[] | undefined)?.length || 0;
+    const criticalEvents = (events as SecurityEvent[] | undefined)?.filter((e: SecurityEvent) => e.level === 'critical').length || 0;
+    const warningEvents = (events as SecurityEvent[] | undefined)?.filter((e: SecurityEvent) => e.level === 'warning').length || 0;
+    const infoEvents = (events as SecurityEvent[] | undefined)?.filter((e: SecurityEvent) => e.level === 'info').length || 0;
+    const authEvents = (events as SecurityEvent[] | undefined)?.filter((e: SecurityEvent) => e.category === 'auth').length || 0;
+    const accessEvents = (events as SecurityEvent[] | undefined)?.filter((e: SecurityEvent) => e.category === 'access').length || 0;
+    const injectionEvents = (events as SecurityEvent[] | undefined)?.filter((e: SecurityEvent) => e.category === 'injection').length || 0;
+    const rateLimitEvents = (events as SecurityEvent[] | undefined)?.filter((e: SecurityEvent) => e.category === 'rate_limit').length || 0;
+    const apiAbuseEvents = (events as SecurityEvent[] | undefined)?.filter((e: SecurityEvent) => e.category === 'api_abuse').length || 0;
+    const backupEvents = (events as SecurityEvent[] | undefined)?.filter((e: SecurityEvent) => e.category === 'backup').length || 0;
+    const systemEvents = (events as SecurityEvent[] | undefined)?.filter((e: SecurityEvent) => e.category === 'system').length || 0;
+    const uniqueIps = new Set((events as SecurityEvent[] | undefined)?.map((e: SecurityEvent) => e.ip_address).filter(Boolean)).size;
+    const failedLogins = (events as SecurityEvent[] | undefined)?.filter((e: SecurityEvent) => e.event_type === 'failed_login').length || 0;
     
-    const uniqueIps = new Set(events?.map((e) => e.ip_address).filter(Boolean)).size
-    const failedLogins = events?.filter((e) => e.event_type === 'failed_login').length || 0
-    
-    // Usar m�tricas do banco se dispon�veis, caso contr�rio usar calculadas
+    // Usar mÃ¡Â©tricas do banco se disponÃ¡Â­veis, caso contrÃ¡Â¡rio usar calculadas
     const metrics = {
       total_events: todayMetrics?.total_events || totalEvents,
       critical_events: todayMetrics?.critical_events || criticalEvents,
@@ -75,7 +88,7 @@ export async function GET(request: NextRequest) {
       blocked_ips: todayMetrics?.blocked_ips || 0
     }
 
-    // Buscar �ltimos eventos para o timeline
+    // Buscar Ã¡Âºltimos eventos para o timeline
     const { data: recentEvents, error: recentEventsError } = await supabase
       .from('security_events')
       .select('*')
@@ -86,7 +99,7 @@ export async function GET(request: NextRequest) {
       console.error('Erro ao buscar eventos recentes:', recentEventsError)
     }
 
-    // Registrar evento de consulta de m�tricas
+    // Registrar evento de consulta de mÃ¡Â©tricas
     await securityMonitor.logEvent({
       level: 'info',
       category: 'access',
@@ -108,7 +121,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Erro interno na API:', error)
     
-    // Registrar erro como evento de seguran�a
+    // Registrar erro como evento de seguranÃ¡Â§a
     await securityMonitor.logEvent({
       level: 'warning',
       category: 'api_abuse',
@@ -127,7 +140,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Endpoint para registrar um evento de seguran�a
+// Endpoint para registrar um evento de seguranÃ¡Â§a
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -135,7 +148,7 @@ export async function POST(request: NextRequest) {
     // Validar dados de entrada
     if (!body.level || !body.category || !body.event_type) {
       return NextResponse.json(
-        { success: false, error: 'Dados obrigat�rios ausentes: level, category, event_type' },
+        { success: false, error: 'Dados obrigatÃ¡Â³rios ausentes: level, category, event_type' },
         { status: 400 }
       )
     }
@@ -155,7 +168,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Evento de seguran�a registrado com sucesso'
+      message: 'Evento de seguranÃ¡Â§a registrado com sucesso'
     })
 
   } catch (error) {
@@ -166,3 +179,4 @@ export async function POST(request: NextRequest) {
     )
   }
 } 
+

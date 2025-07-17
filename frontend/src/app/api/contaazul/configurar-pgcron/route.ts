@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
     const { barId, action = 'configure' } = await request.json()
 
     if (!barId) {
-      return NextResponse.json({ error: 'barId � obrigat�rio' }, { status: 400 })
+      return NextResponse.json({ error: 'barId Ã¡Â© obrigatÃ¡Â³rio' }, { status: 400 })
     }
 
     // Chamar Edge Function do pgcron
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(data)
 
   } catch (error) {
-    console.error('Erro na API de configura��o pgcron:', error)
+    console.error('Erro na API de configuraÃ¡Â§Ã¡Â£o pgcron:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor' 
     }, { status: 500 })
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     const barId = searchParams.get('barId')
 
     if (!barId) {
-      return NextResponse.json({ error: 'barId � obrigat�rio' }, { status: 400 })
+      return NextResponse.json({ error: 'barId Ã¡Â© obrigatÃ¡Â³rio' }, { status: 400 })
     }
 
     // Verificar status dos cron jobs
@@ -84,7 +84,7 @@ export async function DELETE(request: NextRequest) {
     const { barId } = await request.json()
 
     if (!barId) {
-      return NextResponse.json({ error: 'barId � obrigat�rio' }, { status: 400 })
+      return NextResponse.json({ error: 'barId Ã¡Â© obrigatÃ¡Â³rio' }, { status: 400 })
     }
 
     // Remover cron jobs
@@ -117,3 +117,4 @@ export async function DELETE(request: NextRequest) {
     }, { status: 500 })
   }
 } 
+

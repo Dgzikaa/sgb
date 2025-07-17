@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -19,15 +19,15 @@ export async function GET(request: NextRequest) {
   if (error) {
     return NextResponse.json({ success: false, error: error.message })
   }
-  // Agregar KPIs do per�odo
+  // Agregar KPIs do perÃ¡Â­odo
   if (!data || data.length === 0) {
     return NextResponse.json({ success: true, data: null })
   }
-  // Exemplo de agrega��o: soma, m�dia, varia��o
+  // Exemplo de agregaÃ¡Â§Ã¡Â£o: soma, mÃ¡Â©dia, variaÃ¡Â§Ã¡Â£o
   const first = data[0]
   const last = data[data.length - 1]
-  const sum = (arr[], key: string) => arr.reduce((acc, d) => acc + (d[key] || 0), 0)
-  const avg = (arr[], key: string) => arr.length ? sum(arr, key) / arr.length : 0
+  const sum = (arr: any[], key: string) => arr.reduce((acc, d) => acc + (d[key] || 0), 0)
+  const avg = (arr: any[], key: string) => arr.length ? sum(arr, key) / arr.length : 0
   const kpis = {
     total_followers: last.instagram_followers,
     followers_gained: last.instagram_followers - first.instagram_followers,
@@ -49,3 +49,4 @@ export async function GET(request: NextRequest) {
   }
   return NextResponse.json({ success: true, data: kpis })
 } 
+

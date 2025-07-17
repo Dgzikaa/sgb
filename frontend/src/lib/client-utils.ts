@@ -1,17 +1,17 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 
 /**
- * Utilit�rios para verifica��o de ambiente cliente/servidor
+ * UtilitÃ¡Â¡rios para verificaÃ¡Â§Ã¡Â£o de ambiente cliente/servidor
  * e acesso seguro a APIs do navegador
  */
 
 /**
- * Verifica se o c�digo est� rodando no cliente (navegador)
+ * Verifica se o cÃ¡Â³digo estÃ¡Â¡ rodando no cliente (navegador)
  */
 export const isClient = typeof window !== 'undefined'
 
 /**
- * Verifica se o c�digo est� rodando no servidor
+ * Verifica se o cÃ¡Â³digo estÃ¡Â¡ rodando no servidor
  */
 export const isServer = typeof window === 'undefined'
 
@@ -153,3 +153,4 @@ export const safeWindow = {
 // Export individual functions for convenience
 export const { getItem: getLocalStorage, setItem: setLocalStorage, removeItem: removeLocalStorage } = safeLocalStorage
 export const { isOnline, clipboard, mediaDevices, share, serviceWorker } = safeNavigator 
+

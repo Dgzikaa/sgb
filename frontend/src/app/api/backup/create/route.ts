@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { backupSystem } from '@/lib/backup-system';
 
 export async function POST(request: NextRequest) {
@@ -7,12 +7,12 @@ export async function POST(request: NextRequest) {
 
     if (!barId) {
       return NextResponse.json(
-        { error: 'barId � obrigat�rio' },
+        { error: 'barId Ã¡Â© obrigatÃ¡Â³rio' },
         { status: 400 }
       );
     }
 
-    console.log(`🔄 Iniciando backup para bar ${barId}...`);
+    console.log(`Ã°Å¸â€â€ž Iniciando backup para bar ${barId}...`);
 
     // Criar backup
     const result = await backupSystem.createBackup(parseInt(barId));
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('�� Erro ao criar backup:', error);
+    console.error('ÂÅ’ Erro ao criar backup:', error);
     return NextResponse.json(
       { 
         error: 'Erro interno do servidor',
@@ -34,3 +34,4 @@ export async function POST(request: NextRequest) {
     );
   }
 } 
+

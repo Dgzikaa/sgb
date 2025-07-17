@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
@@ -13,14 +13,14 @@ export async function POST(request: NextRequest) {
     if (!data_evento || !bar_id) {
       return NextResponse.json({
         success: false,
-        error: 'Data do evento e bar_id s�o obrigat�rios'
+        error: 'Data do evento e bar_id sÃ¡Â£o obrigatÃ¡Â³rios'
       }, { status: 400 });
     }
 
     // Calcular campos derivados
     const ticket_medio = publico_real && publico_real > 0 ? faturamento_liquido / publico_real : null;
 
-    // Buscar o evento para calcular taxa de ocupa��o
+    // Buscar o evento para calcular taxa de ocupaÃ¡Â§Ã¡Â£o
     const { data: evento, error: eventoError } = await supabase
       .from('eventos')
       .select('capacidade_estimada')
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       console.error('Erro ao buscar evento:', eventoError);
       return NextResponse.json({
         success: false,
-        error: 'Evento n�o encontrado'
+        error: 'Evento nÃ¡Â£o encontrado'
       }, { status: 404 });
     }
 
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
     if (!data_evento || !bar_id) {
       return NextResponse.json({
         success: false,
-        error: 'Data do evento e bar_id s�o obrigat�rios'
+        error: 'Data do evento e bar_id sÃ¡Â£o obrigatÃ¡Â³rios'
       }, { status: 400 });
     }
 
@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
     if (error) {
       return NextResponse.json({
         success: false,
-        error: 'Evento n�o encontrado para esta data'
+        error: 'Evento nÃ¡Â£o encontrado para esta data'
       }, { status: 404 });
     }
 
@@ -123,3 +123,4 @@ export async function GET(request: NextRequest) {
     }, { status: 500 });
   }
 } 
+

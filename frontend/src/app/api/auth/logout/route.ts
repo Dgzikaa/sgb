@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { logLogout } from '@/lib/audit-logger'
 
 export async function POST(request: NextRequest) {
   try {
-    // Capturar informa��es do cliente para logging
+    // Capturar informaÃ¡Â§Ã¡Âµes do cliente para logging
     const forwarded = request.headers.get('x-forwarded-for');
     const clientIp = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
     const sessionId = request.headers.get('x-session-id') || `session_${Date.now()}`;
     
-    // Tentar obter dados do usu�rio do cookie antes de limpar
+    // Tentar obter dados do usuÃ¡Â¡rio do cookie antes de limpar
     let userInfo = null;
     try {
       const userCookie = request.cookies.get('sgb_user');
@@ -48,10 +48,11 @@ export async function POST(request: NextRequest) {
     
     return response
   } catch (error) {
-    console.error('�� Erro no logout:', error)
+    console.error('ÂÅ’ Erro no logout:', error)
     return NextResponse.json(
       { success: false, message: 'Erro interno do servidor' },
       { status: 500 }
     )
   }
 } 
+

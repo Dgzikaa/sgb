@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import React from 'react'
 import { X, Trash2, Edit, Archive, Download, Share2, Copy, MoreHorizontal } from 'lucide-react'
@@ -9,25 +9,25 @@ import { Separator } from './separator'
 import { cn } from '@/lib/utils'
 
 export interface BulkAction {
-  id: string
-  label: string
-  icon?: React.ComponentType<{ className?: string }>
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost'
-  onClick: (selectedItems[]) => void | Promise<void>
+  id: string;
+  label: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost';
+  onClick: (selectedItems: any[]) => void | Promise<void>
   disabled?: boolean
   requiresConfirmation?: boolean
   confirmationMessage?: string
 }
 
 interface BulkActionsToolbarProps {
-  selectedCount: number
-  totalCount: number
-  selectedItems[]
-  actions: BulkAction[]
-  onClearSelection: () => void
-  className?: string
-  position?: 'fixed' | 'sticky' | 'relative'
-  showStats?: boolean
+  selectedCount: number;
+  totalCount: number;
+  selectedItems: any[];
+  actions: BulkAction[];
+  onClearSelection: () => void;
+  className?: string;
+  position?: 'fixed' | 'sticky' | 'relative';
+  showStats?: boolean;
 }
 
 export function BulkActionsToolbar({
@@ -56,7 +56,7 @@ export function BulkActionsToolbar({
     if (action.requiresConfirmation) {
       const confirmed = window.confirm(
         action.confirmationMessage || 
-        `Confirma a a��o "${action.label}" em ${selectedCount} item(s)?`
+        `Confirma a aÃ¡Â§Ã¡Â£o "${action.label}" em ${selectedCount} item(s)?`
       )
       if (!confirmed) return
     }
@@ -64,7 +64,7 @@ export function BulkActionsToolbar({
     try {
       await action.onClick(selectedItems)
     } catch (error) {
-      console.error('Erro na a��o em lote:', error)
+      console.error('Erro na aÃ¡Â§Ã¡Â£o em lote:', error)
     }
   }
 
@@ -173,19 +173,19 @@ export function BulkActionsToolbar({
   )
 }
 
-// A��es predefinidas comuns
+// AÃ¡Â§Ã¡Âµes predefinidas comuns
 export const commonBulkActions = {
-  delete: (onDelete: (items[]) => void): BulkAction => ({
+  delete: (onDelete: (items: any[]) => void): BulkAction => ({
     id: 'delete',
     label: 'Excluir',
     icon: Trash2,
     variant: 'destructive' as const,
     onClick: onDelete,
     requiresConfirmation: true,
-    confirmationMessage: 'Esta a��o n�o pode ser desfeita. Confirma a exclus�o?'
+    confirmationMessage: 'Esta aÃ§Ã£o nÃ£o pode ser desfeita. Confirma a exclusÃ£o?'
   }),
   
-  edit: (onEdit: (items[]) => void): BulkAction => ({
+  edit: (onEdit: (items: any[]) => void): BulkAction => ({
     id: 'edit',
     label: 'Editar',
     icon: Edit,
@@ -193,7 +193,7 @@ export const commonBulkActions = {
     onClick: onEdit
   }),
   
-  archive: (onArchive: (items[]) => void): BulkAction => ({
+  archive: (onArchive: (items: any[]) => void): BulkAction => ({
     id: 'archive',
     label: 'Arquivar',
     icon: Archive,
@@ -202,7 +202,7 @@ export const commonBulkActions = {
     requiresConfirmation: true
   }),
   
-  download: (onDownload: (items[]) => void): BulkAction => ({
+  download: (onDownload: (items: any[]) => void): BulkAction => ({
     id: 'download',
     label: 'Baixar',
     icon: Download,
@@ -210,7 +210,7 @@ export const commonBulkActions = {
     onClick: onDownload
   }),
   
-  duplicate: (onDuplicate: (items[]) => void): BulkAction => ({
+  duplicate: (onDuplicate: (items: any[]) => void): BulkAction => ({
     id: 'duplicate',
     label: 'Duplicar',
     icon: Copy,
@@ -218,7 +218,7 @@ export const commonBulkActions = {
     onClick: onDuplicate
   }),
   
-  share: (onShare: (items[]) => void): BulkAction => ({
+  share: (onShare: (items: any[]) => void): BulkAction => ({
     id: 'share',
     label: 'Compartilhar',
     icon: Share2,
@@ -226,3 +226,4 @@ export const commonBulkActions = {
     onClick: onShare
   })
 } 
+

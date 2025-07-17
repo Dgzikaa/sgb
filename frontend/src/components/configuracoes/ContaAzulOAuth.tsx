@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -85,7 +85,7 @@ export default function ContaAzulOAuth() {
   // Auto-renovar token quando expirado
   useEffect(() => {
     if (status.configured && !status.connected && status.tokenExpired) {
-      console.log('🔄 FRONTEND - Token expirado detectado, tentando renovar automaticamente...')
+      console.log('Ã°Å¸â€â€ž FRONTEND - Token expirado detectado, tentando renovar automaticamente...')
       handleRefresh()
     }
   }, [status.configured, status.connected, status.tokenExpired])
@@ -96,18 +96,18 @@ export default function ContaAzulOAuth() {
     if (!selectedBar?.id) return
     
     try {
-      console.log('🔍 FRONTEND - Carregando status para bar:', selectedBar.id)
+      console.log('Ã°Å¸â€Â FRONTEND - Carregando status para bar:', selectedBar.id)
       const response = await fetch(`/api/contaazul/auth?action=status&barId=${selectedBar.id}`)
       const data = await response.json()
       
-      console.log('🔍 FRONTEND - Resposta da API:', { 
+      console.log('Ã°Å¸â€Â FRONTEND - Resposta da API:', { 
         ok: response.ok, 
         status: response.status,
         data: data
       })
       
       if (response.ok) {
-        // Sempre atualizar o status, independente se est� configurado ou n�o
+        // Sempre atualizar o status, independente se estÃ¡Â¡ configurado ou nÃ¡Â£o
         setStatus({
           connected: data.connected || false,
           configured: data.configured || false,
@@ -120,13 +120,13 @@ export default function ContaAzulOAuth() {
           debug: data.debug
         })
         
-        console.log('�� FRONTEND - Status atualizado:', {
+        console.log('Å“â€¦ FRONTEND - Status atualizado:', {
           connected: data.connected || false,
           configured: data.configured || false,
           tokenExpired: data.tokenExpired || false
         })
       } else {
-        console.log('�� FRONTEND - Erro na resposta:', data)
+        console.log('ÂÅ’ FRONTEND - Erro na resposta:', data)
         setStatus({
           connected: false,
           configured: false,
@@ -138,7 +138,7 @@ export default function ContaAzulOAuth() {
         })
       }
     } catch (error) {
-      console.error('�� FRONTEND - Erro ao carregar status:', error)
+      console.error('ÂÅ’ FRONTEND - Erro ao carregar status:', error)
       setStatus({
         connected: false,
         configured: false,
@@ -154,8 +154,8 @@ export default function ContaAzulOAuth() {
   const handleConfigure = async () => {
     if (!selectedBar?.id || !config.clientId || !config.clientSecret || !config.redirectUri) {
       toast({
-        title: "Campos obrigat�rios",
-        description: "Preencha todos os campos de configura��o",
+        title: "Campos obrigatÃ¡Â³rios",
+        description: "Preencha todos os campos de configuraÃ¡Â§Ã¡Â£o",
         variant: "destructive"
       })
       return
@@ -183,20 +183,20 @@ export default function ContaAzulOAuth() {
       }
 
       toast({
-        title: "Configura��o salva",
+        title: "ConfiguraÃ¡Â§Ã¡Â£o salva",
         description: "Credenciais OAuth configuradas com sucesso!"
       })
 
       setShowConfig(false)
       
       // Aguardar um pouco e recarregar status
-      console.log('🔍 FRONTEND - Aguardando para recarregar status...')
+      console.log('Ã°Å¸â€Â FRONTEND - Aguardando para recarregar status...')
       setTimeout(() => {
         loadStatus()
       }, 500)
     } catch (error) {
       toast({
-        title: "Erro na configura��o",
+        title: "Erro na configuraÃ¡Â§Ã¡Â£o",
         description: error instanceof Error ? error.message : "Erro ao configurar OAuth",
         variant: "destructive"
       })
@@ -224,8 +224,8 @@ export default function ContaAzulOAuth() {
       }
     } catch (error) {
       toast({
-        title: "Erro na autoriza��o",
-        description: error instanceof Error ? error.message : "Erro ao gerar URL de autoriza��o",
+        title: "Erro na autorizaÃ¡Â§Ã¡Â£o",
+        description: error instanceof Error ? error.message : "Erro ao gerar URL de autorizaÃ¡Â§Ã¡Â£o",
         variant: "destructive"
       })
     } finally {
@@ -244,18 +244,18 @@ export default function ContaAzulOAuth() {
       const data = await response.json()
       
       if (!response.ok) {
-        console.log('�� FRONTEND - Falha na renova��o autom�tica:', data.error)
+        console.log('ÂÅ’ FRONTEND - Falha na renovaÃ¡Â§Ã¡Â£o automÃ¡Â¡tica:', data.error)
         
-        // Se a renova��o falhar, n�o mostrar erro para renova��o autom�tica
+        // Se a renovaÃ¡Â§Ã¡Â£o falhar, nÃ¡Â£o mostrar erro para renovaÃ¡Â§Ã¡Â£o automÃ¡Â¡tica
         if (!status.connected) {
-          console.log('🔄 FRONTEND - Renova��o autom�tica falhou, mantendo status atual')
+          console.log('Ã°Å¸â€â€ž FRONTEND - RenovaÃ¡Â§Ã¡Â£o automÃ¡Â¡tica falhou, mantendo status atual')
           return
         }
         
         throw new Error(data.error || 'Erro ao renovar token')
       }
 
-      console.log('�� FRONTEND - Token renovado com sucesso!')
+      console.log('Å“â€¦ FRONTEND - Token renovado com sucesso!')
       
       toast({
         title: "Token renovado",
@@ -264,7 +264,7 @@ export default function ContaAzulOAuth() {
 
       loadStatus()
     } catch (error) {
-      // S� mostrar erro se for renova��o manual (usu�rio conectado)
+      // SÃ¡Â³ mostrar erro se for renovaÃ¡Â§Ã¡Â£o manual (usuÃ¡Â¡rio conectado)
       if (status.connected) {
         toast({
           title: "Erro ao renovar token",
@@ -338,7 +338,7 @@ export default function ContaAzulOAuth() {
         throw new Error(data.error || 'Erro no sync completo')
       }
       
-      console.log('�� SYNC COMPLETO CONCLU�DO:', data)
+      console.log('Å“â€¦ SYNC COMPLETO CONCLUÃ¡ÂDO:', data)
       
       // Usar estrutura da API unificada
       const adaptedResults = {
@@ -351,10 +351,10 @@ export default function ContaAzulOAuth() {
           competencias_encontradas: data.estatisticas?.eventos_sem_parcelas || 0
         },
         problemas_corrigidos: data.regras_implementadas || [
-          '�� Fluxo unificado de 7 passos implementado',
-          '�� Tabela unificada contaazul_eventos_financeiros',
-          '�� Regra: sem parcelas = data_competencia = data_vencimento',
-          '�� Parcelas reais salvas em contaazul_parcelas'
+          'Å“â€¦ Fluxo unificado de 7 passos implementado',
+          'Å“â€¦ Tabela unificada contaazul_eventos_financeiros',
+          'Å“â€¦ Regra: sem parcelas = data_competencia = data_vencimento',
+          'Å“â€¦ Parcelas reais salvas em contaazul_parcelas'
         ]
       }
       
@@ -365,14 +365,14 @@ export default function ContaAzulOAuth() {
       const totalParcelas = adaptedResults.estatisticas.parcelas_processadas || 0
       
       toast({
-        title: "�� Sync Completo Conclu�do!",
+        title: "Å“â€¦ Sync Completo ConcluÃ¡Â­do!",
         description: `${totalEventos} eventos salvos! ${totalParcelas} parcelas processadas. Veja logs no terminal!`,
         variant: "default"
       })
     } catch (error) {
       toast({
-        title: "Erro na Sincroniza��o",
-        description: error instanceof Error ? error.message : "Erro na sincroniza��o",
+        title: "Erro na SincronizaÃ¡Â§Ã¡Â£o",
+        description: error instanceof Error ? error.message : "Erro na sincronizaÃ¡Â§Ã¡Â£o",
         variant: "destructive"
       })
     } finally {
@@ -389,13 +389,13 @@ export default function ContaAzulOAuth() {
       await navigator.clipboard.writeText(text)
       toast({
         title: "Copiado!",
-        description: `${label} copiado para a �rea de transfer�ncia`,
+        description: `${label} copiado para a Ã¡Â¡rea de transferÃ¡Âªncia`,
         variant: "default"
       })
     } catch (error) {
       toast({
         title: "Erro ao copiar",
-        description: "N�o foi poss�vel copiar para a �rea de transfer�ncia",
+        description: "NÃ¡Â£o foi possÃ¡Â­vel copiar para a Ã¡Â¡rea de transferÃ¡Âªncia",
         variant: "destructive"
       })
     }
@@ -411,7 +411,7 @@ export default function ContaAzulOAuth() {
   }
 
   const getStatusText = () => {
-    if (!status.configured) return "N�o configurado"
+    if (!status.configured) return "NÃ¡Â£o configurado"
     if (!status.connected) return "Desconectado"
     if (status.tokenExpired) return "Token expirado"
     return "Conectado"
@@ -424,7 +424,7 @@ export default function ContaAzulOAuth() {
     if (status.configured) {
       return <Badge variant="secondary">Configurado</Badge>
     }
-    return <Badge variant="outline">N�o configurado</Badge>
+    return <Badge variant="outline">NÃ¡Â£o configurado</Badge>
   }
 
   return (
@@ -434,18 +434,18 @@ export default function ContaAzulOAuth() {
         <CardHeader>
           <CardTitle className="flex items-center gap-3">
             {getStatusIcon()}
-            Integra��o ContaAzul
+            IntegraÃ¡Â§Ã¡Â£o ContaAzul
             {getStatusBadge()}
           </CardTitle>
           <CardDescription>
-            Conecte-se ao ContaAzul para sincronizar dados financeiros e processar compet�ncias
+            Conecte-se ao ContaAzul para sincronizar dados financeiros e processar competÃ¡Âªncias
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {!status.configured && (
               <div className="text-center py-8">
-                <p className="text-gray-600 mb-4">Configure suas credenciais OAuth para come�ar</p>
+                <p className="text-gray-600 mb-4">Configure suas credenciais OAuth para comeÃ¡Â§ar</p>
                 <Button onClick={() => setShowConfig(true)}>
                   Configurar Credenciais
                 </Button>
@@ -454,7 +454,7 @@ export default function ContaAzulOAuth() {
 
             {status.configured && !status.connected && (
               <div className="text-center py-8">
-                <p className="text-gray-600 mb-4">Configura��o encontrada. Autorize o acesso ao ContaAzul.</p>
+                <p className="text-gray-600 mb-4">ConfiguraÃ¡Â§Ã¡Â£o encontrada. Autorize o acesso ao ContaAzul.</p>
                 <Button 
                   onClick={handleAuthorize}
                   disabled={loading}
@@ -472,7 +472,7 @@ export default function ContaAzulOAuth() {
 
             {status.connected && (
               <div className="space-y-4">
-                {/* Status da Conex�o */}
+                {/* Status da ConexÃ¡Â£o */}
                 <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -482,7 +482,7 @@ export default function ContaAzulOAuth() {
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-green-800">�ltima renova��o</p>
+                      <p className="text-sm font-medium text-green-800">Ã¡Å¡ltima renovaÃ¡Â§Ã¡Â£o</p>
                       <p className="text-sm text-green-700">
                         {status.lastRefresh ? new Date(status.lastRefresh).toLocaleString('pt-BR') : 'N/A'}
                       </p>
@@ -545,7 +545,7 @@ export default function ContaAzulOAuth() {
                     ) : (
                       <RefreshCw className="w-4 h-4 mr-2" />
                     )}
-                    🚀 Sync Completo
+                    Ã°Å¸Å¡â‚¬ Sync Completo
                   </Button>
                   
                   <Button 
@@ -563,7 +563,7 @@ export default function ContaAzulOAuth() {
                     size="sm"
                     className="border-gray-300 text-gray-700 hover:bg-gray-100"
                   >
-                    {showDebug ? 'Ocultar' : 'Ver'} Debug/C�digos
+                    {showDebug ? 'Ocultar' : 'Ver'} Debug/CÃ¡Â³digos
                   </Button>
                 </div>
               </div>
@@ -578,7 +578,7 @@ export default function ContaAzulOAuth() {
           <CardHeader>
             <CardTitle>Configurar Credenciais OAuth 2.0</CardTitle>
             <CardDescription>
-              Configure as credenciais da sua aplica��o ContaAzul
+              Configure as credenciais da sua aplicaÃ¡Â§Ã¡Â£o ContaAzul
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -623,7 +623,7 @@ export default function ContaAzulOAuth() {
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline"
                 >
-                  Gerenciador de Aplica��es da ContaAzul
+                  Gerenciador de AplicaÃ¡Â§Ã¡Âµes da ContaAzul
                 </a>
               </AlertDescription>
             </Alert>
@@ -636,7 +636,7 @@ export default function ContaAzulOAuth() {
                 {configuring ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 ) : null}
-                Salvar Configura��es
+                Salvar ConfiguraÃ¡Â§Ã¡Âµes
               </Button>
               <Button 
                 onClick={() => setShowConfig(false)}
@@ -651,16 +651,16 @@ export default function ContaAzulOAuth() {
 
 
 
-      {/* Debug/C�digos Section */}
+      {/* Debug/CÃ¡Â³digos Section */}
       {showDebug && status.connected && status.debug && (
         <Card className="border-gray-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-gray-500" />
-              Debug - C�digos para Testes Locais
+              Debug - CÃ¡Â³digos para Testes Locais
             </CardTitle>
             <CardDescription>
-              Use estes c�digos para testes e desenvolvimento local. Mantenha seguro!
+              Use estes cÃ¡Â³digos para testes e desenvolvimento local. Mantenha seguro!
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -750,7 +750,7 @@ export default function ContaAzulOAuth() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-green-500" />
-              Resultados da Sincroniza��o de Dados
+              Resultados da SincronizaÃ¡Â§Ã¡Â£o de Dados
             </CardTitle>
             <CardDescription>
               Executado em: {new Date(syncResults.timestamp).toLocaleString('pt-BR')}
@@ -759,7 +759,7 @@ export default function ContaAzulOAuth() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                <h4 className="font-semibold text-blue-800 mb-2">📂 Categorias</h4>
+                <h4 className="font-semibold text-blue-800 mb-2">Ã°Å¸â€œâ€š Categorias</h4>
                 <p className="text-2xl font-bold text-blue-900">
                   {syncResults.estatisticas?.categorias_processadas || 0}
                 </p>
@@ -767,7 +767,7 @@ export default function ContaAzulOAuth() {
               </div>
 
               <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                <h4 className="font-semibold text-green-800 mb-2">💰 Receitas</h4>
+                <h4 className="font-semibold text-green-800 mb-2">Ã°Å¸â€™Â° Receitas</h4>
                 <p className="text-2xl font-bold text-green-900">
                   {syncResults.estatisticas?.receitas_salvas || 0}
                 </p>
@@ -775,7 +775,7 @@ export default function ContaAzulOAuth() {
               </div>
 
               <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-                <h4 className="font-semibold text-red-800 mb-2">💸 Despesas</h4>
+                <h4 className="font-semibold text-red-800 mb-2">Ã°Å¸â€™Â¸ Despesas</h4>
                 <p className="text-2xl font-bold text-red-900">
                   {syncResults.estatisticas?.despesas_salvas || 0}
                 </p>
@@ -783,7 +783,7 @@ export default function ContaAzulOAuth() {
               </div>
 
               <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                <h4 className="font-semibold text-purple-800 mb-2">📋 Compet�ncia</h4>
+                <h4 className="font-semibold text-purple-800 mb-2">Ã°Å¸â€œâ€¹ CompetÃ¡Âªncia</h4>
                 <p className="text-2xl font-bold text-purple-900">
                   {syncResults.estatisticas?.parcelas_processadas > 0 
                     ? Math.round((syncResults.estatisticas.competencias_encontradas / syncResults.estatisticas.parcelas_processadas) * 100)
@@ -797,10 +797,10 @@ export default function ContaAzulOAuth() {
 
             {syncResults.problemas_corrigidos && syncResults.problemas_corrigidos.length > 0 && (
               <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                <h4 className="font-medium text-yellow-800 mb-2">�� Melhorias Aplicadas:</h4>
+                <h4 className="font-medium text-yellow-800 mb-2">Å“â€¦ Melhorias Aplicadas:</h4>
                 <ul className="text-sm text-yellow-700 space-y-1">
                   {syncResults.problemas_corrigidos.map((problema: string, index: number) => (
-                    <li key={index}>�� {problema}</li>
+                    <li key={index}>â‚¬Â¢ {problema}</li>
                   ))}
                 </ul>
               </div>
@@ -811,3 +811,4 @@ export default function ContaAzulOAuth() {
     </div>
   )
 } 
+

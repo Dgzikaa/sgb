@@ -1,4 +1,4 @@
-import * as React from "react"
+﻿import * as React from "react"
 import { cn } from "@/lib/utils"
 
 interface SwitchProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type' | 'role'> {
@@ -47,3 +47,4 @@ const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
 Switch.displayName = "Switch"
 
 export { Switch } 
+

@@ -1,5 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
+
+interface ChecklistAberturaItem {
+  id: string;
+  titulo: string;
+  descricao?: string;
+  area?: string;
+  prioridade?: string;
+  tempo_estimado?: number;
+  responsavel?: string;
+  status: string;
+  observacoes?: string;
+  horario_inicio?: string;
+  horario_conclusao?: string;
+  verificado_por?: string;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,13 +23,13 @@ export async function GET(request: NextRequest) {
     const data = searchParams.get('data')
 
     if (!bar_id) {
-      return NextResponse.json({ error: 'bar_id � obrigat�rio' }, { status: 400 })
+      return NextResponse.json({ error: 'bar_id Ã¡Â© obrigatÃ¡Â³rio' }, { status: 400 })
     }
 
     const supabase = await getAdminClient()
 
     if (data) {
-      // Buscar checklist espec�fico de uma data
+      // Buscar checklist especÃ¡Â­fico de uma data
       const { data: checklist, error } = await supabase
         .from('checklist_abertura')
         .select(`
@@ -61,28 +76,28 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { 
-      bar_id, 
-      data, 
-      hora_inicio, 
-      hora_conclusao, 
-      itens, 
-      responsavel_geral, 
-      observacoes_gerais 
-    } = body
+    const {
+      bar_id,
+      data,
+      hora_inicio,
+      hora_conclusao,
+      responsavel_geral,
+      observacoes_gerais
+    } = body;
+    const itens: ChecklistAberturaItem[] = body.itens;
 
     if (!bar_id || !data || !itens) {
-      return NextResponse.json({ 
-        error: 'bar_id, data e itens s�o obrigat�rios' 
+      return NextResponse.json({
+        error: 'bar_id, data e itens sÃ¡Â£o obrigatÃ¡Â³rios'
       }, { status: 400 })
     }
 
     const supabase = await getAdminClient()
 
-    // Calcular estat�sticas
-    const total_itens = itens.length
-    const itens_concluidos = itens.filter((item) => item.status === 'concluido').length
-    const itens_problemas = itens.filter((item) => item.status === 'problema').length
+    // Calcular estatÃ¡Â­sticas
+    const total_itens = itens.length;
+    const itens_concluidos = itens.filter((item: any) => item.status === 'concluido').length;
+    const itens_problemas = itens.filter((item: any) => item.status === 'problema').length;
     const percentual_conclusao = total_itens > 0 ? (itens_concluidos / total_itens * 100) : 0
 
     // Criar ou atualizar checklist principal
@@ -118,21 +133,23 @@ export async function POST(request: NextRequest) {
       .eq('checklist_id', checklistData.id)
 
     // Inserir novos itens
-    const itensParaInserir = itens.map((item) => ({
-      checklist_id: checklistData.id,
-      item_id: item.id,
-      titulo: item.titulo,
-      descricao: item.descricao,
-      area: item.area,
-      prioridade: item.prioridade,
-      tempo_estimado: item.tempo_estimado,
-      responsavel: item.responsavel,
-      status: item.status,
-      observacoes: item.observacoes,
-      horario_inicio: item.horario_inicio,
-      horario_conclusao: item.horario_conclusao,
-      verificado_por: item.verificado_por
-    }))
+    const itensParaInserir = itens.map(function(item: ChecklistAberturaItem) {
+      return {
+        checklist_id: checklistData.id,
+        item_id: item.id,
+        titulo: item.titulo,
+        descricao: item.descricao,
+        area: item.area,
+        prioridade: item.prioridade,
+        tempo_estimado: item.tempo_estimado,
+        responsavel: item.responsavel,
+        status: item.status,
+        observacoes: item.observacoes,
+        horario_inicio: item.horario_inicio,
+        horario_conclusao: item.horario_conclusao,
+        verificado_por: item.verificado_por
+      };
+    });
 
     const { error: itensError } = await supabase
       .from('checklist_abertura_itens')
@@ -166,8 +183,8 @@ export async function PUT(request: NextRequest) {
     const { checklist_id, item_id, status, observacoes } = body
 
     if (!checklist_id || !item_id || !status) {
-      return NextResponse.json({ 
-        error: 'checklist_id, item_id e status s�o obrigat�rios' 
+      return NextResponse.json({
+        error: 'checklist_id, item_id e status sÃ¡Â£o obrigatÃ¡Â³rios'
       }, { status: 400 })
     }
 
@@ -175,7 +192,7 @@ export async function PUT(request: NextRequest) {
 
     const agora = new Date().toISOString()
 
-    // Atualizar item espec�fico
+    // Atualizar item especÃ¡Â­fico
     const { error } = await supabase
       .from('checklist_abertura_itens')
       .update({
@@ -193,7 +210,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao atualizar item' }, { status: 500 })
     }
 
-    // Recalcular estat�sticas do checklist
+    // Recalcular estatÃ¡Â­sticas do checklist
     const { data: itens, error: itensError } = await supabase
       .from('checklist_abertura_itens')
       .select('status')
@@ -201,8 +218,8 @@ export async function PUT(request: NextRequest) {
 
     if (!itensError && itens) {
       const total_itens = itens.length
-      const itens_concluidos = itens.filter((item) => item.status === 'concluido').length
-      const itens_problemas = itens.filter((item) => item.status === 'problema').length
+      const itens_concluidos = itens.filter((item: any) => item.status === 'concluido').length
+      const itens_problemas = itens.filter((item: any) => item.status === 'problema').length
       const percentual_conclusao = total_itens > 0 ? (itens_concluidos / total_itens * 100) : 0
 
       await supabase
@@ -226,3 +243,4 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
   }
 } 
+

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getUserAuth, isAdmin } from '@/lib/auth-helper'
 
@@ -6,13 +6,13 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 // ========================================
-// 📅 IMPORTAR EVENTOS DO GOOGLE SHEETS
+// Ã°Å¸â€œâ€¦ IMPORTAR EVENTOS DO GOOGLE SHEETS
 // ========================================
 export async function POST(request: NextRequest) {
   try {
     const user = await getUserAuth(request)
 
-    // Verificar permiss�es
+    // Verificar permissÃ¡Âµes
     if (!user || !isAdmin(user)) {
       return NextResponse.json({ 
         error: 'Apenas administradores podem importar eventos' 
@@ -26,13 +26,13 @@ export async function POST(request: NextRequest) {
 
     if (!dados || !Array.isArray(dados)) {
       return NextResponse.json({ 
-        error: 'Dados inv�lidos. Esperado array de eventos' 
+        error: 'Dados invÃ¡Â¡lidos. Esperado array de eventos' 
       }, { status: 400 })
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    console.log('📅 Importando eventos:', { 
+    console.log('Ã°Å¸â€œâ€¦ Importando eventos:', { 
       bar_id, 
       total_eventos: dados.length,
       substituir_existentes 
@@ -40,13 +40,13 @@ export async function POST(request: NextRequest) {
 
     let eventosImportados = 0
     let eventosAtualizados = 0
-    let erros = []
+    const erros = []
 
     for (const evento of dados) {
       try {
-        // Validar campos obrigat�rios
+        // Validar campos obrigatÃ¡Â³rios
         if (!evento.data_evento || !evento.nome) {
-          erros.push(`Evento ${evento.nome || 'sem nome'}: campos obrigat�rios faltando`)
+          erros.push(`Evento ${evento.nome || 'sem nome'}: campos obrigatÃ¡Â³rios faltando`)
           continue
         }
 
@@ -78,11 +78,11 @@ export async function POST(request: NextRequest) {
           status: evento.status || 'confirmado',
           divulgacao_ativa: evento.divulgacao_ativa !== false,
           observacoes: evento.observacoes || null,
-          // M�tricas do Sympla
+          // MÃ¡Â©tricas do Sympla
           sympla_total_ingressos: parseInt(evento.sympla_total_ingressos) || 0,
           sympla_total_checkins: parseInt(evento.sympla_total_checkins) || 0,
           sympla_faturamento_liquido: parseFloat(evento.sympla_faturamento_liquido) || 0,
-          // M�tricas do Yuzer
+          // MÃ¡Â©tricas do Yuzer
           yuzer_faturamento_bilheteria: parseFloat(evento.yuzer_faturamento_bilheteria) || 0,
           yuzer_faturamento_bar: parseFloat(evento.yuzer_faturamento_bar) || 0,
           yuzer_total_ingressos: parseInt(evento.yuzer_total_ingressos) || 0,
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
           dados_yuzer: evento.dados_yuzer || {}
         }
 
-        // Verificar se j� existe
+        // Verificar se jÃ¡Â¡ existe
         const { data: existente } = await supabase
           .from('eventos')
           .select('id')
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
           .single()
 
         if (existente && !substituir_existentes) {
-          console.log(`��️ Evento ${evento.nome} em ${evento.data_evento} j� existe, pulando`)
+          console.log(`Å¡Â Ã¯Â¸Â Evento ${evento.nome} em ${evento.data_evento} jÃ¡Â¡ existe, pulando`)
           continue
         }
 
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (error) {
-          erros.push(`Evento ${evento.nome}: ${error.message}`)
+          erros.push(`Evento ${evento.nome}: ${(error as any).message}`)
           continue
         }
 
@@ -132,13 +132,13 @@ export async function POST(request: NextRequest) {
         }
 
       } catch (error) {
-        erros.push(`Evento ${evento.nome}: ${error.message}`)
+        erros.push(`Evento ${evento.nome}: ${(error as any).message}`)
       }
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Importa��o de eventos conclu�da',
+      message: 'ImportaÃ¡Â§Ã¡Â£o de eventos concluÃ¡Â­da',
       resultados: {
         eventos_importados: eventosImportados,
         eventos_atualizados: eventosAtualizados,
@@ -149,31 +149,31 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro na importa��o de eventos:', error)
+    console.error('ÂÅ’ Erro na importaÃ¡Â§Ã¡Â£o de eventos:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
-      details: error.message 
+      details: (error as any).message 
     }, { status: 500 })
   }
 }
 
 // ========================================
-// 📋 TEMPLATE DE DADOS PARA IMPORTA��O
+// Ã°Å¸â€œâ€¹ TEMPLATE DE DADOS PARA IMPORTAÃ¡â€¡Ã¡Æ’O
 // ========================================
 export async function GET() {
   const template = {
-    exemplo: "Estrutura de dados para importa��o de eventos",
+    exemplo: "Estrutura de dados para importaÃ¡Â§Ã¡Â£o de eventos",
     formato: [
       {
         data_evento: "2025-06-01",
-        nome: "Samba da tia Z�lia",
+        nome: "Samba da tia ZÃ¡Â©lia",
         descricao: "Evento especial de samba",
         tipo_evento: "musica_ao_vivo",
         categoria: "brasileira",
         genero_musical: "samba",
         sub_genero: null,
-        nome_artista: "Tia Z�lia",
-        nome_banda: "Grupo da Tia Z�lia",
+        nome_artista: "Tia ZÃ¡Â©lia",
+        nome_banda: "Grupo da Tia ZÃ¡Â©lia",
         tipo_artista: "banda_local",
         origem: "local",
         popularidade: "conhecido",
@@ -201,7 +201,7 @@ export async function GET() {
       campos_opcionais: ["descricao", "tipo_evento", "categoria", "genero_musical", "nome_artista", "horario_inicio", "horario_fim", "capacidade_maxima", "observacoes"],
       formato_datas: "YYYY-MM-DD",
       formato_horarios: "HH:MM",
-      substituir_existentes: "false por padr�o, true para sobrescrever eventos existentes",
+      substituir_existentes: "false por padrÃ¡Â£o, true para sobrescrever eventos existentes",
       tipos_evento: ["musica_ao_vivo", "show", "festa", "promocao", "especial"],
       categorias: ["brasileira", "eletronica", "internacional", "outros"],
       generos_musicais: ["samba", "pagode", "funk", "sertanejo", "rock", "jazz", "dj_set", "outros"],
@@ -211,3 +211,4 @@ export async function GET() {
 
   return NextResponse.json(template)
 } 
+

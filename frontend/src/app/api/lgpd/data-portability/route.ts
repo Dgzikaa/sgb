@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 
@@ -6,13 +6,13 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies })
     
-    // Verificar autentica��o
+    // Verificar autenticaÃ¡Â§Ã¡Â£o
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'N�o autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'NÃ¡Â£o autorizado' }, { status: 401 })
     }
 
-    // Buscar todos os dados do usu�rio para exporta��o
+    // Buscar todos os dados do usuÃ¡Â¡rio para exportaÃ¡Â§Ã¡Â£o
     const exportData = {
       metadata: {
         exportedAt: new Date().toISOString(),
@@ -22,10 +22,10 @@ export async function GET(request: NextRequest) {
         format: 'JSON',
         version: '1.0'
       },
-      data: {}
+      data: {} as any
     }
 
-    // 1. Perfil do usu�rio
+    // 1. Perfil do usuÃ¡Â¡rio
     const { data: profile } = await supabase
       .from('profiles')
       .select('*')
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       exportData.data.profile = profile
     }
 
-    // 2. Configura��es LGPD
+    // 2. ConfiguraÃ¡Â§Ã¡Âµes LGPD
     const { data: lgpdSettings } = await supabase
       .from('user_lgpd_settings')
       .select('*')
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       exportData.data.lgpdSettings = lgpdSettings
     }
 
-    // 3. Configura��es do usu�rio
+    // 3. ConfiguraÃ¡Â§Ã¡Âµes do usuÃ¡Â¡rio
     const { data: userSettings } = await supabase
       .from('user_settings')
       .select('*')
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
 
     exportData.data.userSettings = userSettings || []
 
-    // 4. Hist�rico de login (�ltimos 100)
+    // 4. HistÃ³rico de login (Ã¡Âºltimos 100)
     const { data: loginHistory } = await supabase
       .from('user_sessions')
       .select('*')
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
 
     exportData.data.auditTrail = auditLogs || []
 
-    // 6. Dados de neg�cio (bars associados)
+    // 6. Dados de negÃ³cio (bars associados)
     const { data: userBars } = await supabase
       .from('user_bars')
       .select(`
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
 
     exportData.data.associatedBars = userBars || []
 
-    // 7. Execu��es de checklist
+    // 7. ExecuÃ§Ãµes de checklist
     const { data: checklistExecutions } = await supabase
       .from('checklist_executions')
       .select('*')
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
 
     exportData.data.checklistExecutions = checklistExecutions || []
 
-    // 8. Notifica��es
+    // 8. NotificaÃ§Ãµes
     const { data: notifications } = await supabase
       .from('notifications')
       .select('*')
@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
 
     exportData.data.notifications = notifications || []
 
-    // 9. Uploads/arquivos do usu�rio
+    // 9. Uploads/arquivos do usuÃ¡Â¡rio
     const { data: uploads } = await supabase
       .from('uploads')
       .select('*')
@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
 
     exportData.data.uploads = uploads || []
 
-    // Log da solicita��o de portabilidade
+    // Log da solicitaÃ§Ã£o de portabilidade
     await supabase
       .from('lgpd_audit_log')
       .insert({
@@ -170,3 +170,4 @@ function getClientIP(request: NextRequest): string {
   
   return 'unknown'
 } 
+

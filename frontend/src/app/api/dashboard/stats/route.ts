@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -9,7 +9,7 @@ function createServerSupabaseClient() {
   const serviceRoleKey = process.env.SERVICE_ROLE_KEY!
   
   if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error('Vari�veis de ambiente do Supabase n�o configuradas')
+    throw new Error('VariÃ¡Â¡veis de ambiente do Supabase nÃ¡Â£o configuradas')
   }
   
   return createClient(supabaseUrl, serviceRoleKey)
@@ -24,18 +24,18 @@ export async function GET(request: NextRequest) {
 
     if (!barId) {
       return NextResponse.json(
-        { success: false, error: 'Bar ID � obrigat�rio' },
+        { success: false, error: 'Bar ID Ã¡Â© obrigatÃ¡Â³rio' },
         { status: 400 }
       )
     }
 
-    console.log(`📊 Buscando dados do dashboard - Bar: ${barId}, Per�odo: ${startDate} at� ${endDate}`)
+    console.log(`Ã°Å¸â€œÅ  Buscando dados do dashboard - Bar: ${barId}, PerÃ¡Â­odo: ${startDate} atÃ¡Â© ${endDate}`)
 
     const supabase = createServerSupabaseClient()
 
-    // Buscar dados com pagina��o
+    // Buscar dados com paginaÃ¡Â§Ã¡Â£o
     const buscarComPaginacao = async (tabela: string, colunas: string) => {
-      let todosRegistros[] = []
+      let todosRegistros: any[] = []
       let pagina = 0
       const tamanhoPagina = 1000
       
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
 
     // Buscar dados Yuzer (sem bar_id)
     const buscarYuzer = async () => {
-      let todosRegistros[] = []
+      let todosRegistros: any[] = []
       let pagina = 0
       const tamanhoPagina = 1000
 
@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
       buscarComPaginacao('fatporhora', 'hora, valor, vd_dtgerencial')
     ])
 
-    console.log(`�� Dados carregados: ${periodoData.length} per�odo, ${pagamentosData.length} pagamentos, ${symplaData.length} sympla, ${yuzerData.length} yuzer, ${fatporhoraData.length} fatporhora`)
+    console.log(`Å“â€¦ Dados carregados: ${periodoData.length} perÃ¡Â­odo, ${pagamentosData.length} pagamentos, ${symplaData.length} sympla, ${yuzerData.length} yuzer, ${fatporhoraData.length} fatporhora`)
 
     return NextResponse.json({
       success: true,
@@ -138,10 +138,11 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro na API de stats:', error)
+    console.error('ÂÅ’ Erro na API de stats:', error)
     return NextResponse.json(
-      { success: false, error: `Erro interno: ${error.message}` },
+      { success: false, error: `Erro interno: ${(error as any).message}` },
       { status: 500 }
     )
   }
 } 
+

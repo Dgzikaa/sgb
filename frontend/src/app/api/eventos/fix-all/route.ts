@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase';
 
 // Event name mappings to fix encoding issues
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     console.log('?? Starting complete event name fix...');
     
     let totalFixed = 0;
-    let errors = [];
+    const errors = [];
 
     // Fix each mapping
     for (const mapping of eventMappings) {
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
           totalFixed++;
         }
       } catch (err) {
-        errors.push(`Exception fixing ${mapping.name}: ${err.message}`);
+        errors.push(`Exception fixing ${mapping.name}: ${(err as any).message}`);
       }
     }
 
@@ -51,7 +51,8 @@ export async function POST(request: NextRequest) {
     console.error('? Error in fix-all endpoint:', error);
     return NextResponse.json({
       success: false,
-      error: error.message
+      error: (error as any).message
     }, { status: 500 });
   }
 }
+

@@ -1,4 +1,4 @@
-import { sgbDiscordService, DiscordEmbed } from './discord-service';
+Ôªøimport { sgbDiscordService, DiscordEmbed } from './discord-service';
 import { 
   getScoreSaudeGeral,
   getDashboardExecutivo,
@@ -28,7 +28,7 @@ export interface BotResponse {
 }
 
 // ========================================
-// üß† PROCESSADOR DE COMANDOS INTELIGENTE
+// ü§ñ PROCESSADOR DE COMANDOS INTELIGENTE
 // ========================================
 export class DiscordBotService {
   private readonly API_BASE = '/api/ai/query';
@@ -38,7 +38,7 @@ export class DiscordBotService {
    */
   async processCommand(command: BotCommand): Promise<BotResponse> {
     try {
-      console.log(`ü§ñ Bot processando: "${command.message}" do usu·°rio ${command.user}`);
+      console.log(`ü§ñ Bot processando: "${command.message}" do usu√°rio ${command.user}`);
 
       // Detectar tipo de consulta baseado na mensagem
       const queryType = this.detectQueryType(command.message);
@@ -47,45 +47,51 @@ export class DiscordBotService {
         return this.createHelpResponse();
       }
 
-      // Extrair par·¢metros da mensagem
-      const params = this.extractParameters(command.message, queryType);
+      // Extrair par√¢metros da mensagem
+      const params = this.extractParameters(command.message);
 
       console.log(`ü§ñ Processando query: ${queryType} para bar ${command.bar_id}`);
 
-      // Chamar fun·ß·£o diretamente baseado no tipo
-      let data;
+      // Chamar fun√ß√£o diretamente baseado no tipo
+      let data: Record<string, unknown> | null = null;
       
       switch (queryType) {
-        case 'score_saude_geral':
+        case 'score_saude_geral': {
           data = await getScoreSaudeGeral(command.bar_id);
           break;
+        }
           
-        case 'dashboard_executivo':
-          data = await getDashboardExecutivo(command.bar_id, params.periodo_inicio, params.periodo_fim);
+        case 'dashboard_executivo': {
+          data = await getDashboardExecutivo(command.bar_id, params.periodo_inicio as string, params.periodo_fim as string);
           break;
+        }
           
-        case 'visao_360':
-          data = await getVisao360(command.bar_id, params.periodo_inicio, params.periodo_fim);
+        case 'visao_360': {
+          data = await getVisao360(command.bar_id, params.periodo_inicio as string, params.periodo_fim as string);
           break;
+        }
           
-        case 'status_checklists':
-          data = await getStatusChecklists(command.bar_id, params.periodo_inicio, params.periodo_fim);
+        case 'status_checklists': {
+          data = await getStatusChecklists(command.bar_id, params.periodo_inicio as string, params.periodo_fim as string);
           break;
+        }
           
-        case 'performance_funcionarios':
-          data = await getPerformanceFuncionarios(command.bar_id, params.periodo_inicio, params.periodo_fim, params.limite);
+        case 'performance_funcionarios': {
+          data = await getPerformanceFuncionarios(command.bar_id, params.periodo_inicio as string, params.periodo_fim as string, params.limite as number);
           break;
+        }
           
-        case 'whatsapp_stats':
-          data = await getWhatsAppStats(command.bar_id, params.periodo_inicio, params.periodo_fim);
+        case 'whatsapp_stats': {
+          data = await getWhatsAppStats(command.bar_id, params.periodo_inicio as string, params.periodo_fim as string);
           break;
+        }
           
-        case 'tempo_producao':
-          data = await getTempoProducao(command.bar_id, params.periodo_inicio, params.periodo_fim);
+        case 'tempo_producao': {
+          data = await getTempoProducao(command.bar_id, params.periodo_inicio as string, params.periodo_fim as string);
           break;
+        }
           
-        default:
-          // Para outros tipos, usar a API
+        default: {
           try {
             const response = await fetch(`http://localhost:3001/api/ai/query`, {
               method: 'POST',
@@ -101,20 +107,22 @@ export class DiscordBotService {
               throw new Error(`API Error: ${response.status}`);
             }
             
-            const apiResult = await response.json();
+            const apiResult: { success: boolean; error?: string; data?: Record<string, unknown> } = await response.json();
             if (!apiResult.success) {
               throw new Error(apiResult.error || 'Erro na API');
             }
             
-            data = apiResult.data;
-                     } catch (error) {
-             const errorMsg = error instanceof Error ? error.message : 'Erro desconhecido';
-             throw new Error(`Falha na consulta: ${errorMsg}`);
-           }
+            data = apiResult.data || null;
+          } catch (error) {
+            const errorMsg = error instanceof Error ? error.message : 'Erro desconhecido';
+            throw new Error(`Falha na consulta: ${errorMsg}`);
+          }
+          break;
+        }
       }
 
       // Criar resposta formatada
-      const embed = this.createEmbedResponse(queryType, data, command.message);
+      const embed = this.createEmbedResponse(queryType, data ?? {});
       
       return {
         success: true,
@@ -127,7 +135,7 @@ export class DiscordBotService {
       return {
         success: false,
         error: errorMessage,
-        text: `ùå Erro ao processar seu comando: ${errorMessage}`
+        text: `üí• Erro ao processar seu comando: ${errorMessage}`
       };
     }
   }
@@ -142,10 +150,10 @@ export class DiscordBotService {
     if (msg.includes('maior faturamento') || msg.includes('maior venda')) {
       return 'maior_faturamento';
     }
-    if (msg.includes('faturamento') && (msg.includes('per·≠odo') || msg.includes('periodo'))) {
+    if (msg.includes('faturamento') && (msg.includes('per√≠odo') || msg.includes('periodo'))) {
       return 'faturamento_periodo';
     }
-    if (msg.includes('comparativo') && msg.includes('m·™s')) {
+    if (msg.includes('comparativo') && msg.includes('m√™s')) {
       return 'comparativo_mensal';
     }
     if (msg.includes('top') && msg.includes('clientes')) {
@@ -157,15 +165,15 @@ export class DiscordBotService {
     if (msg.includes('resumo') && msg.includes('dia')) {
       return 'resumo_dia';
     }
-    if (msg.includes('resumo') && msg.includes('m·™s')) {
+    if (msg.includes('resumo') && msg.includes('m√™s')) {
       return 'resumo_mes';
     }
 
-    // úÖ Checklists & Operacional
+    // ‚úÖ Checklists & Operacional
     if (msg.includes('checklist') || msg.includes('checklists')) {
       return 'status_checklists';
     }
-    if (msg.includes('performance') && msg.includes('funcion·°rios')) {
+    if (msg.includes('performance') && msg.includes('funcion√°rios')) {
       return 'performance_funcionarios';
     }
     if (msg.includes('qualidade')) {
@@ -177,8 +185,8 @@ export class DiscordBotService {
       return 'whatsapp_stats';
     }
 
-    // üçï Produ·ß·£o
-    if (msg.includes('tempo') && (msg.includes('produ·ß·£o') || msg.includes('producao'))) {
+    // üè≠ Produ√ß√£o
+    if (msg.includes('tempo') && (msg.includes('produ√ß√£o') || msg.includes('producao'))) {
       return 'tempo_producao';
     }
 
@@ -189,7 +197,7 @@ export class DiscordBotService {
     if (msg.includes('insights')) {
       return 'insights_importantes';
     }
-    if (msg.includes('sa·∫de') || msg.includes('score')) {
+    if (msg.includes('sa√∫de') || msg.includes('score')) {
       return 'score_saude_geral';
     }
 
@@ -197,12 +205,12 @@ export class DiscordBotService {
     if (msg.includes('dashboard') || msg.includes('executivo')) {
       return 'dashboard_executivo';
     }
-    if (msg.includes('vis·£o') || msg.includes('360')) {
+    if (msg.includes('vis√£o') || msg.includes('360')) {
       return 'visao_360';
     }
 
     // Comandos gerais
-    if (msg.includes('como vai') || msg.includes('status') || msg.includes('situa·ß·£o')) {
+    if (msg.includes('como vai') || msg.includes('status') || msg.includes('situa√ß√£o')) {
       return 'dashboard_executivo';
     }
 
@@ -210,13 +218,13 @@ export class DiscordBotService {
   }
 
   /**
-   * Extrai par·¢metros da mensagem
+   * Extrai par√¢metros da mensagem
    */
-  private extractParameters(message: string, queryType: string): any {
-    const params = {};
+  private extractParameters(message: string): Record<string, unknown> {
+    const params: Record<string, unknown> = {};
 
     // Extrair datas
-    const dateRegex = /(\d{4}-\d{2}-\d{2})/g;
+    const dateRegex = /\d{4}-\d{2}-\d{2}/g;
     const dates = message.match(dateRegex);
     
     if (dates) {
@@ -224,8 +232,8 @@ export class DiscordBotService {
       if (dates.length >= 2) params.periodo_fim = dates[1];
     }
 
-    // Extrair n·∫meros (limite)
-    const numberRegex = /top\s+(\d+)|(\d+)\s+(?:primeiros|melhores|·∫ltimos)/gi;
+    // Extrair n√∫meros (limite)
+    const numberRegex = /top\s+(\d+)|(\d+)\s+(?:primeiros|melhores|√∫ltimos)/gi;
     const numberMatch = message.match(numberRegex);
     if (numberMatch) {
       const num = parseInt(numberMatch[0].replace(/\D/g, ''));
@@ -234,23 +242,23 @@ export class DiscordBotService {
       }
     }
 
-    // Per·≠odos relativos
+    // Per√≠odos relativos
     if (message.includes('ontem')) {
       const ontem = new Date();
       ontem.setDate(ontem.getDate() - 1);
-      params.periodo_inicio = ontem.toISOString().split('T')[0];
+      params.periodo_inicio = ontem.toISOString().split('T')[0] ;
     }
     
-    if (message.includes('·∫ltima semana')) {
+    if (message.includes('√∫ltima semana')) {
       const semanaAtras = new Date();
       semanaAtras.setDate(semanaAtras.getDate() - 7);
-      params.periodo_inicio = semanaAtras.toISOString().split('T')[0];
+      params.periodo_inicio = semanaAtras.toISOString().split('T')[0] ;
     }
 
-    if (message.includes('·∫ltimo m·™s')) {
+    if (message.includes('√∫ltimo m√™s')) {
       const mesAtras = new Date();
       mesAtras.setMonth(mesAtras.getMonth() - 1);
-      params.periodo_inicio = mesAtras.toISOString().split('T')[0];
+      params.periodo_inicio = mesAtras.toISOString().split('T')[0] ;
     }
 
     return params;
@@ -259,142 +267,187 @@ export class DiscordBotService {
   /**
    * Cria embed formatado baseado no tipo de consulta
    */
-  private createEmbedResponse(queryType: string, data, originalMessage: string): DiscordEmbed {
+  private createEmbedResponse(queryType: string, data: Record<string, unknown>): DiscordEmbed {
     const timestamp = new Date().toISOString();
 
     switch (queryType) {
       case 'maior_faturamento':
         return {
           title: 'üí∞ Maior Faturamento',
-          description: data.mensagem,
+          description: String(data.mensagem ?? ''),
           color: 0x00D084,
           fields: [
             {
-              name: 'üèÜ Maior Venda Individual',
-              value: `**R$ ${data.maior_venda?.valor?.toFixed(2)}**\nData: ${new Date(data.maior_venda?.data).toLocaleDateString('pt-BR')}\nMeio: ${data.maior_venda?.meio_pagamento || 'N/A'}`,
+              name: 'üí∞ Maior Venda Individual',
+              value: `**R$ ${typeof data.maior_venda === 'object' && data.maior_venda && 'valor' in data.maior_venda ? Number((data.maior_venda as Record<string, unknown>).valor).toFixed(2) : '0.00'}**\nData: ${typeof data.maior_venda === 'object' && data.maior_venda && 'data' in data.maior_venda && (data.maior_venda as Record<string, unknown>).data ? new Date(String((data.maior_venda as Record<string, unknown>).data)).toLocaleDateString('pt-BR') : 'N/A'}\nMeio: ${typeof data.maior_venda === 'object' && data.maior_venda && 'meio_pagamento' in data.maior_venda ? String((data.maior_venda as Record<string, unknown>).meio_pagamento) : 'N/A'}`,
               inline: true
             },
             {
               name: 'üìä Faturamento Total do Dia',
-              value: `**R$ ${data.faturamento_total_dia?.toFixed(2)}**`,
+              value: `**R$ ${typeof data.faturamento_total_dia === 'number' ? data.faturamento_total_dia.toFixed(2) : '0.00'}**`,
               inline: true
             }
           ],
-          footer: { text: 'SGB Analytics Ä¢ Consulta de faturamento' },
+          footer: { text: 'SGB Analytics üìä Consulta de faturamento' },
           timestamp
         };
 
-      case 'dashboard_executivo':
-        const kpis = data.kpis_principais;
-        const saude = data.score_saude;
+      case 'dashboard_executivo': {
+        const kpis = typeof data.kpis_principais === 'object' && data.kpis_principais ? data.kpis_principais as Record<string, unknown> : {};
+        const saude = typeof data.score_saude === 'object' && data.score_saude ? data.score_saude as Record<string, unknown> : {};
         return {
           title: 'üìä Dashboard Executivo',
-          description: data.mensagem,
-          color: saude.score_saude >= 80 ? 0x00D084 : saude.score_saude >= 60 ? 0xF59E0B : 0xEF4444,
+          description: String(data.mensagem ?? ''),
+          color: typeof saude.score_saude === 'number' ? (saude.score_saude >= 80 ? 0x00D084 : saude.score_saude >= 60 ? 0xF59E0B : 0xEF4444) : 0x3B82F6,
           fields: [
             {
               name: 'üí∞ Financeiro',
-              value: `**Faturamento:** R$ ${kpis.faturamento_total?.toFixed(2)}\n**Transa·ß·µes:** ${kpis.total_transacoes}\n**Ticket M·©dio:** R$ ${kpis.ticket_medio?.toFixed(2)}`,
+              value: `**Faturamento:** R$ ${typeof kpis.faturamento_total === 'number' ? kpis.faturamento_total.toFixed(2) : '0.00'}\n**Transa√ß√µes:** ${kpis.total_transacoes ?? 0}\n**Ticket M√©dio:** R$ ${typeof kpis.ticket_medio === 'number' ? kpis.ticket_medio.toFixed(2) : '0.00'}`,
               inline: true
             },
             {
-              name: 'úÖ Operacional',
-              value: `**Checklists:** ${kpis.taxa_conclusao_checklists?.toFixed(1)}%\n**WhatsApp:** ${kpis.engagement_whatsapp?.toFixed(1)}%\n**Produ·ß·£o:** ${kpis.tempo_medio_producao?.toFixed(1)}min`,
+              name: '‚úÖ Operacional',
+              value: `**Checklists:** ${typeof kpis.taxa_conclusao_checklists === 'number' ? kpis.taxa_conclusao_checklists.toFixed(1) : '0.0'}%\n**WhatsApp:** ${typeof kpis.engagement_whatsapp === 'number' ? kpis.engagement_whatsapp.toFixed(1) : '0.0'}%\n**Produ√ß√£o:** ${typeof kpis.tempo_medio_producao === 'number' ? kpis.tempo_medio_producao.toFixed(1) : '0.0'}min`,
               inline: true
             },
             {
-              name: 'üéØ Score de Sa·∫de',
-              value: `**${saude.score_saude}%** - ${saude.status.toUpperCase()}\n${this.getHealthEmoji(saude.score_saude)} ${saude.mensagem}`,
+              name: 'üíö Score de Sa√∫de',
+              value: `**${saude.score_saude ?? 0}%** - ${typeof saude.status === 'string' ? saude.status.toUpperCase() : ''}\n${this.getHealthEmoji(Number(saude.score_saude ?? 0))} ${saude.mensagem ?? ''}`,
               inline: false
             }
           ],
-          footer: { text: 'SGB Analytics Ä¢ Dashboard Executivo' },
+          footer: { text: 'SGB Analytics üìä Dashboard Executivo' },
           timestamp
         };
+      }
 
-      case 'status_checklists':
-        const resumo = data.resumo;
+      case 'status_checklists': {
+        const resumo = typeof data.resumo === 'object' && data.resumo ? data.resumo as Record<string, unknown> : {};
+        const totalExecucoes = typeof resumo.total_execucoes === 'number' ? resumo.total_execucoes : 0;
+        const concluidos = typeof resumo.concluidos === 'number' ? resumo.concluidos : 0;
+        const pendentes = typeof resumo.pendentes === 'number' ? resumo.pendentes : 0;
+        const atrasados = typeof resumo.atrasados === 'number' ? resumo.atrasados : 0;
+        const taxaConclusao = typeof resumo.taxa_conclusao === 'number' ? resumo.taxa_conclusao.toFixed(1) : '0.0';
+        const scoreMedio = typeof resumo.score_medio === 'number' ? resumo.score_medio.toFixed(1) : '0.0';
         return {
-          title: 'úÖ Status dos Checklists',
-          description: data.mensagem,
-          color: resumo.taxa_conclusao >= 80 ? 0x00D084 : resumo.taxa_conclusao >= 60 ? 0xF59E0B : 0xEF4444,
+          title: '‚úÖ Status dos Checklists',
+          description: String(data.mensagem ?? ''),
+          color: typeof resumo.taxa_conclusao === 'number' ? (resumo.taxa_conclusao >= 80 ? 0x00D084 : resumo.taxa_conclusao >= 60 ? 0xF59E0B : 0xEF4444) : 0x3B82F6,
           fields: [
             {
               name: 'üìä Resumo Geral',
-              value: `**Total:** ${resumo.total_execucoes}\n**Conclu·≠dos:** ${resumo.concluidos}\n**Pendentes:** ${resumo.pendentes}\n**Atrasados:** ${resumo.atrasados}`,
+              value: `**Total:** ${totalExecucoes}\n**Conclu√≠dos:** ${concluidos}\n**Pendentes:** ${pendentes}\n**Atrasados:** ${atrasados}`,
               inline: true
             },
             {
-              name: 'üìà Performance',
-              value: `**Taxa Conclus·£o:** ${resumo.taxa_conclusao?.toFixed(1)}%\n**Score M·©dio:** ${resumo.score_medio?.toFixed(1)}%`,
+              name: 'üíö Performance',
+              value: `**Taxa Conclus√£o:** ${taxaConclusao}%\n**Score M√©dio:** ${scoreMedio}%`,
               inline: true
             }
           ],
-          footer: { text: 'SGB Analytics Ä¢ Gest·£o de Checklists' },
+          footer: { text: 'SGB Analytics üìä Gest√£o de Checklists' },
           timestamp
         };
+      }
 
-      case 'whatsapp_stats':
-        const stats = data.estatisticas;
+      case 'whatsapp_stats': {
+        const stats = typeof data.estatisticas === 'object' && data.estatisticas ? data.estatisticas as Record<string, unknown> : {};
+        const totalMensagens = typeof stats.total_mensagens === 'number' ? stats.total_mensagens : 0;
+        const taxaEntrega = typeof stats.taxa_entrega === 'number' ? stats.taxa_entrega.toFixed(1) : '0.0';
+        const taxaLeitura = typeof stats.taxa_leitura === 'number' ? stats.taxa_leitura.toFixed(1) : '0.0';
+        const engagement = typeof stats.engagement === 'number' ? stats.engagement.toFixed(1) : '0.0';
+        const taxaFalha = typeof stats.taxa_falha === 'number' ? stats.taxa_falha.toFixed(1) : '0.0';
         return {
-          title: 'üì± Estat·≠sticas WhatsApp',
-          description: data.mensagem,
+          title: 'üì± Estat√≠sticas WhatsApp',
+          description: String(data.mensagem ?? ''),
           color: 0x25D366,
           fields: [
             {
-              name: 'üìä M·©tricas',
-              value: `**Total Mensagens:** ${stats.total_mensagens}\n**Taxa Entrega:** ${stats.taxa_entrega?.toFixed(1)}%\n**Taxa Leitura:** ${stats.taxa_leitura?.toFixed(1)}%`,
+              name: 'üìä M√©tricas',
+              value: `**Total Mensagens:** ${totalMensagens}\n**Taxa Entrega:** ${taxaEntrega}%\n**Taxa Leitura:** ${taxaLeitura}%`,
               inline: true
             },
             {
-              name: 'üéØ Engagement',
-              value: `**Score:** ${stats.engagement?.toFixed(1)}%\n**Falhas:** ${stats.taxa_falha?.toFixed(1)}%`,
+              name: 'üíö Engagement',
+              value: `**Score:** ${engagement}%\n**Falhas:** ${taxaFalha}%`,
               inline: true
             }
           ],
-          footer: { text: 'SGB Analytics Ä¢ WhatsApp Business' },
+          footer: { text: 'SGB Analytics üì± WhatsApp Business' },
           timestamp
         };
+      }
 
-      case 'visao_360':
+      case 'visao_360': {
+        // Definir tipos esperados
+        interface KpisPrincipais {
+          faturamento_total?: number;
+          total_transacoes?: number;
+        }
+        interface VisaoGeral {
+          kpis_principais?: KpisPrincipais;
+        }
+        interface ResumoInteligencia {
+          total_anomalias_ativas?: number;
+          insights_criticos?: number;
+          recomendacoes_altas?: number;
+        }
+        interface FuncionarioRanking {
+          nome?: string;
+        }
+        interface EquipeEstatisticas {
+          total_funcionarios?: number;
+        }
+        interface Equipe {
+          ranking_funcionarios?: FuncionarioRanking[];
+          estatisticas?: EquipeEstatisticas;
+        }
+        const visaoGeral = (typeof data.visao_geral === 'object' && data.visao_geral) ? data.visao_geral as VisaoGeral : {};
+        const kpis = (typeof visaoGeral.kpis_principais === 'object' && visaoGeral.kpis_principais) ? visaoGeral.kpis_principais : {};
+        const resumoInteligencia = (typeof data.resumo_inteligencia === 'object' && data.resumo_inteligencia) ? data.resumo_inteligencia as ResumoInteligencia : {};
+        const equipe = (typeof data.equipe === 'object' && data.equipe) ? data.equipe as Equipe : {};
+        const ranking = Array.isArray(equipe.ranking_funcionarios) ? equipe.ranking_funcionarios : [];
+        const melhorFuncionario = ranking[0]?.nome ?? 'N/A';
+        const estatisticasEquipe = (typeof equipe.estatisticas === 'object' && equipe.estatisticas) ? equipe.estatisticas : {};
         return {
-          title: 'üéØ Vis·£o 360∞ Completa',
-          description: 'An·°lise completa do estabelecimento',
+          title: 'ü§ñ Vis√£o 360¬∞ Completa',
+          description: 'An√°lise completa do estabelecimento',
           color: 0x8B5CF6,
           fields: [
             {
               name: 'üí∞ Financeiro',
-              value: `R$ ${data.visao_geral.kpis_principais.faturamento_total?.toFixed(2)} em ${data.visao_geral.kpis_principais.total_transacoes} transa·ß·µes`,
+              value: `R$ ${typeof kpis.faturamento_total === 'number' ? kpis.faturamento_total.toFixed(2) : '0.00'} em ${typeof kpis.total_transacoes === 'number' ? kpis.total_transacoes : 0} transa√ß√µes`,
               inline: false
             },
             {
               name: 'üö® Alertas Ativos',
-              value: `**Anomalias:** ${data.resumo_inteligencia.total_anomalias_ativas}\n**Insights Cr·≠ticos:** ${data.resumo_inteligencia.insights_criticos}\n**Recomenda·ß·µes Altas:** ${data.resumo_inteligencia.recomendacoes_altas}`,
+              value: `**Anomalias:** ${typeof resumoInteligencia.total_anomalias_ativas === 'number' ? resumoInteligencia.total_anomalias_ativas : 0}\n**Insights Cr√≠ticos:** ${typeof resumoInteligencia.insights_criticos === 'number' ? resumoInteligencia.insights_criticos : 0}\n**Recomenda√ß√µes Altas:** ${typeof resumoInteligencia.recomendacoes_altas === 'number' ? resumoInteligencia.recomendacoes_altas : 0}`,
               inline: true
             },
             {
               name: 'üë• Equipe',
-              value: `**Melhor Funcion·°rio:** ${data.equipe.ranking_funcionarios[0]?.nome || 'N/A'}\n**Total Funcion·°rios:** ${data.equipe.estatisticas.total_funcionarios}`,
+              value: `**Melhor Funcion√°rio:** ${melhorFuncionario}\n**Total Funcion√°rios:** ${typeof estatisticasEquipe.total_funcionarios === 'number' ? estatisticasEquipe.total_funcionarios : 0}`,
               inline: true
             }
           ],
-          footer: { text: 'SGB Analytics Ä¢ Intelig·™ncia Artificial' },
+          footer: { text: 'SGB Analytics ü§ñ Intelig√™ncia Artificial' },
           timestamp
         };
+      }
 
       default:
         return {
-          title: 'üìã Resultado da Consulta',
-          description: data.mensagem || 'Consulta realizada com sucesso',
+          title: 'ü§î Resultado da Consulta',
+          description: String(data.mensagem ?? 'Consulta realizada com sucesso'),
           color: 0x3B82F6,
           fields: [
             {
               name: 'üìä Dados',
-              value: JSON.stringify(data).substring(0, 1000) + (JSON.stringify(data).length > 1000 ? '...' : ''),
+              value: '```json\n' + JSON.stringify(data, null, 2) + '\n```',
               inline: false
             }
           ],
-          footer: { text: 'SGB Analytics Ä¢ Consulta Geral' },
+          footer: { text: 'SGB Analytics ü§ñ Consulta Gen√©rica' },
           timestamp
         };
     }
@@ -407,56 +460,56 @@ export class DiscordBotService {
     return {
       success: true,
       embed: {
-        title: 'ü§ñ SGB Bot - Comandos Dispon·≠veis',
+        title: 'ü§ñ SGB Bot - Comandos Dispon√≠veis',
         description: 'Use linguagem natural para consultar dados do seu estabelecimento!',
         color: 0x5865F2,
         fields: [
           {
             name: 'üí∞ Financeiro',
-            value: 'Ä¢ "Qual o maior faturamento?"\nÄ¢ "Faturamento do ·∫ltimo m·™s"\nÄ¢ "Top 5 clientes"\nÄ¢ "Resumo do dia"',
+            value: 'üí∞ "Qual o maior faturamento?"\nüí∞ "Faturamento do √∫ltimo m√™s"\nüí∞ "Top 5 clientes"\nüí∞ "Resumo do dia"',
             inline: true
           },
           {
-            name: 'úÖ Operacional',
-            value: 'Ä¢ "Status dos checklists"\nÄ¢ "Performance dos funcion·°rios"\nÄ¢ "Como est·° a qualidade?"',
+            name: '‚úÖ Operacional',
+            value: '‚úÖ "Status dos checklists"\n‚úÖ "Performance dos funcion√°rios"\n‚úÖ "Como est√° a qualidade?"',
             inline: true
           },
           {
-            name: 'üì± Comunica·ß·£o',
-            value: 'Ä¢ "Stats do WhatsApp"\nÄ¢ "Mensagens pendentes"',
+            name: 'üì± Comunica√ß√£o',
+            value: 'üì± "Stats do WhatsApp"\nüì± "Mensagens pendentes"',
             inline: true
           },
           {
             name: 'ü§ñ IA & Analytics',
-            value: 'Ä¢ "Score de sa·∫de"\nÄ¢ "Anomalias recentes"\nÄ¢ "Dashboard executivo"\nÄ¢ "Vis·£o 360"',
+            value: 'ü§ñ "Score de sa√∫de"\nü§ñ "Anomalias recentes"\nü§ñ "Dashboard executivo"\nü§ñ "Vis√£o 360"',
             inline: true
           },
           {
-            name: 'üçï Produ·ß·£o',
-            value: 'Ä¢ "Tempo de produ·ß·£o"\nÄ¢ "Produtos mais demorados"',
+            name: 'üè≠ Produ√ß√£o',
+            value: 'üè≠ "Tempo de produ√ß√£o"\nüè≠ "Produtos mais demorados"',
             inline: true
           },
           {
             name: 'üí° Dicas',
-            value: 'Ä¢ Use datas: "2024-01-15"\nÄ¢ Especifique per·≠odos: "·∫ltima semana"\nÄ¢ Defina limites: "top 10"',
+            value: 'üí° Use datas: "2024-01-15"\nüí° Especifique per√≠odos: "√∫ltima semana"\nüí° Defina limites: "top 10"',
             inline: true
           }
         ],
-        footer: { text: 'SGB Analytics Ä¢ Seu assistente inteligente' },
+        footer: { text: 'SGB Analytics ü§ñ Seu assistente inteligente' },
         timestamp: new Date().toISOString()
       }
     };
   }
 
   /**
-   * Emoji baseado no score de sa·∫de
+   * Emoji baseado no score de sa√∫de
    */
   private getHealthEmoji(score: number): string {
-    if (score >= 90) return 'üü¢';
-    if (score >= 75) return 'üîµ';
-    if (score >= 60) return 'üü°';
-    if (score >= 40) return 'üü†';
-    return 'üî¥';
+    if (score >= 90) return 'üí™';
+    if (score >= 75) return 'ü§î';
+    if (score >= 60) return 'ü§î';
+    if (score >= 40) return 'üôÅ';
+    return 'üòê';
   }
 
   /**
@@ -478,12 +531,12 @@ export class DiscordBotService {
 }
 
 // ========================================
-// üè≠ INST·ÇNCIA GLOBAL DO BOT
+// ü§ñ INST√ÇNCIA GLOBAL DO BOT
 // ========================================
 export const sgbBot = new DiscordBotService();
 
 // ========================================
-// üéØ FUN·á·ÉO PRINCIPAL - PROCESSAR COMANDO
+// ü§ñ FUN√á√ÉO PRINCIPAL - PROCESSAR COMANDO
 // ========================================
 export async function processDiscordCommand(message: string, user: string, bar_id: number): Promise<boolean> {
   try {
@@ -515,9 +568,10 @@ export async function processDiscordCommand(message: string, user: string, bar_i
     // Enviar mensagem de erro
     await sgbBot.sendResponse({
       success: false,
-      text: `ùå Erro interno: ${errorMessage}`
+      text: `üí• Erro interno: ${errorMessage}`
     });
     
     return false;
   }
 } 
+

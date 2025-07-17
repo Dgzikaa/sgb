@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic'
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const barId = parseInt(searchParams.get('bar_id') || '1');
 
-    // Buscar grupos �nicos da tabela tempo
+    // Buscar grupos Ã¡Âºnicos da tabela tempo
     const { data: grupos, error } = await supabase
       .from('tempo')
       .select('grp_desc')
@@ -25,8 +25,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao buscar grupos' }, { status: 500 });
     }
 
-    // Extrair grupos �nicos
-    const gruposUnicos = [...new Set(grupos?.map((g) => g.grp_desc))].filter(Boolean).sort();
+    // Extrair grupos Ã¡Âºnicos
+    const gruposUnicos = [...new Set(grupos?.map((g: any) => g.grp_desc))].filter(Boolean).sort();
 
     return NextResponse.json({
       success: true,
@@ -38,3 +38,4 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 } 
+

@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test'
+﻿import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
   testDir: './e2e',
@@ -54,3 +54,4 @@ export default defineConfig({
   },
   maxFailures: process.env.CI ? 10 : undefined,
 }) 
+

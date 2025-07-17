@@ -1,4 +1,4 @@
-import * as React from "react"
+﻿import * as React from "react"
 import { cn } from "@/lib/utils"
 
 interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -6,6 +6,7 @@ interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
   max?: number
 }
 
+// Componente de barra de progresso
 const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
   ({ className, value = 0, max = 100, ...props }, ref) => {
     const percentage = Math.min(100, Math.max(0, (value / max) * 100))
@@ -30,3 +31,4 @@ const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
 Progress.displayName = "Progress"
 
 export { Progress } 
+

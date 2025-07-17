@@ -1,6 +1,6 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { OpenAI } from 'openai'
-import { getVendasData, getClientesData: any, getProdutoMaisVendido, getAnaliseCompleta: any, getDadosSemana, getHistoricoDiaSemana } from '@/lib/database'
+import { getVendasData, getClientesData, getProdutoMaisVendido, getAnaliseCompleta, getDadosSemana, getHistoricoDiaSemana } from '@/lib/database'
 
 // Configurar OpenAI
 const openai = new OpenAI({
@@ -12,36 +12,36 @@ export async function POST(request: NextRequest) {
     const { message } = await request.json()
 
     if (!message) {
-      return NextResponse.json({ error: 'Mensagem á© obrigatá³ria' }, { status: 400 })
+      return NextResponse.json({ error: 'Mensagem ÃÂ¡ÃÂ© obrigatÃÂ¡ÃÂ³ria' }, { status: 400 })
     }
 
-    // ðŸš€ BUSCAR DADOS REAIS usando as funá§áµes já¡ existentes do frontend
+    // ÃÂ°ÃÂ¸ÃÂ¡Ã¢âÂ¬ BUSCAR DADOS REAIS usando as funÃÂ¡ÃÂ§ÃÂ¡ÃÂµes jÃÂ¡ÃÂ¡ existentes do frontend
     let contextoDados = ''
     let vendasData = null
     let clientesData = null
     let produtoMaisVendido = null
     
     try {
-      console.log('ðŸ“Š Buscando dados do sistema usando funá§áµes existentes...')
+      console.log('ÃÂ°ÃÂ¸Ã¢â¬ÅÃÂ  Buscando dados do sistema usando funÃÂ¡ÃÂ§ÃÂ¡ÃÂµes existentes...')
       
-      // Usar as funá§áµes já¡ testadas e em produá§á£o + aná¡lises avaná§adas
+      // Usar as funÃÂ¡ÃÂ§ÃÂ¡ÃÂµes jÃÂ¡ÃÂ¡ testadas e em produÃÂ¡ÃÂ§ÃÂ¡ÃÂ£o + anÃÂ¡ÃÂ¡lises avanÃÂ¡ÃÂ§adas
       const hoje = new Date().toISOString().split('T')[0]
       
       const dados = await Promise.all([
         getVendasData().catch(err => {
-          console.warn('š ï¸ Erro ao buscar vendas:', err.message)
+          console.warn('ÃÂ¡ÃÂ ÃÂ¯ÃÂ¸ÃÂ Erro ao buscar vendas:', err.message)
           return null
         }),
         getClientesData().catch(err => {
-          console.warn('š ï¸ Erro ao buscar clientes:', err.message)
+          console.warn('ÃÂ¡ÃÂ ÃÂ¯ÃÂ¸ÃÂ Erro ao buscar clientes:', err.message)
           return null
         }),
         getProdutoMaisVendido().catch(err => {
-          console.warn('š ï¸ Erro ao buscar produto mais vendido:', err.message)
+          console.warn('ÃÂ¡ÃÂ ÃÂ¯ÃÂ¸ÃÂ Erro ao buscar produto mais vendido:', err.message)
           return null
         }),
         getAnaliseCompleta('semana').catch(err => {
-          console.warn('š ï¸ Erro ao buscar aná¡lise completa:', err.message)
+          console.warn('ÃÂ¡ÃÂ ÃÂ¯ÃÂ¸ÃÂ Erro ao buscar anÃÂ¡ÃÂ¡lise completa:', err.message)
           return null
         })
       ])
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       produtoMaisVendido = dados[2]
       const analiseCompleta = dados[3]
 
-      console.log('ðŸ“ˆ Dados obtidos:', {
+      console.log('ÃÂ°ÃÂ¸Ã¢â¬ÅÃâ  Dados obtidos:', {
         vendas: vendasData ? 'OK' : 'ERRO',
         clientes: clientesData ? 'OK' : 'ERRO', 
         produto: produtoMaisVendido ? 'OK' : 'ERRO',
@@ -60,76 +60,76 @@ export async function POST(request: NextRequest) {
 
       // Montar contexto com dados reais
       contextoDados = `
-ðŸ“Š DADOS ATUAIS DO BAR ORDINáRIO (usando sistema de produá§á£o):
+ÃÂ°ÃÂ¸Ã¢â¬ÅÃÂ  DADOS ATUAIS DO BAR ORDINÃÂ¡ÃÂRIO (usando sistema de produÃÂ¡ÃÂ§ÃÂ¡ÃÂ£o):
 
-ðŸ’° VENDAS:
+ÃÂ°ÃÂ¸Ã¢â¬â¢ÃÂ° VENDAS:
 ${vendasData ? `
 - Vendas hoje: R$ ${vendasData.vendas_hoje.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
 - Vendas da semana: R$ ${vendasData.vendas_semana.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
 - Total de pedidos hoje: ${vendasData.total_pedidos}
-- Ticket má©dio: R$ ${vendasData.ticket_medio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-` : '- Dados de vendas indisponá­veis no momento'}
+- Ticket mÃÂ¡ÃÂ©dio: R$ ${vendasData.ticket_medio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+` : '- Dados de vendas indisponÃÂ¡ÃÂ­veis no momento'}
 
-ðŸ‘¥ CLIENTES:
+ÃÂ°ÃÂ¸Ã¢â¬ËÃÂ¥ CLIENTES:
 ${clientesData ? `
 - Total de clientes hoje: ${clientesData.total_clientes_hoje}
 - Novos clientes: ${clientesData.novos_clientes}
 - Clientes recorrentes: ${clientesData.clientes_recorrentes}
-` : '- Dados de clientes indisponá­veis no momento'}
+` : '- Dados de clientes indisponÃÂ¡ÃÂ­veis no momento'}
 
-ðŸ† PRODUTO MAIS VENDIDO:
+ÃÂ°ÃÂ¸ÃÂÃ¢â¬Â  PRODUTO MAIS VENDIDO:
 ${produtoMaisVendido ? `
 - Produto: ${produtoMaisVendido.produto}
 - Categoria: ${produtoMaisVendido.grupo}
 - Quantidade vendida: ${produtoMaisVendido.quantidade}
 - Valor total: R$ ${produtoMaisVendido.valor_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-` : '- Dados de produtos indisponá­veis no momento'}
+` : '- Dados de produtos indisponÃÂ¡ÃÂ­veis no momento'}
 
-ðŸ“Š ANáLISE AVANá‡ADA DA SEMANA:
+ÃÂ°ÃÂ¸Ã¢â¬ÅÃÂ  ANÃÂ¡ÃÂLISE AVANÃÂ¡Ã¢â¬Â¡ADA DA SEMANA:
 ${analiseCompleta ? `
-- ðŸ† MELHOR DIA: ${analiseCompleta.melhorDiaSemana.dia} (R$ ${analiseCompleta.melhorDiaSemana.faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})
-- ðŸ“ˆ PERFORMANCE DA SEMANA: ${(analiseCompleta.insights.performanceSemana * 100).toFixed(0)}% acima da má©dia
-- ðŸŽ¯ CONSISTáŠNCIA: ${(analiseCompleta.insights.consistencia * 100).toFixed(0)}% dos dias acima de 80% da má©dia
-- ðŸ“Š Má‰DIA DIáRIA: R$ ${analiseCompleta.medias.faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-- ðŸ‘¥ Má‰DIA CLIENTES/DIA: ${analiseCompleta.medias.clientes.toFixed(0)} pessoas
+- ÃÂ°ÃÂ¸ÃÂÃ¢â¬Â  MELHOR DIA: ${analiseCompleta.melhorDiaSemana.dia} (R$ ${analiseCompleta.melhorDiaSemana.faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})
+- ÃÂ°ÃÂ¸Ã¢â¬ÅÃâ  PERFORMANCE DA SEMANA: ${(analiseCompleta.insights.performanceSemana * 100).toFixed(0)}% acima da mÃÂ¡ÃÂ©dia
+- ÃÂ°ÃÂ¸ÃÂ½ÃÂ¯ CONSISTÃÂ¡ÃÂ NCIA: ${(analiseCompleta.insights.consistencia * 100).toFixed(0)}% dos dias acima de 80% da mÃÂ¡ÃÂ©dia
+- ÃÂ°ÃÂ¸Ã¢â¬ÅÃÂ  MÃÂ¡Ã¢â¬Â°DIA DIÃÂ¡ÃÂRIA: R$ ${analiseCompleta.medias.faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+- ÃÂ°ÃÂ¸Ã¢â¬ËÃÂ¥ MÃÂ¡Ã¢â¬Â°DIA CLIENTES/DIA: ${analiseCompleta.medias.clientes.toFixed(0)} pessoas
 
-ðŸ‘¥ TOTAL CLIENTES DA SEMANA: ${analiseCompleta.dadosSemana.reduce((sum: any, dia: any) => sum + dia.clientes, 0)}
-ðŸ’° TOTAL FATURAMENTO DA SEMANA: R$ ${analiseCompleta.dadosSemana.reduce((sum: any, dia: any) => sum + dia.faturamento, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+ÃÂ°ÃÂ¸Ã¢â¬ËÃÂ¥ TOTAL CLIENTES DA SEMANA: ${analiseCompleta.dadosSemana.reduce((sum, dia) => sum + dia.clientes, 0)}
+ÃÂ°ÃÂ¸Ã¢â¬â¢ÃÂ° TOTAL FATURAMENTO DA SEMANA: R$ ${analiseCompleta.dadosSemana.reduce((sum, dia) => sum + dia.faturamento, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
 
 DADOS POR DIA DA SEMANA:
-${analiseCompleta.dadosSemana.map((dia: any) => 
+${analiseCompleta.dadosSemana.map((dia) => 
   `  ${dia.dia}: R$ ${dia.faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${dia.clientes} pessoas)`
 ).join('\n')}
-` : '- Aná¡lise avaná§ada indisponá­vel no momento'}
+` : '- AnÃÂ¡ÃÂ¡lise avanÃÂ¡ÃÂ§ada indisponÃÂ¡ÃÂ­vel no momento'}
 
-ðŸª INFORMAá‡á•ES DO BAR:
-- Nome: Bar Ordiná¡rio
-- Sistema: SGB (Sistema de Gestá£o de Bares)
+ÃÂ°ÃÂ¸ÃÂÃÂª INFORMAÃÂ¡Ã¢â¬Â¡ÃÂ¡Ã¢â¬Â¢ES DO BAR:
+- Nome: Bar OrdinÃÂ¡ÃÂ¡rio
+- Sistema: SGB (Sistema de GestÃÂ¡ÃÂ£o de Bares)
 - Dados em tempo real via Supabase
-- Integraá§á£o com máºltiplas fontes (Contahub: any, Sympla, Yuzer)
+- IntegraÃÂ¡ÃÂ§ÃÂ¡ÃÂ£o com mÃÂ¡ÃÂºltiplas fontes (Contahub, Sympla, Yuzer)
 
-ðŸ’¡ INSTRUá‡á•ES AVANá‡ADAS:
+ÃÂ°ÃÂ¸Ã¢â¬â¢ÃÂ¡ INSTRUÃÂ¡Ã¢â¬Â¡ÃÂ¡Ã¢â¬Â¢ES AVANÃÂ¡Ã¢â¬Â¡ADAS:
 - Use SEMPRE os dados acima para responder perguntas sobre vendas, clientes e produtos
-- RESPONDA ANáLISES COMPLEXAS como "qual foi o melhor dia da semana" usando os dados detalhados
-- COMPARE DIAS: Use os dados por dia da semana para identificar padráµes e tendáªncias
-- ANáLISE DE PERFORMANCE: Use os insights de consistáªncia e performance para dar sugestáµes
-- IDENTIFIQUE OPORTUNIDADES: Dias com performance abaixo da má©dia sá£o oportunidades de melhoria
+- RESPONDA ANÃÂ¡ÃÂLISES COMPLEXAS como "qual foi o melhor dia da semana" usando os dados detalhados
+- COMPARE DIAS: Use os dados por dia da semana para identificar padrÃÂ¡ÃÂµes e tendÃÂ¡ÃÂªncias
+- ANÃÂ¡ÃÂLISE DE PERFORMANCE: Use os insights de consistÃÂ¡ÃÂªncia e performance para dar sugestÃÂ¡ÃÂµes
+- IDENTIFIQUE OPORTUNIDADES: Dias com performance abaixo da mÃÂ¡ÃÂ©dia sÃÂ¡ÃÂ£o oportunidades de melhoria
 - Os valores mostram o desempenho real do estabelecimento em tempo real
-- Se algum dado estiver indisponá­vel, informe e sugira verificar mais tarde
-- Mantenha tom profissional mas amigá¡vel e seja especá­fico com náºmeros
-- Dáª insights ACTIONABLES baseados nos dados reais
+- Se algum dado estiver indisponÃÂ¡ÃÂ­vel, informe e sugira verificar mais tarde
+- Mantenha tom profissional mas amigÃÂ¡ÃÂ¡vel e seja especÃÂ¡ÃÂ­fico com nÃÂ¡ÃÂºmeros
+- DÃÂ¡ÃÂª insights ACTIONABLES baseados nos dados reais
       `.trim()
 
     } catch (error) {
-      console.error('Œ Erro ao buscar dados para contexto:', error)
+      console.error('ÃÂÃâ Erro ao buscar dados para contexto:', error)
       contextoDados = `
-š ï¸ DADOS TEMPORARIAMENTE INDISPONáVEIS
+ÃÂ¡ÃÂ ÃÂ¯ÃÂ¸ÃÂ DADOS TEMPORARIAMENTE INDISPONÃÂ¡ÃÂVEIS
 
-Ná£o foi possá­vel acessar os dados em tempo real do sistema neste momento.
+NÃÂ¡ÃÂ£o foi possÃÂ¡ÃÂ­vel acessar os dados em tempo real do sistema neste momento.
 Posso ainda ajudar com:
-- Informaá§áµes gerais sobre gestá£o de bares
-- Aná¡lise de tendáªncias e estratá©gias
-- Dáºvidas sobre o sistema SGB
+- InformaÃÂ¡ÃÂ§ÃÂ¡ÃÂµes gerais sobre gestÃÂ¡ÃÂ£o de bares
+- AnÃÂ¡ÃÂ¡lise de tendÃÂ¡ÃÂªncias e estratÃÂ¡ÃÂ©gias
+- DÃÂ¡ÃÂºvidas sobre o sistema SGB
 - Planejamento e metas
 
 Por favor, tente novamente em alguns minutos para dados atualizados.
@@ -138,26 +138,26 @@ Por favor, tente novamente em alguns minutos para dados atualizados.
 
     // Prompt do sistema para o assistente
     const systemPrompt = `
-Vocáª á© o assistente inteligente do SGB (Sistema de Gestá£o de Bares), especializado no Bar Ordiná¡rio.
+VocÃÂ¡ÃÂª ÃÂ¡ÃÂ© o assistente inteligente do SGB (Sistema de GestÃÂ¡ÃÂ£o de Bares), especializado no Bar OrdinÃÂ¡ÃÂ¡rio.
 
 ${contextoDados}
 
 PAPEL:
-Vocáª á© um consultor especialista em gestá£o de bares que tem acesso aos dados reais do estabelecimento. 
+VocÃÂ¡ÃÂª ÃÂ¡ÃÂ© um consultor especialista em gestÃÂ¡ÃÂ£o de bares que tem acesso aos dados reais do estabelecimento. 
 Suas respostas devem ser:
 - Baseadas nos dados reais fornecidos acima
-- Prá¡ticas e actioná¡veis para gestores de bar
-- Profissionais mas com tom amigá¡vel
-- Focadas em insights que ajudem na tomada de decisá£o
+- PrÃÂ¡ÃÂ¡ticas e actionÃÂ¡ÃÂ¡veis para gestores de bar
+- Profissionais mas com tom amigÃÂ¡ÃÂ¡vel
+- Focadas em insights que ajudem na tomada de decisÃÂ¡ÃÂ£o
 
 CAPACIDADES:
-- Aná¡lise de vendas e performance
-- Identificaá§á£o de tendáªncias e oportunidades
-- Sugestáµes de melhorias operacionais
-- Comparaá§áµes com benchmarks do setor
-- Explicaá§á£o clara de má©tricas importantes
+- AnÃÂ¡ÃÂ¡lise de vendas e performance
+- IdentificaÃÂ¡ÃÂ§ÃÂ¡ÃÂ£o de tendÃÂ¡ÃÂªncias e oportunidades
+- SugestÃÂ¡ÃÂµes de melhorias operacionais
+- ComparaÃÂ¡ÃÂ§ÃÂ¡ÃÂµes com benchmarks do setor
+- ExplicaÃÂ¡ÃÂ§ÃÂ¡ÃÂ£o clara de mÃÂ¡ÃÂ©tricas importantes
 
-Sempre mencione a fonte dos dados (sistema SGB) e seja especá­fico nos náºmeros quando relevante.
+Sempre mencione a fonte dos dados (sistema SGB) e seja especÃÂ¡ÃÂ­fico nos nÃÂ¡ÃÂºmeros quando relevante.
     `.trim()
 
     // Chamar OpenAI com contexto real
@@ -177,7 +177,7 @@ Sempre mencione a fonte dos dados (sistema SGB) e seja especá­fico nos náºme
       temperature: 0.7,
     })
 
-    const resposta = completion.choices[0]?.message?.content || 'Desculpe, ná£o consegui processar sua solicitaá§á£o.'
+    const resposta = completion.choices[0]?.message?.content || 'Desculpe, nÃÂ¡ÃÂ£o consegui processar sua solicitaÃÂ¡ÃÂ§ÃÂ¡ÃÂ£o.'
 
     return NextResponse.json({ 
       message: resposta,
@@ -190,7 +190,7 @@ Sempre mencione a fonte dos dados (sistema SGB) e seja especá­fico nos náºme
     })
 
   } catch (error) {
-    console.error('Œ Erro na API do assistente:', error)
+    console.error('ÃÂÃâ Erro na API do assistente:', error)
     
     return NextResponse.json({ 
       message: 'Desculpe, ocorreu um erro interno. Tente novamente em alguns instantes.',

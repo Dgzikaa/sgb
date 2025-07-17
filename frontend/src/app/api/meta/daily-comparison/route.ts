@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -10,12 +10,12 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('?? Meta Daily Comparison - An�lise di�ria de dados...')
+    console.log('?? Meta Daily Comparison - AnÃ¡lise diÃ¡ria de dados...')
 
     const { searchParams } = new URL(request.url)
     const days = parseInt(searchParams.get('days') || '7')
 
-    // Obter dados do usu�rio para pegar o bar_id
+    // Obter dados do usuÃ¡rio para pegar o bar_id
     const userData = request.headers.get('x-user-data')
     let barId = 3 // fallback para desenvolvimento
 
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
         barId = parsedUser.bar_id || 3
         console.log(`?? Usando bar_id: ${barId}`)
       } catch (e) {
-        console.log('?? Erro ao parsear userData, usando barId padr�o:', e)
+        console.log('?? Erro ao parsear userData, usando barId padrÃ¡o:', e)
       }
     }
 
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     const hoje = new Date()
     const inicioPeriodo = new Date(hoje.getTime() - days * 24 * 60 * 60 * 1000)
 
-    console.log(`?? Buscando dados de ${inicioPeriodo.toISOString().split('T')[0]} at� ${hoje.toISOString().split('T')[0]}`)
+    console.log(`?? Buscando dados de ${inicioPeriodo.toISOString().split('T')[0]} atÃ© ${hoje.toISOString().split('T')[0]}`)
 
     // 1. BUSCAR DADOS DO FACEBOOK POR DIA
     const { data: facebookData, error: fbError } = await supabase
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
     const dailyMap = new Map()
 
     // Processar dados Facebook
-    facebookData?.forEach((day) => {
+    facebookData?.forEach((day: any) => {
       const date = day.data_referencia
       if (!dailyMap.has(date)) {
         dailyMap.set(date, {
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Processar dados Instagram
-    instagramData?.forEach((day) => {
+    instagramData?.forEach((day: any) => {
       const date = day.data_referencia
       if (!dailyMap.has(date)) {
         dailyMap.set(date, {
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
       new Date(b.date).getTime() - new Date(a.date).getTime()
     )
 
-    // 4. CALCULAR COMPARA��ES
+    // 4. CALCULAR COMPARAÃ‡Ã•ES
     const comparisons = []
     
     if (daysArray.length >= 2) {
@@ -148,7 +148,7 @@ export async function GET(request: NextRequest) {
         })
       }
 
-      // �ltimos 7 dias
+      // Ãšltimos 7 dias
       if (daysArray.length >= 7) {
         const semana_atras = daysArray[6]
         
@@ -159,7 +159,7 @@ export async function GET(request: NextRequest) {
         const engagement_change_week = hoje_data.engajamento - semana_atras.engajamento
         
         comparisons.push({
-          period: '�ltimos 7 dias',
+          period: 'Ãšltimos 7 dias',
           followers_change: followers_change_week,
           followers_percent: Math.round(followers_percent_week * 100) / 100,
           reach_change: reach_change_week,
@@ -168,7 +168,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 5. CALCULAR TEND�NCIAS
+    // 5. CALCULAR TENDÃŠNCIAS
     const trends = {
       followers_trend: 'stable',
       engagement_trend: 'stable',
@@ -219,9 +219,10 @@ export async function GET(request: NextRequest) {
     // Retornar erro real, SEM dados simulados
     return NextResponse.json({
       success: false,
-      error: 'Erro ao carregar dados de compara��o di�ria',
+      error: 'Erro ao carregar dados de comparaÃ§Ã£o diÃ¡ria',
       details: error instanceof Error ? error.message : 'Erro desconhecido',
       data_source: 'error'
     }, { status: 500 })
   }
 } 
+

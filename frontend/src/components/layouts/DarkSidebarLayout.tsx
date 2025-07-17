@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { ReactNode, useEffect, useState } from 'react'
 import { DarkHeader } from './DarkHeader'
@@ -85,7 +85,7 @@ function GlobalPageWrapper({ children }: { children: ReactNode }) {
     // Aplicar na carga inicial
     applyDarkModeClasses()
 
-    // Observar mudan�as no DOM e aplicar automaticamente
+    // Observar mudanÃ¡Â§as no DOM e aplicar automaticamente
     const observer = new MutationObserver(applyDarkModeClasses)
     observer.observe(document.body, {
       childList: true,
@@ -151,3 +151,4 @@ export function DarkSidebarLayout({ children }: DarkSidebarLayoutProps) {
     </AuthGuard>
   )
 } 
+

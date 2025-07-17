@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,15 +7,15 @@ export async function GET(request: NextRequest) {
     let totalKeys = 0
 
     try {
-      // Tentar verificar se existe uma conex�o Redis
-      // Se estiver usando Redis via vari�veis de ambiente
+      // Tentar verificar se existe uma conexÃ¡Â£o Redis
+      // Se estiver usando Redis via variÃ¡Â¡veis de ambiente
       if (process.env.REDIS_URL || process.env.KV_URL) {
-        // TODO: Implementar verifica��o real do Redis quando estiver configurado
+        // TODO: Implementar verificaÃ¡Â§Ã¡Â£o real do Redis quando estiver configurado
         redisConnected = true
         totalKeys = Math.floor(Math.random() * 100) // Simulado por enquanto
       }
     } catch (error) {
-      console.error('�� Erro ao verificar Redis:', error)
+      console.error('ÂÅ’ Erro ao verificar Redis:', error)
       redisConnected = false
     }
 
@@ -33,10 +33,11 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro na API de status de rate limiting:', error)
+    console.error('ÂÅ’ Erro na API de status de rate limiting:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },
       { status: 500 }
     )
   }
 } 
+

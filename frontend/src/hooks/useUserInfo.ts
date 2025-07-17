@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { getSupabaseClient } from '@/lib/supabase'
@@ -10,7 +10,7 @@ interface UserInfo {
   role: string
   avatar?: string
   bar_id: number
-  modulos_permitidos
+  modulos_permitidos: any
 }
 
 export function useUserInfo() {
@@ -42,11 +42,11 @@ export function useUserInfo() {
           }
         }
         
-        // Se chegou at� aqui, n�o h� dados v�lidos no localStorage
-        throw new Error('Usu�rio n�o logado - fa�a login novamente')
+        // Se chegou atÃ¡Â© aqui, nÃ¡Â£o hÃ¡Â¡ dados vÃ¡Â¡lidos no localStorage
+        throw new Error('UsuÃ¡Â¡rio nÃ¡Â£o logado - faÃ¡Â§a login novamente')
 
       } catch (err) {
-        console.error('�� Erro ao carregar informa��es do usu�rio:', err)
+        console.error('ÂÅ’ Erro ao carregar informaÃ¡Â§Ã¡Âµes do usuÃ¡Â¡rio:', err)
         setError(err instanceof Error ? err.message : 'Erro desconhecido')
       } finally {
         if (mounted) {
@@ -69,7 +69,7 @@ export function useUserInfo() {
       case 'financeiro':
         return 'Financeiro'
       case 'funcionario':
-        return 'Funcion�rio'
+        return 'FuncionÃ¡Â¡rio'
       default:
         return role
     }
@@ -82,3 +82,4 @@ export function useUserInfo() {
     roleDisplayName: userInfo ? roleDisplayName(userInfo.role) : null
   }
 } 
+

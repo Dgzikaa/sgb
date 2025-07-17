@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     }
     console.log('?? [EVENTOS API] Iniciando busca de eventos');
     
-    // Debug das vari�veis de ambiente
+    // Debug das variÃ¡veis de ambiente
     console.log('?? [ENV DEBUG] Cliente Supabase configurado');
     
     console.log('?? [EVENTOS API] Criando cliente Supabase...');
@@ -24,8 +24,8 @@ export async function GET(request: NextRequest) {
     console.log('?? [EVENTOS API] Parmetros:', { bar_id, ano, mes });
 
     if (!bar_id) {
-      console.log('? [EVENTOS API] bar_id n�o fornecido');
-      return NextResponse.json({ success: false, error: 'bar_id � obrigat�rio' }, { status: 400 });
+      console.log('? [EVENTOS API] bar_id nÃ¡o fornecido');
+      return NextResponse.json({ success: false, error: 'bar_id Ã© obrigatÃ³rio' }, { status: 400 });
     }
 
     let query = supabase
@@ -35,11 +35,11 @@ export async function GET(request: NextRequest) {
 
     if (ano && mes) {
       const startDate = `${ano}-${mes.padStart(2, '0')}-01`;
-      // Calcular o �ltimo dia do m�s corretamente
+      // Calcular o Ãºltimo dia do mÃªs corretamente
       const lastDay = new Date(parseInt(ano), parseInt(mes), 0).getDate();
       const endDate = `${ano}-${mes.padStart(2, '0')}-${lastDay.toString().padStart(2, '0')}`;
       
-      console.log('?? [EVENTOS API] Filtrando per�odo:', { startDate, endDate, lastDay });
+      console.log('?? [EVENTOS API] Filtrando perÃ­odo:', { startDate, endDate, lastDay });
       
       query = query
         .gte('data_evento', startDate)
@@ -80,7 +80,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 });
     }
 
-    console.log('??? Recebendo requisi��o para deletar eventos...');
+    console.log('??? Recebendo requisiÃ§Ã¡o para deletar eventos...');
     
     const body = await request.json();
     const { bar_id } = body;
@@ -88,8 +88,8 @@ export async function DELETE(request: NextRequest) {
     console.log('?? Parmetros recebidos:', { bar_id });
 
     if (!bar_id) {
-      console.log('? bar_id n�o fornecido');
-      return NextResponse.json({ error: 'bar_id � obrigat�rio' }, { status: 400 });
+      console.log('? bar_id nÃ¡o fornecido');
+      return NextResponse.json({ error: 'bar_id Ã© obrigatÃ³rio' }, { status: 400 });
     }
 
     const { error } = await supabase
@@ -122,20 +122,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 });
     }
 
-    console.log('? [POST EVENTOS] Recebendo requisi��o para inserir eventos...');
+    console.log('? [POST EVENTOS] Recebendo requisiÃ§Ã¡o para inserir eventos...');
     
     const eventos = await request.json();
     console.log('?? [POST EVENTOS] Dados recebidos:', JSON.stringify(eventos, null, 2));
 
     console.log('?? [POST EVENTOS] Validando estrutura...');
-    console.log('?? [POST EVENTOS] � array?', Array.isArray(eventos));
+    console.log('?? [POST EVENTOS] Ã‰ array?', Array.isArray(eventos));
     console.log('?? [POST EVENTOS] Quantidade:', eventos?.length);
 
     if (!Array.isArray(eventos) || eventos.length === 0) {
-      console.log('? [POST EVENTOS] Array de eventos inv�lido');
+      console.log('? [POST EVENTOS] Array de eventos invÃ¡lido');
       return NextResponse.json({ 
         success: false,
-        error: 'Array de eventos � obrigat�rio' 
+        error: 'Array de eventos Ã© obrigatÃ³rio' 
       }, { status: 400 });
     }
 
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
 
     console.log('?? [POST EVENTOS] Criando cliente Supabase...');
     
-    console.log('?? [POST EVENTOS] Executando inser��o...');
+    console.log('?? [POST EVENTOS] Executando inserÃ§Ã¡o...');
     const { data, error } = await supabase
       .from('eventos')
       .insert(eventos)
@@ -171,7 +171,7 @@ export async function POST(request: NextRequest) {
     console.log('? [POST EVENTOS] Eventos inseridos com sucesso:', data?.length || 0);
     console.log('?? [POST EVENTOS] Eventos criados:', data);
     
-    // Verifica��o adicional: buscar os eventos que acabamos de criar
+    // VerificaÃ§Ã¡o adicional: buscar os eventos que acabamos de criar
     if (data && data.length > 0) {
       console.log('?? [POST EVENTOS] Verificando se os eventos foram realmente salvos...');
       
@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
           .single();
           
         if (erroVerificacao || !verificacao) {
-          console.error('? [POST EVENTOS] Evento n�o encontrado ap�s inser��o:', {
+          console.error('? [POST EVENTOS] Evento nÃ¡o encontrado apÃ³s inserÃ§Ã¡o:', {
             id: eventoSalvo.id,
             erro: erroVerificacao
           });
@@ -252,3 +252,4 @@ export async function PUT(request: NextRequest) {
     }, { status: 500 });
   }
 } 
+

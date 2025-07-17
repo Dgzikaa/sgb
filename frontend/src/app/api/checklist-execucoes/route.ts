@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import DiscordChecklistService from '@/lib/discord-checklist-service'
 
-// For�ar renderiza��o din�mica devido ao uso de request.url
+// ForÃ¡Â§ar renderizaÃ¡Â§Ã¡Â£o dinÃ¡Â¢mica devido ao uso de request.url
 export const dynamic = 'force-dynamic';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -24,16 +24,16 @@ export async function POST(request: NextRequest) {
       bar_id
     } = body
 
-    // Valida��es b�sicas
+    // ValidaÃ¡Â§Ã¡Âµes bÃ¡Â¡sicas
     if (!checklist_id || !responsavel_id || !bar_id) {
       return NextResponse.json({
-        error: 'Dados obrigat�rios: checklist_id, responsavel_id, bar_id'
+        error: 'Dados obrigatÃ³rios: checklist_id, responsavel_id, bar_id'
       }, { status: 400 })
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // 1. Criar registro de execu��o
+    // 1. Criar registro de execuÃ§Ã£o
     const { data: execucao, error: execucaoError } = await supabase
       .from('checklist_execucoes')
       .insert({
@@ -57,18 +57,18 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (execucaoError) {
-      console.error('�� Erro ao criar execu��o:', execucaoError)
+      console.error('ÂÅ’ Erro ao criar execuÃ§Ã£o:', execucaoError)
       return NextResponse.json({
-        error: 'Erro ao salvar execu��o do checklist',
+        error: 'Erro ao salvar execuÃ§Ã£o do checklist',
         details: execucaoError.message
       }, { status: 500 })
     }
 
-    console.log('�� Execu��o criada:', execucao.id)
+    console.log('Å“â€¦ ExecuÃ§Ã£o criada:', execucao.id)
 
     // 2. Salvar respostas individuais
     if (respostas && Array.isArray(respostas) && respostas.length > 0) {
-      const respostasFormatadas = respostas.map((resposta) => ({
+      const respostasFormatadas = respostas.map((resposta: any) => ({
         execucao_id: execucao.id,
         item_id: resposta.item_id,
         valor: resposta.valor,
@@ -82,10 +82,10 @@ export async function POST(request: NextRequest) {
         .insert(respostasFormatadas)
 
       if (respostasError) {
-        console.error('�� Erro ao salvar respostas:', respostasError)
-        // N�o falhar a opera��o se s� as respostas deram erro
+        console.error('ÂÅ’ Erro ao salvar respostas:', respostasError)
+        // NÃ£o falhar a operaÃ§Ã£o se sÃ³ as respostas deram erro
       } else {
-        console.log(`�� ${respostasFormatadas.length} respostas salvas`)
+        console.log(`Å“â€¦ ${respostasFormatadas.length} respostas salvas`)
       }
     }
 
@@ -94,12 +94,12 @@ export async function POST(request: NextRequest) {
     try {
       const { calcularScoreFinal } = await import('@/lib/checklist-scoring')
       const mockExecucao = {
-        respostas: { secoes: respostas.map((r) => ({ itens: [r] })) },
+        respostas: { secoes: respostas.map((r: any) => ({ itens: [r] })) },
         estrutura_checklist: { secoes: [] } // Estrutura simplificada para compatibilidade
       }
       scoreResult = calcularScoreFinal(mockExecucao)
       
-      // Atualizar execu��o com score calculado
+      // Atualizar execuÃ§Ã£o com score calculado
       const { error: scoreError } = await supabase
         .from('checklist_execucoes')
         .update({
@@ -110,17 +110,17 @@ export async function POST(request: NextRequest) {
         .eq('id', execucao.id)
 
       if (scoreError) {
-        console.error('�� Erro ao salvar score:', scoreError)
+        console.error('ÂÅ’ Erro ao salvar score:', scoreError)
       } else {
-        console.log(`�� Score calculado: ${scoreResult.score_total}/100 (${scoreResult.categoria})`)
+        console.log(`Å“â€¦ Score calculado: ${scoreResult.score_total}/100 (${scoreResult.categoria})`)
       }
     } catch (scoreError) {
-      console.error('�� Erro no c�lculo de score:', scoreError)
+      console.error('ÂÅ’ Erro no cÃ¡lculo de score:', scoreError)
     }
 
-    // 4. 🔥 ENVIAR NOTIFICA��O DISCORD DE CONCLUS�O
+    // 4. Ã°Å¸â€Â¥ ENVIAR NOTIFICAÃ§Ã£O DISCORD DE CONCLUSÃ£O
     try {
-      // Buscar dados do checklist e usu�rio para notifica��o completa
+      // Buscar dados do checklist e usuÃ¡rio para notificaÃ§Ã£o completa
       const { data: checklistData } = await supabase
         .from('checklists')
         .select('nome, categoria, setor')
@@ -138,8 +138,8 @@ export async function POST(request: NextRequest) {
           id: execucao.id,
           checklist_id: checklist_id,
           titulo: checklistData.nome || 'Checklist',
-          responsavel: userData.nome || 'Usu�rio',
-          setor: checklistData.setor || 'N�o informado',
+          responsavel: userData.nome || 'UsuÃ¡rio',
+          setor: checklistData.setor || 'NÃ£o informado',
           tempo_execucao: tempo_execucao || 0,
           total_itens: total_itens || 0,
           itens_ok: itens_ok || 0,
@@ -147,15 +147,15 @@ export async function POST(request: NextRequest) {
           status: 'concluido',
           observacoes_gerais: observacoes_gerais || '',
           concluido_em: execucao.concluido_em,
-          pontuacao_final: scoreResult?.score_total || null
+          pontuacao_final: scoreResult?.score_total || undefined
         }
 
         await DiscordChecklistService.sendCompletion(executionNotification)
-        console.log(`🎯 Notifica��o Discord enviada: ${checklistData.nome} conclu�do por ${userData.nome}`)
+        console.log(`Ã°Å¸Å½Â¯ NotificaÃ§Ã£o Discord enviada: ${checklistData.nome} concluÃ­do por ${userData.nome}`)
       }
     } catch (discordError) {
-      console.error('�� Erro ao enviar notifica��o Discord:', discordError)
-      // N�o falhar a opera��o se s� o Discord der erro
+      console.error('ÂÅ’ Erro ao enviar notificaÃ§Ã£o Discord:', discordError)
+      // NÃ£o falhar a operaÃ§Ã£o se sÃ³ o Discord der erro
     }
 
     return NextResponse.json({
@@ -166,10 +166,10 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro na API checklist-execucoes:', error)
+    console.error('ÂÅ’ Erro na API checklist-execucoes:', error)
     return NextResponse.json({
       error: 'Erro interno do servidor',
-      details: error.message
+      details: (error as any).message
     }, { status: 500 })
   }
 }
@@ -184,7 +184,7 @@ export async function GET(request: NextRequest) {
 
     if (!bar_id) {
       return NextResponse.json({
-        error: 'Par�metro bar_id � obrigat�rio'
+        error: 'ParÃ¢metro bar_id Ã© obrigatÃ³rio'
       }, { status: 400 })
     }
 
@@ -216,9 +216,9 @@ export async function GET(request: NextRequest) {
     const { data: execucoes, error } = await query
 
     if (error) {
-      console.error('�� Erro ao buscar execu��es:', error)
+      console.error('ÂÅ’ Erro ao buscar execuÃ§Ãµes:', error)
       return NextResponse.json({
-        error: 'Erro ao buscar execu��es',
+        error: 'Erro ao buscar execuÃ§Ãµes',
         details: error.message
       }, { status: 500 })
     }
@@ -229,10 +229,11 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro na API GET checklist-execucoes:', error)
+    console.error('ÂÅ’ Erro na API GET checklist-execucoes:', error)
     return NextResponse.json({
       error: 'Erro interno do servidor',
-      details: error.message
+      details: (error as any).message
     }, { status: 500 })
   }
 } 
+

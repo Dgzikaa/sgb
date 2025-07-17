@@ -1,5 +1,4 @@
-// Sistema Inteligente de Mapeamento de Categorias - ContaAzul
-// Analisa descri·ß·µes e mapeia automaticamente para categorias apropriadas
+Ôªø// Analisa descri√ß√µes e mapeia automaticamente para categorias apropriadas
 
 export interface CategoriaMapping {
   categoria_sugerida: string;
@@ -19,22 +18,22 @@ export interface RegraCategoria {
   descricao: string;
 }
 
-// Regras baseadas na an·°lise dos dados reais do bar
+// Regras baseadas na an√°lise dos dados reais do bar
 const REGRAS_MAPEAMENTO: RegraCategoria[] = [
   // RECEITAS - VENDAS
   {
-    pattern: /cr·©dito domic·≠lio cart·£o.*stone.*d[e·©]bito/i,
-    categoria: 'Stone D·©bito',
+    pattern: /cr√©dito domic√≠lio cart√£o.*stone.*d[e√©]bito/i,
+    categoria: 'Stone D√©bito',
     tipo: 'RECEITA',
     confianca: 98,
-    descricao: 'Vendas com cart·£o de d·©bito via Stone'
+    descricao: 'Vendas com cart√£o de d√©bito via Stone'
   },
   {
-    pattern: /cr·©dito domic·≠lio cart·£o.*stone/i,
-    categoria: 'Stone Cr·©dito',
+    pattern: /cr√©dito domic√≠lio cart√£o.*stone/i,
+    categoria: 'Stone Cr√©dito',
     tipo: 'RECEITA',
     confianca: 98,
-    descricao: 'Vendas com cart·£o de cr·©dito via Stone'
+    descricao: 'Vendas com cart√£o de cr√©dito via Stone'
   },
   {
     pattern: /pix recebido|pix \| maquininha|pix recebido -/i,
@@ -51,11 +50,11 @@ const REGRAS_MAPEAMENTO: RegraCategoria[] = [
     descricao: 'Recebimentos em dinheiro'
   },
   {
-    pattern: /transfer[·™e]ncia recebida/i,
+    pattern: /transfer[√™nciae] recebida/i,
     categoria: 'Pix Direto na Conta',
     tipo: 'RECEITA',
     confianca: 95,
-    descricao: 'Transfer·™ncias recebidas direto na conta'
+    descricao: 'Transfer√™ncias recebidas direto na conta'
   },
   {
     pattern: /bilheteria|evento/i,
@@ -65,11 +64,11 @@ const REGRAS_MAPEAMENTO: RegraCategoria[] = [
     descricao: 'Receita de eventos/bilheteria'
   },
   {
-    pattern: /patroc[i·≠]nio|ambev/i,
+    pattern: /patroc[√≠i]nio|ambev/i,
     categoria: 'Outras Receitas',
     tipo: 'RECEITA',
     confianca: 90,
-    descricao: 'Receitas de patroc·≠nio'
+    descricao: 'Receitas de patroc√≠nio'
   },
   {
     pattern: /receita/i,
@@ -80,28 +79,28 @@ const REGRAS_MAPEAMENTO: RegraCategoria[] = [
   },
   // RECEITAS - ESPECIAIS
   {
-    pattern: /patroc·≠nio/i,
+    pattern: /patroc√≠nio/i,
     categoria: 'RECEITAS_PATROCINIO',
     tipo: 'RECEITA',
     confianca: 98,
-    descricao: 'Receitas de patroc·≠nio'
+    descricao: 'Receitas de patroc√≠nio'
   },
   {
     pattern: /ambev/i,
     categoria: 'RECEITAS_PATROCINIO',
     tipo: 'RECEITA',
     confianca: 95,
-    descricao: 'Patroc·≠nio Ambev'
+    descricao: 'Patroc√≠nio Ambev'
   },
 
-  // DESPESAS - PESSOAL (PIX para pessoas f·≠sicas)
+  // DESPESAS - PESSOAL (PIX para pessoas f√≠sicas)
   {
     pattern: /pix enviado.*(?:[A-Z][a-z]+ ){2,}/i,
     categoria: 'DESPESAS_PESSOAL',
     centro_custo: 'RECURSOS_HUMANOS',
     tipo: 'DESPESA',
     confianca: 85,
-    descricao: 'Pagamentos a pessoas f·≠sicas via PIX'
+    descricao: 'Pagamentos a pessoas f√≠sicas via PIX'
   },
 
   // DESPESAS - FORNECEDORES (empresas)
@@ -114,58 +113,58 @@ const REGRAS_MAPEAMENTO: RegraCategoria[] = [
     descricao: 'Pagamentos a fornecedores/empresas'
   },
 
-  // DESPESAS - MANUTEN·á·ÉO E REPAROS
+  // DESPESAS - MANUTEN√á√ÉO E REPAROS
   {
-    pattern: /reparos|constru·ß·£o|material.*constru·ß·£o|construcoes/i,
+    pattern: /reparos|constru√ß√£o|material.*constru√ß√£o|construcoes/i,
     categoria: 'DESPESAS_MANUTENCAO',
     centro_custo: 'MANUTENCAO',
     tipo: 'DESPESA',
     confianca: 95,
-    descricao: 'Despesas de manuten·ß·£o e reparos'
+    descricao: 'Despesas de manuten√ß√£o e reparos'
   },
 
   // DESPESAS - UTILIDADES
   {
-    pattern: /d·©bito autom·°tico.*caesb|energia|·°gua|g·°s/i,
+    pattern: /d√©bito autom√°tico.*caesb|energia|√°gua|g√°s/i,
     categoria: 'DESPESAS_UTILIDADES',
     centro_custo: 'OPERACIONAL',
     tipo: 'DESPESA',
     confianca: 98,
-    descricao: 'Contas de utilidades (luz, ·°gua, g·°s)'
+    descricao: 'Contas de utilidades (luz, √°gua, g√°s)'
   },
 
-  // DESPESAS - ALUGUEL E CONDOM·çNIO
+  // DESPESAS - ALUGUEL E CONDOM√çNIO
   {
-    pattern: /condom·≠nio|condominio|aluguel/i,
+    pattern: /condom√≠nio|condominio|aluguel/i,
     categoria: 'DESPESAS_ALUGUEL',
     centro_custo: 'ADMINISTRATIVO',
     tipo: 'DESPESA',
     confianca: 95,
-    descricao: 'Despesas de aluguel e condom·≠nio'
+    descricao: 'Despesas de aluguel e condom√≠nio'
   },
 
-  // DESPESAS - EQUIPAMENTOS E LOCA·á·ÉO
+  // DESPESAS - EQUIPAMENTOS E LOCA√á√ÉO
   {
-    pattern: /loca·ß·£o|loc\s|equipamentos|bomtempo/i,
+    pattern: /loca√ß√£o|loc\s|equipamentos|bomtempo/i,
     categoria: 'DESPESAS_EQUIPAMENTOS',
     centro_custo: 'OPERACIONAL',
     tipo: 'DESPESA',
     confianca: 90,
-    descricao: 'Loca·ß·£o de equipamentos'
+    descricao: 'Loca√ß√£o de equipamentos'
   }
 ];
 
 export function mapearCategoria(
   descricao: string, 
   tipo: 'RECEITA' | 'DESPESA',
-  valor: number = 0
+  valor = 0
 ): CategoriaMapping {
   
   if (!descricao) {
     return {
       categoria_sugerida: 'NAO_CLASSIFICADO',
       confianca: 0,
-      motivo: 'Descri·ß·£o vazia'
+      motivo: 'Descri√ß√£o vazia'
     };
   }
 
@@ -200,48 +199,69 @@ export function mapearCategoria(
     return {
       categoria_sugerida: 'RECEITAS_DIVERSAS',
       confianca: 50,
-      motivo: 'Receita n·£o classificada - revisar manualmente'
+      motivo: 'Receita n√£o classificada - revisar manualmente'
     };
   } else {
-    // An·°lise b·°sica para despesas n·£o classificadas
+    // An√°lise b√°sica para despesas n√£o classificadas
     if (valor > 50000) { // > R$ 500
       return {
         categoria_sugerida: 'DESPESAS_OPERACIONAIS',
         centro_custo_sugerido: 'OPERACIONAL',
         confianca: 40,
-        motivo: 'Despesa alta n·£o classificada - revisar manualmente'
+        motivo: 'Despesa alta n√£o classificada - revisar manualmente'
       };
     } else {
       return {
         categoria_sugerida: 'DESPESAS_PEQUENAS',
         centro_custo_sugerido: 'ADMINISTRATIVO',
         confianca: 30,
-        motivo: 'Despesa pequena n·£o classificada'
+        motivo: 'Despesa pequena n√£o classificada'
       };
     }
   }
 }
 
-export function analisarLote(parcelas[]): {
+// Tipo para parcela analisada
+export interface ParcelaAnalise {
+  dados_completos?: {
+    item_original?: {
+      descricao?: string;
+      total?: string;
+    };
+    tipo?: 'RECEITA' | 'DESPESA' | string;
+  };
+}
+
+// Tipo para caso de revis√£o
+interface CasoRevisar {
+  descricao: string;
+  tipo: string;
+  valor: number;
+  categoria_sugerida: string;
+  confianca: number;
+  motivo: string;
+}
+
+export function analisarLote(parcelas: ParcelaAnalise[]): {
   total_analisadas: number;
   total_classificadas: number;
   confianca_media: number;
   categorias_encontradas: Record<string, number>;
-  casos_revisar[];
+  casos_revisar: CasoRevisar[];
 } {
   const resultado = {
     total_analisadas: parcelas.length,
     total_classificadas: 0,
     confianca_media: 0,
     categorias_encontradas: {} as Record<string, number>,
-    casos_revisar: [] as any[]
+    casos_revisar: [] as CasoRevisar[]
   };
 
   let somaConfianca = 0;
 
   for (const parcela of parcelas) {
     const descricao = parcela.dados_completos?.item_original?.descricao || '';
-    const tipo = parcela.dados_completos?.tipo || 'DESPESA';
+    const tipo = (parcela.dados_completos?.tipo === 'RECEITA' ? 'RECEITA' : 'DESPESA');
     const valor = parseFloat(parcela.dados_completos?.item_original?.total || '0');
 
     const mapping = mapearCategoria(descricao, tipo, valor);
@@ -256,7 +276,7 @@ export function analisarLote(parcelas[]): {
     const categoria = mapping.categoria_sugerida;
     resultado.categorias_encontradas[categoria] = (resultado.categorias_encontradas[categoria] || 0) + 1;
 
-    // Casos para revis·£o (baixa confian·ßa)
+    // Casos para revis√£o (baixa confian√ßa)
     if (mapping.confianca < 70) {
       resultado.casos_revisar.push({
         descricao,
@@ -277,22 +297,22 @@ export function analisarLote(parcelas[]): {
 export function gerarRelatorioClassificacao(analise: ReturnType<typeof analisarLote>): string {
   const { total_analisadas, total_classificadas, confianca_media, categorias_encontradas, casos_revisar } = analise;
   
-  let relatorio = `üìä RELAT·ìRIO DE CLASSIFICA·á·ÉO AUTOM·ÅTICA\n\n`;
-  relatorio += `úÖ Total analisado: ${total_analisadas} parcelas\n`;
+  let relatorio = `üìä RELAT√ìRIO DE CLASSIFICA√á√ÉO AUTOM√ÅTICA\n\n`;
+  relatorio += `‚úÖ Total analisado: ${total_analisadas} parcelas\n`;
   relatorio += `üéØ Classificadas: ${total_classificadas} (${Math.round(total_classificadas/total_analisadas*100)}%)\n`;
-  relatorio += `üìà Confian·ßa m·©dia: ${Math.round(confianca_media)}%\n\n`;
+  relatorio += `üìà Confian√ßa m√©dia: ${Math.round(confianca_media)}%\n\n`;
 
-  relatorio += `üìÇ CATEGORIAS ENCONTRADAS:\n`;
+  relatorio += `üìã CATEGORIAS ENCONTRADAS:\n`;
   const categoriasOrdenadas = Object.entries(categorias_encontradas)
     .sort(([,a], [,b]) => b - a);
     
   for (const [categoria, count] of categoriasOrdenadas) {
-    relatorio += `Ä¢ ${categoria}: ${count} parcelas\n`;
+    relatorio += `‚Ä¢ ${categoria}: ${count} parcelas\n`;
   }
 
-  relatorio += `\nö†Ô∏è CASOS PARA REVIS·ÉO (${casos_revisar.length}):\n`;
+  relatorio += `\n‚è∞ CASOS PARA REVIS√ÉO (${casos_revisar.length}):\n`;
   for (const caso of casos_revisar.slice(0, 10)) { // Mostrar apenas 10 primeiros
-    relatorio += `Ä¢ "${caso.descricao}" Üí ${caso.categoria_sugerida} (${caso.confianca}%)\n`;
+    relatorio += `‚Ä¢ "${caso.descricao}" ‚Üí ${caso.categoria_sugerida} (${caso.confianca}%)\n`;
   }
 
   if (casos_revisar.length > 10) {
@@ -301,3 +321,4 @@ export function gerarRelatorioClassificacao(analise: ReturnType<typeof analisarL
 
   return relatorio;
 } 
+

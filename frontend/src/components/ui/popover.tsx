@@ -1,4 +1,4 @@
-import * as React from "react"
+﻿import * as React from "react"
 import { cn } from "@/lib/utils"
 
 interface PopoverProps {
@@ -23,6 +23,7 @@ const PopoverContext = React.createContext<{
   setOpen: (open: boolean) => void
 }>({ open: false, setOpen: () => {} })
 
+// Componente de popover
 const Popover: React.FC<PopoverProps> = ({ children, open: controlledOpen, onOpenChange }) => {
   const [internalOpen, setInternalOpen] = React.useState(false)
   
@@ -43,6 +44,7 @@ const Popover: React.FC<PopoverProps> = ({ children, open: controlledOpen, onOpe
   )
 }
 
+// Trigger do popover
 const PopoverTrigger: React.FC<PopoverTriggerProps> = ({ 
   children, 
   asChild = false,
@@ -59,7 +61,7 @@ const PopoverTrigger: React.FC<PopoverTriggerProps> = ({
     return React.cloneElement(children, { 
       onClick: handleClick,
       ...children.props 
-    } as any)
+    } )
   }
   
   return (
@@ -69,6 +71,7 @@ const PopoverTrigger: React.FC<PopoverTriggerProps> = ({
   )
 }
 
+// Conteúdo do popover
 const PopoverContent: React.FC<PopoverContentProps> = ({ 
   className, 
   align = 'center',
@@ -127,3 +130,4 @@ const PopoverContent: React.FC<PopoverContentProps> = ({
 }
 
 export { Popover, PopoverTrigger, PopoverContent } 
+

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase';
 
 // POST - Migrar dados do localStorage para a tabela metas_negocio
@@ -14,12 +14,12 @@ export async function POST(request: NextRequest) {
 
     if (!bar_id || !metas_config) {
       return NextResponse.json(
-        { success: false, error: 'bar_id e metas_config s�o obrigat�rios' },
+        { success: false, error: 'bar_id e metas_config sÃ¡Â£o obrigatÃ¡Â³rios' },
         { status: 400 }
       )
     }
 
-    // Verificar se j� existe configura��o para este bar
+    // Verificar se jÃ¡Â¡ existe configuraÃ¡Â§Ã¡Â£o para este bar
     const { data: existingMetas, error: checkError } = await supabase
       .from('metas_negocio')
       .select('*')
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Preparar dados para inser��o/atualiza��o
+    // Preparar dados para inserÃ¡Â§Ã¡Â£o/atualizaÃ¡Â§Ã¡Â£o
     const metasData = {
       bar_id: parseInt(bar_id),
       faturamento_diario: metas_config.faturamento_diario || metas_config.faturamentoDiario || 5000,
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Erro na migra��o de metas:', error)
+    console.error('Erro na migraÃ¡Â§Ã¡Â£o de metas:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },
       { status: 500 }
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET - Verificar status da migra��o
+// GET - Verificar status da migraÃ¡Â§Ã¡Â£o
 export async function GET(request: NextRequest) {
   try {
     // Inicializar cliente Supabase
@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
 
     if (!bar_id) {
       return NextResponse.json(
-        { success: false, error: 'bar_id � obrigat�rio' },
+        { success: false, error: 'bar_id Ã¡Â© obrigatÃ¡Â³rio' },
         { status: 400 }
       )
     }
@@ -158,10 +158,11 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Erro ao verificar migra��o:', error)
+    console.error('Erro ao verificar migraÃ¡Â§Ã¡Â£o:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },
       { status: 500 }
     )
   }
 } 
+

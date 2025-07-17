@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+Ôªøimport { useState, useEffect, useCallback } from 'react'
 
 export type SkeletonType = 
   | 'dashboard'
@@ -36,7 +36,7 @@ export interface UsePageLoadingReturn {
 
 export function usePageLoading(
   initialType: SkeletonType = 'fullscreen',
-  initialLoading: boolean = false
+  initialLoading = false
 ): UsePageLoadingReturn {
   const [state, setState] = useState<PageLoadingState>({
     isLoading: initialLoading,
@@ -78,7 +78,7 @@ export function usePageLoading(
     }))
   }, [])
 
-  // Wrapper para executar fun·ß·£o ass·≠ncrona com loading
+  // Wrapper para executar fun√ß√£o ass√≠ncrona com loading
   const withLoading = useCallback(async <T>(
     asyncFn: () => Promise<T>,
     type: SkeletonType = initialType,
@@ -108,7 +108,7 @@ export function usePageLoading(
   }
 }
 
-// Hook espec·≠fico para loading de dados de API
+// Hook espec√≠fico para loading de dados de API
 export function useApiLoading(skeletonType: SkeletonType = 'fullscreen') {
   const {
     loading,
@@ -121,7 +121,7 @@ export function useApiLoading(skeletonType: SkeletonType = 'fullscreen') {
     withLoading
   } = usePageLoading(skeletonType)
 
-  // Fun·ß·£o para fazer requisi·ß·µes com loading autom·°tico
+  // Fun√ß√£o para fazer requisi√ß√µes com loading autom√°tico
   const fetchWithLoading = useCallback(async <T>(
     url: string,
     options?: RequestInit,
@@ -151,7 +151,7 @@ export function useApiLoading(skeletonType: SkeletonType = 'fullscreen') {
   }
 }
 
-// Hook para m·∫ltiplos estados de loading (·∫til para p·°ginas complexas)
+// Hook para m√∫ltiplos estados de loading (√∫til para p√°ginas complexas)
 export function useMultipleLoading() {
   const [loadingStates, setLoadingStates] = useState<Record<string, PageLoadingState>>({})
 
@@ -241,10 +241,10 @@ export function useMultipleLoading() {
   }
 }
 
-// Hook com timer para evitar loading muito r·°pido (evita flicker)
+// Hook com timer para evitar loading muito r√°pido (evita flicker)
 export function useDelayedLoading(
   initialType: SkeletonType = 'fullscreen',
-  minDelay: number = 300
+  minDelay = 300
 ) {
   const pageLoading = usePageLoading(initialType)
   const [shouldShowLoading, setShouldShowLoading] = useState(false)
@@ -270,3 +270,4 @@ export function useDelayedLoading(
     loading: shouldShowLoading && pageLoading.loading
   }
 } 
+

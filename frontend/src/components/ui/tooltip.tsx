@@ -1,4 +1,4 @@
-import * as React from 'react';
+﻿import * as React from 'react';
 import { createPortal } from 'react-dom';
 
 interface TooltipContextType {
@@ -30,10 +30,10 @@ export const TooltipTrigger: React.FC<{ asChild?: boolean; children: React.React
     onFocus: () => setOpen(true),
     onBlur: () => setOpen(false),
     tabIndex: 0,
-    ref: triggerRef as any,
+    ref: triggerRef as unknown as React.RefCallback<HTMLElement> | undefined,
   };
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children, { ...triggerProps, ...children.props } as any);
+    return React.cloneElement(children as React.ReactElement, { ...triggerProps, ...children.props });
   }
   return <span {...triggerProps}>{children}</span>;
 };
@@ -87,3 +87,4 @@ export const TooltipContent: React.FC<{ children: React.ReactNode; side?: 'top' 
     document.body
   );
 }; 
+

@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   try {
     const user = await authenticateUser(request);
     if (!user) {
-      return authErrorResponse('Usuá¡rio ná£o autenticado');
+      return authErrorResponse('UsuÃÂ¡ÃÂ¡rio nÃÂ¡ÃÂ£o autenticado');
     }
 
     const { searchParams } = new URL(request.url);
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     const { data: metas, error } = await query;
 
     if (error) {
-      console.error('Œ Erro ao buscar metas:', error);
+      console.error('ÃÂÃâ Erro ao buscar metas:', error);
       return NextResponse.json({ error: 'Erro ao buscar metas' }, { status: 500 });
     }
 
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Œ Erro na API de metas:', error);
+    console.error('ÃÂÃâ Erro na API de metas:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await authenticateUser(request);
     if (!user) {
-      return authErrorResponse('Usuá¡rio ná£o autenticado');
+      return authErrorResponse('UsuÃÂ¡ÃÂ¡rio nÃÂ¡ÃÂ£o autenticado');
     }
 
     const body = await request.json();
@@ -88,17 +88,17 @@ export async function POST(request: NextRequest) {
       icone_categoria
     } = body;
 
-    // Validaá§áµes
+    // ValidaÃÂ¡ÃÂ§ÃÂ¡ÃÂµes
     if (!categoria || !nome_meta || !tipo_valor) {
       return NextResponse.json(
-        { error: 'Categoria, nome da meta e tipo do valor sá£o obrigatá³rios' },
+        { error: 'Categoria, nome da meta e tipo do valor sÃÂ¡ÃÂ£o obrigatÃÂ¡ÃÂ³rios' },
         { status: 400 }
       );
     }
 
     const supabase = await getAdminClient();
 
-    // Buscar prá³xima ordem
+    // Buscar prÃÂ¡ÃÂ³xima ordem
     const { data: ultimaMeta } = await supabase
       .from('metas_negocio')
       .select('ordem_exibicao')
@@ -133,11 +133,11 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Œ Erro ao criar meta:', error);
+      console.error('ÃÂÃâ Erro ao criar meta:', error);
       return NextResponse.json({ error: 'Erro ao criar meta' }, { status: 500 });
     }
 
-    console.log(`œ… Meta criada: ${nome_meta}`);
+    console.log(`ÃâÃ¢â¬Â¦ Meta criada: ${nome_meta}`);
     return NextResponse.json({
       success: true,
       data: novaMeta,
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Œ Erro ao criar meta:', error);
+    console.error('ÃÂÃâ Erro ao criar meta:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }
@@ -157,14 +157,14 @@ export async function PUT(request: NextRequest) {
   try {
     const user = await authenticateUser(request);
     if (!user) {
-      return authErrorResponse('Usuá¡rio ná£o autenticado');
+      return authErrorResponse('UsuÃÂ¡ÃÂ¡rio nÃÂ¡ÃÂ£o autenticado');
     }
 
     const { metas } = await request.json();
 
     if (!Array.isArray(metas)) {
       return NextResponse.json(
-        { error: 'Formato invá¡lido: esperado array de metas' },
+        { error: 'Formato invÃÂ¡ÃÂ¡lido: esperado array de metas' },
         { status: 400 }
       );
     }
@@ -189,14 +189,14 @@ export async function PUT(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error(`Œ Erro ao atualizar meta ${meta.id}:`, error);
+        console.error(`ÃÂÃâ Erro ao atualizar meta ${meta.id}:`, error);
         continue;
       }
 
       metasAtualizadas.push(metaAtualizada);
     }
 
-    console.log(`œ… ${metasAtualizadas.length} metas atualizadas`);
+    console.log(`ÃâÃ¢â¬Â¦ ${metasAtualizadas.length} metas atualizadas`);
     return NextResponse.json({
       success: true,
       data: metasAtualizadas,
@@ -204,7 +204,7 @@ export async function PUT(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Œ Erro ao atualizar metas:', error);
+    console.error('ÃÂÃâ Erro ao atualizar metas:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 } 

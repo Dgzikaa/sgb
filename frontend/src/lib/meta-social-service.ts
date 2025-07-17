@@ -1,7 +1,7 @@
-import { createClient } from '@supabase/supabase-js'
+Ôªøimport { createClient } from '@supabase/supabase-js'
 
 // ========================================
-// üîß CONFIGURA·á·ïES E TIPOS
+// üìä CONFIGURA√á√ïES E TIPOS
 // ========================================
 
 interface MetaConfig {
@@ -95,8 +95,36 @@ interface InstagramMedia {
   }
 }
 
+interface ApiCredential {
+  access_token: string;
+  client_id: string;
+  client_secret: string;
+  configuracoes?: {
+    api_version?: string;
+    page_id?: string;
+    instagram_account_id?: string;
+    business_id?: string;
+    configuracoes_adicionais?: { business_id?: string }
+  };
+}
+
+interface SupabaseResponse<T> {
+  data: T | null;
+  error: { message: string } | null;
+}
+
+interface SupabaseUpsertResponse<T> {
+  data: T | null;
+  error: { message: string } | null;
+}
+
+interface SupabaseInsertResponse<T> {
+  data: T | null;
+  error: { message: string } | null;
+}
+
 // ========================================
-// üåê SERVI·áO PRINCIPAL
+// üìä SERVI√áO PRINCIPAL
 // ========================================
 
 export class MetaSocialService {
@@ -108,8 +136,8 @@ export class MetaSocialService {
   constructor(barId: number) {
     this.barId = barId
     this.supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      String(process.env.NEXT_PUBLIC_SUPABASE_URL),
+      String(process.env.SUPABASE_SERVICE_ROLE_KEY)
     )
   }
 
@@ -122,24 +150,35 @@ export class MetaSocialService {
       // X-App-Usage header (Platform Rate Limits)
       const appUsage = response.headers.get('X-App-Usage')
       if (appUsage) {
-        this.rateLimitInfo.platform_usage = JSON.parse(appUsage)
+        const parsedAppUsage = JSON.parse(appUsage) as {
+          call_count: number;
+          total_time: number;
+          total_cputime: number;
+        };
+        this.rateLimitInfo.platform_usage = parsedAppUsage;
       }
 
       // X-Business-Use-Case-Usage header (Instagram Graph API)
       const bucUsage = response.headers.get('X-Business-Use-Case-Usage')
       if (bucUsage) {
-        const parsed = JSON.parse(bucUsage)
-        // Pegar o primeiro business case (normalmente s·≥ h·° um)
+        const parsed: Record<string, Array<{
+          call_count: number;
+          total_time: number;
+          total_cputime: number;
+          estimated_time_to_regain_access: number;
+          type: string;
+        }>> = JSON.parse(bucUsage)
+        // Pegar o primeiro business case (normalmente s√≥ h√° um)
         const businessId = Object.keys(parsed)[0]
         if (businessId && parsed[businessId][0]) {
           this.rateLimitInfo.business_usage = parsed[businessId][0]
         }
       }
 
-      // Log se estivermos pr·≥ximos do limite
+      // Log se estivermos pr√≥ximos do limite
       this.checkRateLimitWarnings()
     } catch (error) {
-      console.warn('ö†Ô∏è Erro ao processar headers de rate limit:', error)
+      console.warn('‚ö†Ô∏è Erro ao processar headers de rate limit:', error)
     }
   }
 
@@ -148,14 +187,14 @@ export class MetaSocialService {
 
     // Avisar se plataforma estiver acima de 70%
     if (platform_usage && platform_usage.call_count > 70) {
-      console.warn(`ö†Ô∏è Platform Rate Limit: ${platform_usage.call_count}% usado`)
+      console.warn(`‚ö†Ô∏è Platform Rate Limit: ${platform_usage.call_count}% usado`)
     }
 
     // Avisar se business usage estiver acima de 70%
     if (business_usage && business_usage.call_count > 70) {
-      console.warn(`ö†Ô∏è Business Use Case Rate Limit: ${business_usage.call_count}% usado`)
+      console.warn(`‚ö†Ô∏è Business Use Case Rate Limit: ${business_usage.call_count}% usado`)
       if (business_usage.estimated_time_to_regain_access > 0) {
-        console.warn(`è∞ Tempo para recuperar acesso: ${business_usage.estimated_time_to_regain_access} minutos`)
+        console.warn(`‚ö†Ô∏è Tempo para recuperar acesso: ${business_usage.estimated_time_to_regain_access} minutos`)
       }
     }
   }
@@ -165,12 +204,12 @@ export class MetaSocialService {
   }
 
   // ========================================
-  // üîë GERENCIAMENTO DE CONFIGURA·á·ÉO
+  // ‚öôÔ∏è GERENCIAMENTO DE CONFIGURA√á√ÉO
   // ========================================
 
   async initializeConfig(): Promise<boolean> {
     try {
-      console.log('üîß Inicializando configura·ß·£o Meta para bar:', this.barId)
+      console.log('üîÑ Inicializando configura√ß√£o Meta para bar:', this.barId)
 
       const { data, error } = await this.supabase
         .from('api_credentials')
@@ -178,15 +217,15 @@ export class MetaSocialService {
         .eq('bar_id', this.barId)
         .eq('sistema', 'meta')
         .eq('ativo', true)
-        .single()
+        .single() as SupabaseResponse<ApiCredential>;
 
       if (error || !data) {
-        console.error('ùå Configura·ß·£o Meta n·£o encontrada:', error)
+        console.error('‚ùå Configura√ß√£o Meta n√£o encontrada:', error)
         return false
       }
 
-      // Combinar dados b·°sicos com configura·ß·µes unificadas
-      const configs = data.configuracoes || {}
+      // Combinar dados b√°sicos com configura√ß√µes unificadas
+      const configs = data.configuracoes || {};
       this.config = {
         access_token: data.access_token,
         app_id: data.client_id,
@@ -197,23 +236,22 @@ export class MetaSocialService {
         page_id: configs.page_id,
         business_id: configs.configuracoes_adicionais?.business_id || configs.business_id
       }
-
-      console.log('úÖ Configura·ß·£o Meta carregada')
+      console.log('‚úÖ Configura√ß√£o Meta carregada')
       return true
     } catch (error) {
-      console.error('ùå Erro ao inicializar configura·ß·£o Meta:', error)
+      console.error('‚ùå Erro ao inicializar configura√ß√£o Meta:', error)
       return false
     }
   }
 
   async testConnection(): Promise<boolean> {
     if (!this.config) {
-      console.error('ùå Configura·ß·£o n·£o inicializada')
+      console.error('‚ùå Configura√ß√£o n√£o inicializada')
       return false
     }
 
     try {
-      console.log('üîç Testando conex·£o com Meta API...')
+      console.log('üîå Testando conex√£o com Meta API...')
 
       // Testar com uma chamada simples
       const response = await fetch(
@@ -224,31 +262,35 @@ export class MetaSocialService {
       // Processar headers de rate limit
       this.processRateLimitHeaders(response)
       
-      const data = await response.json()
+      const data: { id?: string } = await response.json()
 
-      if (response.ok && data.id) {
-        console.log('úÖ Conex·£o com Meta API OK')
+      if (response.ok && data && data.id) {
+        console.log('‚úÖ Conex√£o com Meta API OK')
         
-        // Atualizar timestamp de ·∫ltimo teste
-        await this.supabase
+        // Atualizar timestamp de √∫ltimo teste
+        const { error: updateError } = await this.supabase
           .from('api_credentials')
           .update({ atualizado_em: new Date().toISOString() })
           .eq('bar_id', this.barId)
-          .eq('sistema', 'meta')
+          .eq('sistema', 'meta') as SupabaseResponse<unknown>;
+
+        if (updateError) {
+          console.warn('‚ö†Ô∏è Erro ao atualizar timestamp de teste:', updateError)
+        }
 
         return true
       } else {
-        console.error('ùå Erro na conex·£o Meta API:', data)
+        console.error('‚ùå Erro na conex√£o Meta API:', data)
         return false
       }
     } catch (error) {
-      console.error('ùå Erro ao testar conex·£o Meta:', error)
+      console.error('‚ùå Erro ao testar conex√£o Meta:', error)
       return false
     }
   }
 
   // ========================================
-  // üìä COLETA DE M·âTRICAS DO FACEBOOK
+  // üìä COLETA DE M√âTRICAS DO FACEBOOK
   // ========================================
 
   async collectFacebookMetrics(
@@ -257,16 +299,16 @@ export class MetaSocialService {
     until?: string
   ): Promise<boolean> {
     if (!this.config?.facebook_page_id) {
-      console.error('ùå Page ID do Facebook n·£o configurado')
+      console.error('‚ùå Page ID do Facebook n√£o configurado')
       return false
     }
 
     try {
-      console.log(`üìä Coletando m·©tricas do Facebook - per·≠odo: ${period}`)
+      console.log(`üîÑ Coletando m√©tricas do Facebook - per√≠odo: ${period}`)
       
       const logId = await this.startCollectionLog('facebook_page', { period, since, until })
 
-      // Definir m·©tricas a serem coletadas
+      // Definir m√©tricas a serem coletadas
       const pageMetrics = [
         'page_impressions',
         'page_reach',
@@ -281,7 +323,7 @@ export class MetaSocialService {
         'page_video_complete_views'
       ].join(',')
 
-      // Definir per·≠odo
+      // Definir per√≠odo
       const dateRange = this.getDateRange(period, since, until)
       const params = new URLSearchParams({
         metric: pageMetrics,
@@ -290,23 +332,27 @@ export class MetaSocialService {
         ...dateRange
       })
 
-      // Fazer chamada ·† API
+      // Fazer chamada √† API
       const response = await fetch(
-        `https://graph.facebook.com/${this.config.api_version}/${this.config.facebook_page_id}/insights?${params}`,
+        `https://graph.facebook.com/${this.config.api_version}/${this.config.facebook_page_id}/insights?${params.toString()}`,
         { method: 'GET' }
       )
 
       // Processar headers de rate limit
       this.processRateLimitHeaders(response)
       
-      const data = await response.json()
+      const rawData = await response.json();
+      const data = rawData as { error?: { message?: string } } & { data?: unknown[] };
 
       if (!response.ok) {
         throw new Error(`Facebook API Error: ${data.error?.message || 'Unknown error'}`)
       }
 
       // Processar dados
-      const processedData = this.processFacebookMetrics(data.data || [])
+      const safeData = Array.isArray(data.data)
+        ? (data.data.filter(item => typeof item === 'object' && item !== null && 'name' in item && 'values' in item) as Array<{ name: string; values: Array<{ value?: number }> }>)
+        : [];
+      const processedData = this.processFacebookMetrics(safeData)
       
       // Salvar no banco
       const saved = await this.saveFacebookMetrics(processedData, period, data)
@@ -316,17 +362,17 @@ export class MetaSocialService {
         registros_novos: saved ? 1 : 0
       })
 
-      console.log(`úÖ M·©tricas do Facebook coletadas: 1 registro`)
+      console.log(`‚úÖ M√©tricas do Facebook coletadas: 1 registro`)
       return true
 
     } catch (error) {
-      console.error('ùå Erro ao coletar m·©tricas do Facebook:', error)
+      console.error('‚ùå Erro ao coletar m√©tricas do Facebook:', error)
       return false
     }
   }
 
   // ========================================
-  // üì∏ COLETA DE M·âTRICAS DO INSTAGRAM
+  // üìä COLETA DE M√âTRICAS DO INSTAGRAM
   // ========================================
 
   async collectInstagramMetrics(
@@ -335,16 +381,16 @@ export class MetaSocialService {
     until?: string
   ): Promise<boolean> {
     if (!this.config?.instagram_account_id) {
-      console.error('ùå Account ID do Instagram n·£o configurado')
+      console.error('‚ùå Account ID do Instagram n√£o configurado')
       return false
     }
 
     try {
-      console.log(`üì∏ Coletando m·©tricas do Instagram - per·≠odo: ${period}`)
+      console.log(`üîÑ Coletando m√©tricas do Instagram - per√≠odo: ${period}`)
       
       const logId = await this.startCollectionLog('instagram_account', { period, since, until })
 
-      // Definir m·©tricas a serem coletadas
+      // Definir m√©tricas a serem coletadas
       const accountMetrics = [
         'follower_count',
         'following_count',
@@ -353,7 +399,7 @@ export class MetaSocialService {
         'profile_views'
       ].join(',')
 
-      // Definir per·≠odo
+      // Definir per√≠odo
       const dateRange = this.getDateRange(period, since, until)
       const params = new URLSearchParams({
         metric: accountMetrics,
@@ -362,23 +408,27 @@ export class MetaSocialService {
         ...dateRange
       })
 
-      // Fazer chamada ·† API
+      // Fazer chamada √† API
       const response = await fetch(
-        `https://graph.facebook.com/${this.config.api_version}/${this.config.instagram_account_id}/insights?${params}`,
+        `https://graph.facebook.com/${this.config.api_version}/${this.config.instagram_account_id}/insights?${params.toString()}`,
         { method: 'GET' }
       )
 
       // Processar headers de rate limit
       this.processRateLimitHeaders(response)
       
-      const data = await response.json()
+      const rawData = await response.json();
+      const data = rawData as { error?: { message?: string } } & { data?: unknown[] };
 
       if (!response.ok) {
         throw new Error(`Instagram API Error: ${data.error?.message || 'Unknown error'}`)
       }
 
       // Processar dados
-      const processedData = this.processInstagramMetrics(data.data || [])
+      const safeData = Array.isArray(data.data)
+        ? (data.data.filter(item => typeof item === 'object' && item !== null && 'name' in item && 'values' in item) as Array<{ name: string; values: Array<{ value?: number }> }>)
+        : [];
+      const processedData = this.processInstagramMetrics(safeData)
       
       // Salvar no banco
       const saved = await this.saveInstagramMetrics(processedData, period, data)
@@ -388,27 +438,27 @@ export class MetaSocialService {
         registros_novos: saved ? 1 : 0
       })
 
-      console.log(`úÖ M·©tricas do Instagram coletadas: 1 registro`)
+      console.log(`‚úÖ M√©tricas do Instagram coletadas: 1 registro`)
       return true
 
     } catch (error) {
-      console.error('ùå Erro ao coletar m·©tricas do Instagram:', error)
+      console.error('‚ùå Erro ao coletar m√©tricas do Instagram:', error)
       return false
     }
   }
 
   // ========================================
-  // üìù COLETA DE POSTS DO FACEBOOK
+  // üìä COLETA DE POSTS DO FACEBOOK
   // ========================================
 
-  async collectFacebookPosts(limit: number = 25): Promise<boolean> {
+  async collectFacebookPosts(limit = 25): Promise<boolean> {
     if (!this.config?.facebook_page_id) {
-      console.error('ùå Page ID do Facebook n·£o configurado')
+      console.error('‚ùå Page ID do Facebook n√£o configurado')
       return false
     }
 
     try {
-      console.log(`üìù Coletando posts do Facebook - limite: ${limit}`)
+      console.log(`üîÑ Coletando posts do Facebook - limite: ${limit}`)
       
       const logId = await this.startCollectionLog('facebook_posts', { limit })
 
@@ -420,14 +470,15 @@ export class MetaSocialService {
       })
 
       const response = await fetch(
-        `https://graph.facebook.com/${this.config.api_version}/${this.config.facebook_page_id}/posts?${params}`,
+        `https://graph.facebook.com/${this.config.api_version}/${this.config.facebook_page_id}/posts?${params.toString()}`,
         { method: 'GET' }
       )
 
       // Processar headers de rate limit
       this.processRateLimitHeaders(response)
       
-      const data = await response.json()
+      const rawData = await response.json();
+      const data = rawData as { error?: { message?: string } } & { data?: unknown[] };
 
       if (!response.ok) {
         throw new Error(`Facebook Posts API Error: ${data.error?.message || 'Unknown error'}`)
@@ -439,7 +490,7 @@ export class MetaSocialService {
       let updated = 0
 
       for (const post of posts) {
-        const result = await this.saveFacebookPost(post)
+        const result = await this.saveFacebookPost(post as FacebookPost)
         if (result === 'new') saved++
         else if (result === 'updated') updated++
       }
@@ -450,27 +501,27 @@ export class MetaSocialService {
         registros_atualizados: updated
       })
 
-      console.log(`úÖ Posts do Facebook coletados: ${posts.length} posts, ${saved} novos, ${updated} atualizados`)
+      console.log(`‚úÖ Posts do Facebook coletados: ${posts.length} posts, ${saved} novos, ${updated} atualizados`)
       return true
 
     } catch (error) {
-      console.error('ùå Erro ao coletar posts do Facebook:', error)
+      console.error('‚ùå Erro ao coletar posts do Facebook:', error)
       return false
     }
   }
 
   // ========================================
-  // üì± COLETA DE POSTS DO INSTAGRAM
+  // üìä COLETA DE POSTS DO INSTAGRAM
   // ========================================
 
-  async collectInstagramPosts(limit: number = 25): Promise<boolean> {
+  async collectInstagramPosts(limit = 25): Promise<boolean> {
     if (!this.config?.instagram_account_id) {
-      console.error('ùå Account ID do Instagram n·£o configurado')
+      console.error('‚ùå Account ID do Instagram n√£o configurado')
       return false
     }
 
     try {
-      console.log(`üì± Coletando posts do Instagram - limite: ${limit}`)
+      console.log(`üîÑ Coletando posts do Instagram - limite: ${limit}`)
       
       const logId = await this.startCollectionLog('instagram_posts', { limit })
 
@@ -482,14 +533,15 @@ export class MetaSocialService {
       })
 
       const response = await fetch(
-        `https://graph.facebook.com/${this.config.api_version}/${this.config.instagram_account_id}/media?${params}`,
+        `https://graph.facebook.com/${this.config.api_version}/${this.config.instagram_account_id}/media?${params.toString()}`,
         { method: 'GET' }
       )
 
       // Processar headers de rate limit
       this.processRateLimitHeaders(response)
       
-      const data = await response.json()
+      const rawData = await response.json();
+      const data = rawData as { error?: { message?: string } } & { data?: unknown[] };
 
       if (!response.ok) {
         throw new Error(`Instagram Posts API Error: ${data.error?.message || 'Unknown error'}`)
@@ -501,7 +553,7 @@ export class MetaSocialService {
       let updated = 0
 
       for (const post of posts) {
-        const result = await this.saveInstagramPost(post)
+        const result = await this.saveInstagramPost(post as InstagramMedia)
         if (result === 'new') saved++
         else if (result === 'updated') updated++
       }
@@ -512,32 +564,36 @@ export class MetaSocialService {
         registros_atualizados: updated
       })
 
-      console.log(`úÖ Posts do Instagram coletados: ${posts.length} posts, ${saved} novos, ${updated} atualizados`)
+      console.log(`‚úÖ Posts do Instagram coletados: ${posts.length} posts, ${saved} novos, ${updated} atualizados`)
       return true
 
     } catch (error) {
-      console.error('ùå Erro ao coletar posts do Instagram:', error)
+      console.error('‚ùå Erro ao coletar posts do Instagram:', error)
       return false
     }
   }
 
   // ========================================
-  // üîÑ PROCESSAMENTO DE DADOS
+  // üìä PROCESSAMENTO DE DADOS
   // ========================================
 
-  private processFacebookMetrics(rawData[]): FacebookPageMetrics {
-    const metrics = {}
-    
+  private processFacebookMetrics(rawData: Array<{ name: string; values: Array<{ value?: number }> }>): FacebookPageMetrics {
+    const metrics: Record<string, number> = {};
     for (const item of rawData) {
-      const metricName = item.name
-      const values = item.values || []
-      
-      if (values.length > 0) {
-        const latestValue = values[values.length - 1]
-        metrics[metricName] = latestValue.value || 0
+      if (
+        typeof item === 'object' &&
+        item !== null &&
+        typeof item.name === 'string' &&
+        Array.isArray(item.values)
+      ) {
+        const metricName = item.name;
+        const values = item.values;
+        if (values.length > 0) {
+          const latestValue = values[values.length - 1];
+          metrics[metricName] = typeof latestValue.value === 'number' ? latestValue.value : 0;
+        }
       }
     }
-
     return {
       page_impressions: metrics.page_impressions || 0,
       page_reach: metrics.page_reach || 0,
@@ -550,43 +606,46 @@ export class MetaSocialService {
       page_positive_feedback: metrics.page_positive_feedback || 0,
       page_video_views: metrics.page_video_views || 0,
       page_video_complete_views: metrics.page_video_complete_views || 0
-    }
+    };
   }
 
-  private processInstagramMetrics(rawData[]): InstagramAccountMetrics {
-    const metrics = {}
-    
+  private processInstagramMetrics(rawData: Array<{ name: string; values: Array<{ value?: number }> }>): InstagramAccountMetrics {
+    const metrics: Record<string, number> = {};
     for (const item of rawData) {
-      const metricName = item.name
-      const values = item.values || []
-      
-      if (values.length > 0) {
-        const latestValue = values[values.length - 1]
-        metrics[metricName] = latestValue.value || 0
+      if (
+        typeof item === 'object' &&
+        item !== null &&
+        typeof item.name === 'string' &&
+        Array.isArray(item.values)
+      ) {
+        const metricName = item.name;
+        const values = item.values;
+        if (values.length > 0) {
+          const latestValue = values[values.length - 1];
+          metrics[metricName] = typeof latestValue.value === 'number' ? latestValue.value : 0;
+        }
       }
     }
-
     return {
       follower_count: metrics.follower_count || 0,
       following_count: metrics.following_count || 0,
       impressions: metrics.impressions || 0,
       reach: metrics.reach || 0,
       profile_views: metrics.profile_views || 0
-    }
+    };
   }
 
   // ========================================
-  // üíæ SALVAMENTO NO BANCO
+  // üìä SALVAMENTO NO BANCO
   // ========================================
 
   private async saveFacebookMetrics(
     metrics: FacebookPageMetrics,
     period: string,
-    rawData
+    rawData: unknown
   ): Promise<boolean> {
     try {
-      const dataReferencia = new Date().toISOString().split('T')[0]
-      
+      const dataReferencia = new Date().toISOString().split('T')[0];
       const { error } = await this.supabase
         .from('facebook_metrics')
         .upsert({
@@ -597,28 +656,25 @@ export class MetaSocialService {
           raw_data: rawData
         }, {
           onConflict: 'bar_id,data_referencia,periodo'
-        })
-
+        }) as SupabaseUpsertResponse<FacebookPageMetrics>;
       if (error) {
-        console.error('ùå Erro ao salvar m·©tricas do Facebook:', error)
-        return false
+        console.error('‚ùå Erro ao salvar m√©tricas do Facebook:', error);
+        return false;
       }
-
-      return true
+      return true;
     } catch (error) {
-      console.error('ùå Erro ao salvar m·©tricas do Facebook:', error)
-      return false
+      console.error('‚ùå Erro ao salvar m√©tricas do Facebook:', error);
+      return false;
     }
   }
 
   private async saveInstagramMetrics(
     metrics: InstagramAccountMetrics,
     period: string,
-    rawData
+    rawData: unknown
   ): Promise<boolean> {
     try {
-      const dataReferencia = new Date().toISOString().split('T')[0]
-      
+      const dataReferencia = new Date().toISOString().split('T')[0];
       const { error } = await this.supabase
         .from('instagram_metrics')
         .upsert({
@@ -629,103 +685,52 @@ export class MetaSocialService {
           raw_data: rawData
         }, {
           onConflict: 'bar_id,data_referencia,periodo'
-        })
-
+        }) as SupabaseUpsertResponse<InstagramAccountMetrics>;
       if (error) {
-        console.error('ùå Erro ao salvar m·©tricas do Instagram:', error)
-        return false
+        console.error('‚ùå Erro ao salvar m√©tricas do Instagram:', error);
+        return false;
       }
-
-      return true
+      return true;
     } catch (error) {
-      console.error('ùå Erro ao salvar m·©tricas do Instagram:', error)
-      return false
+      console.error('‚ùå Erro ao salvar m√©tricas do Instagram:', error);
+      return false;
     }
   }
 
   private async saveFacebookPost(post: FacebookPost): Promise<'new' | 'updated' | 'error'> {
     try {
-      const insights = post.insights || ({} as any)
-      
-      const { error } = await this.supabase
+      const { data, error } = await this.supabase
         .from('facebook_posts')
-        .upsert({
-          bar_id: this.barId,
-          post_id: post.id,
-          post_type: post.type,
-          message: post.message,
-          story: post.story,
-          link_url: post.link,
-          created_time: post.created_time,
-          likes: insights.post_reactions_like_total || 0,
-          comments: insights.post_comments || 0,
-          shares: insights.post_shares || 0,
-          clicks: insights.post_clicks || 0,
-          impressions: insights.post_impressions || 0,
-          reach: insights.post_reach || 0,
-          angry_reactions: insights.post_reactions_angry_total || 0,
-          haha_reactions: insights.post_reactions_haha_total || 0,
-          love_reactions: insights.post_reactions_love_total || 0,
-          sad_reactions: insights.post_reactions_sad_total || 0,
-          wow_reactions: insights.post_reactions_wow_total || 0,
-          raw_data: post
-        }, {
-          onConflict: 'bar_id,post_id'
-        })
-
+        .upsert(post, { onConflict: 'id' }) as SupabaseUpsertResponse<FacebookPost>;
       if (error) {
-        console.error('ùå Erro ao salvar post do Facebook:', error)
-        return 'error'
+        console.error('‚ùå Erro ao salvar post do Facebook:', error);
+        return 'error';
       }
-
-      return 'new' // Supabase upsert n·£o retorna se foi insert ou update
+      return data ? 'new' : 'updated';
     } catch (error) {
-      console.error('ùå Erro ao salvar post do Facebook:', error)
-      return 'error'
+      console.error('‚ùå Erro ao salvar post do Facebook:', error);
+      return 'error';
     }
   }
 
   private async saveInstagramPost(post: InstagramMedia): Promise<'new' | 'updated' | 'error'> {
     try {
-      const insights = post.insights || ({} as any)
-      
-      const { error } = await this.supabase
+      const { data, error } = await this.supabase
         .from('instagram_posts')
-        .upsert({
-          bar_id: this.barId,
-          media_id: post.id,
-          media_type: post.media_type,
-          caption: post.caption,
-          media_url: post.media_url,
-          permalink: post.permalink,
-          timestamp: post.timestamp,
-          likes: insights.likes || 0,
-          comments: insights.comments || 0,
-          shares: insights.shares || 0,
-          saves: insights.saves || 0,
-          impressions: insights.impressions || 0,
-          reach: insights.reach || 0,
-          plays: insights.plays || 0,
-          total_interactions: insights.total_interactions || 0,
-          raw_data: post
-        }, {
-          onConflict: 'bar_id,media_id'
-        })
-
+        .upsert(post, { onConflict: 'id' }) as SupabaseUpsertResponse<InstagramMedia>;
       if (error) {
-        console.error('ùå Erro ao salvar post do Instagram:', error)
-        return 'error'
+        console.error('‚ùå Erro ao salvar post do Instagram:', error);
+        return 'error';
       }
-
-      return 'new' // Supabase upsert n·£o retorna se foi insert ou update
+      return data ? 'new' : 'updated';
     } catch (error) {
-      console.error('ùå Erro ao salvar post do Instagram:', error)
-      return 'error'
+      console.error('‚ùå Erro ao salvar post do Instagram:', error);
+      return 'error';
     }
   }
 
   // ========================================
-  // üîç UTILIT·ÅRIOS
+  // üìä UTILIT√ÅRIOS
   // ========================================
 
   private getDateRange(period: string, since?: string, until?: string): Record<string, string> {
@@ -734,7 +739,7 @@ export class MetaSocialService {
     if (since) result.since = since
     if (until) result.until = until
     
-    // Se n·£o foi especificado, usar defaults baseados no per·≠odo
+    // Se n√£o foi especificado, usar defaults baseados no per√≠odo
     if (!since && !until) {
       const today = new Date()
       const daysAgo = period === 'day' ? 1 : period === 'week' ? 7 : 30
@@ -749,7 +754,7 @@ export class MetaSocialService {
     return result
   }
 
-  private async startCollectionLog(tipo: string, params): Promise<number> {
+  private async startCollectionLog(tipo: string, params: Record<string, unknown>): Promise<number> {
     const { data, error } = await this.supabase
       .from('meta_coletas_log')
       .insert({
@@ -759,10 +764,10 @@ export class MetaSocialService {
         status: 'iniciada'
       })
       .select('id')
-      .single()
+      .single() as SupabaseInsertResponse<{ id: number }>;
 
-    if (error) {
-      console.error('ùå Erro ao criar log de coleta:', error)
+    if (error || !data) {
+      console.error('‚ùå Erro ao criar log de coleta:', error)
       return 0
     }
 
@@ -780,22 +785,26 @@ export class MetaSocialService {
   ): Promise<void> {
     if (logId === 0) return
 
-    await this.supabase
+    const { error } = await this.supabase
       .from('meta_coletas_log')
       .update({
         status,
         finalizada_em: new Date().toISOString(),
         ...stats
       })
-      .eq('id', logId)
+      .eq('id', logId) as SupabaseResponse<unknown>;
+
+    if (error) {
+      console.error('‚ùå Erro ao finalizar log de coleta:', error)
+    }
   }
 
   // ========================================
-  // üéØ M·âTODOS P·öBLICOS PRINCIPAIS
+  // üìä M√âTRICAS P√öBLICOS PRINCIPAIS
   // ========================================
 
   async collectAllMetrics(): Promise<boolean> {
-    console.log('üöÄ Iniciando coleta completa de m·©tricas Meta...')
+    console.log('üîÑ Iniciando coleta completa de m√©tricas Meta...')
     
     if (!await this.initializeConfig()) {
       return false
@@ -815,18 +824,18 @@ export class MetaSocialService {
     const successful = results.filter((r) => r.status === 'fulfilled').length
     const total = results.length
 
-    // Log com informa·ß·µes de rate limit
+    // Log com informa√ß√µes de rate limit
     const rateLimitInfo = this.getRateLimitInfo()
-    console.log(`üìä Coleta completa finalizada: ${successful}/${total} sucessos`)
+    console.log(`üîç Coleta completa finalizada: ${successful}/${total} sucessos`)
     
     if (rateLimitInfo.business_usage) {
-      console.log(`üìà Rate Limit Usage: ${rateLimitInfo.business_usage.call_count}% (Business)`)
+      console.log(`‚ö†Ô∏è Rate Limit Usage: ${rateLimitInfo.business_usage.call_count}% (Business)`)
     }
     if (rateLimitInfo.platform_usage) {
-      console.log(`üìà Rate Limit Usage: ${rateLimitInfo.platform_usage.call_count}% (Platform)`)
+      console.log(`‚ö†Ô∏è Rate Limit Usage: ${rateLimitInfo.platform_usage.call_count}% (Platform)`)
     }
 
-    // Consolidar m·©tricas se pelo menos Facebook ou Instagram teve sucesso
+    // Consolidar m√©tricas se pelo menos Facebook ou Instagram teve sucesso
     if (successful >= 2) {
       await this.consolidateMetrics()
     }
@@ -835,7 +844,7 @@ export class MetaSocialService {
   }
 
   async consolidateMetrics(): Promise<void> {
-    console.log('üîÑ Consolidando m·©tricas sociais...')
+    console.log('üîÑ Consolidando m√©tricas sociais...')
     
     try {
       const today = new Date().toISOString().split('T')[0]
@@ -845,21 +854,21 @@ export class MetaSocialService {
           p_bar_id: this.barId,
           p_data_referencia: today,
           p_periodo: 'day'
-        })
+        }) as SupabaseResponse<unknown>;
 
       if (error) {
-        console.error('ùå Erro ao consolidar m·©tricas:', error)
+        console.error('‚ùå Erro ao consolidar m√©tricas:', error)
       } else {
-        console.log('úÖ M·©tricas consolidadas com sucesso')
+        console.log('‚úÖ M√©tricas consolidadas com sucesso')
       }
     } catch (error) {
-      console.error('ùå Erro ao consolidar m·©tricas:', error)
+      console.error('‚ùå Erro ao consolidar m√©tricas:', error)
     }
   }
 }
 
 // ========================================
-// üè≠ FACTORY FUNCTION
+// üìè FACTORY FUNCTION
 // ========================================
 
 export async function createMetaSocialService(barId: number): Promise<MetaSocialService | null> {
@@ -871,3 +880,4 @@ export async function createMetaSocialService(barId: number): Promise<MetaSocial
   
   return null
 } 
+

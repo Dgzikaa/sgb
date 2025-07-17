@@ -1,41 +1,41 @@
-// Sistema centralizado de logging para audit trail e eventos de seguran�a
+﻿// Sistema centralizado de logging para audit trail e eventos de seguranÃ¡Â§a
 import { getAdminClient } from '@/lib/supabase-admin';
 
 export interface AuditLogParams {
-  // Obrigat�rios
+  // ObrigatÃ³rios
   operation: string;
   description: string;
   
-  // Contexto do usu�rio
+  // Contexto do usuÃ¡rio
   barId?: number;
   userId?: string;
   userEmail?: string;
   userRole?: string;
   
-  // Informa��es da requisi��o
+  // InformaÃ§Ãµes da requisiÃ§Ã£o
   ipAddress?: string;
   userAgent?: string;
   endpoint?: string;
   method?: string;
   
-  // Dados da opera��o
+  // Dados da operaÃ§Ã£o
   tableName?: string;
   recordId?: string;
-  oldValues?: Record<string, any>;
-  newValues?: Record<string, any>;
+  oldValues?: Record<string, unknown>;
+  newValues?: Record<string, unknown>;
   
-  // Classifica��o
+  // ClassificaÃ§Ã£o
   severity?: 'info' | 'warning' | 'critical';
   category?: 'auth' | 'data' | 'admin' | 'financial' | 'security' | 'system' | 'backup';
   
   // Contexto adicional
   sessionId?: string;
   requestId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface SecurityEventParams {
-  // Obrigat�rios
+  // ObrigatÃ³rios
   level: 'info' | 'warning' | 'critical';
   category: 'auth' | 'access' | 'data' | 'injection' | 'rate_limit' | 'api_abuse' | 'backup' | 'system';
   eventType: string;
@@ -48,7 +48,7 @@ export interface SecurityEventParams {
   endpoint?: string;
   
   // Detalhes
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   riskScore?: number;
 }
 
@@ -96,19 +96,19 @@ class AuditLogger {
       const { error } = await supabase.from('audit_trail').insert(auditData);
       
       if (error) {
-        console.error('�� Erro ao salvar audit log:', error);
+        console.error('ÂÅ’ Erro ao salvar audit log:', error);
       }
       
-      // Notificar Discord para eventos cr�ticos
+      // Notificar Discord para eventos crÃ¡Â­ticos
       if (params.severity === 'critical') {
         await this.notifyDiscordAudit(auditData);
       }
     } catch (error) {
-      console.error('�� Erro no audit logger:', error);
+      console.error('ÂÅ’ Erro no audit logger:', error);
     }
   }
 
-  // Logging de eventos de seguran�a
+  // Logging de eventos de seguranÃ¡Â§a
   async logSecurityEvent(params: SecurityEventParams): Promise<void> {
     try {
       const supabase = await getAdminClient();
@@ -131,19 +131,19 @@ class AuditLogger {
       const { error } = await supabase.from('security_events').insert(eventData);
       
       if (error) {
-        console.error('�� Erro ao salvar security event:', error);
+        console.error('ÂÅ’ Erro ao salvar security event:', error);
       }
       
-      // Notificar Discord para eventos cr�ticos
+      // Notificar Discord para eventos crÃ¡Â­ticos
       if (params.level === 'critical') {
         await this.notifyDiscordSecurity(eventData);
       }
     } catch (error) {
-      console.error('�� Erro no security logger:', error);
+      console.error('ÂÅ’ Erro no security logger:', error);
     }
   }
 
-  // Logs espec�ficos para autentica��o
+  // Logs especÃ¡Â­ficos para autenticaÃ¡Â§Ã¡Â£o
   async logLoginSuccess(params: {
     userId: string;
     userEmail: string;
@@ -233,7 +233,7 @@ class AuditLogger {
         failure_reason: params.reason,
         timestamp: new Date().toISOString()
       },
-      riskScore: 40 // Risco m�dio para tentativas falhas
+      riskScore: 40 // Risco mÃ¡Â©dio para tentativas falhas
     });
   }
 
@@ -265,11 +265,11 @@ class AuditLogger {
     });
   }
 
-  // M�todos auxiliares
-  private calculateChanges(oldValues?: Record<string, any>, newValues?: Record<string, any>): Record<string, any> | null {
+  // MÃ¡Â©todos auxiliares
+  private calculateChanges(oldValues?: Record<string, unknown>, newValues?: Record<string, unknown>): Record<string, unknown> | null {
     if (!oldValues || !newValues) return null;
     
-    const changes: Record<string, any> = {};
+    const changes: Record<string, unknown> = {};
     
     for (const [key, newValue] of Object.entries(newValues)) {
       if (oldValues[key] !== newValue) {
@@ -283,48 +283,48 @@ class AuditLogger {
     return Object.keys(changes).length > 0 ? changes : null;
   }
 
-  private async notifyDiscordAudit(auditData): Promise<void> {
+  private async notifyDiscordAudit(auditData: Record<string, unknown>): Promise<void> {
     try {
       const message = {
         embeds: [{
-          title: '🔍 Critical Audit Event',
-          description: auditData.description,
+          title: 'Ã°Å¸â€Â Critical Audit Event',
+          description: auditData.description as string,
           color: 0xff9900,
           fields: [
             {
               name: 'User',
-              value: auditData.user_email || 'System',
+              value: auditData.user_email as string || 'System',
               inline: true
             },
             {
               name: 'Operation',
-              value: auditData.operation,
+              value: auditData.operation as string,
               inline: true
             },
             {
               name: 'IP Address',
-              value: auditData.ip_address || 'Unknown',
+              value: auditData.ip_address as string || 'Unknown',
               inline: true
             },
             {
               name: 'Table',
-              value: auditData.table_name || 'N/A',
+              value: auditData.table_name as string || 'N/A',
               inline: true
             },
             {
               name: 'Record ID',
-              value: auditData.record_id || 'N/A',
+              value: auditData.record_id as string || 'N/A',
               inline: true
             },
             {
               name: 'Endpoint',
-              value: auditData.endpoint || 'N/A',
+              value: auditData.endpoint as string || 'N/A',
               inline: true
             }
           ],
           timestamp: new Date().toISOString(),
           footer: {
-            text: '🏢 SGB - Audit System'
+            text: 'Ã°Å¸ÂÂ¢ SGB - Audit System'
           }
         }]
       };
@@ -335,21 +335,21 @@ class AuditLogger {
         body: JSON.stringify(message)
       });
     } catch (error) {
-      console.error('�� Erro ao notificar Discord audit:', error);
+      console.error('ÂÅ’ Erro ao notificar Discord audit:', error);
     }
   }
 
-  private async notifyDiscordSecurity(eventData): Promise<void> {
+  private async notifyDiscordSecurity(eventData: Record<string, unknown>): Promise<void> {
     try {
       const message = {
         embeds: [{
-          title: '🚨 Critical Security Event',
-          description: `${eventData.event_type} detected`,
+          title: 'Ã°Å¸Å¡Â¨ Critical Security Event',
+          description: `${eventData.event_type as string} detected`,
           color: 0xff0000,
           fields: [
             {
               name: 'Event Type',
-              value: eventData.event_type,
+              value: eventData.event_type as string,
               inline: true
             },
             {
@@ -359,12 +359,12 @@ class AuditLogger {
             },
             {
               name: 'IP Address',
-              value: eventData.ip_address || 'Unknown',
+              value: eventData.ip_address as string || 'Unknown',
               inline: true
             },
             {
               name: 'Endpoint',
-              value: eventData.endpoint || 'N/A',
+              value: eventData.endpoint as string || 'N/A',
               inline: true
             },
             {
@@ -375,7 +375,7 @@ class AuditLogger {
           ],
           timestamp: new Date().toISOString(),
           footer: {
-            text: '🏢 SGB - Security System'
+            text: 'Ã°Å¸ÂÂ¢ SGB - Security System'
           }
         }]
       };
@@ -386,7 +386,7 @@ class AuditLogger {
         body: JSON.stringify(message)
       });
     } catch (error) {
-      console.error('�� Erro ao notificar Discord security:', error);
+      console.error('ÂÅ’ Erro ao notificar Discord security:', error);
     }
   }
 }
@@ -414,3 +414,4 @@ export async function logAuditEvent(params: AuditLogParams) {
 export async function logSecurityEvent(params: SecurityEventParams) {
   return auditLogger.logSecurityEvent(params);
 } 
+

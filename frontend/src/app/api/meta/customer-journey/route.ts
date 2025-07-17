@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -8,9 +8,9 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🗺️ Customer Journey - Mapeando jornada do cliente...')
+    console.log('Ã°Å¸â€”ÂºÃ¯Â¸Â Customer Journey - Mapeando jornada do cliente...')
 
-    // Obter dados do usu�rio para pegar o bar_id
+    // Obter dados do usuÃ¡Â¡rio para pegar o bar_id
     const userData = request.headers.get('x-user-data')
     let barId = 3 // fallback para desenvolvimento
     
@@ -18,15 +18,15 @@ export async function GET(request: NextRequest) {
       try {
         const parsedUser = JSON.parse(decodeURIComponent(userData))
         barId = parsedUser.bar_id || 3
-        console.log(`👤 Customer Journey - Usando bar_id: ${barId}`)
+        console.log(`Ã°Å¸â€˜Â¤ Customer Journey - Usando bar_id: ${barId}`)
       } catch (e) {
-        console.warn('��️ Erro ao parsear dados do usu�rio, usando bar_id padr�o')
+        console.warn('Å¡Â Ã¯Â¸Â Erro ao parsear dados do usuÃ¡Â¡rio, usando bar_id padrÃ¡Â£o')
       }
     }
 
-    console.log('🗺️ Customer Journey - Mapeando jornada para bar:', barId)
+    console.log('Ã°Å¸â€”ÂºÃ¯Â¸Â Customer Journey - Mapeando jornada para bar:', barId)
 
-    // 1. COLETAR DADOS DE ENGAJAMENTO E CONVERS�O
+    // 1. COLETAR DADOS DE ENGAJAMENTO E CONVERSÃ¡Æ’O
     const etapasJornada = [
       {
         id: 'discovery',
@@ -37,22 +37,22 @@ export async function GET(request: NextRequest) {
       },
       {
         id: 'awareness',
-        nome: 'Consci�ncia',
+        nome: 'ConsciÃ¡Âªncia',
         descricao: 'Cliente demonstra interesse inicial',
         metricas: ['follows', 'likes', 'comments'],
         canais: ['instagram', 'facebook']
       },
       {
         id: 'consideration',
-        nome: 'Considera��o',
+        nome: 'ConsideraÃ¡Â§Ã¡Â£o',
         descricao: 'Cliente avalia a marca e competitors',
         metricas: ['saves', 'shares', 'story_views'],
         canais: ['instagram', 'facebook', 'whatsapp']
       },
       {
         id: 'intent',
-        nome: 'Inten��o',
-        descricao: 'Cliente demonstra inten��o de compra',
+        nome: 'IntenÃ¡Â§Ã¡Â£o',
+        descricao: 'Cliente demonstra intenÃ¡Â§Ã¡Â£o de compra',
         metricas: ['clicks', 'messages', 'calls'],
         canais: ['whatsapp', 'direct', 'phone']
       },
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
       },
       {
         id: 'retention',
-        nome: 'Reten��o',
+        nome: 'RetenÃ¡Â§Ã¡Â£o',
         descricao: 'Cliente se torna recorrente',
         metricas: ['repeat_visits', 'loyalty_program'],
         canais: ['app', 'whatsapp', 'presencial']
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
       .order('updated_at', { ascending: false })
       .limit(50)
 
-    // 3. SIMULAR DADOS DE CONVERS�O (normalmente viriam de outras fontes)
+    // 3. SIMULAR DADOS DE CONVERSÃ¡Æ’O (normalmente viriam de outras fontes)
     const simularDadosConversao = () => {
       const baseConversions = Math.floor(Math.random() * 100) + 50
       
@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 4. ANALISAR PONTOS DE ABANDONO
-    const analisarPontosAbandono = (dadosConversao) => {
+    const analisarPontosAbandono = (dadosConversao: any) => {
       const pontosAbandono = []
       
       const etapasArray = Object.entries(dadosConversao)
@@ -174,42 +174,42 @@ export async function GET(request: NextRequest) {
       return pontosAbandono
     }
 
-    // 5. GERAR RECOMENDA��ES POR PONTO DE ABANDONO
+    // 5. GERAR RECOMENDAÃ¡â€¡Ã¡â€¢ES POR PONTO DE ABANDONO
     const gerarRecomendacoesAbandono = (etapa: string, taxaAbandono: number) => {
-      const recomendacoes = {
+      const recomendacoes: { [key: string]: string[] } = {
         discovery: [
-          'Melhore a qualidade do conte�do para aumentar o interesse',
-          'Aumente a frequ�ncia de postagens',
+          'Melhore a qualidade do conteÃ¡Âºdo para aumentar o interesse',
+          'Aumente a frequÃ¡Âªncia de postagens',
           'Use hashtags mais relevantes'
         ],
         awareness: [
-          'Crie conte�do mais engajante',
-          'Responda coment�rios mais rapidamente',
-          'Fa�a parcerias com influenciadores'
+          'Crie conteÃ¡Âºdo mais engajante',
+          'Responda comentÃ¡Â¡rios mais rapidamente',
+          'FaÃ¡Â§a parcerias com influenciadores'
         ],
         consideration: [
-          'Mostre mais sobre o ambiente e experi�ncia',
+          'Mostre mais sobre o ambiente e experiÃ¡Âªncia',
           'Compartilhe depoimentos de clientes',
-          'Crie conte�do comparativo'
+          'Crie conteÃ¡Âºdo comparativo'
         ],
         intent: [
           'Facilite o processo de reserva',
           'Responda mensagens mais rapidamente',
-          'Ofere�a promo��es especiais'
+          'OfereÃ¡Â§a promoÃ¡Â§Ã¡Âµes especiais'
         ],
         purchase: [
           'Melhore o atendimento presencial',
-          'Ofere�a facilidades de pagamento',
+          'OfereÃ¡Â§a facilidades de pagamento',
           'Crie ambiente mais acolhedor'
         ],
         retention: [
           'Implemente programa de fidelidade',
           'Envie lembretes personalizados',
-          'Ofere�a descontos para clientes recorrentes'
+          'OfereÃ¡Â§a descontos para clientes recorrentes'
         ],
         advocacy: [
-          'Incentive avalia��es e reviews',
-          'Recompense indica��es',
+          'Incentive avaliaÃ¡Â§Ã¡Âµes e reviews',
+          'Recompense indicaÃ¡Â§Ã¡Âµes',
           'Crie campanhas de UGC'
         ]
       }
@@ -217,8 +217,8 @@ export async function GET(request: NextRequest) {
       return recomendacoes[etapa] || []
     }
 
-    // 6. CALCULAR M�TRICAS CHAVE
-    const calcularMetricasChave = (dadosConversao) => {
+    // 6. CALCULAR MÃ¡â€°TRICAS CHAVE
+    const calcularMetricasChave = (dadosConversao: any) => {
       const discovery = dadosConversao.discovery
       const purchase = dadosConversao.purchase
       const advocacy = dadosConversao.advocacy
@@ -226,8 +226,8 @@ export async function GET(request: NextRequest) {
       return {
         taxa_conversao_geral: ((purchase.usuarios / discovery.usuarios) * 100).toFixed(1),
         tempo_ciclo_medio: '7 dias',
-        ltv_estimado: purchase.usuarios * 85, // R$ 85 por compra m�dia
-        cac_estimado: discovery.usuarios * 2.5, // R$ 2,50 por usu�rio alcan�ado
+        ltv_estimado: purchase.usuarios * 85, // R$ 85 por compra mÃ¡Â©dia
+        cac_estimado: discovery.usuarios * 2.5, // R$ 2,50 por usuÃ¡Â¡rio alcanÃ¡Â§ado
         roi_marketing: (((purchase.usuarios * 85) / (discovery.usuarios * 2.5)) * 100).toFixed(1),
         taxa_advocacy: ((advocacy.usuarios / purchase.usuarios) * 100).toFixed(1),
         pontos_criticos: 2,
@@ -236,7 +236,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 7. IDENTIFICAR OPORTUNIDADES DE MELHORIA
-    const identificarOportunidades = (pontosAbandono[], metricas) => {
+    const identificarOportunidades = (pontosAbandono: any[], metricas: any) => {
       const oportunidades = []
       
       // Oportunidades baseadas em pontos de abandono
@@ -244,8 +244,8 @@ export async function GET(request: NextRequest) {
         if (ponto.severidade === 'critica') {
           oportunidades.push({
             tipo: 'critica',
-            titulo: `Cr�tico: ${ponto.taxa_abandono}% abandonam em ${ponto.etapa}`,
-            descricao: `${ponto.usuarios_perdidos} usu�rios perdidos`,
+            titulo: `CrÃ¡Â­tico: ${ponto.taxa_abandono}% abandonam em ${ponto.etapa}`,
+            descricao: `${ponto.usuarios_perdidos} usuÃ¡Â¡rios perdidos`,
             impacto: 'Alto',
             esforco: 'Medio',
             prioridade: 1
@@ -253,12 +253,12 @@ export async function GET(request: NextRequest) {
         }
       })
       
-      // Oportunidades baseadas em m�tricas
+      // Oportunidades baseadas em mÃ¡Â©tricas
       if (parseFloat(metricas.taxa_conversao_geral) < 15) {
         oportunidades.push({
           tipo: 'melhoria',
-          titulo: 'Taxa de convers�o baixa',
-          descricao: `${metricas.taxa_conversao_geral}% de convers�o geral`,
+          titulo: 'Taxa de conversÃ¡Â£o baixa',
+          descricao: `${metricas.taxa_conversao_geral}% de conversÃ¡Â£o geral`,
           impacto: 'Alto',
           esforco: 'Alto',
           prioridade: 2
@@ -336,7 +336,7 @@ export async function GET(request: NextRequest) {
       ]
     }
 
-    console.log('�� Customer Journey Map processado:', {
+    console.log('Å“â€¦ Customer Journey Map processado:', {
       etapas: jornadaVisual.length,
       pontosAbandono: pontosAbandono.length,
       oportunidades: oportunidades.length,
@@ -346,7 +346,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(resultado)
 
   } catch (error) {
-    console.error('�� Erro no Customer Journey Map:', error)
+    console.error('ÂÅ’ Erro no Customer Journey Map:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor',
@@ -354,3 +354,4 @@ export async function GET(request: NextRequest) {
     }, { status: 500 })
   }
 } 
+

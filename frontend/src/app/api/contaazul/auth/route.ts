@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js';
 import { randomBytes } from 'crypto';
 
-// For�ar renderiza��o din�mica devido ao uso de request.url
+// ForÃ¡Â§ar renderizaÃ¡Â§Ã¡Â£o dinÃ¡Â¢mica devido ao uso de request.url
 export const dynamic = 'force-dynamic';
 
 const supabase = createClient(
@@ -27,9 +27,9 @@ export async function GET(request: NextRequest) {
     const action = searchParams.get('action');
     const barId = searchParams.get('barId');
     
-    // Para callback, barId � extra�do do state, ent�o n�o � obrigat�rio aqui
+    // Para callback, barId Ã¡Â© extraÃ¡Â­do do state, entÃ¡Â£o nÃ¡Â£o Ã¡Â© obrigatÃ¡Â³rio aqui
     if (!barId && action !== 'callback') {
-      return NextResponse.json({ error: 'barId � obrigat�rio' }, { status: 400 });
+      return NextResponse.json({ error: 'barId Ã¡Â© obrigatÃ¡Â³rio' }, { status: 400 });
     }
 
     switch (action) {
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       case 'test':
         return await handleTestConnection(barId!);
       default:
-        return NextResponse.json({ error: 'A��o n�o reconhecida' }, { status: 400 });
+        return NextResponse.json({ error: 'AÃ¡Â§Ã¡Â£o nÃ¡Â£o reconhecida' }, { status: 400 });
     }
   } catch (error) {
     console.error('Erro na API ContaAzul Auth:', error);
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     const { action, barId } = body;
 
     if (!barId) {
-      return NextResponse.json({ error: 'barId � obrigat�rio' }, { status: 400 });
+      return NextResponse.json({ error: 'barId Ã¡Â© obrigatÃ¡Â³rio' }, { status: 400 });
     }
 
     switch (action) {
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       case 'disconnect':
         return await handleDisconnect(barId);
       default:
-        return NextResponse.json({ error: 'A��o n�o reconhecida' }, { status: 400 });
+        return NextResponse.json({ error: 'AÃ¡Â§Ã¡Â£o nÃ¡Â£o reconhecida' }, { status: 400 });
     }
   } catch (error) {
     console.error('Erro na API ContaAzul Auth:', error);
@@ -75,17 +75,17 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Gerar URL de autoriza��o
+// Gerar URL de autorizaÃ¡Â§Ã¡Â£o
 async function handleAuthorize(barId: string) {
   try {
-    console.log('🔍 AUTHORIZE - Iniciando autoriza��o para barId:', barId);
+    console.log('Ã°Å¸â€Â AUTHORIZE - Iniciando autorizaÃ¡Â§Ã¡Â£o para barId:', barId);
     
     // Buscar credenciais sem filtro de ambiente primeiro
     let credentials = null;
     
-    // Tentar buscar por ambiente espec�fico primeiro  
+    // Tentar buscar por ambiente especÃ¡Â­fico primeiro  
     const ambiente = process.env.NODE_ENV === 'development' ? 'desenvolvimento' : 'producao';
-    console.log('🔍 AUTHORIZE - Tentando ambiente:', ambiente);
+    console.log('Ã°Å¸â€Â AUTHORIZE - Tentando ambiente:', ambiente);
     
     const { data: envCredentials, error: envError } = await supabase
       .from('api_credentials')
@@ -97,7 +97,7 @@ async function handleAuthorize(barId: string) {
       .single();
     
     if (envError) {
-      console.log('🔍 AUTHORIZE - N�o encontrou no ambiente espec�fico, tentando fallback...');
+      console.log('Ã°Å¸â€Â AUTHORIZE - NÃ¡Â£o encontrou no ambiente especÃ¡Â­fico, tentando fallback...');
       
       // Fallback: buscar qualquer credencial ativa para este bar
       const { data: fallbackCredentials, error: fallbackError } = await supabase
@@ -109,23 +109,23 @@ async function handleAuthorize(barId: string) {
         .single();
         
       if (fallbackError) {
-        console.error('�� AUTHORIZE - Nenhuma credencial encontrada:', fallbackError);
+        console.error('ÂÅ’ AUTHORIZE - Nenhuma credencial encontrada:', fallbackError);
       } else {
         credentials = fallbackCredentials;
-        console.log('�� AUTHORIZE - Credencial encontrada via fallback, ambiente:', credentials.ambiente);
+        console.log('Å“â€¦ AUTHORIZE - Credencial encontrada via fallback, ambiente:', credentials.ambiente);
       }
     } else {
       credentials = envCredentials;
-      console.log('�� AUTHORIZE - Credencial encontrada no ambiente espec�fico');
+      console.log('Å“â€¦ AUTHORIZE - Credencial encontrada no ambiente especÃ¡Â­fico');
     }
 
     if (!credentials || !credentials.client_id || !credentials.redirect_uri) {
       return NextResponse.json({ 
-        error: 'Credenciais n�o configuradas. Configure client_id e redirect_uri primeiro.' 
+        error: 'Credenciais nÃ¡Â£o configuradas. Configure client_id e redirect_uri primeiro.' 
       }, { status: 400 });
     }
 
-    // Gerar state �nico para seguran�a - incluindo barId
+    // Gerar state Ã¡Âºnico para seguranÃ¡Â§a - incluindo barId
     const stateData = {
       random: randomBytes(16).toString('hex'),
       barId: parseInt(barId)
@@ -138,7 +138,7 @@ async function handleAuthorize(barId: string) {
       .update({ oauth_state: state })
       .eq('id', credentials.id);
 
-    // Construir URL de autoriza��o
+    // Construir URL de autorizaÃ¡Â§Ã¡Â£o
     const authUrl = new URL(CONTAAZUL_AUTH_URL);
     authUrl.searchParams.append('response_type', 'code');
     authUrl.searchParams.append('client_id', credentials.client_id);
@@ -152,62 +152,62 @@ async function handleAuthorize(barId: string) {
       state
     });
   } catch (error) {
-    console.error('Erro ao gerar URL de autoriza��o:', error);
-    return NextResponse.json({ error: 'Erro ao gerar URL de autoriza��o' }, { status: 500 });
+    console.error('Erro ao gerar URL de autorizaÃ¡Â§Ã¡Â£o:', error);
+    return NextResponse.json({ error: 'Erro ao gerar URL de autorizaÃ¡Â§Ã¡Â£o' }, { status: 500 });
   }
 }
 
-// Processar callback de autoriza��o
+// Processar callback de autorizaÃ¡Â§Ã¡Â£o
 async function handleCallback(searchParams: URLSearchParams) {
   try {
     const code = searchParams.get('code');
     const state = searchParams.get('state');
     let barId = searchParams.get('barId');
 
-    console.log('🔍 CALLBACK - Par�metros recebidos:', { code: code ? 'presente' : 'ausente', state: state ? 'presente' : 'ausente', barId });
+    console.log('Ã°Å¸â€Â CALLBACK - ParÃ¡Â¢metros recebidos:', { code: code ? 'presente' : 'ausente', state: state ? 'presente' : 'ausente', barId });
 
     if (!code || !state) {
-      console.error('�� CALLBACK - Par�metros obrigat�rios ausentes');
-      return NextResponse.json({ error: 'Par�metros obrigat�rios ausentes' }, { status: 400 });
+      console.error('ÂÅ’ CALLBACK - ParÃ¡Â¢metros obrigatÃ¡Â³rios ausentes');
+      return NextResponse.json({ error: 'ParÃ¡Â¢metros obrigatÃ¡Â³rios ausentes' }, { status: 400 });
     }
 
-    // Extrair barId do state se n�o foi fornecido diretamente
+    // Extrair barId do state se nÃ¡Â£o foi fornecido diretamente
     if (!barId) {
       try {
-        console.log('🔍 CALLBACK - State recebido:', state);
-        console.log('🔍 CALLBACK - State length:', state.length);
+        console.log('Ã°Å¸â€Â CALLBACK - State recebido:', state);
+        console.log('Ã°Å¸â€Â CALLBACK - State length:', state.length);
         const decoded = Buffer.from(state, 'base64').toString();
-        console.log('🔍 CALLBACK - State decodificado string:', decoded);
+        console.log('Ã°Å¸â€Â CALLBACK - State decodificado string:', decoded);
         const stateData = JSON.parse(decoded);
-        console.log('🔍 CALLBACK - State decodificado objeto:', stateData);
+        console.log('Ã°Å¸â€Â CALLBACK - State decodificado objeto:', stateData);
         barId = stateData.barId?.toString();
-        console.log('🔍 CALLBACK - Bar ID extra�do:', barId);
-        console.log('🔍 CALLBACK - Bar ID tipo:', typeof barId);
+        console.log('Ã°Å¸â€Â CALLBACK - Bar ID extraÃ¡Â­do:', barId);
+        console.log('Ã°Å¸â€Â CALLBACK - Bar ID tipo:', typeof barId);
       } catch (error) {
-        console.error('�� CALLBACK - Erro ao extrair barId do state:', error);
-        console.error('�� CALLBACK - State que causou erro:', state);
-        console.error('�� CALLBACK - Erro completo:', error);
+        console.error('ÂÅ’ CALLBACK - Erro ao extrair barId do state:', error);
+        console.error('ÂÅ’ CALLBACK - State que causou erro:', state);
+        console.error('ÂÅ’ CALLBACK - Erro completo:', error);
       }
     }
 
     if (!barId) {
-      console.error('�� CALLBACK - Bar ID n�o encontrado no state');
-      console.error('�� CALLBACK - State original:', state);
-      console.error('�� CALLBACK - Tentativa final de decodifica��o...');
+      console.error('ÂÅ’ CALLBACK - Bar ID nÃ¡Â£o encontrado no state');
+      console.error('ÂÅ’ CALLBACK - State original:', state);
+      console.error('ÂÅ’ CALLBACK - Tentativa final de decodificaÃ¡Â§Ã¡Â£o...');
       
-      // �ltima tentativa de debug
+      // Ã¡Å¡ltima tentativa de debug
       try {
         const finalDecoded = Buffer.from(state, 'base64').toString();
-        console.error('�� CALLBACK - State final decodificado:', finalDecoded);
+        console.error('ÂÅ’ CALLBACK - State final decodificado:', finalDecoded);
         const finalStateData = JSON.parse(finalDecoded);
-        console.error('�� CALLBACK - Objeto final:', finalStateData);
-        console.error('�� CALLBACK - barId no objeto:', finalStateData.barId);
+        console.error('ÂÅ’ CALLBACK - Objeto final:', finalStateData);
+        console.error('ÂÅ’ CALLBACK - barId no objeto:', finalStateData.barId);
       } catch (e) {
-        console.error('�� CALLBACK - Erro na tentativa final:', e);
+        console.error('ÂÅ’ CALLBACK - Erro na tentativa final:', e);
       }
       
       return NextResponse.json({ 
-        error: 'Bar ID n�o encontrado no state',
+        error: 'Bar ID nÃ¡Â£o encontrado no state',
         debug: {
           state: state,
           stateLength: state.length
@@ -216,10 +216,10 @@ async function handleCallback(searchParams: URLSearchParams) {
     }
 
     // Buscar credenciais pelo state
-    console.log('🔍 CALLBACK - Buscando credenciais para barId:', barId);
-    console.log('🔍 CALLBACK - State recebido:', state);
+    console.log('Ã°Å¸â€Â CALLBACK - Buscando credenciais para barId:', barId);
+    console.log('Ã°Å¸â€Â CALLBACK - State recebido:', state);
     
-    // Buscar credencial que possui este state espec�fico
+    // Buscar credencial que possui este state especÃ¡Â­fico
     const { data: credentials, error: dbError } = await supabase
       .from('api_credentials')
       .select('*')
@@ -229,7 +229,7 @@ async function handleCallback(searchParams: URLSearchParams) {
       .eq('ativo', true)
       .single();
 
-    console.log('🔍 CALLBACK - Query executada:', {
+    console.log('Ã°Å¸â€Â CALLBACK - Query executada:', {
       bar_id: parseInt(barId),
       sistema: 'contaazul',
       oauth_state: state,
@@ -237,50 +237,50 @@ async function handleCallback(searchParams: URLSearchParams) {
     });
     
     if (dbError) {
-      console.error('�� CALLBACK - Erro na busca:', dbError);
+      console.error('ÂÅ’ CALLBACK - Erro na busca:', dbError);
     }
 
-    console.log('🔍 CALLBACK - Credenciais encontradas:', credentials ? 'SIM' : 'N�O');
+    console.log('Ã°Å¸â€Â CALLBACK - Credenciais encontradas:', credentials ? 'SIM' : 'NÃ¡Æ’O');
     
     if (credentials) {
-      console.log('🔍 CALLBACK - Client ID das credenciais:', credentials.client_id);
-      console.log('🔍 CALLBACK - Client Secret das credenciais:', credentials.client_secret ? 'PRESENTE' : 'AUSENTE');
-      console.log('🔍 CALLBACK - Redirect URI das credenciais:', credentials.redirect_uri);
-      console.log('🔍 CALLBACK - Ambiente das credenciais:', credentials.ambiente);
-      console.log('🔍 CALLBACK - Estado OAuth das credenciais:', credentials.oauth_state);
+      console.log('Ã°Å¸â€Â CALLBACK - Client ID das credenciais:', credentials.client_id);
+      console.log('Ã°Å¸â€Â CALLBACK - Client Secret das credenciais:', credentials.client_secret ? 'PRESENTE' : 'AUSENTE');
+      console.log('Ã°Å¸â€Â CALLBACK - Redirect URI das credenciais:', credentials.redirect_uri);
+      console.log('Ã°Å¸â€Â CALLBACK - Ambiente das credenciais:', credentials.ambiente);
+      console.log('Ã°Å¸â€Â CALLBACK - Estado OAuth das credenciais:', credentials.oauth_state);
     }
 
     if (!credentials) {
-      console.error('�� CALLBACK - State inv�lido ou expirado');
-      return NextResponse.json({ error: 'State inv�lido ou expirado' }, { status: 400 });
+      console.error('ÂÅ’ CALLBACK - State invÃ¡Â¡lido ou expirado');
+      return NextResponse.json({ error: 'State invÃ¡Â¡lido ou expirado' }, { status: 400 });
     }
 
-    // Verificar se j� temos tokens v�lidos (c�digo j� foi processado)
+    // Verificar se jÃ¡Â¡ temos tokens vÃ¡Â¡lidos (cÃ¡Â³digo jÃ¡Â¡ foi processado)
     if (credentials.access_token && credentials.authorization_code === code) {
-      console.log('�� CALLBACK - C�digo j� foi processado anteriormente, retornando sucesso');
+      console.log('Å“â€¦ CALLBACK - CÃ¡Â³digo jÃ¡Â¡ foi processado anteriormente, retornando sucesso');
       return NextResponse.json({
         success: true,
-        message: 'Autoriza��o j� foi realizada com sucesso',
+        message: 'AutorizaÃ¡Â§Ã¡Â£o jÃ¡Â¡ foi realizada com sucesso',
         tokenInfo: {
-          expiresAt: credentials.expires_at, // �� Corrigido para camelCase
+          expiresAt: credentials.expires_at, // Å“â€¦ Corrigido para camelCase
           token_type: credentials.token_type || 'Bearer'
         }
       });
     }
 
-    // Trocar c�digo por token
-    console.log('🔍 CALLBACK - Iniciando troca de c�digo por token');
+    // Trocar cÃ¡Â³digo por token
+    console.log('Ã°Å¸â€Â CALLBACK - Iniciando troca de cÃ¡Â³digo por token');
     const tokenResponse = await exchangeCodeForToken(code, credentials);
     
-    console.log('🔍 CALLBACK - Resposta da troca de token:', tokenResponse.success ? 'SUCESSO' : 'ERRO');
+    console.log('Ã°Å¸â€Â CALLBACK - Resposta da troca de token:', tokenResponse.success ? 'SUCESSO' : 'ERRO');
     
     if (!tokenResponse.success) {
-      console.error('�� CALLBACK - Erro na troca de token:', tokenResponse.error);
+      console.error('ÂÅ’ CALLBACK - Erro na troca de token:', tokenResponse.error);
       return NextResponse.json({ error: tokenResponse.error }, { status: 400 });
     }
 
     // Salvar tokens no banco
-    console.log('🔍 CALLBACK - Salvando tokens no banco');
+    console.log('Ã°Å¸â€Â CALLBACK - Salvando tokens no banco');
     const expiresAt = new Date(Date.now() + (tokenResponse.expires_in * 1000));
     
     const { error: saveError } = await supabase
@@ -298,40 +298,40 @@ async function handleCallback(searchParams: URLSearchParams) {
       .eq('id', credentials.id);
 
     if (saveError) {
-      console.error('�� CALLBACK - Erro ao salvar tokens:', saveError);
+      console.error('ÂÅ’ CALLBACK - Erro ao salvar tokens:', saveError);
       return NextResponse.json({ 
         error: 'Erro ao salvar tokens',
         details: saveError.message
       }, { status: 500 });
     }
 
-    console.log('�� CALLBACK - Tokens salvos com sucesso!');
+    console.log('Å“â€¦ CALLBACK - Tokens salvos com sucesso!');
 
     return NextResponse.json({
       success: true,
-      message: 'Autoriza��o realizada com sucesso',
+      message: 'AutorizaÃ¡Â§Ã¡Â£o realizada com sucesso',
       tokenInfo: {
-        expiresAt: expiresAt, // �� Corrigido para camelCase
+        expiresAt: expiresAt, // Å“â€¦ Corrigido para camelCase
         token_type: tokenResponse.token_type
       }
     });
   } catch (error) {
-    console.error('Erro no callback de autoriza��o:', error);
-    return NextResponse.json({ error: 'Erro no callback de autoriza��o' }, { status: 500 });
+    console.error('Erro no callback de autorizaÃ¡Â§Ã¡Â£o:', error);
+    return NextResponse.json({ error: 'Erro no callback de autorizaÃ¡Â§Ã¡Â£o' }, { status: 500 });
   }
 }
 
-// Trocar c�digo por token
-async function exchangeCodeForToken(code: string, credentials) {
+// Trocar cÃ¡Â³digo por token
+async function exchangeCodeForToken(code: string, credentials: any) {
   try {
-    console.log('🔍 TOKEN - Iniciando troca de c�digo por token');
-    console.log('🔍 TOKEN - Client ID:', credentials.client_id);
-    console.log('🔍 TOKEN - Client Secret:', credentials.client_secret ? 'PRESENTE' : 'AUSENTE');
-    console.log('🔍 TOKEN - Redirect URI:', credentials.redirect_uri);
-    console.log('🔍 TOKEN - Code:', code);
+    console.log('Ã°Å¸â€Â TOKEN - Iniciando troca de cÃ¡Â³digo por token');
+    console.log('Ã°Å¸â€Â TOKEN - Client ID:', credentials.client_id);
+    console.log('Ã°Å¸â€Â TOKEN - Client Secret:', credentials.client_secret ? 'PRESENTE' : 'AUSENTE');
+    console.log('Ã°Å¸â€Â TOKEN - Redirect URI:', credentials.redirect_uri);
+    console.log('Ã°Å¸â€Â TOKEN - Code:', code);
     
     const basicAuth = Buffer.from(`${credentials.client_id}:${credentials.client_secret}`).toString('base64');
-    console.log('🔍 TOKEN - Basic Auth criado:', basicAuth.substring(0, 20) + '...');
+    console.log('Ã°Å¸â€Â TOKEN - Basic Auth criado:', basicAuth.substring(0, 20) + '...');
     
     const tokenPayload = {
       client_id: credentials.client_id,
@@ -341,7 +341,7 @@ async function exchangeCodeForToken(code: string, credentials) {
       redirect_uri: credentials.redirect_uri
     };
     
-    console.log('🔍 TOKEN - Payload para envio:', {
+    console.log('Ã°Å¸â€Â TOKEN - Payload para envio:', {
       ...tokenPayload,
       client_secret: 'HIDDEN'
     });
@@ -355,18 +355,18 @@ async function exchangeCodeForToken(code: string, credentials) {
       body: new URLSearchParams(tokenPayload)
     });
 
-    console.log('🔍 TOKEN - Response status:', response.status);
-    console.log('🔍 TOKEN - Response headers:', Object.fromEntries(response.headers.entries()));
+    console.log('Ã°Å¸â€Â TOKEN - Response status:', response.status);
+    console.log('Ã°Å¸â€Â TOKEN - Response headers:', Object.fromEntries(response.headers.entries()));
 
     const data = await response.json();
-    console.log('🔍 TOKEN - Response data:', data);
+    console.log('Ã°Å¸â€Â TOKEN - Response data:', data);
     
     if (!response.ok) {
-      console.error('�� TOKEN - Erro na resposta:', data);
-      return { success: false, error: data.error || 'Erro ao trocar c�digo por token' };
+      console.error('ÂÅ’ TOKEN - Erro na resposta:', data);
+      return { success: false, error: data.error || 'Erro ao trocar cÃ¡Â³digo por token' };
     }
 
-    console.log('�� TOKEN - Token obtido com sucesso!');
+    console.log('Å“â€¦ TOKEN - Token obtido com sucesso!');
     return {
       success: true,
       access_token: data.access_token,
@@ -375,15 +375,15 @@ async function exchangeCodeForToken(code: string, credentials) {
       expires_in: data.expires_in
     };
   } catch (error) {
-    console.error('�� TOKEN - Erro ao trocar c�digo por token:', error);
-    return { success: false, error: 'Erro ao trocar c�digo por token' };
+    console.error('ÂÅ’ TOKEN - Erro ao trocar cÃ¡Â³digo por token:', error);
+    return { success: false, error: 'Erro ao trocar cÃ¡Â³digo por token' };
   }
 }
 
-// Verificar status da integra��o
+// Verificar status da integraÃ¡Â§Ã¡Â£o
 async function handleStatus(barId: string) {
   try {
-    console.log('🔍 STATUS - Verificando status para barId:', barId);
+    console.log('Ã°Å¸â€Â STATUS - Verificando status para barId:', barId);
     
     let credentials = null;
     
@@ -397,14 +397,14 @@ async function handleStatus(barId: string) {
       .single();
 
     if (directError) {
-      console.log('🔍 STATUS - Erro na busca:', directError);
+      console.log('Ã°Å¸â€Â STATUS - Erro na busca:', directError);
     } else {
       credentials = directCredentials;
-      console.log('🔍 STATUS - Credencial encontrada, ambiente:', credentials.ambiente);
+      console.log('Ã°Å¸â€Â STATUS - Credencial encontrada, ambiente:', credentials.ambiente);
     }
 
     if (!credentials) {
-      console.log('🔍 STATUS - Nenhuma credencial encontrada');
+      console.log('Ã°Å¸â€Â STATUS - Nenhuma credencial encontrada');
       return NextResponse.json({ 
         connected: false,
         configured: false,
@@ -412,7 +412,7 @@ async function handleStatus(barId: string) {
       });
     }
     
-    console.log('🔍 STATUS - Credenciais encontradas:', {
+    console.log('Ã°Å¸â€Â STATUS - Credenciais encontradas:', {
       id: credentials.id,
       client_id: credentials.client_id ? 'PRESENTE' : 'AUSENTE',
       client_secret: credentials.client_secret ? 'PRESENTE' : 'AUSENTE',
@@ -420,16 +420,16 @@ async function handleStatus(barId: string) {
       access_token: credentials.access_token ? 'PRESENTE' : 'AUSENTE'
     });
 
-    // Verificar se est� configurado (tem credenciais b�sicas)
+    // Verificar se estÃ¡Â¡ configurado (tem credenciais bÃ¡Â¡sicas)
     const configured = !!(credentials.client_id && credentials.client_secret && credentials.redirect_uri);
 
-    // Verificar se o token ainda � v�lido
+    // Verificar se o token ainda Ã¡Â© vÃ¡Â¡lido
     const tokenValid = credentials.access_token && 
                       credentials.expires_at && 
                       new Date(credentials.expires_at) > new Date();
 
     if (!tokenValid && credentials.refresh_token) {
-      console.log('🔄 STATUS - Token expirado, tentando renovar automaticamente...');
+      console.log('Ã°Å¸â€â€ž STATUS - Token expirado, tentando renovar automaticamente...');
       
       try {
         const basicAuth = Buffer.from(`${credentials.client_id}:${credentials.client_secret}`).toString('base64');
@@ -462,7 +462,7 @@ async function handleStatus(barId: string) {
             })
             .eq('id', credentials.id);
 
-          console.log('�� STATUS - Token renovado automaticamente!');
+          console.log('Å“â€¦ STATUS - Token renovado automaticamente!');
           
           return NextResponse.json({ 
             connected: true,
@@ -485,10 +485,10 @@ async function handleStatus(barId: string) {
             }
           });
         } else {
-          console.log('�� STATUS - Falha na renova��o autom�tica:', data.error);
+          console.log('ÂÅ’ STATUS - Falha na renovaÃ¡Â§Ã¡Â£o automÃ¡Â¡tica:', data.error);
         }
       } catch (error) {
-        console.log('�� STATUS - Erro na renova��o autom�tica:', error);
+        console.log('ÂÅ’ STATUS - Erro na renovaÃ¡Â§Ã¡Â£o automÃ¡Â¡tica:', error);
       }
     }
 
@@ -498,7 +498,7 @@ async function handleStatus(barId: string) {
         configured: configured,
         tokenExpired: !!credentials.access_token, // true se tinha token mas expirou
         message: 'Token expirado',
-        expiresAt: credentials.expires_at  // �� Corrigido para camelCase
+        expiresAt: credentials.expires_at  // Å“â€¦ Corrigido para camelCase
       });
     }
 
@@ -506,7 +506,7 @@ async function handleStatus(barId: string) {
       connected: true,
       configured: configured,
       tokenExpired: false,
-      expiresAt: credentials.expires_at, // �� Corrigido para camelCase
+      expiresAt: credentials.expires_at, // Å“â€¦ Corrigido para camelCase
       empresa: {
         id: credentials.empresa_id || '',
         nome: credentials.empresa_nome || '',
@@ -525,7 +525,7 @@ async function handleStatus(barId: string) {
     });
 
   } catch (error) {
-    console.error('�� STATUS - Erro geral:', error);
+    console.error('ÂÅ’ STATUS - Erro geral:', error);
     return NextResponse.json({ 
       connected: false, 
       error: 'Erro interno do servidor',
@@ -547,7 +547,7 @@ async function handleRefresh(barId: string) {
       .single();
 
     if (!credentials || !credentials.refresh_token) {
-      return NextResponse.json({ error: 'Token de renova��o n�o dispon�vel' }, { status: 400 });
+      return NextResponse.json({ error: 'Token de renovaÃ¡Â§Ã¡Â£o nÃ¡Â£o disponÃ¡Â­vel' }, { status: 400 });
     }
 
     const basicAuth = Buffer.from(`${credentials.client_id}:${credentials.client_secret}`).toString('base64');
@@ -595,23 +595,23 @@ async function handleRefresh(barId: string) {
 }
 
 // Configurar credenciais
-async function handleConfigure(body) {
+async function handleConfigure(body: any) {
   try {
     const { barId, clientId, clientSecret, redirectUri } = body;
 
     if (!clientId || !clientSecret || !redirectUri) {
       return NextResponse.json({ 
-        error: 'clientId, clientSecret e redirectUri s�o obrigat�rios' 
+        error: 'clientId, clientSecret e redirectUri sÃ¡Â£o obrigatÃ¡Â³rios' 
       }, { status: 400 });
     }
 
-    console.log('🔍 CONFIGURE - Configurando credenciais para barId:', barId);
+    console.log('Ã°Å¸â€Â CONFIGURE - Configurando credenciais para barId:', barId);
 
-    // Usar sempre 'producao' como ambiente padr�o para simplicidade
+    // Usar sempre 'producao' como ambiente padrÃ¡Â£o para simplicidade
     const ambiente = 'producao';
-    console.log('🔍 CONFIGURE - Usando ambiente:', ambiente);
+    console.log('Ã°Å¸â€Â CONFIGURE - Usando ambiente:', ambiente);
 
-    // Verificar se j� existe configura��o
+    // Verificar se jÃ¡Â¡ existe configuraÃ¡Â§Ã¡Â£o
     const { data: existing } = await supabase
       .from('api_credentials')
       .select('id')
@@ -659,7 +659,7 @@ async function handleConfigure(body) {
   }
 }
 
-// Testar conex�o com a API
+// Testar conexÃ¡Â£o com a API
 async function handleTestConnection(barId: string) {
   try {
     // Buscar credenciais ativas (qualquer ambiente)
@@ -672,10 +672,10 @@ async function handleTestConnection(barId: string) {
       .single();
 
     if (!credentials || !credentials.access_token) {
-      return NextResponse.json({ error: 'Token de acesso n�o dispon�vel' }, { status: 400 });
+      return NextResponse.json({ error: 'Token de acesso nÃ¡Â£o disponÃ¡Â­vel' }, { status: 400 });
     }
 
-    // Testar conex�o fazendo uma chamada � API da ContaAzul
+    // Testar conexÃ¡Â£o fazendo uma chamada Ã¡Â  API da ContaAzul
     const response = await fetch('https://api-v2.contaazul.com/v1/servicos', {
       method: 'GET',
       headers: {
@@ -689,19 +689,19 @@ async function handleTestConnection(barId: string) {
 
     if (!response.ok) {
       return NextResponse.json({ 
-        error: data.error || 'Erro na conex�o com a API da ContaAzul' 
+        error: data.error || 'Erro na conexÃ¡Â£o com a API da ContaAzul' 
       }, { status: 400 });
     }
 
     // Log da resposta para debug
-    console.log('�� Resposta da API ContaAzul:', data);
+    console.log('Å“â€¦ Resposta da API ContaAzul:', data);
 
-    // Verificar se conseguiu acessar os servi�os
+    // Verificar se conseguiu acessar os serviÃ¡Â§os
     const servicosCount = data[0]?.itens?.length || 0;
     
     return NextResponse.json({
       success: true,
-      message: 'Conex�o testada com sucesso',
+      message: 'ConexÃ¡Â£o testada com sucesso',
       apiInfo: {
         endpoint: '/v1/servicos',
         servicosEncontrados: servicosCount,
@@ -709,12 +709,12 @@ async function handleTestConnection(barId: string) {
       }
     });
   } catch (error) {
-    console.error('Erro ao testar conex�o:', error);
-    return NextResponse.json({ error: 'Erro ao testar conex�o' }, { status: 500 });
+    console.error('Erro ao testar conexÃ¡Â£o:', error);
+    return NextResponse.json({ error: 'Erro ao testar conexÃ¡Â£o' }, { status: 500 });
   }
 }
 
-// Desconectar integra��o
+// Desconectar integraÃ¡Â§Ã¡Â£o
 async function handleDisconnect(barId: string) {
   try {
     // Desconectar todas as credenciais ativas para este bar
@@ -739,10 +739,11 @@ async function handleDisconnect(barId: string) {
 
     return NextResponse.json({
       success: true,
-      message: 'Integra��o desconectada com sucesso'
+      message: 'IntegraÃ¡Â§Ã¡Â£o desconectada com sucesso'
     });
   } catch (error) {
-    console.error('Erro ao desconectar integra��o:', error);
-    return NextResponse.json({ error: 'Erro ao desconectar integra��o' }, { status: 500 });
+    console.error('Erro ao desconectar integraÃ¡Â§Ã¡Â£o:', error);
+    return NextResponse.json({ error: 'Erro ao desconectar integraÃ¡Â§Ã¡Â£o' }, { status: 500 });
   }
 } 
+

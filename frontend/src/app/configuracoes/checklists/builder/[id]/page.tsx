@@ -30,33 +30,33 @@ interface CacheMetrics {
 
 interface CacheStats {
   cache: {
-    size: number
-    metrics: CacheMetrics
-    uptimeSeconds: number
-    uptimeFormatted: string
-    efficiency: 'excellent' | 'good' | 'fair' | 'poor'
-    healthScore: number
-  }
+    size: number;
+    metrics: CacheMetrics;
+    uptimeSeconds: number;
+    uptimeFormatted: string;
+    efficiency: 'excellent' | 'good' | 'fair' | 'poor';
+    healthScore: number;
+  };
   performance: {
-    memoryUsage: any
-    cacheSize: number
-    avgResponseTime: string
-    totalRequests: number
-    cacheOperations: number
-  }
-  recommendations: string[]
+    memoryUsage: number;
+    cacheSize: number;
+    avgResponseTime: string;
+    totalRequests: number;
+    cacheOperations: number;
+  };
+  recommendations: string[];
 }
 
 export default function CachePage() {
   const { setPageTitle } = usePageTitle()
-  const { metrics, isLoading: any, refetch, clearCache: any, warmupCache } = useCacheMetrics()
+  const { metrics, isLoading, refetch, clearCache, warmupCache } = useCacheMetrics()
   const [stats, setStats] = useState<CacheStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [clearing, setClearing] = useState(false)
   const [warming, setWarming] = useState(false)
 
   useEffect(() => {
-    setPageTitle('Cache - Configuraá§áµes')
+    setPageTitle('Cache - ConfiguraÃÂ¡ÃÂ§ÃÂ¡ÃÂµes')
     return () => setPageTitle('')
   }, [setPageTitle])
 
@@ -127,7 +127,7 @@ export default function CachePage() {
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600 dark:text-gray-400">Carregando má©tricas do cache...</p>
+              <p className="text-gray-600 dark:text-gray-400">Carregando mÃÂ¡ÃÂ©tricas do cache...</p>
             </div>
           </div>
         </div>
@@ -181,7 +181,7 @@ export default function CachePage() {
             </div>
           </div>
 
-          {/* Má©tricas Principais */}
+          {/* MÃÂ¡ÃÂ©tricas Principais */}
           {stats && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -251,13 +251,13 @@ export default function CachePage() {
                 </Card>
               </div>
 
-              {/* Estatá­sticas Detalhadas */}
+              {/* EstatÃÂ¡ÃÂ­sticas Detalhadas */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <BarChart3 className="w-5 h-5" />
-                      Operaá§áµes de Cache
+                      OperaÃÂ¡ÃÂ§ÃÂ¡ÃÂµes de Cache
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -293,7 +293,7 @@ export default function CachePage() {
                     
                     <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Eficiáªncia</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">EficiÃÂ¡ÃÂªncia</span>
                         <Badge className={`${getEfficiencyColor(stats.cache.efficiency)} border-current`} variant="outline">
                           {stats.cache.efficiency.toUpperCase()}
                         </Badge>
@@ -312,7 +312,7 @@ export default function CachePage() {
                   <CardContent className="space-y-4">
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Tempo Resposta Má©dio</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Tempo Resposta MÃÂ¡ÃÂ©dio</span>
                         <span className="font-semibold text-gray-900 dark:text-white">
                           {stats.performance.avgResponseTime}
                         </span>
@@ -326,17 +326,17 @@ export default function CachePage() {
                       </div>
                       
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Operaá§áµes de Cache</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">OperaÃÂ¡ÃÂ§ÃÂ¡ÃÂµes de Cache</span>
                         <span className="font-semibold text-gray-900 dark:text-white">
                           {stats.performance.cacheOperations.toLocaleString()}
                         </span>
                       </div>
                       
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Uso de Memá³ria</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Uso de MemÃÂ¡ÃÂ³ria</span>
                         <span className="font-semibold text-gray-900 dark:text-white">
                           {stats.performance.memoryUsage 
-                            ? `${(stats.performance.memoryUsage.used / 1024 / 1024).toFixed(1)}MB`
+                            ? `${(stats.performance.memoryUsage / 1024 / 1024).toFixed(1)}MB`
                             : 'N/A'
                           }
                         </span>
@@ -346,18 +346,18 @@ export default function CachePage() {
                 </Card>
               </div>
 
-              {/* Recomendaá§áµes */}
+              {/* RecomendaÃÂ¡ÃÂ§ÃÂ¡ÃÂµes */}
               {stats.recommendations && stats.recommendations.length > 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <AlertTriangle className="w-5 h-5 text-yellow-600" />
-                      Recomendaá§áµes
+                      RecomendaÃÂ¡ÃÂ§ÃÂ¡ÃÂµes
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {stats.recommendations.map((rec: any, index: any) => (
+                      {stats.recommendations.map((rec, index) => (
                         <div key={index} className="flex items-start gap-2">
                           <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
                           <span className="text-sm text-gray-700 dark:text-gray-300">{rec}</span>

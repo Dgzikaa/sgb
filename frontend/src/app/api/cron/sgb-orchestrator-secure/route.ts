@@ -1,17 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔄 Cron SGB Orchestrator Secure iniciado');
+    console.log('Ã°Å¸â€â€ž Cron SGB Orchestrator Secure iniciado');
     
-    // Verificar se � uma requisi��o de cron v�lida
+    // Verificar se Ã¡Â© uma requisiÃ¡Â§Ã¡Â£o de cron vÃ¡Â¡lida
     const authHeader = request.headers.get('authorization');
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      console.log('�� Acesso negado - token inv�lido');
+      console.log('ÂÅ’ Acesso negado - token invÃ¡Â¡lido');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Chamar a fun��o Supabase segura
+    // Chamar a funÃ¡Â§Ã¡Â£o Supabase segura
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const response = await fetch(`${supabaseUrl}/functions/v1/sgb-orchestrator-realtime-secure`, {
       method: 'POST',
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('�� Erro na fun��o Supabase:', errorText);
+      console.error('ÂÅ’ Erro na funÃ¡Â§Ã¡Â£o Supabase:', errorText);
       return NextResponse.json({ 
         success: false, 
         error: 'Supabase function failed',
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     }
 
     const result = await response.json();
-    console.log('�� Cron executado com sucesso:', result);
+    console.log('Å“â€¦ Cron executado com sucesso:', result);
 
     return NextResponse.json({
       success: true,
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('�� Erro no cron:', error);
+    console.error('ÂÅ’ Erro no cron:', error);
     return NextResponse.json({ 
       success: false, 
       error: error instanceof Error ? error.message : 'Unknown error'
@@ -57,3 +57,4 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   return GET(request);
 } 
+

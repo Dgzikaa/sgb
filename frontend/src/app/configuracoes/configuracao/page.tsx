@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -46,7 +46,7 @@ export default function ConfiguracaoPage() {
   const { selectedBar } = useBar()
   const [activeTab, setActiveTab] = useState('usuarios')
   
-  // Estados para usu�rios
+  // Estados para usuÃ¡Â¡rios
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [editandoUsuario, setEditandoUsuario] = useState<any>(null)
   const [novoUsuario, setNovoUsuario] = useState<any>({})
@@ -59,23 +59,23 @@ export default function ConfiguracaoPage() {
   const [editandoMeta, setEditandoMeta] = useState<any>(null)
   const [novaMeta, setNovaMeta] = useState<any>({})
   
-  // Estados para importa��o
+  // Estados para importaÃ¡Â§Ã¡Â£o
   const [urlGoogleSheets, setUrlGoogleSheets] = useState('')
   const [importandoDados, setImportandoDados] = useState(false)
   const [resultadoImportacao, setResultadoImportacao] = useState<any>(null)
   const [statsImportacao, setStatsImportacao] = useState<any>(null)
   
-  // Estados para fun��es/roles
+  // Estados para funÃ¡Â§Ã¡Âµes/roles
   const [funcoes, setFuncoes] = useState<any[]>([])
   
-  // Estados para m�dulos
+  // Estados para mÃ¡Â³dulos
   const [modulosDisponiveis, setModulosDisponiveis] = useState<any[]>([])
 
   if (!selectedBar?.id) {
     return (
       <div className="p-6">
         <div className="text-center">
-          <p className="text-red-600 font-medium">��️ Selecione um bar primeiro</p>
+          <p className="text-red-600 font-medium">Å¡Â Ã¯Â¸Â Selecione um bar primeiro</p>
         </div>
       </div>
     )
@@ -86,19 +86,19 @@ export default function ConfiguracaoPage() {
       {/* Header */}
       <div className="bg-white rounded-lg shadow-sm border p-6">
         <h1 className="text-2xl font-bold text-black mb-2">
-          Configura��es do Sistema
+          ConfiguraÃ¡Â§Ã¡Âµes do Sistema
         </h1>
         <p className="text-gray-700 font-medium">
-          Gerencie usu�rios, permiss�es, metas e importa��es de dados - {selectedBar.nome}
+          Gerencie usuÃ¡Â¡rios, permissÃ¡Âµes, metas e importaÃ¡Â§Ã¡Âµes de dados - {selectedBar.nome}
         </p>
       </div>
 
-      {/* Tabs de Configura��o */}
+      {/* Tabs de ConfiguraÃ¡Â§Ã¡Â£o */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="usuarios" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
-            Usu�rios & Permiss�es
+            UsuÃ¡Â¡rios & PermissÃ¡Âµes
           </TabsTrigger>
           <TabsTrigger value="metas" className="flex items-center gap-2">
             <Target className="w-4 h-4" />
@@ -106,7 +106,7 @@ export default function ConfiguracaoPage() {
           </TabsTrigger>
           <TabsTrigger value="importacao" className="flex items-center gap-2">
             <Database className="w-4 h-4" />
-            Importa��o de Dados
+            ImportaÃ¡Â§Ã¡Â£o de Dados
           </TabsTrigger>
           <TabsTrigger value="sistema" className="flex items-center gap-2">
             <Shield className="w-4 h-4" />
@@ -114,13 +114,13 @@ export default function ConfiguracaoPage() {
           </TabsTrigger>
         </TabsList>
 
-        {/* Tab de Usu�rios */}
+        {/* Tab de UsuÃ¡Â¡rios */}
         <TabsContent value="usuarios">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="w-5 h-5" />
-                Gest�o de Usu�rios e Permiss�es
+                GestÃ¡Â£o de UsuÃ¡Â¡rios e PermissÃ¡Âµes
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -148,13 +148,13 @@ export default function ConfiguracaoPage() {
           </Card>
         </TabsContent>
 
-        {/* Tab de Importa��o */}
+        {/* Tab de ImportaÃ¡Â§Ã¡Â£o */}
         <TabsContent value="importacao">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Database className="w-5 h-5" />
-                Importa��o de Dados
+                ImportaÃ¡Â§Ã¡Â£o de Dados
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -171,7 +171,7 @@ export default function ConfiguracaoPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="w-5 h-5" />
-                Configura��es do Sistema
+                ConfiguraÃ¡Â§Ã¡Âµes do Sistema
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -185,3 +185,4 @@ export default function ConfiguracaoPage() {
     </div>
   )
 } 
+

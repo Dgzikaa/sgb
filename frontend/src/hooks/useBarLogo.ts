@@ -1,10 +1,10 @@
-interface BarLogoOptions {
+﻿interface BarLogoOptions {
   barName?: string
   size?: 'small' | 'medium' | 'large'
 }
 
 export const useBarLogo = ({ barName, size = 'medium' }: BarLogoOptions) => {
-  const isOrdinario = barName?.toLowerCase().includes('ordin�rio') || barName?.toLowerCase().includes('ordinario')
+  const isOrdinario = barName?.toLowerCase().includes('ordinÃ¡Â¡rio') || barName?.toLowerCase().includes('ordinario')
   
   const getLogoSize = () => {
     switch (size) {
@@ -28,3 +28,4 @@ export const useBarLogo = ({ barName, size = 'medium' }: BarLogoOptions) => {
     isOrdinario
   }
 } 
+

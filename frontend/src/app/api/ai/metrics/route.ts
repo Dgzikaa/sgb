@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 
-// Configura��o do Supabase
+// ConfiguraÃ¡Â§Ã¡Â£o do Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Schema de valida��o para filtros
+// Schema de validaÃ¡Â§Ã¡Â£o para filtros
 const FilterMetricsSchema = z.object({
   nome_metrica: z.string().optional(),
   categoria: z.enum(['produtividade', 'qualidade', 'eficiencia', 'engagement']).optional(),
@@ -25,7 +25,7 @@ const FilterMetricsSchema = z.object({
 });
 
 // ========================================
-// 📊 GET /api/ai/metrics
+// Ã°Å¸â€œÅ  GET /api/ai/metrics
 // ========================================
 export async function GET(request: NextRequest) {
   try {
@@ -33,25 +33,25 @@ export async function GET(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
-    // Verificar permiss�es
+    // Verificar permissÃ¡Âµes
     if (!['funcionario', 'financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permiss�o para acessar m�tricas' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permissÃ¡Â£o para acessar mÃ¡Â©tricas' }, { status: 403 });
     }
 
-    // Parse dos par�metros de query
+    // Parse dos parÃ¡Â¢metros de query
     const url = new URL(request.url);
     const rawParams = Object.fromEntries(url.searchParams.entries());
     
     // Converter tipos
-    const processedParams = { ...rawParams };
-    if (processedParams.page) processedParams.page = parseInt(processedParams.page);
-    if (processedParams.limit) processedParams.limit = parseInt(processedParams.limit);
-    if (processedParams.ativa) processedParams.ativa = processedParams.ativa === 'true';
+    const processedParams: any = { ...rawParams };
+    if (processedParams.page !== undefined && processedParams.page !== '') processedParams.page = Number(processedParams.page);
+    if (processedParams.limit !== undefined && processedParams.limit !== '') processedParams.limit = Number(processedParams.limit);
+    if (processedParams.ativa !== undefined && processedParams.ativa !== '') processedParams.ativa = processedParams.ativa === 'true';
 
     const params = FilterMetricsSchema.parse(processedParams);
 
@@ -108,18 +108,18 @@ export async function GET(request: NextRequest) {
       query = query.eq('ativa', params.ativa);
     }
 
-    // Pagina��o
+    // PaginaÃ¡Â§Ã¡Â£o
     const offset = (params.page - 1) * params.limit;
     query = query.range(offset, offset + params.limit - 1);
 
     const { data: metrics, error } = await query;
 
     if (error) {
-      console.error('Erro ao buscar m�tricas:', error);
-      return NextResponse.json({ error: 'Erro ao buscar m�tricas' }, { status: 500 });
+      console.error('Erro ao buscar mÃ¡Â©tricas:', error);
+      return NextResponse.json({ error: 'Erro ao buscar mÃ¡Â©tricas' }, { status: 500 });
     }
 
-    // Buscar estat�sticas gerais
+    // Buscar estatÃ¡Â­sticas gerais
     const { data: stats } = await supabase
       .from('ai_metrics')
       .select('nome_metrica, categoria, performance, tendencia, alerta_ativado, valor')
@@ -128,26 +128,26 @@ export async function GET(request: NextRequest) {
 
     const estatisticas = {
       total_metricas: stats?.length || 0,
-      alertas_ativos: stats?.filter((s) => s.alerta_ativado).length || 0,
-      por_categoria: stats?.reduce((acc, s) => {
+      alertas_ativos: stats?.filter((s: any) => s.alerta_ativado).length || 0,
+      por_categoria: stats?.reduce((acc: Record<string, number>, s: any) => {
         acc[s.categoria] = (acc[s.categoria] || 0) + 1;
         return acc;
       }, {} as Record<string, number>) || {},
       por_performance: {
-        excelente: stats?.filter((s) => s.performance === 'excelente').length || 0,
-        bom: stats?.filter((s) => s.performance === 'bom').length || 0,
-        regular: stats?.filter((s) => s.performance === 'regular').length || 0,
-        ruim: stats?.filter((s) => s.performance === 'ruim').length || 0,
-        critico: stats?.filter((s) => s.performance === 'critico').length || 0
+        excelente: stats?.filter((s: any) => s.performance === 'excelente').length || 0,
+        bom: stats?.filter((s: any) => s.performance === 'bom').length || 0,
+        regular: stats?.filter((s: any) => s.performance === 'regular').length || 0,
+        ruim: stats?.filter((s: any) => s.performance === 'ruim').length || 0,
+        critico: stats?.filter((s: any) => s.performance === 'critico').length || 0
       },
       por_tendencia: {
-        crescente: stats?.filter((s) => s.tendencia === 'crescente').length || 0,
-        estavel: stats?.filter((s) => s.tendencia === 'estavel').length || 0,
-        decrescente: stats?.filter((s) => s.tendencia === 'decrescente').length || 0
+        crescente: stats?.filter((s: any) => s.tendencia === 'crescente').length || 0,
+        estavel: stats?.filter((s: any) => s.tendencia === 'estavel').length || 0,
+        decrescente: stats?.filter((s: any) => s.tendencia === 'decrescente').length || 0
       }
     };
 
-    // Buscar m�tricas com alertas cr�ticos
+    // Buscar mÃ¡Â©tricas com alertas crÃ¡Â­ticos
     const { data: alertas } = await supabase
       .from('ai_metrics')
       .select('nome_metrica, valor, meta_valor, performance')
@@ -157,10 +157,10 @@ export async function GET(request: NextRequest) {
       .order('data_referencia', { ascending: false })
       .limit(5);
 
-    // Calcular KPIs principais (m�tricas mais recentes)
+    // Calcular KPIs principais (mÃ¡Â©tricas mais recentes)
     const kpiMap = {
-      'taxa_conclusao_checklists': 'Taxa de Conclus�o',
-      'tempo_medio_execucao': 'Tempo M�dio',
+      'taxa_conclusao_checklists': 'Taxa de ConclusÃ¡Â£o',
+      'tempo_medio_execucao': 'Tempo MÃ¡Â©dio',
       'score_medio_qualidade': 'Score de Qualidade',
       'whatsapp_engagement': 'Engagement WhatsApp',
       'produtividade_funcionarios': 'Produtividade'
@@ -206,18 +206,18 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({
-        error: 'Par�metros inv�lidos',
+        error: 'ParÃ¡Â¢metros invÃ¡Â¡lidos',
         details: error.errors
       }, { status: 400 });
     }
 
-    console.error('Erro na API de m�tricas:', error);
+    console.error('Erro na API de mÃ¡Â©tricas:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }
 
 // ========================================
-// 📊 GET /api/ai/metrics/trends (Tend�ncias hist�ricas)
+// Ã°Å¸â€œÅ  GET /api/ai/metrics/trends (TendÃ¡Âªncias histÃ¡Â³ricas)
 // ========================================
 export async function POST(request: NextRequest) {
   try {
@@ -225,110 +225,85 @@ export async function POST(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
     if (!['funcionario', 'financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permiss�o para acessar tend�ncias' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permissÃ¡Â£o para acessar tendÃ¡Âªncias' }, { status: 403 });
     }
 
     const body = await request.json();
     const { metrica, periodo_dias = 30, granularidade = 'daily' } = body;
 
     if (!metrica) {
-      return NextResponse.json({ error: 'Nome da m�trica � obrigat�rio' }, { status: 400 });
+      return NextResponse.json({ error: 'Nome da mÃ¡Â©trica Ã¡Â© obrigatÃ¡Â³rio' }, { status: 400 });
     }
 
     const dataInicio = new Date();
     dataInicio.setDate(dataInicio.getDate() - periodo_dias);
+    const dataInicioStr = dataInicio.toISOString().split('T')[0];
 
-    // Buscar dados hist�ricos
+    // Buscar dados históricos
     const { data: historico, error } = await supabase
       .from('ai_metrics')
-      .select(`
-        valor,
-        valor_anterior,
-        variacao_percentual,
-        meta_valor,
-        performance,
-        data_referencia,
-        detalhamento
-      `)
+      .select('data_referencia, valor')
       .eq('bar_id', bar_id)
       .eq('nome_metrica', metrica)
-      .gte('data_referencia', dataInicio.toISOString().split('T')[0])
+      .eq('ativa', true)
+      .gte('data_referencia', dataInicioStr)
       .order('data_referencia', { ascending: true });
 
-    if (error) {
-      console.error('Erro ao buscar tend�ncias:', error);
-      return NextResponse.json({ error: 'Erro ao buscar tend�ncias' }, { status: 500 });
-    }
-
-    // Calcular estat�sticas da s�rie
+    // Calcular estatísticas da série
     if (!historico || historico.length === 0) {
       return NextResponse.json({
         success: true,
         data: [],
-        estatisticas: {
-          total_pontos: 0,
-          valor_atual: null,
-          valor_maximo: null,
-          valor_minimo: null,
-          media: null,
-          desvio_padrao: null,
-          tendencia_geral: 'estavel',
-          atingiu_meta: 0,
-          variacao_total: null
-        }
+        estatisticas: {}
       });
     }
 
-    const valores = historico.map((h) => h.valor);
+    // Série de valores
+    const valores = historico.map((h: any) => h.valor);
+    const datas = historico.map((h: any) => h.data_referencia);
     const valorAtual = valores[valores.length - 1];
     const valorAnterior = valores[0];
     const valorMaximo = Math.max(...valores);
     const valorMinimo = Math.min(...valores);
-    const media = valores.reduce((a, b) => a + b, 0) / valores.length;
-    
-    // Calcular desvio padr�o
-    const variance = valores.reduce((a, b) => a + Math.pow(b - media, 2), 0) / valores.length;
+    // Calcular média
+    const media = valores.reduce((a: any, b: any) => a + b, 0) / valores.length;
+    // Calcular desvio padrão
+    const variance = valores.reduce((a: any, b: any) => a + Math.pow(b - media, 2), 0) / valores.length;
     const desvioPadrao = Math.sqrt(variance);
-
-    // Determinar tend�ncia geral
+    // Determinar tendência geral
     const variacaoTotal = ((valorAtual - valorAnterior) / valorAnterior) * 100;
     let tendenciaGeral = 'estavel';
     if (variacaoTotal > 5) tendenciaGeral = 'crescente';
     else if (variacaoTotal < -5) tendenciaGeral = 'decrescente';
-
-    // Calcular quantas vezes atingiu a meta
-    const atingiuMeta = historico.filter((h) => h.meta_valor && h.valor >= h.meta_valor).length;
-
-    // Preparar dados para gr�fico (agrupamento se necess�rio)
+    // Calcular quantas vezes atingiu a meta (se meta_valor existir)
+    const atingiuMeta = historico.filter((h: any) => h.meta_valor !== undefined && h.valor >= h.meta_valor).length;
+    // Preparar dados para gráfico
     let dadosGrafico = historico;
-    
-    if (granularidade === 'weekly' && historico.length > 7) {
-      // Agrupar por semana
-      const semanas = {};
-      historico.forEach(h => {
-        const data = new Date(h.data_referencia);
-        const inicioSemana = new Date(data.setDate(data.getDate() - data.getDay()));
-        const chave = inicioSemana.toISOString().split('T')[0];
-        
-        if (!semanas[chave]) {
-          semanas[chave] = {
-            valores: [],
-            data_referencia: chave,
-            meta_valor: h.meta_valor
-          };
+    // Agrupar por semana/mês se granularidade for diferente de daily
+    let agrupado: { [key: string]: any } = {};
+    if (granularidade !== 'daily') {
+      agrupado = valores.reduce((acc: { [key: string]: any }, v: any, idx: number) => {
+        const data = new Date(datas[idx]);
+        let key = '';
+        if (granularidade === 'weekly') {
+          const week = Math.ceil(data.getDate() / 7);
+          key = `${data.getFullYear()}-W${week}`;
+        } else if (granularidade === 'monthly') {
+          key = `${data.getFullYear()}-${data.getMonth() + 1}`;
         }
-        semanas[chave].valores.push(h.valor);
-      });
-
-      dadosGrafico = Object.values(semanas).map((s) => ({
-        ...s,
-        valor: s.valores.reduce((a: number, b: number) => a + b, 0) / s.valores.length
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(v);
+        return acc;
+      }, {});
+      dadosGrafico = Object.entries(agrupado).map(([key, arr]: [string, any[]]) => ({
+        data_referencia: key,
+        valor: arr.reduce((a: number, b: number) => a + b, 0) / arr.length
       }));
     }
 
@@ -345,7 +320,7 @@ export async function POST(request: NextRequest) {
         tendencia_geral: tendenciaGeral,
         atingiu_meta: atingiuMeta,
         variacao_total: parseFloat(variacaoTotal.toFixed(2)),
-        performance_distribuicao: historico.reduce((acc, h) => {
+        performance_distribuicao: historico.reduce((acc: Record<string, number>, h: any) => {
           acc[h.performance] = (acc[h.performance] || 0) + 1;
           return acc;
         }, {} as Record<string, number>)
@@ -353,7 +328,8 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Erro na API de tend�ncias:', error);
+    console.error('Erro na API de tendÃªncias:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 } 
+
