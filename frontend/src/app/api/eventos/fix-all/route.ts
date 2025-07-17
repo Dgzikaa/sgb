@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase';
 
 // Event name mappings to fix encoding issues
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 });
     }
 
-    console.log('🔧 Starting complete event name fix...');
+    console.log('?? Starting complete event name fix...');
     
     let totalFixed = 0;
     let errors = [];
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
         if (error) {
           errors.push(`Error fixing ${mapping.name}: ${error.message}`);
         } else {
-          console.log(`✅ Fixed event: ${mapping.name}`);
+          console.log(`? Fixed event: ${mapping.name}`);
           totalFixed++;
         }
       } catch (err: any) {
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Error in fix-all endpoint:', error);
+    console.error('? Error in fix-all endpoint:', error);
     return NextResponse.json({
       success: false,
       error: error.message

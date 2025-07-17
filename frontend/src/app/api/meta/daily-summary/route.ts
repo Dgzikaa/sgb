@@ -210,7 +210,7 @@ function processDailySummaryData(summaryData: any[], fallbackData: any) {
     total_clicks: latestData?.campaigns_total_clicks || 0
   }
 
-  const daily_data = summaryData.map(day => ({
+  const daily_data = summaryData.map((day: any) => ({
     date: day.data_referencia,
     facebook_followers: day.facebook_followers,
     instagram_followers: day.instagram_followers,

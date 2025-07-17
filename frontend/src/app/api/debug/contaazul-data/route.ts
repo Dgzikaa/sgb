@@ -43,7 +43,7 @@ export async function GET(request: Request) {
       .select('bar_id')
       .limit(100)
 
-    const barIds = distinctBars ? [...new Set(distinctBars.map(item => item.bar_id))] : []
+    const barIds = distinctBars ? [...new Set(distinctBars.map((item: any) => item.bar_id))] : []
 
     // 4. Verificar últimas sincronizações
     const { data: recentData, error: recentError } = await supabase

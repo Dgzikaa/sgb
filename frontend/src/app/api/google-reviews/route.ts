@@ -178,7 +178,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Buscar mais fotos (até 10) com diferentes tamanhos
-      const photoUrls = details.photos ? details.photos.slice(0, 10).map(photo => 
+      const photoUrls = details.photos ? details.photos.slice(0, 10).map((photo: any) => 
         googlePlaces.getPhotoUrl(photo.photo_reference, 600)
       ) : []
 
@@ -254,7 +254,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Processar fotos (buscar mais fotos com melhor qualidade)
-    const photoUrls = details.photos ? details.photos.slice(0, 10).map(photo => 
+    const photoUrls = details.photos ? details.photos.slice(0, 10).map((photo: any) => 
       googlePlaces.getPhotoUrl(photo.photo_reference, 600)
     ) : []
 

@@ -210,7 +210,7 @@ export async function GET(request: NextRequest) {
         })
       }
 
-      const highEngagementPosts = allPosts.filter(post => post.engagement_level === 'high')
+      const highEngagementPosts = allPosts.filter((post: any) => post.engagement_level === 'high')
       if (highEngagementPosts.length > 0) {
         managementInsights.push({
           type: 'opportunity',
@@ -220,7 +220,7 @@ export async function GET(request: NextRequest) {
         })
       }
 
-      const postsNeedingAttention = allPosts.filter(post => post.needs_attention)
+      const postsNeedingAttention = allPosts.filter((post: any) => post.needs_attention)
       if (postsNeedingAttention.length > 0) {
         managementInsights.push({
           type: 'attention',

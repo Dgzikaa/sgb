@@ -171,21 +171,21 @@ class SecurityMonitor {
   // Métricas de segurança
   async getSecurityMetrics(): Promise<SecurityMetrics> {
     const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const recentEvents = this.events.filter(e => new Date(e.timestamp) > last24h);
+    const recentEvents = this.events.filter((e: any) => new Date(e.timestamp) > last24h);
 
     return {
-      failed_logins_24h: recentEvents.filter(e => e.event_type === 'failed_login').length,
-      rate_limit_violations_24h: recentEvents.filter(e => e.event_type === 'rate_limit_exceeded').length,
-      sql_injection_attempts_24h: recentEvents.filter(e => e.event_type === 'sql_injection_attempt').length,
-      suspicious_api_calls_24h: recentEvents.filter(e => e.category === 'api_abuse').length,
-      unique_ips_24h: new Set(recentEvents.map(e => e.ip_address).filter(Boolean)).size,
-      critical_events_unresolved: this.events.filter(e => e.level === 'critical' && !e.resolved).length
+      failed_logins_24h: recentEvents.filter((e: any) => e.event_type === 'failed_login').length,
+      rate_limit_violations_24h: recentEvents.filter((e: any) => e.event_type === 'rate_limit_exceeded').length,
+      sql_injection_attempts_24h: recentEvents.filter((e: any) => e.event_type === 'sql_injection_attempt').length,
+      suspicious_api_calls_24h: recentEvents.filter((e: any) => e.category === 'api_abuse').length,
+      unique_ips_24h: new Set(recentEvents.map((e: any) => e.ip_address).filter(Boolean)).size,
+      critical_events_unresolved: this.events.filter((e: any) => e.level === 'critical' && !e.resolved).length
     };
   }
 
   // Verificar se IP está em lista de bloqueio
   async isIPBlocked(ip: string): Promise<boolean> {
-    const recentEvents = this.events.filter(e => 
+    const recentEvents = this.events.filter((e: any) => 
       e.ip_address === ip && 
       e.level === 'critical' &&
       new Date(e.timestamp) > new Date(Date.now() - 60 * 60 * 1000) // última hora
@@ -314,7 +314,7 @@ class SecurityMonitor {
 
   private async getRecentFailedLogins(ip: string): Promise<number> {
     const last10min = new Date(Date.now() - 10 * 60 * 1000);
-    return this.events.filter(e => 
+    return this.events.filter((e: any) => 
       e.ip_address === ip && 
       e.event_type === 'failed_login' &&
       new Date(e.timestamp) > last10min
@@ -334,7 +334,7 @@ class SecurityMonitor {
     }
 
     // IP já teve eventos críticos
-    const criticalEvents = this.events.filter(e => e.ip_address === ip && e.level === 'critical').length;
+    const criticalEvents = this.events.filter((e: any) => e.ip_address === ip && e.level === 'critical').length;
     score += criticalEvents * 10;
 
     return Math.min(score, 100);
@@ -342,7 +342,7 @@ class SecurityMonitor {
 
   private async getRequestCount(ip: string, endpoint: string): Promise<number> {
     const last5min = new Date(Date.now() - 5 * 60 * 1000);
-    return this.events.filter(e => 
+    return this.events.filter((e: any) => 
       e.ip_address === ip && 
       e.endpoint === endpoint &&
       new Date(e.timestamp) > last5min
@@ -351,7 +351,7 @@ class SecurityMonitor {
 
   private async getEndpointFrequency(ip: string, endpoint: string): Promise<number> {
     const lastHour = new Date(Date.now() - 60 * 60 * 1000);
-    return this.events.filter(e => 
+    return this.events.filter((e: any) => 
       e.ip_address === ip && 
       e.endpoint === endpoint &&
       new Date(e.timestamp) > lastHour

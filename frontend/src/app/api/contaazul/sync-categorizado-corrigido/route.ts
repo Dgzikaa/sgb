@@ -173,7 +173,7 @@ export async function POST(request: NextRequest) {
     console.log('📊 PASSO 3: BUSCAR EVENTOS FINANCEIROS (CONTAS-A-RECEBER) POR CATEGORIA...')
     
     // PASSO 3: Query contas-a-receber por categoria (tipo = receita)
-    const categoriasReceita = resultados.passo1_categorias_api.filter(cat => cat.tipo === 'RECEITA')
+    const categoriasReceita = resultados.passo1_categorias_api.filter((cat: any) => cat.tipo === 'RECEITA')
     
     for (const categoria of categoriasReceita) {
       try {
@@ -226,7 +226,7 @@ export async function POST(request: NextRequest) {
     console.log('📊 PASSO 4: BUSCAR EVENTOS FINANCEIROS (CONTAS-A-PAGAR) POR CATEGORIA...')
     
     // PASSO 4: Query contas-a-pagar por categoria (tipo = despesa)
-    const categoriasDespesa = resultados.passo1_categorias_api.filter(cat => cat.tipo === 'DESPESA')
+    const categoriasDespesa = resultados.passo1_categorias_api.filter((cat: any) => cat.tipo === 'DESPESA')
     
     for (const categoria of categoriasDespesa) {
       try {
@@ -396,7 +396,7 @@ export async function POST(request: NextRequest) {
     console.log('💾 PASSO 7: INSERIR PARCELAS NO BANCO...')
     
     // PASSO 7: Inserir apenas parcelas REAIS (não eventos sem parcelas)
-    const parcelasReais = resultados.passo6_parcelas_api.filter(p => p.tipo !== 'evento_sem_parcelas')
+    const parcelasReais = resultados.passo6_parcelas_api.filter((p: any) => p.tipo !== 'evento_sem_parcelas')
     
     console.log(`📊 PASSO 7: ${parcelasReais.length} parcelas reais para inserir`)
     
@@ -457,7 +457,7 @@ export async function POST(request: NextRequest) {
       eventos_inseridos: resultados.passo5_eventos_upsert.length,
       parcelas_reais: parcelasReais.length,
       parcelas_inseridas: resultados.passo7_parcelas_upsert.length,
-      eventos_sem_parcelas: resultados.passo6_parcelas_api.filter(p => p.tipo === 'evento_sem_parcelas').length
+      eventos_sem_parcelas: resultados.passo6_parcelas_api.filter((p: any) => p.tipo === 'evento_sem_parcelas').length
     }
 
     console.log('\n📊 ESTATÍSTICAS FINAIS:')

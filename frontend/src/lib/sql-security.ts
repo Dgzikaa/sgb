@@ -187,7 +187,7 @@ export class SQLSecurityValidator {
 
       // 10. Notificar Discord sobre tentativas críticas de SQL injection
       if (errors.length > 0) {
-        const criticalErrors = errors.filter(error => 
+        const criticalErrors = errors.filter((error: any) => 
           error.includes('Dangerous command') || 
           error.includes('Suspicious SQL pattern') ||
           error.includes('injection')

@@ -91,8 +91,8 @@ export async function GET(request: NextRequest) {
     // Calcular variações (comparar com dados de ontem)
     const ontem = new Date(hoje.getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     
-    const yesterdayFb = facebookData?.find(d => d.data_referencia === ontem)
-    const yesterdayIg = instagramData?.find(d => d.data_referencia === ontem)
+    const yesterdayFb = facebookData?.find((d: any) => d.data_referencia === ontem)
+    const yesterdayIg = instagramData?.find((d: any) => d.data_referencia === ontem)
     
     const followersYesterday = (yesterdayFb?.page_fans || 0) + (yesterdayIg?.follower_count || 0)
     const followersChange = totalFollowers - followersYesterday
@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
       // Usar dados reais de campanhas
       const latestCampaign = campaignsData[0]
       campaignMetrics = {
-        active_campaigns: campaignsData.filter(c => c.status === 'ACTIVE').length,
+        active_campaigns: campaignsData.filter((c: any) => c.status === 'ACTIVE').length,
         total_spend: campaignsData.reduce((sum, c) => sum + (parseFloat(c.spend) || 0), 0),
         total_clicks: campaignsData.reduce((sum, c) => sum + (parseInt(c.clicks) || 0), 0),
         conversion_rate: 0 // Calcular se tiver dados de conversão
@@ -142,13 +142,13 @@ export async function GET(request: NextRequest) {
             followers: facebookFollowers,
             engagement: totalImpressions > 0 ? Math.round(engagementRate * 0.6 * 10) / 10 : 0,
             reach: Math.round(totalReach * 0.45),
-            posts: facebookData?.filter(d => d.post_impressions > 0).length || 0
+            posts: facebookData?.filter((d: any) => d.post_impressions > 0).length || 0
           },
           instagram: {
             followers: instagramFollowers,
             engagement: totalImpressions > 0 ? Math.round(engagementRate * 1.4 * 10) / 10 : 0,
             reach: Math.round(totalReach * 0.55),
-            posts: instagramData?.filter(d => d.posts_impressions > 0).length || 0
+            posts: instagramData?.filter((d: any) => d.posts_impressions > 0).length || 0
           }
         },
         campaigns: campaignMetrics, // Dados reais ou zeros

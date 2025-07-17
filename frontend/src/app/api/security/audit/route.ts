@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Formatar eventos como logs de auditoria
-    const auditLogs = events?.map(event => ({
+    const auditLogs = events?.map((event: any) => ({
       id: event.id,
       user_id: event.user_id || 'system',
       action: event.event_type,

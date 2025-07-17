@@ -489,7 +489,7 @@ export async function GET(request: NextRequest) {
         tipo: ultimaColeta.tipo_coleta,
         registros: ultimaColeta.registros_processados
       } : null,
-      total_coletas_hoje: coletas?.filter(c => 
+      total_coletas_hoje: coletas?.filter((c: any) => 
         new Date(c.iniciada_em).toDateString() === new Date().toDateString()
       ).length || 0,
       por_tipo: statusByType,

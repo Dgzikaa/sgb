@@ -46,7 +46,7 @@ class RedisClient {
     
     if (this.useCluster && process.env.REDIS_CLUSTER_NODES) {
       // Configurar Redis Cluster
-      const clusterNodes = process.env.REDIS_CLUSTER_NODES.split(',').map(node => {
+      const clusterNodes = process.env.REDIS_CLUSTER_NODES.split(',').map((node: any) => {
         const [host, port] = node.split(':');
         return { host, port: parseInt(port) };
       });

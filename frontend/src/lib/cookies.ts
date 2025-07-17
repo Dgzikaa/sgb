@@ -36,7 +36,7 @@ export function setAuthCookie(userData: UserCookie) {
 export function getAuthCookie(): UserCookie | null {
   try {
     const cookies = document.cookie.split(';')
-    const authCookie = cookies.find(cookie => cookie.trim().startsWith(`${AUTH_COOKIE_NAME}=`))
+    const authCookie = cookies.find((cookie: any) => cookie.trim().startsWith(`${AUTH_COOKIE_NAME}=`))
     
     if (!authCookie) return null
     

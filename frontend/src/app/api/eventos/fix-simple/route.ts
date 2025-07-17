@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 });
     }
 
-    console.log('🔧 Starting simple event name fix...');
+    console.log('?? Starting simple event name fix...');
     
     // Simple test: Update just a few specific events
     const updates = [
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
         console.error(`Error updating ${update.date}:`, error);
         results.push({ date: update.date, status: 'error', error: error.message });
       } else {
-        console.log(`✅ Successfully updated ${update.date}`);
+        console.log(`? Successfully updated ${update.date}`);
         successCount++;
         results.push({ date: update.date, status: 'success', rowsAffected: data?.length || 0 });
       }

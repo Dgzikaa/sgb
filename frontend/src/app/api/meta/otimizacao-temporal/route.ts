@@ -231,7 +231,7 @@ export async function GET(request: NextRequest) {
         'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
       ]
       
-      const padroesSazonais = Array.from(dadosPorMes.values()).map(dados => ({
+      const padroesSazonais = Array.from(dadosPorMes.values()).map((dados: any) => ({
         mes: dados.mes,
         nome: nomesMeses[dados.mes],
         engajamento_medio: dados.posts > 0 ? dados.engajamento / dados.posts : 0,

@@ -88,8 +88,8 @@ export async function GET(request: NextRequest) {
     }
 
     // 3. CALCULAR TOTAIS
-    const totalReceitas = todosEventos.filter(e => e.tipo === 'receita').reduce((sum: number, e: any) => sum + (parseFloat(e.valor) || 0), 0)
-    const totalDespesas = todosEventos.filter(e => e.tipo === 'despesa').reduce((sum: number, e: any) => sum + (parseFloat(e.valor) || 0), 0)
+    const totalReceitas = todosEventos.filter((e: any) => e.tipo === 'receita').reduce((sum: number, e: any) => sum + (parseFloat(e.valor) || 0), 0)
+    const totalDespesas = todosEventos.filter((e: any) => e.tipo === 'despesa').reduce((sum: number, e: any) => sum + (parseFloat(e.valor) || 0), 0)
     const saldoLiquido = totalReceitas - totalDespesas
 
     // 4. MAPEAR CATEGORIAS

@@ -63,14 +63,14 @@ export async function GET(request: NextRequest) {
       
       // Verificar padrões de horário
       const postsRecentes = dados.slice(0, 10)
-      const horarios = postsRecentes.map(post => {
+      const horarios = postsRecentes.map((post: any) => {
         const hora = new Date(post.updated_at).getHours()
         return hora
       })
       
       const horariosPopulares = [18, 19, 20, 21, 22] // Prime time para bares
       const horariosUsados = new Set(horarios)
-      const horariosLivres = horariosPopulares.filter(h => !horariosUsados.has(h))
+      const horariosLivres = horariosPopulares.filter((h: any) => !horariosUsados.has(h))
       
       if (horariosLivres.length > 0) {
         gaps.push({
@@ -195,8 +195,8 @@ export async function GET(request: NextRequest) {
 
     // 8. ALERTAS CRÍTICOS
     const alertasCriticos = todasOportunidades
-      .filter(opp => opp.urgencia === 'alta')
-      .map(opp => ({
+      .filter((opp: any) => opp.urgencia === 'alta')
+      .map((opp: any) => ({
         titulo: opp.descricao,
         acao: opp.acao,
         prazo: '24h'
@@ -210,9 +210,9 @@ export async function GET(request: NextRequest) {
         score_oportunidade: score,
         status: score > 70 ? 'excelente' : score > 40 ? 'bom' : 'critico',
         total_oportunidades: todasOportunidades.length,
-        oportunidades_alta: todasOportunidades.filter(o => o.urgencia === 'alta').length,
-        oportunidades_media: todasOportunidades.filter(o => o.urgencia === 'media').length,
-        oportunidades_baixa: todasOportunidades.filter(o => o.urgencia === 'baixa').length
+        oportunidades_alta: todasOportunidades.filter((o: any) => o.urgencia === 'alta').length,
+        oportunidades_media: todasOportunidades.filter((o: any) => o.urgencia === 'media').length,
+        oportunidades_baixa: todasOportunidades.filter((o: any) => o.urgencia === 'baixa').length
       },
       gaps_mercado: {
         atividade_propria: gapsInstagram.concat(gapsFacebook),
@@ -225,15 +225,15 @@ export async function GET(request: NextRequest) {
       proximas_acoes: [
         {
           prazo: 'Agora',
-          acoes: alertasCriticos.map(a => a.acao)
+          acoes: alertasCriticos.map((a: any) => a.acao)
         },
         {
           prazo: '24h',
-          acoes: todasOportunidades.filter(o => o.urgencia === 'media').map(o => o.acao)
+          acoes: todasOportunidades.filter((o: any) => o.urgencia === 'media').map((o: any) => o.acao)
         },
         {
           prazo: 'Esta semana',
-          acoes: todasOportunidades.filter(o => o.urgencia === 'baixa').map(o => o.acao)
+          acoes: todasOportunidades.filter((o: any) => o.urgencia === 'baixa').map((o: any) => o.acao)
         }
       ]
     }

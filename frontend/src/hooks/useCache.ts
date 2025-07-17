@@ -239,7 +239,7 @@ export function useFilteredCache<T = any>(
 ) {
   const filterKey = Object.keys(filters)
     .sort()
-    .map(key => `${key}:${filters[key]}`)
+    .map((key: any) => `${key}:${filters[key]}`)
     .join('|')
   
   const cacheKey = `${baseKey}:filters:${filterKey}`

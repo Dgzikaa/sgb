@@ -30,13 +30,13 @@ export async function getStatusChecklists(bar_id: number, inicio?: string, fim?:
   if (!execucoes) return { erro: 'Erro ao buscar dados' };
 
   const total = execucoes.length;
-  const concluidos = execucoes.filter(e => e.status === 'concluido').length;
-  const pendentes = execucoes.filter(e => e.status === 'em_andamento').length;
-  const atrasados = execucoes.filter(e => e.status === 'atrasado').length;
+  const concluidos = execucoes.filter((e: any) => e.status === 'concluido').length;
+  const pendentes = execucoes.filter((e: any) => e.status === 'em_andamento').length;
+  const atrasados = execucoes.filter((e: any) => e.status === 'atrasado').length;
 
   const scoresMedio = execucoes
-    .filter(e => e.pontuacao_final)
-    .reduce((acc, e) => acc + e.pontuacao_final, 0) / execucoes.filter(e => e.pontuacao_final).length || 0;
+    .filter((e: any) => e.pontuacao_final)
+    .reduce((acc, e) => acc + e.pontuacao_final, 0) / execucoes.filter((e: any) => e.pontuacao_final).length || 0;
 
   return {
     periodo: { inicio: dataInicio, fim: dataFim },
@@ -131,9 +131,9 @@ export async function getWhatsAppStats(bar_id: number, inicio?: string, fim?: st
   if (!mensagens) return { erro: 'Erro ao buscar dados' };
 
   const total = mensagens.length;
-  const enviadas = mensagens.filter(m => ['sent', 'delivered', 'read'].includes(m.status)).length;
-  const lidas = mensagens.filter(m => m.status === 'read').length;
-  const falhas = mensagens.filter(m => m.status === 'failed').length;
+  const enviadas = mensagens.filter((m: any) => ['sent', 'delivered', 'read'].includes(m.status)).length;
+  const lidas = mensagens.filter((m: any) => m.status === 'read').length;
+  const falhas = mensagens.filter((m: any) => m.status === 'failed').length;
 
   // Estatísticas por tipo
   const tipoStats: Record<string, number> = {};
@@ -245,18 +245,18 @@ export async function getScoreSaudeGeral(bar_id: number) {
   let score = 100;
 
   // Penalizar por anomalias ativas
-  const anomaliasCriticas = anomalias.data?.filter(a => a.severidade === 'critica').length || 0;
-  const anomaliasAltas = anomalias.data?.filter(a => a.severidade === 'alta').length || 0;
+  const anomaliasCriticas = anomalias.data?.filter((a: any) => a.severidade === 'critica').length || 0;
+  const anomaliasAltas = anomalias.data?.filter((a: any) => a.severidade === 'alta').length || 0;
   score -= (anomaliasCriticas * 15) + (anomaliasAltas * 8);
 
   // Ajustar por métricas vs metas
-  const metricasAbaixoMeta = metricas.data?.filter(m => 
+  const metricasAbaixoMeta = metricas.data?.filter((m: any) => 
     m.valor < (m.meta_valor * 0.9)
   ).length || 0;
   score -= metricasAbaixoMeta * 5;
 
   // Bonificar insights positivos
-  const insightsPositivos = insights.data?.filter(i => 
+  const insightsPositivos = insights.data?.filter((i: any) => 
     i.impacto === 'positivo'
   ).length || 0;
   score += insightsPositivos * 2;
@@ -374,8 +374,8 @@ export async function getVisao360(bar_id: number, inicio?: string, fim?: string)
     },
     resumo_inteligencia: {
       total_anomalias_ativas: anomalias.data?.length || 0,
-      insights_criticos: insights.data?.filter(i => i.impacto === 'critico').length || 0,
-      recomendacoes_altas: recomendacoes.data?.filter(r => r.prioridade >= 8).length || 0
+      insights_criticos: insights.data?.filter((i: any) => i.impacto === 'critico').length || 0,
+      recomendacoes_altas: recomendacoes.data?.filter((r: any) => r.prioridade >= 8).length || 0
     },
     mensagem: 'Análise 360° completa do estabelecimento'
   };

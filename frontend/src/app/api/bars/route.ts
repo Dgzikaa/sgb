@@ -1,4 +1,4 @@
-Ôªøimport { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase';
 
 export async function GET() {
@@ -23,7 +23,7 @@ export async function GET() {
     const data = barData.map((bar: any) => ({
       id: bar.id,
       nome: bar.nome || bar.name || 'Sem nome',
-      endereco: bar.endereco || bar.address || 'Endere√ßo n√£o informado',
+      endereco: bar.endereco || bar.address || 'EndereÁo n„o informado',
       telefone: bar.telefone || bar.phone || '',
       cnpj: bar.cnpj || '',
       email: bar.email || '',
@@ -32,7 +32,7 @@ export async function GET() {
       updated_at: bar.updated_at || new Date().toISOString()
     }));
 
-    console.log(`‚úÖ Encontrados ${data.length} bares na tabela 'bar':`, data.map((b: any) => b.nome));
+    console.log(`? Encontrados ${data.length} bares na tabela 'bar':`, data.map((b: any) => b.nome));
     
     return NextResponse.json({
       success: true,
@@ -59,11 +59,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { nome, endereco, telefone, cnpj, email } = body;
     
-    // Valida√ß√µes b√°sicas
+    // ValidaÁıes b·sicas
     if (!nome || !endereco) {
       return NextResponse.json({
         success: false,
-        error: 'Nome e endere√ßo s√£o obrigat√≥rios'
+        error: 'Nome e endereÁo s„o obrigatÛrios'
       }, { status: 400 });
     }
     
@@ -92,10 +92,10 @@ export async function POST(request: NextRequest) {
       throw error;
     }
     
-    // Criar configura√ß√µes padr√£o para o bar nas tabelas relacionadas
+    // Criar configuraÁıes padr„o para o bar nas tabelas relacionadas
     await createDefaultConfigurations(data.id);
     
-    console.log(`‚úÖ Novo bar criado: ${nome} (ID: ${data.id})`);
+    console.log(`? Novo bar criado: ${nome} (ID: ${data.id})`);
     
     return NextResponse.json({
       success: true,
@@ -120,9 +120,9 @@ async function createDefaultConfigurations(barId: number) {
       throw new Error('Erro ao conectar com banco');
     }
 
-    // Criar registros padr√£o nas tabelas de configura√ß√£o
+    // Criar registros padr„o nas tabelas de configuraÁ„o
     const configurationsPromises = [
-      // Configura√ß√µes de API para o bar
+      // ConfiguraÁıes de API para o bar
       await supabase.from('bar_api_configs').insert([{
         bar_id: barId,
         api_name: 'sympla',
@@ -130,7 +130,7 @@ async function createDefaultConfigurations(barId: number) {
         settings: { auto_sync: true }
       }]),
       
-      // Configura√ß√µes de notifica√ß√£o
+      // ConfiguraÁıes de notificaÁ„o
       await supabase.from('bar_notification_configs').insert([{
         bar_id: barId,
         email_enabled: true,
@@ -138,7 +138,7 @@ async function createDefaultConfigurations(barId: number) {
         alerts_enabled: true
       }]),
       
-      // Criar entrada na tabela de estat√≠sticas se n√£o existir
+      // Criar entrada na tabela de estatÌsticas se n„o existir
       await supabase.from('bar_stats').insert([{
         bar_id: barId,
         total_eventos: 0,
@@ -148,11 +148,11 @@ async function createDefaultConfigurations(barId: number) {
     ];
     
     await Promise.all(configurationsPromises);
-    console.log(`‚úÖ Configura√ß√µes padr√£o criadas para bar ${barId}`);
+    console.log(`? ConfiguraÁıes padr„o criadas para bar ${barId}`);
     
   } catch (error) {
-    console.warn('‚ö†Ô∏è Erro ao criar configura√ß√µes padr√£o:', error);
-    // N√£o falhar o processo principal por isso
+    console.warn('?? Erro ao criar configuraÁıes padr„o:', error);
+    // N„o falhar o processo principal por isso
   }
 }
 
@@ -170,7 +170,7 @@ export async function PUT(request: NextRequest) {
     if (!id) {
       return NextResponse.json({
         success: false,
-        error: 'ID do bar √© obrigat√≥rio'
+        error: 'ID do bar È obrigatÛrio'
       }, { status: 400 });
     }
     
@@ -231,7 +231,7 @@ export async function DELETE(request: NextRequest) {
     if (!id) {
       return NextResponse.json({
         success: false,
-        error: 'ID do bar √© obrigat√≥rio'
+        error: 'ID do bar È obrigatÛrio'
       }, { status: 400 });
     }
     
@@ -245,11 +245,11 @@ export async function DELETE(request: NextRequest) {
     if (!bar) {
       return NextResponse.json({
         success: false,
-        error: 'Bar n√£o encontrado'
+        error: 'Bar n„o encontrado'
       }, { status: 404 });
     }
     
-    // Soft delete - marcar como inativo ao inv√©s de deletar
+    // Soft delete - marcar como inativo ao invÈs de deletar
     const { error } = await supabase
       .from('bar')
       .update({ 

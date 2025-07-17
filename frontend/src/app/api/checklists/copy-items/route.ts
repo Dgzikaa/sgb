@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     let nextOrder = lastItem?.ordem ? lastItem.ordem + 1 : 1
 
     // Preparar itens para inserção
-    const itemsToInsert = items.map(item => ({
+    const itemsToInsert = items.map((item: any) => ({
       checklist_id: targetChecklistId,
       titulo: item.titulo,
       tipo: item.tipo,

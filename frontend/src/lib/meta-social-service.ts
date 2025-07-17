@@ -812,7 +812,7 @@ export class MetaSocialService {
       this.collectInstagramPosts(25)
     ])
 
-    const successful = results.filter(r => r.status === 'fulfilled').length
+    const successful = results.filter((r: any) => r.status === 'fulfilled').length
     const total = results.length
 
     // Log com informações de rate limit

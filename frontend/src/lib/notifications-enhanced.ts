@@ -390,7 +390,7 @@ export class EnhancedNotificationService {
   private async updateNotificationStats(notificacaoId: number, results: any): Promise<void> {
     try {
       const channelsUsed = Object.values(results.channels).filter(Boolean).length;
-      const channelsSuccess = Object.values(results.channels).filter(v => v === true).length;
+      const channelsSuccess = Object.values(results.channels).filter((v: any) => v === true).length;
 
       await supabase
         .from('notificacoes')

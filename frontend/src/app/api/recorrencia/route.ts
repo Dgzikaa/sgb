@@ -202,7 +202,7 @@ export async function GET(request: Request) {
     console.log(`⚠️ Pulando Sympla - eventos não têm telefone dos clientes`);
 
     // Converter Map para Array e calcular ticket médio (todos já têm telefone)
-    const clientes: ClienteRanking[] = Array.from(clientesMap.values()).map(cliente => ({
+    const clientes: ClienteRanking[] = Array.from(clientesMap.values()).map((cliente: any) => ({
       ...cliente,
       ticket_medio: cliente.total_visitas > 0 ? cliente.valor_total_gasto / cliente.total_visitas : 0
     }));
@@ -213,7 +213,7 @@ export async function GET(request: Request) {
       .slice(0, 10);
 
     const top_ticket: ClienteRanking[] = [...clientes]
-      .filter(c => c.ticket_medio > 0)
+      .filter((c: any) => c.ticket_medio > 0)
       .sort((a, b) => b.ticket_medio - a.ticket_medio)
       .slice(0, 10);
 

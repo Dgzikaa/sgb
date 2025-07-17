@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       success: true,
       barIdConsultado: barId,
       totalCredenciaisContaAzul: allCredentials?.length || 0,
-      credenciaisEncontradas: allCredentials?.map(cred => ({
+      credenciaisEncontradas: allCredentials?.map((cred: any) => ({
         id: cred.id,
         bar_id: cred.bar_id,
         service: cred.service,
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
       barInfo: barInfo || null,
       barEncontrado: !!barInfo,
       totalCredenciais: credentials?.length || 0,
-      credenciais: credentials?.map(cred => ({
+      credenciais: credentials?.map((cred: any) => ({
         id: cred.id,
         bar_id: cred.bar_id,
         service: cred.service,

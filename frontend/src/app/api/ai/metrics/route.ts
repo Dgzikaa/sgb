@@ -128,22 +128,22 @@ export async function GET(request: NextRequest) {
 
     const estatisticas = {
       total_metricas: stats?.length || 0,
-      alertas_ativos: stats?.filter(s => s.alerta_ativado).length || 0,
+      alertas_ativos: stats?.filter((s: any) => s.alerta_ativado).length || 0,
       por_categoria: stats?.reduce((acc, s) => {
         acc[s.categoria] = (acc[s.categoria] || 0) + 1;
         return acc;
       }, {} as Record<string, number>) || {},
       por_performance: {
-        excelente: stats?.filter(s => s.performance === 'excelente').length || 0,
-        bom: stats?.filter(s => s.performance === 'bom').length || 0,
-        regular: stats?.filter(s => s.performance === 'regular').length || 0,
-        ruim: stats?.filter(s => s.performance === 'ruim').length || 0,
-        critico: stats?.filter(s => s.performance === 'critico').length || 0
+        excelente: stats?.filter((s: any) => s.performance === 'excelente').length || 0,
+        bom: stats?.filter((s: any) => s.performance === 'bom').length || 0,
+        regular: stats?.filter((s: any) => s.performance === 'regular').length || 0,
+        ruim: stats?.filter((s: any) => s.performance === 'ruim').length || 0,
+        critico: stats?.filter((s: any) => s.performance === 'critico').length || 0
       },
       por_tendencia: {
-        crescente: stats?.filter(s => s.tendencia === 'crescente').length || 0,
-        estavel: stats?.filter(s => s.tendencia === 'estavel').length || 0,
-        decrescente: stats?.filter(s => s.tendencia === 'decrescente').length || 0
+        crescente: stats?.filter((s: any) => s.tendencia === 'crescente').length || 0,
+        estavel: stats?.filter((s: any) => s.tendencia === 'estavel').length || 0,
+        decrescente: stats?.filter((s: any) => s.tendencia === 'decrescente').length || 0
       }
     };
 
@@ -187,7 +187,7 @@ export async function GET(request: NextRequest) {
       } : null;
     });
 
-    const kpis = (await Promise.all(kpisPromises)).filter(kpi => kpi !== null);
+    const kpis = (await Promise.all(kpisPromises)).filter((kpi: any) => kpi !== null);
 
     return NextResponse.json({
       success: true,
@@ -285,7 +285,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const valores = historico.map(h => h.valor);
+    const valores = historico.map((h: any) => h.valor);
     const valorAtual = valores[valores.length - 1];
     const valorAnterior = valores[0];
     const valorMaximo = Math.max(...valores);
@@ -303,7 +303,7 @@ export async function POST(request: NextRequest) {
     else if (variacaoTotal < -5) tendenciaGeral = 'decrescente';
 
     // Calcular quantas vezes atingiu a meta
-    const atingiuMeta = historico.filter(h => h.meta_valor && h.valor >= h.meta_valor).length;
+    const atingiuMeta = historico.filter((h: any) => h.meta_valor && h.valor >= h.meta_valor).length;
 
     // Preparar dados para gráfico (agrupamento se necessário)
     let dadosGrafico = historico;

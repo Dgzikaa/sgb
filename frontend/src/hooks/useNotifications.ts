@@ -162,7 +162,7 @@ export function useNotifications(): UseNotificationsResult {
       if (response.success) {
         // Atualizar estado local
         setNotificacoes(prev => 
-          prev.map(notif => 
+          prev.map((notif: any) => 
             notif.id === id 
               ? { ...notif, status: 'lida' as const, lida_em: new Date().toISOString() }
               : notif
@@ -198,7 +198,7 @@ export function useNotifications(): UseNotificationsResult {
       if (response.success) {
         // Atualizar estado local
         setNotificacoes(prev => 
-          prev.map(notif => 
+          prev.map((notif: any) => 
             notif.status !== 'lida' 
               ? { ...notif, status: 'lida' as const, lida_em: new Date().toISOString() }
               : notif
@@ -233,10 +233,10 @@ export function useNotifications(): UseNotificationsResult {
       
       if (response.success) {
         // Atualizar estado local
-        setNotificacoes(prev => prev.filter(notif => notif.id !== id))
+        setNotificacoes(prev => prev.filter((notif: any) => notif.id !== id))
         
         // Atualizar estatísticas se era não lida
-        const notificacao = notificacoes.find(n => n.id === id)
+        const notificacao = notificacoes.find((n: any) => n.id === id)
         if (notificacao && ['pendente', 'enviada'].includes(notificacao.status)) {
           setEstatisticas(prev => prev ? {
             ...prev,

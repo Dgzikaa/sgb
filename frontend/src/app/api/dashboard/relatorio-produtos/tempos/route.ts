@@ -496,7 +496,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Filtrar APENAS produtos que têm dados NO DIA ESPECÍFICO (não mostrar "Sem dados")
-    const produtosFiltrados = produtos.filter(p => p.pedidos_dia > 0 && p.tempo_dia_especifico > 0);
+    const produtosFiltrados = produtos.filter((p: any) => p.pedidos_dia > 0 && p.tempo_dia_especifico > 0);
 
     // Ordenar: 1º casos GRAVES (variações positivas altas), 2º casos BONS (variações negativas), 3º normais
     produtosFiltrados.sort((a, b) => {
@@ -549,14 +549,14 @@ export async function GET(request: NextRequest) {
 
     // Log da ordenação para debug
     const categorias = {
-      graves: produtosFiltrados.filter(p => p.variacao_percentual > 50).length,
-      problemas: produtosFiltrados.filter(p => p.variacao_percentual > 25 && p.variacao_percentual <= 50).length,
-      bons: produtosFiltrados.filter(p => p.variacao_percentual < -15).length,
-      normais: produtosFiltrados.filter(p => p.variacao_percentual >= -15 && p.variacao_percentual <= 25).length
+      graves: produtosFiltrados.filter((p: any) => p.variacao_percentual > 50).length,
+      problemas: produtosFiltrados.filter((p: any) => p.variacao_percentual > 25 && p.variacao_percentual <= 50).length,
+      bons: produtosFiltrados.filter((p: any) => p.variacao_percentual < -15).length,
+      normais: produtosFiltrados.filter((p: any) => p.variacao_percentual >= -15 && p.variacao_percentual <= 25).length
     };
     
     console.log(`📊 Ordenação aplicada:`, categorias);
-    console.log(`🔴 Primeiros 3 produtos:`, produtosFiltrados.slice(0, 3).map(p => ({
+    console.log(`🔴 Primeiros 3 produtos:`, produtosFiltrados.slice(0, 3).map((p: any) => ({
       produto: p.produto,
       variacao: p.variacao_percentual,
       categoria: p.variacao_percentual > 50 ? 'GRAVE' : 
@@ -575,8 +575,8 @@ export async function GET(request: NextRequest) {
         periodo_analise: periodoAnalise,
         grupo_filtro: grupoFiltro,
         total_produtos: produtosFiltrados.length,
-        produtos_com_dados_dia: produtosFiltrados.filter(p => p.pedidos_dia > 0).length,
-        produtos_com_variacao_alta: produtosFiltrados.filter(p => Math.abs(p.variacao_percentual) > 25).length,
+        produtos_com_dados_dia: produtosFiltrados.filter((p: any) => p.pedidos_dia > 0).length,
+        produtos_com_variacao_alta: produtosFiltrados.filter((p: any) => Math.abs(p.variacao_percentual) > 25).length,
         dados_periodo_total: dadosPeriodo?.length || 0,
         dados_dia_total: dadosRecentes?.length || 0,
         usando_dados_recentes: usandoDadosRecentes

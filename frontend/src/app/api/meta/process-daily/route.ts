@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Inserir em instagram_daily
-    const instagramRows = dailySummary.map(day => ({
+    const instagramRows = dailySummary.map((day: any) => ({
       bar_id: barId,
       data_coleta: day.data_referencia,
       followers_count: day.instagram_followers ?? null,

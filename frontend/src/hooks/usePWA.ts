@@ -189,7 +189,7 @@ export function usePWA(): PWAState & PWAActions {
     if ('caches' in window) {
       try {
         const cacheNames = await caches.keys()
-        await Promise.all(cacheNames.map(name => caches.delete(name)))
+        await Promise.all(cacheNames.map((name: any) => caches.delete(name)))
       } catch (error) {
         console.error('❌ PWA: Erro ao limpar cache:', error)
       }

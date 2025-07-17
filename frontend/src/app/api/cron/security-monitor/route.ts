@@ -94,7 +94,7 @@ async function analyzeSuspiciousPatterns(events: any[]) {
   const patterns = []
   
   // Múltiplas tentativas de login do mesmo IP
-  const loginAttempts = events.filter(e => e.event_type === 'failed_login')
+  const loginAttempts = events.filter((e: any) => e.event_type === 'failed_login')
   const ipGroups = groupByIP(loginAttempts)
   
   for (const [ip, attempts] of Object.entries(ipGroups)) {
@@ -118,7 +118,7 @@ async function analyzeSuspiciousPatterns(events: any[]) {
 
   // Múltiplas requisições para endpoints sensíveis
   const sensitiveEndpoints = ['/api/usuarios', '/api/admin', '/api/security']
-  const sensitiveRequests = events.filter(e => 
+  const sensitiveRequests = events.filter((e: any) => 
     sensitiveEndpoints.some(endpoint => e.endpoint?.includes(endpoint))
   )
   

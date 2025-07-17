@@ -335,9 +335,9 @@ export class MilestonesService {
   // Verificar progresso até próximo marco
   getProgressToNextMilestone(type: string, platform: string, currentValue: number) {
     const relevantMilestones = DEFAULT_MILESTONES
-      .filter(m => m.type === type && m.platform === platform)
-      .filter(m => !this.achieved_milestones.has(m.id))
-      .filter(m => m.threshold > currentValue)
+      .filter((m: any) => m.type === type && m.platform === platform)
+      .filter((m: any) => !this.achieved_milestones.has(m.id))
+      .filter((m: any) => m.threshold > currentValue)
       .sort((a, b) => a.threshold - b.threshold)
 
     if (relevantMilestones.length === 0) return null
@@ -356,7 +356,7 @@ export class MilestonesService {
 
   // Simular marco para testes
   async simulateMilestone(milestoneId: string) {
-    const milestone = DEFAULT_MILESTONES.find(m => m.id === milestoneId)
+    const milestone = DEFAULT_MILESTONES.find((m: any) => m.id === milestoneId)
     if (!milestone) return false
 
     const simulatedMilestone = {

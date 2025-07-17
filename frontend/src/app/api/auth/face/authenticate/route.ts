@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     console.log(`🔍 Comparando com ${faceDescriptors.length} faces registradas`)
 
     // Preparar dados para comparação
-    const storedDescriptors = faceDescriptors.map(face => ({
+    const storedDescriptors = faceDescriptors.map((face: any) => ({
       user_id: face.user_id,
       user_nome: face.usuarios_bar.nome,
       user_email: face.usuarios_bar.email,
@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
       console.error('❌ Erro ao buscar bares do usuário:', barsError)
     }
 
-    const availableBars = allUserBars?.map(bar => ({
+    const availableBars = allUserBars?.map((bar: any) => ({
       bar_id: bar.bar_id,
       id: bar.bar_id,
       nome: bar.bars.nome,

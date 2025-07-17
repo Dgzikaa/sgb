@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
       const todosOsDados = [...(dadosIG || []), ...(dadosFB || [])]
       
       if (todosOsDados.length === 0) {
-        return etapasFunil.map(etapa => ({
+        return etapasFunil.map((etapa: any) => ({
           ...etapa,
           valor: 0,
           taxa_conversao: 0,

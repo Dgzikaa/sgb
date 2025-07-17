@@ -188,7 +188,7 @@ async function checkChecklistResponse(phoneNumber: string, message: string) {
         .eq('status', 'pendente')
         .gte('data_limite', new Date().toISOString())
 
-      const meusAgendamentos = agendamentos?.filter(ag => 
+      const meusAgendamentos = agendamentos?.filter((ag: any) => 
         ag.checklist_schedules?.responsaveis_whatsapp?.includes(phoneNumber)
       ) || []
 
@@ -247,7 +247,7 @@ _Sistema SGB_`
 }
 
 async function sendMultipleChecklistsMessage(phoneNumber: string, agendamentos: any[]) {
-  const checklistsList = agendamentos.map(ag => {
+  const checklistsList = agendamentos.map((ag: any) => {
     const codigo = ag.id.slice(-8).toUpperCase()
     const prazo = new Date(ag.data_limite).toLocaleDateString('pt-BR', { 
       day: '2-digit', 

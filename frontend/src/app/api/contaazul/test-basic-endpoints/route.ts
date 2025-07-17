@@ -187,7 +187,7 @@ export async function GET(request: NextRequest) {
       resultados,
       resumo: {
         total_testes: resultados.testes.length,
-        testes_ok: resultados.testes.filter(t => t.ok).length,
+        testes_ok: resultados.testes.filter((t: any) => t.ok).length,
         algum_funcionou: resultados.testes.some(t => t.ok)
       }
     })

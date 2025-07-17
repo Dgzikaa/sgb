@@ -321,7 +321,7 @@ export function useReports(): UseReportsResult {
 
       if (response.success) {
         console.log('🗑️ Template excluído com sucesso!')
-        setTemplates(prev => prev.filter(t => t.id !== id))
+        setTemplates(prev => prev.filter((t: any) => t.id !== id))
         if (templateAtual?.id === id) {
           setTemplateAtual(null)
         }
@@ -445,7 +445,7 @@ export function useReports(): UseReportsResult {
 
   const baixarRelatorio = useCallback(async (execucaoId: string) => {
     try {
-      const execucao = execucoes.find(e => e.id === execucaoId)
+      const execucao = execucoes.find((e: any) => e.id === execucaoId)
       if (!execucao || !execucao.arquivo_url) {
         setError('Arquivo do relatório não encontrado')
         return
@@ -524,7 +524,7 @@ export function useReports(): UseReportsResult {
 
       if (response.success) {
         console.log('🗑️ Relatório personalizado excluído!')
-        setRelatoriosPersonalizados(prev => prev.filter(r => r.id !== id))
+        setRelatoriosPersonalizados(prev => prev.filter((r: any) => r.id !== id))
         return true
       } else {
         setError(response.error || 'Erro ao excluir relatório personalizado')
@@ -544,13 +544,13 @@ export function useReports(): UseReportsResult {
   // =====================================================
 
   const obterTemplatesPorCategoria = useCallback((categoria: string): Template[] => {
-    return templates.filter(t => t.categoria === categoria && t.ativo)
+    return templates.filter((t: any) => t.categoria === categoria && t.ativo)
   }, [templates])
 
   const formatarDadosParaExportacao = useCallback((dados: any[], template: Template): any[] => {
     const campos = template.configuracao_campos || {}
     
-    return dados.map(item => {
+    return dados.map((item: any) => {
       const itemFormatado: any = {}
       
       Object.entries(campos).forEach(([campo, config]: [string, any]) => {

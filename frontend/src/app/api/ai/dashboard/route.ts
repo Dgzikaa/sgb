@@ -267,7 +267,7 @@ export async function GET(request: NextRequest) {
       });
 
       const tendencias = await Promise.all(tendenciasPromises);
-      tendenciasMetricas = tendencias.filter(t => t !== null);
+      tendenciasMetricas = tendencias.filter((t: any) => t !== null);
     }
 
     // ========================================
@@ -429,7 +429,7 @@ export async function GET(request: NextRequest) {
          ...(anomaliasResumo && anomaliasResumo.criticas_ativas > 0 ? [`${anomaliasResumo.criticas_ativas} anomalias críticas ativas`] : []),
          ...(insightsResumo && insightsResumo.criticos_pendentes > 0 ? [`${insightsResumo.criticos_pendentes} insights críticos pendentes`] : []),
          ...(!agenteStatus.ativo ? ['Agente IA desativado'] : []),
-         ...(Object.values(kpis).filter(k => k.performance === 'critico').map(k => `KPI crítico detectado`))
+         ...(Object.values(kpis).filter((k: any) => k.performance === 'critico').map((k: any) => `KPI crítico detectado`))
        ],
        oportunidades: [
          ...(recomendacoesResumo && recomendacoesResumo.alta_prioridade > 0 ? [`${recomendacoesResumo.alta_prioridade} recomendações de alta prioridade`] : []),

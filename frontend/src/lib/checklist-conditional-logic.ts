@@ -56,9 +56,9 @@ export function avaliarCondicoes(
   })
 
   // Processar cada item condicional
-  const itensAtualizados = itens.map(item => {
+  const itensAtualizados = itens.map((item: any) => {
     // Encontrar regras condicionais para este item
-    const regraCondicional = itensCondicionais.find(regra => regra.itemId === item.id)
+    const regraCondicional = itensCondicionais.find((regra: any) => regra.itemId === item.id)
     
     if (!regraCondicional) {
       // Item sem condições, manter estado atual
@@ -231,7 +231,7 @@ export function criarRegraCondicionalMultipla(
 ): CondicaoItem {
   return {
     itemId,
-    condicoes: condicoes.map(c => ({
+    condicoes: condicoes.map((c: any) => ({
       ...c,
       acao: c.acao || 'mostrar'
     })),
@@ -261,13 +261,13 @@ export const ExemplosCondicionais = {
 
   // Se equipamento não funcionando, mostrar campos de manutenção
   seEquipamentoNaoFuncionandoMostrarManutencao: (itemEquipamento: string, itensManutencao: string[]) =>
-    itensManutencao.map(itemManutencao =>
+    itensManutencao.map((itemManutencao: any) =>
       criarRegraCondicional(itemManutencao, itemEquipamento, 'igual', false, 'mostrar')
     ),
 
   // Se tipo de problema selecionado, mostrar campos específicos
   seTipoProblemaShowCampos: (itemTipoProblema: string, valor: string, itensEspecificos: string[]) =>
-    itensEspecificos.map(item =>
+    itensEspecificos.map((item: any) =>
       criarRegraCondicional(item, itemTipoProblema, 'igual', valor, 'mostrar')
     )
 }
@@ -290,7 +290,7 @@ export function useConditionalLogic(
     itemId: string,
     novoValor: any
   ): ItemCondicional[] => {
-    const itensAtualizados = itens.map(item =>
+    const itensAtualizados = itens.map((item: any) =>
       item.id === itemId ? { ...item, valor: novoValor } : item
     )
     
@@ -299,11 +299,11 @@ export function useConditionalLogic(
   }
 
   const obterItensVisiveis = (itens: ItemCondicional[]): ItemCondicional[] => {
-    return itens.filter(item => item.visivel)
+    return itens.filter((item: any) => item.visivel)
   }
 
   const obterItensObrigatorios = (itens: ItemCondicional[]): ItemCondicional[] => {
-    return itens.filter(item => 
+    return itens.filter((item: any) => 
       item.visivel && (item.obrigatorio || item.obrigatorioCondicional)
     )
   }
@@ -314,8 +314,8 @@ export function useConditionalLogic(
   } => {
     const obrigatorios = obterItensObrigatorios(itens)
     const vazios = obrigatorios
-      .filter(item => !item.valor || item.valor === '')
-      .map(item => item.titulo)
+      .filter((item: any) => !item.valor || item.valor === '')
+      .map((item: any) => item.titulo)
 
     return {
       valido: vazios.length === 0,

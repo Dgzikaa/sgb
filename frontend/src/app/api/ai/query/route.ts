@@ -685,8 +685,8 @@ async function getAnomaliasRecentes(bar_id: number, limite: number) {
     anomalias: anomalias || [],
     resumo: {
       total_anomalias: anomalias?.length || 0,
-      anomalias_ativas: anomalias?.filter(a => a.ainda_ativa).length || 0,
-      anomalias_criticas: anomalias?.filter(a => a.severidade === 'critica').length || 0
+      anomalias_ativas: anomalias?.filter((a: any) => a.ainda_ativa).length || 0,
+      anomalias_criticas: anomalias?.filter((a: any) => a.severidade === 'critica').length || 0
     },
     mensagem: `${anomalias?.length || 0} anomalias recentes encontradas`
   };
@@ -716,8 +716,8 @@ async function getInsightsImportantes(bar_id: number, limite: number) {
     insights: insights || [],
     resumo: {
       total_insights: insights?.length || 0,
-      insights_criticos: insights?.filter(i => i.impacto === 'critico').length || 0,
-      insights_urgentes: insights?.filter(i => i.urgencia === 'alta').length || 0
+      insights_criticos: insights?.filter((i: any) => i.impacto === 'critico').length || 0,
+      insights_urgentes: insights?.filter((i: any) => i.urgencia === 'alta').length || 0
     },
     mensagem: `${insights?.length || 0} insights importantes encontrados`
   };

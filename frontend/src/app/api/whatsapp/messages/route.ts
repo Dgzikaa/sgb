@@ -133,11 +133,11 @@ export async function GET(request: NextRequest) {
 
     const estatisticas = {
       total: stats?.length || 0,
-      pending: stats?.filter(m => m.status === 'pending').length || 0,
-      sent: stats?.filter(m => m.status === 'sent').length || 0,
-      delivered: stats?.filter(m => m.status === 'delivered').length || 0,
-      read: stats?.filter(m => m.status === 'read').length || 0,
-      failed: stats?.filter(m => m.status === 'failed').length || 0
+      pending: stats?.filter((m: any) => m.status === 'pending').length || 0,
+      sent: stats?.filter((m: any) => m.status === 'sent').length || 0,
+      delivered: stats?.filter((m: any) => m.status === 'delivered').length || 0,
+      read: stats?.filter((m: any) => m.status === 'read').length || 0,
+      failed: stats?.filter((m: any) => m.status === 'failed').length || 0
     };
 
     return NextResponse.json({

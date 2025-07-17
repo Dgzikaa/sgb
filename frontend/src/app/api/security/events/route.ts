@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Formatar eventos para o frontend
-    const formattedEvents = events?.map(event => ({
+    const formattedEvents = events?.map((event: any) => ({
       id: event.id,
       level: event.level,
       category: event.category,

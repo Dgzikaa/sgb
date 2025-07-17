@@ -64,7 +64,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
       })
     }
 
-    console.log('📅 Dias da semana gerados:', diasSemana.map(d => `${d.dia} (${d.data})`).join(', '))
+    console.log('📅 Dias da semana gerados:', diasSemana.map((d: any) => `${d.dia} (${d.data})`).join(', '))
 
     try {
       // FUNÇÃO PARA BUSCAR TODOS OS DADOS COM PAGINAÇÃO

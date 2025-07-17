@@ -217,7 +217,7 @@ export async function GET(request: NextRequest) {
     }
 
     const now = new Date()
-    const agendamentos = configuracoes?.map(config => {
+    const agendamentos = configuracoes?.map((config: any) => {
       const proximaColeta = new Date(config.proxima_coleta)
       const minutosRestantes = Math.round((proximaColeta.getTime() - now.getTime()) / (1000 * 60))
       
@@ -235,9 +235,9 @@ export async function GET(request: NextRequest) {
     // Calcular estatísticas
     const stats = {
       total_configuracoes: agendamentos.length,
-      ativas: agendamentos.filter(a => a.status === 'ativo').length,
-      em_atraso: agendamentos.filter(a => a.em_atraso).length,
-      proxima_execucao: agendamentos.find(a => !a.em_atraso)?.proxima_coleta || null
+      ativas: agendamentos.filter((a: any) => a.status === 'ativo').length,
+      em_atraso: agendamentos.filter((a: any) => a.em_atraso).length,
+      proxima_execucao: agendamentos.find((a: any) => !a.em_atraso)?.proxima_coleta || null
     }
 
     return NextResponse.json({

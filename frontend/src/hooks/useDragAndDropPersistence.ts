@@ -77,8 +77,8 @@ export function useDragAndDropPersistence<T>(
     const hasIds = defaults.every(item => item && typeof item === 'object' && 'id' in item)
     
     if (hasIds) {
-      const defaultMap = new Map(defaults.map(item => [(item as any).id, item]))
-      const storedMap = new Map(stored.map(item => [(item as any).id, item]))
+      const defaultMap = new Map(defaults.map((item: any) => [(item as any).id, item]))
+      const storedMap = new Map(stored.map((item: any) => [(item as any).id, item]))
       
       // Preserve order from stored, add new items from defaults
       const merged: T[] = []

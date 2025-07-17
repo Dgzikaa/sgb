@@ -97,7 +97,7 @@ ${analiseCompleta ? `
 💰 TOTAL FATURAMENTO DA SEMANA: R$ ${analiseCompleta.dadosSemana.reduce((sum, dia) => sum + dia.faturamento, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
 
 DADOS POR DIA DA SEMANA:
-${analiseCompleta.dadosSemana.map(dia => 
+${analiseCompleta.dadosSemana.map((dia: any) => 
   `  ${dia.dia}: R$ ${dia.faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${dia.clientes} pessoas)`
 ).join('\n')}
 ` : '- Análise avançada indisponível no momento'}

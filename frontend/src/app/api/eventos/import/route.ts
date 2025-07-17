@@ -1,162 +1,162 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 
 
-// Dados histÃ³ricos de fevereiro a junho 2025
+// Dados históricos de fevereiro a junho 2025
 const eventosHistoricos = `
-01/02	SÃBADO		Soft FamÃ­lia - 100 pessoas
+01/02	SÁBADO		Soft Família - 100 pessoas
 02/02	DOMINGO		FOLGA DOMINGO
 03/02	SEGUNDA		FECHADO
-04/02	TERÃ‡A		Soft - 80 pessoas
+04/02	TERÇA		Soft - 80 pessoas
 05/02	QUARTA		Soft - 200 pessoas - Samba do Breno
 06/02	QUINTA		Soft - 120 pessoas - DJ Umiranda
 07/02	SEXTA		Soft - 200 pessoas - Samba dos Amigos
-08/02	SÃBADO		Soft - 300 pessoas - DJs Variados
+08/02	SÁBADO		Soft - 300 pessoas - DJs Variados
 09/02	DOMINGO		FECHADO DOMINGO
 10/02	SEGUNDA		FECHADO
-11/02	TERÃ‡A		DJs - Imprensa (DJ)
+11/02	TERÇA		DJs - Imprensa (DJ)
 12/02	QUARTA		Quarta de Bamba - Breno Alves (Samba)
 13/02	QUINTA		Black music (DJ)
 14/02	SEXTA		Samba das Dez (Samba)
-15/02	SÃBADO		DJs - Hugo drop + convidados (DJ)
-16/02	DOMINGO		Pagode do Ordi - AtraÃ§Ã£o Surpresa (12 por 8) (Pagode)
+15/02	SÁBADO		DJs - Hugo drop + convidados (DJ)
+16/02	DOMINGO		Pagode do Ordi - Atração Surpresa (12 por 8) (Pagode)
 17/02	SEGUNDA		FECHADO
-18/02	TERÃ‡A		Caramelo Jazz Night (Jazz)
+18/02	TERÇA		Caramelo Jazz Night (Jazz)
 19/02	QUARTA		Quarta de Bamba - Breno Alves (Samba)
 20/02	QUINTA		Discolate (DJ)
 21/02	SEXTA		Pagode Vira-lata (Pagode)
-22/02	SÃBADO		MSN - Musica sÃ³ nostÃ¡lgica (DJ)
+22/02	SÁBADO		MSN - Musica só nostálgica (DJ)
 23/02	DOMINGO		Braslidades (DJ)
 24/02	SEGUNDA		FECHADO
-25/02	TERÃ‡A		Caramelo Jazz Night (Jazz)
+25/02	TERÇA		Caramelo Jazz Night (Jazz)
 26/02	QUARTA		Quarta de Bamba - Breno Alves (Samba)
 27/02	QUINTA		Discolate (DJ)
 28/02	SEXTA		Samba das Dez (Samba)
 
-01/03	SÃBADO		CARNAVAL - Bloco MSN Umiranda (Carnaval)
+01/03	SÁBADO		CARNAVAL - Bloco MSN Umiranda (Carnaval)
 02/03	DOMINGO		CARNAVAL - Pagode Vira lata Doze por Oito (Carnaval)
 03/03	SEGUNDA		CARNAVAL - Macetada Caramelo (Carnaval)
-04/03	TERÃ‡A		CARNAVAL - Volto pro Eixo (Carnaval)
+04/03	TERÇA		CARNAVAL - Volto pro Eixo (Carnaval)
 05/03	QUARTA		QUARTA FEIRA DE CINZAS
 06/03	QUINTA		Discolate - 2 DJs Fortes - Hugo e Underlove (DJ)
 07/03	SEXTA		Pagode Vira-Lata - Gigi (Pagode)
-08/03	SÃBADO		Elas cantam o Brasil - Lithie (DJ)
+08/03	SÁBADO		Elas cantam o Brasil - Lithie (DJ)
 09/03	DOMINGO		Algo simples - Brasilidades (DJ)
 10/03	SEGUNDA		FECHADO
-11/03	TERÃ‡A		Caramelo Jazz Night (Jazz)
+11/03	TERÇA		Caramelo Jazz Night (Jazz)
 12/03	QUARTA		Quarta de Bamba - Breno Alves (Samba)
 13/03	QUINTA		Discolate - 2 DJs Fortes - Hugo e Chicco (DJ)
 14/03	SEXTA		Pagode Vira-lata - Dudu7 (Pagode)
-15/03	SÃBADO		TBC (DJ)
+15/03	SÁBADO		TBC (DJ)
 16/03	DOMINGO		Algo simples (DJ)
 17/03	SEGUNDA		FECHADO
-18/03	TERÃ‡A		Caramelo Jazz Night (Jazz)
+18/03	TERÇA		Caramelo Jazz Night (Jazz)
 19/03	QUARTA		Quarta de Bamba - Breno Alves (Samba)
 20/03	QUINTA		Marvin canta + DJs (DJ)
 21/03	SEXTA		Pagode Vira-lata - Benza (Pagode)
-22/03	SÃBADO		R&Baile -  Laady B + Umiranda + Israel PaixÃ£o (DJ)
+22/03	SÁBADO		R&Baile -  Laady B + Umiranda + Israel Paixão (DJ)
 23/03	DOMINGO		Uma Mesa e Um Pagode (Pagode)
 24/03	SEGUNDA		Dia D - Pagode do Duzo v1 (Especial)
-25/03	TERÃ‡A		Brasil x Argentina (DJ)
+25/03	TERÇA		Brasil x Argentina (DJ)
 26/03	QUARTA		Quarta de Bamba - Breno Alves (Samba)
 27/03	QUINTA		Discolate - Dj Hugo Drop e Chicco Aquino (DJ)
-28/03	SEXTA		Pagode Vira-lata com TonzÃ£o (Pagode)
-29/03	SÃBADO		Perro Caliente - Noite de mÃºsica latina com Cubanos + Dj Pequi e convidados (DJ)
+28/03	SEXTA		Pagode Vira-lata com Tonzão (Pagode)
+29/03	SÁBADO		Perro Caliente - Noite de música latina com Cubanos + Dj Pequi e convidados (DJ)
 30/03	DOMINGO		Algo simples (DJ)
 31/03	SEGUNDA		FECHADO
 
-01/04	TERÃ‡A		Libertadores no telÃ£o (DJ)
+01/04	TERÇA		Libertadores no telão (DJ)
 02/04	QUARTA		Quarta de Bamba - Breno Alves (Samba)
 03/04	QUINTA		Quinta de abril com BenzaDeus (Pagode)
 04/04	SEXTA		Pagode Vira-lata - Dudu 7 - Divulgar: Toda semana (Pagode)
-05/04	SÃBADO		Noite do MSN - Dj Tiago Jousef (DJ)
+05/04	SÁBADO		Noite do MSN - Dj Tiago Jousef (DJ)
 06/04	DOMINGO		Uma mesa e um pagode(Sympla) - Divulgar: 15 dias (Pagode)
 07/04	SEGUNDA		FECHADO
-08/04	TERÃ‡A		Jogos de futebol - Kipecado (Pagode)
+08/04	TERÇA		Jogos de futebol - Kipecado (Pagode)
 09/04	QUARTA		Quarta de Bamba - Breno Alves (Samba)
 10/04	QUINTA		Quinta de abril com BenzaDeus (Pagode)
 11/04	SEXTA		Pagode Vira-lata - Gigi - Divulgar: Toda semana (Pagode)
-12/04	SÃBADO		Noite do MSN - Dj Tiago Jousef (DJ)
+12/04	SÁBADO		Noite do MSN - Dj Tiago Jousef (DJ)
 13/04	DOMINGO		Algo Simples (DJ)
 14/04	SEGUNDA		FECHADO
-15/04	TERÃ‡A		NÃ£o tem futebol (DJ)
+15/04	TERÇA		Não tem futebol (DJ)
 16/04	QUARTA		Quarta de Bamba - Breno Alves (Samba)
 17/04	QUINTA		Quinta de abril com BenzaDeus (Pagode)
 18/04	SEXTA		Pagode Vira-lata - Cris Maciel - Divulgar: Toda semana (Pagode)
-19/04	SÃBADO		R&Baile - Umiranda & time (DJ)
-20/04	DOMINGO		Uma Mesa e um Pagode - VÃ©spera de Feriado (Pagode)
+19/04	SÁBADO		R&Baile - Umiranda & time (DJ)
+20/04	DOMINGO		Uma Mesa e um Pagode - Véspera de Feriado (Pagode)
 21/04	SEGUNDA		Feriado - aberto (DJ)
-22/04	TERÃ‡A		FECHADO
+22/04	TERÇA		FECHADO
 23/04	QUARTA		Quarta de Bamba - Breno Alves (Samba)
 24/04	QUINTA		Quinta de abril com BenzaDeus (Pagode)
-25/04	SEXTA		Pagode Vira-lata - Benzadeus/tonzÃ£o - Divulgar: Toda semana (Pagode)
-26/04	SÃBADO		R&Baile - Umiranda & time (DJ)
+25/04	SEXTA		Pagode Vira-lata - Benzadeus/tonzão - Divulgar: Toda semana (Pagode)
+26/04	SÁBADO		R&Baile - Umiranda & time (DJ)
 27/04	DOMINGO		TBD - Um samba ou um Pagode - Doze? (Pagode)
 28/04	SEGUNDA		FECHADO
-29/04	TERÃ‡A		FECHADO
-30/04	QUARTA		Quarta de Bamba - Breno Alves | VÃ©spera de Feriado (Samba)
+29/04	TERÇA		FECHADO
+30/04	QUARTA		Quarta de Bamba - Breno Alves | Véspera de Feriado (Samba)
 
 01/05	QUINTA		Pagode do Trabalhador com Benza (Pagode)
 02/05	SEXTA		Pagode Vira-lata - Madu (Pagode)
-03/05	SÃBADO		R&Baile (DJ)
+03/05	SÁBADO		R&Baile (DJ)
 04/05	DOMINGO		Uma mesa e um pagode - Doze (Pagode)
 05/05	SEGUNDA		FECHADO
-06/05	TERÃ‡A		FECHADO
+06/05	TERÇA		FECHADO
 07/05	QUARTA		Quarta de Bamba (Samba)
 08/05	QUINTA		R&Baile (DJ)
 09/05	SEXTA		Pagode Vira Lata - PAULINHO (Pagode)
-10/05	SÃBADO		ESPECIAL - JORGE ARAGAO (DJ)
+10/05	SÁBADO		ESPECIAL - JORGE ARAGAO (DJ)
 11/05	DOMINGO		Uma mesa e um pagode - Doze (Pagode)
 12/05	SEGUNDA		FECHADO
-13/05	TERÃ‡A		FECHADO
+13/05	TERÇA		FECHADO
 14/05	QUARTA		Quarta de Bamba (Samba)
 15/05	QUINTA		R&Baile (DJ)
 16/05	SEXTA		Pagode Vira Lata - Benzadeus (Pagode)
-17/05	SÃBADO		ESPECIAL - BETH CARVALHO (DJ)
+17/05	SÁBADO		ESPECIAL - BETH CARVALHO (DJ)
 18/05	DOMINGO		Um Belo Domingo - Pagode Lado a Lado (Pagode)
 19/05	SEGUNDA		FECHADO
-20/05	TERÃ‡A		FECHADO
+20/05	TERÇA		FECHADO
 21/05	QUARTA		Quarta de Bamba (Samba)
-22/05	QUINTA		Sertanejo - ModÃ£o e Viola - Brener Viola (Sertanejo)
+22/05	QUINTA		Sertanejo - Modão e Viola - Brener Viola (Sertanejo)
 23/05	SEXTA		Pagode Vira Lata - Benzadeus (Pagode)
-24/05	SÃBADO		ESPECIAL - "ZECA PAGODINHO" - Nenel Vida (DJ)
+24/05	SÁBADO		ESPECIAL - "ZECA PAGODINHO" - Nenel Vida (DJ)
 25/05	DOMINGO		Uma mesa e um pagode - Doze (Pagode)
 26/05	SEGUNDA		FECHADO
-27/05	TERÃ‡A		FECHADO
+27/05	TERÇA		FECHADO
 28/05	QUARTA		Quarta de Bamba (Samba)
 29/05	QUINTA		Sertanejo - Lia Almeida (Sertanejo)
 30/05	SEXTA		Pagode Vira Lata - Benzadeus (Pagode)
-31/05	SÃBADO		ESPECIAL - "ALCIONE" - Karla Sangaletti (DJ)
+31/05	SÁBADO		ESPECIAL - "ALCIONE" - Karla Sangaletti (DJ)
 
-01/06	DOMINGO		Evento - Samba da tia ZÃ©lia (Samba)
+01/06	DOMINGO		Evento - Samba da tia Zélia (Samba)
 02/06	SEGUNDA		Jet - Segunda da Resenha (Samba)
-03/06	TERÃ‡A		FECHADO
+03/06	TERÇA		FECHADO
 04/06	QUARTA		Quarta de Bamba
-05/06	QUINTA		ModÃ£o e Viola - Sertanejo - Precisa confirmar
+05/06	QUINTA		Modão e Viola - Sertanejo - Precisa confirmar
 06/06	SEXTA		Pagode Vira-Lata: Benzadeus
-07/06	SÃBADO		Homenagem a alguÃ©m (a definir)
+07/06	SÁBADO		Homenagem a alguém (a definir)
 08/06	DOMINGO		Uma e Mesa e Um Pagode - Precisa confirmar
 09/06	SEGUNDA		Jet - Segunda da Resenha (Samba)
-10/06	TERÃ‡A		FECHADO
+10/06	TERÇA		FECHADO
 11/06	QUARTA		Quarta de Bamba (Samba)
-12/06	QUINTA		Moda e Viola - Sertanejo - Afogar as mÃ¡goas ou casal sertanejo - Grazi Maciel (Sertanejo)
+12/06	QUINTA		Moda e Viola - Sertanejo - Afogar as mágoas ou casal sertanejo - Grazi Maciel (Sertanejo)
 13/06	SEXTA		Pagode Vira-Lata: Benzadeus (Pagode)
-14/06	SÃBADO		Sambadona  (DJ)
+14/06	SÁBADO		Sambadona  (DJ)
 15/06	DOMINGO		Uma e Mesa e Um Pagode - Precisa confirmar (Pagode)
 16/06	SEGUNDA		Jet - Segunda da Resenha (Samba)
-17/06	TERÃ‡A		FECHADO
+17/06	TERÇA		FECHADO
 18/06	QUARTA		Quarta de Bamba - VESPERA (Samba)
 19/06	QUINTA		Moda e Viola - Sertanejo - FERIADO - Lia Almeida (Sertanejo)
 20/06	SEXTA		Pagode Vira-Lata: Benzadeus (Pagode)
-21/06	SÃBADO		Samba Rainha (Samba)
+21/06	SÁBADO		Samba Rainha (Samba)
 22/06	DOMINGO		Uma e Mesa e Um Pagode - Precisa confirmar (Pagode)
 23/06	SEGUNDA		Jet - Segunda da Resenha (Samba)
-24/06	TERÃ‡A		FECHADO
+24/06	TERÇA		FECHADO
 25/06	QUARTA		Festival Junino - Quarta de Bamba (Samba)
 26/06	QUINTA		Festival Junino - Moda e Viola - Sertanejo - Lia Almeida (Sertanejo)
 27/06	SEXTA		 Festival Junino- Pagode Vira-Lata: Benzadeus (Pagode)
-28/06	SÃBADO		Festival Junino - Sambadona (Samba)
+28/06	SÁBADO		Festival Junino - Sambadona (Samba)
 29/06	DOMINGO		PDJ - Pagode do Jorgin (Pagode)
 30/06	SEGUNDA		Jet - Segunda da Resenha (Samba)
 `;
@@ -178,7 +178,7 @@ function extrairGenero(texto: string): string {
     }
   }
   
-  // Detectar por palavras-chave se nÃ£o tiver parÃªnteses
+  // Detectar por palavras-chave se não tiver parênteses
   const textoLower = texto.toLowerCase();
   if (textoLower.includes('dj') || textoLower.includes('music')) return 'dj_set';
   if (textoLower.includes('samba')) return 'samba';
@@ -197,19 +197,19 @@ function extrairCapacidade(texto: string): number | null {
 }
 
 function extrairArtista(texto: string): string {
-  // Remove partes especÃ­ficas para extrair o artista
+  // Remove partes específicas para extrair o artista
   let artistaTexto = texto
     .replace(/\s*-\s*\d+\s*pessoas/, '') // Remove "- X pessoas"
-    .replace(/\s*\([^)]+\)/, '') // Remove gÃªnero entre parÃªnteses
+    .replace(/\s*\([^)]+\)/, '') // Remove gênero entre parênteses
     .replace(/.*?-\s*/, '') // Remove parte antes do primeiro " - "
-    .replace(/\s*-\s*Divulgar:.*/, '') // Remove instruÃ§Ãµes de divulgaÃ§Ã£o
+    .replace(/\s*-\s*Divulgar:.*/, '') // Remove instruções de divulgação
     .replace(/\s*-\s*Precisa confirmar.*/, '') // Remove "Precisa confirmar"
     .replace(/\s*-\s*VESPERA.*/, '') // Remove "VESPERA"
     .replace(/\s*-\s*FERIADO.*/, '') // Remove "FERIADO"
-    .replace(/\s*\|\s*.*/, '') // Remove parte apÃ³s pipe |
+    .replace(/\s*\|\s*.*/, '') // Remove parte após pipe |
     .trim();
   
-  // Se sobrou alguma coisa Ãºtil, retorna, senÃ£o vazio
+  // Se sobrou alguma coisa útil, retorna, senão vazio
   if (artistaTexto && artistaTexto.length > 3 && !artistaTexto.includes('TBC') && !artistaTexto.includes('TBD')) {
     return artistaTexto;
   }
@@ -218,7 +218,7 @@ function extrairArtista(texto: string): string {
 }
 
 function parseEventos(dados: string, barId: number, ano: number = 2025): any[] {
-  const linhas = dados.trim().split('\n').filter(linha => linha.trim());
+  const linhas = dados.trim().split('\n').filter((linha: any) => linha.trim());
   const eventos: any[] = [];
   
   for (const linha of linhas) {
@@ -232,10 +232,10 @@ function parseEventos(dados: string, barId: number, ano: number = 2025): any[] {
       continue;
     }
     
-    // Construir data completa com validaÃ§Ã£o
+    // Construir data completa com validação
     const [dia, mes] = dataStr.split('/').map(Number);
     
-    // Validar se a data Ã© vÃ¡lida antes de criar
+    // Validar se a data é válida antes de criar
     const diasNoMes = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     // Ajustar para ano bissexto
     if (ano % 4 === 0 && (ano % 100 !== 0 || ano % 400 === 0)) {
@@ -243,21 +243,21 @@ function parseEventos(dados: string, barId: number, ano: number = 2025): any[] {
     }
     
     if (dia > diasNoMes[mes - 1]) {
-      console.warn(`âš ï¸  Data invÃ¡lida ignorada: ${dia}/${mes}/${ano} (mÃªs ${mes} sÃ³ tem ${diasNoMes[mes - 1]} dias)`);
+      console.warn(`⚠️  Data inválida ignorada: ${dia}/${mes}/${ano} (mês ${mes} só tem ${diasNoMes[mes - 1]} dias)`);
       continue;
     }
     
     const dataEvento = `${ano}-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
     
-    // VERSÃƒO ULTRA SIMPLES: SÃ³ aplicar as transformaÃ§Ãµes bÃ¡sicas
+    // VERSÃO ULTRA SIMPLES: Só aplicar as transformações básicas
     let nomeEvento = eventoStr.trim();
     
     // DEBUG: Log ALL events being processed
-    console.log(`ðŸ” Processing ${dataStr}: "${eventoStr}"`);
+    console.log(`🔍 Processing ${dataStr}: "${eventoStr}"`);
     
     // DEBUG: Force specific test for first few events
     if (dataStr === '01/06' || dataStr === '02/06' || dataStr === '03/06') {
-      console.log(`ðŸš¨ IMPORTANT EVENT ${dataStr}: "${eventoStr}"`);
+      console.log(`🚨 IMPORTANT EVENT ${dataStr}: "${eventoStr}"`);
     }
     
     // Step 1: Remove parentheses at the end
@@ -292,20 +292,20 @@ function parseEventos(dados: string, barId: number, ano: number = 2025): any[] {
     
     // DEBUG: Log final result for first few events
     if (dataStr === '01/06' || dataStr === '02/06' || dataStr === '03/06') {
-      console.log(`ðŸš¨ FINAL RESULT ${dataStr}: "${nomeEvento}"`);
+      console.log(`🚨 FINAL RESULT ${dataStr}: "${nomeEvento}"`);
     }
     const genero = extrairGenero(eventoStr);
     const capacidade = extrairCapacidade(eventoStr);
     const artista = extrairArtista(eventoStr);
     
-    // Definir horÃ¡rios padrÃ£o baseados no tipo de evento
+    // Definir horários padrão baseados no tipo de evento
     let horarioInicio = '20:00';
     let horarioFim = '02:00';
     
     if (diaSemana === 'DOMINGO') {
       horarioInicio = '18:00';
       horarioFim = '00:00';
-    } else if (diaSemana === 'SEGUNDA' || diaSemana === 'TERÃ‡A') {
+    } else if (diaSemana === 'SEGUNDA' || diaSemana === 'TERÇA') {
       horarioInicio = '19:00';
       horarioFim = '01:00';
     }
@@ -358,33 +358,33 @@ export async function POST(request: NextRequest) {
     if (!supabase) {
       return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 });
     }
-    console.log('ðŸ”„ Iniciando importaÃ§Ã£o de eventos...');
+    console.log('🔄 Iniciando importação de eventos...');
     
     let body;
     try {
       body = await request.json();
     } catch (parseError) {
-      console.error('âŒ Erro ao fazer parse do JSON:', parseError);
+      console.error('❌ Erro ao fazer parse do JSON:', parseError);
       return NextResponse.json({
         success: false,
-        error: 'Body da requisiÃ§Ã£o nÃ£o Ã© um JSON vÃ¡lido'
+        error: 'Body da requisição não é um JSON válido'
       }, { status: 400 });
     }
     
     const { bar_id, bar_name, ano = 2025, confirmar_substituicao = false } = body;
     
-    console.log('ðŸ“¥ Dados recebidos no endpoint:', { bar_id, bar_name, ano, confirmar_substituicao });
+    console.log('📥 Dados recebidos no endpoint:', { bar_id, bar_name, ano, confirmar_substituicao });
     
     if (!bar_id && !bar_name) {
-      console.error('âŒ bar_id ou bar_name nÃ£o fornecido');
+      console.error('❌ bar_id ou bar_name não fornecido');
       return NextResponse.json({
         success: false,
-        error: 'bar_id ou bar_name Ã© obrigatÃ³rio'
+        error: 'bar_id ou bar_name é obrigatório'
       }, { status: 400 });
     }
     
     // Verificar se o bar existe
-    console.log('ðŸ” Verificando se bar existe...');
+    console.log('🔍 Verificando se bar existe...');
     let query = supabase
       .from('bar')
       .select('id, nome');
@@ -398,22 +398,22 @@ export async function POST(request: NextRequest) {
     const { data: barData, error: barError } = await query.single();
     
     if (barError || !barData) {
-      console.error('âŒ Bar nÃ£o encontrado:', barError);
+      console.error('❌ Bar não encontrado:', barError);
       const identifier = bar_id ? `ID ${bar_id}` : `nome "${bar_name}"`;
       return NextResponse.json({
         success: false,
-        error: `Bar com ${identifier} nÃ£o encontrado`
+        error: `Bar com ${identifier} não encontrado`
       }, { status: 404 });
     }
     
-    console.log(`âœ… Bar encontrado: ${barData.nome} (ID: ${barData.id})`);
+    console.log(`✅ Bar encontrado: ${barData.nome} (ID: ${barData.id})`);
     
     // Parse dos eventos usando o ID do bar encontrado
     const barIdFinal = barData.id;
     const eventosParaImportar = parseEventos(eventosHistoricos, barIdFinal, ano);
     
     if (!confirmar_substituicao) {
-      // Primeiro, verificar se jÃ¡ existem eventos no perÃ­odo
+      // Primeiro, verificar se já existem eventos no período
       const { data: eventosExistentes } = await supabase
         .from('eventos')
         .select('id, data_evento')
@@ -424,14 +424,14 @@ export async function POST(request: NextRequest) {
       if (eventosExistentes && eventosExistentes.length > 0) {
         return NextResponse.json({
           success: false,
-          error: 'JÃ¡ existem eventos no perÃ­odo. Confirme a substituiÃ§Ã£o.',
+          error: 'Já existem eventos no período. Confirme a substituição.',
           eventos_existentes: eventosExistentes.length,
           eventos_para_importar: eventosParaImportar.length,
           requer_confirmacao: true
         });
       }
     } else {
-      // Deletar eventos existentes no perÃ­odo
+      // Deletar eventos existentes no período
       await supabase
         .from('eventos')
         .delete()
@@ -441,8 +441,8 @@ export async function POST(request: NextRequest) {
     }
     
     // Inserir novos eventos
-    console.log(`ðŸ“¤ Inserindo ${eventosParaImportar.length} eventos para bar_id: ${barIdFinal}`);
-    console.log('ðŸ“‹ Primeiro evento:', JSON.stringify(eventosParaImportar[0], null, 2));
+    console.log(`📤 Inserindo ${eventosParaImportar.length} eventos para bar_id: ${barIdFinal}`);
+    console.log('📋 Primeiro evento:', JSON.stringify(eventosParaImportar[0], null, 2));
     
     // Inserir em lotes para evitar timeouts
     const BATCH_SIZE = 50;
@@ -450,7 +450,7 @@ export async function POST(request: NextRequest) {
     
     for (let i = 0; i < eventosParaImportar.length; i += BATCH_SIZE) {
       const lote = eventosParaImportar.slice(i, i + BATCH_SIZE);
-      console.log(`ðŸ“¦ Inserindo lote ${Math.floor(i / BATCH_SIZE) + 1}: ${lote.length} eventos`);
+      console.log(`📦 Inserindo lote ${Math.floor(i / BATCH_SIZE) + 1}: ${lote.length} eventos`);
       
       const { data, error } = await supabase
         .from('eventos')
@@ -458,7 +458,7 @@ export async function POST(request: NextRequest) {
         .select();
       
       if (error) {
-        console.error(`âŒ Erro ao inserir lote ${Math.floor(i / BATCH_SIZE) + 1}:`, error);
+        console.error(`❌ Erro ao inserir lote ${Math.floor(i / BATCH_SIZE) + 1}:`, error);
         console.error('Evento que causou erro:', JSON.stringify(lote[0], null, 2));
         return NextResponse.json({
           success: false,
@@ -469,10 +469,10 @@ export async function POST(request: NextRequest) {
       }
       
       totalInseridos += data?.length || 0;
-      console.log(`âœ… Lote inserido com sucesso! Total atÃ© agora: ${totalInseridos}`);
+      console.log(`✅ Lote inserido com sucesso! Total até agora: ${totalInseridos}`);
     }
     
-    console.log(`âœ… ${totalInseridos} eventos inseridos com sucesso!`);
+    console.log(`✅ ${totalInseridos} eventos inseridos com sucesso!`);
     
     return NextResponse.json({
       success: true,

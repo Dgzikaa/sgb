@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
       resultados: {
         total_enviados: resultados.sucessos.length,
         total_falhas: resultados.falhas.length,
-        destinatarios: destinatarios.map(d => ({ nome: d.nome, numero: d.numero }))
+        destinatarios: destinatarios.map((d: any) => ({ nome: d.nome, numero: d.numero }))
       }
     })
 
@@ -248,7 +248,7 @@ async function determinarDestinatarios(supabase: any, execucao: any, customizado
 
   // Remover duplicatas por número
   const numerosUnicos = new Set()
-  return destinatarios.filter(dest => {
+  return destinatarios.filter((dest: any) => {
     if (numerosUnicos.has(dest.numero)) {
       return false
     }

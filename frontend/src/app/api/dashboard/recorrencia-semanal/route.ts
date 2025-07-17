@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
       // Analisar padrões de recorrência
       const clientesArray = Array.from(clientesPorTelefone.values())
       const clientesUnicos = clientesArray.length
-      const clientesRecorrentes = clientesArray.filter(cliente => cliente.total_visitas > 1).length
+      const clientesRecorrentes = clientesArray.filter((cliente: any) => cliente.total_visitas > 1).length
       const taxaRecorrencia = clientesUnicos > 0 ? (clientesRecorrentes / clientesUnicos) * 100 : 0
 
       // Agrupar por número de visitas
@@ -151,10 +151,10 @@ export async function GET(request: NextRequest) {
 
       // Detalhar clientes mais recorrentes (top 10)
       const clientesRecorrentesDetalhados = clientesArray
-        .filter(cliente => cliente.total_visitas > 1)
+        .filter((cliente: any) => cliente.total_visitas > 1)
         .sort((a, b) => b.total_visitas - a.total_visitas)
         .slice(0, 10)
-        .map(cliente => ({
+        .map((cliente: any) => ({
           nome: cliente.nome,
           telefone: cliente.telefone.replace(/(\d{2})(\d{4,5})(\d{4})/, '($1) $2-$3'), // formatar telefone
           total_visitas: cliente.total_visitas,

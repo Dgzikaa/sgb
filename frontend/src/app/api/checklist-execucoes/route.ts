@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     // 2. Salvar respostas individuais
     if (respostas && Array.isArray(respostas) && respostas.length > 0) {
-      const respostasFormatadas = respostas.map(resposta => ({
+      const respostasFormatadas = respostas.map((resposta: any) => ({
         execucao_id: execucao.id,
         item_id: resposta.item_id,
         valor: resposta.valor,

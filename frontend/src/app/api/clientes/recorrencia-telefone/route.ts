@@ -324,14 +324,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Filtrar por número mínimo de visitas
-    let clientesFiltrados = clientesTelefone.filter(cliente => cliente.total_visitas >= minVisitas);
+    let clientesFiltrados = clientesTelefone.filter((cliente: any) => cliente.total_visitas >= minVisitas);
 
     // Aplicar filtros adicionais
     if (statusAtividade && statusAtividade !== 'todos') {
-      clientesFiltrados = clientesFiltrados.filter(cliente => cliente.status_atividade === statusAtividade);
+      clientesFiltrados = clientesFiltrados.filter((cliente: any) => cliente.status_atividade === statusAtividade);
     }
     if (categoriaRecorrencia && categoriaRecorrencia !== 'todos') {
-      clientesFiltrados = clientesFiltrados.filter(cliente => cliente.categoria_recorrencia === categoriaRecorrencia);
+      clientesFiltrados = clientesFiltrados.filter((cliente: any) => cliente.categoria_recorrencia === categoriaRecorrencia);
     }
 
     // Ordenar por total de visitas e valor gasto

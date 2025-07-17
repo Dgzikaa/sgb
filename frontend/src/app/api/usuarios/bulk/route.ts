@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
           if (error) throw error
 
           // Preparar dados para exportação
-          const exportData = users.map(user => ({
+          const exportData = users.map((user: any) => ({
             'ID': user.id,
             'Nome': user.nome,
             'Email': user.email,

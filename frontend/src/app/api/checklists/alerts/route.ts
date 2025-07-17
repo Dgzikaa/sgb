@@ -74,8 +74,8 @@ export async function GET(req: NextRequest) {
     const alerts = await generateAlerts(schedules || [], executions || [])
 
     // 🔥 ENVIAR ALERTAS CRÍTICOS PARA DISCORD
-    const criticalAlerts = alerts.filter(a => a.nivel === 'critico')
-    const urgentAlerts = alerts.filter(a => a.nivel === 'alto')
+    const criticalAlerts = alerts.filter((a: any) => a.nivel === 'critico')
+    const urgentAlerts = alerts.filter((a: any) => a.nivel === 'alto')
     
     // Enviar alertas críticos imediatamente para Discord
     for (const criticalAlert of criticalAlerts) {
@@ -136,7 +136,7 @@ async function generateAlerts(schedules: Schedule[], executions: ChecklistExecut
 
     // Verificar última execução
     const lastExecution = executions
-      .filter(exec => exec.checklist_id === schedule.checklist_id)
+      .filter((exec: any) => exec.checklist_id === schedule.checklist_id)
       .sort((a, b) => new Date(b.executed_at).getTime() - new Date(a.executed_at).getTime())[0]
 
     // Calcular horário esperado de hoje

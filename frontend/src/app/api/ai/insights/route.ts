@@ -120,17 +120,17 @@ export async function GET(request: NextRequest) {
     const stats = {
       total: count || 0,
       por_status: {
-        novo: insights?.filter(i => i.status === 'novo').length || 0,
-        lido: insights?.filter(i => i.status === 'lido').length || 0,
-        em_acao: insights?.filter(i => i.status === 'em_acao').length || 0,
-        resolvido: insights?.filter(i => i.status === 'resolvido').length || 0,
-        ignorado: insights?.filter(i => i.status === 'ignorado').length || 0
+        novo: insights?.filter((i: any) => i.status === 'novo').length || 0,
+        lido: insights?.filter((i: any) => i.status === 'lido').length || 0,
+        em_acao: insights?.filter((i: any) => i.status === 'em_acao').length || 0,
+        resolvido: insights?.filter((i: any) => i.status === 'resolvido').length || 0,
+        ignorado: insights?.filter((i: any) => i.status === 'ignorado').length || 0
       },
       por_impacto: {
-        critico: insights?.filter(i => i.impacto === 'critico').length || 0,
-        alto: insights?.filter(i => i.impacto === 'alto').length || 0,
-        medio: insights?.filter(i => i.impacto === 'medio').length || 0,
-        baixo: insights?.filter(i => i.impacto === 'baixo').length || 0
+        critico: insights?.filter((i: any) => i.impacto === 'critico').length || 0,
+        alto: insights?.filter((i: any) => i.impacto === 'alto').length || 0,
+        medio: insights?.filter((i: any) => i.impacto === 'medio').length || 0,
+        baixo: insights?.filter((i: any) => i.impacto === 'baixo').length || 0
       }
     };
 

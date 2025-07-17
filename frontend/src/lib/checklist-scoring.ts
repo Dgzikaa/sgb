@@ -446,8 +446,8 @@ function identificarItemNegativo(titulo: string): boolean {
 // =====================================================
 
 function determinarCategoria(score: number, problemas: ProblemIdenticado[]): 'excelente' | 'bom' | 'atencao' | 'critico' {
-  const problemasAltos = problemas.filter(p => p.impacto === 'alto').length
-  const problemasCriticos = problemas.filter(p => p.tipo_problema === 'esperado_sim_marcado_nao').length
+  const problemasAltos = problemas.filter((p: any) => p.impacto === 'alto').length
+  const problemasCriticos = problemas.filter((p: any) => p.tipo_problema === 'esperado_sim_marcado_nao').length
   
   if (problemasCriticos > 0 || problemasAltos >= 3) {
     return 'critico'
@@ -478,12 +478,12 @@ function determinarCategoriaSecao(score: number, problemas: number): 'excelente'
 function gerarRecomendacoes(problemas: ProblemIdenticado[], score: number): string[] {
   const recomendacoes: string[] = []
   
-  const problemasCriticos = problemas.filter(p => p.tipo_problema === 'esperado_sim_marcado_nao')
+  const problemasCriticos = problemas.filter((p: any) => p.tipo_problema === 'esperado_sim_marcado_nao')
   if (problemasCriticos.length > 0) {
     recomendacoes.push(`🚨 AÇÃO IMEDIATA: ${problemasCriticos.length} item(ns) crítico(s) identificado(s)`)
   }
   
-  const itensObrigatorios = problemas.filter(p => p.tipo_problema === 'obrigatorio_nao_preenchido')
+  const itensObrigatorios = problemas.filter((p: any) => p.tipo_problema === 'obrigatorio_nao_preenchido')
   if (itensObrigatorios.length > 0) {
     recomendacoes.push(`📝 Completar ${itensObrigatorios.length} item(ns) obrigatório(s) pendente(s)`)
   }
@@ -559,7 +559,7 @@ export function obterIconeCategoria(categoria: string): string {
 
 export function obterResumoScore(scoreResult: ScoreResult): string {
   const { score_total, categoria, problemas_identificados } = scoreResult
-  const problemasCriticos = problemas_identificados.filter(p => p.impacto === 'alto').length
+  const problemasCriticos = problemas_identificados.filter((p: any) => p.impacto === 'alto').length
   
   if (categoria === 'excelente') {
     return `Score excelente: ${score_total}/100 🏆`

@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase';
 ;
 
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     if (!supabase) {
       return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 });
     }
-    console.log('ðŸ”„ Sincronizando dados de performance...');
+    console.log('🔄 Sincronizando dados de performance...');
     
     // Criar cliente Supabase
 
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     if (!data_evento || !bar_id) {
       return NextResponse.json({
         success: false,
-        error: 'Data do evento e bar_id sÃ£o obrigatÃ³rios'
+        error: 'Data do evento e bar_id são obrigatórios'
       }, { status: 400 });
     }
 
@@ -40,21 +40,21 @@ export async function POST(request: NextRequest) {
       }, { status: 404 });
     }
 
-    // Verificar se jÃ¡ tem dados de performance atualizados
+    // Verificar se já tem dados de performance atualizados
     if (evento.publico_real && evento.faturamento_liquido && !forcar_atualizacao) {
       return NextResponse.json({
         success: true,
-        message: 'Evento jÃ¡ possui dados de performance atualizados',
+        message: 'Evento já possui dados de performance atualizados',
         data: evento,
         ja_sincronizado: true
       });
     }
 
-    console.log(`ðŸ”„ Sincronizando dados para ${data_evento} - Bar ${bar_id}`);
+    console.log(`🔄 Sincronizando dados para ${data_evento} - Bar ${bar_id}`);
 
     // Buscar dados de vendas do dia
     const [periodoResponse, pagamentosResponse, symplaResponse] = await Promise.all([
-      // 1. Dados de pessoas da tabela perÃ­odo
+      // 1. Dados de pessoas da tabela período
       supabase
         .from('periodo')
         .select('pessoas, vr_produtos, vr_couvert, vr_pagamentos')
@@ -87,17 +87,17 @@ export async function POST(request: NextRequest) {
     let receita_ingressos = 0;
     let receita_bar = 0;
 
-    // 1. PÃºblico real - somar pessoas da tabela perÃ­odo
+    // 1. Público real - somar pessoas da tabela período
     publico_real = periodoData.reduce((sum: number, item: any) => {
       return sum + parseInt(item.pessoas || '0');
     }, 0);
 
-    // 2. Faturamento lÃ­quido - somar pagamentos
+    // 2. Faturamento líquido - somar pagamentos
     faturamento_liquido = pagamentosData.reduce((sum: number, item: any) => {
       return sum + parseFloat(item.liquido || '0');
     }, 0);
 
-    // 3. Receita de couvert - tanto de perÃ­odo quanto pagamentos
+    // 3. Receita de couvert - tanto de período quanto pagamentos
     receita_couvert = periodoData.reduce((sum: number, item: any) => {
       return sum + parseFloat(item.vr_couvert || '0');
     }, 0);
@@ -118,20 +118,20 @@ export async function POST(request: NextRequest) {
       return sum + parseFloat(item.vr_produtos || '0');
     }, 0);
 
-    // Se nÃ£o temos pÃºblico da tabela perÃ­odo, tentar usar checkins do Sympla
+    // Se não temos público da tabela período, tentar usar checkins do Sympla
     if (publico_real === 0 && symplaData.length > 0) {
       publico_real = symplaData.reduce((sum: number, item: any) => {
         return sum + parseInt(item.qtd_checkins_realizados || '0');
       }, 0);
     }
 
-    // Calcular mÃ©tricas derivadas
+    // Calcular métricas derivadas
     const ticket_medio = publico_real > 0 ? faturamento_liquido / publico_real : null;
     const taxa_ocupacao = evento.capacidade_estimada && publico_real > 0 
       ? (publico_real / evento.capacidade_estimada) * 100 
       : null;
 
-    console.log(`ðŸ“Š Dados calculados:`, {
+    console.log(`📊 Dados calculados:`, {
       publico_real,
       faturamento_liquido,
       receita_couvert,
@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('âŒ Erro:', error);
+    console.error('❌ Erro:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor',

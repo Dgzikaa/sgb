@@ -18,7 +18,7 @@ export function useBulkSelection<T extends BulkSelectionItem>(
   const [selectedIds, setSelectedIds] = useState<Set<string | number>>(new Set())
   
   const selectedItems = useMemo(() => {
-    return items.filter(item => selectedIds.has(item.id))
+    return items.filter((item: any) => selectedIds.has(item.id))
   }, [items, selectedIds])
 
   const isAllSelected = useMemo(() => {
@@ -44,7 +44,7 @@ export function useBulkSelection<T extends BulkSelectionItem>(
       }
       
       // Trigger callbacks
-      const newSelectedItems = items.filter(item => newSet.has(item.id))
+      const newSelectedItems = items.filter((item: any) => newSet.has(item.id))
       config.onSelectionChange?.(newSelectedItems)
       
       return newSet
@@ -62,7 +62,7 @@ export function useBulkSelection<T extends BulkSelectionItem>(
         newSet.add(id)
       })
       
-      const newSelectedItems = items.filter(item => newSet.has(item.id))
+      const newSelectedItems = items.filter((item: any) => newSet.has(item.id))
       config.onSelectionChange?.(newSelectedItems)
       
       return newSet
@@ -77,7 +77,7 @@ export function useBulkSelection<T extends BulkSelectionItem>(
         ? items.slice(0, config.maxSelection)
         : items
       
-      setSelectedIds(new Set(itemsToSelect.map(item => item.id)))
+      setSelectedIds(new Set(itemsToSelect.map((item: any) => item.id)))
       config.onSelectionChange?.(itemsToSelect)
     } else {
       setSelectedIds(new Set())
@@ -101,7 +101,7 @@ export function useBulkSelection<T extends BulkSelectionItem>(
     const start = Math.min(startIndex, endIndex)
     const end = Math.max(startIndex, endIndex)
     
-    const rangeIds = items.slice(start, end + 1).map(item => item.id)
+    const rangeIds = items.slice(start, end + 1).map((item: any) => item.id)
     selectMultiple(rangeIds)
   }, [items, selectMultiple])
 

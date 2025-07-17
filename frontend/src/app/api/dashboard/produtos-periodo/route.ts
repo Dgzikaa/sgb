@@ -141,14 +141,14 @@ export async function GET(request: NextRequest) {
 
       // Log resumo
       const totalDias = Object.keys(produtosPorDia).length
-      const diasComDados = Object.keys(produtosPorDia).filter(dia => 
+      const diasComDados = Object.keys(produtosPorDia).filter((dia: any) => 
         produtosPorDia[dia].contahub.length > 0 || produtosPorDia[dia].yuzer.length > 0
       ).length
 
       console.log('📊 Resumo dos produtos por período:', {
         total_dias: totalDias,
         dias_com_dados: diasComDados,
-        primeiro_dia_com_dados: diasComDados > 0 ? Object.keys(produtosPorDia).find(dia => 
+        primeiro_dia_com_dados: diasComDados > 0 ? Object.keys(produtosPorDia).find((dia: any) => 
           produtosPorDia[dia].contahub.length > 0 || produtosPorDia[dia].yuzer.length > 0
         ) : null
       })

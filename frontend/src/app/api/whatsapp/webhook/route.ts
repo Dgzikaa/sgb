@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
         .eq('ativo', true);
 
       // Verificar se o token coincide com alguma configuração
-      const validConfig = configs?.find(config => config.webhook_verify_token === token);
+      const validConfig = configs?.find((config: any) => config.webhook_verify_token === token);
 
       if (validConfig) {
         console.log('Webhook verificado com sucesso para bar_id:', validConfig.bar_id);

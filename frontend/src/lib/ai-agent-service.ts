@@ -324,7 +324,7 @@ export class AIIntelligentAgent {
     if (!executions || executions.length === 0) return null;
 
     const total = executions.length;
-    const concluidas = executions.filter(e => e.status === 'concluido').length;
+    const concluidas = executions.filter((e: any) => e.status === 'concluido').length;
     const taxa = (concluidas / total) * 100;
 
     return {
@@ -359,7 +359,7 @@ export class AIIntelligentAgent {
 
     if (!executions || executions.length === 0) return null;
 
-    const tempos = executions.map(e => e.tempo_execucao_minutos);
+    const tempos = executions.map((e: any) => e.tempo_execucao_minutos);
     const tempoMedio = tempos.reduce((a, b) => a + b, 0) / tempos.length;
 
     return {
@@ -395,7 +395,7 @@ export class AIIntelligentAgent {
 
     if (!executions || executions.length === 0) return null;
 
-    const scores = executions.map(e => e.pontuacao_final);
+    const scores = executions.map((e: any) => e.pontuacao_final);
     const scoreMedio = scores.reduce((a, b) => a + b, 0) / scores.length;
 
     return {
@@ -411,8 +411,8 @@ export class AIIntelligentAgent {
         total_execucoes: executions.length,
         score_minimo: Math.min(...scores),
         score_maximo: Math.max(...scores),
-        scores_acima_90: scores.filter(s => s >= 90).length,
-        scores_abaixo_70: scores.filter(s => s < 70).length
+        scores_acima_90: scores.filter((s: any) => s >= 90).length,
+        scores_abaixo_70: scores.filter((s: any) => s < 70).length
       }
     };
   }
@@ -431,8 +431,8 @@ export class AIIntelligentAgent {
     if (!messages || messages.length === 0) return null;
 
     const total = messages.length;
-    const lidas = messages.filter(m => m.status === 'read').length;
-    const entregues = messages.filter(m => ['delivered', 'read'].includes(m.status)).length;
+    const lidas = messages.filter((m: any) => m.status === 'read').length;
+    const entregues = messages.filter((m: any) => ['delivered', 'read'].includes(m.status)).length;
     
     const taxaLeitura = (lidas / total) * 100;
     const taxaEntrega = (entregues / total) * 100;
@@ -710,7 +710,7 @@ export class AIIntelligentAgent {
     if (!metrics || metrics.length < 3) return null;
 
     // Calcular média e desvio padrão histórico
-    const valores = metrics.slice(0, -1).map(m => m.valor); // Excluir hoje
+    const valores = metrics.slice(0, -1).map((m: any) => m.valor); // Excluir hoje
     const media = valores.reduce((a, b) => a + b, 0) / valores.length;
     const variance = valores.reduce((a, b) => a + Math.pow(b - media, 2), 0) / valores.length;
     const desvio = Math.sqrt(variance);
@@ -769,7 +769,7 @@ export class AIIntelligentAgent {
 
     if (!metrics || metrics.length < 3) return null;
 
-    const valores = metrics.slice(0, -1).map(m => m.valor);
+    const valores = metrics.slice(0, -1).map((m: any) => m.valor);
     const media = valores.reduce((a, b) => a + b, 0) / valores.length;
     const variance = valores.reduce((a, b) => a + Math.pow(b - media, 2), 0) / valores.length;
     const desvio = Math.sqrt(variance);
@@ -827,7 +827,7 @@ export class AIIntelligentAgent {
 
     if (!metrics || metrics.length < 3) return null;
 
-    const valores = metrics.slice(0, -1).map(m => m.valor);
+    const valores = metrics.slice(0, -1).map((m: any) => m.valor);
     const media = valores.reduce((a, b) => a + b, 0) / valores.length;
     const variance = valores.reduce((a, b) => a + Math.pow(b - media, 2), 0) / valores.length;
     const desvio = Math.sqrt(variance);
@@ -1200,13 +1200,13 @@ export class AIIntelligentAgent {
         .catch(() => ({ alerts: [] }))
 
       const totalExecucoes = execucoes?.length || 0
-      const execucoesConcluidas = execucoes?.filter(e => e.status === 'concluido').length || 0
+      const execucoesConcluidas = execucoes?.filter((e: any) => e.status === 'concluido').length || 0
       const execucoesPendentes = totalExecucoes - execucoesConcluidas
 
-      const temposExecucao = execucoes?.filter(e => e.tempo_execucao_minutos).map(e => e.tempo_execucao_minutos) || []
+      const temposExecucao = execucoes?.filter((e: any) => e.tempo_execucao_minutos).map((e: any) => e.tempo_execucao_minutos) || []
       const tempoMedio = temposExecucao.length > 0 ? temposExecucao.reduce((a, b) => a + b, 0) / temposExecucao.length : 0
 
-      const scores = execucoes?.filter(e => e.score_final).map(e => e.score_final) || []
+      const scores = execucoes?.filter((e: any) => e.score_final).map((e: any) => e.score_final) || []
       const scoreMedio = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0
 
       const alertasAtivos = alertasData?.alerts?.length || 0

@@ -234,7 +234,7 @@ export async function POST(request: NextRequest) {
 
           if (error) throw error
 
-          const exportData = checklists.map(checklist => ({
+          const exportData = checklists.map((checklist: any) => ({
             'ID': checklist.id,
             'Nome': checklist.nome,
             'Descrição': checklist.descricao,

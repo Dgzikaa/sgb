@@ -510,7 +510,7 @@ export class WhatsAppNotificationService {
     };
 
     const templateName = templateMap[notificacao.tipo] || 'sgb_lembrete_checklist';
-    const template = moduleTemplates.find(t => t.name === templateName);
+    const template = moduleTemplates.find((t: any) => t.name === templateName);
 
     if (!template) {
       return null;

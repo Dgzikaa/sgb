@@ -210,7 +210,7 @@ export function useAssignments(): UseAssignmentsResult {
         console.log('📝 Atribuição atualizada com sucesso!')
         
         // Atualizar na lista
-        setAtribuicoes(prev => prev.map(a => 
+        setAtribuicoes(prev => prev.map((a: any) => 
           a.id === id ? { ...a, ...response.data } : a
         ))
         
@@ -245,7 +245,7 @@ export function useAssignments(): UseAssignmentsResult {
         console.log('🗑️ Atribuição excluída com sucesso!')
         
         // Remover da lista
-        setAtribuicoes(prev => prev.filter(a => a.id !== id))
+        setAtribuicoes(prev => prev.filter((a: any) => a.id !== id))
         
         // Limpar atribuição individual se era a atual
         if (atribuicao?.id === id) {
@@ -568,7 +568,7 @@ export function formatarDiasSemana(dias: number[]): string {
   
   const nomesDias = dias
     .sort()
-    .map(dia => diasSemana.find(d => d.value === dia)?.abrev || dia.toString())
+    .map((dia: any) => diasSemana.find((d: any) => d.value === dia)?.abrev || dia.toString())
   
   if (nomesDias.length <= 3) return nomesDias.join(', ')
   

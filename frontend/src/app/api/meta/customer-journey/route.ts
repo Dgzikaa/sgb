@@ -286,10 +286,10 @@ export async function GET(request: NextRequest) {
     const oportunidades = identificarOportunidades(pontosAbandono, metricas)
 
     // 8. MONTAR JORNADA VISUAL
-    const jornadaVisual = etapasJornada.map(etapa => ({
+    const jornadaVisual = etapasJornada.map((etapa: any) => ({
       ...etapa,
       dados: dadosConversao[etapa.id as keyof typeof dadosConversao],
-      status: pontosAbandono.find(p => p.etapa === etapa.id) ? 'problema' : 'saudavel'
+      status: pontosAbandono.find((p: any) => p.etapa === etapa.id) ? 'problema' : 'saudavel'
     }))
 
     const resultado = {
@@ -323,15 +323,15 @@ export async function GET(request: NextRequest) {
       acoes_sugeridas: [
         {
           prazo: 'Imediato',
-          acoes: oportunidades.filter(o => o.tipo === 'critica').map(o => o.titulo)
+          acoes: oportunidades.filter((o: any) => o.tipo === 'critica').map((o: any) => o.titulo)
         },
         {
           prazo: '7 dias',
-          acoes: oportunidades.filter(o => o.tipo === 'melhoria').map(o => o.titulo)
+          acoes: oportunidades.filter((o: any) => o.tipo === 'melhoria').map((o: any) => o.titulo)
         },
         {
           prazo: '30 dias',
-          acoes: oportunidades.filter(o => o.tipo === 'crescimento').map(o => o.titulo)
+          acoes: oportunidades.filter((o: any) => o.tipo === 'crescimento').map((o: any) => o.titulo)
         }
       ]
     }

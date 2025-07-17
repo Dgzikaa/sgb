@@ -619,7 +619,7 @@ export async function getAnaliseCompleta(periodo: 'hoje' | 'semana' | 'mes' = 's
       },
       insights: {
         performanceSemana: melhorDia.faturamento / mediaFaturamento,
-        consistencia: dadosSemana.filter(dia => dia.faturamento > mediaFaturamento * 0.8).length / 7,
+        consistencia: dadosSemana.filter((dia: any) => dia.faturamento > mediaFaturamento * 0.8).length / 7,
         crescimento: vendasData ? vendasData.vendas_hoje / vendasData.vendas_semana : 0
       }
     }

@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Transformar dados para o formato esperado pela interface
-    const checklistsFormatados = checklists?.map(checklist => {
+    const checklistsFormatados = checklists?.map((checklist: any) => {
       // Contar total de itens
       const totalItens = checklist.checklist_secoes?.reduce((total: number, secao: any) => {
         return total + (secao.checklist_itens?.length || 0)

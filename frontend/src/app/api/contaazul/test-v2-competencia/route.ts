@@ -349,7 +349,7 @@ export async function GET(request: NextRequest) {
         total_eventos_testados: idsParaTestar.length,
         resultados: resultadosParcelas,
         parcelas_tem_competencia: resultadosParcelas.some(r => r.analise?.tem_data_competencia),
-        eventos_com_sucesso: resultadosParcelas.filter(r => r.ok).length
+        eventos_com_sucesso: resultadosParcelas.filter((r: any) => r.ok).length
       })
     }
 
@@ -359,12 +359,12 @@ export async function GET(request: NextRequest) {
       testes,
       conclusoes: {
         total_testes: testes.length,
-        testes_ok: testes.filter(t => t.ok || t.eventos_com_sucesso).length,
-        receitas_tem_competencia: testes.find(t => t.nome.includes('Receitas'))?.analise?.tem_data_competencia || false,
-        despesas_tem_competencia: testes.find(t => t.nome.includes('Despesas'))?.analise?.tem_data_competencia || false,
-        receitas_comp_tem_competencia: testes.find(t => t.nome.includes('COM data_competencia') && t.nome.includes('Receitas'))?.analise?.tem_data_competencia || false,
-        despesas_comp_tem_competencia: testes.find(t => t.nome.includes('COM data_competencia') && t.nome.includes('Despesas'))?.analise?.tem_data_competencia || false,
-        parcelas_tem_competencia: testes.find(t => t.nome.includes('parcelas'))?.parcelas_tem_competencia || false,
+        testes_ok: testes.filter((t: any) => t.ok || t.eventos_com_sucesso).length,
+        receitas_tem_competencia: testes.find((t: any) => t.nome.includes('Receitas'))?.analise?.tem_data_competencia || false,
+        despesas_tem_competencia: testes.find((t: any) => t.nome.includes('Despesas'))?.analise?.tem_data_competencia || false,
+        receitas_comp_tem_competencia: testes.find((t: any) => t.nome.includes('COM data_competencia') && t.nome.includes('Receitas'))?.analise?.tem_data_competencia || false,
+        despesas_comp_tem_competencia: testes.find((t: any) => t.nome.includes('COM data_competencia') && t.nome.includes('Despesas'))?.analise?.tem_data_competencia || false,
+        parcelas_tem_competencia: testes.find((t: any) => t.nome.includes('parcelas'))?.parcelas_tem_competencia || false,
         viavel_para_dre: testes.some(t => t.analise?.tem_data_competencia || t.parcelas_tem_competencia)
       }
     })
