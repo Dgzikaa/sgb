@@ -1,4 +1,4 @@
-'use client'
+ï»¿'use client'
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
@@ -60,7 +60,7 @@ export default function ResponsavelWhatsAppSelector({
         setUsuariosSemWhatsApp(data.sem_whatsapp || [])
       }
     } catch (error) {
-      console.error('Erro ao carregar usuá¡rios:', error)
+      console.error('Erro ao carregar usuÃ¡Â¡rios:', error)
     } finally {
       setLoading(false)
     }
@@ -87,32 +87,32 @@ export default function ResponsavelWhatsAppSelector({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
             <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            Selecionar Responsá¡veis (WhatsApp)
+            Selecionar ResponsÃ¡Â¡veis (WhatsApp)
           </CardTitle>
           <CardDescription className="text-gray-600 dark:text-gray-400">
-            Escolha os funcioná¡rios que receberá£o notificaá§áµes do checklist via WhatsApp
+            Escolha os funcionÃ¡Â¡rios que receberÃ¡Â£o notificaÃ¡Â§Ã¡Âµes do checklist via WhatsApp
           </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
           {loading ? (
             <div className="text-center py-4 text-gray-600 dark:text-gray-400">
-              Carregando funcioná¡rios...
+              Carregando funcionÃ¡Â¡rios...
             </div>
           ) : (
             <>
-              {/* Estatá­sticas */}
+              {/* EstatÃ¡Â­sticas */}
               <div className="flex flex-wrap gap-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
                   <span className="text-sm text-gray-700 dark:text-gray-300">
-                    {usuariosValidos.length} com WhatsApp vá¡lido
+                    {usuariosValidos.length} com WhatsApp vÃ¡Â¡lido
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4 text-yellow-600" />
                   <span className="text-sm text-gray-700 dark:text-gray-300">
-                    {usuariosInvalidos.length} com WhatsApp invá¡lido
+                    {usuariosInvalidos.length} com WhatsApp invÃ¡Â¡lido
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -123,12 +123,12 @@ export default function ResponsavelWhatsAppSelector({
                 </div>
               </div>
 
-              {/* Funcioná¡rios com WhatsApp Vá¡lido */}
+              {/* FuncionÃ¡Â¡rios com WhatsApp VÃ¡Â¡lido */}
               {usuariosValidos.length > 0 && (
                 <div className="space-y-3">
                   <h4 className="font-medium text-green-700 dark:text-green-300 flex items-center gap-2">
                     <CheckCircle className="h-4 w-4" />
-                    Funcioná¡rios Disponá­veis ({usuariosValidos.length})
+                    FuncionÃ¡Â¡rios DisponÃ¡Â­veis ({usuariosValidos.length})
                   </h4>
                   
                   <div className="grid gap-3">
@@ -161,7 +161,7 @@ export default function ResponsavelWhatsAppSelector({
                               </div>
                               {(usuario.cargo || usuario.departamento) && (
                                 <div className="text-xs text-gray-500 dark:text-gray-500">
-                                  {[usuario.cargo, usuario.departamento].filter(Boolean).join(' €¢ ')}
+                                  {[usuario.cargo, usuario.departamento].filter(Boolean).join(' â‚¬Â¢ ')}
                                 </div>
                               )}
                             </div>
@@ -185,19 +185,19 @@ export default function ResponsavelWhatsAppSelector({
                 </div>
               )}
 
-              {/* Funcioná¡rios com WhatsApp Invá¡lido */}
+              {/* FuncionÃ¡Â¡rios com WhatsApp InvÃ¡Â¡lido */}
               {usuariosInvalidos.length > 0 && showWarnings && (
                 <div className="space-y-3">
                   <h4 className="font-medium text-yellow-700 dark:text-yellow-300 flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4" />
-                    WhatsApp Invá¡lido ({usuariosInvalidos.length})
+                    WhatsApp InvÃ¡Â¡lido ({usuariosInvalidos.length})
                   </h4>
                   
                   <Alert className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20">
                     <AlertTriangle className="h-4 w-4 text-yellow-600" />
                     <AlertDescription className="text-yellow-700 dark:text-yellow-300">
-                      Estes funcioná¡rios ná£o podem receber notificaá§áµes pois táªm náºmeros invá¡lidos. 
-                      Configure o WhatsApp na pá¡gina de usuá¡rios.
+                      Estes funcionÃ¡Â¡rios nÃ¡Â£o podem receber notificaÃ¡Â§Ã¡Âµes pois tÃ¡Âªm nÃ¡Âºmeros invÃ¡Â¡lidos. 
+                      Configure o WhatsApp na pÃ¡Â¡gina de usuÃ¡Â¡rios.
                     </AlertDescription>
                   </Alert>
                   
@@ -228,7 +228,7 @@ export default function ResponsavelWhatsAppSelector({
                               </div>
                             )}
                             <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 text-xs">
-                              Náºmero Invá¡lido
+                              NÃ¡Âºmero InvÃ¡Â¡lido
                             </Badge>
                           </div>
                         </div>
@@ -238,7 +238,7 @@ export default function ResponsavelWhatsAppSelector({
                 </div>
               )}
 
-              {/* Funcioná¡rios sem WhatsApp */}
+              {/* FuncionÃ¡Â¡rios sem WhatsApp */}
               {usuariosSemWhatsApp.length > 0 && showWarnings && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -262,7 +262,7 @@ export default function ResponsavelWhatsAppSelector({
                       <Alert className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20">
                         <UserPlus className="h-4 w-4 text-red-600" />
                         <AlertDescription className="text-red-700 dark:text-red-300">
-                          Estes funcioná¡rios precisam cadastrar o WhatsApp para receber notificaá§áµes.
+                          Estes funcionÃ¡Â¡rios precisam cadastrar o WhatsApp para receber notificaÃ¡Â§Ã¡Âµes.
                         </AlertDescription>
                       </Alert>
                       
@@ -294,26 +294,26 @@ export default function ResponsavelWhatsAppSelector({
                 </div>
               )}
 
-              {/* Nenhum funcioná¡rio disponá­vel */}
+              {/* Nenhum funcionÃ¡Â¡rio disponÃ¡Â­vel */}
               {usuariosValidos.length === 0 && !loading && (
                 <Alert className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20">
                   <AlertTriangle className="h-4 w-4 text-red-600" />
                   <AlertDescription className="text-red-700 dark:text-red-300">
-                    <strong>Nenhum funcioná¡rio com WhatsApp vá¡lido encontrado!</strong>
+                    <strong>Nenhum funcionÃ¡Â¡rio com WhatsApp vÃ¡Â¡lido encontrado!</strong>
                     <br />
-                    Configure os náºmeros de WhatsApp dos funcioná¡rios antes de criar checklists automatizados.
+                    Configure os nÃ¡Âºmeros de WhatsApp dos funcionÃ¡Â¡rios antes de criar checklists automatizados.
                   </AlertDescription>
                 </Alert>
               )}
 
-              {/* Resumo da Seleá§á£o */}
+              {/* Resumo da SeleÃ¡Â§Ã¡Â£o */}
               {responsaveisSelecionados.length > 0 && (
                 <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                   <h4 className="font-medium text-green-900 dark:text-green-200 mb-2">
-                    œ… {responsaveisSelecionados.length} responsá¡vel(eis) selecionado(s)
+                    Å“â€¦ {responsaveisSelecionados.length} responsÃ¡Â¡vel(eis) selecionado(s)
                   </h4>
                   <div className="text-sm text-green-700 dark:text-green-300">
-                    Estes funcioná¡rios receberá£o notificaá§áµes via WhatsApp quando o checklist for agendado.
+                    Estes funcionÃ¡Â¡rios receberÃ¡Â£o notificaÃ¡Â§Ã¡Âµes via WhatsApp quando o checklist for agendado.
                   </div>
                 </div>
               )}

@@ -1,4 +1,4 @@
-// Sistema de backup autom�tico para dados cr�ticos
+﻿// Sistema de backup automá¡tico para dados crá­ticos
 import { getAdminClient } from '@/lib/supabase-admin';
 
 export interface BackupConfig {
@@ -61,7 +61,7 @@ export class BackupSystem {
     const backupId = this.generateBackupId();
 
     try {
-      console.log(`🔄 Iniciando backup ${backupId}...`);
+      console.log(`ðŸ”„ Iniciando backup ${backupId}...`);
 
       const { getAdminClient } = await import('@/lib/supabase-admin');
       const supabase = await getAdminClient();
@@ -82,17 +82,17 @@ export class BackupSystem {
           const { data, error } = await query;
 
           if (error) {
-            console.error(`�� Erro no backup da tabela ${table}:`, error);
+            console.error(`Œ Erro no backup da tabela ${table}:`, error);
             continue;
           }
 
           if (data) {
             backupData[table] = data;
             totalRecords += data.length;
-            console.log(`�� ${table}: ${data.length} registros`);
+            console.log(`œ… ${table}: ${data.length} registros`);
           }
         } catch (tableError) {
-          console.error(`�� Erro ao processar tabela ${table}:`, tableError);
+          console.error(`Œ Erro ao processar tabela ${table}:`, tableError);
         }
       }
 
@@ -112,7 +112,7 @@ export class BackupSystem {
         data: backupData
       };
 
-      // Salvar backup e obter informa��es do storage
+      // Salvar backup e obter informaá§áµes do storage
       const saveResult = await this.saveBackup(backupId, fullBackup);
       const durationSeconds = Math.round((Date.now() - startTime) / 1000);
 
@@ -135,7 +135,7 @@ export class BackupSystem {
       // Limpeza de backups antigos
       await this.cleanupOldBackups();
 
-      console.log(`�� Backup ${backupId} conclu�do em ${durationSeconds}s`);
+      console.log(`œ… Backup ${backupId} concluá­do em ${durationSeconds}s`);
       return result;
 
     } catch (error) {
@@ -152,7 +152,7 @@ export class BackupSystem {
       };
 
       await this.notifyBackupError(result);
-      console.error(`�� Backup ${backupId} falhou:`, error);
+      console.error(`Œ Backup ${backupId} falhou:`, error);
       return result;
     } finally {
       this.isRunning = false;
@@ -161,19 +161,19 @@ export class BackupSystem {
 
   async restoreBackup(backupId: string, barId?: number): Promise<boolean> {
     try {
-      console.log(`🔄 Iniciando restore do backup ${backupId}...`);
+      console.log(`ðŸ”„ Iniciando restore do backup ${backupId}...`);
 
       const backupData = await this.loadBackup(backupId);
       if (!backupData) {
-        throw new Error('Backup n�o encontrado');
+        throw new Error('Backup ná£o encontrado');
       }
 
       const { getAdminClient } = await import('@/lib/supabase-admin');
       const supabase = await getAdminClient();
 
-      // Validar se backup � compat�vel
+      // Validar se backup á© compatá­vel
       if (backupData.metadata.version !== '2.0.0') {
-        throw new Error('Vers�o do backup incompat�vel');
+        throw new Error('Versá£o do backup incompatá­vel');
       }
 
       // Restaurar dados por tabela
@@ -181,7 +181,7 @@ export class BackupSystem {
         if (!Array.isArray(records) || records.length === 0) continue;
 
         try {
-          // Filtrar por bar_id se necess�rio
+          // Filtrar por bar_id se necessá¡rio
           let filteredRecords = records;
           if (barId && await this.tableHasBarId(table)) {
             filteredRecords = records.filter((record: any) => record.bar_id === barId);
@@ -195,20 +195,20 @@ export class BackupSystem {
             .upsert(filteredRecords, { onConflict: 'id' });
 
           if (error) {
-            console.error(`�� Erro ao restaurar tabela ${table}:`, error);
+            console.error(`Œ Erro ao restaurar tabela ${table}:`, error);
           } else {
-            console.log(`�� Restaurada tabela ${table}: ${filteredRecords.length} registros`);
+            console.log(`œ… Restaurada tabela ${table}: ${filteredRecords.length} registros`);
           }
         } catch (tableError) {
-          console.error(`�� Erro ao processar tabela ${table}:`, tableError);
+          console.error(`Œ Erro ao processar tabela ${table}:`, tableError);
         }
       }
 
-      console.log(`�� Restore do backup ${backupId} conclu�do`);
+      console.log(`œ… Restore do backup ${backupId} concluá­do`);
       return true;
 
     } catch (error) {
-      console.error(`�� Erro no restore do backup ${backupId}:`, error);
+      console.error(`Œ Erro no restore do backup ${backupId}:`, error);
       return false;
     }
   }
@@ -241,7 +241,7 @@ export class BackupSystem {
     }
   }
 
-  // M�todos privados
+  // Má©todos privados
   private generateBackupId(): string {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const random = Math.random().toString(36).substr(2, 6);
@@ -249,7 +249,7 @@ export class BackupSystem {
   }
 
   private async tableHasBarId(table: string): Promise<boolean> {
-    // Lista de tabelas que t�m coluna bar_id
+    // Lista de tabelas que táªm coluna bar_id
     const barIdTables = [
       'usuarios_bar', 'checklists', 'checklist_execucoes', 
       'receitas', 'producoes', 'api_credentials', 
@@ -266,16 +266,16 @@ export class BackupSystem {
       let jsonString = JSON.stringify(data);
       let finalData = new TextEncoder().encode(jsonString);
       
-      // Aplicar compress�o se habilitado
+      // Aplicar compressá£o se habilitado
       if (this.config.compression) {
         finalData = await this.compressData(finalData);
-        console.log(`🗜️ Dados comprimidos de ${jsonString.length} para ${finalData.length} bytes`);
+        console.log(`ðŸ—œï¸ Dados comprimidos de ${jsonString.length} para ${finalData.length} bytes`);
       }
       
       // Aplicar criptografia se habilitado
       if (this.config.encryption) {
         finalData = await this.encryptData(finalData);
-        console.log(`🔒 Dados criptografados`);
+        console.log(`ðŸ”’ Dados criptografados`);
       }
       
       // Calcular tamanho em MB
@@ -295,18 +295,18 @@ export class BackupSystem {
         });
       
       if (uploadError) {
-        console.error('�� Erro no upload do backup:', uploadError);
+        console.error('Œ Erro no upload do backup:', uploadError);
         throw new Error(`Falha no upload: ${uploadError.message}`);
       }
       
-      console.log(`�� Backup ${fileName} salvo com sucesso (${fileSizeMb}MB)`);
+      console.log(`œ… Backup ${fileName} salvo com sucesso (${fileSizeMb}MB)`);
       return {
         fileSizeMb,
         storagePath: fileName
       };
       
     } catch (error) {
-      console.error('�� Erro ao salvar backup:', error);
+      console.error('Œ Erro ao salvar backup:', error);
       throw error;
     }
   }
@@ -323,16 +323,16 @@ export class BackupSystem {
         });
       
       if (listError || !files || files.length === 0) {
-        console.error('�� Backup n�o encontrado:', listError);
+        console.error('Œ Backup ná£o encontrado:', listError);
         return null;
       }
       
-      // Pegar o arquivo mais recente se houver m�ltiplos
+      // Pegar o arquivo mais recente se houver máºltiplos
       const backupFile = files.sort((a: any, b: any) => 
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       )[0];
       
-      console.log(`📥 Carregando backup ${backupFile.name}...`);
+      console.log(`ðŸ“¥ Carregando backup ${backupFile.name}...`);
       
       // Download do arquivo
       const { data: fileData, error: downloadError } = await supabase.storage
@@ -340,39 +340,39 @@ export class BackupSystem {
         .download(backupFile.name);
       
       if (downloadError || !fileData) {
-        console.error('�� Erro no download do backup:', downloadError);
+        console.error('Œ Erro no download do backup:', downloadError);
         return null;
       }
       
       // Converter para bytes
       let finalData = new Uint8Array(await fileData.arrayBuffer());
       
-      // Descriptografar se necess�rio
+      // Descriptografar se necessá¡rio
       if (this.config.encryption) {
         finalData = await this.decryptData(finalData);
-        console.log(`🔓 Dados descriptografados`);
+        console.log(`ðŸ”“ Dados descriptografados`);
       }
       
-      // Descomprimir se necess�rio
+      // Descomprimir se necessá¡rio
       if (this.config.compression) {
         finalData = await this.decompressData(finalData);
-        console.log(`🗜️ Dados descomprimidos`);
+        console.log(`ðŸ—œï¸ Dados descomprimidos`);
       }
       
       // Converter de volta para JSON
       const jsonString = new TextDecoder().decode(finalData);
       const backupData = JSON.parse(jsonString);
       
-      console.log(`�� Backup ${backupFile.name} carregado com sucesso`);
+      console.log(`œ… Backup ${backupFile.name} carregado com sucesso`);
       return backupData;
       
     } catch (error) {
-      console.error('�� Erro ao carregar backup:', error);
+      console.error('Œ Erro ao carregar backup:', error);
       return null;
     }
   }
 
-  // M�todos de criptografia e compress�o
+  // Má©todos de criptografia e compressá£o
   private async encryptData(data: Uint8Array): Promise<Uint8Array> {
     try {
       // Gerar chave de criptografia a partir de uma senha mestra
@@ -380,7 +380,7 @@ export class BackupSystem {
       const encoder = new TextEncoder();
       const passwordBuffer = encoder.encode(password);
       
-      // Gerar salt aleat�rio
+      // Gerar salt aleatá³rio
       const salt = crypto.getRandomValues(new Uint8Array(16));
       
       // Derivar chave usando PBKDF2
@@ -405,7 +405,7 @@ export class BackupSystem {
         ['encrypt']
       );
       
-      // Gerar IV aleat�rio
+      // Gerar IV aleatá³rio
       const iv = crypto.getRandomValues(new Uint8Array(12));
       
       // Criptografar dados
@@ -423,7 +423,7 @@ export class BackupSystem {
       
       return result;
     } catch (error) {
-      console.error('�� Erro na criptografia:', error);
+      console.error('Œ Erro na criptografia:', error);
       throw error;
     }
   }
@@ -470,14 +470,14 @@ export class BackupSystem {
       
       return new Uint8Array(decryptedData);
     } catch (error) {
-      console.error('�� Erro na descriptografia:', error);
+      console.error('Œ Erro na descriptografia:', error);
       throw error;
     }
   }
 
   private async compressData(data: Uint8Array): Promise<Uint8Array> {
     try {
-      // Usar CompressionStream se dispon�vel (browser moderno)
+      // Usar CompressionStream se disponá­vel (browser moderno)
       if (typeof CompressionStream !== 'undefined') {
         const stream = new CompressionStream('gzip');
         const writer = stream.writable.getWriter();
@@ -506,19 +506,19 @@ export class BackupSystem {
         
         return compressed;
       } else {
-        // Fallback: retornar dados sem compress�o
-        console.warn('��️ CompressionStream n�o dispon�vel, pulando compress�o');
+        // Fallback: retornar dados sem compressá£o
+        console.warn('š ï¸ CompressionStream ná£o disponá­vel, pulando compressá£o');
         return data;
       }
     } catch (error) {
-      console.error('�� Erro na compress�o:', error);
+      console.error('Œ Erro na compressá£o:', error);
       return data; // Retornar dados originais em caso de erro
     }
   }
 
   private async decompressData(data: Uint8Array): Promise<Uint8Array> {
     try {
-      // Usar DecompressionStream se dispon�vel
+      // Usar DecompressionStream se disponá­vel
       if (typeof DecompressionStream !== 'undefined') {
         const stream = new DecompressionStream('gzip');
         const writer = stream.writable.getWriter();
@@ -547,13 +547,13 @@ export class BackupSystem {
         
         return decompressed;
       } else {
-        // Fallback: retornar dados como est�o
-        console.warn('��️ DecompressionStream n�o dispon�vel, pulando descompress�o');
+        // Fallback: retornar dados como está£o
+        console.warn('š ï¸ DecompressionStream ná£o disponá­vel, pulando descompressá£o');
         return data;
       }
     } catch (error) {
-      console.error('�� Erro na descompress�o:', error);
-      return data; // Retornar dados como est�o em caso de erro
+      console.error('Œ Erro na descompressá£o:', error);
+      return data; // Retornar dados como está£o em caso de erro
     }
   }
 
@@ -577,7 +577,7 @@ export class BackupSystem {
         config: this.config
       });
     } catch (error) {
-      console.error('�� Erro ao registrar backup:', error);
+      console.error('Œ Erro ao registrar backup:', error);
     }
   }
 
@@ -619,9 +619,9 @@ export class BackupSystem {
               .remove(filesToDelete);
 
             if (deleteError) {
-              console.error('�� Erro ao deletar arquivos antigos:', deleteError);
+              console.error('Œ Erro ao deletar arquivos antigos:', deleteError);
             } else {
-              console.log(`🗑️ ${filesToDelete.length} arquivos de backup removidos do storage`);
+              console.log(`ðŸ—‘ï¸ ${filesToDelete.length} arquivos de backup removidos do storage`);
             }
           }
         }
@@ -633,13 +633,13 @@ export class BackupSystem {
           .lt('timestamp', cutoffDate.toISOString());
 
         if (dbDeleteError) {
-          console.error('�� Erro ao remover registros antigos do banco:', dbDeleteError);
+          console.error('Œ Erro ao remover registros antigos do banco:', dbDeleteError);
         } else {
-          console.log(`🧹 ${oldBackups.length} registros de backup antigos removidos do banco`);
+          console.log(`ðŸ§¹ ${oldBackups.length} registros de backup antigos removidos do banco`);
         }
       }
     } catch (error) {
-      console.error('�� Erro na limpeza de backups:', error);
+      console.error('Œ Erro na limpeza de backups:', error);
     }
   }
 
@@ -649,7 +649,7 @@ export class BackupSystem {
     try {
       const message = {
         embeds: [{
-          title: '�� Backup Conclu�do com Sucesso',
+          title: 'œ… Backup Concluá­do com Sucesso',
           description: `Backup ID: ${result.id}`,
           color: 0x00ff00,
           fields: [
@@ -669,7 +669,7 @@ export class BackupSystem {
               inline: true
             },
             {
-              name: 'Dura��o',
+              name: 'Duraá§á£o',
               value: `${result.duration_seconds}s`,
               inline: true
             }
@@ -684,7 +684,7 @@ export class BackupSystem {
         body: JSON.stringify(message)
       });
     } catch (error) {
-      console.error('Erro ao enviar notifica��o de backup:', error);
+      console.error('Erro ao enviar notificaá§á£o de backup:', error);
     }
   }
 
@@ -694,7 +694,7 @@ export class BackupSystem {
     try {
       const message = {
         embeds: [{
-          title: '�� Falha no Backup',
+          title: 'Œ Falha no Backup',
           description: `Backup ID: ${result.id}`,
           color: 0xff0000,
           fields: [
@@ -704,7 +704,7 @@ export class BackupSystem {
               inline: false
             },
             {
-              name: 'Dura��o',
+              name: 'Duraá§á£o',
               value: `${result.duration_seconds}s`,
               inline: true
             }
@@ -719,7 +719,7 @@ export class BackupSystem {
         body: JSON.stringify(message)
       });
     } catch (error) {
-      console.error('Erro ao enviar notifica��o de erro de backup:', error);
+      console.error('Erro ao enviar notificaá§á£o de erro de backup:', error);
     }
   }
 }
@@ -735,11 +735,11 @@ export class BackupScheduler {
 
   start(): void {
     if (this.interval) {
-      console.warn('Backup scheduler j� est� rodando');
+      console.warn('Backup scheduler já¡ está¡ rodando');
       return;
     }
 
-    // Executar backup di�rio �s 2:00 AM
+    // Executar backup diá¡rio á s 2:00 AM
     const scheduleBackup = () => {
       const now = new Date();
       const target = new Date();
@@ -754,7 +754,7 @@ export class BackupScheduler {
       setTimeout(async () => {
         try {
           await this.backupSystem.createBackup();
-          scheduleBackup(); // Agendar pr�ximo backup
+          scheduleBackup(); // Agendar prá³ximo backup
         } catch (error) {
           console.error('Erro no backup agendado:', error);
           scheduleBackup(); // Reagendar mesmo com erro
@@ -763,14 +763,14 @@ export class BackupScheduler {
     };
 
     scheduleBackup();
-    console.log('📅 Backup scheduler iniciado - pr�ximo backup �s 2:00 AM');
+    console.log('ðŸ“… Backup scheduler iniciado - prá³ximo backup á s 2:00 AM');
   }
 
   stop(): void {
     if (this.interval) {
       clearTimeout(this.interval);
       this.interval = undefined;
-      console.log('📅 Backup scheduler parado');
+      console.log('ðŸ“… Backup scheduler parado');
     }
   }
 

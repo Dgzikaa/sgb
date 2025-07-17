@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { CommandPalette } from '@/components/ui/command-palette'
 import { useCommandPalette } from '@/contexts/CommandPaletteContext'

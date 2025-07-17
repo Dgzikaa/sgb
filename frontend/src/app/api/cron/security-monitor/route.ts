@@ -1,14 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { securityMonitor } from '@/lib/security-monitor'
 import { createClient } from '@supabase/supabase-js'
 
-// Fun��o para criar cliente Supabase com valida��o
+// Funá§á£o para criar cliente Supabase com validaá§á£o
 function getSupabaseClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
   
   if (!supabaseUrl || !serviceKey) {
-    throw new Error('Vari�veis de ambiente Supabase n�o configuradas')
+    throw new Error('Variá¡veis de ambiente Supabase ná£o configuradas')
   }
   
   return createClient(supabaseUrl, serviceKey)
@@ -16,19 +16,19 @@ function getSupabaseClient() {
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔍 Iniciando monitoramento autom�tico de seguran�a...')
+    console.log('ðŸ” Iniciando monitoramento automá¡tico de seguraná§a...')
     
-    // Verificar se � uma requisi��o de cron v�lida
+    // Verificar se á© uma requisiá§á£o de cron vá¡lida
     const authHeader = request.headers.get('authorization')
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      console.log('�� Acesso negado - token inv�lido')
+      console.log('Œ Acesso negado - token invá¡lido')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Criar cliente Supabase apenas quando necess�rio
+    // Criar cliente Supabase apenas quando necessá¡rio
     const supabase = getSupabaseClient()
 
-    // 1. Verificar eventos suspeitos dos �ltimos 5 minutos
+    // 1. Verificar eventos suspeitos dos áºltimos 5 minutos
     const last5Minutes = new Date(Date.now() - 5 * 60 * 1000)
     
     const { data: recentEvents, error: eventsError } = await supabase
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Database error' }, { status: 500 })
     }
 
-    // 2. An�lise de padr�es suspeitos
+    // 2. Aná¡lise de padráµes suspeitos
     const suspiciousPatterns = await analyzeSuspiciousPatterns(recentEvents || [])
     
     // 3. Registrar eventos detectados
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
     // 5. Gerar eventos de sistema
     await generateSystemEvents()
 
-    // 6. Calcular e salvar m�tricas di�rias
+    // 6. Calcular e salvar má©tricas diá¡rias
     await calculateDailyMetrics(supabase)
 
     const result = {
@@ -77,11 +77,11 @@ export async function GET(request: NextRequest) {
       system_events_generated: 3
     }
 
-    console.log('�� Monitoramento de seguran�a conclu�do:', result)
+    console.log('œ… Monitoramento de seguraná§a concluá­do:', result)
     return NextResponse.json(result)
 
   } catch (error) {
-    console.error('�� Erro no monitoramento de seguran�a:', error)
+    console.error('Œ Erro no monitoramento de seguraná§a:', error)
     return NextResponse.json({ 
       success: false, 
       error: error instanceof Error ? error.message : 'Unknown error' 
@@ -89,11 +89,11 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Analisar padr�es suspeitos
+// Analisar padráµes suspeitos
 async function analyzeSuspiciousPatterns(events: any[]) {
   const patterns = []
   
-  // M�ltiplas tentativas de login do mesmo IP
+  // Máºltiplas tentativas de login do mesmo IP
   const loginAttempts = events.filter((e: any) => e.event_type === 'failed_login')
   const ipGroups = groupByIP(loginAttempts)
   
@@ -116,7 +116,7 @@ async function analyzeSuspiciousPatterns(events: any[]) {
     }
   }
 
-  // M�ltiplas requisi��es para endpoints sens�veis
+  // Máºltiplas requisiá§áµes para endpoints sensá­veis
   const sensitiveEndpoints = ['/api/usuarios', '/api/admin', '/api/security']
   const sensitiveRequests = events.filter((e: any) => 
     sensitiveEndpoints.some(endpoint => e.endpoint?.includes(endpoint))
@@ -169,7 +169,7 @@ async function checkSuspiciousIPs(events: any[]) {
 async function generateSystemEvents() {
   const timestamp = new Date().toISOString()
   
-  // Evento de verifica��o de sistema
+  // Evento de verificaá§á£o de sistema
   await securityMonitor.logEvent({
     level: 'info',
     category: 'system',
@@ -184,10 +184,10 @@ async function generateSystemEvents() {
     risk_score: 5
   })
 
-  // Simular alguns eventos de sistema baseados em hor�rio
+  // Simular alguns eventos de sistema baseados em horá¡rio
   const hour = new Date().getHours()
   
-  if (hour === 2) { // 2h da manh� - backup
+  if (hour === 2) { // 2h da manhá£ - backup
     await securityMonitor.logEvent({
       level: 'info',
       category: 'backup',
@@ -203,8 +203,8 @@ async function generateSystemEvents() {
     })
   }
 
-  if (hour >= 8 && hour <= 22) { // Hor�rio comercial - gerar alguns eventos
-    // Simula��o de acesso normal
+  if (hour >= 8 && hour <= 22) { // Horá¡rio comercial - gerar alguns eventos
+    // Simulaá§á£o de acesso normal
     await securityMonitor.logEvent({
       level: 'info',
       category: 'access',
@@ -221,7 +221,7 @@ async function generateSystemEvents() {
   }
 }
 
-// Calcular m�tricas di�rias
+// Calcular má©tricas diá¡rias
 async function calculateDailyMetrics(supabase: any) {
   const today = new Date()
   const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate())
@@ -233,7 +233,7 @@ async function calculateDailyMetrics(supabase: any) {
     .lt('timestamp', today.toISOString())
 
   if (error) {
-    console.error('Erro ao calcular m�tricas di�rias:', error)
+    console.error('Erro ao calcular má©tricas diá¡rias:', error)
     return
   }
 
@@ -256,7 +256,7 @@ async function calculateDailyMetrics(supabase: any) {
     blocked_ips: events.filter((e: any) => e.event_type === 'ip_blocked').length
   }
 
-  // Inserir ou atualizar m�tricas do dia
+  // Inserir ou atualizar má©tricas do dia
   await supabase
     .from('security_metrics')
     .upsert(metrics, { onConflict: 'date' })

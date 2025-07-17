@@ -1,363 +1,210 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getAdminClient } from '@/lib/supabase-admin'
-import { authenticateUser, authErrorResponse } from '@/middleware/auth'
-import { z } from 'zod'
+﻿import { NextRequest, NextResponse } from 'next/server';
+import { getAdminClient } from '@/lib/supabase-admin';
+import { authenticateUser, authErrorResponse } from '@/middleware/auth';
 
 // =====================================================
-// SCHEMAS DE VALIDAÇÃO
+// GET - LISTAR METAS
 // =====================================================
-
-const AtualizarNotificacaoSchema = z.object({
-  status: z.enum(['lida', 'descartada']).optional(),
-  dados_extras: z.record(z.any()).optional()
-})
-
-// =====================================================
-// GET - BUSCAR NOTIFICAÇÃO ESPECÍFICA
-// =====================================================
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
-    // 🔐 AUTENTICAÇÃO
-    const user = await authenticateUser(request)
+    const user = await authenticateUser(request);
     if (!user) {
-      return authErrorResponse('Usuário não autenticado')
+      return authErrorResponse('Usuá¡rio ná£o autenticado');
     }
 
-    const { id: notificacaoId } = params
-    const supabase = await getAdminClient()
-    
-    // Buscar notificação específica
-    const { data: notificacao, error } = await supabase
-      .from('notificacoes')
-      .select(`
-        *,
-        usuario:usuarios_bar!usuario_id (nome, email, role),
-        logs:notificacoes_logs (
-          canal, status, tentativa, tentado_em, erro_detalhes
-        )
-      `)
-      .eq('id', notificacaoId)
+    const { searchParams } = new URL(request.url);
+    const categoria = searchParams.get('categoria');
+    const ativas = searchParams.get('ativas') !== 'false';
+
+    const supabase = await getAdminClient();
+
+    // Construir query
+    let query = supabase
+      .from('metas_negocio')
+      .select('*')
       .eq('bar_id', user.bar_id)
-      .single()
+      .order('ordem_exibicao', { ascending: true });
+
+    // Filtrar por categoria se especificada
+    if (categoria) {
+      query = query.eq('categoria', categoria);
+    }
+
+    // Filtrar apenas metas ativas se especificado
+    if (ativas) {
+      query = query.eq('meta_ativa', true);
+    }
+
+    const { data: metas, error } = await query;
 
     if (error) {
-      console.error('Erro ao buscar notificação:', error)
-      return NextResponse.json({ 
-        error: 'Notificação não encontrada' 
-      }, { status: 404 })
+      console.error('Œ Erro ao buscar metas:', error);
+      return NextResponse.json({ error: 'Erro ao buscar metas' }, { status: 500 });
     }
 
-    // Verificar se o usuário tem acesso a esta notificação
-    const temAcesso = notificacao.usuario_id === user.user_id || 
-                     notificacao.role_alvo === user.role ||
-                     user.role === 'admin'
-
-    if (!temAcesso) {
-      return NextResponse.json({ 
-        error: 'Sem permissão para acessar esta notificação' 
-      }, { status: 403 })
-    }
+    // Organizar por categoria
+    const metasOrganizadas = {
+      financeiro: metas?.filter((m: any) => m.categoria === 'financeiro') || [],
+      clientes: metas?.filter((m: any) => m.categoria === 'clientes') || [],
+      avaliacoes: metas?.filter((m: any) => m.categoria === 'avaliacoes') || [],
+      cockpit_produtos: metas?.filter((m: any) => m.categoria === 'cockpit_produtos') || [],
+      marketing: metas?.filter((m: any) => m.categoria === 'marketing') || [],
+    };
 
     return NextResponse.json({
       success: true,
-      data: notificacao
-    })
+      data: metasOrganizadas,
+      total: metas?.length || 0
+    });
 
-  } catch (error: any) {
-    console.error('Erro na API de buscar notificação:', error)
-    return NextResponse.json({ 
-      error: 'Erro interno do servidor',
-      details: error.message 
-    }, { status: 500 })
+  } catch (error) {
+    console.error('Œ Erro na API de metas:', error);
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }
 
 // =====================================================
-// PUT - ATUALIZAR NOTIFICAÇÃO (MARCAR COMO LIDA)
+// POST - CRIAR NOVA META
 // =====================================================
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest) {
   try {
-    // 🔐 AUTENTICAÇÃO
-    const user = await authenticateUser(request)
+    const user = await authenticateUser(request);
     if (!user) {
-      return authErrorResponse('Usuário não autenticado')
+      return authErrorResponse('Usuá¡rio ná£o autenticado');
     }
 
-    const { id: notificacaoId } = params
-    const body = await request.json()
-    const data = AtualizarNotificacaoSchema.parse(body)
-    
-    const supabase = await getAdminClient()
-    
-    // Buscar notificação atual
-    const { data: notificacaoAtual, error: fetchError } = await supabase
-      .from('notificacoes')
-      .select('usuario_id, role_alvo, status')
-      .eq('id', notificacaoId)
+    const body = await request.json();
+    const {
+      categoria,
+      subcategoria,
+      nome_meta,
+      tipo_valor,
+      valor_semanal,
+      valor_mensal,
+      valor_unico,
+      unidade,
+      descricao,
+      cor_categoria,
+      icone_categoria
+    } = body;
+
+    // Validaá§áµes
+    if (!categoria || !nome_meta || !tipo_valor) {
+      return NextResponse.json(
+        { error: 'Categoria, nome da meta e tipo do valor sá£o obrigatá³rios' },
+        { status: 400 }
+      );
+    }
+
+    const supabase = await getAdminClient();
+
+    // Buscar prá³xima ordem
+    const { data: ultimaMeta } = await supabase
+      .from('metas_negocio')
+      .select('ordem_exibicao')
       .eq('bar_id', user.bar_id)
-      .single()
+      .order('ordem_exibicao', { ascending: false })
+      .limit(1)
+      .single();
 
-    if (fetchError || !notificacaoAtual) {
-      return NextResponse.json({ 
-        error: 'Notificação não encontrada' 
-      }, { status: 404 })
-    }
+    const novaOrdem = (ultimaMeta?.ordem_exibicao || 0) + 1;
 
-    // Verificar permissões
-    const temAcesso = notificacaoAtual.usuario_id === user.user_id || 
-                     notificacaoAtual.role_alvo === user.role ||
-                     user.role === 'admin'
-
-    if (!temAcesso) {
-      return NextResponse.json({ 
-        error: 'Sem permissão para atualizar esta notificação' 
-      }, { status: 403 })
-    }
-
-    // Preparar dados de atualização
-    const dadosAtualizacao: any = {}
-
-    if (data.status) {
-      dadosAtualizacao.status = data.status
-      
-      if (data.status === 'lida') {
-        dadosAtualizacao.lida_em = new Date().toISOString()
-      }
-    }
-
-    if (data.dados_extras) {
-      dadosAtualizacao.dados_extras = {
-        ...notificacaoAtual.dados_extras,
-        ...data.dados_extras
-      }
-    }
-
-    // Atualizar notificação
-    const { data: notificacaoAtualizada, error: updateError } = await supabase
-      .from('notificacoes')
-      .update(dadosAtualizacao)
-      .eq('id', notificacaoId)
+    // Criar nova meta
+    const { data: novaMeta, error } = await supabase
+      .from('metas_negocio')
+      .insert({
+        bar_id: user.bar_id,
+        categoria,
+        subcategoria,
+        nome_meta,
+        tipo_valor,
+        valor_semanal,
+        valor_mensal,
+        valor_unico,
+        unidade,
+        descricao,
+        cor_categoria,
+        icone_categoria,
+        ordem_exibicao: novaOrdem,
+        criado_por: user.user_id,
+        atualizado_por: user.user_id
+      })
       .select()
-      .single()
+      .single();
 
-    if (updateError) {
-      console.error('Erro ao atualizar notificação:', updateError)
-      return NextResponse.json({ 
-        error: 'Erro ao atualizar notificação' 
-      }, { status: 500 })
+    if (error) {
+      console.error('Œ Erro ao criar meta:', error);
+      return NextResponse.json({ error: 'Erro ao criar meta' }, { status: 500 });
     }
 
-    console.log(`📱 Notificação atualizada: ${notificacaoId} - ${data.status}`)
-
+    console.log(`œ… Meta criada: ${nome_meta}`);
     return NextResponse.json({
       success: true,
-      message: 'Notificação atualizada com sucesso',
-      data: notificacaoAtualizada
-    })
+      data: novaMeta,
+      message: 'Meta criada com sucesso'
+    });
 
-  } catch (error: any) {
-    console.error('Erro na API de atualizar notificação:', error)
-    
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ 
-        error: 'Dados inválidos',
-        details: error.errors 
-      }, { status: 400 })
-    }
-    
-    return NextResponse.json({ 
-      error: 'Erro interno do servidor',
-      details: error.message 
-    }, { status: 500 })
+  } catch (error) {
+    console.error('Œ Erro ao criar meta:', error);
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }
 
 // =====================================================
-// DELETE - EXCLUIR NOTIFICAÇÃO
+// PUT - ATUALIZAR METAS EM LOTE
 // =====================================================
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest) {
   try {
-    // 🔐 AUTENTICAÇÃO
-    const user = await authenticateUser(request)
+    const user = await authenticateUser(request);
     if (!user) {
-      return authErrorResponse('Usuário não autenticado')
+      return authErrorResponse('Usuá¡rio ná£o autenticado');
     }
 
-    const { id: notificacaoId } = params
-    const supabase = await getAdminClient()
-    
-    // Buscar notificação
-    const { data: notificacao, error: fetchError } = await supabase
-      .from('notificacoes')
-      .select('usuario_id, role_alvo, titulo')
-      .eq('id', notificacaoId)
-      .eq('bar_id', user.bar_id)
-      .single()
+    const { metas } = await request.json();
 
-    if (fetchError || !notificacao) {
-      return NextResponse.json({ 
-        error: 'Notificação não encontrada' 
-      }, { status: 404 })
+    if (!Array.isArray(metas)) {
+      return NextResponse.json(
+        { error: 'Formato invá¡lido: esperado array de metas' },
+        { status: 400 }
+      );
     }
 
-    // Verificar permissões (apenas admin ou próprio usuário pode excluir)
-    const podeExcluir = user.role === 'admin' || 
-                       notificacao.usuario_id === user.user_id
+    const supabase = await getAdminClient();
+    const metasAtualizadas = [];
 
-    if (!podeExcluir) {
-      return NextResponse.json({ 
-        error: 'Sem permissão para excluir esta notificação' 
-      }, { status: 403 })
+    // Atualizar cada meta
+    for (const meta of metas) {
+      const { data: metaAtualizada, error } = await supabase
+        .from('metas_negocio')
+        .update({
+          valor_semanal: meta.valor_semanal,
+          valor_mensal: meta.valor_mensal,
+          valor_unico: meta.valor_unico,
+          meta_ativa: meta.meta_ativa,
+          atualizado_por: user.user_id
+        })
+        .eq('id', meta.id)
+        .eq('bar_id', user.bar_id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error(`Œ Erro ao atualizar meta ${meta.id}:`, error);
+        continue;
+      }
+
+      metasAtualizadas.push(metaAtualizada);
     }
 
-    // Excluir notificação (hard delete por enquanto)
-    const { error: deleteError } = await supabase
-      .from('notificacoes')
-      .delete()
-      .eq('id', notificacaoId)
-
-    if (deleteError) {
-      console.error('Erro ao excluir notificação:', deleteError)
-      return NextResponse.json({ 
-        error: 'Erro ao excluir notificação' 
-      }, { status: 500 })
-    }
-
-    console.log(`🗑️ Notificação excluída: ${notificacaoId} - ${notificacao.titulo}`)
-
+    console.log(`œ… ${metasAtualizadas.length} metas atualizadas`);
     return NextResponse.json({
       success: true,
-      message: 'Notificação excluída com sucesso'
-    })
+      data: metasAtualizadas,
+      message: `${metasAtualizadas.length} metas atualizadas com sucesso`
+    });
 
-  } catch (error: any) {
-    console.error('Erro na API de excluir notificação:', error)
-    return NextResponse.json({ 
-      error: 'Erro interno do servidor',
-      details: error.message 
-    }, { status: 500 })
+  } catch (error) {
+    console.error('Œ Erro ao atualizar metas:', error);
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
-}
-
-// =====================================================
-// ENDPOINTS ESPECIAIS
-// =====================================================
-
-// Endpoint para marcar múltiplas notificações como lidas
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    // 🔐 AUTENTICAÇÃO
-    const user = await authenticateUser(request)
-    if (!user) {
-      return authErrorResponse('Usuário não autenticado')
-    }
-
-    const { searchParams } = new URL(request.url)
-    const action = searchParams.get('action')
-
-    if (action === 'mark_all_read') {
-      return await marcarTodasComoLidas(user, request)
-    }
-
-    if (action === 'clear_old') {
-      return await limparNotificacoesAntigas(user, request)
-    }
-
-    return NextResponse.json({ 
-      error: 'Ação não suportada' 
-    }, { status: 400 })
-
-  } catch (error: any) {
-    console.error('Erro na API PATCH de notificações:', error)
-    return NextResponse.json({ 
-      error: 'Erro interno do servidor',
-      details: error.message 
-    }, { status: 500 })
-  }
-}
-
-// =====================================================
-// FUNÇÕES AUXILIARES
-// =====================================================
-
-async function marcarTodasComoLidas(user: any, request: NextRequest) {
-  const supabase = await getAdminClient()
-  
-  const { searchParams } = new URL(request.url)
-  const modulo = searchParams.get('modulo')
-  
-  let query = supabase
-    .from('notificacoes')
-    .update({ 
-      status: 'lida', 
-      lida_em: new Date().toISOString() 
-    })
-    .eq('bar_id', user.bar_id)
-    .in('status', ['pendente', 'enviada'])
-    .or(`usuario_id.eq.${user.user_id},role_alvo.eq.${user.role}`)
-
-  if (modulo) {
-    query = query.eq('modulo', modulo)
-  }
-
-  const { count, error } = await query
-
-  if (error) {
-    console.error('Erro ao marcar todas como lidas:', error)
-    return NextResponse.json({ 
-      error: 'Erro ao marcar notificações como lidas' 
-    }, { status: 500 })
-  }
-
-  console.log(`📱 ${count} notificações marcadas como lidas para usuário ${user.user_id}`)
-
-  return NextResponse.json({
-    success: true,
-    message: `${count} notificações marcadas como lidas`,
-    count
-  })
-}
-
-async function limparNotificacoesAntigas(user: any, request: NextRequest) {
-  const supabase = await getAdminClient()
-  
-  const { searchParams } = new URL(request.url)
-  const dias = parseInt(searchParams.get('dias') || '7')
-  
-  const dataLimite = new Date(Date.now() - dias * 24 * 60 * 60 * 1000).toISOString()
-  
-  const { count, error } = await supabase
-    .from('notificacoes')
-    .delete()
-    .eq('bar_id', user.bar_id)
-    .eq('status', 'lida')
-    .or(`usuario_id.eq.${user.user_id},role_alvo.eq.${user.role}`)
-    .lt('lida_em', dataLimite)
-
-  if (error) {
-    console.error('Erro ao limpar notificações antigas:', error)
-    return NextResponse.json({ 
-      error: 'Erro ao limpar notificações antigas' 
-    }, { status: 500 })
-  }
-
-  console.log(`🧹 ${count} notificações antigas removidas para usuário ${user.user_id}`)
-
-  return NextResponse.json({
-    success: true,
-    message: `${count} notificações antigas removidas`,
-    count
-  })
 } 

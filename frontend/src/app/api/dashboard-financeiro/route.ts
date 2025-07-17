@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -16,14 +16,14 @@ function createSupabaseClient() {
   )
 }
 
-// Fun��o para buscar todos os dados com pagina��o
+// Funá§á£o para buscar todos os dados com paginaá§á£o
 async function buscarTodosEventosFinanceiros(supabase: any, barId: number) {
   const todosEventos: any[] = []
   let pagina = 0
   const LIMITE_POR_PAGINA = 1000
 
   while (true) {
-    console.log(`🔄 Buscando p�gina ${pagina + 1} dos eventos financeiros...`)
+    console.log(`ðŸ”„ Buscando pá¡gina ${pagina + 1} dos eventos financeiros...`)
     
     const { data: eventosPagina, error } = await supabase
       .from('contaazul_eventos_financeiros')
@@ -36,21 +36,21 @@ async function buscarTodosEventosFinanceiros(supabase: any, barId: number) {
       .range(pagina * LIMITE_POR_PAGINA, (pagina + 1) * LIMITE_POR_PAGINA - 1)
 
     if (error) {
-      console.error(`�� Erro na p�gina ${pagina + 1}:`, error)
+      console.error(`Œ Erro na pá¡gina ${pagina + 1}:`, error)
       throw error
     }
 
     if (!eventosPagina || eventosPagina.length === 0) {
-      console.log(`�� Busca finalizada. Total de eventos: ${todosEventos.length}`)
+      console.log(`œ… Busca finalizada. Total de eventos: ${todosEventos.length}`)
       break
     }
 
     todosEventos.push(...eventosPagina)
-    console.log(`📄 P�gina ${pagina + 1}: ${eventosPagina.length} eventos (Total acumulado: ${todosEventos.length})`)
+    console.log(`ðŸ“„ Pá¡gina ${pagina + 1}: ${eventosPagina.length} eventos (Total acumulado: ${todosEventos.length})`)
 
-    // Se a p�gina retornou menos que o limite, � a �ltima p�gina
+    // Se a pá¡gina retornou menos que o limite, á© a áºltima pá¡gina
     if (eventosPagina.length < LIMITE_POR_PAGINA) {
-      console.log(`�� �ltima p�gina atingida. Total final: ${todosEventos.length} eventos`)
+      console.log(`œ… ášltima pá¡gina atingida. Total final: ${todosEventos.length} eventos`)
       break
     }
 
@@ -66,14 +66,14 @@ export async function GET(request: NextRequest) {
     const barId = searchParams.get('barId')
     
     if (!barId) {
-      return NextResponse.json({ error: 'Bar ID � obrigat�rio' }, { status: 400 })
+      return NextResponse.json({ error: 'Bar ID á© obrigatá³rio' }, { status: 400 })
     }
 
     const supabase = createSupabaseClient()
 
-    console.log(`💰 BUSCANDO DADOS FINANCEIROS PARA BAR ${barId} - 2025 (COM PAGINA��O)`)
+    console.log(`ðŸ’° BUSCANDO DADOS FINANCEIROS PARA BAR ${barId} - 2025 (COM PAGINAá‡áƒO)`)
 
-    // 1. BUSCAR TODOS OS EVENTOS COM PAGINA��O
+    // 1. BUSCAR TODOS OS EVENTOS COM PAGINAá‡áƒO
     const todosEventos = await buscarTodosEventosFinanceiros(supabase, parseInt(barId))
 
     // 2. BUSCAR CATEGORIAS
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
       .eq('bar_id', parseInt(barId))
 
     if (errorCategorias) {
-      console.error('�� Erro ao buscar categorias:', errorCategorias)
+      console.error('Œ Erro ao buscar categorias:', errorCategorias)
       return NextResponse.json({ error: 'Erro ao buscar categorias' }, { status: 500 })
     }
 
@@ -139,13 +139,13 @@ export async function GET(request: NextRequest) {
       .sort((a: any, b: any) => b.total - a.total)
       .slice(0, 10)
 
-    // 7. TRANSA��ES RECENTES (primeiras 20)
+    // 7. TRANSAá‡á•ES RECENTES (primeiras 20)
     const transacoesRecentes = todosEventos.slice(0, 20).map((evento: any) => {
       const categoria = mapaCategorias[evento.categoria_id]
       return {
         id: evento.evento_id,
         tipo: evento.tipo,
-        descricao: evento.descricao || 'Sem descri��o',
+        descricao: evento.descricao || 'Sem descriá§á£o',
         valor: parseFloat(evento.valor) || 0,
         data: evento.data_competencia,
         status: evento.status || 'N/A',
@@ -173,17 +173,17 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    console.log(`💰 Dados financeiros carregados (TODOS OS DADOS):`)
-    console.log(`   📊 Total de eventos processados: ${todosEventos.length}`)
-    console.log(`   📈 Receitas: R$ ${totalReceitas.toFixed(2)}`)
-    console.log(`   📉 Despesas: R$ ${totalDespesas.toFixed(2)}`)
-    console.log(`   💰 Saldo: R$ ${saldoLiquido.toFixed(2)}`)
+    console.log(`ðŸ’° Dados financeiros carregados (TODOS OS DADOS):`)
+    console.log(`   ðŸ“Š Total de eventos processados: ${todosEventos.length}`)
+    console.log(`   ðŸ“ˆ Receitas: R$ ${totalReceitas.toFixed(2)}`)
+    console.log(`   ðŸ“‰ Despesas: R$ ${totalDespesas.toFixed(2)}`)
+    console.log(`   ðŸ’° Saldo: R$ ${saldoLiquido.toFixed(2)}`)
 
     return NextResponse.json(resultado)
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
-    console.error('�� Erro ao buscar dados financeiros:', error)
+    console.error('Œ Erro ao buscar dados financeiros:', error)
     return NextResponse.json(
       { error: 'Erro ao buscar dados financeiros: ' + errorMessage },
       { status: 500 }

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const barId = searchParams.get('barId') || '3'
     
-    console.log('🧪 TESTANDO ENDPOINTS V2 CORRETOS COM DATA_COMPETENCIA...')
+    console.log('ðŸ§ª TESTANDO ENDPOINTS V2 CORRETOS COM DATA_COMPETENCIA...')
 
     const supabase = createSupabaseClient()
 
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     if (credError || !credentials) {
       return NextResponse.json({ 
-        error: 'Credenciais ContaAzul n�o encontradas' 
+        error: 'Credenciais ContaAzul ná£o encontradas' 
       }, { status: 404 })
     }
 
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     
     if (expiraEm <= agora) {
       return NextResponse.json({ 
-        error: 'Token ContaAzul expirado. Renova��o necess�ria.' 
+        error: 'Token ContaAzul expirado. Renovaá§á£o necessá¡ria.' 
       }, { status: 401 })
     }
 
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
 
     // TESTE 1: Receitas v2 com endpoint correto
     if (categoriasReceita && categoriasReceita.length > 0) {
-      console.log('🧪 TESTE 1: Receitas v2 endpoint correto...')
+      console.log('ðŸ§ª TESTE 1: Receitas v2 endpoint correto...')
       try {
         const categoria = categoriasReceita[0]
         const urlReceitas = `${baseUrl}/v1/financeiro/eventos-financeiros/contas-a-receber/buscar?` +
@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
 
     // TESTE 2: Despesas v2 com endpoint correto
     if (categoriasDespesa && categoriasDespesa.length > 0) {
-      console.log('🧪 TESTE 2: Despesas v2 endpoint correto...')
+      console.log('ðŸ§ª TESTE 2: Despesas v2 endpoint correto...')
       try {
         const categoria = categoriasDespesa[0]
         const urlDespesas = `${baseUrl}/v1/financeiro/eventos-financeiros/contas-a-pagar/buscar?` +
@@ -182,9 +182,9 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 🆕 TESTE 3: Receitas v2 COM PAR�METROS DE COMPET�NCIA
+    // ðŸ†• TESTE 3: Receitas v2 COM PARá‚METROS DE COMPETáŠNCIA
     if (categoriasReceita && categoriasReceita.length > 0) {
-      console.log('🧪 TESTE 3: Receitas v2 COM data_competencia_de e data_competencia_ate...')
+      console.log('ðŸ§ª TESTE 3: Receitas v2 COM data_competencia_de e data_competencia_ate...')
       try {
         const categoria = categoriasReceita[0]
         const urlReceitasCompetencia = `${baseUrl}/v1/financeiro/eventos-financeiros/contas-a-receber/buscar?` +
@@ -236,9 +236,9 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 🆕 TESTE 4: Despesas v2 COM PAR�METROS DE COMPET�NCIA
+    // ðŸ†• TESTE 4: Despesas v2 COM PARá‚METROS DE COMPETáŠNCIA
     if (categoriasDespesa && categoriasDespesa.length > 0) {
-      console.log('🧪 TESTE 4: Despesas v2 COM data_competencia_de e data_competencia_ate...')
+      console.log('ðŸ§ª TESTE 4: Despesas v2 COM data_competencia_de e data_competencia_ate...')
       try {
         const categoria = categoriasDespesa[0]
         const urlDespesasCompetencia = `${baseUrl}/v1/financeiro/eventos-financeiros/contas-a-pagar/buscar?` +
@@ -290,9 +290,9 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 🆕 TESTE 5: Endpoint de PARCELAS
+    // ðŸ†• TESTE 5: Endpoint de PARCELAS
     if (eventosFinanceiros && eventosFinanceiros.length > 0) {
-      console.log('🧪 TESTE 5: Endpoint de parcelas...')
+      console.log('ðŸ§ª TESTE 5: Endpoint de parcelas...')
       
       const resultadosParcelas = []
       
@@ -355,7 +355,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       sucesso: true,
-      message: 'Teste endpoints v2 corretos com data_competencia conclu�do',
+      message: 'Teste endpoints v2 corretos com data_competencia concluá­do',
       testes,
       conclusoes: {
         total_testes: testes.length,
@@ -370,7 +370,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro interno:', error)
+    console.error('Œ Erro interno:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
       details: error instanceof Error ? error.message : 'Erro desconhecido'

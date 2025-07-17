@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+﻿import { useState, useEffect, useCallback } from 'react'
 import { useUser } from '@/contexts/UserContext'
 import { useBar } from '@/contexts/BarContext'
 import { api } from '@/lib/api-client'
@@ -46,7 +46,7 @@ export function useChecklistBadge() {
     return () => clearInterval(interval)
   }, [fetchChecklistBadgeData])
 
-  // Retornar o n�mero total de itens pendentes + atrasados para o badge
+  // Retornar o náºmero total de itens pendentes + atrasados para o badge
   const badgeCount = badgeData.pendentes + badgeData.atrasados
 
   return {

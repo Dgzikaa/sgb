@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const barId = parseInt(searchParams.get('bar_id') || '3')
     
-    console.log(`🍽️ Buscando TODAS as receitas para dashboard - bar_id: ${barId}`)
+    console.log(`ðŸ½ï¸ Buscando TODAS as receitas para dashboard - bar_id: ${barId}`)
 
     const supabase = await getSupabaseClient()
     if (!supabase) {
@@ -44,16 +44,16 @@ export async function GET(request: NextRequest) {
       .order('receita_codigo')
 
     if (receitasError) {
-      console.error('�� Erro ao buscar receitas:', receitasError)
+      console.error('Œ Erro ao buscar receitas:', receitasError)
       return NextResponse.json({
         success: false,
         error: 'Erro ao buscar receitas: ' + receitasError.message
       }, { status: 500 })
     }
 
-    console.log(`🍽️ ${todasReceitas?.length || 0} registros de receitas encontrados (incluindo inativas)`)
+    console.log(`ðŸ½ï¸ ${todasReceitas?.length || 0} registros de receitas encontrados (incluindo inativas)`)
 
-    // Agrupar receitas por c�digo
+    // Agrupar receitas por cá³digo
     const receitasAgrupadas = new Map()
     
     for (const receita of todasReceitas || []) {
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
           receita_codigo: codigo,
           receita_nome: receita.receita_nome,
           receita_categoria: receita.receita_categoria,
-          rendimento_esperado: 0, // Ser� preenchido quando encontrar o insumo chefe
+          rendimento_esperado: 0, // Será¡ preenchido quando encontrar o insumo chefe
           insumo_chefe_id: receita.insumo_chefe_id,
           tipo_local: receita.receita_categoria?.includes('DRINKS') ? 'bar' : 'cozinha',
           ativo: receita.ativo, // IMPORTANTE: Incluir status ativo/inativo
@@ -72,12 +72,12 @@ export async function GET(request: NextRequest) {
         })
       }
       
-      // Adicionar insumo � receita
+      // Adicionar insumo á  receita
       if (receita.insumos) {
         const receitaObj = receitasAgrupadas.get(codigo)
         const isChefe = receita.insumo_chefe_id === receita.insumos.id
         
-        // Se este � o insumo chefe, aplicar o rendimento esperado � receita
+        // Se este á© o insumo chefe, aplicar o rendimento esperado á  receita
         if (isChefe && receita.rendimento_esperado) {
           receitaObj.rendimento_esperado = receita.rendimento_esperado
         }
@@ -96,11 +96,11 @@ export async function GET(request: NextRequest) {
 
     const receitasComInsumos = Array.from(receitasAgrupadas.values())
     
-    // Estat�sticas
+    // Estatá­sticas
     const receitasAtivas = receitasComInsumos.filter((r: any) => r.ativo !== false)
     const receitasInativas = receitasComInsumos.filter((r: any) => r.ativo === false)
     
-    console.log(`�� ${receitasComInsumos.length} receitas processadas: ${receitasAtivas.length} ativas, ${receitasInativas.length} inativas`)
+    console.log(`œ… ${receitasComInsumos.length} receitas processadas: ${receitasAtivas.length} ativas, ${receitasInativas.length} inativas`)
 
     return NextResponse.json({
       success: true,
@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro interno na API receitas/todas:', error)
+    console.error('Œ Erro interno na API receitas/todas:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro interno do servidor: ' + (error as Error).message

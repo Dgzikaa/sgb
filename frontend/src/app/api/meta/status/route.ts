@@ -1,4 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+﻿import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const userDataHeader = request.headers.get('x-user-data')
     
     if (!userDataHeader) {
-      return NextResponse.json({ error: 'Dados do usu�rio n�o encontrados' }, { status: 401 })
+      return NextResponse.json({ error: 'Dados do usuá¡rio ná£o encontrados' }, { status: 401 })
     }
 
     const { bar_id } = JSON.parse(userDataHeader)
@@ -25,11 +25,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: false,
         connected: false,
-        error: 'Credenciais Meta n�o encontradas'
+        error: 'Credenciais Meta ná£o encontradas'
       })
     }
 
-    // 2. Verificar se token est� v�lido
+    // 2. Verificar se token está¡ vá¡lido
     const hasValidToken = !!credenciais.access_token
 
     // 3. Verificar dados coletados
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       .select('*', { count: 'exact', head: true })
       .eq('bar_id', bar_id)
 
-    // 4. �ltima coleta
+    // 4. ášltima coleta
     const { data: ultimaColeta } = await supabase
       .from('meta_coletas_log')
       .select('*')
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
       job.jobname?.includes(`meta_sync_bar_${bar_id}`)
     )
 
-    // 6. Estat�sticas recentes (�ltimos 30 dias)
+    // 6. Estatá­sticas recentes (áºltimos 30 dias)
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
       .eq('bar_id', bar_id)
       .gte('created_time', thirtyDaysAgo.toISOString())
 
-    // 7. Calcular m�tricas
+    // 7. Calcular má©tricas
     const totalEngagement = [
       ...(recentInstagramPosts || []),
       ...(recentFacebookPosts || [])
@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
     const totalPosts = (recentInstagramPosts?.length || 0) + (recentFacebookPosts?.length || 0)
     const averageEngagement = totalPosts > 0 ? (totalEngagement / totalPosts).toFixed(2) : '0'
 
-    // 8. Informa��es das p�ginas configuradas
+    // 8. Informaá§áµes das pá¡ginas configuradas
     let pageInfo = {}
     if (credenciais.configuracao_json) {
       try {
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
           appId: config.app_id
         }
       } catch (e) {
-        console.warn('Erro ao parsear configura��o Meta:', e)
+        console.warn('Erro ao parsear configuraá§á£o Meta:', e)
       }
     }
 
@@ -147,7 +147,7 @@ export async function GET(request: NextRequest) {
         lastRun: metaJob?.last_run
       },
       statistics: {
-        period: '�ltimos 30 dias',
+        period: 'ášltimos 30 dias',
         totalPosts,
         totalLikes,
         totalComments,
@@ -163,7 +163,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro ao buscar status Meta:', error)
+    console.error('Œ Erro ao buscar status Meta:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro interno do servidor'

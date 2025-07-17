@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -23,7 +23,7 @@ export default function ContaAzulInvestigacaoCompleta() {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.error || 'Erro na investiga��o');
+        throw new Error(data.error || 'Erro na investigaá§á£o');
       }
 
       setResultado(data);
@@ -44,7 +44,7 @@ export default function ContaAzulInvestigacaoCompleta() {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.error || 'Erro na investiga��o de categorias');
+        throw new Error(data.error || 'Erro na investigaá§á£o de categorias');
       }
 
       setResultado(data);
@@ -74,9 +74,9 @@ export default function ContaAzulInvestigacaoCompleta() {
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold mb-2">🔍 Investiga��o Completa ContaAzul</h1>
+          <h1 className="text-3xl font-bold mb-2">ðŸ” Investigaá§á£o Completa ContaAzul</h1>
           <p className="text-gray-600">
-            Testando TODOS os endpoints poss�veis para encontrar dados de categoriza��o
+            Testando TODOS os endpoints possá­veis para encontrar dados de categorizaá§á£o
           </p>
         </div>
 
@@ -94,12 +94,12 @@ export default function ContaAzulInvestigacaoCompleta() {
             {loading ? (
               <>
                 <Search className="w-4 h-4 mr-2 animate-spin" />
-                Investigando... (pode demorar at� 30 segundos)
+                Investigando... (pode demorar atá© 30 segundos)
               </>
             ) : (
               <>
                 <Search className="w-4 h-4 mr-2" />
-                🚀 Iniciar Investiga��o Completa
+                ðŸš€ Iniciar Investigaá§á£o Completa
               </>
             )}
           </Button>
@@ -119,7 +119,7 @@ export default function ContaAzulInvestigacaoCompleta() {
             ) : (
               <>
                 <BarChart3 className="w-4 h-4 mr-2" />
-                🎯 Investigar Categorias Espec�ficas
+                ðŸŽ¯ Investigar Categorias Especá­ficas
               </>
             )}
           </Button>
@@ -141,12 +141,12 @@ export default function ContaAzulInvestigacaoCompleta() {
 
         {resultado && (
           <div className="space-y-6">
-            {/* Resumo da An�lise */}
+            {/* Resumo da Aná¡lise */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <BarChart3 className="w-5 h-5 mr-2" />
-                  📊 Resumo da An�lise
+                  ðŸ“Š Resumo da Aná¡lise
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -167,7 +167,7 @@ export default function ContaAzulInvestigacaoCompleta() {
 
                 {/* Endpoints com Sucesso */}
                 <div className="mt-6">
-                  <h3 className="font-semibold mb-3">🎯 Endpoints com Sucesso</h3>
+                  <h3 className="font-semibold mb-3">ðŸŽ¯ Endpoints com Sucesso</h3>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                     {Object.entries(resultado.analise.endpoints_com_sucesso).map(([endpoint, sucessos]) => {
                       const numSucessos = Number(sucessos);
@@ -188,7 +188,7 @@ export default function ContaAzulInvestigacaoCompleta() {
                 <CardHeader>
                   <CardTitle className="text-green-800 flex items-center">
                     <Target className="w-5 h-5 mr-2" />
-                    🎉 Descobertas Importantes
+                    ðŸŽ‰ Descobertas Importantes
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -204,19 +204,19 @@ export default function ContaAzulInvestigacaoCompleta() {
               </Card>
             )}
 
-            {/* Recomenda��es */}
+            {/* Recomendaá§áµes */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <AlertCircle className="w-5 h-5 mr-2" />
-                  💡 Recomenda��es
+                  ðŸ’¡ Recomendaá§áµes
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   {resultado.recomendacoes.map((recomendacao: string, index: number) => (
                     <div key={index} className="flex items-start space-x-2">
-                      <span className="text-blue-500">��</span>
+                      <span className="text-blue-500">€¢</span>
                       <span>{recomendacao}</span>
                     </div>
                   ))}
@@ -229,10 +229,10 @@ export default function ContaAzulInvestigacaoCompleta() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Search className="w-5 h-5 mr-2" />
-                  🔍 Resultados Detalhados
+                  ðŸ” Resultados Detalhados
                 </CardTitle>
                 <CardDescription>
-                  An�lise completa de cada evento testado
+                  Aná¡lise completa de cada evento testado
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -241,7 +241,7 @@ export default function ContaAzulInvestigacaoCompleta() {
                     <div key={index} className="border rounded-lg p-4">
                       <div className="mb-3">
                         <h4 className="font-semibold">
-                          📋 Evento: {evento.evento_id}
+                          ðŸ“‹ Evento: {evento.evento_id}
                         </h4>
                         <p className="text-sm text-gray-600">
                           {evento.tipo} - {evento.descricao}
@@ -267,17 +267,17 @@ export default function ContaAzulInvestigacaoCompleta() {
                                 <div className="space-y-1 text-sm">
                                   {t.tem_rateio && (
                                     <Badge variant="outline" className="text-blue-600">
-                                      🎯 Rateio
+                                      ðŸŽ¯ Rateio
                                     </Badge>
                                   )}
                                   {t.tem_categorias && (
                                     <Badge variant="outline" className="text-purple-600">
-                                      📊 Categorias
+                                      ðŸ“Š Categorias
                                     </Badge>
                                   )}
                                   {t.tem_centros_custo && (
                                     <Badge variant="outline" className="text-orange-600">
-                                      🏢 Centros de Custo
+                                      ðŸ¢ Centros de Custo
                                     </Badge>
                                   )}
                                   {t.campos_primeiro_nivel && (
@@ -307,9 +307,9 @@ export default function ContaAzulInvestigacaoCompleta() {
             {/* JSON Completo */}
             <Card>
               <CardHeader>
-                <CardTitle>📝 JSON Completo</CardTitle>
+                <CardTitle>ðŸ“ JSON Completo</CardTitle>
                 <CardDescription>
-                  Dados completos da investiga��o para an�lise t�cnica
+                  Dados completos da investigaá§á£o para aná¡lise tá©cnica
                 </CardDescription>
               </CardHeader>
               <CardContent>

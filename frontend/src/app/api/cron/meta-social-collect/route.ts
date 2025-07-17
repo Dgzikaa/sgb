@@ -1,33 +1,33 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createMetaSocialService } from '@/lib/meta-social-service'
 
-// Configura��o do Supabase
+// Configuraá§á£o do Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
 // ========================================
-// 🕐 POST /api/cron/meta-social-collect
-// Endpoint para execu��o autom�tica via cron
+// ðŸ• POST /api/cron/meta-social-collect
+// Endpoint para execuá§á£o automá¡tica via cron
 // ========================================
 export async function POST(request: NextRequest) {
   const executionId = `meta-collect-${Date.now()}`
   
   try {
-    console.log(`🕐 [${executionId}] Iniciando coleta autom�tica de m�tricas sociais...`)
+    console.log(`ðŸ• [${executionId}] Iniciando coleta automá¡tica de má©tricas sociais...`)
 
-    // Verificar autoriza��o do cron (Vercel Cron ou token interno)
+    // Verificar autorizaá§á£o do cron (Vercel Cron ou token interno)
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET
 
     if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      console.error(`�� [${executionId}] Acesso n�o autorizado ao cron`)
+      console.error(`Œ [${executionId}] Acesso ná£o autorizado ao cron`)
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Buscar todas as configura��es ativas
+    // Buscar todas as configuraá§áµes ativas
     const { data: configuracoes, error: configError } = await supabase
       .from('api_credentials')
       .select('bar_id, configuracoes')
@@ -35,19 +35,19 @@ export async function POST(request: NextRequest) {
       .eq('sistema', 'meta')
 
     if (configError) {
-      console.error(`�� [${executionId}] Erro ao buscar configura��es:`, configError)
+      console.error(`Œ [${executionId}] Erro ao buscar configuraá§áµes:`, configError)
       return NextResponse.json({ error: 'Database error' }, { status: 500 })
     }
 
     if (!configuracoes || configuracoes.length === 0) {
-      console.log(`��️ [${executionId}] Nenhuma configura��o ativa encontrada`)
+      console.log(`„¹ï¸ [${executionId}] Nenhuma configuraá§á£o ativa encontrada`)
       return NextResponse.json({ 
-        message: 'Nenhuma configura��o ativa encontrada',
+        message: 'Nenhuma configuraá§á£o ativa encontrada',
         processed: 0 
       })
     }
 
-    console.log(`📊 [${executionId}] Encontradas ${configuracoes.length} configura��es ativas`)
+    console.log(`ðŸ“Š [${executionId}] Encontradas ${configuracoes.length} configuraá§áµes ativas`)
 
     const results = {
       total_configs: configuracoes.length,
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     const now = new Date()
 
-    // Processar cada configura��o
+    // Processar cada configuraá§á£o
     for (const config of configuracoes) {
       const barId = config.bar_id
       const resultDetail: any = {
@@ -71,27 +71,27 @@ export async function POST(request: NextRequest) {
       }
 
       try {
-        console.log(`🔍 [${executionId}] Processando bar ${barId}...`)
+        console.log(`ðŸ” [${executionId}] Processando bar ${barId}...`)
 
-        // Verificar se � hora de coletar
+        // Verificar se á© hora de coletar
         const proximaColeta = new Date(config.proxima_coleta)
         
         if (proximaColeta > now) {
-          console.log(`��️ [${executionId}] Bar ${barId}: Pr�xima coleta em ${proximaColeta.toISOString()}`)
+          console.log(`­ï¸ [${executionId}] Bar ${barId}: Prá³xima coleta em ${proximaColeta.toISOString()}`)
           resultDetail.status = 'skipped'
-          resultDetail.reason = 'N�o � hora de coletar ainda'
+          resultDetail.reason = 'Ná£o á© hora de coletar ainda'
           results.skipped++
           results.details.push(resultDetail)
           continue
         }
 
-        // Verificar se n�o coletou muito recentemente (evitar duplicatas)
+        // Verificar se ná£o coletou muito recentemente (evitar duplicatas)
         if (config.ultima_coleta) {
           const ultimaColeta = new Date(config.ultima_coleta)
           const diffHours = (now.getTime() - ultimaColeta.getTime()) / (1000 * 60 * 60)
           
           if (diffHours < (config.frequencia_coleta_horas - 0.5)) {
-            console.log(`��️ [${executionId}] Bar ${barId}: Coleta recente h� ${diffHours.toFixed(1)}h`)
+            console.log(`­ï¸ [${executionId}] Bar ${barId}: Coleta recente há¡ ${diffHours.toFixed(1)}h`)
             resultDetail.status = 'skipped'
             resultDetail.reason = 'Coleta muito recente'
             results.skipped++
@@ -100,26 +100,26 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // Criar servi�o de coleta
+        // Criar serviá§o de coleta
         const metaService = await createMetaSocialService(barId)
         if (!metaService) {
-          console.error(`�� [${executionId}] Bar ${barId}: N�o foi poss�vel criar servi�o Meta`)
+          console.error(`Œ [${executionId}] Bar ${barId}: Ná£o foi possá­vel criar serviá§o Meta`)
           resultDetail.status = 'failed'
-          resultDetail.error = 'Configura��o inv�lida'
+          resultDetail.error = 'Configuraá§á£o invá¡lida'
           results.failed++
           results.details.push(resultDetail)
           continue
         }
 
-        console.log(`🚀 [${executionId}] Bar ${barId}: Iniciando coleta...`)
+        console.log(`ðŸš€ [${executionId}] Bar ${barId}: Iniciando coleta...`)
 
         // Executar coleta completa
         const collectResult = await metaService.collectAllMetrics()
 
         if (collectResult) {
-          console.log(`�� [${executionId}] Bar ${barId}: Coleta realizada com sucesso`)
+          console.log(`œ… [${executionId}] Bar ${barId}: Coleta realizada com sucesso`)
           
-          // Atualizar timestamps da configura��o
+          // Atualizar timestamps da configuraá§á£o
           const proximaColetaFutura = new Date(now)
           proximaColetaFutura.setHours(proximaColetaFutura.getHours() + config.frequencia_coleta_horas)
 
@@ -140,16 +140,16 @@ export async function POST(request: NextRequest) {
           results.successful++
 
         } else {
-          console.error(`�� [${executionId}] Bar ${barId}: Falha na coleta`)
+          console.error(`Œ [${executionId}] Bar ${barId}: Falha na coleta`)
           resultDetail.status = 'failed'
-          resultDetail.error = 'Falha na coleta de m�tricas'
+          resultDetail.error = 'Falha na coleta de má©tricas'
           results.failed++
         }
 
         results.processed++
 
       } catch (error: any) {
-        console.error(`�� [${executionId}] Bar ${barId}: Erro durante coleta:`, error)
+        console.error(`Œ [${executionId}] Bar ${barId}: Erro durante coleta:`, error)
         resultDetail.status = 'failed'
         resultDetail.error = error.message
         results.failed++
@@ -163,7 +163,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Log final
-    console.log(`🏁 [${executionId}] Coleta autom�tica finalizada:`, {
+    console.log(`ðŸ [${executionId}] Coleta automá¡tica finalizada:`, {
       processed: results.processed,
       successful: results.successful,
       failed: results.failed,
@@ -176,16 +176,16 @@ export async function POST(request: NextRequest) {
       execution_id: executionId,
       timestamp: now.toISOString(),
       summary: results,
-      message: `Processadas ${results.processed} configura��es. ${results.successful} sucessos, ${results.failed} falhas, ${results.skipped} ignoradas.`
+      message: `Processadas ${results.processed} configuraá§áµes. ${results.successful} sucessos, ${results.failed} falhas, ${results.skipped} ignoradas.`
     })
 
   } catch (error: any) {
-    console.error(`�� [${executionId}] Erro cr�tico na coleta autom�tica:`, error)
+    console.error(`Œ [${executionId}] Erro crá­tico na coleta automá¡tica:`, error)
     
     return NextResponse.json({
       success: false,
       execution_id: executionId,
-      error: 'Erro cr�tico durante execu��o',
+      error: 'Erro crá­tico durante execuá§á£o',
       details: error.message,
       timestamp: new Date().toISOString()
     }, { status: 500 })
@@ -193,14 +193,14 @@ export async function POST(request: NextRequest) {
 }
 
 // ========================================
-// 📋 GET /api/cron/meta-social-collect
-// Status das pr�ximas execu��es agendadas
+// ðŸ“‹ GET /api/cron/meta-social-collect
+// Status das prá³ximas execuá§áµes agendadas
 // ========================================
 export async function GET(request: NextRequest) {
   try {
-    console.log('📋 Consultando status das coletas agendadas...')
+    console.log('ðŸ“‹ Consultando status das coletas agendadas...')
 
-    // Buscar configura��es com pr�ximas coletas
+    // Buscar configuraá§áµes com prá³ximas coletas
     const { data: configuracoes, error } = await supabase
       .from('api_credentials')
       .select(`
@@ -212,7 +212,7 @@ export async function GET(request: NextRequest) {
       .eq('sistema', 'meta')
 
     if (error) {
-      console.error('�� Erro ao buscar configura��es:', error)
+      console.error('Œ Erro ao buscar configuraá§áµes:', error)
       return NextResponse.json({ error: 'Database error' }, { status: 500 })
     }
 
@@ -232,7 +232,7 @@ export async function GET(request: NextRequest) {
       }
     }) || []
 
-    // Calcular estat�sticas
+    // Calcular estatá­sticas
     const stats = {
       total_configuracoes: agendamentos.length,
       ativas: agendamentos.filter((a: any) => a.status === 'ativo').length,
@@ -248,7 +248,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('�� Erro ao consultar agendamentos:', error)
+    console.error('Œ Erro ao consultar agendamentos:', error)
     return NextResponse.json({
       success: false,
       error: error.message

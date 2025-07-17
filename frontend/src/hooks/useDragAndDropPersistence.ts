@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+﻿import { useState, useEffect, useCallback } from 'react'
 
 export interface PersistenceOptions {
   key: string
@@ -156,7 +156,7 @@ export function useDragAndDropPersistence<T>(
   }
 }
 
-// Hook para m�ltiplas listas persistentes
+// Hook para máºltiplas listas persistentes
 export function useMultipleDragAndDropPersistence<T>(
   configs: Array<{ key: string; defaultItems: T[]; options?: Omit<PersistenceOptions, 'key'> }>
 ) {
@@ -182,7 +182,7 @@ export function useMultipleDragAndDropPersistence<T>(
   }
 }
 
-// Hook espec�fico para checklists
+// Hook especá­fico para checklists
 export function useChecklistPersistence(defaultChecklists: any[]) {
   return useDragAndDropPersistence(defaultChecklists, {
     key: 'checklists',
@@ -192,7 +192,7 @@ export function useChecklistPersistence(defaultChecklists: any[]) {
   })
 }
 
-// Hook espec�fico para tasks
+// Hook especá­fico para tasks
 export function useTasksPersistence(defaultTasks: any[]) {
   return useDragAndDropPersistence(defaultTasks, {
     key: 'tasks',

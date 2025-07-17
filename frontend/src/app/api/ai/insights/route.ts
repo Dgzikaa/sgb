@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
 import { createServiceRoleClient } from '@/lib/supabase-admin';
 
-// Schema de valida��o para filtros
+// Schema de validaá§á£o para filtros
 const FilterInsightsSchema = z.object({
   tipo_insight: z.string().optional(),
   categoria: z.string().optional(),
@@ -19,7 +19,7 @@ const FilterInsightsSchema = z.object({
   order_direction: z.enum(['asc', 'desc']).default('desc')
 });
 
-// Schema para atualiza��o de insight
+// Schema para atualizaá§á£o de insight
 const UpdateInsightSchema = z.object({
   status: z.enum(['novo', 'lido', 'em_acao', 'resolvido', 'ignorado']).optional(),
   acao_tomada: z.string().optional(),
@@ -29,7 +29,7 @@ const UpdateInsightSchema = z.object({
 });
 
 // ========================================
-// 🧠 GET /api/ai/insights
+// ðŸ§  GET /api/ai/insights
 // ========================================
 export async function GET(request: NextRequest) {
   try {
@@ -37,21 +37,21 @@ export async function GET(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'Usuá¡rio ná£o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
-    // Verificar permiss�es
+    // Verificar permissáµes
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permiss�o para acessar insights' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permissá£o para acessar insights' }, { status: 403 });
     }
 
-    // Parsear par�metros de consulta
+    // Parsear pará¢metros de consulta
     const { searchParams } = new URL(request.url);
     const rawParams = Object.fromEntries(searchParams.entries());
     
-    // Converter tipos num�ricos
+    // Converter tipos numá©ricos
     const processedParams: any = { ...rawParams };
     if (processedParams.page) processedParams.page = parseInt(processedParams.page);
     if (processedParams.limit) processedParams.limit = parseInt(processedParams.limit);
@@ -97,12 +97,12 @@ export async function GET(request: NextRequest) {
       query = query.gte('confianca', validatedParams.confianca_minima);
     }
 
-    // Aplicar ordena��o
+    // Aplicar ordenaá§á£o
     query = query.order(validatedParams.order_by, { 
       ascending: validatedParams.order_direction === 'asc' 
     });
 
-    // Aplicar pagina��o
+    // Aplicar paginaá§á£o
     const offset = (validatedParams.page - 1) * validatedParams.limit;
     query = query.range(offset, offset + validatedParams.limit - 1);
 
@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao buscar insights' }, { status: 500 });
     }
 
-    // Calcular estat�sticas
+    // Calcular estatá­sticas
     const stats = {
       total: count || 0,
       por_status: {
@@ -149,7 +149,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ 
-        error: 'Par�metros inv�lidos',
+        error: 'Pará¢metros invá¡lidos',
         details: error.errors 
       }, { status: 400 });
     }
@@ -160,7 +160,7 @@ export async function GET(request: NextRequest) {
 }
 
 // ========================================
-// 🧠 PUT /api/ai/insights
+// ðŸ§  PUT /api/ai/insights
 // ========================================
 export async function PUT(request: NextRequest) {
   try {
@@ -168,21 +168,21 @@ export async function PUT(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'Usuá¡rio ná£o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao, usuario_id } = JSON.parse(userData);
 
-    // Verificar permiss�es
+    // Verificar permissáµes
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permiss�o para atualizar insights' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permissá£o para atualizar insights' }, { status: 403 });
     }
 
     const body = await request.json();
     const { id, ...updateData } = body;
 
     if (!id) {
-      return NextResponse.json({ error: 'ID do insight � obrigat�rio' }, { status: 400 });
+      return NextResponse.json({ error: 'ID do insight á© obrigatá³rio' }, { status: 400 });
     }
 
     const validatedData = UpdateInsightSchema.parse(updateData);
@@ -197,10 +197,10 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (fetchError || !existing) {
-      return NextResponse.json({ error: 'Insight n�o encontrado' }, { status: 404 });
+      return NextResponse.json({ error: 'Insight ná£o encontrado' }, { status: 404 });
     }
 
-    // Preparar dados para atualiza��o
+    // Preparar dados para atualizaá§á£o
     const updatePayload: any = { ...validatedData };
 
     // Se mudando status para 'lido' pela primeira vez
@@ -235,7 +235,7 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({
-        error: 'Dados inv�lidos',
+        error: 'Dados invá¡lidos',
         details: error.errors
       }, { status: 400 });
     }
@@ -246,7 +246,7 @@ export async function PUT(request: NextRequest) {
 }
 
 // ========================================
-// 🧠 POST /api/ai/insights (Marcar m�ltiplos como lidos)
+// ðŸ§  POST /api/ai/insights (Marcar máºltiplos como lidos)
 // ========================================
 export async function POST(request: NextRequest) {
   try {
@@ -254,14 +254,14 @@ export async function POST(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'Usuá¡rio ná£o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao, usuario_id } = JSON.parse(userData);
 
-    // Verificar permiss�es
+    // Verificar permissáµes
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permiss�o para atualizar insights' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permissá£o para atualizar insights' }, { status: 403 });
     }
 
     const body = await request.json();
@@ -269,7 +269,7 @@ export async function POST(request: NextRequest) {
 
     if (!action || !Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json({ 
-        error: 'A��o e lista de IDs s�o obrigat�rios' 
+        error: 'Aá§á£o e lista de IDs sá£o obrigatá³rios' 
       }, { status: 400 });
     }
 
@@ -297,10 +297,10 @@ export async function POST(request: NextRequest) {
         break;
       
       default:
-        return NextResponse.json({ error: 'A��o inv�lida' }, { status: 400 });
+        return NextResponse.json({ error: 'Aá§á£o invá¡lida' }, { status: 400 });
     }
 
-    // Atualizar m�ltiplos insights
+    // Atualizar máºltiplos insights
     const supabase = createServiceRoleClient();
     const { data, error } = await supabase
       .from('ai_insights')

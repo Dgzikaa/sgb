@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 
 interface ChecklistAbertura {
@@ -25,12 +25,12 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '30')
 
     if (!bar_id) {
-      return NextResponse.json({ error: 'bar_id � obrigat�rio' }, { status: 400 })
+      return NextResponse.json({ error: 'bar_id á© obrigatá³rio' }, { status: 400 })
     }
 
     const supabase = await getAdminClient()
 
-    // Buscar hist�rico de checklists de abertura
+    // Buscar histá³rico de checklists de abertura
     const { data: historico, error } = await supabase
       .from('checklist_abertura')
       .select(`
@@ -52,8 +52,8 @@ export async function GET(request: NextRequest) {
       .limit(limit)
 
     if (error) {
-      console.error('Erro ao buscar hist�rico:', error)
-      return NextResponse.json({ error: 'Erro ao buscar hist�rico' }, { status: 500 })
+      console.error('Erro ao buscar histá³rico:', error)
+      return NextResponse.json({ error: 'Erro ao buscar histá³rico' }, { status: 500 })
     }
 
     // Formatar dados para retorno
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
       total: historicoFormatado.length
     })
   } catch (error) {
-    console.error('Erro na API de hist�rico:', error)
+    console.error('Erro na API de histá³rico:', error)
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
   }
 }
@@ -94,7 +94,7 @@ function calcularTempoTotal(inicio: string, fim: string): string {
     
     let diferencaMinutos = fimMinutos - inicioMinutos
     
-    // Se a diferen�a for negativa, significa que passou para o dia seguinte
+    // Se a diferená§a for negativa, significa que passou para o dia seguinte
     if (diferencaMinutos < 0) {
       diferencaMinutos += 24 * 60
     }

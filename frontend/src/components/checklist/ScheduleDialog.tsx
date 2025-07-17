@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -26,7 +26,7 @@ import {
 } from 'lucide-react'
 
 // =====================================================
-// 📅 AGENDAMENTO DE CHECKLISTS (MOBILE-FRIENDLY)
+// ðŸ“… AGENDAMENTO DE CHECKLISTS (MOBILE-FRIENDLY)
 // =====================================================
 
 interface ScheduleConfig {
@@ -81,43 +81,43 @@ export default function ScheduleDialog({
   })
 
   const diasSemanaOptions = [
-    { value: 0, label: 'Dom', emoji: '🔵' },
-    { value: 1, label: 'Seg', emoji: '💼' },
-    { value: 2, label: 'Ter', emoji: '💼' },
-    { value: 3, label: 'Qua', emoji: '💼' },
-    { value: 4, label: 'Qui', emoji: '💼' },
-    { value: 5, label: 'Sex', emoji: '💼' },
-    { value: 6, label: 'S�b', emoji: '🔵' }
+    { value: 0, label: 'Dom', emoji: 'ðŸ”µ' },
+    { value: 1, label: 'Seg', emoji: 'ðŸ’¼' },
+    { value: 2, label: 'Ter', emoji: 'ðŸ’¼' },
+    { value: 3, label: 'Qua', emoji: 'ðŸ’¼' },
+    { value: 4, label: 'Qui', emoji: 'ðŸ’¼' },
+    { value: 5, label: 'Sex', emoji: 'ðŸ’¼' },
+    { value: 6, label: 'Sá¡b', emoji: 'ðŸ”µ' }
   ]
 
   const frequenciaOptions = [
     { 
       value: 'diaria', 
-      label: 'Di�ria', 
-      emoji: '📅', 
-      desc: 'Todo dia no hor�rio definido',
-      example: 'Todos os dias �s 08:00'
+      label: 'Diá¡ria', 
+      emoji: 'ðŸ“…', 
+      desc: 'Todo dia no horá¡rio definido',
+      example: 'Todos os dias á s 08:00'
     },
     { 
       value: 'semanal', 
       label: 'Semanal', 
-      emoji: '📆', 
-      desc: 'Dias espec�ficos da semana',
-      example: 'Seg, Ter, Qua, Qui, Sex �s 08:00'
+      emoji: 'ðŸ“†', 
+      desc: 'Dias especá­ficos da semana',
+      example: 'Seg, Ter, Qua, Qui, Sex á s 08:00'
     },
     { 
       value: 'mensal', 
       label: 'Mensal', 
-      emoji: '🗓️', 
-      desc: 'Dia espec�fico do m�s',
-      example: 'Todo dia 1 �s 08:00'
+      emoji: 'ðŸ—“ï¸', 
+      desc: 'Dia especá­fico do máªs',
+      example: 'Todo dia 1 á s 08:00'
     },
     { 
       value: 'personalizada', 
       label: 'Personalizada', 
-      emoji: '��️', 
-      desc: 'Configura��o avan�ada',
-      example: 'Configura��o customizada'
+      emoji: 'š™ï¸', 
+      desc: 'Configuraá§á£o avaná§ada',
+      example: 'Configuraá§á£o customizada'
     }
   ]
 
@@ -179,14 +179,14 @@ export default function ScheduleDialog({
   const getFrequenciaDescription = () => {
     switch (config.frequencia) {
       case 'diaria':
-        return `Todos os dias �s ${config.horario}`
+        return `Todos os dias á s ${config.horario}`
       case 'semanal':
         const diasTexto = config.diasSemana?.map((d: any) => diasSemanaOptions[d].label).join(', ')
-        return `${diasTexto} �s ${config.horario}`
+        return `${diasTexto} á s ${config.horario}`
       case 'mensal':
-        return `Todo dia ${config.diaMes} �s ${config.horario}`
+        return `Todo dia ${config.diaMes} á s ${config.horario}`
       case 'personalizada':
-        return 'Configura��o personalizada'
+        return 'Configuraá§á£o personalizada'
       default:
         return ''
     }
@@ -199,9 +199,9 @@ export default function ScheduleDialog({
           <div className="space-y-4">
             <div className="text-center p-4 bg-blue-50 rounded-lg">
               <Calendar className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-              <h3 className="font-medium text-blue-900">Escolha a Frequ�ncia</h3>
+              <h3 className="font-medium text-blue-900">Escolha a Frequáªncia</h3>
               <p className="text-sm text-blue-700 mt-1">
-                Com que frequ�ncia este checklist deve ser executado?
+                Com que frequáªncia este checklist deve ser executado?
               </p>
             </div>
 
@@ -256,15 +256,15 @@ export default function ScheduleDialog({
           <div className="space-y-4">
             <div className="text-center p-4 bg-green-50 rounded-lg">
               <Clock className="w-8 h-8 mx-auto mb-2 text-green-600" />
-              <h3 className="font-medium text-green-900">Configure o Hor�rio</h3>
+              <h3 className="font-medium text-green-900">Configure o Horá¡rio</h3>
               <p className="text-sm text-green-700 mt-1">
                 Defina quando o checklist deve ser executado
               </p>
             </div>
 
-            {/* Hor�rio */}
+            {/* Horá¡rio */}
             <div>
-              <Label className="text-sm font-medium">Hor�rio:</Label>
+              <Label className="text-sm font-medium">Horá¡rio:</Label>
               <Input
                 type="time"
                 value={config.horario}
@@ -273,7 +273,7 @@ export default function ScheduleDialog({
               />
             </div>
 
-            {/* Configura��es espec�ficas por frequ�ncia */}
+            {/* Configuraá§áµes especá­ficas por frequáªncia */}
             {config.frequencia === 'semanal' && (
               <div>
                 <Label className="text-sm font-medium mb-3 block">Dias da Semana:</Label>
@@ -296,7 +296,7 @@ export default function ScheduleDialog({
 
             {config.frequencia === 'mensal' && (
               <div>
-                <Label className="text-sm font-medium">Dia do M�s:</Label>
+                <Label className="text-sm font-medium">Dia do Máªs:</Label>
                 <Select 
                   value={config.diaMes?.toString()} 
                   onValueChange={(value) => setConfig(prev => ({ ...prev, diaMes: parseInt(value) }))}
@@ -315,7 +315,7 @@ export default function ScheduleDialog({
               </div>
             )}
 
-            {/* Preview da configura��o */}
+            {/* Preview da configuraá§á£o */}
             <div className="p-3 bg-gray-50 rounded-lg">
               <div className="text-sm font-medium text-gray-700 mb-1">Preview:</div>
               <div className="text-sm text-gray-900">{getFrequenciaDescription()}</div>
@@ -328,19 +328,19 @@ export default function ScheduleDialog({
           <div className="space-y-4">
             <div className="text-center p-4 bg-orange-50 rounded-lg">
               <Bell className="w-8 h-8 mx-auto mb-2 text-orange-600" />
-              <h3 className="font-medium text-orange-900">Notifica��es</h3>
+              <h3 className="font-medium text-orange-900">Notificaá§áµes</h3>
               <p className="text-sm text-orange-700 mt-1">
-                Configure lembretes e respons�veis
+                Configure lembretes e responsá¡veis
               </p>
             </div>
 
-            {/* T�tulo do Agendamento */}
+            {/* Tá­tulo do Agendamento */}
             <div>
-              <Label className="text-sm font-medium">T�tulo do Agendamento:</Label>
+              <Label className="text-sm font-medium">Tá­tulo do Agendamento:</Label>
               <Input
                 value={config.titulo}
                 onChange={(e) => setConfig(prev => ({ ...prev, titulo: e.target.value }))}
-                placeholder="Ex: Checklist de Abertura - Manh�"
+                placeholder="Ex: Checklist de Abertura - Manhá£"
                 className="mt-1 touch-manipulation"
               />
             </div>
@@ -350,7 +350,7 @@ export default function ScheduleDialog({
               <div>
                 <div className="font-medium text-blue-900">Ativar Agendamento</div>
                 <div className="text-sm text-blue-700">
-                  O agendamento come�ar� a funcionar imediatamente
+                  O agendamento comeá§ará¡ a funcionar imediatamente
                 </div>
               </div>
               <Switch
@@ -359,10 +359,10 @@ export default function ScheduleDialog({
               />
             </div>
 
-            {/* Notifica��es */}
+            {/* Notificaá§áµes */}
             <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
               <div>
-                <div className="font-medium text-orange-900">Enviar Notifica��es</div>
+                <div className="font-medium text-orange-900">Enviar Notificaá§áµes</div>
                 <div className="text-sm text-orange-700">
                   Lembrar quando o checklist deve ser executado
                 </div>
@@ -373,13 +373,13 @@ export default function ScheduleDialog({
               />
             </div>
 
-            {/* Observa��es */}
+            {/* Observaá§áµes */}
             <div>
-              <Label className="text-sm font-medium">Observa��es (opcional):</Label>
+              <Label className="text-sm font-medium">Observaá§áµes (opcional):</Label>
               <textarea
                 value={config.observacoes}
                 onChange={(e) => setConfig(prev => ({ ...prev, observacoes: e.target.value }))}
-                placeholder="Instru��es especiais, exce��es, etc."
+                placeholder="Instruá§áµes especiais, exceá§áµes, etc."
                 className="mt-1 w-full p-3 border rounded-lg resize-none touch-manipulation"
                 rows={3}
               />
@@ -394,7 +394,7 @@ export default function ScheduleDialog({
               <Check className="w-8 h-8 mx-auto mb-2 text-green-600" />
               <h3 className="font-medium text-green-900">Confirmar Agendamento</h3>
               <p className="text-sm text-green-700 mt-1">
-                Revise as configura��es antes de salvar
+                Revise as configuraá§áµes antes de salvar
               </p>
             </div>
 
@@ -410,13 +410,13 @@ export default function ScheduleDialog({
 
               {/* Agendamento */}
               <div className="p-3 bg-gray-50 rounded-lg">
-                <div className="text-sm font-medium text-gray-900">T�tulo:</div>
+                <div className="text-sm font-medium text-gray-900">Tá­tulo:</div>
                 <div className="text-sm text-gray-800">{config.titulo}</div>
               </div>
 
-              {/* Frequ�ncia */}
+              {/* Frequáªncia */}
               <div className="p-3 bg-gray-50 rounded-lg">
-                <div className="text-sm font-medium text-gray-900">Frequ�ncia:</div>
+                <div className="text-sm font-medium text-gray-900">Frequáªncia:</div>
                 <div className="text-sm text-gray-800">{getFrequenciaDescription()}</div>
               </div>
 
@@ -429,7 +429,7 @@ export default function ScheduleDialog({
                   </Badge>
                 </div>
                 <div className="p-3 bg-gray-50 rounded-lg text-center">
-                  <div className="text-sm font-medium text-gray-900">Notifica��es:</div>
+                  <div className="text-sm font-medium text-gray-900">Notificaá§áµes:</div>
                   <Badge className={config.notificacoes ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}>
                     {config.notificacoes ? 'Ativadas' : 'Desativadas'}
                   </Badge>
@@ -438,7 +438,7 @@ export default function ScheduleDialog({
 
               {config.observacoes && (
                 <div className="p-3 bg-gray-50 rounded-lg">
-                  <div className="text-sm font-medium text-gray-900">Observa��es:</div>
+                  <div className="text-sm font-medium text-gray-900">Observaá§áµes:</div>
                   <div className="text-sm text-gray-800">{config.observacoes}</div>
                 </div>
               )}
@@ -468,7 +468,7 @@ export default function ScheduleDialog({
               onClick={() => setCurrentStep('timing')}
               className="flex-1 touch-manipulation"
             >
-              Pr�ximo
+              Prá³ximo
               <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
@@ -488,7 +488,7 @@ export default function ScheduleDialog({
               onClick={() => setCurrentStep('notifications')}
               className="flex-1 touch-manipulation"
             >
-              Pr�ximo
+              Prá³ximo
               <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
@@ -508,7 +508,7 @@ export default function ScheduleDialog({
               onClick={() => setCurrentStep('confirm')}
               className="flex-1 touch-manipulation"
             >
-              Pr�ximo
+              Prá³ximo
               <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
@@ -605,7 +605,7 @@ export default function ScheduleDialog({
 }
 
 // =====================================================
-// 🎯 HOOK PARA GERENCIAR AGENDAMENTOS
+// ðŸŽ¯ HOOK PARA GERENCIAR AGENDAMENTOS
 // =====================================================
 
 export function useSchedules() {

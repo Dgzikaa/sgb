@@ -1,4 +1,4 @@
-'use client';
+Ôªø'use client';
 
 import React, { useState } from 'react';
 
@@ -20,7 +20,7 @@ export default function ContaAzulDiretoPage() {
       const data = await response.json();
       setResultado(data);
     } catch (error) {
-      setResultado({ erro: 'Falha na conex·o' });
+      setResultado({ erro: 'Falha na conex√°o' });
     } finally {
       setTestando(false);
     }
@@ -34,7 +34,7 @@ export default function ContaAzulDiretoPage() {
         <p className="text-gray-600 mb-8">
           Vamos testar <strong>diretamente</strong> o que funciona no ContaAzul.
           <br />
-          <strong>Sem enrolaÁ·o, sem diagnÛsticos complexos.</strong>
+          <strong>Sem enrola√ß√°o, sem diagn√≥sticos complexos.</strong>
         </p>
 
         <button
@@ -64,7 +64,7 @@ export default function ContaAzulDiretoPage() {
               </div>
             ) : (
               <div>
-                <h3 className="font-bold text-red-800 mb-2">? N·o funcionou ainda</h3>
+                <h3 className="font-bold text-red-800 mb-2">? N√°o funcionou ainda</h3>
                 <p className="text-red-700 mb-3">{resultado.problema}</p>
                 {resultado.status && (
                   <div className="text-sm text-gray-600">
@@ -76,9 +76,9 @@ export default function ContaAzulDiretoPage() {
                     ))}
                   </div>
                 )}
-                {resultado.prÛximo && (
+                {resultado.pr√≥ximo && (
                   <div className="mt-3 p-2 bg-blue-100 rounded">
-                    <strong>PrÛximo passo:</strong> {resultado.prÛximo}
+                    <strong>Pr√≥ximo passo:</strong> {resultado.pr√≥ximo}
                   </div>
                 )}
               </div>

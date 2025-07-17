@@ -1,4 +1,4 @@
-'use client'
+ï»¿'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -84,14 +84,14 @@ export default function ContaAzulPgcronPage() {
       const data = await response.json()
 
       if (response.ok) {
-        alert('œ… Cron job configurado com sucesso!')
+        alert('Å“â€¦ Cron job configurado com sucesso!')
         await loadStatus()
       } else {
-        alert(`Œ Erro: ${data.error}`)
+        alert(`ÂÅ’ Erro: ${data.error}`)
       }
     } catch (error) {
       console.error('Erro ao configurar cron:', error)
-      alert('Œ Erro ao configurar cron job')
+      alert('ÂÅ’ Erro ao configurar cron job')
     } finally {
       setIsLoading(false)
     }
@@ -115,14 +115,14 @@ export default function ContaAzulPgcronPage() {
       const data = await response.json()
 
       if (response.ok) {
-        alert('œ… Cron job removido com sucesso!')
+        alert('Å“â€¦ Cron job removido com sucesso!')
         await loadStatus()
       } else {
-        alert(`Œ Erro: ${data.error}`)
+        alert(`ÂÅ’ Erro: ${data.error}`)
       }
     } catch (error) {
       console.error('Erro ao remover cron:', error)
-      alert('Œ Erro ao remover cron job')
+      alert('ÂÅ’ Erro ao remover cron job')
     } finally {
       setIsLoading(false)
     }
@@ -147,7 +147,7 @@ export default function ContaAzulPgcronPage() {
       const data = await response.json()
       setTestResult(data)
       
-      // Recarregar status apá³s teste
+      // Recarregar status apÃ¡Â³s teste
       setTimeout(() => loadStatus(), 2000)
     } catch (error) {
       console.error('Erro ao testar sync:', error)
@@ -162,11 +162,11 @@ export default function ContaAzulPgcronPage() {
 
   const getStatusBadge = (configured: boolean, active: boolean) => {
     if (configured && active) {
-      return <Badge className="bg-green-100 text-green-800">œ… Ativo</Badge>
+      return <Badge className="bg-green-100 text-green-800">Å“â€¦ Ativo</Badge>
     } else if (configured && !active) {
-      return <Badge className="bg-yellow-100 text-yellow-800">š ï¸ Configurado mas Inativo</Badge>
+      return <Badge className="bg-yellow-100 text-yellow-800">Å¡Â Ã¯Â¸Â Configurado mas Inativo</Badge>
     } else {
-      return <Badge className="bg-red-100 text-red-800">Œ Ná£o Configurado</Badge>
+      return <Badge className="bg-red-100 text-red-800">ÂÅ’ NÃ¡Â£o Configurado</Badge>
     }
   }
 
@@ -201,10 +201,10 @@ export default function ContaAzulPgcronPage() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">ContaAzul pgcron</h1>
               <p className="text-gray-600">
-                Gerenciamento da automaá§á£o de coleta do ContaAzul para {selectedBar.nome}
+                Gerenciamento da automaÃ¡Â§Ã¡Â£o de coleta do ContaAzul para {selectedBar.nome}
               </p>
               <div className="mt-2 text-sm text-blue-600 bg-blue-50 p-2 rounded">
-                ğŸ”„ <strong>Arquitetura:</strong> pgcron †’ edge function †’ API dados-brutos †’ trigger †’ tabela receitas
+                Ã°Å¸â€â€ <strong>Arquitetura:</strong> pgcron â€ â€™ edge function â€ â€™ API dados-brutos â€ â€™ trigger â€ â€™ tabela receitas
               </div>
             </div>
             <Button 
@@ -251,7 +251,7 @@ export default function ContaAzulPgcronPage() {
                       "bg-green-100 text-green-800" : 
                       "bg-red-100 text-red-800"
                     }>
-                      {jobStatus.edgeFunction.available ? 'œ… Online' : 'Œ Offline'}
+                      {jobStatus.edgeFunction.available ? 'Å“â€¦ Online' : 'ÂÅ’ Offline'}
                     </Badge>
                     <div className="mt-2 text-sm text-gray-600">
                       {jobStatus.edgeFunction.message}
@@ -265,7 +265,7 @@ export default function ContaAzulPgcronPage() {
 
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">ášltima Execuá§á£o</CardTitle>
+                <CardTitle className="text-sm font-medium">Ã¡Å¡ltima ExecuÃ¡Â§Ã¡Â£o</CardTitle>
               </CardHeader>
               <CardContent>
                 {jobStatus ? (
@@ -274,7 +274,7 @@ export default function ContaAzulPgcronPage() {
                       {formatarData(jobStatus.status.lastRun)}
                     </div>
                     <div className="text-xs text-gray-500 mt-1">
-                      Prá³xima: {jobStatus.status.nextRun}
+                      PrÃ¡Â³xima: {jobStatus.status.nextRun}
                     </div>
                   </>
                 ) : (
@@ -289,7 +289,7 @@ export default function ContaAzulPgcronPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Activity className="w-5 h-5" />
-                Aá§áµes de Gerenciamento
+                AÃ¡Â§Ã¡Âµes de Gerenciamento
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -323,7 +323,7 @@ export default function ContaAzulPgcronPage() {
               </div>
 
               <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
-                <strong>ğŸ“… Cronograma:</strong> Executa a cada 4 horas (00:00, 04:00, 08:00, 12:00, 16:00, 20:00 UTC)
+                <strong>Ã°Å¸â€œâ€¦ Cronograma:</strong> Executa a cada 4 horas (00:00, 04:00, 08:00, 12:00, 16:00, 20:00 UTC)
               </div>
             </CardContent>
           </Card>
@@ -395,11 +395,11 @@ export default function ContaAzulPgcronPage() {
             </Card>
           )}
 
-          {/* Execuá§áµes Recentes */}
+          {/* ExecuÃ¡Â§Ã¡Âµes Recentes */}
           {jobStatus?.recentRuns && jobStatus.recentRuns.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Execuá§áµes Recentes</CardTitle>
+                <CardTitle>ExecuÃ¡Â§Ã¡Âµes Recentes</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
@@ -431,7 +431,7 @@ export default function ContaAzulPgcronPage() {
 
           {/* Footer Info */}
           <div className="text-center text-sm text-gray-500">
-            ášltima atualizaá§á£o: {lastUpdate.toLocaleTimeString('pt-BR')}
+            Ã¡Å¡ltima atualizaÃ¡Â§Ã¡Â£o: {lastUpdate.toLocaleTimeString('pt-BR')}
           </div>
         </div>
       </StandardPageLayout>

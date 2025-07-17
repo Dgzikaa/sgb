@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 
 export async function GET(request: NextRequest) {
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       throw error
     }
 
-    // Calcular estat�sticas resumidas
+    // Calcular estatá­sticas resumidas
     const resumo = {
       total_eventos: eventos?.length || 0,
       usuarios_unicos: new Set(eventos?.map((e: any) => e.user_id).filter(Boolean)).size,
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       resumo.eventos_por_tipo[evento.evento_tipo] = 
         (resumo.eventos_por_tipo[evento.evento_tipo] || 0) + 1
       
-      // P�ginas mais visitadas
+      // Pá¡ginas mais visitadas
       if (evento.pagina_atual) {
         resumo.paginas_mais_visitadas[evento.pagina_atual] = 
           (resumo.paginas_mais_visitadas[evento.pagina_atual] || 0) + 1
@@ -70,10 +70,10 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro ao buscar eventos:', error)
+    console.error('Œ Erro ao buscar eventos:', error)
     return NextResponse.json({
       success: false,
-      error: 'Erro ao buscar eventos de usu�rio',
+      error: 'Erro ao buscar eventos de usuá¡rio',
       details: error instanceof Error ? error.message : 'Erro desconhecido'
     }, { status: 500 })
   }
@@ -97,23 +97,23 @@ export async function POST(request: NextRequest) {
       user_agent
     } = body
 
-    // Valida��o b�sica
+    // Validaá§á£o bá¡sica
     if (!bar_id || !sessao_id || !evento_tipo || !evento_nome) {
       return NextResponse.json({
         success: false,
-        error: 'Campos obrigat�rios: bar_id, sessao_id, evento_tipo, evento_nome'
+        error: 'Campos obrigatá³rios: bar_id, sessao_id, evento_tipo, evento_nome'
       }, { status: 400 })
     }
 
     const supabase = await getAdminClient()
 
-    // Extrair informa��es da requisi��o
+    // Extrair informaá§áµes da requisiá§á£o
     const forwarded = request.headers.get('x-forwarded-for')
     const ip = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown'
     const referrer = request.headers.get('referer')
     const userAgent = user_agent || request.headers.get('user-agent') || 'unknown'
 
-    // Detectar dispositivo se n�o fornecido
+    // Detectar dispositivo se ná£o fornecido
     let tipoDispositivo = dispositivo_tipo
     if (!tipoDispositivo) {
       if (userAgent.includes('Mobile')) tipoDispositivo = 'mobile'
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
       else tipoDispositivo = 'desktop'
     }
 
-    // Detectar navegador se n�o fornecido
+    // Detectar navegador se ná£o fornecido
     let browserDetectado = navegador
     if (!browserDetectado) {
       if (userAgent.includes('Chrome')) browserDetectado = 'Chrome'
@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro ao registrar evento:', error)
+    console.error('Œ Erro ao registrar evento:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro ao registrar evento',
@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Endpoint para registrar m�ltiplos eventos de uma vez (batch)
+// Endpoint para registrar máºltiplos eventos de uma vez (batch)
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
@@ -183,7 +183,7 @@ export async function PUT(request: NextRequest) {
     if (!eventos || !Array.isArray(eventos) || eventos.length === 0) {
       return NextResponse.json({
         success: false,
-        error: 'Campo obrigat�rio: eventos (array com pelo menos 1 item)'
+        error: 'Campo obrigatá³rio: eventos (array com pelo menos 1 item)'
       }, { status: 400 })
     }
 
@@ -224,7 +224,7 @@ export async function PUT(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro ao registrar eventos em lote:', error)
+    console.error('Œ Erro ao registrar eventos em lote:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro ao registrar eventos em lote',

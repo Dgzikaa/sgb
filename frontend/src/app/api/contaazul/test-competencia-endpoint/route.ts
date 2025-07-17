@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getValidContaAzulToken } from '@/lib/contaazul-auth-helper'
 
@@ -22,22 +22,22 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const barId = searchParams.get('barId') || '3'
     
-    console.log('🧪 TESTANDO NOVO ENDPOINT COM DATA_COMPETENCIA...')
+    console.log('ðŸ§ª TESTANDO NOVO ENDPOINT COM DATA_COMPETENCIA...')
 
-    // �� USAR HELPER QUE RENOVA AUTOMATICAMENTE (igual sync-dados-brutos)
+    // œ… USAR HELPER QUE RENOVA AUTOMATICAMENTE (igual sync-dados-brutos)
     const accessToken = await getValidContaAzulToken(parseInt(barId))
     
     if (!accessToken) {
-      console.error('�� N�o foi poss�vel obter token v�lido (renova��o autom�tica falhou)')
+      console.error('Œ Ná£o foi possá­vel obter token vá¡lido (renovaá§á£o automá¡tica falhou)')
       return NextResponse.json({ 
-        error: 'Token ContaAzul indispon�vel. Verifique as credenciais ou reautorize.' 
+        error: 'Token ContaAzul indisponá­vel. Verifique as credenciais ou reautorize.' 
       }, { status: 401 })
     }
 
-    console.log('�� Token v�lido obtido (com renova��o autom�tica se necess�rio)')
+    console.log('œ… Token vá¡lido obtido (com renovaá§á£o automá¡tica se necessá¡rio)')
 
     // TESTE 1: Contas a Receber com data_competencia
-    console.log('🔍 TESTE 1: Endpoint contas-a-receber com data_competencia...')
+    console.log('ðŸ” TESTE 1: Endpoint contas-a-receber com data_competencia...')
     
     const urlReceitas = new URL('https://api.contaazul.com/v1/financeiro/eventos-financeiros/contas-a-receber/buscar')
     urlReceitas.searchParams.append('pagina', '1')
@@ -59,15 +59,15 @@ export async function GET(request: NextRequest) {
     let dadosReceitas = null
     if (responseReceitas.ok) {
       dadosReceitas = await responseReceitas.json()
-      console.log('�� TESTE 1 bem-sucedido! Total de itens:', dadosReceitas?.itens?.length || 0)
+      console.log('œ… TESTE 1 bem-sucedido! Total de itens:', dadosReceitas?.itens?.length || 0)
     } else {
-      console.error('�� TESTE 1 falhou:', responseReceitas.status, responseReceitas.statusText)
+      console.error('Œ TESTE 1 falhou:', responseReceitas.status, responseReceitas.statusText)
       const errorText = await responseReceitas.text()
       console.error('Erro detalhado:', errorText)
     }
 
     // TESTE 2: Contas a Pagar com data_competencia
-    console.log('🔍 TESTE 2: Endpoint contas-a-pagar com data_competencia...')
+    console.log('ðŸ” TESTE 2: Endpoint contas-a-pagar com data_competencia...')
     
     const urlDespesas = new URL('https://api.contaazul.com/v1/financeiro/eventos-financeiros/contas-a-pagar/buscar')
     urlDespesas.searchParams.append('pagina', '1')
@@ -89,9 +89,9 @@ export async function GET(request: NextRequest) {
     let dadosDespesas = null
     if (responseDespesas.ok) {
       dadosDespesas = await responseDespesas.json()
-      console.log('�� TESTE 2 bem-sucedido! Total de itens:', dadosDespesas?.itens?.length || 0)
+      console.log('œ… TESTE 2 bem-sucedido! Total de itens:', dadosDespesas?.itens?.length || 0)
     } else {
-      console.error('�� TESTE 2 falhou:', responseDespesas.status, responseDespesas.statusText)
+      console.error('Œ TESTE 2 falhou:', responseDespesas.status, responseDespesas.statusText)
       const errorText = await responseDespesas.text()
       console.error('Erro detalhado:', errorText)
     }
@@ -150,7 +150,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       sucesso: true,
-      message: 'Teste de endpoints com data_competencia conclu�do',
+      message: 'Teste de endpoints com data_competencia concluá­do',
       analise,
       dados_completos: {
         receitas: dadosReceitas,
@@ -166,7 +166,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro interno no teste:', error)
+    console.error('Œ Erro interno no teste:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
       details: error instanceof Error ? error.message : 'Erro desconhecido'

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -10,14 +10,14 @@ export default function ContaAzulCallback() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [message, setMessage] = useState('Processando autoriza��o...');
+  const [message, setMessage] = useState('Processando autorizaá§á£o...');
   const [details, setDetails] = useState<any>(null);
-  const hasProcessed = useRef(false); // Prote��o contra m�ltiplas execu��es
+  const hasProcessed = useRef(false); // Proteá§á£o contra máºltiplas execuá§áµes
 
   useEffect(() => {
-    // Se j� foi processado, n�o executar novamente
+    // Se já¡ foi processado, ná£o executar novamente
     if (hasProcessed.current) {
-      console.log('🔍 CALLBACK PAGE - J� foi processado, ignorando...');
+      console.log('ðŸ” CALLBACK PAGE - Já¡ foi processado, ignorando...');
       return;
     }
 
@@ -26,7 +26,7 @@ export default function ContaAzulCallback() {
     const error = searchParams.get('error');
     const error_description = searchParams.get('error_description');
     
-    console.log('🔍 CALLBACK PAGE - Par�metros recebidos:', {
+    console.log('ðŸ” CALLBACK PAGE - Pará¢metros recebidos:', {
       code: code ? 'presente' : 'ausente',
       state: state ? 'presente' : 'ausente',
       error,
@@ -36,7 +36,7 @@ export default function ContaAzulCallback() {
     if (error) {
       hasProcessed.current = true;
       setStatus('error');
-      setMessage(`Erro de autoriza��o: ${error}`);
+      setMessage(`Erro de autorizaá§á£o: ${error}`);
       if (error_description) {
         setDetails({ error_description });
       }
@@ -46,53 +46,53 @@ export default function ContaAzulCallback() {
     if (!code || !state) {
       hasProcessed.current = true;
       setStatus('error');
-      setMessage('Par�metros de autoriza��o ausentes');
+      setMessage('Pará¢metros de autorizaá§á£o ausentes');
       return;
     }
     
-    // Marcar como processando para evitar m�ltiplas execu��es
+    // Marcar como processando para evitar máºltiplas execuá§áµes
     hasProcessed.current = true;
     
     // Processar callback diretamente
     processCallback(code, state);
-  }, [searchParams]); // Depend�ncia apenas nos searchParams
+  }, [searchParams]); // Dependáªncia apenas nos searchParams
 
   const processCallback = async (code: string, state: string) => {
     try {
-      console.log('🔍 CALLBACK PAGE - Iniciando processamento callback');
+      console.log('ðŸ” CALLBACK PAGE - Iniciando processamento callback');
       
       // Chamar a API diretamente - ela vai extrair o barId do state
       const response = await fetch(`/api/contaazul/auth?action=callback&code=${code}&state=${state}`);
       const data = await response.json();
       
-      console.log('🔍 CALLBACK PAGE - Resposta da API:', data);
+      console.log('ðŸ” CALLBACK PAGE - Resposta da API:', data);
       
       if (!response.ok) {
         throw new Error(data.error || 'Erro ao processar callback');
       }
       
       setStatus('success');
-      setMessage('Autoriza��o realizada com sucesso!');
+      setMessage('Autorizaá§á£o realizada com sucesso!');
       setDetails(data);
       
-      // Marcar OAuth como conclu�do no localStorage para o componente detectar
+      // Marcar OAuth como concluá­do no localStorage para o componente detectar
       localStorage.setItem('contaazul_oauth_completed', 'true');
       
-      // Limpar dados tempor�rios
+      // Limpar dados temporá¡rios
       localStorage.removeItem('contaazul_bar_id');
       
-      // Marcar que OAuth foi conclu�do para selecionar aba API
+      // Marcar que OAuth foi concluá­do para selecionar aba API
       localStorage.setItem('select_api_tab', 'true');
       
-      // Redirecionar para a URL atual (Vercel ou localhost) ap�s 3 segundos
+      // Redirecionar para a URL atual (Vercel ou localhost) apá³s 3 segundos
       setTimeout(() => {
         const baseUrl = window.location.origin; // Detecta automaticamente https://sgbv2.vercel.app ou http://localhost:3001
         window.location.href = `${baseUrl}/configuracoes?tab=integracoes&oauth_success=true`;
       }, 3000);
     } catch (error) {
-      console.error('�� CALLBACK PAGE - Erro:', error);
+      console.error('Œ CALLBACK PAGE - Erro:', error);
       setStatus('error');
-      setMessage(error instanceof Error ? error.message : 'Erro ao processar autoriza��o');
+      setMessage(error instanceof Error ? error.message : 'Erro ao processar autorizaá§á£o');
       setDetails({ 
         error: error instanceof Error ? error.message : 'Erro desconhecido',
         state: state ? 'State presente' : 'State ausente',
@@ -137,7 +137,7 @@ export default function ContaAzulCallback() {
           <CardTitle>{message}</CardTitle>
           {status === 'loading' && (
             <CardDescription>
-              Aguarde enquanto finalizamos a integra��o com o ContaAzul...
+              Aguarde enquanto finalizamos a integraá§á£o com o ContaAzul...
             </CardDescription>
           )}
         </CardHeader>
@@ -154,13 +154,13 @@ export default function ContaAzulCallback() {
           {status === 'success' && (
             <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
               <AlertCircle className="w-4 h-4" />
-              <span>Voc� ser� redirecionado em breve...</span>
+              <span>Vocáª será¡ redirecionado em breve...</span>
             </div>
           )}
           
           {status === 'error' && (
             <Button onClick={handleRetry} className="w-full">
-              Voltar para Configura��es
+              Voltar para Configuraá§áµes
             </Button>
           )}
         </CardContent>

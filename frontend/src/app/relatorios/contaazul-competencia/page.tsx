@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { StandardPageLayout } from '@/components/layouts'
@@ -8,18 +8,18 @@ import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useRef } from 'react'
 import { AdvancedDataTable } from '@/components/ui/advanced-datatable'
 
-// Grupos DRE conforme regras do usu�rio
+// Grupos DRE conforme regras do usuá¡rio
 const GRUPOS_DRE = [
   {
     nome: 'Receita',
     categorias: [
-      'Stone Cr�dito', 'Stone D�bito', 'Stone Pix', 'Pix Direto na Conta', 'Dinheiro', 'Receita de Eventos', 'Outras Receitas'
+      'Stone Crá©dito', 'Stone Dá©bito', 'Stone Pix', 'Pix Direto na Conta', 'Dinheiro', 'Receita de Eventos', 'Outras Receitas'
     ],
     cor: 'text-green-600 dark:text-green-400'
   },
   {
-    nome: 'Custos Vari�veis',
-    categorias: ['IMPOSTO', 'COMISS�O 10%', 'TAXA MAQUININHA'],
+    nome: 'Custos Variá¡veis',
+    categorias: ['IMPOSTO', 'COMISSáƒO 10%', 'TAXA MAQUININHA'],
     cor: 'text-red-600 dark:text-red-400'
   },
   {
@@ -28,34 +28,34 @@ const GRUPOS_DRE = [
     cor: 'text-red-600 dark:text-red-400'
   },
   {
-    nome: 'M�o-de-Obra',
+    nome: 'Má£o-de-Obra',
     categorias: [
-      'SALARIO FUNCIONARIOS', 'VALE TRANSPORTE', 'ALIMENTA��O', 'ADICIONAIS', 'FREELA ATENDIMENTO', 'FREELA BAR', 'FREELA COZINHA', 'FREELA LIMPEZA', 'FREELA SEGURAN�A', 'PRO LABORE', 'PROVIS�O TRABALHISTA'
+      'SALARIO FUNCIONARIOS', 'VALE TRANSPORTE', 'ALIMENTAá‡áƒO', 'ADICIONAIS', 'FREELA ATENDIMENTO', 'FREELA BAR', 'FREELA COZINHA', 'FREELA LIMPEZA', 'FREELA SEGURANá‡A', 'PRO LABORE', 'PROVISáƒO TRABALHISTA'
     ],
     cor: 'text-red-600 dark:text-red-400'
   },
   {
     nome: 'Despesas Comerciais',
-    categorias: ['Marketing', 'Atra��es Programa��o', 'Produ��o Eventos'],
+    categorias: ['Marketing', 'Atraá§áµes Programaá§á£o', 'Produá§á£o Eventos'],
     cor: 'text-red-600 dark:text-red-400'
   },
   {
     nome: 'Despesas Administrativas',
-    categorias: ['Administrativo Ordin�rio', 'Escrit�rio Central', 'Recursos Humanos'],
+    categorias: ['Administrativo Ordiná¡rio', 'Escritá³rio Central', 'Recursos Humanos'],
     cor: 'text-red-600 dark:text-red-400'
   },
   {
     nome: 'Despesas Operacionais',
-    categorias: ['Materiais Opera��o', 'Materiais de Limpeza e Descart�veis', 'Utens�lios', 'Estorno', 'Outros Opera��o'],
+    categorias: ['Materiais Operaá§á£o', 'Materiais de Limpeza e Descartá¡veis', 'Utensá­lios', 'Estorno', 'Outros Operaá§á£o'],
     cor: 'text-red-600 dark:text-red-400'
   },
   {
-    nome: 'Despesas de Ocupa��o (Contas)',
-    categorias: ['ALUGUEL/CONDOM�NIO/IPTU', '�GUA', 'MANUTEN��O', 'INTERNET', 'G�S', 'LUZ'],
+    nome: 'Despesas de Ocupaá§á£o (Contas)',
+    categorias: ['ALUGUEL/CONDOMáNIO/IPTU', 'áGUA', 'MANUTENá‡áƒO', 'INTERNET', 'GáS', 'LUZ'],
     cor: 'text-red-600 dark:text-red-400'
   },
   {
-    nome: 'N�o Operacionais',
+    nome: 'Ná£o Operacionais',
     categorias: ['Contratos'],
     cor: 'text-red-600 dark:text-red-400'
   }
@@ -112,7 +112,7 @@ export default function DREOrdinarioPage() {
     <StandardPageLayout>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 py-6">
-          <h1 className="card-title-dark mb-6">DRE Ordin�rio</h1>
+          <h1 className="card-title-dark mb-6">DRE Ordiná¡rio</h1>
           <div ref={scrollRef} className="w-full overflow-x-auto">
             <table className="table-dark w-full border-collapse">
               <thead>

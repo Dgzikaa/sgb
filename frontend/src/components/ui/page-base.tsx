@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import { cn } from '@/lib/utils'
 
 interface PageBaseProps {
@@ -19,12 +19,12 @@ interface PageContentProps {
   className?: string
 }
 
-// Componente base da p�gina
+// Componente base da pá¡gina
 export function PageBase({ children, className }: PageBaseProps) {
   return (
     <div className={cn(
       "p-6 max-w-7xl mx-auto",
-      "text-black", // For�a texto preto por padr�o
+      "text-black", // Forá§a texto preto por padrá£o
       className
     )}>
       {children}
@@ -32,7 +32,7 @@ export function PageBase({ children, className }: PageBaseProps) {
   )
 }
 
-// Header da p�gina com estilos padronizados
+// Header da pá¡gina com estilos padronizados
 export function PageHeader({ title, description, badge, children, className }: PageHeaderProps) {
   return (
     <div className={cn("mb-6", className)}>
@@ -50,12 +50,12 @@ export function PageHeader({ title, description, badge, children, className }: P
   )
 }
 
-// Conte�do da p�gina
+// Conteáºdo da pá¡gina
 export function PageContent({ children, className }: PageContentProps) {
   return (
     <div className={cn(
       "space-y-6",
-      "text-black", // For�a texto preto por padr�o
+      "text-black", // Forá§a texto preto por padrá£o
       className
     )}>
       {children}
@@ -92,7 +92,7 @@ export function PageCard({
       )}
       <div className={cn(
         "p-6",
-        "text-black", // For�a texto preto
+        "text-black", // Forá§a texto preto
         contentClassName
       )}>
         {children}

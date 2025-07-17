@@ -1,4 +1,4 @@
-// Sistema avan�ado de valida��o SQL para prevenir injection attacks
+﻿// Sistema avaná§ado de validaá§á£o SQL para prevenir injection attacks
 
 export interface SQLValidationResult {
   isValid: boolean;
@@ -7,17 +7,17 @@ export interface SQLValidationResult {
   sanitizedSQL?: string;
 }
 
-// Discord webhook para notifica��es de seguran�a
+// Discord webhook para notificaá§áµes de seguraná§a
 const SECURITY_DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1393646423748116602/3zUhIrSKFHmq0zNRLf5AzrkSZNzTj7oYk6f45Tpj2LZWChtmGTKKTHxhfaNZigyLXN4y';
 
-// Fun��o para notificar Discord sobre tentativas de SQL injection
+// Funá§á£o para notificar Discord sobre tentativas de SQL injection
 async function notifyDiscordSQLThreat(sql: string, errors: string[], clientInfo?: { ip?: string; userAgent?: string; endpoint?: string }) {
   try {
     const message = {
       embeds: [{
-        title: '🚨 SQL INJECTION ATTEMPT DETECTED',
+        title: 'ðŸš¨ SQL INJECTION ATTEMPT DETECTED',
         description: `Tentativa de SQL injection bloqueada`,
-        color: 0xff0000, // Vermelho para cr�tico
+        color: 0xff0000, // Vermelho para crá­tico
         fields: [
           {
             name: 'IP Address',
@@ -47,7 +47,7 @@ async function notifyDiscordSQLThreat(sql: string, errors: string[], clientInfo?
         ],
         timestamp: new Date().toISOString(),
         footer: {
-          text: '🏢 SGB - SQL Security System'
+          text: 'ðŸ¢ SGB - SQL Security System'
         }
       }]
     };
@@ -58,7 +58,7 @@ async function notifyDiscordSQLThreat(sql: string, errors: string[], clientInfo?
       body: JSON.stringify(message)
     });
   } catch (error) {
-    console.error('�� Erro ao enviar notifica��o Discord:', error);
+    console.error('Œ Erro ao enviar notificaá§á£o Discord:', error);
   }
 }
 
@@ -70,7 +70,7 @@ export interface SQLSecurityConfig {
   allowSubqueries: boolean;
 }
 
-// Configura��o padr�o de seguran�a
+// Configuraá§á£o padrá£o de seguraná§a
 const DEFAULT_CONFIG: SQLSecurityConfig = {
   allowedTables: [
     'usuarios_bar', 'checklists', 'checklist_execucoes', 'bars', 
@@ -100,7 +100,7 @@ export class SQLSecurityValidator {
     const warnings: string[] = [];
 
     try {
-      // 1. Valida��es b�sicas
+      // 1. Validaá§áµes bá¡sicas
       if (!sql || sql.trim().length === 0) {
         errors.push('SQL query is empty');
         return { isValid: false, errors, warnings };
@@ -113,7 +113,7 @@ export class SQLSecurityValidator {
 
       const sqlLower = sql.toLowerCase().trim();
 
-      // 2. Verificar se � apenas SELECT
+      // 2. Verificar se á© apenas SELECT
       if (!sqlLower.startsWith('select')) {
         errors.push('Only SELECT statements are allowed');
         return { isValid: false, errors, warnings };
@@ -133,7 +133,7 @@ export class SQLSecurityValidator {
         }
       }
 
-      // 4. Verificar filtro bar_id obrigat�rio
+      // 4. Verificar filtro bar_id obrigatá³rio
       if (this.config.requireBarIdFilter && barId) {
         if (!this.hasBarIdFilter(sql, barId)) {
           errors.push('Query must include bar_id filter for security (multi-tenant isolation)');
@@ -148,7 +148,7 @@ export class SQLSecurityValidator {
         }
       }
 
-      // 6. Validar fun��es utilizadas
+      // 6. Validar funá§áµes utilizadas
       const usedFunctions = this.extractFunctions(sql);
       for (const func of usedFunctions) {
         if (!this.config.allowedFunctions.includes(func.toUpperCase())) {
@@ -156,7 +156,7 @@ export class SQLSecurityValidator {
         }
       }
 
-      // 7. Verificar subqueries se n�o permitidas
+      // 7. Verificar subqueries se ná£o permitidas
       if (!this.config.allowSubqueries && this.hasSubqueries(sql)) {
         errors.push('Subqueries are not allowed in this context');
       }
@@ -180,12 +180,12 @@ export class SQLSecurityValidator {
         }
       }
 
-      // 9. Verificar coment�rios suspeitos
+      // 9. Verificar comentá¡rios suspeitos
       if (sql.includes('/*') || sql.includes('--')) {
         warnings.push('SQL comments detected - review for suspicious content');
       }
 
-      // 10. Notificar Discord sobre tentativas cr�ticas de SQL injection
+      // 10. Notificar Discord sobre tentativas crá­ticas de SQL injection
       if (errors.length > 0) {
         const criticalErrors = errors.filter((error: any) => 
           error.includes('Dangerous command') || 
@@ -194,7 +194,7 @@ export class SQLSecurityValidator {
         );
         
         if (criticalErrors.length > 0) {
-          // Notificar Discord de forma ass�ncrona (n�o bloquear valida��o)
+          // Notificar Discord de forma assá­ncrona (ná£o bloquear validaá§á£o)
           notifyDiscordSQLThreat(sql, criticalErrors, clientInfo).catch(console.error);
         }
       }
@@ -260,11 +260,11 @@ export class SQLSecurityValidator {
   }
 
   private sanitizeSQL(sql: string): string {
-    // Remover coment�rios
+    // Remover comentá¡rios
     let sanitized = sql.replace(/--.*$/gm, '');
     sanitized = sanitized.replace(/\/\*[\s\S]*?\*\//g, '');
     
-    // Normalizar espa�os
+    // Normalizar espaá§os
     sanitized = sanitized.replace(/\s+/g, ' ').trim();
     
     return sanitized;
@@ -277,7 +277,7 @@ export function validateSQL(sql: string, config?: Partial<SQLSecurityConfig>, ba
   return validator.validate(sql, barId, clientInfo);
 }
 
-// Middleware para APIs que executam SQL din�mico
+// Middleware para APIs que executam SQL diná¢mico
 export function requireSQLValidation(config?: Partial<SQLSecurityConfig>) {
   return (sql: string, barId?: number) => {
     const result = validateSQL(sql, config, barId);

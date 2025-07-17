@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
@@ -8,8 +8,8 @@ export default function RecorrenciaPage() {
   return (
     <ProtectedRoute requiredModule="recorrencia">
       <EmConstrucao 
-      titulo="An�lise de Recorr�ncia"
-      descricao="An�lise de clientes recorrentes, frequ�ncia de visitas e padr�es de consumo."
+      titulo="Aná¡lise de Recorráªncia"
+      descricao="Aná¡lise de clientes recorrentes, frequáªncia de visitas e padráµes de consumo."
       prioridade="media"
       previsao="3-4 semanas"
       />

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+﻿import { useEffect, useRef } from 'react'
 
 interface FaviconOptions {
   barName?: string
@@ -14,13 +14,13 @@ export const useFavicon = ({ barName }: FaviconOptions) => {
       clearTimeout(timeoutRef.current)
     }
 
-    // Evitar m�ltiplas atualiza��es simult�neas
+    // Evitar máºltiplas atualizaá§áµes simultá¢neas
     if (isUpdatingRef.current) {
       return
     }
 
     const updateFavicon = () => {
-      // Verificar se estamos no browser e se o componente ainda est� montado
+      // Verificar se estamos no browser e se o componente ainda está¡ montado
       if (typeof window === 'undefined' || typeof document === 'undefined') {
         return
       }
@@ -30,11 +30,11 @@ export const useFavicon = ({ barName }: FaviconOptions) => {
 
       try {
         // Determinar qual pasta de favicon usar baseado no nome do bar
-        const faviconPath = barName?.toLowerCase().includes('ordin�rio') || barName?.toLowerCase().includes('ordinario')
+        const faviconPath = barName?.toLowerCase().includes('ordiná¡rio') || barName?.toLowerCase().includes('ordinario')
           ? '/favicons/ordinario'
           : '/favicons/default'
 
-        // Usar setTimeout para executar a atualiza��o de forma ass�ncrona
+        // Usar setTimeout para executar a atualizaá§á£o de forma assá­ncrona
         timeoutRef.current = setTimeout(() => {
           try {
             // Atualizar apenas o favicon principal sem remover elementos
@@ -43,11 +43,11 @@ export const useFavicon = ({ barName }: FaviconOptions) => {
               existingFavicon.href = `${faviconPath}/favicon.ico?v=${Date.now()}`
             }
 
-            // Atualizar t�tulo da p�gina
+            // Atualizar tá­tulo da pá¡gina
             if (barName) {
               document.title = `${barName} - SGB`
             } else {
-              document.title = 'SGB - Sistema de Gest�o de Bares'
+              document.title = 'SGB - Sistema de Gestá£o de Bares'
             }
 
             // Favicon atualizado silenciosamente

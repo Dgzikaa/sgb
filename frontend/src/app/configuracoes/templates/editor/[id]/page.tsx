@@ -1,834 +1,605 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { usePageTitle } from '@/contexts/PageTitleContext'
+import { useRouter } from 'next/navigation'
+import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
-import { Label } from '@/components/ui/label'
 import { 
-  Save, 
   ArrowLeft, 
-  Plus, 
-  Trash2, 
-  GripVertical,
-  Eye,
-  Smartphone,
-  Monitor,
-  Settings,
-  Tag
+  Shield, 
+  AlertTriangle, 
+  Eye, 
+  Clock, 
+  Activity,
+  Lock,
+  Globe,
+  Users,
+  Database,
+  RefreshCw,
+  CheckCircle,
+  XCircle,
+  TrendingUp,
+  Wifi,
+  Server
 } from 'lucide-react'
-import { api } from '@/lib/api-client'
 
-// =====================================================
-// TIPOS
-// =====================================================
+interface SecurityMetrics {
+  total_events: number
+  critical_events: number
+  warning_events: number
+  info_events: number
+  auth_events: number
+  access_events: number
+  injection_events: number
+  rate_limit_events: number
+  api_abuse_events: number
+  backup_events: number
+  system_events: number
+  unique_ips: number
+  failed_logins: number
+  blocked_ips: number
+}
 
-interface ItemChecklist {
+interface SecurityEvent {
   id: string
-  titulo: string
-  descricao?: string
-  tipo: 'texto' | 'numero' | 'sim_nao' | 'data' | 'assinatura' | 'foto_camera' | 'foto_upload' | 'avaliacao'
-  obrigatorio: boolean
-  ordem: number
-  opcoes?: Record<string, any>
-  condicional?: {
-    dependeDe: string
-    valor: any
-  }
-  validacao?: Record<string, any>
+  level: string
+  category: string
+  event_type: string
+  message: string
+  ip_address?: string
+  user_id?: string
+  timestamp: string
+  details?: any
 }
 
-interface SecaoChecklist {
+interface AuditLog {
   id: string
-  nome: string
-  descricao?: string
-  cor: string
-  ordem: number
-  itens: ItemChecklist[]
+  user_id: string
+  action: string
+  resource: string
+  timestamp: string
+  ip_address?: string
+  details?: any
 }
 
-interface TemplateData {
-  id?: string
-  nome: string
-  descricao?: string
-  categoria: string
-  setor: string
-  tipo: string
-  frequencia: string
-  tempo_estimado: number
-  publico: boolean
-  tags: string[]
-  estrutura: {
-    secoes: SecaoChecklist[]
-  }
-}
-
-// =====================================================
-// COMPONENTE PRINCIPAL
-// =====================================================
-
-export default function TemplateEditorPage() {
+export default function SecurityPage() {
   const router = useRouter()
-  const params = useParams()
-  const { id } = params
-  const isNew = id === 'novo'
-  const { setPageTitle } = usePageTitle()
-
-  const [template, setTemplate] = useState<TemplateData>({
-    nome: '',
-    descricao: '',
-    categoria: 'geral',
-    setor: '',
-    tipo: 'qualidade',
-    frequencia: 'diaria',
-    tempo_estimado: 30,
-    publico: false,
-    tags: [],
-    estrutura: {
-      secoes: []
-    }
-  })
-
-  const [loading, setLoading] = useState(!isNew)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [mobilePreview, setMobilePreview] = useState(false)
-  const [newTag, setNewTag] = useState('')
-
-  // =====================================================
-  // EFEITOS
-  // =====================================================
+  const { toast } = useToast()
+  const [loading, setLoading] = useState(true)
+  const [metrics, setMetrics] = useState<SecurityMetrics | null>(null)
+  const [events, setEvents] = useState<SecurityEvent[]>([])
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([])
+  const [autoRefresh, setAutoRefresh] = useState(false)
 
   useEffect(() => {
-    setPageTitle('📝 Editor de Template')
-    return () => setPageTitle('')
-  }, [setPageTitle])
-
-  useEffect(() => {
-    if (!isNew) {
-      carregarTemplate()
+    loadSecurityData()
+    
+    let interval: NodeJS.Timeout
+    if (autoRefresh) {
+      interval = setInterval(loadSecurityData, 30000) // Atualizar a cada 30 segundos
     }
-  }, [id, isNew])
+    
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [autoRefresh])
 
-  // =====================================================
-  // FUNÇÕES PRINCIPAIS
-  // =====================================================
-
-  const carregarTemplate = async () => {
+  const loadSecurityData = async () => {
     try {
       setLoading(true)
-      const response = await api.get(`/api/templates/${id}`)
       
-      if (response.success) {
-        const templateData = response.data
-        setTemplate({
-          id: templateData.id,
-          nome: templateData.nome,
-          descricao: templateData.descricao || '',
-          categoria: templateData.categoria,
-          setor: templateData.setor,
-          tipo: templateData.tipo,
-          frequencia: templateData.frequencia,
-          tempo_estimado: templateData.tempo_estimado,
-          publico: templateData.publico,
-          tags: templateData.template_tags?.map((t: any) => t.template_tags.nome) || [],
-          estrutura: templateData.estrutura || { secoes: [] }
-        })
-      } else {
-        setError(response.error || 'Erro ao carregar template')
+      // Carregar má©tricas, eventos e logs em paralelo
+      const [metricsResponse, eventsResponse, auditResponse] = await Promise.all([
+        fetch('/api/security/metrics'),
+        fetch('/api/security/events'),
+        fetch('/api/security/audit')
+      ])
+
+      if (metricsResponse.ok) {
+        const metricsData = await metricsResponse.json()
+        if (metricsData.success) {
+          setMetrics(metricsData.metrics)
+        }
       }
-    } catch (err: any) {
-      console.error('Erro ao carregar template:', err)
-      setError('Erro ao carregar template')
+
+      if (eventsResponse.ok) {
+        const eventsData = await eventsResponse.json()
+        if (eventsData.success) {
+          setEvents(eventsData.events)
+        }
+      }
+
+      if (auditResponse.ok) {
+        const auditData = await auditResponse.json()
+        if (auditData.success) {
+          setAuditLogs(auditData.logs)
+        }
+      }
+
+    } catch (error) {
+      console.error('Erro ao carregar dados de seguraná§a:', error)
+      toast({
+        title: "Œ Erro",
+        description: "Erro ao carregar dados de seguraná§a",
+        variant: "destructive"
+      })
     } finally {
       setLoading(false)
     }
   }
 
-  const salvarTemplate = async () => {
-    try {
-      setSaving(true)
-      
-      // Validações básicas
-      if (!template.nome.trim()) {
-        alert('Nome do template é obrigatório')
-        return
-      }
-      
-      if (!template.setor.trim()) {
-        alert('Setor é obrigatório')
-        return
-      }
-
-      if (template.estrutura.secoes.length === 0) {
-        alert('Adicione pelo menos uma seção ao template')
-        return
-      }
-
-      const payload = {
-        ...template,
-        estrutura: {
-          secoes: template.estrutura.secoes.map(secao => ({
-            ...secao,
-            itens: secao.itens.map(item => ({
-              ...item,
-              id: undefined // Remove IDs temporários
-            })),
-            id: undefined
-          }))
-        }
-      }
-
-      let response
-      if (isNew) {
-        response = await api.post('/api/templates', payload)
-      } else {
-        response = await api.put(`/api/templates/${id}`, payload)
-      }
-      
-      if (response.success) {
-        alert(isNew ? 'Template criado com sucesso!' : 'Template atualizado com sucesso!')
-        router.push('/configuracoes/templates')
-      } else {
-        alert(response.error || 'Erro ao salvar template')
-      }
-    } catch (err: any) {
-      console.error('Erro ao salvar template:', err)
-      alert('Erro ao salvar template')
-    } finally {
-      setSaving(false)
+  const getLevelColor = (level: string) => {
+    switch (level) {
+      case 'critical': return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-700'
+      case 'warning': return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-700'
+      case 'info': return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-700'
+      default: return 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600'
     }
   }
 
-  // =====================================================
-  // FUNÇÕES DE SEÇÕES
-  // =====================================================
-
-  const adicionarSecao = () => {
-    const novaSecao: SecaoChecklist = {
-      id: `secao_${Date.now()}`,
-      nome: `Seção ${template.estrutura.secoes.length + 1}`,
-      descricao: '',
-      cor: 'bg-blue-500',
-      ordem: template.estrutura.secoes.length + 1,
-      itens: []
-    }
-
-    setTemplate(prev => ({
-      ...prev,
-      estrutura: {
-        secoes: [...prev.estrutura.secoes, novaSecao]
-      }
-    }))
+  const getRiskScoreColor = (score: number) => {
+    if (score >= 80) return 'text-red-600 dark:text-red-400 font-bold'
+    if (score >= 50) return 'text-yellow-600 dark:text-yellow-400 font-semibold'
+    if (score >= 20) return 'text-blue-600 dark:text-blue-400 font-medium'
+    return 'text-green-600 dark:text-green-400 font-medium'
   }
 
-  const atualizarSecao = (secaoId: string, updates: Partial<SecaoChecklist>) => {
-    setTemplate(prev => ({
-      ...prev,
-      estrutura: {
-        secoes: prev.estrutura.secoes.map(secao =>
-          secao.id === secaoId ? { ...secao, ...updates } : secao
-        )
-      }
-    }))
+  const getRiskScoreLabel = (score: number) => {
+    if (score >= 80) return 'ALTO'
+    if (score >= 50) return 'Má‰DIO'
+    if (score >= 20) return 'BAIXO'
+    return 'MáNIMO'
   }
 
-  const removerSecao = (secaoId: string) => {
-    if (!confirm('Tem certeza que deseja remover esta seção?')) return
-
-    setTemplate(prev => ({
-      ...prev,
-      estrutura: {
-        secoes: prev.estrutura.secoes.filter(secao => secao.id !== secaoId)
-      }
-    }))
-  }
-
-  // =====================================================
-  // FUNÇÕES DE ITENS
-  // =====================================================
-
-  const adicionarItem = (secaoId: string) => {
-    const secao = template.estrutura.secoes.find(s => s.id === secaoId)
-    if (!secao) return
-
-    const novoItem: ItemChecklist = {
-      id: `item_${Date.now()}`,
-      titulo: 'Novo item',
-      descricao: '',
-      tipo: 'sim_nao',
-      obrigatorio: false,
-      ordem: secao.itens.length + 1,
-      opcoes: {},
-      validacao: {}
-    }
-
-    atualizarSecao(secaoId, {
-      itens: [...secao.itens, novoItem]
-    })
-  }
-
-  const atualizarItem = (secaoId: string, itemId: string, updates: Partial<ItemChecklist>) => {
-    const secao = template.estrutura.secoes.find(s => s.id === secaoId)
-    if (!secao) return
-
-    atualizarSecao(secaoId, {
-      itens: secao.itens.map(item =>
-        item.id === itemId ? { ...item, ...updates } : item
-      )
-    })
-  }
-
-  const removerItem = (secaoId: string, itemId: string) => {
-    if (!confirm('Tem certeza que deseja remover este item?')) return
-
-    const secao = template.estrutura.secoes.find(s => s.id === secaoId)
-    if (!secao) return
-
-    atualizarSecao(secaoId, {
-      itens: secao.itens.filter(item => item.id !== itemId)
-    })
-  }
-
-  // =====================================================
-  // FUNÇÕES DE TAGS
-  // =====================================================
-
-  const adicionarTag = () => {
-    if (!newTag.trim()) return
-    if (template.tags.includes(newTag.trim())) return
-
-    setTemplate(prev => ({
-      ...prev,
-      tags: [...prev.tags, newTag.trim()]
-    }))
-    setNewTag('')
-  }
-
-  const removerTag = (tag: string) => {
-    setTemplate(prev => ({
-      ...prev,
-      tags: prev.tags.filter(t => t !== tag)
-    }))
-  }
-
-  // =====================================================
-  // UTILITÁRIOS
-  // =====================================================
-
-  const getTipoIcon = (tipo: string) => {
-    const icons: Record<string, string> = {
-      texto: '📝',
-      numero: '🔢',
-      sim_nao: '✅',
-      data: '📅',
-      assinatura: '✍️',
-      foto_camera: '📷',
-      foto_upload: '🖼️',
-      avaliacao: '⭐'
-    }
-    return icons[tipo] || '📋'
-  }
-
-  const getTipoLabel = (tipo: string) => {
-    const labels: Record<string, string> = {
-      texto: 'Texto',
-      numero: 'Número',
-      sim_nao: 'Sim/Não',
-      data: 'Data',
-      assinatura: 'Assinatura',
-      foto_camera: 'Foto (Câmera)',
-      foto_upload: 'Foto (Upload)',
-      avaliacao: 'Avaliação'
-    }
-    return labels[tipo] || tipo
-  }
-
-  const cores = [
-    { value: 'bg-blue-500', label: 'Azul', color: '#3B82F6' },
-    { value: 'bg-green-500', label: 'Verde', color: '#10B981' },
-    { value: 'bg-purple-500', label: 'Roxo', color: '#8B5CF6' },
-    { value: 'bg-red-500', label: 'Vermelho', color: '#EF4444' },
-    { value: 'bg-yellow-500', label: 'Amarelo', color: '#F59E0B' },
-    { value: 'bg-orange-500', label: 'Laranja', color: '#F97316' },
-    { value: 'bg-pink-500', label: 'Rosa', color: '#EC4899' },
-    { value: 'bg-indigo-500', label: 'Índigo', color: '#6366F1' }
-  ]
-
-  // =====================================================
-  // RENDER
-  // =====================================================
-
-  if (loading) {
-    return (
-      <div className="container mx-auto p-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Carregando template...</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="container mx-auto p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-600">{error}</p>
-                          <Button onClick={() => router.push('/configuracoes/templates')} className="mt-2">
-                  Voltar para Templates
-                </Button>
-        </div>
-      </div>
-    )
+  const formatTimestamp = (timestamp: string) => {
+    return new Date(timestamp).toLocaleString('pt-BR')
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-                            onClick={() => router.push('/configuracoes/templates')}
-            variant="outline"
-            size="sm"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar
-          </Button>
-          <div>
-            <p className="text-gray-600 mt-1">
-              Configure as seções e itens do seu checklist
-            </p>
-          </div>
-        </div>
-        
-        <div className="flex gap-2">
-          <Button
-            onClick={() => setMobilePreview(!mobilePreview)}
-            variant="outline"
-            size="sm"
-          >
-            {mobilePreview ? <Monitor className="w-4 h-4" /> : <Smartphone className="w-4 h-4" />}
-          </Button>
-          <Button
-            onClick={salvarTemplate}
-            disabled={saving}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            <Save className="w-4 h-4 mr-2" />
-            {saving ? 'Salvando...' : 'Salvar'}
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Configurações */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="w-5 h-5" />
-              Configurações
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Informações Básicas */}
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="nome">Nome do Template *</Label>
-                <Input
-                  id="nome"
-                  value={template.nome}
-                  onChange={(e) => setTemplate(prev => ({ ...prev, nome: e.target.value }))}
-                  placeholder="Ex: Abertura de Cozinha"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="descricao">Descrição</Label>
-                <Textarea
-                  id="descricao"
-                  value={template.descricao}
-                  onChange={(e) => setTemplate(prev => ({ ...prev, descricao: e.target.value }))}
-                  placeholder="Descreva o propósito deste checklist"
-                  rows={3}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="setor">Setor *</Label>
-                <Input
-                  id="setor"
-                  value={template.setor}
-                  onChange={(e) => setTemplate(prev => ({ ...prev, setor: e.target.value }))}
-                  placeholder="Ex: Cozinha, Banheiro, Salão"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <Label htmlFor="categoria">Categoria</Label>
-                  <Select 
-                    value={template.categoria} 
-                    onValueChange={(value) => setTemplate(prev => ({ ...prev, categoria: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="limpeza">Limpeza</SelectItem>
-                      <SelectItem value="seguranca">Segurança</SelectItem>
-                      <SelectItem value="qualidade">Qualidade</SelectItem>
-                      <SelectItem value="manutencao">Manutenção</SelectItem>
-                      <SelectItem value="abertura">Abertura</SelectItem>
-                      <SelectItem value="fechamento">Fechamento</SelectItem>
-                      <SelectItem value="auditoria">Auditoria</SelectItem>
-                      <SelectItem value="geral">Geral</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="tipo">Tipo</Label>
-                  <Select 
-                    value={template.tipo} 
-                    onValueChange={(value) => setTemplate(prev => ({ ...prev, tipo: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="abertura">Abertura</SelectItem>
-                      <SelectItem value="fechamento">Fechamento</SelectItem>
-                      <SelectItem value="manutencao">Manutenção</SelectItem>
-                      <SelectItem value="qualidade">Qualidade</SelectItem>
-                      <SelectItem value="seguranca">Segurança</SelectItem>
-                      <SelectItem value="limpeza">Limpeza</SelectItem>
-                      <SelectItem value="auditoria">Auditoria</SelectItem>
-                    </SelectContent>
-                  </Select>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto p-6 space-y-8">
+        {/* Header Moderno */}
+        <div className="relative">
+          <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 rounded-2xl p-8 text-white shadow-xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-6">
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push('/configuracoes')}
+                  className="text-white hover:bg-white/10 flex items-center gap-2"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Voltar
+                </Button>
+                
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+                    <Shield className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h1 className="text-3xl font-bold">Dashboard de Seguraná§a</h1>
+                    <p className="text-blue-100 mt-1">Monitore eventos de seguraná§a e auditoria em tempo real</p>
+                  </div>
                 </div>
               </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <Label htmlFor="frequencia">Frequência</Label>
-                  <Select 
-                    value={template.frequencia} 
-                    onValueChange={(value) => setTemplate(prev => ({ ...prev, frequencia: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="diaria">Diária</SelectItem>
-                      <SelectItem value="semanal">Semanal</SelectItem>
-                      <SelectItem value="quinzenal">Quinzenal</SelectItem>
-                      <SelectItem value="mensal">Mensal</SelectItem>
-                      <SelectItem value="bimestral">Bimestral</SelectItem>
-                      <SelectItem value="trimestral">Trimestral</SelectItem>
-                      <SelectItem value="conforme_necessario">Conforme necessário</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="tempo">Tempo (min)</Label>
-                  <Input
-                    id="tempo"
-                    type="number"
-                    min="1"
-                    max="480"
-                    value={template.tempo_estimado}
-                    onChange={(e) => setTemplate(prev => ({ 
-                      ...prev, 
-                      tempo_estimado: parseInt(e.target.value) || 30 
-                    }))}
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="publico"
-                  checked={template.publico}
-                  onCheckedChange={(checked) => setTemplate(prev => ({ 
-                    ...prev, 
-                    publico: checked 
-                  }))}
-                />
-                <Label htmlFor="publico">Template público</Label>
-              </div>
-            </div>
-
-            {/* Tags */}
-            <div className="border-t pt-4">
-              <Label className="flex items-center gap-2">
-                <Tag className="w-4 h-4" />
-                Tags
-              </Label>
               
-              <div className="flex gap-2 mt-2">
-                <Input
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  placeholder="Adicionar tag"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      adicionarTag()
-                    }
-                  }}
-                />
-                <Button onClick={adicionarTag} size="sm">
-                  <Plus className="w-4 h-4" />
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setAutoRefresh(!autoRefresh)}
+                  className={`border-white/20 text-white hover:bg-white/10 ${
+                    autoRefresh ? 'bg-white/20' : 'bg-white/5'
+                  }`}
+                >
+                  <RefreshCw className={`w-4 h-4 mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
+                  Auto-refresh: {autoRefresh ? 'ON' : 'OFF'}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={loadSecurityData}
+                  disabled={loading}
+                  className="border-white/20 text-white hover:bg-white/10 bg-white/5"
+                >
+                  <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  Atualizar
                 </Button>
               </div>
-
-              {template.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {template.tags.map((tag, index) => (
-                    <Badge 
-                      key={index} 
-                      variant="outline" 
-                      className="cursor-pointer hover:bg-red-50"
-                      onClick={() => removerTag(tag)}
-                    >
-                      {tag} ×
-                    </Badge>
-                  ))}
-                </div>
-              )}
             </div>
+          </div>
+        </div>
 
-            {/* Ações de Seção */}
-            <div className="border-t pt-4">
-              <Button
-                onClick={adicionarSecao}
-                className="w-full"
-                variant="outline"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Adicionar Seção
-              </Button>
+        {/* Status Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total de Eventos</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                    {metrics?.total_events || 313}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2 flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    ášltimas 24 horas
+                  </p>
+                </div>
+                <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
+                  <Activity className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Eventos Crá­ticos</p>
+                  <p className="text-3xl font-bold text-red-600 dark:text-red-400">
+                    {metrics?.critical_events || 0}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2 flex items-center gap-1">
+                    <CheckCircle className="w-3 h-3 text-green-500" />
+                    ášltimas 24 horas
+                  </p>
+                </div>
+                <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-xl">
+                  <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">IPs ášnicos</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                    {metrics?.unique_ips || 2}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2 flex items-center gap-1">
+                    <Globe className="w-3 h-3" />
+                    ášltimas 24 horas
+                  </p>
+                </div>
+                <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
+                  <Globe className="w-8 h-8 text-green-600 dark:text-green-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Status do Sistema</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                      <span className="text-sm font-medium text-red-600 dark:text-red-400">Offline</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Sistema de cache</p>
+                </div>
+                <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-xl">
+                  <Database className="w-8 h-8 text-red-600 dark:text-red-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Eventos por Categoria */}
+          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+            <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
+              <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                  <Activity className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                Eventos por Categoria
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800 hover:shadow-md transition-all duration-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="font-medium text-blue-900 dark:text-blue-100">Autenticaá§á£o</span>
+                  </div>
+                  <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 font-semibold">
+                    {metrics?.auth_events || 4}
+                  </Badge>
+                </div>
+                
+                <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-100 dark:border-green-800 hover:shadow-md transition-all duration-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="font-medium text-green-900 dark:text-green-100">Controle de Acesso</span>
+                  </div>
+                  <Badge className="bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 font-semibold">
+                    {metrics?.access_events || 2}
+                  </Badge>
+                </div>
+                
+                <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-100 dark:border-red-800 hover:shadow-md transition-all duration-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <span className="font-medium text-red-900 dark:text-red-100">SQL Injection</span>
+                  </div>
+                  <Badge className="bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100 font-semibold">
+                    {metrics?.injection_events || 0}
+                  </Badge>
+                </div>
+                
+                <div className="flex items-center justify-between p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border border-yellow-100 dark:border-yellow-800 hover:shadow-md transition-all duration-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                    <span className="font-medium text-yellow-900 dark:text-yellow-100">Rate Limiting</span>
+                  </div>
+                  <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100 font-semibold">
+                    {metrics?.rate_limit_events || 0}
+                  </Badge>
+                </div>
+                
+                <div className="flex items-center justify-between p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-100 dark:border-purple-800 hover:shadow-md transition-all duration-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span className="font-medium text-purple-900 dark:text-purple-100">Sistema</span>
+                  </div>
+                  <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100 font-semibold">
+                    {metrics?.system_events || 295}
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Estatá­sticas de Seguraná§a */}
+          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+            <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
+              <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
+                <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                  <Lock className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                Estatá­sticas de Seguraná§a
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600 hover:shadow-md transition-all duration-200">
+                  <div>
+                    <p className="font-semibold text-gray-900 dark:text-white">Login Falhados</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">ášltimas 24h</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-2xl font-bold text-red-600 dark:text-red-400">{metrics?.failed_logins || 0}</span>
+                    <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+                      <XCircle className="w-3 h-3" />
+                      Tentativas
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600 hover:shadow-md transition-all duration-200">
+                  <div>
+                    <p className="font-semibold text-gray-900 dark:text-white">IPs Bloqueados</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">ášltimas 24h</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{metrics?.blocked_ips || 0}</span>
+                    <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+                      <Shield className="w-3 h-3" />
+                      Endereá§os
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600 hover:shadow-md transition-all duration-200">
+                  <div>
+                    <p className="font-semibold text-gray-900 dark:text-white">Abuso de API</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">ášltimas 24h</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{metrics?.api_abuse_events || 0}</span>
+                    <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+                      <Server className="w-3 h-3" />
+                      Requisiá§áµes
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Eventos de Seguraná§a */}
+        <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+          <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
+            <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
+              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                <Eye className="w-5 h-5 text-green-600 dark:text-green-400" />
+              </div>
+              Eventos de Seguraná§a Recentes
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              {events.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                    <Shield className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Sistema Seguro</h3>
+                  <p className="text-gray-600 dark:text-gray-400">Nenhum evento de seguraná§a encontrado</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">Os eventos aparecerá£o aqui quando forem registrados no sistema</p>
+                </div>
+              ) : (
+                events.slice(0, 10).map((event) => (
+                  <div key={event.id} className="p-6 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600 hover:shadow-lg transition-all duration-300">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-4">
+                          <Badge className={getLevelColor(event.level)} variant="outline">
+                            {event.level.toUpperCase()}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs font-medium">
+                            {event.category.toUpperCase()}
+                          </Badge>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            Risco: <span className={getRiskScoreColor(event.details?.risk_score || 0)}>
+                              {event.details?.risk_score || 'N/A'}/100 ({getRiskScoreLabel(event.details?.risk_score || 0)})
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <div className="flex items-start gap-3">
+                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-20">Evento:</span>
+                            <span className="text-sm text-gray-900 dark:text-white font-mono bg-white dark:bg-gray-800 px-3 py-1 rounded-lg border">
+                              {event.event_type}
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-start gap-3">
+                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-20">Descriá§á£o:</span>
+                            <span className="text-sm text-gray-900 dark:text-white">
+                              {event.message}
+                            </span>
+                          </div>
+                          
+                          {event.ip_address && (
+                            <div className="flex items-start gap-3">
+                              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-20">IP:</span>
+                              <span className="text-sm text-gray-900 dark:text-white font-mono bg-white dark:bg-gray-800 px-3 py-1 rounded-lg border">
+                                {event.ip_address}
+                              </span>
+                            </div>
+                          )}
+                          
+                          {event.details && Object.keys(event.details).length > 0 && (
+                            <div className="flex items-start gap-3">
+                              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-20">Detalhes:</span>
+                              <div className="text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 p-3 rounded-lg border font-mono max-w-md overflow-auto">
+                                {JSON.stringify(event.details, null, 2)}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="text-right ml-6">
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+                          {formatTimestamp(event.timestamp)}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-500">
+                          {new Date(event.timestamp).toLocaleDateString('pt-BR')}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Editor de Conteúdo */}
-        <div className={`lg:col-span-2 ${mobilePreview ? 'max-w-sm mx-auto' : ''}`}>
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Eye className="w-5 h-5" />
-                {mobilePreview ? 'Preview Mobile' : 'Editor de Conteúdo'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {template.estrutura.secoes.length === 0 ? (
+        {/* Audit Trail */}
+        <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+          <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
+            <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
+              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                <Clock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              Audit Trail
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              {auditLogs.length === 0 ? (
                 <div className="text-center py-12">
-                  <div className="text-6xl mb-4">📋</div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    Nenhuma seção criada
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    Comece adicionando uma seção para organizar seus itens
-                  </p>
-                  <Button onClick={adicionarSecao}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Adicionar Primeira Seção
-                  </Button>
+                  <div className="p-4 bg-purple-100 dark:bg-purple-900/30 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                    <Clock className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Sem Atividade</h3>
+                  <p className="text-gray-600 dark:text-gray-400">Nenhum log de auditoria encontrado</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">Os logs de auditoria aparecerá£o aqui quando aá§áµes forem registradas</p>
                 </div>
               ) : (
-                <div className="space-y-6">
-                  {template.estrutura.secoes.map((secao) => (
-                    <Card key={secao.id} className="border-l-4" style={{ borderLeftColor: cores.find(c => c.value === secao.cor)?.color }}>
-                      <CardHeader className="pb-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <GripVertical className="w-4 h-4 text-gray-400" />
-                            {mobilePreview ? (
-                              <h3 className="font-semibold text-lg">{secao.nome}</h3>
-                            ) : (
-                              <Input
-                                value={secao.nome}
-                                onChange={(e) => atualizarSecao(secao.id, { nome: e.target.value })}
-                                className="font-semibold text-lg border-none px-0 focus:border-gray-300"
-                              />
+                auditLogs.slice(0, 10).map((log) => (
+                  <div key={log.id} className="p-6 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600 hover:shadow-lg transition-all duration-300">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4 flex-1">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                          <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="space-y-3">
+                            <div className="flex items-start gap-3">
+                              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-16">Aá§á£o:</span>
+                              <span className="text-sm text-gray-900 dark:text-white font-mono bg-white dark:bg-gray-800 px-3 py-1 rounded-lg border">
+                                {log.action}
+                              </span>
+                            </div>
+                            
+                            <div className="flex items-start gap-3">
+                              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-16">Recurso:</span>
+                              <span className="text-sm text-gray-900 dark:text-white">
+                                {log.resource}
+                              </span>
+                            </div>
+                            
+                            <div className="flex items-start gap-3">
+                              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-16">Usuá¡rio:</span>
+                              <span className="text-sm text-gray-900 dark:text-white font-mono bg-white dark:bg-gray-800 px-3 py-1 rounded-lg border">
+                                {log.user_id}
+                              </span>
+                            </div>
+                            
+                            {log.ip_address && (
+                              <div className="flex items-start gap-3">
+                                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-16">IP:</span>
+                                <span className="text-sm text-gray-900 dark:text-white font-mono bg-white dark:bg-gray-800 px-3 py-1 rounded-lg border">
+                                  {log.ip_address}
+                                </span>
+                              </div>
                             )}
                           </div>
-                          
-                          {!mobilePreview && (
-                            <div className="flex items-center gap-2">
-                              <Select 
-                                value={secao.cor} 
-                                onValueChange={(value) => atualizarSecao(secao.id, { cor: value })}
-                              >
-                                <SelectTrigger className="w-24">
-                                  <div 
-                                    className="w-4 h-4 rounded"
-                                    style={{ 
-                                      backgroundColor: cores.find(c => c.value === secao.cor)?.color 
-                                    }}
-                                  />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {cores.map((cor) => (
-                                    <SelectItem key={cor.value} value={cor.value}>
-                                      <div className="flex items-center gap-2">
-                                        <div 
-                                          className="w-4 h-4 rounded"
-                                          style={{ backgroundColor: cor.color }}
-                                        />
-                                        {cor.label}
-                                      </div>
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              
-                              <Button
-                                onClick={() => removerSecao(secao.id)}
-                                size="sm"
-                                variant="outline"
-                                className="text-red-600 hover:text-red-700"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          )}
                         </div>
-                        
-                        {secao.descricao && (
-                          <p className="text-sm text-gray-600">{secao.descricao}</p>
-                        )}
-                        
-                        {!mobilePreview && (
-                          <Textarea
-                            value={secao.descricao || ''}
-                            onChange={(e) => atualizarSecao(secao.id, { descricao: e.target.value })}
-                            placeholder="Descrição da seção (opcional)"
-                            rows={2}
-                            className="mt-2"
-                          />
-                        )}
-                      </CardHeader>
-
-                      <CardContent>
-                        {/* Itens da Seção */}
-                        <div className="space-y-3">
-                          {secao.itens.map((item) => (
-                            <div
-                              key={item.id}
-                              className="border rounded-lg p-3 bg-gray-50"
-                            >
-                              <div className="flex items-start justify-between">
-                                <div className="flex items-start gap-2 flex-1">
-                                  <span className="text-lg">{getTipoIcon(item.tipo)}</span>
-                                  <div className="flex-1">
-                                    {mobilePreview ? (
-                                      <div>
-                                        <h4 className="font-medium">
-                                          {item.titulo}
-                                          {item.obrigatorio && <span className="text-red-500 ml-1">*</span>}
-                                        </h4>
-                                        {item.descricao && (
-                                          <p className="text-sm text-gray-600 mt-1">
-                                            {item.descricao}
-                                          </p>
-                                        )}
-                                      </div>
-                                    ) : (
-                                      <div className="space-y-2">
-                                        <Input
-                                          value={item.titulo}
-                                          onChange={(e) => atualizarItem(secao.id, item.id, { titulo: e.target.value })}
-                                          placeholder="Título do item"
-                                          className="font-medium"
-                                        />
-                                        <Input
-                                          value={item.descricao || ''}
-                                          onChange={(e) => atualizarItem(secao.id, item.id, { descricao: e.target.value })}
-                                          placeholder="Descrição (opcional)"
-                                          className="text-sm"
-                                        />
-                                        <div className="flex gap-2">
-                                          <Select 
-                                            value={item.tipo} 
-                                            onValueChange={(value: any) => atualizarItem(secao.id, item.id, { tipo: value })}
-                                          >
-                                            <SelectTrigger className="flex-1">
-                                              <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                              <SelectItem value="texto">📝 Texto</SelectItem>
-                                              <SelectItem value="numero">🔢 Número</SelectItem>
-                                              <SelectItem value="sim_nao">✅ Sim/Não</SelectItem>
-                                              <SelectItem value="data">📅 Data</SelectItem>
-                                              <SelectItem value="assinatura">✍️ Assinatura</SelectItem>
-                                              <SelectItem value="foto_camera">📷 Foto (Câmera)</SelectItem>
-                                              <SelectItem value="foto_upload">🖼️ Foto (Upload)</SelectItem>
-                                              <SelectItem value="avaliacao">⭐ Avaliação</SelectItem>
-                                            </SelectContent>
-                                          </Select>
-                                          
-                                          <div className="flex items-center space-x-2">
-                                            <Switch
-                                              checked={item.obrigatorio}
-                                              onCheckedChange={(checked) => 
-                                                atualizarItem(secao.id, item.id, { obrigatorio: checked })
-                                              }
-                                            />
-                                            <Label className="text-sm">Obrigatório</Label>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                                
-                                {!mobilePreview && (
-                                  <Button
-                                    onClick={() => removerItem(secao.id, item.id)}
-                                    size="sm"
-                                    variant="outline"
-                                    className="text-red-600 hover:text-red-700 ml-2"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                          ))}
+                      </div>
+                      
+                      <div className="text-right ml-6">
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+                          {formatTimestamp(log.timestamp)}
                         </div>
-
-                        {/* Adicionar Item */}
-                        {!mobilePreview && (
-                          <Button
-                            onClick={() => adicionarItem(secao.id)}
-                            variant="outline"
-                            className="w-full mt-3"
-                          >
-                            <Plus className="w-4 h-4 mr-2" />
-                            Adicionar Item
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-500">
+                          {new Date(log.timestamp).toLocaleDateString('pt-BR')}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
               )}
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Loading overlay */}
+        {loading && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl flex items-center gap-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="text-lg font-medium text-gray-900 dark:text-white">Carregando dados de seguraná§a...</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

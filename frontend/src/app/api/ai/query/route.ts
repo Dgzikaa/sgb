@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@supabase/supabase-js';
 import { 
@@ -11,7 +11,7 @@ import {
   getVisao360
 } from '@/lib/analytics-service';
 
-// Configura��o do Supabase
+// Configuraá§á£o do Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -20,7 +20,7 @@ const supabase = createClient(
 // Schema para consultas
 const QuerySchema = z.object({
   query_type: z.enum([
-    // 💰 Financeiro & Faturamento
+    // ðŸ’° Financeiro & Faturamento
     'maior_faturamento',
     'faturamento_periodo',
     'comparativo_mensal',
@@ -30,7 +30,7 @@ const QuerySchema = z.object({
     'resumo_dia',
     'resumo_mes',
     
-    // �� Checklists & Operacional
+    // œ… Checklists & Operacional
     'status_checklists',
     'performance_funcionarios',
     'checklists_atrasados',
@@ -38,31 +38,31 @@ const QuerySchema = z.object({
     'tempo_medio_execucao',
     'funcionario_destaque',
     
-    // 📱 WhatsApp & Comunica��o
+    // ðŸ“± WhatsApp & Comunicaá§á£o
     'whatsapp_stats',
     'engagement_whatsapp',
     'mensagens_pendentes',
     'campanhas_ativas',
     
-    // 🍕 Produ��o & Tempo
+    // ðŸ• Produá§á£o & Tempo
     'tempo_producao',
     'produtos_demorados',
     'eficiencia_cozinha',
     'picos_movimento',
     
-    // 🤖 IA & Analytics
+    // ðŸ¤– IA & Analytics
     'anomalias_recentes',
     'insights_importantes',
     'recomendacoes_ia',
     'score_saude_geral',
     'metricas_ia',
     
-    // 👥 Equipe & Usu�rios
+    // ðŸ‘¥ Equipe & Usuá¡rios
     'atividade_usuarios',
     'usuarios_ativos',
     'perfil_funcionarios',
     
-    // 📊 Dashboards & Vis�o Geral
+    // ðŸ“Š Dashboards & Visá£o Geral
     'dashboard_executivo',
     'visao_360',
     'comparativo_historico',
@@ -77,7 +77,7 @@ const QuerySchema = z.object({
 });
 
 // ========================================
-// 🤖 POST /api/ai/query (Consultas inteligentes)
+// ðŸ¤– POST /api/ai/query (Consultas inteligentes)
 // ========================================
 export async function POST(request: NextRequest) {
   try {
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
         resultado = await getInsightsImportantes(bar_id, limite);
         break;
       
-      // �� Checklists & Operacional
+      // œ… Checklists & Operacional
       case 'status_checklists':
         resultado = await getStatusChecklists(bar_id, periodo_inicio, periodo_fim);
         break;
@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
         resultado = { mensagem: 'Funcionalidade em desenvolvimento' };
         break;
       
-      // 📱 WhatsApp & Comunica��o
+      // ðŸ“± WhatsApp & Comunicaá§á£o
       case 'whatsapp_stats':
         resultado = await getWhatsAppStats(bar_id, periodo_inicio, periodo_fim);
         break;
@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
         resultado = { mensagem: 'Funcionalidade em desenvolvimento' };
         break;
       
-      // 🍕 Produ��o & Tempo
+      // ðŸ• Produá§á£o & Tempo
       case 'tempo_producao':
         resultado = await getTempoProducao(bar_id, periodo_inicio, periodo_fim);
         break;
@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
         resultado = { mensagem: 'Funcionalidade em desenvolvimento' };
         break;
       
-      // 🤖 IA & Analytics
+      // ðŸ¤– IA & Analytics
       case 'recomendacoes_ia':
         resultado = { mensagem: 'Funcionalidade em desenvolvimento' };
         break;
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
         resultado = { mensagem: 'Funcionalidade em desenvolvimento' };
         break;
       
-      // 👥 Equipe & Usu�rios
+      // ðŸ‘¥ Equipe & Usuá¡rios
       case 'atividade_usuarios':
         resultado = { mensagem: 'Funcionalidade em desenvolvimento' };
         break;
@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
         resultado = { mensagem: 'Funcionalidade em desenvolvimento' };
         break;
       
-      // 📊 Dashboards & Vis�o Geral
+      // ðŸ“Š Dashboards & Visá£o Geral
       case 'dashboard_executivo':
         resultado = await getDashboardExecutivo(bar_id, periodo_inicio, periodo_fim);
         break;
@@ -225,7 +225,7 @@ export async function POST(request: NextRequest) {
         break;
       
       default:
-        return NextResponse.json({ error: 'Tipo de consulta n�o suportado' }, { status: 400 });
+        return NextResponse.json({ error: 'Tipo de consulta ná£o suportado' }, { status: 400 });
     }
 
     return NextResponse.json({
@@ -238,7 +238,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({
-        error: 'Par�metros inv�lidos',
+        error: 'Pará¢metros invá¡lidos',
         details: error.errors
       }, { status: 400 });
     }
@@ -249,7 +249,7 @@ export async function POST(request: NextRequest) {
 }
 
 // ========================================
-// 💰 CONSULTAS DE FATURAMENTO
+// ðŸ’° CONSULTAS DE FATURAMENTO
 // ========================================
 
 /**
@@ -302,7 +302,7 @@ async function getMaiorFaturamento(bar_id: number) {
 }
 
 /**
- * Faturamento em per�odo espec�fico
+ * Faturamento em perá­odo especá­fico
  */
 async function getFaturamentoPeriodo(bar_id: number, inicio?: string, fim?: string) {
   const dataInicio = inicio || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -326,7 +326,7 @@ async function getFaturamentoPeriodo(bar_id: number, inicio?: string, fim?: stri
       periodo: { inicio: dataInicio, fim: dataFim },
       faturamento_total: 0,
       transacoes: 0,
-      mensagem: 'Nenhum faturamento encontrado no per�odo'
+      mensagem: 'Nenhum faturamento encontrado no perá­odo'
     };
   }
 
@@ -336,7 +336,7 @@ async function getFaturamentoPeriodo(bar_id: number, inicio?: string, fim?: stri
   // Agrupar por meio de pagamento
   const meiosPagamento: Record<string, { valor: number; transacoes: number }> = {};
   pagamentos.forEach(pag => {
-    const meio = pag.meio || 'N�o informado';
+    const meio = pag.meio || 'Ná£o informado';
     if (!meiosPagamento[meio]) {
       meiosPagamento[meio] = { valor: 0, transacoes: 0 };
     }
@@ -366,7 +366,7 @@ async function getFaturamentoPeriodo(bar_id: number, inicio?: string, fim?: stri
     melhor_dia: melhorDia,
     meios_pagamento: meiosPagamento,
     faturamento_por_dia: faturamentoPorDia,
-    mensagem: `Faturamento de R$ ${faturamentoTotal.toFixed(2)} em ${pagamentos.length} transa��es no per�odo`
+    mensagem: `Faturamento de R$ ${faturamentoTotal.toFixed(2)} em ${pagamentos.length} transaá§áµes no perá­odo`
   };
 }
 
@@ -378,7 +378,7 @@ async function getComparativoMensal(bar_id: number) {
   const mesAtual = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
   const mesAnterior = `${hoje.getMonth() === 0 ? hoje.getFullYear() - 1 : hoje.getFullYear()}-${String(hoje.getMonth() === 0 ? 12 : hoje.getMonth()).padStart(2, '0')}`;
 
-  // Faturamento m�s atual
+  // Faturamento máªs atual
   const { data: fatAtual } = await supabase
     .from('contahub_pagamentos')
     .select('valor_liquido')
@@ -386,7 +386,7 @@ async function getComparativoMensal(bar_id: number) {
     .gte('dt_gerencial', `${mesAtual}-01`)
     .lt('dt_gerencial', `${mesAtual}-32`);
 
-  // Faturamento m�s anterior
+  // Faturamento máªs anterior
   const { data: fatAnterior } = await supabase
     .from('contahub_pagamentos')
     .select('valor_liquido')
@@ -414,9 +414,9 @@ async function getComparativoMensal(bar_id: number) {
     comparativo: {
       variacao_percentual: variacao,
       diferenca_absoluta: faturamentoAtual - faturamentoAnterior,
-      status: variacao > 0 ? 'crescimento' : variacao < 0 ? 'queda' : 'est�vel'
+      status: variacao > 0 ? 'crescimento' : variacao < 0 ? 'queda' : 'está¡vel'
     },
-    mensagem: `${variacao > 0 ? '📈' : variacao < 0 ? '📉' : '��️'} ${Math.abs(variacao).toFixed(1)}% em rela��o ao m�s anterior`
+    mensagem: `${variacao > 0 ? 'ðŸ“ˆ' : variacao < 0 ? 'ðŸ“‰' : 'ž¡ï¸'} ${Math.abs(variacao).toFixed(1)}% em relaá§á£o ao máªs anterior`
   };
 }
 
@@ -448,7 +448,7 @@ async function getTopClientes(bar_id: number, limite: number, inicio?: string, f
 
   const clientesFormatados = clientes.map((cliente, index) => ({
     posicao: index + 1,
-    nome: cliente.cli_nome || 'Cliente n�o identificado',
+    nome: cliente.cli_nome || 'Cliente ná£o identificado',
     cpf: cliente.cli_cpf,
     faturamento_total: cliente.valor,
     total_vendas: cliente.vendas,
@@ -496,7 +496,7 @@ async function getProdutosMaisVendidos(bar_id: number, limite: number, inicio?: 
   // Agrupar por produto
   const produtosAgrupados: Record<string, any> = {};
   produtos.forEach(produto => {
-    const nome = produto.prd_desc || 'Produto n�o identificado';
+    const nome = produto.prd_desc || 'Produto ná£o identificado';
     if (!produtosAgrupados[nome]) {
       produtosAgrupados[nome] = {
         nome,
@@ -531,13 +531,13 @@ async function getProdutosMaisVendidos(bar_id: number, limite: number, inicio?: 
 }
 
 /**
- * Performance do per�odo
+ * Performance do perá­odo
  */
 async function getPerformancePeriodo(bar_id: number, inicio?: string, fim?: string) {
   const dataInicio = inicio || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const dataFim = fim || new Date().toISOString().split('T')[0];
 
-  // Buscar dados do per�odo
+  // Buscar dados do perá­odo
   const [pagamentos, tempos, analitico] = await Promise.all([
     supabase
       .from('contahub_pagamentos')
@@ -576,7 +576,7 @@ async function getPerformancePeriodo(bar_id: number, inicio?: string, fim?: stri
       tempo_medio_producao_minutos: tempoMedioProducao / 60,
       ticket_medio: (pagamentos.data?.length || 0) > 0 ? faturamentoTotal / (pagamentos.data?.length || 1) : 0
     },
-    mensagem: `Performance do per�odo: R$ ${faturamentoTotal.toFixed(2)} em ${pagamentos.data?.length || 0} transa��es`
+    mensagem: `Performance do perá­odo: R$ ${faturamentoTotal.toFixed(2)} em ${pagamentos.data?.length || 0} transaá§áµes`
   };
 }
 
@@ -601,7 +601,7 @@ async function getResumoDia(bar_id: number, data: string) {
 
   const faturamento = pagamentos.data?.reduce((total, item) => total + (item.valor_liquido || 0), 0) || 0;
   
-  // Hor�rio de pico
+  // Horá¡rio de pico
   const horarioPico = fatPorHora.data?.reduce((max, current) => 
     (current.valor || 0) > (max.valor || 0) ? current : max, { hora: '', valor: 0 });
 
@@ -611,7 +611,7 @@ async function getResumoDia(bar_id: number, data: string) {
       faturamento_total: faturamento,
       total_transacoes: pagamentos.data?.length || 0,
       ticket_medio: (pagamentos.data?.length || 0) > 0 ? faturamento / (pagamentos.data?.length || 1) : 0,
-      horario_pico: horarioPico ? `${horarioPico.hora}h com R$ ${horarioPico.valor?.toFixed(2)}` : 'N�o identificado'
+      horario_pico: horarioPico ? `${horarioPico.hora}h com R$ ${horarioPico.valor?.toFixed(2)}` : 'Ná£o identificado'
     },
     faturamento_por_hora: fatPorHora.data || [],
     mensagem: `Resumo de ${new Date(data).toLocaleDateString('pt-BR')}: R$ ${faturamento.toFixed(2)}`
@@ -619,7 +619,7 @@ async function getResumoDia(bar_id: number, data: string) {
 }
 
 /**
- * Resumo do m�s
+ * Resumo do máªs
  */
 async function getResumoMes(bar_id: number, mes?: string) {
   const mesReferencia = mes || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
@@ -656,7 +656,7 @@ async function getResumoMes(bar_id: number, mes?: string) {
       ticket_medio: (pagamentos?.length || 0) > 0 ? faturamento / (pagamentos?.length || 1) : 0
     },
     faturamento_por_dia: faturamentoPorDia,
-    mensagem: `Resumo do m�s ${mesReferencia}: R$ ${faturamento.toFixed(2)} em ${diasAtivos} dias ativos`
+    mensagem: `Resumo do máªs ${mesReferencia}: R$ ${faturamento.toFixed(2)} em ${diasAtivos} dias ativos`
   };
 }
 

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -135,7 +135,7 @@ export default function Marketing360Page() {
   const advancedLoadedRef = useRef(false)
 
   useEffect(() => {
-    setPageTitle('Marketing 360� - Vis�o Geral')
+    setPageTitle('Marketing 360° - Visá£o Geral')
     loadAnalytics()
     loadPostHighlights()
     return () => setPageTitle('')
@@ -158,7 +158,7 @@ export default function Marketing360Page() {
       } else {
         throw new Error(analyticsResult.error)
       }
-      // Buscar dados di�rios para gr�ficos
+      // Buscar dados diá¡rios para grá¡ficos
       const trendRes = await fetch(`/api/meta/daily-summary${params}`)
       const trendJson = await trendRes.json()
       if (trendJson.success && Array.isArray(trendJson.data)) {
@@ -177,15 +177,15 @@ export default function Marketing360Page() {
       
       if (dailyResult.success) {
         setDailySummary(dailyResult.data)
-        console.log('📊 Daily Summary carregado:', dailyResult.data)
+        console.log('ðŸ“Š Daily Summary carregado:', dailyResult.data)
       } else {
-        console.warn('��️ Daily Summary n�o dispon�vel:', dailyResult.error)
+        console.warn('š ï¸ Daily Summary ná£o disponá­vel:', dailyResult.error)
       }
       
     } catch (error) {
       console.error('Erro ao carregar analytics:', error)
       toast({
-        title: '�� Erro',
+        title: 'Œ Erro',
         description: 'Falha ao carregar dados do Meta',
         variant: 'destructive'
       })
@@ -198,7 +198,7 @@ export default function Marketing360Page() {
     try {
       setAdvancedLoading(true)
       
-      // Simula��o de dados avan�ados (implementar APIs espec�ficas depois)
+      // Simulaá§á£o de dados avaná§ados (implementar APIs especá­ficas depois)
       await new Promise(resolve => setTimeout(resolve, 1500))
       
       setAdvancedData({
@@ -210,7 +210,7 @@ export default function Marketing360Page() {
         },
         radar_oportunidades: {
           melhor_horario: '18:00-21:00',
-          dias_otimos: ['Sexta', 'S�bado'],
+          dias_otimos: ['Sexta', 'Sá¡bado'],
           publico_alvo: 'Jovens 25-35 anos',
           crescimento_potencial: '+25%'
         },
@@ -234,8 +234,8 @@ export default function Marketing360Page() {
       })
     } catch (error) {
       toast({
-        title: '�� Erro',
-        description: 'Falha ao carregar analytics avan�ados',
+        title: 'Œ Erro',
+        description: 'Falha ao carregar analytics avaná§ados',
         variant: 'destructive'
       })
     } finally {
@@ -247,13 +247,13 @@ export default function Marketing360Page() {
     try {
       setRefreshing(true)
       
-      // For�ar nova coleta via edge function
+      // Forá§ar nova coleta via edge function
       const response = await fetch('/api/meta/force-sync', { method: 'POST' })
       const result = await response.json()
       
       if (result.success) {
         toast({
-          title: '�� Sucesso',
+          title: 'œ… Sucesso',
           description: 'Dados atualizados com sucesso',
         })
         
@@ -267,7 +267,7 @@ export default function Marketing360Page() {
       }
     } catch (error) {
       toast({
-        title: '�� Erro',
+        title: 'Œ Erro',
         description: 'Falha ao atualizar dados',
         variant: 'destructive'
       })
@@ -362,7 +362,7 @@ export default function Marketing360Page() {
           ...(json.management_data.instagram_posts || []),
           ...(json.management_data.facebook_posts || [])
         ]
-        // Ordenar por engagement_rate (desc), likes, impress�es
+        // Ordenar por engagement_rate (desc), likes, impressáµes
         allPosts.sort((a, b) => {
           const erA = a.metrics.engagement_rate || 0
           const erB = b.metrics.engagement_rate || 0
@@ -390,7 +390,7 @@ export default function Marketing360Page() {
     loadCampaignsTable()
   }, [dateRange, campaignsPage, campaignsSearch, campaignsSort, campaignsOrder, campaignsTablePage, campaignsTableSearch, campaignsTableSort, campaignsTableOrder])
 
-  // Carregamento autom�tico ao trocar de aba
+  // Carregamento automá¡tico ao trocar de aba
   useEffect(() => {
     if ((selectedTab === 'funnel' || selectedTab === 'optimization' || selectedTab === 'prediction') && !advancedData && !advancedLoading && !advancedLoadedRef.current) {
       loadAdvancedAnalytics()
@@ -422,33 +422,33 @@ export default function Marketing360Page() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-6 py-8 max-w-7xl">
-        {/* Substituir todas as TabsList/Tabs secund�rias por uma �nica Tabs principal no topo: */}
+        {/* Substituir todas as TabsList/Tabs secundá¡rias por uma áºnica Tabs principal no topo: */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6 mb-6">
           <TabsList className="grid w-full grid-cols-8 bg-gray-200 dark:bg-gray-800 p-1 rounded-xl shadow-lg">
             <TabsTrigger value="destaques" className="text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-800 data-[state=active]:to-purple-900 data-[state=active]:text-white data-[state=active]:shadow-md">
-              �� Destaques
+              œ¨ Destaques
             </TabsTrigger>
             <TabsTrigger value="overview" className="text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-800 data-[state=active]:to-purple-900 data-[state=active]:text-white data-[state=active]:shadow-md">
-              📊 Vis�o Geral
+              ðŸ“Š Visá£o Geral
             </TabsTrigger>
             <TabsTrigger value="campaigns" className="text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-800 data-[state=active]:to-purple-900 data-[state=active]:text-white data-[state=active]:shadow-md">
-              🎯 Campanhas
+              ðŸŽ¯ Campanhas
             </TabsTrigger>
             <TabsTrigger value="analytics" className="text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-800 data-[state=active]:to-purple-900 data-[state=active]:text-white data-[state=active]:shadow-md">
-              📈 Analytics
+              ðŸ“ˆ Analytics
             </TabsTrigger>
             <TabsTrigger value="funnel" className="text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-700 data-[state=active]:to-blue-900 data-[state=active]:text-white data-[state=active]:shadow-md">
-              🔄 Funil
+              ðŸ”„ Funil
             </TabsTrigger>
             <TabsTrigger value="optimization" className="text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-900 data-[state=active]:to-purple-700 data-[state=active]:text-white data-[state=active]:shadow-md">
-              🚀 Otimiza��o
+              ðŸš€ Otimizaá§á£o
             </TabsTrigger>
             <TabsTrigger value="prediction" className="text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-800 data-[state=active]:to-pink-900 data-[state=active]:text-white data-[state=active]:shadow-md">
-              🔮 IA
+              ðŸ”® IA
             </TabsTrigger>
           </TabsList>
 
-          {/* Tab Destaques: s� cards de resumo premium */}
+          {/* Tab Destaques: sá³ cards de resumo premium */}
           <TabsContent value="destaques" className="space-y-6">
             <div className="rounded-2xl mb-6 p-6 bg-gradient-to-r from-purple-700 via-blue-700 to-blue-900 shadow-lg flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
@@ -456,7 +456,7 @@ export default function Marketing360Page() {
                   <BarChart3 className="w-8 h-8 text-white drop-shadow-lg" />
                   <h1 className="text-3xl font-bold text-white">Marketing 360</h1>
                 </div>
-                <p className="text-base text-white/80">Vis�o completa da performance em redes sociais e campanhas</p>
+                <p className="text-base text-white/80">Visá£o completa da performance em redes sociais e campanhas</p>
                 <div className="flex gap-3 mt-1">
                   <span className="flex items-center gap-1 text-white/80 text-xs"><Instagram className="w-3 h-3" /> Instagram Analytics</span>
                   <span className="flex items-center gap-1 text-white/80 text-xs"><Facebook className="w-3 h-3" /> Facebook Insights</span>
@@ -535,14 +535,14 @@ export default function Marketing360Page() {
                     <span className="text-xs font-medium card-description-dark px-2 py-1 rounded-full">INVESTIMENTO</span>
                   </div>
                   <div className="card-title-dark text-3xl mb-1">{formatCurrency(campaigns?.stats?.total_spend || 0)}</div>
-                  <p className="card-description-dark">Gasto total (m�s)</p>
+                  <p className="card-description-dark">Gasto total (máªs)</p>
                   <div className="text-xs card-description-dark mt-1">CPM: R$ {formatPercent(campaigns?.stats?.avg_cpm || 0)}</div>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
 
-          {/* Tab Vis�o Geral: KPIs principais, gr�ficos, cards, etc */}
+          {/* Tab Visá£o Geral: KPIs principais, grá¡ficos, cards, etc */}
           <TabsContent value="overview" className="space-y-6">
             {/* KPIs PRINCIPAIS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -591,7 +591,7 @@ export default function Marketing360Page() {
                 </CardContent>
               </Card>
             </div>
-            {/* Gr�ficos de evolu��o */}
+            {/* Grá¡ficos de evoluá§á£o */}
             <div className="mb-8">
               <AdvancedCharts trendData={trendData} />
             </div>
@@ -624,7 +624,7 @@ export default function Marketing360Page() {
                   <p className="card-description-dark">Seguidores</p>
                   <div className="flex items-center text-sm mt-2">
                     <Eye className="w-4 h-4 text-pink-600 mr-1" />
-                    <span className="text-pink-600">{formatNumber(ig?.profile_views || 0)} visualiza��es do perfil</span>
+                    <span className="text-pink-600">{formatNumber(ig?.profile_views || 0)} visualizaá§áµes do perfil</span>
                   </div>
                 </CardContent>
               </Card>
@@ -653,7 +653,7 @@ export default function Marketing360Page() {
                 </CardHeader>
                 <CardContent>
                   <div className="card-title-dark text-2xl mb-1">{formatCurrency(campaigns?.stats?.total_spend || 0)}</div>
-                  <p className="card-description-dark">Gasto total (m�s)</p>
+                  <p className="card-description-dark">Gasto total (máªs)</p>
                   <div className="flex items-center text-sm mt-2">
                     <BarChart3 className="w-4 h-4 text-blue-500 mr-1" />
                     <span className="text-blue-500">CPM: R$ {formatPercent(campaigns?.stats?.avg_cpm || 0)}</span>
@@ -691,7 +691,7 @@ export default function Marketing360Page() {
                         <th className="py-4 px-6">Nome</th>
                         <th className="py-4 px-6">Status</th>
                         <th className="py-4 px-6 cursor-pointer" onClick={() => { setCampaignsTableSort('spend'); setCampaignsTableOrder(campaignsTableOrder === 'asc' ? 'desc' : 'asc'); }}>Gasto</th>
-                        <th className="py-4 px-6 cursor-pointer" onClick={() => { setCampaignsTableSort('impressions'); setCampaignsTableOrder(campaignsTableOrder === 'asc' ? 'desc' : 'asc'); }}>Impress�es</th>
+                        <th className="py-4 px-6 cursor-pointer" onClick={() => { setCampaignsTableSort('impressions'); setCampaignsTableOrder(campaignsTableOrder === 'asc' ? 'desc' : 'asc'); }}>Impressáµes</th>
                         <th className="py-4 px-6 cursor-pointer" onClick={() => { setCampaignsTableSort('clicks'); setCampaignsTableOrder(campaignsTableOrder === 'asc' ? 'desc' : 'asc'); }}>Cliques</th>
                         <th className="py-4 px-6">Objetivo</th>
                       </tr>
@@ -707,9 +707,9 @@ export default function Marketing360Page() {
                           <td className="table-cell-dark py-4 px-6 font-medium">{c.campaign_name}</td>
                           <td className="table-cell-dark py-4 px-6">
                             {c.effective_status === 'ACTIVE' ? (
-                              <Badge className="badge-success">�� Ativa</Badge>
+                              <Badge className="badge-success">œ“ Ativa</Badge>
                             ) : c.effective_status === 'PAUSED' ? (
-                              <Badge className="badge-warning">�� Pausada</Badge>
+                              <Badge className="badge-warning">¸ Pausada</Badge>
                             ) : (
                               <Badge className="badge-secondary">{c.effective_status}</Badge>
                             )}
@@ -723,12 +723,12 @@ export default function Marketing360Page() {
                     </tbody>
                   </table>
                 </div>
-                {/* Pagina��o */}
+                {/* Paginaá§á£o */}
                 <div className="flex justify-between items-center p-4">
-                  <span className="text-xs card-description-dark">P�gina {campaignsTablePage} de {Math.ceil(campaignsTableTotal/campaignsTablePageSize) || 1}</span>
+                  <span className="text-xs card-description-dark">Pá¡gina {campaignsTablePage} de {Math.ceil(campaignsTableTotal/campaignsTablePageSize) || 1}</span>
                   <div className="flex gap-2">
                     <Button className="btn-secondary-dark px-3 py-1" disabled={campaignsTablePage===1} onClick={()=>setCampaignsTablePage(p=>p-1)}>Anterior</Button>
-                    <Button className="btn-secondary-dark px-3 py-1" disabled={campaignsTablePage*campaignsTablePageSize>=campaignsTableTotal} onClick={()=>setCampaignsTablePage(p=>p+1)}>Pr�xima</Button>
+                    <Button className="btn-secondary-dark px-3 py-1" disabled={campaignsTablePage*campaignsTablePageSize>=campaignsTableTotal} onClick={()=>setCampaignsTablePage(p=>p+1)}>Prá³xima</Button>
                   </div>
                 </div>
               </CardContent>
@@ -741,7 +741,7 @@ export default function Marketing360Page() {
               <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-t-lg">
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="w-5 h-5" />
-                  Analytics Avan�ados
+                  Analytics Avaná§ados
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
@@ -749,9 +749,9 @@ export default function Marketing360Page() {
                   <BarChart3 className="w-16 h-16 text-purple-400 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold mb-2">Analytics Detalhados</h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    An�lises detalhadas de performance, hist�rico e comparativos.
+                    Aná¡lises detalhadas de performance, histá³rico e comparativos.
                   </p>
-                  <p className="text-sm text-purple-600">Em desenvolvimento - pr�xima atualiza��o</p>
+                  <p className="text-sm text-purple-600">Em desenvolvimento - prá³xima atualizaá§á£o</p>
                 </div>
               </CardContent>
             </Card>
@@ -763,7 +763,7 @@ export default function Marketing360Page() {
               <Card className="bg-white dark:bg-gray-800 shadow-lg border-0">
                 <CardContent className="p-12 text-center">
                   <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-                  <p>Carregando an�lise do funil de convers�o...</p>
+                  <p>Carregando aná¡lise do funil de conversá£o...</p>
                 </CardContent>
               </Card>
             ) : advancedData ? (
@@ -771,16 +771,16 @@ export default function Marketing360Page() {
                 <CardHeader className="bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-t-lg">
                   <CardTitle className="flex items-center gap-2">
                     <Activity className="w-5 h-5" />
-                    Funil de Convers�o
+                    Funil de Conversá£o
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="space-y-6">
-                    {/* Impress�es */}
+                    {/* Impressáµes */}
                     <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-l-4 border-blue-500">
                       <div>
                         <div className="card-title-dark text-2xl mb-1">{formatNumber(advancedData.funil_conversao.impressoes)}</div>
-                        <div className="card-description-dark">Impress�es</div>
+                        <div className="card-description-dark">Impressáµes</div>
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-semibold text-blue-600">100%</div>
@@ -812,15 +812,15 @@ export default function Marketing360Page() {
                         <div className="text-lg font-semibold text-blue-600">
                           {calculatePercent(advancedData.funil_conversao.leads, advancedData.funil_conversao.clicks).toFixed(1)}%
                         </div>
-                        <div className="text-xs text-blue-500">Taxa de convers�o</div>
+                        <div className="text-xs text-blue-500">Taxa de conversá£o</div>
                       </div>
                     </div>
 
-                    {/* Convers�es */}
+                    {/* Conversáµes */}
                     <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border-l-4 border-green-500">
                       <div>
                         <div className="card-title-dark text-2xl mb-1">{formatNumber(advancedData.funil_conversao.conversoes)}</div>
-                        <div className="card-description-dark">Convers�es</div>
+                        <div className="card-description-dark">Conversáµes</div>
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-semibold text-green-600">
@@ -836,19 +836,19 @@ export default function Marketing360Page() {
               <Card className="bg-white dark:bg-gray-800 shadow-lg border-0">
                 <CardContent className="p-12 text-center">
                   <Activity className="w-16 h-16 text-green-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Funil de Convers�o</h3>
+                  <h3 className="text-xl font-semibold mb-2">Funil de Conversá£o</h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    An�lise completa do funil desde impress�es at� convers�es.
+                    Aná¡lise completa do funil desde impressáµes atá© conversáµes.
                   </p>
-                  {/* Bot�o removido, agora carrega autom�tico */}
+                  {/* Botá£o removido, agora carrega automá¡tico */}
                 </CardContent>
               </Card>
             )}
           </TabsContent>
 
-          {/* Tab Otimiza��o (unificada) */}
+          {/* Tab Otimizaá§á£o (unificada) */}
           <TabsContent value="optimization" className="space-y-6">
-            {/* Juntar conte�do de Radar, Temporal e Journey aqui */}
+            {/* Juntar conteáºdo de Radar, Temporal e Journey aqui */}
             {advancedLoading ? (
               <Card className="bg-white dark:bg-gray-800 shadow-lg border-0">
                 <CardContent className="p-12 text-center">
@@ -868,17 +868,17 @@ export default function Marketing360Page() {
                   <CardContent className="p-6">
                     <div className="space-y-4">
                       <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                        <div className="font-semibold text-blue-800 dark:text-blue-200">🕘 Melhor Hor�rio</div>
+                        <div className="font-semibold text-blue-800 dark:text-blue-200">ðŸ•˜ Melhor Horá¡rio</div>
                         <div className="text-lg font-bold text-blue-900 dark:text-blue-100">{advancedData.radar_oportunidades.melhor_horario}</div>
-                        <div className="text-sm text-blue-700 dark:text-blue-300">Para m�ximo engajamento</div>
+                        <div className="text-sm text-blue-700 dark:text-blue-300">Para má¡ximo engajamento</div>
                       </div>
                       <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                        <div className="font-semibold text-purple-800 dark:text-purple-200">📅 Dias �timos</div>
+                        <div className="font-semibold text-purple-800 dark:text-purple-200">ðŸ“… Dias á“timos</div>
                         <div className="text-lg font-bold text-purple-900 dark:text-purple-100">{advancedData.radar_oportunidades.dias_otimos.join(', ')}</div>
                         <div className="text-sm text-purple-700 dark:text-purple-300">Melhor performance</div>
                       </div>
                       <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                        <div className="font-semibold text-purple-800 dark:text-purple-200">🎯 P�blico Alvo</div>
+                        <div className="font-semibold text-purple-800 dark:text-purple-200">ðŸŽ¯ Páºblico Alvo</div>
                         <div className="text-lg font-bold text-purple-900 dark:text-purple-100">{advancedData.radar_oportunidades.publico_alvo}</div>
                         <div className="text-sm text-purple-700 dark:text-purple-300">Segmento mais engajado</div>
                       </div>
@@ -899,7 +899,7 @@ export default function Marketing360Page() {
                       <div className="text-lg text-gray-700 dark:text-gray-300 mb-4">Crescimento Potencial</div>
                       <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
                         <p className="text-sm text-green-800 dark:text-green-200">
-                          Baseado na an�lise de padr�es de engajamento e otimiza��es identificadas
+                          Baseado na aná¡lise de padráµes de engajamento e otimizaá§áµes identificadas
                         </p>
                       </div>
                     </div>
@@ -912,9 +912,9 @@ export default function Marketing360Page() {
                   <Gauge className="w-16 h-16 text-blue-400 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold mb-2">Radar de Oportunidades</h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    Identifica oportunidades de otimiza��o e crescimento.
+                    Identifica oportunidades de otimizaá§á£o e crescimento.
                   </p>
-                  {/* Bot�o removido, agora carrega autom�tico */}
+                  {/* Botá£o removido, agora carrega automá¡tico */}
                 </CardContent>
               </Card>
             )}
@@ -926,7 +926,7 @@ export default function Marketing360Page() {
               <Card className="bg-white dark:bg-gray-800 shadow-lg border-0">
                 <CardContent className="p-12 text-center">
                   <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-                  <p>IA analisando padr�es para previs�es...</p>
+                  <p>IA analisando padráµes para previsáµes...</p>
                 </CardContent>
               </Card>
             ) : advancedData ? (
@@ -934,13 +934,13 @@ export default function Marketing360Page() {
                 <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-t-lg">
                   <CardTitle className="flex items-center gap-2">
                     <Brain className="w-5 h-5" />
-                    Previs�es com IA
+                    Previsáµes com IA
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="space-y-6">
                     <div className="text-center mb-6">
-                      <div className="text-sm text-purple-600 mb-2">Previs�o para os pr�ximos 30 dias</div>
+                      <div className="text-sm text-purple-600 mb-2">Previsá£o para os prá³ximos 30 dias</div>
                       <div className="flex items-center justify-center gap-2">
                         <Sparkles className="w-5 h-5 text-purple-600" />
                         <span className="text-lg font-semibold">Baseado em IA e Machine Learning</span>
@@ -982,9 +982,9 @@ export default function Marketing360Page() {
                         <span className="font-semibold text-purple-900 dark:text-purple-100">Insights da IA</span>
                       </div>
                       <p className="text-sm text-purple-800 dark:text-purple-200">
-                        Com base nos padr�es identificados, recomendamos focar em conte�do nos fins de semana 
-                        entre 18h-21h para maximizar o engajamento. A otimiza��o temporal pode resultar em 
-                        economia de 15% no or�amento de ads.
+                        Com base nos padráµes identificados, recomendamos focar em conteáºdo nos fins de semana 
+                        entre 18h-21h para maximizar o engajamento. A otimizaá§á£o temporal pode resultar em 
+                        economia de 15% no orá§amento de ads.
                       </p>
                     </div>
                   </div>
@@ -994,11 +994,11 @@ export default function Marketing360Page() {
               <Card className="bg-white dark:bg-gray-800 shadow-lg border-0">
                 <CardContent className="p-12 text-center">
                   <Brain className="w-16 h-16 text-purple-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Previs�es com IA</h3>
+                  <h3 className="text-xl font-semibold mb-2">Previsáµes com IA</h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    Intelig�ncia artificial para prever performance futura e otimiza��es.
+                    Inteligáªncia artificial para prever performance futura e otimizaá§áµes.
                   </p>
-                  {/* Bot�o removido, agora carrega autom�tico */}
+                  {/* Botá£o removido, agora carrega automá¡tico */}
                 </CardContent>
               </Card>
             )}

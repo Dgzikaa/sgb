@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 
-// Tipos para o usu�rio autenticado
+// Tipos para o usuá¡rio autenticado
 export interface AuthenticatedUser {
   id: number
   user_id: string
@@ -13,7 +13,7 @@ export interface AuthenticatedUser {
   ativo: boolean
 }
 
-// Tipos para permiss�es
+// Tipos para permissáµes
 export interface PermissionCheck {
   module: string
   action: 'read' | 'write' | 'delete' | 'admin'
@@ -21,22 +21,22 @@ export interface PermissionCheck {
 }
 
 /**
- * Middleware de autentica��o para APIs
- * Valida o usu�rio logado via cookie/header
+ * Middleware de autenticaá§á£o para APIs
+ * Valida o usuá¡rio logado via cookie/header
  */
 export async function authenticateUser(request: NextRequest): Promise<AuthenticatedUser | null> {
   try {
     // Tentar pegar token do header Authorization
     let userToken = request.headers.get('authorization')?.replace('Bearer ', '')
     
-    // Se n�o tem no header, tentar no cookie
+    // Se ná£o tem no header, tentar no cookie
     if (!userToken) {
       userToken = request.cookies.get('sgb_user')?.value
     }
     
-    // Se n�o tem token, tentar parsear dados do localStorage via cookie
+    // Se ná£o tem token, tentar parsear dados do localStorage via cookie
     if (!userToken) {
-      // Buscar dados do usu�rio que o frontend envia via header customizado
+      // Buscar dados do usuá¡rio que o frontend envia via header customizado
       const userDataHeader = request.headers.get('x-user-data')
       if (userDataHeader) {
         try {
@@ -51,20 +51,20 @@ export async function authenticateUser(request: NextRequest): Promise<Authentica
     }
     
     if (!userToken) {
-      console.log('🚫 Nenhum token de autentica��o encontrado')
+      console.log('ðŸš« Nenhum token de autenticaá§á£o encontrado')
       return null
     }
     
-    // Tentar parsear o token como JSON (dados do usu�rio)
+    // Tentar parsear o token como JSON (dados do usuá¡rio)
     try {
       const userData = JSON.parse(decodeURIComponent(userToken))
       
       if (!userData || !userData.email || !userData.id) {
-        console.log('🚫 Token inv�lido - dados incompletos')
+        console.log('ðŸš« Token invá¡lido - dados incompletos')
         return null
       }
       
-      // Validar se o usu�rio ainda existe e est� ativo
+      // Validar se o usuá¡rio ainda existe e está¡ ativo
       const supabase = await getAdminClient()
       const { data: usuario, error } = await supabase
         .from('usuarios_bar')
@@ -74,26 +74,26 @@ export async function authenticateUser(request: NextRequest): Promise<Authentica
         .single()
       
       if (error || !usuario) {
-        console.log('🚫 Usu�rio n�o encontrado ou inativo:', userData.email)
+        console.log('ðŸš« Usuá¡rio ná£o encontrado ou inativo:', userData.email)
         return null
       }
       
-      console.log('�� Usu�rio autenticado:', usuario.nome)
+      console.log('œ… Usuá¡rio autenticado:', usuario.nome)
       return usuario as AuthenticatedUser
       
     } catch (parseError) {
-      console.log('🚫 Erro ao parsear token de usu�rio:', parseError)
+      console.log('ðŸš« Erro ao parsear token de usuá¡rio:', parseError)
       return null
     }
     
   } catch (error) {
-    console.error('�� Erro na autentica��o:', error)
+    console.error('Œ Erro na autenticaá§á£o:', error)
     return null
   }
 }
 
 /**
- * Verificar permiss�es do usu�rio
+ * Verificar permissáµes do usuá¡rio
  */
 export function checkPermission(user: AuthenticatedUser, permission: PermissionCheck): boolean {
   // Admin pode tudo
@@ -101,7 +101,7 @@ export function checkPermission(user: AuthenticatedUser, permission: PermissionC
     return true
   }
   
-  // Verificar permiss�es espec�ficas do m�dulo
+  // Verificar permissáµes especá­ficas do má³dulo
   const modulePermissions = user.modulos_permitidos || []
   
   switch (permission.module) {
@@ -120,12 +120,12 @@ export function checkPermission(user: AuthenticatedUser, permission: PermissionC
                  modulePermissions.includes('checklists_admin')
         
         case 'delete':
-          // S� admin pode deletar
+          // Sá³ admin pode deletar
           return (user.role as string) === 'admin' || 
                  modulePermissions.includes('checklists_admin')
         
         case 'admin':
-          // S� admin tem acesso total
+          // Sá³ admin tem acesso total
           return (user.role as string) === 'admin'
         
         default:
@@ -138,9 +138,9 @@ export function checkPermission(user: AuthenticatedUser, permission: PermissionC
 }
 
 /**
- * Resposta de erro de autentica��o
+ * Resposta de erro de autenticaá§á£o
  */
-export function authErrorResponse(message: string = 'N�o autorizado', status: number = 401) {
+export function authErrorResponse(message: string = 'Ná£o autorizado', status: number = 401) {
   return NextResponse.json({
     success: false,
     error: message,
@@ -149,9 +149,9 @@ export function authErrorResponse(message: string = 'N�o autorizado', status: n
 }
 
 /**
- * Resposta de erro de permiss�o
+ * Resposta de erro de permissá£o
  */
-export function permissionErrorResponse(message: string = 'Permiss�o negada', status: number = 403) {
+export function permissionErrorResponse(message: string = 'Permissá£o negada', status: number = 403) {
   return NextResponse.json({
     success: false,
     error: message,
@@ -159,7 +159,7 @@ export function permissionErrorResponse(message: string = 'Permiss�o negada', s
   }, { status })
 }
 
-// Lista de rotas que requerem autentica��o
+// Lista de rotas que requerem autenticaá§á£o
 export const PROTECTED_ROUTES = [
   '/api/admin',
   '/api/dashboard',
@@ -168,18 +168,18 @@ export const PROTECTED_ROUTES = [
   '/api/contaazul-automation'
 ]
 
-// Lista de rotas p�blicas (podem ser acessadas sem auth)
+// Lista de rotas páºblicas (podem ser acessadas sem auth)
 export const PUBLIC_ROUTES = [
-  '/api/config', // Temporariamente p�blico at� implementar auth adequada
-  '/api/relatorios' // Dados agregados, sem informa��es sens�veis
+  '/api/config', // Temporariamente páºblico atá© implementar auth adequada
+  '/api/relatorios' // Dados agregados, sem informaá§áµes sensá­veis
 ]
 
 export function requiresAuth(pathname: string): boolean {
-  // Verificar se � uma rota protegida
+  // Verificar se á© uma rota protegida
   return PROTECTED_ROUTES.some(route => pathname.startsWith(route))
 }
 
 export function isPublicRoute(pathname: string): boolean {
-  // Verificar se � uma rota explicitamente p�blica
+  // Verificar se á© uma rota explicitamente páºblica
   return PUBLIC_ROUTES.some(route => pathname.startsWith(route))
 } 

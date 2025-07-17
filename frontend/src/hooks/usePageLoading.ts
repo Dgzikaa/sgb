@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+﻿import { useState, useEffect, useCallback } from 'react'
 
 export type SkeletonType = 
   | 'dashboard'
@@ -78,7 +78,7 @@ export function usePageLoading(
     }))
   }, [])
 
-  // Wrapper para executar fun��o ass�ncrona com loading
+  // Wrapper para executar funá§á£o assá­ncrona com loading
   const withLoading = useCallback(async <T>(
     asyncFn: () => Promise<T>,
     type: SkeletonType = initialType,
@@ -108,7 +108,7 @@ export function usePageLoading(
   }
 }
 
-// Hook espec�fico para loading de dados de API
+// Hook especá­fico para loading de dados de API
 export function useApiLoading(skeletonType: SkeletonType = 'fullscreen') {
   const {
     loading,
@@ -121,7 +121,7 @@ export function useApiLoading(skeletonType: SkeletonType = 'fullscreen') {
     withLoading
   } = usePageLoading(skeletonType)
 
-  // Fun��o para fazer requisi��es com loading autom�tico
+  // Funá§á£o para fazer requisiá§áµes com loading automá¡tico
   const fetchWithLoading = useCallback(async <T>(
     url: string,
     options?: RequestInit,
@@ -151,7 +151,7 @@ export function useApiLoading(skeletonType: SkeletonType = 'fullscreen') {
   }
 }
 
-// Hook para m�ltiplos estados de loading (�til para p�ginas complexas)
+// Hook para máºltiplos estados de loading (áºtil para pá¡ginas complexas)
 export function useMultipleLoading() {
   const [loadingStates, setLoadingStates] = useState<Record<string, PageLoadingState>>({})
 
@@ -241,7 +241,7 @@ export function useMultipleLoading() {
   }
 }
 
-// Hook com timer para evitar loading muito r�pido (evita flicker)
+// Hook com timer para evitar loading muito rá¡pido (evita flicker)
 export function useDelayedLoading(
   initialType: SkeletonType = 'fullscreen',
   minDelay: number = 300

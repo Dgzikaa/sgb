@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { useUser } from '@/contexts/UserContext'
@@ -38,7 +38,7 @@ export function useMenuBadges() {
       setLoading(true)
       setError(null)
       
-      // 🎯 UMA S� REQUISI��O para todos os badges
+      // ðŸŽ¯ UMA Sá“ REQUISIá‡áƒO para todos os badges
       const response = await fetch('/api/badges', {
         method: 'POST',
         headers: {
@@ -59,7 +59,7 @@ export function useMenuBadges() {
       if (data.success && data.badges) {
         setBadges(data.badges)
       } else {
-        console.warn('Resposta inv�lida da API badges:', data)
+        console.warn('Resposta invá¡lida da API badges:', data)
       }
     } catch (error) {
       console.error('Erro ao buscar badges:', error)
@@ -79,12 +79,12 @@ export function useMenuBadges() {
     return () => clearInterval(interval)
   }, [fetchBadges])
 
-  // Fun��o para for�ar atualiza��o manual
+  // Funá§á£o para forá§ar atualizaá§á£o manual
   const refresh = useCallback(() => {
     fetchBadges()
   }, [fetchBadges])
 
-  // Fun��o para limpar badges (�til ao trocar de bar)
+  // Funá§á£o para limpar badges (áºtil ao trocar de bar)
   const clear = useCallback(() => {
     setBadges({
       checklist: 0,

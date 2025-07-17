@@ -1,22 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 
-// Fun��es dispon�veis no sistema
+// Funá§áµes disponá­veis no sistema
 const FUNCOES_DISPONIVEL = [
   {
     id: 'funcionario',
-    nome: 'Funcion�rio',
-    descricao: 'Acesso b�sico �s funcionalidades operacionais',
+    nome: 'Funcioná¡rio',
+    descricao: 'Acesso bá¡sico á s funcionalidades operacionais',
     nivel: 1,
     cor: 'bg-blue-100 text-blue-800 border-blue-200',
-    icone: '👤'
+    icone: 'ðŸ‘¤'
   },
   {
     id: 'gerente',
     nome: 'Gerente',
-    descricao: 'Acesso a relat�rios e gest�o de funcion�rios',
+    descricao: 'Acesso a relatá³rios e gestá£o de funcioná¡rios',
     nivel: 2,
     cor: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    icone: '👨��💼'
+    icone: 'ðŸ‘¨€ðŸ’¼'
   },
   {
     id: 'admin',
@@ -24,16 +24,16 @@ const FUNCOES_DISPONIVEL = [
     descricao: 'Acesso completo a todas as funcionalidades',
     nivel: 3,
     cor: 'bg-red-100 text-red-800 border-red-200',
-    icone: '👑'
+    icone: 'ðŸ‘‘'
   }
 ]
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('📊 GET /api/usuarios/funcoes - Buscando fun��es dispon�veis')
+    console.log('ðŸ“Š GET /api/usuarios/funcoes - Buscando funá§áµes disponá­veis')
     
-    // Aqui voc� pode adicionar l�gica para buscar fun��es espec�ficas por bar
-    // ou implementar diferentes tipos de fun��es baseadas no plano do bar
+    // Aqui vocáª pode adicionar lá³gica para buscar funá§áµes especá­ficas por bar
+    // ou implementar diferentes tipos de funá§áµes baseadas no plano do bar
     
     return NextResponse.json({
       success: true,
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     })
     
   } catch (error) {
-    console.error('�� Erro na API de fun��es:', error)
+    console.error('Œ Erro na API de funá§áµes:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },
       { status: 500 }

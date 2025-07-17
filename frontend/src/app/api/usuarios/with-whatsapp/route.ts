@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -6,7 +6,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// GET - Listar funcion�rios com WhatsApp cadastrado
+// GET - Listar funcioná¡rios com WhatsApp cadastrado
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
@@ -25,14 +25,14 @@ export async function GET(req: NextRequest) {
     const { data: usuarios, error } = await query
 
     if (error) {
-      console.error('Erro ao buscar usu�rios:', error)
+      console.error('Erro ao buscar usuá¡rios:', error)
       return NextResponse.json(
-        { success: false, error: 'Erro ao buscar usu�rios' },
+        { success: false, error: 'Erro ao buscar usuá¡rios' },
         { status: 500 }
       )
     }
 
-    // Filtrar e categorizar usu�rios
+    // Filtrar e categorizar usuá¡rios
     const usuariosComWhatsApp = usuarios?.filter((u: any) =>
       u.whatsapp &&
       typeof u.whatsapp === 'string' &&
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
       u.whatsapp.replace(/\D/g, '').length < 10
     ) || []
 
-    // Validar n�meros de WhatsApp
+    // Validar náºmeros de WhatsApp
     const usuariosValidados = usuariosComWhatsApp.map((usuario: any) => ({
       ...usuario,
       whatsapp_valido: usuario.whatsapp && usuario.whatsapp.replace(/\D/g, '').length >= 10
@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(response)
 
   } catch (error) {
-    console.error('Erro ao buscar usu�rios com WhatsApp:', error)
+    console.error('Erro ao buscar usuá¡rios com WhatsApp:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno' },
       { status: 500 }
@@ -76,13 +76,13 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST - Atualizar m�ltiplos usu�rios (para opera��es em lote)
+// POST - Atualizar máºltiplos usuá¡rios (para operaá§áµes em lote)
 export async function POST(req: NextRequest) {
   try {
     const { operacao, usuarios } = await req.json()
 
     if (operacao === 'validar_whatsapp') {
-      // Validar n�meros WhatsApp em lote
+      // Validar náºmeros WhatsApp em lote
       const resultados = []
 
       for (const usuario of usuarios) {
@@ -92,14 +92,14 @@ export async function POST(req: NextRequest) {
           resultados.push({
             id: usuario.id,
             valido: false,
-            erro: 'N�mero inv�lido'
+            erro: 'Náºmero invá¡lido'
           })
           continue
         }
 
         try {
-          // Aqui voc� poderia fazer uma valida��o real via API
-          // Por enquanto, apenas valida��o de formato
+          // Aqui vocáª poderia fazer uma validaá§á£o real via API
+          // Por enquanto, apenas validaá§á£o de formato
           const isValid = parseInt(numero.substring(0, 2)) >= 11 && 
                          parseInt(numero.substring(0, 2)) <= 99 &&
                          numero[2] === '9'
@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
           resultados.push({
             id: usuario.id,
             valido: false,
-            erro: 'Erro na valida��o'
+            erro: 'Erro na validaá§á£o'
           })
         }
       }
@@ -126,12 +126,12 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: false, error: 'Opera��o n�o suportada' },
+      { success: false, error: 'Operaá§á£o ná£o suportada' },
       { status: 400 }
     )
 
   } catch (error) {
-    console.error('Erro na opera��o em lote:', error)
+    console.error('Erro na operaá§á£o em lote:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno' },
       { status: 500 }

@@ -1,12 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
 
-// FUN��O COMPLETAMENTE NOVA PARA FOR�AR RECOMPILA��O
+// FUNá‡áƒO COMPLETAMENTE NOVA PARA FORá‡AR RECOMPILAá‡áƒO
 async function getDashboardSemanalCorrigido(request: NextRequest) {
   const VERSAO_DOMINGO_CORRIGIDA = "V5_FINAL_" + Date.now()
-  console.log(`🔥🔥🔥 NOVA FUN��O DOMINGO CORRIGIDA: ${VERSAO_DOMINGO_CORRIGIDA} 🔥🔥🔥`)
+  console.log(`ðŸ”¥ðŸ”¥ðŸ”¥ NOVA FUNá‡áƒO DOMINGO CORRIGIDA: ${VERSAO_DOMINGO_CORRIGIDA} ðŸ”¥ðŸ”¥ðŸ”¥`)
   
   try {
     const { searchParams } = new URL(request.url)
@@ -16,23 +16,23 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
 
     if (!data_inicio || !data_fim || !bar_id) {
       return NextResponse.json(
-        { success: false, error: 'Par�metros obrigat�rios: data_inicio, data_fim, bar_id' },
+        { success: false, error: 'Pará¢metros obrigatá³rios: data_inicio, data_fim, bar_id' },
         { status: 400 }
       )
     }
 
-    console.log('🔍 API Dashboard Semanal - Par�metros recebidos:', {
+    console.log('ðŸ” API Dashboard Semanal - Pará¢metros recebidos:', {
       data_inicio,
       data_fim,
       bar_id,
       timestamp: new Date().toISOString(),
-      versao: 'CORRE��O_DOMINGO_V2'
+      versao: 'CORREá‡áƒO_DOMINGO_V2'
     })
 
     // Inicializar cliente Supabase
     const supabase = await getSupabaseClient()
     if (!supabase) {
-      console.error('�� Erro ao conectar com banco')
+      console.error('Œ Erro ao conectar com banco')
       return NextResponse.json(
         { success: false, error: 'Erro ao conectar com banco' },
         { status: 500 }
@@ -49,7 +49,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
       clientes: number
       ticketMedio: number
     }> = []
-    const diasNomes = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'S�b']
+    const diasNomes = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sá¡b']
     
     for (let i = 0; i <= 6; i++) {
       const dia = new Date(inicioSemana)
@@ -64,10 +64,10 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
       })
     }
 
-    console.log('📅 Dias da semana gerados:', diasSemana.map((d: any) => `${d.dia} (${d.data})`).join(', '))
+    console.log('ðŸ“… Dias da semana gerados:', diasSemana.map((d: any) => `${d.dia} (${d.data})`).join(', '))
 
     try {
-      // FUN��O PARA BUSCAR TODOS OS DADOS COM PAGINA��O
+      // FUNá‡áƒO PARA BUSCAR TODOS OS DADOS COM PAGINAá‡áƒO
       const buscarTodosPagamentos = async () => {
         let todosPagamentos: any[] = []
         let offset = 0
@@ -86,13 +86,13 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
             .range(offset, offset + limit - 1)
 
           if (error) {
-            console.error(`�� Erro na pagina��o offset ${offset}:`, error)
+            console.error(`Œ Erro na paginaá§á£o offset ${offset}:`, error)
             break
           }
 
           if (data && data.length > 0) {
             todosPagamentos = [...todosPagamentos, ...data]
-            console.log(`📄 P�gina ${Math.floor(offset/limit) + 1}: ${data.length} registros (total: ${todosPagamentos.length})`)
+            console.log(`ðŸ“„ Pá¡gina ${Math.floor(offset/limit) + 1}: ${data.length} registros (total: ${todosPagamentos.length})`)
             
             if (data.length < limit) {
               hasMore = false
@@ -104,13 +104,13 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
           }
         }
 
-        console.log(`💰 TOTAL PAGAMENTOS ENCONTRADOS: ${todosPagamentos.length}`)
+        console.log(`ðŸ’° TOTAL PAGAMENTOS ENCONTRADOS: ${todosPagamentos.length}`)
         return todosPagamentos
       }
 
-      // Buscar dados de TODAS as fontes (pagina��o + paralelismo)
+      // Buscar dados de TODAS as fontes (paginaá§á£o + paralelismo)
       const [pagamentos, symplaResult, periodoResult] = await Promise.all([
-        // 1. Pagamentos ContaHub (COM PAGINA��O)
+        // 1. Pagamentos ContaHub (COM PAGINAá‡áƒO)
         buscarTodosPagamentos(),
 
         // 2. Sympla bilheteria + SEM LIMITE
@@ -123,7 +123,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
           .not('total_liquido', 'is', null)
           .then((result: any) => result.data || []),
 
-        // 3. Per�odo para clientes E faturamento adicional + SEM LIMITE
+        // 3. Perá­odo para clientes E faturamento adicional + SEM LIMITE
         supabase
           .from('periodo')
           .select('dt_gerencial, pessoas, vr_pagamentos, vr_couvert')
@@ -136,13 +136,13 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
       const sympla = symplaResult
       const periodo = periodoResult
 
-      console.log('📊 Dados encontrados (PAGINA��O):', {
+      console.log('ðŸ“Š Dados encontrados (PAGINAá‡áƒO):', {
         pagamentos: pagamentos.length,
         sympla: sympla.length,
         periodo: periodo.length
       })
 
-      // BUSCAR DADOS YUZER (igual ao dashboard di�rio) + COM PAGINA��O
+      // BUSCAR DADOS YUZER (igual ao dashboard diá¡rio) + COM PAGINAá‡áƒO
       const buscarTodosYuzerBar = async () => {
         let todosYuzerBar: any[] = []
         let offset = 0
@@ -160,7 +160,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
             .range(offset, offset + limit - 1)
 
           if (error) {
-            console.error(`�� Erro na pagina��o Yuzer Bar offset ${offset}:`, error)
+            console.error(`Œ Erro na paginaá§á£o Yuzer Bar offset ${offset}:`, error)
             break
           }
 
@@ -176,7 +176,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
           }
         }
 
-        console.log(`🍺 TOTAL YUZER BAR ENCONTRADOS: ${todosYuzerBar.length}`)
+        console.log(`ðŸº TOTAL YUZER BAR ENCONTRADOS: ${todosYuzerBar.length}`)
         return todosYuzerBar
       }
 
@@ -197,7 +197,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
             .range(offset, offset + limit - 1)
 
           if (error) {
-            console.error(`�� Erro na pagina��o Yuzer Ingressos offset ${offset}:`, error)
+            console.error(`Œ Erro na paginaá§á£o Yuzer Ingressos offset ${offset}:`, error)
             break
           }
 
@@ -213,7 +213,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
           }
         }
 
-        console.log(`🎫 TOTAL YUZER INGRESSOS ENCONTRADOS: ${todosYuzerIngressos.length}`)
+        console.log(`ðŸŽ« TOTAL YUZER INGRESSOS ENCONTRADOS: ${todosYuzerIngressos.length}`)
         return todosYuzerIngressos
       }
 
@@ -222,12 +222,12 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
         buscarTodosYuzerIngressos()
       ])
 
-      console.log('📊 Dados Yuzer detalhados (PAGINA��O):', {
+      console.log('ðŸ“Š Dados Yuzer detalhados (PAGINAá‡áƒO):', {
         yuzerBar: yuzerBar.length,
         yuzerIngresso: yuzerIngresso.length
       })
 
-      // Processar faturamento de TODAS as fontes (igual ao di�rio)
+      // Processar faturamento de TODAS as fontes (igual ao diá¡rio)
       // 1. ContaHub (pagamentos filtrados)
       const faturamento_contahub_real = pagamentos.reduce((sum: number, item: any) => {
         return sum + (parseFloat(item.liquido) || 0)
@@ -248,12 +248,12 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
         return sum + (parseFloat(item.valor_total) || 0)
       }, 0)
 
-      // 5. Couvert real da tabela per�odo
+      // 5. Couvert real da tabela perá­odo
       const couvert_real_periodo = periodo.reduce((sum: number, item: any) => {
         return sum + (parseFloat(item.vr_couvert) || 0)
       }, 0)
 
-      console.log('💰 Faturamentos detalhados (igual ao di�rio):', {
+      console.log('ðŸ’° Faturamentos detalhados (igual ao diá¡rio):', {
         contahub_real: faturamento_contahub_real,
         bilheteria: faturamento_bilheteria,
         yuzer_bar: faturamento_yuzer_bar,
@@ -261,20 +261,20 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
         couvert_periodo: couvert_real_periodo
       })
 
-      // TOTAIS CONSOLIDADOS (igual ao di�rio)
+      // TOTAIS CONSOLIDADOS (igual ao diá¡rio)
       const faturamento_bar_sem_couvert = faturamento_contahub_real - couvert_real_periodo + faturamento_bilheteria
       const bar_total = faturamento_bar_sem_couvert + faturamento_yuzer_bar
       const couvert_total = couvert_real_periodo + faturamento_yuzer_ingressos
       const faturamento_total = bar_total + couvert_total
 
-      console.log('💰 Faturamento CONSOLIDADO IGUAL AO DI�RIO:', {
+      console.log('ðŸ’° Faturamento CONSOLIDADO IGUAL AO DIáRIO:', {
         bar_total: bar_total,
         couvert_total: couvert_total,
         faturamento_total: faturamento_total
       })
 
-      // **CORRE��O IGUAL AO DI�RIO: Usar pessoas_diario_corrigido quando poss�vel**
-      console.log('👥 Buscando clientes na tabela pessoas_diario_corrigido para cada dia da semana...')
+      // **CORREá‡áƒO IGUAL AO DIáRIO: Usar pessoas_diario_corrigido quando possá­vel**
+      console.log('ðŸ‘¥ Buscando clientes na tabela pessoas_diario_corrigido para cada dia da semana...')
       
       let clientes_pessoas_diario_total = 0
       const diasSemanaArray = []
@@ -292,26 +292,26 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
 
           if (pessoasData) {
             clientes_pessoas_diario_total += pessoasData.total_pessoas_bruto || 0
-            console.log(`👥 ${dia}: pessoas_diario_corrigido = ${pessoasData.total_pessoas_bruto || 0}`)
+            console.log(`ðŸ‘¥ ${dia}: pessoas_diario_corrigido = ${pessoasData.total_pessoas_bruto || 0}`)
           } else {
-            console.log(`��️ ${dia}: sem dados em pessoas_diario_corrigido`)
+            console.log(`š ï¸ ${dia}: sem dados em pessoas_diario_corrigido`)
           }
         } catch (error) {
-          console.log(`�� Erro ao buscar ${dia} em pessoas_diario_corrigido:`, error)
+          console.log(`Œ Erro ao buscar ${dia} em pessoas_diario_corrigido:`, error)
         }
       }
 
       // Calcular clientes do ContaHub
       const periodo_com_pagamento = periodo.filter((item: any) => parseFloat(item.vr_pagamentos || '0') > 0)
-      const clientes_contahub_periodo = periodo_com_pagamento.length // CONTAR registros, n�o somar pessoas
+      const clientes_contahub_periodo = periodo_com_pagamento.length // CONTAR registros, ná£o somar pessoas
 
       // Clientes Yuzer (apenas ingressos)
       const pedidos_unicos_yuzer_ingresso = [...new Set(yuzerIngresso.map((y: any) => y.pedido_id))]
       const clientes_yuzer = pedidos_unicos_yuzer_ingresso.length
 
-      // Buscar TODAS as visitas Sympla do per�odo COM PAGINA��O
-      console.log('🔍 Buscando TODAS as visitas_clientes Sympla do per�odo COM PAGINA��O...')
-      console.log('📋 RESUMO PER�ODO (antes de filtrar):', {
+      // Buscar TODAS as visitas Sympla do perá­odo COM PAGINAá‡áƒO
+      console.log('ðŸ” Buscando TODAS as visitas_clientes Sympla do perá­odo COM PAGINAá‡áƒO...')
+      console.log('ðŸ“‹ RESUMO PERáODO (antes de filtrar):', {
         total_registros: periodo.length,
         amostra_5_primeiros: periodo.slice(0, 5).map((p: any) => ({
           dt_gerencial: p.dt_gerencial,
@@ -338,7 +338,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
             .range(offset, offset + limit - 1)
 
           if (error) {
-            console.error(`�� Erro na pagina��o Visitas Sympla offset ${offset}:`, error)
+            console.error(`Œ Erro na paginaá§á£o Visitas Sympla offset ${offset}:`, error)
             break
           }
 
@@ -354,7 +354,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
           }
         }
 
-        console.log(`👥 TOTAL VISITAS SYMPLA ENCONTRADAS: ${todasVisitas.length}`)
+        console.log(`ðŸ‘¥ TOTAL VISITAS SYMPLA ENCONTRADAS: ${todasVisitas.length}`)
         return todasVisitas
       }
 
@@ -364,26 +364,26 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
         return sum + (parseInt(item.pessoas_na_mesa) || 0)
       }, 0)
 
-      // **L�GICA FINAL IGUAL AO DI�RIO: Usar pessoas_diario_corrigido como base**
-      let clientes_contahub = clientes_contahub_periodo // Valor padr�o
+      // **Lá“GICA FINAL IGUAL AO DIáRIO: Usar pessoas_diario_corrigido como base**
+      let clientes_contahub = clientes_contahub_periodo // Valor padrá£o
       let clientesSource = 'periodo_com_pagamento'
       
       if (clientes_pessoas_diario_total > 0) {
-        // **CORRE��O IGUAL AO DI�RIO: usar pessoas_diario_corrigido COMO BASE e somar Yuzer + Sympla**
+        // **CORREá‡áƒO IGUAL AO DIáRIO: usar pessoas_diario_corrigido COMO BASE e somar Yuzer + Sympla**
         clientes_contahub = clientes_pessoas_diario_total
         clientesSource = 'pessoas_diario_corrigido + yuzer + sympla'
-        console.log(`👥 Usando pessoas_diario_corrigido como base: ${clientes_pessoas_diario_total} + ${clientes_yuzer} (Yuzer) + ${clientes_visitas_sympla} (Sympla)`)
+        console.log(`ðŸ‘¥ Usando pessoas_diario_corrigido como base: ${clientes_pessoas_diario_total} + ${clientes_yuzer} (Yuzer) + ${clientes_visitas_sympla} (Sympla)`)
       } else {
-        // Usar dados do per�odo
+        // Usar dados do perá­odo
         clientes_contahub = clientes_contahub_periodo
         clientesSource = 'periodo_com_pagamento'
-        console.log(`👥 Usando per�odo com pagamento: ${clientes_contahub_periodo}`)
+        console.log(`ðŸ‘¥ Usando perá­odo com pagamento: ${clientes_contahub_periodo}`)
       }
 
-      // **SOMA IGUAL AO DI�RIO: base + yuzer + sympla**
+      // **SOMA IGUAL AO DIáRIO: base + yuzer + sympla**
       const clientes_total = clientes_contahub + clientes_yuzer + clientes_visitas_sympla
 
-      console.log('👥 Clientes detalhados (CORRIGIDO - IGUAL AO DI�RIO):', {
+      console.log('ðŸ‘¥ Clientes detalhados (CORRIGIDO - IGUAL AO DIáRIO):', {
         periodo_total_registros: periodo.length,
         periodo_com_pagamento_registros: periodo_com_pagamento.length,
         pessoas_diario_corrigido_total: clientes_pessoas_diario_total,
@@ -414,14 +414,14 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
         const couvert_total_dia = couvert_periodo_dia + faturamento_yuzer_ingressos_dia
         dia.faturamento = bar_total_dia + couvert_total_dia
 
-        // **Distribuir clientes por dia (EXATAMENTE IGUAL AO DI�RIO)**
+        // **Distribuir clientes por dia (EXATAMENTE IGUAL AO DIáRIO)**
         let clientes_base_dia = 0
         let clientes_pessoas_diario_dia = 0
         let clientesSourceDia = 'periodo_com_pagamento'
         
-        // **CORRE��O IGUAL AO DI�RIO: Buscar pessoas_diario_corrigido primeiro**
-        console.log(`🔥🔥🔥 DISTRIBUINDO CLIENTES INDIVIDUALMENTE - DIA: ${dia.data} (${dia.dia}) 🔥🔥🔥`)
-        console.log(`👥 🔍 BUSCANDO PESSOAS_DIARIO_CORRIGIDO PARA ${dia.data} (${dia.dia})...`)
+        // **CORREá‡áƒO IGUAL AO DIáRIO: Buscar pessoas_diario_corrigido primeiro**
+        console.log(`ðŸ”¥ðŸ”¥ðŸ”¥ DISTRIBUINDO CLIENTES INDIVIDUALMENTE - DIA: ${dia.data} (${dia.dia}) ðŸ”¥ðŸ”¥ðŸ”¥`)
+        console.log(`ðŸ‘¥ ðŸ” BUSCANDO PESSOAS_DIARIO_CORRIGIDO PARA ${dia.data} (${dia.dia})...`)
         try {
           const { data: pessoasDataDia, error: pessoasErrorDia } = await supabase
             .from('pessoas_diario_corrigido')
@@ -432,64 +432,64 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
           if (pessoasDataDia) {
             clientes_pessoas_diario_dia = pessoasDataDia.total_pessoas_bruto || 0
             clientesSourceDia = 'pessoas_diario_corrigido'
-            console.log(`👥 ${dia.data} - Pessoas di�rio corrigido: ${clientes_pessoas_diario_dia}`)
+            console.log(`ðŸ‘¥ ${dia.data} - Pessoas diá¡rio corrigido: ${clientes_pessoas_diario_dia}`)
           } else {
-            console.log(`��️ ${dia.data} - Nenhum dado encontrado na tabela pessoas_diario_corrigido`)
+            console.log(`š ï¸ ${dia.data} - Nenhum dado encontrado na tabela pessoas_diario_corrigido`)
           }
         } catch (error) {
-          console.log(`�� ${dia.data} - Erro ao buscar clientes pessoas_diario_corrigido:`, error)
+          console.log(`Œ ${dia.data} - Erro ao buscar clientes pessoas_diario_corrigido:`, error)
         }
 
-        // **L�GICA FINAL IGUAL AO DI�RIO**
+        // **Lá“GICA FINAL IGUAL AO DIáRIO**
         const periodo_com_pagamento_dia = periodo_dia.filter((item: any) => parseFloat(item.vr_pagamentos || '0') > 0)
-        const clientes_contahub_dia = periodo_com_pagamento_dia.length // Dados do per�odo
+        const clientes_contahub_dia = periodo_com_pagamento_dia.length // Dados do perá­odo
         
         if (clientes_pessoas_diario_dia > 0) {
-          // Se h� dados consolidados, usar eles COMO BASE
+          // Se há¡ dados consolidados, usar eles COMO BASE
           clientes_base_dia = clientes_pessoas_diario_dia
           clientesSourceDia = 'pessoas_diario_corrigido + yuzer + sympla'
-          console.log(`👥 ${dia.data} - Usando pessoas_diario_corrigido como base: ${clientes_pessoas_diario_dia}`)
+          console.log(`ðŸ‘¥ ${dia.data} - Usando pessoas_diario_corrigido como base: ${clientes_pessoas_diario_dia}`)
         } else {
-          // Usar dados do per�odo com pagamento
+          // Usar dados do perá­odo com pagamento
           clientes_base_dia = clientes_contahub_dia
           clientesSourceDia = 'periodo_com_pagamento'
-          console.log(`👥 ${dia.data} - Usando per�odo com pagamento: ${clientes_contahub_dia}`)
+          console.log(`ðŸ‘¥ ${dia.data} - Usando perá­odo com pagamento: ${clientes_contahub_dia}`)
         }
 
         // Yuzer ingressos do dia
         const pedidos_unicos_yuzer_ingresso_dia = [...new Set(yuzer_ingresso_dia.map((y: any) => y.pedido_id))]
         const clientes_yuzer_dia = pedidos_unicos_yuzer_ingresso_dia.length
 
-        // Visitas Sympla do dia (j� filtradas)
+        // Visitas Sympla do dia (já¡ filtradas)
         const clientes_visitas_sympla_dia = visitas_sympla_dia.reduce((sum: number, item: any) => {
           return sum + (parseInt(item.pessoas_na_mesa) || 0)
         }, 0)
 
-        // **SOMAR TODAS AS FONTES por dia (IGUAL AO DI�RIO)**
+        // **SOMAR TODAS AS FONTES por dia (IGUAL AO DIáRIO)**
         dia.clientes = clientes_base_dia + clientes_yuzer_dia + clientes_visitas_sympla_dia
 
         // Log detalhado para debug
-        console.log(`👥 ${dia.dia} (${dia.data}) - CLIENTES FINAL (${clientesSourceDia}): ${dia.clientes}`)
-        console.log(`   💎 pessoas_diario_corrigido: ${clientes_pessoas_diario_dia}`)
-        console.log(`   🏢 base_dia: ${clientes_base_dia}`)
-        console.log(`   🎫 yuzer_dia: ${clientes_yuzer_dia}`)
-        console.log(`   🎪 sympla_dia: ${clientes_visitas_sympla_dia}`)
+        console.log(`ðŸ‘¥ ${dia.dia} (${dia.data}) - CLIENTES FINAL (${clientesSourceDia}): ${dia.clientes}`)
+        console.log(`   ðŸ’Ž pessoas_diario_corrigido: ${clientes_pessoas_diario_dia}`)
+        console.log(`   ðŸ¢ base_dia: ${clientes_base_dia}`)
+        console.log(`   ðŸŽ« yuzer_dia: ${clientes_yuzer_dia}`)
+        console.log(`   ðŸŽª sympla_dia: ${clientes_visitas_sympla_dia}`)
 
-        // Calcular ticket m�dio
+        // Calcular ticket má©dio
         dia.ticketMedio = dia.clientes > 0 ? dia.faturamento / dia.clientes : 0
       }
 
       // Log dos resultados por dia
       diasSemana.forEach(dia => {
         if (dia.faturamento > 0 || dia.clientes > 0) {
-          console.log(`📅 ${dia.dia} (${dia.data}): R$ ${dia.faturamento.toFixed(2)}, ${dia.clientes} pessoas`)
+          console.log(`ðŸ“… ${dia.dia} (${dia.data}): R$ ${dia.faturamento.toFixed(2)}, ${dia.clientes} pessoas`)
         }
       })
 
       const totalFaturamento = diasSemana.reduce((sum, dia) => sum + dia.faturamento, 0)
       const totalClientes = diasSemana.reduce((sum, dia) => sum + dia.clientes, 0)
 
-      console.log('�� Totais da semana (CORRIGIDOS):', {
+      console.log('œ… Totais da semana (CORRIGIDOS):', {
         faturamento: totalFaturamento,
         clientes: totalClientes,
         ticketMedio: totalClientes > 0 ? totalFaturamento / totalClientes : 0
@@ -537,7 +537,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
       return response
 
     } catch (dbError) {
-      console.error('�� Erro ao buscar dados do banco:', dbError)
+      console.error('Œ Erro ao buscar dados do banco:', dbError)
       return NextResponse.json(
         { success: false, error: 'Erro ao buscar dados do banco: ' + (dbError as Error).message },
         { status: 500 }
@@ -545,7 +545,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('�� Erro na API Dashboard Semanal:', error)
+    console.error('Œ Erro na API Dashboard Semanal:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor: ' + (error as Error).message },
       { status: 500 }

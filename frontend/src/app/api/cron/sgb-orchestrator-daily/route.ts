@@ -1,22 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server';
+ï»¿import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('ğŸŒ… Cron diá¡rio SGB iniciado');
+    console.log('Ã°Å¸Å’â€¦ Cron diÃ¡Â¡rio SGB iniciado');
     
-    // Verificar se á© uma requisiá§á£o de cron vá¡lida
+    // Verificar se Ã¡Â© uma requisiÃ¡Â§Ã¡Â£o de cron vÃ¡Â¡lida
     const authHeader = request.headers.get('authorization');
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      console.log('Œ Acesso negado - token invá¡lido');
+      console.log('ÂÅ’ Acesso negado - token invÃ¡Â¡lido');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     
     if (!supabaseUrl) {
-      throw new Error('URL do Supabase ná£o configurada');
+      throw new Error('URL do Supabase nÃ¡Â£o configurada');
     }
     
     // Disparar o orchestrator final que vai iniciar o ciclo de 15 minutos
@@ -34,17 +34,17 @@ export async function GET(request: NextRequest) {
     
     if (response.ok) {
       const result = await response.json();
-      console.log('œ… Orchestrator diá¡rio disparado com sucesso');
+      console.log('Å“â€¦ Orchestrator diÃ¡Â¡rio disparado com sucesso');
       
       return NextResponse.json({
         success: true,
-        message: 'Orchestrator diá¡rio executado e ciclo de 15 minutos iniciado',
+        message: 'Orchestrator diÃ¡Â¡rio executado e ciclo de 15 minutos iniciado',
         result,
         timestamp: new Date().toISOString()
       });
     } else {
       const errorText = await response.text();
-      console.log('Œ Erro no cron diá¡rio:', response.status, errorText);
+      console.log('ÂÅ’ Erro no cron diÃ¡Â¡rio:', response.status, errorText);
       
       return NextResponse.json({
         success: false,
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
     }
     
   } catch (error) {
-    console.error('Œ Erro no cron diá¡rio:', error);
+    console.error('ÂÅ’ Erro no cron diÃ¡Â¡rio:', error);
     return NextResponse.json({ 
       success: false, 
       error: error instanceof Error ? error.message : 'Unknown error',

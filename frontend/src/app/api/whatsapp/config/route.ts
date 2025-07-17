@@ -1,14 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
 import { createServiceRoleClient } from '@/lib/supabase-admin';
 
-// Schema de valida��o para configura��es WhatsApp
+// Schema de validaá§á£o para configuraá§áµes WhatsApp
 const ConfigWhatsAppSchema = z.object({
-  phone_number_id: z.string().min(1, 'Phone Number ID � obrigat�rio'),
-  access_token: z.string().min(1, 'Access Token � obrigat�rio'),
-  webhook_verify_token: z.string().min(1, 'Webhook Verify Token � obrigat�rio'),
-  webhook_url: z.string().url('URL do webhook deve ser v�lida').optional(),
+  phone_number_id: z.string().min(1, 'Phone Number ID á© obrigatá³rio'),
+  access_token: z.string().min(1, 'Access Token á© obrigatá³rio'),
+  webhook_verify_token: z.string().min(1, 'Webhook Verify Token á© obrigatá³rio'),
+  webhook_url: z.string().url('URL do webhook deve ser vá¡lida').optional(),
   ativo: z.boolean().default(false),
   api_version: z.string().default('v18.0'),
   rate_limit_per_minute: z.number().int().min(1).max(1000).default(80),
@@ -19,13 +19,13 @@ const ConfigWhatsAppSchema = z.object({
 });
 
 const UpdateConfigSchema = ConfigWhatsAppSchema.partial().omit({
-  phone_number_id: true // Phone Number ID n�o pode ser alterado
+  phone_number_id: true // Phone Number ID ná£o pode ser alterado
 });
 
-// Fun��o para validar token WhatsApp
+// Funá§á£o para validar token WhatsApp
 async function validateWhatsAppToken(accessToken: string, phoneNumberId: string): Promise<boolean> {
   try {
-    console.log('🔍 Validando token WhatsApp...');
+    console.log('ðŸ” Validando token WhatsApp...');
     
     const response = await fetch(`https://graph.facebook.com/v18.0/${phoneNumberId}`, {
       headers: {
@@ -36,20 +36,20 @@ async function validateWhatsAppToken(accessToken: string, phoneNumberId: string)
 
     if (response.ok) {
       const data = await response.json();
-      console.log('�� Token WhatsApp v�lido:', data.display_phone_number);
+      console.log('œ… Token WhatsApp vá¡lido:', data.display_phone_number);
       return true;
     } else {
-      console.error('�� Token WhatsApp inv�lido:', response.status, response.statusText);
+      console.error('Œ Token WhatsApp invá¡lido:', response.status, response.statusText);
       return false;
     }
   } catch (error) {
-    console.error('�� Erro ao validar token WhatsApp:', error);
+    console.error('Œ Erro ao validar token WhatsApp:', error);
     return false;
   }
 }
 
 // ========================================
-// 📱 GET /api/whatsapp/config
+// ðŸ“± GET /api/whatsapp/config
 // ========================================
 export async function GET(request: NextRequest) {
   try {
@@ -57,20 +57,20 @@ export async function GET(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'Usuá¡rio ná£o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
-    // Verificar permiss�es
+    // Verificar permissáµes
     if (permissao !== 'admin') {
-      return NextResponse.json({ error: 'Apenas admins podem visualizar configura��es' }, { status: 403 });
+      return NextResponse.json({ error: 'Apenas admins podem visualizar configuraá§áµes' }, { status: 403 });
     }
 
     // Criar cliente Supabase
     const supabase = createServiceRoleClient();
 
-    // Buscar configura��o existente
+    // Buscar configuraá§á£o existente
     const { data: config, error } = await supabase
       .from('whatsapp_configuracoes')
       .select('*')
@@ -79,19 +79,19 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       if (error.code === 'PGRST116') {
-        // Nenhuma configura��o encontrada
+        // Nenhuma configuraá§á£o encontrada
         return NextResponse.json({ 
           success: true,
           config: null,
-          message: 'Nenhuma configura��o encontrada'
+          message: 'Nenhuma configuraá§á£o encontrada'
         });
       }
       
-      console.error('Erro ao buscar configura��o:', error);
-      return NextResponse.json({ error: 'Erro ao buscar configura��o' }, { status: 500 });
+      console.error('Erro ao buscar configuraá§á£o:', error);
+      return NextResponse.json({ error: 'Erro ao buscar configuraá§á£o' }, { status: 500 });
     }
 
-    // Mascarar dados sens�veis
+    // Mascarar dados sensá­veis
     const configSafe = {
       ...config,
       access_token: config.access_token ? '***' + config.access_token.slice(-8) : null,
@@ -104,13 +104,13 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Erro na API de configura��o WhatsApp:', error);
+    console.error('Erro na API de configuraá§á£o WhatsApp:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }
 
 // ========================================
-// 📱 POST /api/whatsapp/config
+// ðŸ“± POST /api/whatsapp/config
 // ========================================
 export async function POST(request: NextRequest) {
   try {
@@ -118,12 +118,12 @@ export async function POST(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'Usuá¡rio ná£o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
-    // Verificar permiss�es (apenas admin pode criar)
+    // Verificar permissáµes (apenas admin pode criar)
     if (permissao !== 'admin') {
       return NextResponse.json({ error: 'Apenas admins podem configurar WhatsApp' }, { status: 403 });
     }
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = ConfigWhatsAppSchema.parse(body);
 
-    // Verificar se j� existe configura��o
+    // Verificar se já¡ existe configuraá§á£o
     const supabase = createServiceRoleClient();
     const { data: existing } = await supabase
       .from('whatsapp_configuracoes')
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
 
     if (existing) {
       return NextResponse.json({ 
-        error: 'Configura��o j� existe. Use PUT para atualizar.' 
+        error: 'Configuraá§á£o já¡ existe. Use PUT para atualizar.' 
       }, { status: 409 });
     }
 
@@ -153,11 +153,11 @@ export async function POST(request: NextRequest) {
 
     if (!isTokenValid) {
       return NextResponse.json({ 
-        error: 'Token de acesso inv�lido ou Phone Number ID incorreto' 
+        error: 'Token de acesso invá¡lido ou Phone Number ID incorreto' 
       }, { status: 400 });
     }
 
-    // Criar configura��o
+    // Criar configuraá§á£o
     const { data: config, error } = await supabase
       .from('whatsapp_configuracoes')
       .insert({
@@ -169,31 +169,31 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Erro ao criar configura��o WhatsApp:', error);
-      return NextResponse.json({ error: 'Erro ao salvar configura��o' }, { status: 500 });
+      console.error('Erro ao criar configuraá§á£o WhatsApp:', error);
+      return NextResponse.json({ error: 'Erro ao salvar configuraá§á£o' }, { status: 500 });
     }
 
     return NextResponse.json({
       success: true,
       data: config,
-      message: 'Configura��o WhatsApp criada com sucesso'
+      message: 'Configuraá§á£o WhatsApp criada com sucesso'
     }, { status: 201 });
 
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({
-        error: 'Dados inv�lidos',
+        error: 'Dados invá¡lidos',
         details: error.errors
       }, { status: 400 });
     }
 
-    console.error('Erro na API de configura��es WhatsApp:', error);
+    console.error('Erro na API de configuraá§áµes WhatsApp:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }
 
 // ========================================
-// 📱 PUT /api/whatsapp/config
+// ðŸ“± PUT /api/whatsapp/config
 // ========================================
 export async function PUT(request: NextRequest) {
   try {
@@ -201,20 +201,20 @@ export async function PUT(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'Usuá¡rio ná£o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
-    // Verificar permiss�es
+    // Verificar permissáµes
     if (permissao !== 'admin') {
-      return NextResponse.json({ error: 'Apenas admins podem alterar configura��es' }, { status: 403 });
+      return NextResponse.json({ error: 'Apenas admins podem alterar configuraá§áµes' }, { status: 403 });
     }
 
     const body = await request.json();
     const validatedData = UpdateConfigSchema.parse(body);
 
-    // Verificar se configura��o existe
+    // Verificar se configuraá§á£o existe
     const supabase = createServiceRoleClient();
     const { data: existing, error: fetchError } = await supabase
       .from('whatsapp_configuracoes')
@@ -224,11 +224,11 @@ export async function PUT(request: NextRequest) {
 
     if (fetchError || !existing) {
       return NextResponse.json({ 
-        error: 'Configura��o n�o encontrada' 
+        error: 'Configuraá§á£o ná£o encontrada' 
       }, { status: 404 });
     }
 
-    // Preparar dados para atualiza��o
+    // Preparar dados para atualizaá§á£o
     let updateData: any = { ...validatedData };
 
     // Se alterando token, validar novamente
@@ -240,14 +240,14 @@ export async function PUT(request: NextRequest) {
 
       if (!isTokenValid) {
         return NextResponse.json({ 
-          error: 'Novo token de acesso inv�lido' 
+          error: 'Novo token de acesso invá¡lido' 
         }, { status: 400 });
       }
       
       updateData.last_tested_at = new Date().toISOString();
     }
 
-    // Atualizar configura��o
+    // Atualizar configuraá§á£o
     const { data: config, error } = await supabase
       .from('whatsapp_configuracoes')
       .update(updateData)
@@ -256,31 +256,31 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Erro ao atualizar configura��o WhatsApp:', error);
-      return NextResponse.json({ error: 'Erro ao atualizar configura��o' }, { status: 500 });
+      console.error('Erro ao atualizar configuraá§á£o WhatsApp:', error);
+      return NextResponse.json({ error: 'Erro ao atualizar configuraá§á£o' }, { status: 500 });
     }
 
     return NextResponse.json({
       success: true,
       data: config,
-      message: 'Configura��o atualizada com sucesso'
+      message: 'Configuraá§á£o atualizada com sucesso'
     });
 
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({
-        error: 'Dados inv�lidos',
+        error: 'Dados invá¡lidos',
         details: error.errors
       }, { status: 400 });
     }
 
-    console.error('Erro na API de configura��es WhatsApp:', error);
+    console.error('Erro na API de configuraá§áµes WhatsApp:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }
 
 // ========================================
-// 📱 DELETE /api/whatsapp/config
+// ðŸ“± DELETE /api/whatsapp/config
 // ========================================
 export async function DELETE(request: NextRequest) {
   try {
@@ -288,17 +288,17 @@ export async function DELETE(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'Usuá¡rio ná£o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
-    // Verificar permiss�es (apenas admin)
+    // Verificar permissáµes (apenas admin)
     if (permissao !== 'admin') {
-      return NextResponse.json({ error: 'Apenas admins podem deletar configura��es' }, { status: 403 });
+      return NextResponse.json({ error: 'Apenas admins podem deletar configuraá§áµes' }, { status: 403 });
     }
 
-    // Verificar se h� mensagens pendentes
+    // Verificar se há¡ mensagens pendentes
     const supabase = createServiceRoleClient();
     const { data: pendingMessages } = await supabase
       .from('whatsapp_mensagens')
@@ -309,34 +309,34 @@ export async function DELETE(request: NextRequest) {
 
     if (pendingMessages && pendingMessages.length > 0) {
       return NextResponse.json({ 
-        error: 'N�o � poss�vel deletar. H� mensagens pendentes.' 
+        error: 'Ná£o á© possá­vel deletar. Há¡ mensagens pendentes.' 
       }, { status: 409 });
     }
 
-    // Deletar configura��o
+    // Deletar configuraá§á£o
     const { error } = await supabase
       .from('whatsapp_configuracoes')
       .delete()
       .eq('bar_id', bar_id);
 
     if (error) {
-      console.error('Erro ao deletar configura��o WhatsApp:', error);
-      return NextResponse.json({ error: 'Erro ao deletar configura��o' }, { status: 500 });
+      console.error('Erro ao deletar configuraá§á£o WhatsApp:', error);
+      return NextResponse.json({ error: 'Erro ao deletar configuraá§á£o' }, { status: 500 });
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Configura��o WhatsApp removida com sucesso'
+      message: 'Configuraá§á£o WhatsApp removida com sucesso'
     });
 
   } catch (error) {
-    console.error('Erro na API de configura��es WhatsApp:', error);
+    console.error('Erro na API de configuraá§áµes WhatsApp:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }
 
 // ========================================
-// 🔧 FUN��ES AUXILIARES
+// ðŸ”§ FUNá‡á•ES AUXILIARES
 // ========================================
 
 /**
@@ -369,7 +369,7 @@ async function testWhatsAppConnection(config: any): Promise<{
       const error = await response.json();
       return {
         success: false,
-        message: 'Falha na conex�o com WhatsApp',
+        message: 'Falha na conexá£o com WhatsApp',
         details: error
       };
     }

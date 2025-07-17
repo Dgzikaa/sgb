@@ -1,19 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { createClient } from '@supabase/supabase-js'
 import { logLoginSuccess, logLoginFailure } from '@/lib/audit-logger'
 
 export async function POST(request: NextRequest) {
-  console.log('🚀 API de login iniciada')
+  console.log('ðŸš€ API de login iniciada')
   
-  // Capturar informa��es do cliente para logging
+  // Capturar informaá§áµes do cliente para logging
   const forwarded = request.headers.get('x-forwarded-for');
   const clientIp = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown';
   const userAgent = request.headers.get('user-agent') || 'unknown';
   const sessionId = request.headers.get('x-session-id') || `session_${Date.now()}`;
   
-  // Verificar vari�veis de ambiente logo no in�cio
-  console.log('🔍 Verificando vari�veis de ambiente...')
+  // Verificar variá¡veis de ambiente logo no iná­cio
+  console.log('ðŸ” Verificando variá¡veis de ambiente...')
   console.log('SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'OK' : 'FALTANDO')
   console.log('ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'OK' : 'FALTANDO')
   console.log('SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'OK' : 'FALTANDO')
@@ -22,44 +22,44 @@ export async function POST(request: NextRequest) {
   try {
     const { email, senha } = await request.json()
 
-    console.log('🔐 Tentativa de login:', { email })
+    console.log('ðŸ” Tentativa de login:', { email })
 
     if (!email || !senha) {
       await logLoginFailure({
-        email: email || 'n�o fornecido',
-        reason: 'Email e senha s�o obrigat�rios',
+        email: email || 'ná£o fornecido',
+        reason: 'Email e senha sá£o obrigatá³rios',
         ipAddress: clientIp,
         userAgent,
         sessionId
       });
       
       return NextResponse.json(
-        { success: false, error: 'Email e senha s�o obrigat�rios' },
+        { success: false, error: 'Email e senha sá£o obrigatá³rios' },
         { status: 400 }
       )
     }
 
-    console.log('🔑 Iniciando autentica��o com Supabase Auth...')
+    console.log('ðŸ”‘ Iniciando autenticaá§á£o com Supabase Auth...')
 
     // Obter cliente administrativo
     let adminClient
     try {
       adminClient = await getAdminClient()
     } catch (adminError) {
-      console.error('�� Erro ao obter cliente administrativo:', adminError)
+      console.error('Œ Erro ao obter cliente administrativo:', adminError)
       return NextResponse.json(
-        { success: false, error: 'Configura��o administrativa n�o dispon�vel' },
+        { success: false, error: 'Configuraá§á£o administrativa ná£o disponá­vel' },
         { status: 500 }
       )
     }
 
-    // Criar cliente para autentica��o (sem service role)
+    // Criar cliente para autenticaá§á£o (sem service role)
     const authClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
-    console.log('🔍 Tentando autenticar usu�rio...')
+    console.log('ðŸ” Tentando autenticar usuá¡rio...')
 
     // Tentar autenticar com Supabase Auth
     const { data: authData, error: authError } = await authClient.auth.signInWithPassword({
@@ -68,11 +68,11 @@ export async function POST(request: NextRequest) {
     })
 
     if (authError || !authData.user) {
-      console.log('�� Falha na autentica��o:', authError?.message)
+      console.log('Œ Falha na autenticaá§á£o:', authError?.message)
       
       await logLoginFailure({
         email,
-        reason: authError?.message || 'Usu�rio n�o encontrado',
+        reason: authError?.message || 'Usuá¡rio ná£o encontrado',
         ipAddress: clientIp,
         userAgent,
         sessionId
@@ -84,45 +84,45 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('�� Autentica��o bem-sucedida. User ID:', authData.user.id)
-    console.log('📊 Buscando dados do usu�rio na tabela usuarios_bar...')
+    console.log('œ… Autenticaá§á£o bem-sucedida. User ID:', authData.user.id)
+    console.log('ðŸ“Š Buscando dados do usuá¡rio na tabela usuarios_bar...')
 
-    // Buscar dados do usu�rio na tabela usuarios_bar
+    // Buscar dados do usuá¡rio na tabela usuarios_bar
     let { data: usuarios, error: dbError } = await adminClient
       .from('usuarios_bar')
       .select('*')
       .eq('user_id', authData.user.id)
       .eq('ativo', true)
 
-    console.log('🔍 Query executada - User ID:', authData.user.id)
-    console.log('🔍 Usu�rios encontrados:', usuarios?.length || 0)
+    console.log('ðŸ” Query executada - User ID:', authData.user.id)
+    console.log('ðŸ” Usuá¡rios encontrados:', usuarios?.length || 0)
     
-    // Se n�o encontrou usu�rio ativo, tentar buscar qualquer usu�rio com esse user_id
+    // Se ná£o encontrou usuá¡rio ativo, tentar buscar qualquer usuá¡rio com esse user_id
     if (!usuarios || usuarios.length === 0) {
       const { data: todosUsuarios } = await adminClient
         .from('usuarios_bar')
         .select('*')
         .eq('user_id', authData.user.id)
       
-      console.log('🔍 Todos os usu�rios (incluindo inativos):', todosUsuarios?.length || 0)
+      console.log('ðŸ” Todos os usuá¡rios (incluindo inativos):', todosUsuarios?.length || 0)
       if (todosUsuarios && todosUsuarios.length > 0) {
-        console.log('🔍 Usu�rio encontrado mas inativo:', todosUsuarios[0])
+        console.log('ðŸ” Usuá¡rio encontrado mas inativo:', todosUsuarios[0])
       }
       
-      // Tamb�m tentar buscar por email
+      // Tambá©m tentar buscar por email
       const { data: usuariosPorEmail } = await adminClient
         .from('usuarios_bar')
         .select('*')
         .eq('email', email)
       
-      console.log('🔍 Usu�rios encontrados por email:', usuariosPorEmail?.length || 0)
+      console.log('ðŸ” Usuá¡rios encontrados por email:', usuariosPorEmail?.length || 0)
       if (usuariosPorEmail && usuariosPorEmail.length > 0) {
-        console.log('🔍 Usu�rio por email:', usuariosPorEmail[0])
+        console.log('ðŸ” Usuá¡rio por email:', usuariosPorEmail[0])
       }
     }
 
     if (dbError) {
-      console.error('�� Erro ao buscar usu�rio no banco:', dbError)
+      console.error('Œ Erro ao buscar usuá¡rio no banco:', dbError)
       return NextResponse.json(
         { success: false, error: 'Erro interno do servidor' },
         { status: 500 }
@@ -130,9 +130,9 @@ export async function POST(request: NextRequest) {
     }
 
     if (!usuarios || usuarios.length === 0) {
-      console.log('�� Usu�rio n�o encontrado na tabela usuarios_bar')
+      console.log('Œ Usuá¡rio ná£o encontrado na tabela usuarios_bar')
       
-      // Verificar se existe usu�rio por email mas com user_id diferente
+      // Verificar se existe usuá¡rio por email mas com user_id diferente
       const { data: usuariosPorEmail } = await adminClient
         .from('usuarios_bar')
         .select('*')
@@ -140,9 +140,9 @@ export async function POST(request: NextRequest) {
       
       if (usuariosPorEmail && usuariosPorEmail.length > 0) {
         const usuarioExistente = usuariosPorEmail[0]
-        console.log('🔧 Detectado user_id desatualizado. Corrigindo...')
-        console.log('🔧 ID antigo:', usuarioExistente.user_id)
-        console.log('🔧 ID novo:', authData.user.id)
+        console.log('ðŸ”§ Detectado user_id desatualizado. Corrigindo...')
+        console.log('ðŸ”§ ID antigo:', usuarioExistente.user_id)
+        console.log('ðŸ”§ ID novo:', authData.user.id)
         
         // Atualizar o user_id na tabela para corresponder ao Supabase Auth
         const { error: updateError } = await adminClient
@@ -151,16 +151,16 @@ export async function POST(request: NextRequest) {
           .eq('email', email)
         
         if (updateError) {
-          console.error('�� Erro ao atualizar user_id:', updateError)
+          console.error('Œ Erro ao atualizar user_id:', updateError)
           return NextResponse.json(
             { success: false, error: 'Erro interno do servidor' },
             { status: 500 }
           )
         }
         
-        console.log('�� User_id atualizado com sucesso!')
+        console.log('œ… User_id atualizado com sucesso!')
         
-        // Buscar novamente o usu�rio com o ID atualizado
+        // Buscar novamente o usuá¡rio com o ID atualizado
         const { data: usuariosAtualizados, error: newDbError } = await adminClient
           .from('usuarios_bar')
           .select('*')
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
           .eq('ativo', true)
         
         if (newDbError) {
-          console.error('�� Erro ao buscar usu�rio atualizado:', newDbError)
+          console.error('Œ Erro ao buscar usuá¡rio atualizado:', newDbError)
           return NextResponse.json(
             { success: false, error: 'Erro interno do servidor' },
             { status: 500 }
@@ -178,40 +178,40 @@ export async function POST(request: NextRequest) {
         if (usuariosAtualizados && usuariosAtualizados.length > 0) {
           // Continuar com o fluxo normal usando os dados atualizados
           usuarios = usuariosAtualizados
-          console.log('�� Login continuando com dados atualizados')
+          console.log('œ… Login continuando com dados atualizados')
         }
       }
       
-      // Se ainda n�o encontrou usu�rio, retornar erro
+      // Se ainda ná£o encontrou usuá¡rio, retornar erro
       if (!usuarios || usuarios.length === 0) {
         await logLoginFailure({
           email,
-          reason: 'Usu�rio n�o encontrado ou inativo na tabela usuarios_bar',
+          reason: 'Usuá¡rio ná£o encontrado ou inativo na tabela usuarios_bar',
           ipAddress: clientIp,
           userAgent,
           sessionId
         });
         
         return NextResponse.json(
-          { success: false, error: 'Usu�rio n�o encontrado ou inativo' },
+          { success: false, error: 'Usuá¡rio ná£o encontrado ou inativo' },
           { status: 401 }
         )
       }
     }
 
-    console.log('�� Usu�rio encontrado:', usuarios[0].nome)
+    console.log('œ… Usuá¡rio encontrado:', usuarios[0].nome)
 
-    // Montar dados do usu�rio
+    // Montar dados do usuá¡rio
     const usuarioPrincipal = usuarios[0]
 
     // Verificar se precisa redefinir senha (primeiro acesso)
     if (!usuarioPrincipal.senha_redefinida) {
-      console.log('🔑 Primeiro acesso detectado - redirecionando para redefini��o de senha')
+      console.log('ðŸ”‘ Primeiro acesso detectado - redirecionando para redefiniá§á£o de senha')
       
-      // Gerar token para redefini��o
+      // Gerar token para redefiniá§á£o
       const token = Buffer.from(`${usuarioPrincipal.email}:${Date.now()}`).toString('base64')
       
-      // Detectar automaticamente o dom�nio baseado no request
+      // Detectar automaticamente o domá­nio baseado no request
       const protocol = request.headers.get('x-forwarded-proto') || 'https'
       const host = request.headers.get('host') || request.headers.get('x-forwarded-host')
       
@@ -221,7 +221,7 @@ export async function POST(request: NextRequest) {
       } else if (host?.includes('localhost')) {
         baseUrl = `http://${host}`
       } else {
-        // Fallback para produ��o
+        // Fallback para produá§á£o
         baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://sgbv2.vercel.app'
       }
       
@@ -235,7 +235,7 @@ export async function POST(request: NextRequest) {
           nome: usuarioPrincipal.nome,
           email: usuarioPrincipal.email
         },
-        message: '� necess�rio redefinir sua senha no primeiro acesso'
+        message: 'á‰ necessá¡rio redefinir sua senha no primeiro acesso'
       })
     }
     
@@ -245,7 +245,7 @@ export async function POST(request: NextRequest) {
       modulos_permitidos: u.modulos_permitidos
     }))
 
-    console.log('🔍 Buscando dados completos dos bares...')
+    console.log('ðŸ” Buscando dados completos dos bares...')
     
     // Buscar dados completos dos bares (incluindo nome)
     const barIds = [...new Set(baresAcesso.map((b: any) => b.bar_id))]
@@ -256,10 +256,10 @@ export async function POST(request: NextRequest) {
       .eq('ativo', true)
 
     if (barsError) {
-      console.error('�� Erro ao buscar dados dos bares:', barsError)
+      console.error('Œ Erro ao buscar dados dos bares:', barsError)
     }
 
-    console.log('�� Dados dos bares encontrados:', barsData?.length || 0)
+    console.log('œ… Dados dos bares encontrados:', barsData?.length || 0)
 
     // Enriquecer baresAcesso com nome dos bares
     const baresComNome = baresAcesso.map((bar: any) => {
@@ -271,7 +271,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    console.log('🔍 Buscando credenciais de APIs...')
+    console.log('ðŸ” Buscando credenciais de APIs...')
     
     // Buscar credenciais de APIs
     const credenciaisPromises = baresComNome.map(async (bar: any) => {
@@ -288,9 +288,9 @@ export async function POST(request: NextRequest) {
     })
 
     const credenciaisPorBar = await Promise.all(credenciaisPromises)
-    console.log('�� Credenciais encontradas para', credenciaisPorBar.length, 'bares')
+    console.log('œ… Credenciais encontradas para', credenciaisPorBar.length, 'bares')
 
-    // Fazer logout do authClient (n�o queremos manter sess�o no servidor)
+    // Fazer logout do authClient (ná£o queremos manter sessá£o no servidor)
     await authClient.auth.signOut()
 
     const response = {
@@ -302,7 +302,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('🎉 LOGIN BEM-SUCEDIDO para:', usuarioPrincipal.nome)
+    console.log('ðŸŽ‰ LOGIN BEM-SUCEDIDO para:', usuarioPrincipal.nome)
     
     // Log de login bem-sucedido
     await logLoginSuccess({
@@ -319,7 +319,7 @@ export async function POST(request: NextRequest) {
     // Criar resposta com cookie para o middleware
     const nextResponse = NextResponse.json(response)
     
-    // Salvar cookie com dados b�sicos do usu�rio (para middleware)
+    // Salvar cookie com dados bá¡sicos do usuá¡rio (para middleware)
     const userCookie = {
       id: usuarioPrincipal.id,
       email: usuarioPrincipal.email,
@@ -337,7 +337,7 @@ export async function POST(request: NextRequest) {
     return nextResponse
 
   } catch (error: any) {
-    console.error('🔥 Erro fatal na API de login:', error)
+    console.error('ðŸ”¥ Erro fatal na API de login:', error)
     
     // Log de erro interno 
     await logLoginFailure({

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+ï»¿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const days = parseInt(searchParams.get('days') || '30')
 
-    // Obter dados do usuário para pegar o bar_id
+    // Obter dados do usuÃ¡rio para pegar o bar_id
     const userData = request.headers.get('x-user-data')
     let barId = 3 // fallback para desenvolvimento
 
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
         barId = parsedUser.bar_id || 3
         console.log(`?? Usando bar_id: ${barId}`)
       } catch (e) {
-        console.log('?? Erro ao parsear userData, usando barId padráo:', e)
+        console.log('?? Erro ao parsear userData, usando barId padrÃ¡o:', e)
       }
     }
 
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     const hoje = new Date()
     const inicioPeriodo = new Date(hoje.getTime() - days * 24 * 60 * 60 * 1000)
 
-    console.log(`?? Buscando dados de ${inicioPeriodo.toISOString().split('T')[0]} até ${hoje.toISOString().split('T')[0]}`)
+    console.log(`?? Buscando dados de ${inicioPeriodo.toISOString().split('T')[0]} atÃ© ${hoje.toISOString().split('T')[0]}`)
 
     // 1. BUSCAR DADOS CONSOLIDADOS DA TABELA meta_daily_summary
     const { data: dailySummary, error: summaryError } = await supabase
@@ -84,10 +84,10 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 3. PROCESSAR DADOS E CALCULAR MÉTRICAS
+    // 3. PROCESSAR DADOS E CALCULAR MÃ‰TRICAS
     const processedData = processDailySummaryData(dailySummary || [], fallbackData)
 
-    // 4. BUSCAR TENDÊNCIAS (view meta_trends_analysis)
+    // 4. BUSCAR TENDÃŠNCIAS (view meta_trends_analysis)
     const { data: trendsData, error: trendsError } = await supabase
       .from('meta_trends_analysis')
       .select('*')
@@ -232,7 +232,7 @@ function processDailySummaryData(summaryData: any[], fallbackData: any) {
   }
 }
 
-// Processar dados de tendências
+// Processar dados de tendÃªncias
 function processTrendsData(trendsData: any[]) {
   if (trendsData.length === 0) {
     return {

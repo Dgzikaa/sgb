@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { api } from '@/lib/api-client'
 
 // =====================================================
@@ -82,7 +82,7 @@ interface UseTemplatesResult {
     total: number
     pages: number
   } | null
-  // A��es
+  // Aá§áµes
   setFiltros: (filtros: Partial<TemplateFilters>) => void
   carregarTemplates: () => Promise<void>
   instalarPredefinidos: () => Promise<boolean>
@@ -116,7 +116,7 @@ export function useTemplates(filtrosIniciais: TemplateFilters = {}): UseTemplate
   }, [filtros])
 
   // =====================================================
-  // FUN��ES PRINCIPAIS
+  // FUNá‡á•ES PRINCIPAIS
   // =====================================================
 
   const carregarTemplates = async () => {
@@ -247,7 +247,7 @@ export function useTemplate(id?: string): UseTemplateResult {
   }, [id])
 
   // =====================================================
-  // FUN��ES
+  // FUNá‡á•ES
   // =====================================================
 
   const carregarTemplate = async () => {
@@ -262,7 +262,7 @@ export function useTemplate(id?: string): UseTemplateResult {
       if (response.success) {
         setTemplate(response.data)
       } else {
-        setError(response.error || 'Template n�o encontrado')
+        setError(response.error || 'Template ná£o encontrado')
       }
     } catch (err: any) {
       console.error('Erro ao carregar template:', err)
@@ -320,7 +320,7 @@ export function useTemplate(id?: string): UseTemplateResult {
 }
 
 // =====================================================
-// UTILIT�RIOS
+// UTILITáRIOS
 // =====================================================
 
 export const templateUtils = {
@@ -339,46 +339,46 @@ export const templateUtils = {
     return colors[categoria] || 'bg-gray-100 text-gray-800'
   },
 
-  // Obter �cone do tipo
+  // Obter á­cone do tipo
   getTipoIcon: (tipo: string): string => {
     const icons: Record<string, string> = {
-      abertura: '🌅',
-      fechamento: '🌙',
-      manutencao: '🔧',
-      qualidade: '��',
-      seguranca: '🛡️',
-      limpeza: '🧹',
-      auditoria: '📋'
+      abertura: 'ðŸŒ…',
+      fechamento: 'ðŸŒ™',
+      manutencao: 'ðŸ”§',
+      qualidade: 'œ…',
+      seguranca: 'ðŸ›¡ï¸',
+      limpeza: 'ðŸ§¹',
+      auditoria: 'ðŸ“‹'
     }
-    return icons[tipo] || '📋'
+    return icons[tipo] || 'ðŸ“‹'
   },
 
-  // Obter �cone do tipo de campo
+  // Obter á­cone do tipo de campo
   getCampoIcon: (tipo: string): string => {
     const icons: Record<string, string> = {
-      texto: '📝',
-      numero: '🔢',
-      sim_nao: '��',
-      data: '📅',
-      assinatura: '��️',
-      foto_camera: '📷',
-      foto_upload: '🖼️',
-      avaliacao: '��'
+      texto: 'ðŸ“',
+      numero: 'ðŸ”¢',
+      sim_nao: 'œ…',
+      data: 'ðŸ“…',
+      assinatura: 'œï¸',
+      foto_camera: 'ðŸ“·',
+      foto_upload: 'ðŸ–¼ï¸',
+      avaliacao: '­'
     }
-    return icons[tipo] || '📋'
+    return icons[tipo] || 'ðŸ“‹'
   },
 
   // Obter label do tipo de campo
   getCampoLabel: (tipo: string): string => {
     const labels: Record<string, string> = {
       texto: 'Texto',
-      numero: 'N�mero',
-      sim_nao: 'Sim/N�o',
+      numero: 'Náºmero',
+      sim_nao: 'Sim/Ná£o',
       data: 'Data',
       assinatura: 'Assinatura',
-      foto_camera: 'Foto (C�mera)',
+      foto_camera: 'Foto (Cá¢mera)',
       foto_upload: 'Foto (Upload)',
-      avaliacao: 'Avalia��o'
+      avaliacao: 'Avaliaá§á£o'
     }
     return labels[tipo] || tipo
   },
@@ -388,39 +388,39 @@ export const templateUtils = {
     const erros: string[] = []
 
     if (!template.nome?.trim()) {
-      erros.push('Nome � obrigat�rio')
+      erros.push('Nome á© obrigatá³rio')
     }
 
     if (!template.setor?.trim()) {
-      erros.push('Setor � obrigat�rio')
+      erros.push('Setor á© obrigatá³rio')
     }
 
     if (!template.categoria) {
-      erros.push('Categoria � obrigat�ria')
+      erros.push('Categoria á© obrigatá³ria')
     }
 
     if (!template.tipo) {
-      erros.push('Tipo � obrigat�rio')
+      erros.push('Tipo á© obrigatá³rio')
     }
 
     if (!template.estrutura?.secoes?.length) {
-      erros.push('Pelo menos uma se��o � obrigat�ria')
+      erros.push('Pelo menos uma seá§á£o á© obrigatá³ria')
     }
 
-    // Validar se��es
+    // Validar seá§áµes
     template.estrutura?.secoes?.forEach((secao, index) => {
       if (!secao.nome?.trim()) {
-        erros.push(`Nome da se��o ${index + 1} � obrigat�rio`)
+        erros.push(`Nome da seá§á£o ${index + 1} á© obrigatá³rio`)
       }
 
       if (!secao.itens?.length) {
-        erros.push(`Se��o "${secao.nome}" deve ter pelo menos um item`)
+        erros.push(`Seá§á£o "${secao.nome}" deve ter pelo menos um item`)
       }
 
       // Validar itens
       secao.itens?.forEach((item, itemIndex) => {
         if (!item.titulo?.trim()) {
-          erros.push(`T�tulo do item ${itemIndex + 1} na se��o "${secao.nome}" � obrigat�rio`)
+          erros.push(`Tá­tulo do item ${itemIndex + 1} na seá§á£o "${secao.nome}" á© obrigatá³rio`)
         }
       })
     })

@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-// For�ar modo din�mico para essa rota (necess�rio para usar request.url)
+// Forá§ar modo diná¢mico para essa rota (necessá¡rio para usar request.url)
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
-  console.log('🔍 [DEBUG] Verificando anos dispon�veis...')
+  console.log('ðŸ” [DEBUG] Verificando anos disponá­veis...')
   
   try {
     const { searchParams } = new URL(request.url)
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
       exemploDespesas: despesas?.slice(0, 3) || []
     }
 
-    console.log('�� [DEBUG] An�lise conclu�da:', resumo)
+    console.log('œ… [DEBUG] Aná¡lise concluá­da:', resumo)
 
     return NextResponse.json({
       success: true,
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� [DEBUG] Erro:', error)
+    console.error('Œ [DEBUG] Erro:', error)
     
     return NextResponse.json({
       success: false,

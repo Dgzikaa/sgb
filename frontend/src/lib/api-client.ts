@@ -1,5 +1,5 @@
-/**
- * Cliente API que adiciona automaticamente headers de autentica��o
+﻿/**
+ * Cliente API que adiciona automaticamente headers de autenticaá§á£o
  */
 
 export interface ApiOptions {
@@ -13,13 +13,13 @@ export interface ApiOptions {
  */
 export async function apiCall(endpoint: string, options: ApiOptions = {}) {
   try {
-    // Headers padr�o
+    // Headers padrá£o
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers || {})
     }
     
-    // Pegar apenas dados essenciais do usu�rio
+    // Pegar apenas dados essenciais do usuá¡rio
     const userData = localStorage.getItem('sgb_user')
     if (userData) {
       try {
@@ -28,25 +28,25 @@ export async function apiCall(endpoint: string, options: ApiOptions = {}) {
         if (user.id) headers['x-user-id'] = user.id
         if (user.email) headers['x-user-email'] = user.email
       } catch (e) {
-        console.warn('Erro ao parsear dados do usu�rio:', e)
+        console.warn('Erro ao parsear dados do usuá¡rio:', e)
       }
     }
     
-    // Configura��o da requisi��o
+    // Configuraá§á£o da requisiá§á£o
     const fetchOptions: RequestInit = {
       method: options.method || 'GET',
       headers
     }
     
-    // Adicionar body se necess�rio
+    // Adicionar body se necessá¡rio
     if (options.body && options.method !== 'GET') {
       fetchOptions.body = JSON.stringify(options.body)
     }
     
-    // Fazer a requisi��o
+    // Fazer a requisiá§á£o
     const response = await fetch(endpoint, fetchOptions)
     
-    // Verificar se a resposta � OK
+    // Verificar se a resposta á© OK
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
       throw new Error(errorData.error || `HTTP ${response.status}`)
@@ -62,7 +62,7 @@ export async function apiCall(endpoint: string, options: ApiOptions = {}) {
 }
 
 /**
- * Fun��es de conveni�ncia para cada m�todo HTTP
+ * Funá§áµes de conveniáªncia para cada má©todo HTTP
  */
 export const api = {
   get: (endpoint: string, headers?: Record<string, string>) => 
@@ -79,7 +79,7 @@ export const api = {
 }
 
 /**
- * Cliente espec�fico para checklists
+ * Cliente especá­fico para checklists
  */
 export const checklistsApi = {
   // Listar checklists
@@ -106,7 +106,7 @@ export const checklistsApi = {
 }
 
 /**
- * Cliente espec�fico para uploads
+ * Cliente especá­fico para uploads
  */
 export const uploadsApi = {
   // Fazer upload de arquivo (com FormData)

@@ -1,245 +1,208 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getAdminClient } from '@/lib/supabase-admin'
-import { authenticateUser, checkPermission, authErrorResponse, permissionErrorResponse } from '@/middleware/auth'
-import { z } from 'zod'
+﻿import { NextRequest, NextResponse } from 'next/server'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 
 // =====================================================
-// SCHEMA DE VALIDAÇÃO
+// ðŸ“… API PARA GERENCIAR AGENDAMENTOS DE CHECKLISTS
 // =====================================================
 
-const RollbackSchema = z.object({
-  versao_destino: z.number().min(1),
-  comentario: z.string().optional().default('Rollback automático')
-})
-
-// =====================================================
-// POST - FAZER ROLLBACK PARA VERSÃO ANTERIOR
-// =====================================================
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest) {
   try {
-    // 🔐 AUTENTICAÇÃO
-    const user = await authenticateUser(request)
-    if (!user) {
-      return authErrorResponse('Usuário não autenticado')
-    }
-
-    // 🔒 PERMISSÕES - Verificar se pode editar checklists
-    if (!checkPermission(user, { module: 'checklists', action: 'write' })) {
-      return permissionErrorResponse('Sem permissão para fazer rollback de checklists')
-    }
-
-    const { id } = params
-    const body = await request.json()
-    const { versao_destino, comentario } = RollbackSchema.parse(body)
+    const supabase = createRouteHandlerClient({ cookies })
     
-    const supabase = await getAdminClient()
-    
-    // Verificar se checklist existe e pertence ao bar
-    const { data: checklistAtual, error: fetchError } = await supabase
-      .from('checklists')
-      .select('*')
-      .eq('id', id)
-      .eq('bar_id', user.bar_id)
-      .single()
-
-    if (fetchError || !checklistAtual) {
-      return NextResponse.json({ error: 'Checklist não encontrado' }, { status: 404 })
+    // Verificar autenticaá§á£o
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Ná£o autorizado' }, { status: 401 })
     }
 
-    // Buscar a versão de destino no histórico
-    const { data: versaoDestino, error: versaoError } = await supabase
-      .from('checklist_historico')
-      .select('*')
-      .eq('checklist_id', id)
-      .eq('versao', versao_destino)
-      .single()
+    const scheduleData = await req.json()
 
-    if (versaoError || !versaoDestino) {
+    if (!scheduleData.checklistId || !scheduleData.frequencia || !scheduleData.horario) {
       return NextResponse.json({ 
-        error: `Versão ${versao_destino} não encontrada no histórico` 
+        error: 'Dados obrigatá³rios ná£o fornecidos' 
+      }, { status: 400 })
+    }
+
+    // Verificar se o checklist existe e pertence ao usuá¡rio
+    const { data: checklist, error: checklistError } = await supabase
+      .from('checklists')
+      .select('id, titulo, user_id')
+      .eq('id', scheduleData.checklistId)
+      .eq('user_id', user.id)
+      .single()
+
+    if (checklistError || !checklist) {
+      return NextResponse.json({ 
+        error: 'Checklist ná£o encontrado' 
       }, { status: 404 })
     }
 
-    // Verificar se não é um rollback desnecessário
-    if (checklistAtual.versao === versao_destino) {
-      return NextResponse.json({
-        success: true,
-        message: 'Checklist já está na versão solicitada',
-        data: checklistAtual
-      })
+    // Preparar dados para inserá§á£o
+    const scheduleToInsert = {
+      checklist_id: scheduleData.checklistId,
+      titulo: scheduleData.titulo,
+      frequencia: scheduleData.frequencia,
+      horario: scheduleData.horario,
+      dias_semana: scheduleData.diasSemana || null,
+      dia_mes: scheduleData.diaMes || null,
+      ativo: scheduleData.ativo ?? true,
+      notificacoes: scheduleData.notificacoes ?? true,
+      responsaveis: scheduleData.responsaveis || [],
+      observacoes: scheduleData.observacoes || null,
+      user_id: user.id,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     }
 
-    // Buscar próximo número de versão para o rollback
-    const { data: ultimaVersao } = await supabase
-      .from('checklist_historico')
-      .select('versao')
-      .eq('checklist_id', id)
-      .order('versao', { ascending: false })
-      .limit(1)
+    // Inserir agendamento
+    const { data: insertedSchedule, error: insertError } = await supabase
+      .from('checklist_schedules')
+      .insert(scheduleToInsert)
+      .select()
       .single()
 
-    const novaVersao = (ultimaVersao?.versao || 0) + 1
-
-    // Salvar estado atual no histórico ANTES do rollback
-    const { error: historicoError } = await supabase
-      .from('checklist_historico')
-      .insert({
-        checklist_id: id,
-        versao: novaVersao,
-        nome_anterior: checklistAtual.nome,
-        estrutura_anterior: checklistAtual.estrutura,
-        mudancas_detectadas: [`Rollback para versão ${versao_destino}`],
-        comentario: `${comentario} (rollback v${checklistAtual.versao} → v${versao_destino})`,
-        usuario_id: user.user_id,
-        tipo_mudanca: 'rollback'
-      })
-
-    if (historicoError) {
-      console.error('Erro ao salvar histórico do rollback:', historicoError)
-      return NextResponse.json({ error: 'Erro ao salvar histórico' }, { status: 500 })
+    if (insertError) {
+      console.error('Erro ao inserir agendamento:', insertError)
+      return NextResponse.json({ 
+        error: 'Erro ao criar agendamento' 
+      }, { status: 500 })
     }
-
-    // Restaurar dados da versão de destino
-    const dadosRollback = {
-      nome: versaoDestino.nome_anterior,
-      estrutura: versaoDestino.estrutura_anterior,
-      versao: novaVersao,
-      atualizado_em: new Date().toISOString(),
-      atualizado_por: user.user_id
-    }
-
-    // Aplicar o rollback
-    const { data: checklistRollback, error: rollbackError } = await supabase
-      .from('checklists')
-      .update(dadosRollback)
-      .eq('id', id)
-      .eq('bar_id', user.bar_id)
-      .select(`
-        *,
-        criado_por:usuarios_bar!criado_por (nome, email),
-        atualizado_por:usuarios_bar!atualizado_por (nome, email)
-      `)
-      .single()
-
-    if (rollbackError) {
-      console.error('Erro ao fazer rollback:', rollbackError)
-      return NextResponse.json({ error: 'Erro ao fazer rollback' }, { status: 500 })
-    }
-
-    console.log(`🔄 Rollback executado: ${checklistRollback.nome} (v${checklistAtual.versao} → v${versao_destino} → v${novaVersao})`)
 
     return NextResponse.json({
       success: true,
-      message: `Rollback executado com sucesso para versão ${versao_destino}`,
-      data: checklistRollback,
-      rollback_info: {
-        versao_anterior: checklistAtual.versao,
-        versao_destino: versao_destino,
-        nova_versao: novaVersao,
-        comentario
-      }
+      message: 'Agendamento criado com sucesso',
+      schedule: insertedSchedule
     })
 
-  } catch (error: any) {
-    console.error('Erro na API de rollback:', error)
-    
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ 
-        error: 'Dados inválidos',
-        details: error.errors 
-      }, { status: 400 })
-    }
-    
+  } catch (error) {
+    console.error('Erro ao criar agendamento:', error)
     return NextResponse.json({ 
-      error: 'Erro interno do servidor',
-      details: error.message 
+      error: 'Erro interno do servidor' 
     }, { status: 500 })
   }
 }
 
-// =====================================================
-// GET - LISTAR VERSÕES DISPONÍVEIS PARA ROLLBACK
-// =====================================================
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest) {
   try {
-    // 🔐 AUTENTICAÇÃO
-    const user = await authenticateUser(request)
-    if (!user) {
-      return authErrorResponse('Usuário não autenticado')
-    }
-
-    const { id } = params
-    const supabase = await getAdminClient()
+    const supabase = createRouteHandlerClient({ cookies })
     
-    // Verificar se checklist existe e pertence ao bar
-    const { data: checklist, error: checklistError } = await supabase
-      .from('checklists')
-      .select('nome, versao')
-      .eq('id', id)
-      .eq('bar_id', user.bar_id)
-      .single()
-
-    if (checklistError || !checklist) {
-      return NextResponse.json({ error: 'Checklist não encontrado' }, { status: 404 })
+    // Verificar autenticaá§á£o
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Ná£o autorizado' }, { status: 401 })
     }
 
-    // Buscar todas as versões no histórico
-    const { data: versoes, error: versoesError } = await supabase
-      .from('checklist_historico')
+    const { searchParams } = new URL(req.url)
+    const checklistId = searchParams.get('checklistId')
+
+    let query = supabase
+      .from('checklist_schedules')
       .select(`
-        versao,
-        nome_anterior,
-        mudancas_detectadas,
-        comentario,
-        criado_em,
-        tipo_mudanca,
-        usuario:usuarios_bar!usuario_id (nome, email)
+        *,
+        checklist:checklists(id, titulo, categoria)
       `)
-      .eq('checklist_id', id)
-      .neq('versao', 0) // Excluir marcadores especiais
-      .order('versao', { ascending: false })
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
 
-    if (versoesError) {
-      console.error('Erro ao buscar versões:', versoesError)
-      return NextResponse.json({ error: 'Erro ao buscar histórico' }, { status: 500 })
+    if (checklistId) {
+      query = query.eq('checklist_id', checklistId)
     }
 
-    // Processar versões para rollback
-    const versoesDisponiveis = versoes?.map((versao: any) => ({
-      versao: versao.versao,
-      nome: versao.nome_anterior,
-      mudancas: versao.mudancas_detectadas || [],
-      comentario: versao.comentario,
-      data: versao.criado_em,
-      tipo: versao.tipo_mudanca,
-      usuario: versao.usuario?.nome || 'Sistema',
-      pode_rollback: versao.versao < checklist.versao,
-      e_versao_atual: versao.versao === checklist.versao
-    })) || []
+    const { data: schedules, error: schedulesError } = await query
+
+    if (schedulesError) {
+      console.error('Erro ao buscar agendamentos:', schedulesError)
+      return NextResponse.json({ 
+        error: 'Erro ao buscar agendamentos' 
+      }, { status: 500 })
+    }
 
     return NextResponse.json({
       success: true,
-      data: {
-        checklist_atual: {
-          nome: checklist.nome,
-          versao_atual: checklist.versao
-        },
-        versoes_disponiveis: versoesDisponiveis,
-        total_versoes: versoesDisponiveis.length
-      }
+      schedules: schedules || []
     })
 
-  } catch (error: any) {
-    console.error('Erro na API de versões para rollback:', error)
+  } catch (error) {
+    console.error('Erro ao buscar agendamentos:', error)
     return NextResponse.json({ 
-      error: 'Erro interno do servidor',
-      details: error.message 
+      error: 'Erro interno do servidor' 
+    }, { status: 500 })
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    const supabase = createRouteHandlerClient({ cookies })
+    
+    // Verificar autenticaá§á£o
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Ná£o autorizado' }, { status: 401 })
+    }
+
+    const scheduleData = await req.json()
+
+    if (!scheduleData.id) {
+      return NextResponse.json({ 
+        error: 'ID do agendamento ná£o fornecido' 
+      }, { status: 400 })
+    }
+
+    // Verificar se o agendamento existe e pertence ao usuá¡rio
+    const { data: existingSchedule, error: scheduleError } = await supabase
+      .from('checklist_schedules')
+      .select('id, user_id')
+      .eq('id', scheduleData.id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (scheduleError || !existingSchedule) {
+      return NextResponse.json({ 
+        error: 'Agendamento ná£o encontrado' 
+      }, { status: 404 })
+    }
+
+    // Preparar dados para atualizaá§á£o
+    const scheduleToUpdate = {
+      titulo: scheduleData.titulo,
+      frequencia: scheduleData.frequencia,
+      horario: scheduleData.horario,
+      dias_semana: scheduleData.diasSemana || null,
+      dia_mes: scheduleData.diaMes || null,
+      ativo: scheduleData.ativo ?? true,
+      notificacoes: scheduleData.notificacoes ?? true,
+      responsaveis: scheduleData.responsaveis || [],
+      observacoes: scheduleData.observacoes || null,
+      updated_at: new Date().toISOString()
+    }
+
+    // Atualizar agendamento
+    const { data: updatedSchedule, error: updateError } = await supabase
+      .from('checklist_schedules')
+      .update(scheduleToUpdate)
+      .eq('id', scheduleData.id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (updateError) {
+      console.error('Erro ao atualizar agendamento:', updateError)
+      return NextResponse.json({ 
+        error: 'Erro ao atualizar agendamento' 
+      }, { status: 500 })
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Agendamento atualizado com sucesso',
+      schedule: updatedSchedule
+    })
+
+  } catch (error) {
+    console.error('Erro ao atualizar agendamento:', error)
+    return NextResponse.json({ 
+      error: 'Erro interno do servidor' 
     }, { status: 500 })
   }
 } 

@@ -1,4 +1,4 @@
-import { ReactNode, useCallback, useId } from 'react'
+﻿import { ReactNode, useCallback, useId } from 'react'
 import { cn } from '@/lib/utils'
 import { useSortableList } from '@/hooks/useDragAndDrop'
 import { DraggableItem } from './DraggableItem'
@@ -91,9 +91,9 @@ export function SortableList<T>({
       <div className={cn('text-center py-12', className)}>
         {emptyState || (
           <div className="text-gray-500 dark:text-gray-400">
-            <div className="text-4xl mb-4">📝</div>
+            <div className="text-4xl mb-4">ðŸ“</div>
             <p className="text-lg font-medium mb-2">Nenhum item encontrado</p>
-            <p className="text-sm">Adicione itens para come�ar a organiz�-los</p>
+            <p className="text-sm">Adicione itens para comeá§ar a organizá¡-los</p>
           </div>
         )}
       </div>
@@ -116,12 +116,12 @@ export function SortableList<T>({
         className
       )}
       role="list"
-      aria-label="Lista orden�vel"
+      aria-label="Lista ordená¡vel"
       aria-describedby={`${listId}-instructions`}
     >
       {/* Instructions for screen readers */}
       <div id={`${listId}-instructions`} className="sr-only">
-        Lista orden�vel com {items.length} itens. 
+        Lista ordená¡vel com {items.length} itens. 
         Use Ctrl+Setas para reordenar via teclado ou arraste com o mouse.
       </div>
 
@@ -172,7 +172,7 @@ export function SortableList<T>({
         <div className="absolute inset-0 border-2 border-dashed border-blue-400 dark:border-blue-500 rounded-lg pointer-events-none bg-blue-50/50 dark:bg-blue-900/20">
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg">
-              📦 Solte aqui para reordenar
+              ðŸ“¦ Solte aqui para reordenar
             </div>
           </div>
         </div>
@@ -181,7 +181,7 @@ export function SortableList<T>({
   )
 }
 
-// Variant espec�fico para cards horizontais
+// Variant especá­fico para cards horizontais
 export function SortableCardGrid<T>(props: Omit<SortableListProps<T>, 'orientation'>) {
   return (
     <SortableList
@@ -192,7 +192,7 @@ export function SortableCardGrid<T>(props: Omit<SortableListProps<T>, 'orientati
   )
 }
 
-// Variant espec�fico para listas simples
+// Variant especá­fico para listas simples
 export function SortableSimpleList<T>(props: Omit<SortableListProps<T>, 'orientation' | 'showDragHandle'>) {
   return (
     <SortableList

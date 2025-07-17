@@ -1,4 +1,4 @@
-'use client'
+ï»¿'use client'
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
@@ -24,7 +24,7 @@ export default function OfflinePage() {
   useEffect(() => {
     if (!isClient) return
 
-    // Detectar mudaná§as de conectividade
+    // Detectar mudanÃ¡Â§as de conectividade
     const handleOnline = () => {
       setIsOnline(true)
       window.location.reload()
@@ -40,7 +40,7 @@ export default function OfflinePage() {
     // Verificar estado inicial
     setIsOnline(safeNavigator.isOnline())
     
-    // Simular áºltima atualizaá§á£o
+    // Simular Ã¡Âºltima atualizaÃ¡Â§Ã¡Â£o
     setLastUpdate(new Date().toLocaleString('pt-BR'))
 
     return () => {
@@ -52,7 +52,7 @@ export default function OfflinePage() {
   const handleRetry = () => {
     setRetryCount(prev => prev + 1)
     
-    // Tentar recarregar a pá¡gina
+    // Tentar recarregar a pÃ¡Â¡gina
     if (safeNavigator.isOnline()) {
       window.location.href = '/'
     } else {
@@ -70,7 +70,7 @@ export default function OfflinePage() {
   const offlineFeatures = [
     {
       title: 'Visualizar Dados em Cache',
-      description: 'Consulte informaá§áµes salvas localmente',
+      description: 'Consulte informaÃ¡Â§Ã¡Âµes salvas localmente',
       icon: Eye,
       available: true
     },
@@ -82,13 +82,13 @@ export default function OfflinePage() {
     },
     {
       title: 'Cache Local',
-      description: 'Dados importantes ficam disponá­veis',
+      description: 'Dados importantes ficam disponÃ¡Â­veis',
       icon: Database,
       available: true
     },
     {
       title: 'Interface Completa',
-      description: 'Navegaá§á£o e visualizaá§áµes funcionam',
+      description: 'NavegaÃ¡Â§Ã¡Â£o e visualizaÃ¡Â§Ã¡Âµes funcionam',
       icon: Smartphone,
       available: true
     }
@@ -107,14 +107,14 @@ export default function OfflinePage() {
           
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Vocáª está¡ offline
+              VocÃ¡Âª estÃ¡Â¡ offline
             </h1>
             <p className="text-gray-600 dark:text-gray-400 text-lg">
-              Sem conexá£o com a internet. Algumas funcionalidades ainda está£o disponá­veis.
+              Sem conexÃ¡Â£o com a internet. Algumas funcionalidades ainda estÃ¡Â£o disponÃ¡Â­veis.
             </p>
           </div>
 
-          {/* Status da conexá£o */}
+          {/* Status da conexÃ¡Â£o */}
           <div className="flex justify-center">
             <Badge 
               className={`px-4 py-2 text-sm font-medium ${
@@ -129,7 +129,7 @@ export default function OfflinePage() {
           </div>
         </div>
 
-        {/* Aá§áµes principais */}
+        {/* AÃ¡Â§Ã¡Âµes principais */}
         <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row gap-4">
@@ -154,18 +154,18 @@ export default function OfflinePage() {
             
             {retryCount > 0 && (
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-3 text-center">
-                Tentativa {retryCount} - Verificando conexá£o...
+                Tentativa {retryCount} - Verificando conexÃ¡Â£o...
               </p>
             )}
           </CardContent>
         </Card>
 
-        {/* Funcionalidades disponá­veis offline */}
+        {/* Funcionalidades disponÃ¡Â­veis offline */}
         <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
               <Database className="w-5 h-5" />
-              Disponá­vel Offline
+              DisponÃ¡Â­vel Offline
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -189,11 +189,11 @@ export default function OfflinePage() {
           </CardContent>
         </Card>
 
-        {/* Informaá§áµes tá©cnicas */}
+        {/* InformaÃ¡Â§Ã¡Âµes tÃ¡Â©cnicas */}
         <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white text-lg">
-              Informaá§áµes da Sessá£o
+              InformaÃ¡Â§Ã¡Âµes da SessÃ¡Â£o
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -204,11 +204,11 @@ export default function OfflinePage() {
             
             <div className="flex justify-between items-center text-sm">
               <span className="text-gray-600 dark:text-gray-400">Cache Local:</span>
-              <Badge className="badge-primary">Disponá­vel</Badge>
+              <Badge className="badge-primary">DisponÃ¡Â­vel</Badge>
             </div>
             
             <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600 dark:text-gray-400">ášltima Sincronizaá§á£o:</span>
+              <span className="text-gray-600 dark:text-gray-400">Ã¡Å¡ltima SincronizaÃ¡Â§Ã¡Â£o:</span>
               <span className="text-gray-900 dark:text-white text-xs">{lastUpdate}</span>
             </div>
             
@@ -219,25 +219,25 @@ export default function OfflinePage() {
           </CardContent>
         </Card>
 
-        {/* Dicas para usuá¡rio */}
+        {/* Dicas para usuÃ¡Â¡rio */}
         <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
           <CardContent className="p-4">
             <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-              ðŸ’¡ Dicas para usar offline:
+              Ã°Å¸â€™Â¡ Dicas para usar offline:
             </h3>
             <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-              <li>€¢ Dados em cache ficam disponá­veis para consulta</li>
-              <li>€¢ Checklists podem ser visualizados offline</li>
-              <li>€¢ Configuraá§áµes locais sá£o mantidas</li>
-              <li>€¢ Dados será£o sincronizados quando voltar online</li>
+              <li>â‚¬Â¢ Dados em cache ficam disponÃ¡Â­veis para consulta</li>
+              <li>â‚¬Â¢ Checklists podem ser visualizados offline</li>
+              <li>â‚¬Â¢ ConfiguraÃ¡Â§Ã¡Âµes locais sÃ¡Â£o mantidas</li>
+              <li>â‚¬Â¢ Dados serÃ¡Â£o sincronizados quando voltar online</li>
             </ul>
           </CardContent>
         </Card>
 
         {/* Footer */}
         <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>SGB - Sistema de Gestá£o de Bares</p>
-          <p>PWA Mode €¢ Service Worker Ativo</p>
+          <p>SGB - Sistema de GestÃ¡Â£o de Bares</p>
+          <p>PWA Mode â‚¬Â¢ Service Worker Ativo</p>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -12,7 +12,7 @@ const supabase = createClient(
   }
 )
 
-// Fun��o para calcular dist�ncia euclidiana entre dois descritores
+// Funá§á£o para calcular distá¢ncia euclidiana entre dois descritores
 function euclideanDistance(desc1: number[], desc2: number[]): number {
   if (desc1.length !== desc2.length) {
     throw new Error('Descritores devem ter o mesmo tamanho')
@@ -27,7 +27,7 @@ function euclideanDistance(desc1: number[], desc2: number[]): number {
   return Math.sqrt(sum)
 }
 
-// Fun��o para encontrar a melhor correspond�ncia
+// Funá§á£o para encontrar a melhor correspondáªncia
 function findBestMatch(inputDescriptor: number[], storedDescriptors: any[]) {
   let bestMatch = null
   let bestDistance = Infinity
@@ -36,7 +36,7 @@ function findBestMatch(inputDescriptor: number[], storedDescriptors: any[]) {
     try {
       const distance = euclideanDistance(inputDescriptor, stored.descriptor)
       
-      console.log(`📏 Dist�ncia para ${stored.user_nome}: ${distance.toFixed(4)} (threshold: ${stored.confidence_threshold})`)
+      console.log(`ðŸ“ Distá¢ncia para ${stored.user_nome}: ${distance.toFixed(4)} (threshold: ${stored.confidence_threshold})`)
       
       if (distance < stored.confidence_threshold && distance < bestDistance) {
         bestDistance = distance
@@ -47,7 +47,7 @@ function findBestMatch(inputDescriptor: number[], storedDescriptors: any[]) {
         }
       }
     } catch (error) {
-      console.error(`�� Erro ao calcular dist�ncia para usu�rio ${stored.user_nome}:`, error)
+      console.error(`Œ Erro ao calcular distá¢ncia para usuá¡rio ${stored.user_nome}:`, error)
     }
   }
   
@@ -55,20 +55,20 @@ function findBestMatch(inputDescriptor: number[], storedDescriptors: any[]) {
 }
 
 export async function POST(request: NextRequest) {
-  console.log('🔍 API de autentica��o facial iniciada')
+  console.log('ðŸ” API de autenticaá§á£o facial iniciada')
   
   try {
     const { descriptor, barId } = await request.json()
 
-    console.log('📊 Dados recebidos:', { 
+    console.log('ðŸ“Š Dados recebidos:', { 
       barId, 
       descriptorLength: descriptor?.length 
     })
 
-    // Validar dados obrigat�rios
+    // Validar dados obrigatá³rios
     if (!descriptor || !barId) {
       return NextResponse.json(
-        { success: false, error: 'Dados obrigat�rios n�o fornecidos' },
+        { success: false, error: 'Dados obrigatá³rios ná£o fornecidos' },
         { status: 400 }
       )
     }
@@ -76,12 +76,12 @@ export async function POST(request: NextRequest) {
     // Validar descriptor
     if (!Array.isArray(descriptor) || descriptor.length !== 128) {
       return NextResponse.json(
-        { success: false, error: 'Descritor facial inv�lido' },
+        { success: false, error: 'Descritor facial invá¡lido' },
         { status: 400 }
       )
     }
 
-    console.log('�� Valida��es passaram')
+    console.log('œ… Validaá§áµes passaram')
 
     // Buscar todos os descritores faciais ativos para este bar
     const { data: faceDescriptors, error: faceError } = await supabase
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
       .eq('usuarios_bar.ativo', true)
 
     if (faceError) {
-      console.error('�� Erro ao buscar descritores faciais:', faceError)
+      console.error('Œ Erro ao buscar descritores faciais:', faceError)
       return NextResponse.json(
         { success: false, error: 'Erro interno do servidor' },
         { status: 500 }
@@ -118,9 +118,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`🔍 Comparando com ${faceDescriptors.length} faces registradas`)
+    console.log(`ðŸ” Comparando com ${faceDescriptors.length} faces registradas`)
 
-    // Preparar dados para compara��o
+    // Preparar dados para comparaá§á£o
     const storedDescriptors = faceDescriptors.map((face: any) => ({
       user_id: face.user_id,
       user_nome: face.usuarios_bar.nome,
@@ -132,20 +132,20 @@ export async function POST(request: NextRequest) {
       face_id: face.id
     }))
 
-    // Encontrar a melhor correspond�ncia
+    // Encontrar a melhor correspondáªncia
     const bestMatch = findBestMatch(descriptor, storedDescriptors)
 
     if (!bestMatch) {
-      console.log('�� Nenhuma correspond�ncia encontrada')
+      console.log('Œ Nenhuma correspondáªncia encontrada')
       return NextResponse.json(
-        { success: false, error: 'Face n�o reconhecida. Tente novamente ou use login tradicional.' },
+        { success: false, error: 'Face ná£o reconhecida. Tente novamente ou use login tradicional.' },
         { status: 401 }
       )
     }
 
-    console.log(`�� Face reconhecida: ${bestMatch.user_nome} (similaridade: ${bestMatch.similarity.toFixed(1)}%)`)
+    console.log(`œ… Face reconhecida: ${bestMatch.user_nome} (similaridade: ${bestMatch.similarity.toFixed(1)}%)`)
 
-    // Buscar dados completos do usu�rio para retorno
+    // Buscar dados completos do usuá¡rio para retorno
     const { data: userData, error: userError } = await supabase
       .from('usuarios_bar')
       .select('*')
@@ -154,16 +154,16 @@ export async function POST(request: NextRequest) {
       .eq('ativo', true)
 
     if (userError || !userData || userData.length === 0) {
-      console.error('�� Erro ao buscar dados do usu�rio:', userError)
+      console.error('Œ Erro ao buscar dados do usuá¡rio:', userError)
       return NextResponse.json(
-        { success: false, error: 'Erro ao recuperar dados do usu�rio' },
+        { success: false, error: 'Erro ao recuperar dados do usuá¡rio' },
         { status: 500 }
       )
     }
 
     const user = userData[0]
 
-    // Buscar dados dos bares dispon�veis para o usu�rio
+    // Buscar dados dos bares disponá­veis para o usuá¡rio
     const { data: allUserBars, error: barsError } = await supabase
       .from('usuarios_bar')
       .select(`
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
       .eq('bars.ativo', true)
 
     if (barsError) {
-      console.error('�� Erro ao buscar bares do usu�rio:', barsError)
+      console.error('Œ Erro ao buscar bares do usuá¡rio:', barsError)
     }
 
     const availableBars = allUserBars?.map((bar: any) => ({
@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
       modulos_permitidos: bar.modulos_permitidos
     })) || []
 
-    // Buscar credenciais de APIs se necess�rio
+    // Buscar credenciais de APIs se necessá¡rio
     const { data: credentials, error: credError } = await supabase
       .from('api_credentials')
       .select('*')
@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
       .eq('ativo', true)
 
     if (credError) {
-      console.error('��️ Aviso ao buscar credenciais:', credError)
+      console.error('š ï¸ Aviso ao buscar credenciais:', credError)
     }
 
     const credenciais_apis = credentials ? [{
@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
     }] : []
 
     // Log de auditoria
-    console.log(`🎉 LOGIN FACIAL CONCLU�DO: ${user.nome} (${user.email}) - Bar ${barId}`)
+    console.log(`ðŸŽ‰ LOGIN FACIAL CONCLUáDO: ${user.nome} (${user.email}) - Bar ${barId}`)
 
     // Montar resposta similar ao login tradicional
     const responseData = {
@@ -227,7 +227,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(responseData)
 
   } catch (error: any) {
-    console.error('🔥 Erro fatal na API de autentica��o facial:', error)
+    console.error('ðŸ”¥ Erro fatal na API de autenticaá§á£o facial:', error)
     
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },

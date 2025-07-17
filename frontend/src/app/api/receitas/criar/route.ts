@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    console.log('📝 Criando nova receita:', body)
+    console.log('ðŸ“ Criando nova receita:', body)
 
     const supabase = await getSupabaseClient()
     if (!supabase) {
@@ -14,18 +14,18 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
 
-    // Valida��es b�sicas
+    // Validaá§áµes bá¡sicas
     if (!body.receita_codigo?.trim() || !body.receita_nome?.trim()) {
       return NextResponse.json({ 
         success: false, 
-        error: 'C�digo e nome da receita s�o obrigat�rios' 
+        error: 'Cá³digo e nome da receita sá£o obrigatá³rios' 
       }, { status: 400 })
     }
 
     if (!body.insumo_id) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Insumo � obrigat�rio' 
+        error: 'Insumo á© obrigatá³rio' 
       }, { status: 400 })
     }
 
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       quantidade_necessaria: body.quantidade_necessaria || 0,
       insumo_chefe_id: body.insumo_chefe_id,
       rendimento_esperado: body.rendimento_esperado || 0,
-      ativo: body.ativo !== undefined ? body.ativo : true, // Por padr�o, receitas ativas
+      ativo: body.ativo !== undefined ? body.ativo : true, // Por padrá£o, receitas ativas
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     }
@@ -51,14 +51,14 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (receitaError) {
-      console.error('�� Erro ao inserir receita:', receitaError)
+      console.error('Œ Erro ao inserir receita:', receitaError)
       return NextResponse.json({
         success: false,
         error: 'Erro ao criar receita: ' + receitaError.message
       }, { status: 500 })
     }
 
-    console.log('�� Receita criada com sucesso:', receita.id)
+    console.log('œ… Receita criada com sucesso:', receita.id)
 
     return NextResponse.json({
       success: true,
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro interno na cria��o de receita:', error)
+    console.error('Œ Erro interno na criaá§á£o de receita:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro interno do servidor: ' + (error as Error).message

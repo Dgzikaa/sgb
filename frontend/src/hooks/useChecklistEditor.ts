@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+ï»¿import { useState, useEffect } from 'react'
 import { api } from '@/lib/api-client'
 
 // =====================================================
@@ -87,29 +87,29 @@ interface UseChecklistEditorResult {
   error: string | null
   mudancasDetectadas: MudancasDetectadas
   
-  // Aá§áµes principais
+  // AÃ¡Â§Ã¡Âµes principais
   carregarChecklist: () => Promise<void>
   carregarVersoes: () => Promise<void>
   salvarChecklist: (comentario?: string) => Promise<boolean>
   fazerRollback: (versaoDestino: number, comentario?: string) => Promise<boolean>
   descartarAlteracoes: () => void
   
-  // Ediá§á£o de campos bá¡sicos
+  // EdiÃ¡Â§Ã¡Â£o de campos bÃ¡Â¡sicos
   atualizarCampo: (campo: keyof ChecklistData, valor: any) => void
   
-  // Ediá§á£o de estrutura
+  // EdiÃ¡Â§Ã¡Â£o de estrutura
   adicionarSecao: () => void
   atualizarSecao: (secaoIndex: number, updates: Partial<SecaoChecklist>) => void
   removerSecao: (secaoIndex: number) => void
   moverSecao: (fromIndex: number, toIndex: number) => void
   
-  // Ediá§á£o de itens
+  // EdiÃ¡Â§Ã¡Â£o de itens
   adicionarItem: (secaoIndex: number) => void
   atualizarItem: (secaoIndex: number, itemIndex: number, updates: Partial<ItemChecklist>) => void
   removerItem: (secaoIndex: number, itemIndex: number) => void
   moverItem: (secaoIndex: number, fromIndex: number, toIndex: number) => void
   
-  // Utilitá¡rios
+  // UtilitÃ¡Â¡rios
   podeSerSalvo: boolean
   temMudancas: boolean
   resetarMudancas: () => void
@@ -151,7 +151,7 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
   }, [checklist, checklistOriginal])
 
   // =====================================================
-  // FUNá‡á•ES PRINCIPAIS
+  // FUNÃ¡â€¡Ã¡â€¢ES PRINCIPAIS
   // =====================================================
 
   const carregarChecklist = async (): Promise<void> => {
@@ -184,7 +184,7 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
         setVersoes(response.data.versoes_disponiveis || [])
       }
     } catch (err: any) {
-      console.error('Erro ao carregar versáµes:', err)
+      console.error('Erro ao carregar versÃ¡Âµes:', err)
     }
   }
 
@@ -205,7 +205,7 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
         tempo_estimado: checklist.tempo_estimado,
         ativo: checklist.ativo,
         estrutura: checklist.estrutura,
-        comentario_edicao: comentario || 'Atualizaá§á£o via editor'
+        comentario_edicao: comentario || 'AtualizaÃ¡Â§Ã¡Â£o via editor'
       }
 
       const response = await api.put(`/api/checklists/${checklistId}`, payload)
@@ -256,7 +256,7 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
   }
 
   // =====================================================
-  // EDIá‡áƒO DE CAMPOS BáSICOS
+  // EDIÃ¡â€¡Ã¡Æ’O DE CAMPOS BÃ¡ÂSICOS
   // =====================================================
 
   const atualizarCampo = (campo: keyof ChecklistData, valor: any): void => {
@@ -269,7 +269,7 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
   }
 
   // =====================================================
-  // EDIá‡áƒO DE ESTRUTURA - SEá‡á•ES
+  // EDIÃ¡â€¡Ã¡Æ’O DE ESTRUTURA - SEÃ¡â€¡Ã¡â€¢ES
   // =====================================================
 
   const adicionarSecao = (): void => {
@@ -277,7 +277,7 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
 
     const novaSecao: SecaoChecklist = {
       id: `temp_${Date.now()}`,
-      nome: `Seá§á£o ${(checklist.estrutura?.secoes?.length || 0) + 1}`,
+      nome: `SeÃ¡Â§Ã¡Â£o ${(checklist.estrutura?.secoes?.length || 0) + 1}`,
       descricao: '',
       cor: 'bg-blue-500',
       ordem: (checklist.estrutura?.secoes?.length || 0) + 1,
@@ -337,7 +337,7 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
   }
 
   // =====================================================
-  // EDIá‡áƒO DE ESTRUTURA - ITENS
+  // EDIÃ¡â€¡Ã¡Æ’O DE ESTRUTURA - ITENS
   // =====================================================
 
   const adicionarItem = (secaoIndex: number): void => {
@@ -423,29 +423,29 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
     error,
     mudancasDetectadas,
     
-    // Aá§áµes principais
+    // AÃ¡Â§Ã¡Âµes principais
     carregarChecklist,
     carregarVersoes,
     salvarChecklist,
     fazerRollback,
     descartarAlteracoes,
     
-    // Ediá§á£o de campos bá¡sicos
+    // EdiÃ¡Â§Ã¡Â£o de campos bÃ¡Â¡sicos
     atualizarCampo,
     
-    // Ediá§á£o de estrutura
+    // EdiÃ¡Â§Ã¡Â£o de estrutura
     adicionarSecao,
     atualizarSecao,
     removerSecao,
     moverSecao,
     
-    // Ediá§á£o de itens
+    // EdiÃ¡Â§Ã¡Â£o de itens
     adicionarItem,
     atualizarItem,
     removerItem,
     moverItem,
     
-    // Utilitá¡rios
+    // UtilitÃ¡Â¡rios
     podeSerSalvo,
     temMudancas,
     resetarMudancas
@@ -453,7 +453,7 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
 }
 
 // =====================================================
-// FUNá‡á•ES UTILITáRIAS
+// FUNÃ¡â€¡Ã¡â€¢ES UTILITÃ¡ÂRIAS
 // =====================================================
 
 function deepClone<T>(obj: T): T {
@@ -464,49 +464,49 @@ function detectarMudancas(original: ChecklistData, atual: ChecklistData): Mudanc
   const mudancas: string[] = []
   let tipoMudanca: 'menor' | 'maior' | 'estrutural' = 'menor'
 
-  // Verificar mudaná§as nos campos bá¡sicos
+  // Verificar mudanÃ¡Â§as nos campos bÃ¡Â¡sicos
   if (atual.nome !== original.nome) {
-    mudancas.push(`Nome: "${original.nome}" †’ "${atual.nome}"`)
+    mudancas.push(`Nome: "${original.nome}" â€ â€™ "${atual.nome}"`)
     tipoMudanca = 'maior'
   }
 
   if (atual.descricao !== original.descricao) {
-    mudancas.push('Descriá§á£o alterada')
+    mudancas.push('DescriÃ¡Â§Ã¡Â£o alterada')
   }
 
   if (atual.setor !== original.setor) {
-    mudancas.push(`Setor: "${original.setor}" †’ "${atual.setor}"`)
+    mudancas.push(`Setor: "${original.setor}" â€ â€™ "${atual.setor}"`)
     tipoMudanca = 'maior'
   }
 
   if (atual.tipo !== original.tipo) {
-    mudancas.push(`Tipo: "${original.tipo}" †’ "${atual.tipo}"`)
+    mudancas.push(`Tipo: "${original.tipo}" â€ â€™ "${atual.tipo}"`)
     tipoMudanca = 'maior'
   }
 
   if (atual.frequencia !== original.frequencia) {
-    mudancas.push(`Frequáªncia: "${original.frequencia}" †’ "${atual.frequencia}"`)
+    mudancas.push(`FrequÃ¡Âªncia: "${original.frequencia}" â€ â€™ "${atual.frequencia}"`)
   }
 
   if (atual.tempo_estimado !== original.tempo_estimado) {
-    mudancas.push(`Tempo: ${original.tempo_estimado}min †’ ${atual.tempo_estimado}min`)
+    mudancas.push(`Tempo: ${original.tempo_estimado}min â€ â€™ ${atual.tempo_estimado}min`)
   }
 
   if (atual.ativo !== original.ativo) {
-    mudancas.push(`Status: ${original.ativo ? 'Ativo' : 'Inativo'} †’ ${atual.ativo ? 'Ativo' : 'Inativo'}`)
+    mudancas.push(`Status: ${original.ativo ? 'Ativo' : 'Inativo'} â€ â€™ ${atual.ativo ? 'Ativo' : 'Inativo'}`)
     tipoMudanca = 'maior'
   }
 
-  // Verificar mudaná§as na estrutura
+  // Verificar mudanÃ¡Â§as na estrutura
   const secoesOriginais = original.estrutura?.secoes || []
   const secoesAtuais = atual.estrutura?.secoes || []
 
   if (secoesOriginais.length !== secoesAtuais.length) {
-    mudancas.push(`Náºmero de seá§áµes: ${secoesOriginais.length} †’ ${secoesAtuais.length}`)
+    mudancas.push(`NÃ¡Âºmero de seÃ¡Â§Ã¡Âµes: ${secoesOriginais.length} â€ â€™ ${secoesAtuais.length}`)
     tipoMudanca = 'estrutural'
   }
 
-  // Verificar mudaná§as detalhadas na estrutura
+  // Verificar mudanÃ¡Â§as detalhadas na estrutura
   const mudancasEstrutura = detectarMudancasEstrutura(secoesOriginais, secoesAtuais)
   if (mudancasEstrutura.length > 0) {
     mudancas.push(...mudancasEstrutura)
@@ -523,31 +523,31 @@ function detectarMudancas(original: ChecklistData, atual: ChecklistData): Mudanc
 function detectarMudancasEstrutura(secoesOriginais: SecaoChecklist[], secoesAtuais: SecaoChecklist[]): string[] {
   const mudancas: string[] = []
 
-  // Verificar mudaná§as em seá§áµes existentes
+  // Verificar mudanÃ¡Â§as em seÃ¡Â§Ã¡Âµes existentes
   secoesAtuais.forEach((secaoAtual, index) => {
     const secaoOriginal = secoesOriginais[index]
     
     if (!secaoOriginal) {
-      mudancas.push(`+ Nova seá§á£o: "${secaoAtual.nome}"`)
+      mudancas.push(`+ Nova seÃ¡Â§Ã¡Â£o: "${secaoAtual.nome}"`)
       return
     }
 
     if (secaoAtual.nome !== secaoOriginal.nome) {
-      mudancas.push(`Seá§á£o renomeada: "${secaoOriginal.nome}" †’ "${secaoAtual.nome}"`)
+      mudancas.push(`SeÃ¡Â§Ã¡Â£o renomeada: "${secaoOriginal.nome}" â€ â€™ "${secaoAtual.nome}"`)
     }
 
     if (secaoAtual.cor !== secaoOriginal.cor) {
-      mudancas.push(`Cor da seá§á£o "${secaoAtual.nome}" alterada`)
+      mudancas.push(`Cor da seÃ¡Â§Ã¡Â£o "${secaoAtual.nome}" alterada`)
     }
 
     const itensOriginais = secaoOriginal.itens || []
     const itensAtuais = secaoAtual.itens || []
 
     if (itensOriginais.length !== itensAtuais.length) {
-      mudancas.push(`"${secaoAtual.nome}": ${itensOriginais.length} †’ ${itensAtuais.length} itens`)
+      mudancas.push(`"${secaoAtual.nome}": ${itensOriginais.length} â€ â€™ ${itensAtuais.length} itens`)
     }
 
-    // Verificar mudaná§as em itens
+    // Verificar mudanÃ¡Â§as em itens
     itensAtuais.forEach((itemAtual, itemIndex) => {
       const itemOriginal = itensOriginais[itemIndex]
       
@@ -555,25 +555,25 @@ function detectarMudancasEstrutura(secoesOriginais: SecaoChecklist[], secoesAtua
         mudancas.push(`+ "${secaoAtual.nome}": novo item "${itemAtual.titulo}"`)
       } else {
         if (itemAtual.titulo !== itemOriginal.titulo) {
-          mudancas.push(`Item renomeado: "${itemOriginal.titulo}" †’ "${itemAtual.titulo}"`)
+          mudancas.push(`Item renomeado: "${itemOriginal.titulo}" â€ â€™ "${itemAtual.titulo}"`)
         }
         
         if (itemAtual.tipo !== itemOriginal.tipo) {
-          mudancas.push(`Tipo do item "${itemAtual.titulo}": ${itemOriginal.tipo} †’ ${itemAtual.tipo}`)
+          mudancas.push(`Tipo do item "${itemAtual.titulo}": ${itemOriginal.tipo} â€ â€™ ${itemAtual.tipo}`)
         }
         
         if (itemAtual.obrigatorio !== itemOriginal.obrigatorio) {
-          mudancas.push(`"${itemAtual.titulo}": ${itemOriginal.obrigatorio ? 'Obrigatá³rio †’ Opcional' : 'Opcional †’ Obrigatá³rio'}`)
+          mudancas.push(`"${itemAtual.titulo}": ${itemOriginal.obrigatorio ? 'ObrigatÃ¡Â³rio â€ â€™ Opcional' : 'Opcional â€ â€™ ObrigatÃ¡Â³rio'}`)
         }
       }
     })
   })
 
-  // Verificar seá§áµes removidas
+  // Verificar seÃ¡Â§Ã¡Âµes removidas
   if (secoesOriginais.length > secoesAtuais.length) {
     const secoesRemovidas = secoesOriginais.slice(secoesAtuais.length)
     secoesRemovidas.forEach((secao) => {
-      mudancas.push(`- Seá§á£o removida: "${secao.nome}"`)
+      mudancas.push(`- SeÃ¡Â§Ã¡Â£o removida: "${secao.nome}"`)
     })
   }
 
@@ -581,20 +581,20 @@ function detectarMudancasEstrutura(secoesOriginais: SecaoChecklist[], secoesAtua
 }
 
 // =====================================================
-// UTILITáRIOS PARA VALIDAá‡áƒO
+// UTILITÃ¡ÂRIOS PARA VALIDAÃ¡â€¡Ã¡Æ’O
 // =====================================================
 
 export const checklistValidators = {
-  // Validar campos obrigatá³rios
+  // Validar campos obrigatÃ¡Â³rios
   validarCamposBasicos: (checklist: ChecklistData): string[] => {
     const erros: string[] = []
 
     if (!checklist.nome.trim()) {
-      erros.push('Nome á© obrigatá³rio')
+      erros.push('Nome Ã¡Â© obrigatÃ¡Â³rio')
     }
 
     if (!checklist.setor.trim()) {
-      erros.push('Setor á© obrigatá³rio')
+      erros.push('Setor Ã¡Â© obrigatÃ¡Â³rio')
     }
 
     if (checklist.tempo_estimado < 1 || checklist.tempo_estimado > 480) {
@@ -609,22 +609,22 @@ export const checklistValidators = {
     const erros: string[] = []
 
     if (!checklist.estrutura?.secoes?.length) {
-      erros.push('Pelo menos uma seá§á£o á© obrigatá³ria')
+      erros.push('Pelo menos uma seÃ¡Â§Ã¡Â£o Ã¡Â© obrigatÃ¡Â³ria')
       return erros
     }
 
     checklist.estrutura.secoes.forEach((secao, secaoIndex) => {
       if (!secao.nome.trim()) {
-        erros.push(`Nome da seá§á£o ${secaoIndex + 1} á© obrigatá³rio`)
+        erros.push(`Nome da seÃ¡Â§Ã¡Â£o ${secaoIndex + 1} Ã¡Â© obrigatÃ¡Â³rio`)
       }
 
       if (!secao.itens?.length) {
-        erros.push(`Seá§á£o "${secao.nome}" deve ter pelo menos um item`)
+        erros.push(`SeÃ¡Â§Ã¡Â£o "${secao.nome}" deve ter pelo menos um item`)
       }
 
       secao.itens?.forEach((item, itemIndex) => {
         if (!item.titulo.trim()) {
-          erros.push(`Tá­tulo do item ${itemIndex + 1} na seá§á£o "${secao.nome}" á© obrigatá³rio`)
+          erros.push(`TÃ¡Â­tulo do item ${itemIndex + 1} na seÃ¡Â§Ã¡Â£o "${secao.nome}" Ã¡Â© obrigatÃ¡Â³rio`)
         }
       })
     })
@@ -632,7 +632,7 @@ export const checklistValidators = {
     return erros
   },
 
-  // Validaá§á£o completa
+  // ValidaÃ¡Â§Ã¡Â£o completa
   validarCompleto: (checklist: ChecklistData): { valido: boolean; erros: string[] } => {
     const errosBasicos = checklistValidators.validarCamposBasicos(checklist)
     const errosEstrutura = checklistValidators.validarEstrutura(checklist)

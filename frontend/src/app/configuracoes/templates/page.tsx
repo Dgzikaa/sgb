@@ -1,4 +1,4 @@
-'use client'
+Ôªø'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -131,7 +131,7 @@ export default function TemplatesPage() {
       console.error('Erro ao carregar templates:', err)
       setError('Erro ao conectar com o servidor')
       toast({
-        title: "ùå Erro",
+        title: "¬ù≈í Erro",
         description: "Erro ao carregar templates",
         variant: "destructive"
       })
@@ -151,12 +151,12 @@ export default function TemplatesPage() {
       if (response.success) {
         await carregarTemplates()
         toast({
-          title: "úÖ Sucesso",
+          title: "≈ì‚Ä¶ Sucesso",
           description: response.message || "Templates predefinidos instalados!",
         })
       } else {
         toast({
-          title: "ùå Erro",
+          title: "¬ù≈í Erro",
           description: response.error || "Erro ao instalar templates",
           variant: "destructive"
         })
@@ -164,7 +164,7 @@ export default function TemplatesPage() {
     } catch (err: any) {
       console.error('Erro ao instalar templates:', err)
       toast({
-        title: "ùå Erro",
+        title: "¬ù≈í Erro",
         description: "Erro ao instalar templates predefinidos",
         variant: "destructive"
       })
@@ -184,12 +184,12 @@ export default function TemplatesPage() {
       if (response.success) {
         await carregarTemplates()
         toast({
-          title: "úÖ Sucesso",
+          title: "≈ì‚Ä¶ Sucesso",
           description: "Template deletado com sucesso!",
         })
       } else {
         toast({
-          title: "ùå Erro",
+          title: "¬ù≈í Erro",
           description: response.error || "Erro ao deletar template",
           variant: "destructive"
         })
@@ -197,7 +197,7 @@ export default function TemplatesPage() {
     } catch (err: any) {
       console.error('Erro ao deletar template:', err)
       toast({
-        title: "ùå Erro",
+        title: "¬ù≈í Erro",
         description: "Erro ao deletar template",
         variant: "destructive"
       })
@@ -282,7 +282,7 @@ export default function TemplatesPage() {
                     </div>
                     <div>
                       <h1 className="text-3xl font-bold">Templates de Checklists</h1>
-                      <p className="text-indigo-100 mt-1">Gerencie e organize templates reutiliz·°veis</p>
+                      <p className="text-indigo-100 mt-1">Gerencie e organize templates reutiliz√°¬°veis</p>
                     </div>
                   </div>
                 </div>
@@ -321,7 +321,7 @@ export default function TemplatesPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">P·∫blicos</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">P√°¬∫blicos</p>
                     <p className="text-3xl font-bold text-gray-900 dark:text-white">{estatisticas.publicos}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Compartilhados</p>
                   </div>
@@ -426,8 +426,8 @@ export default function TemplatesPage() {
                     <SelectItem value="all">Todas</SelectItem>
                     <SelectItem value="operacional">Operacional</SelectItem>
                     <SelectItem value="qualidade">Qualidade</SelectItem>
-                    <SelectItem value="seguranca">Seguran·ßa</SelectItem>
-                    <SelectItem value="manutencao">Manuten·ß·£o</SelectItem>
+                    <SelectItem value="seguranca">Seguran√°¬ßa</SelectItem>
+                    <SelectItem value="manutencao">Manuten√°¬ß√°¬£o</SelectItem>
                     <SelectItem value="atendimento">Atendimento</SelectItem>
                     <SelectItem value="administrativo">Administrativo</SelectItem>
                   </SelectContent>
@@ -441,7 +441,7 @@ export default function TemplatesPage() {
                     <SelectItem value="all">Todos</SelectItem>
                     <SelectItem value="abertura">Abertura</SelectItem>
                     <SelectItem value="fechamento">Fechamento</SelectItem>
-                    <SelectItem value="diario">Di·°rio</SelectItem>
+                    <SelectItem value="diario">Di√°¬°rio</SelectItem>
                     <SelectItem value="semanal">Semanal</SelectItem>
                     <SelectItem value="mensal">Mensal</SelectItem>
                   </SelectContent>
@@ -453,7 +453,7 @@ export default function TemplatesPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="true">P·∫blicos</SelectItem>
+                    <SelectItem value="true">P√°¬∫blicos</SelectItem>
                     <SelectItem value="false">Privados</SelectItem>
                   </SelectContent>
                 </Select>
@@ -529,7 +529,7 @@ export default function TemplatesPage() {
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Nenhum Template Encontrado</h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  N·£o h·° templates que correspondem aos filtros aplicados
+                  N√°¬£o h√°¬° templates que correspondem aos filtros aplicados
                 </p>
                 <div className="flex items-center gap-3 justify-center">
                   <Button onClick={limparFiltros} variant="outline">
@@ -569,7 +569,7 @@ export default function TemplatesPage() {
                             </Badge>
                             {template.publico && (
                               <Badge className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
-                                P·∫blico
+                                P√°¬∫blico
                               </Badge>
                             )}
                             {template.predefinido && (

@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic'
 
-// Configura��o do Supabase
+// Configuraá§á£o do Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -22,7 +22,7 @@ const DashboardFiltersSchema = z.object({
 });
 
 // ========================================
-// 📊 GET /api/ai/dashboard (Dashboard Executivo)
+// ðŸ“Š GET /api/ai/dashboard (Dashboard Executivo)
 // ========================================
 export async function GET(request: NextRequest) {
   try {
@@ -30,17 +30,17 @@ export async function GET(request: NextRequest) {
     const userData = headersList.get('x-user-data');
     
     if (!userData) {
-      return NextResponse.json({ error: 'Usu�rio n�o autenticado' }, { status: 401 });
+      return NextResponse.json({ error: 'Usuá¡rio ná£o autenticado' }, { status: 401 });
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
-    // Verificar permiss�es
+    // Verificar permissáµes
     if (!['funcionario', 'financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permiss�o para acessar dashboard de IA' }, { status: 403 });
+      return NextResponse.json({ error: 'Sem permissá£o para acessar dashboard de IA' }, { status: 403 });
     }
 
-    // Parse dos par�metros
+    // Parse dos pará¢metros
     const url = new URL(request.url);
     const rawParams = Object.fromEntries(url.searchParams.entries());
     const processedParams: any = { ...rawParams };
@@ -58,10 +58,10 @@ export async function GET(request: NextRequest) {
     const dataInicioStr = dataInicio.toISOString();
 
     // ========================================
-    // 🔢 KPIs PRINCIPAIS
+    // ðŸ”¢ KPIs PRINCIPAIS
     // ========================================
     const kpisPromises = [
-      // Taxa de conclus�o de checklists
+      // Taxa de conclusá£o de checklists
       supabase
         .from('ai_metrics')
         .select('valor, meta_valor, variacao_percentual, performance')
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
         .limit(1)
         .single(),
       
-      // Tempo m�dio de execu��o
+      // Tempo má©dio de execuá§á£o
       supabase
         .from('ai_metrics')
         .select('valor, meta_valor, variacao_percentual, performance')
@@ -136,7 +136,7 @@ export async function GET(request: NextRequest) {
     };
 
     // ========================================
-    // 🧠 INSIGHTS RESUMO
+    // ðŸ§  INSIGHTS RESUMO
     // ========================================
     let insightsResumo = null;
     if (filters.incluir_insights) {
@@ -184,7 +184,7 @@ export async function GET(request: NextRequest) {
     }
 
     // ========================================
-    // 🚨 ANOMALIAS RESUMO
+    // ðŸš¨ ANOMALIAS RESUMO
     // ========================================
     let anomaliasResumo = null;
     if (filters.incluir_anomalias) {
@@ -231,7 +231,7 @@ export async function GET(request: NextRequest) {
     }
 
     // ========================================
-    // 📈 TEND�NCIAS DE M�TRICAS
+    // ðŸ“ˆ TENDáŠNCIAS DE Má‰TRICAS
     // ========================================
     let tendenciasMetricas = null;
     if (filters.incluir_metricas) {
@@ -253,7 +253,7 @@ export async function GET(request: NextRequest) {
 
         if (!data || data.length === 0) return null;
 
-        // Calcular tend�ncia simples
+        // Calcular tendáªncia simples
         const primeira = data[0].valor;
         const ultima = data[data.length - 1].valor;
         const variacao = ((ultima - primeira) / primeira) * 100;
@@ -271,7 +271,7 @@ export async function GET(request: NextRequest) {
     }
 
     // ========================================
-    // 💡 RECOMENDA��ES RESUMO
+    // ðŸ’¡ RECOMENDAá‡á•ES RESUMO
     // ========================================
     let recomendacoesResumo = null;
     if (filters.incluir_recomendacoes) {
@@ -316,7 +316,7 @@ export async function GET(request: NextRequest) {
     }
 
     // ========================================
-    // 🔮 PREVIS�ES RESUMO
+    // ðŸ”® PREVISá•ES RESUMO
     // ========================================
     let predicoesResumo = null;
     if (filters.incluir_predicoes) {
@@ -358,7 +358,7 @@ export async function GET(request: NextRequest) {
     }
 
     // ========================================
-    // 🤖 STATUS DO AGENTE
+    // ðŸ¤– STATUS DO AGENTE
     // ========================================
     const [configAgente, logsRecentes] = await Promise.all([
       supabase
@@ -389,7 +389,7 @@ export async function GET(request: NextRequest) {
     };
 
     // ========================================
-    // 📊 SCORE GERAL DE SA�DE
+    // ðŸ“Š SCORE GERAL DE SAášDE
     // ========================================
     const scoresSaude = [];
     
@@ -417,7 +417,7 @@ export async function GET(request: NextRequest) {
       Math.round(scoresSaude.reduce((a: number, b: number) => a + b, 0) / scoresSaude.length) : 70;
 
     // ========================================
-    // 📋 RESUMO EXECUTIVO
+    // ðŸ“‹ RESUMO EXECUTIVO
     // ========================================
     const resumoExecutivo = {
       score_saude_geral: scoreSaudeGeral,
@@ -426,13 +426,13 @@ export async function GET(request: NextRequest) {
                     scoreSaudeGeral >= 60 ? 'regular' : 
                     scoreSaudeGeral >= 40 ? 'ruim' : 'critico',
              principais_problemas: [
-         ...(anomaliasResumo && anomaliasResumo.criticas_ativas > 0 ? [`${anomaliasResumo.criticas_ativas} anomalias cr�ticas ativas`] : []),
-         ...(insightsResumo && insightsResumo.criticos_pendentes > 0 ? [`${insightsResumo.criticos_pendentes} insights cr�ticos pendentes`] : []),
+         ...(anomaliasResumo && anomaliasResumo.criticas_ativas > 0 ? [`${anomaliasResumo.criticas_ativas} anomalias crá­ticas ativas`] : []),
+         ...(insightsResumo && insightsResumo.criticos_pendentes > 0 ? [`${insightsResumo.criticos_pendentes} insights crá­ticos pendentes`] : []),
          ...(!agenteStatus.ativo ? ['Agente IA desativado'] : []),
-         ...(Object.values(kpis).filter((k: any) => k.performance === 'critico').map((k: any) => `KPI cr�tico detectado`))
+         ...(Object.values(kpis).filter((k: any) => k.performance === 'critico').map((k: any) => `KPI crá­tico detectado`))
        ],
        oportunidades: [
-         ...(recomendacoesResumo && recomendacoesResumo.alta_prioridade > 0 ? [`${recomendacoesResumo.alta_prioridade} recomenda��es de alta prioridade`] : []),
+         ...(recomendacoesResumo && recomendacoesResumo.alta_prioridade > 0 ? [`${recomendacoesResumo.alta_prioridade} recomendaá§áµes de alta prioridade`] : []),
          ...(recomendacoesResumo && recomendacoesResumo.roi_potencial_total > 0 ? [`ROI potencial de ${recomendacoesResumo.roi_potencial_total.toFixed(1)}%`] : [])
        ],
       periodo_analise: `${filters.periodo_dias} dias`,
@@ -456,7 +456,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({
-        error: 'Par�metros inv�lidos',
+        error: 'Pará¢metros invá¡lidos',
         details: error.errors
       }, { status: 400 });
     }

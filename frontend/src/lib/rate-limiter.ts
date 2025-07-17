@@ -1,25 +1,25 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { redisClient } from './redis-client';
 
-// Configura��o de rate limiting por endpoint
+// Configuraá§á£o de rate limiting por endpoint
 const RATE_LIMITS: Record<string, { requests: number; window: number }> = {
   '/api/auth/login': { requests: 5, window: 300000 }, // 5 tentativas em 5 min
   '/api/usuarios': { requests: 10, window: 60000 },   // 10 requests por minuto
   '/api/uploads': { requests: 3, window: 60000 },     // 3 uploads por minuto
   '/api/contaazul': { requests: 20, window: 3600000 }, // 20 por hora (API externa)
   '/api/meta': { requests: 30, window: 3600000 },     // 30 por hora (API externa)
-  'default': { requests: 100, window: 60000 }         // 100 requests por minuto padr�o
+  'default': { requests: 100, window: 60000 }         // 100 requests por minuto padrá£o
 };
 
-// Discord webhook para notifica��es de seguran�a
+// Discord webhook para notificaá§áµes de seguraná§a
 const SECURITY_DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1393646423748116602/3zUhIrSKFHmq0zNRLf5AzrkSZNzTj7oYk6f45Tpj2LZWChtmGTKKTHxhfaNZigyLXN4y';
 
-// Fun��o para notificar Discord sobre rate limiting
+// Funá§á£o para notificar Discord sobre rate limiting
 async function notifyDiscordRateLimit(ip: string, endpoint: string, userAgent: string, requestsInWindow: number) {
   try {
     const message = {
       embeds: [{
-        title: '🚫 Rate Limit Violation',
+        title: 'ðŸš« Rate Limit Violation',
         description: `Tentativas excessivas detectadas`,
         color: 0xff9900, // Laranja para warnings
         fields: [
@@ -46,7 +46,7 @@ async function notifyDiscordRateLimit(ip: string, endpoint: string, userAgent: s
         ],
         timestamp: new Date().toISOString(),
         footer: {
-          text: '🏢 SGB - Security System'
+          text: 'ðŸ¢ SGB - Security System'
         }
       }]
     };
@@ -57,7 +57,7 @@ async function notifyDiscordRateLimit(ip: string, endpoint: string, userAgent: s
       body: JSON.stringify(message)
     });
   } catch (error) {
-    console.error('�� Erro ao enviar notifica��o Discord:', error);
+    console.error('Œ Erro ao enviar notificaá§á£o Discord:', error);
   }
 }
 
@@ -70,7 +70,7 @@ export function createRateLimiter(endpoint: string) {
       const userAgent = request.headers.get('user-agent') || 'unknown';
       const clientId = `${ip}-${userAgent.slice(0, 50)}`;
       
-      // Pegar configura��o do endpoint
+      // Pegar configuraá§á£o do endpoint
       const config = RATE_LIMITS[endpoint] || RATE_LIMITS.default;
       const key = `${endpoint}:${clientId}`;
       
@@ -80,7 +80,7 @@ export function createRateLimiter(endpoint: string) {
       if (!rateLimitResult.success) {
         // Rate limit excedido - notificar Discord
         await notifyDiscordRateLimit(ip, endpoint, userAgent, rateLimitResult.count);
-        console.warn(`🚫 Rate limit excedido - IP: ${ip}, Endpoint: ${endpoint}`);
+        console.warn(`ðŸš« Rate limit excedido - IP: ${ip}, Endpoint: ${endpoint}`);
         
         return NextResponse.json(
           { 
@@ -99,11 +99,11 @@ export function createRateLimiter(endpoint: string) {
         );
       }
       
-      // Permitir requisi��o
+      // Permitir requisiá§á£o
       return null;
       
     } catch (error) {
-      console.error('�� Erro no rate limiter:', error);
+      console.error('Œ Erro no rate limiter:', error);
       return null; // Em caso de erro, permitir (fail-safe)
     }
   };
@@ -123,7 +123,7 @@ export async function getRateLimitStatus(): Promise<{
       totalKeys: keys.length
     };
   } catch (error) {
-    console.error('�� Erro ao verificar status rate limit:', error);
+    console.error('Œ Erro ao verificar status rate limit:', error);
     return {
       redisConnected: false,
       totalKeys: 0
@@ -131,12 +131,12 @@ export async function getRateLimitStatus(): Promise<{
   }
 }
 
-// Limpeza manual do Redis (se necess�rio)
+// Limpeza manual do Redis (se necessá¡rio)
 export async function cleanupRateLimitCache(): Promise<void> {
   try {
     await redisClient.cleanup();
-    console.log('�� Cache de rate limit limpo');
+    console.log('œ… Cache de rate limit limpo');
   } catch (error) {
-    console.error('�� Erro ao limpar cache:', error);
+    console.error('Œ Erro ao limpar cache:', error);
   }
 } 

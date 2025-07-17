@@ -1,4 +1,4 @@
-import { headers } from 'next/headers'
+﻿import { headers } from 'next/headers'
 import { NextRequest } from 'next/server'
 
 export interface UserAuth {
@@ -14,8 +14,8 @@ export interface UserAuth {
 }
 
 /**
- * Fun��o para extrair dados de autentica��o do usu�rio
- * L� os dados reais do usu�rio do cookie/header
+ * Funá§á£o para extrair dados de autenticaá§á£o do usuá¡rio
+ * Láª os dados reais do usuá¡rio do cookie/header
  */
 export async function getUserAuth(request?: NextRequest): Promise<UserAuth | null> {
   try {
@@ -25,7 +25,7 @@ export async function getUserAuth(request?: NextRequest): Promise<UserAuth | nul
       // Se temos o request, usar headers diretamente
       userData = request.headers.get('x-user-data')
       
-      // Fallback: tentar pegar do cookie se n�o tem header
+      // Fallback: tentar pegar do cookie se ná£o tem header
       if (!userData) {
         const cookieValue = request.cookies.get('sgb_user')?.value
         if (cookieValue) {
@@ -57,7 +57,7 @@ export async function getUserAuth(request?: NextRequest): Promise<UserAuth | nul
       email: parsedUser.email,
       nome: parsedUser.nome || parsedUser.email,
       role: parsedUser.role || parsedUser.permissao || 'funcionario',
-      bar_id: parsedUser.bar_id || 3, // Default para Ordin�rio Bar se n�o especificado
+      bar_id: parsedUser.bar_id || 3, // Default para Ordiná¡rio Bar se ná£o especificado
       permissao: parsedUser.role || parsedUser.permissao || 'funcionario',
       modulos_permitidos: parsedUser.modulos_permitidos || [],
       ativo: parsedUser.ativo !== false
@@ -66,48 +66,48 @@ export async function getUserAuth(request?: NextRequest): Promise<UserAuth | nul
     return user
 
   } catch (error) {
-    console.error('�� Erro ao processar autentica��o:', error)
+    console.error('Œ Erro ao processar autenticaá§á£o:', error)
     return null
   }
 }
 
 /**
- * Verificar se o usu�rio tem uma permiss�o espec�fica
+ * Verificar se o usuá¡rio tem uma permissá£o especá­fica
  */
 export function hasPermission(user: UserAuth, permission: string): boolean {
-  // Admin sempre tem todas as permiss�es
+  // Admin sempre tem todas as permissáµes
   if (user.role === 'admin') {
     return true
   }
 
-  // Verificar permiss�es espec�ficas
+  // Verificar permissáµes especá­ficas
   const permissions = user.modulos_permitidos || []
   return permissions.includes(permission) || permissions.includes('admin')
 }
 
 /**
- * Verificar se o usu�rio pode administrar o sistema
+ * Verificar se o usuá¡rio pode administrar o sistema
  */
 export function isAdmin(user: UserAuth): boolean {
   return user.role === 'admin' || user.permissao === 'admin'
 }
 
 /**
- * Verificar se o usu�rio pode gerenciar dados financeiros
+ * Verificar se o usuá¡rio pode gerenciar dados financeiros
  */
 export function canManageFinancial(user: UserAuth): boolean {
   return isAdmin(user) || user.role === 'financeiro'
 }
 
 /**
- * Middleware helper para autentica��o de APIs
+ * Middleware helper para autenticaá§á£o de APIs
  */
 export function createAuthResponse(error: string, status: number = 401) {
   return new Response(JSON.stringify({
     success: false,
     error,
     code: 'AUTH_ERROR',
-    help: 'Fa�a login em /login para acessar esta funcionalidade'
+    help: 'Faá§a login em /login para acessar esta funcionalidade'
   }), {
     status,
     headers: { 'Content-Type': 'application/json' }

@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+ï»¿import { createClient } from '@supabase/supabase-js'
 
 // Cliente administrativo do Supabase (usa service role key)
 let adminClient: any = null
@@ -13,7 +13,7 @@ async function getAdminClient() {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SERVICE_ROLE_KEY
 
   if (!serviceRoleKey) {
-    throw new Error('SUPABASE_SERVICE_ROLE_KEY ná£o está¡ configurada nos secrets do sistema. Configure via MCP Supabase.')
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY nÃ¡Â£o estÃ¡Â¡ configurada nos secrets do sistema. Configure via MCP Supabase.')
   }
 
   try {
@@ -24,22 +24,22 @@ async function getAdminClient() {
       }
     })
 
-    console.log('œ… Cliente administrativo Supabase inicializado')
+    console.log('Å“â€¦ Cliente administrativo Supabase inicializado')
     return adminClient
 
   } catch (error) {
-    console.error('Œ Erro ao inicializar cliente administrativo:', error)
+    console.error('ÂÅ’ Erro ao inicializar cliente administrativo:', error)
     throw error
   }
 }
 
-// Funá§á£o helper para rotas API (evita inicializaá§á£o no má³dulo)
+// FunÃ¡Â§Ã¡Â£o helper para rotas API (evita inicializaÃ¡Â§Ã¡Â£o no mÃ¡Â³dulo)
 function createServiceRoleClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SERVICE_ROLE_KEY
 
   if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error('Variá¡veis de ambiente Supabase ná£o configuradas')
+    throw new Error('VariÃ¡Â¡veis de ambiente Supabase nÃ¡Â£o configuradas')
   }
 
   return createClient(supabaseUrl, serviceRoleKey, {

@@ -1,14 +1,14 @@
-import { createClient } from '@supabase/supabase-js';
+﻿import { createClient } from '@supabase/supabase-js';
 import { createWhatsAppService } from './whatsapp-service';
 
-// Configura��o do Supabase
+// Configuraá§á£o do Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
 // ========================================
-// 📱 ENHANCED NOTIFICATION SERVICE
+// ðŸ“± ENHANCED NOTIFICATION SERVICE
 // ========================================
 
 export interface NotificationChannel {
@@ -38,7 +38,7 @@ export interface EnhancedNotificationOptions {
   agendado_para?: Date;
   expirar_em?: Date;
   
-  // WhatsApp espec�fico
+  // WhatsApp especá­fico
   whatsapp_template?: string;
   whatsapp_parameters?: string[];
 }
@@ -51,11 +51,11 @@ export class EnhancedNotificationService {
   }
 
   // ========================================
-  // 🚀 ENVIO MULTI-CANAL
+  // ðŸš€ ENVIO MULTI-CANAL
   // ========================================
 
   /**
-   * Envia notifica��o em m�ltiplos canais
+   * Envia notificaá§á£o em máºltiplos canais
    */
   async sendMultiChannelNotification(options: EnhancedNotificationOptions): Promise<{
     success: boolean;
@@ -78,10 +78,10 @@ export class EnhancedNotificationService {
       errors: [] as string[]
     };
 
-    // 1. Criar notifica��o base no banco
+    // 1. Criar notificaá§á£o base no banco
     const notificacao = await this.createBaseNotification(options);
     if (!notificacao) {
-      results.errors.push('Falha ao criar notifica��o base');
+      results.errors.push('Falha ao criar notificaá§á£o base');
       return results;
     }
 
@@ -121,7 +121,7 @@ export class EnhancedNotificationService {
       }
     }
 
-    // Atualizar estat�sticas
+    // Atualizar estatá­sticas
     await this.updateNotificationStats(notificacao.id, results);
 
     results.success = Object.values(results.channels).some(Boolean);
@@ -129,7 +129,7 @@ export class EnhancedNotificationService {
   }
 
   // ========================================
-  // 📋 M�TODOS ESPEC�FICOS PARA CHECKLISTS
+  // ðŸ“‹ Má‰TODOS ESPECáFICOS PARA CHECKLISTS
   // ========================================
 
   /**
@@ -169,11 +169,11 @@ export class EnhancedNotificationService {
       url_acao: `/funcionario/checklists/execucao/${checklistId}`,
       whatsapp_template: 'sgb_lembrete_checklist',
       whatsapp_parameters: [
-        usuarioId.toString(), // Nome ser� resolvido no service
+        usuarioId.toString(), // Nome será¡ resolvido no service
         minutosAntes.toString(),
         checklist.nome,
         new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-        'Geral' // Setor padr�o
+        'Geral' // Setor padrá£o
       ]
     };
 
@@ -203,7 +203,7 @@ export class EnhancedNotificationService {
       usuario_id: usuarioId,
       bar_id: this.barId,
       titulo: `Checklist Atrasado: ${checklist.nome}`,
-      conteudo: `Este checklist est� atrasado h� ${horasAtraso} horas. Execute agora!`,
+      conteudo: `Este checklist está¡ atrasado há¡ ${horasAtraso} horas. Execute agora!`,
       tipo: 'checklist_atrasado',
       modulo: 'checklists',
       prioridade: 'alta',
@@ -219,7 +219,7 @@ export class EnhancedNotificationService {
       whatsapp_parameters: [
         checklist.nome,
         horasAtraso.toString(),
-        usuarioId.toString(), // Nome ser� resolvido
+        usuarioId.toString(), // Nome será¡ resolvido
         'Geral'
       ]
     };
@@ -229,7 +229,7 @@ export class EnhancedNotificationService {
   }
 
   /**
-   * Envia confirma��o de checklist conclu�do
+   * Envia confirmaá§á£o de checklist concluá­do
    */
   async sendChecklistCompletionConfirmation(
     usuarioId: number,
@@ -250,14 +250,14 @@ export class EnhancedNotificationService {
     const options: EnhancedNotificationOptions = {
       usuario_id: usuarioId,
       bar_id: this.barId,
-      titulo: `Checklist Conclu�do: ${checklist.nome}`,
-      conteudo: `Parab�ns! Checklist executado com ${pontuacao}% de aproveitamento.`,
+      titulo: `Checklist Concluá­do: ${checklist.nome}`,
+      conteudo: `Parabá©ns! Checklist executado com ${pontuacao}% de aproveitamento.`,
       tipo: 'checklist_concluido',
       modulo: 'checklists',
       prioridade: 'baixa',
       canais: {
         browser: true,
-        whatsapp: pontuacao >= 80, // S� envia WhatsApp se pontua��o boa
+        whatsapp: pontuacao >= 80, // Sá³ envia WhatsApp se pontuaá§á£o boa
         email: false,
         sms: false
       },
@@ -266,7 +266,7 @@ export class EnhancedNotificationService {
       whatsapp_template: 'sgb_checklist_concluido',
       whatsapp_parameters: [
         checklist.nome,
-        usuarioId.toString(), // Nome ser� resolvido
+        usuarioId.toString(), // Nome será¡ resolvido
         pontuacao.toString(),
         new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
       ]
@@ -277,11 +277,11 @@ export class EnhancedNotificationService {
   }
 
   // ========================================
-  // 🔧 M�TODOS PRIVADOS
+  // ðŸ”§ Má‰TODOS PRIVADOS
   // ========================================
 
   /**
-   * Cria notifica��o base no banco
+   * Cria notificaá§á£o base no banco
    */
   private async createBaseNotification(options: EnhancedNotificationOptions): Promise<any> {
     try {
@@ -306,17 +306,17 @@ export class EnhancedNotificationService {
 
       return notificacao;
     } catch (error) {
-      console.error('Erro ao criar notifica��o base:', error);
+      console.error('Erro ao criar notificaá§á£o base:', error);
       return null;
     }
   }
 
   /**
-   * Envia notifica��o browser (sistema existente)
+   * Envia notificaá§á£o browser (sistema existente)
    */
   private async sendBrowserNotification(notificacao: any): Promise<boolean> {
     try {
-      // Usar API existente de notifica��es browser
+      // Usar API existente de notificaá§áµes browser
       const response = await fetch('/api/notifications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -332,13 +332,13 @@ export class EnhancedNotificationService {
 
       return response.ok;
     } catch (error) {
-      console.error('Erro ao enviar notifica��o browser:', error);
+      console.error('Erro ao enviar notificaá§á£o browser:', error);
       return false;
     }
   }
 
   /**
-   * Envia notifica��o WhatsApp
+   * Envia notificaá§á£o WhatsApp
    */
   private async sendWhatsAppNotification(notificacao: any, options: EnhancedNotificationOptions): Promise<boolean> {
     try {
@@ -347,7 +347,7 @@ export class EnhancedNotificationService {
         return false;
       }
 
-      // Processar notifica��o via WhatsApp Service
+      // Processar notificaá§á£o via WhatsApp Service
       const success = await whatsappService.processNotificationForWhatsApp({
         id: notificacao.id,
         usuario_id: notificacao.usuario_id,
@@ -361,31 +361,31 @@ export class EnhancedNotificationService {
 
       return success;
     } catch (error) {
-      console.error('Erro ao enviar notifica��o WhatsApp:', error);
+      console.error('Erro ao enviar notificaá§á£o WhatsApp:', error);
       return false;
     }
   }
 
   /**
-   * Envia notifica��o por email (placeholder)
+   * Envia notificaá§á£o por email (placeholder)
    */
   private async sendEmailNotification(notificacao: any): Promise<boolean> {
-    // TODO: Implementar quando necess�rio
+    // TODO: Implementar quando necessá¡rio
     console.log('Email notification (placeholder):', notificacao.titulo);
     return false;
   }
 
   /**
-   * Envia notifica��o por SMS (placeholder)
+   * Envia notificaá§á£o por SMS (placeholder)
    */
   private async sendSMSNotification(notificacao: any): Promise<boolean> {
-    // TODO: Implementar quando necess�rio
+    // TODO: Implementar quando necessá¡rio
     console.log('SMS notification (placeholder):', notificacao.titulo);
     return false;
   }
 
   /**
-   * Atualiza estat�sticas da notifica��o
+   * Atualiza estatá­sticas da notificaá§á£o
    */
   private async updateNotificationStats(notificacaoId: number, results: any): Promise<void> {
     try {
@@ -402,24 +402,24 @@ export class EnhancedNotificationService {
         })
         .eq('id', notificacaoId);
     } catch (error) {
-      console.error('Erro ao atualizar estat�sticas da notifica��o:', error);
+      console.error('Erro ao atualizar estatá­sticas da notificaá§á£o:', error);
     }
   }
 }
 
 // ========================================
-// 🚀 FUN��ES UTILIT�RIAS
+// ðŸš€ FUNá‡á•ES UTILITáRIAS
 // ========================================
 
 /**
- * Cria inst�ncia do Enhanced Notification Service
+ * Cria instá¢ncia do Enhanced Notification Service
  */
 export function createEnhancedNotificationService(barId: number): EnhancedNotificationService {
   return new EnhancedNotificationService(barId);
 }
 
 /**
- * Envia notifica��o para usu�rios m�ltiplos
+ * Envia notificaá§á£o para usuá¡rios máºltiplos
  */
 export async function sendBulkNotifications(
   barId: number,
@@ -470,7 +470,7 @@ export async function sendBulkNotifications(
 }
 
 /**
- * Configura��es padr�o de canais por tipo de notifica��o
+ * Configuraá§áµes padrá£o de canais por tipo de notificaá§á£o
  */
 export const DEFAULT_CHANNELS = {
   lembrete_agendamento: { browser: true, whatsapp: true, email: false, sms: false },

@@ -1,13 +1,13 @@
-// =====================================================
-// 🇧🇷 TIMEZONE UTILS - BRAS�LIA (UTC-3)
-// Centraliza todas as opera��es de data/hora no timezone do Brasil
+﻿// =====================================================
+// ðŸ‡§ðŸ‡· TIMEZONE UTILS - BRASáLIA (UTC-3)
+// Centraliza todas as operaá§áµes de data/hora no timezone do Brasil
 // =====================================================
 
 export const BRASIL_TIMEZONE = 'America/Sao_Paulo';
 export const BRASIL_LOCALE = 'pt-BR';
 
 // =====================================================
-// 📅 FUN��ES DE DATA
+// ðŸ“… FUNá‡á•ES DE DATA
 // =====================================================
 
 /**
@@ -26,7 +26,7 @@ export function paraBrasilia(data: string | Date): Date {
 }
 
 /**
- * Formata data no padr�o brasileiro
+ * Formata data no padrá£o brasileiro
  */
 export function formatarData(data: string | Date): string {
   if (!data) return 'N/A';
@@ -47,7 +47,7 @@ export function formatarData(data: string | Date): string {
 }
 
 /**
- * Formata data e hora no padr�o brasileiro
+ * Formata data e hora no padrá£o brasileiro
  */
 export function formatarDataHora(data: string | Date): string {
   if (!data) return 'N/A';
@@ -70,7 +70,7 @@ export function formatarDataHora(data: string | Date): string {
 }
 
 /**
- * Formata apenas a hora no padr�o brasileiro
+ * Formata apenas a hora no padrá£o brasileiro
  */
 export function formatarHora(data: string | Date): string {
   if (!data) return 'N/A';
@@ -104,7 +104,7 @@ export function paraISOBrasilia(data: string | Date): string {
 }
 
 // =====================================================
-// 📊 FUN��ES DE RELAT�RIO
+// ðŸ“Š FUNá‡á•ES DE RELATá“RIO
 // =====================================================
 
 /**
@@ -116,7 +116,7 @@ export function dataHojeBrasil(): string {
 }
 
 /**
- * Retorna primeiro dia do m�s atual (Brasil)
+ * Retorna primeiro dia do máªs atual (Brasil)
  */
 export function primeiroDiaDoMes(): string {
   const hoje = agora();
@@ -124,7 +124,7 @@ export function primeiroDiaDoMes(): string {
 }
 
 /**
- * Retorna �ltimo dia do m�s atual (Brasil)
+ * Retorna áºltimo dia do máªs atual (Brasil)
  */
 export function ultimoDiaDoMes(): string {
   const hoje = agora();
@@ -156,11 +156,11 @@ export function fimSemana(): string {
 }
 
 // =====================================================
-// �� FUN��ES DE TEMPO
+// ° FUNá‡á•ES DE TEMPO
 // =====================================================
 
 /**
- * Formata diferen�a de tempo em portugu�s
+ * Formata diferená§a de tempo em portuguáªs
  */
 export function formatarTempoRelativo(dataString: string): string {
   const data = paraBrasilia(dataString);
@@ -180,7 +180,7 @@ export function formatarTempoRelativo(dataString: string): string {
 }
 
 /**
- * Verifica se � hor�rio comercial no Brasil (8h-18h)
+ * Verifica se á© horá¡rio comercial no Brasil (8h-18h)
  */
 export function isHorarioComercial(): boolean {
   const agoraBrasil = agora();
@@ -189,7 +189,7 @@ export function isHorarioComercial(): boolean {
 }
 
 /**
- * Verifica se � hor�rio de relat�rio matinal (8h)
+ * Verifica se á© horá¡rio de relatá³rio matinal (8h)
  */
 export function isHorarioRelatorioMatinal(): boolean {
   const agoraBrasil = agora();
@@ -197,11 +197,11 @@ export function isHorarioRelatorioMatinal(): boolean {
 }
 
 // =====================================================
-// 🔧 CONFIGURA��ES PARA COMPONENTES
+// ðŸ”§ CONFIGURAá‡á•ES PARA COMPONENTES
 // =====================================================
 
 /**
- * Configura��o padr�o para Intl.DateTimeFormat (Brasil)
+ * Configuraá§á£o padrá£o para Intl.DateTimeFormat (Brasil)
  */
 export const formatoBrasileiroData = {
   timeZone: BRASIL_TIMEZONE,
@@ -212,7 +212,7 @@ export const formatoBrasileiroData = {
 };
 
 /**
- * Configura��o padr�o para Intl.DateTimeFormat com hora (Brasil)
+ * Configuraá§á£o padrá£o para Intl.DateTimeFormat com hora (Brasil)
  */
 export const formatoBrasileiroDataHora = {
   timeZone: BRASIL_TIMEZONE,
@@ -225,20 +225,20 @@ export const formatoBrasileiroDataHora = {
 };
 
 /**
- * Lista dos dias da semana em portugu�s
+ * Lista dos dias da semana em portuguáªs
  */
-export const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'S�b'];
+export const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sá¡b'];
 
 /**
- * Lista dos meses em portugu�s
+ * Lista dos meses em portuguáªs
  */
 export const meses = [
-  'Janeiro', 'Fevereiro', 'Mar�o', 'Abril', 'Maio', 'Junho',
+  'Janeiro', 'Fevereiro', 'Mará§o', 'Abril', 'Maio', 'Junho',
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ];
 
 // =====================================================
-// 📱 FUN��ES PARA LOGS E DEBUG
+// ðŸ“± FUNá‡á•ES PARA LOGS E DEBUG
 // =====================================================
 
 /**
@@ -250,7 +250,7 @@ export function logBrasilia(message: string, ...args: any[]): void {
 }
 
 /**
- * Retorna informa��es de timezone para debug
+ * Retorna informaá§áµes de timezone para debug
  */
 export function debugTimezone(): object {
   const agoraBrasil = agora();

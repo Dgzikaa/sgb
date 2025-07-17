@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     if (!produto_codigo || !peso_limpo_g || !bar_id) {
       return NextResponse.json({
         success: false,
-        error: 'produto_codigo, peso_limpo_g e bar_id s�o obrigat�rios'
+        error: 'produto_codigo, peso_limpo_g e bar_id sá£o obrigatá³rios'
       }, { status: 400 })
     }
 
@@ -49,23 +49,23 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (produtoError || !produto) {
-      console.error('�� Erro ao buscar produto:', produtoError)
+      console.error('Œ Erro ao buscar produto:', produtoError)
       return NextResponse.json({
         success: false,
-        error: 'Produto n�o encontrado: ' + produto_codigo
+        error: 'Produto ná£o encontrado: ' + produto_codigo
       }, { status: 404 })
     }
 
     if (!produto.receitas || produto.receitas.length === 0) {
       return NextResponse.json({
         success: false,
-        error: 'Produto n�o possui receitas cadastradas'
+        error: 'Produto ná£o possui receitas cadastradas'
       }, { status: 404 })
     }
 
     // 2. Calcular insumos proporcionalmente
     const pesoLimpo = parseFloat(peso_limpo_g)
-    const pesoReferencia = produto.quantidade_base || 1000 // Base padr�o 1kg
+    const pesoReferencia = produto.quantidade_base || 1000 // Base padrá£o 1kg
     const fatorProporcional = pesoLimpo / pesoReferencia
 
     const insumosCalculados = produto.receitas.map((receita: any) => {
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    console.log(`🧮 Calculados ${insumosCalculados.length} insumos para ${pesoLimpo}g`)
+    console.log(`ðŸ§® Calculados ${insumosCalculados.length} insumos para ${pesoLimpo}g`)
 
     return NextResponse.json({
       success: true,
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
         peso_limpo_g: pesoLimpo,
         peso_referencia_g: pesoReferencia,
         fator_proporcional: fatorProporcional,
-                  calculo_detalhado: `Base ${pesoReferencia}g �� Produzindo ${pesoLimpo}g (${(fatorProporcional * 100).toFixed(1)}%)`
+                  calculo_detalhado: `Base ${pesoReferencia}g †’ Produzindo ${pesoLimpo}g (${(fatorProporcional * 100).toFixed(1)}%)`
       },
       insumos: insumosCalculados,
       estatisticas: {
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro ao calcular insumos:', error)
+    console.error('Œ Erro ao calcular insumos:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro interno: ' + (error as Error).message

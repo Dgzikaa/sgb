@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { getSupabaseClient } from '@/lib/supabase'
@@ -70,7 +70,7 @@ export default function ContaAzulFinanceiroPage() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    setPageTitle('💰 ContaAzul - Dashboard Financeiro')
+    setPageTitle('ðŸ’° ContaAzul - Dashboard Financeiro')
     return () => setPageTitle('')
   }, [setPageTitle])
 
@@ -85,7 +85,7 @@ export default function ContaAzulFinanceiroPage() {
     // Inicializar cliente Supabase
     const supabase = await getSupabaseClient();
     if (!supabase) {
-      console.error('�� Erro ao conectar com banco');
+      console.error('Œ Erro ao conectar com banco');
       return;
     }
 
@@ -122,7 +122,7 @@ export default function ContaAzulFinanceiroPage() {
         })
       }
 
-      // 2. Carregar contas a receber (�ltimas 100)
+      // 2. Carregar contas a receber (áºltimas 100)
       const { data: receberList } = await supabase
         .from('contaazul_contas_receber')
         .select('*')
@@ -134,7 +134,7 @@ export default function ContaAzulFinanceiroPage() {
         setContasReceber(receberList)
       }
 
-      // 3. Carregar contas a pagar (�ltimas 100)
+      // 3. Carregar contas a pagar (áºltimas 100)
       const { data: pagarList } = await supabase
         .from('contaazul_contas_pagar')
         .select('*')
@@ -157,7 +157,7 @@ export default function ContaAzulFinanceiroPage() {
         setCategorias(categoriasList)
       }
 
-      // 5. Verificar �ltima sincroniza��o
+      // 5. Verificar áºltima sincronizaá§á£o
       const { data: configData } = await supabase
         .from('api_credentials')
         .select('ultima_sync')
@@ -226,7 +226,7 @@ export default function ContaAzulFinanceiroPage() {
     return (
       <div className="p-8">
         <div className="text-center">
-          <div className="text-lg">🔄 Carregando dados financeiros...</div>
+          <div className="text-lg">ðŸ”„ Carregando dados financeiros...</div>
         </div>
       </div>
     )
@@ -236,31 +236,31 @@ export default function ContaAzulFinanceiroPage() {
     <div className="p-8 max-w-7xl mx-auto">
       <div className="mb-8">
         <p className="text-gray-600">
-          �ltima sincroniza��o: {ultimaSync || 'Nunca sincronizado'}
+          ášltima sincronizaá§á£o: {ultimaSync || 'Nunca sincronizado'}
         </p>
       </div>
 
       {/* Resumo Financeiro */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-green-50 p-6 rounded-lg border border-green-200">
-          <h3 className="text-lg font-semibold text-green-800 mb-2">📥 Receber - Total</h3>
+          <h3 className="text-lg font-semibold text-green-800 mb-2">ðŸ“¥ Receber - Total</h3>
           <p className="text-2xl font-bold text-green-600">{formatCurrency(summary.receber_total)}</p>
           <p className="text-sm text-green-700 mt-1">{contasReceber.length} registros</p>
         </div>
 
         <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
-          <h3 className="text-lg font-semibold text-blue-800 mb-2">�� Receber - Pago</h3>
+          <h3 className="text-lg font-semibold text-blue-800 mb-2">œ… Receber - Pago</h3>
           <p className="text-2xl font-bold text-blue-600">{formatCurrency(summary.receber_pago)}</p>
         </div>
 
         <div className="bg-red-50 p-6 rounded-lg border border-red-200">
-          <h3 className="text-lg font-semibold text-red-800 mb-2">📤 Pagar - Total</h3>
+          <h3 className="text-lg font-semibold text-red-800 mb-2">ðŸ“¤ Pagar - Total</h3>
           <p className="text-2xl font-bold text-red-600">{formatCurrency(summary.pagar_total)}</p>
           <p className="text-sm text-red-700 mt-1">{contasPagar.length} registros</p>
         </div>
 
         <div className="bg-purple-50 p-6 rounded-lg border border-purple-200">
-          <h3 className="text-lg font-semibold text-purple-800 mb-2">�� Pagar - Pago</h3>
+          <h3 className="text-lg font-semibold text-purple-800 mb-2">œ… Pagar - Pago</h3>
           <p className="text-2xl font-bold text-purple-600">{formatCurrency(summary.pagar_pago)}</p>
         </div>
       </div>
@@ -268,15 +268,15 @@ export default function ContaAzulFinanceiroPage() {
       {/* Controles */}
       <div className="mb-6 flex flex-wrap gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Visualiza��o:</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Visualizaá§á£o:</label>
           <select
             value={tipoVisualizacao}
             onChange={(e) => setTipoVisualizacao(e.target.value)}
             className="border border-gray-300 rounded-md px-3 py-2"
           >
-            <option value="RECEBER">📥 Contas a Receber</option>
-            <option value="PAGAR">📤 Contas a Pagar</option>
-            <option value="CATEGORIAS">🏷️ Categorias</option>
+            <option value="RECEBER">ðŸ“¥ Contas a Receber</option>
+            <option value="PAGAR">ðŸ“¤ Contas a Pagar</option>
+            <option value="CATEGORIAS">ðŸ·ï¸ Categorias</option>
           </select>
         </div>
 
@@ -297,17 +297,17 @@ export default function ContaAzulFinanceiroPage() {
         )}
       </div>
 
-      {/* Conte�do Principal */}
+      {/* Conteáºdo Principal */}
       {tipoVisualizacao === 'RECEBER' && (
         <div>
-          <h2 className="text-2xl font-bold mb-4">📥 Contas a Receber ({contasReceberFiltradas.length})</h2>
+          <h2 className="text-2xl font-bold mb-4">ðŸ“¥ Contas a Receber ({contasReceberFiltradas.length})</h2>
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descri��o</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descriá§á£o</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliente</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vencimento</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
@@ -348,14 +348,14 @@ export default function ContaAzulFinanceiroPage() {
 
       {tipoVisualizacao === 'PAGAR' && (
         <div>
-          <h2 className="text-2xl font-bold mb-4">📤 Contas a Pagar ({contasPagarFiltradas.length})</h2>
+          <h2 className="text-2xl font-bold mb-4">ðŸ“¤ Contas a Pagar ({contasPagarFiltradas.length})</h2>
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descri��o</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descriá§á£o</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fornecedor</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vencimento</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
@@ -396,7 +396,7 @@ export default function ContaAzulFinanceiroPage() {
 
       {tipoVisualizacao === 'CATEGORIAS' && (
         <div>
-          <h2 className="text-2xl font-bold mb-4">🏷️ Categorias ({categorias.length})</h2>
+          <h2 className="text-2xl font-bold mb-4">ðŸ·ï¸ Categorias ({categorias.length})</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {categorias.map((categoria) => (
               <div key={categoria.id} className="bg-white p-4 rounded-lg shadow border">
@@ -415,20 +415,20 @@ export default function ContaAzulFinanceiroPage() {
         </div>
       )}
 
-      {/* A��es */}
+      {/* Aá§áµes */}
       <div className="mt-8 flex gap-4">
         <button
           onClick={carregarDados}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
-          🔄 Recarregar Dados
+          ðŸ”„ Recarregar Dados
         </button>
         
         <a
           href="/testar-contaazul"
           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 inline-block"
         >
-          🚀 Nova Sincroniza��o
+          ðŸš€ Nova Sincronizaá§á£o
         </a>
       </div>
     </div>

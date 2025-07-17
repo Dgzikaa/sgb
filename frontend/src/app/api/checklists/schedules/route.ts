@@ -1,30 +1,30 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 
 // =====================================================
-// 📅 API PARA GERENCIAR AGENDAMENTOS DE CHECKLISTS
+// ðŸ“… API PARA GERENCIAR AGENDAMENTOS DE CHECKLISTS
 // =====================================================
 
 export async function POST(req: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies })
     
-    // Verificar autentica��o
+    // Verificar autenticaá§á£o
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'N�o autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'Ná£o autorizado' }, { status: 401 })
     }
 
     const scheduleData = await req.json()
 
     if (!scheduleData.checklistId || !scheduleData.frequencia || !scheduleData.horario) {
       return NextResponse.json({ 
-        error: 'Dados obrigat�rios n�o fornecidos' 
+        error: 'Dados obrigatá³rios ná£o fornecidos' 
       }, { status: 400 })
     }
 
-    // Verificar se o checklist existe e pertence ao usu�rio
+    // Verificar se o checklist existe e pertence ao usuá¡rio
     const { data: checklist, error: checklistError } = await supabase
       .from('checklists')
       .select('id, titulo, user_id')
@@ -34,11 +34,11 @@ export async function POST(req: NextRequest) {
 
     if (checklistError || !checklist) {
       return NextResponse.json({ 
-        error: 'Checklist n�o encontrado' 
+        error: 'Checklist ná£o encontrado' 
       }, { status: 404 })
     }
 
-    // Preparar dados para inser��o
+    // Preparar dados para inserá§á£o
     const scheduleToInsert = {
       checklist_id: scheduleData.checklistId,
       titulo: scheduleData.titulo,
@@ -87,10 +87,10 @@ export async function GET(req: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies })
     
-    // Verificar autentica��o
+    // Verificar autenticaá§á£o
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'N�o autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'Ná£o autorizado' }, { status: 401 })
     }
 
     const { searchParams } = new URL(req.url)
@@ -135,21 +135,21 @@ export async function PUT(req: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies })
     
-    // Verificar autentica��o
+    // Verificar autenticaá§á£o
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'N�o autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'Ná£o autorizado' }, { status: 401 })
     }
 
     const scheduleData = await req.json()
 
     if (!scheduleData.id) {
       return NextResponse.json({ 
-        error: 'ID do agendamento n�o fornecido' 
+        error: 'ID do agendamento ná£o fornecido' 
       }, { status: 400 })
     }
 
-    // Verificar se o agendamento existe e pertence ao usu�rio
+    // Verificar se o agendamento existe e pertence ao usuá¡rio
     const { data: existingSchedule, error: scheduleError } = await supabase
       .from('checklist_schedules')
       .select('id, user_id')
@@ -159,11 +159,11 @@ export async function PUT(req: NextRequest) {
 
     if (scheduleError || !existingSchedule) {
       return NextResponse.json({ 
-        error: 'Agendamento n�o encontrado' 
+        error: 'Agendamento ná£o encontrado' 
       }, { status: 404 })
     }
 
-    // Preparar dados para atualiza��o
+    // Preparar dados para atualizaá§á£o
     const scheduleToUpdate = {
       titulo: scheduleData.titulo,
       frequencia: scheduleData.frequencia,

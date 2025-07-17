@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
+Ôªøimport { NextRequest, NextResponse } from 'next/server'
 
-// Configura·ß·µes OAuth - ADICIONE NO SEU .env.local:
+// Configura√°¬ß√°¬µes OAuth - ADICIONE NO SEU .env.local:
 // GOOGLE_OAUTH_CLIENT_ID=your_google_oauth_client_id
 // GOOGLE_OAUTH_CLIENT_SECRET=your_google_oauth_client_secret
 
@@ -23,18 +23,18 @@ class GoogleOAuthManager {
 
   private checkCredentials(): boolean {
     if (!this.clientId || !this.clientSecret) {
-      console.error('ùå Google OAuth credentials n·£o configuradas')
+      console.error('¬ù≈í Google OAuth credentials n√°¬£o configuradas')
       return false
     }
     return true
   }
 
   /**
-   * Gerar URL de autoriza·ß·£o OAuth
+   * Gerar URL de autoriza√°¬ß√°¬£o OAuth
    */
   getAuthUrl(state?: string): string {
     if (!this.checkCredentials()) {
-      throw new Error('Google OAuth credentials n·£o configuradas')
+      throw new Error('Google OAuth credentials n√°¬£o configuradas')
     }
 
     const scopes = [
@@ -58,7 +58,7 @@ class GoogleOAuthManager {
   }
 
   /**
-   * Trocar c·≥digo por token
+   * Trocar c√°¬≥digo por token
    */
   async exchangeCodeForToken(code: string): Promise<{
     access_token: string
@@ -87,16 +87,16 @@ class GoogleOAuthManager {
 
       if (!response.ok) {
         const errorData = await response.text()
-        console.error('ùå Erro ao trocar c·≥digo por token:', errorData)
+        console.error('¬ù≈í Erro ao trocar c√°¬≥digo por token:', errorData)
         return null
       }
 
       const tokenData = await response.json()
-      console.log('úÖ Token obtido com sucesso')
+      console.log('≈ì‚Ä¶ Token obtido com sucesso')
       
       return tokenData
     } catch (error) {
-      console.error('ùå Erro na troca de c·≥digo por token:', error)
+      console.error('¬ù≈í Erro na troca de c√°¬≥digo por token:', error)
       return null
     }
   }
@@ -128,16 +128,16 @@ class GoogleOAuthManager {
       })
 
       if (!response.ok) {
-        console.error('ùå Erro ao atualizar token')
+        console.error('¬ù≈í Erro ao atualizar token')
         return null
       }
 
       const tokenData = await response.json()
-      console.log('úÖ Token atualizado com sucesso')
+      console.log('≈ì‚Ä¶ Token atualizado com sucesso')
       
       return tokenData
     } catch (error) {
-      console.error('ùå Erro na atualiza·ß·£o do token:', error)
+      console.error('¬ù≈í Erro na atualiza√°¬ß√°¬£o do token:', error)
       return null
     }
   }
@@ -146,7 +146,7 @@ class GoogleOAuthManager {
 const oauthManager = new GoogleOAuthManager()
 
 /**
- * GET: Redirecionar para autoriza·ß·£o Google
+ * GET: Redirecionar para autoriza√°¬ß√°¬£o Google
  */
 export async function GET(request: NextRequest) {
   try {
@@ -157,17 +157,17 @@ export async function GET(request: NextRequest) {
       const state = searchParams.get('state') || 'sgb-auth-' + Date.now()
       const authUrl = oauthManager.getAuthUrl(state)
       
-      console.log('üîÑ Redirecionando para autoriza·ß·£o Google...')
+      console.log('√∞≈∏‚Äù‚Äû Redirecionando para autoriza√°¬ß√°¬£o Google...')
       
       return NextResponse.redirect(authUrl)
     }
 
     return NextResponse.json({
-      error: 'A·ß·£o n·£o especificada. Use ?action=authorize'
+      error: 'A√°¬ß√°¬£o n√°¬£o especificada. Use ?action=authorize'
     }, { status: 400 })
 
   } catch (error) {
-    console.error('ùå Erro na autoriza·ß·£o:', error)
+    console.error('¬ù≈í Erro na autoriza√°¬ß√°¬£o:', error)
     return NextResponse.json({
       error: 'Erro interno do servidor'
     }, { status: 500 })
@@ -175,7 +175,7 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * POST: Trocar c·≥digo por token (manual)
+ * POST: Trocar c√°¬≥digo por token (manual)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
     if (action === 'exchange') {
       if (!code) {
         return NextResponse.json({
-          error: 'C·≥digo de autoriza·ß·£o ·© obrigat·≥rio'
+          error: 'C√°¬≥digo de autoriza√°¬ß√°¬£o √°¬© obrigat√°¬≥rio'
         }, { status: 400 })
       }
 
@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
       
       if (!refresh_token) {
         return NextResponse.json({
-          error: 'Refresh token ·© obrigat·≥rio'
+          error: 'Refresh token √°¬© obrigat√°¬≥rio'
         }, { status: 400 })
       }
 
@@ -226,11 +226,11 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
-      error: 'A·ß·£o n·£o especificada'
+      error: 'A√°¬ß√°¬£o n√°¬£o especificada'
     }, { status: 400 })
 
   } catch (error) {
-    console.error('ùå Erro na troca de token:', error)
+    console.error('¬ù≈í Erro na troca de token:', error)
     return NextResponse.json({
       error: 'Erro interno do servidor'
     }, { status: 500 })

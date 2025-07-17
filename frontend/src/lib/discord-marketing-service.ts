@@ -1,8 +1,8 @@
+﻿// ========================================
+// ðŸ“± DISCORD MARKETING SERVICE - SGB
 // ========================================
-// 📱 DISCORD MARKETING SERVICE - SGB
-// ========================================
-// Servi�o especializado para notifica��es de marketing
-// Facebook, Instagram, campanhas e m�tricas sociais
+// Serviá§o especializado para notificaá§áµes de marketing
+// Facebook, Instagram, campanhas e má©tricas sociais
 
 export interface MarketingMetrics {
   facebook: {
@@ -44,7 +44,7 @@ export interface DiscordMarketingEmbed {
 }
 
 // ========================================
-// 📱 DISCORD MARKETING SERVICE CLASS
+// ðŸ“± DISCORD MARKETING SERVICE CLASS
 // ========================================
 export class DiscordMarketingService {
   private webhookUrl: string
@@ -58,7 +58,7 @@ export class DiscordMarketingService {
   }
 
   // ========================================
-  // 📤 ENVIAR EMBED MARKETING
+  // ðŸ“¤ ENVIAR EMBED MARKETING
   // ========================================
   async sendMarketingEmbed(embed: DiscordMarketingEmbed, content?: string): Promise<boolean> {
     try {
@@ -90,7 +90,7 @@ export class DiscordMarketingService {
   }
 
   // ========================================
-  // 📊 RELAT�RIO DI�RIO DE M�TRICAS
+  // ðŸ“Š RELATá“RIO DIáRIO DE Má‰TRICAS
   // ========================================
   async enviarRelatorioMetricas(metrics: MarketingMetrics): Promise<boolean> {
     const totalGrowth = (metrics.facebook.growth_rate + metrics.instagram.growth_rate) / 2
@@ -101,16 +101,16 @@ export class DiscordMarketingService {
     else if (totalGrowth < 2) cor = 0xF59E0B // Amarelo
 
     const bestPlatform = metrics.overall.best_performing_platform
-    const bestPlatformIcon = bestPlatform === 'facebook' ? '📘' : '📸'
+    const bestPlatformIcon = bestPlatform === 'facebook' ? 'ðŸ“˜' : 'ðŸ“¸'
     const bestPlatformName = bestPlatform === 'facebook' ? 'Facebook' : 'Instagram'
 
     const embed: DiscordMarketingEmbed = {
-      title: `📱 Relat�rio Di�rio de Marketing - ${new Date().toLocaleDateString('pt-BR')}`,
-      description: `**Ordin�rio Bar** - M�tricas de Redes Sociais\n\n🏆 **Melhor Performance:** ${bestPlatformIcon} ${bestPlatformName}`,
+      title: `ðŸ“± Relatá³rio Diá¡rio de Marketing - ${new Date().toLocaleDateString('pt-BR')}`,
+      description: `**Ordiná¡rio Bar** - Má©tricas de Redes Sociais\n\nðŸ† **Melhor Performance:** ${bestPlatformIcon} ${bestPlatformName}`,
       color: cor,
       fields: [
         {
-          name: '📘 Facebook',
+          name: 'ðŸ“˜ Facebook',
           value: `**Seguidores:** ${metrics.facebook.followers.toLocaleString()} (${metrics.facebook.growth_rate > 0 ? '+' : ''}${metrics.facebook.growth_rate}%)
 **Alcance:** ${metrics.facebook.reach.toLocaleString()}
 **Engajamento:** ${metrics.facebook.engagement.toLocaleString()}
@@ -118,7 +118,7 @@ export class DiscordMarketingService {
           inline: true
         },
         {
-          name: '📸 Instagram',
+          name: 'ðŸ“¸ Instagram',
           value: `**Seguidores:** ${metrics.instagram.followers.toLocaleString()} (${metrics.instagram.growth_rate > 0 ? '+' : ''}${metrics.instagram.growth_rate}%)
 **Alcance:** ${metrics.instagram.reach.toLocaleString()}
 **Engajamento:** ${metrics.instagram.engagement.toLocaleString()}
@@ -126,16 +126,16 @@ export class DiscordMarketingService {
           inline: true
         },
         {
-          name: '📊 Resumo Geral',
+          name: 'ðŸ“Š Resumo Geral',
           value: `**Total Seguidores:** ${metrics.overall.total_followers.toLocaleString()}
 **Alcance Total:** ${metrics.overall.total_reach.toLocaleString()}
 **Taxa Engajamento:** ${metrics.overall.engagement_rate.toFixed(1)}%
-**Crescimento M�dio:** ${totalGrowth > 0 ? '+' : ''}${totalGrowth.toFixed(1)}%`,
+**Crescimento Má©dio:** ${totalGrowth > 0 ? '+' : ''}${totalGrowth.toFixed(1)}%`,
           inline: false
         }
       ],
       footer: {
-        text: 'SGB Marketing Analytics �� Ordin�rio Bar',
+        text: 'SGB Marketing Analytics €¢ Ordiná¡rio Bar',
       },
       timestamp: new Date().toISOString()
     }
@@ -144,32 +144,32 @@ export class DiscordMarketingService {
   }
 
   // ========================================
-  // 🚀 NOTIFICA��O DE COLETA INICIADA
+  // ðŸš€ NOTIFICAá‡áƒO DE COLETA INICIADA
   // ========================================
   async notificarColetaIniciada(tipo: 'manual' | 'automatica'): Promise<boolean> {
     const embed: DiscordMarketingEmbed = {
-      title: '🚀 Coleta de M�tricas Iniciada',
+      title: 'ðŸš€ Coleta de Má©tricas Iniciada',
       description: `Iniciando coleta ${tipo} de dados do Facebook e Instagram`,
       color: 0x3B82F6, // Azul
       fields: [
         {
-          name: '📱 Plataformas',
-          value: '�� Facebook Page Insights\n�� Instagram Business Account\n�� Posts e Stories recentes',
+          name: 'ðŸ“± Plataformas',
+          value: '€¢ Facebook Page Insights\n€¢ Instagram Business Account\n€¢ Posts e Stories recentes',
           inline: true
         },
         {
-          name: '�� Tipo de Coleta',
-          value: tipo === 'automatica' ? 'Autom�tica (2x/dia: 8h e 20h)' : 'Manual (solicitada)',
+          name: '° Tipo de Coleta',
+          value: tipo === 'automatica' ? 'Automá¡tica (2x/dia: 8h e 20h)' : 'Manual (solicitada)',
           inline: true
         },
         {
-          name: '📊 Dados Coletados',
-          value: '�� M�tricas de alcance\n�� Engagement rates\n�� Crescimento de seguidores\n�� Performance de posts',
+          name: 'ðŸ“Š Dados Coletados',
+          value: '€¢ Má©tricas de alcance\n€¢ Engagement rates\n€¢ Crescimento de seguidores\n€¢ Performance de posts',
           inline: false
         }
       ],
       footer: {
-        text: 'SGB Marketing Bot �� Ordin�rio Bar',
+        text: 'SGB Marketing Bot €¢ Ordiná¡rio Bar',
       },
       timestamp: new Date().toISOString()
     }
@@ -178,7 +178,7 @@ export class DiscordMarketingService {
   }
 
   // ========================================
-  // �� NOTIFICA��O DE COLETA CONCLU�DA
+  // œ… NOTIFICAá‡áƒO DE COLETA CONCLUáDA
   // ========================================
   async notificarColetaConcluida(resultado: {
     facebook_metricas: boolean
@@ -205,44 +205,44 @@ export class DiscordMarketingService {
     const cor = sucessos >= 2 ? 0x10B981 : sucessos >= 1 ? 0xF59E0B : 0xEF4444
 
     const statusEmoji = {
-      2: '��',
-      1: '��️',
-      0: '��'
+      2: 'œ…',
+      1: 'š ï¸',
+      0: 'Œ'
     }
 
     const embed: DiscordMarketingEmbed = {
-      title: `${statusEmoji[sucessos as keyof typeof statusEmoji]} Coleta de M�tricas Conclu�da`,
+      title: `${statusEmoji[sucessos as keyof typeof statusEmoji]} Coleta de Má©tricas Concluá­da`,
       description: `Coleta finalizada em ${resultado.tempo_execucao}s com **${sucessos}/2** sucessos`,
       color: cor,
       fields: [
         {
-          name: '📊 Status das Coletas',
-          value: `${resultado.facebook_metricas ? '��' : '��'} **Facebook:** ${resultado.facebook_metricas ? 'Sucesso' : 'Falha'}
-${resultado.instagram_metricas ? '��' : '��'} **Instagram:** ${resultado.instagram_metricas ? 'Sucesso' : 'Falha'}`,
+          name: 'ðŸ“Š Status das Coletas',
+          value: `${resultado.facebook_metricas ? 'œ…' : 'Œ'} **Facebook:** ${resultado.facebook_metricas ? 'Sucesso' : 'Falha'}
+${resultado.instagram_metricas ? 'œ…' : 'Œ'} **Instagram:** ${resultado.instagram_metricas ? 'Sucesso' : 'Falha'}`,
           inline: true
         },
         {
-          name: '📝 Posts Processados',
+          name: 'ðŸ“ Posts Processados',
           value: `**Facebook:** ${resultado.facebook_posts} posts
 **Instagram:** ${resultado.instagram_posts} posts
 **Total:** ${resultado.facebook_posts + resultado.instagram_posts} posts`,
           inline: true
         },
         {
-          name: '💾 Dados Salvos',
+          name: 'ðŸ’¾ Dados Salvos',
           value: `**Registros Novos:** ${resultado.registros_novos}
-**Tempo Execu��o:** ${resultado.tempo_execucao}s
-**Pr�xima Coleta:** ${this.getProximaColeta()}`,
+**Tempo Execuá§á£o:** ${resultado.tempo_execucao}s
+**Prá³xima Coleta:** ${this.getProximaColeta()}`,
           inline: false
         },
         {
-          name: '📊 Rate Limits (Otimizado)',
+          name: 'ðŸ“Š Rate Limits (Otimizado)',
           value: this.formatRateLimitInfo(resultado.rate_limit_info),
           inline: true
         }
       ],
       footer: {
-        text: 'SGB Marketing Bot �� Dados atualizados',
+        text: 'SGB Marketing Bot €¢ Dados atualizados',
       },
       timestamp: new Date().toISOString()
     }
@@ -251,7 +251,7 @@ ${resultado.instagram_metricas ? '��' : '��'} **Instagram:** ${resultado.instagr
   }
 
   // ========================================
-  // 🎯 ALERTA DE MARCOS IMPORTANTES
+  // ðŸŽ¯ ALERTA DE MARCOS IMPORTANTES
   // ========================================
   async alertarMarcoImportante(tipo: 'seguidores' | 'engajamento' | 'alcance', dados: {
     plataforma: 'facebook' | 'instagram'
@@ -260,16 +260,16 @@ ${resultado.instagram_metricas ? '��' : '��'} **Instagram:** ${resultado.instagr
     crescimento: number
   }): Promise<boolean> {
     const emojis = {
-      seguidores: '👥',
-      engajamento: '��️',
-      alcance: '👀'
+      seguidores: 'ðŸ‘¥',
+      engajamento: '¤ï¸',
+      alcance: 'ðŸ‘€'
     }
 
-    const plataformaEmoji = dados.plataforma === 'facebook' ? '📘' : '📸'
+    const plataformaEmoji = dados.plataforma === 'facebook' ? 'ðŸ“˜' : 'ðŸ“¸'
     const plataformaNome = dados.plataforma === 'facebook' ? 'Facebook' : 'Instagram'
 
     const embed: DiscordMarketingEmbed = {
-      title: `🎉 Marco Importante Atingido!`,
+      title: `ðŸŽ‰ Marco Importante Atingido!`,
       description: `${plataformaEmoji} **${plataformaNome}** atingiu um novo marco!`,
       color: 0x10B981, // Verde
       fields: [
@@ -281,13 +281,13 @@ ${resultado.instagram_metricas ? '��' : '��'} **Instagram:** ${resultado.instagr
           inline: true
         },
         {
-          name: '🚀 Progresso',
-          value: `Parab�ns! O ${plataformaNome} do Ordin�rio Bar continua crescendo!`,
+          name: 'ðŸš€ Progresso',
+          value: `Parabá©ns! O ${plataformaNome} do Ordiná¡rio Bar continua crescendo!`,
           inline: false
         }
       ],
       footer: {
-        text: 'SGB Marketing Bot �� Celebrando o crescimento!',
+        text: 'SGB Marketing Bot €¢ Celebrando o crescimento!',
       },
       timestamp: new Date().toISOString()
     }
@@ -296,7 +296,7 @@ ${resultado.instagram_metricas ? '��' : '��'} **Instagram:** ${resultado.instagr
   }
 
   // ========================================
-  // �� NOTIFICA��O DE ERRO
+  // Œ NOTIFICAá‡áƒO DE ERRO
   // ========================================
   async notificarErro(erro: {
     tipo: string
@@ -305,25 +305,25 @@ ${resultado.instagram_metricas ? '��' : '��'} **Instagram:** ${resultado.instagr
     acao_sugerida?: string
   }): Promise<boolean> {
     const embed: DiscordMarketingEmbed = {
-      title: '�� Erro na Coleta de M�tricas',
+      title: 'Œ Erro na Coleta de Má©tricas',
       description: `**${erro.tipo}:** ${erro.mensagem}`,
       color: 0xEF4444, // Vermelho
       fields: [
         {
-          name: '🔍 Detalhes',
-          value: erro.detalhes || 'Nenhum detalhe adicional dispon�vel',
+          name: 'ðŸ” Detalhes',
+          value: erro.detalhes || 'Nenhum detalhe adicional disponá­vel',
           inline: false
         }
       ],
       footer: {
-        text: 'SGB Marketing Bot �� Erro reportado',
+        text: 'SGB Marketing Bot €¢ Erro reportado',
       },
       timestamp: new Date().toISOString()
     }
 
     if (erro.acao_sugerida) {
       embed.fields?.push({
-        name: '�� A��o Sugerida',
+        name: 'š¡ Aá§á£o Sugerida',
         value: erro.acao_sugerida,
         inline: false
       })
@@ -333,32 +333,32 @@ ${resultado.instagram_metricas ? '��' : '��'} **Instagram:** ${resultado.instagr
   }
 
   // ========================================
-  // 🧪 TESTE DE CONEX�O
+  // ðŸ§ª TESTE DE CONEXáƒO
   // ========================================
   async testarConexao(): Promise<boolean> {
     const embed: DiscordMarketingEmbed = {
-      title: '🧪 Teste de Conex�o - Marketing Bot',
-      description: 'Webhook de marketing funcionando perfeitamente! ��',
+      title: 'ðŸ§ª Teste de Conexá£o - Marketing Bot',
+      description: 'Webhook de marketing funcionando perfeitamente! œ…',
       color: 0x10B981, // Verde
       fields: [
         {
-          name: '📱 Canal Dedicado',
+          name: 'ðŸ“± Canal Dedicado',
           value: 'Meta/Marketing Analytics',
           inline: true
         },
         {
-          name: '�� Status',
+          name: '° Status',
           value: 'Online e Pronto',
           inline: true
         },
         {
-          name: '🎯 Funcionalidades',
-          value: '�� Relat�rios di�rios\n�� Alertas de marcos\n�� Notifica��es de coleta\n�� An�lises de performance',
+          name: 'ðŸŽ¯ Funcionalidades',
+          value: '€¢ Relatá³rios diá¡rios\n€¢ Alertas de marcos\n€¢ Notificaá§áµes de coleta\n€¢ Aná¡lises de performance',
           inline: false
         }
       ],
       footer: {
-        text: 'SGB Marketing Bot �� Sistema Funcionando',
+        text: 'SGB Marketing Bot €¢ Sistema Funcionando',
       },
       timestamp: new Date().toISOString()
     }
@@ -367,30 +367,30 @@ ${resultado.instagram_metricas ? '��' : '��'} **Instagram:** ${resultado.instagr
   }
 
   // ========================================
-  // 🔧 M�TODOS AUXILIARES
+  // ðŸ”§ Má‰TODOS AUXILIARES
   // ========================================
   private formatRateLimitInfo(rateLimitInfo?: {
     business_usage?: { call_count: number; type: string }
     platform_usage?: { call_count: number }
   }): string {
     if (!rateLimitInfo) {
-      return '**Instagram Graph:** N/A\n**Platform:** N/A\n🎯 **Uso Otimizado:** ~10 calls/dia'
+      return '**Instagram Graph:** N/A\n**Platform:** N/A\nðŸŽ¯ **Uso Otimizado:** ~10 calls/dia'
     }
 
     const businessUsage = rateLimitInfo.business_usage?.call_count || 0
     const platformUsage = rateLimitInfo.platform_usage?.call_count || 0
     
-    const businessStatus = businessUsage < 30 ? '🟢' : businessUsage < 70 ? '🟡' : '🔴'
-    const platformStatus = platformUsage < 30 ? '🟢' : platformUsage < 70 ? '🟡' : '🔴'
+    const businessStatus = businessUsage < 30 ? 'ðŸŸ¢' : businessUsage < 70 ? 'ðŸŸ¡' : 'ðŸ”´'
+    const platformStatus = platformUsage < 30 ? 'ðŸŸ¢' : platformUsage < 70 ? 'ðŸŸ¡' : 'ðŸ”´'
 
     return `${businessStatus} **Instagram Graph:** ${businessUsage}%
 ${platformStatus} **Platform:** ${platformUsage}%
-🎯 **Frequ�ncia:** 2x/dia (otimizado)`
+ðŸŽ¯ **Frequáªncia:** 2x/dia (otimizado)`
   }
 
   private getProximaColeta(): string {
     const agora = new Date()
-    const proximasHoras = [8, 20] // Frequ�ncia otimizada: 8h (manh�) e 20h (noite)
+    const proximasHoras = [8, 20] // Frequáªncia otimizada: 8h (manhá£) e 20h (noite)
     
     for (let hora of proximasHoras) {
       const proxima = new Date(agora)
@@ -401,21 +401,21 @@ ${platformStatus} **Platform:** ${platformUsage}%
       }
     }
     
-    // Se nenhuma hora hoje, pr�xima � 08:00 de amanh�
+    // Se nenhuma hora hoje, prá³xima á© 08:00 de amanhá£
     const amanha = new Date(agora)
     amanha.setDate(amanha.getDate() + 1)
-    amanha.setHours(8, 0, 0, 0) // Sempre come�ar �s 8h da manh�
+    amanha.setHours(8, 0, 0, 0) // Sempre comeá§ar á s 8h da manhá£
     return amanha.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
   }
 }
 
 // ========================================
-// 🏭 INST�NCIA SINGLETON
+// ðŸ­ INSTá‚NCIA SINGLETON
 // ========================================
 export const sgbMarketingBot = new DiscordMarketingService()
 
 // ========================================
-// 🎯 FUN��O DE CONVENI�NCIA
+// ðŸŽ¯ FUNá‡áƒO DE CONVENIáŠNCIA
 // ========================================
 export async function notifyMarketingUpdate(tipo: 'coleta' | 'erro' | 'marco' | 'relatorio', dados: any): Promise<boolean> {
   try {
@@ -440,7 +440,7 @@ export async function notifyMarketingUpdate(tipo: 'coleta' | 'erro' | 'marco' | 
         return false
     }
   } catch (error) {
-    console.error('Erro ao enviar notifica��o marketing:', error)
+    console.error('Erro ao enviar notificaá§á£o marketing:', error)
     return false
   }
 } 

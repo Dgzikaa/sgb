@@ -1,132 +1,172 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getAdminClient } from '@/lib/supabase-admin';
-import { authenticateUser, authErrorResponse } from '@/middleware/auth';
+﻿import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
+import { NextRequest, NextResponse } from 'next/server'
 
-// =====================================================
-// GET - BUSCAR META ESPECÍFICA
-// =====================================================
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
-    const user = await authenticateUser(request);
-    if (!user) {
-      return authErrorResponse('Usuário não autenticado');
+    const supabase = createRouteHandlerClient({ cookies })
+    const userDataHeader = request.headers.get('x-user-data')
+    
+    if (!userDataHeader) {
+      return NextResponse.json({ error: 'Dados do usuá¡rio ná£o encontrados' }, { status: 401 })
     }
 
-    const { id } = params;
-    const supabase = await getAdminClient();
+    const { bar_id } = JSON.parse(userDataHeader)
 
-    const { data: meta, error } = await supabase
-      .from('metas_negocio')
+    // 1. Verificar credenciais Meta
+    const { data: credenciais } = await supabase
+      .from('credenciais_integracoes')
       .select('*')
-      .eq('id', id)
-      .eq('bar_id', user.bar_id)
-      .single();
+      .eq('bar_id', bar_id)
+      .eq('sistema', 'meta')
+      .single()
 
-    if (error || !meta) {
-      return NextResponse.json({ error: 'Meta não encontrada' }, { status: 404 });
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: meta
-    });
-
-  } catch (error) {
-    console.error('❌ Erro ao buscar meta:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
-  }
-}
-
-// =====================================================
-// PUT - ATUALIZAR META
-// =====================================================
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const user = await authenticateUser(request);
-    if (!user) {
-      return authErrorResponse('Usuário não autenticado');
-    }
-
-    const { id } = params;
-    const body = await request.json();
-    const supabase = await getAdminClient();
-
-    // Atualizar meta
-    const { data: metaAtualizada, error } = await supabase
-      .from('metas_negocio')
-      .update({
-        ...body,
-        atualizado_por: user.user_id
+    if (!credenciais) {
+      return NextResponse.json({
+        success: false,
+        connected: false,
+        error: 'Credenciais Meta ná£o encontradas'
       })
-      .eq('id', id)
-      .eq('bar_id', user.bar_id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('❌ Erro ao atualizar meta:', error);
-      return NextResponse.json({ error: 'Erro ao atualizar meta' }, { status: 500 });
     }
 
-    if (!metaAtualizada) {
-      return NextResponse.json({ error: 'Meta não encontrada' }, { status: 404 });
+    // 2. Verificar se token está¡ vá¡lido
+    const hasValidToken = !!credenciais.access_token
+
+    // 3. Verificar dados coletados
+    const { data: instagramPosts, count: instagramCount } = await supabase
+      .from('meta_instagram_posts')
+      .select('*', { count: 'exact', head: true })
+      .eq('bar_id', bar_id)
+
+    const { data: facebookPosts, count: facebookCount } = await supabase
+      .from('meta_facebook_posts')
+      .select('*', { count: 'exact', head: true })
+      .eq('bar_id', bar_id)
+
+    const { data: instagramInsights, count: insightsCount } = await supabase
+      .from('meta_instagram_insights')
+      .select('*', { count: 'exact', head: true })
+      .eq('bar_id', bar_id)
+
+    // 4. ášltima coleta
+    const { data: ultimaColeta } = await supabase
+      .from('meta_coletas_log')
+      .select('*')
+      .eq('bar_id', bar_id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    // 5. Verificar PgCron Meta
+    const { data: pgcronJobs } = await supabase
+      .rpc('get_cron_jobs')
+
+    const metaJob = pgcronJobs?.find((job: any) => 
+      job.jobname?.includes(`meta_sync_bar_${bar_id}`)
+    )
+
+    // 6. Estatá­sticas recentes (áºltimos 30 dias)
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+    const { data: recentInstagramPosts } = await supabase
+      .from('meta_instagram_posts')
+      .select('engagement_rate, likes_count, comments_count')
+      .eq('bar_id', bar_id)
+      .gte('created_time', thirtyDaysAgo.toISOString())
+
+    const { data: recentFacebookPosts } = await supabase
+      .from('meta_facebook_posts')
+      .select('engagement_rate, likes_count, comments_count, shares_count')
+      .eq('bar_id', bar_id)
+      .gte('created_time', thirtyDaysAgo.toISOString())
+
+    // 7. Calcular má©tricas
+    const totalEngagement = [
+      ...(recentInstagramPosts || []),
+      ...(recentFacebookPosts || [])
+    ].reduce((sum, post) => sum + (post.engagement_rate || 0), 0)
+
+    const totalLikes = [
+      ...(recentInstagramPosts || []),
+      ...(recentFacebookPosts || [])
+    ].reduce((sum, post) => sum + (post.likes_count || 0), 0)
+
+    const totalComments = [
+      ...(recentInstagramPosts || []),
+      ...(recentFacebookPosts || [])
+    ].reduce((sum, post) => sum + (post.comments_count || 0), 0)
+
+    const totalPosts = (recentInstagramPosts?.length || 0) + (recentFacebookPosts?.length || 0)
+    const averageEngagement = totalPosts > 0 ? (totalEngagement / totalPosts).toFixed(2) : '0'
+
+    // 8. Informaá§áµes das pá¡ginas configuradas
+    let pageInfo = {}
+    if (credenciais.configuracao_json) {
+      try {
+        const config = JSON.parse(credenciais.configuracao_json)
+        pageInfo = {
+          facebookPageId: config.facebook_page_id,
+          instagramAccountId: config.instagram_account_id,
+          appId: config.app_id
+        }
+      } catch (e) {
+        console.warn('Erro ao parsear configuraá§á£o Meta:', e)
+      }
     }
 
-    console.log(`✅ Meta atualizada: ${metaAtualizada.nome_meta}`);
     return NextResponse.json({
       success: true,
-      data: metaAtualizada,
-      message: 'Meta atualizada com sucesso'
-    });
+      connected: hasValidToken,
+      credentials: {
+        hasCredentials: !!credenciais,
+        hasValidToken,
+        lastUpdate: credenciais.updated_at,
+        expiresAt: credenciais.expires_at,
+        pageInfo
+      },
+      database: {
+        instagramPosts: instagramCount || 0,
+        facebookPosts: facebookCount || 0,
+        insights: insightsCount || 0,
+        totalDataPoints: (instagramCount || 0) + (facebookCount || 0) + (insightsCount || 0)
+      },
+      lastCollection: {
+        date: ultimaColeta?.created_at,
+        success: ultimaColeta?.success || false,
+        instagram_posts: ultimaColeta?.instagram_posts || 0,
+        facebook_posts: ultimaColeta?.facebook_posts || 0,
+        insights_collected: ultimaColeta?.insights_collected || 0,
+        error: ultimaColeta?.error_message
+      },
+      pgcron: {
+        configured: !!metaJob,
+        jobName: metaJob?.jobname,
+        schedule: metaJob?.schedule || 'A cada 6 horas',
+        nextRun: metaJob?.next_run,
+        lastRun: metaJob?.last_run
+      },
+      statistics: {
+        period: 'ášltimos 30 dias',
+        totalPosts,
+        totalLikes,
+        totalComments,
+        averageEngagement: `${averageEngagement}%`,
+        instagramPostsRecent: recentInstagramPosts?.length || 0,
+        facebookPostsRecent: recentFacebookPosts?.length || 0
+      },
+      api: {
+        baseUrl: 'https://graph.facebook.com',
+        version: 'v18.0',
+        dataTypes: ['posts', 'insights', 'engagement', 'reach']
+      }
+    })
 
   } catch (error) {
-    console.error('❌ Erro ao atualizar meta:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
-  }
-}
-
-// =====================================================
-// DELETE - DELETAR META
-// =====================================================
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const user = await authenticateUser(request);
-    if (!user) {
-      return authErrorResponse('Usuário não autenticado');
-    }
-
-    const { id } = params;
-    const supabase = await getAdminClient();
-
-    // Deletar meta
-    const { error } = await supabase
-      .from('metas_negocio')
-      .delete()
-      .eq('id', id)
-      .eq('bar_id', user.bar_id);
-
-    if (error) {
-      console.error('❌ Erro ao deletar meta:', error);
-      return NextResponse.json({ error: 'Erro ao deletar meta' }, { status: 500 });
-    }
-
-    console.log(`✅ Meta deletada: ${id}`);
+    console.error('Œ Erro ao buscar status Meta:', error)
     return NextResponse.json({
-      success: true,
-      message: 'Meta deletada com sucesso'
-    });
-
-  } catch (error) {
-    console.error('❌ Erro ao deletar meta:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+      success: false,
+      error: 'Erro interno do servidor'
+    }, { status: 500 })
   }
 } 

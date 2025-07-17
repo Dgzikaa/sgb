@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
@@ -8,14 +8,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 })
     }
 
-    // Usar fun��o do banco para gerar pr�ximo c�digo
+    // Usar funá§á£o do banco para gerar prá³ximo cá³digo
     const { data, error } = await supabase.rpc('get_proximo_codigo_insumo')
 
     if (error) {
-      console.error('�� Erro ao buscar pr�ximo c�digo:', error)
+      console.error('Œ Erro ao buscar prá³ximo cá³digo:', error)
       return NextResponse.json({ 
         success: false, 
-        error: 'Erro ao gerar c�digo' 
+        error: 'Erro ao gerar cá³digo' 
       }, { status: 500 })
     }
 
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro interno:', error)
+    console.error('Œ Erro interno:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor' 

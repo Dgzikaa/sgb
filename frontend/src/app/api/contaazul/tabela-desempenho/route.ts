@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { mapearCategoria } from '@/lib/contaazul-categoria-mapper';
 
@@ -14,13 +14,13 @@ const GRUPOS = [
   {
     nome: 'Receitas',
     categorias: [
-      'Stone Cr�dito', 'Stone D�bito', 'Stone Pix', 'Pix Direto na Conta', 'Dinheiro', 'Receita de Eventos', 'Outras Receitas'
+      'Stone Crá©dito', 'Stone Dá©bito', 'Stone Pix', 'Pix Direto na Conta', 'Dinheiro', 'Receita de Eventos', 'Outras Receitas'
     ]
   },
   {
-    nome: 'Custos Vari�veis',
+    nome: 'Custos Variá¡veis',
     categorias: [
-      'IMPOSTO', 'COMISS�O 10%', 'TAXA MAQUININHA'
+      'IMPOSTO', 'COMISSáƒO 10%', 'TAXA MAQUININHA'
     ]
   },
   {
@@ -30,37 +30,37 @@ const GRUPOS = [
     ]
   },
   {
-    nome: 'M�o-de-Obra',
+    nome: 'Má£o-de-Obra',
     categorias: [
-      'SALARIO FUNCIONARIOS', 'VALE TRANSPORTE', 'ALIMENTA��O', 'ADICIONAIS', 'FREELA ATENDIMENTO', 'FREELA BAR', 'FREELA COZINHA', 'FREELA LIMPEZA', 'FREELA SEGURAN�A', 'PRO LABORE', 'PROVIS�O TRABALHISTA'
+      'SALARIO FUNCIONARIOS', 'VALE TRANSPORTE', 'ALIMENTAá‡áƒO', 'ADICIONAIS', 'FREELA ATENDIMENTO', 'FREELA BAR', 'FREELA COZINHA', 'FREELA LIMPEZA', 'FREELA SEGURANá‡A', 'PRO LABORE', 'PROVISáƒO TRABALHISTA'
     ]
   },
   {
     nome: 'Despesas Comerciais',
     categorias: [
-      'Marketing', 'Atra��es Programa��o', 'Produ��o Eventos'
+      'Marketing', 'Atraá§áµes Programaá§á£o', 'Produá§á£o Eventos'
     ]
   },
   {
     nome: 'Despesas Administrativas',
     categorias: [
-      'Administrativo Ordin�rio', 'Escrit�rio Central', 'Recursos Humanos'
+      'Administrativo Ordiná¡rio', 'Escritá³rio Central', 'Recursos Humanos'
     ]
   },
   {
     nome: 'Despesas Operacionais',
     categorias: [
-      'Materiais Opera��o', 'Materiais de Limpeza e Descart�veis', 'Utens�lios', 'Estorno', 'Outros Opera��o'
+      'Materiais Operaá§á£o', 'Materiais de Limpeza e Descartá¡veis', 'Utensá­lios', 'Estorno', 'Outros Operaá§á£o'
     ]
   },
   {
-    nome: 'Despesas de Ocupa��o (Contas)',
+    nome: 'Despesas de Ocupaá§á£o (Contas)',
     categorias: [
-      'ALUGUEL/CONDOM�NIO/IPTU', '�GUA', 'MANUTEN��O', 'INTERNET', 'G�S', 'LUZ'
+      'ALUGUEL/CONDOMáNIO/IPTU', 'áGUA', 'MANUTENá‡áƒO', 'INTERNET', 'GáS', 'LUZ'
     ]
   },
   {
-    nome: 'N�o Operacionais',
+    nome: 'Ná£o Operacionais',
     categorias: [
       'Contratos'
     ]
@@ -68,36 +68,36 @@ const GRUPOS = [
 ];
 
 // Mapeamento de categorias do ContaAzul para as categorias do briefing
-// (Ajuste conforme necess�rio)
+// (Ajuste conforme necessá¡rio)
 const MAPEAMENTO_CATEGORIAS = {
   // RECEITAS
-  'Stone Cr�dito': 'Stone Cr�dito',
-  'Stone D�bito': 'Stone D�bito',
+  'Stone Crá©dito': 'Stone Crá©dito',
+  'Stone Dá©bito': 'Stone Dá©bito',
   'Stone Pix': 'Stone Pix',
   'Pix Direto na Conta': 'Pix Direto na Conta',
   'Dinheiro': 'Dinheiro',
   'Receita de Eventos': 'Receita de Eventos',
   'Outras Receitas': 'Outras Receitas',
   'Ifood': 'Outras Receitas',
-  'Receitas de Servi�os': 'Outras Receitas',
+  'Receitas de Serviá§os': 'Outras Receitas',
   'Fretes recebidos': 'Outras Receitas',
   'PERSE': 'Outras Receitas',
   'Descontos incondicionais obtidos': 'Outras Receitas',
   'Descontos financeiros obtidos': 'Outras Receitas',
-  'Empr�stimos de S�cios': 'Outras Receitas',
-  'Outros S�cios': 'Outras Receitas',
+  'Emprá©stimos de Sá³cios': 'Outras Receitas',
+  'Outros Sá³cios': 'Outras Receitas',
   'Dividendos': 'Outras Receitas',
   'Outros Investimentos': 'Outras Receitas',
   'Consultoria': 'Outras Receitas',
 
   // DESPESAS COMERCIAIS
-  'Produ��o Eventos': 'Produ��o Eventos',
+  'Produá§á£o Eventos': 'Produá§á£o Eventos',
   'Marketing': 'Marketing',
-  'Atra��es Programa��o': 'Atra��es Programa��o',
+  'Atraá§áµes Programaá§á£o': 'Atraá§áµes Programaá§á£o',
 
-  // CUSTOS VARI�VEIS
+  // CUSTOS VARIáVEIS
   'IMPOSTO': 'IMPOSTO',
-  'COMISS�O 10%': 'COMISS�O 10%',
+  'COMISSáƒO 10%': 'COMISSáƒO 10%',
   'TAXA MAQUININHA': 'TAXA MAQUININHA',
 
   // CMV
@@ -106,40 +106,40 @@ const MAPEAMENTO_CATEGORIAS = {
   'Custo Comida': 'Custo Comida',
   'Custo Outros': 'Custo Outros',
 
-  // M�O-DE-OBRA
+  // MáƒO-DE-OBRA
   'SALARIO FUNCIONARIOS': 'SALARIO FUNCIONARIOS',
   'VALE TRANSPORTE': 'VALE TRANSPORTE',
-  'ALIMENTA��O': 'ALIMENTA��O',
+  'ALIMENTAá‡áƒO': 'ALIMENTAá‡áƒO',
   'ADICIONAIS': 'ADICIONAIS',
   'FREELA ATENDIMENTO': 'FREELA ATENDIMENTO',
   'FREELA BAR': 'FREELA BAR',
   'FREELA COZINHA': 'FREELA COZINHA',
   'FREELA LIMPEZA': 'FREELA LIMPEZA',
-  'FREELA SEGURAN�A': 'FREELA SEGURAN�A',
+  'FREELA SEGURANá‡A': 'FREELA SEGURANá‡A',
   'PRO LABORE': 'PRO LABORE',
-  'PROVIS�O TRABALHISTA': 'PROVIS�O TRABALHISTA',
+  'PROVISáƒO TRABALHISTA': 'PROVISáƒO TRABALHISTA',
 
   // ADMINISTRATIVAS
-  'Administrativo Ordin�rio': 'Administrativo Ordin�rio',
-  'Escrit�rio Central': 'Escrit�rio Central',
+  'Administrativo Ordiná¡rio': 'Administrativo Ordiná¡rio',
+  'Escritá³rio Central': 'Escritá³rio Central',
   'Recursos Humanos': 'Recursos Humanos',
 
   // OPERACIONAIS
-  'Materiais Opera��o': 'Materiais Opera��o',
-  'Materiais de Limpeza e Descart�veis': 'Materiais de Limpeza e Descart�veis',
-  'Utens�lios': 'Utens�lios',
+  'Materiais Operaá§á£o': 'Materiais Operaá§á£o',
+  'Materiais de Limpeza e Descartá¡veis': 'Materiais de Limpeza e Descartá¡veis',
+  'Utensá­lios': 'Utensá­lios',
   'Estorno': 'Estorno',
-  'Outros Opera��o': 'Outros Opera��o',
+  'Outros Operaá§á£o': 'Outros Operaá§á£o',
 
-  // OCUPA��O
-  'ALUGUEL/CONDOM�NIO/IPTU': 'ALUGUEL/CONDOM�NIO/IPTU',
-  '�GUA': '�GUA',
-  'MANUTEN��O': 'MANUTEN��O',
+  // OCUPAá‡áƒO
+  'ALUGUEL/CONDOMáNIO/IPTU': 'ALUGUEL/CONDOMáNIO/IPTU',
+  'áGUA': 'áGUA',
+  'MANUTENá‡áƒO': 'MANUTENá‡áƒO',
   'INTERNET': 'INTERNET',
-  'G�S': 'G�S',
+  'GáS': 'GáS',
   'LUZ': 'LUZ',
 
-  // N�O OPERACIONAIS
+  // NáƒO OPERACIONAIS
   'Contratos': 'Contratos',
 };
 
@@ -149,13 +149,13 @@ export async function POST(request: NextRequest) {
     const bar_id = body.bar_id;
     const data_inicio = body.data_inicio;
     const data_fim = body.data_fim;
-    const pageSize = body.pageSize || 1000; // Pega mais por p�gina para acelerar
+    const pageSize = body.pageSize || 1000; // Pega mais por pá¡gina para acelerar
 
     if (!bar_id) {
-      return NextResponse.json({ success: false, error: 'Par�metro bar_id obrigat�rio.' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'Pará¢metro bar_id obrigatá³rio.' }, { status: 400 });
     }
 
-    // Buscar todas as categorias do bar e criar dicion�rio {categoria_id: nome}
+    // Buscar todas as categorias do bar e criar dicioná¡rio {categoria_id: nome}
     const { data: categorias, error: catError } = await supabase
       .from('contaazul_categorias')
       .select('id, nome')
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
       categoriasDict[cat.id] = cat.nome;
     }
 
-    // PAGINA��O: Buscar todos os eventos do per�odo
+    // PAGINAá‡áƒO: Buscar todos os eventos do perá­odo
     let eventos: any[] = [];
     let page = 1;
     let fetched = 0;
@@ -216,7 +216,7 @@ export async function POST(request: NextRequest) {
     }
     console.log('[DEBUG] Total eventos:', eventos.length);
     console.log('[DEBUG] Total receitas:', totalReceitas);
-    console.log('[DEBUG] Exemplos descri��es receitas:', receitasDescricoes.slice(0, 10));
+    console.log('[DEBUG] Exemplos descriá§áµes receitas:', receitasDescricoes.slice(0, 10));
     console.log('[DEBUG] Receitas por categoria:', receitasPorCategoria);
 
     // Agrupar por grupo/categoria
@@ -234,14 +234,14 @@ export async function POST(request: NextRequest) {
       let categoriaMapeada = null;
       if (nomeCategoria) {
         categoriaMapeada = (MAPEAMENTO_CATEGORIAS as Record<string, string>)[nomeCategoria];
-        // Fallback: receitas n�o mapeadas v�o para Outras Receitas, despesas para Outros Opera��o
+        // Fallback: receitas ná£o mapeadas vá£o para Outras Receitas, despesas para Outros Operaá§á£o
         if (!categoriaMapeada) {
-          categoriaMapeada = evento.tipo === 'receita' ? 'Outras Receitas' : 'Outros Opera��o';
+          categoriaMapeada = evento.tipo === 'receita' ? 'Outras Receitas' : 'Outros Operaá§á£o';
         }
       } else {
-        // Usar utilit�rio inteligente se n�o houver categoria
+        // Usar utilitá¡rio inteligente se ná£o houver categoria
         const mapeado = mapearCategoria(evento.descricao, evento.tipo === 'receita' ? 'RECEITA' : 'DESPESA', evento.valor);
-        categoriaMapeada = (MAPEAMENTO_CATEGORIAS as Record<string, string>)[mapeado.categoria_sugerida] || (evento.tipo === 'receita' ? 'Outras Receitas' : 'Outros Opera��o');
+        categoriaMapeada = (MAPEAMENTO_CATEGORIAS as Record<string, string>)[mapeado.categoria_sugerida] || (evento.tipo === 'receita' ? 'Outras Receitas' : 'Outros Operaá§á£o');
       }
       // Encontrar grupo correspondente
       let grupoNome = null;

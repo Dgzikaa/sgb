@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -61,10 +61,10 @@ export default function TimezoneDebugPage() {
       <div className="space-y-2">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Globe className="h-6 w-6" />
-          Debug de Timezone - Bras�lia
+          Debug de Timezone - Brasá­lia
         </h1>
         <p className="text-muted-foreground">
-          Verifica��o de timezone em todos os componentes do sistema
+          Verificaá§á£o de timezone em todos os componentes do sistema
         </p>
       </div>
 
@@ -74,7 +74,7 @@ export default function TimezoneDebugPage() {
           <CardHeader className="pb-3">
             <CardTitle className="text-sm flex items-center gap-2">
               <Clock className="h-4 w-4" />
-              Hor�rio Atual
+              Horá¡rio Atual
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -110,17 +110,17 @@ export default function TimezoneDebugPage() {
           <CardContent>
             <div className="space-y-2">
               <Badge variant={isHorarioComercial() ? 'default' : 'secondary'}>
-                {isHorarioComercial() ? 'Hor�rio Comercial' : 'Fora do Hor�rio'}
+                {isHorarioComercial() ? 'Horá¡rio Comercial' : 'Fora do Horá¡rio'}
               </Badge>
               <Badge variant={isHorarioRelatorioMatinal() ? 'destructive' : 'outline'}>
-                {isHorarioRelatorioMatinal() ? 'Hora do Relat�rio' : 'Hora Normal'}
+                {isHorarioRelatorioMatinal() ? 'Hora do Relatá³rio' : 'Hora Normal'}
               </Badge>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Informa��es Detalhadas */}
+      {/* Informaá§áµes Detalhadas */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Frontend Timezone Info */}
         <Card>
@@ -147,12 +147,12 @@ export default function TimezoneDebugPage() {
               </div>
 
               <div>
-                <strong>Per�odo Atual:</strong>
+                <strong>Perá­odo Atual:</strong>
                 <div className="space-y-1 mt-1">
                   <div className="text-sm">Hoje: {dataHojeBrasil()}</div>
-                  <div className="text-sm">In�cio do M�s: {primeiroDiaDoMes()}</div>
-                  <div className="text-sm">Fim do M�s: {ultimoDiaDoMes()}</div>
-                  <div className="text-sm">In�cio da Semana: {inicioSemana()}</div>
+                  <div className="text-sm">Iná­cio do Máªs: {primeiroDiaDoMes()}</div>
+                  <div className="text-sm">Fim do Máªs: {ultimoDiaDoMes()}</div>
+                  <div className="text-sm">Iná­cio da Semana: {inicioSemana()}</div>
                   <div className="text-sm">Fim da Semana: {fimSemana()}</div>
                 </div>
               </div>
@@ -178,7 +178,7 @@ export default function TimezoneDebugPage() {
               </div>
 
               <div>
-                <strong>Compara��o UTC vs Brasil:</strong>
+                <strong>Comparaá§á£o UTC vs Brasil:</strong>
                 {timezoneInfo && (
                   <div className="space-y-1 mt-1">
                     <div className="text-sm">UTC: {timezoneInfo.utc}</div>
@@ -196,10 +196,10 @@ export default function TimezoneDebugPage() {
         </Card>
       </div>
 
-      {/* Exemplos de Formata��o */}
+      {/* Exemplos de Formataá§á£o */}
       <Card>
         <CardHeader>
-          <CardTitle>Exemplos de Formata��o</CardTitle>
+          <CardTitle>Exemplos de Formataá§á£o</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -215,9 +215,9 @@ export default function TimezoneDebugPage() {
             <div>
               <h4 className="font-semibold mb-2">Tempo Relativo</h4>
               <div className="space-y-2 text-sm">
-                <div><strong>H� 1 hora:</strong> {formatarTempoRelativo(new Date(Date.now() - 60*60*1000).toISOString())}</div>
-                <div><strong>H� 30 min:</strong> {formatarTempoRelativo(new Date(Date.now() - 30*60*1000).toISOString())}</div>
-                <div><strong>H� 5 min:</strong> {formatarTempoRelativo(new Date(Date.now() - 5*60*1000).toISOString())}</div>
+                <div><strong>Há¡ 1 hora:</strong> {formatarTempoRelativo(new Date(Date.now() - 60*60*1000).toISOString())}</div>
+                <div><strong>Há¡ 30 min:</strong> {formatarTempoRelativo(new Date(Date.now() - 30*60*1000).toISOString())}</div>
+                <div><strong>Há¡ 5 min:</strong> {formatarTempoRelativo(new Date(Date.now() - 5*60*1000).toISOString())}</div>
                 <div><strong>Agora:</strong> {formatarTempoRelativo(new Date().toISOString())}</div>
               </div>
             </div>

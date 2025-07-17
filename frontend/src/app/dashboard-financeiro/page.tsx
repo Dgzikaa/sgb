@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { StandardPageLayout } from '@/components/layouts'
@@ -126,7 +126,7 @@ export default function DashboardFinanceiroPage() {
   const carregarDados = async () => {
     if (!selectedBar) {
       toast({
-        title: "Bar n�o selecionado",
+        title: "Bar ná£o selecionado",
         description: "Selecione um bar para ver os dados financeiros",
         variant: "destructive"
       })
@@ -145,8 +145,8 @@ export default function DashboardFinanceiroPage() {
       setData(result)
       
       toast({
-        title: "�� Dados Carregados!",
-        description: `${result.resumo.total_transacoes} transa��es encontradas`,
+        title: "œ… Dados Carregados!",
+        description: `${result.resumo.total_transacoes} transaá§áµes encontradas`,
       })
       
     } catch (error) {
@@ -163,7 +163,7 @@ export default function DashboardFinanceiroPage() {
   const carregarDRE = async (mes?: string) => {
     if (!selectedBar) {
       toast({
-        title: "Bar n�o selecionado",
+        title: "Bar ná£o selecionado",
         description: "Selecione um bar para ver a DRE",
         variant: "destructive"
       })
@@ -188,7 +188,7 @@ export default function DashboardFinanceiroPage() {
       setDreData(result)
       
       toast({
-        title: "📊 DRE Carregada!",
+        title: "ðŸ“Š DRE Carregada!",
         description: `${result.dre.estatisticas.eventos_mapeados} eventos processados`,
       })
       
@@ -214,46 +214,46 @@ export default function DashboardFinanceiroPage() {
     return new Date(dateString).toLocaleDateString('pt-BR')
   }
 
-  // Fun��o para corrigir nomes das categorias com caracteres especiais mal codificados
+  // Funá§á£o para corrigir nomes das categorias com caracteres especiais mal codificados
   const fixCategoryName = (categoryName: string) => {
     if (!categoryName) return categoryName
     
     return categoryName
-      .replace(/Crჩdito/g, 'Cr�dito')
-      .replace(/Dჩbito/g, 'D�bito')
-      .replace(/Emprჩstimos/g, 'Empr�stimos')
-      .replace(/Sჳcios/g, 'S�cios')
-      .replace(/Utensჭlios/g, 'Utens�lios')
-      .replace(/Descartსveis/g, 'Descart�veis')
-      .replace(/�gჼa/g, '�gua')
-      .replace(/�GUA/g, '�GUA')
-      .replace(/Elჩtrica/g, 'El�trica')
-      .replace(/ENERGIA EL�TRICA/g, 'ENERGIA EL�TRICA')
-      .replace(/Manutenყუo/g, 'Manuten��o')
-      .replace(/MANUTEN��O/g, 'MANUTEN��O')
-      .replace(/AluguelCondomჭnio/g, 'Aluguel/Condom�nio')
-      .replace(/CONDOM�NIO/g, 'CONDOM�NIO')
-      .replace(/SAL�RIOS/g, 'SAL�RIOS')
-      .replace(/Dჩcimo/g, 'D�cimo')
-      .replace(/Gსs/g, 'G�s')
-      .replace(/Escritჳrio/g, 'Escrit�rio')
-      .replace(/AdministrativoOrdinსrio/g, 'Administrativo Ordin�rio')
-      .replace(/Produყუo/g, 'Produ��o')
-      .replace(/Operaყუo/g, 'Opera��o')
-      .replace(/Programaყუo/g, 'Programa��o')
-      .replace(/Atraყჵes/g, 'Atra��es')
+      .replace(/Cráƒ©dito/g, 'Crá©dito')
+      .replace(/Dáƒ©bito/g, 'Dá©bito')
+      .replace(/Empráƒ©stimos/g, 'Emprá©stimos')
+      .replace(/Sáƒ³cios/g, 'Sá³cios')
+      .replace(/Utensáƒ­lios/g, 'Utensá­lios')
+      .replace(/Descartáƒ¡veis/g, 'Descartá¡veis')
+      .replace(/áƒgáƒ¼a/g, 'água')
+      .replace(/áƒGUA/g, 'áGUA')
+      .replace(/Eláƒ©trica/g, 'Elá©trica')
+      .replace(/ENERGIA ELáƒTRICA/g, 'ENERGIA ELá‰TRICA')
+      .replace(/Manutenáƒ§áƒ£o/g, 'Manutená§á£o')
+      .replace(/MANUTENáƒáƒO/g, 'MANUTENá‡áƒO')
+      .replace(/AluguelCondomáƒ­nio/g, 'Aluguel/Condomá­nio')
+      .replace(/CONDOMáƒNIO/g, 'CONDOMáNIO')
+      .replace(/SALáƒRIOS/g, 'SALáRIOS')
+      .replace(/Dáƒ©cimo/g, 'Dá©cimo')
+      .replace(/Gáƒ¡s/g, 'Gá¡s')
+      .replace(/Escritáƒ³rio/g, 'Escritá³rio')
+      .replace(/AdministrativoOrdináƒ¡rio/g, 'Administrativo Ordiná¡rio')
+      .replace(/Produáƒ§áƒ£o/g, 'Produá§á£o')
+      .replace(/Operaáƒ§áƒ£o/g, 'Operaá§á£o')
+      .replace(/Programaáƒ§áƒ£o/g, 'Programaá§á£o')
+      .replace(/Atraáƒ§áƒµes/g, 'Atraá§áµes')
   }
 
   const getPageTitle = () => {
     switch (activeTab) {
       case 'resumo':
-        return '📊 Resumo Geral 2025'
+        return 'ðŸ“Š Resumo Geral 2025'
       case 'dre':
-        return '📊 DRE Mensal'
+        return 'ðŸ“Š DRE Mensal'
       case 'insights':
-        return '👁️ Insights'
+        return 'ðŸ‘ï¸ Insights'
       default:
-        return '📊 Dashboard Financeiro'
+        return 'ðŸ“Š Dashboard Financeiro'
     }
   }
 
@@ -278,7 +278,7 @@ export default function DashboardFinanceiroPage() {
                 {getPageTitle()}
               </h1>
               <p className="text-responsive-sm text-gray-600 mt-1">
-                Vis�o completa das finan�as - {selectedBar?.nome}
+                Visá£o completa das finaná§as - {selectedBar?.nome}
               </p>
             </div>
             <div className="flex gap-2">
@@ -294,7 +294,7 @@ export default function DashboardFinanceiroPage() {
                   <option value="">Todos os meses de 2025</option>
                   <option value="2025-01">Janeiro 2025</option>
                   <option value="2025-02">Fevereiro 2025</option>
-                  <option value="2025-03">Mar�o 2025</option>
+                  <option value="2025-03">Mará§o 2025</option>
                   <option value="2025-04">Abril 2025</option>
                   <option value="2025-05">Maio 2025</option>
                   <option value="2025-06">Junho 2025</option>
@@ -338,7 +338,7 @@ export default function DashboardFinanceiroPage() {
           </div>
 
 
-          {/* Tabs de Navega��o */}
+          {/* Tabs de Navegaá§á£o */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="resumo" className="flex items-center gap-2">
@@ -393,7 +393,7 @@ export default function DashboardFinanceiroPage() {
 
                   <Card className={`shadow-lg border-0 hover:shadow-xl transition-all duration-300 ${data.resumo.saldo_liquido >= 0 ? 'bg-gradient-to-br from-green-50 to-white' : 'bg-gradient-to-br from-red-50 to-white'}`}>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-semibold text-gray-700">Saldo L�quido</CardTitle>
+                      <CardTitle className="text-sm font-semibold text-gray-700">Saldo Lá­quido</CardTitle>
                       <BarChart3Icon className={`h-5 w-5 ${data.resumo.saldo_liquido >= 0 ? 'text-green-600' : 'text-red-600'}`} />
                     </CardHeader>
                     <CardContent>
@@ -408,7 +408,7 @@ export default function DashboardFinanceiroPage() {
 
                   <Card className="shadow-lg border-0 bg-gradient-to-br from-blue-50 to-white hover:shadow-xl transition-all duration-300">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-semibold text-gray-700">Total Transa��es</CardTitle>
+                      <CardTitle className="text-sm font-semibold text-gray-700">Total Transaá§áµes</CardTitle>
                       <ActivityIcon className="h-5 w-5 text-blue-600" />
                     </CardHeader>
                     <CardContent>
@@ -423,18 +423,18 @@ export default function DashboardFinanceiroPage() {
                 </div>
               )}
 
-              {/* An�lises Financeiras Avan�adas */}
+              {/* Aná¡lises Financeiras Avaná§adas */}
               {data && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {/* Distribui��o de Receitas */}
+                  {/* Distribuiá§á£o de Receitas */}
                   <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-green-50/30">
                     <CardHeader className="pb-3">
                       <CardTitle className="flex items-center gap-2">
                         <PieChartIcon className="w-5 h-5 text-green-600" />
-                        <span className="text-gray-800 font-bold">Distribui��o de Receitas</span>
+                        <span className="text-gray-800 font-bold">Distribuiá§á£o de Receitas</span>
                       </CardTitle>
                       <CardDescription className="text-gray-600 font-medium">
-                        Concentra��o e diversifica��o das fontes
+                        Concentraá§á£o e diversificaá§á£o das fontes
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -464,42 +464,42 @@ export default function DashboardFinanceiroPage() {
                     </CardContent>
                   </Card>
 
-                  {/* Indicadores de Efici�ncia */}
+                  {/* Indicadores de Eficiáªncia */}
                   <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-blue-50/30">
                     <CardHeader className="pb-3">
                       <CardTitle className="flex items-center gap-2">
                         <ActivityIcon className="w-5 h-5 text-blue-600" />
-                        <span className="text-gray-800 font-bold">Indicadores de Efici�ncia</span>
+                        <span className="text-gray-800 font-bold">Indicadores de Eficiáªncia</span>
                       </CardTitle>
                       <CardDescription className="text-gray-600 font-medium">
-                        M�tricas operacionais chave
+                        Má©tricas operacionais chave
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium text-gray-700">Margem L�quida</span>
+                          <span className="text-sm font-medium text-gray-700">Margem Lá­quida</span>
                           <span className={`text-sm font-bold ${data.resumo.saldo_liquido >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {((data.resumo.saldo_liquido / data.resumo.total_receitas) * 100).toFixed(1)}%
                           </span>
                         </div>
                         
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium text-gray-700">Receita por Transa��o</span>
+                          <span className="text-sm font-medium text-gray-700">Receita por Transaá§á£o</span>
                           <span className="text-sm font-bold text-blue-600">
                             {formatCurrency(data.resumo.total_receitas / data.estatisticas.receitas_categorizadas)}
                           </span>
                         </div>
 
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium text-gray-700">Despesa por Transa��o</span>
+                          <span className="text-sm font-medium text-gray-700">Despesa por Transaá§á£o</span>
                           <span className="text-sm font-bold text-red-600">
                             {formatCurrency(data.resumo.total_despesas / data.estatisticas.despesas_categorizadas)}
                           </span>
                         </div>
 
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium text-gray-700">Taxa de Categoriza��o</span>
+                          <span className="text-sm font-medium text-gray-700">Taxa de Categorizaá§á£o</span>
                           <span className="text-sm font-bold text-purple-600">
                             {(((data.estatisticas.receitas_categorizadas + data.estatisticas.despesas_categorizadas) / data.resumo.total_transacoes) * 100).toFixed(1)}%
                           </span>
@@ -516,7 +516,7 @@ export default function DashboardFinanceiroPage() {
                         <span className="text-gray-800 font-bold">Estrutura de Custos</span>
                       </CardTitle>
                       <CardDescription className="text-gray-600 font-medium">
-                        An�lise das principais despesas
+                        Aná¡lise das principais despesas
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -543,15 +543,15 @@ export default function DashboardFinanceiroPage() {
                     </CardContent>
                   </Card>
 
-                  {/* An�lise de Volumes */}
+                  {/* Aná¡lise de Volumes */}
                   <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-yellow-50/30">
                     <CardHeader className="pb-3">
                       <CardTitle className="flex items-center gap-2">
                         <TrendingUpIcon className="w-5 h-5 text-yellow-600" />
-                        <span className="text-gray-800 font-bold">An�lise de Volumes</span>
+                        <span className="text-gray-800 font-bold">Aná¡lise de Volumes</span>
                       </CardTitle>
                       <CardDescription className="text-gray-600 font-medium">
-                        Distribui��o de transa��es
+                        Distribuiá§á£o de transaá§áµes
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -603,7 +603,7 @@ export default function DashboardFinanceiroPage() {
                         <span className="text-gray-800 font-bold">Resumo Executivo</span>
                       </CardTitle>
                       <CardDescription className="text-gray-600 font-medium">
-                        Principais indicadores do per�odo
+                        Principais indicadores do perá­odo
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -633,22 +633,22 @@ export default function DashboardFinanceiroPage() {
                             Status Financeiro
                           </div>
                           <div className={`text-lg font-bold ${data.resumo.saldo_liquido >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {data.resumo.saldo_liquido >= 0 ? 'Lucrativo' : 'Deficit�rio'}
+                            {data.resumo.saldo_liquido >= 0 ? 'Lucrativo' : 'Deficitá¡rio'}
                           </div>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
 
-                  {/* Diversifica��o de Receitas */}
+                  {/* Diversificaá§á£o de Receitas */}
                   <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-teal-50/30">
                     <CardHeader className="pb-3">
                       <CardTitle className="flex items-center gap-2">
                         <TrendingUp className="w-5 h-5 text-teal-600" />
-                        <span className="text-gray-800 font-bold">Diversifica��o</span>
+                        <span className="text-gray-800 font-bold">Diversificaá§á£o</span>
                       </CardTitle>
                       <CardDescription className="text-gray-600 font-medium">
-                        An�lise de concentra��o de risco
+                        Aná¡lise de concentraá§á£o de risco
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -656,20 +656,20 @@ export default function DashboardFinanceiroPage() {
                         {(() => {
                           const topReceita = data.receitas_por_categoria[0]?.total || 0
                           const concentracao = (topReceita / data.resumo.total_receitas) * 100
-                          const risco = concentracao > 50 ? 'Alto' : concentracao > 30 ? 'M�dio' : 'Baixo'
+                          const risco = concentracao > 50 ? 'Alto' : concentracao > 30 ? 'Má©dio' : 'Baixo'
                           const corRisco = concentracao > 50 ? 'text-red-600' : concentracao > 30 ? 'text-yellow-600' : 'text-green-600'
                           
                           return (
                             <>
                               <div className="flex justify-between items-center">
-                                <span className="text-sm font-medium text-gray-700">Concentra��o Principal</span>
+                                <span className="text-sm font-medium text-gray-700">Concentraá§á£o Principal</span>
                                 <span className={`text-sm font-bold ${corRisco}`}>
                                   {concentracao.toFixed(1)}%
                                 </span>
                               </div>
                               
                               <div className="flex justify-between items-center">
-                                <span className="text-sm font-medium text-gray-700">Risco de Concentra��o</span>
+                                <span className="text-sm font-medium text-gray-700">Risco de Concentraá§á£o</span>
                                 <span className={`text-sm font-bold ${corRisco}`}>
                                   {risco}
                                 </span>
@@ -684,9 +684,9 @@ export default function DashboardFinanceiroPage() {
 
                               <div className={`p-3 rounded-lg ${concentracao > 50 ? 'bg-red-50' : concentracao > 30 ? 'bg-yellow-50' : 'bg-green-50'}`}>
                                 <div className={`text-xs font-medium ${concentracao > 50 ? 'text-red-700' : concentracao > 30 ? 'text-yellow-700' : 'text-green-700'}`}>
-                                  {concentracao > 50 ? '��️ Alta depend�ncia de uma fonte' : 
-                                   concentracao > 30 ? '�� Concentra��o moderada' : 
-                                   '�� Receitas bem diversificadas'}
+                                  {concentracao > 50 ? 'š ï¸ Alta dependáªncia de uma fonte' : 
+                                   concentracao > 30 ? 'š¡ Concentraá§á£o moderada' : 
+                                   'œ… Receitas bem diversificadas'}
                                 </div>
                               </div>
                             </>
@@ -721,7 +721,7 @@ export default function DashboardFinanceiroPage() {
                       <DollarSignIcon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                       <h3 className="text-lg font-semibold mb-2">Dados Financeiros</h3>
                       <p className="text-gray-500 mb-4">
-                        Clique em "Atualizar Dados" para carregar as informa��es financeiras do ContaAzul.
+                        Clique em "Atualizar Dados" para carregar as informaá§áµes financeiras do ContaAzul.
                       </p>
                       <Button onClick={carregarDados}>
                         <RefreshCwIcon className="w-4 h-4 mr-2" />
@@ -732,12 +732,12 @@ export default function DashboardFinanceiroPage() {
                 </Card>
               )}
 
-              {/* Info sobre sincroniza��o */}
+              {/* Info sobre sincronizaá§á£o */}
               {!loading && !selectedBar && (
                 <Alert>
                   <AlertDescription>
-                    💡 Selecione um bar no menu lateral para visualizar os dados financeiros do ContaAzul.
-                    Certifique-se de que o sync categorizado foi executado nas configura��es.
+                    ðŸ’¡ Selecione um bar no menu lateral para visualizar os dados financeiros do ContaAzul.
+                    Certifique-se de que o sync categorizado foi executado nas configuraá§áµes.
                   </AlertDescription>
                 </Alert>
               )}
@@ -762,7 +762,7 @@ export default function DashboardFinanceiroPage() {
                     <CardContent className="p-6">
                       <div className="text-center">
                         <h3 className={`text-xl font-semibold mb-4 ${dreData.metricas.lucro_liquido >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                          🎯 RESULTADO FINAL
+                          ðŸŽ¯ RESULTADO FINAL
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                           <div>
@@ -794,7 +794,7 @@ export default function DashboardFinanceiroPage() {
                   {/* DRE FORMATO EXCEL */}
                   <Card>
                     <CardHeader className="bg-gray-50">
-                      <CardTitle className="text-gray-800">📊 DRE - Demonstra��o do Resultado do Exerc�cio</CardTitle>
+                      <CardTitle className="text-gray-800">ðŸ“Š DRE - Demonstraá§á£o do Resultado do Exercá­cio</CardTitle>
                       <p className="text-gray-600 text-sm mt-1">{dreData.periodo}</p>
                     </CardHeader>
                     <CardContent className="p-0">
@@ -810,7 +810,7 @@ export default function DashboardFinanceiroPage() {
                           <tbody>
                             {/* RECEITAS */}
                             <tr className="bg-green-50 border-t-2 border-green-200">
-                              <td className="py-3 px-4 font-bold text-green-700">💰 RECEITAS</td>
+                              <td className="py-3 px-4 font-bold text-green-700">ðŸ’° RECEITAS</td>
                               <td className="py-3 px-4 text-right font-bold text-green-700">
                                 {formatCurrency(dreData.dre.receitas.total)}
                               </td>
@@ -834,7 +834,7 @@ export default function DashboardFinanceiroPage() {
                             
                             {/* DESPESAS */}
                             <tr className="bg-red-50 border-t-2 border-red-200">
-                              <td className="py-3 px-4 font-bold text-red-700">💸 DESPESAS</td>
+                              <td className="py-3 px-4 font-bold text-red-700">ðŸ’¸ DESPESAS</td>
                               <td className="py-3 px-4 text-right font-bold text-red-700">
                                 {formatCurrency(dreData.metricas.despesas_total)}
                               </td>
@@ -885,7 +885,7 @@ export default function DashboardFinanceiroPage() {
                             {/* RESULTADO */}
                             <tr className={`border-t-4 ${dreData.metricas.lucro_liquido >= 0 ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'}`}>
                               <td className={`py-4 px-4 font-bold text-lg ${dreData.metricas.lucro_liquido >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                                🎯 RESULTADO DO PER�ODO
+                                ðŸŽ¯ RESULTADO DO PERáODO
                               </td>
                               <td className={`py-4 px-4 text-right font-bold text-xl ${dreData.metricas.lucro_liquido >= 0 ? 'text-green-700' : 'text-red-700'}`}>
                                 {dreData.metricas.lucro_liquido >= 0 ? '+' : ''}{formatCurrency(dreData.metricas.lucro_liquido)}
@@ -905,9 +905,9 @@ export default function DashboardFinanceiroPage() {
                   <CardContent className="py-8">
                     <div className="text-center">
                       <BarChart3Icon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                      <h3 className="text-lg font-semibold mb-2">DRE - Demonstra��o do Resultado</h3>
+                      <h3 className="text-lg font-semibold mb-2">DRE - Demonstraá§á£o do Resultado</h3>
                       <p className="text-gray-500 mb-4">
-                        Selecione um m�s e clique em "Atualizar DRE" para calcular a demonstra��o do resultado.
+                        Selecione um máªs e clique em "Atualizar DRE" para calcular a demonstraá§á£o do resultado.
                       </p>
                       <Button onClick={() => carregarDRE()}>
                         <BarChart3Icon className="w-4 h-4 mr-2" />
@@ -933,7 +933,7 @@ export default function DashboardFinanceiroPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-gray-600 mb-4">
-                      An�lise de crescimento de receitas m�s a m�s
+                      Aná¡lise de crescimento de receitas máªs a máªs
                     </p>
                     <div className="text-center text-gray-500 py-8">
                       Em desenvolvimento...
@@ -950,7 +950,7 @@ export default function DashboardFinanceiroPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-gray-600 mb-4">
-                      Padr�es sazonais de receitas e despesas
+                      Padráµes sazonais de receitas e despesas
                     </p>
                     <div className="text-center text-gray-500 py-8">
                       Em desenvolvimento...
@@ -962,12 +962,12 @@ export default function DashboardFinanceiroPage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <CalendarIcon className="w-5 h-5 text-purple-600" />
-                      Previs�es
+                      Previsáµes
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-gray-600 mb-4">
-                      Proje��es baseadas em dados hist�ricos
+                      Projeá§áµes baseadas em dados histá³ricos
                     </p>
                     <div className="text-center text-gray-500 py-8">
                       Em desenvolvimento...
@@ -979,8 +979,8 @@ export default function DashboardFinanceiroPage() {
               <Alert>
                 <ActivityIcon className="h-4 w-4" />
                 <AlertDescription>
-                  💡 Esta se��o ser� desenvolvida com an�lises avan�adas baseadas nos dados coletados. 
-                  Incluir� gr�ficos de tend�ncias, compara��es mensais e insights automatizados.
+                  ðŸ’¡ Esta seá§á£o será¡ desenvolvida com aná¡lises avaná§adas baseadas nos dados coletados. 
+                  Incluirá¡ grá¡ficos de tendáªncias, comparaá§áµes mensais e insights automatizados.
                 </AlertDescription>
               </Alert>
             </TabsContent>

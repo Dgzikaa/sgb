@@ -1,4 +1,4 @@
-import { useState } from 'react'
+ï»¿import { useState } from 'react'
 
 export default function GoogleAvaliacoesIntegracao() {
   const [loading, setLoading] = useState(false)
@@ -16,12 +16,12 @@ export default function GoogleAvaliacoesIntegracao() {
       })
       const data = await res.json()
       if (data.success) {
-        setResult('œ… Coleta realizada com sucesso!')
+        setResult('Å“â€¦ Coleta realizada com sucesso!')
       } else {
-        setResult('Œ Erro: ' + (data.error || 'Erro desconhecido'))
+        setResult('ÂÅ’ Erro: ' + (data.error || 'Erro desconhecido'))
       }
     } catch (e: any) {
-      setResult('Œ Erro: ' + e.message)
+      setResult('ÂÅ’ Erro: ' + e.message)
     } finally {
       setLoading(false)
     }
@@ -31,10 +31,10 @@ export default function GoogleAvaliacoesIntegracao() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
         <div className="card-dark p-6">
-          <h1 className="card-title-dark mb-4">Google Avaliaá§áµes - Integraá§á£o</h1>
-          <p className="card-description-dark mb-6">Clique no botá£o abaixo para rodar manualmente a coleta das avaliaá§áµes do Google para o dia anterior.</p>
+          <h1 className="card-title-dark mb-4">Google AvaliaÃ¡Â§Ã¡Âµes - IntegraÃ¡Â§Ã¡Â£o</h1>
+          <p className="card-description-dark mb-6">Clique no botÃ¡Â£o abaixo para rodar manualmente a coleta das avaliaÃ¡Â§Ã¡Âµes do Google para o dia anterior.</p>
           <button className="btn-primary-dark px-4 py-2" onClick={handleRun} disabled={loading}>
-            {loading ? 'Executando...' : 'Rodar coleta de avaliaá§áµes (ontem)'}
+            {loading ? 'Executando...' : 'Rodar coleta de avaliaÃ¡Â§Ã¡Âµes (ontem)'}
           </button>
           {result && <div className="mt-4 card-description-dark">{result}</div>}
         </div>

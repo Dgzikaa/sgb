@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic'
@@ -17,10 +17,10 @@ export async function GET(request: NextRequest) {
     const barId = parseInt(searchParams.get('bar_id') || '1');
 
     if (!dataEspecifica) {
-      return NextResponse.json({ error: 'Data espec�fica � obrigat�ria' }, { status: 400 });
+      return NextResponse.json({ error: 'Data especá­fica á© obrigatá³ria' }, { status: 400 });
     }
 
-    console.log(`📊 Calculando estat�sticas para ${dataEspecifica}, per�odo: ${periodoAnalise} dias, bar: ${barId}`);
+    console.log(`ðŸ“Š Calculando estatá­sticas para ${dataEspecifica}, perá­odo: ${periodoAnalise} dias, bar: ${barId}`);
 
     // Calcular datas
     const dataFim = new Date(dataEspecifica);
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       dataInicio.setDate(dataFim.getDate() - parseInt(periodoAnalise));
     }
 
-    console.log(`📅 Per�odo: ${dataInicio.toISOString().split('T')[0]} at� ${dataFim.toISOString().split('T')[0]}`);
+    console.log(`ðŸ“… Perá­odo: ${dataInicio.toISOString().split('T')[0]} atá© ${dataFim.toISOString().split('T')[0]}`);
 
     // Query base
     let queryBase = supabase
@@ -49,17 +49,17 @@ export async function GET(request: NextRequest) {
       queryBase = queryBase.eq('grp_desc', grupoFiltro);
     }
 
-    // Buscar dados do per�odo completo
+    // Buscar dados do perá­odo completo
     const { data: dadosPeriodo, error: errorPeriodo } = await queryBase
       .gte('t0_lancamento', dataInicio.toISOString().split('T')[0])
       .lte('t0_lancamento', dataFim.toISOString().split('T')[0]);
 
     if (errorPeriodo) {
-      console.error('�� Erro ao buscar dados do per�odo:', errorPeriodo);
-      return NextResponse.json({ error: 'Erro ao buscar dados do per�odo' }, { status: 500 });
+      console.error('Œ Erro ao buscar dados do perá­odo:', errorPeriodo);
+      return NextResponse.json({ error: 'Erro ao buscar dados do perá­odo' }, { status: 500 });
     }
 
-    // Buscar dados do dia espec�fico
+    // Buscar dados do dia especá­fico
     let queryDia = supabase
       .from('tempo')
       .select('t1_t2, prd_desc, grp_desc, t0_lancamento, itm_qtd')
@@ -79,13 +79,13 @@ export async function GET(request: NextRequest) {
     const { data: dadosDia, error: errorDia } = await queryDia;
 
     if (errorDia) {
-      console.error('�� Erro ao buscar dados do dia:', errorDia);
+      console.error('Œ Erro ao buscar dados do dia:', errorDia);
       return NextResponse.json({ error: 'Erro ao buscar dados do dia' }, { status: 500 });
     }
 
-    console.log(`📊 Dados encontrados - Per�odo: ${dadosPeriodo?.length || 0}, Dia espec�fico: ${dadosDia?.length || 0}`);
+    console.log(`ðŸ“Š Dados encontrados - Perá­odo: ${dadosPeriodo?.length || 0}, Dia especá­fico: ${dadosDia?.length || 0}`);
 
-    // Se n�o h� dados para o dia espec�fico, buscar dados dos �ltimos 7 dias
+    // Se ná£o há¡ dados para o dia especá­fico, buscar dados dos áºltimos 7 dias
     let dadosComparacao = dadosDia;
     if (!dadosDia || dadosDia.length === 0) {
       const dataInicioRecente = new Date(dataFim);
@@ -96,16 +96,16 @@ export async function GET(request: NextRequest) {
         .lte('t0_lancamento', dataFim.toISOString().split('T')[0]);
       
       dadosComparacao = dadosRecentes || [];
-      console.log(`📊 Usando dados dos �ltimos 7 dias: ${dadosComparacao.length} registros`);
+      console.log(`ðŸ“Š Usando dados dos áºltimos 7 dias: ${dadosComparacao.length} registros`);
     } else {
-      console.log(`📊 Usando dados do dia espec�fico: ${dadosComparacao.length} registros`);
+      console.log(`ðŸ“Š Usando dados do dia especá­fico: ${dadosComparacao.length} registros`);
     }
 
-    // Calcular estat�sticas gerais
+    // Calcular estatá­sticas gerais
     const temposPeriodo = dadosPeriodo?.map((item: any) => item.t1_t2) || [];
     const temposComparacao = dadosComparacao?.map((item: any) => item.t1_t2) || [];
 
-    console.log(`🔢 Tempos extra�dos - Per�odo: ${temposPeriodo.length}, Compara��o: ${temposComparacao.length}`);
+    console.log(`ðŸ”¢ Tempos extraá­dos - Perá­odo: ${temposPeriodo.length}, Comparaá§á£o: ${temposComparacao.length}`);
 
     const tempoMedioGeral = temposPeriodo.length > 0 
       ? temposPeriodo.reduce((a: number, b: number) => a + b, 0) / temposPeriodo.length 
@@ -115,20 +115,20 @@ export async function GET(request: NextRequest) {
       ? temposComparacao.reduce((a: number, b: number) => a + b, 0) / temposComparacao.length 
       : 0;
 
-    console.log(`��️ Tempos calculados - Geral: ${tempoMedioGeral}s, Dia: ${tempoDiaEspecifico}s`);
+    console.log(`±ï¸ Tempos calculados - Geral: ${tempoMedioGeral}s, Dia: ${tempoDiaEspecifico}s`);
 
     const variacaoGeral = tempoMedioGeral > 0 
       ? ((tempoDiaEspecifico - tempoMedioGeral) / tempoMedioGeral) * 100 
       : 0;
 
-    // Contar produtos �nicos
+    // Contar produtos áºnicos
     const produtosUnicos = new Set(dadosPeriodo?.map((item: any) => `${item.prd_desc}_${item.grp_desc}`));
     const totalProdutos = produtosUnicos.size;
 
-    // Identificar produtos problema (com varia��o > 25% ou tempo > 20 min)
+    // Identificar produtos problema (com variaá§á£o > 25% ou tempo > 20 min)
     const produtosProblema = new Set();
     
-    // Agrupar por produto para an�lise individual
+    // Agrupar por produto para aná¡lise individual
     const produtoMap = new Map();
     dadosPeriodo?.forEach((item: any) => {
       const key = `${item.prd_desc}_${item.grp_desc}`;
@@ -140,7 +140,7 @@ export async function GET(request: NextRequest) {
       produto.pedidos += item.itm_qtd || 1;
     });
 
-    // Verificar produtos do dia espec�fico/compara��o
+    // Verificar produtos do dia especá­fico/comparaá§á£o
     const produtosComparacaoMap = new Map();
     dadosComparacao?.forEach((item: any) => {
       const key = `${item.prd_desc}_${item.grp_desc}`;
@@ -162,7 +162,7 @@ export async function GET(request: NextRequest) {
       
       const variacao = Math.abs(((tempoMedioComparacao - tempoMedioPeriodo) / tempoMedioPeriodo) * 100);
       
-      if (variacao > 25 || tempoMedioComparacao > 1200) { // > 25% varia��o ou > 20 minutos
+      if (variacao > 25 || tempoMedioComparacao > 1200) { // > 25% variaá§á£o ou > 20 minutos
         produtosProblema.add(dadosComparacao.produto);
       }
     });
@@ -176,7 +176,7 @@ export async function GET(request: NextRequest) {
       produtos_problema: produtosProblema.size
     };
 
-    console.log(`📈 Estat�sticas calculadas:`, {
+    console.log(`ðŸ“ˆ Estatá­sticas calculadas:`, {
       ...estatisticas,
       dados_periodo: dadosPeriodo?.length || 0,
       dados_comparacao: dadosComparacao?.length || 0
@@ -196,7 +196,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('�� Erro interno na API de estat�sticas:', error);
+    console.error('Œ Erro interno na API de estatá­sticas:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 } 

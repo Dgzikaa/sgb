@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { processDiscordCommand } from '@/lib/discord-bot-service';
 import { sgbDiscordService } from '@/lib/discord-service';
 
 // ========================================
-// 🧪 TESTES DO DISCORD BOT - SGB
+// ðŸ§ª TESTES DO DISCORD BOT - SGB
 // ========================================
 
 // Lista de comandos para testar
@@ -12,17 +12,17 @@ const COMANDOS_TESTE = [
   'dashboard executivo',
   'status dos checklists', 
   'stats do whatsapp',
-  'tempo de produ��o',
-  'score de sa�de',
-  'vis�o 360',
+  'tempo de produá§á£o',
+  'score de saáºde',
+  'visá£o 360',
   'top 5 clientes',
   'resumo do dia',
-  'performance dos funcion�rios',
+  'performance dos funcioná¡rios',
   'ajuda'
 ];
 
 // ========================================
-// 🧪 GET /api/discord/test (Teste Completo)
+// ðŸ§ª GET /api/discord/test (Teste Completo)
 // ========================================
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -32,12 +32,12 @@ export async function GET(request: NextRequest) {
   try {
     if (testarTodos) {
       // Testar todos os comandos
-      console.log('🧪 Iniciando teste completo do Discord Bot...');
+      console.log('ðŸ§ª Iniciando teste completo do Discord Bot...');
       
       const resultados = [];
       
       for (const cmd of COMANDOS_TESTE) {
-        console.log(`🤖 Testando comando: "${cmd}"`);
+        console.log(`ðŸ¤– Testando comando: "${cmd}"`);
         
         try {
           const success = await processDiscordCommand(cmd, 'Sistema de Teste', 3);
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
             timestamp: new Date().toISOString()
           });
           
-          // Pausa entre comandos para n�o sobrecarregar
+          // Pausa entre comandos para ná£o sobrecarregar
           await new Promise(resolve => setTimeout(resolve, 2000));
           
         } catch (error) {
@@ -68,8 +68,8 @@ export async function GET(request: NextRequest) {
       });
       
     } else if (comando) {
-      // Testar comando espec�fico
-      console.log(`🧪 Testando comando espec�fico: "${comando}"`);
+      // Testar comando especá­fico
+      console.log(`ðŸ§ª Testando comando especá­fico: "${comando}"`);
       
       const success = await processDiscordCommand(comando, 'Sistema de Teste', 3);
       
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
       });
       
     } else {
-      // Mostrar informa��es de teste
+      // Mostrar informaá§áµes de teste
       return NextResponse.json({
         success: true,
         message: 'Discord Bot SGB - Sistema de Testes',
@@ -92,15 +92,15 @@ export async function GET(request: NextRequest) {
           webhook_teste: '/api/discord/webhook?test=qual o maior faturamento'
         },
         instrucoes: [
-          '1. Use ?cmd= para testar um comando espec�fico',
+          '1. Use ?cmd= para testar um comando especá­fico',
           '2. Use ?all=true para testar todos os comandos',
-          '3. O bot processar� e enviar� a resposta no Discord'
+          '3. O bot processará¡ e enviará¡ a resposta no Discord'
         ]
       });
     }
 
   } catch (error) {
-    console.error('�� Erro no teste do Discord Bot:', error);
+    console.error('Œ Erro no teste do Discord Bot:', error);
     
     return NextResponse.json({
       success: false,
@@ -111,22 +111,22 @@ export async function GET(request: NextRequest) {
 }
 
 // ========================================
-// 🚀 POST /api/discord/test (Teste de Conex�o)
+// ðŸš€ POST /api/discord/test (Teste de Conexá£o)
 // ========================================
 export async function POST(request: NextRequest) {
   try {
-    console.log('🚀 Testando conex�o Discord...');
+    console.log('ðŸš€ Testando conexá£o Discord...');
     
     const body = await request.json();
     const { teste_conexao, comando_personalizado } = body;
     
     if (teste_conexao) {
-      // Testar conex�o do webhook Discord
+      // Testar conexá£o do webhook Discord
       const success = await sgbDiscordService.testarConexao();
       
       return NextResponse.json({
         success,
-        message: success ? 'Conex�o Discord OK' : 'Falha na conex�o Discord',
+        message: success ? 'Conexá£o Discord OK' : 'Falha na conexá£o Discord',
         webhook_status: success ? 'Ativo' : 'Inativo',
         timestamp: new Date().toISOString()
       });
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
     
     if (comando_personalizado) {
       // Testar comando personalizado
-      console.log(`🧪 Comando personalizado: "${comando_personalizado}"`);
+      console.log(`ðŸ§ª Comando personalizado: "${comando_personalizado}"`);
       
       const success = await processDiscordCommand(comando_personalizado, 'Teste POST', 3);
       
@@ -148,12 +148,12 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      message: 'Par�metros inv�lidos',
+      message: 'Pará¢metros invá¡lidos',
       parametros_aceitos: ['teste_conexao', 'comando_personalizado']
     }, { status: 400 });
 
   } catch (error) {
-    console.error('�� Erro no teste POST:', error);
+    console.error('Œ Erro no teste POST:', error);
     
     return NextResponse.json({
       success: false,

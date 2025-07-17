@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -10,9 +10,9 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🎯 Marketing 360� API - Carregando dados diretamente...')
+    console.log('ðŸŽ¯ Marketing 360° API - Carregando dados diretamente...')
 
-    // Obter dados do usu�rio para pegar o bar_id
+    // Obter dados do usuá¡rio para pegar o bar_id
     const userData = request.headers.get('x-user-data')
     let barId = 3 // fallback para desenvolvimento
 
@@ -20,15 +20,15 @@ export async function GET(request: NextRequest) {
       try {
         const parsedUser = JSON.parse(decodeURIComponent(userData))
         barId = parsedUser.bar_id || 3
-        console.log(`👤 Usando bar_id: ${barId}`)
+        console.log(`ðŸ‘¤ Usando bar_id: ${barId}`)
       } catch (e) {
-        console.log('��️ Erro ao parsear userData, usando barId padr�o:', e)
+        console.log('š ï¸ Erro ao parsear userData, usando barId padrá£o:', e)
       }
     }
 
     // Calcular datas
     const hoje = new Date()
-    const diasAtras = new Date(hoje.getTime() - 7 * 24 * 60 * 60 * 1000) // �ltimos 7 dias
+    const diasAtras = new Date(hoje.getTime() - 7 * 24 * 60 * 60 * 1000) // ášltimos 7 dias
 
     // 1. BUSCAR DADOS DO FACEBOOK
     const { data: facebookData, error: fbError } = await supabase
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       .order('data_referencia', { ascending: false })
 
     if (fbError) {
-      console.error('�� Erro ao buscar facebook_metrics:', fbError)
+      console.error('Œ Erro ao buscar facebook_metrics:', fbError)
     }
 
     // 2. BUSCAR DADOS DO INSTAGRAM
@@ -51,12 +51,12 @@ export async function GET(request: NextRequest) {
       .order('data_referencia', { ascending: false })
 
     if (igError) {
-      console.error('�� Erro ao buscar instagram_metrics:', igError)
+      console.error('Œ Erro ao buscar instagram_metrics:', igError)
     }
 
-    console.log(`📊 Dados encontrados - Facebook: ${facebookData?.length || 0}, Instagram: ${instagramData?.length || 0}`)
+    console.log(`ðŸ“Š Dados encontrados - Facebook: ${facebookData?.length || 0}, Instagram: ${instagramData?.length || 0}`)
 
-    // 3. PROCESSAR DADOS E CALCULAR M�TRICAS
+    // 3. PROCESSAR DADOS E CALCULAR Má‰TRICAS
     let totalFollowers = 0
     let facebookFollowers = 0
     let instagramFollowers = 0
@@ -84,11 +84,11 @@ export async function GET(request: NextRequest) {
 
     totalFollowers = facebookFollowers + instagramFollowers
 
-    // Calcular taxa de engajamento REAL (se n�o h� impress�es, mostrar 0)
+    // Calcular taxa de engajamento REAL (se ná£o há¡ impressáµes, mostrar 0)
     const engagementRate = totalImpressions > 0 ? 
       (totalEngagement / totalImpressions * 100) : 0
 
-    // Calcular varia��es (comparar com dados de ontem)
+    // Calcular variaá§áµes (comparar com dados de ontem)
     const ontem = new Date(hoje.getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     
     const yesterdayFb = facebookData?.find((d: any) => d.data_referencia === ontem)
@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
     const followersYesterday = (yesterdayFb?.page_fans || 0) + (yesterdayIg?.follower_count || 0)
     const followersChange = totalFollowers - followersYesterday
 
-    // ROI baseado apenas em dados reais (se n�o h� alcance, mostrar 0)
+    // ROI baseado apenas em dados reais (se ná£o há¡ alcance, mostrar 0)
     const roiEstimate = totalReach > 0 ? Math.min(Math.round(totalReach / 100 + engagementRate * 10), 500) : 0
 
     // Buscar dados de campanhas REAIS da tabela meta_campaigns_history
@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
       .gte('data_coleta', diasAtras.toISOString().split('T')[0])
       .order('data_coleta', { ascending: false })
 
-    console.log(`💰 Campanhas encontradas: ${campaignsData?.length || 0}`)
+    console.log(`ðŸ’° Campanhas encontradas: ${campaignsData?.length || 0}`)
 
     // Processar campanhas REAIS
     let campaignMetrics = {
@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
         active_campaigns: campaignsData.filter((c: any) => c.status === 'ACTIVE').length,
         total_spend: campaignsData.reduce((sum, c) => sum + (parseFloat(c.spend) || 0), 0),
         total_clicks: campaignsData.reduce((sum, c) => sum + (parseInt(c.clicks) || 0), 0),
-        conversion_rate: 0 // Calcular se tiver dados de convers�o
+        conversion_rate: 0 // Calcular se tiver dados de conversá£o
       }
     }
 
@@ -136,8 +136,8 @@ export async function GET(request: NextRequest) {
         metrics: {
           total_followers: totalFollowers,
           engagement_rate: Math.round(engagementRate * 10) / 10,
-          weekly_reach: totalReach, // Ser� 0 se n�o houver dados
-          roi_estimate: roiEstimate, // Ser� 0 se n�o houver dados
+          weekly_reach: totalReach, // Será¡ 0 se ná£o houver dados
+          roi_estimate: roiEstimate, // Será¡ 0 se ná£o houver dados
           facebook: {
             followers: facebookFollowers,
             engagement: totalImpressions > 0 ? Math.round(engagementRate * 0.6 * 10) / 10 : 0,
@@ -163,11 +163,11 @@ export async function GET(request: NextRequest) {
           followers_change_percent: followersYesterday > 0 ? 
             Math.round((followersChange / followersYesterday) * 100 * 100) / 100 : 0,
           engagement_change: Math.round((totalEngagement - (yesterdayFb?.page_engaged_users || 0) - (yesterdayIg?.profile_views || 0))),
-          reach_change: 0, // Ser� calculado quando houver dados hist�ricos
+          reach_change: 0, // Será¡ calculado quando houver dados histá³ricos
           trend_direction: followersChange > 0 ? 'growing' : followersChange < 0 ? 'declining' : 'stable'
         },
         last_updated: new Date().toISOString(),
-        data_source: 'real_data_only', // Indicar que s�o apenas dados reais
+        data_source: 'real_data_only', // Indicar que sá£o apenas dados reais
         data_availability: {
           followers: totalFollowers > 0,
           reach: totalReach > 0,
@@ -191,7 +191,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    console.log('�� Marketing 360� - Dados processados:', {
+    console.log('œ… Marketing 360° - Dados processados:', {
       total_followers: responseData.data.metrics.total_followers,
       engagement_rate: responseData.data.metrics.engagement_rate,
       source: responseData.data.data_source
@@ -200,12 +200,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(responseData)
 
   } catch (error) {
-    console.error('�� Erro na API Marketing 360�:', error)
+    console.error('Œ Erro na API Marketing 360°:', error)
     
     // Retornar erro real, SEM dados simulados
     return NextResponse.json({
       success: false,
-      error: 'Erro ao carregar dados do Marketing 360�',
+      error: 'Erro ao carregar dados do Marketing 360°',
       details: error instanceof Error ? error.message : 'Erro desconhecido',
       data_source: 'error'
     }, { status: 500 })

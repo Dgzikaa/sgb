@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 interface ProducaoComProduto {
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       timestamp_finalizado
     } = body
 
-    console.log(`🏭 Receitas: Salvando produ��o`, {
+    console.log(`ðŸ­ Receitas: Salvando produá§á£o`, {
       bar_id,
       produto: produto_nome,
       funcionario,
@@ -61,17 +61,17 @@ export async function POST(request: NextRequest) {
       tempo: tempo_total_segundos
     })
 
-    // Valida��es b�sicas
+    // Validaá§áµes bá¡sicas
     if (!bar_id || !produto_codigo || !funcionario || !peso_bruto_g) {
       return NextResponse.json({
         success: false,
-        error: 'Dados obrigat�rios: bar_id, produto_codigo, funcionario, peso_bruto_g'
+        error: 'Dados obrigatá³rios: bar_id, produto_codigo, funcionario, peso_bruto_g'
       }, { status: 400 })
     }
 
     const supabase = await getSupabaseClient()
     if (!supabase) {
-      console.error('�� Erro ao conectar com Supabase')
+      console.error('Œ Erro ao conectar com Supabase')
       return NextResponse.json({ 
         success: false,
         error: 'Erro ao conectar com banco' 
@@ -86,10 +86,10 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (produtoError || !produto) {
-      console.error('�� Produto n�o encontrado:', produto_codigo)
+      console.error('Œ Produto ná£o encontrado:', produto_codigo)
       return NextResponse.json({ 
         success: false, 
-        error: 'Produto n�o encontrado: ' + produto_codigo
+        error: 'Produto ná£o encontrado: ' + produto_codigo
       }, { status: 400 })
     }
 
@@ -98,13 +98,13 @@ export async function POST(request: NextRequest) {
     let inicioProducao
     
     if (timestamp_iniciado) {
-      // Se foi informado timestamp de in�cio, usar ele
+      // Se foi informado timestamp de iná­cio, usar ele
       inicioProducao = new Date(timestamp_iniciado)
     } else if (tempo_total_segundos && tempo_total_segundos > 0) {
-      // Se temos tempo total, calcular in�cio = fim - tempo
+      // Se temos tempo total, calcular iná­cio = fim - tempo
       inicioProducao = new Date(fimProducao.getTime() - (tempo_total_segundos * 1000))
     } else {
-      // Caso padr�o: in�cio = agora - 1 minuto
+      // Caso padrá£o: iná­cio = agora - 1 minuto
       inicioProducao = new Date(fimProducao.getTime() - 60000)
     }
     
@@ -119,14 +119,14 @@ export async function POST(request: NextRequest) {
       itens_produzidos_real: quantidade_produzida || null,
       inicio_producao: inicioProducao.toISOString(),
       fim_producao: fimProducao.toISOString(),
-      // tempo_total_producao ser� calculado automaticamente no banco via trigger ou computed column
+      // tempo_total_producao será¡ calculado automaticamente no banco via trigger ou computed column
       status: 'finalizada',
       observacoes: observacoes || '',
       fator_correcao: fator_correcao || (peso_bruto_g > 0 ? (peso_limpo_g / peso_bruto_g) * 100 : 0),
       desvio: desvio || (rendimento_teorico > 0 ? (rendimento_real / rendimento_teorico) * 100 : 0)
     }
 
-    console.log('📊 Dados adaptados para tabela producoes:', dadosProducao)
+    console.log('ðŸ“Š Dados adaptados para tabela producoes:', dadosProducao)
 
     const { data, error } = await supabase
       .from('producoes')
@@ -134,23 +134,23 @@ export async function POST(request: NextRequest) {
       .select()
 
     if (error) {
-      console.error('�� Erro ao salvar produ��o:', error)
+      console.error('Œ Erro ao salvar produá§á£o:', error)
       return NextResponse.json({ 
         success: false, 
-        error: 'Erro ao salvar dados de produ��o: ' + error.message
+        error: 'Erro ao salvar dados de produá§á£o: ' + error.message
       }, { status: 500 })
     }
 
-    console.log(`�� Produ��o salva com ID: ${data[0]?.id}`)
+    console.log(`œ… Produá§á£o salva com ID: ${data[0]?.id}`)
 
     return NextResponse.json({
       success: true,
       data: data[0],
-      message: 'Produ��o registrada com sucesso!'
+      message: 'Produá§á£o registrada com sucesso!'
     })
 
   } catch (error) {
-    console.error('�� Erro interno:', error)
+    console.error('Œ Erro interno:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor: ' + (error as Error).message
@@ -158,17 +158,17 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// API para buscar hist�rico de produ��es
+// API para buscar histá³rico de produá§áµes
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const barId = parseInt(searchParams.get('bar_id') || '1')
     const produtoCodigo = searchParams.get('produto_codigo')
     const funcionario = searchParams.get('funcionario')
-    const data = searchParams.get('data') // Novo par�metro de data
+    const data = searchParams.get('data') // Novo pará¢metro de data
     const limite = parseInt(searchParams.get('limite') || '50')
 
-    console.log(`📊 Receitas: Buscando hist�rico de produ��es`, {
+    console.log(`ðŸ“Š Receitas: Buscando histá³rico de produá§áµes`, {
       barId,
       produtoCodigo,
       funcionario,
@@ -195,7 +195,7 @@ export async function GET(request: NextRequest) {
       .order('fim_producao', { ascending: false })
       .limit(limite)
 
-    // Filtro por data espec�fica
+    // Filtro por data especá­fica
     if (data) {
       const dataInicio = `${data}T00:00:00`
       const dataFim = `${data}T23:59:59`
@@ -206,7 +206,7 @@ export async function GET(request: NextRequest) {
 
     // Filtros opcionais (adaptar para a nova estrutura)
     if (produtoCodigo) {
-      // Buscar pelo ID do produto em vez do c�digo
+      // Buscar pelo ID do produto em vez do cá³digo
       const { data: produto } = await supabase
         .from('produtos')
         .select('id')
@@ -221,14 +221,14 @@ export async function GET(request: NextRequest) {
     const { data: producoes, error } = await query
 
     if (error) {
-      console.error('�� Erro ao buscar hist�rico:', error)
+      console.error('Œ Erro ao buscar histá³rico:', error)
       return NextResponse.json({ 
         success: false, 
         error: 'Erro ao buscar dados' 
       }, { status: 500 })
     }
 
-    // Transformar dados para incluir informa��es do produto
+    // Transformar dados para incluir informaá§áµes do produto
     const producoesComProdutos = producoes?.map((producao: any) => ({
       ...producao,
       produto_codigo: producao.produtos?.codigo,
@@ -243,7 +243,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro interno:', error)
+    console.error('Œ Erro interno:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor' 

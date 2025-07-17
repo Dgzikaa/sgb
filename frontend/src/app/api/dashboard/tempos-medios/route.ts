@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
@@ -12,12 +12,12 @@ export async function GET(request: NextRequest) {
 
     if (!data_inicio || !data_fim || !bar_id) {
       return NextResponse.json(
-        { success: false, error: 'Par�metros obrigat�rios: data_inicio, data_fim, bar_id' },
+        { success: false, error: 'Pará¢metros obrigatá³rios: data_inicio, data_fim, bar_id' },
         { status: 400 }
       )
     }
 
-    console.log('��️ API Tempos M�dios - Par�metros recebidos:', {
+    console.log('±ï¸ API Tempos Má©dios - Pará¢metros recebidos:', {
       data_inicio,
       data_fim,
       bar_id
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     // Inicializar cliente Supabase
     const supabase = await getSupabaseClient()
     if (!supabase) {
-      console.error('�� Erro ao conectar com banco')
+      console.error('Œ Erro ao conectar com banco')
       return NextResponse.json(
         { success: false, error: 'Erro ao conectar com banco' },
         { status: 500 }
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
       const dataInicioInt = parseInt(data_inicio.replace(/-/g, ''))
       const dataFimInt = parseInt(data_fim.replace(/-/g, ''))
 
-      console.log('📅 Buscando tempos no per�odo:', {
+      console.log('ðŸ“… Buscando tempos no perá­odo:', {
         data_inicio_int: dataInicioInt,
         data_fim_int: dataFimInt
       })
@@ -65,14 +65,14 @@ export async function GET(request: NextRequest) {
         .not('prd_desc', 'is', null)
 
       if (temposError) {
-        console.error('�� Erro ao buscar dados de tempo:', temposError)
+        console.error('Œ Erro ao buscar dados de tempo:', temposError)
         return NextResponse.json(
           { success: false, error: 'Erro ao buscar dados de tempo: ' + temposError.message },
           { status: 500 }
         )
       }
 
-      console.log(`📊 Registros de tempo encontrados: ${temposData?.length || 0}`)
+      console.log(`ðŸ“Š Registros de tempo encontrados: ${temposData?.length || 0}`)
 
       if (!temposData || temposData.length === 0) {
         return NextResponse.json({
@@ -89,26 +89,26 @@ export async function GET(request: NextRequest) {
             periodo: `${data_inicio} a ${data_fim}`,
             bar_id: parseInt(bar_id),
             registros_encontrados: 0,
-            observacao: 'Nenhum dado encontrado para o per�odo'
+            observacao: 'Nenhum dado encontrado para o perá­odo'
           }
         })
       }
 
-      // Fun��o para classificar produtos como cozinha ou bar
+      // Funá§á£o para classificar produtos como cozinha ou bar
       const isComida = (produto: string, grupo: string): boolean => {
         const produtoLower = produto.toLowerCase()
         const grupoLower = grupo?.toLowerCase() || ''
         
         const palavrasComida = [
           'pizza', 'hambur', 'sanduich', 'batata', 'frango', 'carne', 'peixe',
-          'salada', 'prato', 'entrada', 'petisco', 'lanche', 'comida', 'por��o',
+          'salada', 'prato', 'entrada', 'petisco', 'lanche', 'comida', 'porá§á£o',
           'caldinho', 'caldo', 'sopa', 'risoto', 'massa', 'lasanha', 'nhoque'
         ]
         
         const gruposComida = [
           'pratos', 'lanches', 'entradas', 'petiscos', 'pizzas', 'hamburgers',
           'sanduiches', 'saladas', 'massas', 'risotos', 'carnes', 'peixes',
-          'frango', 'por��es', 'comidas'
+          'frango', 'porá§áµes', 'comidas'
         ]
         
         return palavrasComida.some(palavra => produtoLower.includes(palavra)) ||
@@ -121,20 +121,20 @@ export async function GET(request: NextRequest) {
         
         const palavrasBebida = [
           'cerveja', 'chopp', 'vinho', 'caipirinha', 'drink', 'coquetel',
-          'refrigerante', 'suco', '�gua', 'caf�', 'whisky', 'vodka', 'gin',
-          'cacha�a', 'rum', 'tequila', 'licor', 'espumante', 'champagne'
+          'refrigerante', 'suco', 'á¡gua', 'cafá©', 'whisky', 'vodka', 'gin',
+          'cachaá§a', 'rum', 'tequila', 'licor', 'espumante', 'champagne'
         ]
         
         const gruposBebida = [
-          'bebidas', 'cervejas', 'vinhos', 'drinks', 'coquet�is', 'refrigerantes',
-          'sucos', '�guas', 'caf�s', 'destilados', 'licores', 'espumantes'
+          'bebidas', 'cervejas', 'vinhos', 'drinks', 'coquetá©is', 'refrigerantes',
+          'sucos', 'á¡guas', 'cafá©s', 'destilados', 'licores', 'espumantes'
         ]
         
         return palavrasBebida.some(palavra => produtoLower.includes(palavra)) ||
                gruposBebida.some(grupo => grupoLower.includes(grupo))
       }
 
-      // Processar dados e calcular tempos m�dios
+      // Processar dados e calcular tempos má©dios
       let temposCozinha: number[] = []
       let temposBar: number[] = []
       let pedidosCozinha = 0
@@ -149,14 +149,14 @@ export async function GET(request: NextRequest) {
         let isValidTempo = false
 
         if (isComida(produto, grupo)) {
-          // Para comidas: usar t1_t2 (in�cio produ��o at� fim produ��o)
+          // Para comidas: usar t1_t2 (iná­cio produá§á£o atá© fim produá§á£o)
           if (item.t1_t2 && item.t1_t2 > 0 && item.t1_t2 <= 2700) { // max 45 min
             tempo = item.t1_t2
             isValidTempo = true
             pedidosCozinha += quantidade
           }
         } else if (isBebida(produto, grupo)) {
-          // Para bebidas: usar t0_t3 (lan�amento at� entrega)
+          // Para bebidas: usar t0_t3 (laná§amento atá© entrega)
           if (item.t0_t3 && item.t0_t3 > 0 && item.t0_t3 <= 1200) { // max 20 min
             tempo = item.t0_t3
             isValidTempo = true
@@ -171,7 +171,7 @@ export async function GET(request: NextRequest) {
           }
         }
 
-        // Adicionar tempo v�lido aos arrays correspondentes
+        // Adicionar tempo vá¡lido aos arrays correspondentes
         if (isValidTempo && tempo > 0) {
           if (isComida(produto, grupo) || (!isBebida(produto, grupo))) {
             temposCozinha.push(tempo)
@@ -181,7 +181,7 @@ export async function GET(request: NextRequest) {
         }
       })
 
-      // Calcular m�dias
+      // Calcular má©dias
       const tempoMedioCozinha = temposCozinha.length > 0 
         ? Math.round(temposCozinha.reduce((a, b) => a + b, 0) / temposCozinha.length)
         : 0
@@ -204,7 +204,7 @@ export async function GET(request: NextRequest) {
         pedidos_bar: pedidosBar
       }
 
-      console.log('��️ Tempos calculados:', tempos)
+      console.log('±ï¸ Tempos calculados:', tempos)
 
       return NextResponse.json({
         success: true,
@@ -216,15 +216,15 @@ export async function GET(request: NextRequest) {
           tempos_validos_cozinha: temposCozinha.length,
           tempos_validos_bar: temposBar.length,
           criterios: {
-            comidas: 't1_t2 (in�cio at� fim produ��o), max 45min',
-            bebidas: 't0_t3 (lan�amento at� entrega), max 20min',
+            comidas: 't1_t2 (iná­cio atá© fim produá§á£o), max 45min',
+            bebidas: 't0_t3 (laná§amento atá© entrega), max 20min',
             indefinidos: 't1_t2 como fallback, max 60min'
           }
         }
       })
 
     } catch (dbError) {
-      console.error('�� Erro ao buscar tempos do banco:', dbError)
+      console.error('Œ Erro ao buscar tempos do banco:', dbError)
       return NextResponse.json(
         { success: false, error: 'Erro ao buscar tempos: ' + (dbError as Error).message },
         { status: 500 }
@@ -232,7 +232,7 @@ export async function GET(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('�� Erro na API Tempos M�dios:', error)
+    console.error('Œ Erro na API Tempos Má©dios:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor: ' + (error as Error).message },
       { status: 500 }

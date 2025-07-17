@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    console.log('📊 Dados recebidos para produ��o:', body)
+    console.log('ðŸ“Š Dados recebidos para produá§á£o:', body)
 
     const supabase = await getSupabaseClient()
     if (!supabase) {
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
 
-    // 1. Buscar produto para obter informa��es b�sicas
+    // 1. Buscar produto para obter informaá§áµes bá¡sicas
     const { data: produto, error: produtoError } = await supabase
       .from('produtos')
       .select('id, nome, rendimento_esperado')
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     if (produtoError || !produto) {
       return NextResponse.json({
         success: false,
-        error: `Produto ${body.produto_codigo} n�o encontrado: ${produtoError?.message}`
+        error: `Produto ${body.produto_codigo} ná£o encontrado: ${produtoError?.message}`
       }, { status: 404 })
     }
 
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     // 3. Identificar insumo chefe (maior quantidade + palavras-chave)
     let insumoChefe = null
-    let receitaId = receitas[0].id // Usar o ID da primeira receita como refer�ncia
+    let receitaId = receitas[0].id // Usar o ID da primeira receita como referáªncia
     let maiorQuantidade = 0
     
     for (const receita of receitas) {
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 4. Calcular m�tricas
+    // 4. Calcular má©tricas
     const pesoBruto = parseFloat(body.peso_bruto_g) || 0
     const pesoLiquido = parseFloat(body.peso_limpo_g) || 0
     const rendimentoProduzido = parseFloat(body.peso_final_g) || 0
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
     const fatorCorrecao = pesoBruto > 0 ? pesoLiquido / pesoBruto : 0
     const desvio = rendimentoEsperado > 0 ? rendimentoProduzido / rendimentoEsperado : 0
 
-    // 5. Preparar dados para inser��o
+    // 5. Preparar dados para inserá§á£o
     const dadosProducao = {
       bar_id: 3,
       receita_id: receitaId, // Usar ID correto da receita
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
       desvio: desvio
     }
 
-    console.log('📊 Dados calculados:', {
+    console.log('ðŸ“Š Dados calculados:', {
       produto: produto.nome,
       insumo_chefe_id: insumoChefe,
       rendimento_esperado: rendimentoEsperado,
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
       percentual_rendimento: `${(desvio * 100).toFixed(1)}%`
     })
 
-    // 6. Inserir produ��o no banco
+    // 6. Inserir produá§á£o no banco
     const { data: producao, error: producaoError } = await supabase
       .from('producoes')
       .insert(dadosProducao)
@@ -127,18 +127,18 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (producaoError) {
-      console.error('�� Erro ao inserir produ��o:', producaoError)
+      console.error('Œ Erro ao inserir produá§á£o:', producaoError)
       return NextResponse.json({
         success: false,
-        error: `Erro ao salvar produ��o: ${producaoError.message}`
+        error: `Erro ao salvar produá§á£o: ${producaoError.message}`
       }, { status: 500 })
     }
 
-    console.log('�� Produ��o salva com sucesso:', producao.id)
+    console.log('œ… Produá§á£o salva com sucesso:', producao.id)
 
     return NextResponse.json({
       success: true,
-      message: 'Produ��o salva com sucesso!',
+      message: 'Produá§á£o salva com sucesso!',
       data: {
         producao_id: producao.id,
         produto_nome: produto.nome,
@@ -147,13 +147,13 @@ export async function POST(request: NextRequest) {
         rendimento_produzido: rendimentoProduzido,
         fator_correcao: Math.round(fatorCorrecao * 10000) / 100, // % com 2 decimais
         desvio: Math.round(desvio * 10000) / 100, // % com 2 decimais
-        performance: desvio >= 1.0 ? 'Excelente (��100%)' : 
+        performance: desvio >= 1.0 ? 'Excelente (‰¥100%)' : 
                     desvio >= 0.9 ? 'Bom (90-99%)' : 'Abaixo do esperado (<90%)'
       }
     })
 
   } catch (error) {
-    console.error('�� Erro interno:', error)
+    console.error('Œ Erro interno:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro interno do servidor: ' + String(error)
@@ -169,7 +169,7 @@ export async function GET(request: NextRequest) {
     const dataInicio = searchParams.get('data_inicio')
     const dataFim = searchParams.get('data_fim')
 
-    console.log(`🏭 Terminal: Buscando hist�rico de produ��o`, {
+    console.log(`ðŸ­ Terminal: Buscando histá³rico de produá§á£o`, {
       bar_id: barId,
       funcionario,
       periodo: `${dataInicio} - ${dataFim}`
@@ -180,7 +180,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 })
     }
 
-    // Buscar dados de produ��o
+    // Buscar dados de produá§á£o
     let query = supabase
       .from('producao_terminal')
       .select('*')
@@ -202,11 +202,11 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query.limit(100)
 
     if (error) {
-      console.error('�� Erro ao buscar hist�rico:', error)
-      return NextResponse.json({ error: 'Erro ao buscar hist�rico' }, { status: 500 })
+      console.error('Œ Erro ao buscar histá³rico:', error)
+      return NextResponse.json({ error: 'Erro ao buscar histá³rico' }, { status: 500 })
     }
 
-    // Calcular estat�sticas do per�odo
+    // Calcular estatá­sticas do perá­odo
     const estatisticas = {
       total_producoes: data?.length || 0,
       tempo_medio: 0,
@@ -251,7 +251,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro na busca do hist�rico:', error)
+    console.error('Œ Erro na busca do histá³rico:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor: ' + (error as Error).message },
       { status: 500 }

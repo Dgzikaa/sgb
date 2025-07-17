@@ -1,30 +1,30 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 
 // =====================================================
-// 📋 API PARA COPIAR ITENS ENTRE CHECKLISTS
+// ðŸ“‹ API PARA COPIAR ITENS ENTRE CHECKLISTS
 // =====================================================
 
 export async function POST(req: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies })
     
-    // Verificar autentica��o
+    // Verificar autenticaá§á£o
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'N�o autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'Ná£o autorizado' }, { status: 401 })
     }
 
     const { targetChecklistId, items } = await req.json()
 
     if (!targetChecklistId || !items || !Array.isArray(items)) {
       return NextResponse.json({ 
-        error: 'Dados inv�lidos' 
+        error: 'Dados invá¡lidos' 
       }, { status: 400 })
     }
 
-    // Verificar se o checklist de destino existe e pertence ao usu�rio
+    // Verificar se o checklist de destino existe e pertence ao usuá¡rio
     const { data: targetChecklist, error: checklistError } = await supabase
       .from('checklists')
       .select('id, titulo, user_id')
@@ -34,11 +34,11 @@ export async function POST(req: NextRequest) {
 
     if (checklistError || !targetChecklist) {
       return NextResponse.json({ 
-        error: 'Checklist de destino n�o encontrado' 
+        error: 'Checklist de destino ná£o encontrado' 
       }, { status: 404 })
     }
 
-    // Obter a pr�xima ordem dispon�vel no checklist de destino
+    // Obter a prá³xima ordem disponá­vel no checklist de destino
     const { data: lastItem } = await supabase
       .from('checklist_items')
       .select('ordem')
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     let nextOrder = lastItem?.ordem ? lastItem.ordem + 1 : 1
 
-    // Preparar itens para inser��o
+    // Preparar itens para inserá§á£o
     const itemsToInsert = items.map((item: any) => ({
       checklist_id: targetChecklistId,
       titulo: item.titulo,
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
       }, { status: 500 })
     }
 
-    // Atualizar estat�sticas do checklist de destino
+    // Atualizar estatá­sticas do checklist de destino
     const { error: updateError } = await supabase
       .from('checklists')
       .update({
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
       .eq('id', targetChecklistId)
 
     if (updateError) {
-      console.error('Erro ao atualizar estat�sticas:', updateError)
+      console.error('Erro ao atualizar estatá­sticas:', updateError)
     }
 
     return NextResponse.json({

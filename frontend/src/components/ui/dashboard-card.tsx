@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { ReactNode } from 'react'
 
@@ -53,9 +53,9 @@ export function DashboardCard({
   }
 
   const changeIcons = {
-    positive: '��',
-    negative: '��',
-    neutral: '��'
+    positive: '†—',
+    negative: '†˜',
+    neutral: '†’'
   }
 
   return (
@@ -189,7 +189,7 @@ export function DashboardGrid({
   )
 }
 
-// Componente de m�trica simples
+// Componente de má©trica simples
 interface MetricCardProps {
   label: string
   value: string | number
@@ -229,7 +229,7 @@ export function MetricCard({
   )
 }
 
-// Componente de estat�stica com gr�fico simples
+// Componente de estatá­stica com grá¡fico simples
 interface StatCardProps {
   title: string
   value: string | number
@@ -252,9 +252,9 @@ export function StatCard({
   }
 
   const trendIcons = {
-    up: '📈',
-    down: '📉',
-    stable: '📊'
+    up: 'ðŸ“ˆ',
+    down: 'ðŸ“‰',
+    stable: 'ðŸ“Š'
   }
 
   return (

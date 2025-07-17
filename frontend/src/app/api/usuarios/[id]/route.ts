@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -6,32 +6,69 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// GET - Buscar usuário específico
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// GET - Listar funcioná¡rios com WhatsApp cadastrado
+export async function GET(req: NextRequest) {
   try {
-    const { data: usuario, error } = await supabase
+    const { searchParams } = new URL(req.url)
+    const barId = searchParams.get('bar_id')
+    const includeWithout = searchParams.get('include_without') === 'true'
+
+    let query = supabase
       .from('usuarios_bar')
-      .select('*')
-      .eq('id', params.id)
-      .single()
+      .select('id, nome, email, celular, ativo, cargo, departamento')
+      .eq('ativo', true)
+
+    if (barId) {
+      query = query.eq('bar_id', barId)
+    }
+
+    const { data: usuarios, error } = await query
 
     if (error) {
+      console.error('Erro ao buscar usuá¡rios:', error)
       return NextResponse.json(
-        { success: false, error: 'Usuário não encontrado' },
-        { status: 404 }
+        { success: false, error: 'Erro ao buscar usuá¡rios' },
+        { status: 500 }
       )
     }
 
-    return NextResponse.json({
+    // Filtrar e categorizar usuá¡rios
+    const usuariosComWhatsApp = usuarios?.filter((u: any) =>
+      u.whatsapp &&
+      typeof u.whatsapp === 'string' &&
+      u.whatsapp.replace(/\D/g, '').length >= 10
+    ) || []
+
+    const usuariosSemWhatsApp = usuarios?.filter((u: any) =>
+      !u.whatsapp ||
+      typeof u.whatsapp !== 'string' ||
+      u.whatsapp.replace(/\D/g, '').length < 10
+    ) || []
+
+    // Validar náºmeros de WhatsApp
+    const usuariosValidados = usuariosComWhatsApp.map((usuario: any) => ({
+      ...usuario,
+      whatsapp_valido: usuario.whatsapp && usuario.whatsapp.replace(/\D/g, '').length >= 10
+    }))
+
+    const response: any = {
       success: true,
-      usuario
-    })
+      com_whatsapp: usuariosValidados,
+      total_com_whatsapp: usuariosValidados.length,
+      total_whatsapp_valido: usuariosValidados.filter((u: any) => u.whatsapp_valido).length
+    }
+
+    if (includeWithout) {
+      response.sem_whatsapp = usuariosSemWhatsApp
+      response.total_sem_whatsapp = usuariosSemWhatsApp.length
+    }
+
+    response.total_usuarios = usuarios?.length || 0
+
+    return NextResponse.json(response)
 
   } catch (error) {
-    console.error('Erro ao buscar usuário:', error)
+    console.error('Erro ao buscar usuá¡rios com WhatsApp:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno' },
       { status: 500 }
@@ -39,70 +76,62 @@ export async function GET(
   }
 }
 
-// PATCH - Atualizar dados do usuário (incluindo celular)
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// POST - Atualizar máºltiplos usuá¡rios (para operaá§áµes em lote)
+export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
-    
-    // Validar celular se fornecido
-    if (body.celular) {
-      const celularNumbers = body.celular.replace(/\D/g, '')
-      
-      // Validação básica: 11 dígitos, DDD válido, terceiro dígito 9
-      if (celularNumbers.length !== 11) {
-        return NextResponse.json(
-          { success: false, error: 'Celular deve ter 11 dígitos' },
-          { status: 400 }
-        )
-      }
-      
-      const ddd = parseInt(celularNumbers.substring(0, 2))
-      if (ddd < 11 || ddd > 99) {
-        return NextResponse.json(
-          { success: false, error: 'DDD inválido' },
-          { status: 400 }
-        )
-      }
-      
-      if (celularNumbers[2] !== '9') {
-        return NextResponse.json(
-          { success: false, error: 'Terceiro dígito deve ser 9 (celular)' },
-          { status: 400 }
-        )
-      }
-      
-      body.celular = celularNumbers // Salvar apenas números
-    }
+    const { operacao, usuarios } = await req.json()
 
-    const { data: usuario, error } = await supabase
-      .from('usuarios_bar')
-      .update({
-        ...body,
-        updated_at: new Date().toISOString()
+    if (operacao === 'validar_whatsapp') {
+      // Validar náºmeros WhatsApp em lote
+      const resultados = []
+
+      for (const usuario of usuarios) {
+        const numero = usuario.celular?.replace(/\D/g, '')
+        
+        if (!numero || numero.length !== 11) {
+          resultados.push({
+            id: usuario.id,
+            valido: false,
+            erro: 'Náºmero invá¡lido'
+          })
+          continue
+        }
+
+        try {
+          // Aqui vocáª poderia fazer uma validaá§á£o real via API
+          // Por enquanto, apenas validaá§á£o de formato
+          const isValid = parseInt(numero.substring(0, 2)) >= 11 && 
+                         parseInt(numero.substring(0, 2)) <= 99 &&
+                         numero[2] === '9'
+
+          resultados.push({
+            id: usuario.id,
+            valido: isValid,
+            numero: numero
+          })
+
+        } catch (error) {
+          resultados.push({
+            id: usuario.id,
+            valido: false,
+            erro: 'Erro na validaá§á£o'
+          })
+        }
+      }
+
+      return NextResponse.json({
+        success: true,
+        resultados
       })
-      .eq('id', params.id)
-      .select()
-      .single()
-
-    if (error) {
-      console.error('Erro ao atualizar usuário:', error)
-      return NextResponse.json(
-        { success: false, error: 'Erro ao atualizar usuário' },
-        { status: 500 }
-      )
     }
 
-    return NextResponse.json({
-      success: true,
-      usuario,
-      message: 'Usuário atualizado com sucesso'
-    })
+    return NextResponse.json(
+      { success: false, error: 'Operaá§á£o ná£o suportada' },
+      { status: 400 }
+    )
 
   } catch (error) {
-    console.error('Erro ao atualizar usuário:', error)
+    console.error('Erro na operaá§á£o em lote:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno' },
       { status: 500 }

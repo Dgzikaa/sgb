@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -65,7 +65,7 @@ export function ModernSidebar() {
   const { isRole } = usePermissions()
   const { badges } = useMenuBadges()
   
-  // Fun��o para obter itens da sidebar com badges din�micos
+  // Funá§á£o para obter itens da sidebar com badges diná¢micos
   const getSidebarItems = (): SidebarItem[] => [
     { 
       icon: Home, 
@@ -84,7 +84,7 @@ export function ModernSidebar() {
           icon: CheckSquare, 
           label: 'Checklists', 
           href: '/checklists/abertura', 
-          description: 'Checklist de abertura di�ria'
+          description: 'Checklist de abertura diá¡ria'
         },
         { 
           icon: Users, 
@@ -96,7 +96,7 @@ export function ModernSidebar() {
     },
     { 
       icon: ChefHat, 
-      label: 'Produ��o', 
+      label: 'Produá§á£o', 
       color: 'text-orange-600 dark:text-orange-400',
       badge: badges.producao > 0 ? badges.producao : undefined,
       subItems: [
@@ -107,7 +107,7 @@ export function ModernSidebar() {
         },
         { 
           icon: Zap, 
-          label: 'Terminal de Produ��o', 
+          label: 'Terminal de Produá§á£o', 
           href: '/producao/terminal'
         },
       ]
@@ -120,12 +120,12 @@ export function ModernSidebar() {
       subItems: [
         { 
           icon: FileText, 
-          label: 'Compet�ncia', 
+          label: 'Competáªncia', 
           href: '/relatorios/financeiro-competencia'
         },
         { 
           icon: FileText, 
-          label: 'DRE Ordin�rio', 
+          label: 'DRE Ordiná¡rio', 
           href: '/relatorios/contaazul-competencia'
         },
       ]
@@ -145,17 +145,17 @@ export function ModernSidebar() {
     },
     // { 
     //   icon: BarChart3, 
-    //   label: 'Vis�o Geral', 
+    //   label: 'Visá£o Geral', 
     //   href: '/visao-geral', 
     //   color: 'text-purple-600 dark:text-purple-400',
     //   badge: badges.visaoGeral > 0 ? badges.visaoGeral : undefined
     // },
   ]
 
-  // Fun��o para obter configura��es com badges
+  // Funá§á£o para obter configuraá§áµes com badges
   const getConfiguracoesItems = (): SidebarItem => ({ 
     icon: Settings, 
-    label: 'Configura��es', 
+    label: 'Configuraá§áµes', 
     color: 'text-gray-600 dark:text-gray-400',
     badge: badges.configuracoes > 0 ? badges.configuracoes : undefined,
     subItems: [
@@ -171,12 +171,12 @@ export function ModernSidebar() {
       },
       { 
         icon: Database, 
-        label: 'Integra��es', 
+        label: 'Integraá§áµes', 
         href: '/configuracoes/integracoes'
       },
       { 
         icon: Shield, 
-        label: 'Seguran�a', 
+        label: 'Seguraná§a', 
         href: '/configuracoes/seguranca'
       },
       { 
@@ -211,7 +211,7 @@ export function ModernSidebar() {
   // Obter itens da sidebar com badges
   const sidebarItems = getSidebarItems()
   
-  // Combinar itens da sidebar com configura��es se for admin
+  // Combinar itens da sidebar com configuraá§áµes se for admin
   const allSidebarItems = [...sidebarItems]
   if (isRole('admin')) {
     allSidebarItems.push(getConfiguracoesItems())
@@ -248,7 +248,7 @@ export function ModernSidebar() {
       return result
     }
     
-    // Se n�o foi manipulado manualmente, pode usar expans�o autom�tica por hover
+    // Se ná£o foi manipulado manualmente, pode usar expansá£o automá¡tica por hover
     if (isHovered && hasActiveSubItem(allSidebarItems.find((item: any) => item.label === label)?.subItems)) {
       return true
     }
@@ -398,7 +398,7 @@ export function ModernSidebar() {
   )
 }
 
-// Componente auxiliar para renderizar o conte�do do item
+// Componente auxiliar para renderizar o conteáºdo do item
 function ItemContent({ 
   item, 
   isItemActive, 

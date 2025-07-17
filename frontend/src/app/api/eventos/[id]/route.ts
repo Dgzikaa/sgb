@@ -1,86 +1,125 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest) {
   try {
-    const { id } = await params;
-    console.log('🗑️ [DELETE EVENTO] Iniciando exclusão do evento ID:', id);
-    
-    const eventoId = parseInt(id);
-    if (isNaN(eventoId)) {
-      console.log('❌ [DELETE EVENTO] ID inválido:', id);
-      return NextResponse.json({ 
-        success: false, 
-        error: 'ID do evento inválido' 
+    // Inicializar cliente Supabase
+    const supabase = await getSupabaseClient();
+    if (!supabase) {
+      return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 });
+    }
+    const { data_evento, bar_id, publico_real, faturamento_liquido, receita_couvert, receita_ingressos, receita_bar } = await request.json();
+
+    if (!data_evento || !bar_id) {
+      return NextResponse.json({
+        success: false,
+        error: 'Data do evento e bar_id sá£o obrigatá³rios'
       }, { status: 400 });
     }
 
-    console.log('🔗 [DELETE EVENTO] Inicializando cliente Supabase...');
-    const supabase = await getSupabaseClient();
-    if (!supabase) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Erro ao conectar com banco de dados'
-      }, { status: 500 });
-    }
-    
-    // Primeiro verificar se o evento existe
-    console.log('🔍 [DELETE EVENTO] Verificando se evento existe...');
-    const { data: eventoExistente, error: erroConsulta } = await supabase
+    // Calcular campos derivados
+    const ticket_medio = publico_real && publico_real > 0 ? faturamento_liquido / publico_real : null;
+
+    // Buscar o evento para calcular taxa de ocupaá§á£o
+    const { data: evento, error: eventoError } = await supabase
       .from('eventos')
-      .select('id, nome_evento')
-      .eq('id', eventoId)
+      .select('capacidade_estimada')
+      .eq('bar_id', bar_id)
+      .eq('data_evento', data_evento)
       .single();
 
-    if (erroConsulta) {
-      console.error('❌ [DELETE EVENTO] Erro ao consultar evento:', erroConsulta);
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Evento não encontrado' 
+    if (eventoError) {
+      console.error('Erro ao buscar evento:', eventoError);
+      return NextResponse.json({
+        success: false,
+        error: 'Evento ná£o encontrado'
       }, { status: 404 });
     }
 
-    if (!eventoExistente) {
-      console.log('❌ [DELETE EVENTO] Evento não encontrado:', eventoId);
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Evento não encontrado' 
-      }, { status: 404 });
-    }
+    const taxa_ocupacao = evento.capacidade_estimada && publico_real 
+      ? (publico_real / evento.capacidade_estimada) * 100 
+      : null;
 
-    console.log('📝 [DELETE EVENTO] Evento encontrado:', eventoExistente.nome_evento);
-    
-    // Deletar o evento
-    console.log('🗑️ [DELETE EVENTO] Executando exclusão...');
-    const { error: erroDelecao } = await supabase
+    // Atualizar os dados de performance
+    const { data, error } = await supabase
       .from('eventos')
-      .delete()
-      .eq('id', eventoId);
+      .update({
+        publico_real,
+        receita_total: faturamento_liquido, // Usar campo existente
+        updated_at: new Date().toISOString()
+      })
+      .eq('bar_id', bar_id)
+      .eq('data_evento', data_evento)
+      .select()
+      .single();
 
-    if (erroDelecao) {
-      console.error('❌ [DELETE EVENTO] Erro ao deletar:', erroDelecao);
-      return NextResponse.json({ 
-        success: false, 
-        error: erroDelecao.message 
+    if (error) {
+      console.error('Erro ao atualizar performance:', error);
+      return NextResponse.json({
+        success: false,
+        error: error.message
       }, { status: 500 });
     }
 
-    console.log('✅ [DELETE EVENTO] Evento excluído com sucesso:', eventoId);
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Evento excluído com sucesso',
-      deletedId: eventoId
+    return NextResponse.json({
+      success: true,
+      data,
+      message: 'Dados de performance atualizados com sucesso'
     });
 
   } catch (error) {
-    console.error('💥 [DELETE EVENTO] Erro inesperado:', error);
-    return NextResponse.json({ 
+    console.error('Erro interno:', error);
+    return NextResponse.json({
       success: false,
-      error: 'Erro interno do servidor',
-      details: error instanceof Error ? error.message : 'Erro desconhecido'
+      error: 'Erro interno do servidor'
+    }, { status: 500 });
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    // Inicializar cliente Supabase
+    const supabase = await getSupabaseClient();
+    if (!supabase) {
+      return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const data_evento = searchParams.get('data_evento');
+    const bar_id = searchParams.get('bar_id');
+
+    if (!data_evento || !bar_id) {
+      return NextResponse.json({
+        success: false,
+        error: 'Data do evento e bar_id sá£o obrigatá³rios'
+      }, { status: 400 });
+    }
+
+    // Buscar evento com dados de performance
+    const { data: evento, error } = await supabase
+      .from('eventos')
+      .select('*')
+      .eq('bar_id', bar_id)
+      .eq('data_evento', data_evento)
+      .single();
+
+    if (error) {
+      return NextResponse.json({
+        success: false,
+        error: 'Evento ná£o encontrado para esta data'
+      }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: evento
+    });
+
+  } catch (error) {
+    console.error('Erro interno:', error);
+    return NextResponse.json({
+      success: false,
+      error: 'Erro interno do servidor'
     }, { status: 500 });
   }
 } 

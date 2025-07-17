@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -49,7 +49,7 @@ export default function ConfiguracoesPage() {
   })
 
   useEffect(() => {
-    setPageTitle('��️ Configura��es')
+    setPageTitle('š™ï¸ Configuraá§áµes')
     loadSystemStats()
     return () => setPageTitle('')
   }, [setPageTitle])
@@ -57,7 +57,7 @@ export default function ConfiguracoesPage() {
   const loadSystemStats = async () => {
     try {
       setLoading(true)
-      // Simular carregamento de estat�sticas
+      // Simular carregamento de estatá­sticas
       await new Promise(resolve => setTimeout(resolve, 1000))
       setStats({
         totalUsers: 12,
@@ -65,7 +65,7 @@ export default function ConfiguracoesPage() {
         systemHealth: 'good'
       })
     } catch (error) {
-      console.error('Erro ao carregar estat�sticas:', error)
+      console.error('Erro ao carregar estatá­sticas:', error)
     } finally {
       setLoading(false)
     }
@@ -74,18 +74,18 @@ export default function ConfiguracoesPage() {
   const configSections: ConfigSection[] = [
     {
       id: 'users',
-      title: 'Gerenciamento de Usu�rios',
-      description: 'Gerencie usu�rios, permiss�es e controle de acesso',
+      title: 'Gerenciamento de Usuá¡rios',
+      description: 'Gerencie usuá¡rios, permissáµes e controle de acesso',
       icon: <Users className="w-6 h-6" />,
       route: '/configuracoes/usuarios',
       status: 'active',
-      badge: `${stats.totalUsers} usu�rios`,
+      badge: `${stats.totalUsers} usuá¡rios`,
       color: 'blue'
     },
     {
       id: 'security', 
-      title: 'Seguran�a',
-      description: 'Monitor de seguran�a, logs e auditoria do sistema',
+      title: 'Seguraná§a',
+      description: 'Monitor de seguraná§a, logs e auditoria do sistema',
       icon: <Shield className="w-6 h-6" />,
       route: '/configuracoes/seguranca',
       status: 'active',
@@ -94,8 +94,8 @@ export default function ConfiguracoesPage() {
     },
     {
       id: 'integrations',
-      title: 'Integra��es',
-      description: 'Configure Discord, WhatsApp, Meta e outras integra��es',
+      title: 'Integraá§áµes',
+      description: 'Configure Discord, WhatsApp, Meta e outras integraá§áµes',
       icon: <Zap className="w-6 h-6" />,
       route: '/configuracoes/integracoes',
       status: 'active',
@@ -105,7 +105,7 @@ export default function ConfiguracoesPage() {
     {
       id: 'checklists',
       title: 'Checklists',
-      description: 'Configure templates, itens e automa��es de checklists',
+      description: 'Configure templates, itens e automaá§áµes de checklists',
       icon: <CheckSquare className="w-6 h-6" />,
       route: '/configuracoes/checklists',
       status: 'active',
@@ -124,12 +124,12 @@ export default function ConfiguracoesPage() {
     },
     {
       id: 'contahub',
-      title: 'ContaHub Autom�tico',
-      description: 'Configure coleta autom�tica de dados financeiros',
+      title: 'ContaHub Automá¡tico',
+      description: 'Configure coleta automá¡tica de dados financeiros',
       icon: <BarChart3 className="w-6 h-6" />,
       route: '/configuracoes/contahub-automatico',
       status: 'active',
-      badge: 'Autom�tico',
+      badge: 'Automá¡tico',
       color: 'cyan'
     }
   ]
@@ -165,7 +165,7 @@ export default function ConfiguracoesPage() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Carregando configura��es...</p>
+          <p className="text-gray-600 dark:text-gray-400">Carregando configuraá§áµes...</p>
         </div>
       </div>
     )
@@ -183,8 +183,8 @@ export default function ConfiguracoesPage() {
                   <Settings className="w-8 h-8" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold">Central de Configura��es</h1>
-                  <p className="text-blue-100 mt-1">Gerencie todas as configura��es do seu sistema</p>
+                  <h1 className="text-3xl font-bold">Central de Configuraá§áµes</h1>
+                  <p className="text-blue-100 mt-1">Gerencie todas as configuraá§áµes do seu sistema</p>
                 </div>
               </div>
               
@@ -205,7 +205,7 @@ export default function ConfiguracoesPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Usu�rios Ativos</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Usuá¡rios Ativos</p>
                   <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalUsers}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Contas registradas</p>
                 </div>
@@ -220,9 +220,9 @@ export default function ConfiguracoesPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Integra��es</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Integraá§áµes</p>
                   <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.activeIntegrations}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Servi�os conectados</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Serviá§os conectados</p>
                 </div>
                 <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
                   <Zap className="w-8 h-8 text-green-600 dark:text-green-400" />
@@ -236,8 +236,8 @@ export default function ConfiguracoesPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Status Sistema</p>
-                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">Saud�vel</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Todos os servi�os</p>
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">Saudá¡vel</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Todos os serviá§os</p>
                 </div>
                 <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
                   <Shield className="w-8 h-8 text-green-600 dark:text-green-400" />
@@ -247,7 +247,7 @@ export default function ConfiguracoesPage() {
           </Card>
         </div>
 
-        {/* Grid de Configura��es */}
+        {/* Grid de Configuraá§áµes */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {configSections.map((section) => (
             <Card 
@@ -292,14 +292,14 @@ export default function ConfiguracoesPage() {
           ))}
         </div>
 
-        {/* Se��o de Informa��es Adicionais */}
+        {/* Seá§á£o de Informaá§áµes Adicionais */}
         <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
           <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
             <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
               <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                 <Activity className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
-              Informa��es do Sistema
+              Informaá§áµes do Sistema
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -314,11 +314,11 @@ export default function ConfiguracoesPage() {
               </div>
               <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">Seg</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Backup Di�rio</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Backup Diá¡rio</div>
               </div>
               <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">v2.0</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Vers�o SGB</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Versá£o SGB</div>
               </div>
             </div>
           </CardContent>

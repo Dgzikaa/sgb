@@ -1,674 +1,852 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
-import { useChecklistExecution } from '@/hooks/useChecklistExecution'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
-import PhotoUpload from '@/components/uploads/PhotoUpload'
-import SignaturePad from '@/components/uploads/SignaturePad'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useToast } from '@/hooks/use-toast'
+import { useBar } from '@/contexts/BarContext'
+import { usePageTitle } from '@/contexts/PageTitleContext'
 import { 
-  Save, 
-  Check, 
-  X, 
-  Camera, 
-  Upload, 
   Calendar,
+  Plus,
+  Edit3,
+  Trash2,
+  Tag,
   Clock,
-  User,
-  AlertTriangle,
+  MapPin,
+  Users,
   ChevronLeft,
   ChevronRight,
-  Home,
-  Pause,
-  Play
+  Filter,
+  Search,
+  Eye
 } from 'lucide-react'
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 
-// =====================================================
-// COMPONENTE PRINCIPAL
-// =====================================================
+interface Evento {
+  id?: number
+  nome_evento: string
+  descricao?: string
+  data_evento: string
+  hora_inicio?: string
+  hora_fim?: string
+  categoria: string
+  local?: string
+  capacidade_maxima?: number
+  preco?: number
+  status: 'planejado' | 'confirmado' | 'cancelado' | 'concluido'
+  bar_id: number
+  created_at?: string
+  updated_at?: string
+}
 
-export default function ChecklistExecutionPage() {
-  const router = useRouter()
-  const params = useParams()
-  const { id } = params
+interface CategoriaEvento {
+  id: string
+  nome: string
+  cor: string
+  icon: string
+}
 
-  const [currentSection, setCurrentSection] = useState(0)
-  const [showFinalizationModal, setShowFinalizationModal] = useState(false)
-  const [observacoesFinais, setObservacoesFinais] = useState('')
-  const [assinaturaFinal, setAssinaturaFinal] = useState<any>(null)
+const categoriasPadrao: CategoriaEvento[] = [
+  { id: 'show', nome: 'Show/Máºsica', cor: 'bg-purple-500', icon: 'ðŸŽµ' },
+  { id: 'festa', nome: 'Festa Temá¡tica', cor: 'bg-pink-500', icon: 'ðŸŽ‰' },
+  { id: 'happy-hour', nome: 'Happy Hour', cor: 'bg-orange-500', icon: 'ðŸ»' },
+  { id: 'esporte', nome: 'Evento Esportivo', cor: 'bg-green-500', icon: 'š½' },
+  { id: 'gastronomia', nome: 'Gastronomia', cor: 'bg-yellow-500', icon: 'ðŸ½ï¸' },
+  { id: 'networking', nome: 'Networking', cor: 'bg-blue-500', icon: 'ðŸ¤' },
+  { id: 'promocao', nome: 'Promoá§á£o', cor: 'bg-red-500', icon: 'ðŸ·ï¸' },
+  { id: 'especial', nome: 'Data Especial', cor: 'bg-indigo-500', icon: 'ðŸŒŸ' }
+]
 
-  const {
-    execucao,
-    loading,
-    saving,
-    finalizing,
-    error,
-    autoSaveEnabled,
-    carregarExecucao,
-    salvarRespostas,
-    finalizarExecucao,
-    cancelarExecucao,
-    atualizarResposta,
-    adicionarAnexo,
-    removerAnexo,
-    validacao,
-    podeSerFinalizada,
-    temAlteracoesPendentes,
-    proximoItemPendente,
-    toggleAutoSave
-  } = useChecklistExecution()
-
-  // =====================================================
-  // EFEITOS
-  // =====================================================
+export default function EventosPage() {
+  const { toast } = useToast()
+  const { selectedBar } = useBar()
+  const { setPageTitle } = usePageTitle()
+  
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [eventos, setEventos] = useState<Evento[]>([])
+  const [showEventModal, setShowEventModal] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [editingEvent, setEditingEvent] = useState<Evento | null>(null)
+  const [filtroCategoria, setFiltroCategoria] = useState<string>('all')
+  const [filtroStatus, setFiltroStatus] = useState<string>('all')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar')
 
   useEffect(() => {
-    if (id && typeof id === 'string') {
-      carregarExecucao(id)
-    }
-  }, [id])
+    setPageTitle('Eventos & Planejamento')
+    return () => setPageTitle('')
+  }, [setPageTitle])
 
-  // Auto-scroll para próximo item pendente
   useEffect(() => {
-    if (proximoItemPendente) {
-      setCurrentSection(proximoItemPendente.secaoIndex)
+    if (selectedBar) {
+      loadEventos()
     }
-  }, [proximoItemPendente])
+  }, [selectedBar, currentDate])
 
-  // =====================================================
-  // HANDLERS
-  // =====================================================
-
-  const handleSaveManual = async () => {
-    const sucesso = await salvarRespostas(false)
-    if (sucesso) {
-      alert('✅ Respostas salvas com sucesso!')
-    }
-  }
-
-  const handleFinalizar = async () => {
-    if (!podeSerFinalizada) {
-      alert('❌ Complete todos os campos obrigatórios antes de finalizar')
-      return
-    }
-
-    setShowFinalizationModal(true)
-  }
-
-  const handleConfirmFinalizar = async () => {
-    const sucesso = await finalizarExecucao(observacoesFinais, assinaturaFinal)
-    if (sucesso) {
-      alert('🎉 Checklist finalizado com sucesso!')
-      router.push('/funcionario/checklists')
-    }
-    setShowFinalizationModal(false)
-  }
-
-  const handleCancelar = async () => {
-    if (!confirm('❌ Tem certeza que deseja cancelar esta execução?')) return
-
-    const motivo = prompt('Motivo do cancelamento (opcional):') || 'Cancelado pelo funcionário'
-    const sucesso = await cancelarExecucao(motivo)
+  const loadEventos = async () => {
+    if (!selectedBar) return
     
-    if (sucesso) {
-      router.push('/funcionario/checklists')
-    }
-  }
-
-  const handleItemResponse = (secaoIndex: number, itemIndex: number, valor: any) => {
-    atualizarResposta(secaoIndex, itemIndex, valor)
-  }
-
-  const handleAddAnexo = (secaoIndex: number, itemIndex: number, anexo: any) => {
-    adicionarAnexo(secaoIndex, itemIndex, anexo)
-  }
-
-  const handleRemoveAnexo = (secaoIndex: number, itemIndex: number, anexoIndex: number) => {
-    removerAnexo(secaoIndex, itemIndex, anexoIndex)
-  }
-
-  // =====================================================
-  // COMPONENTES
-  // =====================================================
-
-  const ProgressHeader = () => {
-    if (!execucao) return null
-
-    const progresso = execucao.progresso
-    const tempoDecorrido = calcularTempoDecorrido(execucao.iniciado_em)
-
-    return (
-      <Card className="mb-4 bg-gradient-to-r from-blue-50 to-indigo-50">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h1 className="text-lg font-bold text-gray-900">{execucao.checklist.nome}</h1>
-              <p className="text-sm text-gray-600">{execucao.checklist.setor}</p>
-            </div>
-            <Badge variant={execucao.status === 'em_andamento' ? 'default' : 'secondary'}>
-              {getStatusLabel(execucao.status)}
-            </Badge>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Progresso geral</span>
-              <span>{progresso.itens_respondidos}/{progresso.total_itens} itens</span>
-            </div>
-            <Progress value={progresso.percentual_completo} className="h-2" />
-            
-            <div className="flex justify-between text-sm">
-              <span>Campos obrigatórios</span>
-              <span className={progresso.percentual_obrigatorios === 100 ? 'text-green-600' : 'text-red-600'}>
-                {progresso.campos_obrigatorios_respondidos}/{progresso.campos_obrigatorios_total}
-              </span>
-            </div>
-            <Progress 
-              value={progresso.percentual_obrigatorios} 
-              className="h-2"
-            />
-
-            <div className="flex items-center justify-between text-xs text-gray-500 mt-2">
-              <div className="flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                <span>Tempo: {tempoDecorrido}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <User className="w-3 h-3" />
-                <span>{execucao.funcionario.nome}</span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  const SectionTabs = () => {
-    if (!execucao) return null
-
-    return (
-      <div className="flex overflow-x-auto gap-2 mb-4 pb-2">
-        {execucao.respostas.secoes.map((secao, index) => {
-          const itensRespondidos = secao.itens.filter(item => item.respondido).length
-          const totalItens = secao.itens.length
-          const percentual = totalItens > 0 ? (itensRespondidos / totalItens) * 100 : 0
-          const temObrigatoriosPendentes = secao.itens.some(item => item.obrigatorio && !item.respondido)
-
-          return (
-            <button
-              key={index}
-              onClick={() => setCurrentSection(index)}
-              className={`min-w-max px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                currentSection === index
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <div className="text-center">
-                <div className="flex items-center gap-1">
-                  {secao.nome}
-                  {temObrigatoriosPendentes && (
-                    <AlertTriangle className="w-3 h-3 text-red-500" />
-                  )}
-                </div>
-                <div className="text-xs opacity-75">
-                  {itensRespondidos}/{totalItens}
-                </div>
-              </div>
-            </button>
-          )
-        })}
-      </div>
-    )
-  }
-
-  const ItemRenderer = ({ secao, secaoIndex, item, itemIndex }: any) => {
-    const isObrigatorio = item.obrigatorio
-    const isRespondido = item.respondido
-
-    const renderInputByType = () => {
-      switch (item.tipo) {
-        case 'texto':
-          return (
-            <Textarea
-              value={item.valor || ''}
-              onChange={(e) => handleItemResponse(secaoIndex, itemIndex, e.target.value)}
-              placeholder="Digite sua resposta..."
-              className={isObrigatorio && !isRespondido ? 'border-red-300' : ''}
-            />
-          )
-
-        case 'numero':
-          return (
-            <Input
-              type="number"
-              value={item.valor || ''}
-              onChange={(e) => handleItemResponse(secaoIndex, itemIndex, e.target.value)}
-              placeholder="Digite um número..."
-              className={isObrigatorio && !isRespondido ? 'border-red-300' : ''}
-            />
-          )
-
-        case 'sim_nao':
-          return (
-            <div className="flex gap-3">
-              <Button
-                variant={item.valor === true ? 'default' : 'outline'}
-                onClick={() => handleItemResponse(secaoIndex, itemIndex, true)}
-                className="flex-1"
-              >
-                <Check className="w-4 h-4 mr-2" />
-                Sim
-              </Button>
-              <Button
-                variant={item.valor === false ? 'default' : 'outline'}
-                onClick={() => handleItemResponse(secaoIndex, itemIndex, false)}
-                className="flex-1"
-              >
-                <X className="w-4 h-4 mr-2" />
-                Não
-              </Button>
-            </div>
-          )
-
-        case 'data':
-          return (
-            <Input
-              type="date"
-              value={item.valor || ''}
-              onChange={(e) => handleItemResponse(secaoIndex, itemIndex, e.target.value)}
-              className={isObrigatorio && !isRespondido ? 'border-red-300' : ''}
-            />
-          )
-
-        case 'avaliacao':
-          return (
-            <div className="flex gap-2 justify-center">
-              {[1, 2, 3, 4, 5].map((rating) => (
-                <Button
-                  key={rating}
-                  variant={item.valor === rating ? 'default' : 'outline'}
-                  onClick={() => handleItemResponse(secaoIndex, itemIndex, rating)}
-                  className="w-12 h-12 text-lg"
-                >
-                  {getEmojiForRating(rating)}
-                </Button>
-              ))}
-            </div>
-          )
-
-        case 'foto_camera':
-        case 'foto_upload':
-          return (
-            <PhotoUpload
-              onUploadComplete={(result) => handleAddAnexo(secaoIndex, itemIndex, result)}
-              onError={(error) => console.error('Erro no upload:', error)}
-              folder="checklist_photos"
-              multiple={true}
-            />
-          )
-
-        case 'assinatura':
-          return (
-            <SignaturePad
-              onSignatureComplete={(result) => handleAddAnexo(secaoIndex, itemIndex, result)}
-              onError={(error) => console.error('Erro na assinatura:', error)}
-            />
-          )
-
-        default:
-          return (
-            <div className="text-gray-500 text-center py-4">
-              Tipo de campo não suportado: {item.tipo}
-            </div>
-          )
+    try {
+      setLoading(true)
+      const response = await fetch(`/api/eventos?bar_id=${selectedBar.id}&ano=${currentDate.getFullYear()}&mes=${currentDate.getMonth() + 1}`)
+      const data = await response.json()
+      
+      if (data.success) {
+        setEventos(data.data || [])
+      } else {
+        console.error('Erro ao carregar eventos:', data.error)
+        toast({
+          title: 'Œ Erro',
+          description: 'Falha ao carregar eventos',
+          variant: 'destructive'
+        })
       }
+    } catch (error) {
+      console.error('Erro ao carregar eventos:', error)
+      toast({
+        title: 'Œ Erro',
+        description: 'Falha ao carregar eventos',
+        variant: 'destructive'
+      })
+    } finally {
+      setLoading(false)
     }
+  }
 
-    return (
-      <Card key={itemIndex} className={`mb-4 ${isObrigatorio && !isRespondido ? 'border-red-200' : ''}`}>
-        <CardContent className="p-4">
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex-1">
-              <h3 className="font-medium text-gray-900 flex items-center gap-2">
-                {item.titulo}
-                {isObrigatorio && (
-                  <Badge variant="destructive" className="text-xs">
-                    Obrigatório
-                  </Badge>
-                )}
-                {isRespondido && (
-                  <Check className="w-4 h-4 text-green-500" />
-                )}
-              </h3>
-              {item.descricao && (
-                <p className="text-sm text-gray-600 mt-1">{item.descricao}</p>
-              )}
+  const saveEvento = async (evento: Partial<Evento>) => {
+    if (!selectedBar) return
+    
+    try {
+      setLoading(true)
+      
+      const eventoData = {
+        ...evento,
+        bar_id: selectedBar.id
+      }
+      
+      const response = await fetch('/api/eventos', {
+        method: editingEvent ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingEvent ? { id: editingEvent.id, ...eventoData } : [eventoData])
+      })
+      
+      const result = await response.json()
+      
+      if (result.success) {
+        toast({
+          title: 'œ… Sucesso',
+          description: editingEvent ? 'Evento atualizado!' : 'Evento criado!'
+        })
+        setShowEventModal(false)
+        setEditingEvent(null)
+        loadEventos()
+      } else {
+        throw new Error(result.error)
+      }
+    } catch (error) {
+      console.error('Erro ao salvar evento:', error)
+      toast({
+        title: 'Œ Erro',
+        description: 'Falha ao salvar evento',
+        variant: 'destructive'
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const deleteEvento = async (id: number) => {
+    if (!confirm('Tem certeza que deseja deletar este evento?')) return
+    
+    try {
+      setLoading(true)
+      const response = await fetch(`/api/eventos?id=${id}`, {
+        method: 'DELETE'
+      })
+      
+      const result = await response.json()
+      
+      if (result.success) {
+        toast({
+          title: 'œ… Sucesso',
+          description: 'Evento deletado!'
+        })
+        loadEventos()
+      } else {
+        throw new Error(result.error)
+      }
+    } catch (error) {
+      console.error('Erro ao deletar evento:', error)
+      toast({
+        title: 'Œ Erro',
+        description: 'Falha ao deletar evento',
+        variant: 'destructive'
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getCategoria = (categoriaId: string) => {
+    return categoriasPadrao.find((cat: any) => cat.id === categoriaId) || categoriasPadrao[0]
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'confirmado':
+        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+      case 'planejado':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+      case 'cancelado':
+        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+      case 'concluido':
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+    }
+  }
+
+  const filteredEventos = eventos.filter((evento: any) => {
+    const matchesCategoria = filtroCategoria === 'all' || evento.categoria === filtroCategoria
+    const matchesStatus = filtroStatus === 'all' || evento.status === filtroStatus
+    const matchesSearch = searchTerm === '' || 
+      evento.nome_evento.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      evento.descricao?.toLowerCase().includes(searchTerm.toLowerCase())
+    
+    return matchesCategoria && matchesStatus && matchesSearch
+  })
+
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    setCurrentDate(direction === 'prev' ? subMonths(currentDate, 1) : addMonths(currentDate, 1))
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 py-6">
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+                <Calendar className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Eventos & Planejamento</h1>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Gerencie e planeje os eventos do seu bar
+                </p>
+              </div>
             </div>
-            <div className="text-xs text-gray-500">
-              {getFieldTypeIcon(item.tipo)}
+            
+            <div className="flex flex-wrap gap-3">
+              <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                <Button
+                  variant={viewMode === 'calendar' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('calendar')}
+                  className="text-xs"
+                >
+                  <Calendar className="w-4 h-4 mr-1" />
+                  Calendá¡rio
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="text-xs"
+                >
+                  <Eye className="w-4 h-4 mr-1" />
+                  Lista
+                </Button>
+              </div>
+              
+              <Button 
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+                onClick={() => {
+                  setEditingEvent(null)
+                  setShowEventModal(true)
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Evento
+              </Button>
+              
+              <Dialog open={showEventModal} onOpenChange={setShowEventModal}>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingEvent ? 'Editar Evento' : 'Novo Evento'}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <EventForm 
+                    evento={editingEvent}
+                    onSave={saveEvento}
+                    onCancel={() => {
+                      setShowEventModal(false)
+                      setEditingEvent(null)
+                    }}
+                    categorias={categoriasPadrao}
+                    loading={loading}
+                  />
+                                  </DialogContent>
+                </Dialog>
             </div>
           </div>
 
-          {renderInputByType()}
+          {/* Filtros */}
+          <Card>
+            <CardContent className="p-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <Label className="text-sm text-gray-600 dark:text-gray-400">Buscar eventos</Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      placeholder="Nome, descriá§á£o..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <Label className="text-sm text-gray-600 dark:text-gray-400">Categoria</Label>
+                  <Select value={filtroCategoria} onValueChange={setFiltroCategoria}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas as categorias</SelectItem>
+                      {categoriasPadrao.map((categoria: any) => (
+                        <SelectItem key={categoria.id} value={categoria.id}>
+                          {categoria.icon} {categoria.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label className="text-sm text-gray-600 dark:text-gray-400">Status</Label>
+                  <Select value={filtroStatus} onValueChange={setFiltroStatus}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os status</SelectItem>
+                      <SelectItem value="planejado">Planejado</SelectItem>
+                      <SelectItem value="confirmado">Confirmado</SelectItem>
+                      <SelectItem value="cancelado">Cancelado</SelectItem>
+                      <SelectItem value="concluido">Concluá­do</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex items-end">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => {
+                      setFiltroCategoria('all')
+                      setFiltroStatus('all')
+                      setSearchTerm('')
+                    }}
+                  >
+                    <Filter className="w-4 h-4 mr-2" />
+                    Limpar
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          {item.respondido_em && (
-            <div className="text-xs text-gray-500 mt-2">
-              Respondido em: {new Date(item.respondido_em).toLocaleString('pt-BR')}
-            </div>
+          {/* Calendá¡rio ou Lista */}
+          {viewMode === 'calendar' ? (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl">
+                    {format(currentDate, 'MMMM yyyy', { locale: ptBR })}
+                  </CardTitle>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigateMonth('prev')}
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentDate(new Date())}
+                    >
+                      Hoje
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigateMonth('next')}
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <CalendarView
+                  currentDate={currentDate}
+                  eventos={filteredEventos}
+                  onEditEvent={(evento) => {
+                    setEditingEvent(evento)
+                    setShowEventModal(true)
+                  }}
+                  onDeleteEvent={deleteEvento}
+                  categorias={categoriasPadrao}
+                />
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Lista de Eventos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <EventList
+                  eventos={filteredEventos}
+                  onEditEvent={(evento) => {
+                    setEditingEvent(evento)
+                    setShowEventModal(true)
+                  }}
+                  onDeleteEvent={deleteEvento}
+                  categorias={categoriasPadrao}
+                />
+              </CardContent>
+            </Card>
           )}
-        </CardContent>
-      </Card>
-    )
-  }
 
-  const CurrentSection = () => {
-    if (!execucao || !execucao.respostas.secoes[currentSection]) return null
-
-    const secao = execucao.respostas.secoes[currentSection]
-
-    return (
-      <div>
-        <div className="mb-4">
-          <h2 className="text-xl font-bold text-gray-900">{secao.nome}</h2>
-          <div className="flex items-center justify-between text-sm text-gray-600 mt-1">
-            <span>{secao.itens.length} itens</span>
-            <span>
-              {secao.itens.filter(item => item.respondido).length} respondidos
-            </span>
+          {/* Resumo */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-4 text-center">
+                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                </div>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {eventos.length}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Total do Máªs</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4 text-center">
+                <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <Users className="w-4 h-4 text-green-600 dark:text-green-400" />
+                </div>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {eventos.filter((e: any) => e.status === 'confirmado').length}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Confirmados</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4 text-center">
+                <div className="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <Clock className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                </div>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {eventos.filter((e: any) => e.status === 'planejado').length}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Planejados</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4 text-center">
+                <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <Tag className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                </div>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {new Set(eventos.map((e: any) => e.categoria)).size}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Categorias</p>
+              </CardContent>
+            </Card>
           </div>
         </div>
-
-        <div className="space-y-4">
-          {secao.itens.map((item, itemIndex) => (
-            <ItemRenderer
-              key={itemIndex}
-              secao={secao}
-              secaoIndex={currentSection}
-              item={item}
-              itemIndex={itemIndex}
-            />
-          ))}
-        </div>
       </div>
-    )
-  }
-
-  const ActionButtons = () => (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 space-y-3">
-      {/* Auto-save toggle */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Switch
-            checked={autoSaveEnabled}
-            onCheckedChange={toggleAutoSave}
-            id="auto-save"
-          />
-          <Label htmlFor="auto-save" className="text-sm">
-            Salvamento automático
-          </Label>
-        </div>
-        {saving && (
-          <div className="flex items-center gap-1 text-sm text-blue-600">
-            <div className="w-3 h-3 border border-blue-600 border-t-transparent rounded-full animate-spin" />
-            Salvando...
-          </div>
-        )}
-      </div>
-
-      {/* Navigation */}
-      <div className="flex gap-2">
-        <Button
-          variant="outline"
-          onClick={() => setCurrentSection(Math.max(0, currentSection - 1))}
-          disabled={currentSection === 0}
-          className="flex-1"
-        >
-          <ChevronLeft className="w-4 h-4 mr-1" />
-          Anterior
-        </Button>
-        
-        <Button
-          variant="outline"
-          onClick={() => setCurrentSection(Math.min(execucao?.respostas.secoes.length! - 1, currentSection + 1))}
-          disabled={!execucao || currentSection >= execucao.respostas.secoes.length - 1}
-          className="flex-1"
-        >
-          Próxima
-          <ChevronRight className="w-4 h-4 ml-1" />
-        </Button>
-      </div>
-
-      {/* Main actions */}
-      <div className="flex gap-2">
-        <Button
-          variant="outline"
-          onClick={() => router.push('/funcionario/checklists')}
-          className="flex-1"
-        >
-          <Home className="w-4 h-4 mr-2" />
-          Voltar
-        </Button>
-
-        <Button
-          onClick={handleSaveManual}
-          disabled={saving || !temAlteracoesPendentes}
-          variant="outline"
-          className="flex-1"
-        >
-          <Save className="w-4 h-4 mr-2" />
-          Salvar
-        </Button>
-
-        <Button
-          onClick={handleFinalizar}
-          disabled={!podeSerFinalizada || finalizing}
-          className="flex-1 bg-green-600 hover:bg-green-700"
-        >
-          <Check className="w-4 h-4 mr-2" />
-          {finalizing ? 'Finalizando...' : 'Finalizar'}
-        </Button>
-      </div>
-
-      {/* Danger actions */}
-      <Button
-        variant="destructive"
-        onClick={handleCancelar}
-        className="w-full"
-        size="sm"
-      >
-        <X className="w-4 h-4 mr-2" />
-        Cancelar Execução
-      </Button>
     </div>
   )
+}
 
-  const FinalizationModal = () => {
-    if (!showFinalizationModal) return null
+// Componente do formulá¡rio de evento
+function EventForm({ 
+  evento, 
+  onSave, 
+  onCancel, 
+  categorias, 
+  loading 
+}: {
+  evento: Evento | null
+  onSave: (evento: Partial<Evento>) => void
+  onCancel: () => void
+  categorias: CategoriaEvento[]
+  loading: boolean
+}) {
+  const [formData, setFormData] = useState<Partial<Evento>>({
+    nome_evento: '',
+    descricao: '',
+    data_evento: '',
+    hora_inicio: '',
+    hora_fim: '',
+    categoria: 'show',
+    local: '',
+    capacidade_maxima: undefined,
+    preco: undefined,
+    status: 'planejado'
+  })
 
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Finalizar Checklist</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="observacoes-finais">Observações finais (opcional)</Label>
-              <Textarea
-                id="observacoes-finais"
-                value={observacoesFinais}
-                onChange={(e) => setObservacoesFinais(e.target.value)}
-                placeholder="Adicione observações sobre a execução..."
-                rows={3}
-              />
-            </div>
+  useEffect(() => {
+    if (evento) {
+      setFormData({
+        ...evento,
+        data_evento: evento.data_evento.split('T')[0],
+        hora_inicio: evento.hora_inicio || '',
+        hora_fim: evento.hora_fim || ''
+      })
+    }
+  }, [evento])
 
-            <div>
-              <Label>Assinatura (opcional)</Label>
-              <SignaturePad
-                onSignatureComplete={setAssinaturaFinal}
-                onSignatureCancel={() => setAssinaturaFinal(null)}
-                onError={(error) => console.error('Erro na assinatura:', error)}
-              />
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowFinalizationModal(false)}
-                className="flex-1"
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleConfirmFinalizar}
-                disabled={finalizing}
-                className="flex-1 bg-green-600 hover:bg-green-700"
-              >
-                {finalizing ? 'Finalizando...' : 'Confirmar Finalização'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSave(formData)
   }
 
-  // =====================================================
-  // RENDER PRINCIPAL
-  // =====================================================
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="md:col-span-2">
+          <Label htmlFor="nome_evento">Nome do Evento *</Label>
+          <Input
+            id="nome_evento"
+            value={formData.nome_evento}
+            onChange={(e) => setFormData({ ...formData, nome_evento: e.target.value })}
+            placeholder="Ex: Show de Rock, Happy Hour..."
+            required
+          />
+        </div>
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-6"></div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            Carregando checklist...
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            Preparando execução do checklist
-          </p>
+        <div className="md:col-span-2">
+          <Label htmlFor="descricao">Descriá§á£o</Label>
+          <Textarea
+            id="descricao"
+            value={formData.descricao}
+            onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+            placeholder="Descreva o evento..."
+            rows={3}
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="data_evento">Data *</Label>
+          <Input
+            id="data_evento"
+            type="date"
+            value={formData.data_evento}
+            onChange={(e) => setFormData({ ...formData, data_evento: e.target.value })}
+            required
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="categoria">Categoria *</Label>
+          <Select value={formData.categoria} onValueChange={(value) => setFormData({ ...formData, categoria: value })}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {categorias.map((categoria: any) => (
+                <SelectItem key={categoria.id} value={categoria.id}>
+                  {categoria.icon} {categoria.nome}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="hora_inicio">Hora de Iná­cio</Label>
+          <Input
+            id="hora_inicio"
+            type="time"
+            value={formData.hora_inicio}
+            onChange={(e) => setFormData({ ...formData, hora_inicio: e.target.value })}
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="hora_fim">Hora de Fim</Label>
+          <Input
+            id="hora_fim"
+            type="time"
+            value={formData.hora_fim}
+            onChange={(e) => setFormData({ ...formData, hora_fim: e.target.value })}
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="status">Status *</Label>
+          <Select value={formData.status} onValueChange={(value: any) => setFormData({ ...formData, status: value })}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="planejado">Planejado</SelectItem>
+              <SelectItem value="confirmado">Confirmado</SelectItem>
+              <SelectItem value="cancelado">Cancelado</SelectItem>
+              <SelectItem value="concluido">Concluá­do</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="local">Local</Label>
+          <Input
+            id="local"
+            value={formData.local}
+            onChange={(e) => setFormData({ ...formData, local: e.target.value })}
+            placeholder="Ex: Salá£o Principal..."
+          />
         </div>
       </div>
-    )
+
+      <div className="flex gap-3 pt-4">
+        <Button type="submit" disabled={loading} className="bg-purple-600 hover:bg-purple-700">
+          {loading ? 'Salvando...' : 'Salvar Evento'}
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancelar
+        </Button>
+      </div>
+    </form>
+  )
+}
+
+// Componente do calendá¡rio
+function CalendarView({ 
+  currentDate, 
+  eventos, 
+  onEditEvent, 
+  onDeleteEvent, 
+  categorias 
+}: {
+  currentDate: Date
+  eventos: Evento[]
+  onEditEvent: (evento: Evento) => void
+  onDeleteEvent: (id: number) => void
+  categorias: CategoriaEvento[]
+}) {
+  const days = eachDayOfInterval({
+    start: startOfMonth(currentDate),
+    end: endOfMonth(currentDate)
+  })
+
+  const getEventosForDay = (day: Date) => {
+    return eventos.filter((evento: any) => isSameDay(new Date(evento.data_evento), day))
   }
 
-  if (error) {
-    return (
-      <div className="container mx-auto p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-600">Erro: {error}</p>
-          <Button 
-            onClick={() => router.push('/funcionario/checklists')} 
-            className="mt-2"
+  const getCategoria = (categoriaId: string) => {
+    return categorias.find((cat: any) => cat.id === categoriaId) || categorias[0]
+  }
+
+  return (
+    <div className="grid grid-cols-7 gap-1">
+      {/* Cabeá§alho dos dias da semana */}
+      {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sá¡b'].map((day: any) => (
+        <div key={day} className="p-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
+          {day}
+        </div>
+      ))}
+      
+      {/* Dias do máªs */}
+      {days.map((day: any) => {
+        const dayEvents = getEventosForDay(day)
+        const isCurrentMonth = isSameMonth(day, currentDate)
+        const isCurrentDay = isToday(day)
+        
+        return (
+          <div
+            key={day.toISOString()}
+            className={`
+              min-h-[100px] p-2 border border-gray-200 dark:border-gray-700 rounded-lg
+              ${isCurrentMonth ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900/50'}
+              ${isCurrentDay ? 'ring-2 ring-purple-500' : ''}
+            `}
           >
-            Voltar para Checklists
-          </Button>
-        </div>
-      </div>
-    )
+            <div className={`
+              text-sm font-medium mb-1
+              ${isCurrentMonth ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-600'}
+              ${isCurrentDay ? 'text-purple-600 dark:text-purple-400' : ''}
+            `}>
+              {format(day, 'd')}
+            </div>
+            
+            <div className="space-y-1">
+              {dayEvents.slice(0, 2).map((evento: any) => {
+                const categoria = getCategoria(evento.categoria)
+                return (
+                  <div
+                    key={evento.id}
+                    className={`
+                      px-2 py-1 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity
+                      ${categoria.cor} text-white
+                    `}
+                    onClick={() => onEditEvent(evento)}
+                    title={evento.nome_evento}
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>{categoria.icon}</span>
+                      <span className="truncate">{evento.nome_evento}</span>
+                    </div>
+                  </div>
+                )
+              })}
+              
+              {dayEvents.length > 2 && (
+                <div className="text-xs text-gray-500 dark:text-gray-400 px-2">
+                  +{dayEvents.length - 2}
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// Componente da lista de eventos
+function EventList({ 
+  eventos, 
+  onEditEvent, 
+  onDeleteEvent, 
+  categorias 
+}: {
+  eventos: Evento[]
+  onEditEvent: (evento: Evento) => void
+  onDeleteEvent: (id: number) => void
+  categorias: CategoriaEvento[]
+}) {
+  const getCategoria = (categoriaId: string) => {
+    return categorias.find((cat: any) => cat.id === categoriaId) || categorias[0]
   }
 
-  if (!execucao) {
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'confirmado':
+        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+      case 'planejado':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+      case 'cancelado':
+        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+      case 'concluido':
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+    }
+  }
+
+  if (eventos.length === 0) {
     return (
-      <div className="container mx-auto p-4">
-        <div className="text-center py-12">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Execução não encontrada
-          </h3>
-          <p className="text-gray-600 mb-4">
-            Verifique se você tem permissão para acessar esta execução.
-          </p>
-          <Button onClick={() => router.push('/funcionario/checklists')}>
-            Voltar para Checklists
-          </Button>
-        </div>
+      <div className="text-center py-8">
+        <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+        <p className="text-gray-500 dark:text-gray-400">Nenhum evento encontrado</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-48">
-      <div className="container mx-auto p-4">
-        <ProgressHeader />
-        <SectionTabs />
-        <CurrentSection />
-        
-        {/* Validação de campos pendentes */}
-        {validacao && validacao.campos_obrigatorios_vazios > 0 && (
-          <Card className="mt-4 bg-yellow-50 border-yellow-200">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-yellow-800">
-                <AlertTriangle className="w-4 h-4" />
-                <span className="font-medium">
-                  {validacao.campos_obrigatorios_vazios} campo(s) obrigatório(s) pendente(s)
-                </span>
+    <div className="space-y-3">
+      {eventos.map((evento: any) => {
+        const categoria = getCategoria(evento.categoria)
+        return (
+          <div
+            key={evento.id}
+            className="card-dark p-4 hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className={`w-3 h-3 rounded-full ${categoria.cor}`} />
+                  <h3 className="font-semibold text-gray-900 dark:text-white">
+                    {evento.nome_evento}
+                  </h3>
+                  <Badge className={getStatusColor(evento.status)}>
+                    {evento.status}
+                  </Badge>
+                </div>
+                
+                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-4 h-4" />
+                    {format(new Date(evento.data_evento), 'dd/MM/yyyy', { locale: ptBR })}
+                  </div>
+                  
+                  {evento.hora_inicio && (
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      {evento.hora_inicio}
+                      {evento.hora_fim && ` - ${evento.hora_fim}`}
+                    </div>
+                  )}
+                  
+                  {evento.local && (
+                    <div className="flex items-center gap-1">
+                      <MapPin className="w-4 h-4" />
+                      {evento.local}
+                    </div>
+                  )}
+                </div>
+                
+                {evento.descricao && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                    {evento.descricao}
+                  </p>
+                )}
               </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      <ActionButtons />
-      <FinalizationModal />
+              
+              <div className="flex gap-2 ml-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onEditEvent(evento)}
+                >
+                  <Edit3 className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => evento.id && onDeleteEvent(evento.id)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
-}
-
-// =====================================================
-// FUNÇÕES UTILITÁRIAS
-// =====================================================
-
-function getStatusLabel(status: string): string {
-  const labels: Record<string, string> = {
-    'em_andamento': 'Em Andamento',
-    'pausado': 'Pausado',
-    'completado': 'Completado',
-    'cancelado': 'Cancelado'
-  }
-  return labels[status] || status
-}
-
-function getFieldTypeIcon(tipo: string): string {
-  const icons: Record<string, string> = {
-    'texto': '📝',
-    'numero': '🔢',
-    'sim_nao': '✅',
-    'data': '📅',
-    'assinatura': '✍️',
-    'foto_camera': '📷',
-    'foto_upload': '🖼️',
-    'avaliacao': '⭐'
-  }
-  return icons[tipo] || '📋'
-}
-
-function getEmojiForRating(rating: number): string {
-  const emojis = ['😞', '😕', '😐', '😊', '😍']
-  return emojis[rating - 1] || '😐'
-}
-
-function calcularTempoDecorrido(iniciadoEm: string): string {
-  const inicio = new Date(iniciadoEm)
-  const agora = new Date()
-  const minutos = Math.round((agora.getTime() - inicio.getTime()) / 1000 / 60)
-  
-  if (minutos < 60) {
-    return `${minutos}min`
-  }
-  
-  const horas = Math.floor(minutos / 60)
-  const mins = minutos % 60
-  
-  return mins > 0 ? `${horas}h ${mins}min` : `${horas}h`
 } 

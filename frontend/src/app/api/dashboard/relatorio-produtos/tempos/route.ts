@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic'
@@ -17,12 +17,12 @@ export async function GET(request: NextRequest) {
     const barId = parseInt(searchParams.get('bar_id') || '1');
 
     if (!dataEspecifica) {
-      return NextResponse.json({ error: 'Data espec�fica � obrigat�ria' }, { status: 400 });
+      return NextResponse.json({ error: 'Data especá­fica á© obrigatá³ria' }, { status: 400 });
     }
 
-    console.log(`🔍 Analisando tempos para ${dataEspecifica}, per�odo: ${periodoAnalise} dias, grupo: ${grupoFiltro}, bar: ${barId}`);
+    console.log(`ðŸ” Analisando tempos para ${dataEspecifica}, perá­odo: ${periodoAnalise} dias, grupo: ${grupoFiltro}, bar: ${barId}`);
 
-    // Calcular data de in�cio do per�odo de compara��o
+    // Calcular data de iná­cio do perá­odo de comparaá§á£o
     const dataFim = new Date(dataEspecifica);
     const dataInicio = new Date(dataFim);
     
@@ -32,9 +32,9 @@ export async function GET(request: NextRequest) {
       dataInicio.setDate(dataFim.getDate() - parseInt(periodoAnalise));
     }
 
-    console.log(`📅 Per�odo de an�lise: ${dataInicio.toISOString().split('T')[0]} at� ${dataFim.toISOString().split('T')[0]}`);
+    console.log(`ðŸ“… Perá­odo de aná¡lise: ${dataInicio.toISOString().split('T')[0]} atá© ${dataFim.toISOString().split('T')[0]}`);
 
-    // Query base para buscar dados de tempo - AGORA COM TODOS OS CAMPOS NECESS�RIOS
+    // Query base para buscar dados de tempo - AGORA COM TODOS OS CAMPOS NECESSáRIOS
     let queryBase = supabase
       .from('tempo')
       .select(`
@@ -61,13 +61,13 @@ export async function GET(request: NextRequest) {
       queryBase = queryBase.eq('grp_desc', grupoFiltro);
     }
 
-    // Buscar dados do per�odo de compara��o usando campo 'dia' - COM PAGINA��O
+    // Buscar dados do perá­odo de comparaá§á£o usando campo 'dia' - COM PAGINAá‡áƒO
     const diaInicioInt = parseInt(dataInicio.toISOString().split('T')[0].replace(/-/g, ''));
     const diaFimInt = parseInt(dataFim.toISOString().split('T')[0].replace(/-/g, ''));
     
-    console.log(`📅 Buscando per�odo de compara��o: ${diaInicioInt} at� ${diaFimInt}`);
+    console.log(`ðŸ“… Buscando perá­odo de comparaá§á£o: ${diaInicioInt} atá© ${diaFimInt}`);
     
-    // Buscar dados do per�odo com pagina��o
+    // Buscar dados do perá­odo com paginaá§á£o
     let dadosPeriodo: any[] = [];
     let pagina = 0;
     const tamanhoPagina = 1000;
@@ -102,30 +102,30 @@ export async function GET(request: NextRequest) {
         .range(inicio, fim);
 
       if (errorPagina) {
-        console.error('�� Erro ao buscar dados do per�odo:', errorPagina);
-        return NextResponse.json({ error: 'Erro ao buscar dados do per�odo' }, { status: 500 });
+        console.error('Œ Erro ao buscar dados do perá­odo:', errorPagina);
+        return NextResponse.json({ error: 'Erro ao buscar dados do perá­odo' }, { status: 500 });
       }
 
       if (!dadosPagina || dadosPagina.length === 0) break;
       
       dadosPeriodo = [...dadosPeriodo, ...dadosPagina];
-      console.log(`📄 P�gina ${pagina + 1}: ${dadosPagina.length} registros (Total: ${dadosPeriodo.length})`);
+      console.log(`ðŸ“„ Pá¡gina ${pagina + 1}: ${dadosPagina.length} registros (Total: ${dadosPeriodo.length})`);
       
       if (dadosPagina.length < tamanhoPagina) break;
       pagina++;
     }
 
-    console.log(`📊 Total de registros do per�odo: ${dadosPeriodo.length}`);
+    console.log(`ðŸ“Š Total de registros do perá­odo: ${dadosPeriodo.length}`);
 
-    // Buscar dados do dia espec�fico - USANDO CAMPO 'dia' (YYYYMMDD)
-    console.log(`🔍 Buscando dados para o dia: ${dataEspecifica}`);
+    // Buscar dados do dia especá­fico - USANDO CAMPO 'dia' (YYYYMMDD)
+    console.log(`ðŸ” Buscando dados para o dia: ${dataEspecifica}`);
     
     // Converter data para formato YYYYMMDD
     const diaEspecificoInt = parseInt(dataEspecifica.replace(/-/g, '')); // 2025-06-13 -> 20250613
     
-    console.log(`📅 Convertendo data: ${dataEspecifica} �� ${diaEspecificoInt}`);
+    console.log(`ðŸ“… Convertendo data: ${dataEspecifica} †’ ${diaEspecificoInt}`);
     
-    // Buscar dados do dia espec�fico usando campo 'dia' - COM PAGINA��O
+    // Buscar dados do dia especá­fico usando campo 'dia' - COM PAGINAá‡áƒO
     let dadosDia: any[] = [];
     pagina = 0;
     
@@ -158,24 +158,24 @@ export async function GET(request: NextRequest) {
         .range(inicio, fim);
 
       if (errorPagina) {
-        console.error('�� Erro ao buscar dados do dia:', errorPagina);
+        console.error('Œ Erro ao buscar dados do dia:', errorPagina);
         return NextResponse.json({ error: 'Erro ao buscar dados do dia' }, { status: 500 });
       }
 
       if (!dadosPagina || dadosPagina.length === 0) break;
       
       dadosDia = [...dadosDia, ...dadosPagina];
-      console.log(`📄 Dia - P�gina ${pagina + 1}: ${dadosPagina.length} registros (Total: ${dadosDia.length})`);
+      console.log(`ðŸ“„ Dia - Pá¡gina ${pagina + 1}: ${dadosPagina.length} registros (Total: ${dadosDia.length})`);
       
       if (dadosPagina.length < tamanhoPagina) break;
       pagina++;
     }
 
-    console.log(`📊 Dados encontrados - Per�odo: ${dadosPeriodo?.length || 0}, Dia espec�fico: ${dadosDia?.length || 0}`);
+    console.log(`ðŸ“Š Dados encontrados - Perá­odo: ${dadosPeriodo?.length || 0}, Dia especá­fico: ${dadosDia?.length || 0}`);
     
     // Log de debug dos primeiros registros do dia
     if (dadosDia && dadosDia.length > 0) {
-      console.log(`📋 Primeiros registros do dia:`, dadosDia.slice(0, 3).map((item: any) => ({
+      console.log(`ðŸ“‹ Primeiros registros do dia:`, dadosDia.slice(0, 3).map((item: any) => ({
         produto: item.prd_desc,
         grupo: item.grp_desc,
         dia: item.dia,
@@ -185,12 +185,12 @@ export async function GET(request: NextRequest) {
       })));
     }
 
-    // Fun��o para determinar se � bebida ou comida e calcular tempo correto
+    // Funá§á£o para determinar se á© bebida ou comida e calcular tempo correto
     const calcularTempo = (item: any) => {
       const grupo = (item.grp_desc || '').toLowerCase();
       const localizacao = (item.loc_desc || '').toLowerCase();
       
-      // Determinar tipo baseado no grupo e localiza��o
+      // Determinar tipo baseado no grupo e localizaá§á£o
       const isBebida = grupo.includes('cerveja') || 
                       grupo.includes('drink') || 
                       grupo.includes('dose') || 
@@ -216,7 +216,7 @@ export async function GET(request: NextRequest) {
       
       if (isBebida) {
         tipo = 'bebida';
-        // Para bebidas: t0-t3 (lan�amento at� entrega)
+        // Para bebidas: t0-t3 (laná§amento atá© entrega)
         if (item.t0_t3 && item.t0_t3 > 0) {
           tempo = item.t0_t3;
           tempoValido = tempo >= 30 && tempo <= 1200; // 0.5 a 20 minutos
@@ -230,7 +230,7 @@ export async function GET(request: NextRequest) {
         }
       } else if (isComida) {
         tipo = 'comida';
-        // Para comidas: t1-t2 (in�cio produ��o at� fim produ��o)
+        // Para comidas: t1-t2 (iná­cio produá§á£o atá© fim produá§á£o)
         if (item.t1_t2 && item.t1_t2 > 0) {
           tempo = item.t1_t2;
           tempoValido = tempo >= 60 && tempo <= 2700; // 1 a 45 minutos
@@ -268,14 +268,14 @@ export async function GET(request: NextRequest) {
       };
     };
 
-    // Se n�o h� dados para o dia espec�fico, buscar dados dos �ltimos 7 dias para mostrar algo �til
+    // Se ná£o há¡ dados para o dia especá­fico, buscar dados dos áºltimos 7 dias para mostrar algo áºtil
     let dadosRecentes = dadosDia;
     let usandoDadosRecentes = false;
     
     if (!dadosDia || dadosDia.length === 0) {
-      console.log(`��️ Nenhum dado encontrado para o dia ${dataEspecifica}. Buscando �ltimos 7 dias...`);
+      console.log(`š ï¸ Nenhum dado encontrado para o dia ${dataEspecifica}. Buscando áºltimos 7 dias...`);
       
-      // Calcular range dos �ltimos 7 dias em formato YYYYMMDD
+      // Calcular range dos áºltimos 7 dias em formato YYYYMMDD
       const dataFimObj = new Date(dataEspecifica);
       const dataInicioObj = new Date(dataFimObj);
       dataInicioObj.setDate(dataFimObj.getDate() - 7);
@@ -283,9 +283,9 @@ export async function GET(request: NextRequest) {
       const diaFimInt = parseInt(dataEspecifica.replace(/-/g, ''));
       const diaInicioInt = parseInt(dataInicioObj.toISOString().split('T')[0].replace(/-/g, ''));
       
-      console.log(`📅 Buscando dados de ${diaInicioInt} at� ${diaFimInt}`);
+      console.log(`ðŸ“… Buscando dados de ${diaInicioInt} atá© ${diaFimInt}`);
       
-      // Buscar �ltimos 7 dias com pagina��o
+      // Buscar áºltimos 7 dias com paginaá§á£o
       let dadosUltimos7Dias: any[] = [];
       let paginaRecente = 0;
       
@@ -321,7 +321,7 @@ export async function GET(request: NextRequest) {
         if (!dadosPagina || dadosPagina.length === 0) break;
         
         dadosUltimos7Dias = [...dadosUltimos7Dias, ...dadosPagina];
-        console.log(`📄 �ltimos 7 dias - P�gina ${paginaRecente + 1}: ${dadosPagina.length} registros (Total: ${dadosUltimos7Dias.length})`);
+        console.log(`ðŸ“„ ášltimos 7 dias - Pá¡gina ${paginaRecente + 1}: ${dadosPagina.length} registros (Total: ${dadosUltimos7Dias.length})`);
         
         if (dadosPagina.length < tamanhoPagina) break;
         paginaRecente++;
@@ -329,10 +329,10 @@ export async function GET(request: NextRequest) {
       
       dadosRecentes = dadosUltimos7Dias;
       usandoDadosRecentes = true;
-      console.log(`📊 Usando dados dos �ltimos 7 dias como refer�ncia: ${dadosRecentes.length} registros`);
+      console.log(`ðŸ“Š Usando dados dos áºltimos 7 dias como referáªncia: ${dadosRecentes.length} registros`);
     }
 
-    // M�tricas de qualidade dos dados
+    // Má©tricas de qualidade dos dados
     const metricas = {
       bebidas: {
         total: 0,
@@ -360,13 +360,13 @@ export async function GET(request: NextRequest) {
     // Processar dados por produto
     const produtosMap = new Map();
 
-    // Fun��o para processar um conjunto de dados
+    // Funá§á£o para processar um conjunto de dados
     const processarDados = (dados: any[], isPeriodo: boolean) => {
       dados?.forEach((item: any) => {
         const key = `${item.prd_desc}_${item.grp_desc}`;
         const analise = calcularTempo(item);
         
-        // Atualizar m�tricas
+        // Atualizar má©tricas
         if (analise.tipo === 'bebida') {
           metricas.bebidas.total++;
           if (analise.dadosCompletos) metricas.bebidas.completas++;
@@ -387,7 +387,7 @@ export async function GET(request: NextRequest) {
           else metricas.indefinidos.sem_dados++;
         }
         
-        // S� processar se o tempo � v�lido
+        // Sá³ processar se o tempo á© vá¡lido
         if (!analise.tempoValido || analise.tempo <= 0) return;
         
         if (!produtosMap.has(key)) {
@@ -414,25 +414,25 @@ export async function GET(request: NextRequest) {
       });
     };
 
-    // Processar dados do per�odo e do dia
+    // Processar dados do perá­odo e do dia
     processarDados(dadosPeriodo, true);
     processarDados(dadosRecentes, false);
 
-    console.log(`📊 M�tricas de qualidade dos dados:`, metricas);
+    console.log(`ðŸ“Š Má©tricas de qualidade dos dados:`, metricas);
 
-    // Calcular estat�sticas e detectar outliers
+    // Calcular estatá­sticas e detectar outliers
     const produtos = Array.from(produtosMap.values()).map((produto: any) => {
-      // Tempo m�dio do per�odo (excluindo o dia espec�fico para compara��o justa)
+      // Tempo má©dio do perá­odo (excluindo o dia especá­fico para comparaá§á£o justa)
       let temposPeriodoSemDia = produto.tempos_periodo;
       
-      // Se estamos usando dados do dia espec�fico, remover esses dados do per�odo para compara��o
+      // Se estamos usando dados do dia especá­fico, remover esses dados do perá­odo para comparaá§á£o
       if (!usandoDadosRecentes && dadosDia && dadosDia.length > 0) {
-        // Filtrar dados do per�odo que n�o sejam do dia espec�fico
+        // Filtrar dados do perá­odo que ná£o sejam do dia especá­fico
         const dadosPeriodoSemDia = dadosPeriodo?.filter((item: any) => {
           return item.dia !== diaEspecificoInt;
         }) || [];
         
-        // Recalcular tempos do per�odo sem o dia espec�fico
+        // Recalcular tempos do perá­odo sem o dia especá­fico
         const temposProdutoPeriodo: number[] = [];
         dadosPeriodoSemDia.forEach((item: any) => {
           if (`${item.prd_desc}_${item.grp_desc}` === `${produto.produto}_${produto.grupo}`) {
@@ -454,12 +454,12 @@ export async function GET(request: NextRequest) {
         ? produto.tempos_dia.reduce((a: number, b: number) => a + b, 0) / produto.tempos_dia.length 
         : 0;
 
-      // Calcular varia��o percentual
+      // Calcular variaá§á£o percentual
       const variacaoPercentual = tempoMedioGeral > 0 
         ? ((tempoDiaEspecifico - tempoMedioGeral) / tempoMedioGeral) * 100 
         : 0;
 
-      // Determinar status baseado na varia��o
+      // Determinar status baseado na variaá§á£o
       let status = 'normal';
       if (Math.abs(variacaoPercentual) > 50) {
         status = 'muito_alto';
@@ -469,7 +469,7 @@ export async function GET(request: NextRequest) {
         status = 'baixo';
       }
 
-      // Calcular desvio padr�o para detectar outliers
+      // Calcular desvio padrá£o para detectar outliers
       const temposValidos = temposPeriodoSemDia.filter((t: number) => t > 0);
       let desvio = 0;
       if (temposValidos.length > 1) {
@@ -495,10 +495,10 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // Filtrar APENAS produtos que t�m dados NO DIA ESPEC�FICO (n�o mostrar "Sem dados")
+    // Filtrar APENAS produtos que táªm dados NO DIA ESPECáFICO (ná£o mostrar "Sem dados")
     const produtosFiltrados = produtos.filter((p: any) => p.pedidos_dia > 0 && p.tempo_dia_especifico > 0);
 
-    // Ordenar: 1� casos GRAVES (varia��es positivas altas), 2� casos BONS (varia��es negativas), 3� normais
+    // Ordenar: 1º casos GRAVES (variaá§áµes positivas altas), 2º casos BONS (variaá§áµes negativas), 3º normais
     produtosFiltrados.sort((a, b) => {
       const variacaoA = a.variacao_percentual;
       const variacaoB = b.variacao_percentual;
@@ -513,15 +513,15 @@ export async function GET(request: NextRequest) {
       const bomA = variacaoA < -15;    // Casos bons: <-15% (ex: -70%)
       const bomB = variacaoB < -15;
       
-      // 1� PRIORIDADE: Casos GRAVES (varia��es positivas muito altas)
+      // 1º PRIORIDADE: Casos GRAVES (variaá§áµes positivas muito altas)
       if (graveA && !graveB) return -1;
       if (graveB && !graveA) return 1;
       if (graveA && graveB) {
-        // Ambos graves - ordenar pelo MAIS grave (maior varia��o positiva)
+        // Ambos graves - ordenar pelo MAIS grave (maior variaá§á£o positiva)
         return variacaoB - variacaoA; // +200% vem antes de +100%
       }
       
-      // 2� PRIORIDADE: Problemas moderados (25-50%)
+      // 2º PRIORIDADE: Problemas moderados (25-50%)
       if (problemaA && !problemaB && !bomB) return -1;
       if (problemaB && !problemaA && !bomA) return 1;
       if (problemaA && problemaB) {
@@ -529,7 +529,7 @@ export async function GET(request: NextRequest) {
         return variacaoB - variacaoA;
       }
       
-      // 3� PRIORIDADE: Casos BONS (varia��es negativas - melhorias)
+      // 3º PRIORIDADE: Casos BONS (variaá§áµes negativas - melhorias)
       if (bomA && !bomB && !graveB && !problemaB) return -1;
       if (bomB && !bomA && !graveA && !problemaA) return 1;
       if (bomA && bomB) {
@@ -537,7 +537,7 @@ export async function GET(request: NextRequest) {
         return variacaoA - variacaoB; // -70% vem antes de -30%
       }
       
-      // 4� PRIORIDADE: Casos normais (-15% a +25%)
+      // 4º PRIORIDADE: Casos normais (-15% a +25%)
       // Ordenar por melhor tempo (menor tempo = melhor performance)
       if (a.tempo_dia_especifico !== b.tempo_dia_especifico) {
         return a.tempo_dia_especifico - b.tempo_dia_especifico;
@@ -547,7 +547,7 @@ export async function GET(request: NextRequest) {
       return b.pedidos_dia - a.pedidos_dia;
     });
 
-    // Log da ordena��o para debug
+    // Log da ordenaá§á£o para debug
     const categorias = {
       graves: produtosFiltrados.filter((p: any) => p.variacao_percentual > 50).length,
       problemas: produtosFiltrados.filter((p: any) => p.variacao_percentual > 25 && p.variacao_percentual <= 50).length,
@@ -555,8 +555,8 @@ export async function GET(request: NextRequest) {
       normais: produtosFiltrados.filter((p: any) => p.variacao_percentual >= -15 && p.variacao_percentual <= 25).length
     };
     
-    console.log(`📊 Ordena��o aplicada:`, categorias);
-    console.log(`🔴 Primeiros 3 produtos:`, produtosFiltrados.slice(0, 3).map((p: any) => ({
+    console.log(`ðŸ“Š Ordenaá§á£o aplicada:`, categorias);
+    console.log(`ðŸ”´ Primeiros 3 produtos:`, produtosFiltrados.slice(0, 3).map((p: any) => ({
       produto: p.produto,
       variacao: p.variacao_percentual,
       categoria: p.variacao_percentual > 50 ? 'GRAVE' : 
@@ -564,7 +564,7 @@ export async function GET(request: NextRequest) {
                 p.variacao_percentual < -15 ? 'BOM' : 'NORMAL'
     })));
     
-    console.log(`�� Processamento conclu�do: ${produtosFiltrados.length} produtos analisados`);
+    console.log(`œ… Processamento concluá­do: ${produtosFiltrados.length} produtos analisados`);
 
     return NextResponse.json({
       success: true,
@@ -584,7 +584,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('�� Erro na API de tempos:', error);
+    console.error('Œ Erro na API de tempos:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 } 

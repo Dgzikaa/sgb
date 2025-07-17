@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser, authErrorResponse } from '@/middleware/auth'
 
@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usu�rio n�o autenticado')
+      return authErrorResponse('Usuá¡rio ná£o autenticado')
     }
 
     const body = await request.json()
@@ -14,14 +14,14 @@ export async function POST(request: NextRequest) {
 
     if (!bar_id || !user_id) {
       return NextResponse.json(
-        { error: 'bar_id e user_id s�o obrigat�rios' },
+        { error: 'bar_id e user_id sá£o obrigatá³rios' },
         { status: 400 }
       )
     }
 
     const supabase = await getAdminClient()
     
-    // 🎯 BUSCAR TODOS OS DADOS EM UMA S� CONSULTA
+    // ðŸŽ¯ BUSCAR TODOS OS DADOS EM UMA Sá“ CONSULTA
     const badges = {
       // Principais
       checklist: 0,
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       
       badges.checklist = checklists?.length || 0
 
-      // 2. PRODU��ES PENDENTES (todos os tipos)
+      // 2. PRODUá‡á•ES PENDENTES (todos os tipos)
       const { data: producoes } = await supabase
         .from('producoes')
         .select('id')
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       
       badges.producao = producoes?.length || 0
 
-      // 3. NOTIFICA��ES N�O LIDAS
+      // 3. NOTIFICAá‡á•ES NáƒO LIDAS
       const { data: notificacoes } = await supabase
         .from('notificacoes')
         .select('id')
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       
       badges.notifications = notificacoes?.length || 0
 
-      // 4. ALERTAS DO SISTEMA (vis�o geral)
+      // 4. ALERTAS DO SISTEMA (visá£o geral)
       const { data: alertas } = await supabase
         .from('sistema_alertas')
         .select('id')
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       
       badges.marketing = posts?.length || 0
 
-      // 7. CONFIGURA��ES - Para admins apenas
+      // 7. CONFIGURAá‡á•ES - Para admins apenas
       if (user.role === 'admin') {
         const { data: integracoes } = await supabase
           .from('integracoes_config')

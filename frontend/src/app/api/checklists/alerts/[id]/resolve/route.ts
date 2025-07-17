@@ -1,57 +1,315 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+﻿import { NextRequest, NextResponse } from 'next/server'
+import { getAdminClient } from '@/lib/supabase-admin'
+import { authenticateUser, authErrorResponse, permissionErrorResponse } from '@/middleware/auth'
+import { z } from 'zod'
 
 // =====================================================
-// ✅ API PARA RESOLVER ALERTAS
+// SCHEMAS DE VALIDAá‡áƒO
 // =====================================================
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+const AgendamentoSchema = z.object({
+  checklist_id: z.string().uuid('ID do checklist invá¡lido'),
+  titulo: z.string().min(1).max(255),
+  frequencia: z.enum(['diaria', 'semanal', 'quinzenal', 'mensal', 'conforme_necessario']),
+  horario: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Horá¡rio deve estar no formato HH:MM'),
+  dias_semana: z.array(z.number().min(0).max(6)).optional(), // 0 = domingo, 6 = sá¡bado
+  dia_mes: z.number().min(1).max(31).optional(),
+  ativo: z.boolean().default(true),
+  notificacoes_ativas: z.boolean().default(true),
+  tempo_limite_horas: z.number().int().min(1).max(168).default(24), // Má¡x 1 semana
+  tempo_alerta_horas: z.number().int().min(1).max(48).default(2), // Alerta 2h antes do prazo
+  prioridade: z.enum(['baixa', 'normal', 'alta', 'critica']).default('normal'),
+  observacoes: z.string().optional(),
+  responsaveis_whatsapp: z.array(z.object({
+    nome: z.string(),
+    numero: z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Náºmero WhatsApp invá¡lido'),
+    cargo: z.string().optional()
+  })).default([])
+})
+
+const UpdateAgendamentoSchema = AgendamentoSchema.partial().omit({
+  checklist_id: true
+})
+
+// =====================================================
+// GET - LISTAR AGENDAMENTOS
+// =====================================================
+export async function GET(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
-    
-    // Verificar autenticação
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    const user = await authenticateUser(request)
+    if (!user) {
+      return authErrorResponse('Usuá¡rio ná£o autenticado')
     }
 
-    const alertId = params.id
+    const { searchParams } = new URL(request.url)
+    const checklistId = searchParams.get('checklist_id')
+    const ativo = searchParams.get('ativo')
+    const frequencia = searchParams.get('frequencia')
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100)
+    const offset = (page - 1) * limit
 
-    if (!alertId) {
-      return NextResponse.json({ 
-        error: 'ID do alerta não fornecido' 
-      }, { status: 400 })
+    const supabase = await getAdminClient()
+
+    let query = supabase
+      .from('checklist_schedules')
+      .select(`
+        *,
+        checklist:checklists (
+          id, nome, setor, tipo, tempo_estimado
+        ),
+        _count_execucoes:checklist_execucoes (count)
+      `)
+      .eq('bar_id', user.bar_id)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
+
+    // Aplicar filtros
+    if (checklistId) {
+      query = query.eq('checklist_id', checklistId)
+    }
+    if (ativo !== null) {
+      query = query.eq('ativo', ativo === 'true')
+    }
+    if (frequencia) {
+      query = query.eq('frequencia', frequencia)
     }
 
-    // Log da resolução do alerta (se você quiser salvar no banco)
-    const resolveLog = {
-      alert_id: alertId,
-      user_id: user.id,
-      action: 'resolved',
-      resolved_at: new Date().toISOString(),
-      notes: 'Alerta resolvido pelo usuário'
+    const { data: agendamentos, error } = await query
+
+    if (error) {
+      console.error('Erro ao buscar agendamentos:', error)
+      return NextResponse.json({ error: 'Erro ao buscar agendamentos' }, { status: 500 })
     }
 
-    // Aqui você pode salvar o log de resolução no banco se necessário
-    // const { error: logError } = await supabase
-    //   .from('alert_resolutions')
-    //   .insert(resolveLog)
+    // Buscar prá³ximas execuá§áµes para cada agendamento
+    const agendamentosComProximaExecucao = await Promise.all(
+      (agendamentos || []).map(async (agendamento: any) => {
+        const proximaExecucao = calcularProximaExecucao(agendamento)
+        const ultimaExecucao = await buscarUltimaExecucao(supabase, agendamento.id)
+        
+        return {
+          ...agendamento,
+          proxima_execucao: proximaExecucao,
+          ultima_execucao: ultimaExecucao,
+          status_atual: determinarStatusAtual(agendamento, proximaExecucao, ultimaExecucao)
+        }
+      })
+    )
 
     return NextResponse.json({
       success: true,
-      message: 'Alerta resolvido com sucesso',
-      alertId,
-      resolvedAt: resolveLog.resolved_at
+      data: agendamentosComProximaExecucao,
+      pagination: {
+        page,
+        limit,
+        total: agendamentos?.length || 0
+      }
     })
 
-  } catch (error) {
-    console.error('Erro ao resolver alerta:', error)
+  } catch (error: any) {
+    console.error('Erro na API de agendamentos GET:', error)
     return NextResponse.json({ 
-      error: 'Erro interno do servidor' 
+      error: 'Erro interno do servidor',
+      details: error.message 
     }, { status: 500 })
   }
+}
+
+// =====================================================
+// POST - CRIAR AGENDAMENTO
+// =====================================================
+export async function POST(request: NextRequest) {
+  try {
+    const user = await authenticateUser(request)
+    if (!user) {
+      return authErrorResponse('Usuá¡rio ná£o autenticado')
+    }
+
+    // Verificar permissáµes - apenas admin pode criar agendamentos
+    if (user.role !== 'admin') {
+      return permissionErrorResponse('Apenas administradores podem criar agendamentos')
+    }
+
+    const body = await request.json()
+    const data = AgendamentoSchema.parse(body)
+
+    const supabase = await getAdminClient()
+
+    // Verificar se checklist existe
+    const { data: checklist, error: checklistError } = await supabase
+      .from('checklists')
+      .select('id, nome, setor')
+      .eq('id', data.checklist_id)
+      .eq('bar_id', user.bar_id)
+      .single()
+
+    if (checklistError || !checklist) {
+      return NextResponse.json({ error: 'Checklist ná£o encontrado' }, { status: 404 })
+    }
+
+    // Verificar conflitos de agendamento
+    const conflito = await verificarConflitoAgendamento(supabase, data, user.bar_id)
+    if (conflito) {
+      return NextResponse.json({ 
+        error: 'Já¡ existe um agendamento similar para este horá¡rio',
+        conflito 
+      }, { status: 409 })
+    }
+
+    // Criar agendamento
+    const agendamentoData = {
+      ...data,
+      bar_id: user.bar_id,
+      criado_por: user.user_id,
+      created_at: new Date().toISOString()
+    }
+
+    const { data: novoAgendamento, error: createError } = await supabase
+      .from('checklist_schedules')
+      .insert(agendamentoData)
+      .select(`
+        *,
+        checklist:checklists (nome, setor),
+        criado_por_usuario:usuarios_bar!criado_por (nome, email)
+      `)
+      .single()
+
+    if (createError) {
+      console.error('Erro ao criar agendamento:', createError)
+      return NextResponse.json({ error: 'Erro ao criar agendamento' }, { status: 500 })
+    }
+
+    // Log da criaá§á£o
+    console.log(`œ… Agendamento criado: ${novoAgendamento.titulo} para checklist ${checklist.nome}`)
+
+    return NextResponse.json({
+      success: true,
+      message: 'Agendamento criado com sucesso',
+      data: novoAgendamento
+    }, { status: 201 })
+
+  } catch (error: any) {
+    console.error('Erro na API de agendamentos POST:', error)
+    
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ 
+        error: 'Dados invá¡lidos',
+        details: error.errors 
+      }, { status: 400 })
+    }
+    
+    return NextResponse.json({ 
+      error: 'Erro interno do servidor',
+      details: error.message 
+    }, { status: 500 })
+  }
+}
+
+// =====================================================
+// FUNá‡á•ES AUXILIARES
+// =====================================================
+
+function calcularProximaExecucao(agendamento: any): string | null {
+  if (!agendamento.ativo) return null
+
+  const agora = new Date()
+  const [hora, minuto] = agendamento.horario.split(':').map(Number)
+  
+  let proximaData = new Date()
+  proximaData.setHours(hora, minuto, 0, 0)
+
+  // Se já¡ passou da hora hoje, comeá§ar de amanhá£
+  if (proximaData <= agora) {
+    proximaData.setDate(proximaData.getDate() + 1)
+  }
+
+  switch (agendamento.frequencia) {
+    case 'diaria':
+      return proximaData.toISOString()
+    
+    case 'semanal':
+      const diasSemana = agendamento.dias_semana || []
+      while (!diasSemana.includes(proximaData.getDay())) {
+        proximaData.setDate(proximaData.getDate() + 1)
+      }
+      return proximaData.toISOString()
+    
+    case 'quinzenal':
+      // Lá³gica para quinzenal (a cada 2 semanas nos dias especificados)
+      const diasQuinzenal = agendamento.dias_semana || []
+      let encontrou = false
+      let tentativas = 0
+      
+      while (!encontrou && tentativas < 14) {
+        if (diasQuinzenal.includes(proximaData.getDay())) {
+          encontrou = true
+        } else {
+          proximaData.setDate(proximaData.getDate() + 1)
+          tentativas++
+        }
+      }
+      return encontrou ? proximaData.toISOString() : null
+    
+    case 'mensal':
+      const diaMes = agendamento.dia_mes || 1
+      proximaData.setDate(diaMes)
+      
+      // Se já¡ passou este máªs, prá³ximo máªs
+      if (proximaData <= agora) {
+        proximaData.setMonth(proximaData.getMonth() + 1)
+        proximaData.setDate(diaMes)
+      }
+      return proximaData.toISOString()
+    
+    case 'conforme_necessario':
+      return null // Apenas manual
+    
+    default:
+      return null
+  }
+}
+
+async function buscarUltimaExecucao(supabase: any, agendamentoId: string) {
+  const { data, error } = await supabase
+    .from('checklist_execucoes')
+    .select('id, status, iniciado_em, concluido_em')
+    .eq('agendamento_id', agendamentoId)
+    .order('iniciado_em', { ascending: false })
+    .limit(1)
+    .single()
+
+  return error ? null : data
+}
+
+function determinarStatusAtual(agendamento: any, proximaExecucao: string | null, ultimaExecucao: any) {
+  if (!agendamento.ativo) return 'inativo'
+  if (!proximaExecucao) return 'manual'
+  
+  const agora = new Date()
+  const proxima = new Date(proximaExecucao)
+  
+  if (proxima <= agora) {
+    return ultimaExecucao?.status === 'completado' ? 'aguardando' : 'atrasado'
+  }
+  
+  return 'agendado'
+}
+
+async function verificarConflitoAgendamento(supabase: any, data: any, barId: number) {
+  const { data: conflitos, error } = await supabase
+    .from('checklist_schedules')
+    .select('id, titulo, horario')
+    .eq('bar_id', barId)
+    .eq('checklist_id', data.checklist_id)
+    .eq('frequencia', data.frequencia)
+    .eq('horario', data.horario)
+    .eq('ativo', true)
+
+  if (error) {
+    console.error('Erro ao verificar conflitos:', error)
+    return null
+  }
+
+  return conflitos && conflitos.length > 0 ? conflitos[0] : null
 } 

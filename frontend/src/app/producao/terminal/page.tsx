@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { useBar } from '@/contexts/BarContext'
@@ -68,7 +68,7 @@ export default function TerminalProducao() {
   const [buscaReceita, setBuscaReceita] = useState('')
   const [mostrarDropdown, setMostrarDropdown] = useState(false)
 
-  // M�ltiplas produ��es ativas
+  // Máºltiplas produá§áµes ativas
   const [producoesAtivas, setProducoesAtivas] = useState<ProducaoAtiva[]>([])
   const [producaoAtivaSelecionada, setProducaoAtivaSelecionada] = useState<string | null>(null)
 
@@ -78,7 +78,7 @@ export default function TerminalProducao() {
   const [buscaInsumo, setBuscaInsumo] = useState<{[key: string]: string}>({})
   const [mostrarDropdownInsumo, setMostrarDropdownInsumo] = useState<{[key: string]: boolean}>({})
 
-  // Carregar insumos dispon�veis
+  // Carregar insumos disponá­veis
   const carregarInsumos = async () => {
     try {
       const response = await fetch('/api/receitas/insumos?ativo=true')
@@ -133,13 +133,13 @@ export default function TerminalProducao() {
       setReceitasFiltradas(filtradas)
     }
     
-    // Ordenar por nome da receita em ordem alfab�tica
+    // Ordenar por nome da receita em ordem alfabá©tica
     setReceitasFiltradas(prev => [...prev].sort((a, b) => 
       a.receita_nome.localeCompare(b.receita_nome)
     ))
   }, [buscaReceita, receitas, tipoLocalSelecionado])
 
-  // Timer para todas as produ��es ativas
+  // Timer para todas as produá§áµes ativas
   useEffect(() => {
     const interval = setInterval(() => {
       setProducoesAtivas(prev => prev.map((producao: any) => 
@@ -184,7 +184,7 @@ export default function TerminalProducao() {
       pesoBruto: '',
       pesoLiquido: '',
       rendimentoEsperado: receita.rendimento_esperado?.toString() || '',
-      rendimentoProduzido: '', // Come�a vazio para o funcion�rio preencher
+      rendimentoProduzido: '', // Comeá§a vazio para o funcioná¡rio preencher
       observacoes: '',
       insumos: [],
       insumoChefe: undefined,
@@ -213,12 +213,12 @@ export default function TerminalProducao() {
       novaProducao.insumos = insumosCalculados
       novaProducao.insumoChefe = insumoChefe
       
-      // Se tem insumo chefe, pr�-preencher peso l�quido
+      // Se tem insumo chefe, prá©-preencher peso lá­quido
       if (insumoChefe) {
         novaProducao.pesoLiquido = insumoChefe.quantidade_necessaria?.toString() || ''
       }
       
-      console.log(`📋 Receita ${receita.receita_codigo}: insumo chefe = ${insumoChefe?.nome}, rendimento esperado = ${novaProducao.rendimentoReceita}`)
+      console.log(`ðŸ“‹ Receita ${receita.receita_codigo}: insumo chefe = ${insumoChefe?.nome}, rendimento esperado = ${novaProducao.rendimentoReceita}`)
     }
 
     setProducoesAtivas(prev => [...prev, novaProducao])
@@ -236,7 +236,7 @@ export default function TerminalProducao() {
   const iniciarTimer = (id: string) => {
     const producao = producoesAtivas.find((p: any) => p.id === id)
     if (!producao || !producao.pesoBruto || parseFloat(producao.pesoBruto) <= 0) {
-      alert('��️ Preencha o peso bruto antes de iniciar a produ��o!')
+      alert('š ï¸ Preencha o peso bruto antes de iniciar a produá§á£o!')
       return
     }
     
@@ -262,12 +262,12 @@ export default function TerminalProducao() {
     if (!producao) return
 
     if (!producao.rendimentoProduzido.trim()) {
-      alert('��️ Rendimento produzido � obrigat�rio!')
+      alert('š ï¸ Rendimento produzido á© obrigatá³rio!')
       return
     }
 
     if (!selectedBar?.id) {
-      alert('��️ Bar n�o selecionado!')
+      alert('š ï¸ Bar ná£o selecionado!')
       return
     }
 
@@ -276,7 +276,7 @@ export default function TerminalProducao() {
     const pesoLiquidoNum = parseFloat(producao.pesoLiquido) || 0
     const rendimentoNum = parseFloat(producao.rendimentoProduzido) || 0
 
-    // Preparar dados dos insumos para an�lise de ader�ncia
+    // Preparar dados dos insumos para aná¡lise de aderáªncia
     const dadosInsumos = producao.insumos.map((insumo: any) => ({
       id: insumo.id,
       codigo: insumo.codigo,
@@ -306,11 +306,11 @@ export default function TerminalProducao() {
       insumo_chefe_nome: producao.insumoChefe?.nome,
       peso_insumo_chefe: pesoLiquidoNum,
       status: 'finalizada',
-      // NOVO: Dados dos insumos para an�lise de ader�ncia
+      // NOVO: Dados dos insumos para aná¡lise de aderáªncia
       insumos: dadosInsumos
     }
 
-    console.log('💾 Dados da produ��o sendo enviados:', {
+    console.log('ðŸ’¾ Dados da produá§á£o sendo enviados:', {
       ...dadosProducao,
       insumos: `${dadosInsumos.length} insumos`
     })
@@ -326,36 +326,36 @@ export default function TerminalProducao() {
 
       if (response.ok && result.success) {
         const aderencia = result.data.percentual_aderencia_receita
-        let mensagem = '�� Produ��o salva com sucesso!'
+        let mensagem = 'œ… Produá§á£o salva com sucesso!'
         
         if (aderencia !== undefined) {
-          mensagem += `\n\n📊 Ader�ncia � receita: ${aderencia.toFixed(1)}%`
+          mensagem += `\n\nðŸ“Š Aderáªncia á  receita: ${aderencia.toFixed(1)}%`
           
           if (aderencia >= 95) {
-            mensagem += '\n🏆 Excelente! Receita seguida perfeitamente.'
+            mensagem += '\nðŸ† Excelente! Receita seguida perfeitamente.'
           } else if (aderencia >= 85) {
-            mensagem += '\n👍 Bom! Pequenos ajustes na receita.'
+            mensagem += '\nðŸ‘ Bom! Pequenos ajustes na receita.'
           } else if (aderencia >= 75) {
-            mensagem += '\n��️ Regular. Considere revisar as quantidades.'
+            mensagem += '\nš ï¸ Regular. Considere revisar as quantidades.'
           } else {
-            mensagem += '\n🔴 Aten��o! Grandes desvios da receita detectados.'
+            mensagem += '\nðŸ”´ Atená§á£o! Grandes desvios da receita detectados.'
           }
         }
         
         if (result.data.insumos_salvos > 0) {
-          mensagem += `\n📋 ${result.data.insumos_salvos} insumos salvos para an�lise.`
+          mensagem += `\nðŸ“‹ ${result.data.insumos_salvos} insumos salvos para aná¡lise.`
         }
         
         alert(mensagem)
-        console.log('📊 Dados salvos:', result.data)
+        console.log('ðŸ“Š Dados salvos:', result.data)
         removerProducao(id)
       } else {
-        console.error('�� Erro na API:', result)
-        alert('Erro ao salvar produ��o: ' + (result.error || 'Erro desconhecido'))
+        console.error('Œ Erro na API:', result)
+        alert('Erro ao salvar produá§á£o: ' + (result.error || 'Erro desconhecido'))
       }
     } catch (error) {
-      console.error('�� Erro na requisi��o:', error)
-      alert('Erro ao salvar produ��o: ' + (error as Error).message)
+      console.error('Œ Erro na requisiá§á£o:', error)
+      alert('Erro ao salvar produá§á£o: ' + (error as Error).message)
     }
   }
 
@@ -373,12 +373,12 @@ export default function TerminalProducao() {
     setProducoesAtivas(prev => prev.map((producao: any) => {
       if (producao.id !== producaoId) return producao
       
-      // Verificar se � insumo chefe
+      // Verificar se á© insumo chefe
       const insumo = producao.insumos.find((i: any) => i.id === insumoId)
       if (!insumo) return producao
       
       if (insumo.is_chefe) {
-        // Se editou o insumo chefe diretamente, atualizar peso l�quido tamb�m
+        // Se editou o insumo chefe diretamente, atualizar peso lá­quido tambá©m
         const proporcao = quantidadeNum / insumo.quantidade_necessaria
         
         const insumosAtualizados = producao.insumos.map((ins: any) => 
@@ -389,11 +389,11 @@ export default function TerminalProducao() {
         
         return { 
           ...producao, 
-          pesoLiquido: quantidadeNum.toString(), // Sincronizar peso l�quido com insumo chefe
+          pesoLiquido: quantidadeNum.toString(), // Sincronizar peso lá­quido com insumo chefe
           insumos: insumosAtualizados 
         }
       } else {
-        // Se editou insumo n�o-chefe, apenas atualizar aquele insumo
+        // Se editou insumo ná£o-chefe, apenas atualizar aquele insumo
         const insumosAtualizados = producao.insumos.map((ins: any) => 
           ins.id === insumoId 
             ? { ...ins, quantidade_real: quantidadeNum }
@@ -405,7 +405,7 @@ export default function TerminalProducao() {
     }))
   }
 
-  // NOVA FUN��O: Atualizar peso l�quido e recalcular quantidades calculadas
+  // NOVA FUNá‡áƒO: Atualizar peso lá­quido e recalcular quantidades calculadas
   const atualizarPesoLiquido = (id: string, novoPeso: string) => {
     const pesoNum = parseFloat(novoPeso) || 0
     
@@ -414,18 +414,18 @@ export default function TerminalProducao() {
       
       const insumoChefe = producao.insumoChefe
       if (!insumoChefe || !insumoChefe.quantidade_necessaria) {
-        // Sem insumo chefe, apenas atualizar peso l�quido
+        // Sem insumo chefe, apenas atualizar peso lá­quido
         return { ...producao, pesoLiquido: novoPeso }
       }
       
-      // Calcular propor��o baseada no insumo chefe
+      // Calcular proporá§á£o baseada no insumo chefe
       const proporcao = pesoNum / insumoChefe.quantidade_necessaria
       
-      // Recalcular quantidades calculadas baseado na nova propor��o
+      // Recalcular quantidades calculadas baseado na nova proporá§á£o
       const insumosAtualizados = producao.insumos.map((insumo: any) => ({
         ...insumo,
         quantidade_calculada: insumo.is_chefe 
-          ? pesoNum // Insumo chefe = peso l�quido
+          ? pesoNum // Insumo chefe = peso lá­quido
           : Math.round(insumo.quantidade_necessaria * proporcao * 100) / 100
       }))
       
@@ -434,7 +434,7 @@ export default function TerminalProducao() {
       if (producao.rendimentoReceita && producao.rendimentoReceita > 0) {
         const rendimentoCalculado = Math.round(producao.rendimentoReceita * proporcao)
         novoRendimentoEsperado = rendimentoCalculado.toString()
-        console.log(`🧮 Peso l�quido: ${novoPeso}g | Propor��o: ${proporcao.toFixed(3)} | Rendimento esperado: ${rendimentoCalculado}g`)
+        console.log(`ðŸ§® Peso lá­quido: ${novoPeso}g | Proporá§á£o: ${proporcao.toFixed(3)} | Rendimento esperado: ${rendimentoCalculado}g`)
       }
       
       return {
@@ -446,7 +446,7 @@ export default function TerminalProducao() {
     }))
   }
 
-  // NOVA FUN��O: Atualizar apenas a quantidade real digitada pelo cozinheiro
+  // NOVA FUNá‡áƒO: Atualizar apenas a quantidade real digitada pelo cozinheiro
   const atualizarQuantidadeRealManual = (producaoId: string, insumoId: number, quantidade: string) => {
     const quantidadeNum = parseFloat(quantidade) || 0
     
@@ -463,7 +463,7 @@ export default function TerminalProducao() {
     }))
   }
 
-  // NOVA FUN��O: Atualizar quantidade planejada de insumo adicionado manualmente
+  // NOVA FUNá‡áƒO: Atualizar quantidade planejada de insumo adicionado manualmente
   const atualizarQuantidadePlanejada = (producaoId: string, insumoId: number, quantidade: number) => {
     setProducoesAtivas(prev => prev.map((producao: any) => {
       if (producao.id !== producaoId) return producao
@@ -482,7 +482,7 @@ export default function TerminalProducao() {
     }))
   }
 
-  // Fun��o para recalcular todas as quantidades quando peso l�quido muda
+  // Funá§á£o para recalcular todas as quantidades quando peso lá­quido muda
   const recalcularTodasQuantidades = (producaoId: string) => {
     const producao = producoesAtivas.find((p: any) => p.id === producaoId)
     if (!producao) return
@@ -508,24 +508,24 @@ export default function TerminalProducao() {
     }
   }
 
-  // Fun��o para adicionar insumo � produ��o
+  // Funá§á£o para adicionar insumo á  produá§á£o
   const adicionarInsumoProducao = (producaoId: string, insumo: Insumo) => {
     setProducoesAtivas(prev => prev.map((producao: any) => {
       if (producao.id !== producaoId) return producao
       
-      // Verificar se insumo j� existe
+      // Verificar se insumo já¡ existe
       const jaExiste = producao.insumos.some(i => i.id === insumo.id)
       if (jaExiste) {
-        alert('��️ Este insumo j� est� na receita!')
+        alert('š ï¸ Este insumo já¡ está¡ na receita!')
         return producao
       }
       
-      // Criar novo insumo para a produ��o
+      // Criar novo insumo para a produá§á£o
       const novoInsumo: InsumoExpandido = {
         id: insumo.id,
         codigo: insumo.codigo,
         nome: insumo.nome,
-        quantidade_necessaria: 0, // Ser� preenchido pelo usu�rio
+        quantidade_necessaria: 0, // Será¡ preenchido pelo usuá¡rio
         quantidade_calculada: 0, // Iniciar zerado
         quantidade_real: 0,
         unidade_medida: insumo.unidade_medida || 'g',
@@ -545,15 +545,15 @@ export default function TerminalProducao() {
     setAdicionandoInsumo(prev => ({ ...prev, [producaoId]: false }))
   }
 
-  // Fun��o para remover insumo da produ��o
+  // Funá§á£o para remover insumo da produá§á£o
   const removerInsumoProducao = (producaoId: string, insumoId: number) => {
     setProducoesAtivas(prev => prev.map((producao: any) => {
       if (producao.id !== producaoId) return producao
       
-      // N�o permitir remover insumo chefe
+      // Ná£o permitir remover insumo chefe
       const insumo = producao.insumos.find((i: any) => i.id === insumoId)
       if (insumo?.is_chefe) {
-        alert('��️ N�o � poss�vel remover o insumo chefe!')
+        alert('š ï¸ Ná£o á© possá­vel remover o insumo chefe!')
         return producao
       }
       
@@ -564,26 +564,26 @@ export default function TerminalProducao() {
     }))
   }
 
-  // Fun��o para filtrar insumos dispon�veis
+  // Funá§á£o para filtrar insumos disponá­veis
   const filtrarInsumosDisponiveis = (producaoId: string) => {
     const busca = buscaInsumo[producaoId] || ''
     const producao = producoesAtivas.find((p: any) => p.id === producaoId)
     
     if (!producao) {
-      console.log('�� Produ��o n�o encontrada:', producaoId)
+      console.log('Œ Produá§á£o ná£o encontrada:', producaoId)
       return []
     }
     
-    // Filtrar insumos que ainda n�o est�o na produ��o
+    // Filtrar insumos que ainda ná£o está£o na produá§á£o
     const insumosNaoUsados = insumosDisponiveis.filter((insumo: any) => 
       !producao.insumos.some(i => i.id === insumo.id)
     )
     
-    console.log(`🔍 Busca: "${busca}" | Insumos dispon�veis: ${insumosDisponiveis.length} | N�o usados: ${insumosNaoUsados.length}`)
+    console.log(`ðŸ” Busca: "${busca}" | Insumos disponá­veis: ${insumosDisponiveis.length} | Ná£o usados: ${insumosNaoUsados.length}`)
     
     if (!busca) {
       const resultado = insumosNaoUsados.slice(0, 10)
-      console.log('📋 Retornando primeiros 10:', resultado.map((i: any) => i.nome))
+      console.log('ðŸ“‹ Retornando primeiros 10:', resultado.map((i: any) => i.nome))
       return resultado
     }
     
@@ -592,12 +592,12 @@ export default function TerminalProducao() {
       insumo.codigo.toLowerCase().includes(busca.toLowerCase())
     )
     
-    console.log(`🔍 Busca "${busca}" retornou ${filtrados.length} insumos:`, filtrados.map((i: any) => i.nome))
+    console.log(`ðŸ” Busca "${busca}" retornou ${filtrados.length} insumos:`, filtrados.map((i: any) => i.nome))
     return filtrados
   }
 
   useEffect(() => {
-    setPageTitle('🏭 Terminal de Produ��o')
+    setPageTitle('ðŸ­ Terminal de Produá§á£o')
     return () => setPageTitle('')
   }, [setPageTitle])
 
@@ -615,7 +615,7 @@ export default function TerminalProducao() {
     return (
       <div className="p-6">
         <div className="text-center">
-          <p className="text-red-600 font-medium">��️ Selecione um bar primeiro</p>
+          <p className="text-red-600 font-medium">š ï¸ Selecione um bar primeiro</p>
         </div>
       </div>
     )
@@ -634,27 +634,27 @@ export default function TerminalProducao() {
             {/* Seletor de Tipo e Receita */}
             <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
               <CardHeader>
-                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">🏭 Terminal de Produ��o</CardTitle>
+                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">ðŸ­ Terminal de Produá§á£o</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 
                 {/* Seletor Bar vs Cozinha */}
                 <div>
-                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">Local de Produ��o</Label>
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">Local de Produá§á£o</Label>
                   <div className="grid grid-cols-2 gap-2">
                     <Button
                       variant={tipoLocalSelecionado === 'cozinha' ? 'default' : 'outline'}
                       onClick={() => setTipoLocalSelecionado('cozinha')}
                       className="flex items-center justify-center gap-2 h-12 text-sm sm:text-base touch-manipulation"
                     >
-                      👨��🍳 Cozinha ({receitasCozinha})
+                      ðŸ‘¨€ðŸ³ Cozinha ({receitasCozinha})
                     </Button>
                     <Button
                       variant={tipoLocalSelecionado === 'bar' ? 'default' : 'outline'}
                       onClick={() => setTipoLocalSelecionado('bar')}
                       className="flex items-center justify-center gap-2 h-12 text-sm sm:text-base touch-manipulation"
                     >
-                      🍺 Bar ({receitasBar})
+                      ðŸº Bar ({receitasBar})
                     </Button>
                   </div>
                 </div>
@@ -683,7 +683,7 @@ export default function TerminalProducao() {
                         size="sm"
                         className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 h-8 w-8"
                       >
-                        �
+                        á—
                       </Button>
                     )}
                   </div>
@@ -700,13 +700,13 @@ export default function TerminalProducao() {
                         >
                           <div className="font-semibold text-gray-900 dark:text-white">{receita.receita_nome}</div>
                           <div className="text-sm text-gray-600 dark:text-gray-400">
-                            {receita.tipo_local === 'bar' ? '🍺' : '👨��🍳'} {receita.tipo_local} �� {receita.insumos?.length || 0} insumos
+                            {receita.tipo_local === 'bar' ? 'ðŸº' : 'ðŸ‘¨€ðŸ³'} {receita.tipo_local} €¢ {receita.insumos?.length || 0} insumos
                           </div>
                         </div>
                       ))
                     ) : (
                       <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-                        🔍 Nenhuma receita de {tipoLocalSelecionado} encontrada para "{buscaReceita}"
+                        ðŸ” Nenhuma receita de {tipoLocalSelecionado} encontrada para "{buscaReceita}"
                       </div>
                     )}
                   </div>
@@ -714,11 +714,11 @@ export default function TerminalProducao() {
             </CardContent>
           </Card>
 
-            {/* Abas das Produ��es Ativas */}
+            {/* Abas das Produá§áµes Ativas */}
             {producoesAtivas.length > 0 && (
               <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">🔄 Produ��es Ativas ({producoesAtivas.length})</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">ðŸ”„ Produá§áµes Ativas ({producoesAtivas.length})</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Tabs value={producaoAtivaSelecionada || ''} onValueChange={setProducaoAtivaSelecionada}>
@@ -732,7 +732,7 @@ export default function TerminalProducao() {
                           <div className="flex flex-col">
                             <span className="font-medium">{producao.receita.receita_nome}</span>
                             <span className="text-xs text-gray-500 dark:text-gray-400">
-                              {formatarTempo(producao.segundosDecorridos)} {producao.timerAtivo && '��️'}
+                              {formatarTempo(producao.segundosDecorridos)} {producao.timerAtivo && '±ï¸'}
                             </span>
                           </div>
                         </TabsTrigger>
@@ -743,18 +743,18 @@ export default function TerminalProducao() {
                     <TabsContent key={producao.id} value={producao.id} className="mt-6">
                         <div className="flex flex-col space-y-6">
                           
-                          {/* Dados da Produ��o */}
+                          {/* Dados da Produá§á£o */}
                           <div className="space-y-6">
                             <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                               <CardHeader>
                                 <CardTitle className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                                  📋 {producao.receita.receita_nome}
+                                  ðŸ“‹ {producao.receita.receita_nome}
                                 </CardTitle>
                               </CardHeader>
                               <CardContent className="space-y-3">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                                   <div>
-                                    <span className="text-gray-600 dark:text-gray-400">C�digo:</span>
+                                    <span className="text-gray-600 dark:text-gray-400">Cá³digo:</span>
                                     <span className="ml-2 font-medium text-gray-900 dark:text-white">{producao.receita.receita_codigo}</span>
                                   </div>
                                   <div>
@@ -764,13 +764,13 @@ export default function TerminalProducao() {
                                   <div>
                                     <span className="text-gray-600 dark:text-gray-400">Local:</span>
                                     <span className="ml-2 font-medium text-gray-900 dark:text-white">
-                                      {producao.tipo_local === 'bar' ? '🍺 Bar' : '👨��🍳 Cozinha'}
+                                      {producao.tipo_local === 'bar' ? 'ðŸº Bar' : 'ðŸ‘¨€ðŸ³ Cozinha'}
                                     </span>
                                   </div>
                                   <div>
                                     <span className="text-gray-600 dark:text-gray-400">Meta:</span>
                                     <span className="ml-2 font-medium text-gray-900 dark:text-white">
-                                      {producao.rendimentoReceita ? `${producao.rendimentoReceita}g` : 'N�o definido'}
+                                      {producao.rendimentoReceita ? `${producao.rendimentoReceita}g` : 'Ná£o definido'}
                                     </span>
                                   </div>
                                   <div>
@@ -792,7 +792,7 @@ export default function TerminalProducao() {
                               <CardHeader>
                                 <div className="flex items-center justify-between">
                                   <CardTitle className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                                    ��️ Timer de Produ��o
+                                    ±ï¸ Timer de Produá§á£o
                                   </CardTitle>
                                   <div className="text-2xl font-mono font-bold text-blue-600 dark:text-blue-400">
                                     {formatarTempo(producao.segundosDecorridos)}
@@ -810,40 +810,40 @@ export default function TerminalProducao() {
                                         : 'bg-green-600 hover:bg-green-700'
                                     } text-white`}
                                   >
-                                    ��️ Iniciar
+                                    –¶ï¸ Iniciar
                                   </Button>
                                   <Button
                                     onClick={() => resetarTimer(producao.id)}
                                     variant="outline"
                                     className="flex-1 h-12 text-base border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 touch-manipulation"
                                   >
-                                    🔄 Reset
+                                    ðŸ”„ Reset
                                   </Button>
                                   <Button
                                     onClick={() => removerProducao(producao.id)}
                                     variant="outline"
                                     className="flex-1 h-12 text-base border-red-300 dark:border-red-600 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 touch-manipulation"
                                   >
-                                    🗑️ Remover
+                                    ðŸ—‘ï¸ Remover
                                   </Button>
                                 </div>
                               </CardContent>
                             </Card>
 
-                            {/* Controles de Produ��o */}
+                            {/* Controles de Produá§á£o */}
                             <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                               <CardHeader>
                                 <CardTitle className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                                  ��️ Controles de Produ��o
+                                  š–ï¸ Controles de Produá§á£o
                                 </CardTitle>
                               </CardHeader>
                               <CardContent>
                                 <div className="space-y-6">
-                                  {/* Etapa 1: Peso Bruto (Sempre vis�vel) */}
+                                  {/* Etapa 1: Peso Bruto (Sempre visá­vel) */}
                                   <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
                                     <Label htmlFor={`peso-bruto-${producao.id}`} className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2 mb-2">
-                                      1️�� Peso Bruto (g) *
-                                      {producao.pesoBruto && parseFloat(producao.pesoBruto) > 0 && <span className="text-green-600 dark:text-green-400 text-xs">��</span>}
+                                      1ï¸ƒ£ Peso Bruto (g) *
+                                      {producao.pesoBruto && parseFloat(producao.pesoBruto) > 0 && <span className="text-green-600 dark:text-green-400 text-xs">œ…</span>}
                                     </Label>
                                     <Input
                                       id={`peso-bruto-${producao.id}`}
@@ -860,12 +860,12 @@ export default function TerminalProducao() {
                                     />
                                   </div>
 
-                                  {/* Etapa 2: Peso L�quido (S� ap�s timer iniciar) */}
+                                  {/* Etapa 2: Peso Lá­quido (Sá³ apá³s timer iniciar) */}
                                   {producao.timerAtivo && (
                                     <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
                                       <Label htmlFor={`peso-liquido-${producao.id}`} className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2 mb-2">
-                                        2️�� Peso L�quido (g)
-                                        {producao.insumoChefe && <span className="text-blue-600 dark:text-blue-400 text-xs">🔗 Ajusta {producao.insumoChefe.nome}</span>}
+                                        2ï¸ƒ£ Peso Lá­quido (g)
+                                        {producao.insumoChefe && <span className="text-blue-600 dark:text-blue-400 text-xs">ðŸ”— Ajusta {producao.insumoChefe.nome}</span>}
                                       </Label>
                                       <Input
                                         id={`peso-liquido-${producao.id}`}
@@ -876,22 +876,22 @@ export default function TerminalProducao() {
                                           const value = e.target.value.replace(/[^0-9.]/g, '')
                                           atualizarPesoLiquido(producao.id, value)
                                         }}
-                                        placeholder="Digite o peso ap�s limpeza..."
+                                        placeholder="Digite o peso apá³s limpeza..."
                                         className="h-12 text-base bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                                       />
                                     </div>
                                   )}
 
-                              {/* Etapa 3: Resultado Final (S� ap�s timer iniciar) */}
+                              {/* Etapa 3: Resultado Final (Sá³ apá³s timer iniciar) */}
                               {producao.timerAtivo && (
                                 <div className="bg-white p-3 rounded border border-orange-200">
                                   <div className="flex items-center justify-between mb-2">
                                     <Label htmlFor={`rendimento-produzido-${producao.id}`} className="text-black font-semibold">
-                                      3️�� Resultado Final (g) *
+                                      3ï¸ƒ£ Resultado Final (g) *
                                     </Label>
                                     {producao.rendimentoEsperado && (
                                       <span className="text-sm text-gray-600">
-                                        🎯 Meta: {producao.rendimentoEsperado}g
+                                        ðŸŽ¯ Meta: {producao.rendimentoEsperado}g
                                       </span>
                                     )}
                                   </div>
@@ -910,7 +910,7 @@ export default function TerminalProducao() {
                                     required
                                   />
                                   
-                                  {/* Compara��o com meta */}
+                                  {/* Comparaá§á£o com meta */}
                                   {producao.rendimentoProduzido && producao.rendimentoEsperado && (
                                     <div className="mt-2 text-sm">
                                       {(() => {
@@ -920,11 +920,11 @@ export default function TerminalProducao() {
                                         const percentual = esperado > 0 ? (diferenca / esperado * 100) : 0
                                         
                                         if (Math.abs(diferenca) < 5) {
-                                          return <span className="text-green-600">�� Rendimento dentro do esperado</span>
+                                          return <span className="text-green-600">œ… Rendimento dentro do esperado</span>
                                         } else if (diferenca > 0) {
-                                          return <span className="text-green-600">📈 +{diferenca.toFixed(1)}g (+{percentual.toFixed(1)}%) acima da meta</span>
+                                          return <span className="text-green-600">ðŸ“ˆ +{diferenca.toFixed(1)}g (+{percentual.toFixed(1)}%) acima da meta</span>
                                         } else {
-                                          return <span className="text-orange-600">📉 {diferenca.toFixed(1)}g ({percentual.toFixed(1)}%) abaixo da meta</span>
+                                          return <span className="text-orange-600">ðŸ“‰ {diferenca.toFixed(1)}g ({percentual.toFixed(1)}%) abaixo da meta</span>
                                         }
                                       })()}
                                     </div>
@@ -932,17 +932,17 @@ export default function TerminalProducao() {
                                 </div>
                               )}
 
-                              {/* Observa��es (S� ap�s timer iniciar) */}
+                              {/* Observaá§áµes (Sá³ apá³s timer iniciar) */}
                               {producao.timerAtivo && (
                                 <div className="bg-white p-3 rounded border border-gray-200">
                                   <Label htmlFor={`obs-${producao.id}`} className="text-black font-semibold">
-                                    📝 Observa��es
+                                    ðŸ“ Observaá§áµes
                                   </Label>
                                   <Textarea
                                     id={`obs-${producao.id}`}
                                     value={producao.observacoes}
                                     onChange={(e) => atualizarProducao(producao.id, { observacoes: e.target.value })}
-                                    placeholder="Anote qualquer observa��o sobre a produ��o..."
+                                    placeholder="Anote qualquer observaá§á£o sobre a produá§á£o..."
                                     className="text-black font-medium resize-none mt-1"
                                     rows={2}
                                   />
@@ -958,7 +958,7 @@ export default function TerminalProducao() {
                             <CardHeader>
                               <div className="flex items-center justify-between">
                                 <CardTitle className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                                  🥘 Insumos da Receita
+                                  ðŸ¥˜ Insumos da Receita
                                 </CardTitle>
                                 <Button
                                   onClick={() => alternarInsumosExpandidos(producao.id)}
@@ -966,7 +966,7 @@ export default function TerminalProducao() {
                                   size="sm"
                                   className="text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 h-10 w-10 touch-manipulation"
                                 >
-                                  {producao.insumosExpandidos ? '🔽' : '🔼'}
+                                  {producao.insumosExpandidos ? 'ðŸ”½' : 'ðŸ”¼'}
                                 </Button>
                               </div>
                             </CardHeader>
@@ -996,7 +996,7 @@ export default function TerminalProducao() {
                                           className="text-red-500 hover:text-red-700 hover:bg-red-50 h-6 w-6 p-0"
                                           title="Remover insumo"
                                         >
-                                          ��
+                                          Œ
                                         </Button>
                                       )}
                                     </div>
@@ -1006,7 +1006,7 @@ export default function TerminalProducao() {
                                       {/* Linha 1: Quantidade sugerida/calculada */}
                                       <div className="flex items-center justify-between">
                                         <span className="text-sm text-gray-600">
-                                          {insumo.is_chefe ? '🎯 Quantidade base:' : '💡 Sugerido:'}
+                                          {insumo.is_chefe ? 'ðŸŽ¯ Quantidade base:' : 'ðŸ’¡ Sugerido:'}
                                         </span>
                                         <div className="font-medium text-purple-700 text-sm bg-purple-50 rounded px-3 py-1 border border-purple-200">
                                           {insumo.quantidade_calculada ? 
@@ -1019,7 +1019,7 @@ export default function TerminalProducao() {
                                       {/* Linha 2: Input para quantidade real */}
                                       <div className="flex items-center gap-3">
                                         <span className="text-sm text-gray-600 min-w-0 flex-shrink-0">
-                                          ��️ Usado:
+                                          œï¸ Usado:
                                         </span>
                                         <Input
                                           type="number"
@@ -1038,7 +1038,7 @@ export default function TerminalProducao() {
                                         </span>
                                       </div>
 
-                                      {/* Mostrar diferen�a se houver */}
+                                      {/* Mostrar diferená§a se houver */}
                                       {insumo.quantidade_real > 0 && (
                                         <div className="text-xs text-right">
                                           {(() => {
@@ -1048,11 +1048,11 @@ export default function TerminalProducao() {
                                             const percentual = calculado > 0 ? (diferenca / calculado * 100) : 0
                                             
                                             if (Math.abs(diferenca) < 0.1) {
-                                              return <span className="text-green-600">�� Conforme receita</span>
+                                              return <span className="text-green-600">œ… Conforme receita</span>
                                             } else if (diferenca > 0) {
-                                              return <span className="text-orange-600">📈 +{diferenca.toFixed(1)}g (+{percentual.toFixed(1)}%)</span>
+                                              return <span className="text-orange-600">ðŸ“ˆ +{diferenca.toFixed(1)}g (+{percentual.toFixed(1)}%)</span>
                                             } else {
-                                              return <span className="text-blue-600">📉 {diferenca.toFixed(1)}g ({percentual.toFixed(1)}%)</span>
+                                              return <span className="text-blue-600">ðŸ“‰ {diferenca.toFixed(1)}g ({percentual.toFixed(1)}%)</span>
                                             }
                                           })()}
                                         </div>
@@ -1061,7 +1061,7 @@ export default function TerminalProducao() {
                                   </div>
                                 ))}
                                 
-                                {/* Se��o para adicionar insumos */}
+                                {/* Seá§á£o para adicionar insumos */}
                                 <div className="border-t pt-3 mt-3">
                                   {!adicionandoInsumo[producao.id] ? (
                                     <Button
@@ -1069,7 +1069,7 @@ export default function TerminalProducao() {
                                       variant="outline"
                                       className="w-full border-dashed border-2 border-orange-300 text-orange-600 hover:bg-orange-50"
                                     >
-                                      �� Adicionar Insumo
+                                      ž• Adicionar Insumo
                                     </Button>
                                   ) : (
                                     <div className="space-y-2">
@@ -1085,7 +1085,7 @@ export default function TerminalProducao() {
                                           size="sm"
                                           className="text-gray-500 hover:text-gray-700 h-6 w-6 p-0"
                                         >
-                                          ��
+                                          Œ
                                         </Button>
                                       </div>
                                       
@@ -1097,7 +1097,7 @@ export default function TerminalProducao() {
                                             setBuscaInsumo(prev => ({ ...prev, [producao.id]: e.target.value }))
                                             setMostrarDropdownInsumo(prev => ({ ...prev, [producao.id]: true }))
                                           }}
-                                          placeholder="🔍 Buscar insumo por nome ou c�digo..."
+                                          placeholder="ðŸ” Buscar insumo por nome ou cá³digo..."
                                           className="text-sm text-black font-medium border-2 border-orange-300"
                                           onFocus={() => setMostrarDropdownInsumo(prev => ({ ...prev, [producao.id]: true }))}
                                           onBlur={() => {
@@ -1113,7 +1113,7 @@ export default function TerminalProducao() {
                                               <>
                                                 {!buscaInsumo[producao.id] && filtrarInsumosDisponiveis(producao.id).length > 10 && (
                                                   <div className="p-2 bg-orange-50 text-orange-700 text-xs text-center border-b border-orange-100">
-                                                    💡 Digite para filtrar entre {filtrarInsumosDisponiveis(producao.id).length} insumos
+                                                    ðŸ’¡ Digite para filtrar entre {filtrarInsumosDisponiveis(producao.id).length} insumos
                                                   </div>
                                                 )}
                                                 {filtrarInsumosDisponiveis(producao.id).map((insumo) => (
@@ -1123,15 +1123,15 @@ export default function TerminalProducao() {
                                                     onClick={() => adicionarInsumoProducao(producao.id, insumo)}
                                                   >
                                                     <div className="font-semibold text-black text-sm">{insumo.nome}</div>
-                                                    <div className="text-xs text-gray-600">{insumo.codigo} �� {insumo.unidade_medida}</div>
+                                                    <div className="text-xs text-gray-600">{insumo.codigo} €¢ {insumo.unidade_medida}</div>
                                                   </div>
                                                 ))}
                                               </>
                                             ) : (
                                               <div className="p-3 text-center text-gray-500 text-sm">
                                                 {buscaInsumo[producao.id] ? 
-                                                  `🔍 Nenhum insumo encontrado para "${buscaInsumo[producao.id]}"` :
-                                                  `��️ Nenhum insumo dispon�vel. Sistema tem ${insumosDisponiveis.length} insumos totais.`
+                                                  `ðŸ” Nenhum insumo encontrado para "${buscaInsumo[producao.id]}"` :
+                                                  `š ï¸ Nenhum insumo disponá­vel. Sistema tem ${insumosDisponiveis.length} insumos totais.`
                                                 }
                                               </div>
                                             )}
@@ -1146,13 +1146,13 @@ export default function TerminalProducao() {
                             </CardContent>
                           </Card>
 
-                          {/* Bot�o Salvar */}
+                          {/* Botá£o Salvar */}
                           <Button
                             onClick={() => salvarProducao(producao.id)}
                             className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-bold py-3 h-12 text-base touch-manipulation"
                             disabled={!producao.rendimentoProduzido.trim()}
                           >
-                            💾 Salvar Produ��o
+                            ðŸ’¾ Salvar Produá§á£o
                           </Button>
                         </div>
                       </TabsContent>
@@ -1166,8 +1166,8 @@ export default function TerminalProducao() {
               <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
                 <CardContent className="py-12">
                   <div className="text-center text-gray-500 dark:text-gray-400">
-                    <p className="text-lg font-medium">🍽️ Nenhuma produ��o ativa</p>
-                    <p className="text-sm">Selecione uma receita acima para come�ar</p>
+                    <p className="text-lg font-medium">ðŸ½ï¸ Nenhuma produá§á£o ativa</p>
+                    <p className="text-sm">Selecione uma receita acima para comeá§ar</p>
                   </div>
                 </CardContent>
               </Card>

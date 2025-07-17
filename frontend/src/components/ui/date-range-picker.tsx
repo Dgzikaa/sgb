@@ -1,4 +1,4 @@
-import * as React from 'react'
+ï»¿import * as React from 'react'
 import { Calendar } from './calendar'
 import { cn } from '@/lib/utils'
 
@@ -42,10 +42,10 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   return (
     <div className={cn('flex flex-col gap-2 card-dark p-4 rounded-xl', className)}>
       <div className="flex items-center gap-4 mb-2">
-        <span className="card-title-dark">Perá­odo:</span>
+        <span className="card-title-dark">PerÃ¡Â­odo:</span>
         <span className="card-description-dark">
-          {start ? start.toLocaleDateString('pt-BR') : 'Iná­cio'}
-          {' '}€“{' '}
+          {start ? start.toLocaleDateString('pt-BR') : 'InÃ¡Â­cio'}
+          {' '}â‚¬â€œ{' '}
           {end ? end.toLocaleDateString('pt-BR') : 'Fim'}
         </span>
         {(start || end) && (

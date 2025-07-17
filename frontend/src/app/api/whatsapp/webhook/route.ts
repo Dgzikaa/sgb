@@ -1,17 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 
-// Configura��o do Supabase
+// Configuraá§á£o do Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
 // ========================================
-// 📱 GET /api/whatsapp/webhook
+// ðŸ“± GET /api/whatsapp/webhook
 // ========================================
-// Verifica��o de webhook do WhatsApp
+// Verificaá§á£o de webhook do WhatsApp
 export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
@@ -19,36 +19,36 @@ export async function GET(request: NextRequest) {
     const token = url.searchParams.get('hub.verify_token');
     const challenge = url.searchParams.get('hub.challenge');
 
-    // Verificar se � uma requisi��o de verifica��o v�lida
+    // Verificar se á© uma requisiá§á£o de verificaá§á£o vá¡lida
     if (mode === 'subscribe') {
-      // Buscar configura��o para validar token
+      // Buscar configuraá§á£o para validar token
       const { data: configs } = await supabase
         .from('whatsapp_configuracoes')
         .select('webhook_verify_token, bar_id')
         .eq('ativo', true);
 
-      // Verificar se o token coincide com alguma configura��o
+      // Verificar se o token coincide com alguma configuraá§á£o
       const validConfig = configs?.find((config: any) => config.webhook_verify_token === token);
 
       if (validConfig) {
         console.log('Webhook verificado com sucesso para bar_id:', validConfig.bar_id);
         return new Response(challenge, { status: 200 });
       } else {
-        console.error('Token de verifica��o inv�lido:', token);
-        return new Response('Token inv�lido', { status: 403 });
+        console.error('Token de verificaá§á£o invá¡lido:', token);
+        return new Response('Token invá¡lido', { status: 403 });
       }
     }
 
-    return new Response('Verifica��o inv�lida', { status: 400 });
+    return new Response('Verificaá§á£o invá¡lida', { status: 400 });
 
   } catch (error) {
-    console.error('Erro na verifica��o do webhook:', error);
+    console.error('Erro na verificaá§á£o do webhook:', error);
     return new Response('Erro interno', { status: 500 });
   }
 }
 
 // ========================================
-// 📱 POST /api/whatsapp/webhook
+// ðŸ“± POST /api/whatsapp/webhook
 // ========================================
 // Recebimento de webhooks do WhatsApp
 export async function POST(request: NextRequest) {
@@ -64,15 +64,15 @@ export async function POST(request: NextRequest) {
     try {
       payload = JSON.parse(body);
     } catch (error) {
-      console.error('Payload JSON inv�lido:', error);
-      return NextResponse.json({ error: 'JSON inv�lido' }, { status: 400 });
+      console.error('Payload JSON invá¡lido:', error);
+      return NextResponse.json({ error: 'JSON invá¡lido' }, { status: 400 });
     }
 
     // Identificar bar_id pela estrutura do webhook
     const barId = await identifyBarFromWebhook(payload);
     if (!barId) {
-      console.error('N�o foi poss�vel identificar o bar do webhook');
-      return NextResponse.json({ error: 'Bar n�o identificado' }, { status: 400 });
+      console.error('Ná£o foi possá­vel identificar o bar do webhook');
+      return NextResponse.json({ error: 'Bar ná£o identificado' }, { status: 400 });
     }
 
     // Verificar assinatura do webhook (opcional em desenvolvimento)
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
 
-    // Processar webhook se for v�lido
+    // Processar webhook se for vá¡lido
     if (payload.object === 'whatsapp_business_account') {
       await processWhatsAppWebhook(payload, barId, logEntry?.id);
     }
@@ -110,11 +110,11 @@ export async function POST(request: NextRequest) {
 }
 
 // ========================================
-// 🔧 FUN��ES AUXILIARES
+// ðŸ”§ FUNá‡á•ES AUXILIARES
 // ========================================
 
 /**
- * Identifica o bar_id atrav�s do payload do webhook
+ * Identifica o bar_id atravá©s do payload do webhook
  */
 async function identifyBarFromWebhook(payload: any): Promise<number | null> {
   try {
@@ -125,7 +125,7 @@ async function identifyBarFromWebhook(payload: any): Promise<number | null> {
       return null;
     }
 
-    // Buscar configura��o correspondente
+    // Buscar configuraá§á£o correspondente
     const { data: config } = await supabase
       .from('whatsapp_configuracoes')
       .select('bar_id')
@@ -146,13 +146,13 @@ async function identifyBarFromWebhook(payload: any): Promise<number | null> {
 async function verifyWebhookSignature(body: string, signature: string | null, barId: number): Promise<boolean> {
   try {
     if (!signature) {
-      return false; // Em produ��o, deve ser obrigat�rio
+      return false; // Em produá§á£o, deve ser obrigatá³rio
     }
 
-    // Buscar app secret da configura��o
+    // Buscar app secret da configuraá§á£o
     const { data: config } = await supabase
       .from('whatsapp_configuracoes')
-      .select('webhook_verify_token') // Em produ��o, usar app_secret
+      .select('webhook_verify_token') // Em produá§á£o, usar app_secret
       .eq('bar_id', barId)
       .single();
 
@@ -162,7 +162,7 @@ async function verifyWebhookSignature(body: string, signature: string | null, ba
 
     // Calcular hash esperado
     const expectedSignature = 'sha256=' + crypto
-      .createHmac('sha256', config.webhook_verify_token) // Em produ��o, usar app_secret
+      .createHmac('sha256', config.webhook_verify_token) // Em produá§á£o, usar app_secret
       .update(body, 'utf8')
       .digest('hex');
 
@@ -190,7 +190,7 @@ async function processWhatsAppWebhook(payload: any, barId: number, webhookLogId?
       for (const change of changes) {
         const value = change.value;
 
-        // Processar atualiza��es de status de mensagem
+        // Processar atualizaá§áµes de status de mensagem
         if (value.statuses) {
           await processMessageStatuses(value.statuses, barId);
         }
@@ -230,7 +230,7 @@ async function processWhatsAppWebhook(payload: any, barId: number, webhookLogId?
 }
 
 /**
- * Processa atualiza��es de status de mensagens
+ * Processa atualizaá§áµes de status de mensagens
  */
 async function processMessageStatuses(statuses: any[], barId: number): Promise<void> {
   for (const status of statuses) {
@@ -246,7 +246,7 @@ async function processMessageStatuses(statuses: any[], barId: number): Promise<v
       status_updated_at: new Date(parseInt(timestamp) * 1000).toISOString()
     };
 
-    // Campos espec�ficos por status
+    // Campos especá­ficos por status
     switch (newStatus) {
       case 'sent':
         updateData.enviado_em = updateData.status_updated_at;
@@ -272,7 +272,7 @@ async function processMessageStatuses(statuses: any[], barId: number): Promise<v
       .select('contato_id')
       .single();
 
-    // Atualizar estat�sticas do contato se necess�rio
+    // Atualizar estatá­sticas do contato se necessá¡rio
     if (updatedMessage && ['delivered', 'read'].includes(newStatus)) {
       const incrementField = newStatus === 'delivered' 
         ? 'total_mensagens_entregues' 
@@ -287,7 +287,7 @@ async function processMessageStatuses(statuses: any[], barId: number): Promise<v
 }
 
 /**
- * Processa mensagens recebidas (respostas dos usu�rios)
+ * Processa mensagens recebidas (respostas dos usuá¡rios)
  */
 async function processReceivedMessages(messages: any[], barId: number): Promise<void> {
   for (const message of messages) {
@@ -304,7 +304,7 @@ async function processReceivedMessages(messages: any[], barId: number): Promise<
       .single();
 
     if (contato) {
-      // Atualizar �ltima intera��o do contato
+      // Atualizar áºltima interaá§á£o do contato
       await supabase
         .from('whatsapp_contatos')
         .update({
@@ -329,10 +329,10 @@ async function processReceivedMessages(messages: any[], barId: number): Promise<
 }
 
 // ========================================
-// 📊 FUN��O PARA CRIAR RPC NO BANCO
+// ðŸ“Š FUNá‡áƒO PARA CRIAR RPC NO BANCO
 // ========================================
 /*
--- Executar no Supabase para criar fun��o RPC
+-- Executar no Supabase para criar funá§á£o RPC
 CREATE OR REPLACE FUNCTION increment_contact_stat(
   contact_id INTEGER,
   field_name TEXT

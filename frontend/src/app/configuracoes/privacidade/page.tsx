@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -27,14 +27,14 @@ export default function PrivacidePage() {
   const [userData, setUserData] = useState<any>(null)
   const [loadingAction, setLoadingAction] = useState<string | null>(null)
 
-  // Carregar dados do usu�rio
+  // Carregar dados do usuá¡rio
   useEffect(() => {
     const loadUserData = async () => {
       try {
         const data = await exerciseRights.accessData()
         setUserData(data)
       } catch (error) {
-        console.error('Erro ao carregar dados do usu�rio:', error)
+        console.error('Erro ao carregar dados do usuá¡rio:', error)
       }
     }
 
@@ -52,13 +52,13 @@ export default function PrivacidePage() {
       }
       
       toast({
-        title: 'Prefer�ncia atualizada',
+        title: 'Preferáªncia atualizada',
         description: `Cookie ${type} ${granted ? 'ativado' : 'desativado'} com sucesso.`
       })
     } catch (error) {
       toast({
         title: 'Erro',
-        description: 'N�o foi poss�vel atualizar a prefer�ncia.',
+        description: 'Ná£o foi possá­vel atualizar a preferáªncia.',
         variant: 'destructive'
       })
     }
@@ -86,7 +86,7 @@ export default function PrivacidePage() {
     } catch (error) {
       toast({
         title: 'Erro no download',
-        description: 'N�o foi poss�vel baixar seus dados.',
+        description: 'Ná£o foi possá­vel baixar seus dados.',
         variant: 'destructive'
       })
     } finally {
@@ -95,11 +95,11 @@ export default function PrivacidePage() {
   }
 
   const handleDataDeletion = async () => {
-    if (!confirm('��️ ATEN��O: Esta a��o ir� EXCLUIR PERMANENTEMENTE todos os seus dados. Esta a��o � IRREVERS�VEL. Deseja continuar?')) {
+    if (!confirm('š ï¸ ATENá‡áƒO: Esta aá§á£o irá¡ EXCLUIR PERMANENTEMENTE todos os seus dados. Esta aá§á£o á© IRREVERSáVEL. Deseja continuar?')) {
       return
     }
 
-    if (!confirm('Confirme novamente: Voc� tem CERTEZA que deseja excluir todos os seus dados? Esta a��o n�o pode ser desfeita.')) {
+    if (!confirm('Confirme novamente: Vocáª tem CERTEZA que deseja excluir todos os seus dados? Esta aá§á£o ná£o pode ser desfeita.')) {
       return
     }
 
@@ -108,15 +108,15 @@ export default function PrivacidePage() {
       await exerciseRights.deleteData()
       
       toast({
-        title: 'Dados exclu�dos',
+        title: 'Dados excluá­dos',
         description: 'Todos os seus dados foram removidos permanentemente.'
       })
       
-      // A p�gina ser� recarregada automaticamente pelo hook
+      // A pá¡gina será¡ recarregada automaticamente pelo hook
     } catch (error) {
       toast({
-        title: 'Erro na exclus�o',
-        description: 'N�o foi poss�vel excluir seus dados.',
+        title: 'Erro na exclusá£o',
+        description: 'Ná£o foi possá­vel excluir seus dados.',
         variant: 'destructive'
       })
       setLoadingAction(null)
@@ -127,32 +127,32 @@ export default function PrivacidePage() {
     {
       type: 'essential' as ConsentType,
       name: 'Essenciais',
-      description: 'Necess�rios para funcionamento b�sico',
-      icon: '🔒',
+      description: 'Necessá¡rios para funcionamento bá¡sico',
+      icon: 'ðŸ”’',
       color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300',
       required: true
     },
     {
       type: 'analytics' as ConsentType,
       name: 'Analytics',
-      description: 'An�lise de uso e performance',
-      icon: '📊',
+      description: 'Aná¡lise de uso e performance',
+      icon: 'ðŸ“Š',
       color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
       required: false
     },
     {
       type: 'marketing' as ConsentType,
       name: 'Marketing',
-      description: 'An�ncios personalizados',
-      icon: '📢',
+      description: 'Anáºncios personalizados',
+      icon: 'ðŸ“¢',
       color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300',
       required: false
     },
     {
       type: 'preferences' as ConsentType,
-      name: 'Prefer�ncias',
-      description: 'Configura��es pessoais',
-      icon: '��️',
+      name: 'Preferáªncias',
+      description: 'Configuraá§áµes pessoais',
+      icon: 'š™ï¸',
       color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
       required: false
     },
@@ -160,7 +160,7 @@ export default function PrivacidePage() {
       type: 'functional' as ConsentType,
       name: 'Funcionais',
       description: 'Recursos extras e melhorias',
-      icon: '🔧',
+      icon: 'ðŸ”§',
       color: 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300',
       required: false
     }
@@ -196,7 +196,7 @@ export default function PrivacidePage() {
           <CardHeader>
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-xl flex items-center justify-center">
-                <span className="text-2xl">🔒</span>
+                <span className="text-2xl">ðŸ”’</span>
               </div>
               <div>
                 <CardTitle className="card-title-dark">Centro de Privacidade</CardTitle>
@@ -214,10 +214,10 @@ export default function PrivacidePage() {
         {/* Abas principais */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid grid-cols-4 w-full max-w-2xl mx-auto">
-            <TabsTrigger value="consents">🍪 Cookies</TabsTrigger>
-            <TabsTrigger value="rights">��️ Direitos</TabsTrigger>
-            <TabsTrigger value="data">📄 Meus Dados</TabsTrigger>
-            <TabsTrigger value="audit">📋 Hist�rico</TabsTrigger>
+            <TabsTrigger value="consents">ðŸª Cookies</TabsTrigger>
+            <TabsTrigger value="rights">š–ï¸ Direitos</TabsTrigger>
+            <TabsTrigger value="data">ðŸ“„ Meus Dados</TabsTrigger>
+            <TabsTrigger value="audit">ðŸ“‹ Histá³rico</TabsTrigger>
           </TabsList>
 
           {/* Aba Consentimentos */}
@@ -242,7 +242,7 @@ export default function PrivacidePage() {
                             </h3>
                             {cookie.required && (
                               <Badge className="text-xs bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300">
-                                Obrigat�rio
+                                Obrigatá³rio
                               </Badge>
                             )}
                           </div>
@@ -263,9 +263,9 @@ export default function PrivacidePage() {
 
                 <Alert>
                   <AlertDescription>
-                    <strong>Importante:</strong> Cookies essenciais s�o obrigat�rios para o funcionamento 
-                    do site e n�o podem ser desabilitados. Outros cookies podem ser ativados/desativados 
-                    conforme sua prefer�ncia.
+                    <strong>Importante:</strong> Cookies essenciais sá£o obrigatá³rios para o funcionamento 
+                    do site e ná£o podem ser desabilitados. Outros cookies podem ser ativados/desativados 
+                    conforme sua preferáªncia.
                   </AlertDescription>
                 </Alert>
               </CardContent>
@@ -280,7 +280,7 @@ export default function PrivacidePage() {
               <Card className="card-dark">
                 <CardHeader>
                   <CardTitle className="card-title-dark flex items-center gap-2">
-                    📤 Portabilidade de Dados
+                    ðŸ“¤ Portabilidade de Dados
                   </CardTitle>
                   <p className="card-description-dark">
                     Baixe todos os seus dados em formato estruturado
@@ -301,10 +301,10 @@ export default function PrivacidePage() {
               <Card className="card-dark">
                 <CardHeader>
                   <CardTitle className="card-title-dark flex items-center gap-2">
-                    🗑️ Direito ao Esquecimento
+                    ðŸ—‘ï¸ Direito ao Esquecimento
                   </CardTitle>
                   <p className="card-description-dark">
-                    Solicite a exclus�o permanente dos seus dados
+                    Solicite a exclusá£o permanente dos seus dados
                   </p>
                 </CardHeader>
                 <CardContent>
@@ -319,14 +319,14 @@ export default function PrivacidePage() {
                 </CardContent>
               </Card>
 
-              {/* Retifica��o */}
+              {/* Retificaá§á£o */}
               <Card className="card-dark">
                 <CardHeader>
                   <CardTitle className="card-title-dark flex items-center gap-2">
-                    ��️ Retifica��o de Dados
+                    œï¸ Retificaá§á£o de Dados
                   </CardTitle>
                   <p className="card-description-dark">
-                    Corrija informa��es incorretas em seu perfil
+                    Corrija informaá§áµes incorretas em seu perfil
                   </p>
                 </CardHeader>
                 <CardContent>
@@ -336,11 +336,11 @@ export default function PrivacidePage() {
                 </CardContent>
               </Card>
 
-              {/* Restri��o de Processamento */}
+              {/* Restriá§á£o de Processamento */}
               <Card className="card-dark">
                 <CardHeader>
                   <CardTitle className="card-title-dark flex items-center gap-2">
-                    ��️ Limita��o de Tratamento
+                    ¸ï¸ Limitaá§á£o de Tratamento
                   </CardTitle>
                   <p className="card-description-dark">
                     Restrinja o processamento dos seus dados
@@ -354,10 +354,10 @@ export default function PrivacidePage() {
               </Card>
             </div>
 
-            {/* Informa��es de contato do DPO */}
+            {/* Informaá§áµes de contato do DPO */}
             <Card className="card-dark">
               <CardHeader>
-                <CardTitle className="card-title-dark">📞 Contato - Encarregado de Prote��o de Dados (DPO)</CardTitle>
+                <CardTitle className="card-title-dark">ðŸ“ž Contato - Encarregado de Proteá§á£o de Dados (DPO)</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
@@ -374,10 +374,10 @@ export default function PrivacidePage() {
                     </a>
                   </div>
                   <div>
-                    <strong>Endere�o:</strong><br />
+                    <strong>Endereá§o:</strong><br />
                     <span className="text-gray-600 dark:text-gray-400">
                       Rua Exemplo, 123<br />
-                      S�o Paulo - SP
+                      Sá£o Paulo - SP
                     </span>
                   </div>
                 </div>
@@ -389,9 +389,9 @@ export default function PrivacidePage() {
           <TabsContent value="data" className="space-y-6">
             <Card className="card-dark">
               <CardHeader>
-                <CardTitle className="card-title-dark">📄 Resumo dos Seus Dados</CardTitle>
+                <CardTitle className="card-title-dark">ðŸ“„ Resumo dos Seus Dados</CardTitle>
                 <p className="card-description-dark">
-                  Visualize quais informa��es temos sobre voc�
+                  Visualize quais informaá§áµes temos sobre vocáª
                 </p>
               </CardHeader>
               <CardContent>
@@ -403,9 +403,9 @@ export default function PrivacidePage() {
                           Dados Pessoais
                         </label>
                         <div className="mt-1 p-3 bg-gray-50 dark:bg-gray-800 rounded border text-sm">
-                          �� Nome: {userData.name || 'N�o informado'}<br />
-                          �� Email: {userData.email || 'N�o informado'}<br />
-                          �� Telefone: {userData.phone || 'N�o informado'}
+                          €¢ Nome: {userData.name || 'Ná£o informado'}<br />
+                          €¢ Email: {userData.email || 'Ná£o informado'}<br />
+                          €¢ Telefone: {userData.phone || 'Ná£o informado'}
                         </div>
                       </div>
                       
@@ -414,9 +414,9 @@ export default function PrivacidePage() {
                           Dados de Uso
                         </label>
                         <div className="mt-1 p-3 bg-gray-50 dark:bg-gray-800 rounded border text-sm">
-                          �� �ltimo login: {userData.lastLogin || 'Nunca'}<br />
-                          �� Conta criada: {userData.createdAt || 'N�o informado'}<br />
-                          �� Total de acessos: {userData.loginCount || 0}
+                          €¢ ášltimo login: {userData.lastLogin || 'Nunca'}<br />
+                          €¢ Conta criada: {userData.createdAt || 'Ná£o informado'}<br />
+                          €¢ Total de acessos: {userData.loginCount || 0}
                         </div>
                       </div>
                     </div>
@@ -431,13 +431,13 @@ export default function PrivacidePage() {
             </Card>
           </TabsContent>
 
-          {/* Aba Hist�rico */}
+          {/* Aba Histá³rico */}
           <TabsContent value="audit" className="space-y-6">
             <Card className="card-dark">
               <CardHeader>
-                <CardTitle className="card-title-dark">📋 Hist�rico de Consentimentos</CardTitle>
+                <CardTitle className="card-title-dark">ðŸ“‹ Histá³rico de Consentimentos</CardTitle>
                 <p className="card-description-dark">
-                  Veja o hist�rico das suas decis�es sobre privacidade
+                  Veja o histá³rico das suas decisáµes sobre privacidade
                 </p>
               </CardHeader>
               <CardContent>

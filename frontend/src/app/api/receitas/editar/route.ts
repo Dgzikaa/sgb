@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 export async function PUT(request: NextRequest) {
@@ -19,18 +19,18 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 })
     }
 
-    // Valida��es b�sicas
+    // Validaá§áµes bá¡sicas
     if (!receita_codigo?.trim() || !receita_nome?.trim()) {
       return NextResponse.json({ 
         success: false, 
-        error: 'C�digo e nome da receita s�o obrigat�rios' 
+        error: 'Cá³digo e nome da receita sá£o obrigatá³rios' 
       }, { status: 400 })
     }
 
     if (!insumos || insumos.length === 0) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Pelo menos um insumo � obrigat�rio' 
+        error: 'Pelo menos um insumo á© obrigatá³rio' 
       }, { status: 400 })
     }
 
@@ -42,7 +42,7 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Remover todas as receitas antigas com o mesmo c�digo
+    // Remover todas as receitas antigas com o mesmo cá³digo
     const { error: deleteError } = await supabase
       .from('receitas')
       .delete()
@@ -58,8 +58,8 @@ export async function PUT(request: NextRequest) {
 
     // Inserir novas receitas com os insumos atualizados
     const insumoChefe = insumos.find((i: any) => i.is_chefe)
-    console.log('🔄 Insumo chefe encontrado:', insumoChefe)
-    console.log('🔄 Dados recebidos:', { receita_codigo, tipo_local, bar_id, insumos })
+    console.log('ðŸ”„ Insumo chefe encontrado:', insumoChefe)
+    console.log('ðŸ”„ Dados recebidos:', { receita_codigo, tipo_local, bar_id, insumos })
     
     const receitasData = insumos.map((insumo: any) => ({
       bar_id: bar_id,
@@ -75,7 +75,7 @@ export async function PUT(request: NextRequest) {
       updated_at: new Date().toISOString()
     }))
     
-    console.log('📦 Dados que ser�o inseridos:', receitasData)
+    console.log('ðŸ“¦ Dados que será£o inseridos:', receitasData)
 
     const { data: novasReceitas, error: receitasError } = await supabase
       .from('receitas')
@@ -83,8 +83,8 @@ export async function PUT(request: NextRequest) {
       .select()
 
     if (receitasError) {
-      console.error('�� Erro ao inserir receitas:', receitasError)
-      console.error('�� Dados que causaram erro:', receitasData)
+      console.error('Œ Erro ao inserir receitas:', receitasError)
+      console.error('Œ Dados que causaram erro:', receitasData)
       return NextResponse.json({ 
         success: false, 
         error: 'Erro ao atualizar receitas: ' + receitasError.message,
@@ -92,7 +92,7 @@ export async function PUT(request: NextRequest) {
       }, { status: 500 })
     }
 
-    console.log('�� Receita atualizada com sucesso:', receita_codigo)
+    console.log('œ… Receita atualizada com sucesso:', receita_codigo)
 
     return NextResponse.json({
       success: true,
@@ -105,8 +105,8 @@ export async function PUT(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro interno:', error)
-    console.error('�� Stack trace:', error instanceof Error ? error.stack : 'Sem stack trace')
+    console.error('Œ Erro interno:', error)
+    console.error('Œ Stack trace:', error instanceof Error ? error.stack : 'Sem stack trace')
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor: ' + (error instanceof Error ? error.message : String(error)),

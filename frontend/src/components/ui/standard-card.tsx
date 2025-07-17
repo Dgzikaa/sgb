@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { ReactNode, forwardRef } from 'react'
 import { cn } from '@/lib/utils'
@@ -16,8 +16,8 @@ const StandardCard = forwardRef<HTMLDivElement, StandardCardProps>(
     
     const variantClasses = {
       default: baseClasses,
-      stats: baseClasses, // Para cards de estat�sticas
-      filter: baseClasses, // Para se��o de filtros
+      stats: baseClasses, // Para cards de estatá­sticas
+      filter: baseClasses, // Para seá§á£o de filtros
       table: baseClasses   // Para tabelas
     }
 
@@ -51,7 +51,7 @@ const StandardCardHeader = forwardRef<HTMLDivElement, StandardCardHeaderProps>(
 )
 StandardCardHeader.displayName = "StandardCardHeader"
 
-// T�tulo do Card
+// Tá­tulo do Card
 interface StandardCardTitleProps {
   children: ReactNode
   className?: string
@@ -74,7 +74,7 @@ const StandardCardTitle = forwardRef<HTMLHeadingElement, StandardCardTitleProps>
 )
 StandardCardTitle.displayName = "StandardCardTitle"
 
-// Descri��o do Card
+// Descriá§á£o do Card
 interface StandardCardDescriptionProps {
   children: ReactNode
   className?: string
@@ -92,7 +92,7 @@ const StandardCardDescription = forwardRef<HTMLParagraphElement, StandardCardDes
 )
 StandardCardDescription.displayName = "StandardCardDescription"
 
-// Conte�do do Card
+// Conteáºdo do Card
 interface StandardCardContentProps {
   children: ReactNode
   className?: string
@@ -110,7 +110,7 @@ const StandardCardContent = forwardRef<HTMLDivElement, StandardCardContentProps>
 )
 StandardCardContent.displayName = "StandardCardContent"
 
-// Card de Estat�stica (formato especial para m�tricas)
+// Card de Estatá­stica (formato especial para má©tricas)
 interface StatsCardProps {
   title: string
   value: string | number

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -7,30 +7,30 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ 
     status: 'API funcionando',
     timestamp: new Date().toISOString(),
-    message: 'API de coleta de dados brutos ativa - Trigger autom�tico habilitado'
+    message: 'API de coleta de dados brutos ativa - Trigger automá¡tico habilitado'
   })
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Verificar autentica��o
+    // Verificar autenticaá§á£o
     const authHeader = request.headers.get('Authorization')
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Token de autoriza��o necess�rio' }, { status: 401 })
+      return NextResponse.json({ error: 'Token de autorizaá§á£o necessá¡rio' }, { status: 401 })
     }
 
     const token = authHeader.replace('Bearer ', '')
     if (token !== 'sgb-dados-brutos-processamento-2025') {
-      return NextResponse.json({ error: 'Token inv�lido' }, { status: 401 })
+      return NextResponse.json({ error: 'Token invá¡lido' }, { status: 401 })
     }
 
     const { barId, source = 'manual' } = await request.json()
     
     if (!barId) {
-      return NextResponse.json({ error: 'Bar ID � obrigat�rio' }, { status: 400 })
+      return NextResponse.json({ error: 'Bar ID á© obrigatá³rio' }, { status: 400 })
     }
 
-    console.log('🗂️ COLETA DE DADOS BRUTOS - Bar:', barId, 'Source:', source)
+    console.log('ðŸ—‚ï¸ COLETA DE DADOS BRUTOS - Bar:', barId, 'Source:', source)
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. Buscar credenciais
-    console.log('🔍 Verificando credenciais ContaAzul...')
+    console.log('ðŸ” Verificando credenciais ContaAzul...')
     const { data: credentials, error: credError } = await supabase
       .from('api_credentials')
       .select('*')
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (credError || !credentials) {
-      throw new Error('Credenciais ContaAzul n�o encontradas')
+      throw new Error('Credenciais ContaAzul ná£o encontradas')
     }
 
     // 2. Verificar token
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     const expiraEm = new Date(credentials.expires_at)
     
     if (expiraEm <= agora) {
-      throw new Error('Token ContaAzul expirado. Renova��o necess�ria.')
+      throw new Error('Token ContaAzul expirado. Renovaá§á£o necessá¡ria.')
     }
 
     const headers = {
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     const baseUrl = 'https://api-v2.contaazul.com'
 
     // 3. Sync Categorias (processamento direto - pequeno volume)
-    console.log('📁 Sincronizando categorias...')
+    console.log('ðŸ“ Sincronizando categorias...')
     let paginaCategoria = 1
     const tamanhoPagina = 500
 
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       const respCategorias = await fetch(urlCategorias, { headers })
       
       if (!respCategorias.ok) {
-        console.error(`�� Erro na API categorias: ${respCategorias.status}`)
+        console.error(`Œ Erro na API categorias: ${respCategorias.status}`)
         break
       }
       
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
       .eq('tipo', 'DESPESA')
 
     // 5. Coletar RECEITAS como dados brutos (alto volume)
-    console.log('💰 Coletando receitas como dados brutos...')
+    console.log('ðŸ’° Coletando receitas como dados brutos...')
     if (categoriasReceita && categoriasReceita.length > 0) {
       for (const categoria of categoriasReceita) {
         let paginaReceita = 1
@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
             const respReceitas = await fetch(urlReceitas, { headers })
             
             if (!respReceitas.ok) {
-              console.warn(`��️ Erro na API receitas - Cat: ${categoria.id}, P�gina: ${paginaReceita} - Status: ${respReceitas.status}`)
+              console.warn(`š ï¸ Erro na API receitas - Cat: ${categoria.id}, Pá¡gina: ${paginaReceita} - Status: ${respReceitas.status}`)
               break
             }
             
@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
             
             if (!receitas || receitas.length === 0) break
 
-            // 🔥 SALVAR DADOS BRUTOS - TRIGGER PROCESSAR� AUTOMATICAMENTE
+            // ðŸ”¥ SALVAR DADOS BRUTOS - TRIGGER PROCESSARá AUTOMATICAMENTE
             const { error: insertError } = await supabase
               .from('contaazul_dados_brutos')
               .upsert({
@@ -169,25 +169,25 @@ export async function POST(request: NextRequest) {
                 pagina: paginaReceita,
                 dados_json: receitas,
                 total_registros: receitas.length,
-                processado: false // Trigger ir� processar
+                processado: false // Trigger irá¡ processar
               }, {
                 onConflict: 'bar_id,tipo,categoria_id,pagina'
               })
 
             if (insertError) {
-              console.error('�� Erro ao salvar dados brutos receitas:', insertError)
+              console.error('Œ Erro ao salvar dados brutos receitas:', insertError)
               stats.erros++
             } else {
               stats.receitas_lotes_coletados++
               stats.total_registros_brutos += receitas.length
-              console.log(`�� Receitas Cat: ${categoria.id}, P�gina: ${paginaReceita} - ${receitas.length} registros salvos`)
+              console.log(`œ… Receitas Cat: ${categoria.id}, Pá¡gina: ${paginaReceita} - ${receitas.length} registros salvos`)
             }
 
             paginaReceita++
             if (receitas.length < tamanhoPagina) break
 
           } catch (error) {
-            console.error(`�� Erro ao coletar receitas - Cat: ${categoria.id}, P�gina: ${paginaReceita}:`, error)
+            console.error(`Œ Erro ao coletar receitas - Cat: ${categoria.id}, Pá¡gina: ${paginaReceita}:`, error)
             stats.erros++
             break
           }
@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 6. Coletar DESPESAS como dados brutos (alto volume)
-    console.log('💸 Coletando despesas como dados brutos...')
+    console.log('ðŸ’¸ Coletando despesas como dados brutos...')
     if (categoriasDespesa && categoriasDespesa.length > 0) {
       for (const categoria of categoriasDespesa) {
         let paginaDespesa = 1
@@ -214,7 +214,7 @@ export async function POST(request: NextRequest) {
             const respDespesas = await fetch(urlDespesas, { headers })
             
             if (!respDespesas.ok) {
-              console.warn(`��️ Erro na API despesas - Cat: ${categoria.id}, P�gina: ${paginaDespesa} - Status: ${respDespesas.status}`)
+              console.warn(`š ï¸ Erro na API despesas - Cat: ${categoria.id}, Pá¡gina: ${paginaDespesa} - Status: ${respDespesas.status}`)
               break
             }
             
@@ -223,7 +223,7 @@ export async function POST(request: NextRequest) {
             
             if (!despesas || despesas.length === 0) break
 
-            // 🔥 SALVAR DADOS BRUTOS - TRIGGER PROCESSAR� AUTOMATICAMENTE
+            // ðŸ”¥ SALVAR DADOS BRUTOS - TRIGGER PROCESSARá AUTOMATICAMENTE
             const { error: insertError } = await supabase
               .from('contaazul_dados_brutos')
               .upsert({
@@ -233,25 +233,25 @@ export async function POST(request: NextRequest) {
                 pagina: paginaDespesa,
                 dados_json: despesas,
                 total_registros: despesas.length,
-                processado: false // Trigger ir� processar
+                processado: false // Trigger irá¡ processar
               }, {
                 onConflict: 'bar_id,tipo,categoria_id,pagina'
               })
 
             if (insertError) {
-              console.error('�� Erro ao salvar dados brutos despesas:', insertError)
+              console.error('Œ Erro ao salvar dados brutos despesas:', insertError)
               stats.erros++
             } else {
               stats.despesas_lotes_coletados++
               stats.total_registros_brutos += despesas.length
-              console.log(`�� Despesas Cat: ${categoria.id}, P�gina: ${paginaDespesa} - ${despesas.length} registros salvos`)
+              console.log(`œ… Despesas Cat: ${categoria.id}, Pá¡gina: ${paginaDespesa} - ${despesas.length} registros salvos`)
             }
 
             paginaDespesa++
             if (despesas.length < tamanhoPagina) break
 
           } catch (error) {
-            console.error(`�� Erro ao coletar despesas - Cat: ${categoria.id}, P�gina: ${paginaDespesa}:`, error)
+            console.error(`Œ Erro ao coletar despesas - Cat: ${categoria.id}, Pá¡gina: ${paginaDespesa}:`, error)
             stats.erros++
             break
           }
@@ -259,22 +259,22 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 7. Calcular estat�sticas finais
+    // 7. Calcular estatá­sticas finais
     const tempoExecucao = new Date().getTime() - stats.tempo_inicio.getTime()
     const duracaoSegundos = Math.round(tempoExecucao / 1000)
 
-    console.log('\n📊 ESTAT�STICAS FINAIS:')
-    console.log(`   �� Categorias sincronizadas: ${stats.categorias_sincronizadas}`)
-    console.log(`   �� Lotes de receitas coletados: ${stats.receitas_lotes_coletados}`)
-    console.log(`   �� Lotes de despesas coletados: ${stats.despesas_lotes_coletados}`)
-    console.log(`   �� Total de registros brutos: ${stats.total_registros_brutos}`)
-    console.log(`   �� Erros: ${stats.erros}`)
-    console.log(`   �� Dura��o: ${duracaoSegundos}s`)
-    console.log(`   �� Processamento: Trigger autom�tico`)
+    console.log('\nðŸ“Š ESTATáSTICAS FINAIS:')
+    console.log(`   €¢ Categorias sincronizadas: ${stats.categorias_sincronizadas}`)
+    console.log(`   €¢ Lotes de receitas coletados: ${stats.receitas_lotes_coletados}`)
+    console.log(`   €¢ Lotes de despesas coletados: ${stats.despesas_lotes_coletados}`)
+    console.log(`   €¢ Total de registros brutos: ${stats.total_registros_brutos}`)
+    console.log(`   €¢ Erros: ${stats.erros}`)
+    console.log(`   €¢ Duraá§á£o: ${duracaoSegundos}s`)
+    console.log(`   €¢ Processamento: Trigger automá¡tico`)
 
     return NextResponse.json({
       success: true,
-      message: 'Coleta de dados brutos conclu�da com sucesso',
+      message: 'Coleta de dados brutos concluá­da com sucesso',
       stats: {
         categorias_sincronizadas: stats.categorias_sincronizadas,
         receitas_lotes_coletados: stats.receitas_lotes_coletados,
@@ -288,14 +288,14 @@ export async function POST(request: NextRequest) {
       },
       observacoes: [
         'Dados salvos na tabela contaazul_dados_brutos',
-        'Trigger autom�tico processar� em background',
-        'Eventos financeiros ser�o inseridos automaticamente',
+        'Trigger automá¡tico processará¡ em background',
+        'Eventos financeiros será£o inseridos automaticamente',
         'Monitore tabela contaazul_eventos_financeiros para ver resultados'
       ]
     })
 
   } catch (error) {
-    console.error('�� Erro na coleta de dados brutos:', error)
+    console.error('Œ Erro na coleta de dados brutos:', error)
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Erro desconhecido',

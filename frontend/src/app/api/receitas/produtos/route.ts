@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const barId = parseInt(searchParams.get('bar_id') || '3')
     
-    console.log(`📦 Buscando produtos para bar_id: ${barId}`)
+    console.log(`ðŸ“¦ Buscando produtos para bar_id: ${barId}`)
 
     const supabase = await getSupabaseClient()
     if (!supabase) {
@@ -27,19 +27,19 @@ export async function GET(request: NextRequest) {
       .order('nome')
 
     if (produtosError) {
-      console.error('�� Erro ao buscar produtos:', produtosError)
+      console.error('Œ Erro ao buscar produtos:', produtosError)
       return NextResponse.json({
         success: false,
         error: 'Erro ao buscar produtos: ' + produtosError.message
       }, { status: 500 })
     }
 
-    console.log(`📦 ${produtos.length} produtos encontrados`)
+    console.log(`ðŸ“¦ ${produtos.length} produtos encontrados`)
 
-    // Se n�o encontrou produtos para este bar_id, buscar de todos os bars
+    // Se ná£o encontrou produtos para este bar_id, buscar de todos os bars
     let produtosFinal = produtos
     if (produtos.length === 0) {
-      console.log('��️ Nenhum produto encontrado para este bar_id, buscando todos...')
+      console.log('š ï¸ Nenhum produto encontrado para este bar_id, buscando todos...')
       
       const { data: todosProdutos, error: todosError } = await supabase
         .from('produtos')
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
         .order('nome')
 
       if (todosError) {
-        console.error('�� Erro ao buscar todos os produtos:', todosError)
+        console.error('Œ Erro ao buscar todos os produtos:', todosError)
         return NextResponse.json({
           success: false,
           error: 'Erro ao buscar produtos: ' + todosError.message
@@ -55,14 +55,14 @@ export async function GET(request: NextRequest) {
       }
 
       produtosFinal = todosProdutos
-      console.log(`📦 ${produtosFinal.length} produtos encontrados (todos os bars)`)
+      console.log(`ðŸ“¦ ${produtosFinal.length} produtos encontrados (todos os bars)`)
     }
 
     // 2. Para cada produto, buscar receitas com insumos
     const produtosComReceitas = await Promise.all(
       produtosFinal.map(async (produto: any) => {
         try {
-          // Buscar receitas do produto com insumos usando relacionamento espec�fico
+          // Buscar receitas do produto com insumos usando relacionamento especá­fico
           const { data: receitasData, error: receitasError } = await supabase
             .from('receitas')
             .select(`
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
             .eq('produto_id', produto.id)
 
           if (receitasError) {
-            console.warn(`��️ Erro nas receitas do produto ${produto.codigo}:`, receitasError)
+            console.warn(`š ï¸ Erro nas receitas do produto ${produto.codigo}:`, receitasError)
             return {
               ...produto,
               tipo_local: produto.tipo === 'bebida' ? 'bar' : 'cozinha',
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
             receitas: receitasFormatadas
           }
         } catch (err) {
-          console.warn(`��️ Erro na receita do produto ${produto.codigo}:`, err)
+          console.warn(`š ï¸ Erro na receita do produto ${produto.codigo}:`, err)
           return {
             ...produto,
             tipo_local: produto.tipo === 'bebida' ? 'bar' : 'cozinha',
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
 
     const produtosComReceitasValidas = produtosComReceitas.filter((p: any) => p.receitas && p.receitas.length > 0)
 
-    console.log(`�� ${produtosComReceitasValidas.length} produtos com receitas retornados`)
+    console.log(`œ… ${produtosComReceitasValidas.length} produtos com receitas retornados`)
 
     return NextResponse.json({
       success: true,
@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('�� Erro interno:', error)
+    console.error('Œ Erro interno:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro interno do servidor: ' + String(error)

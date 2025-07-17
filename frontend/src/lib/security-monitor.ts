@@ -1,4 +1,4 @@
-// Sistema de monitoramento de eventos de seguran�a
+﻿// Sistema de monitoramento de eventos de seguraná§a
 
 export interface SecurityEvent {
   id?: string;
@@ -31,7 +31,7 @@ class SecurityMonitor {
   private webhookUrl?: string;
 
   private constructor() {
-    // Webhook ser� carregado dinamicamente da tabela api_credentials
+    // Webhook será¡ carregado dinamicamente da tabela api_credentials
     this.loadWebhookConfig();
   }
 
@@ -58,14 +58,14 @@ class SecurityMonitor {
 
         if (!error && data?.configuracoes?.webhook_url) {
           this.webhookUrl = data.configuracoes.webhook_url;
-          console.log('🔗 Security webhook loaded from database');
+          console.log('ðŸ”— Security webhook loaded from database');
         } else {
-          console.warn('��️ Security webhook not configured in database');
+          console.warn('š ï¸ Security webhook not configured in database');
         }
       }
     } catch (error) {
       console.error('Failed to load webhook config:', error);
-      // Fallback para webhook hardcoded se necess�rio
+      // Fallback para webhook hardcoded se necessá¡rio
       this.webhookUrl = 'https://discord.com/api/webhooks/1393646423748116602/3zUhIrSKFHmq0zNRLf5AzrkSZNzTj7oYk6f45Tpj2LZWChtmGTKKTHxhfaNZigyLXN4y';
     }
   }
@@ -82,22 +82,22 @@ class SecurityMonitor {
     
     // Log no console (apenas em desenvolvimento)
     if (process.env.NODE_ENV === 'development') {
-      console.warn(`🚨 Security Event [${securityEvent.level.toUpperCase()}]:`, securityEvent);
+      console.warn(`ðŸš¨ Security Event [${securityEvent.level.toUpperCase()}]:`, securityEvent);
     }
 
     // Salvar no banco de dados
     await this.persistEvent(securityEvent);
 
-    // Enviar alerta se cr�tico
+    // Enviar alerta se crá­tico
     if (securityEvent.level === 'critical') {
       await this.sendCriticalAlert(securityEvent);
     }
 
-    // Auto-resposta para eventos espec�ficos
+    // Auto-resposta para eventos especá­ficos
     await this.autoRespond(securityEvent);
   }
 
-  // Eventos espec�ficos de seguran�a
+  // Eventos especá­ficos de seguraná§a
   async logFailedLogin(ip: string, email: string, userAgent: string): Promise<void> {
     await this.logEvent({
       level: 'warning',
@@ -168,7 +168,7 @@ class SecurityMonitor {
     });
   }
 
-  // M�tricas de seguran�a
+  // Má©tricas de seguraná§a
   async getSecurityMetrics(): Promise<SecurityMetrics> {
     const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const recentEvents = this.events.filter((e: any) => new Date(e.timestamp) > last24h);
@@ -183,15 +183,15 @@ class SecurityMonitor {
     };
   }
 
-  // Verificar se IP est� em lista de bloqueio
+  // Verificar se IP está¡ em lista de bloqueio
   async isIPBlocked(ip: string): Promise<boolean> {
     const recentEvents = this.events.filter((e: any) => 
       e.ip_address === ip && 
       e.level === 'critical' &&
-      new Date(e.timestamp) > new Date(Date.now() - 60 * 60 * 1000) // �ltima hora
+      new Date(e.timestamp) > new Date(Date.now() - 60 * 60 * 1000) // áºltima hora
     );
 
-    return recentEvents.length >= 3; // Bloquear ap�s 3 eventos cr�ticos
+    return recentEvents.length >= 3; // Bloquear apá³s 3 eventos crá­ticos
   }
 
   // Auto-resposta a eventos
@@ -224,7 +224,7 @@ class SecurityMonitor {
   }
 
   private async persistEvent(event: SecurityEvent): Promise<void> {
-    // Em produ��o, salvar no banco de dados
+    // Em produá§á£o, salvar no banco de dados
     try {
       if (typeof window === 'undefined') { // Server-side
         const { getAdminClient } = await import('@/lib/supabase-admin');
@@ -257,14 +257,14 @@ class SecurityMonitor {
     }
 
     if (!this.webhookUrl) {
-      console.error('Discord webhook n�o configurado para alertas de seguran�a');
+      console.error('Discord webhook ná£o configurado para alertas de seguraná§a');
       return;
     }
 
     try {
       const message = {
         embeds: [{
-          title: '🚨 ALERTA CR�TICO DE SEGURAN�A',
+          title: 'ðŸš¨ ALERTA CRáTICO DE SEGURANá‡A',
           description: `**Evento:** ${event.event_type}\n**IP:** ${event.ip_address}\n**Endpoint:** ${event.endpoint}`,
           color: 0xff0000,
           fields: [
@@ -291,7 +291,7 @@ class SecurityMonitor {
           ],
           timestamp: event.timestamp,
           footer: {
-            text: '🔐 SGB Security Monitor - Sistema Autom�tico'
+            text: 'ðŸ” SGB Security Monitor - Sistema Automá¡tico'
           }
         }]
       };
@@ -305,7 +305,7 @@ class SecurityMonitor {
       if (!response.ok) {
         console.error('Falha ao enviar alerta Discord:', response.status, response.statusText);
       } else {
-        console.log('�� Alerta cr�tico de seguran�a enviado para Discord');
+        console.log('œ… Alerta crá­tico de seguraná§a enviado para Discord');
       }
     } catch (error) {
       console.error('Failed to send critical alert:', error);
@@ -324,7 +324,7 @@ class SecurityMonitor {
   private async calculateLoginRiskScore(ip: string, email: string): Promise<number> {
     let score = 30; // Base score
 
-    // M�ltiplas tentativas do mesmo IP
+    // Máºltiplas tentativas do mesmo IP
     const recentFailures = await this.getRecentFailedLogins(ip);
     score += recentFailures * 15;
 
@@ -333,7 +333,7 @@ class SecurityMonitor {
       score += 20;
     }
 
-    // IP j� teve eventos cr�ticos
+    // IP já¡ teve eventos crá­ticos
     const criticalEvents = this.events.filter((e: any) => e.ip_address === ip && e.level === 'critical').length;
     score += criticalEvents * 10;
 
@@ -359,8 +359,8 @@ class SecurityMonitor {
   }
 
   private async temporaryIPBlock(ip: string, seconds: number): Promise<void> {
-    // Implementar bloqueio tempor�rio (Redis, cache, etc.)
-    console.warn(`🚫 IP ${ip} temporarily blocked for ${seconds} seconds`);
+    // Implementar bloqueio temporá¡rio (Redis, cache, etc.)
+    console.warn(`ðŸš« IP ${ip} temporarily blocked for ${seconds} seconds`);
     
     // Registrar evento de bloqueio
     await this.logEvent({
@@ -380,18 +380,18 @@ class SecurityMonitor {
 
   private async increaseLoginDelay(ip: string): Promise<void> {
     // Implementar delay progressivo para tentativas de login
-    console.warn(`��️ Login delay increased for IP ${ip}`);
+    console.warn(`±ï¸ Login delay increased for IP ${ip}`);
   }
 
   private async notifyAdmins(event: SecurityEvent): Promise<void> {
     // Notificar administradores via Discord
-    console.warn(`📧 Admins notified about security event: ${event.event_type}`);
+    console.warn(`ðŸ“§ Admins notified about security event: ${event.event_type}`);
     
     if (this.webhookUrl) {
       try {
         const message = {
           embeds: [{
-            title: '��️ Evento de Seguran�a - Aten��o Necess�ria',
+            title: 'š ï¸ Evento de Seguraná§a - Atená§á£o Necessá¡ria',
             description: `**Evento:** ${event.event_type}\n**IP:** ${event.ip_address}`,
             color: 0xffa500, // Orange
             fields: [
@@ -408,7 +408,7 @@ class SecurityMonitor {
             ],
             timestamp: event.timestamp,
             footer: {
-              text: '��️ SGB Security - Notifica��o Admin'
+              text: 'š ï¸ SGB Security - Notificaá§á£o Admin'
             }
           }]
         };

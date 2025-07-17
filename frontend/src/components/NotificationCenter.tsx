@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -64,7 +64,7 @@ export function NotificationCenter() {
 
   useEffect(() => {
     if (!hasInitializedRef.current) {
-      // Carregar notifica��es iniciais
+      // Carregar notificaá§áµes iniciais
       carregarNotificacoes({ apenas_nao_lidas: false, limit: 20 })
       
       hasInitializedRef.current = true
@@ -76,10 +76,10 @@ export function NotificationCenter() {
         clearInterval(intervalRef.current)
       }
     }
-  }, []) // DEPEND�NCIAS VAZIAS - executar apenas uma vez
+  }, []) // DEPENDáŠNCIAS VAZIAS - executar apenas uma vez
 
   // =====================================================
-  // CONTROLE DE POLLING VIA CONFIGURA��ES
+  // CONTROLE DE POLLING VIA CONFIGURAá‡á•ES
   // =====================================================
 
   useEffect(() => {
@@ -101,11 +101,11 @@ export function NotificationCenter() {
   }, [configuracoes.autoRefresh, configuracoes.refreshInterval, loading])
 
   // =====================================================
-  // FILTRAR NOTIFICA��ES
+  // FILTRAR NOTIFICAá‡á•ES
   // =====================================================
 
   const notificacoesFiltradas = notificacoes.filter((notificacao: any) => {
-    // Verificar se a notifica��o tem dados v�lidos
+    // Verificar se a notificaá§á£o tem dados vá¡lidos
     if (!notificacao || !notificacao.id) return false
     
     if (filtroTab === 'nao_lidas') {
@@ -124,13 +124,13 @@ export function NotificationCenter() {
   const handleMarcarComoLida = async (notificacaoId: string) => {
     try {
       if (!notificacaoId) {
-        console.error('�� ID da notifica��o n�o fornecido')
+        console.error('Œ ID da notificaá§á£o ná£o fornecido')
         return
       }
       
       await marcarComoLida(notificacaoId)
     } catch (error) {
-      console.error('�� Erro ao marcar notifica��o como lida:', error)
+      console.error('Œ Erro ao marcar notificaá§á£o como lida:', error)
     }
   }
 
@@ -138,27 +138,27 @@ export function NotificationCenter() {
     try {
       await marcarTodasComoLidas()
     } catch (error) {
-      console.error('�� Erro ao marcar todas como lidas:', error)
+      console.error('Œ Erro ao marcar todas como lidas:', error)
     }
   }
 
   const handleExcluirNotificacao = async (notificacaoId: string) => {
     try {
       if (!notificacaoId) {
-        console.error('�� ID da notifica��o n�o fornecido')
+        console.error('Œ ID da notificaá§á£o ná£o fornecido')
         return
       }
       
       await excluirNotificacao(notificacaoId)
     } catch (error) {
-      console.error('�� Erro ao excluir notifica��o:', error)
+      console.error('Œ Erro ao excluir notificaá§á£o:', error)
     }
   }
 
   const handleAcaoNotificacao = (acao: any) => {
     try {
       if (!acao) {
-        console.error('�� A��o n�o fornecida')
+        console.error('Œ Aá§á£o ná£o fornecida')
         return
       }
       
@@ -169,7 +169,7 @@ export function NotificationCenter() {
         window.open(acao.url, '_blank')
       }
     } catch (error) {
-      console.error('�� Erro ao executar a��o da notifica��o:', error)
+      console.error('Œ Erro ao executar aá§á£o da notificaá§á£o:', error)
     }
   }
 
@@ -218,7 +218,7 @@ export function NotificationCenter() {
             <div className="flex items-center justify-between">
               <CardTitle className="card-title-dark flex items-center gap-2">
                 <BellRing className="h-5 w-5" />
-                Notifica��es
+                Notificaá§áµes
               </CardTitle>
               
               <div className="flex items-center gap-2">
@@ -245,11 +245,11 @@ export function NotificationCenter() {
               </div>
             </div>
 
-            {/* Estat�sticas R�pidas */}
+            {/* Estatá­sticas Rá¡pidas */}
             <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-              <span>📬 {totalNaoLidas} n�o lidas</span>
-              <span>🔥 {totalImportantes} importantes</span>
-              <span>📊 {notificacoes.length} total</span>
+              <span>ðŸ“¬ {totalNaoLidas} ná£o lidas</span>
+              <span>ðŸ”¥ {totalImportantes} importantes</span>
+              <span>ðŸ“Š {notificacoes.length} total</span>
             </div>
           </CardHeader>
 
@@ -261,14 +261,14 @@ export function NotificationCenter() {
                   Todas ({notificacoes.length})
                 </TabsTrigger>
                 <TabsTrigger value="nao_lidas" className="tabs-trigger-dark">
-                  N�o Lidas ({totalNaoLidas})
+                  Ná£o Lidas ({totalNaoLidas})
                 </TabsTrigger>
                 <TabsTrigger value="importantes" className="tabs-trigger-dark">
                   Importantes ({totalImportantes})
                 </TabsTrigger>
               </TabsList>
 
-              {/* Lista de Notifica��es */}
+              {/* Lista de Notificaá§áµes */}
               <ScrollArea className="h-96">
                 <div className="p-4 space-y-3">
                   {loading && notificacoes.length === 0 ? (
@@ -280,15 +280,15 @@ export function NotificationCenter() {
                     <div className="text-center py-8">
                       <Bell className="h-12 w-12 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
                       <p className="text-gray-500 dark:text-gray-400">
-                        {filtroTab === 'todas' ? 'Nenhuma notifica��o' : 
-                         filtroTab === 'nao_lidas' ? 'Todas as notifica��es foram lidas' :
-                         'Nenhuma notifica��o importante'}
+                        {filtroTab === 'todas' ? 'Nenhuma notificaá§á£o' : 
+                         filtroTab === 'nao_lidas' ? 'Todas as notificaá§áµes foram lidas' :
+                         'Nenhuma notificaá§á£o importante'}
                       </p>
                     </div>
                   ) : (
                     notificacoesFiltradas.map((notificacao) => (
                       <Card key={notificacao.id} className="card-dark p-3 space-y-2">
-                        {/* Header da Notifica��o */}
+                        {/* Header da Notificaá§á£o */}
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-2">
                             <Badge 
@@ -328,10 +328,10 @@ export function NotificationCenter() {
                           </div>
                         </div>
 
-                        {/* Conte�do da Notifica��o */}
+                        {/* Conteáºdo da Notificaá§á£o */}
                         <div className="space-y-1">
                           <h4 className="font-medium text-sm text-gray-900 dark:text-white">
-                            {notificacao.titulo || 'Notifica��o sem t�tulo'}
+                            {notificacao.titulo || 'Notificaá§á£o sem tá­tulo'}
                           </h4>
                           <p className="text-xs text-gray-600 dark:text-gray-400">
                             {notificacao.mensagem || 'Sem mensagem'}
@@ -341,7 +341,7 @@ export function NotificationCenter() {
                           </p>
                         </div>
 
-                        {/* A��es da Notifica��o */}
+                        {/* Aá§áµes da Notificaá§á£o */}
                         {notificacao.acoes && Array.isArray(notificacao.acoes) && notificacao.acoes.length > 0 && (
                           <div className="flex flex-wrap gap-1 pt-2">
                             {notificacao.acoes.map((acao, index) => (
@@ -354,7 +354,7 @@ export function NotificationCenter() {
                               >
                                 {acao.action === 'redirect' && <ExternalLink className="h-3 w-3 mr-1" />}
                                 {acao.action === 'download' && <Download className="h-3 w-3 mr-1" />}
-                                {acao.label || 'A��o'}
+                                {acao.label || 'Aá§á£o'}
                               </Button>
                             ))}
                           </div>
@@ -366,9 +366,9 @@ export function NotificationCenter() {
               </ScrollArea>
             </Tabs>
 
-            {/* Footer com A��es R�pidas */}
+            {/* Footer com Aá§áµes Rá¡pidas */}
             <div className="border-t border-gray-200 dark:border-gray-700 p-4 space-y-3">
-              {/* A��es R�pidas */}
+              {/* Aá§áµes Rá¡pidas */}
               <div className="flex items-center justify-between">
                 <Button
                   variant="outline"
@@ -389,11 +389,11 @@ export function NotificationCenter() {
                 </Button>
               </div>
 
-              {/* Configura��es R�pidas */}
+              {/* Configuraá§áµes Rá¡pidas */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    Atualiza��o autom�tica
+                    Atualizaá§á£o automá¡tica
                   </span>
                   <Switch
                     checked={configuracoes.autoRefresh}

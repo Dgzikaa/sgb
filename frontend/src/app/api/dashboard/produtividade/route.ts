@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser, authErrorResponse } from '@/middleware/auth'
 
@@ -9,10 +9,10 @@ export const dynamic = 'force-dynamic'
 // =====================================================
 export async function GET(request: NextRequest) {
   try {
-    // 🔐 AUTENTICA��O
+    // ðŸ” AUTENTICAá‡áƒO
     const user = await authenticateUser(request)
     if (!user) {
-      return authErrorResponse('Usu�rio n�o autenticado')
+      return authErrorResponse('Usuá¡rio ná£o autenticado')
     }
 
     const { searchParams } = new URL(request.url)
@@ -24,15 +24,15 @@ export async function GET(request: NextRequest) {
     
     const supabase = await getAdminClient()
     
-    // Calcular data de in�cio baseada no per�odo
+    // Calcular data de iná­cio baseada no perá­odo
     const dataFim = new Date()
     const dataInicio = new Date()
     dataInicio.setDate(dataFim.getDate() - parseInt(periodo))
 
-    // Buscar m�tricas gerais
+    // Buscar má©tricas gerais
     const metricas = await calcularMetricasGerais(supabase, user.bar_id.toString(), dataInicio, dataFim)
 
-    // Buscar ranking de funcion�rios
+    // Buscar ranking de funcioná¡rios
     const ranking = await calcularRankingFuncionarios(
       supabase, 
       user.bar_id.toString(), 
@@ -43,13 +43,13 @@ export async function GET(request: NextRequest) {
       cargo || undefined
     )
 
-    // Buscar evolu��o temporal
+    // Buscar evoluá§á£o temporal
     const evolucao = await calcularEvolucaoTemporal(supabase, user.bar_id.toString(), dataInicio, dataFim)
 
-    // Buscar alertas e pend�ncias
+    // Buscar alertas e pendáªncias
     const alertas = await buscarAlertas(supabase, user.bar_id.toString())
 
-    // Buscar estat�sticas por setor/cargo
+    // Buscar estatá­sticas por setor/cargo
     const estatisticasPorSetor = await calcularEstatisticasPorSetor(supabase, user.bar_id.toString(), dataInicio, dataFim)
     const estatisticasPorCargo = await calcularEstatisticasPorCargo(supabase, user.bar_id.toString(), dataInicio, dataFim)
 
@@ -88,11 +88,11 @@ export async function GET(request: NextRequest) {
 }
 
 // =====================================================
-// FUN��ES DE C�LCULO
+// FUNá‡á•ES DE CáLCULO
 // =====================================================
 
 async function calcularMetricasGerais(supabase: any, barId: string, dataInicio: Date, dataFim: Date) {
-  // Buscar execu��es do per�odo
+  // Buscar execuá§áµes do perá­odo
   const { data: execucoes } = await supabase
     .from('checklist_execucoes')
     .select(`
@@ -148,7 +148,7 @@ async function calcularRankingFuncionarios(
   setorFiltro?: string,
   cargoFiltro?: string
 ) {
-  // Buscar execu��es por funcion�rio
+  // Buscar execuá§áµes por funcioná¡rio
   let query = supabase
     .from('checklist_execucoes')
     .select(`
@@ -167,7 +167,7 @@ async function calcularRankingFuncionarios(
 
   if (!execucoes) return []
 
-  // Filtrar funcion�rios
+  // Filtrar funcioná¡rios
   let execucoesFiltradas = execucoes
   
   if (funcionarioIdFiltro) {
@@ -182,7 +182,7 @@ async function calcularRankingFuncionarios(
     execucoesFiltradas = execucoes.filter((e: any) => e.funcionario?.cargo === cargoFiltro)
   }
 
-  // Agrupar por funcion�rio
+  // Agrupar por funcioná¡rio
   const funcionarios = new Map()
 
   execucoesFiltradas.forEach((execucao: any) => {
@@ -224,7 +224,7 @@ async function calcularRankingFuncionarios(
     }
   })
 
-  // Calcular m�tricas finais e ordenar
+  // Calcular má©tricas finais e ordenar
   const ranking = Array.from(funcionarios.values()).map((funcionario: any) => {
     const taxa_conclusao = funcionario.total_execucoes > 0 ? 
       Math.round((funcionario.execucoes_concluidas / funcionario.total_execucoes) * 100) : 0
@@ -235,7 +235,7 @@ async function calcularRankingFuncionarios(
     const tempo_medio = funcionario.execucoes_com_tempo > 0 ? 
       Math.round(funcionario.tempo_total / funcionario.execucoes_com_tempo) : 0
 
-    // Calcular score de produtividade (m�dia ponderada)
+    // Calcular score de produtividade (má©dia ponderada)
     const score_produtividade = Math.round(
       (taxa_conclusao * 0.4) + 
       (score_medio * 2) +  // Score 0-100 -> peso 0.2
@@ -249,16 +249,16 @@ async function calcularRankingFuncionarios(
       tempo_medio,
       dias_ativos: funcionario.dias_ativos.size,
       score_produtividade,
-      // Classifica��o qualitativa
+      // Classificaá§á£o qualitativa
       classificacao: getClassificacaoDesempenho(score_produtividade, taxa_conclusao)
     }
   }).sort((a, b) => b.score_produtividade - a.score_produtividade)
 
-  // Adicionar posi��o no ranking
+  // Adicionar posiá§á£o no ranking
   return ranking.map((funcionario, index) => ({
     ...funcionario,
     posicao: index + 1,
-    dias_ativos: funcionario.dias_ativos // Manter apenas o n�mero
+    dias_ativos: funcionario.dias_ativos // Manter apenas o náºmero
   }))
 }
 
@@ -300,7 +300,7 @@ async function calcularEvolucaoTemporal(supabase: any, barId: string, dataInicio
     }
   })
 
-  // Converter para array e calcular m�tricas
+  // Converter para array e calcular má©tricas
   return Array.from(evolucaoPorDia.values())
     .map((dia: any) => ({
       ...dia,
@@ -344,7 +344,7 @@ async function buscarAlertas(supabase: any, barId: string) {
     })
   }
 
-  // Funcion�rios com baixa performance
+  // Funcioná¡rios com baixa performance
   const { data: execucoesRecentes } = await supabase
     .from('checklist_execucoes')
     .select(`
@@ -381,7 +381,7 @@ async function buscarAlertas(supabase: any, barId: string) {
       if (dados.scores.length >= 3) {
         const scoreMedio = dados.scores.reduce((a: number, b: number) => a + b, 0) / dados.scores.length
         
-        if (scoreMedio < 70) { // Threshold configur�vel
+        if (scoreMedio < 70) { // Threshold configurá¡vel
           funcionariosBaixaPerformance.push({
             funcionario: dados.funcionario?.nome,
             score_medio: Math.round(scoreMedio * 10) / 10,
@@ -395,8 +395,8 @@ async function buscarAlertas(supabase: any, barId: string) {
       alertas.push({
         tipo: 'baixa_performance',
         severidade: 'media',
-        titulo: `${funcionariosBaixaPerformance.length} funcion�rio(s) com baixa performance`,
-        descricao: 'Funcion�rios com score m�dio abaixo de 70% nos �ltimos 7 dias',
+        titulo: `${funcionariosBaixaPerformance.length} funcioná¡rio(s) com baixa performance`,
+        descricao: 'Funcioná¡rios com score má©dio abaixo de 70% nos áºltimos 7 dias',
         itens: funcionariosBaixaPerformance
       })
     }
@@ -575,17 +575,17 @@ async function buscarTopChecklists(supabase: any, barId: string, dataInicio: Dat
 }
 
 // =====================================================
-// FUN��ES UTILIT�RIAS
+// FUNá‡á•ES UTILITáRIAS
 // =====================================================
 
 function getClassificacaoDesempenho(scoreProdutividade: number, taxaConclusao: number) {
   if (scoreProdutividade >= 80 && taxaConclusao >= 90) {
-    return { nivel: 'excelente', cor: 'green', emoji: '🏆' }
+    return { nivel: 'excelente', cor: 'green', emoji: 'ðŸ†' }
   } else if (scoreProdutividade >= 60 && taxaConclusao >= 70) {
-    return { nivel: 'bom', cor: 'blue', emoji: '👍' }
+    return { nivel: 'bom', cor: 'blue', emoji: 'ðŸ‘' }
   } else if (scoreProdutividade >= 40 && taxaConclusao >= 50) {
-    return { nivel: 'regular', cor: 'yellow', emoji: '��️' }
+    return { nivel: 'regular', cor: 'yellow', emoji: 'š ï¸' }
   } else {
-    return { nivel: 'precisa_melhorar', cor: 'red', emoji: '🔴' }
+    return { nivel: 'precisa_melhorar', cor: 'red', emoji: 'ðŸ”´' }
   }
 } 

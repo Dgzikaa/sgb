@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+﻿import { useState, useEffect, useCallback, useRef } from 'react'
 import { api } from '@/lib/api-client'
 
 // =====================================================
@@ -78,13 +78,13 @@ interface UseNotificationsResult {
   estatisticas: EstatisticasNotificacao | null
   paginacao: PaginacaoNotificacao | null
   
-  // A��es CRUD
+  // Aá§áµes CRUD
   carregarNotificacoes: (filtros?: FiltrosNotificacao) => Promise<void>
   marcarComoLida: (id: string) => Promise<boolean>
   marcarTodasComoLidas: () => Promise<boolean>
   excluirNotificacao: (id: string) => Promise<boolean>
   
-  // Utilit�rios
+  // Utilitá¡rios
   recarregar: () => Promise<void>
   limparErro: () => void
 }
@@ -105,11 +105,11 @@ export function useNotifications(): UseNotificationsResult {
   const [estatisticas, setEstatisticas] = useState<EstatisticasNotificacao | null>(null)
   const [paginacao, setPaginacao] = useState<PaginacaoNotificacao | null>(null)
   
-  // Ref para armazenar �ltimos filtros usados
+  // Ref para armazenar áºltimos filtros usados
   const ultimosFiltrosRef = useRef<FiltrosNotificacao>({})
   
   // =====================================================
-  // CARREGAR NOTIFICA��ES
+  // CARREGAR NOTIFICAá‡á•ES
   // =====================================================
   
   const carregarNotificacoes = useCallback(async (filtros: FiltrosNotificacao = {}) => {
@@ -122,7 +122,7 @@ export function useNotifications(): UseNotificationsResult {
       
       const params = new URLSearchParams()
       
-      // Adicionar filtros como par�metros
+      // Adicionar filtros como pará¢metros
       if (filtros.status) params.append('status', filtros.status)
       if (filtros.modulo) params.append('modulo', filtros.modulo)
       if (filtros.tipo) params.append('tipo', filtros.tipo)
@@ -141,11 +141,11 @@ export function useNotifications(): UseNotificationsResult {
         setEstatisticas(response.data.estatisticas || null)
         setPaginacao(response.data.paginacao || null)
       } else {
-        setError(response.error || 'Erro ao carregar notifica��es')
+        setError(response.error || 'Erro ao carregar notificaá§áµes')
       }
     } catch (err: any) {
-      console.error('Erro ao carregar notifica��es:', err)
-      setError('Erro ao carregar notifica��es')
+      console.error('Erro ao carregar notificaá§áµes:', err)
+      setError('Erro ao carregar notificaá§áµes')
     } finally {
       setLoading(false)
     }
@@ -169,7 +169,7 @@ export function useNotifications(): UseNotificationsResult {
           )
         )
         
-        // Atualizar estat�sticas
+        // Atualizar estatá­sticas
         setEstatisticas(prev => prev ? {
           ...prev,
           nao_lidas: Math.max(0, prev.nao_lidas - 1)
@@ -205,7 +205,7 @@ export function useNotifications(): UseNotificationsResult {
           )
         )
         
-        // Atualizar estat�sticas
+        // Atualizar estatá­sticas
         setEstatisticas(prev => prev ? {
           ...prev,
           nao_lidas: 0
@@ -224,7 +224,7 @@ export function useNotifications(): UseNotificationsResult {
   }, [])
   
   // =====================================================
-  // EXCLUIR NOTIFICA��O
+  // EXCLUIR NOTIFICAá‡áƒO
   // =====================================================
   
   const excluirNotificacao = useCallback(async (id: string): Promise<boolean> => {
@@ -235,7 +235,7 @@ export function useNotifications(): UseNotificationsResult {
         // Atualizar estado local
         setNotificacoes(prev => prev.filter((notif: any) => notif.id !== id))
         
-        // Atualizar estat�sticas se era n�o lida
+        // Atualizar estatá­sticas se era ná£o lida
         const notificacao = notificacoes.find((n: any) => n.id === id)
         if (notificacao && ['pendente', 'enviada'].includes(notificacao.status)) {
           setEstatisticas(prev => prev ? {
@@ -246,12 +246,12 @@ export function useNotifications(): UseNotificationsResult {
         
         return true
       } else {
-        setError(response.error || 'Erro ao excluir notifica��o')
+        setError(response.error || 'Erro ao excluir notificaá§á£o')
         return false
       }
     } catch (err: any) {
-      console.error('Erro ao excluir notifica��o:', err)
-      setError('Erro ao excluir notifica��o')
+      console.error('Erro ao excluir notificaá§á£o:', err)
+      setError('Erro ao excluir notificaá§á£o')
       return false
     }
   }, [notificacoes])
@@ -286,20 +286,20 @@ export function useNotifications(): UseNotificationsResult {
     estatisticas,
     paginacao,
     
-    // A��es CRUD
+    // Aá§áµes CRUD
     carregarNotificacoes,
     marcarComoLida,
     marcarTodasComoLidas,
     excluirNotificacao,
     
-    // Utilit�rios
+    // Utilitá¡rios
     recarregar,
     limparErro
   }
 }
 
 // =====================================================
-// FUN��ES UTILIT�RIAS
+// FUNá‡á•ES UTILITáRIAS
 // =====================================================
 
 export function getColorByType(tipo: string): string {
@@ -331,12 +331,12 @@ export function formatarTempo(timestamp: string): string {
     return 'agora'
   } else if (diffInSeconds < 3600) {
     const minutes = Math.floor(diffInSeconds / 60)
-    return `${minutes}m atr�s`
+    return `${minutes}m atrá¡s`
   } else if (diffInSeconds < 86400) {
     const hours = Math.floor(diffInSeconds / 3600)
-    return `${hours}h atr�s`
+    return `${hours}h atrá¡s`
   } else {
     const days = Math.floor(diffInSeconds / 86400)
-    return `${days}d atr�s`
+    return `${days}d atrá¡s`
   }
 } 

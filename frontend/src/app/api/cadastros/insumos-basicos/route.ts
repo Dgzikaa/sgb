@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+Ôªøimport { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
 // Listar insumos
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('ùå Erro interno:', error)
+    console.error('¬ù≈í Erro interno:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor' 
@@ -78,7 +78,7 @@ export async function PUT(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('ùå Erro interno:', error)
+    console.error('¬ù≈í Erro interno:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor: ' + String(error) 
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('ùå Erro interno:', error)
+    console.error('¬ù≈í Erro interno:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Erro interno do servidor: ' + String(error) 

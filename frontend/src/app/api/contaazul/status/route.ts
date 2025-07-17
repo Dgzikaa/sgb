@@ -1,4 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+ï»¿import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const userDataHeader = request.headers.get('x-user-data')
     
     if (!userDataHeader) {
-      return NextResponse.json({ error: 'Dados do usuá¡rio ná£o encontrados' }, { status: 401 })
+      return NextResponse.json({ error: 'Dados do usuÃ¡Â¡rio nÃ¡Â£o encontrados' }, { status: 401 })
     }
 
     const { bar_id } = JSON.parse(userDataHeader)
@@ -25,11 +25,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: false,
         connected: false,
-        error: 'Credenciais ná£o encontradas'
+        error: 'Credenciais nÃ¡Â£o encontradas'
       })
     }
 
-    // 2. Verificar se token está¡ vá¡lido
+    // 2. Verificar se token estÃ¡Â¡ vÃ¡Â¡lido
     const tokenExpired = credenciais.expires_at && new Date(credenciais.expires_at) < new Date()
 
     // 3. Verificar dados nas tabelas
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       .select('*', { count: 'exact', head: true })
       .eq('bar_id', bar_id)
 
-    // 4. ášltima sincronizaá§á£o
+    // 4. Ã¡Å¡ltima sincronizaÃ¡Â§Ã¡Â£o
     const { data: ultimaSync } = await supabase
       .from('contaazul_eventos_financeiros')
       .select('created_at')
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
       job.jobname?.includes(`contaazul_sync_bar_${bar_id}`)
     )
 
-    // 6. Estatá­sticas do máªs atual
+    // 6. EstatÃ¡Â­sticas do mÃ¡Âªs atual
     const currentMonth = new Date().toISOString().slice(0, 7) // YYYY-MM
     
     const { data: statsReceitas } = await supabase
@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Œ Erro ao buscar status ContaAzul:', error)
+    console.error('ÂÅ’ Erro ao buscar status ContaAzul:', error)
     return NextResponse.json({
       success: false,
       error: 'Erro interno do servidor'

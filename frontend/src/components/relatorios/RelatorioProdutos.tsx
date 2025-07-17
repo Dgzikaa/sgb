@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +7,7 @@ import { Calendar, Clock, BarChart3 } from 'lucide-react';
 import { useBar } from '@/contexts/BarContext';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 
-// Componentes otimizados ser�o criados separadamente
+// Componentes otimizados será£o criados separadamente
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -34,13 +34,13 @@ export default function RelatorioProdutos() {
   });
 
   useEffect(() => {
-    setPageTitle('Relat�rio de Tempo de Produ��o');
+    setPageTitle('Relatá³rio de Tempo de Produá§á£o');
     return () => setPageTitle('');
   }, [setPageTitle]);
 
   const analisarTempos = async (filtros: any) => {
     if (!dataEspecifica) {
-      alert('Por favor, selecione uma data para an�lise');
+      alert('Por favor, selecione uma data para aná¡lise');
       return;
     }
 
@@ -99,11 +99,11 @@ export default function RelatorioProdutos() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
           <div className="flex items-center gap-2 mb-4">
             <BarChart3 className="h-6 w-6 text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-900">Relat�rio de Produ��o</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Relatá³rio de Produá§á£o</h1>
           </div>
           
           <p className="text-gray-600">
-            An�lise detalhada dos tempos de produ��o por produto
+            Aná¡lise detalhada dos tempos de produá§á£o por produto
           </p>
           
           <div className="flex gap-2 mt-4">
@@ -128,7 +128,7 @@ export default function RelatorioProdutos() {
           </div>
         </div>
 
-        {/* Filtros B�sicos */}
+        {/* Filtros Bá¡sicos */}
         <Card>
           <CardHeader>
             <CardTitle>Filtros</CardTitle>
@@ -136,7 +136,7 @@ export default function RelatorioProdutos() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label htmlFor="data">Data para An�lise</Label>
+                <Label htmlFor="data">Data para Aná¡lise</Label>
                 <Input
                   id="data"
                   type="date"
@@ -157,7 +157,7 @@ export default function RelatorioProdutos() {
           </CardContent>
         </Card>
 
-        {/* Resultados B�sicos */}
+        {/* Resultados Bá¡sicos */}
         {analisado && dados.produtos.length > 0 && (
           <Card>
             <CardHeader>
@@ -168,7 +168,7 @@ export default function RelatorioProdutos() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600">
-                Dados carregados com sucesso. Componentes detalhados ser�o implementados.
+                Dados carregados com sucesso. Componentes detalhados será£o implementados.
               </p>
             </CardContent>
           </Card>

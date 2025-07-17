@@ -1,17 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { createClient } from '@supabase/supabase-js';
 
-// Fun��o utilit�ria para pegar a Service Account do env
+// Funá§á£o utilitá¡ria para pegar a Service Account do env
 function getGoogleServiceAccount() {
   const json = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-  if (!json) throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON n�o definida');
+  if (!json) throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON ná£o definida');
   return typeof json === 'string' ? JSON.parse(json) : json;
 }
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Ler vari�veis de ambiente
+    // 1. Ler variá¡veis de ambiente
     const serviceAccount = getGoogleServiceAccount();
     const SUPABASE_URL = process.env.SUPABASE_URL!;
     const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     const insumosSheet = doc.sheetsByTitle['Base - Preparos - CMV'];
     const receitasSheet = doc.sheetsByTitle['Lista - Preparos'];
     if (!insumosSheet || !receitasSheet) {
-      throw new Error('N�o foi poss�vel localizar as abas "Base - Preparos - CMV" ou "Lista - Preparos" na planilha.');
+      throw new Error('Ná£o foi possá­vel localizar as abas "Base - Preparos - CMV" ou "Lista - Preparos" na planilha.');
     }
 
     const insumosRows = await insumosSheet.getRows();
@@ -39,20 +39,20 @@ export async function POST(req: NextRequest) {
     // 4. Transformar dados em arrays de objetos
     // Ajuste os campos conforme as colunas reais das abas
     const insumos = insumosRows.map((row: any) => ({
-      codigo: row['C�digo'] || row['codigo'],
+      codigo: row['Cá³digo'] || row['codigo'],
       nome: row['Nome'] || row['nome'],
       unidade: row['Unidade'] || row['unidade'],
-      custo_unitario: row['Custo Unit�rio'] || row['custo_unitario'],
+      custo_unitario: row['Custo Unitá¡rio'] || row['custo_unitario'],
       grupo: row['Grupo'] || row['grupo'],
-      // ...adicione outros campos conforme necess�rio
+      // ...adicione outros campos conforme necessá¡rio
     }));
 
     const receitas = receitasRows.map((row: any) => ({
-      codigo: row['C�digo'] || row['codigo'],
+      codigo: row['Cá³digo'] || row['codigo'],
       nome: row['Nome'] || row['nome'],
       rendimento: row['Rendimento'] || row['rendimento'],
       unidade: row['Unidade'] || row['unidade'],
-      // ...adicione outros campos conforme necess�rio
+      // ...adicione outros campos conforme necessá¡rio
     }));
 
     // 5. Inicializar Supabase

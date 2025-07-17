@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useBar } from '@/contexts/BarContext'
@@ -111,7 +111,7 @@ export default function ReceitasPage() {
   // Estados para Insumos
   const [insumos, setInsumos] = useState<Insumo[]>([])
   const [novoInsumo, setNovoInsumo] = useState<NovoInsumo>({
-    codigo: 'i0001', // C�digo padr�o inicial
+    codigo: 'i0001', // Cá³digo padrá£o inicial
     nome: '',
     unidade_medida: 'g',
     categoria: 'cozinha',
@@ -128,7 +128,7 @@ export default function ReceitasPage() {
   // Estados para Receitas
   const [receitas, setReceitas] = useState<Receita[]>([])
   const [novaReceita, setNovaReceita] = useState<NovaReceita>({
-    receita_codigo: 'r0001', // C�digo padr�o inicial
+    receita_codigo: 'r0001', // Cá³digo padrá£o inicial
     receita_nome: '',
     receita_categoria: '',
     tipo_local: 'cozinha',
@@ -144,7 +144,7 @@ export default function ReceitasPage() {
   const [modalEditarReceita, setModalEditarReceita] = useState(false)
   const [modalVisualizarReceita, setModalVisualizarReceita] = useState(false)
 
-  // Estados para cria��o de receitas
+  // Estados para criaá§á£o de receitas
   const [insumosReceita, setInsumosReceita] = useState<{
     insumo_id: number
     quantidade_necessaria: number
@@ -157,7 +157,7 @@ export default function ReceitasPage() {
   const [syncLoading, setSyncLoading] = useState(false)
   const [syncLog, setSyncLog] = useState<string | null>(null)
 
-  // Sincronizar tipo_local dos formul�rios com o tipo selecionado
+  // Sincronizar tipo_local dos formulá¡rios com o tipo selecionado
   useEffect(() => {
     setNovoInsumo(prev => ({ ...prev, tipo_local: tipoLocalInsumos }))
   }, [tipoLocalInsumos])
@@ -167,16 +167,16 @@ export default function ReceitasPage() {
   }, [tipoLocalReceitas])
 
   useEffect(() => {
-    setPageTitle('📋 Receitas e Insumos')
+    setPageTitle('ðŸ“‹ Receitas e Insumos')
     return () => setPageTitle('')
   }, [setPageTitle])
 
-  // CARREGAR DADOS REAIS DO BANCO - Fun��o para buscar insumos
+  // CARREGAR DADOS REAIS DO BANCO - Funá§á£o para buscar insumos
   const carregarInsumos = useCallback(async () => {
     if (!selectedBar) return
     
     try {
-      console.log('🔄 Carregando insumos do banco...')
+      console.log('ðŸ”„ Carregando insumos do banco...')
       const response = await fetch(`/api/receitas/insumos?ativo=true`)
       
       if (!response.ok) {
@@ -200,27 +200,27 @@ export default function ReceitasPage() {
         
         setInsumos(insumosFormatados)
         
-        // Debug: verificar distribui��o por tipo_local
+        // Debug: verificar distribuiá§á£o por tipo_local
         const cozinhaCount = insumosFormatados.filter((i: any) => i.tipo_local === 'cozinha').length
         const barCount = insumosFormatados.filter((i: any) => i.tipo_local === 'bar').length
-        console.log(`�� ${insumosFormatados.length} insumos carregados - Cozinha: ${cozinhaCount}, Bar: ${barCount}`)
+        console.log(`œ… ${insumosFormatados.length} insumos carregados - Cozinha: ${cozinhaCount}, Bar: ${barCount}`)
       } else {
-        console.error('�� Erro na resposta da API insumos:', data)
+        console.error('Œ Erro na resposta da API insumos:', data)
         setInsumos([])
       }
     } catch (error) {
-      console.error('�� Erro ao carregar insumos:', error)
+      console.error('Œ Erro ao carregar insumos:', error)
       toast.error('Erro', 'Falha ao carregar insumos do banco de dados')
       setInsumos([])
     }
   }, [selectedBar])
 
-  // CARREGAR DADOS REAIS DO BANCO - Fun��o para buscar receitas
+  // CARREGAR DADOS REAIS DO BANCO - Funá§á£o para buscar receitas
   const carregarReceitas = useCallback(async () => {
     if (!selectedBar) return
     
     try {
-      console.log('🔄 Carregando receitas do banco...')
+      console.log('ðŸ”„ Carregando receitas do banco...')
       const response = await fetch(`/api/receitas/todas?bar_id=${selectedBar.id}`)
       
       if (!response.ok) {
@@ -231,19 +231,19 @@ export default function ReceitasPage() {
       
       if (data.success && data.receitas) {
         setReceitas(data.receitas)
-        console.log(`�� ${data.receitas.length} receitas carregadas`)
+        console.log(`œ… ${data.receitas.length} receitas carregadas`)
       } else {
-        console.error('�� Erro na resposta da API receitas:', data)
+        console.error('Œ Erro na resposta da API receitas:', data)
         setReceitas([])
       }
     } catch (error) {
-      console.error('�� Erro ao carregar receitas:', error)
+      console.error('Œ Erro ao carregar receitas:', error)
       toast.error('Erro', 'Falha ao carregar receitas do banco de dados')
       setReceitas([])
     }
   }, [selectedBar])
 
-  // Fun��o para verificar se um insumo � chefe em alguma receita
+  // Funá§á£o para verificar se um insumo á© chefe em alguma receita
   const isInsumoChefe = useCallback((insumoId: number) => {
     return receitas.some(receita => 
       receita.insumos?.some(insumo => 
@@ -252,7 +252,7 @@ export default function ReceitasPage() {
     )
   }, [receitas])
 
-  // Fun��o para obter receitas onde o insumo � chefe
+  // Funá§á£o para obter receitas onde o insumo á© chefe
   const getReceitasOndeEChefe = useCallback((insumoId: number) => {
     return receitas.filter((receita: any) => 
       receita.insumos?.some(insumo => 
@@ -306,7 +306,7 @@ export default function ReceitasPage() {
     )
   }, [receitas, buscaReceitas, tipoLocalReceitas])
 
-  // Otimiza��o: calcular insumos chefes uma vez
+  // Otimizaá§á£o: calcular insumos chefes uma vez
   const insumosChefes = useMemo(() => {
     return insumos.filter((insumo: any) => isInsumoChefe(insumo.id))
   }, [insumos, isInsumoChefe])
@@ -319,11 +319,11 @@ export default function ReceitasPage() {
     )
   }, [insumos, buscaInsumoReceita])
 
-  // Fun��o para gerar pr�ximo c�digo de insumo
+  // Funá§á£o para gerar prá³ximo cá³digo de insumo
   const gerarProximoCodigoInsumo = useCallback(() => {
     if (insumos.length === 0) return 'i0001'
     
-    // Buscar c�digos que seguem o padr�o i0000
+    // Buscar cá³digos que seguem o padrá£o i0000
     const codigosNumericos = insumos
       .map((insumo: any) => insumo.codigo)
       .filter((codigo: any) => /^i\d+$/.test(codigo))
@@ -338,13 +338,13 @@ export default function ReceitasPage() {
     return `i${proximoNumero.toString().padStart(4, '0')}`
   }, [insumos])
 
-  // Fun��o para gerar pr�ximo c�digo de receita baseado no tipo local
+  // Funá§á£o para gerar prá³ximo cá³digo de receita baseado no tipo local
   const gerarProximoCodigoReceita = useCallback((tipoLocal: 'cozinha' | 'bar') => {
     const prefixo = tipoLocal === 'cozinha' ? 'pc' : 'pd'
     
     if (receitas.length === 0) return `${prefixo}001`
     
-    // Buscar c�digos que seguem o padr�o pc000 ou pd000
+    // Buscar cá³digos que seguem o padrá£o pc000 ou pd000
     const codigosNumericos = receitas
       .filter((receita: any) => receita.tipo_local === tipoLocal)
       .map((receita: any) => receita.receita_codigo)
@@ -360,7 +360,7 @@ export default function ReceitasPage() {
     return `${prefixo}${proximoNumero.toString().padStart(3, '0')}`
   }, [receitas])
 
-  // Atualizar c�digo do insumo quando os dados carregarem
+  // Atualizar cá³digo do insumo quando os dados carregarem
   useEffect(() => {
     if (insumos.length >= 0) { // Sempre atualizar quando os dados carregarem
       const novoCodigo = gerarProximoCodigoInsumo()
@@ -371,7 +371,7 @@ export default function ReceitasPage() {
     }
   }, [insumos, gerarProximoCodigoInsumo])
 
-  // Gerar c�digo automaticamente quando tipo_local da receita mudar
+  // Gerar cá³digo automaticamente quando tipo_local da receita mudar
   useEffect(() => {
     if (novaReceita.tipo_local && modalCriarReceita) {
       const novoCodigo = gerarProximoCodigoReceita(novaReceita.tipo_local)
@@ -393,7 +393,7 @@ export default function ReceitasPage() {
 
   const salvarEdicaoInsumo = async () => {
     if (!insumoEditando || !insumoEditando.nome.trim()) {
-      toast.error('Nome do insumo � obrigat�rio')
+      toast.error('Nome do insumo á© obrigatá³rio')
       return
     }
 
@@ -435,7 +435,7 @@ export default function ReceitasPage() {
       setInsumoEditando(null)
       
     } catch (error) {
-      console.error('Erro ao salvar edi��o do insumo:', error)
+      console.error('Erro ao salvar ediá§á£o do insumo:', error)
       toast.error('Erro ao atualizar insumo. Tente novamente.')
     } finally {
       setIsLoading(false)
@@ -444,7 +444,7 @@ export default function ReceitasPage() {
 
   const salvarCriacaoInsumo = async () => {
     if (!novoInsumo.codigo || !novoInsumo.nome.trim()) {
-      toast.error('C�digo e nome s�o obrigat�rios')
+      toast.error('Cá³digo e nome sá£o obrigatá³rios')
       return
     }
 
@@ -483,7 +483,7 @@ export default function ReceitasPage() {
         // Fechar modal
         setModalCriarInsumo(false)
         
-        // Reset form para pr�ximo uso
+        // Reset form para prá³ximo uso
         setNovoInsumo({
           codigo: gerarProximoCodigoInsumo(),
           nome: '',
@@ -511,7 +511,7 @@ export default function ReceitasPage() {
 
   const salvarEdicaoReceita = async () => {
     if (!receitaEditando || !receitaEditando.receita_nome.trim()) {
-      toast.error('Nome da receita � obrigat�rio')
+      toast.error('Nome da receita á© obrigatá³rio')
       return
     }
 
@@ -525,7 +525,7 @@ export default function ReceitasPage() {
         is_chefe: insumo.is_chefe || false
       }))
 
-      console.log('📤 Dados enviados para API:', {
+      console.log('ðŸ“¤ Dados enviados para API:', {
         receita_codigo: receitaEditando.receita_codigo,
         receita_nome: receitaEditando.receita_nome.trim(),
         receita_categoria: receitaEditando.receita_categoria,
@@ -555,14 +555,14 @@ export default function ReceitasPage() {
 
       if (!response.ok) {
         const errorData = await response.text()
-        console.error('�� Erro HTTP:', response.status, errorData)
+        console.error('Œ Erro HTTP:', response.status, errorData)
         throw new Error(`Erro ${response.status}: ${errorData}`)
       }
 
       const result = await response.json()
-      console.log('�� Resposta da API:', result)
+      console.log('œ… Resposta da API:', result)
 
-      // Recarregar as receitas do servidor para garantir consist�ncia
+      // Recarregar as receitas do servidor para garantir consistáªncia
       await carregarReceitas()
 
       toast.success('Receita atualizada com sucesso!')
@@ -570,7 +570,7 @@ export default function ReceitasPage() {
       setReceitaEditando(null)
       
     } catch (error) {
-      console.error('�� Erro ao salvar edi��o da receita:', error)
+      console.error('Œ Erro ao salvar ediá§á£o da receita:', error)
       toast.error(`Erro ao atualizar receita: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
     } finally {
       setIsLoading(false)
@@ -582,10 +582,10 @@ export default function ReceitasPage() {
       insumo.nome,
       async () => {
         try {
-          // TODO: Implementar API de exclus�o
+          // TODO: Implementar API de exclusá£o
           // Por enquanto, remover localmente
           setInsumos(prev => prev.filter((i: any) => i.id !== insumo.id))
-          toast.success('Sucesso!', 'Insumo exclu�do com sucesso')
+          toast.success('Sucesso!', 'Insumo excluá­do com sucesso')
         } catch (error) {
           toast.error('Erro', 'Falha ao excluir insumo')
         }
@@ -593,11 +593,11 @@ export default function ReceitasPage() {
     )
   }
 
-  // FUN��ES PARA INSUMOS
+  // FUNá‡á•ES PARA INSUMOS
 
   const abrirModalCriarInsumo = () => {
     setNovoInsumo({
-      codigo: gerarProximoCodigoInsumo(), // Gerar pr�ximo c�digo automaticamente
+      codigo: gerarProximoCodigoInsumo(), // Gerar prá³ximo cá³digo automaticamente
       nome: '',
       unidade_medida: 'g',
       categoria: 'cozinha',
@@ -607,12 +607,12 @@ export default function ReceitasPage() {
     setModalCriarInsumo(true)
   }
 
-  // FUN��ES PARA RECEITAS
+  // FUNá‡á•ES PARA RECEITAS
 
   const abrirModalCriarReceita = () => {
     const tipoLocalPadrao: 'cozinha' | 'bar' = 'cozinha'
     setNovaReceita({
-      receita_codigo: gerarProximoCodigoReceita(tipoLocalPadrao), // Gerar c�digo baseado no tipo padr�o
+      receita_codigo: gerarProximoCodigoReceita(tipoLocalPadrao), // Gerar cá³digo baseado no tipo padrá£o
       receita_nome: '',
       receita_categoria: '',
       tipo_local: tipoLocalPadrao,
@@ -638,16 +638,16 @@ export default function ReceitasPage() {
     const insumoId = parseInt(insumoSelecionado)
     const quantidade = parseFloat(quantidadeInsumo)
 
-    // Verificar se insumo j� foi adicionado
+    // Verificar se insumo já¡ foi adicionado
     if (insumosReceita.some(i => i.insumo_id === insumoId)) {
-      toast.error('Erro', 'Este insumo j� foi adicionado � receita')
+      toast.error('Erro', 'Este insumo já¡ foi adicionado á  receita')
       return
     }
 
     const novoInsumoReceita = {
       insumo_id: insumoId,
       quantidade_necessaria: quantidade,
-      is_chefe: false // Por padr�o n�o � chefe
+      is_chefe: false // Por padrá£o ná£o á© chefe
     }
 
     setInsumosReceita(prev => [...prev, novoInsumoReceita])
@@ -665,14 +665,14 @@ export default function ReceitasPage() {
       const insumoClicado = prev.find((i: any) => i.insumo_id === insumoId)
       
       if (insumoClicado?.is_chefe) {
-        // Se j� � chefe, desmarcar
+        // Se já¡ á© chefe, desmarcar
         return prev.map((i: any) => 
           i.insumo_id === insumoId 
             ? { ...i, is_chefe: false }
             : i
         )
       } else {
-        // Se n�o � chefe, marcar como chefe e desmarcar todos os outros
+        // Se ná£o á© chefe, marcar como chefe e desmarcar todos os outros
         return prev.map((i: any) => ({
           ...i,
           is_chefe: i.insumo_id === insumoId
@@ -683,12 +683,12 @@ export default function ReceitasPage() {
 
   const salvarReceita = async () => {
     if (!novaReceita.receita_codigo || !novaReceita.receita_nome) {
-      toast.error('Erro', 'C�digo e nome da receita s�o obrigat�rios')
+      toast.error('Erro', 'Cá³digo e nome da receita sá£o obrigatá³rios')
       return
     }
 
     if (insumosReceita.length === 0) {
-      toast.error('Erro', 'Adicione pelo menos um insumo � receita')
+      toast.error('Erro', 'Adicione pelo menos um insumo á  receita')
       return
     }
 
@@ -723,7 +723,7 @@ export default function ReceitasPage() {
         toast.success('Sucesso!', 'Receita criada com sucesso')
         setModalCriarReceita(false)
         
-        // Resetar form com c�digo baseado no tipo padr�o
+        // Resetar form com cá³digo baseado no tipo padrá£o
         const tipoLocalPadrao: 'cozinha' | 'bar' = 'cozinha'
         setNovaReceita({
           receita_codigo: gerarProximoCodigoReceita(tipoLocalPadrao),
@@ -743,7 +743,7 @@ export default function ReceitasPage() {
         toast.error('Erro', data.error || 'Falha ao criar receita')
       }
     } catch (error) {
-      console.error('�� Erro ao criar receita:', error)
+      console.error('Œ Erro ao criar receita:', error)
       toast.error('Erro', 'Falha ao criar receita')
     } finally {
       setIsLoading(false)
@@ -762,9 +762,9 @@ export default function ReceitasPage() {
       receita.receita_nome,
       async () => {
         try {
-          // TODO: Implementar API de exclus�o de receitas
+          // TODO: Implementar API de exclusá£o de receitas
           setReceitas(prev => prev.filter((r: any) => r.receita_codigo !== receita.receita_codigo))
-          toast.success('Sucesso!', 'Receita exclu�da com sucesso')
+          toast.success('Sucesso!', 'Receita excluá­da com sucesso')
         } catch (error) {
           toast.error('Erro', 'Falha ao excluir receita')
         }
@@ -789,19 +789,19 @@ export default function ReceitasPage() {
     }
   }
 
-  // Fun��o para obter nome do insumo por ID
+  // Funá§á£o para obter nome do insumo por ID
   const obterNomeInsumo = (insumoId: number) => {
     const insumo = insumos.find((i: any) => i.id === insumoId)
     return insumo ? insumo.nome : `Insumo #${insumoId}`
   }
 
-  // Fun��o para obter insumo chefe de uma receita
+  // Funá§á£o para obter insumo chefe de uma receita
   const obterInsumoChefe = (receita: Receita) => {
     if (!receita.insumos) return null
     return receita.insumos.find((i: any) => i.is_chefe)
   }
 
-  // Fun��o para sincronizar receitas/insumos do Google Sheets
+  // Funá§á£o para sincronizar receitas/insumos do Google Sheets
   const syncReceitasFromSheets = async () => {
     setSyncLoading(true)
     setSyncLog(null)
@@ -809,11 +809,11 @@ export default function ReceitasPage() {
       const res = await fetch('/api/receitas/sync')
       const data = await res.json()
       if (data.success) {
-        setSyncLog('Sincroniza��o conclu�da!')
+        setSyncLog('Sincronizaá§á£o concluá­da!')
         toast.success('Receitas e insumos atualizados do Google Sheets!')
         await recarregarDados()
       } else {
-        setSyncLog(data.error || 'Erro desconhecido na sincroniza��o')
+        setSyncLog(data.error || 'Erro desconhecido na sincronizaá§á£o')
         toast.error('Erro ao sincronizar do Google Sheets')
       }
     } catch (e) {
@@ -828,8 +828,8 @@ export default function ReceitasPage() {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">��️ Selecione um Bar</h1>
-          <p className="text-gray-600 dark:text-gray-400">Voc� precisa selecionar um bar para gerenciar receitas e insumos.</p>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">š ï¸ Selecione um Bar</h1>
+          <p className="text-gray-600 dark:text-gray-400">Vocáª precisa selecionar um bar para gerenciar receitas e insumos.</p>
         </div>
       </div>
     )
@@ -913,14 +913,14 @@ export default function ReceitasPage() {
                     onClick={() => setTipoLocalInsumos('cozinha')}
                     className="flex items-center justify-center gap-1 sm:gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
-                    👨��🍳 Cozinha ({insumos.filter((i: any) => i.tipo_local === 'cozinha').length})
+                    ðŸ‘¨€ðŸ³ Cozinha ({insumos.filter((i: any) => i.tipo_local === 'cozinha').length})
                   </Button>
                   <Button
                     variant={tipoLocalInsumos === 'bar' ? 'default' : 'outline'}
                     onClick={() => setTipoLocalInsumos('bar')}
                     className="flex items-center justify-center gap-1 sm:gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
-                    🍺 Bar ({insumos.filter((i: any) => i.tipo_local === 'bar').length})
+                    ðŸº Bar ({insumos.filter((i: any) => i.tipo_local === 'bar').length})
                   </Button>
                 </div>
               </div>
@@ -1079,7 +1079,7 @@ export default function ReceitasPage() {
 
                             {insumo.observacoes && (
                               <div className="pt-2 border-t border-gray-200 dark:border-gray-600">
-                                <span className="text-gray-600 dark:text-gray-400">Observa��es:</span>
+                                <span className="text-gray-600 dark:text-gray-400">Observaá§áµes:</span>
                                 <p className="text-gray-700 dark:text-gray-300 text-xs mt-1 leading-relaxed">
                                   {insumo.observacoes}
                                 </p>
@@ -1106,26 +1106,26 @@ export default function ReceitasPage() {
                     onClick={() => setTipoLocalReceitas('cozinha')}
                     className="flex items-center justify-center gap-1 sm:gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
-                    👨��🍳 Cozinha ({receitas.filter((r: any) => r.tipo_local === 'cozinha').length})
+                    ðŸ‘¨€ðŸ³ Cozinha ({receitas.filter((r: any) => r.tipo_local === 'cozinha').length})
                   </Button>
                   <Button
                     variant={tipoLocalReceitas === 'bar' ? 'default' : 'outline'}
                     onClick={() => setTipoLocalReceitas('bar')}
                     className="flex items-center justify-center gap-1 sm:gap-2 h-11 text-sm sm:text-base touch-manipulation"
                   >
-                    🍺 Bar ({receitas.filter((r: any) => r.tipo_local === 'bar').length})
+                    ðŸº Bar ({receitas.filter((r: any) => r.tipo_local === 'bar').length})
                   </Button>
                 </div>
               </div>
             </div>
             
-            {/* Bot�o para criar nova receita */}
+            {/* Botá£o para criar nova receita */}
             <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                     <ChefHat className="w-5 h-5" />
-                    Receitas ({tipoLocalReceitas === 'bar' ? '🍺 Bar' : '👨��🍳 Cozinha'})
+                    Receitas ({tipoLocalReceitas === 'bar' ? 'ðŸº Bar' : 'ðŸ‘¨€ðŸ³ Cozinha'})
                   </CardTitle>
                   <Button
                     onClick={abrirModalCriarReceita}
@@ -1155,7 +1155,7 @@ export default function ReceitasPage() {
                       {buscaReceitas ? 'Nenhuma receita encontrada' : 'Nenhuma receita cadastrada'}
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400">
-                      {buscaReceitas ? `Busca por: "${buscaReceitas}"` : 'Clique em "Nova Receita" para come�ar'}
+                      {buscaReceitas ? `Busca por: "${buscaReceitas}"` : 'Clique em "Nova Receita" para comeá§ar'}
                     </p>
                   </div>
                 ) : (
@@ -1283,11 +1283,11 @@ export default function ReceitasPage() {
             </DialogHeader>
 
             <div className="space-y-6 flex-1 overflow-y-auto">
-              {/* Dados b�sicos da receita */}
+              {/* Dados bá¡sicos da receita */}
               <div className="grid grid-cols-1 gap-4 sm:gap-6">
                 <div>
                   <Label className="text-gray-700 dark:text-gray-300">
-                    C�digo <span className="text-red-500">*</span>
+                    Cá³digo <span className="text-red-500">*</span>
                     <span className="text-xs text-blue-600 dark:text-blue-400 ml-1">(auto)</span>
                   </Label>
                   <div className="flex gap-2">
@@ -1307,7 +1307,7 @@ export default function ReceitasPage() {
                         receita_codigo: prev.tipo_local ? gerarProximoCodigoReceita(prev.tipo_local) : ''
                       }))}
                       className="px-3 shrink-0"
-                      title="Gerar pr�ximo c�digo"
+                      title="Gerar prá³ximo cá³digo"
                     >
                       <RefreshCw className="w-4 h-4" />
                     </Button>
@@ -1319,7 +1319,7 @@ export default function ReceitasPage() {
                   <Input
                     value={novaReceita.receita_nome}
                     onChange={(e) => setNovaReceita(prev => ({ ...prev, receita_nome: e.target.value }))}
-                    placeholder="Ex: Frango � Passarinho"
+                    placeholder="Ex: Frango á  Passarinho"
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
                 </div>
@@ -1362,7 +1362,7 @@ export default function ReceitasPage() {
                 </div>
               </div>
 
-              {/* Se��o de insumos */}
+              {/* Seá§á£o de insumos */}
               <div className="flex items-center gap-2">
                 <Utensils className="w-5 h-5 text-blue-600" />
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Insumos da Receita</h3>
@@ -1378,7 +1378,7 @@ export default function ReceitasPage() {
                         value={buscaInsumoReceita}
                         onChange={(e) => {
                           setBuscaInsumoReceita(e.target.value)
-                          setInsumoSelecionado('') // Limpar sele��o ao digitar
+                          setInsumoSelecionado('') // Limpar seleá§á£o ao digitar
                         }}
                         placeholder="Digite para buscar insumo..."
                         className="bg-white dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-900 dark:text-white h-12 text-base"
@@ -1401,7 +1401,7 @@ export default function ReceitasPage() {
                           >
                             <div className="font-medium">{insumo.nome}</div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">
-                              {insumo.codigo} �� {insumo.categoria}
+                              {insumo.codigo} €¢ {insumo.categoria}
                             </div>
                           </button>
                         ))}
@@ -1539,10 +1539,10 @@ export default function ReceitasPage() {
 
             {receitaEditando && (
               <div className="space-y-6 flex-1 overflow-y-auto">
-                {/* Informa��es b�sicas */}
+                {/* Informaá§áµes bá¡sicas */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-gray-600 dark:text-gray-400">C�digo:</Label>
+                    <Label className="text-gray-600 dark:text-gray-400">Cá³digo:</Label>
                     <p className="font-semibold text-gray-900 dark:text-white">{receitaEditando.receita_codigo}</p>
                   </div>
                   <div>
@@ -1640,7 +1640,7 @@ export default function ReceitasPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Modal de Edi��o de Insumo */}
+        {/* Modal de Ediá§á£o de Insumo */}
         <Dialog open={modalEditarInsumo} onOpenChange={setModalEditarInsumo}>
           <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 flex flex-col">
             <DialogHeader className="flex-shrink-0">
@@ -1649,7 +1649,7 @@ export default function ReceitasPage() {
                 Editar Insumo
               </DialogTitle>
               <DialogDescription className="text-gray-600 dark:text-gray-400">
-                Modifique as informa��es do insumo selecionado.
+                Modifique as informaá§áµes do insumo selecionado.
               </DialogDescription>
             </DialogHeader>
 
@@ -1658,7 +1658,7 @@ export default function ReceitasPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="edit-codigo" className="text-gray-700 dark:text-gray-300">
-                      C�digo
+                      Cá³digo
                     </Label>
                     <Input
                       id="edit-codigo"
@@ -1698,7 +1698,7 @@ export default function ReceitasPage() {
                         <SelectItem value="cozinha">Cozinha</SelectItem>
                         <SelectItem value="bar">Bar</SelectItem>
                         <SelectItem value="bebidas">Bebidas</SelectItem>
-                        <SelectItem value="descartaveis">Descart�veis</SelectItem>
+                        <SelectItem value="descartaveis">Descartá¡veis</SelectItem>
                         <SelectItem value="limpeza">Limpeza</SelectItem>
                         <SelectItem value="outros">Outros</SelectItem>
                       </SelectContent>
@@ -1717,8 +1717,8 @@ export default function ReceitasPage() {
                         <SelectValue placeholder="Selecione o tipo local" />
                       </SelectTrigger>
                       <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                        <SelectItem value="cozinha">👨��🍳 Cozinha</SelectItem>
-                        <SelectItem value="bar">🍺 Bar</SelectItem>
+                        <SelectItem value="cozinha">ðŸ‘¨€ðŸ³ Cozinha</SelectItem>
+                        <SelectItem value="bar">ðŸº Bar</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1748,7 +1748,7 @@ export default function ReceitasPage() {
 
                   <div className="md:col-span-1">
                     <Label htmlFor="edit-custo" className="text-gray-700 dark:text-gray-300">
-                      Custo Unit�rio (R$)
+                      Custo Unitá¡rio (R$)
                     </Label>
                     <Input
                       id="edit-custo"
@@ -1768,14 +1768,14 @@ export default function ReceitasPage() {
 
                 <div>
                   <Label htmlFor="edit-observacoes" className="text-gray-700 dark:text-gray-300">
-                    Observa��es
+                    Observaá§áµes
                   </Label>
                   <Textarea
                     id="edit-observacoes"
                     value={insumoEditando.observacoes || ''}
                     onChange={(e) => setInsumoEditando({...insumoEditando, observacoes: e.target.value})}
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                    placeholder="Observa��es adicionais sobre o insumo..."
+                    placeholder="Observaá§áµes adicionais sobre o insumo..."
                     rows={3}
                   />
                 </div>
@@ -1799,13 +1799,13 @@ export default function ReceitasPage() {
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Save className="w-4 h-4 mr-2" />
-                Salvar Altera��es
+                Salvar Alteraá§áµes
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* Modal de Edi��o de Receita */}
+        {/* Modal de Ediá§á£o de Receita */}
         <Dialog open={modalEditarReceita} onOpenChange={setModalEditarReceita}>
           <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 flex flex-col">
             <DialogHeader className="flex-shrink-0">
@@ -1814,17 +1814,17 @@ export default function ReceitasPage() {
                 Editar Receita
               </DialogTitle>
               <DialogDescription className="text-gray-600 dark:text-gray-400">
-                Modifique as informa��es da receita selecionada.
+                Modifique as informaá§áµes da receita selecionada.
               </DialogDescription>
             </DialogHeader>
 
             {receitaEditando && (
               <div className="space-y-6 flex-1 overflow-y-auto">
-                {/* Informa��es b�sicas */}
+                {/* Informaá§áµes bá¡sicas */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="edit-receita-codigo" className="text-gray-700 dark:text-gray-300">
-                      C�digo
+                      Cá³digo
                     </Label>
                     <Input
                       id="edit-receita-codigo"
@@ -1919,19 +1919,19 @@ export default function ReceitasPage() {
 
                 <div>
                   <Label htmlFor="edit-observacoes-receita" className="text-gray-700 dark:text-gray-300">
-                    Observa��es
+                    Observaá§áµes
                   </Label>
                   <Textarea
                     id="edit-observacoes-receita"
                     value={receitaEditando.observacoes || ''}
                     onChange={(e) => setReceitaEditando({...receitaEditando, observacoes: e.target.value})}
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                    placeholder="Observa��es adicionais sobre a receita..."
+                    placeholder="Observaá§áµes adicionais sobre a receita..."
                     rows={3}
                   />
                 </div>
 
-                {/* Edi��o de insumos da receita */}
+                {/* Ediá§á£o de insumos da receita */}
                 {receitaEditando.insumos && receitaEditando.insumos.length > 0 && (
                   <>
                     <div className="flex items-center justify-between">
@@ -2028,7 +2028,7 @@ export default function ReceitasPage() {
                                 </div>
                               </div>
 
-                              {/* Bot�o remover */}
+                              {/* Botá£o remover */}
                               <Button
                                 onClick={() => {
                                   const newInsumos = receitaEditando.insumos!.filter((_, i) => i !== index)
@@ -2057,7 +2057,7 @@ export default function ReceitasPage() {
                           </div>
                         ))}
 
-                        {/* Mensagem se n�o tem insumo chefe */}
+                        {/* Mensagem se ná£o tem insumo chefe */}
                         {receitaEditando.insumos.length > 0 && !receitaEditando.insumos.some(i => i.is_chefe) && (
                           <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
                             <Crown className="w-4 h-4 text-amber-600" />
@@ -2095,14 +2095,14 @@ export default function ReceitasPage() {
                   className="flex-1 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Save className="w-4 h-4 mr-2" />
-                  Salvar Altera��es
+                  Salvar Alteraá§áµes
                 </Button>
               </div>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* Modal de Cria��o de Insumo */}
+        {/* Modal de Criaá§á£o de Insumo */}
         <Dialog open={modalCriarInsumo} onOpenChange={setModalCriarInsumo}>
           <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 flex flex-col">
             <DialogHeader className="flex-shrink-0">
@@ -2119,7 +2119,7 @@ export default function ReceitasPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-gray-700 dark:text-gray-300">
-                    C�digo <span className="text-red-500">*</span>
+                    Cá³digo <span className="text-red-500">*</span>
                     <span className="text-xs text-blue-600 dark:text-blue-400 ml-1">(auto)</span>
                   </Label>
                   <div className="flex gap-2">
@@ -2147,7 +2147,7 @@ export default function ReceitasPage() {
                   <Input
                     value={novoInsumo.nome}
                     onChange={(e) => setNovoInsumo(prev => ({ ...prev, nome: e.target.value }))}
-                    placeholder="Ex: Frango � passarinho"
+                    placeholder="Ex: Frango á  passarinho"
                     className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
                 </div>
@@ -2178,8 +2178,8 @@ export default function ReceitasPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                      <SelectItem value="cozinha">👨��🍳 Cozinha</SelectItem>
-                      <SelectItem value="bar">🍺 Bar</SelectItem>
+                      <SelectItem value="cozinha">ðŸ‘¨€ðŸ³ Cozinha</SelectItem>
+                      <SelectItem value="bar">ðŸº Bar</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -2205,7 +2205,7 @@ export default function ReceitasPage() {
                 </div>
 
                 <div>
-                  <Label className="text-gray-700 dark:text-gray-300">Custo Unit�rio (R$)</Label>
+                  <Label className="text-gray-700 dark:text-gray-300">Custo Unitá¡rio (R$)</Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -2219,11 +2219,11 @@ export default function ReceitasPage() {
               </div>
 
               <div>
-                <Label className="text-gray-700 dark:text-gray-300">Observa��es</Label>
+                <Label className="text-gray-700 dark:text-gray-300">Observaá§áµes</Label>
                 <Textarea
                   value={novoInsumo.observacoes}
                   onChange={(e) => setNovoInsumo(prev => ({ ...prev, observacoes: e.target.value }))}
-                  placeholder="Observa��es adicionais..."
+                  placeholder="Observaá§áµes adicionais..."
                   className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                 />
               </div>
