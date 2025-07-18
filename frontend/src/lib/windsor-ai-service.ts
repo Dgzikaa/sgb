@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 // ========================================
 // 🚀 WINDSOR.AI SERVICE
 // ========================================
@@ -42,7 +58,7 @@ export interface WindsorConfig {
     time: string
     timezone: string
   }
-  filters: Record<string, any>
+  filters: Record<string, unknown>
   plan: 'free' | 'basic' | 'standard' | 'plus' | 'professional' | 'enterprise'
 }
 
@@ -52,8 +68,8 @@ export interface WindsorData {
   date_from: string
   date_to: string
   connector: string
-  raw_data: any
-  processed_data: any[]
+  raw_data: unknown
+  processed_data: unknown[]
   metrics_collected: string[]
 }
 
@@ -377,7 +393,7 @@ export class WindsorAIService {
     barId: number,
     eventType: string,
     message: string,
-    details: Record<string, any> = {}
+    details: Record<string, unknown> = {}
   ): Promise<void> {
     try {
       await supabase
@@ -464,8 +480,8 @@ export class WindsorAIService {
   /**
    * Processar dados do Windsor.ai
    */
-  private processWindsorData(windsorData: any, barId: number, platform: string): any[] {
-    const processed: any[] = []
+  private processWindsorData(windsorData: unknown, barId: number, platform: string): unknown[] {
+    const processed: unknown[] = []
 
     if (!windsorData.data || !Array.isArray(windsorData.data)) {
       return processed

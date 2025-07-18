@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -44,7 +60,7 @@ interface PostHistorico {
   reach?: number;
   impressions?: number;
   page_reach?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export async function GET(request: NextRequest) {
@@ -57,7 +73,7 @@ export async function GET(request: NextRequest) {
     
     if (userData) {
       try {
-        const parsedUser = JSON.parse(decodeURIComponent(userData))
+        const parsedUser = JSON.parse(decodeURIComponent(userData) as unknown)
         barId = parsedUser.bar_id || 3
         console.log(`Ã°Å¸â€˜Â¤ PrevisÃ¡Â£o de Performance - Usando bar_id: ${barId}`)
       } catch (e) {

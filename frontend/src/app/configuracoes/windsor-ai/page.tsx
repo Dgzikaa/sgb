@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -358,7 +374,7 @@ export default function WindsorAIPage() {
                         key={plan}
                         variant={config?.plan === plan ? 'default' : 'secondary'}
                         className="cursor-pointer"
-                        onClick={() => updateConfig({ plan: plan as any })}
+                        onClick={() => updateConfig({ plan: plan as unknown })}
                       >
                         {plan.charAt(0).toUpperCase() + plan.slice(1)}
                       </Badge>

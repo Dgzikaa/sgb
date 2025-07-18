@@ -1,9 +1,46 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Configuração mais robusta do Supabase
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+// Verificação mais segura das variáveis de ambiente
+if (!supabaseUrl) {
+  console.warn('NEXT_PUBLIC_SUPABASE_URL não está configurada');
+}
+
+if (!supabaseKey) {
+  console.warn('SUPABASE_SERVICE_ROLE_KEY não está configurada');
+}
+
+// Criação do cliente com fallback
+const supabase = supabaseUrl && supabaseKey 
+  ? createClient(supabaseUrl, supabaseKey)
+  : null;
+
+// Função helper para verificar se o cliente está disponível
+function checkSupabaseClient() {
+  if (!supabase) {
+    throw new Error('Cliente Supabase não está configurado. Verifique as variáveis de ambiente.');
+  }
+  return supabase;
+}
 
 // ========================================
 // INTERFACES PARA TIPAGEM
@@ -71,15 +108,117 @@ interface ProdutoTempo {
   total_pedidos: number;
 }
 
+interface ChecklistResult {
+  erro?: string;
+  periodo?: { inicio: string; fim: string };
+  resumo?: {
+    total_execucoes: number;
+    concluidos: number;
+    pendentes: number;
+    atrasados: number;
+    taxa_conclusao: number;
+    score_medio: number;
+  };
+  execucoes_detalhes?: ChecklistExecucao[];
+  mensagem?: string;
+}
+
+interface PerformanceResult {
+  erro?: string;
+  ranking_funcionarios?: Array<FuncionarioPerformance & { posicao: number }>;
+  estatisticas?: {
+    total_funcionarios: number;
+    melhor_score: number;
+    melhor_funcionario: string;
+  };
+  mensagem?: string;
+}
+
+interface WhatsAppResult {
+  erro?: string;
+  periodo?: { inicio: string; fim: string };
+  estatisticas?: {
+    total_mensagens: number;
+    taxa_entrega: number;
+    taxa_leitura: number;
+    taxa_falha: number;
+    engagement: number;
+  };
+  por_tipo?: Record<string, number>;
+  mensagem?: string;
+}
+
+interface TempoResult {
+  erro?: string;
+  periodo?: { inicio: string; fim: string };
+  tempos_medios?: {
+    total_segundos: number;
+    total_minutos: number;
+    preparacao: number;
+    cozinha: number;
+    entrega: number;
+  };
+  produtos_mais_demorados?: ProdutoTempo[];
+  total_producoes?: number;
+  mensagem?: string;
+}
+
+interface ScoreSaudeResult {
+  score_saude: number;
+  status: string;
+  fatores: {
+    anomalias_criticas: number;
+    anomalias_altas: number;
+    metricas_abaixo_meta: number;
+    insights_positivos: number;
+  };
+  mensagem: string;
+}
+
+interface DashboardResult {
+  periodo: { inicio: string; fim: string };
+  kpis_principais: {
+    faturamento_total: number;
+    total_transacoes: number;
+    ticket_medio: number;
+    taxa_conclusao_checklists: number;
+    engagement_whatsapp: number;
+    tempo_medio_producao: number;
+  };
+  score_saude: ScoreSaudeResult;
+  resumo_operacional: {
+    checklists?: ChecklistResult['resumo'];
+    whatsapp?: WhatsAppResult['estatisticas'];
+    producao?: TempoResult['tempos_medios'];
+  };
+  mensagem: string;
+}
+
+interface Visao360Result {
+  visao_geral: DashboardResult;
+  equipe: PerformanceResult;
+  alertas: {
+    anomalias_ativas: unknown[];
+    insights_recentes: Insight[];
+    recomendacoes_prioritarias: Array<{ titulo: string; roi_estimado: number; prioridade: number }>;
+  };
+  resumo_inteligencia: {
+    total_anomalias_ativas: number;
+    insights_criticos: number;
+    recomendacoes_altas: number;
+  };
+  mensagem: string;
+}
+
 // ========================================
 // ANÁLISES DE CHECKLISTS & OPERACIONAL
 // ========================================
 
-export async function getStatusChecklists(bar_id: number, inicio?: string, fim?: string) {
+export async function getStatusChecklists(bar_id: number, inicio?: string, fim?: string): Promise<ChecklistResult> {
   const dataInicio = inicio || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const dataFim = fim || new Date().toISOString().split('T')[0];
 
-  const { data: execucoes } = await supabase
+  const response = await (checkSupabaseClient() as unknown)
     .from('checklist_execucoes')
     .select(`
       status,
@@ -93,17 +232,16 @@ export async function getStatusChecklists(bar_id: number, inicio?: string, fim?:
     .gte('created_at', `${dataInicio}T00:00:00Z`)
     .lte('created_at', `${dataFim}T23:59:59Z`);
 
+  const execucoes = response.data as ChecklistExecucao[] | null;
   if (!execucoes) return { erro: 'Erro ao buscar dados' };
+  const total = execucoes.length;
+  const concluidos = execucoes.filter((e: ChecklistExecucao) => e.status === 'concluido').length;
+  const pendentes = execucoes.filter((e: ChecklistExecucao) => e.status === 'em_andamento').length;
+  const atrasados = execucoes.filter((e: ChecklistExecucao) => e.status === 'atrasado').length;
 
-  const execucoesTyped = execucoes as ChecklistExecucao[];
-  const total = execucoesTyped.length;
-  const concluidos = execucoesTyped.filter((e: ChecklistExecucao) => e.status === 'concluido').length;
-  const pendentes = execucoesTyped.filter((e: ChecklistExecucao) => e.status === 'em_andamento').length;
-  const atrasados = execucoesTyped.filter((e: ChecklistExecucao) => e.status === 'atrasado').length;
-
-  const scoresMedio = execucoesTyped
+  const scoresMedio = execucoes
     .filter((e: ChecklistExecucao) => e.pontuacao_final)
-    .reduce((acc: number, e: ChecklistExecucao) => acc + (e.pontuacao_final || 0), 0) / execucoesTyped.filter((e: ChecklistExecucao) => e.pontuacao_final).length || 0;
+    .reduce((acc: number, e: ChecklistExecucao) => acc + (e.pontuacao_final || 0), 0) / execucoes.filter((e: ChecklistExecucao) => e.pontuacao_final).length || 0;
 
   return {
     periodo: { inicio: dataInicio, fim: dataFim },
@@ -115,13 +253,13 @@ export async function getStatusChecklists(bar_id: number, inicio?: string, fim?:
       taxa_conclusao: total > 0 ? (concluidos / total) * 100 : 0,
       score_medio: scoresMedio
     },
-    execucoes_detalhes: execucoesTyped.slice(0, 10),
+    execucoes_detalhes: execucoes.slice(0, 10),
     mensagem: `${concluidos} de ${total} checklists concluídos (${((concluidos/total)*100).toFixed(1)}%)`
   };
 }
 
-export async function getPerformanceFuncionarios(bar_id: number, inicio?: string, fim?: string, limite = 10) {
-  const { data: execucoes } = await supabase
+export async function getPerformanceFuncionarios(bar_id: number, inicio?: string, fim?: string, limite = 10): Promise<PerformanceResult> {
+  const response = await (checkSupabaseClient() as unknown)
     .from('checklist_execucoes')
     .select(`
       executado_por,
@@ -133,13 +271,12 @@ export async function getPerformanceFuncionarios(bar_id: number, inicio?: string
     .eq('bar_id', bar_id)
     .eq('status', 'concluido');
 
+  const execucoes = response.data as (ChecklistExecucao & { executado_por: number; usuarios_bar: { nome: string; email: string } })[] | null;
   if (!execucoes) return { erro: 'Erro ao buscar dados' };
-
-  const execucoesTyped = execucoes as (ChecklistExecucao & { executado_por: number; usuarios_bar: { nome: string; email: string } })[];
 
   // Agrupar por funcionário
   const funcionarios: Record<string, FuncionarioPerformance> = {};
-  execucoesTyped.forEach((exec) => {
+  execucoes.forEach((exec) => {
     const id = exec.executado_por.toString();
     if (!funcionarios[id]) {
       funcionarios[id] = {
@@ -186,28 +323,27 @@ export async function getPerformanceFuncionarios(bar_id: number, inicio?: string
 // ANÁLISES DE WHATSAPP
 // ========================================
 
-export async function getWhatsAppStats(bar_id: number, inicio?: string, fim?: string) {
+export async function getWhatsAppStats(bar_id: number, inicio?: string, fim?: string): Promise<WhatsAppResult> {
   const dataInicio = inicio || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const dataFim = fim || new Date().toISOString().split('T')[0];
 
-  const { data: mensagens } = await supabase
+  const response = await (checkSupabaseClient() as unknown)
     .from('whatsapp_mensagens')
     .select('status, tipo, created_at')
     .eq('bar_id', bar_id)
     .gte('created_at', `${dataInicio}T00:00:00Z`)
     .lte('created_at', `${dataFim}T23:59:59Z`);
 
+  const mensagens = response.data as WhatsAppMensagem[] | null;
   if (!mensagens) return { erro: 'Erro ao buscar dados' };
-
-  const mensagensTyped = mensagens as WhatsAppMensagem[];
-  const total = mensagensTyped.length;
-  const enviadas = mensagensTyped.filter((m: WhatsAppMensagem) => ['sent', 'delivered', 'read'].includes(m.status)).length;
-  const lidas = mensagensTyped.filter((m: WhatsAppMensagem) => m.status === 'read').length;
-  const falhas = mensagensTyped.filter((m: WhatsAppMensagem) => m.status === 'failed').length;
+  const total = mensagens.length;
+  const enviadas = mensagens.filter((m: WhatsAppMensagem) => ['sent', 'delivered', 'read'].includes(m.status)).length;
+  const lidas = mensagens.filter((m: WhatsAppMensagem) => m.status === 'read').length;
+  const falhas = mensagens.filter((m: WhatsAppMensagem) => m.status === 'failed').length;
 
   // Estatísticas por tipo
   const tipoStats: Record<string, number> = {};
-  mensagensTyped.forEach((m: WhatsAppMensagem) => {
+  mensagens.forEach((m: WhatsAppMensagem) => {
     tipoStats[m.tipo] = (tipoStats[m.tipo] || 0) + 1;
   });
 
@@ -229,11 +365,11 @@ export async function getWhatsAppStats(bar_id: number, inicio?: string, fim?: st
 // ANÁLISES DE PRODUÇÃO & TEMPO  
 // ========================================
 
-export async function getTempoProducao(bar_id: number, inicio?: string, fim?: string) {
+export async function getTempoProducao(bar_id: number, inicio?: string, fim?: string): Promise<TempoResult> {
   const dataInicio = inicio || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const dataFim = fim || new Date().toISOString().split('T')[0];
 
-  const { data: tempos } = await supabase
+  const response = await (checkSupabaseClient() as unknown)
     .from('contahub_tempo')
     .select(`
       tempo_t0_t1,
@@ -247,17 +383,16 @@ export async function getTempoProducao(bar_id: number, inicio?: string, fim?: st
     .gte('dia', `${dataInicio}T00:00:00`)
     .lte('dia', `${dataFim}T23:59:59`);
 
+  const tempos = response.data as TempoProducao[] | null;
   if (!tempos) return { erro: 'Erro ao buscar dados' };
-
-  const temposTyped = tempos as TempoProducao[];
-  const tempoMedioTotal = temposTyped.reduce((acc: number, t: TempoProducao) => acc + (t.tempo_t0_t3 || 0), 0) / temposTyped.length;
-  const tempoMedioPrep = temposTyped.reduce((acc: number, t: TempoProducao) => acc + (t.tempo_t0_t1 || 0), 0) / temposTyped.length;
-  const tempoMedioCozinha = temposTyped.reduce((acc: number, t: TempoProducao) => acc + (t.tempo_t1_t2 || 0), 0) / temposTyped.length;
-  const tempoMedioEntrega = temposTyped.reduce((acc: number, t: TempoProducao) => acc + (t.tempo_t2_t3 || 0), 0) / temposTyped.length;
+  const tempoMedioTotal = tempos.reduce((acc: number, t: TempoProducao) => acc + (t.tempo_t0_t3 || 0), 0) / tempos.length;
+  const tempoMedioPrep = tempos.reduce((acc: number, t: TempoProducao) => acc + (t.tempo_t0_t1 || 0), 0) / tempos.length;
+  const tempoMedioCozinha = tempos.reduce((acc: number, t: TempoProducao) => acc + (t.tempo_t1_t2 || 0), 0) / tempos.length;
+  const tempoMedioEntrega = tempos.reduce((acc: number, t: TempoProducao) => acc + (t.tempo_t2_t3 || 0), 0) / tempos.length;
 
   // Produtos mais demorados
   const produtosTempo: Record<string, number[]> = {};
-  temposTyped.forEach((t: TempoProducao) => {
+  tempos.forEach((t: TempoProducao) => {
     if (!produtosTempo[t.prd_desc]) produtosTempo[t.prd_desc] = [];
     produtosTempo[t.prd_desc].push(t.tempo_t0_t3 || 0);
   });
@@ -281,7 +416,7 @@ export async function getTempoProducao(bar_id: number, inicio?: string, fim?: st
       entrega: tempoMedioEntrega
     },
     produtos_mais_demorados: produtosMaisDemorados,
-    total_producoes: temposTyped.length,
+    total_producoes: tempos.length,
     mensagem: `Tempo médio de produção: ${(tempoMedioTotal/60).toFixed(1)} minutos`
   };
 }
@@ -290,23 +425,23 @@ export async function getTempoProducao(bar_id: number, inicio?: string, fim?: st
 // ANÁLISES DE IA & ANALYTICS
 // ========================================
 
-export async function getScoreSaudeGeral(bar_id: number) {
+export async function getScoreSaudeGeral(bar_id: number): Promise<ScoreSaudeResult> {
   const hoje = new Date().toISOString().split('T')[0];
   
-  const [metricas, anomalias, insights] = await Promise.all([
-    supabase
+  const [metricasResponse, anomaliasResponse, insightsResponse] = await Promise.all([
+    (checkSupabaseClient() as unknown)
       .from('ai_metrics')
       .select('valor, meta_valor, nome_metrica')
       .eq('bar_id', bar_id)
       .eq('data_referencia', hoje),
     
-    supabase
+    (checkSupabaseClient() as unknown)
       .from('ai_anomalies')
       .select('severidade')
       .eq('bar_id', bar_id)
       .eq('ainda_ativa', true),
     
-    supabase
+    (checkSupabaseClient() as unknown)
       .from('ai_insights')
       .select('impacto, urgencia')
       .eq('bar_id', bar_id)
@@ -316,21 +451,21 @@ export async function getScoreSaudeGeral(bar_id: number) {
   let score = 100;
 
   // Penalizar por anomalias ativas
-  const anomaliasTyped = anomalias.data as Anomalia[] || [];
-  const anomaliasCriticas = anomaliasTyped.filter((a: Anomalia) => a.severidade === 'critica').length;
-  const anomaliasAltas = anomaliasTyped.filter((a: Anomalia) => a.severidade === 'alta').length;
+  const anomalias = anomaliasResponse.data as Anomalia[] || [];
+  const anomaliasCriticas = anomalias.filter((a: Anomalia) => a.severidade === 'critica').length;
+  const anomaliasAltas = anomalias.filter((a: Anomalia) => a.severidade === 'alta').length;
   score -= (anomaliasCriticas * 15) + (anomaliasAltas * 8);
 
   // Ajustar por métricas vs metas
-  const metricasTyped = metricas.data as Metrica[] || [];
-  const metricasAbaixoMeta = metricasTyped.filter((m: Metrica) => 
+  const metricas = metricasResponse.data as Metrica[] || [];
+  const metricasAbaixoMeta = metricas.filter((m: Metrica) => 
     m.valor < (m.meta_valor * 0.9)
   ).length;
   score -= metricasAbaixoMeta * 5;
 
   // Bonificar insights positivos
-  const insightsTyped = insights.data as Insight[] || [];
-  const insightsPositivos = insightsTyped.filter((i: Insight) => 
+  const insights = insightsResponse.data as Insight[] || [];
+  const insightsPositivos = insights.filter((i: Insight) => 
     i.impacto === 'positivo'
   ).length;
   score += insightsPositivos * 2;
@@ -360,18 +495,18 @@ export async function getScoreSaudeGeral(bar_id: number) {
 // DASHBOARD EXECUTIVO COMPLETO
 // ========================================
 
-export async function getDashboardExecutivo(bar_id: number, inicio?: string, fim?: string) {
+export async function getDashboardExecutivo(bar_id: number, inicio?: string, fim?: string): Promise<DashboardResult> {
   const dataInicio = inicio || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const dataFim = fim || new Date().toISOString().split('T')[0];
 
   const [
-    faturamento,
+    faturamentoResponse,
     checklists,
     whatsapp,
     tempos,
     scoreSaude
   ] = await Promise.all([
-    supabase
+    (checkSupabaseClient() as unknown)
       .from('contahub_pagamentos')
       .select('valor_liquido')
       .eq('bar_id', bar_id)
@@ -384,9 +519,14 @@ export async function getDashboardExecutivo(bar_id: number, inicio?: string, fim
     getScoreSaudeGeral(bar_id)
   ]);
 
-  const faturamentoTyped = faturamento.data as Faturamento[] || [];
-  const faturamentoTotal = faturamentoTyped.reduce((acc: number, f: Faturamento) => acc + (f.valor_liquido || 0), 0);
-  const transacoes = faturamentoTyped.length;
+  const faturamento = faturamentoResponse.data as Faturamento[] || [];
+  const faturamentoTotal = faturamento.reduce((acc: number, f: Faturamento) => acc + (f.valor_liquido || 0), 0);
+  const transacoes = faturamento.length;
+
+  const taxaConclusaoChecklists = checklists.resumo?.taxa_conclusao || 0;
+  const engagementWhatsapp = whatsapp.estatisticas?.engagement || 0;
+  const tempoMedioProducao = tempos.tempos_medios?.total_minutos || 0;
+  const scoreSaudeValue = scoreSaude.score_saude;
 
   return {
     periodo: { inicio: dataInicio, fim: dataFim },
@@ -394,9 +534,9 @@ export async function getDashboardExecutivo(bar_id: number, inicio?: string, fim
       faturamento_total: faturamentoTotal,
       total_transacoes: transacoes,
       ticket_medio: transacoes > 0 ? faturamentoTotal / transacoes : 0,
-      taxa_conclusao_checklists: checklists.resumo?.taxa_conclusao || 0,
-      engagement_whatsapp: whatsapp.estatisticas?.engagement || 0,
-      tempo_medio_producao: tempos.tempos_medios?.total_minutos || 0
+      taxa_conclusao_checklists: taxaConclusaoChecklists,
+      engagement_whatsapp: engagementWhatsapp,
+      tempo_medio_producao: tempoMedioProducao
     },
     score_saude: scoreSaude,
     resumo_operacional: {
@@ -404,7 +544,7 @@ export async function getDashboardExecutivo(bar_id: number, inicio?: string, fim
       whatsapp: whatsapp.estatisticas,
       producao: tempos.tempos_medios
     },
-    mensagem: `Dashboard executivo: R$ ${faturamentoTotal.toFixed(2)} em ${transacoes} transações - Score saúde: ${scoreSaude.score_saude}%`
+    mensagem: `Dashboard executivo: R$ ${faturamentoTotal.toFixed(2)} em ${transacoes} transações - Score saúde: ${scoreSaudeValue}%`
   };
 }
 
@@ -412,26 +552,26 @@ export async function getDashboardExecutivo(bar_id: number, inicio?: string, fim
 // ANÁLISE 360° COMPLETA
 // ========================================
 
-export async function getVisao360(bar_id: number, inicio?: string, fim?: string) {
+export async function getVisao360(bar_id: number, inicio?: string, fim?: string): Promise<Visao360Result> {
   const dashboard = await getDashboardExecutivo(bar_id, inicio, fim);
   const performance = await getPerformanceFuncionarios(bar_id, inicio, fim, 5);
   
-  const [anomalias, insights, recomendacoes] = await Promise.all([
-    supabase
+  const [anomaliasResponse, insightsResponse, recomendacoesResponse] = await Promise.all([
+    (checkSupabaseClient() as unknown)
       .from('ai_anomalies')
       .select('titulo, severidade, ainda_ativa')
       .eq('bar_id', bar_id)
       .eq('ainda_ativa', true)
       .limit(5),
     
-    supabase
+    (checkSupabaseClient() as unknown)
       .from('ai_insights')
       .select('titulo, impacto, urgencia')
       .eq('bar_id', bar_id)
       .order('created_at', { ascending: false })
       .limit(5),
     
-    supabase
+    (checkSupabaseClient() as unknown)
       .from('ai_recommendations')
       .select('titulo, roi_estimado, prioridade')
       .eq('bar_id', bar_id)
@@ -439,19 +579,19 @@ export async function getVisao360(bar_id: number, inicio?: string, fim?: string)
       .limit(5)
   ]);
 
-  const insightsTyped = insights.data as Insight[] || [];
-  const recomendacoesTyped = recomendacoes.data as { titulo: string; roi_estimado: number; prioridade: number }[] || [];
+  const insightsTyped = insightsResponse.data as Insight[] || [];
+  const recomendacoesTyped = recomendacoesResponse.data as { titulo: string; roi_estimado: number; prioridade: number }[] || [];
 
   return {
     visao_geral: dashboard,
     equipe: performance,
     alertas: {
-      anomalias_ativas: anomalias.data || [],
+      anomalias_ativas: anomaliasResponse.data || [],
       insights_recentes: insightsTyped,
       recomendacoes_prioritarias: recomendacoesTyped
     },
     resumo_inteligencia: {
-      total_anomalias_ativas: anomalias.data?.length || 0,
+      total_anomalias_ativas: anomaliasResponse.data?.length || 0,
       insights_criticos: insightsTyped.filter((i: Insight) => i.impacto === 'critico').length,
       recomendacoes_altas: recomendacoesTyped.filter((r) => r.prioridade >= 8).length
     },

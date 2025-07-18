@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState } from 'react'
@@ -214,7 +230,7 @@ export default function ScheduleDialog({
                       ? 'ring-2 ring-blue-500 bg-blue-50' 
                       : 'hover:bg-gray-50'
                   }`}
-                  onClick={() => setConfig(prev => ({ ...prev, frequencia: option.value as any }))}
+                  onClick={() => setConfig(prev => ({ ...prev, frequencia: option.value as unknown }))}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-center gap-3">

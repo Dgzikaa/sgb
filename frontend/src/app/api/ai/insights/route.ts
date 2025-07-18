@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
@@ -40,7 +56,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao } = JSON.parse(userData);
+    const { bar_id, permissao } = JSON.parse(userData) as unknown;
 
     // Verificar permissÃ¡Âµes
     if (!['financeiro', 'admin'].includes(permissao)) {
@@ -52,7 +68,7 @@ export async function GET(request: NextRequest) {
     const rawParams = Object.fromEntries(searchParams.entries());
     
     // Converter tipos numÃ¡Â©ricos
-    const processedParams: any = { ...rawParams };
+    const processedParams: unknown = { ...rawParams };
     if (processedParams.page !== undefined && processedParams.page !== '') processedParams.page = Number(processedParams.page);
     if (processedParams.limit !== undefined && processedParams.limit !== '') processedParams.limit = Number(processedParams.limit);
     if (processedParams.confianca_minima !== undefined && processedParams.confianca_minima !== '') processedParams.confianca_minima = parseFloat(processedParams.confianca_minima);
@@ -120,17 +136,17 @@ export async function GET(request: NextRequest) {
     const stats = {
       total: count || 0,
       por_status: {
-        novo: insights?.filter((i: any) => i.status === 'novo').length || 0,
-        lido: insights?.filter((i: any) => i.status === 'lido').length || 0,
-        em_acao: insights?.filter((i: any) => i.status === 'em_acao').length || 0,
-        resolvido: insights?.filter((i: any) => i.status === 'resolvido').length || 0,
-        ignorado: insights?.filter((i: any) => i.status === 'ignorado').length || 0
+        novo: insights?.filter((i: unknown) => i.status === 'novo').length || 0,
+        lido: insights?.filter((i: unknown) => i.status === 'lido').length || 0,
+        em_acao: insights?.filter((i: unknown) => i.status === 'em_acao').length || 0,
+        resolvido: insights?.filter((i: unknown) => i.status === 'resolvido').length || 0,
+        ignorado: insights?.filter((i: unknown) => i.status === 'ignorado').length || 0
       },
       por_impacto: {
-        critico: insights?.filter((i: any) => i.impacto === 'critico').length || 0,
-        alto: insights?.filter((i: any) => i.impacto === 'alto').length || 0,
-        medio: insights?.filter((i: any) => i.impacto === 'medio').length || 0,
-        baixo: insights?.filter((i: any) => i.impacto === 'baixo').length || 0
+        critico: insights?.filter((i: unknown) => i.impacto === 'critico').length || 0,
+        alto: insights?.filter((i: unknown) => i.impacto === 'alto').length || 0,
+        medio: insights?.filter((i: unknown) => i.impacto === 'medio').length || 0,
+        baixo: insights?.filter((i: unknown) => i.impacto === 'baixo').length || 0
       }
     };
 
@@ -171,7 +187,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao, usuario_id } = JSON.parse(userData);
+    const { bar_id, permissao, usuario_id } = JSON.parse(userData) as unknown;
 
     // Verificar permissÃ¡Âµes
     if (!['financeiro', 'admin'].includes(permissao)) {
@@ -205,8 +221,8 @@ export async function PUT(request: NextRequest) {
 
     // Se mudando status para 'lido' pela primeira vez
     if (validatedData.status === 'lido' && existing.status === 'novo') {
-      (updatePayload as any).lido_por = usuario_id;
-      (updatePayload as any).lido_em = new Date().toISOString();
+      (updatePayload as unknown).lido_por = usuario_id;
+      (updatePayload as unknown).lido_em = new Date().toISOString();
     }
 
     // Atualizar insight
@@ -257,7 +273,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao, usuario_id } = JSON.parse(userData);
+    const { bar_id, permissao, usuario_id } = JSON.parse(userData) as unknown;
 
     // Verificar permissÃ¡Âµes
     if (!['financeiro', 'admin'].includes(permissao)) {

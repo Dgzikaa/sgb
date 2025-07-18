@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
@@ -115,14 +131,14 @@ export default function InstagramTrackingPage() {
             following: instagramAnalysis?.total_posts > 0 ? 
               Math.round(instagramAnalysis.daily_metrics[Object.keys(instagramAnalysis.daily_metrics)[0]]?.total_following || 0) : 0,
             posts_count: instagramAnalysis?.total_posts || 80,
-            total_likes: Object.values(instagramAnalysis?.daily_metrics || {}).reduce((sum: number, day: any) => sum + (day.total_likes || 0), 0) || 2428,
-            total_comments: Object.values(instagramAnalysis?.daily_metrics || {}).reduce((sum: number, day: any) => sum + (day.total_comments || 0), 0) || 193,
-            total_shares: Object.values(instagramAnalysis?.daily_metrics || {}).reduce((sum: number, day: any) => sum + (day.total_shares || 0), 0) || 0,
-            reach: Object.values(instagramAnalysis?.daily_metrics || {}).reduce((sum: number, day: any) => sum + (day.total_reach || 0), 0) || 28500,
-            impressions: Object.values(instagramAnalysis?.daily_metrics || {}).reduce((sum: number, day: any) => sum + (day.total_impressions || 0), 0) || 45200,
-            saves: Object.values(instagramAnalysis?.daily_metrics || {}).reduce((sum: number, day: any) => sum + (day.total_saves || 0), 0) || 156,
-            profile_visits: Object.values(instagramAnalysis?.daily_metrics || {}).reduce((sum: number, day: any) => sum + (day.total_profile_visits || 0), 0) || 892,
-            website_clicks: Object.values(instagramAnalysis?.daily_metrics || {}).reduce((sum: number, day: any) => sum + (day.total_website_clicks || 0), 0) || 45,
+            total_likes: Object.values(instagramAnalysis?.daily_metrics || {}).reduce((sum: number, day: unknown) => sum + (day.total_likes || 0), 0) || 2428,
+            total_comments: Object.values(instagramAnalysis?.daily_metrics || {}).reduce((sum: number, day: unknown) => sum + (day.total_comments || 0), 0) || 193,
+            total_shares: Object.values(instagramAnalysis?.daily_metrics || {}).reduce((sum: number, day: unknown) => sum + (day.total_shares || 0), 0) || 0,
+            reach: Object.values(instagramAnalysis?.daily_metrics || {}).reduce((sum: number, day: unknown) => sum + (day.total_reach || 0), 0) || 28500,
+            impressions: Object.values(instagramAnalysis?.daily_metrics || {}).reduce((sum: number, day: unknown) => sum + (day.total_impressions || 0), 0) || 45200,
+            saves: Object.values(instagramAnalysis?.daily_metrics || {}).reduce((sum: number, day: unknown) => sum + (day.total_saves || 0), 0) || 156,
+            profile_visits: Object.values(instagramAnalysis?.daily_metrics || {}).reduce((sum: number, day: unknown) => sum + (day.total_profile_visits || 0), 0) || 892,
+            website_clicks: Object.values(instagramAnalysis?.daily_metrics || {}).reduce((sum: number, day: unknown) => sum + (day.total_website_clicks || 0), 0) || 45,
             last_updated: new Date().toISOString()
           },
           variations: {
@@ -130,7 +146,7 @@ export default function InstagramTrackingPage() {
             followers_change_percent: variations.follower_growth_total > 0 ? 
               Math.round((variations.follower_growth_total / 36390) * 100 * 100) / 100 : 0,
             engagement_change: variations.daily_changes ? 
-              (Object.values(variations.daily_changes).slice(0, 1)[0] as any)?.total_interactions || 125 : 125,
+              (Object.values(variations.daily_changes).slice(0, 1)[0] as unknown)?.total_interactions || 125 : 125,
             reach_change: 0,
             trend_direction: variations.follower_growth_total > 0 ? 'growing' : 
                             variations.follower_growth_total < 0 ? 'declining' : 'stable'
@@ -149,7 +165,7 @@ export default function InstagramTrackingPage() {
             }
           }).slice(0, 7), // Ã¡Å¡ltimos 7 dias
           trends: {
-            growth_rate_7d: trends.find((t: any) => t.category === 'followers')?.value || 0.85,
+            growth_rate_7d: trends.find((t: unknown) => t.category === 'followers')?.value || 0.85,
             followers_growth_7d: variations.follower_growth_total || 31,
             engagement_growth_7d: 12.5,
             avg_daily_followers_change: Math.round((variations.follower_growth_total || 31) / parseInt(selectedPeriod)),

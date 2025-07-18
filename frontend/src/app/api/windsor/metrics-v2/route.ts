@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { windsorMultiAccountService } from '@/lib/windsor-multi-account-service'
 
@@ -19,7 +35,7 @@ export async function GET(request: NextRequest) {
       consolidated
     })
 
-    let data: any[] = []
+    let data: unknown[] = []
 
     if (consolidated) {
       // Métricas consolidadas de todas as empresas

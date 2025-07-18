@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
@@ -33,7 +49,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao } = JSON.parse(userData);
+    const { bar_id, permissao } = JSON.parse(userData) as unknown;
 
     // Verificar permissÃ¡Âµes
     if (!['funcionario', 'financeiro', 'admin'].includes(permissao)) {
@@ -43,7 +59,7 @@ export async function GET(request: NextRequest) {
     // Parse dos parÃ¡Â¢metros
     const url = new URL(request.url);
     const rawParams = Object.fromEntries(url.searchParams.entries());
-    const processedParams: any = { ...rawParams };
+    const processedParams: unknown = { ...rawParams };
     if (processedParams.periodo_dias !== undefined && processedParams.periodo_dias !== '') processedParams.periodo_dias = Number(processedParams.periodo_dias);
     if (processedParams.incluir_insights) processedParams.incluir_insights = processedParams.incluir_insights === 'true';
     if (processedParams.incluir_anomalias) processedParams.incluir_anomalias = processedParams.incluir_anomalias === 'true';
@@ -169,12 +185,12 @@ export async function GET(request: NextRequest) {
         total: totalInsights.data?.length || 0,
         criticos_pendentes: insightsCriticos.data?.length || 0,
         por_status: totalInsights.data
-          ? totalInsights.data.reduce((acc: Record<string, number>, i: any) => {
+          ? totalInsights.data.reduce((acc: Record<string, number>, i: unknown) => {
               acc[i.status] = (acc[i.status] || 0) + 1;
               return acc;
             }, {} as Record<string, number>) || {}
           : {},
-        por_impacto: totalInsights.data?.reduce((acc: Record<string, number>, i: any) => {
+        por_impacto: totalInsights.data?.reduce((acc: Record<string, number>, i: unknown) => {
           acc[i.impacto] = (acc[i.impacto] || 0) + 1;
           return acc;
         }, {} as Record<string, number>) || {},
@@ -215,13 +231,13 @@ export async function GET(request: NextRequest) {
 
       anomaliasResumo = {
         total: totalAnomalias.data?.length || 0,
-        ativas: totalAnomalias.data?.filter((a: any) => a.ainda_ativa).length || 0,
+        ativas: totalAnomalias.data?.filter((a: unknown) => a.ainda_ativa).length || 0,
         criticas_ativas: anomaliasAtivas.data?.length || 0,
-        por_severidade: totalAnomalias.data?.reduce((acc: Record<string, number>, a: any) => {
+        por_severidade: totalAnomalias.data?.reduce((acc: Record<string, number>, a: unknown) => {
           acc[a.severidade] = (acc[a.severidade] || 0) + 1;
           return acc;
         }, {} as Record<string, number>) || {},
-        por_status: totalAnomalias.data?.reduce((acc: Record<string, number>, a: any) => {
+        por_status: totalAnomalias.data?.reduce((acc: Record<string, number>, a: unknown) => {
           acc[a.status] = (acc[a.status] || 0) + 1;
           return acc;
         }, {} as Record<string, number>) || {},
@@ -300,13 +316,13 @@ export async function GET(request: NextRequest) {
           .limit(5)
       ]);
 
-      const roiPotencial = totalRecomendacoes.data?.reduce((acc: number, r: any) => acc + (r.roi_estimado || 0), 0) || 0;
+      const roiPotencial = totalRecomendacoes.data?.reduce((acc: number, r: unknown) => acc + (r.roi_estimado || 0), 0) || 0;
 
       recomendacoesResumo = {
         total: totalRecomendacoes.data?.length || 0,
         alta_prioridade: recomendacoesAlta.data?.length || 0,
         roi_potencial_total: roiPotencial,
-        por_status: totalRecomendacoes.data?.reduce((acc: Record<string, number>, r: any) => {
+        por_status: totalRecomendacoes.data?.reduce((acc: Record<string, number>, r: unknown) => {
           acc[r.status] = (acc[r.status] || 0) + 1;
           return acc;
         }, {} as Record<string, number>) || {},
@@ -335,8 +351,8 @@ export async function GET(request: NextRequest) {
         .gte('data_predicao', dataInicioStr)
         .order('data_predicao', { ascending: false });
 
-      const predicoesCriticas = predicoes?.filter((p: any) => p.gerar_alerta) || [];
-      const proximasSemana = predicoes?.filter((p: any) => {
+      const predicoesCriticas = predicoes?.filter((p: unknown) => p.gerar_alerta) || [];
+      const proximasSemana = predicoes?.filter((p: unknown) => {
         const dataAlvo = new Date(p.data_alvo);
         const umaSemana = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
         return dataAlvo <= umaSemana;
@@ -346,12 +362,12 @@ export async function GET(request: NextRequest) {
         total: predicoes?.length || 0,
         criticas: predicoesCriticas.length,
         proximas_semana: proximasSemana.length,
-        por_tipo: predicoes?.reduce((acc: Record<string, number>, p: any) => {
+        por_tipo: predicoes?.reduce((acc: Record<string, number>, p: unknown) => {
           acc[p.tipo_predicao] = (acc[p.tipo_predicao] || 0) + 1;
           return acc;
         }, {} as Record<string, number>) || {},
         confianca_media: predicoes?.length ? 
-          predicoes.reduce((acc: number, p: any) => acc + p.confianca, 0) / predicoes.length : 0,
+          predicoes.reduce((acc: number, p: unknown) => acc + p.confianca, 0) / predicoes.length : 0,
         criticas_detalhes: predicoesCriticas.slice(0, 3),
         proximas_detalhes: proximasSemana.slice(0, 3)
       };
@@ -382,10 +398,10 @@ export async function GET(request: NextRequest) {
         new Date(Date.now() + (configAgente.data.frequencia_analise_minutos * 60 * 1000)) : null,
       execucoes_recentes: logsRecentes.data?.length || 0,
       sucesso_rate: logsRecentes.data?.length ? 
-        (logsRecentes.data?.filter((l: any) => l.status === 'concluido').length || 0) / (logsRecentes.data?.length || 1) * 100 : 0,
+        (logsRecentes.data?.filter((l: unknown) => l.status === 'concluido').length || 0) / (logsRecentes.data?.length || 1) * 100 : 0,
       tempo_medio_execucao: logsRecentes.data?.length ?
-        logsRecentes.data.filter((l: any) => l.duracao_segundos).reduce((acc: number, l: any) => acc + l.duracao_segundos, 0) / 
-        logsRecentes.data.filter((l: any) => l.duracao_segundos).length : 0
+        logsRecentes.data.filter((l: unknown) => l.duracao_segundos).reduce((acc: number, l: unknown) => acc + l.duracao_segundos, 0) / 
+        logsRecentes.data.filter((l: unknown) => l.duracao_segundos).length : 0
     };
 
     // ========================================

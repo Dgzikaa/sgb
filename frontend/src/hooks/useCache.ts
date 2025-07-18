@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { useState, useEffect, useCallback } from 'react'
 import { cacheService } from '@/lib/redis-cache'
 
@@ -233,8 +249,8 @@ export function usePaginatedCache<T = any>(
 export function useFilteredCache<T = any>(
   type: CacheType,
   baseKey: string,
-  fetchFunction: (filters: Record<string, any>) => Promise<T>,
-  filters: Record<string, any>,
+  fetchFunction: (filters: Record<string, unknown>) => Promise<T>,
+  filters: Record<string, unknown>,
   options: UseCacheOptions = {}
 ) {
   const filterKey = Object.keys(filters)

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -33,7 +49,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Inserir em instagram_daily
-    const instagramRows = dailySummary.map((day: any) => ({
+    const instagramRows = dailySummary.map((day: unknown) => ({
       bar_id: barId,
       data_coleta: day.data_referencia,
       followers_count: day.instagram_followers ?? null,
@@ -93,7 +109,7 @@ export async function POST(request: NextRequest) {
       ads_error: adsError
     })
   } catch (error) {
-    return NextResponse.json({ success: false, error: (error as any).message }, { status: 500 })
+    return NextResponse.json({ success: false, error: (error as unknown).message }, { status: 500 })
   }
 } 
 

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -21,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     if (userData) {
       try {
-        const parsedUser = JSON.parse(decodeURIComponent(userData))
+        const parsedUser = JSON.parse(decodeURIComponent(userData) as unknown)
         barId = parsedUser.bar_id || 3
         console.log(`?? Usando bar_id: ${barId}`)
       } catch (e) {
@@ -146,7 +162,7 @@ export async function GET(request: NextRequest) {
 }
 
 // Processar dados da meta_daily_summary
-function processDailySummaryData(summaryData: any[], fallbackData: any) {
+function processDailySummaryData(summaryData: unknown[], fallbackData: unknown) {
   if (summaryData.length === 0 && fallbackData) {
     // Usar dados de fallback
     return {
@@ -156,7 +172,7 @@ function processDailySummaryData(summaryData: any[], fallbackData: any) {
                           (fallbackData.instagram?.posts_likes || 0) + (fallbackData.instagram?.posts_comments || 0),
         facebook_followers: fallbackData.facebook?.page_fans || 0,
         instagram_followers: fallbackData.instagram?.follower_count || 0,
-        campaigns_active: fallbackData.campaigns?.filter((c: any) => c.effective_status === 'ACTIVE').length || 0,
+        campaigns_active: fallbackData.campaigns?.filter((c: unknown) => c.effective_status === 'ACTIVE').length || 0,
         total_reach: (fallbackData.facebook?.page_reach || 0) + (fallbackData.instagram?.reach || 0)
       },
       daily_data: [{
@@ -164,7 +180,7 @@ function processDailySummaryData(summaryData: any[], fallbackData: any) {
         facebook_followers: fallbackData.facebook?.page_fans || 0,
         instagram_followers: fallbackData.instagram?.follower_count || 0,
         total_engagement: (fallbackData.facebook?.post_likes || 0) + (fallbackData.instagram?.posts_likes || 0),
-        campaigns_active: fallbackData.campaigns?.filter((c: any) => c.effective_status === 'ACTIVE').length || 0
+        campaigns_active: fallbackData.campaigns?.filter((c: unknown) => c.effective_status === 'ACTIVE').length || 0
       }],
       variations: {
         followers_change_today: 0,
@@ -173,8 +189,8 @@ function processDailySummaryData(summaryData: any[], fallbackData: any) {
       },
       campaigns_summary: {
         total_campaigns: fallbackData.campaigns?.length || 0,
-        active_campaigns: fallbackData.campaigns?.filter((c: any) => c.effective_status === 'ACTIVE').length || 0,
-        total_spend: fallbackData.campaigns?.reduce((sum: number, c: any) => sum + (c.spend || 0), 0) || 0
+        active_campaigns: fallbackData.campaigns?.filter((c: unknown) => c.effective_status === 'ACTIVE').length || 0,
+        total_spend: fallbackData.campaigns?.reduce((sum: number, c: unknown) => sum + (c.spend || 0), 0) || 0
       }
     }
   }
@@ -210,7 +226,7 @@ function processDailySummaryData(summaryData: any[], fallbackData: any) {
     total_clicks: latestData?.campaigns_total_clicks || 0
   }
 
-  const daily_data = summaryData.map((day: any) => ({
+  const daily_data = summaryData.map((day: unknown) => ({
     date: day.data_referencia,
     facebook_followers: day.facebook_followers,
     instagram_followers: day.instagram_followers,
@@ -233,7 +249,7 @@ function processDailySummaryData(summaryData: any[], fallbackData: any) {
 }
 
 // Processar dados de tendÃªncias
-function processTrendsData(trendsData: any[]) {
+function processTrendsData(trendsData: unknown[]) {
   if (trendsData.length === 0) {
     return {
       growth_rate_7d: 0,

@@ -7,6 +7,7 @@
 
 interface ItemResposta {
   item_id: string
+  id?: string // Para compatibilidade
   titulo: string
   tipo: 'texto' | 'numero' | 'sim_nao' | 'data' | 'assinatura' | 'foto_camera' | 'foto_upload' | 'avaliacao'
   obrigatorio: boolean
@@ -14,6 +15,7 @@ interface ItemResposta {
   observacoes?: string
   respondido: boolean
   esperado_positivo?: boolean // Para identificar problemas
+  opcoes?: { min?: number; max?: number } // Para itens numéricos
 }
 
 interface ScoreResult {
@@ -48,13 +50,34 @@ interface ScoreSecao {
   categoria: 'excelente' | 'bom' | 'atencao' | 'critico'
 }
 
+interface EstruturaSecao {
+  nome: string
+  itens: ItemResposta[]
+}
+
+interface EstruturaChecklist {
+  secoes: EstruturaSecao[]
+}
+
+interface ExecucaoChecklist {
+  respostas: { secoes: { itens: ItemResposta[] }[] }
+  estrutura_checklist: EstruturaChecklist
+  checklist?: {
+    estrutura: EstruturaChecklist
+  }
+}
+
+interface RespostasChecklist {
+  secoes: { itens: ItemResposta[] }[]
+}
+
 // =====================================================
 // 📊 FUNÇÃO PRINCIPAL DE CÁLCULO
 // =====================================================
 
-export function calcularScoreFinal(execucao: { respostas: { secoes: { itens: ItemResposta[] }[] }, estrutura_checklist: { secoes: { nome: string; itens: ItemResposta[] }[] } }): ScoreResult {
+export function calcularScoreFinal(execucao: ExecucaoChecklist): ScoreResult {
   const respostas = execucao.respostas || {}
-  const estrutura = execucao.estrutura_checklist || (execucao as any).checklist?.estrutura
+  const estrutura = execucao.estrutura_checklist || execucao.checklist?.estrutura
 
   if (!estrutura?.secoes || !Array.isArray(estrutura.secoes)) {
     return criarScoreVazio()
@@ -71,7 +94,7 @@ export function calcularScoreFinal(execucao: { respostas: { secoes: { itens: Ite
   let somaScores = 0
 
   // Calcular score por seção
-  estrutura.secoes.forEach((secao: any, secaoIndex: number) => {
+  estrutura.secoes.forEach((secao: EstruturaSecao) => {
     if (!secao.itens || !Array.isArray(secao.itens)) return
 
     const scoreSecao = calcularScoreSecao(secao, respostas, problemas)
@@ -114,8 +137,8 @@ export function calcularScoreFinal(execucao: { respostas: { secoes: { itens: Ite
 // =====================================================
 
 function calcularScoreSecao(
-  secao: any, 
-  respostas: any, 
+  secao: EstruturaSecao, 
+  respostas: RespostasChecklist, 
   problemas: ProblemIdenticado[]
 ): ScoreSecao {
   const nomeSecao = secao.nome || 'Seção sem nome'
@@ -126,7 +149,7 @@ function calcularScoreSecao(
   let problemasSecao = 0
   let somaScoreItens = 0
 
-  itens.forEach((item: any) => {
+  itens.forEach((item: ItemResposta) => {
     const resposta = encontrarResposta(item, respostas)
     const scoreItem = calcularScoreItem(item, resposta, nomeSecao, problemas)
     
@@ -160,9 +183,9 @@ function calcularScoreSecao(
 // =====================================================
 
 function calcularScoreItem(
-  item: any,
-  resposta: any,
-  nomeSecao: any,
+  item: ItemResposta,
+  resposta: ItemResposta | null,
+  nomeSecao: string,
   problemas: ProblemIdenticado[]
 ): { score: number, tem_problema: boolean } {
   
@@ -188,9 +211,9 @@ function calcularScoreItem(
 }
 
 function calcularScorePorTipo(
-  item: any,
-  resposta: any,
-  nomeSecao: any,
+  item: ItemResposta,
+  resposta: ItemResposta,
+  nomeSecao: string,
   problemas: ProblemIdenticado[]
 ): { score: number, tem_problema: boolean } {
   
@@ -199,28 +222,21 @@ function calcularScorePorTipo(
   switch (item.tipo) {
     case 'sim_nao':
       return calcularScoreSimNao(item, valor, nomeSecao, problemas)
-    
     case 'avaliacao':
       return calcularScoreAvaliacao(item, valor, nomeSecao, problemas)
-    
     case 'numero':
       return calcularScoreNumero(item, valor, nomeSecao, problemas)
-    
-    case 'texto':
-      return calcularScoreTexto(item, valor, nomeSecao, problemas)
-    
-    case 'data':
-      return calcularScoreData(item, valor, nomeSecao, problemas)
-    
-    case 'foto_camera':
-    case 'foto_upload':
-      return calcularScoreFoto(item, valor, nomeSecao, problemas)
-    
-    case 'assinatura':
-      return calcularScoreAssinatura(item, valor, nomeSecao, problemas)
-    
+          case 'texto':
+        return calcularScoreTexto(item, valor)
+          case 'data':
+        return calcularScoreData(item, valor)
+          case 'foto_camera':
+      case 'foto_upload':
+        return calcularScoreFoto(item, valor)
+          case 'assinatura':
+        return calcularScoreAssinatura(item, valor)
     default:
-      return { score: 100, tem_problema: false }
+      return { score: 50, tem_problema: false }
   }
 }
 
@@ -229,9 +245,9 @@ function calcularScorePorTipo(
 // =====================================================
 
 function calcularScoreSimNao(
-  item: any,
-  valor: any,
-  nomeSecao: any,
+  item: ItemResposta,
+  valor: string | number | boolean | null,
+  nomeSecao: string,
   problemas: ProblemIdenticado[]
 ): { score: number, tem_problema: boolean } {
   
@@ -276,13 +292,13 @@ function calcularScoreSimNao(
 }
 
 function calcularScoreAvaliacao(
-  item: any,
-  valor: any,
-  nomeSecao: any,
+  item: ItemResposta,
+  valor: string | number | boolean | null,
+  nomeSecao: string,
   problemas: ProblemIdenticado[]
 ): { score: number, tem_problema: boolean } {
   
-  const nota = parseFloat(valor) || 0
+  const nota = parseFloat(String(valor)) || 0
   
   if (nota <= 2) {
     problemas.push({
@@ -305,13 +321,13 @@ function calcularScoreAvaliacao(
 }
 
 function calcularScoreNumero(
-  item: any,
-  valor: any,
-  nomeSecao: any,
+  item: ItemResposta,
+  valor: string | number | boolean | null,
+  nomeSecao: string,
   problemas: ProblemIdenticado[]
 ): { score: number, tem_problema: boolean } {
   
-  const numero = parseFloat(valor) || 0
+  const numero = parseFloat(String(valor)) || 0
   const opcoes = item.opcoes || {}
   
   if (opcoes.min !== undefined && numero < opcoes.min) {
@@ -344,13 +360,11 @@ function calcularScoreNumero(
 }
 
 function calcularScoreTexto(
-  item: any,
-  valor: any,
-  nomeSecao: any,
-  problemas: ProblemIdenticado[]
+  _item: ItemResposta,
+  valor: string | number | boolean | null
 ): { score: number, tem_problema: boolean } {
   
-  const texto = (valor || '').toString().trim()
+  const texto = String(valor || '').trim()
   
   if (texto.length === 0) {
     return { score: 0, tem_problema: true }
@@ -364,17 +378,15 @@ function calcularScoreTexto(
 }
 
 function calcularScoreData(
-  item: any,
-  valor: any,
-  nomeSecao: any,
-  problemas: ProblemIdenticado[]
+  _item: ItemResposta,
+  valor: string | number | boolean | null
 ): { score: number, tem_problema: boolean } {
   
   if (!valor) {
     return { score: 0, tem_problema: true }
   }
   
-  const data = new Date(valor)
+  const data = new Date(String(valor))
   if (isNaN(data.getTime())) {
     return { score: 0, tem_problema: true }
   }
@@ -383,10 +395,8 @@ function calcularScoreData(
 }
 
 function calcularScoreFoto(
-  item: any,
-  valor: any,
-  nomeSecao: any,
-  problemas: ProblemIdenticado[]
+  item: ItemResposta,
+  valor: string | number | boolean | null
 ): { score: number, tem_problema: boolean } {
   
   if (!valor || (Array.isArray(valor) && valor.length === 0)) {
@@ -400,13 +410,11 @@ function calcularScoreFoto(
 }
 
 function calcularScoreAssinatura(
-  item: any,
-  valor: any,
-  nomeSecao: any,
-  problemas: ProblemIdenticado[]
+  item: ItemResposta,
+  valor: string | number | boolean | null
 ): { score: number, tem_problema: boolean } {
   
-  if (!valor || valor.length < 10) {
+  if (!valor || String(valor).length < 10) {
     if (item.obrigatorio) {
       return { score: 0, tem_problema: true }
     }
@@ -446,8 +454,8 @@ function identificarItemNegativo(titulo: string): boolean {
 // =====================================================
 
 function determinarCategoria(score: number, problemas: ProblemIdenticado[]): 'excelente' | 'bom' | 'atencao' | 'critico' {
-  const problemasAltos = problemas.filter((p: any) => p.impacto === 'alto').length
-  const problemasCriticos = problemas.filter((p: any) => p.tipo_problema === 'esperado_sim_marcado_nao').length
+  const problemasAltos = problemas.filter((p: ProblemIdenticado) => p.impacto === 'alto').length
+  const problemasCriticos = problemas.filter((p: ProblemIdenticado) => p.tipo_problema === 'esperado_sim_marcado_nao').length
   
   if (problemasCriticos > 0 || problemasAltos >= 3) {
     return 'critico'
@@ -478,12 +486,12 @@ function determinarCategoriaSecao(score: number, problemas: number): 'excelente'
 function gerarRecomendacoes(problemas: ProblemIdenticado[], score: number): string[] {
   const recomendacoes: string[] = []
   
-  const problemasCriticos = problemas.filter((p: any) => p.tipo_problema === 'esperado_sim_marcado_nao')
+  const problemasCriticos = problemas.filter((p: ProblemIdenticado) => p.tipo_problema === 'esperado_sim_marcado_nao')
   if (problemasCriticos.length > 0) {
     recomendacoes.push(`🔴 AÇÃO IMEDIATA: ${problemasCriticos.length} item(ns) crítico(s) identificado(s)`)
   }
   
-  const itensObrigatorios = problemas.filter((p: any) => p.tipo_problema === 'obrigatorio_nao_preenchido')
+  const itensObrigatorios = problemas.filter((p: ProblemIdenticado) => p.tipo_problema === 'obrigatorio_nao_preenchido')
   if (itensObrigatorios.length > 0) {
     recomendacoes.push(`🔴 Completar ${itensObrigatorios.length} item(ns) obrigatório(s) pendente(s)`)
   }
@@ -503,12 +511,12 @@ function gerarRecomendacoes(problemas: ProblemIdenticado[], score: number): stri
 // 📊 FUNÇÕES UTILITÁRIAS
 // =====================================================
 
-function encontrarResposta(item: ItemResposta, respostas: { secoes: { itens: ItemResposta[] }[] }): ItemResposta | null {
+function encontrarResposta(item: ItemResposta, respostas: RespostasChecklist): ItemResposta | null {
   if (!respostas?.secoes) return null
   
   for (const secao of respostas.secoes) {
     if (secao.itens) {
-      const resposta = secao.itens.find((r: any) => 
+      const resposta = secao.itens.find((r: ItemResposta) => 
         r.item_id === item.item_id || r.titulo === item.titulo
       )
       if (resposta) return resposta
@@ -534,7 +542,7 @@ function criarScoreVazio(): ScoreResult {
 }
 
 // =====================================================
-// �� FUNÇÕES DE ANÁLISE ADICIONAL
+//  FUNÇÕES DE ANÁLISE ADICIONAL
 // =====================================================
 
 export function obterCorCategoria(categoria: string): string {
@@ -559,7 +567,7 @@ export function obterIconeCategoria(categoria: string): string {
 
 export function obterResumoScore(scoreResult: ScoreResult): string {
   const { score_total, categoria, problemas_identificados } = scoreResult
-  const problemasCriticos = problemas_identificados.filter((p: any) => p.impacto === 'alto').length
+  const problemasCriticos = problemas_identificados.filter((p: ProblemIdenticado) => p.impacto === 'alto').length
   
   if (categoria === 'excelente') {
     return `Score excelente: ${score_total}/100 📊`

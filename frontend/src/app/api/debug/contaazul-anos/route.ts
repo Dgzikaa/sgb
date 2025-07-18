@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -34,7 +50,7 @@ export async function GET(request: NextRequest) {
 
     // Processar anos das receitas
     const anosReceitas = new Map()
-    receitas?.forEach((item: any) => {
+    receitas?.forEach((item: unknown) => {
       const data = item.data_competencia || item.data_vencimento || item.data_pagamento
       if (data) {
         const ano = new Date(data).getFullYear()
@@ -49,7 +65,7 @@ export async function GET(request: NextRequest) {
 
     // Processar anos das despesas
     const anosDespesas = new Map()
-    despesas?.forEach((item: any) => {
+    despesas?.forEach((item: unknown) => {
       const data = item.data_competencia || item.data_vencimento || item.data_pagamento
       if (data) {
         const ano = new Date(data).getFullYear()

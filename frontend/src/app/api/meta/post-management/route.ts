@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -20,7 +36,7 @@ export async function GET(request: NextRequest) {
     
     if (userData) {
       try {
-        const parsedUser = JSON.parse(decodeURIComponent(userData))
+        const parsedUser = JSON.parse(decodeURIComponent(userData) as unknown)
         barId = parsedUser.bar_id || 3
         console.log(`Ã°Å¸â€˜Â¤ Usando bar_id: ${barId}`)
       } catch (e) {
@@ -52,10 +68,10 @@ export async function GET(request: NextRequest) {
 
     try {
       const managementData = {
-        facebook_posts: [] as any[],
-        instagram_posts: [] as any[],
-        recent_comments: [] as any[],
-        pending_responses: [] as any[],
+        facebook_posts: [] as unknown[],
+        instagram_posts: [] as unknown[],
+        recent_comments: [] as unknown[],
+        pending_responses: [] as unknown[],
         engagement_summary: {
           total_posts: 0,
           total_comments: 0,
@@ -162,17 +178,17 @@ export async function GET(request: NextRequest) {
       
       allPosts.forEach((post: FacebookPost | InstagramPost) => {
         ((post.comments && Array.isArray(post.comments.data)) ? post.comments.data : []).forEach((comment: FacebookComment | InstagramComment) => {
-          if (((comment as any).needs_response && !(comment as any).has_response && !(comment as any).has_replies) || 
-              ((comment as any).message?.includes('dúvida') || (comment as any).text?.includes('dúvida'))) {
+          if (((comment as unknown).needs_response && !(comment as unknown).has_response && !(comment as unknown).has_replies) || 
+              ((comment as unknown).message?.includes('dúvida') || (comment as unknown).text?.includes('dúvida'))) {
             managementData.pending_responses.push({
               post_id: post.id,
               post_platform: post.platform,
               post_preview: post.message?.substring(0, 50) || post.caption?.substring(0, 50) || '',
               comment_id: comment.id,
-              comment_text: (comment as any).message || (comment as any).text,
-              comment_from: (comment as any).from,
-              comment_time: (comment as any).created_time || (comment as any).timestamp,
-              priority: ((comment as any).message?.includes('problema') || (comment as any).text?.includes('problema')) ? 'high' : 'medium'
+              comment_text: (comment as unknown).message || (comment as unknown).text,
+              comment_from: (comment as unknown).from,
+              comment_time: (comment as unknown).created_time || (comment as unknown).timestamp,
+              priority: ((comment as unknown).message?.includes('problema') || (comment as unknown).text?.includes('problema')) ? 'high' : 'medium'
             })
           }
         })
@@ -180,13 +196,13 @@ export async function GET(request: NextRequest) {
 
       // 4. BUSCAR COMENTÃ¡ÂRIOS RECENTES GERAIS
       managementData.recent_comments = allPosts
-        .flatMap((post: any) => (post.comments?.data || []).map((comment: any) => ({
+        .flatMap((post: unknown) => (post.comments?.data || []).map((comment: unknown) => ({
           ...comment,
           post_id: post.id,
           post_platform: post.platform,
           post_preview: post.message?.substring(0, 30) || post.caption?.substring(0, 30) || ''
         })))
-        .sort((a: any, b: any) => {
+        .sort((a: unknown, b: unknown) => {
           const aTime = (a.created_time || a.timestamp);
           const bTime = (b.created_time || b.timestamp);
           return new Date(bTime).getTime() - new Date(aTime).getTime();
@@ -196,14 +212,14 @@ export async function GET(request: NextRequest) {
       // 5. CALCULAR RESUMO DE ENGAJAMENTO
       managementData.engagement_summary = {
         total_posts: allPosts.length,
-        total_comments: allPosts.reduce((sum: number, post: any) => sum + (post.comments?.data?.length || 0), 0),
+        total_comments: allPosts.reduce((sum: number, post: unknown) => sum + (post.comments?.data?.length || 0), 0),
         pending_comments: managementData.pending_responses.length,
         response_rate: managementData.pending_responses.length > 0 ? 
           ((managementData.engagement_summary.total_comments - managementData.pending_responses.length) / managementData.engagement_summary.total_comments) * 100 : 100
       }
 
       // 6. GERAR INSIGHTS DE GESTÃ¡Æ’O
-      const managementInsights = [] as any[]
+      const managementInsights = [] as unknown[]
 
       if (managementData.pending_responses.length > 5) {
         managementInsights.push({
@@ -248,21 +264,21 @@ export async function GET(request: NextRequest) {
       })
 
     } catch (metaError) {
-      console.log(`Å¡Â Ã¯Â¸Â Erro ao buscar dados de gestÃ¡Â£o: ${(metaError as any).message}`)
+      console.log(`Å¡Â Ã¯Â¸Â Erro ao buscar dados de gestÃ¡Â£o: ${(metaError as unknown).message}`)
       
       return NextResponse.json({
         success: true,
         management_data: {
-          facebook_posts: [] as any[],
-          instagram_posts: [] as any[],
-          recent_comments: [] as any[],
-          pending_responses: [] as any[],
+          facebook_posts: [] as unknown[],
+          instagram_posts: [] as unknown[],
+          recent_comments: [] as unknown[],
+          pending_responses: [] as unknown[],
           engagement_summary: { total_posts: 0, total_comments: 0, pending_comments: 0, response_rate: 0 }
         },
-        insights: [] as any[],
+        insights: [] as unknown[],
         metadata: {
           data_type: 'no_management_data',
-          error: (metaError as any).message,
+          error: (metaError as unknown).message,
           note: 'Para gestÃ¡Â£o de posts, Ã¡Â© necessÃ¡Â¡rio ter posts recentes e permissÃ¡Âµes de comentÃ¡Â¡rios.'
         },
         timestamp: new Date().toISOString()
@@ -270,11 +286,11 @@ export async function GET(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('ÂÅ’ Erro na gestÃ¡Â£o de posts:', (error as any).message)
+    console.error('ÂÅ’ Erro na gestÃ¡Â£o de posts:', (error as unknown).message)
     return NextResponse.json({ 
       success: false,
       error: 'Erro na gestÃ¡Â£o de posts',
-      details: (error as any).message
+      details: (error as unknown).message
     }, { status: 500 })
   }
 }
@@ -293,7 +309,7 @@ export async function POST(request: NextRequest) {
     
     if (userData) {
       try {
-        const parsedUser = JSON.parse(decodeURIComponent(userData))
+        const parsedUser = JSON.parse(decodeURIComponent(userData) as unknown)
         barId = parsedUser.bar_id || 3
         console.log(`Ã°Å¸â€˜Â¤ Usando bar_id: ${barId}`)
       } catch (e) {
@@ -349,7 +365,7 @@ export async function POST(request: NextRequest) {
         responseResult = await facebookResponse.json()
 
         if (!facebookResponse.ok) {
-          throw new Error(`Erro Facebook: ${(responseResult as any).error?.message}`)
+          throw new Error(`Erro Facebook: ${(responseResult as unknown).error?.message}`)
         }
       } else if (platform === 'instagram') {
         // Responder comentÃ¡Â¡rio do Instagram
@@ -369,7 +385,7 @@ export async function POST(request: NextRequest) {
         responseResult = await instagramResponse.json()
 
         if (!instagramResponse.ok) {
-          throw new Error(`Erro Instagram: ${(responseResult as any).error?.message}`)
+          throw new Error(`Erro Instagram: ${(responseResult as unknown).error?.message}`)
         }
       } else {
         throw new Error('Plataforma nÃ£o suportada')
@@ -391,22 +407,22 @@ export async function POST(request: NextRequest) {
       })
 
     } catch (metaError) {
-      console.error(`ÂÅ’ Erro ao responder comentÃ¡Â¡rio: ${(metaError as any).message}`)
+      console.error(`ÂÅ’ Erro ao responder comentÃ¡Â¡rio: ${(metaError as unknown).message}`)
       
       return NextResponse.json({
         success: false,
         error: 'Erro ao enviar resposta',
-        details: (metaError as any).message,
+        details: (metaError as unknown).message,
         note: 'Verifique se vocÃª tem permissÃµes para responder comentÃ¡Â¡rios nesta plataforma.'
       }, { status: 400 })
     }
 
   } catch (error) {
-    console.error('ÂÅ’ Erro ao processar resposta:', (error as any).message)
+    console.error('ÂÅ’ Erro ao processar resposta:', (error as unknown).message)
     return NextResponse.json({ 
       success: false,
       error: 'Erro ao processar resposta',
-      details: (error as any).message
+      details: (error as unknown).message
     }, { status: 500 })
   }
 } 
@@ -416,8 +432,8 @@ interface FacebookComment {
   id: string;
   message: string;
   created_time: string;
-  from: any;
-  parent?: any;
+  from: unknown;
+  parent?: unknown;
   has_response?: boolean;
   needs_response?: boolean;
 }
@@ -436,14 +452,14 @@ interface FacebookPost {
   comments?: { data: FacebookComment[] };
   shares?: { count: number };
   reactions?: { summary: { total_count: number } };
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface InstagramComment {
   id: string;
   text: string;
   timestamp: string;
-  from: any;
+  from: unknown;
   replies?: { data: InstagramComment[] };
   has_replies?: boolean;
   needs_response?: boolean;
@@ -461,6 +477,6 @@ interface InstagramPost {
   comments_count?: number;
   comments?: { data: InstagramComment[] };
   insights?: { data: { name: string; values: { value: number }[] }[] };
-  [key: string]: any;
+  [key: string]: unknown;
 } 
 

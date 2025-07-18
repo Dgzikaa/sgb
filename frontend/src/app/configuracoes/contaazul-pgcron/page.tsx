@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
@@ -11,8 +27,8 @@ import { useBarContext } from '@/contexts/BarContext'
 
 interface JobStatus {
   success: boolean
-  activeJobs: any[]
-  recentRuns: any[]
+  activeJobs: unknown[]
+  recentRuns: unknown[]
   hasActiveJob: boolean
   edgeFunction: {
     available: boolean
@@ -29,7 +45,7 @@ interface JobStatus {
 interface TestResult {
   success: boolean
   message: string
-  result?: any
+  result?: unknown
   status?: number
 }
 

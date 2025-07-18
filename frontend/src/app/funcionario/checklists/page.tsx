@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
@@ -59,12 +75,12 @@ interface ChecklistItem {
   descricao?: string
   tipo: 'texto' | 'numero' | 'sim_nao' | 'data' | 'assinatura' | 'foto_camera' | 'foto_upload' | 'avaliacao'
   obrigatorio: boolean
-  valor?: any
+  valor?: unknown
   observacoes?: string
   status: 'pendente' | 'preenchido'
   condicional?: {
     dependeDe: string
-    valor: any
+    valor: unknown
   }
   opcoes?: {
     placeholder?: string
@@ -411,7 +427,7 @@ export default function ChecklistsFuncionario() {
     setTempoInicio(new Date())
   }
 
-  const atualizarItem = (secaoId: string, itemId: string, valor: any, observacoes?: string) => {
+  const atualizarItem = (secaoId: string, itemId: string, valor: unknown, observacoes?: string) => {
     if (!checklistAtivo) return
 
     const novoChecklist = { ...checklistAtivo }
@@ -524,7 +540,7 @@ export default function ChecklistsFuncionario() {
       
     } catch (error) {
       console.error('Erro ao enviar checklist:', error)
-      alert('Erro ao enviar: ' + (error as any).message)
+      alert('Erro ao enviar: ' + (error as unknown).message)
     } finally {
       setLoading(false)
     }
@@ -599,7 +615,7 @@ export default function ChecklistsFuncionario() {
   }
 
   // Função para processar upload de foto
-  const handleFotoUpload = (secaoId: string, itemId: string, result: any) => {
+  const handleFotoUpload = (secaoId: string, itemId: string, result: unknown) => {
     atualizarItem(secaoId, itemId, result.url || result.filename)
     console.log('Foto enviada:', result)
   }
@@ -613,7 +629,7 @@ export default function ChecklistsFuncionario() {
   }
 
   // Função para processar assinatura capturada
-  const handleAssinaturaCapturada = (result: any) => {
+  const handleAssinaturaCapturada = (result: unknown) => {
     console.log('handleAssinaturaCapturada chamada', { result, itemAssinaturaAtual })
     
     if (!itemAssinaturaAtual) {
@@ -643,7 +659,7 @@ export default function ChecklistsFuncionario() {
   }
 
   const renderCampoItem = (item: ChecklistItem, secaoId: string) => {
-    const atualizar = (valor: any, obs?: string) => atualizarItem(secaoId, item.id, valor, obs)
+    const atualizar = (valor: unknown, obs?: string) => atualizarItem(secaoId, item.id, valor, obs)
 
     return (
       <div className="space-y-3">

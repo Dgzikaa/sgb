@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect, useMemo, Fragment } from 'react';
@@ -78,7 +94,7 @@ const GRUPOS = [
   }
 ];
 
-const CATEGORIA_ICONS: Record<string, any> = {
+const CATEGORIA_ICONS: Record<string, unknown> = {
   'Stone Crédito': <DollarSign className="w-4 h-4 text-blue-500 dark:text-blue-300" />,
   'Stone Débito': <DollarSign className="w-4 h-4 text-blue-400 dark:text-blue-200" />,
   'Stone Pix': <DollarSign className="w-4 h-4 text-green-500 dark:text-green-300" />,
@@ -123,7 +139,7 @@ function Spinner() {
 }
 
 // 3. Modal de drilldown
-function DrilldownModal({ open, onClose, categoria, grupo, dados }: { open: boolean, onClose: () => void, categoria?: string, grupo?: string, dados: any[] }) {
+function DrilldownModal({ open, onClose, categoria, grupo, dados }: { open: boolean, onClose: () => void, categoria?: string, grupo?: string, dados: unknown[] }) {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -210,7 +226,7 @@ export default function TabelaDesempenhoPage() {
       // ---
       if (!selectedBar?.id) return;
       const { data_inicio, data_fim } = getPeriodoRange(periodo);
-      const body: any = {
+      const body: unknown = {
         bar_id: 3, // Forçado para debug/validação
         page,
         pageSize,
@@ -272,7 +288,7 @@ export default function TabelaDesempenhoPage() {
     setExportando(true);
     setTimeout(() => {
       const header = ['Grupo', 'Categoria', 'Valor Real', 'Meta', '% do Total'];
-      const rows: any[] = [];
+      const rows: unknown[] = [];
       gruposUnicos.forEach(grupo => {
         dadosPorGrupo[grupo].forEach(linha => {
           if (mesesSelecionados.length && !mesesSelecionados.includes('all') && !mesesSelecionados.includes(linha.mes_ano)) return;
@@ -290,7 +306,7 @@ export default function TabelaDesempenhoPage() {
       });
       if (tipo === 'csv') {
         let csv = header.join(';') + '\n';
-        csv += rows.map((r: any) => r.join(';')).join('\n');
+        csv += rows.map((r: unknown) => r.join(';')).join('\n');
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         saveAs(blob, 'tabela_desempenho.csv');
       } else {

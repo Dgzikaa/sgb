@@ -161,7 +161,7 @@ export class MilestonesService {
     try {
       const stored = localStorage.getItem('sgb_achieved_milestones')
       if (stored) {
-        const milestones: string[] = JSON.parse(stored)
+        const milestones: string[] = JSON.parse(stored) as unknown
         this.achieved_milestones = new Set(milestones)
       }
     } catch (error) {

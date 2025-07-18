@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import DiscordChecklistService from '@/lib/discord-checklist-service'
@@ -68,7 +84,7 @@ export async function POST(request: NextRequest) {
 
     // 2. Salvar respostas individuais
     if (respostas && Array.isArray(respostas) && respostas.length > 0) {
-      const respostasFormatadas = respostas.map((resposta: any) => ({
+      const respostasFormatadas = respostas.map((resposta: unknown) => ({
         execucao_id: execucao.id,
         item_id: resposta.item_id,
         valor: resposta.valor,
@@ -94,7 +110,7 @@ export async function POST(request: NextRequest) {
     try {
       const { calcularScoreFinal } = await import('@/lib/checklist-scoring')
       const mockExecucao = {
-        respostas: { secoes: respostas.map((r: any) => ({ itens: [r] })) },
+        respostas: { secoes: respostas.map((r: unknown) => ({ itens: [r] })) },
         estrutura_checklist: { secoes: [] } // Estrutura simplificada para compatibilidade
       }
       scoreResult = calcularScoreFinal(mockExecucao)
@@ -169,7 +185,7 @@ export async function POST(request: NextRequest) {
     console.error('ÂÅ’ Erro na API checklist-execucoes:', error)
     return NextResponse.json({
       error: 'Erro interno do servidor',
-      details: (error as any).message
+      details: (error as unknown).message
     }, { status: 500 })
   }
 }
@@ -232,7 +248,7 @@ export async function GET(request: NextRequest) {
     console.error('ÂÅ’ Erro na API GET checklist-execucoes:', error)
     return NextResponse.json({
       error: 'Erro interno do servidor',
-      details: (error as any).message
+      details: (error as unknown).message
     }, { status: 500 })
   }
 } 

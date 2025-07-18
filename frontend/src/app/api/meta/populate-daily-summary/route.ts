@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -17,7 +33,7 @@ interface FacebookMetric {
   post_shares?: number;
   page_reach?: number;
   page_impressions?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface InstagramMetric {
@@ -28,7 +44,7 @@ interface InstagramMetric {
   posts_comments?: number;
   reach?: number;
   impressions?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Campaign {
@@ -38,7 +54,7 @@ interface Campaign {
   impressions?: number;
   clicks?: number;
   conversions?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export async function POST(request: NextRequest) {

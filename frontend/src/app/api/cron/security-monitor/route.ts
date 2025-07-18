@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { securityMonitor } from '@/lib/security-monitor'
 import { createClient } from '@supabase/supabase-js'
@@ -90,24 +106,24 @@ export async function GET(request: NextRequest) {
 }
 
 // Analisar padrÃ¡Âµes suspeitos
-async function analyzeSuspiciousPatterns(events: any[]) {
+async function analyzeSuspiciousPatterns(events: unknown[]) {
   const patterns = []
   
   // MÃ¡Âºltiplas tentativas de login do mesmo IP
-  const loginAttempts = events.filter((e: any) => e.event_type === 'failed_login')
+  const loginAttempts = events.filter((e: unknown) => e.event_type === 'failed_login')
   const ipGroups = groupByIP(loginAttempts)
   
   for (const [ip, attempts] of Object.entries(ipGroups)) {
-    if ((attempts as any[]).length >= 3) {
+    if ((attempts as unknown[]).length >= 3) {
       patterns.push({
         level: 'critical' as const,
         category: 'auth' as const,
         event_type: 'brute_force_detected',
         ip_address: ip,
-        user_agent: (attempts as any[])[0]?.user_agent || 'unknown',
+        user_agent: (attempts as unknown[])[0]?.user_agent || 'unknown',
         endpoint: '/api/auth/login',
         details: { 
-          attempt_count: (attempts as any[]).length,
+          attempt_count: (attempts as unknown[]).length,
           time_window: '5_minutes',
           pattern: 'brute_force'
         },
@@ -118,22 +134,22 @@ async function analyzeSuspiciousPatterns(events: any[]) {
 
   // MÃ¡Âºltiplas requisiÃ¡Â§Ã¡Âµes para endpoints sensÃ¡Â­veis
   const sensitiveEndpoints = ['/api/usuarios', '/api/admin', '/api/security']
-  const sensitiveRequests = events.filter((e: any) => 
-    sensitiveEndpoints.some((endpoint: any) => e.endpoint?.includes(endpoint))
+  const sensitiveRequests = events.filter((e: unknown) => 
+    sensitiveEndpoints.some((endpoint: unknown) => e.endpoint?.includes(endpoint))
   )
   
   const endpointGroups = groupByEndpoint(sensitiveRequests)
   for (const [endpoint, requests] of Object.entries(endpointGroups)) {
-    if ((requests as any[]).length >= 10) {
+    if ((requests as unknown[]).length >= 10) {
       patterns.push({
         level: 'warning' as const,
         category: 'api_abuse' as const,
         event_type: 'endpoint_abuse_detected',
-        ip_address: (requests as any[])[0]?.ip_address || 'unknown',
-        user_agent: (requests as any[])[0]?.user_agent || 'unknown',
+        ip_address: (requests as unknown[])[0]?.ip_address || 'unknown',
+        user_agent: (requests as unknown[])[0]?.user_agent || 'unknown',
         endpoint: endpoint,
         details: { 
-          request_count: (requests as any[]).length,
+          request_count: (requests as unknown[]).length,
           time_window: '5_minutes',
           pattern: 'endpoint_abuse'
         },
@@ -146,10 +162,10 @@ async function analyzeSuspiciousPatterns(events: any[]) {
 }
 
 // Verificar IPs suspeitos
-async function checkSuspiciousIPs(events: any[]) {
+async function checkSuspiciousIPs(events: unknown[]) {
   const ipCounts = new Map()
   
-  events.forEach((event: any) => {
+  events.forEach((event: unknown) => {
     if (event.ip_address) {
       ipCounts.set(event.ip_address, (ipCounts.get(event.ip_address) || 0) + 1)
     }
@@ -222,7 +238,7 @@ async function generateSystemEvents() {
 }
 
 // Calcular mÃ¡Â©tricas diÃ¡Â¡rias
-async function calculateDailyMetrics(supabase: any) {
+async function calculateDailyMetrics(supabase: unknown) {
   const today = new Date()
   const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate())
   
@@ -241,19 +257,19 @@ async function calculateDailyMetrics(supabase: any) {
   const metrics = {
     date: today.toISOString().split('T')[0],
     total_events: events.length,
-    critical_events: events.filter((e: any) => e.level === 'critical').length,
-    warning_events: events.filter((e: any) => e.level === 'warning').length,
-    info_events: events.filter((e: any) => e.level === 'info').length,
-    auth_events: events.filter((e: any) => e.category === 'auth').length,
-    access_events: events.filter((e: any) => e.category === 'access').length,
-    injection_events: events.filter((e: any) => e.category === 'injection').length,
-    rate_limit_events: events.filter((e: any) => e.category === 'rate_limit').length,
-    api_abuse_events: events.filter((e: any) => e.category === 'api_abuse').length,
-    backup_events: events.filter((e: any) => e.category === 'backup').length,
-    system_events: events.filter((e: any) => e.category === 'system').length,
-    unique_ips: new Set(events.map((e: any) => e.ip_address).filter(Boolean)).size,
-    failed_logins: events.filter((e: any) => e.event_type === 'failed_login').length,
-    blocked_ips: events.filter((e: any) => e.event_type === 'ip_blocked').length
+    critical_events: events.filter((e: unknown) => e.level === 'critical').length,
+    warning_events: events.filter((e: unknown) => e.level === 'warning').length,
+    info_events: events.filter((e: unknown) => e.level === 'info').length,
+    auth_events: events.filter((e: unknown) => e.category === 'auth').length,
+    access_events: events.filter((e: unknown) => e.category === 'access').length,
+    injection_events: events.filter((e: unknown) => e.category === 'injection').length,
+    rate_limit_events: events.filter((e: unknown) => e.category === 'rate_limit').length,
+    api_abuse_events: events.filter((e: unknown) => e.category === 'api_abuse').length,
+    backup_events: events.filter((e: unknown) => e.category === 'backup').length,
+    system_events: events.filter((e: unknown) => e.category === 'system').length,
+    unique_ips: new Set(events.map((e: unknown) => e.ip_address).filter(Boolean)).size,
+    failed_logins: events.filter((e: unknown) => e.event_type === 'failed_login').length,
+    blocked_ips: events.filter((e: unknown) => e.event_type === 'ip_blocked').length
   }
 
   // Inserir ou atualizar mÃ¡Â©tricas do dia
@@ -263,8 +279,8 @@ async function calculateDailyMetrics(supabase: any) {
 }
 
 // Helpers
-function groupByIP(events: any[]) {
-  return events.reduce((groups: any, event: any) => {
+function groupByIP(events: unknown[]) {
+  return events.reduce((groups: unknown, event: unknown) => {
     const ip = event.ip_address || 'unknown'
     if (!groups[ip]) groups[ip] = []
     groups[ip].push(event)
@@ -272,8 +288,8 @@ function groupByIP(events: any[]) {
   }, {} as Record<string, any[]>)
 }
 
-function groupByEndpoint(events: any[]) {
-  return events.reduce((groups: any, event: any) => {
+function groupByEndpoint(events: unknown[]) {
+  return events.reduce((groups: unknown, event: unknown) => {
     const endpoint = event.endpoint || 'unknown'
     if (!groups[endpoint]) groups[endpoint] = []
     groups[endpoint].push(event)

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
@@ -22,7 +38,7 @@ export async function GET(request: NextRequest) {
         format: 'JSON',
         version: '1.0'
       },
-      data: {} as any
+      data: {} as unknown
     }
 
     // 1. Perfil do usuÃ¡Â¡rio

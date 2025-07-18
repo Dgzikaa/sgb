@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { createServiceRoleClient } from '@/lib/supabase-admin'
@@ -43,7 +59,7 @@ export async function GET(request: NextRequest) {
       const decodedUserData = decodeURIComponent(userData);
       console.log('Ã°Å¸â€â€œ Dados decodificados:', decodedUserData)
       
-      parsedUserData = JSON.parse(decodedUserData);
+      parsedUserData = JSON.parse(decodedUserData) as unknown;
       console.log('Å“â€¦ Dados do usuÃ¡Â¡rio parseados:', {
         hasBarId: !!parsedUserData.bar_id,
         hasPermissao: !!parsedUserData.permissao,
@@ -161,7 +177,7 @@ export async function POST(request: NextRequest) {
       const decodedUserData = decodeURIComponent(userData);
       console.log('Ã°Å¸â€â€œ Dados decodificados:', decodedUserData)
       
-      parsedUserData = JSON.parse(decodedUserData);
+      parsedUserData = JSON.parse(decodedUserData) as unknown;
       console.log('Å“â€¦ Dados do usuÃ¡Â¡rio parseados:', {
         hasBarId: !!parsedUserData.bar_id,
         hasPermissao: !!parsedUserData.permissao,
@@ -331,16 +347,16 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('ÂÅ’ Erro crÃ¡Â­tico ao salvar configuraÃ¡Â§Ã¡Â£o Meta:', error)
     
-    if ((error as any).name === 'ZodError') {
+    if ((error as unknown).name === 'ZodError') {
       return NextResponse.json({ 
         error: 'Dados invÃ¡Â¡lidos',
-        details: (error as any).errors 
+        details: (error as unknown).errors 
       }, { status: 400 })
     }
 
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
-      details: (error as any).message 
+      details: (error as unknown).message 
     }, { status: 500 })
   }
 }
@@ -372,7 +388,7 @@ export async function PUT(request: NextRequest) {
       const decodedUserData = decodeURIComponent(userData);
       console.log('Ã°Å¸â€â€œ Dados decodificados:', decodedUserData)
       
-      parsedUserData = JSON.parse(decodedUserData);
+      parsedUserData = JSON.parse(decodedUserData) as unknown;
       console.log('Å“â€¦ Dados do usuÃ¡Â¡rio parseados:', {
         hasBarId: !!parsedUserData.bar_id,
         hasPermissao: !!parsedUserData.permissao,
@@ -430,7 +446,7 @@ export async function PUT(request: NextRequest) {
     console.error('ÂÅ’ Erro crÃ¡Â­tico ao testar configuraÃ¡Â§Ã¡Â£o Meta:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
-      details: (error as any).message 
+      details: (error as unknown).message 
     }, { status: 500 })
   }
 }
@@ -439,7 +455,7 @@ export async function PUT(request: NextRequest) {
 // Ã°Å¸â€ºÂ Ã¯Â¸Â FUNÃ¡â€¡Ã¡â€¢ES AUXILIARES
 // ========================================
 
-async function testMetaConnection(config: any): Promise<{
+async function testMetaConnection(config: unknown): Promise<{
   success: boolean
   error?: string
   accounts?: {
@@ -476,7 +492,7 @@ async function testMetaConnection(config: any): Promise<{
     )
 
     const pagesData = await pagesResponse.json()
-    const accounts: any = {};
+    const accounts: unknown = {};
 
     if (pagesResponse.ok && pagesData.data?.length > 0) {
       const firstPage = pagesData.data[0]
@@ -523,7 +539,7 @@ async function testMetaConnection(config: any): Promise<{
     console.error('ÂÅ’ Erro ao testar conexÃ¡Â£o Meta:', error)
     return {
       success: false,
-      error: (error as any).message || 'Erro de conexÃ¡Â£o'
+      error: (error as unknown).message || 'Erro de conexÃ¡Â£o'
     }
   }
 }
@@ -555,7 +571,7 @@ export async function DELETE(request: NextRequest) {
       const decodedUserData = decodeURIComponent(userData);
       console.log('Ã°Å¸â€â€œ Dados decodificados:', decodedUserData)
       
-      parsedUserData = JSON.parse(decodedUserData);
+      parsedUserData = JSON.parse(decodedUserData) as unknown;
       console.log('Å“â€¦ Dados do usuÃ¡Â¡rio parseados:', {
         hasBarId: !!parsedUserData.bar_id,
         hasPermissao: !!parsedUserData.permissao,
@@ -605,7 +621,7 @@ export async function DELETE(request: NextRequest) {
     console.error('ÂÅ’ Erro crÃ¡Â­tico ao remover configuraÃ¡Â§Ã¡Â£o Meta:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
-      details: (error as any).message 
+      details: (error as unknown).message 
     }, { status: 500 })
   }
 } 

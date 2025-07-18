@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -37,7 +53,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function configurarCronJob(supabase: any, barId: string) {
+async function configurarCronJob(supabase: unknown, barId: string) {
   try {
     console.log(`Ã°Å¸â€Â§ Configurando cron job para bar ${barId}`)
 
@@ -98,7 +114,7 @@ async function configurarCronJob(supabase: any, barId: string) {
   }
 }
 
-async function verificarStatus(supabase: any, barId: string) {
+async function verificarStatus(supabase: unknown, barId: string) {
   try {
     console.log(`Ã°Å¸â€Â Verificando status para bar ${barId}`)
 
@@ -144,7 +160,7 @@ async function verificarStatus(supabase: any, barId: string) {
   }
 }
 
-async function removerCronJob(supabase: any, barId: string) {
+async function removerCronJob(supabase: unknown, barId: string) {
   try {
     console.log(`Ã°Å¸â€”â€˜Ã¯Â¸Â Removendo cron job para bar ${barId}`)
 
@@ -171,7 +187,7 @@ async function removerCronJob(supabase: any, barId: string) {
   }
 }
 
-async function testarSyncManual(supabase: any, barId: string) {
+async function testarSyncManual(supabase: unknown, barId: string) {
   try {
     console.log(`Ã°Å¸Â§Âª Testando sync manual para bar ${barId}`)
 

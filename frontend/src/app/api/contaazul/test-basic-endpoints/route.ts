@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getValidContaAzulToken } from '@/lib/contaazul-auth-helper'
@@ -37,7 +53,7 @@ export async function GET(request: NextRequest) {
     const resultados = {
       credenciais_ok: true,
       access_token_length: accessToken.length,
-      testes: [] as any[]
+      testes: [] as unknown[]
     }
 
     // TESTE 1: Endpoint bÃ¡Â¡sico de receitas (antigo)

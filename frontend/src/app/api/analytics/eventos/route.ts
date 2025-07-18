@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 
@@ -42,14 +58,14 @@ export async function GET(request: NextRequest) {
     // Calcular estatÃ¡Â­sticas resumidas
     const resumo = {
       total_eventos: eventos?.length || 0,
-      usuarios_unicos: new Set(eventos?.map((e: any) => e.user_id).filter(Boolean)).size,
+      usuarios_unicos: new Set(eventos?.map((e: unknown) => e.user_id).filter(Boolean)).size,
       eventos_por_tipo: {} as Record<string, number>,
       paginas_mais_visitadas: {} as Record<string, number>,
       periodo_consultado: `${periodo} dias`,
       ultima_atividade: eventos?.[0]?.timestamp_evento || null
     }
 
-    eventos?.forEach((evento: any) => {
+    eventos?.forEach((evento: unknown) => {
       // Contadores por tipo
       resumo.eventos_por_tipo[evento.evento_tipo] = 
         (resumo.eventos_por_tipo[evento.evento_tipo] || 0) + 1
@@ -190,7 +206,7 @@ export async function PUT(request: NextRequest) {
     const supabase = await getAdminClient()
 
     // Processar eventos em lote
-    const eventosProcessados = eventos.map((evento: any) => ({
+    const eventosProcessados = eventos.map((evento: unknown) => ({
       user_id: evento.user_id || null,
       bar_id: parseInt(evento.bar_id),
       sessao_id: evento.sessao_id,

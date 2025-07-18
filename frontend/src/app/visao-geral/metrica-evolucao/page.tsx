@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
@@ -207,21 +223,21 @@ export default function MetricaEvolucaoPage() {
           const faturamentoPorDia: {[key: string]: number} = {}
 
           // ContaHub
-          pagamentosData?.forEach((item: any) => {
+          pagamentosData?.forEach((item: unknown) => {
             const data = item.dt_gerencial
             if (!faturamentoPorDia[data]) faturamentoPorDia[data] = 0
             faturamentoPorDia[data] += parseFloat(item.liquido || '0')
           })
 
           // Yuzer
-          yuzerData?.forEach((item: any) => {
+          yuzerData?.forEach((item: unknown) => {
             const data = item.data_pedido
             if (!faturamentoPorDia[data]) faturamentoPorDia[data] = 0
             faturamentoPorDia[data] += parseFloat(item.valor_total || '0')
           })
 
           // Sympla (estimativa: R$ 50 por pessoa)
-          symplaData?.forEach((item: any) => {
+          symplaData?.forEach((item: unknown) => {
             const data = item.data_visita.split('T')[0] // Converter para YYYY-MM-DD
             if (!faturamentoPorDia[data]) faturamentoPorDia[data] = 0
             const pessoas = parseInt(item.pessoas_na_mesa || '1')
@@ -294,21 +310,21 @@ export default function MetricaEvolucaoPage() {
           const clientesPorDia: {[key: string]: number} = {}
 
           // ContaHub
-          periodoData?.forEach((item: any) => {
+          periodoData?.forEach((item: unknown) => {
             const data = item.dt_gerencial
             if (!clientesPorDia[data]) clientesPorDia[data] = 0
             clientesPorDia[data] += parseInt(item.pessoas || '0')
           })
 
           // Yuzer (quantidade de ingressos)
-          yuzerData?.forEach((item: any) => {
+          yuzerData?.forEach((item: unknown) => {
             const data = item.data_pedido
             if (!clientesPorDia[data]) clientesPorDia[data] = 0
             clientesPorDia[data] += parseInt(item.quantidade || '0')
           })
 
           // Sympla (pessoas que fizeram check-in)
-          symplaData?.forEach((item: any) => {
+          symplaData?.forEach((item: unknown) => {
             const data = item.data_visita.split('T')[0] // Converter para YYYY-MM-DD
             if (!clientesPorDia[data]) clientesPorDia[data] = 0
             clientesPorDia[data] += parseInt(item.pessoas_na_mesa || '1')
@@ -363,7 +379,7 @@ export default function MetricaEvolucaoPage() {
               console.log('Ã°Å¸â€œâ€¹ Amostra:', data.slice(0, 3))
               console.log('Ã°Å¸â€œâ€¹ Ã¡Å¡ltimos:', data.slice(-3))
               
-              dados = data.map((item: any) => ({
+              dados = data.map((item: unknown) => ({
                 data: item.dt_gerencial,
                 valor: parseFloat(item.ticket_medio || '0'),
                 meta: metas.ticketMedioTarget
@@ -385,7 +401,7 @@ export default function MetricaEvolucaoPage() {
             // Fallback: Usar chunking para faturamento + dados agregados para clientes
             console.log('Ã°Å¸â€™Â° Buscando faturamento com chunking para ticket mÃ¡Â©dio...')
             const CHUNK_SIZE = 1000
-            let allFaturamentoData: any[] = []
+            let allFaturamentoData: unknown[] = []
             let offset = 0
             let hasMore = true
             
@@ -452,7 +468,7 @@ export default function MetricaEvolucaoPage() {
               console.log('Ã°Å¸â€™Â° Dias Ã¡Âºnicos de faturamento processados:', Object.keys(faturamentoPorDia).length)
               
               // 4. PROCESSAR CLIENTES POR DIA (agrupar pessoas da tabela periodo)
-              const clientesPorDia = clientesData.reduce((acc: {[key: string]: number}, item: any) => {
+              const clientesPorDia = clientesData.reduce((acc: {[key: string]: number}, item: unknown) => {
                 const data = item.dt_gerencial
                 
                 if (!acc[data]) acc[data] = 0
@@ -498,7 +514,7 @@ export default function MetricaEvolucaoPage() {
               
               console.log('Ã°Å¸Å½Â¯ Ticket mÃ¡Â©dio FINAL processado (fallback):', dados.length, 'dias com clientes pagantes')
               console.log('Ã°Å¸â€œâ€¦ PerÃ¡Â­odo:', dados[0]?.data, 'atÃ¡Â©', dados[dados.length - 1]?.data)
-              console.log('Ã°Å¸â€œÅ  Amostra valores:', dados.slice(0, 5).map((d: any) => ({ 
+              console.log('Ã°Å¸â€œÅ  Amostra valores:', dados.slice(0, 5).map((d: unknown) => ({ 
                 data: d.data, 
                 valor: Math.round(d.valor * 100) / 100 
               })))
@@ -554,7 +570,7 @@ export default function MetricaEvolucaoPage() {
           })
         )
 
-        dados = reservasPorDia.filter((item: any) => item.valor > 0)
+        dados = reservasPorDia.filter((item: unknown) => item.valor > 0)
         console.log('Ã°Å¸Å½Â¯ Dias com reservas:', dados.length)
       }
       else if (metricaSelecionada === 'tempo_cozinha' || metricaSelecionada === 'tempo_bar') {
@@ -587,7 +603,7 @@ export default function MetricaEvolucaoPage() {
               console.log('Ã°Å¸â€œâ€¹ Amostra:', data.slice(0, 3))
               console.log('Ã°Å¸â€œâ€¹ Ã¡Å¡ltimos:', data.slice(-3))
               
-              dados = data.map((item: any) => ({
+              dados = data.map((item: unknown) => ({
                 data: item.dt_gerencial,
                 valor: parseFloat(item.tempo_medio_minutos || '0'),
                 meta: metaTempo
@@ -595,7 +611,7 @@ export default function MetricaEvolucaoPage() {
               
               console.log('Å"â€¦ Tempos via RPC:', dados.length, 'dias')
               console.log('Ã°Å¸â€œâ€¦ PerÃ¡Â­odo:', dados[0]?.data, 'atÃ¡Â©', dados[dados.length - 1]?.data)
-              console.log('Ã°Å¸â€œÅ  Amostra valores:', dados.slice(0, 5).map((d: any) => ({ 
+              console.log('Ã°Å¸â€œÅ  Amostra valores:', dados.slice(0, 5).map((d: unknown) => ({ 
                 data: d.data, 
                 valor: d.valor + ' min'
               })))
@@ -608,7 +624,7 @@ export default function MetricaEvolucaoPage() {
             
             // Fallback: CHUNKING PARA TEMPOS
             const CHUNK_SIZE = 1000
-            let allTempoData: any[] = []
+            let allTempoData: unknown[] = []
             let offset = 0
             let hasMore = true
             
@@ -702,7 +718,7 @@ export default function MetricaEvolucaoPage() {
               
               console.log('ÂÂ±Ã¯Â¸Â Tempos FINAL processados (fallback):', dados.length, 'dias com dados vÃ¡Â¡lidos')
               console.log('Ã°Å¸â€œâ€¦ PerÃ¡Â­odo:', dados[0]?.data, 'atÃ¡Â©', dados[dados.length - 1]?.data)
-              console.log('Ã°Å¸â€œÅ  Amostra valores:', dados.slice(0, 5).map((d: any) => ({ 
+              console.log('Ã°Å¸â€œÅ  Amostra valores:', dados.slice(0, 5).map((d: unknown) => ({ 
                 data: d.data, 
                 valor: Math.round(d.valor * 100) / 100 
               })))
@@ -724,7 +740,7 @@ export default function MetricaEvolucaoPage() {
               .limit(10)
             
             if (!verError && verificacao && verificacao.length > 0) {
-              console.log('Ã°Å¸â€Â VerificaÃ¡Â§Ã¡Â£o: Dados disponÃ¡Â­veis na tabela tempo:', verificacao.map((d: any) => d.dia))
+              console.log('Ã°Å¸â€Â VerificaÃ¡Â§Ã¡Â£o: Dados disponÃ¡Â­veis na tabela tempo:', verificacao.map((d: unknown) => d.dia))
               console.log('Ã°Å¸â€™Â¡ SugestÃ¡Â£o: PerÃ¡Â­odo disponÃ¡Â­vel aproximadamente de', verificacao[0].dia, 'atÃ¡Â©', verificacao[verificacao.length - 1].dia)
             } else {
               console.log('Tabela tempo parece estar vazia ou inacessível')

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useCallback } from 'react'
@@ -213,7 +229,7 @@ export function useFileUpload() {
         [uploadId]: {
           loading: false,
           progress: 0,
-          error: (error as any).message,
+          error: (error as unknown).message,
           result: null
         }
       }))

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -47,7 +63,7 @@ export async function GET(request: NextRequest) {
       success: true,
       barIdConsultado: barId,
       totalCredenciaisContaAzul: allCredentials?.length || 0,
-      credenciaisEncontradas: allCredentials?.map((cred: any) => ({
+      credenciaisEncontradas: allCredentials?.map((cred: unknown) => ({
         id: cred.id,
         bar_id: cred.bar_id,
         service: cred.service,
@@ -116,7 +132,7 @@ export async function POST(request: NextRequest) {
       barInfo: barInfo || null,
       barEncontrado: !!barInfo,
       totalCredenciais: credentials?.length || 0,
-      credenciais: credentials?.map((cred: any) => ({
+      credenciais: credentials?.map((cred: unknown) => ({
         id: cred.id,
         bar_id: cred.bar_id,
         service: cred.service,

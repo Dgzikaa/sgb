@@ -1,5 +1,5 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
-import { cacheService } from '../lib/redis-cache'
+import { cacheService } from '@/lib/redis-cache'
 
 // Rotas que devem ser cacheadas automaticamente
 const CACHEABLE_ROUTES = {

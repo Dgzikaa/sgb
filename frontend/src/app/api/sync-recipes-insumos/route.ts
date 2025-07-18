@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { createClient } from '@supabase/supabase-js';
@@ -6,12 +22,12 @@ import { createClient } from '@supabase/supabase-js';
 function getGoogleServiceAccount() {
   const json = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
   if (!json) throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON nÃ¡Â£o definida');
-  return typeof json === 'string' ? JSON.parse(json) : json;
+  return typeof json === 'string' ? JSON.parse(json) as unknown : json;
 }
 
 // Tipos auxiliares para insumos e receitas
 interface InsumoRow {
-  [key: string]: any;
+  [key: string]: unknown;
   'CÃ¡Â³digo'?: string;
   'codigo'?: string;
   'Nome'?: string;
@@ -25,7 +41,7 @@ interface InsumoRow {
 }
 
 interface ReceitaRow {
-  [key: string]: any;
+  [key: string]: unknown;
   'CÃ¡Â³digo'?: string;
   'codigo'?: string;
   'Nome'?: string;
@@ -45,7 +61,7 @@ export async function POST(req: NextRequest) {
 
     // 2. Inicializar Google Sheets
     // ID da planilha fornecida
-    const doc = new GoogleSpreadsheet('1klPn-uVLKeoJ9UA9TkiSYqa7sV7NdUdDEELdgd1q4b8', {} as any);
+    const doc = new GoogleSpreadsheet('1klPn-uVLKeoJ9UA9TkiSYqa7sV7NdUdDEELdgd1q4b8', {} as unknown);
     // await doc.useServiceAccountAuth({
     //   client_email: serviceAccount.client_email,
     //   private_key: serviceAccount.private_key,

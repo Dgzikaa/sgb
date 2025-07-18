@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -147,7 +163,7 @@ export async function GET(request: NextRequest) {
     const telefoneMap = new Map();
 
     // Processar telefones do perÃ¡Â­odo
-    telefonesPeriodo?.forEach((item: any) => {
+    telefonesPeriodo?.forEach((item: unknown) => {
       const telefone = item.cli_telefone || item.cli_fone;
       if (!telefone || telefone.length < 10) return;
 
@@ -175,7 +191,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Processar telefones do Getin
-    telefonesGetin?.forEach((item: any) => {
+    telefonesGetin?.forEach((item: unknown) => {
       const telefone = item.mobile;
       if (!telefone || telefone.length < 10) return;
 
@@ -225,7 +241,7 @@ export async function GET(request: NextRequest) {
       // 1. Por data de atividade (mÃ¡Â©todo atual)
       // 2. Por telefone do cliente (se existir na tabela clientes)
       
-      let visitasCliente: any[] = [];
+      let visitasCliente: unknown[] = [];
       
       // MÃ¡Â©todo 1: Buscar por data de atividade
       const { data: visitasPorData, error: errorVisitasData } = await supabase
@@ -253,7 +269,7 @@ export async function GET(request: NextRequest) {
         .eq('bar_id', barId);
 
       if (clientesPorTelefone && clientesPorTelefone.length > 0) {
-        const clienteIds = clientesPorTelefone.map((c: any) => c.id);
+        const clienteIds = clientesPorTelefone.map((c: unknown) => c.id);
         
         const { data: visitasPorTelefone, error: errorVisitasTel } = await supabase
           .from('cliente_visitas')
@@ -279,11 +295,11 @@ export async function GET(request: NextRequest) {
 
       // Remover duplicatas baseado em cliente_id + data_visita
       const visitasUnicas = visitasCliente
-        .filter((visita: any, index: number, array: any[]) => {
+        .filter((visita: unknown, index: number, array: unknown[]) => {
           const key = `${visita.cliente_id}-${visita.data_visita}`;
-          return array.findIndex((v: any) => `${v.cliente_id}-${v.data_visita}` === key) === index;
+          return array.findIndex((v: unknown) => `${v.cliente_id}-${v.data_visita}` === key) === index;
         })
-        .sort((a: any, b: any) => new Date(a.data_visita).getTime() - new Date(b.data_visita).getTime())
+        .sort((a: unknown, b: unknown) => new Date(a.data_visita).getTime() - new Date(b.data_visita).getTime())
         .slice(0, 100); // MÃ¡Â¡ximo de 100 visitas por telefone
 
       if (visitasUnicas.length === 0) continue;
@@ -291,7 +307,7 @@ export async function GET(request: NextRequest) {
       const totalVisitas = visitasUnicas.length;
       const primeiraVisita = visitasUnicas[0]?.data_visita;
       const ultimaVisita = visitasUnicas[visitasUnicas.length - 1]?.data_visita;
-      const valorTotal = visitasUnicas.reduce((sum: number, v: any) => sum + parseFloat(String(v.valor_gasto || 0)), 0);
+      const valorTotal = visitasUnicas.reduce((sum: number, v: unknown) => sum + parseFloat(String(v.valor_gasto || 0)), 0);
       const ticketMedio = totalVisitas > 0 ? valorTotal / totalVisitas : 0;
 
       // Calcular dias sem visitar
@@ -324,18 +340,18 @@ export async function GET(request: NextRequest) {
     }
 
     // Filtrar por nÃ¡Âºmero mÃ¡Â­nimo de visitas
-    let clientesFiltrados = clientesTelefone.filter((cliente: any) => cliente.total_visitas >= minVisitas);
+    let clientesFiltrados = clientesTelefone.filter((cliente: unknown) => cliente.total_visitas >= minVisitas);
 
     // Aplicar filtros adicionais
     if (statusAtividade && statusAtividade !== 'todos') {
-      clientesFiltrados = clientesFiltrados.filter((cliente: any) => cliente.status_atividade === statusAtividade);
+      clientesFiltrados = clientesFiltrados.filter((cliente: unknown) => cliente.status_atividade === statusAtividade);
     }
     if (categoriaRecorrencia && categoriaRecorrencia !== 'todos') {
-      clientesFiltrados = clientesFiltrados.filter((cliente: any) => cliente.categoria_recorrencia === categoriaRecorrencia);
+      clientesFiltrados = clientesFiltrados.filter((cliente: unknown) => cliente.categoria_recorrencia === categoriaRecorrencia);
     }
 
     // Ordenar por total de visitas e valor gasto
-    clientesFiltrados.sort((a: any, b: any) => {
+    clientesFiltrados.sort((a: unknown, b: unknown) => {
       if (a.total_visitas !== b.total_visitas) {
         return b.total_visitas - a.total_visitas;
       }
@@ -362,7 +378,7 @@ export async function GET(request: NextRequest) {
 
       if (!errorEvento && visitasEvento) {
         // Mapear dados do evento para formato compatÃ¡Â­vel
-        clientesEvento = visitasEvento.map((visita: any) => ({
+        clientesEvento = visitasEvento.map((visita: unknown) => ({
           telefone: visita.clientes.telefone,
           nome: visita.clientes.nome,
           total_visitas: visita.clientes.total_visitas,
@@ -384,7 +400,7 @@ export async function GET(request: NextRequest) {
         .eq('genero_musical', generoMusical);
 
       if (!errorGenero && eventosGenero?.length > 0) {
-        const eventoIds = eventosGenero.map((e: any) => e.id);
+        const eventoIds = eventosGenero.map((e: unknown) => e.id);
         
         const { data: visitasGenero, error: errorVisitasGenero } = await supabase
           .from('cliente_visitas')
@@ -402,7 +418,7 @@ export async function GET(request: NextRequest) {
           .not('clientes.telefone', 'is', null);
 
         if (!errorVisitasGenero && visitasGenero) {
-          const clientesGenero = visitasGenero.map((visita: any) => ({
+          const clientesGenero = visitasGenero.map((visita: unknown) => ({
             telefone: visita.clientes.telefone,
             nome: visita.clientes.nome,
             total_visitas: visita.clientes.total_visitas,
@@ -414,8 +430,8 @@ export async function GET(request: NextRequest) {
           }));
 
           // Filtrar clientes principais pelos que visitaram eventos do gÃ¡Âªnero
-          const telefonesFiltrados = new Set(clientesGenero.map((c: any) => c.telefone));
-          clientesFiltrados = clientesFiltrados.filter((cliente: any) => 
+          const telefonesFiltrados = new Set(clientesGenero.map((c: unknown) => c.telefone));
+          clientesFiltrados = clientesFiltrados.filter((cliente: unknown) => 
             telefonesFiltrados.has(cliente.telefone)
           );
         }
@@ -424,14 +440,14 @@ export async function GET(request: NextRequest) {
 
     // Calcular estatÃ¡Â­sticas
     const totalClientes = clientesFiltrados.length;
-    const clientesVIP = clientesFiltrados.filter((c: any) => c.categoria_recorrencia === 'VIP').length;
-    const clientesFrequentes = clientesFiltrados.filter((c: any) => c.categoria_recorrencia === 'Frequente').length;
-    const clientesAtivos = clientesFiltrados.filter((c: any) => c.status_atividade === 'Ativo').length;
-    const receitaTotal = clientesFiltrados.reduce((sum: number, c: any) => sum + parseFloat(String(c.valor_total_gasto || 0)), 0);
+    const clientesVIP = clientesFiltrados.filter((c: unknown) => c.categoria_recorrencia === 'VIP').length;
+    const clientesFrequentes = clientesFiltrados.filter((c: unknown) => c.categoria_recorrencia === 'Frequente').length;
+    const clientesAtivos = clientesFiltrados.filter((c: unknown) => c.status_atividade === 'Ativo').length;
+    const receitaTotal = clientesFiltrados.reduce((sum: number, c: unknown) => sum + parseFloat(String(c.valor_total_gasto || 0)), 0);
     const ticketMedio = totalClientes > 0 ? receitaTotal / totalClientes : 0;
 
     // Top clientes para diferentes mÃ¡Â©tricas
-    const topPorVisitas = clientesFiltrados.slice(0, 10).map((cliente: any) => ({
+    const topPorVisitas = clientesFiltrados.slice(0, 10).map((cliente: unknown) => ({
       ...cliente,
       telefone: formatarTelefone(cliente.telefone_normalizado || cliente.telefone)
     }));
@@ -445,9 +461,9 @@ export async function GET(request: NextRequest) {
     })));
     
     const topPorTicket = [...clientesFiltrados]
-      .sort((a: any, b: any) => parseFloat(String(b.ticket_medio || 0)) - parseFloat(String(a.ticket_medio || 0)))
+      .sort((a: unknown, b: unknown) => parseFloat(String(b.ticket_medio || 0)) - parseFloat(String(a.ticket_medio || 0)))
       .slice(0, 10)
-      .map((cliente: any) => ({
+      .map((cliente: unknown) => ({
         ...cliente,
         telefone: formatarTelefone(cliente.telefone_normalizado || cliente.telefone)
       }));
@@ -461,9 +477,9 @@ export async function GET(request: NextRequest) {
     })));
       
     const topPorReceita = [...clientesFiltrados]
-      .sort((a: any, b: any) => parseFloat(String(b.valor_total_gasto || 0)) - parseFloat(String(a.valor_total_gasto || 0)))
+      .sort((a: unknown, b: unknown) => parseFloat(String(b.valor_total_gasto || 0)) - parseFloat(String(a.valor_total_gasto || 0)))
       .slice(0, 10)
-      .map((cliente: any) => ({
+      .map((cliente: unknown) => ({
         ...cliente,
         telefone: formatarTelefone(cliente.telefone_normalizado || cliente.telefone)
       }));
@@ -478,8 +494,8 @@ export async function GET(request: NextRequest) {
 
     // Clientes para campanhas de marketing (4+ visitas com telefone)
     const clientesCampanha = clientesFiltrados
-      .filter((c: any) => c.total_visitas >= 4 && (c.telefone_normalizado || c.telefone) && (c.telefone_normalizado || c.telefone).length >= 10)
-      .map((cliente: any) => ({
+      .filter((c: unknown) => c.total_visitas >= 4 && (c.telefone_normalizado || c.telefone) && (c.telefone_normalizado || c.telefone).length >= 10)
+      .map((cliente: unknown) => ({
         ...cliente,
         telefone: formatarTelefone(cliente.telefone_normalizado || cliente.telefone)
       }));

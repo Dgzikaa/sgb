@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { useState, useEffect, useCallback, useRef } from 'react'
 import { api } from '@/lib/api-client'
 
@@ -34,7 +50,7 @@ interface NotificacaoTemplate {
   template_nome: string
   template_modulo: string
   template_categoria: string
-  variaveis: Record<string, any>
+  variaveis: Record<string, unknown>
   usuario_id?: string
   role_alvo?: string
   enviar_em?: string
@@ -66,6 +82,12 @@ interface PaginacaoNotificacao {
   limit: number
   total: number
   total_pages: number
+}
+
+interface ApiResponse<T> {
+  success: boolean
+  data: T
+  error?: string
 }
 
 interface UseNotificationsResult {
@@ -136,12 +158,18 @@ export function useNotifications(): UseNotificationsResult {
       
       const response = await api.get(`/api/notifications?${params.toString()}`)
       
-      if (response.success) {
-        setNotificacoes(response.data.notificacoes || [])
-        setEstatisticas(response.data.estatisticas || null)
-        setPaginacao(response.data.paginacao || null)
+      const typedResponse = response as ApiResponse<{
+        notificacoes: Notificacao[]
+        estatisticas: EstatisticasNotificacao | null
+        paginacao: PaginacaoNotificacao | null
+      }>
+      
+      if (typedResponse.success && typedResponse.data) {
+        setNotificacoes(typedResponse.data.notificacoes || [])
+        setEstatisticas(typedResponse.data.estatisticas || null)
+        setPaginacao(typedResponse.data.paginacao || null)
       } else {
-        setError(response.error || 'Erro ao carregar notificações')
+        setError(typedResponse.error || 'Erro ao carregar notificações')
       }
     } catch (err) {
       console.error('Erro ao carregar notificações:', err)
@@ -159,7 +187,9 @@ export function useNotifications(): UseNotificationsResult {
     try {
       const response = await api.put(`/api/notifications/${id}`, { status: 'lida' })
       
-      if (response.success) {
+      const typedResponse = response as ApiResponse<unknown>
+      
+      if (typedResponse.success) {
         // Atualizar estado local
         setNotificacoes(prev => 
           prev.map((notif) => 
@@ -177,7 +207,7 @@ export function useNotifications(): UseNotificationsResult {
         
         return true
       } else {
-        setError(response.error || 'Erro ao marcar como lida')
+        setError(typedResponse.error || 'Erro ao marcar como lida')
         return false
       }
     } catch (err) {
@@ -195,7 +225,9 @@ export function useNotifications(): UseNotificationsResult {
     try {
       const response = await api.put('/api/notifications/read-all', {})
       
-      if (response.success) {
+      const typedResponse = response as ApiResponse<unknown>
+      
+      if (typedResponse.success) {
         // Atualizar estado local
         setNotificacoes(prev => 
           prev.map((notif) => 
@@ -213,7 +245,7 @@ export function useNotifications(): UseNotificationsResult {
         
         return true
       } else {
-        setError(response.error || 'Erro ao marcar todas como lidas')
+        setError(typedResponse.error || 'Erro ao marcar todas como lidas')
         return false
       }
     } catch (err) {
@@ -231,7 +263,9 @@ export function useNotifications(): UseNotificationsResult {
     try {
       const response = await api.delete(`/api/notifications/${id}`)
       
-      if (response.success) {
+      const typedResponse = response as ApiResponse<unknown>
+      
+      if (typedResponse.success) {
         // Atualizar estado local
         setNotificacoes(prev => prev.filter((notif) => notif.id !== id))
         
@@ -246,7 +280,7 @@ export function useNotifications(): UseNotificationsResult {
         
         return true
       } else {
-        setError(response.error || 'Erro ao excluir notificação')
+        setError(typedResponse.error || 'Erro ao excluir notificação')
         return false
       }
     } catch (err) {

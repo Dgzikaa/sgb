@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect, ComponentType, SVGProps } from 'react'
@@ -229,8 +245,8 @@ export default function AdminChecklists() {
   })
 
   // Bulk selection
-  type BulkSelectionItem = { id: string } & Record<string, any>;
-  const checklistsFiltradosBulk: BulkSelectionItem[] = checklistsFiltrados.map((c: any) => ({ ...c, id: c.id }))
+  type BulkSelectionItem = { id: string } & Record<string, unknown>;
+  const checklistsFiltradosBulk: BulkSelectionItem[] = checklistsFiltrados.map((c: unknown) => ({ ...c, id: c.id }))
   const bulkSelection = useBulkSelection(checklistsFiltradosBulk, {
     onSelectionChange: (selectedItems) => {
       console.log('Seleção alterada:', selectedItems)
@@ -723,7 +739,7 @@ export default function AdminChecklists() {
                           <Settings className="w-4 h-4 text-orange-600" />
                           Tipo *
                         </Label>
-                        <Select value={checklistSelecionado.tipo as any} onValueChange={(value) => setChecklistSelecionado({...checklistSelecionado, tipo: value as any})}>
+                        <Select value={checklistSelecionado.tipo as unknown} onValueChange={(value) => setChecklistSelecionado({...checklistSelecionado, tipo: value as unknown})}>
                           <SelectTrigger className="h-11 border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500">
                             <SelectValue />
                           </SelectTrigger>
@@ -773,7 +789,7 @@ export default function AdminChecklists() {
                           <Calendar className="w-4 h-4 text-indigo-600" />
                           Frequência *
                         </Label>
-                        <Select value={checklistSelecionado.frequencia as any} onValueChange={(value) => setChecklistSelecionado({...checklistSelecionado, frequencia: value as any})}>
+                        <Select value={checklistSelecionado.frequencia as unknown} onValueChange={(value) => setChecklistSelecionado({...checklistSelecionado, frequencia: value as unknown})}>
                           <SelectTrigger className="h-11 border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500">
                             <SelectValue />
                           </SelectTrigger>
@@ -992,7 +1008,7 @@ export default function AdminChecklists() {
                       <Settings className="w-4 h-4 text-orange-600" />
                       Tipo *
                     </Label>
-                    <Select value={novoChecklist.tipo as any} onValueChange={(value) => setNovoChecklist({...novoChecklist, tipo: value as any})}>
+                    <Select value={novoChecklist.tipo as unknown} onValueChange={(value) => setNovoChecklist({...novoChecklist, tipo: value as unknown})}>
                       <SelectTrigger className="h-11 border-gray-300 text-gray-900 focus:border-green-500 focus:ring-green-500">
                         <SelectValue />
                       </SelectTrigger>
@@ -1042,7 +1058,7 @@ export default function AdminChecklists() {
                       <Calendar className="w-4 h-4 text-indigo-600" />
                       Frequência *
                     </Label>
-                    <Select value={novoChecklist.frequencia as any} onValueChange={(value) => setNovoChecklist({...novoChecklist, frequencia: value as any})}>
+                    <Select value={novoChecklist.frequencia as unknown} onValueChange={(value) => setNovoChecklist({...novoChecklist, frequencia: value as unknown})}>
                       <SelectTrigger className="h-11 border-gray-300 text-gray-900 focus:border-green-500 focus:ring-green-500">
                         <SelectValue />
                       </SelectTrigger>

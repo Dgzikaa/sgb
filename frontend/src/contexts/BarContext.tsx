@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
@@ -7,6 +23,14 @@ import { useUser } from '@/contexts/UserContext'
 interface Bar {
   id: number
   nome: string
+}
+
+interface UsuarioBar {
+  id: number
+  email: string
+  nome: string
+  role: string
+  bar_id: number
 }
 
 interface BarContextType {
@@ -62,7 +86,7 @@ export function BarProvider({ children }: { children: ReactNode }) {
           const storedUserData = localStorage.getItem('sgb_user')
           if (storedUserData) {
             try {
-              const userData = JSON.parse(storedUserData)
+              const userData = JSON.parse(storedUserData) as unknown
               if (userData.availableBars && Array.isArray(userData.availableBars) && userData.availableBars.length > 0) {
                 
                 if (mounted) {
@@ -97,7 +121,7 @@ export function BarProvider({ children }: { children: ReactNode }) {
         
         if (storedUser) {
           try {
-            const userData = JSON.parse(storedUser)
+            const userData = JSON.parse(storedUser) as unknown
             userEmail = userData.email
             
             // Verificar se jÃ¡Â¡ temos os bares no localStorage
@@ -158,8 +182,8 @@ export function BarProvider({ children }: { children: ReactNode }) {
           return
         }
 
-        // Extrair IDs Ã¡Âºnicos dos bares (caso usuÃ¡Â¡rio tenha acesso a mÃ¡Âºltiplos bares)
-        const barIds = [...new Set(userData.map((user: any) => user.bar_id))]
+        // Extrair IDs únicos dos bares (caso usuário tenha acesso a múltiplos bares)
+        const barIds = [...new Set(userData.map((user: UsuarioBar) => user.bar_id))]
         
         // Buscar detalhes dos bares
         const { data: barsData, error: barsError } = await supabase

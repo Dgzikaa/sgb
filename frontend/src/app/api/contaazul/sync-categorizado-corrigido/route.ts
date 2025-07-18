@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -34,7 +50,7 @@ async function getValidContaAzulToken(barId: number) {
   return null
 }
 
-async function buscarDadosAPI(url: string, headers: any) {
+async function buscarDadosAPI(url: string, headers: unknown) {
   console.log('Ã°Å¸â€â€” Buscando:', url)
   
   const response = await fetch(url, { headers })
@@ -78,13 +94,13 @@ export async function POST(request: NextRequest) {
     }
 
     const resultados = {
-      passo1_categorias_api: [] as any[],
-      passo2_categorias_upsert: [] as any[],
-      passo3_eventos_receitas_api: [] as any[],
-      passo4_eventos_despesas_api: [] as any[],
-      passo5_eventos_upsert: [] as any[],
-      passo6_parcelas_api: [] as any[],
-      passo7_parcelas_upsert: [] as any[]
+      passo1_categorias_api: [] as unknown[],
+      passo2_categorias_upsert: [] as unknown[],
+      passo3_eventos_receitas_api: [] as unknown[],
+      passo4_eventos_despesas_api: [] as unknown[],
+      passo5_eventos_upsert: [] as unknown[],
+      passo6_parcelas_api: [] as unknown[],
+      passo7_parcelas_upsert: [] as unknown[]
     }
 
     console.log('Ã°Å¸ÂÂ·Ã¯Â¸Â PASSO 1: BUSCAR TODAS AS CATEGORIAS DA API...')
@@ -98,7 +114,7 @@ export async function POST(request: NextRequest) {
       while (temMaisCategorias) {
         const urlPagina = `${urlCategorias}?pagina=${paginaCategoria}&tamanho_pagina=100`
         try {
-          const categoriasAPI: any[] = await buscarDadosAPI(urlPagina, headers)
+          const categoriasAPI: unknown[] = await buscarDadosAPI(urlPagina, headers)
           
           if (categoriasAPI.length === 0) {
             temMaisCategorias = false
@@ -201,7 +217,7 @@ export async function POST(request: NextRequest) {
             console.log(`Ã°Å¸â€œÅ  PASSO 3 - PÃ¡Â¡gina ${paginaReceita}: ${receitas.length} contas-a-receber encontradas`)
             
             // Å“â€¦ contas-a-receber = tipo 'receita'
-            resultados.passo3_eventos_receitas_api.push(...receitas.map((r: any) => ({ 
+            resultados.passo3_eventos_receitas_api.push(...receitas.map((r: unknown) => ({ 
               ...r, 
               categoria: categoria, 
               tipo: 'receita' 
@@ -254,7 +270,7 @@ export async function POST(request: NextRequest) {
             console.log(`Ã°Å¸â€œÅ  PASSO 4 - PÃ¡Â¡gina ${paginaDespesa}: ${despesas.length} contas-a-pagar encontradas`)
             
             // Å“â€¦ contas-a-pagar = tipo 'despesa'
-            resultados.passo4_eventos_despesas_api.push(...despesas.map((d: any) => ({ 
+            resultados.passo4_eventos_despesas_api.push(...despesas.map((d: unknown) => ({ 
               ...d, 
               categoria: categoria, 
               tipo: 'despesa' 
@@ -348,7 +364,7 @@ export async function POST(request: NextRequest) {
             if (parcelas.length > 1) {
               console.log('Ã°Å¸â€â€ž EXEMPLO: Compra parcelada (ex: 10x no cartÃ¡Â£o)')
             }
-            resultados.passo6_parcelas_api.push(...parcelas.map((p: any) => ({ 
+            resultados.passo6_parcelas_api.push(...parcelas.map((p: unknown) => ({ 
               ...p, 
               evento: evento 
             })))
@@ -396,7 +412,7 @@ export async function POST(request: NextRequest) {
     console.log('Ã°Å¸â€™Â¾ PASSO 7: INSERIR PARCELAS NO BANCO...')
     
     // PASSO 7: Inserir apenas parcelas REAIS (nÃ¡Â£o eventos sem parcelas)
-    const parcelasReais = resultados.passo6_parcelas_api.filter((p: any) => p.tipo !== 'evento_sem_parcelas')
+    const parcelasReais = resultados.passo6_parcelas_api.filter((p: unknown) => p.tipo !== 'evento_sem_parcelas')
     
     console.log(`Ã°Å¸â€œÅ  PASSO 7: ${parcelasReais.length} parcelas reais para inserir`)
     

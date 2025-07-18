@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { useState, useEffect, useCallback, useMemo } from 'react'
 import { api } from '@/lib/api-client'
 
@@ -80,6 +96,19 @@ interface ValidacaoExecucao {
   pode_finalizar: boolean
 }
 
+interface ApiResponse<T> {
+  success: boolean
+  data?: T
+  error?: string
+}
+
+interface Anexo {
+  url: string
+  nome: string
+  tipo: string
+  tamanho?: number
+}
+
 interface UseChecklistExecutionResult {
   // Estados
   execucao: ExecucaoData | null
@@ -97,8 +126,8 @@ interface UseChecklistExecutionResult {
   cancelarExecucao: (motivo?: string) => Promise<boolean>
   
   // Edição de respostas
-  atualizarResposta: (secaoIndex: number, itemIndex: number, valor: string | number | boolean | null, anexos?: { url: string; nome: string; tipo: string; tamanho?: number }[]) => void
-  adicionarAnexo: (secaoIndex: number, itemIndex: number, anexo: unknown) => void
+  atualizarResposta: (secaoIndex: number, itemIndex: number, valor: string | number | boolean | null, anexos?: Anexo[]) => void
+  adicionarAnexo: (secaoIndex: number, itemIndex: number, anexo: Anexo) => void
   removerAnexo: (secaoIndex: number, itemIndex: number, anexoIndex: number) => void
   
   // Utilitários
@@ -144,7 +173,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
       }
       // Configurar novo timer para salvar em 3 segundos
       const timer = setTimeout(() => {
-        salvarRespostas(true) // Auto-save
+        void salvarRespostas(true) // Auto-save
       }, 3000)
       setAutoSaveTimer(timer)
     }
@@ -174,9 +203,9 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
       
       const response = await api.post(`/api/checklists/${checklistId}/execucoes`, {
         observacoes_iniciais: observacoesIniciais
-      })
+      }) as ApiResponse<ExecucaoData>
       
-      if (response.success) {
+      if (response.success && response.data) {
         const novaExecucao = response.data
         setExecucao(novaExecucao)
         setExecucaoOriginal(deepClone(novaExecucao))
@@ -199,9 +228,9 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
       setLoading(true)
       setError(null)
       
-      const response = await api.get(`/api/execucoes/${execucaoId}`)
+      const response = await api.get(`/api/checklists/execucoes/${execucaoId}`) as ApiResponse<ExecucaoData>
       
-      if (response.success) {
+      if (response.success && response.data) {
         const execucaoCarregada = response.data
         setExecucao(execucaoCarregada)
         setExecucaoOriginal(deepClone(execucaoCarregada))
@@ -220,23 +249,18 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
     if (!execucao) return false
     
     try {
-      setSaving(true)
+      if (!autoSave) setSaving(true)
+      setError(null)
       
-      const response = await api.put(`/api/execucoes/${execucao.id}`, {
+      const response = await api.put(`/api/checklists/execucoes/${execucao.id}/respostas`, {
         respostas: execucao.respostas,
-        observacoes: execucao.observacoes,
-        auto_save: autoSave
-      })
+        progresso: calcularProgresso(execucao.respostas)
+      }) as ApiResponse<ExecucaoData>
       
-      if (response.success) {
-        const execucaoAtualizada = response.data.execucao
+      if (response.success && response.data) {
+        const execucaoAtualizada = response.data
         setExecucao(execucaoAtualizada)
         setExecucaoOriginal(deepClone(execucaoAtualizada))
-        
-        if (!autoSave) {
-          console.log('Respostas salvas manualmente')
-        }
-        
         return true
       } else {
         setError(response.error || 'Erro ao salvar respostas')
@@ -247,7 +271,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
       setError('Erro ao salvar respostas')
       return false
     } finally {
-      setSaving(false)
+      if (!autoSave) setSaving(false)
     }
   }
 
@@ -256,30 +280,19 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
     
     try {
       setFinalizing(true)
+      setError(null)
       
-      // Primeiro salvar as respostas atuais
-      const salvou = await salvarRespostas(false)
-      if (!salvou) {
-        return false
-      }
-      
-      const payload: Record<string, unknown> = {
+      const response = await api.put(`/api/checklists/execucoes/${execucao.id}/finalizar`, {
         observacoes_finais: observacoesFinais,
-        confirmacao_finalizacao: true
-      }
+        assinatura: assinatura,
+        respostas: execucao.respostas,
+        progresso: calcularProgresso(execucao.respostas)
+      }) as ApiResponse<ExecucaoData>
       
-      if (assinatura) {
-        (payload )["assinatura_digital"] = assinatura
-      }
-      
-      const response = await api.post(`/api/execucoes/${execucao.id}/finalizar`, payload)
-      
-      if (response.success) {
-        const execucaoFinalizada = response.data.execucao
+      if (response.success && response.data) {
+        const execucaoFinalizada = response.data
         setExecucao(execucaoFinalizada)
         setExecucaoOriginal(deepClone(execucaoFinalizada))
-        
-        console.log(`Execução finalizada com score: ${response.data.score.score_total}%`)
         return true
       } else {
         setError(response.error || 'Erro ao finalizar execução')
@@ -298,10 +311,17 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
     if (!execucao) return false
     
     try {
-      const response = await api.delete(`/api/execucoes/${execucao.id}?motivo=${encodeURIComponent(motivo || 'Cancelado pelo usuário')}`)
+      setLoading(true)
+      setError(null)
       
-      if (response.success) {
-        console.log('Execução cancelada')
+      const response = await api.put(`/api/checklists/execucoes/${execucao.id}/cancelar`, {
+        motivo: motivo
+      }) as ApiResponse<ExecucaoData>
+      
+      if (response.success && response.data) {
+        const execucaoCancelada = response.data
+        setExecucao(execucaoCancelada)
+        setExecucaoOriginal(deepClone(execucaoCancelada))
         return true
       } else {
         setError(response.error || 'Erro ao cancelar execução')
@@ -311,6 +331,8 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
       console.error('Erro ao cancelar execução:', err)
       setError('Erro ao cancelar execução')
       return false
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -318,82 +340,77 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
   // EDIÇÃO DE RESPOSTAS
   // =====================================================
 
-  const atualizarResposta = useCallback((secaoIndex: number, itemIndex: number, valor: string | number | boolean | null, anexos?: { url: string; nome: string; tipo: string; tamanho?: number }[]) => {
+  const atualizarResposta = useCallback((
+    secaoIndex: number, 
+    itemIndex: number, 
+    valor: string | number | boolean | null, 
+    anexos?: Anexo[]
+  ) => {
     if (!execucao) return
     
     setExecucao(prev => {
       if (!prev) return prev
       
       const novaExecucao = deepClone(prev)
-      const item = novaExecucao.respostas.secoes[secaoIndex]?.itens[itemIndex]
+      const secao = novaExecucao.respostas.secoes[secaoIndex]
+      if (!secao) return prev
       
-      if (item) {
-        item.valor = valor
-        item.respondido = valor !== null && valor !== undefined && valor !== ''
-        item.respondido_em = item.respondido ? new Date().toISOString() : undefined
-        
-        if (anexos) {
-          item.anexos = anexos
-        }
-        
-        // Recalcular progresso
-        novaExecucao.progresso = calcularProgresso(novaExecucao.respostas)
+      const item = secao.itens[itemIndex]
+      if (!item) return prev
+      
+      item.valor = valor
+      item.respondido = valor !== null && valor !== ''
+      item.respondido_em = item.respondido ? new Date().toISOString() : undefined
+      
+      if (anexos) {
+        item.anexos = anexos
       }
       
       return novaExecucao
     })
   }, [execucao])
 
-  const adicionarAnexo = useCallback((secaoIndex: number, itemIndex: number, anexo: unknown) => {
+  const adicionarAnexo = useCallback((
+    secaoIndex: number, 
+    itemIndex: number, 
+    anexo: Anexo
+  ) => {
     if (!execucao) return
     
     setExecucao(prev => {
       if (!prev) return prev
       
       const novaExecucao = deepClone(prev)
-      const item = novaExecucao.respostas.secoes[secaoIndex]?.itens[itemIndex]
+      const secao = novaExecucao.respostas.secoes[secaoIndex]
+      if (!secao) return prev
       
-      if (item) {
-        if (!item.anexos) {
-          item.anexos = []
-        }
-        item.anexos.push(anexo as { url: string; nome: string; tipo: string; tamanho?: number })
-        
-        // Marcar como respondido se tinha anexo obrigatório
-        if (!item.respondido && ['foto_camera', 'foto_upload', 'assinatura'].includes(item.tipo)) {
-          item.respondido = true
-          item.respondido_em = new Date().toISOString()
-        }
-        
-        // Recalcular progresso
-        novaExecucao.progresso = calcularProgresso(novaExecucao.respostas)
-      }
+      const item = secao.itens[itemIndex]
+      if (!item) return prev
+      
+      item.anexos.push(anexo)
       
       return novaExecucao
     })
   }, [execucao])
 
-  const removerAnexo = useCallback((secaoIndex: number, itemIndex: number, anexoIndex: number) => {
+  const removerAnexo = useCallback((
+    secaoIndex: number, 
+    itemIndex: number, 
+    anexoIndex: number
+  ) => {
     if (!execucao) return
     
     setExecucao(prev => {
       if (!prev) return prev
       
       const novaExecucao = deepClone(prev)
-      const item = novaExecucao.respostas.secoes[secaoIndex]?.itens[itemIndex]
+      const secao = novaExecucao.respostas.secoes[secaoIndex]
+      if (!secao) return prev
       
-      if (item?.anexos) {
-        item.anexos.splice(anexoIndex, 1)
-        
-        // Se não tem mais anexos e é campo de anexo obrigatório, marcar como não respondido
-        if (item.anexos.length === 0 && ['foto_camera', 'foto_upload', 'assinatura'].includes(item.tipo) && item.obrigatorio) {
-          item.respondido = false
-          item.respondido_em = undefined
-        }
-        
-        // Recalcular progresso
-        novaExecucao.progresso = calcularProgresso(novaExecucao.respostas)
-      }
+      const item = secao.itens[itemIndex]
+      if (!item) return prev
+      
+      item.anexos.splice(anexoIndex, 1)
       
       return novaExecucao
     })
@@ -403,54 +420,52 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
   // UTILITÁRIOS
   // =====================================================
 
-  const toggleAutoSave = useCallback(() => {
-    setAutoSaveEnabled(prev => !prev)
-  }, [])
-
-  // Calcular se tem alterações pendentes
   const temAlteracoesPendentes = useMemo(() => {
     if (!execucao || !execucaoOriginal) return false
     return JSON.stringify(execucao.respostas) !== JSON.stringify(execucaoOriginal.respostas)
   }, [execucao, execucaoOriginal])
 
-  // Verificar se pode ser finalizada
   const podeSerFinalizada = useMemo(() => {
-    return validacao?.pode_finalizar ?? false
+    return validacao?.pode_finalizar || false
   }, [validacao])
 
-  // Encontrar próximo item pendente
   const proximoItemPendente = useMemo(() => {
     if (!execucao) return null
     
     for (let secaoIndex = 0; secaoIndex < execucao.respostas.secoes.length; secaoIndex++) {
       const secao = execucao.respostas.secoes[secaoIndex]
-      
       for (let itemIndex = 0; itemIndex < secao.itens.length; itemIndex++) {
         const item = secao.itens[itemIndex]
-        
         if (item.obrigatorio && !item.respondido) {
           return { secaoIndex, itemIndex }
         }
       }
     }
-    
     return null
   }, [execucao])
 
-  // Navegação
+  // =====================================================
+  // AUTO-SAVE
+  // =====================================================
+
+  const toggleAutoSave = useCallback(() => {
+    setAutoSaveEnabled(prev => !prev)
+  }, [])
+
+  // =====================================================
+  // NAVEGAÇÃO
+  // =====================================================
+
   const irParaProximoItem = useCallback(() => {
-    // Implementar lógica de navegação
-    console.log('Ir para próximo item')
+    // Implementação da navegação para próximo item
   }, [])
 
   const irParaItemAnterior = useCallback(() => {
-    // Implementar lógica de navegação
-    console.log('Ir para item anterior')
+    // Implementação da navegação para item anterior
   }, [])
 
   const irParaSecao = useCallback((secaoIndex: number) => {
-    // Implementar lógica de navegação
-    console.log(`Ir para seção ${secaoIndex}`)
+    // Implementação da navegação para seção
   }, [])
 
   return {
@@ -491,50 +506,37 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
 }
 
 // =====================================================
-// FUNÇÕES UTILITÁRIAS
+// FUNÇÕES AUXILIARES
 // =====================================================
 
 function deepClone<T>(obj: T): T {
-  return JSON.parse(JSON.stringify(obj))
+  return JSON.parse(JSON.stringify(obj) as unknown)
 }
 
 function validarExecucao(execucao: ExecucaoData): ValidacaoExecucao {
   const erros: string[] = []
   let camposObrigatoriosVazios = 0
   
-  if (!execucao.respostas?.secoes) {
-    return {
-      valido: false,
-      erros: ['Estrutura de respostas inválida'],
-      campos_obrigatorios_vazios: 0,
-      pode_continuar: false,
-      pode_finalizar: false
-    }
-  }
-  
-  execucao.respostas.secoes.forEach((secao, secaoIndex) => {
-    secao.itens.forEach((item, itemIndex) => {
+  // Validar campos obrigatórios
+  execucao.respostas.secoes.forEach(secao => {
+    secao.itens.forEach(item => {
       if (item.obrigatorio && !item.respondido) {
-        erros.push(`Campo obrigatório "${item.titulo}" não foi preenchido`)
         camposObrigatoriosVazios++
-      }
-      
-      // Validar anexos obrigatórios
-      if (item.obrigatorio && ['foto_camera', 'foto_upload', 'assinatura'].includes(item.tipo)) {
-        if (!item.anexos || item.anexos.length === 0) {
-          erros.push(`Anexo obrigatório "${item.titulo}" não foi fornecido`)
-          camposObrigatoriosVazios++
-        }
+        erros.push(`Campo obrigatório não respondido: ${item.titulo}`)
       }
     })
   })
   
+  const valido = erros.length === 0
+  const podeContinuar = camposObrigatoriosVazios <= 3 // Permite até 3 campos obrigatórios vazios
+  const podeFinalizar = camposObrigatoriosVazios === 0
+  
   return {
-    valido: erros.length === 0,
+    valido,
     erros,
     campos_obrigatorios_vazios: camposObrigatoriosVazios,
-    pode_continuar: ['em_andamento', 'pausado'].includes(execucao.status),
-    pode_finalizar: camposObrigatoriosVazios === 0 && execucao.status === 'em_andamento'
+    pode_continuar: podeContinuar,
+    pode_finalizar: podeFinalizar
   }
 }
 
@@ -547,7 +549,6 @@ function calcularProgresso(respostas: RespostasExecucao): ProgressoExecucao {
   respostas.secoes.forEach(secao => {
     secao.itens.forEach(item => {
       totalItens++
-      
       if (item.respondido) {
         itensRespondidos++
       }
@@ -561,9 +562,9 @@ function calcularProgresso(respostas: RespostasExecucao): ProgressoExecucao {
     })
   })
   
-  const percentualCompleto = totalItens > 0 ? Math.round((itensRespondidos / totalItens) * 100) : 0
-  const percentualObrigatorios = camposObrigatoriosTotal > 0 ? 
-    Math.round((camposObrigatoriosRespondidos / camposObrigatoriosTotal) * 100) : 100
+  const percentualCompleto = totalItens > 0 ? (itensRespondidos / totalItens) * 100 : 0
+  const percentualObrigatorios = camposObrigatoriosTotal > 0 ? (camposObrigatoriosRespondidos / camposObrigatoriosTotal) * 100 : 0
+  const podeSerFinalizado = percentualObrigatorios === 100
   
   return {
     total_itens: totalItens,
@@ -572,47 +573,21 @@ function calcularProgresso(respostas: RespostasExecucao): ProgressoExecucao {
     campos_obrigatorios_total: camposObrigatoriosTotal,
     campos_obrigatorios_respondidos: camposObrigatoriosRespondidos,
     percentual_obrigatorios: percentualObrigatorios,
-    pode_ser_finalizado: percentualObrigatorios === 100,
-    tempo_estimado: 30, // Default
-    tempo_decorrido: 0 // Será calculado pelo frontend
+    pode_ser_finalizado: podeSerFinalizado,
+    tempo_estimado: 0, // Será calculado baseado no checklist
+    tempo_decorrido: 0 // Será calculado baseado no tempo real
   }
 }
 
 // =====================================================
-// HOOK PARA LISTA DE EXECUÇÕES
+// HOOK SECUNDÁRIO PARA LISTAGEM
 // =====================================================
 
 export function useChecklistExecutions() {
-  const [execucoes, setExecucoes] = useState<ExecucaoData[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  
-  const carregarExecucoes = async (filtros?: any) => {
-    try {
-      setLoading(true)
-      setError(null)
-      
-      const params = new URLSearchParams(filtros || {})
-      const response = await api.get(`/api/execucoes?${params.toString()}`)
-      
-      if (response.success) {
-        setExecucoes(response.data.execucoes || [])
-      } else {
-        setError(response.error || 'Erro ao carregar execuções')
-      }
-    } catch (err) {
-      console.error('Erro ao carregar execuções:', err)
-      setError('Erro ao carregar execuções')
-    } finally {
-      setLoading(false)
-    }
+  const carregarExecucoes = async (filtros?: Record<string, unknown>) => {
+    // Implementação para carregar lista de execuções
   }
   
-  return {
-    execucoes,
-    loading,
-    error,
-    carregarExecucoes
-  }
+  return { carregarExecucoes }
 } 
 

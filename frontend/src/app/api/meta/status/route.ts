@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
@@ -11,7 +27,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Dados do usuÃ¡Â¡rio nÃ¡Â£o encontrados' }, { status: 401 })
     }
 
-    const { bar_id } = JSON.parse(userDataHeader)
+    const { bar_id } = JSON.parse(userDataHeader) as unknown
 
     // 1. Verificar credenciais Meta
     const { data: credenciais } = await supabase
@@ -61,7 +77,7 @@ export async function GET(request: NextRequest) {
     const { data: pgcronJobs } = await supabase
       .rpc('get_cron_jobs')
 
-    const metaJob = pgcronJobs?.find((job: any) => 
+    const metaJob = pgcronJobs?.find((job: unknown) => 
       job.jobname?.includes(`meta_sync_bar_${bar_id}`)
     )
 
@@ -104,7 +120,7 @@ export async function GET(request: NextRequest) {
     let pageInfo = {}
     if (credenciais.configuracao_json) {
       try {
-        const config = JSON.parse(credenciais.configuracao_json)
+        const config = JSON.parse(credenciais.configuracao_json) as unknown
         pageInfo = {
           facebookPageId: config.facebook_page_id,
           instagramAccountId: config.instagram_account_id,

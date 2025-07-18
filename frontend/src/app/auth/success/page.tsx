@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
@@ -87,7 +103,7 @@ export default function AuthSuccessPage() {
         console.log('Ã°Å¸â€œâ€¹ Contas encontradas:', accountsData.accounts?.length || 0)
         
         // Adicionar informaÃ¡Â§Ã¡Âµes das contas ao token
-        const existingToken = JSON.parse(localStorage.getItem('google_oauth_token') || '{}')
+        const existingToken = JSON.parse(localStorage.getItem('google_oauth_token') as unknown || '{}')
         existingToken.my_business_accounts = accountsData.accounts || []
         localStorage.setItem('google_oauth_token', JSON.stringify(existingToken))
         

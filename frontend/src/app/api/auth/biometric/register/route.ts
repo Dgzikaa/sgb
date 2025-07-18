@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -51,7 +67,7 @@ export async function POST(request: NextRequest) {
     const existingCredentials = usuario.biometric_credentials || []
     
     // Verificar se credencial jÃ¡Â¡ existe
-    const credentialExists = existingCredentials.some((cred: any) => cred.id === credentialId)
+    const credentialExists = existingCredentials.some((cred: unknown) => cred.id === credentialId)
     if (credentialExists) {
       return NextResponse.json(
         { error: 'Credencial biomÃ¡Â©trica jÃ¡Â¡ estÃ¡Â¡ registrada' },

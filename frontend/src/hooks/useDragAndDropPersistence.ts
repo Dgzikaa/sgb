@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { useState, useEffect, useCallback } from 'react'
 
 export interface PersistenceOptions {
@@ -28,7 +44,7 @@ export function useDragAndDropPersistence<T>(
     try {
       const stored = localStorage.getItem(storageKey)
       if (stored) {
-        const parsedItems = JSON.parse(stored)
+        const parsedItems = JSON.parse(stored) as unknown
         
         // Validate that stored items have same structure
         if (Array.isArray(parsedItems) && parsedItems.length > 0) {
@@ -77,22 +93,22 @@ export function useDragAndDropPersistence<T>(
     const hasIds = defaults.every(item => item && typeof item === 'object' && 'id' in item)
     
     if (hasIds) {
-      const defaultMap = new Map(defaults.map((item) => [(item as any).id, item]))
-      const storedMap = new Map(stored.map((item) => [(item as any).id, item]))
+      const defaultMap = new Map(defaults.map((item) => [(item as unknown).id, item]))
+      const storedMap = new Map(stored.map((item) => [(item as unknown).id, item]))
       
       // Preserve order from stored, add new items from defaults
       const merged: T[] = []
       
       // First, add stored items that still exist in defaults
       stored.forEach(item => {
-        if (defaultMap.has((item as any).id)) {
+        if (defaultMap.has((item as unknown).id)) {
           merged.push(item)
         }
       })
       
       // Then, add new items from defaults that aren't in stored
       defaults.forEach(item => {
-        if (!storedMap.has((item as any).id)) {
+        if (!storedMap.has((item as unknown).id)) {
           merged.push(item)
         }
       })
@@ -183,7 +199,7 @@ export function useMultipleDragAndDropPersistence<T>(
 }
 
 // Hook especÃ¡Â­fico para checklists
-export function useChecklistPersistence(defaultChecklists: any[]) {
+export function useChecklistPersistence(defaultChecklists: unknown[]) {
   return useDragAndDropPersistence(defaultChecklists, {
     key: 'checklists',
     enabled: true,
@@ -193,7 +209,7 @@ export function useChecklistPersistence(defaultChecklists: any[]) {
 }
 
 // Hook especÃ¡Â­fico para tasks
-export function useTasksPersistence(defaultTasks: any[]) {
+export function useTasksPersistence(defaultTasks: unknown[]) {
   return useDragAndDropPersistence(defaultTasks, {
     key: 'tasks',
     enabled: true,

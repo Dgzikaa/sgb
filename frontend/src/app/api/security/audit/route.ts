@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase-admin'
 
@@ -9,7 +25,7 @@ interface SecurityEvent {
   endpoint?: string;
   details?: {
     resource?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   timestamp: string;
   ip_address?: string;
@@ -25,9 +41,9 @@ interface AuditLogPostBody {
   ip_address?: string | null;
   user_agent?: string | null;
   resource?: string | null;
-  old_value?: any;
-  new_value?: any;
-  details?: Record<string, any>;
+  old_value?: unknown;
+  new_value?: unknown;
+  details?: Record<string, unknown>;
 }
 
 export async function GET(request: NextRequest) {

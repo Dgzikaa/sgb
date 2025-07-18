@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿// Sistema de backup automÃ¡Â¡tico para dados crÃ¡Â­ticos
 import { getAdminClient } from '@/lib/supabase-admin';
 
@@ -258,7 +274,7 @@ export class BackupSystem {
     return barIdTables.includes(table);
   }
 
-  private async saveBackup(backupId: string, data: any): Promise<{fileSizeMb: number, storagePath: string}> {
+  private async saveBackup(backupId: string, data: unknown): Promise<{fileSizeMb: number, storagePath: string}> {
     try {
       const supabase = await getAdminClient();
       
@@ -361,7 +377,7 @@ export class BackupSystem {
       
       // Converter de volta para JSON
       const jsonString = new TextDecoder().decode(finalData);
-      const backupData = JSON.parse(jsonString);
+      const backupData = JSON.parse(jsonString) as unknown;
       
       console.log(`Å“â€¦ Backup ${backupFile.name} carregado com sucesso`);
       return backupData;

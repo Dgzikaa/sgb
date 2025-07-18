@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
@@ -59,7 +75,7 @@ export default function MetricasBarrasPage() {
   useEffect(() => {
     const metasConfig = localStorage.getItem('metas-config')
     if (metasConfig) {
-      const config = JSON.parse(metasConfig)
+      const config = JSON.parse(metasConfig) as unknown
       setMetas(config)
     }
   }, [])
@@ -96,7 +112,7 @@ export default function MetricasBarrasPage() {
         console.log(`Ã°Å¸â€™Â° Buscando faturamento CORRETO para ${meses[mes - 1]}: ${dataInicio} atÃ¡Â© ${dataFim}`)
         
         const CHUNK_SIZE = 1000
-        let allFaturamentoData: any[] = []
+        let allFaturamentoData: unknown[] = []
         let offset = 0
         let hasMore = true
         
@@ -142,8 +158,8 @@ export default function MetricasBarrasPage() {
         let clientesPagantes = 0
         
         if (!clientesError && clientesData) {
-          clientes = clientesData.reduce((sum: number, item: any) => sum + parseInt(item.total_pessoas_bruto || '0'), 0)
-          clientesPagantes = clientesData.reduce((sum: number, item: any) => sum + parseInt(item.pessoas_pagantes || '0'), 0)
+          clientes = clientesData.reduce((sum: number, item: unknown) => sum + parseInt(item.total_pessoas_bruto || '0'), 0)
+          clientesPagantes = clientesData.reduce((sum: number, item: unknown) => sum + parseInt(item.pessoas_pagantes || '0'), 0)
           console.log(`Ã°Å¸â€˜Â¥ ${meses[mes - 1]}: ${clientes} pessoas totais, ${clientesPagantes} pagantes`)
         }
         
@@ -175,7 +191,7 @@ export default function MetricasBarrasPage() {
         const dataFimInt = parseInt(dataFim.replace(/-/g, ''))
 
         // TEMPO COZINHA com chunking
-        let allTempoCozinhaData: any[] = []
+        let allTempoCozinhaData: unknown[] = []
         offset = 0
         hasMore = true
         
@@ -207,7 +223,7 @@ export default function MetricasBarrasPage() {
         }
 
         // TEMPO BAR com chunking
-        let allTempoBarData: any[] = []
+        let allTempoBarData: unknown[] = []
         offset = 0
         hasMore = true
         

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
@@ -36,16 +52,16 @@ interface DailyAnalysisData {
     days_analyzed: number
   }
   daily_variations: {
-    daily_changes: Record<string, any>
+    daily_changes: Record<string, unknown>
     avg_daily_engagement: number
     follower_growth_total: number
     best_day: string | null
     worst_day: string | null
   }
   platform_analysis: {
-    instagram: Record<string, any>
-    facebook: Record<string, any>
-    insights: Record<string, any>
+    instagram: Record<string, unknown>
+    facebook: Record<string, unknown>
+    insights: Record<string, unknown>
   }
   trends_and_insights: Array<{
     type: string

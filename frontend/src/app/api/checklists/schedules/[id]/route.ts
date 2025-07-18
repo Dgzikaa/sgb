@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser, authErrorResponse } from '@/middleware/auth'
@@ -125,13 +141,13 @@ export async function POST(request: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ 
         error: 'Dados invÃ¡lidos',
-        details: (error as any).errors 
+        details: (error as unknown).errors 
       }, { status: 400 })
     }
     
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
-      details: (error as any).message 
+      details: (error as unknown).message 
     }, { status: 500 })
   }
 }
@@ -196,7 +212,7 @@ export async function GET(request: NextRequest) {
     console.error('Erro na API de histÃ³rico de notificaÃ§Ãµes:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
-      details: (error as any).message 
+      details: (error as unknown).message 
     }, { status: 500 })
   }
 }
@@ -205,7 +221,7 @@ export async function GET(request: NextRequest) {
 // FUNÃÂ¡Ã¢â¬Â¡ÃÂ¡Ã¢â¬Â¢ES AUXILIARES
 // =====================================================
 
-async function determinarDestinatarios(supabase: any, execucao: any, customizados?: string[], barId?: number) {
+async function determinarDestinatarios(supabase: unknown, execucao: unknown, customizados?: string[], barId?: number) {
   const destinatarios = [];
 
   // 1. DestinatÃÂ¡ÃÂ¡rios do agendamento
@@ -215,7 +231,7 @@ async function determinarDestinatarios(supabase: any, execucao: any, customizado
 
   // 2. DestinatÃÂ¡ÃÂ¡rios customizados (nÃÂ¡ÃÂºmeros diretos)
   if (customizados && customizados.length > 0) {
-    customizados.forEach((numero: any) => {
+    customizados.forEach((numero: unknown) => {
       destinatarios.push({
         nome: 'DestinatÃ¡rio customizado',
         numero: numero,
@@ -234,7 +250,7 @@ async function determinarDestinatarios(supabase: any, execucao: any, customizado
       .not('telefone', 'is', null)
 
     if (admins) {
-      admins.forEach((admin: any) => {
+      admins.forEach((admin: unknown) => {
         if (admin.telefone) {
           destinatarios.push({
             nome: admin.nome,
@@ -248,7 +264,7 @@ async function determinarDestinatarios(supabase: any, execucao: any, customizado
 
   // Remover duplicatas por nÃÂ¡ÃÂºmero
   const numerosUnicos = new Set()
-  return destinatarios.filter((dest: any) => {
+  return destinatarios.filter((dest: unknown) => {
     if (numerosUnicos.has(dest.numero)) {
       return false
     }
@@ -257,7 +273,7 @@ async function determinarDestinatarios(supabase: any, execucao: any, customizado
   })
 }
 
-async function gerarMensagemWhatsApp(execucao: any, dados: any, barId: number) {
+async function gerarMensagemWhatsApp(execucao: unknown, dados: unknown, barId: number) {
   const checklist = execucao.checklist
   const funcionario = execucao.funcionario
   
@@ -317,7 +333,7 @@ _Sistema de GestÃ£o de Bares_`
   return mensagem
 }
 
-async function enviarNotificacoesWhatsApp(supabase: any, destinatarios: any[], mensagem: string, execucao: any, incluirRelatorio: boolean) {
+async function enviarNotificacoesWhatsApp(supabase: unknown, destinatarios: unknown[], mensagem: string, execucao: unknown, incluirRelatorio: boolean) {
   const sucessos = [];
   const falhas = [];
 
@@ -337,7 +353,7 @@ async function enviarNotificacoesWhatsApp(supabase: any, destinatarios: any[], m
       })
 
       if (error) {
-        falhas.push({ destinatario, erro: (error as any).message })
+        falhas.push({ destinatario, erro: (error as unknown).message })
       } else {
         sucessos.push({ destinatario, resultado })
         
@@ -355,14 +371,14 @@ async function enviarNotificacoesWhatsApp(supabase: any, destinatarios: any[], m
         }
       }
     } catch (error) {
-      falhas.push({ destinatario, erro: (error as any).message })
+      falhas.push({ destinatario, erro: (error as unknown).message })
     }
   }
 
   return { sucessos, falhas }
 }
 
-function calcularEstatisticasExecucao(execucao: any) {
+function calcularEstatisticasExecucao(execucao: unknown) {
   const respostas = execucao.respostas || {}
   const totalItens = execucao.progresso?.total_itens || 0
   const itensRespondidos = execucao.progresso?.itens_respondidos || 0
@@ -376,8 +392,8 @@ function calcularEstatisticasExecucao(execucao: any) {
   let problemasEncontrados = 0
 
   if (respostas.secoes) {
-    respostas.secoes.forEach((secao: any) => {
-      secao.itens?.forEach((item: any) => {
+    respostas.secoes.forEach((secao: unknown) => {
+      secao.itens?.forEach((item: unknown) => {
         if (item.tipo === 'sim_nao' && item.valor === 'nao' && item.obrigatorio) {
           scoreQualidade -= 10
           problemasEncontrados++
@@ -397,7 +413,7 @@ function calcularEstatisticasExecucao(execucao: any) {
   }
 }
 
-async function registrarLogNotificacao(supabase: any, dados: any) {
+async function registrarLogNotificacao(supabase: unknown, dados: unknown) {
   const { error } = await supabase
     .from('checklist_notification_logs')
     .insert({

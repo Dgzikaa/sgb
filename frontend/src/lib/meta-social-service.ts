@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { createClient } from '@supabase/supabase-js'
 
 // ========================================
@@ -150,7 +166,7 @@ export class MetaSocialService {
       // X-App-Usage header (Platform Rate Limits)
       const appUsage = response.headers.get('X-App-Usage')
       if (appUsage) {
-        const parsedAppUsage = JSON.parse(appUsage) as {
+        const parsedAppUsage = JSON.parse(appUsage) as unknown as {
           call_count: number;
           total_time: number;
           total_cputime: number;
@@ -167,7 +183,7 @@ export class MetaSocialService {
           total_cputime: number;
           estimated_time_to_regain_access: number;
           type: string;
-        }>> = JSON.parse(bucUsage)
+        }>> = JSON.parse(bucUsage) as unknown
         // Pegar o primeiro business case (normalmente só há um)
         const businessId = Object.keys(parsed)[0]
         if (businessId && parsed[businessId][0]) {

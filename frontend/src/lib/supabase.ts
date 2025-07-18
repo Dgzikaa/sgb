@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { SupabaseClient } from '@supabase/supabase-js';
 
@@ -69,8 +85,8 @@ const supabaseProxy = new Proxy({} as SupabaseClient, {
       };
     }
     if (supabaseClient && typeof prop === 'string' && prop in supabaseClient) {
-      // Acesso dinâmico seguro
-      return (supabaseClient as any)[prop];
+      // Acesso dinâmico seguro com type assertion
+      return (supabaseClient as unknown as Record<string, unknown>)[prop];
     }
     return undefined;
   }

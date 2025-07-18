@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
@@ -110,14 +126,14 @@ export async function GET(request: NextRequest) {
 
     const barsData = bars || [];
     const checklistsData = checklists || [];
-    (userData as any).businessData = {
+    (userData as unknown).businessData = {
       associatedBars: barsData,
       recentChecklists: checklistsData,
       roles: 'Extraído dos bars'
     };
 
     // 6. Dados técnicos
-    (userData as any).technicalData = {
+    (userData as unknown).technicalData = {
       ipAddresses: 'Histórico obtido dos logs',
       userAgents: 'Histórico obtido dos logs',
       cookies: 'Baseado nos consentimentos',

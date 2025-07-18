@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
@@ -60,7 +76,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao } = JSON.parse(userData);
+    const { bar_id, permissao } = JSON.parse(userData) as unknown;
 
     // Verificar permissÃ¡Âµes
     if (permissao !== 'admin') {
@@ -121,7 +137,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao } = JSON.parse(userData);
+    const { bar_id, permissao } = JSON.parse(userData) as unknown;
 
     // Verificar permissÃ¡Âµes (apenas admin pode criar)
     if (permissao !== 'admin') {
@@ -204,7 +220,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao } = JSON.parse(userData);
+    const { bar_id, permissao } = JSON.parse(userData) as unknown;
 
     // Verificar permissÃ¡Âµes
     if (permissao !== 'admin') {
@@ -291,7 +307,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao } = JSON.parse(userData);
+    const { bar_id, permissao } = JSON.parse(userData) as unknown;
 
     // Verificar permissÃ¡Âµes (apenas admin)
     if (permissao !== 'admin') {

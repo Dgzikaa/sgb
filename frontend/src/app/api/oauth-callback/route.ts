@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(req: NextRequest) {
@@ -14,7 +30,7 @@ export async function GET(req: NextRequest) {
     // console.log('Å“â€¦ Tokens:', tokens) // Linha removida pois 'tokens' nÃ¡Â£o existe mais
     return new NextResponse('Autenticado com sucesso. Pode fechar a aba.', { status: 200 })
   } catch (e) {
-    return NextResponse.json({ success: false, error: (e as any).message || String(e) }, { status: 500 })
+    return NextResponse.json({ success: false, error: (e as unknown).message || String(e) }, { status: 500 })
   }
 } 
 

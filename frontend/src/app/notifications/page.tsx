@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
@@ -340,7 +356,7 @@ export default function NotificationsPage() {
                 />
               </div>
 
-              <Select value={filtros.status || ''} onValueChange={(value) => handleFiltros({ ...filtros, status: value as any || undefined })}>
+              <Select value={filtros.status || ''} onValueChange={(value) => handleFiltros({ ...filtros, status: value as unknown || undefined })}>
                 <SelectTrigger className="bg-white dark:bg-gray-700">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>

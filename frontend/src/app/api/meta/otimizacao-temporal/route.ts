@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -92,7 +108,7 @@ export async function GET(request: NextRequest) {
     
     if (userData) {
       try {
-        const parsedUser = JSON.parse(decodeURIComponent(userData))
+        const parsedUser = JSON.parse(decodeURIComponent(userData) as unknown)
         barId = parsedUser.bar_id || 3
         console.log(`Ã°Å¸â€˜Â¤ OtimizaÃ¡Â§Ã¡Â£o Temporal - Usando bar_id: ${barId}`)
       } catch (e) {
@@ -309,7 +325,7 @@ export async function GET(request: NextRequest) {
         'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
       ]
       
-      const padroesSazonais: PadraoSazonal[] = Array.from(dadosPorMes.values()).map((dados: any) => ({
+      const padroesSazonais: PadraoSazonal[] = Array.from(dadosPorMes.values()).map((dados: unknown) => ({
         mes: dados.mes,
         nome: nomesMeses[dados.mes],
         engajamento_medio: dados.posts > 0 ? dados.engajamento / dados.posts : 0,

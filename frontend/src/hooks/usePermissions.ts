@@ -37,7 +37,7 @@ export function usePermissions(): PermissionsHook {
       try {
         const userData = safeLocalStorage.getItem('sgb_user')
         if (userData) {
-          const parsedUser = JSON.parse(userData)
+          const parsedUser = JSON.parse(userData) as unknown
           setUser(parsedUser)
           // Dados do usuário carregados:
         }

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getUserAuth, isAdmin } from '@/lib/auth-helper'
@@ -121,7 +137,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (error) {
-          erros.push(`Evento ${evento.nome}: ${(error as any).message}`)
+          erros.push(`Evento ${evento.nome}: ${(error as unknown).message}`)
           continue
         }
 
@@ -132,7 +148,7 @@ export async function POST(request: NextRequest) {
         }
 
       } catch (error) {
-        erros.push(`Evento ${evento.nome}: ${(error as any).message}`)
+        erros.push(`Evento ${evento.nome}: ${(error as unknown).message}`)
       }
     }
 
@@ -152,7 +168,7 @@ export async function POST(request: NextRequest) {
     console.error('ÂÅ’ Erro na importaÃ¡Â§Ã¡Â£o de eventos:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
-      details: (error as any).message 
+      details: (error as unknown).message 
     }, { status: 500 })
   }
 }

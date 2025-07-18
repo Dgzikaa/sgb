@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser, authErrorResponse } from '@/middleware/auth'
@@ -150,7 +166,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
-      details: (error as any).message 
+      details: (error as unknown).message 
     }, { status: 500 })
   }
 }
@@ -233,7 +249,7 @@ export async function GET(request: NextRequest) {
 
     // Enriquecer atribuiÃ¡Â§Ã¡Âµes com estatÃ¡Â­sticas
     const atribuicoesEnriquecidas = await Promise.all(
-      (atribuicoes || []).map(async (atribuicao: any) => {
+      (atribuicoes || []).map(async (atribuicao: unknown) => {
         const stats = await calcularEstatisticasAtribuicao(supabase, atribuicao.id)
         return {
           ...atribuicao,
@@ -263,7 +279,7 @@ export async function GET(request: NextRequest) {
     console.error('Erro na API de listar atribuiÃ¡Â§Ã¡Âµes:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
-      details: (error as any).message 
+      details: (error as unknown).message 
     }, { status: 500 })
   }
 }
@@ -272,7 +288,7 @@ export async function GET(request: NextRequest) {
 // FUNÃ¡â€¡Ã¡â€¢ES UTILITÃ¡ÂRIAS
 // =====================================================
 
-function validarDadosAtribuicao(data: any) {
+function validarDadosAtribuicao(data: unknown) {
   const erros: string[] = []
 
   // Validar tipo especÃ¡Â­fico
@@ -332,8 +348,8 @@ function validarDadosAtribuicao(data: any) {
   }
 }
 
-async function verificarConflitosAtribuicao(supabase: any, data: any, barId: string) {
-  const conflitos: any[] = [];
+async function verificarConflitosAtribuicao(supabase: unknown, data: unknown, barId: string) {
+  const conflitos: unknown[] = [];
 
   // Buscar atribuiÃ¡Â§Ã¡Âµes existentes que possam conflitar
   const { data: atribuicoesExistentes } = await supabase
@@ -345,7 +361,7 @@ async function verificarConflitosAtribuicao(supabase: any, data: any, barId: str
 
   if (!atribuicoesExistentes) return conflitos
 
-  atribuicoesExistentes.forEach((existente: any) => {
+  atribuicoesExistentes.forEach((existente: unknown) => {
     // Verificar conflitos por tipo
     let temConflito = false
     let motivo = ''
@@ -392,7 +408,7 @@ async function verificarConflitosAtribuicao(supabase: any, data: any, barId: str
   return conflitos
 }
 
-async function criarAgendamentosAutomaticos(supabase: any, atribuicao: any) {
+async function criarAgendamentosAutomaticos(supabase: unknown, atribuicao: unknown) {
   try {
     const agendamentos = gerarAgendamentos(atribuicao, 30) // PrÃ¡Â³ximos 30 dias
 
@@ -412,8 +428,8 @@ async function criarAgendamentosAutomaticos(supabase: any, atribuicao: any) {
   }
 }
 
-function gerarAgendamentos(atribuicao: any, dias: number) {
-  const agendamentos: any[] = [];
+function gerarAgendamentos(atribuicao: unknown, dias: number) {
+  const agendamentos: unknown[] = [];
   const config = atribuicao.configuracao_frequencia
   const dataInicio = new Date(atribuicao.data_inicio)
   const dataFim = atribuicao.data_fim ? new Date(atribuicao.data_fim) : new Date(Date.now() + dias * 24 * 60 * 60 * 1000)
@@ -477,7 +493,7 @@ function gerarAgendamentos(atribuicao: any, dias: number) {
   return agendamentos
 }
 
-function criarAgendamento(atribuicao: any, dataAgendamento: Date) {
+function criarAgendamento(atribuicao: unknown, dataAgendamento: Date) {
   return {
     atribuicao_id: atribuicao.id,
     checklist_id: atribuicao.checklist_id,
@@ -497,7 +513,7 @@ function criarAgendamento(atribuicao: any, dataAgendamento: Date) {
   }
 }
 
-async function calcularEstatisticasAtribuicao(supabase: any, atribuicaoId: string) {
+async function calcularEstatisticasAtribuicao(supabase: unknown, atribuicaoId: string) {
   // Buscar agendamentos desta atribuiÃ¡Â§Ã¡Â£o
   const { data: agendamentos } = await supabase
     .from('checklist_agendamentos')
@@ -515,9 +531,9 @@ async function calcularEstatisticasAtribuicao(supabase: any, atribuicaoId: strin
   }
 
   const agora = new Date()
-  const concluidos = agendamentos.filter((a: any) => a.status === 'concluido').length
-  const pendentes = agendamentos.filter((a: any) => a.status === 'agendado' && new Date(a.data_agendada) > agora).length
-  const atrasados = agendamentos.filter((a: any) => a.status === 'agendado' && new Date(a.data_agendada) <= agora).length
+  const concluidos = agendamentos.filter((a: unknown) => a.status === 'concluido').length
+  const pendentes = agendamentos.filter((a: unknown) => a.status === 'agendado' && new Date(a.data_agendada) > agora).length
+  const atrasados = agendamentos.filter((a: unknown) => a.status === 'agendado' && new Date(a.data_agendada) <= agora).length
 
   return {
     total_agendados: agendamentos.length,
@@ -528,7 +544,7 @@ async function calcularEstatisticasAtribuicao(supabase: any, atribuicaoId: strin
   }
 }
 
-function calcularEstatisticasGerais(atribuicoes: any[]) {
+function calcularEstatisticasGerais(atribuicoes: unknown[]) {
   const total = atribuicoes.length;
   const ativas = atribuicoes.filter((a) => a.ativo).length;
   const inativas = total - ativas;

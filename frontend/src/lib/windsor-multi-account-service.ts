@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 // ========================================
 // 🚀 WINDSOR.AI MULTI-ACCOUNT SERVICE
 // ========================================
@@ -60,8 +76,8 @@ export interface WindsorDataV2 {
   date_from: string
   date_to: string
   connector: string
-  raw_data: any
-  processed_data: any[]
+  raw_data: unknown
+  processed_data: unknown[]
   metrics_collected: string[]
   collected_at: string
   created_at: string
@@ -99,7 +115,7 @@ export interface WindsorLogV2 {
   platform?: string
   platform_account_id?: string
   message: string
-  details: any
+  details: unknown
   created_at: string
 }
 
@@ -540,7 +556,7 @@ export class WindsorMultiAccountService {
     platform?: string
     platformAccountId?: string
     message: string
-    details?: any
+    details?: unknown
   }): Promise<void> {
     try {
       await supabase
@@ -623,8 +639,8 @@ export class WindsorMultiAccountService {
   /**
    * Processar dados do Windsor.ai
    */
-  private processWindsorData(windsorData: any, mapping: WindsorCompanyMapping): any[] {
-    const processed: any[] = []
+  private processWindsorData(windsorData: unknown, mapping: WindsorCompanyMapping): unknown[] {
+    const processed: unknown[] = []
 
     if (!windsorData.data || !Array.isArray(windsorData.data)) {
       return processed

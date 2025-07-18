@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
@@ -61,14 +77,14 @@ const GRUPOS_DRE = [
   }
 ];
 
-function totalGrupo(mes: any, grupo: any) {
+function totalGrupo(mes: unknown, grupo: unknown) {
   return grupo.categorias.reduce((acc: number, cat: string) => acc + (mes.categorias[cat] || 0), 0);
 }
 
-function totalReceitas(mes: any) {
+function totalReceitas(mes: unknown) {
   return GRUPOS_DRE[0].categorias.reduce((acc: number, cat: string) => acc + (mes.categorias[cat] || 0), 0);
 }
-function totalCustos(mes: any) {
+function totalCustos(mes: unknown) {
   // Soma todos os grupos exceto Receita
   return GRUPOS_DRE.slice(1).reduce((acc: number, grupo) => acc + totalGrupo(mes, grupo), 0);
 }
@@ -91,7 +107,7 @@ export default function DREOrdinarioPage() {
       .then(res => {
         if (res.success) {
           // Filtrar meses a partir de fevereiro
-          const filtrados = (res.meses || []).filter((m: any) => m.mes >= 2)
+          const filtrados = (res.meses || []).filter((m: unknown) => m.mes >= 2)
           setDadosMensais(filtrados)
         }
         setLoading(false)

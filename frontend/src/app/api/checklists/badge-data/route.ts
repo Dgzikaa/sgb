@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser } from '@/middleware/auth'
@@ -69,19 +85,19 @@ export async function GET(request: NextRequest) {
     let atrasados = 0
     
     // Contar execuÃ§Ãµes em andamento como pendentes
-    const execucoesPendentesCount = execucoesPendentes?.filter((exec: any) => 
+    const execucoesPendentesCount = execucoesPendentes?.filter((exec: unknown) => 
       exec.status === 'em_andamento' || exec.status === 'pausado'
     ).length || 0
     
     // Contar execuÃ§Ãµes atrasadas (com prazo vencido)
-    const execucoesAtrasadas = execucoesPendentes?.filter((exec: any) => {
+    const execucoesAtrasadas = execucoesPendentes?.filter((exec: unknown) => {
       if (!exec.prazo_execucao) return false
       const prazo = new Date(exec.prazo_execucao)
       return prazo < hoje
     }).length || 0
 
     // Contar agendamentos que deveriam ter execuÃ§Ãµes hoje mas nÃ£o tÃªm
-    const agendamentosHoje = agendamentos?.filter((agendamento: any) => {
+    const agendamentosHoje = agendamentos?.filter((agendamento: unknown) => {
       if (!agendamento.proximo_agendamento) return false
       const proximoAgendamento = new Date(agendamento.proximo_agendamento)
       return proximoAgendamento.toISOString().split('T')[0] <= hojeStr
@@ -114,7 +130,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: false,
       error: 'Erro interno do servidor',
-      details: (error as any).message
+      details: (error as unknown).message
     }, { status: 500 })
   }
 } 

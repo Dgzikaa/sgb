@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -83,7 +99,7 @@ export async function GET(request: NextRequest) {
     console.log('?? ANÃLISE DETALHADA DE STATUS:');
     
     // Contar por status
-    const porStatus = reservas?.reduce((acc: any, r: any) => {
+    const porStatus = reservas?.reduce((acc: unknown, r: unknown) => {
       acc[r.status] = (acc[r.status] || 0) + 1;
       return acc;
     }, {}) || {};
@@ -91,7 +107,7 @@ export async function GET(request: NextRequest) {
     console.log('   ?? Reservas por status:', porStatus);
     
     // Pessoas por status
-    const pessoasPorStatus = reservas?.reduce((acc: any, r: any) => {
+    const pessoasPorStatus = reservas?.reduce((acc: unknown, r: unknown) => {
       acc[r.status] = (acc[r.status] || 0) + (r.numero_pessoas || 0);
       return acc;
     }, {}) || {};
@@ -100,29 +116,29 @@ export async function GET(request: NextRequest) {
 
     const stats = {
       total_reservas: reservas?.length || 0,
-      total_pessoas: reservas?.reduce((sum: number, r: any) => sum + (r.numero_pessoas || 0), 0) || 0,
-      confirmed: reservas?.filter((r: any) => r.status === 'confirmada').length || 0,
-      seated: reservas?.filter((r: any) => r.status === 'finalizada').length || 0,
-      pending: reservas?.filter((r: any) => r.status === 'pendente').length || 0,
+      total_pessoas: reservas?.reduce((sum: number, r: unknown) => sum + (r.numero_pessoas || 0), 0) || 0,
+      confirmed: reservas?.filter((r: unknown) => r.status === 'confirmada').length || 0,
+      seated: reservas?.filter((r: unknown) => r.status === 'finalizada').length || 0,
+      pending: reservas?.filter((r: unknown) => r.status === 'pendente').length || 0,
       
       // **NOVA MÃ‰TRICA: Confirmadas apenas (confirmed + seated)**
-      reservas_confirmadas: reservas?.filter((r: any) => statusConfirmados.includes(r.status)).length || 0,
-      pessoas_confirmadas: reservas?.filter((r: any) => statusConfirmados.includes(r.status)).reduce((sum: number, r: any) => sum + (r.numero_pessoas || 0), 0) || 0,
+      reservas_confirmadas: reservas?.filter((r: unknown) => statusConfirmados.includes(r.status)).length || 0,
+      pessoas_confirmadas: reservas?.filter((r: unknown) => statusConfirmados.includes(r.status)).reduce((sum: number, r: unknown) => sum + (r.numero_pessoas || 0), 0) || 0,
       
       // **NOVA MÃ‰TRICA: Confirmadas + Pendentes (como no planejamento)**
-      reservas_confirmadas_mais_pendentes: reservas?.filter((r: any) => [...statusConfirmados, ...statusPendentes].includes(r.status)).length || 0,
-      pessoas_confirmadas_mais_pendentes: reservas?.filter((r: any) => [...statusConfirmados, ...statusPendentes].includes(r.status)).reduce((sum: number, r: any) => sum + (r.numero_pessoas || 0), 0) || 0,
+      reservas_confirmadas_mais_pendentes: reservas?.filter((r: unknown) => [...statusConfirmados, ...statusPendentes].includes(r.status)).length || 0,
+      pessoas_confirmadas_mais_pendentes: reservas?.filter((r: unknown) => [...statusConfirmados, ...statusPendentes].includes(r.status)).reduce((sum: number, r: unknown) => sum + (r.numero_pessoas || 0), 0) || 0,
       
-      reservas_pendentes: reservas?.filter((r: any) => r.status === 'pendente').length || 0,
-      pessoas_pendentes: reservas?.filter((r: any) => r.status === 'pendente').reduce((sum: number, r: any) => sum + (r.numero_pessoas || 0), 0) || 0,
+      reservas_pendentes: reservas?.filter((r: unknown) => r.status === 'pendente').length || 0,
+      pessoas_pendentes: reservas?.filter((r: unknown) => r.status === 'pendente').reduce((sum: number, r: unknown) => sum + (r.numero_pessoas || 0), 0) || 0,
       
-      canceled: reservas?.filter((r: any) => r.status?.includes('cancelada')).length || 0,
-      no_show: reservas?.filter((r: any) => r.status === 'no_show').length || 0,
-      canceladas_total: reservas?.filter((r: any) => statusCancelados.includes(r.status)).length || 0,
-      pessoas_canceladas: reservas?.filter((r: any) => statusCancelados.includes(r.status)).reduce((sum: number, r: any) => sum + (r.numero_pessoas || 0), 0) || 0,
+      canceled: reservas?.filter((r: unknown) => r.status?.includes('cancelada')).length || 0,
+      no_show: reservas?.filter((r: unknown) => r.status === 'no_show').length || 0,
+      canceladas_total: reservas?.filter((r: unknown) => statusCancelados.includes(r.status)).length || 0,
+      pessoas_canceladas: reservas?.filter((r: unknown) => statusCancelados.includes(r.status)).reduce((sum: number, r: unknown) => sum + (r.numero_pessoas || 0), 0) || 0,
       
       // Agrupamento por horÃ¡rio
-      por_horario: reservas?.reduce((acc: any, reserva: any) => {
+      por_horario: reservas?.reduce((acc: unknown, reserva: unknown) => {
         const hora = reserva.hora_reserva?.substring(0, 2) || '00';
         if (!acc[hora]) {
           acc[hora] = {
@@ -137,7 +153,7 @@ export async function GET(request: NextRequest) {
       }, {}) || {},
 
       // Agrupamento por mesa
-      por_mesa: reservas?.reduce((acc: any, reserva: any) => {
+      por_mesa: reservas?.reduce((acc: unknown, reserva: unknown) => {
         const mesa = reserva.mesa_numero || 'Sem mesa definida';
         if (!acc[mesa]) {
           acc[mesa] = {

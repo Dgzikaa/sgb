@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser, authErrorResponse } from '@/middleware/auth'
@@ -82,7 +98,7 @@ export async function GET(request: NextRequest) {
     console.error('Erro na API de dashboard de produtividade:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
-      details: (error as any).message 
+      details: (error as unknown).message 
     }, { status: 500 })
   }
 }
@@ -91,7 +107,7 @@ export async function GET(request: NextRequest) {
 // FUNÃ¡â€¡Ã¡â€¢ES DE CÃ¡ÂLCULO
 // =====================================================
 
-async function calcularMetricasGerais(supabase: any, barId: string, dataInicio: Date, dataFim: Date) {
+async function calcularMetricasGerais(supabase: unknown, barId: string, dataInicio: Date, dataFim: Date) {
   // Buscar execuÃ¡Â§Ã¡Âµes do perÃ¡Â­odo
   const { data: execucoes } = await supabase
     .from('checklist_execucoes')
@@ -115,18 +131,18 @@ async function calcularMetricasGerais(supabase: any, barId: string, dataInicio: 
     }
   }
 
-  const concluidas = execucoes.filter((e: any) => e.status === 'completado')
-  const pendentes = execucoes.filter((e: any) => ['em_andamento', 'pausado'].includes(e.status))
+  const concluidas = execucoes.filter((e: unknown) => e.status === 'completado')
+  const pendentes = execucoes.filter((e: unknown) => ['em_andamento', 'pausado'].includes(e.status))
   
   const scoreTotal = concluidas
-    .filter((e: any) => e.score_final != null)
-    .reduce((acc: any, e: any) => acc + e.score_final, 0)
+    .filter((e: unknown) => e.score_final != null)
+    .reduce((acc: unknown, e: unknown) => acc + e.score_final, 0)
   
   const tempoTotal = concluidas
-    .filter((e: any) => e.tempo_total_minutos != null)
-    .reduce((acc: any, e: any) => acc + e.tempo_total_minutos, 0)
+    .filter((e: unknown) => e.tempo_total_minutos != null)
+    .reduce((acc: unknown, e: unknown) => acc + e.tempo_total_minutos, 0)
 
-  const funcionariosUnicos = new Set(execucoes.map((e: any) => e.funcionario_id)).size
+  const funcionariosUnicos = new Set(execucoes.map((e: unknown) => e.funcionario_id)).size
 
   return {
     total_execucoes: execucoes.length,
@@ -140,7 +156,7 @@ async function calcularMetricasGerais(supabase: any, barId: string, dataInicio: 
 }
 
 async function calcularRankingFuncionarios(
-  supabase: any, 
+  supabase: unknown, 
   barId: string, 
   dataInicio: Date, 
   dataFim: Date,
@@ -171,21 +187,21 @@ async function calcularRankingFuncionarios(
   let execucoesFiltradas = execucoes
   
   if (funcionarioIdFiltro) {
-    execucoesFiltradas = execucoes.filter((e: any) => e.funcionario_id === funcionarioIdFiltro)
+    execucoesFiltradas = execucoes.filter((e: unknown) => e.funcionario_id === funcionarioIdFiltro)
   }
 
   if (setorFiltro) {
-    execucoesFiltradas = execucoes.filter((e: any) => e.funcionario?.setor === setorFiltro)
+    execucoesFiltradas = execucoes.filter((e: unknown) => e.funcionario?.setor === setorFiltro)
   }
 
   if (cargoFiltro) {
-    execucoesFiltradas = execucoes.filter((e: any) => e.funcionario?.cargo === cargoFiltro)
+    execucoesFiltradas = execucoes.filter((e: unknown) => e.funcionario?.cargo === cargoFiltro)
   }
 
   // Agrupar por funcionÃ¡Â¡rio
   const funcionarios = new Map()
 
-  execucoesFiltradas.forEach((execucao: any) => {
+  execucoesFiltradas.forEach((execucao: unknown) => {
     const funcionarioId = execucao.funcionario_id
     
     if (!funcionarios.has(funcionarioId)) {
@@ -225,7 +241,7 @@ async function calcularRankingFuncionarios(
   })
 
   // Calcular mÃ¡Â©tricas finais e ordenar
-  const ranking = Array.from(funcionarios.values()).map((funcionario: any) => {
+  const ranking = Array.from(funcionarios.values()).map((funcionario: unknown) => {
     const taxa_conclusao = funcionario.total_execucoes > 0 ? 
       Math.round((funcionario.execucoes_concluidas / funcionario.total_execucoes) * 100) : 0
     
@@ -252,17 +268,17 @@ async function calcularRankingFuncionarios(
       // ClassificaÃ¡Â§Ã¡Â£o qualitativa
       classificacao: getClassificacaoDesempenho(score_produtividade, taxa_conclusao)
     }
-  }).sort((a: any, b: any) => b.score_produtividade - a.score_produtividade)
+  }).sort((a: unknown, b: unknown) => b.score_produtividade - a.score_produtividade)
 
   // Adicionar posiÃ¡Â§Ã¡Â£o no ranking
-  return ranking.map((funcionario: any, index: number) => ({
+  return ranking.map((funcionario: unknown, index: number) => ({
     ...funcionario,
     posicao: index + 1,
     dias_ativos: funcionario.dias_ativos // Manter apenas o nÃ¡Âºmero
   }))
 }
 
-async function calcularEvolucaoTemporal(supabase: any, barId: string, dataInicio: Date, dataFim: Date) {
+async function calcularEvolucaoTemporal(supabase: unknown, barId: string, dataInicio: Date, dataFim: Date) {
   const { data: execucoes } = await supabase
     .from('checklist_execucoes')
     .select('iniciado_em, status, score_final')
@@ -274,7 +290,7 @@ async function calcularEvolucaoTemporal(supabase: any, barId: string, dataInicio
   // Agrupar por dia
   const evolucaoPorDia = new Map()
   
-  execucoes.forEach((execucao: any) => {
+  execucoes.forEach((execucao: unknown) => {
     const dia = execucao.iniciado_em.split('T')[0]
     
     if (!evolucaoPorDia.has(dia)) {
@@ -312,7 +328,7 @@ async function calcularEvolucaoTemporal(supabase: any, barId: string, dataInicio
     .sort((a, b) => a.data.localeCompare(b.data))
 }
 
-async function buscarAlertas(supabase: any, barId: string) {
+async function buscarAlertas(supabase: unknown, barId: string) {
   const agora = new Date()
   const alertas = []
 
@@ -335,7 +351,7 @@ async function buscarAlertas(supabase: any, barId: string) {
       severidade: 'alta',
       titulo: `${agendamentosAtrasados.length} agendamento(s) atrasado(s)`,
       descricao: 'Existem checklists que deveriam ter sido executados',
-      itens: agendamentosAtrasados.map((a: any) => ({
+      itens: agendamentosAtrasados.map((a: unknown) => ({
         checklist: a.checklist?.nome,
         funcionario: a.funcionario?.nome,
         data_agendada: a.data_agendada,
@@ -357,10 +373,10 @@ async function buscarAlertas(supabase: any, barId: string) {
     .gte('iniciado_em', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
 
   if (execucoesRecentes) {
-    const funcionariosBaixaPerformance: any[] = [];
+    const funcionariosBaixaPerformance: unknown[] = [];
     const funcionarios = new Map()
 
-    execucoesRecentes.forEach((exec: any) => {
+    execucoesRecentes.forEach((exec: unknown) => {
       if (!funcionarios.has(exec.funcionario_id)) {
         funcionarios.set(exec.funcionario_id, {
           funcionario: exec.funcionario,
@@ -405,7 +421,7 @@ async function buscarAlertas(supabase: any, barId: string) {
   return alertas
 }
 
-async function calcularEstatisticasPorSetor(supabase: any, barId: string, dataInicio: Date, dataFim: Date) {
+async function calcularEstatisticasPorSetor(supabase: unknown, barId: string, dataInicio: Date, dataFim: Date) {
   const { data: execucoes } = await supabase
     .from('checklist_execucoes')
     .select(`
@@ -420,7 +436,7 @@ async function calcularEstatisticasPorSetor(supabase: any, barId: string, dataIn
 
   const setores = new Map()
 
-  execucoes.forEach((exec: any) => {
+  execucoes.forEach((exec: unknown) => {
     const setor = exec.checklist?.setor || 'Sem setor'
     
     if (!setores.has(setor)) {
@@ -457,7 +473,7 @@ async function calcularEstatisticasPorSetor(supabase: any, barId: string, dataIn
     .sort((a, b) => b.total_execucoes - a.total_execucoes)
 }
 
-async function calcularEstatisticasPorCargo(supabase: any, barId: string, dataInicio: Date, dataFim: Date) {
+async function calcularEstatisticasPorCargo(supabase: unknown, barId: string, dataInicio: Date, dataFim: Date) {
   const { data: execucoes } = await supabase
     .from('checklist_execucoes')
     .select(`
@@ -472,7 +488,7 @@ async function calcularEstatisticasPorCargo(supabase: any, barId: string, dataIn
 
   const cargos = new Map()
 
-  execucoes.forEach((exec: any) => {
+  execucoes.forEach((exec: unknown) => {
     const cargo = exec.funcionario?.cargo || 'Sem cargo'
     
     if (!cargos.has(cargo)) {
@@ -509,7 +525,7 @@ async function calcularEstatisticasPorCargo(supabase: any, barId: string, dataIn
     .sort((a, b) => b.total_execucoes - a.total_execucoes)
 }
 
-async function buscarTopChecklists(supabase: any, barId: string, dataInicio: Date, dataFim: Date) {
+async function buscarTopChecklists(supabase: unknown, barId: string, dataInicio: Date, dataFim: Date) {
   const { data: execucoes } = await supabase
     .from('checklist_execucoes')
     .select(`
@@ -526,7 +542,7 @@ async function buscarTopChecklists(supabase: any, barId: string, dataInicio: Dat
 
   const checklists = new Map()
 
-  execucoes.forEach((exec: any) => {
+  execucoes.forEach((exec: unknown) => {
     const checklistId = exec.checklist_id
     
     if (!checklists.has(checklistId)) {

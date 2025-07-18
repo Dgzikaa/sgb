@@ -1,9 +1,25 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
 // Cache das configuraÃ§Ãµes para evitar mÃºltiplas chamadas
-let configCache: any = null
+let configCache: unknown = null
 let cacheTimestamp = 0
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutos
 

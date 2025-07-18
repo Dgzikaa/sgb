@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
@@ -35,14 +51,14 @@ export async function POST(request: NextRequest) {
 
     // Separar por urgÃ¡Âªncia baseado no prazo
     const agora = new Date()
-    const urgentes = checklists?.filter((c: any) => {
+    const urgentes = checklists?.filter((c: unknown) => {
       if (!c.prazo) return false
       const prazo = new Date(c.prazo)
       const horasRestantes = (prazo.getTime() - agora.getTime()) / (1000 * 60 * 60)
       return horasRestantes <= 2 && horasRestantes > 0
     }) || []
 
-    const atrasados = checklists?.filter((c: any) => {
+    const atrasados = checklists?.filter((c: unknown) => {
       if (!c.prazo) return false
       const prazo = new Date(c.prazo)
       return prazo < agora
@@ -51,8 +67,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       meus_pendentes: meusPendentes,
       detalhes: {
-        pending: checklists?.filter((c: any) => c.status === 'pending').length || 0,
-        doing: checklists?.filter((c: any) => c.status === 'doing').length || 0,
+        pending: checklists?.filter((c: unknown) => c.status === 'pending').length || 0,
+        doing: checklists?.filter((c: unknown) => c.status === 'doing').length || 0,
         urgentes: urgentes.length,
         atrasados: atrasados.length,
         no_prazo: meusPendentes - urgentes.length - atrasados.length

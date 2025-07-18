@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
@@ -42,19 +58,19 @@ import { PostHighlightsCard, PostHighlight } from '@/components/marketing/Advanc
 
 interface MetaAnalytics {
   facebook: {
-    current: any;
-    history: any[];
-    error: any;
+    current: unknown;
+    history: unknown[];
+    error: unknown;
   };
   instagram: {
-    current: any;
-    history: any[];
-    error: any;
+    current: unknown;
+    history: unknown[];
+    error: unknown;
   };
   campaigns: {
-    list: any[];
-    stats: any;
-    error: any;
+    list: unknown[];
+    stats: unknown;
+    error: unknown;
   };
   consolidated: {
     total_reach: number;
@@ -82,7 +98,7 @@ interface DailySummary {
     reach_change_today: number;
     followers_change_percent: number;
   };
-  daily_data: any[];
+  daily_data: unknown[];
   campaigns_summary: {
     total_campaigns: number;
     active_campaigns: number;
@@ -91,11 +107,11 @@ interface DailySummary {
 }
 
 interface AdvancedAnalytics {
-  funil_conversao: any;
-  radar_oportunidades: any;
-  otimizacao_temporal: any;
-  customer_journey: any;
-  previsao_performance: any;
+  funil_conversao: unknown;
+  radar_oportunidades: unknown;
+  otimizacao_temporal: unknown;
+  customer_journey: unknown;
+  previsao_performance: unknown;
 }
 
 export default function Marketing360Page() {

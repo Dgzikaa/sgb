@@ -43,7 +43,7 @@ export function getAuthCookie(): UserCookie | null {
     const value = authCookie.split('=')[1]
     if (!value) return null
     
-    const userData = JSON.parse(decodeURIComponent(value)) as UserCookie
+    const userData = JSON.parse(decodeURIComponent(value) as unknown) as UserCookie
     return userData
   } catch (error) {
     console.error('❌ Erro ao ler cookie de autenticação:', error)

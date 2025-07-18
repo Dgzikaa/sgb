@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getValidContaAzulToken } from '@/lib/contaazul-auth-helper'
@@ -102,15 +118,15 @@ export async function GET(request: NextRequest) {
         total_itens: dadosReceitas?.itens?.length || 0,
         tem_data_competencia: false,
         campos_disponiveis: [] as string[],
-        amostra_campos: null as any,
-        primeiro_item: null as any
+        amostra_campos: null as unknown,
+        primeiro_item: null as unknown
       },
       despesas: {
         total_itens: dadosDespesas?.itens?.length || 0,
         tem_data_competencia: false,
         campos_disponiveis: [] as string[],
-        amostra_campos: null as any,
-        primeiro_item: null as any
+        amostra_campos: null as unknown,
+        primeiro_item: null as unknown
       }
     }
 

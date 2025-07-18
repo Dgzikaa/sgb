@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -50,7 +66,7 @@ interface Campaign {
   post_engagements?: number;
   page_likes?: number;
   page_follows?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export async function POST(request: NextRequest) {
@@ -72,9 +88,9 @@ export async function POST(request: NextRequest) {
       console.error('[meta-process] meta_raw nÃ¡Â£o encontrado:', rawError)
       return NextResponse.json({ success: false, error: 'meta_raw nÃ¡Â£o encontrado', details: rawError }, { status: 404 })
     }
-    let rawJson: any;
+    let rawJson: unknown;
     try {
-      rawJson = typeof metaRaw.json_raw === 'string' ? JSON.parse(metaRaw.json_raw) : metaRaw.json_raw
+      rawJson = typeof metaRaw.json_raw === 'string' ? JSON.parse(metaRaw.json_raw) as unknown : metaRaw.json_raw
     } catch (e: unknown) {
       console.error('[meta-process] Erro ao parsear json_raw:', e)
       return NextResponse.json({ success: false, error: 'Erro ao parsear json_raw', details: e }, { status: 500 })
@@ -220,7 +236,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: 'Processamento concluÃ¡Â­do e tabelas populadas.', meta_raw_id: metaRaw.id, logs }, { status: 200 })
     } catch (procError) {
       console.error('[meta-process] Erro no processamento:', procError)
-      const errorMsg = (procError && typeof procError === 'object' && 'message' in procError) ? (procError as any).message : JSON.stringify(procError)
+      const errorMsg = (procError && typeof procError === 'object' && 'message' in procError) ? (procError as unknown).message : JSON.stringify(procError)
       return NextResponse.json({ success: false, error: 'Erro no processamento', details: errorMsg }, { status: 500 })
     }
 

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -114,12 +130,12 @@ async function buscarResumoExecutivo(barId: string) {
       .lt('data_competencia', ontem + 'T23:59:59')
 
     // Calcular totais de hoje
-    const receitasHoje = dadosHoje?.filter((d: any) => d.tipo === 'receita').reduce((acc: any, curr: any) => acc + curr.valor, 0) || 0
-    const despesasHoje = dadosHoje?.filter((d: any) => d.tipo === 'despesa').reduce((acc: any, curr: any) => acc + Math.abs(curr.valor), 0) || 0
+    const receitasHoje = dadosHoje?.filter((d: unknown) => d.tipo === 'receita').reduce((acc: unknown, curr: unknown) => acc + curr.valor, 0) || 0
+    const despesasHoje = dadosHoje?.filter((d: unknown) => d.tipo === 'despesa').reduce((acc: unknown, curr: unknown) => acc + Math.abs(curr.valor), 0) || 0
     
     // Calcular totais de ontem
-    const receitasOntem = dadosOntem?.filter((d: any) => d.tipo === 'receita').reduce((acc: any, curr: any) => acc + curr.valor, 0) || 0
-    const despesasOntem = dadosOntem?.filter((d: any) => d.tipo === 'despesa').reduce((acc: any, curr: any) => acc + Math.abs(curr.valor), 0) || 0
+    const receitasOntem = dadosOntem?.filter((d: unknown) => d.tipo === 'receita').reduce((acc: unknown, curr: unknown) => acc + curr.valor, 0) || 0
+    const despesasOntem = dadosOntem?.filter((d: unknown) => d.tipo === 'despesa').reduce((acc: unknown, curr: unknown) => acc + Math.abs(curr.valor), 0) || 0
 
     // Calcular margem
     const margem = receitasHoje > 0 ? ((receitasHoje - despesasHoje) / receitasHoje) * 100 : 0
@@ -169,9 +185,9 @@ async function buscarOperacoesCriticas(barId: string) {
 
     const checklistStats = {
       total: checklists?.length || 0,
-      concluidos: checklists?.filter((c: any) => c.status === 'completed').length || 0,
-      pendentes: checklists?.filter((c: any) => c.status === 'pending').length || 0,
-      problemas: checklists?.filter((c: any) => c.status === 'problem').length || 0
+      concluidos: checklists?.filter((c: unknown) => c.status === 'completed').length || 0,
+      pendentes: checklists?.filter((c: unknown) => c.status === 'pending').length || 0,
+      problemas: checklists?.filter((c: unknown) => c.status === 'problem').length || 0
     }
 
     // Buscar dados de produÃ¡Â§Ã¡Â£o (simular por enquanto)

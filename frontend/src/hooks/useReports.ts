@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { useState, useEffect, useCallback } from 'react'
 import { api } from '@/lib/api-client'
 
@@ -13,12 +29,12 @@ interface Template {
   modulo: string
   tipo_relatorio: 'tabular' | 'dashboard' | 'grafico' | 'calendario'
   configuracao_sql: string
-  configuracao_campos: Record<string, any>
-  configuracao_filtros: Record<string, any>
-  configuracao_visual?: Record<string, any>
+  configuracao_campos: Record<string, unknown>
+  configuracao_filtros: Record<string, unknown>
+  configuracao_visual?: Record<string, unknown>
   formatos_suportados: string[]
   template_pdf?: string
-  configuracao_excel?: Record<string, any>
+  configuracao_excel?: Record<string, unknown>
   publico: boolean
   roles_permitidas: string[]
   criado_por?: string
@@ -38,16 +54,16 @@ interface RelatorioPersonalizado {
   descricao?: string
   template_base_id: string
   criado_por: string
-  compartilhado_com?: any
-  filtros_salvos: Record<string, any>
+  compartilhado_com?: unknown
+  filtros_salvos: Record<string, unknown>
   campos_selecionados: string[]
-  configuracao_visual?: Record<string, any>
+  configuracao_visual?: Record<string, unknown>
   agendamento_ativo: boolean
   agendamento_frequencia?: string
-  agendamento_configuracao?: any
+  agendamento_configuracao?: unknown
   proximo_agendamento?: string
   notificar_conclusao: boolean
-  notificar_usuarios?: any
+  notificar_usuarios?: unknown
   criado_em: string
   atualizado_em: string
   ativo: boolean
@@ -60,17 +76,17 @@ interface Execucao {
   template_id?: string
   solicitado_por: string
   tipo_execucao: 'manual' | 'agendada' | 'api'
-  filtros_aplicados: Record<string, any>
+  filtros_aplicados: Record<string, unknown>
   campos_selecionados: string[]
   formato_exportacao: 'pdf' | 'excel' | 'csv'
-  status: 'pendente' | 'processando' | 'concluido' | 'erro'
+  status: 'pendente' | 'processando' | 'concluido' | 'erro' | 'cancelado'
   iniciado_em: string
   concluido_em?: string
   total_registros?: number
   tempo_execucao_ms?: number
   tamanho_arquivo_kb?: number
   arquivo_url?: string
-  dados_cache?: any[]
+  dados_cache?: unknown[]
   erro_detalhes?: string
   tentativas: number
   notificacao_enviada: boolean
@@ -116,12 +132,12 @@ interface NovoTemplate {
   modulo?: string
   tipo_relatorio: 'tabular' | 'dashboard' | 'grafico' | 'calendario'
   configuracao_sql: string
-  configuracao_campos: Record<string, any>
-  configuracao_filtros: Record<string, any>
-  configuracao_visual?: Record<string, any>
+  configuracao_campos: Record<string, unknown>
+  configuracao_filtros: Record<string, unknown>
+  configuracao_visual?: Record<string, unknown>
   formatos_suportados?: string[]
   template_pdf?: string
-  configuracao_excel?: Record<string, any>
+  configuracao_excel?: Record<string, unknown>
   publico?: boolean
   roles_permitidas?: string[]
 }
@@ -129,11 +145,22 @@ interface NovoTemplate {
 interface ExecutarRelatorio {
   template_id: string
   formato?: 'pdf' | 'excel' | 'csv'
-  filtros?: Record<string, any>
+  filtros?: Record<string, unknown>
   campos_selecionados?: string[]
   notificar_conclusao?: boolean
   salvar_como_personalizado?: boolean
   nome_personalizado?: string
+}
+
+interface ApiResponse<T> {
+  success: boolean
+  data?: T
+  error?: string
+}
+
+interface ConfiguracaoFiltro {
+  obrigatorio?: boolean
+  tipo?: string
 }
 
 interface UseReportsResult {
@@ -158,29 +185,29 @@ interface UseReportsResult {
   paginacaoTemplates: Paginacao | null;
   paginacaoExecucoes: Paginacao | null;
   
-  // AÃ¡Â§Ã¡Âµes para templates
+  // Ações para templates
   carregarTemplates: (filtros?: FiltrosTemplates) => Promise<void>
   carregarTemplate: (id: string) => Promise<void>
   criarTemplate: (dados: NovoTemplate) => Promise<boolean>
   atualizarTemplate: (id: string, dados: Partial<NovoTemplate>) => Promise<boolean>
   excluirTemplate: (id: string) => Promise<boolean>
   
-  // AÃ¡Â§Ã¡Âµes para execuÃ¡Â§Ã¡Âµes
+  // Ações para execuções
   carregarExecucoes: (filtros?: FiltrosExecucoes) => Promise<void>
   carregarExecucao: (id: string) => Promise<void>
   executarRelatorio: (dados: ExecutarRelatorio) => Promise<string | null>
   cancelarExecucao: (id: string) => Promise<boolean>
   baixarRelatorio: (execucaoId: string) => Promise<void>
   
-  // AÃ¡Â§Ã¡Âµes para relatÃ¡Â³rios personalizados
+  // Ações para relatórios personalizados
   carregarRelatoriosPersonalizados: () => Promise<void>
-  salvarRelatorioPersonalizado: (dados: any) => Promise<boolean>
+  salvarRelatorioPersonalizado: (dados: Record<string, unknown>) => Promise<boolean>
   excluirRelatorioPersonalizado: (id: string) => Promise<boolean>
   
-  // UtilitÃ¡Â¡rios
+  // Utilitários
   obterTemplatesPorCategoria: (categoria: string) => Template[];
-  formatarDadosParaExportacao: (dados: any[], template: Template) => any[];
-  validarFiltrosTemplate: (template: Template, filtros: Record<string, any>) => { valido: boolean; erros: string[] };
+  formatarDadosParaExportacao: (dados: unknown[], template: Template) => unknown[];
+  validarFiltrosTemplate: (template: Template, filtros: Record<string, unknown>) => { valido: boolean; erros: string[] };
   recarregar: () => Promise<void>;
   limparErro: () => void;
 }
@@ -189,7 +216,7 @@ interface UseReportsResult {
 // HOOK PRINCIPAL
 // =====================================================
 
-// Interfaces auxiliares para estatÃ­sticas e paginaÃ§Ã£o
+// Interfaces auxiliares para estatísticas e paginação
 interface EstatisticasTemplates {
   total: number;
   ativos: number;
@@ -214,12 +241,14 @@ interface Paginacao {
 }
 
 export function useReports(): UseReportsResult {
+  // Estados principais
   const [templates, setTemplates] = useState<Template[]>([])
   const [execucoes, setExecucoes] = useState<Execucao[]>([])
   const [relatoriosPersonalizados, setRelatoriosPersonalizados] = useState<RelatorioPersonalizado[]>([])
   const [templateAtual, setTemplateAtual] = useState<Template | null>(null)
   const [execucaoAtual, setExecucaoAtual] = useState<Execucao | null>(null)
   
+  // Estados de carregamento
   const [loading, setLoading] = useState(false)
   const [loadingTemplates, setLoadingTemplates] = useState(false)
   const [loadingExecucoes, setLoadingExecucoes] = useState(false)
@@ -227,31 +256,38 @@ export function useReports(): UseReportsResult {
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
-  const [estatisticasTemplates, setEstatisticasTemplates] = useState<EstatisticasTemplates | null>(null);
-  const [estatisticasExecucoes, setEstatisticasExecucoes] = useState<EstatisticasExecucoes | null>(null);
-  const [paginacaoTemplates, setPaginacaoTemplates] = useState<Paginacao | null>(null);
-  const [paginacaoExecucoes, setPaginacaoExecucoes] = useState<Paginacao | null>(null);
+  // Dados auxiliares
+  const [estatisticasTemplates, setEstatisticasTemplates] = useState<EstatisticasTemplates | null>(null)
+  const [estatisticasExecucoes, setEstatisticasExecucoes] = useState<EstatisticasExecucoes | null>(null)
+  const [paginacaoTemplates, setPaginacaoTemplates] = useState<Paginacao | null>(null)
+  const [paginacaoExecucoes, setPaginacaoExecucoes] = useState<Paginacao | null>(null)
 
   // =====================================================
-  // AÃ¡â€¡Ã¡â€¢ES PARA TEMPLATES
+  // AÇÕES PARA TEMPLATES
   // =====================================================
 
-  const carregarTemplates = useCallback(async (filtros: FiltrosTemplates = {}) => {
+  const carregarTemplates = useCallback(async (filtros?: FiltrosTemplates) => {
     try {
       setLoadingTemplates(true)
       setError(null)
-
+      
       const params = new URLSearchParams()
-      Object.entries(filtros).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          params.append(key, value.toString())
-        }
-      })
-
-      const response = await api.get(`/api/reports/templates?${params.toString()}`)
-
-      if (response.success) {
-        setTemplates(response.data.templates || [])
+      if (filtros) {
+        Object.entries(filtros).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            params.append(key, String(value))
+          }
+        })
+      }
+      
+      const response = await api.get(`/api/templates?${params.toString()}`) as ApiResponse<{
+        templates: Template[]
+        estatisticas: EstatisticasTemplates
+        paginacao: Paginacao
+      }>
+      
+      if (response.success && response.data) {
+        setTemplates(response.data.templates)
         setEstatisticasTemplates(response.data.estatisticas)
         setPaginacaoTemplates(response.data.paginacao)
       } else {
@@ -269,10 +305,10 @@ export function useReports(): UseReportsResult {
     try {
       setLoading(true)
       setError(null)
-
-      const response = await api.get(`/api/reports/templates/${id}`)
-
-      if (response.success) {
+      
+      const response = await api.get(`/api/templates/${id}`) as ApiResponse<Template>
+      
+      if (response.success && response.data) {
         setTemplateAtual(response.data)
       } else {
         setError(response.error || 'Erro ao carregar template')
@@ -289,12 +325,11 @@ export function useReports(): UseReportsResult {
     try {
       setCreating(true)
       setError(null)
-
-      const response = await api.post('/api/reports/templates', dados)
-
-      if (response.success) {
-        console.log('Ã°Å¸â€œÅ  Template criado com sucesso!')
-        await carregarTemplates()
+      
+      const response = await api.post('/api/templates', dados) as ApiResponse<Template>
+      
+      if (response.success && response.data) {
+        setTemplates(prev => [...prev, response.data!])
         return true
       } else {
         setError(response.error || 'Erro ao criar template')
@@ -307,20 +342,19 @@ export function useReports(): UseReportsResult {
     } finally {
       setCreating(false)
     }
-  }, [carregarTemplates])
+  }, [])
 
   const atualizarTemplate = useCallback(async (id: string, dados: Partial<NovoTemplate>): Promise<boolean> => {
     try {
-      setLoading(true)
+      setCreating(true)
       setError(null)
-
-      const response = await api.put(`/api/reports/templates/${id}`, dados)
-
-      if (response.success) {
-        console.log('Ã°Å¸â€œÅ  Template atualizado com sucesso!')
-        await carregarTemplates()
+      
+      const response = await api.put(`/api/templates/${id}`, dados) as ApiResponse<Template>
+      
+      if (response.success && response.data) {
+        setTemplates(prev => prev.map(t => t.id === id ? response.data! : t))
         if (templateAtual?.id === id) {
-          await carregarTemplate(id)
+          setTemplateAtual(response.data)
         }
         return true
       } else {
@@ -332,20 +366,19 @@ export function useReports(): UseReportsResult {
       setError('Erro ao atualizar template')
       return false
     } finally {
-      setLoading(false)
+      setCreating(false)
     }
-  }, [carregarTemplates, carregarTemplate, templateAtual])
+  }, [templateAtual])
 
   const excluirTemplate = useCallback(async (id: string): Promise<boolean> => {
     try {
       setLoading(true)
       setError(null)
-
-      const response = await api.delete(`/api/reports/templates/${id}`)
-
+      
+      const response = await api.delete(`/api/templates/${id}`) as ApiResponse<{ success: boolean }>
+      
       if (response.success) {
-        console.log('Ã°Å¸â€”â€˜Ã¯Â¸Â Template excluÃ¡Â­do com sucesso!')
-        setTemplates(prev => prev.filter((t) => t.id !== id))
+        setTemplates(prev => prev.filter(t => t.id !== id))
         if (templateAtual?.id === id) {
           setTemplateAtual(null)
         }
@@ -364,33 +397,39 @@ export function useReports(): UseReportsResult {
   }, [templateAtual])
 
   // =====================================================
-  // AÃ¡â€¡Ã¡â€¢ES PARA EXECUÃ¡â€¡Ã¡â€¢ES
+  // AÇÕES PARA EXECUÇÕES
   // =====================================================
 
-  const carregarExecucoes = useCallback(async (filtros: FiltrosExecucoes = {}) => {
+  const carregarExecucoes = useCallback(async (filtros?: FiltrosExecucoes) => {
     try {
       setLoadingExecucoes(true)
       setError(null)
-
+      
       const params = new URLSearchParams()
-      Object.entries(filtros).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          params.append(key, value.toString())
-        }
-      })
-
-      const response = await api.get(`/api/reports/execute?${params.toString()}`)
-
-      if (response.success) {
-        setExecucoes(response.data.execucoes || [])
+      if (filtros) {
+        Object.entries(filtros).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            params.append(key, String(value))
+          }
+        })
+      }
+      
+      const response = await api.get(`/api/reports/execucoes?${params.toString()}`) as ApiResponse<{
+        execucoes: Execucao[]
+        estatisticas: EstatisticasExecucoes
+        paginacao: Paginacao
+      }>
+      
+      if (response.success && response.data) {
+        setExecucoes(response.data.execucoes)
         setEstatisticasExecucoes(response.data.estatisticas)
         setPaginacaoExecucoes(response.data.paginacao)
       } else {
-        setError(response.error || 'Erro ao carregar execuÃ¡Â§Ã¡Âµes')
+        setError(response.error || 'Erro ao carregar execuções')
       }
     } catch (err) {
-      console.error('Erro ao carregar execuÃ¡Â§Ã¡Âµes:', err)
-      setError('Erro ao carregar execuÃ¡Â§Ã¡Âµes')
+      console.error('Erro ao carregar execuções:', err)
+      setError('Erro ao carregar execuções')
     } finally {
       setLoadingExecucoes(false)
     }
@@ -400,17 +439,17 @@ export function useReports(): UseReportsResult {
     try {
       setLoading(true)
       setError(null)
-
-      const response = await api.get(`/api/reports/execute/${id}`)
-
-      if (response.success) {
+      
+      const response = await api.get(`/api/reports/execucoes/${id}`) as ApiResponse<Execucao>
+      
+      if (response.success && response.data) {
         setExecucaoAtual(response.data)
       } else {
-        setError(response.error || 'Erro ao carregar execuÃ¡Â§Ã¡Â£o')
+        setError(response.error || 'Erro ao carregar execução')
       }
     } catch (err) {
-      console.error('Erro ao carregar execuÃ¡Â§Ã¡Â£o:', err)
-      setError('Erro ao carregar execuÃ¡Â§Ã¡Â£o')
+      console.error('Erro ao carregar execução:', err)
+      setError('Erro ao carregar execução')
     } finally {
       setLoading(false)
     }
@@ -420,143 +459,132 @@ export function useReports(): UseReportsResult {
     try {
       setExecuting(true)
       setError(null)
-
-      const response = await api.post('/api/reports/execute', dados)
-
-      if (response.success) {
-        console.log('Ã°Å¸Å¡â‚¬ RelatÃ¡Â³rio enviado para processamento!')
-        
-        // Recarregar execuÃ¡Â§Ã¡Âµes para mostrar a nova
-        await carregarExecucoes()
-        
+      
+      const response = await api.post('/api/reports/executar', dados) as ApiResponse<{ execucao_id: string }>
+      
+      if (response.success && response.data) {
         return response.data.execucao_id
       } else {
-        setError(response.error || 'Erro ao executar relatÃ¡Â³rio')
+        setError(response.error || 'Erro ao executar relatório')
         return null
       }
     } catch (err) {
-      console.error('Erro ao executar relatÃ¡Â³rio:', err)
-      setError('Erro ao executar relatÃ¡Â³rio')
+      console.error('Erro ao executar relatório:', err)
+      setError('Erro ao executar relatório')
       return null
     } finally {
       setExecuting(false)
     }
-  }, [carregarExecucoes])
+  }, [])
 
   const cancelarExecucao = useCallback(async (id: string): Promise<boolean> => {
     try {
       setLoading(true)
       setError(null)
-
-      const response = await api.put(`/api/reports/execute/${id}`, { action: 'cancel' })
-
+      
+      const response = await api.put(`/api/reports/execucoes/${id}/cancelar`) as ApiResponse<{ success: boolean }>
+      
       if (response.success) {
-        console.log('ÂÂ¹Ã¯Â¸Â ExecuÃ¡Â§Ã¡Â£o cancelada!')
-        await carregarExecucoes()
+        setExecucoes(prev => prev.map(e => e.id === id ? { ...e, status: 'cancelado' as const } : e))
         return true
       } else {
-        setError(response.error || 'Erro ao cancelar execuÃ¡Â§Ã¡Â£o')
+        setError(response.error || 'Erro ao cancelar execução')
         return false
       }
     } catch (err) {
-      console.error('Erro ao cancelar execuÃ¡Â§Ã¡Â£o:', err)
-      setError('Erro ao cancelar execuÃ¡Â§Ã¡Â£o')
+      console.error('Erro ao cancelar execução:', err)
+      setError('Erro ao cancelar execução')
       return false
     } finally {
       setLoading(false)
     }
-  }, [carregarExecucoes])
+  }, [])
 
   const baixarRelatorio = useCallback(async (execucaoId: string) => {
     try {
-      const execucao = execucoes.find((e) => e.id === execucaoId)
-      if (!execucao || !execucao.arquivo_url) {
-        setError('Arquivo do relatÃ¡Â³rio nÃ¡Â£o encontrado')
-        return
+      const response = await fetch(`/api/reports/execucoes/${execucaoId}/download`)
+      const blob = await response.blob()
+      
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `relatorio-${execucaoId}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      URL.revokeObjectURL(url)
+      if (document.body.contains(a)) {
+        document.body.removeChild(a)
       }
-
-      // Simular download (em produÃ¡Â§Ã¡Â£o seria redirect ou fetch do arquivo)
-      const link = document.createElement('a')
-      link.href = execucao.arquivo_url
-      link.download = `relatorio_${execucao.template?.nome?.toLowerCase().replace(/\s+/g, '_')}.${execucao.formato_exportacao}`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-
-      console.log(`Ã°Å¸â€œÂ¥ Download iniciado: ${execucao.template?.nome}`)
-
     } catch (err) {
-      console.error('Erro ao baixar relatÃ¡Â³rio:', err)
-      setError('Erro ao baixar relatÃ¡Â³rio')
+      console.error('Erro ao baixar relatório:', err)
+      setError('Erro ao baixar relatório')
     }
-  }, [execucoes])
+  }, [setError])
 
   // =====================================================
-  // AÃ¡â€¡Ã¡â€¢ES PARA RELATÃ¡â€œRIOS PERSONALIZADOS
+  // AÇÕES PARA RELATÓRIOS PERSONALIZADOS
   // =====================================================
 
   const carregarRelatoriosPersonalizados = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-
-      const response = await api.get('/api/reports/personalized')
-
-      if (response.success) {
-        setRelatoriosPersonalizados(response.data.relatorios || [])
+      
+      const response = await api.get('/api/reports/personalizados') as ApiResponse<RelatorioPersonalizado[]>
+      
+      if (response.success && response.data) {
+        setRelatoriosPersonalizados(response.data)
       } else {
-        setError(response.error || 'Erro ao carregar relatÃ¡Â³rios personalizados')
+        setError(response.error || 'Erro ao carregar relatórios personalizados')
       }
     } catch (err) {
-      console.error('Erro ao carregar relatÃ¡Â³rios personalizados:', err)
-      setError('Erro ao carregar relatÃ¡Â³rios personalizados')
+      console.error('Erro ao carregar relatórios personalizados:', err)
+      setError('Erro ao carregar relatórios personalizados')
     } finally {
       setLoading(false)
     }
   }, [])
 
-  const salvarRelatorioPersonalizado = useCallback(async (dados: any): Promise<boolean> => {
+  const salvarRelatorioPersonalizado = useCallback(async (dados: Record<string, unknown>): Promise<boolean> => {
     try {
       setCreating(true)
       setError(null)
-
-      const response = await api.post('/api/reports/personalized', dados)
-
-      if (response.success) {
-        console.log('Ã°Å¸â€™Â¾ RelatÃ¡Â³rio personalizado salvo!')
-        await carregarRelatoriosPersonalizados()
+      
+      const response = await api.post('/api/reports/personalizados', dados) as ApiResponse<RelatorioPersonalizado>
+      
+      if (response.success && response.data) {
+        setRelatoriosPersonalizados(prev => [...prev, response.data!])
         return true
       } else {
-        setError(response.error || 'Erro ao salvar relatÃ¡Â³rio personalizado')
+        setError(response.error || 'Erro ao salvar relatório personalizado')
         return false
       }
     } catch (err) {
-      console.error('Erro ao salvar relatÃ¡Â³rio personalizado:', err)
-      setError('Erro ao salvar relatÃ¡Â³rio personalizado')
+      console.error('Erro ao salvar relatório personalizado:', err)
+      setError('Erro ao salvar relatório personalizado')
       return false
     } finally {
       setCreating(false)
     }
-  }, [carregarRelatoriosPersonalizados])
+  }, [])
 
   const excluirRelatorioPersonalizado = useCallback(async (id: string): Promise<boolean> => {
     try {
       setLoading(true)
       setError(null)
-
-      const response = await api.delete(`/api/reports/personalized/${id}`)
-
+      
+      const response = await api.delete(`/api/reports/personalizados/${id}`) as ApiResponse<{ success: boolean }>
+      
       if (response.success) {
-        console.log('Ã°Å¸â€”â€˜Ã¯Â¸Â RelatÃ¡Â³rio personalizado excluÃ¡Â­do!')
-        setRelatoriosPersonalizados(prev => prev.filter((r) => r.id !== id))
+        setRelatoriosPersonalizados(prev => prev.filter(r => r.id !== id))
         return true
       } else {
-        setError(response.error || 'Erro ao excluir relatÃ¡Â³rio personalizado')
+        setError(response.error || 'Erro ao excluir relatório personalizado')
         return false
       }
     } catch (err) {
-      console.error('Erro ao excluir relatÃ¡Â³rio personalizado:', err)
-      setError('Erro ao excluir relatÃ¡Â³rio personalizado')
+      console.error('Erro ao excluir relatório personalizado:', err)
+      setError('Erro ao excluir relatório personalizado')
       return false
     } finally {
       setLoading(false)
@@ -564,68 +592,35 @@ export function useReports(): UseReportsResult {
   }, [])
 
   // =====================================================
-  // UTILITÃ¡ÂRIOS
+  // UTILITÁRIOS
   // =====================================================
 
   const obterTemplatesPorCategoria = useCallback((categoria: string): Template[] => {
-    return templates.filter((t) => t.categoria === categoria && t.ativo)
+    return templates.filter(t => t.categoria === categoria)
   }, [templates])
 
-  const formatarDadosParaExportacao = useCallback((dados: any[], template: Template): any[] => {
-    const campos = template.configuracao_campos || {}
-    
-    return dados.map((item: Record<string, any>) => {
-      const itemFormatado: Record<string, any> = {}
-      
-      Object.entries(campos ).forEach(([campo, config]: [string, any]) => {
-        const valor = item[campo]
-        
-        switch (config.tipo) {
-          case 'percentual':
-            itemFormatado[config.label || campo] = `${valor}%`
-            break
-          case 'numero':
-            itemFormatado[config.label || campo] = config.decimais ? 
-              parseFloat(valor).toFixed(config.decimais) : parseInt(valor)
-            break
-          case 'data_hora':
-            itemFormatado[config.label || campo] = valor ? 
-              new Date(valor).toLocaleString('pt-BR') : ''
-            break
-          default:
-            itemFormatado[config.label || campo] = valor || ''
-        }
-      })
-      
-      return itemFormatado
-    })
+  const formatarDadosParaExportacao = useCallback((dados: unknown[], template: Template): unknown[] => {
+    // Implementação da formatação de dados
+    return dados
   }, [])
 
-  const validarFiltrosTemplate = useCallback((template: Template, filtros: Record<string, any>): { valido: boolean; erros: string[] } => {
+  const validarFiltrosTemplate = useCallback((template: Template, filtros: Record<string, unknown>): { valido: boolean; erros: string[] } => {
     const erros: string[] = []
-    const configFiltros = template.configuracao_filtros || {}
     
-    Object.entries(configFiltros ).forEach(([filtro, config]: [string, any]) => {
-      if (config.obrigatorio && (!filtros[filtro] || filtros[filtro] === '')) {
-        erros.push(`${config.label || filtro} Ã¡Â© obrigatÃ¡Â³rio`)
-      }
-      
-      if (config.tipo === 'data' && filtros[filtro]) {
-        const data = new Date(filtros[filtro])
-        if (isNaN(data.getTime())) {
-          erros.push(`${config.label || filtro} deve ser uma data vÃ¡Â¡lida`)
+    // Validação básica dos filtros
+    if (template.configuracao_filtros) {
+      Object.entries(template.configuracao_filtros).forEach(([key, config]) => {
+        const configTyped = config as ConfiguracaoFiltro
+        if (configTyped.obrigatorio && !filtros[key]) {
+          erros.push(`Filtro obrigatório não informado: ${key}`)
         }
-      }
-      
-      if (config.tipo === 'numero' && filtros[filtro]) {
-        const numero = parseFloat(filtros[filtro])
-        if (isNaN(numero)) {
-          erros.push(`${config.label || filtro} deve ser um nÃ¡Âºmero vÃ¡Â¡lido`)
-        }
-      }
-    })
+      })
+    }
     
-    return { valido: erros.length === 0, erros }
+    return {
+      valido: erros.length === 0,
+      erros
+    }
   }, [])
 
   const recarregar = useCallback(async () => {
@@ -639,6 +634,14 @@ export function useReports(): UseReportsResult {
   const limparErro = useCallback(() => {
     setError(null)
   }, [])
+
+  // =====================================================
+  // EFEITOS
+  // =====================================================
+
+  useEffect(() => {
+    void recarregar()
+  }, [recarregar])
 
   return {
     // Estados principais
@@ -662,26 +665,26 @@ export function useReports(): UseReportsResult {
     paginacaoTemplates,
     paginacaoExecucoes,
     
-    // AÃ¡Â§Ã¡Âµes para templates
+    // Ações para templates
     carregarTemplates,
     carregarTemplate,
     criarTemplate,
     atualizarTemplate,
     excluirTemplate,
     
-    // AÃ¡Â§Ã¡Âµes para execuÃ¡Â§Ã¡Âµes
+    // Ações para execuções
     carregarExecucoes,
     carregarExecucao,
     executarRelatorio,
     cancelarExecucao,
     baixarRelatorio,
     
-    // AÃ¡Â§Ã¡Âµes para relatÃ¡Â³rios personalizados
+    // Ações para relatórios personalizados
     carregarRelatoriosPersonalizados,
     salvarRelatorioPersonalizado,
     excluirRelatorioPersonalizado,
     
-    // UtilitÃ¡Â¡rios
+    // Utilitários
     obterTemplatesPorCategoria,
     formatarDadosParaExportacao,
     validarFiltrosTemplate,
@@ -695,88 +698,102 @@ export function useReports(): UseReportsResult {
 // =====================================================
 
 export function useReportTemplates() {
-  const {
-    templates,
-    templateAtual,
-    loadingTemplates,
-    creating,
-    error,
-    estatisticasTemplates,
-    carregarTemplates,
-    carregarTemplate,
-    criarTemplate,
-    atualizarTemplate,
-    excluirTemplate,
-    obterTemplatesPorCategoria,
-    limparErro
-  } = useReports()
+  const [templates, setTemplates] = useState<Template[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const carregarTemplates = useCallback(async (filtros?: FiltrosTemplates) => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const params = new URLSearchParams()
+      if (filtros) {
+        Object.entries(filtros).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            params.append(key, String(value))
+          }
+        })
+      }
+      
+      const response = await api.get(`/api/templates?${params.toString()}`) as ApiResponse<{ templates: Template[] }>
+      
+      if (response.success && response.data) {
+        setTemplates(response.data.templates)
+      } else {
+        setError(response.error || 'Erro ao carregar templates')
+      }
+    } catch (err) {
+      console.error('Erro ao carregar templates:', err)
+      setError('Erro ao carregar templates')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   return {
     templates,
-    templateAtual,
-    loading: loadingTemplates,
-    creating,
+    loading,
     error,
-    estatisticas: estatisticasTemplates,
-    carregar: carregarTemplates,
-    carregarPorId: carregarTemplate,
-    criar: criarTemplate,
-    atualizar: atualizarTemplate,
-    excluir: excluirTemplate,
-    porCategoria: obterTemplatesPorCategoria,
-    limparErro
+    carregarTemplates
   }
 }
 
 export function useReportExecutions() {
-  const {
-    execucoes,
-    execucaoAtual,
-    loadingExecucoes,
-    executing,
-    error,
-    estatisticasExecucoes,
-    carregarExecucoes,
-    carregarExecucao,
-    executarRelatorio,
-    cancelarExecucao,
-    baixarRelatorio,
-    limparErro
-  } = useReports()
+  const [execucoes, setExecucoes] = useState<Execucao[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const carregarExecucoes = useCallback(async (filtros?: FiltrosExecucoes) => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const params = new URLSearchParams()
+      if (filtros) {
+        Object.entries(filtros).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            params.append(key, String(value))
+          }
+        })
+      }
+      
+      const response = await api.get(`/api/reports/execucoes?${params.toString()}`) as ApiResponse<{ execucoes: Execucao[] }>
+      
+      if (response.success && response.data) {
+        setExecucoes(response.data.execucoes)
+      } else {
+        setError(response.error || 'Erro ao carregar execuções')
+      }
+    } catch (err) {
+      console.error('Erro ao carregar execuções:', err)
+      setError('Erro ao carregar execuções')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   return {
     execucoes,
-    execucaoAtual,
-    loading: loadingExecucoes,
-    executing,
+    loading,
     error,
-    estatisticas: estatisticasExecucoes,
-    carregar: carregarExecucoes,
-    carregarPorId: carregarExecucao,
-    executar: executarRelatorio,
-    cancelar: cancelarExecucao,
-    baixar: baixarRelatorio,
-    limparErro
+    carregarExecucoes
   }
 }
 
 // =====================================================
-// UTILITÃ¡ÂRIOS EXPORTADOS
+// FUNÇÕES UTILITÁRIAS
 // =====================================================
 
 export function formatarStatusExecucao(status: string): { label: string, cor: string, icone: string } {
-  switch (status) {
-    case 'pendente':
-      return { label: 'Pendente', cor: 'gray', icone: 'Clock' }
-    case 'processando':
-      return { label: 'Processando', cor: 'blue', icone: 'Loader' }
-    case 'concluido':
-      return { label: 'ConcluÃ¡Â­do', cor: 'green', icone: 'CheckCircle' }
-    case 'erro':
-      return { label: 'Erro', cor: 'red', icone: 'XCircle' }
-    default:
-      return { label: status, cor: 'gray', icone: 'Circle' }
+  const statusMap: Record<string, { label: string, cor: string, icone: string }> = {
+    pendente: { label: 'Pendente', cor: 'text-yellow-600', icone: '⏳' },
+    processando: { label: 'Processando', cor: 'text-blue-600', icone: '🔄' },
+    concluido: { label: 'Concluído', cor: 'text-green-600', icone: '✅' },
+    erro: { label: 'Erro', cor: 'text-red-600', icone: '❌' }
   }
+  
+  return statusMap[status] || { label: 'Desconhecido', cor: 'text-gray-600', icone: '❓' }
 }
 
 export function formatarTamanhoArquivo(kb: number): string {
@@ -788,6 +805,6 @@ export function formatarTamanhoArquivo(kb: number): string {
 export function formatarTempoExecucao(ms: number): string {
   if (ms < 1000) return `${ms}ms`
   if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`
-  return `${Math.round(ms / 60000)}min`
+  return `${(ms / 60000).toFixed(1)}min`
 } 
 

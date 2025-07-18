@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useRef, useEffect } from 'react'
@@ -30,7 +46,7 @@ export interface WidgetConfig {
   position: { x: number; y: number }
   visible: boolean
   refreshInterval?: number
-  customConfig?: Record<string, any>
+  customConfig?: Record<string, unknown>
 }
 
 export interface DashboardWidgetProps {

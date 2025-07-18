@@ -1,10 +1,26 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { ReactNode, forwardRef, useRef, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { DragHandlers } from '@/hooks/useDragAndDrop'
 
 export interface DraggableItemProps {
   children: ReactNode
-  item: any
+  item: unknown
   dragHandlers: DragHandlers
   isDragging?: boolean
   isDragOver?: boolean

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -73,7 +89,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Processar dados do webhook Windsor.ai
-async function processWindsorWebhookData(webhookData: any) {
+async function processWindsorWebhookData(webhookData: unknown) {
   const processed: Array<{
     bar_id?: number
     platform: string
@@ -88,7 +104,7 @@ async function processWindsorWebhookData(webhookData: any) {
     ctr: number
     cpc: number
     cpm: number
-    raw_row: any
+    raw_row: unknown
   }> = []
 
   for (const row of webhookData.data) {
@@ -119,7 +135,7 @@ async function processWindsorWebhookData(webhookData: any) {
 }
 
 // Identificar bar_id baseado nos dados recebidos
-async function identifyBarFromData(row: any): Promise<number | undefined> {
+async function identifyBarFromData(row: unknown): Promise<number | undefined> {
   try {
     // Buscar por campaign_name que contenha identificadores do bar
     if (row.campaign_name) {

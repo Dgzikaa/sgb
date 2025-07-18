@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
@@ -140,7 +156,7 @@ export async function GET(request: NextRequest) {
       let pedidosCozinha = 0
       let pedidosBar = 0
 
-      temposData.forEach((item: any) => {
+      temposData.forEach((item: unknown) => {
         const produto = item.prd_desc || ''
         const grupo = item.grp_desc || ''
         const quantidade = parseInt(item.itm_qtd || '1')

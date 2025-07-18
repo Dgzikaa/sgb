@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
@@ -62,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     let payload;
     try {
-      payload = JSON.parse(body);
+      payload = JSON.parse(body) as unknown;
     } catch (error) {
       console.error('Payload JSON invÃ¡Â¡lido:', error);
       return NextResponse.json({ error: 'JSON invÃ¡Â¡lido' }, { status: 400 });
@@ -119,7 +135,7 @@ export async function POST(request: NextRequest) {
 async function identifyBarFromWebhook(payload: unknown): Promise<number | null> {
   try {
     // Extrair phone_number_id do webhook
-    const phoneNumberId = (payload as any)?.entry?.[0]?.changes?.[0]?.value?.metadata?.phone_number_id;
+    const phoneNumberId = (payload as unknown)?.entry?.[0]?.changes?.[0]?.value?.metadata?.phone_number_id;
     
     if (!phoneNumberId) {
       return null;
@@ -182,7 +198,7 @@ async function verifyWebhookSignature(body: string, signature: string | null, ba
  */
 async function processWhatsAppWebhook(payload: unknown, barId: number, webhookLogId?: number): Promise<void> {
   try {
-    const entries = (payload as any).entry || [];
+    const entries = (payload as unknown).entry || [];
 
     for (const entry of entries) {
       const changes = entry.changes || [];
@@ -232,7 +248,7 @@ async function processWhatsAppWebhook(payload: unknown, barId: number, webhookLo
 /**
  * Processa atualizaÃ¡Â§Ã¡Âµes de status de mensagens
  */
-async function processMessageStatuses(statuses: Record<string, any>[], barId: number): Promise<void> {
+async function processMessageStatuses(statuses: Record<string, unknown>[], barId: number): Promise<void> {
   for (const status of statuses) {
     const messageId = status.id;
     const newStatus = status.status; // sent, delivered, read, failed
@@ -241,7 +257,7 @@ async function processMessageStatuses(statuses: Record<string, any>[], barId: nu
     const errorMessage = status.errors?.[0]?.message;
 
     // Atualizar status da mensagem no banco
-    const updateData: any = {
+    const updateData: unknown = {
       status: newStatus,
       status_updated_at: new Date(parseInt(timestamp) * 1000).toISOString()
     };
@@ -289,7 +305,7 @@ async function processMessageStatuses(statuses: Record<string, any>[], barId: nu
 /**
  * Processa mensagens recebidas (respostas dos usuÃ¡Â¡rios)
  */
-async function processReceivedMessages(messages: Record<string, any>[], barId: number): Promise<void> {
+async function processReceivedMessages(messages: Record<string, unknown>[], barId: number): Promise<void> {
   for (const message of messages) {
     const fromNumber = message.from;
     const messageText = message.text?.body || message.type;

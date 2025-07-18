@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿// PÃ¡Â¡gina de sincronizaÃ¡Â§Ã¡Â£o de receitas/insumos via upload de Excel/CSV
 'use client'
 import React, { useState } from 'react'
@@ -30,7 +46,7 @@ export default function SyncReceitasInsumosPage() {
       setLog(data)
       if (!data.success) setError(data.error || 'Erro desconhecido')
     } catch (e) {
-      setError((e as any).message || String(e))
+      setError((e as unknown).message || String(e))
     } finally {
       setLoading(false)
     }

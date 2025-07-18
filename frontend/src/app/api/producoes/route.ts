@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
@@ -240,7 +256,7 @@ export async function GET(request: NextRequest) {
       observacoes?: string;
       status?: string;
       desvio?: number;
-      [key: string]: any;
+      [key: string]: unknown;
     }
 
     if (producoes && producoes.length > 0) {

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
@@ -24,6 +40,13 @@ import {
   Download,
   Loader2
 } from 'lucide-react'
+
+interface NotificacaoAcao {
+  label: string
+  action: 'redirect' | 'callback' | 'download'
+  url?: string
+  callback?: string
+}
 
 // =====================================================
 // NOTIFICATION CENTER COMPONENT
@@ -155,7 +178,7 @@ export function NotificationCenter() {
     }
   }
 
-  const handleAcaoNotificacao = (acao: any) => {
+  const handleAcaoNotificacao = (acao: NotificacaoAcao) => {
     try {
       if (!acao) {
         console.error('❌ Ação não fornecida')
@@ -255,7 +278,7 @@ export function NotificationCenter() {
 
           <CardContent className="p-0">
             {/* Tabs de Filtro */}
-            <Tabs value={filtroTab} onValueChange={(value) => setFiltroTab(value as any)}>
+            <Tabs value={filtroTab} onValueChange={(value) => setFiltroTab(value as unknown)}>
               <TabsList className="tabs-list-dark w-full rounded-none">
                 <TabsTrigger value="todas" className="tabs-trigger-dark">
                   Todas ({notificacoes.length})

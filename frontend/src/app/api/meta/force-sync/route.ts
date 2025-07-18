@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextResponse } from 'next/server'
 
 export async function POST() {
@@ -38,7 +54,7 @@ export async function POST() {
     return NextResponse.json({
       success: false,
       message: 'ÂÅ’ Falha ao atualizar dados do Meta',
-      error: (error as any).message
+      error: (error as unknown).message
     }, { status: 500 })
   }
 }

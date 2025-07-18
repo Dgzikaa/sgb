@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -68,7 +84,7 @@ export async function GET(request: NextRequest) {
     console.log(`Ã°Å¸â€œâ€¦ Buscando perÃ¡Â­odo de comparaÃ¡Â§Ã¡Â£o: ${diaInicioInt} atÃ¡Â© ${diaFimInt}`);
     
     // Buscar dados do perÃ¡Â­odo com paginaÃ¡Â§Ã¡Â£o
-    let dadosPeriodo: any[] = [];
+    let dadosPeriodo: unknown[] = [];
     let pagina = 0;
     const tamanhoPagina = 1000;
     
@@ -126,7 +142,7 @@ export async function GET(request: NextRequest) {
     console.log(`Ã°Å¸â€œâ€¦ Convertendo data: ${dataEspecifica} â€ â€™ ${diaEspecificoInt}`);
     
     // Buscar dados do dia especÃ¡Â­fico usando campo 'dia' - COM PAGINAÃ¡â€¡Ã¡Æ’O
-    let dadosDia: any[] = [];
+    let dadosDia: unknown[] = [];
     pagina = 0;
     
     while (true) {
@@ -186,7 +202,7 @@ export async function GET(request: NextRequest) {
     }
 
     // FunÃ¡Â§Ã¡Â£o para determinar se Ã¡Â© bebida ou comida e calcular tempo correto
-    const calcularTempo = (item: any) => {
+    const calcularTempo = (item: unknown) => {
       const grupo = (item.grp_desc || '').toLowerCase();
       const localizacao = (item.loc_desc || '').toLowerCase();
       
@@ -286,7 +302,7 @@ export async function GET(request: NextRequest) {
       console.log(`Ã°Å¸â€œâ€¦ Buscando dados de ${diaInicioInt} atÃ¡Â© ${diaFimInt}`);
       
       // Buscar Ã¡Âºltimos 7 dias com paginaÃ¡Â§Ã¡Â£o
-      let dadosUltimos7Dias: any[] = [];
+      let dadosUltimos7Dias: unknown[] = [];
       let paginaRecente = 0;
       
       while (true) {
@@ -361,7 +377,7 @@ export async function GET(request: NextRequest) {
     const produtosMap = new Map();
 
     // FunÃ¡Â§Ã¡Â£o para processar um conjunto de dados
-    const processarDados = (dados: any[], isPeriodo: boolean) => {
+    const processarDados = (dados: unknown[], isPeriodo: boolean) => {
       dados?.forEach((item) => {
         const key = `${item.prd_desc}_${item.grp_desc}`;
         const analise = calcularTempo(item);

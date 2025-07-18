@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -148,7 +164,7 @@ export async function POST(request: NextRequest) {
 
             // Copiar itens
             if (originalChecklist.checklist_items?.length > 0) {
-              const itemsToInsert = originalChecklist.checklist_items.map((item: any) => ({
+              const itemsToInsert = originalChecklist.checklist_items.map((item: unknown) => ({
                 checklist_id: newChecklist.id,
                 nome: item.nome,
                 descricao: item.descricao,
@@ -234,7 +250,7 @@ export async function POST(request: NextRequest) {
 
           if (error) throw error
 
-          const exportData = checklists.map((checklist: any) => ({
+          const exportData = checklists.map((checklist: unknown) => ({
             'ID': checklist.id,
             'Nome': checklist.nome,
             'DescriÃ§Ã£o': checklist.descricao,
@@ -242,7 +258,7 @@ export async function POST(request: NextRequest) {
             'Ativo': checklist.ativo ? 'Sim' : 'NÃ£o',
             'Bar': checklist.bars?.nome || 'N/A',
             'Total de Itens': checklist.checklist_items?.length || 0,
-            'Itens ObrigatÃ³rios': checklist.checklist_items?.filter((item: any) => item.obrigatorio).length || 0,
+            'Itens ObrigatÃ³rios': checklist.checklist_items?.filter((item: unknown) => item.obrigatorio).length || 0,
             'Criado em': new Date(checklist.created_at).toLocaleDateString('pt-BR')
           }))
 
@@ -284,7 +300,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Erro na operaÃ§Ã£o em lote de checklists:', error)
     return NextResponse.json({ 
-      error: (error as any).message || 'Erro interno do servidor'
+      error: (error as unknown).message || 'Erro interno do servidor'
     }, { status: 500 })
   }
 }

@@ -12,7 +12,7 @@ export default function AuthSync() {
       try {
         const userData = localStorage.getItem('sgb_user')
         if (userData) {
-          const parsedData = JSON.parse(userData)
+          const parsedData = JSON.parse(userData) as unknown
           if (parsedData && parsedData.id && parsedData.email) {
             syncAuthData(parsedData)
           }

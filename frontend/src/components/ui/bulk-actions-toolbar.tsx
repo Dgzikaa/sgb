@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿"use client"
 
 import React from 'react'
@@ -13,7 +29,7 @@ export interface BulkAction {
   label: string;
   icon?: React.ComponentType<{ className?: string }>;
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost';
-  onClick: (selectedItems: any[]) => void | Promise<void>
+  onClick: (selectedItems: unknown[]) => void | Promise<void>
   disabled?: boolean
   requiresConfirmation?: boolean
   confirmationMessage?: string
@@ -22,7 +38,7 @@ export interface BulkAction {
 interface BulkActionsToolbarProps {
   selectedCount: number;
   totalCount: number;
-  selectedItems: any[];
+  selectedItems: unknown[];
   actions: BulkAction[];
   onClearSelection: () => void;
   className?: string;
@@ -175,7 +191,7 @@ export function BulkActionsToolbar({
 
 // AÃ¡Â§Ã¡Âµes predefinidas comuns
 export const commonBulkActions = {
-  delete: (onDelete: (items: any[]) => void): BulkAction => ({
+  delete: (onDelete: (items: unknown[]) => void): BulkAction => ({
     id: 'delete',
     label: 'Excluir',
     icon: Trash2,
@@ -185,7 +201,7 @@ export const commonBulkActions = {
     confirmationMessage: 'Esta aÃ§Ã£o nÃ£o pode ser desfeita. Confirma a exclusÃ£o?'
   }),
   
-  edit: (onEdit: (items: any[]) => void): BulkAction => ({
+  edit: (onEdit: (items: unknown[]) => void): BulkAction => ({
     id: 'edit',
     label: 'Editar',
     icon: Edit,
@@ -193,7 +209,7 @@ export const commonBulkActions = {
     onClick: onEdit
   }),
   
-  archive: (onArchive: (items: any[]) => void): BulkAction => ({
+  archive: (onArchive: (items: unknown[]) => void): BulkAction => ({
     id: 'archive',
     label: 'Arquivar',
     icon: Archive,
@@ -202,7 +218,7 @@ export const commonBulkActions = {
     requiresConfirmation: true
   }),
   
-  download: (onDownload: (items: any[]) => void): BulkAction => ({
+  download: (onDownload: (items: unknown[]) => void): BulkAction => ({
     id: 'download',
     label: 'Baixar',
     icon: Download,
@@ -210,7 +226,7 @@ export const commonBulkActions = {
     onClick: onDownload
   }),
   
-  duplicate: (onDuplicate: (items: any[]) => void): BulkAction => ({
+  duplicate: (onDuplicate: (items: unknown[]) => void): BulkAction => ({
     id: 'duplicate',
     label: 'Duplicar',
     icon: Copy,
@@ -218,7 +234,7 @@ export const commonBulkActions = {
     onClick: onDuplicate
   }),
   
-  share: (onShare: (items: any[]) => void): BulkAction => ({
+  share: (onShare: (items: unknown[]) => void): BulkAction => ({
     id: 'share',
     label: 'Compartilhar',
     icon: Share2,

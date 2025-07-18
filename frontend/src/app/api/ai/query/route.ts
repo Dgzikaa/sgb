@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@supabase/supabase-js';
@@ -285,7 +301,7 @@ async function getMaiorFaturamento(bar_id: number) {
     .eq('bar_id', bar_id)
     .eq('dt_gerencial', record.dt_gerencial);
 
-  const faturamentoDia = diaTotal?.reduce((total: any, item: any) => total + (item.valor_liquido || 0), 0) || 0;
+  const faturamentoDia = diaTotal?.reduce((total: unknown, item: unknown) => total + (item.valor_liquido || 0), 0) || 0;
 
   return {
     maior_venda: {
@@ -330,12 +346,12 @@ async function getFaturamentoPeriodo(bar_id: number, inicio?: string, fim?: stri
     };
   }
 
-  const faturamentoTotal = pagamentos.reduce((total: any, item: any) => total + (item.valor_liquido || 0), 0);
-  const faturamentoBruto = pagamentos.reduce((total: any, item: any) => total + (item.valor_bruto || 0), 0);
+  const faturamentoTotal = pagamentos.reduce((total: unknown, item: unknown) => total + (item.valor_liquido || 0), 0);
+  const faturamentoBruto = pagamentos.reduce((total: unknown, item: unknown) => total + (item.valor_bruto || 0), 0);
   
   // Agrupar por meio de pagamento
   const meiosPagamento: Record<string, { valor: number; transacoes: number }> = {};
-  pagamentos.forEach((pag: any) => {
+  pagamentos.forEach((pag: unknown) => {
     const meio = pag.meio || 'NÃ¡Â£o informado';
     if (!meiosPagamento[meio]) {
       meiosPagamento[meio] = { valor: 0, transacoes: 0 };
@@ -346,7 +362,7 @@ async function getFaturamentoPeriodo(bar_id: number, inicio?: string, fim?: stri
 
   // Agrupar por dia
   const faturamentoPorDia: Record<string, number> = {};
-  pagamentos.forEach((pag: any) => {
+  pagamentos.forEach((pag: unknown) => {
     const dia = pag.dt_gerencial;
     if (!faturamentoPorDia[dia]) {
       faturamentoPorDia[dia] = 0;
@@ -354,7 +370,7 @@ async function getFaturamentoPeriodo(bar_id: number, inicio?: string, fim?: stri
     faturamentoPorDia[dia] += pag.valor_liquido || 0;
   });
 
-  const melhorDia = Object.entries(faturamentoPorDia).reduce((max: any, [dia, valor]: [string, any]) => 
+  const melhorDia = Object.entries(faturamentoPorDia).reduce((max: unknown, [dia, valor]: [string, any]) => 
     (valor ) > max.valor ? { dia, valor: valor  } : max, { dia: '', valor: 0 });
 
   return {
@@ -394,8 +410,8 @@ async function getComparativoMensal(bar_id: number) {
     .gte('dt_gerencial', `${mesAnterior}-01`)
     .lt('dt_gerencial', `${mesAnterior}-32`);
 
-  const faturamentoAtual = fatAtual?.reduce((total: any, item: any) => total + (item.valor_liquido || 0), 0) || 0;
-  const faturamentoAnterior = fatAnterior?.reduce((total: any, item: any) => total + (item.valor_liquido || 0), 0) || 0;
+  const faturamentoAtual = fatAtual?.reduce((total: unknown, item: unknown) => total + (item.valor_liquido || 0), 0) || 0;
+  const faturamentoAnterior = fatAnterior?.reduce((total: unknown, item: unknown) => total + (item.valor_liquido || 0), 0) || 0;
   
   const variacao = faturamentoAnterior > 0 ? 
     ((faturamentoAtual - faturamentoAnterior) / faturamentoAnterior) * 100 : 0;
@@ -446,7 +462,7 @@ async function getTopClientes(bar_id: number, limite: number, inicio?: string, f
     };
   }
 
-  const clientesFormatados = clientes.map((cliente: any, index: any) => ({
+  const clientesFormatados = clientes.map((cliente: unknown, index: unknown) => ({
     posicao: index + 1,
     nome: cliente.cli_nome || 'Cliente nÃ£o identificado',
     cpf: cliente.cli_cpf,
@@ -456,7 +472,7 @@ async function getTopClientes(bar_id: number, limite: number, inicio?: string, f
     ultima_compra: cliente.ultima
   }));
 
-  const faturamentoTotalClientes = clientes.reduce((total: any, cliente: any) => total + (cliente.valor || 0), 0);
+  const faturamentoTotalClientes = clientes.reduce((total: unknown, cliente: unknown) => total + (cliente.valor || 0), 0);
 
   return {
     clientes: clientesFormatados,
@@ -494,8 +510,8 @@ async function getProdutosMaisVendidos(bar_id: number, limite: number, inicio?: 
   }
 
   // Agrupar por produto
-  const produtosAgrupados: Record<string, any> = {};
-  produtos.forEach((produto: any) => {
+  const produtosAgrupados: Record<string, unknown> = {};
+  produtos.forEach((produto: unknown) => {
     const nome = produto.prd_desc || 'Produto nÃ£o identificado';
     if (!produtosAgrupados[nome]) {
       produtosAgrupados[nome] = {
@@ -561,10 +577,10 @@ async function getPerformancePeriodo(bar_id: number, inicio?: string, fim?: stri
       .lte('dia', `${dataFim}T23:59:59`)
   ]);
 
-  const faturamentoTotal = pagamentos.data?.reduce((total: any, item: any) => total + (item.valor_liquido || 0), 0) || 0;
-  const totalItens = analitico.data?.reduce((total: any, item: any) => total + (item.itm_qtd || 0), 0) || 0;
+  const faturamentoTotal = pagamentos.data?.reduce((total: unknown, item: unknown) => total + (item.valor_liquido || 0), 0) || 0;
+  const totalItens = analitico.data?.reduce((total: unknown, item: unknown) => total + (item.itm_qtd || 0), 0) || 0;
         const tempoMedioProducao = (tempos.data && tempos.data.length > 0) ?
-        tempos.data.reduce((total: number, item: any) => total + (item.tempo_t0_t3 || 0), 0) / (tempos.data.length || 1) : 0;
+        tempos.data.reduce((total: number, item: unknown) => total + (item.tempo_t0_t3 || 0), 0) / (tempos.data.length || 1) : 0;
 
   return {
     periodo: { inicio: dataInicio, fim: dataFim },
@@ -599,10 +615,10 @@ async function getResumoDia(bar_id: number, data: string) {
       .order('hora')
   ]);
 
-  const faturamento = pagamentos.data?.reduce((total: any, item: any) => total + (item.valor_liquido || 0), 0) || 0;
+  const faturamento = pagamentos.data?.reduce((total: unknown, item: unknown) => total + (item.valor_liquido || 0), 0) || 0;
   
   // HorÃ¡Â¡rio de pico
-  const horarioPico = fatPorHora.data?.reduce((max: any, current: any) => 
+  const horarioPico = fatPorHora.data?.reduce((max: unknown, current: unknown) => 
     (current.valor || 0) > (max.valor || 0) ? current : max, { hora: '', valor: 0 });
 
   return {
@@ -631,11 +647,11 @@ async function getResumoMes(bar_id: number, mes?: string) {
     .gte('dt_gerencial', `${mesReferencia}-01`)
     .lt('dt_gerencial', `${mesReferencia}-32`);
 
-  const faturamento = pagamentos?.reduce((total: any, item: any) => total + (item.valor_liquido || 0), 0) || 0;
+  const faturamento = pagamentos?.reduce((total: unknown, item: unknown) => total + (item.valor_liquido || 0), 0) || 0;
   
   // Agrupar por dia
   const faturamentoPorDia: Record<string, number> = {};
-  pagamentos?.forEach((pag: any) => {
+  pagamentos?.forEach((pag: unknown) => {
     const dia = pag.dt_gerencial;
     if (!faturamentoPorDia[dia]) {
       faturamentoPorDia[dia] = 0;
@@ -685,8 +701,8 @@ async function getAnomaliasRecentes(bar_id: number, limite: number) {
     anomalias: anomalias || [],
     resumo: {
       total_anomalias: anomalias?.length || 0,
-      anomalias_ativas: anomalias?.filter((a: any) => a.ainda_ativa).length || 0,
-      anomalias_criticas: anomalias?.filter((a: any) => a.severidade === 'critica').length || 0
+      anomalias_ativas: anomalias?.filter((a: unknown) => a.ainda_ativa).length || 0,
+      anomalias_criticas: anomalias?.filter((a: unknown) => a.severidade === 'critica').length || 0
     },
     mensagem: `${anomalias?.length || 0} anomalias recentes encontradas`
   };
@@ -716,8 +732,8 @@ async function getInsightsImportantes(bar_id: number, limite: number) {
     insights: insights || [],
     resumo: {
       total_insights: insights?.length || 0,
-      insights_criticos: insights?.filter((i: any) => i.impacto === 'critico').length || 0,
-      insights_urgentes: insights?.filter((i: any) => i.urgencia === 'alta').length || 0
+      insights_criticos: insights?.filter((i: unknown) => i.impacto === 'critico').length || 0,
+      insights_urgentes: insights?.filter((i: unknown) => i.urgencia === 'alta').length || 0
     },
     mensagem: `${insights?.length || 0} insights importantes encontrados`
   };

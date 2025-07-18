@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -45,9 +61,9 @@ export async function GET(req: NextRequest) {
     }
 
     // Transformar dados para o formato esperado pela interface
-    const checklistsFormatados = checklists?.map((checklist: any) => {
+    const checklistsFormatados = checklists?.map((checklist: unknown) => {
       // Contar total de itens
-      const totalItens = checklist.checklist_secoes?.reduce((total: number, secao: any) => {
+      const totalItens = checklist.checklist_secoes?.reduce((total: number, secao: unknown) => {
         return total + (secao.checklist_itens?.length || 0)
       }, 0) || 0
 

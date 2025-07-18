@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
@@ -151,14 +167,14 @@ export default function TesteVisaoCompetenciaPage() {
       setDados(dadosVisao || [])
 
       // Calcular resumo
-      const receitas = dadosVisao?.filter((d: any) => d.tipo === 'RECEITA') || []
-      const despesas = dadosVisao?.filter((d: any) => d.tipo === 'DESPESA') || []
+      const receitas = dadosVisao?.filter((d: unknown) => d.tipo === 'RECEITA') || []
+      const despesas = dadosVisao?.filter((d: unknown) => d.tipo === 'DESPESA') || []
       
-      const totalReceitas = receitas.reduce((sum: number, item: any) => sum + (item.valor || 0), 0)
-      const totalDespesas = despesas.reduce((sum: number, item: any) => sum + Math.abs(item.valor || 0), 0)
+      const totalReceitas = receitas.reduce((sum: number, item: unknown) => sum + (item.valor || 0), 0)
+      const totalDespesas = despesas.reduce((sum: number, item: unknown) => sum + Math.abs(item.valor || 0), 0)
       
-      const categorias = new Set(dadosVisao?.map((d: any) => d.categoria_id).filter(Boolean))
-      const centrosCusto = new Set(dadosVisao?.map((d: any) => d.centro_custo_id).filter(Boolean))
+      const categorias = new Set(dadosVisao?.map((d: unknown) => d.categoria_id).filter(Boolean))
+      const centrosCusto = new Set(dadosVisao?.map((d: unknown) => d.centro_custo_id).filter(Boolean))
 
       setResumo({
         total_receitas: totalReceitas,

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 
@@ -35,12 +51,12 @@ export async function GET(request: NextRequest) {
     // Calcular estatÃ¡Â­sticas resumidas
     const resumo = {
       total_kpis: kpis?.length || 0,
-      kpis_atingidos: kpis?.filter((kpi: any) => kpi.status_meta === 'atingido').length || 0,
-      kpis_criticos: kpis?.filter((kpi: any) => kpi.status_meta === 'critico').length || 0,
+      kpis_atingidos: kpis?.filter((kpi: unknown) => kpi.status_meta === 'atingido').length || 0,
+      kpis_criticos: kpis?.filter((kpi: unknown) => kpi.status_meta === 'critico').length || 0,
       percentual_sucesso: kpis?.length ? 
-        Math.round((kpis.filter((kpi: any) => kpi.status_meta === 'atingido').length / kpis.length) * 100) : 0,
+        Math.round((kpis.filter((kpi: unknown) => kpi.status_meta === 'atingido').length / kpis.length) * 100) : 0,
       data_referencia: dataReferencia,
-      categorias: [...new Set(kpis?.map((kpi: any) => kpi.categoria_kpi) || [])]
+      categorias: [...new Set(kpis?.map((kpi: unknown) => kpi.categoria_kpi) || [])]
     }
 
     return NextResponse.json({

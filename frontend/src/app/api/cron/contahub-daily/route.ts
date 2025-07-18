@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -35,7 +51,7 @@ export async function GET(request: NextRequest) {
     
     let data
     try {
-      data = JSON.parse(responseText)
+      data = JSON.parse(responseText) as unknown
     } catch (parseError) {
       throw new Error(`Erro parsing resposta: ${responseText}`)
     }

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { useState, useEffect, useCallback } from 'react'
 import { useUser } from '@/contexts/UserContext'
 import { useBar } from '@/contexts/BarContext'
@@ -7,6 +23,12 @@ interface ChecklistBadgeData {
   pendentes: number
   atrasados: number
   total: number
+}
+
+interface ApiResponse<T> {
+  success: boolean
+  data: T
+  error?: string
 }
 
 export function useChecklistBadge() {
@@ -27,8 +49,9 @@ export function useChecklistBadge() {
       
       const response = await api.get(`/api/checklists/badge-data?bar_id=${selectedBar.id}&user_id=${user.id}`)
       
-      if (response.success) {
-        setBadgeData(response.data)
+      const typedResponse = response as ApiResponse<ChecklistBadgeData>
+      if (typedResponse.success && typedResponse.data) {
+        setBadgeData(typedResponse.data)
       }
     } catch (error) {
       console.error('Erro ao buscar dados do badge de checklists:', error)

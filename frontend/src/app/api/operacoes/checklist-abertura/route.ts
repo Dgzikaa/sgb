@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 
@@ -96,8 +112,8 @@ export async function POST(request: NextRequest) {
 
     // Calcular estatÃ¡Â­sticas
     const total_itens = itens.length;
-    const itens_concluidos = itens.filter((item: any) => item.status === 'concluido').length;
-    const itens_problemas = itens.filter((item: any) => item.status === 'problema').length;
+    const itens_concluidos = itens.filter((item: unknown) => item.status === 'concluido').length;
+    const itens_problemas = itens.filter((item: unknown) => item.status === 'problema').length;
     const percentual_conclusao = total_itens > 0 ? (itens_concluidos / total_itens * 100) : 0
 
     // Criar ou atualizar checklist principal
@@ -218,8 +234,8 @@ export async function PUT(request: NextRequest) {
 
     if (!itensError && itens) {
       const total_itens = itens.length
-      const itens_concluidos = itens.filter((item: any) => item.status === 'concluido').length
-      const itens_problemas = itens.filter((item: any) => item.status === 'problema').length
+      const itens_concluidos = itens.filter((item: unknown) => item.status === 'concluido').length
+      const itens_problemas = itens.filter((item: unknown) => item.status === 'problema').length
       const percentual_conclusao = total_itens > 0 ? (itens_concluidos / total_itens * 100) : 0
 
       await supabase

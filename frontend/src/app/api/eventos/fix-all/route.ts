@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -36,7 +52,7 @@ export async function POST(request: NextRequest) {
           totalFixed++;
         }
       } catch (err) {
-        errors.push(`Exception fixing ${mapping.name}: ${(err as any).message}`);
+        errors.push(`Exception fixing ${mapping.name}: ${(err as unknown).message}`);
       }
     }
 
@@ -51,7 +67,7 @@ export async function POST(request: NextRequest) {
     console.error('? Error in fix-all endpoint:', error);
     return NextResponse.json({
       success: false,
-      error: (error as any).message
+      error: (error as unknown).message
     }, { status: 500 });
   }
 }

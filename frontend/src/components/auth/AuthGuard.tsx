@@ -38,7 +38,7 @@ export default function AuthGuard({
           console.log('Ã°Å¸â€Â AuthGuard: Verificando localStorage...', userData ? 'Dados encontrados' : 'Nenhum dado')
           
           if (userData) {
-            const parsedUser = JSON.parse(userData)
+            const parsedUser = JSON.parse(userData) as unknown
             console.log('Ã°Å¸â€Â AuthGuard: Dados parseados:', parsedUser)
             
             if (parsedUser && parsedUser.id && parsedUser.email && parsedUser.nome) {

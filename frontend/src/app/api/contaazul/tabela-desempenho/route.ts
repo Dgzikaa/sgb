@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { mapearCategoria } from '@/lib/contaazul-categoria-mapper';
@@ -169,7 +185,7 @@ export async function POST(request: NextRequest) {
     }
 
     // PAGINAÃ¡â€¡Ã¡Æ’O: Buscar todos os eventos do perÃ¡Â­odo
-    let eventos: any[] = [];
+    let eventos: unknown[] = [];
     let page = 1;
     let fetched = 0;
     let totalReceitas = 0;
@@ -220,7 +236,7 @@ export async function POST(request: NextRequest) {
     console.log('[DEBUG] Receitas por categoria:', receitasPorCategoria);
 
     // Agrupar por grupo/categoria
-    const resultado: Record<string, Record<string, { valor: number, eventos: any[] }>> = {};
+    const resultado: Record<string, Record<string, { valor: number, eventos: unknown[] }>> = {};
     for (const grupo of GRUPOS) {
       resultado[grupo.nome] = {};
       for (const cat of grupo.categorias) {
@@ -272,7 +288,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, tabela, totalEventos: eventos.length, totalReceitas, receitasPorCategoria, pageSize }, { status: 200 });
   } catch (e) {
-    return NextResponse.json({ success: false, error: (e as any).message || String(e) }, { status: 500 });
+    return NextResponse.json({ success: false, error: (e as unknown).message || String(e) }, { status: 500 });
   }
 } 
 

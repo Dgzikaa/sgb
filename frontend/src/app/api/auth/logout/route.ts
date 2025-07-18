@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     try {
       const userCookie = request.cookies.get('sgb_user');
       if (userCookie?.value) {
-        userInfo = JSON.parse(userCookie.value);
+        userInfo = JSON.parse(userCookie.value) as unknown;
       }
     } catch (cookieError) {
       // Ignorar erro do cookie

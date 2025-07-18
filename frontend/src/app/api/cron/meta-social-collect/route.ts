@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createMetaSocialService } from '@/lib/meta-social-service'
@@ -55,7 +71,7 @@ export async function POST(request: NextRequest) {
       successful: 0,
       failed: 0,
       skipped: 0,
-      details: [] as any[]
+      details: [] as unknown[]
     }
 
     const now = new Date()
@@ -63,7 +79,7 @@ export async function POST(request: NextRequest) {
     // Processar cada configuraÃ§Ã£o
     for (const config of configuracoes) {
       const barId = config.bar_id
-      const resultDetail: any = {
+      const resultDetail: unknown = {
         bar_id: barId,
         status: 'pending',
         error: null,
@@ -151,7 +167,7 @@ export async function POST(request: NextRequest) {
       } catch (error) {
         console.error(`ÂÅ’ [${executionId}] Bar ${barId}: Erro durante coleta:`, error)
         resultDetail.status = 'failed'
-        resultDetail.error = (error as any).message
+        resultDetail.error = (error as unknown).message
         results.failed++
         results.processed++
       }
@@ -186,7 +202,7 @@ export async function POST(request: NextRequest) {
       success: false,
       execution_id: executionId,
       error: 'Erro crÃ­tico durante execuÃ§Ã£o',
-      details: (error as any).message,
+      details: (error as unknown).message,
       timestamp: new Date().toISOString()
     }, { status: 500 })
   }
@@ -217,7 +233,7 @@ export async function GET(request: NextRequest) {
     }
 
     const now = new Date()
-    const agendamentos = configuracoes?.map((config: any) => {
+    const agendamentos = configuracoes?.map((config: unknown) => {
       const proximaColeta = new Date(config.proxima_coleta)
       const minutosRestantes = Math.round((proximaColeta.getTime() - now.getTime()) / (1000 * 60))
       
@@ -235,9 +251,9 @@ export async function GET(request: NextRequest) {
     // Calcular estatÃ­sticas
     const stats = {
       total_configuracoes: agendamentos.length,
-      ativas: agendamentos.filter((a: any) => a.status === 'ativo').length,
-      em_atraso: agendamentos.filter((a: any) => a.em_atraso).length,
-      proxima_execucao: agendamentos.find((a: any) => !a.em_atraso)?.proxima_coleta || null
+      ativas: agendamentos.filter((a: unknown) => a.status === 'ativo').length,
+      em_atraso: agendamentos.filter((a: unknown) => a.em_atraso).length,
+      proxima_execucao: agendamentos.find((a: unknown) => !a.em_atraso)?.proxima_coleta || null
     }
 
     return NextResponse.json({
@@ -251,7 +267,7 @@ export async function GET(request: NextRequest) {
     console.error('ÂÅ’ Erro ao consultar agendamentos:', error)
     return NextResponse.json({
       success: false,
-      error: (error as any).message
+      error: (error as unknown).message
     }, { status: 500 })
   }
 } 

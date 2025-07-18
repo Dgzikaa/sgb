@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -16,7 +32,7 @@ export async function GET(request: NextRequest) {
     
     if (userData) {
       try {
-        const parsedUser = JSON.parse(decodeURIComponent(userData))
+        const parsedUser = JSON.parse(decodeURIComponent(userData) as unknown)
         barId = parsedUser.bar_id || 3
         console.log(`Ã°Å¸â€˜Â¤ Customer Journey - Usando bar_id: ${barId}`)
       } catch (e) {
@@ -145,7 +161,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 4. ANALISAR PONTOS DE ABANDONO
-    const analisarPontosAbandono = (dadosConversao: any) => {
+    const analisarPontosAbandono = (dadosConversao: unknown) => {
       const pontosAbandono = []
       
       const etapasArray = Object.entries(dadosConversao)
@@ -157,14 +173,14 @@ export async function GET(request: NextRequest) {
         const [nomeAtual, dadosAtual] = etapaAtual
         const [nomeProximo, dadosProximo] = proximaEtapa
         
-        const taxaAbandono = 100 - (dadosAtual as any).taxa_passagem
+        const taxaAbandono = 100 - (dadosAtual as unknown).taxa_passagem
         
         if (taxaAbandono > 40) {
           pontosAbandono.push({
             etapa: nomeAtual,
             proxima_etapa: nomeProximo,
             taxa_abandono: taxaAbandono,
-            usuarios_perdidos: (dadosAtual as any).usuarios - (dadosProximo as any).usuarios,
+            usuarios_perdidos: (dadosAtual as unknown).usuarios - (dadosProximo as unknown).usuarios,
             severidade: taxaAbandono > 60 ? 'critica' : taxaAbandono > 40 ? 'alta' : 'media',
             recomendacoes: gerarRecomendacoesAbandono(nomeAtual, taxaAbandono)
           })
@@ -218,7 +234,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 6. CALCULAR MÃ¡â€°TRICAS CHAVE
-    const calcularMetricasChave = (dadosConversao: any) => {
+    const calcularMetricasChave = (dadosConversao: unknown) => {
       const discovery = dadosConversao.discovery
       const purchase = dadosConversao.purchase
       const advocacy = dadosConversao.advocacy
@@ -236,7 +252,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 7. IDENTIFICAR OPORTUNIDADES DE MELHORIA
-    const identificarOportunidades = (pontosAbandono: any[], metricas: any) => {
+    const identificarOportunidades = (pontosAbandono: unknown[], metricas: unknown) => {
       const oportunidades = []
       
       // Oportunidades baseadas em pontos de abandono

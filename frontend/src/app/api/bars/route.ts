@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -20,7 +36,7 @@ export async function GET() {
     }
 
     // Mapear dados para estrutura padronizada
-    const data = barData.map((bar: any) => ({
+    const data = barData.map((bar: unknown) => ({
       id: bar.id,
       nome: bar.nome || bar.name || 'Sem nome',
       endereco: bar.endereco || bar.address || 'EndereÃ§o nÃ¡o informado',
@@ -32,7 +48,7 @@ export async function GET() {
       updated_at: bar.updated_at || new Date().toISOString()
     }));
 
-    console.log(`? Encontrados ${data.length} bares na tabela 'bar':`, data.map((b: any) => b.nome));
+    console.log(`? Encontrados ${data.length} bares na tabela 'bar':`, data.map((b: unknown) => b.nome));
     
     return NextResponse.json({
       success: true,
@@ -43,7 +59,7 @@ export async function GET() {
     console.error('Erro ao buscar bares:', error);
     return NextResponse.json({
       success: false,
-      error: (error as any).message
+      error: (error as unknown).message
     }, { status: 500 });
   }
 }
@@ -107,7 +123,7 @@ export async function POST(request: NextRequest) {
     console.error('Erro ao criar bar:', error);
     return NextResponse.json({
       success: false,
-      error: (error as any).message
+      error: (error as unknown).message
     }, { status: 500 });
   }
 }
@@ -185,7 +201,7 @@ export async function PUT(request: NextRequest) {
     };
     
     // Remover campos undefined
-    Object.keys(updates).forEach((key: any) => {
+    Object.keys(updates).forEach((key: unknown) => {
       if (updates[key as keyof typeof updates] === undefined) {
         delete updates[key as keyof typeof updates];
       }
@@ -212,7 +228,7 @@ export async function PUT(request: NextRequest) {
     console.error('Erro ao atualizar bar:', error);
     return NextResponse.json({
       success: false,
-      error: (error as any).message
+      error: (error as unknown).message
     }, { status: 500 });
   }
 }
@@ -271,7 +287,7 @@ export async function DELETE(request: NextRequest) {
     console.error('Erro ao deletar bar:', error);
     return NextResponse.json({
       success: false,
-      error: (error as any).message
+      error: (error as unknown).message
     }, { status: 500 });
   }
 }

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 
@@ -44,7 +60,7 @@ export async function GET(request: NextRequest) {
       periodo_consultado: `${periodo} dias`
     }
 
-    metricas?.forEach((metrica: any) => {
+    metricas?.forEach((metrica: unknown) => {
       resumo.metricas_por_tipo[metrica.tipo_metrica] = 
         (resumo.metricas_por_tipo[metrica.tipo_metrica] || 0) + 1
     })

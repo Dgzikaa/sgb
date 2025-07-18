@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import * as React from "react"
 import { createPortal } from "react-dom"
 import { cn } from "@/lib/utils"
@@ -78,7 +94,7 @@ const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) => {
       >
         {React.Children.map(children, (child) => {
           if (React.isValidElement(child) && child.type === DialogContent) {
-            return React.cloneElement(child, { onClose: () => onOpenChange(false) } as any)
+            return React.cloneElement(child, { onClose: () => onOpenChange(false) } as unknown)
           }
           return child
         })}

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import React, { useState, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -8,7 +24,7 @@ interface BiometricAuthProps {
   mode: 'register' | 'login'
   userEmail?: string
   barId?: string
-  onSuccess?: (result: any) => void
+  onSuccess?: (result: unknown) => void
   onError?: (error: string) => void
   className?: string
 }

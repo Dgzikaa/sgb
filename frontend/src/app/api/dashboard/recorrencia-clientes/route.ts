@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -24,8 +40,8 @@ export async function GET(request: NextRequest) {
     console.log(`Ã°Å¸â€Â Analisando recorrÃ¡Âªncia entre ${data1} e ${data2} para bar ${barId}`);
 
     // Try multiple sources for customer data
-    let emailsData1: any[] = [];
-    let emailsData2: any[] = [];
+    let emailsData1: unknown[] = [];
+    let emailsData2: unknown[] = [];
 
     // First try the periodo table
     const { data: periodData1, error: periodError1 } = await supabase

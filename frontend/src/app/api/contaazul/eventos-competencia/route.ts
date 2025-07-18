@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -11,8 +27,8 @@ function createSupabaseClient() {
 }
 
 // FunÃ¡Â§Ã¡Â£o para buscar TODOS os dados com paginaÃ¡Â§Ã¡Â£o automÃ¡Â¡tica
-async function buscarTodosRegistros(query: any, chunkSize = 1000) {
-  let todosRegistros: any[] = []
+async function buscarTodosRegistros(query: unknown, chunkSize = 1000) {
+  let todosRegistros: unknown[] = []
   let offset = 0
   let hasMore = true
 
@@ -129,19 +145,19 @@ export async function GET(request: NextRequest) {
       console.log('Ã°Å¸â€™Â° Calculando totais a partir de', resumoData.length, 'registros...')
       
       // Debug: contar tipos de registros
-      const tiposCount = resumoData.reduce((acc: any, evento: any) => {
+      const tiposCount = resumoData.reduce((acc: unknown, evento: unknown) => {
         acc[evento.tipo] = (acc[evento.tipo] || 0) + 1
         return acc
       }, {})
       console.log('Ã°Å¸â€œÅ  Tipos de registros encontrados:', tiposCount)
       
       // Debug: primeiros 5 registros de cada tipo
-      const receitas = resumoData.filter((e: any) => e.tipo === 'receita').slice(0, 5)
-      const despesas = resumoData.filter((e: any) => e.tipo === 'despesa').slice(0, 5)
+      const receitas = resumoData.filter((e: unknown) => e.tipo === 'receita').slice(0, 5)
+      const despesas = resumoData.filter((e: unknown) => e.tipo === 'despesa').slice(0, 5)
       console.log('Ã°Å¸â€™Å¡ Primeiras 5 receitas:', receitas.map((r) => ({ tipo: r.tipo, valor: r.valor })))
       console.log('ÂÂ¤Ã¯Â¸Â Primeiras 5 despesas:', despesas.map((d) => ({ tipo: d.tipo, valor: d.valor })))
       
-      resumo = resumoData.reduce((acc: any, evento: any) => {
+      resumo = resumoData.reduce((acc: unknown, evento: unknown) => {
         const valor = parseFloat(evento.valor || 0)
         
         if (evento.tipo === 'receita') {
@@ -165,8 +181,8 @@ export async function GET(request: NextRequest) {
       })
       
       // Debug final: comparar com contagem manual
-      const receitasManual = resumoData.filter((e: any) => e.tipo === 'receita').reduce((sum: number, e: any) => sum + parseFloat(e.valor || 0), 0)
-      const despesasManual = resumoData.filter((e: any) => e.tipo === 'despesa').reduce((sum: number, e: any) => sum + parseFloat(e.valor || 0), 0)
+      const receitasManual = resumoData.filter((e: unknown) => e.tipo === 'receita').reduce((sum: number, e: unknown) => sum + parseFloat(e.valor || 0), 0)
+      const despesasManual = resumoData.filter((e: unknown) => e.tipo === 'despesa').reduce((sum: number, e: unknown) => sum + parseFloat(e.valor || 0), 0)
       
       console.log('Ã°Å¸â€Â VerificaÃ¡Â§Ã¡Â£o manual:')
       console.log(`   Receitas: R$ ${receitasManual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
@@ -239,13 +255,13 @@ export async function GET(request: NextRequest) {
     console.log(`Ã°Å¸â€œâ€¹ Categorias encontradas: ${categorias?.length || 0}`)
 
     // Criar mapa de categorias para lookup rÃ¡Â¡pido
-    const mapaCategorias = categorias?.reduce((acc: any, categoria: any) => {
+    const mapaCategorias = categorias?.reduce((acc: unknown, categoria: unknown) => {
       acc[categoria.id] = categoria.nome
       return acc
     }, {}) || {}
 
     // Formatar dados para compatibilidade com interface existente
-    const lancamentos = eventos?.map((evento: any) => ({
+    const lancamentos = eventos?.map((evento: unknown) => ({
       id: evento.evento_id,
       descricao: evento.descricao || 'Sem descriÃ¡Â§Ã¡Â£o',
       valor: parseFloat(evento.valor || 0),

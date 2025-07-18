@@ -1,24 +1,40 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { useRef, useCallback, useState, useEffect } from 'react'
 
 export interface DragState {
   isDragging: boolean;
-  draggedItem: any | null;
-  dragOverItem: any | null;
+  draggedItem: unknown | null;
+  dragOverItem: unknown | null;
   dropZone: string | null;
 }
 
 export interface DragHandlers {
-  onDragStart: (e: React.DragEvent | React.TouchEvent, item: any) => void;
+  onDragStart: (e: React.DragEvent | React.TouchEvent, item: unknown) => void;
   onDragEnd: (e: React.DragEvent | React.TouchEvent) => void;
   onDragOver: (e: React.DragEvent | React.TouchEvent) => void;
-  onDragEnter: (e: React.DragEvent | React.TouchEvent, item: any) => void;
+  onDragEnter: (e: React.DragEvent | React.TouchEvent, item: unknown) => void;
   onDragLeave: (e: React.DragEvent | React.TouchEvent) => void;
-  onDrop: (e: React.DragEvent | React.TouchEvent, targetItem: any) => void;
+  onDrop: (e: React.DragEvent | React.TouchEvent, targetItem: unknown) => void;
 }
 
 export interface UseDragAndDropProps {
-  onReorder?: (fromIndex: number, toIndex: number, items: any[]) => void;
-  onMove?: (item: any, targetZone: string) => void;
+  onReorder?: (fromIndex: number, toIndex: number, items: unknown[]) => void;
+  onMove?: (item: unknown, targetZone: string) => void;
   disabled?: boolean;
   enableTouch?: boolean;
 }
@@ -66,7 +82,7 @@ export function useDragAndDrop({
   }, [])
 
   // Drag start handler
-  const handleDragStart = useCallback((e: React.DragEvent | React.TouchEvent, item: any) => {
+  const handleDragStart = useCallback((e: React.DragEvent | React.TouchEvent, item: unknown) => {
     if (disabled) return
 
     if ('dataTransfer' in e) {
@@ -134,7 +150,7 @@ export function useDragAndDrop({
   }, [disabled])
 
   // Drag enter handler
-  const handleDragEnter = useCallback((e: React.DragEvent | React.TouchEvent, item: any) => {
+  const handleDragEnter = useCallback((e: React.DragEvent | React.TouchEvent, item: unknown) => {
     if (disabled) return
     
     e.preventDefault()
@@ -162,7 +178,7 @@ export function useDragAndDrop({
   }, [disabled])
 
   // Drop handler
-  const handleDrop = useCallback((e: React.DragEvent | React.TouchEvent, targetItem: any) => {
+  const handleDrop = useCallback((e: React.DragEvent | React.TouchEvent, targetItem: unknown) => {
     if (disabled) return
     
     e.preventDefault()
@@ -173,7 +189,7 @@ export function useDragAndDrop({
       try {
         const data = e.dataTransfer.getData('text/plain')
         if (data) {
-          draggedData = JSON.parse(data)
+          draggedData = JSON.parse(data) as unknown
         }
       } catch (error) {
         console.warn('Could not parse drag data:', error)
@@ -252,8 +268,8 @@ export function useDragAndDrop({
           const targetData = dropZone.getAttribute('data-drop-item')
           if (targetData) {
             try {
-              const targetItem = JSON.parse(targetData)
-              handleDrop(e as any, targetItem)
+              const targetItem = JSON.parse(targetData) as unknown
+              handleDrop(e as unknown, targetItem)
             } catch (error) {
               console.warn('Could not parse drop target data:', error)
             }

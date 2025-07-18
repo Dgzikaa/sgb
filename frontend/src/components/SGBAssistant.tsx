@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useRef, useEffect } from 'react'
@@ -23,6 +39,19 @@ interface SGBAssistantProps {
     nome: string
     id?: number
   } | null
+}
+
+interface SalesData {
+  vendasHoje?: {
+    total: number
+    quantidade: number
+    ticketMedio: number
+  }
+  ultimasVendas?: Array<{
+    liquido: string
+    meio: string
+    created_at: string
+  }>
 }
 
 export default function SGBAssistant({ isOpen, onToggle, barInfo }: SGBAssistantProps) {
@@ -344,11 +373,11 @@ async function processUserInput(input: string, barInfo: { nome: string; id?: num
 }
 
 // Função para buscar dados básicos de vendas para contexto
-async function getBasicSalesData(barInfo: { nome: string; id?: number } | null) {
+async function getBasicSalesData(barInfo: { nome: string; id?: number } | null): Promise<SalesData | null> {
   try {
     const today = new Date().toISOString().split('T')[0]
     const supabase = await getSupabaseClient();
-    if (!supabase) return 0;
+    if (!supabase) return null;
     const { data: vendas } = await supabase
       .from('pagamentos')
       .select('liquido, meio, created_at')
@@ -369,13 +398,13 @@ async function getBasicSalesData(barInfo: { nome: string; id?: number } | null) 
       ultimasVendas: vendas?.slice(0, 5) // últimas 5 vendas como contexto
     }
   } catch (error) {
-    console.warn('Å¡Â Ã¯Â¸Â Erro ao buscar dados de contexto:', error)
+    console.warn('Å¡Â Ã¯Â¸Â Erro ao buscar dados de contexto:', error)
     return null
   }
 }
 
 // Função para converter dados de vendas para Record<string, string | number | boolean>
-function salesDataToRecord(data: any): Record<string, string | number | boolean> {
+function salesDataToRecord(data: SalesData | null): Record<string, string | number | boolean> {
   if (!data) return {};
   return {
     total: data.vendasHoje?.total ?? 0,

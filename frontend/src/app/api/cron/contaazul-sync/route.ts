@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -137,7 +153,7 @@ async function executarSincronizacaoAutomatica() {
 }
 
 // Salvar log da execuÃ¡Â§Ã¡Â£o
-async function salvarLogExecucao(resultado: any) {
+async function salvarLogExecucao(resultado: unknown) {
   const logEntry = {
     sistema: 'contaazul',
     tipo: 'cron_sync',
@@ -214,11 +230,11 @@ export async function POST(request: NextRequest) {
     // Salvar log de erro
     await salvarLogExecucao({
       success: false,
-      error: (error as any).message
+      error: (error as unknown).message
     })
     return NextResponse.json({
       success: false,
-      error: (error as any).message,
+      error: (error as unknown).message,
       timestamp: new Date().toISOString()
     }, { status: 500 })
   }
@@ -260,7 +276,7 @@ export async function GET(request: NextRequest) {
     console.error('ÂÅ’ Erro ao verificar status:', error)
     return NextResponse.json({
       success: false,
-      error: (error as any).message
+      error: (error as unknown).message
     }, { status: 500 })
   }
 } 

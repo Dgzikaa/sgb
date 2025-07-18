@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
@@ -42,7 +58,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao } = JSON.parse(userData);
+    const { bar_id, permissao } = JSON.parse(userData) as unknown;
 
     // Verificar permissÃ¡Âµes
     if (!['financeiro', 'admin'].includes(permissao)) {
@@ -54,7 +70,7 @@ export async function GET(request: NextRequest) {
     const rawParams = Object.fromEntries(url.searchParams.entries());
     
     // Converter tipos
-    const processedParams: any = { ...rawParams };
+    const processedParams: unknown = { ...rawParams };
     if (processedParams.page !== undefined && processedParams.page !== '') processedParams.page = Number(processedParams.page);
     if (processedParams.limit !== undefined && processedParams.limit !== '') processedParams.limit = Number(processedParams.limit);
     if (processedParams.confianca_minima !== undefined && processedParams.confianca_minima !== '') processedParams.confianca_minima = parseFloat(processedParams.confianca_minima);
@@ -147,25 +163,25 @@ export async function GET(request: NextRequest) {
 
     const estatisticas = {
       total: stats?.length || 0,
-      ativas: stats?.filter((s: any) => s.ainda_ativa).length || 0,
-      resolvidas: stats?.filter((s: any) => s.status === 'resolvida').length || 0,
-      falsos_positivos: stats?.filter((s: any) => s.falso_positivo).length || 0,
+      ativas: stats?.filter((s: unknown) => s.ainda_ativa).length || 0,
+      resolvidas: stats?.filter((s: unknown) => s.status === 'resolvida').length || 0,
+      falsos_positivos: stats?.filter((s: unknown) => s.falso_positivo).length || 0,
       por_severidade: {
-        critica: stats?.filter((s: any) => s.severidade === 'critica').length || 0,
-        alta: stats?.filter((s: any) => s.severidade === 'alta').length || 0,
-        media: stats?.filter((s: any) => s.severidade === 'media').length || 0,
-        baixa: stats?.filter((s: any) => s.severidade === 'baixa').length || 0
+        critica: stats?.filter((s: unknown) => s.severidade === 'critica').length || 0,
+        alta: stats?.filter((s: unknown) => s.severidade === 'alta').length || 0,
+        media: stats?.filter((s: unknown) => s.severidade === 'media').length || 0,
+        baixa: stats?.filter((s: unknown) => s.severidade === 'baixa').length || 0
       },
-      por_tipo: stats?.reduce((acc: Record<string, number>, s: any) => {
+      por_tipo: stats?.reduce((acc: Record<string, number>, s: unknown) => {
         acc[s.tipo_anomalia] = (acc[s.tipo_anomalia] || 0) + 1;
         return acc;
       }, {} as Record<string, number>) || {},
-      por_status: stats?.reduce((acc: Record<string, number>, s: any) => {
+      por_status: stats?.reduce((acc: Record<string, number>, s: unknown) => {
         acc[s.status] = (acc[s.status] || 0) + 1;
         return acc;
       }, {} as Record<string, number>) || {},
       confianca_media: stats?.length ? 
-        stats.reduce((sum: number, s: any) => sum + s.confianca_deteccao, 0) / stats.length : 0
+        stats.reduce((sum: number, s: unknown) => sum + s.confianca_deteccao, 0) / stats.length : 0
     };
 
     // Buscar anomalias crÃ¡Â­ticas ativas
@@ -250,7 +266,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao, usuario_id } = JSON.parse(userData);
+    const { bar_id, permissao, usuario_id } = JSON.parse(userData) as unknown;
 
     // Verificar permissÃ¡Âµes
     if (!['financeiro', 'admin'].includes(permissao)) {
@@ -286,17 +302,17 @@ export async function PUT(request: NextRequest) {
 
     // LÃ¡Â³gica de status automÃ¡Â¡tico
     if (validatedData.status === 'investigando' && existing.status === 'detectada') {
-      (updatePayload as any).investigada_por = usuario_id;
-      (updatePayload as any).investigada_em = new Date().toISOString();
+      (updatePayload as unknown).investigada_por = usuario_id;
+      (updatePayload as unknown).investigada_em = new Date().toISOString();
     }
 
     if (validatedData.status === 'resolvida') {
-      (updatePayload as any).resolvida_em = new Date().toISOString();
-      (updatePayload as any).ainda_ativa = false;
+      (updatePayload as unknown).resolvida_em = new Date().toISOString();
+      (updatePayload as unknown).ainda_ativa = false;
       
       // Se nÃ¡Â£o forneceu data_fim, usar agora
       if (!validatedData.data_fim) {
-        (updatePayload as any).data_fim = new Date().toISOString();
+        (updatePayload as unknown).data_fim = new Date().toISOString();
       }
       
       // Calcular duraÃ¡Â§Ã¡Â£o se possÃ¡Â­vel
@@ -306,17 +322,17 @@ export async function PUT(request: NextRequest) {
         .eq('id', id)
         .single();
         
-      if (original?.data_inicio && (updatePayload as any).data_fim) {
+      if (original?.data_inicio && (updatePayload as unknown).data_fim) {
         const inicio = new Date(original.data_inicio);
-        const fim = new Date((updatePayload as any).data_fim);
-        (updatePayload as any).duracao_minutos = Math.round((fim.getTime() - inicio.getTime()) / 60000);
+        const fim = new Date((updatePayload as unknown).data_fim);
+        (updatePayload as unknown).duracao_minutos = Math.round((fim.getTime() - inicio.getTime()) / 60000);
       }
     }
 
     if (validatedData.falso_positivo === true) {
-      (updatePayload as any).status = 'falso_positivo';
-      (updatePayload as any).ainda_ativa = false;
-      (updatePayload as any).data_fim = new Date().toISOString();
+      (updatePayload as unknown).status = 'falso_positivo';
+      (updatePayload as unknown).ainda_ativa = false;
+      (updatePayload as unknown).data_fim = new Date().toISOString();
     }
 
     // Atualizar anomalia
@@ -367,7 +383,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao, usuario_id } = JSON.parse(userData);
+    const { bar_id, permissao, usuario_id } = JSON.parse(userData) as unknown;
 
     // Verificar permissÃ¡Âµes
     if (!['financeiro', 'admin'].includes(permissao)) {

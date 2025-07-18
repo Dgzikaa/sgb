@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
@@ -31,7 +47,7 @@ interface ProducaoEficiencia {
   rendimento_teorico: number
   rendimento_real: number
   tempo_total_segundos: number
-  insumos_utilizados: any[]
+  insumos_utilizados: unknown[]
 }
 
 export default function RelatorioEficienciaProducao() {

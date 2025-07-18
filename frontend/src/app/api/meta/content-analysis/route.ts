@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -82,7 +98,7 @@ export async function GET(request: NextRequest) {
     
     if (userData) {
       try {
-        const parsedUser = JSON.parse(decodeURIComponent(userData))
+        const parsedUser = JSON.parse(decodeURIComponent(userData) as unknown)
         barId = parsedUser.bar_id || 3
         console.log(`Ã°Å¸â€˜Â¤ Usando bar_id: ${barId}`)
       } catch (e) {
@@ -157,13 +173,13 @@ export async function GET(request: NextRequest) {
         const instagramPostsData = await instagramPostsResponse.json()
 
         if (instagramPostsResponse.ok && instagramPostsData.data) {
-          const posts = instagramPostsData.data.map((post: any): InstagramPost => {
+          const posts = instagramPostsData.data.map((post: unknown): InstagramPost => {
             const insights = post.insights?.data || []
-            const impressions = insights.find((i: any) => i.name === 'impressions')?.values?.[0]?.value || 0
-            const reach = insights.find((i: any) => i.name === 'reach')?.values?.[0]?.value || 0
-            const engagement = insights.find((i: any) => i.name === 'engagement')?.values?.[0]?.value || 0
-            const saves = insights.find((i: any) => i.name === 'saves')?.values?.[0]?.value || 0
-            const videoViews = insights.find((i: any) => i.name === 'video_views')?.values?.[0]?.value || 0
+            const impressions = insights.find((i: unknown) => i.name === 'impressions')?.values?.[0]?.value || 0
+            const reach = insights.find((i: unknown) => i.name === 'reach')?.values?.[0]?.value || 0
+            const engagement = insights.find((i: unknown) => i.name === 'engagement')?.values?.[0]?.value || 0
+            const saves = insights.find((i: unknown) => i.name === 'saves')?.values?.[0]?.value || 0
+            const videoViews = insights.find((i: unknown) => i.name === 'video_views')?.values?.[0]?.value || 0
 
             const engagementRate = impressions > 0 ? (engagement / impressions) * 100 : 0
             const saveRate = impressions > 0 ? (saves / impressions) * 100 : 0
@@ -211,7 +227,7 @@ export async function GET(request: NextRequest) {
           if (posts.length > 0) {
             contentAnalysis.instagram.metrics.total_posts = posts.length
             contentAnalysis.instagram.metrics.avg_engagement_rate = 
-              posts.reduce((sum: number, post: any) => sum + post.metrics.engagement_rate, 0) / posts.length
+              posts.reduce((sum: number, post: unknown) => sum + post.metrics.engagement_rate, 0) / posts.length
 
             // Melhor e pior post
             contentAnalysis.instagram.metrics.best_performing_post = 
@@ -310,12 +326,12 @@ export async function GET(request: NextRequest) {
           const storiesData = await storiesResponse.json()
 
           if (storiesResponse.ok && storiesData.data) {
-            contentAnalysis.instagram.stories = storiesData.data.map((story: any) => {
+            contentAnalysis.instagram.stories = storiesData.data.map((story: unknown) => {
               const insights = story.insights?.data || []
-              const impressions = insights.find((i: any) => i.name === 'impressions')?.values?.[0]?.value || 0
-              const reach = insights.find((i: any) => i.name === 'reach')?.values?.[0]?.value || 0
-              const replies = insights.find((i: any) => i.name === 'replies')?.values?.[0]?.value || 0
-              const exits = insights.find((i: any) => i.name === 'exits')?.values?.[0]?.value || 0
+              const impressions = insights.find((i: unknown) => i.name === 'impressions')?.values?.[0]?.value || 0
+              const reach = insights.find((i: unknown) => i.name === 'reach')?.values?.[0]?.value || 0
+              const replies = insights.find((i: unknown) => i.name === 'replies')?.values?.[0]?.value || 0
+              const exits = insights.find((i: unknown) => i.name === 'exits')?.values?.[0]?.value || 0
 
               return {
                 id: story.id,
@@ -347,11 +363,11 @@ export async function GET(request: NextRequest) {
         const facebookPostsData = await facebookPostsResponse.json()
 
         if (facebookPostsResponse.ok && facebookPostsData.data) {
-          const posts = facebookPostsData.data.map((post: any): FacebookPost => {
+          const posts = facebookPostsData.data.map((post: unknown): FacebookPost => {
             const insights = post.insights?.data || [];
-            const impressions = insights.find((i: any) => i.name === 'post_impressions')?.values?.[0]?.value || 0;
-            const engagedUsers = insights.find((i: any) => i.name === 'post_engaged_users')?.values?.[0]?.value || 0;
-            const clicks = insights.find((i: any) => i.name === 'post_clicks')?.values?.[0]?.value || 0;
+            const impressions = insights.find((i: unknown) => i.name === 'post_impressions')?.values?.[0]?.value || 0;
+            const engagedUsers = insights.find((i: unknown) => i.name === 'post_engaged_users')?.values?.[0]?.value || 0;
+            const clicks = insights.find((i: unknown) => i.name === 'post_clicks')?.values?.[0]?.value || 0;
             const likes = post.likes?.summary?.total_count || 0;
             const comments = post.comments?.summary?.total_count || 0;
             const shares = post.shares?.count || 0;
@@ -382,7 +398,7 @@ export async function GET(request: NextRequest) {
           if (posts.length > 0) {
             contentAnalysis.facebook.metrics.total_posts = posts.length
             contentAnalysis.facebook.metrics.avg_engagement_rate = 
-              posts.reduce((sum: number, post: any) => sum + post.metrics.engagement_rate, 0) / posts.length
+              posts.reduce((sum: number, post: unknown) => sum + post.metrics.engagement_rate, 0) / posts.length
 
             contentAnalysis.facebook.metrics.best_performing_post = 
               posts.reduce((best: FacebookPost, current: FacebookPost) => 
@@ -526,7 +542,7 @@ export async function GET(request: NextRequest) {
         timestamp: new Date().toISOString()
       })
 
-    } catch (metaError: any) {
+    } catch (metaError: unknown) {
       console.log(`Å¡Â Ã¯Â¸Â Erro ao analisar conteÃ¡Âºdo: ${metaError.message}`)
       
       return NextResponse.json({
@@ -546,7 +562,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('ÂÅ’ Erro ao analisar conteÃ¡Âºdo:', error)
     return NextResponse.json({ 
       success: false,

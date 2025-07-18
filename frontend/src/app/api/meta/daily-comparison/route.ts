@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -21,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     if (userData) {
       try {
-        const parsedUser = JSON.parse(decodeURIComponent(userData))
+        const parsedUser = JSON.parse(decodeURIComponent(userData) as unknown)
         barId = parsedUser.bar_id || 3
         console.log(`?? Usando bar_id: ${barId}`)
       } catch (e) {
@@ -65,7 +81,7 @@ export async function GET(request: NextRequest) {
     const dailyMap = new Map()
 
     // Processar dados Facebook
-    facebookData?.forEach((day: any) => {
+    facebookData?.forEach((day: unknown) => {
       const date = day.data_referencia
       if (!dailyMap.has(date)) {
         dailyMap.set(date, {
@@ -84,7 +100,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Processar dados Instagram
-    instagramData?.forEach((day: any) => {
+    instagramData?.forEach((day: unknown) => {
       const date = day.data_referencia
       if (!dailyMap.has(date)) {
         dailyMap.set(date, {

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
@@ -11,7 +27,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Dados do usuÃ¡Â¡rio nÃ¡Â£o encontrados' }, { status: 401 })
     }
 
-    const { bar_id } = JSON.parse(userDataHeader)
+    const { bar_id } = JSON.parse(userDataHeader) as unknown
 
     // 1. Verificar credenciais
     const { data: credenciais } = await supabase
@@ -56,7 +72,7 @@ export async function GET(request: NextRequest) {
     const { data: pgcronJobs } = await supabase
       .rpc('get_cron_jobs')
 
-    const contaazulJob = pgcronJobs?.find((job: any) => 
+    const contaazulJob = pgcronJobs?.find((job: unknown) => 
       job.jobname?.includes(`contaazul_sync_bar_${bar_id}`)
     )
 
@@ -79,8 +95,8 @@ export async function GET(request: NextRequest) {
       .gte('competencia', `${currentMonth}-01`)
       .lt('competencia', `${currentMonth}-32`)
 
-    const totalReceitas = statsReceitas?.reduce((sum: any, item: any) => sum + (item.valor_total || 0), 0) || 0
-    const totalDespesas = statsDespesas?.reduce((sum: any, item: any) => sum + (item.valor_total || 0), 0) || 0
+    const totalReceitas = statsReceitas?.reduce((sum: unknown, item: unknown) => sum + (item.valor_total || 0), 0) || 0
+    const totalDespesas = statsDespesas?.reduce((sum: unknown, item: unknown) => sum + (item.valor_total || 0), 0) || 0
 
     return NextResponse.json({
       success: true,

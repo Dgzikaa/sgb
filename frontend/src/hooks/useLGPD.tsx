@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect, useCallback, createContext, useContext } from 'react'
@@ -31,7 +47,7 @@ export interface LGPDConsent {
 export interface LGPDUserRights {
   accessData: () => Promise<any>           // Art. 15 - Acesso aos dados
   portabilityData: () => Promise<Blob>     // Art. 20 - Portabilidade
-  rectifyData: (data: any) => Promise<void> // Art. 16 - RetificaÃ¡Â§Ã¡Â£o
+  rectifyData: (data: unknown) => Promise<void> // Art. 16 - RetificaÃ¡Â§Ã¡Â£o
   deleteData: () => Promise<void>          // Art. 17 - ExclusÃ¡Â£o
   restrictProcessing: () => Promise<void>  // Art. 18 - LimitaÃ¡Â§Ã¡Â£o
   objectProcessing: () => Promise<void>    // Art. 21 - OposiÃ¡Â§Ã¡Â£o
@@ -124,7 +140,7 @@ export function useLGPDImplementation() {
         
         // Primeiro, verificar localStorage
         const stored = localStorage.getItem('lgpd_settings')
-        let localSettings = stored ? JSON.parse(stored) : null
+        let localSettings = stored ? JSON.parse(stored) as unknown : null
 
         // Verificar se hÃ¡Â¡ configuraÃ¡Â§Ã¡Âµes no servidor (se usuÃ¡Â¡rio logado)
         const userId = localStorage.getItem('user_id')
@@ -341,7 +357,7 @@ export function useLGPDImplementation() {
     },
 
     // RetificaÃ§Ã£o (Art. 16)
-    rectifyData: async (data: any) => {
+    rectifyData: async (data: unknown) => {
       await fetch('/api/lgpd/data-rectification', {
         method: 'POST',
         headers: {

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 
@@ -61,43 +77,43 @@ export async function GET(request: NextRequest) {
 
     // === MÃ¡â€°TRICAS RESUMIDAS ===
     const metricasResumo = {
-      usuarios_ativos_hoje: eventos?.filter((e: any) => 
+      usuarios_ativos_hoje: eventos?.filter((e: unknown) => 
         e.timestamp_evento >= new Date().toISOString().split('T')[0] && e.user_id
-      ).map((e: any) => e.user_id).filter((v: any, i: number, a: any[]) => a.indexOf(v) === i).length || 0,
+      ).map((e: unknown) => e.user_id).filter((v: unknown, i: number, a: unknown[]) => a.indexOf(v) === i).length || 0,
       
-      sessoes_hoje: eventos?.filter((e: any) => 
+      sessoes_hoje: eventos?.filter((e: unknown) => 
         e.timestamp_evento >= new Date().toISOString().split('T')[0]
       ).length || 0,
       
       tempo_medio_sessao: eventos?.length ? 
-        Math.round(eventos.reduce((acc: number, e: any) => acc + (e.tempo_gasto_segundos || 0), 0) / eventos.length) : 0,
+        Math.round(eventos.reduce((acc: number, e: unknown) => acc + (e.tempo_gasto_segundos || 0), 0) / eventos.length) : 0,
         
       taxa_mobile: eventos?.length ? 
-        Math.round((eventos.filter((e: any) => e.dispositivo_tipo === 'mobile').length / eventos.length) * 100) : 0
+        Math.round((eventos.filter((e: unknown) => e.dispositivo_tipo === 'mobile').length / eventos.length) * 100) : 0
     }
 
     // === KPIs RESUMIDOS ===
     const kpisResumo = {
       total_kpis: kpis?.length || 0,
-      kpis_atingidos: kpis?.filter((k: any) => k.status_meta === 'atingido').length || 0,
-      kpis_criticos: kpis?.filter((k: any) => k.status_meta === 'critico').length || 0,
+      kpis_atingidos: kpis?.filter((k: unknown) => k.status_meta === 'atingido').length || 0,
+      kpis_criticos: kpis?.filter((k: unknown) => k.status_meta === 'critico').length || 0,
       percentual_sucesso: kpis?.length ? 
-        Math.round((kpis.filter((k: any) => k.status_meta === 'atingido').length / kpis.length) * 100) : 0
+        Math.round((kpis.filter((k: unknown) => k.status_meta === 'atingido').length / kpis.length) * 100) : 0
     }
 
     // === PERFORMANCE RESUMIDA ===
     const performanceResumo = {
       tempo_resposta_medio: performance?.length ? 
-        Math.round(performance.reduce((acc: number, p: any) => acc + p.tempo_resposta_ms, 0) / performance.length) : 0,
+        Math.round(performance.reduce((acc: number, p: unknown) => acc + p.tempo_resposta_ms, 0) / performance.length) : 0,
       
       total_requests: performance?.length || 0,
       taxa_erro: performance?.length ? 
-        Math.round((performance.filter((p: any) => p.status_code >= 400).length / performance.length) * 100) : 0,
+        Math.round((performance.filter((p: unknown) => p.status_code >= 400).length / performance.length) * 100) : 0,
       
       endpoints_mais_lentos: performance
-        ?.sort((a: any, b: any) => b.tempo_resposta_ms - a.tempo_resposta_ms)
+        ?.sort((a: unknown, b: unknown) => b.tempo_resposta_ms - a.tempo_resposta_ms)
         .slice(0, 5)
-        .map((p: any) => ({
+        .map((p: unknown) => ({
           endpoint: p.endpoint_ou_pagina,
           tempo_ms: p.tempo_resposta_ms,
           componente: p.componente
@@ -105,31 +121,31 @@ export async function GET(request: NextRequest) {
     }
 
     // === EVENTOS POR TIPO ===
-    const eventosPorTipo = eventos?.reduce((acc: any, evento: any) => {
+    const eventosPorTipo = eventos?.reduce((acc: unknown, evento: unknown) => {
       acc[evento.evento_tipo] = (acc[evento.evento_tipo] || 0) + 1
       return acc
     }, {}) || {}
 
     // === PÃ¡ÂGINAS MAIS VISITADAS ===
     const paginasVisitadas = eventos
-      ?.filter((e: any) => e.evento_tipo === 'page_view')
-      ?.reduce((acc: any, evento: any) => {
+      ?.filter((e: unknown) => e.evento_tipo === 'page_view')
+      ?.reduce((acc: unknown, evento: unknown) => {
         const pagina = evento.dados_evento?.pagina || 'Desconhecida'
         acc[pagina] = (acc[pagina] || 0) + 1
         return acc
       }, {}) || {}
 
     const topPaginas = Object.entries(paginasVisitadas)
-      .sort(([,a]: any, [,b]: any) => b - a)
+      .sort(([,a]: unknown, [,b]: unknown) => b - a)
       .slice(0, 10)
       .map(([pagina, visitas]: [any, any]) => ({ pagina, visitas }))
 
     // === ALERTAS RESUMIDOS ===
     const alertasResumo = {
       total_ativos: alertas?.length || 0,
-      criticos: alertas?.filter((a: any) => a.severidade === 'critical').length || 0,
-      warnings: alertas?.filter((a: any) => a.severidade === 'warning').length || 0,
-      errors: alertas?.filter((a: any) => a.severidade === 'error').length || 0
+      criticos: alertas?.filter((a: unknown) => a.severidade === 'critical').length || 0,
+      warnings: alertas?.filter((a: unknown) => a.severidade === 'warning').length || 0,
+      errors: alertas?.filter((a: unknown) => a.severidade === 'error').length || 0
     }
 
     // === RESPOSTA FINAL ===
@@ -146,7 +162,7 @@ export async function GET(request: NextRequest) {
         alertas_resumo: alertasResumo,
         
         // Dados detalhados
-        kpis: kpis?.map((kpi: any) => ({
+        kpis: kpis?.map((kpi: unknown) => ({
           id: kpi.id,
           categoria: kpi.categoria_kpi,
           nome: kpi.nome_kpi,
@@ -161,9 +177,9 @@ export async function GET(request: NextRequest) {
         eventos_por_tipo: eventosPorTipo,
         top_paginas: topPaginas,
         
-        alertas_criticos: alertas?.filter((a: any) => a.severidade === 'critical').slice(0, 5) || [],
+        alertas_criticos: alertas?.filter((a: unknown) => a.severidade === 'critical').slice(0, 5) || [],
         
-        performance_trends: performance?.map((p: any) => ({
+        performance_trends: performance?.map((p: unknown) => ({
           timestamp: p.timestamp_request,
           tempo_resposta: p.tempo_resposta_ms,
           endpoint: p.endpoint_ou_pagina,

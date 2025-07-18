@@ -20,7 +20,7 @@ export function useSGBAssistant() {
     try {
       const saved = localStorage.getItem('sgb-assistant-state')
       if (saved) {
-        const parsed = JSON.parse(saved)
+        const parsed = JSON.parse(saved) as unknown
         setState(prev => ({
           ...prev,
           ...parsed,

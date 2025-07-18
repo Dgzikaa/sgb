@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { windsorMultiAccountService } from '@/lib/windsor-multi-account-service'
 
@@ -13,7 +29,7 @@ export async function GET(request: NextRequest) {
       limit
     })
 
-    let data: any[] = []
+    let data: unknown[] = []
 
     if (companyName) {
       // Logs de uma empresa específica

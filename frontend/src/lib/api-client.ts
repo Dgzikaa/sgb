@@ -1,17 +1,33 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿/**
  * Cliente API que adiciona automaticamente headers de autenticaÃ§Ã£o
  */
 
 export interface ApiOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
-  body?: any
+  body?: unknown
   headers?: Record<string, string>
 }
 
 /**
  * Fazer chamada API autenticada
  */
-export async function apiCall(endpoint: string, options: ApiOptions = {}) {
+export async function apiCall<T = unknown>(endpoint: string, options: ApiOptions = {}): Promise<T> {
   try {
     // Headers padrÃ£o
     const headers: Record<string, string> = {
@@ -23,7 +39,7 @@ export async function apiCall(endpoint: string, options: ApiOptions = {}) {
     const userData = localStorage.getItem('sgb_user')
     if (userData) {
       try {
-        const user = JSON.parse(userData)
+        const user = JSON.parse(userData) as unknown
         // Enviar apenas ID e email (dados pequenos)
         if (user.id) headers['x-user-id'] = user.id
         if (user.email) headers['x-user-email'] = user.email
@@ -53,7 +69,7 @@ export async function apiCall(endpoint: string, options: ApiOptions = {}) {
     }
     
     // Retornar dados JSON
-    return await response.json()
+    return await response.json() as T
     
   } catch (error) {
     console.error(`Erro na API ${endpoint}:`, error)
@@ -65,17 +81,17 @@ export async function apiCall(endpoint: string, options: ApiOptions = {}) {
  * FunÃ§Ãµes de conveniÃªncia para cada mÃ©todo HTTP
  */
 export const api = {
-  get: (endpoint: string, headers?: Record<string, string>) => 
-    apiCall(endpoint, { method: 'GET', headers }),
+  get: <T = unknown>(endpoint: string, headers?: Record<string, string>) => 
+    apiCall<T>(endpoint, { method: 'GET', headers }),
     
-  post: (endpoint: string, body: unknown, headers?: Record<string, string>) => 
-    apiCall(endpoint, { method: 'POST', body, headers }),
+  post: <T = unknown>(endpoint: string, body: unknown, headers?: Record<string, string>) => 
+    apiCall<T>(endpoint, { method: 'POST', body, headers }),
     
-  put: (endpoint: string, body: unknown, headers?: Record<string, string>) => 
-    apiCall(endpoint, { method: 'PUT', body, headers }),
+  put: <T = unknown>(endpoint: string, body: unknown, headers?: Record<string, string>) => 
+    apiCall<T>(endpoint, { method: 'PUT', body, headers }),
     
-  delete: (endpoint: string, headers?: Record<string, string>) => 
-    apiCall(endpoint, { method: 'DELETE', headers })
+  delete: <T = unknown>(endpoint: string, headers?: Record<string, string>) => 
+    apiCall<T>(endpoint, { method: 'DELETE', headers })
 }
 
 /**
@@ -96,10 +112,10 @@ export const checklistsApi = {
   },
   
   // Criar checklist
-  create: (checklist: any) => api.post('/api/checklists', checklist),
+  create: (checklist: unknown) => api.post('/api/checklists', checklist),
   
   // Atualizar checklist
-  update: (id: string, checklist: any) => api.put(`/api/checklists?id=${id}`, checklist),
+  update: (id: string, checklist: unknown) => api.put(`/api/checklists?id=${id}`, checklist),
   
   // Deletar checklist
   delete: (id: string) => api.delete(`/api/checklists?id=${id}`)

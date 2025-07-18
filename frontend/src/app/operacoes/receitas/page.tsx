@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
@@ -187,7 +203,7 @@ export default function ReceitasPage() {
       
       if (data.success && data.data) {
         // Mapear dados da API para o formato esperado
-        const insumosFormatados = data.data.map((insumo: any) => ({
+        const insumosFormatados = data.data.map((insumo: unknown) => ({
           id: insumo.id,
           codigo: insumo.codigo,
           nome: insumo.nome,
@@ -201,8 +217,8 @@ export default function ReceitasPage() {
         setInsumos(insumosFormatados)
         
         // Debug: verificar distribuição por tipo_local
-        const cozinhaCount = insumosFormatados.filter((i: any) => i.tipo_local === 'cozinha').length
-        const barCount = insumosFormatados.filter((i: any) => i.tipo_local === 'bar').length
+        const cozinhaCount = insumosFormatados.filter((i: unknown) => i.tipo_local === 'cozinha').length
+        const barCount = insumosFormatados.filter((i: unknown) => i.tipo_local === 'bar').length
         console.log(`${insumosFormatados.length} insumos carregados - Cozinha: ${cozinhaCount}, Bar: ${barCount}`)
       } else {
         console.error('Erro na resposta da API insumos:', data)
@@ -254,11 +270,11 @@ export default function ReceitasPage() {
 
   // Função para obter receitas onde o insumo é chefe
   const getReceitasOndeEChefe = useCallback((insumoId: number) => {
-    return receitas.filter((receita: any) => 
-      receita.insumos?.some((insumo: any) => 
+    return receitas.filter((receita: unknown) => 
+      receita.insumos?.some((insumo: unknown) => 
         insumo.id === insumoId && insumo.is_chefe
       )
-    ).map((receita: any) => receita.receita_nome)
+    ).map((receita: unknown) => receita.receita_nome)
   }, [receitas])
 
   // Carregar dados quando o bar for selecionado
@@ -282,11 +298,11 @@ export default function ReceitasPage() {
 
   const insumosFiltrados = useMemo(() => {
     // Filtrar por tipo_local primeiro
-    const insumosPorTipo = insumos.filter((insumo: any) => 
+    const insumosPorTipo = insumos.filter((insumo: unknown) => 
       insumo.tipo_local === tipoLocalInsumos
     )
     
-    return insumosPorTipo.filter((insumo: any) =>
+    return insumosPorTipo.filter((insumo: unknown) =>
       insumo.nome.toLowerCase().includes(buscaInsumos.toLowerCase()) ||
       insumo.codigo.toLowerCase().includes(buscaInsumos.toLowerCase()) ||
       insumo.categoria.toLowerCase().includes(buscaInsumos.toLowerCase())
@@ -295,11 +311,11 @@ export default function ReceitasPage() {
 
   const receitasFiltradas = useMemo(() => {
     // Filtrar por tipo_local primeiro
-    const receitasPorTipo = receitas.filter((receita: any) => 
+    const receitasPorTipo = receitas.filter((receita: unknown) => 
       receita.tipo_local === tipoLocalReceitas
     )
     
-    return receitasPorTipo.filter((receita: any) =>
+    return receitasPorTipo.filter((receita: unknown) =>
       receita.receita_nome.toLowerCase().includes(buscaReceitas.toLowerCase()) ||
       receita.receita_codigo.toLowerCase().includes(buscaReceitas.toLowerCase()) ||
       receita.receita_categoria.toLowerCase().includes(buscaReceitas.toLowerCase())
@@ -308,12 +324,12 @@ export default function ReceitasPage() {
 
   // Otimização: calcular insumos chefes uma vez
   const insumosChefes = useMemo(() => {
-    return insumos.filter((insumo: any) => isInsumoChefe(insumo.id))
+    return insumos.filter((insumo: unknown) => isInsumoChefe(insumo.id))
   }, [insumos, isInsumoChefe])
 
   // Filtrar insumos para adicionar na receita (baseado na busca)
   const insumosParaReceita = useMemo(() => {
-    return insumos.filter((insumo: any) =>
+    return insumos.filter((insumo: unknown) =>
       insumo.nome.toLowerCase().includes(buscaInsumoReceita.toLowerCase()) ||
       insumo.codigo.toLowerCase().includes(buscaInsumoReceita.toLowerCase())
     )

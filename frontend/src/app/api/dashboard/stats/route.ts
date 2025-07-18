@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -35,7 +51,7 @@ export async function GET(request: NextRequest) {
 
     // Buscar dados com paginaÃ¡Â§Ã¡Â£o
     const buscarComPaginacao = async (tabela: string, colunas: string) => {
-      let todosRegistros: any[] = []
+      let todosRegistros: unknown[] = []
       let pagina = 0
       const tamanhoPagina = 1000
       
@@ -81,7 +97,7 @@ export async function GET(request: NextRequest) {
 
     // Buscar dados Yuzer (sem bar_id)
     const buscarYuzer = async () => {
-      let todosRegistros: any[] = []
+      let todosRegistros: unknown[] = []
       let pagina = 0
       const tamanhoPagina = 1000
 
@@ -140,7 +156,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('ÂÅ’ Erro na API de stats:', error)
     return NextResponse.json(
-      { success: false, error: `Erro interno: ${(error as any).message}` },
+      { success: false, error: `Erro interno: ${(error as unknown).message}` },
       { status: 500 }
     )
   }

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -88,39 +104,39 @@ export async function POST(request: NextRequest) {
     let receita_bar = 0;
 
     // 1. PÃ¡Âºblico real - somar pessoas da tabela perÃ¡Â­odo
-    publico_real = periodoData.reduce((sum: number, item: any) => {
+    publico_real = periodoData.reduce((sum: number, item: unknown) => {
       return sum + parseInt(item.pessoas || '0');
     }, 0);
 
     // 2. Faturamento lÃ¡Â­quido - somar pagamentos
-    faturamento_liquido = pagamentosData.reduce((sum: number, item: any) => {
+    faturamento_liquido = pagamentosData.reduce((sum: number, item: unknown) => {
       return sum + parseFloat(item.liquido || '0');
     }, 0);
 
     // 3. Receita de couvert - tanto de perÃ¡Â­odo quanto pagamentos
-    receita_couvert = periodoData.reduce((sum: number, item: any) => {
+    receita_couvert = periodoData.reduce((sum: number, item: unknown) => {
       return sum + parseFloat(item.vr_couvert || '0');
     }, 0);
 
-    const couvertPagamentos = pagamentosData.reduce((sum: number, item: any) => {
+    const couvertPagamentos = pagamentosData.reduce((sum: number, item: unknown) => {
       return sum + parseFloat(item.vr_couvert || '0');
     }, 0);
 
     receita_couvert = Math.max(receita_couvert, couvertPagamentos);
 
     // 4. Receita de ingressos - Sympla
-    receita_ingressos = symplaData.reduce((sum: number, item: any) => {
+    receita_ingressos = symplaData.reduce((sum: number, item: unknown) => {
       return sum + parseFloat(item.total_liquido || '0');
     }, 0);
 
     // 5. Receita do bar - produtos
-    receita_bar = periodoData.reduce((sum: number, item: any) => {
+    receita_bar = periodoData.reduce((sum: number, item: unknown) => {
       return sum + parseFloat(item.vr_produtos || '0');
     }, 0);
 
     // Se nÃ¡Â£o temos pÃ¡Âºblico da tabela perÃ¡Â­odo, tentar usar checkins do Sympla
     if (publico_real === 0 && symplaData.length > 0) {
-      publico_real = symplaData.reduce((sum: number, item: any) => {
+      publico_real = symplaData.reduce((sum: number, item: unknown) => {
         return sum + parseInt(item.qtd_checkins_realizados || '0');
       }, 0);
     }

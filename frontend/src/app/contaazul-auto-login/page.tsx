@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client';
 
 import { useEffect, useState } from 'react';
@@ -19,7 +35,7 @@ export default function ContaAzulAutoLogin() {
     const checkData = () => {
       const dataStr = sessionStorage.getItem('contaazul_auto_login');
       if (dataStr) {
-        const data = JSON.parse(dataStr);
+        const data = JSON.parse(dataStr) as unknown;
         
         // Verificar se ainda Ã¡Â© vÃ¡Â¡lido (5 min)
         if (Date.now() - data.timestamp > 300000) {

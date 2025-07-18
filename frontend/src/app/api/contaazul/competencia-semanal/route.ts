@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { mapearCategoria } from '@/lib/contaazul-categoria-mapper';
@@ -96,7 +112,7 @@ export async function GET(req: NextRequest) {
       categoriasDict[cat.id] = cat.nome;
     }
     // Agrupar por mÃ¡Âªs e categoria
-    const meses: Record<string, any> = {};
+    const meses: Record<string, unknown> = {};
     for (const evento of eventos || []) {
       if (!evento.data_competencia) continue;
       const { mes, ano } = getMonthYear(evento.data_competencia);
@@ -141,7 +157,7 @@ export async function GET(req: NextRequest) {
     });
     return NextResponse.json({ success: true, meses: resultado }, { status: 200 });
   } catch (e) {
-    return NextResponse.json({ success: false, error: (e as any).message || String(e) }, { status: 500 });
+    return NextResponse.json({ success: false, error: (e as unknown).message || String(e) }, { status: 500 });
   }
 } 
 

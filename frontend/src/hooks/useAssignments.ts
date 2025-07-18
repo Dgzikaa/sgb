@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { useState, useEffect, useCallback } from 'react'
 import { api } from '@/lib/api-client'
 
@@ -78,6 +94,12 @@ interface FiltrosAtribuicao {
   limit?: number
 }
 
+interface ApiResponse<T> {
+  success: boolean
+  data?: T
+  error?: string
+}
+
 interface UseAssignmentsResult {
   // Estados
   atribuicoes: Atribuicao[]
@@ -102,14 +124,14 @@ interface UseAssignmentsResult {
     perPage: number
   } | null
   
-  // AÃ¡Â§Ã¡Âµes CRUD
+  // Ações CRUD
   carregarAtribuicoes: (filtros?: FiltrosAtribuicao) => Promise<void>
   carregarAtribuicao: (id: string) => Promise<void>
   criarAtribuicao: (dados: NovaAtribuicao) => Promise<boolean>
   atualizarAtribuicao: (id: string, dados: Partial<NovaAtribuicao>) => Promise<boolean>
   excluirAtribuicao: (id: string, force?: boolean) => Promise<boolean>
   
-  // UtilitÃ¡Â¡rios
+  // Utilitários
   recarregar: () => Promise<void>
   limparErro: () => void
 }
@@ -126,12 +148,22 @@ export function useAssignments(): UseAssignmentsResult {
   const [updating, setUpdating] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [estatisticas, setEstatisticas] = useState<any>(null)
-  const [paginacao, setPaginacao] = useState<any>(null)
+  const [estatisticas, setEstatisticas] = useState<{
+    total_agendados: number
+    concluidos: number
+    pendentes: number
+    atrasados: number
+    taxa_conclusao: number
+  } | null>(null)
+  const [paginacao, setPaginacao] = useState<{
+    page: number
+    total: number
+    perPage: number
+  } | null>(null)
   const [filtrosAtuais, setFiltrosAtuais] = useState<FiltrosAtribuicao>({})
 
   // =====================================================
-  // AÃ¡â€¡Ã¡â€¢ES CRUD
+  // AÇÕES CRUD
   // =====================================================
 
   const carregarAtribuicoes = useCallback(async (filtros: FiltrosAtribuicao = {}) => {
@@ -147,18 +179,32 @@ export function useAssignments(): UseAssignmentsResult {
         }
       })
 
-      const response = await api.get(`/api/atribuicoes?${params.toString()}`)
+      const response = await api.get(`/api/atribuicoes?${params.toString()}`) as ApiResponse<{
+        atribuicoes: Atribuicao[]
+        estatisticas: {
+          total_agendados: number
+          concluidos: number
+          pendentes: number
+          atrasados: number
+          taxa_conclusao: number
+        }
+        paginacao: {
+          page: number
+          total: number
+          perPage: number
+        }
+      }>
 
-      if (response.success) {
+      if (response.success && response.data) {
         setAtribuicoes(response.data.atribuicoes || [])
         setEstatisticas(response.data.estatisticas)
         setPaginacao(response.data.paginacao)
       } else {
-        setError(response.error || 'Erro ao carregar atribuiÃ¡Â§Ã¡Âµes')
+        setError(response.error || 'Erro ao carregar atribuições')
       }
     } catch (err) {
-      console.error('Erro ao carregar atribuiÃ¡Â§Ã¡Âµes:', err)
-      setError('Erro ao carregar atribuiÃ¡Â§Ã¡Âµes')
+      console.error('Erro ao carregar atribuições:', err)
+      setError('Erro ao carregar atribuições')
     } finally {
       setLoading(false)
     }
@@ -169,16 +215,16 @@ export function useAssignments(): UseAssignmentsResult {
       setLoading(true)
       setError(null)
 
-      const response = await api.get(`/api/atribuicoes/${id}`)
+      const response = await api.get(`/api/atribuicoes/${id}`) as ApiResponse<Atribuicao>
 
-      if (response.success) {
+      if (response.success && response.data) {
         setAtribuicao(response.data)
       } else {
-        setError(response.error || 'Erro ao carregar atribuiÃ¡Â§Ã¡Â£o')
+        setError(response.error || 'Erro ao carregar atribuição')
       }
     } catch (err) {
-      console.error('Erro ao carregar atribuiÃ¡Â§Ã¡Â£o:', err)
-      setError('Erro ao carregar atribuiÃ¡Â§Ã¡Â£o')
+      console.error('Erro ao carregar atribuição:', err)
+      setError('Erro ao carregar atribuição')
     } finally {
       setLoading(false)
     }
@@ -189,20 +235,20 @@ export function useAssignments(): UseAssignmentsResult {
       setCreating(true)
       setError(null)
 
-      const response = await api.post('/api/atribuicoes', dados)
+      const response = await api.post('/api/atribuicoes', dados) as ApiResponse<Atribuicao>
 
-      if (response.success) {
-        console.log('Å“â€¦ AtribuiÃ¡Â§Ã¡Â£o criada com sucesso!')
+      if (response.success && response.data) {
+        console.log('✅ Atribuição criada com sucesso!')
         // Recarregar lista
         await carregarAtribuicoes(filtrosAtuais)
         return true
       } else {
-        setError(response.error || 'Erro ao criar atribuiÃ¡Â§Ã¡Â£o')
+        setError(response.error || 'Erro ao criar atribuição')
         return false
       }
     } catch (err) {
-      console.error('Erro ao criar atribuiÃ¡Â§Ã¡Â£o:', err)
-      setError('Erro ao criar atribuiÃ¡Â§Ã¡Â£o')
+      console.error('Erro ao criar atribuição:', err)
+      setError('Erro ao criar atribuição')
       return false
     } finally {
       setCreating(false)
@@ -214,29 +260,29 @@ export function useAssignments(): UseAssignmentsResult {
       setUpdating(true)
       setError(null)
 
-      const response = await api.put(`/api/atribuicoes/${id}`, dados)
+      const response = await api.put(`/api/atribuicoes/${id}`, dados) as ApiResponse<Atribuicao>
 
-      if (response.success) {
-        console.log('Ã°Å¸â€œÂ AtribuiÃ¡Â§Ã¡Â£o atualizada com sucesso!')
+      if (response.success && response.data) {
+        console.log('✅ Atribuição atualizada com sucesso!')
         
         // Atualizar na lista
         setAtribuicoes(prev => prev.map((a) => 
-          a.id === id ? { ...a, ...response.data } : a
+          a.id === id ? { ...a, ...response.data! } : a
         ))
         
-        // Atualizar atribuiÃ¡Â§Ã¡Â£o individual se carregada
+        // Atualizar atribuição individual se carregada
         if (atribuicao?.id === id) {
-          setAtribuicao(prev => prev ? { ...prev, ...response.data } : null)
+          setAtribuicao(prev => prev ? { ...prev, ...response.data! } : null)
         }
         
         return true
       } else {
-        setError(response.error || 'Erro ao atualizar atribuiÃ¡Â§Ã¡Â£o')
+        setError(response.error || 'Erro ao atualizar atribuição')
         return false
       }
     } catch (err) {
-      console.error('Erro ao atualizar atribuiÃ¡Â§Ã¡Â£o:', err)
-      setError('Erro ao atualizar atribuiÃ¡Â§Ã¡Â£o')
+      console.error('Erro ao atualizar atribuição:', err)
+      setError('Erro ao atualizar atribuição')
       return false
     } finally {
       setUpdating(false)
@@ -249,27 +295,27 @@ export function useAssignments(): UseAssignmentsResult {
       setError(null)
 
       const params = force ? '?force=true' : ''
-      const response = await api.delete(`/api/atribuicoes/${id}${params}`)
+      const response = await api.delete(`/api/atribuicoes/${id}${params}`) as ApiResponse<{ success: boolean }>
 
       if (response.success) {
-        console.log('Ã°Å¸â€”â€˜Ã¯Â¸Â AtribuiÃ¡Â§Ã¡Â£o excluÃ¡Â­da com sucesso!')
+        console.log('🗑️ Atribuição excluída com sucesso!')
         
         // Remover da lista
         setAtribuicoes(prev => prev.filter((a) => a.id !== id))
         
-        // Limpar atribuiÃ¡Â§Ã¡Â£o individual se era a atual
+        // Limpar atribuição individual se era a atual
         if (atribuicao?.id === id) {
           setAtribuicao(null)
         }
         
         return true
       } else {
-        setError(response.error || 'Erro ao excluir atribuiÃ¡Â§Ã¡Â£o')
+        setError(response.error || 'Erro ao excluir atribuição')
         return false
       }
     } catch (err) {
-      console.error('Erro ao excluir atribuiÃ¡Â§Ã¡Â£o:', err)
-      setError('Erro ao excluir atribuiÃ¡Â§Ã¡Â£o')
+      console.error('Erro ao excluir atribuição:', err)
+      setError('Erro ao excluir atribuição')
       return false
     } finally {
       setDeleting(false)
@@ -277,7 +323,7 @@ export function useAssignments(): UseAssignmentsResult {
   }, [atribuicao])
 
   // =====================================================
-  // UTILITÃ¡ÂRIOS
+  // UTILITÁRIOS
   // =====================================================
 
   const recarregar = useCallback(async () => {
@@ -302,14 +348,14 @@ export function useAssignments(): UseAssignmentsResult {
     estatisticas,
     paginacao,
     
-    // AÃ¡Â§Ã¡Âµes CRUD
+    // Ações CRUD
     carregarAtribuicoes,
     carregarAtribuicao,
     criarAtribuicao,
     atualizarAtribuicao,
     excluirAtribuicao,
     
-    // UtilitÃ¡Â¡rios
+    // Utilitários
     recarregar,
     limparErro
   }
@@ -410,9 +456,9 @@ export function useProductivityDashboard(): UseDashboardResult {
         }
       })
 
-      const response = await api.get(`/api/dashboard/produtividade?${params.toString()}`)
+      const response = await api.get(`/api/dashboard/produtividade?${params.toString()}`) as ApiResponse<DashboardData>
 
-      if (response.success) {
+      if (response.success && response.data) {
         setDashboard(response.data)
       } else {
         setError(response.error || 'Erro ao carregar dashboard')
@@ -452,7 +498,7 @@ export function useAssignmentForm() {
     }
   })
 
-  const updateField = useCallback((field: keyof NovaAtribuicao, value: any) => {
+  const updateField = useCallback((field: keyof NovaAtribuicao, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }, [])
 
@@ -481,56 +527,56 @@ export function useAssignmentForm() {
     const errors: string[] = []
 
     if (!formData.checklist_id) {
-      errors.push('Checklist Ã¡Â© obrigatÃ¡Â³rio')
+      errors.push('Checklist é obrigatório')
     }
 
     if (!formData.tipo_atribuicao) {
-      errors.push('Tipo de atribuiÃ¡Â§Ã¡Â£o Ã¡Â© obrigatÃ¡Â³rio')
+      errors.push('Tipo de atribuição é obrigatório')
     }
 
     if (formData.tipo_atribuicao === 'funcionario_especifico' && !formData.funcionario_id) {
-      errors.push('FuncionÃ¡Â¡rio Ã¡Â© obrigatÃ¡Â³rio para atribuiÃ¡Â§Ã¡Â£o especÃ¡Â­fica')
+      errors.push('Funcionário é obrigatório para atribuição específica')
     }
 
     if (formData.tipo_atribuicao === 'cargo' && !formData.cargo) {
-      errors.push('Cargo Ã¡Â© obrigatÃ¡Â³rio para atribuiÃ¡Â§Ã¡Â£o por cargo')
+      errors.push('Cargo é obrigatório para atribuição por cargo')
     }
 
     if (formData.tipo_atribuicao === 'setor' && !formData.setor) {
-      errors.push('Setor Ã¡Â© obrigatÃ¡Â³rio para atribuiÃ¡Â§Ã¡Â£o por setor')
+      errors.push('Setor é obrigatório para atribuição por setor')
     }
 
     if (!formData.frequencia) {
-      errors.push('FrequÃ¡Âªncia Ã¡Â© obrigatÃ¡Â³ria')
+      errors.push('Frequência é obrigatória')
     }
 
     if (!formData.data_inicio) {
-      errors.push('Data de inÃ¡Â­cio Ã¡Â© obrigatÃ¡Â³ria')
+      errors.push('Data de início é obrigatória')
     }
 
     if (formData.data_fim && formData.data_inicio) {
       if (new Date(formData.data_fim) <= new Date(formData.data_inicio)) {
-        errors.push('Data de fim deve ser posterior Ã¡Â  data de inÃ¡Â­cio')
+        errors.push('Data de fim deve ser posterior à data de início')
       }
     }
 
     const config = formData.configuracao_frequencia
     if (config) {
       if (formData.frequencia === 'diaria' && (!config.horarios || config.horarios.length === 0)) {
-        errors.push('HorÃ¡Â¡rios sÃ¡Â£o obrigatÃ¡Â³rios para frequÃ¡Âªncia diÃ¡Â¡ria')
+        errors.push('Horários são obrigatórios para frequência diária')
       }
 
       if (formData.frequencia === 'semanal') {
         if (!config.dias_semana || config.dias_semana.length === 0) {
-          errors.push('Dias da semana sÃ¡Â£o obrigatÃ¡Â³rios para frequÃ¡Âªncia semanal')
+          errors.push('Dias da semana são obrigatórios para frequência semanal')
         }
         if (!config.horarios || config.horarios.length === 0) {
-          errors.push('HorÃ¡Â¡rios sÃ¡Â£o obrigatÃ¡Â³rios para frequÃ¡Âªncia semanal')
+          errors.push('Horários são obrigatórios para frequência semanal')
         }
       }
 
       if (formData.frequencia === 'personalizada' && !config.recorrencia_personalizada) {
-        errors.push('ExpressÃ¡Â£o de recorrÃ¡Âªncia Ã¡Â© obrigatÃ¡Â³ria para frequÃ¡Âªncia personalizada')
+        errors.push('Expressão de recorrência é obrigatória para frequência personalizada')
       }
     }
 
@@ -550,46 +596,46 @@ export function useAssignmentForm() {
 }
 
 // =====================================================
-// UTILITÃ¡ÂRIOS
+// UTILITÁRIOS
 // =====================================================
 
 export const tiposAtribuicao = [
-  { value: 'funcionario_especifico', label: 'FuncionÃ¡Â¡rio EspecÃ¡Â­fico', icon: 'Ã°Å¸â€˜Â¤' },
-  { value: 'cargo', label: 'Por Cargo', icon: 'Ã°Å¸â€™Â¼' },
-  { value: 'setor', label: 'Por Setor', icon: 'Ã°Å¸ÂÂ¢' },
-  { value: 'todos', label: 'Todos os FuncionÃ¡Â¡rios', icon: 'Ã°Å¸â€˜Â¥' }
+  { value: 'funcionario_especifico', label: 'Funcionário Específico', icon: '👤' },
+  { value: 'cargo', label: 'Por Cargo', icon: '🆔' },
+  { value: 'setor', label: 'Por Setor', icon: '🏢' },
+  { value: 'todos', label: 'Todos os Funcionários', icon: '👥' }
 ]
 
 export const frequencias = [
-  { value: 'diaria', label: 'DiÃ¡Â¡ria', icon: 'Ã°Å¸â€œâ€¦' },
-  { value: 'semanal', label: 'Semanal', icon: 'Ã°Å¸â€œâ€ ' },
-  { value: 'mensal', label: 'Mensal', icon: 'Ã°Å¸â€”â€œÃ¯Â¸Â' },
-  { value: 'personalizada', label: 'Personalizada', icon: 'Å¡â„¢Ã¯Â¸Â' }
+  { value: 'diaria', label: 'Diária', icon: '📅' },
+  { value: 'semanal', label: 'Semanal', icon: '📆' },
+  { value: 'mensal', label: 'Mensal', icon: '🗓️' },
+  { value: 'personalizada', label: 'Personalizada', icon: '⚙️' }
 ]
 
 export const diasSemana = [
   { value: 0, label: 'Domingo', abrev: 'Dom' },
   { value: 1, label: 'Segunda', abrev: 'Seg' },
-  { value: 2, label: 'TerÃ¡Â§a', abrev: 'Ter' },
+  { value: 2, label: 'Terça', abrev: 'Ter' },
   { value: 3, label: 'Quarta', abrev: 'Qua' },
   { value: 4, label: 'Quinta', abrev: 'Qui' },
   { value: 5, label: 'Sexta', abrev: 'Sex' },
-  { value: 6, label: 'SÃ¡Â¡bado', abrev: 'SÃ¡Â¡b' }
+  { value: 6, label: 'Sábado', abrev: 'Sáb' }
 ]
 
 export function formatarTipoAtribuicao(tipo: string): string {
   const tipos: Record<string, string> = {
-    'funcionario_especifico': 'FuncionÃ¡Â¡rio EspecÃ¡Â­fico',
+    'funcionario_especifico': 'Funcionário Específico',
     'cargo': 'Por Cargo',
     'setor': 'Por Setor',
-    'todos': 'Todos os FuncionÃ¡Â¡rios'
+    'todos': 'Todos os Funcionários'
   }
   return tipos[tipo] || tipo
 }
 
 export function formatarFrequencia(frequencia: string): string {
   const frequencias: Record<string, string> = {
-    'diaria': 'DiÃ¡Â¡ria',
+    'diaria': 'Diária',
     'semanal': 'Semanal',
     'mensal': 'Mensal',
     'personalizada': 'Personalizada'
@@ -598,7 +644,7 @@ export function formatarFrequencia(frequencia: string): string {
 }
 
 export function formatarHorarios(horarios: string[]): string {
-  if (!horarios || horarios.length === 0) return 'Nenhum horÃ¡Â¡rio'
+  if (!horarios || horarios.length === 0) return 'Nenhum horário'
   
   if (horarios.length === 1) return horarios[0]
   

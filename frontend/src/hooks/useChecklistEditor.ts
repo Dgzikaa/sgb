@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { useState, useEffect } from 'react'
 import { api } from '@/lib/api-client'
 
@@ -95,7 +111,7 @@ interface UseChecklistEditorResult {
   descartarAlteracoes: () => void
   
   // Edição de campos básicos
-  atualizarCampo: (campo: keyof ChecklistData, valor: any) => void
+  atualizarCampo: (campo: keyof ChecklistData, valor: unknown) => void
   
   // Edição de estrutura
   adicionarSecao: () => void
@@ -159,42 +175,50 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
       setLoading(true)
       setError(null)
       
-      const response = await api.get(`/api/checklists/${checklistId}?incluir_historico=false`)
+      const response = await api.get(`/api/checklists/${checklistId}?incluir_historico=false`) as {
+        success: boolean;
+        data: { checklist: ChecklistData };
+        error?: string;
+      };
       
-      if (response.success) {
-        const dados = response.data.checklist
-        setChecklist(dados)
-        setChecklistOriginal(deepClone(dados))
+      if (response.success && response.data) {
+        const dados = response.data.checklist;
+        setChecklist(dados);
+        setChecklistOriginal(deepClone(dados));
       } else {
-        setError(response.error || 'Erro ao carregar checklist')
+        setError(response.error || 'Erro ao carregar checklist');
       }
     } catch (err) {
-      console.error('Erro ao carregar checklist:', err)
-      setError('Erro ao carregar checklist')
+      console.error('Erro ao carregar checklist:', err);
+      setError('Erro ao carregar checklist');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const carregarVersoes = async (): Promise<void> => {
     try {
-      const response = await api.get(`/api/checklists/${checklistId}/rollback`)
+      const response = await api.get(`/api/checklists/${checklistId}/rollback`) as {
+        success: boolean;
+        data: { versoes_disponiveis: VersaoHistorico[] };
+        error?: string;
+      };
       
-      if (response.success) {
-        setVersoes(response.data.versoes_disponiveis || [])
+      if (response.success && response.data) {
+        setVersoes(response.data.versoes_disponiveis || []);
       }
     } catch (err) {
-      console.error('Erro ao carregar versões:', err)
+      console.error('Erro ao carregar versões:', err);
     }
-  }
+  };
 
   const salvarChecklist = async (comentario?: string): Promise<boolean> => {
     if (!checklist || !mudancasDetectadas.temAlteracoes) {
-      return false
+      return false;
     }
 
     try {
-      setSaving(true)
+      setSaving(true);
       
       const payload = {
         nome: checklist.nome,
@@ -205,49 +229,57 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
         tempo_estimado: checklist.tempo_estimado,
         ativo: checklist.ativo,
         estrutura: checklist.estrutura,
-        comentario_edicao: comentario || 'Atualização via editor'
-      }
+        comentario_edicao: comentario || 'Atualização via editor',
+      };
 
-      const response = await api.put(`/api/checklists/${checklistId}`, payload)
+      const response = await api.put(`/api/checklists/${checklistId}`, payload) as {
+        success: boolean;
+        data?: { checklist: ChecklistData };
+        error?: string;
+      };
       
       if (response.success) {
-        await carregarChecklist()
-        await carregarVersoes()
-        return true
+        await carregarChecklist();
+        await carregarVersoes();
+        return true;
       } else {
-        setError(response.error || 'Erro ao salvar checklist')
-        return false
+        setError(response.error || 'Erro ao salvar checklist');
+        return false;
       }
     } catch (err) {
-      console.error('Erro ao salvar checklist:', err)
-      setError('Erro ao salvar checklist')
-      return false
+      console.error('Erro ao salvar checklist:', err);
+      setError('Erro ao salvar checklist');
+      return false;
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const fazerRollback = async (versaoDestino: number, comentario?: string): Promise<boolean> => {
     try {
       const response = await api.post(`/api/checklists/${checklistId}/rollback`, {
         versao_destino: versaoDestino,
-        comentario: comentario || 'Rollback via interface'
-      })
+        comentario: comentario || 'Rollback via interface',
+      }) as {
+        success: boolean;
+        data?: { checklist: ChecklistData };
+        error?: string;
+      };
       
       if (response.success) {
-        await carregarChecklist()
-        await carregarVersoes()
-        return true
+        await carregarChecklist();
+        await carregarVersoes();
+        return true;
       } else {
-        setError(response.error || 'Erro ao fazer rollback')
-        return false
+        setError(response.error || 'Erro ao fazer rollback');
+        return false;
       }
     } catch (err) {
-      console.error('Erro ao fazer rollback:', err)
-      setError('Erro ao fazer rollback')
-      return false
+      console.error('Erro ao fazer rollback:', err);
+      setError('Erro ao fazer rollback');
+      return false;
     }
-  }
+  };
 
   const descartarAlteracoes = (): void => {
     if (checklistOriginal) {
@@ -259,7 +291,7 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
   // EDIÇÃO DE CAMPOS BÁSICOS
   // =====================================================
 
-  const atualizarCampo = (campo: keyof ChecklistData, valor: any): void => {
+  const atualizarCampo = (campo: keyof ChecklistData, valor: unknown): void => {
     if (!checklist) return
     
     setChecklist(prev => ({
@@ -457,7 +489,7 @@ export function useChecklistEditor(checklistId: string): UseChecklistEditorResul
 // =====================================================
 
 function deepClone<T>(obj: T): T {
-  return JSON.parse(JSON.stringify(obj))
+  return JSON.parse(JSON.stringify(obj) as unknown)
 }
 
 function detectarMudancas(original: ChecklistData, atual: ChecklistData): MudancasDetectadas {

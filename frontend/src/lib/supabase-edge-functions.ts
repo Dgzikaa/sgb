@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿const EDGE_FUNCTION_URL = 'https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1';
 
 export async function callContaAzulEdgeFunction(action: string, params: Record<string, unknown> = {}): Promise<unknown> {

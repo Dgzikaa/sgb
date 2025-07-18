@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 
@@ -35,7 +51,7 @@ export async function authenticateUser(request: NextRequest): Promise<Authentica
       const userDataHeader = request.headers.get('x-user-data');
       if (userDataHeader) {
         try {
-          const userData: unknown = JSON.parse(decodeURIComponent(userDataHeader));
+          const userData: unknown = JSON.parse(decodeURIComponent(userDataHeader) as unknown);
           if (
             typeof userData === 'object' &&
             userData !== null &&
@@ -54,7 +70,7 @@ export async function authenticateUser(request: NextRequest): Promise<Authentica
       return null;
     }
     try {
-      const userData: unknown = JSON.parse(decodeURIComponent(userToken));
+      const userData: unknown = JSON.parse(decodeURIComponent(userToken) as unknown);
       if (
         typeof userData !== 'object' ||
         userData === null ||

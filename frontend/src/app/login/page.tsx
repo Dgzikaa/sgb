@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
@@ -37,7 +53,7 @@ export default function LoginPage() {
     
     // Detectar dispositivo móvel
     const checkMobileDevice = () => {
-      const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera
+      const userAgent = navigator.userAgent || navigator.vendor || (window as unknown).opera
       const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
       const isMobile = mobileRegex.test(userAgent)
       const isTablet = /iPad|Android(?!.*Mobile)/i.test(userAgent)
@@ -57,7 +73,7 @@ export default function LoginPage() {
         const userData = localStorage.getItem('sgb_user')
         if (userData) {
           // Validar se os dados são válidos (não apenas se existem)
-          const user = JSON.parse(userData)
+          const user = JSON.parse(userData) as unknown
           if (user && user.email && user.nome) {
             console.log('Usuário já está logado, redirecionando...', user.nome)
             const destination = returnUrl ? decodeURIComponent(returnUrl) : '/home'
@@ -107,7 +123,7 @@ export default function LoginPage() {
       setForgotSuccess(true)
       
     } catch (error) {
-      setError('Erro ao enviar email de recuperação: ' + (error as any).message)
+      setError('Erro ao enviar email de recuperação: ' + (error as unknown).message)
     } finally {
       setForgotLoading(false)
     }
@@ -186,14 +202,14 @@ export default function LoginPage() {
       }, 1500)
       
     } catch (error) {
-      setError('Erro na conexão: ' + (error as any).message)
+      setError('Erro na conexão: ' + (error as unknown).message)
     } finally {
       setIsLoading(false)
     }
   }
 
   // Função para lidar com sucesso do login biométrico
-  const handleBiometricLoginSuccess = async (userData?: any) => {
+  const handleBiometricLoginSuccess = async (userData?: unknown) => {
     if (userData) {
       // Salvar dados do usuário no localStorage e cookie
       const { syncAuthData } = await import('@/lib/cookies')
@@ -213,7 +229,7 @@ export default function LoginPage() {
   }
 
   // Função para lidar com sucesso do registro biométrico após login
-  const handlePostLoginBiometricRegister = async (userData?: any) => {
+  const handlePostLoginBiometricRegister = async (userData?: unknown) => {
     if (lastLoginData) {
       setShowBiometricRegistration(false)
       setSuccess(`Biometria configurada! Agora você pode fazer login rapidamente!`)

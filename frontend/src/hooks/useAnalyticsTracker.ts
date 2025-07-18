@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { useEffect, useRef, useCallback } from 'react'
 import { useUser } from '@/contexts/UserContext'
 import { useBar } from '@/contexts/BarContext'
@@ -221,7 +237,7 @@ export function useQuickTracker() {
   
   return {
     // Tracking rÃ¡Â¡pido de botÃ¡Âµes
-    onButtonClick: (buttonName: string, data?: Record<string, any>) => 
+    onButtonClick: (buttonName: string, data?: Record<string, unknown>) => 
       trackClick(`button:${buttonName}`, data),
     
     // Tracking rÃ¡Â¡pido de links
@@ -229,7 +245,7 @@ export function useQuickTracker() {
       trackClick(`link:${linkName}`, { href }),
     
     // Tracking rÃ¡Â¡pido de formulÃ¡Â¡rios
-    onFormSubmit: (formName: string, data?: Record<string, any>) => 
+    onFormSubmit: (formName: string, data?: Record<string, unknown>) => 
       trackAction(`form_submit:${formName}`, data),
     
     // Tracking rÃ¡Â¡pido de modais

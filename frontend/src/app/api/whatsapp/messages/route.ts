@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
@@ -76,7 +92,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao } = JSON.parse(userData);
+    const { bar_id, permissao } = JSON.parse(userData) as unknown;
 
     // Verificar permissÃ¡Âµes
     if (!['financeiro', 'admin'].includes(permissao)) {
@@ -161,11 +177,11 @@ export async function GET(request: NextRequest) {
 
     const estatisticas = {
       total: stats?.length || 0,
-      pending: (stats as any[] | undefined)?.filter((m: any) => m.status === 'pending').length || 0,
-      sent: (stats as any[] | undefined)?.filter((m: any) => m.status === 'sent').length || 0,
-      delivered: (stats as any[] | undefined)?.filter((m: any) => m.status === 'delivered').length || 0,
-      read: (stats as any[] | undefined)?.filter((m: any) => m.status === 'read').length || 0,
-      failed: (stats as any[] | undefined)?.filter((m: any) => m.status === 'failed').length || 0
+      pending: (stats as unknown[] | undefined)?.filter((m: unknown) => m.status === 'pending').length || 0,
+      sent: (stats as unknown[] | undefined)?.filter((m: unknown) => m.status === 'sent').length || 0,
+      delivered: (stats as unknown[] | undefined)?.filter((m: unknown) => m.status === 'delivered').length || 0,
+      read: (stats as unknown[] | undefined)?.filter((m: unknown) => m.status === 'read').length || 0,
+      failed: (stats as unknown[] | undefined)?.filter((m: unknown) => m.status === 'failed').length || 0
     };
 
     return NextResponse.json({
@@ -205,7 +221,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao, usuario_id } = JSON.parse(userData);
+    const { bar_id, permissao, usuario_id } = JSON.parse(userData) as unknown;
 
     // Verificar permissÃµes
     if (!['financeiro', 'admin'].includes(permissao)) {
@@ -405,7 +421,7 @@ async function sendWhatsAppMessage(config: WhatsAppConfig, contato: WhatsAppCont
   try {
     const url = `https://graph.facebook.com/${config.api_version}/${config.phone_number_id}/messages`;
     
-    const payload: any = { messaging_product: 'whatsapp', to: contato.numero_whatsapp };
+    const payload: unknown = { messaging_product: 'whatsapp', to: contato.numero_whatsapp };
 
     if (mensagem.tipo_mensagem === 'template') {
       payload.type = 'template';

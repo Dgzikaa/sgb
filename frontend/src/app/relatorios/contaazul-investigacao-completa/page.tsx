@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client';
 
 import { useState } from 'react';
@@ -237,7 +253,7 @@ export default function ContaAzulInvestigacaoCompleta() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {resultado.resultados_detalhados.map((evento: any, index: number) => (
+                  {resultado.resultados_detalhados.map((evento: unknown, index: number) => (
                     <div key={index} className="border rounded-lg p-4 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                       <div className="mb-3">
                         <h4 className="font-semibold card-title-dark">
@@ -250,7 +266,7 @@ export default function ContaAzulInvestigacaoCompleta() {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {Object.entries(evento.testes).map(([endpoint, teste]) => {
-                          const t = teste as any;
+                          const t = teste as unknown;
                           return (
                             <div key={endpoint} className="border rounded p-3 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                               <div className="flex items-center justify-between mb-2">

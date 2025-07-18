@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
@@ -36,7 +52,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao } = JSON.parse(userData);
+    const { bar_id, permissao } = JSON.parse(userData) as unknown;
 
     // Verificar permissÃ¡Âµes
     if (!['funcionario', 'financeiro', 'admin'].includes(permissao)) {
@@ -48,7 +64,7 @@ export async function GET(request: NextRequest) {
     const rawParams = Object.fromEntries(url.searchParams.entries());
     
     // Converter tipos
-    const processedParams: any = { ...rawParams };
+    const processedParams: unknown = { ...rawParams };
     if (processedParams.page !== undefined && processedParams.page !== '') processedParams.page = Number(processedParams.page);
     if (processedParams.limit !== undefined && processedParams.limit !== '') processedParams.limit = Number(processedParams.limit);
     if (processedParams.ativa !== undefined && processedParams.ativa !== '') processedParams.ativa = processedParams.ativa === 'true';
@@ -128,22 +144,22 @@ export async function GET(request: NextRequest) {
 
     const estatisticas = {
       total_metricas: stats?.length || 0,
-      alertas_ativos: stats?.filter((s: any) => s.alerta_ativado).length || 0,
-      por_categoria: stats?.reduce((acc: Record<string, number>, s: any) => {
+      alertas_ativos: stats?.filter((s: unknown) => s.alerta_ativado).length || 0,
+      por_categoria: stats?.reduce((acc: Record<string, number>, s: unknown) => {
         acc[s.categoria] = (acc[s.categoria] || 0) + 1;
         return acc;
       }, {} as Record<string, number>) || {},
       por_performance: {
-        excelente: stats?.filter((s: any) => s.performance === 'excelente').length || 0,
-        bom: stats?.filter((s: any) => s.performance === 'bom').length || 0,
-        regular: stats?.filter((s: any) => s.performance === 'regular').length || 0,
-        ruim: stats?.filter((s: any) => s.performance === 'ruim').length || 0,
-        critico: stats?.filter((s: any) => s.performance === 'critico').length || 0
+        excelente: stats?.filter((s: unknown) => s.performance === 'excelente').length || 0,
+        bom: stats?.filter((s: unknown) => s.performance === 'bom').length || 0,
+        regular: stats?.filter((s: unknown) => s.performance === 'regular').length || 0,
+        ruim: stats?.filter((s: unknown) => s.performance === 'ruim').length || 0,
+        critico: stats?.filter((s: unknown) => s.performance === 'critico').length || 0
       },
       por_tendencia: {
-        crescente: stats?.filter((s: any) => s.tendencia === 'crescente').length || 0,
-        estavel: stats?.filter((s: any) => s.tendencia === 'estavel').length || 0,
-        decrescente: stats?.filter((s: any) => s.tendencia === 'decrescente').length || 0
+        crescente: stats?.filter((s: unknown) => s.tendencia === 'crescente').length || 0,
+        estavel: stats?.filter((s: unknown) => s.tendencia === 'estavel').length || 0,
+        decrescente: stats?.filter((s: unknown) => s.tendencia === 'decrescente').length || 0
       }
     };
 
@@ -228,7 +244,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ¡Â£o autenticado' }, { status: 401 });
     }
 
-    const { bar_id, permissao } = JSON.parse(userData);
+    const { bar_id, permissao } = JSON.parse(userData) as unknown;
 
     if (!['funcionario', 'financeiro', 'admin'].includes(permissao)) {
       return NextResponse.json({ error: 'Sem permissÃ¡Â£o para acessar tendÃ¡Âªncias' }, { status: 403 });
@@ -265,16 +281,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Série de valores
-    const valores = historico.map((h: any) => h.valor);
-    const datas = historico.map((h: any) => h.data_referencia);
+    const valores = historico.map((h: unknown) => h.valor);
+    const datas = historico.map((h: unknown) => h.data_referencia);
     const valorAtual = valores[valores.length - 1];
     const valorAnterior = valores[0];
     const valorMaximo = Math.max(...valores);
     const valorMinimo = Math.min(...valores);
     // Calcular média
-    const media = valores.reduce((a: any, b: any) => a + b, 0) / valores.length;
+    const media = valores.reduce((a: unknown, b: unknown) => a + b, 0) / valores.length;
     // Calcular desvio padrão
-    const variance = valores.reduce((a: any, b: any) => a + Math.pow(b - media, 2), 0) / valores.length;
+    const variance = valores.reduce((a: unknown, b: unknown) => a + Math.pow(b - media, 2), 0) / valores.length;
     const desvioPadrao = Math.sqrt(variance);
     // Determinar tendência geral
     const variacaoTotal = ((valorAtual - valorAnterior) / valorAnterior) * 100;
@@ -282,13 +298,13 @@ export async function POST(request: NextRequest) {
     if (variacaoTotal > 5) tendenciaGeral = 'crescente';
     else if (variacaoTotal < -5) tendenciaGeral = 'decrescente';
     // Calcular quantas vezes atingiu a meta (se meta_valor existir)
-    const atingiuMeta = historico.filter((h: any) => h.meta_valor !== undefined && h.valor >= h.meta_valor).length;
+    const atingiuMeta = historico.filter((h: unknown) => h.meta_valor !== undefined && h.valor >= h.meta_valor).length;
     // Preparar dados para gráfico
     let dadosGrafico = historico;
     // Agrupar por semana/mês se granularidade for diferente de daily
-    let agrupado: { [key: string]: any } = {};
+    let agrupado: { [key: string]: unknown } = {};
     if (granularidade !== 'daily') {
-      agrupado = valores.reduce((acc: { [key: string]: any }, v: any, idx: number) => {
+      agrupado = valores.reduce((acc: { [key: string]: unknown }, v: unknown, idx: number) => {
         const data = new Date(datas[idx]);
         let key = '';
         if (granularidade === 'weekly') {
@@ -320,7 +336,7 @@ export async function POST(request: NextRequest) {
         tendencia_geral: tendenciaGeral,
         atingiu_meta: atingiuMeta,
         variacao_total: parseFloat(variacaoTotal.toFixed(2)),
-        performance_distribuicao: historico.reduce((acc: Record<string, number>, h: any) => {
+        performance_distribuicao: historico.reduce((acc: Record<string, number>, h: unknown) => {
           acc[h.performance] = (acc[h.performance] || 0) + 1;
           return acc;
         }, {} as Record<string, number>)

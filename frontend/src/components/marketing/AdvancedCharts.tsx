@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 // ========================================
@@ -121,8 +137,8 @@ const generatePerformanceRadar = () => [
 // Ã°Å¸â€œÅ  COMPONENTES DE GRÃ¡ÂFICOS
 // ========================================
 interface AdvancedChartsProps {
-  trendData?: any[] // [{ data_coleta, instagram_followers, facebook_fans, total_impressions, total_spend, total_clicks }]
-  campaignData?: any[] // [{ status, objective, spend, impressions, clicks }]
+  trendData?: unknown[] // [{ data_coleta, instagram_followers, facebook_fans, total_impressions, total_spend, total_clicks }]
+  campaignData?: unknown[] // [{ status, objective, spend, impressions, clicks }]
   timeRange?: 'week' | 'month' | 'quarter' | 'year'
 }
 

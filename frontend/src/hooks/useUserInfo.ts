@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
@@ -10,7 +26,7 @@ interface UserInfo {
   role: string
   avatar?: string
   bar_id: number
-  modulos_permitidos: any
+  modulos_permitidos: string[]
 }
 
 export function useUserInfo() {
@@ -27,7 +43,7 @@ export function useUserInfo() {
         const storedUser = localStorage.getItem('sgb_user')
         if (storedUser) {
           try {
-            const userData = JSON.parse(storedUser)
+            const userData = JSON.parse(storedUser) as unknown
             if (userData && userData.nome && userData.email) {
               setUserInfo(userData)
               if (mounted) {

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client';
 
 import { useState, useEffect } from 'react';
@@ -38,7 +54,7 @@ export default function RelatorioProdutos() {
     return () => setPageTitle('');
   }, [setPageTitle]);
 
-  const analisarTempos = async (filtros: any) => {
+  const analisarTempos = async (filtros: unknown) => {
     if (!dataEspecifica) {
       alert('Por favor, selecione uma data para anÃ¡Â¡lise');
       return;

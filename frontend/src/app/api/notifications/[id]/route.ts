@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { authenticateUser, authErrorResponse } from '@/middleware/auth';
@@ -44,11 +60,11 @@ export async function GET(request: NextRequest) {
 
     // Organizar por categoria
     const metasOrganizadas = {
-      financeiro: metas?.filter((m: any) => m.categoria === 'financeiro') || [],
-      clientes: metas?.filter((m: any) => m.categoria === 'clientes') || [],
-      avaliacoes: metas?.filter((m: any) => m.categoria === 'avaliacoes') || [],
-      cockpit_produtos: metas?.filter((m: any) => m.categoria === 'cockpit_produtos') || [],
-      marketing: metas?.filter((m: any) => m.categoria === 'marketing') || [],
+      financeiro: metas?.filter((m: unknown) => m.categoria === 'financeiro') || [],
+      clientes: metas?.filter((m: unknown) => m.categoria === 'clientes') || [],
+      avaliacoes: metas?.filter((m: unknown) => m.categoria === 'avaliacoes') || [],
+      cockpit_produtos: metas?.filter((m: unknown) => m.categoria === 'cockpit_produtos') || [],
+      marketing: metas?.filter((m: unknown) => m.categoria === 'marketing') || [],
     };
 
     return NextResponse.json({

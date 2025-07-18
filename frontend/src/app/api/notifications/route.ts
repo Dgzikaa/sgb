@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser, authErrorResponse } from '@/middleware/auth'
@@ -305,7 +321,7 @@ export async function GET(request: NextRequest) {
 
     // Transformar dados para formato esperado pelo frontend
     const notificacoesTransformadas = (notificacoes || []).map((notificacao: Notificacao) => {
-      const dados: Record<string, any> = notificacao.dados || {};
+      const dados: Record<string, unknown> = notificacao.dados || {};
       
       return {
         id: notificacao.id,
@@ -382,7 +398,7 @@ interface Notificacao {
   tipo?: string;
   titulo?: string;
   mensagem?: string;
-  dados?: Record<string, any>;
+  dados?: Record<string, unknown>;
   status?: string;
   canais?: string[];
   agendada_para?: string;
@@ -390,7 +406,7 @@ interface Notificacao {
   lida_em?: string;
   criada_em?: string;
   bar_id?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface NotificacaoStats {

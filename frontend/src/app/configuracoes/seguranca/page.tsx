@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
@@ -51,7 +67,7 @@ interface SecurityEvent {
   ip_address?: string
   user_id?: string
   timestamp: string
-  details?: any
+  details?: unknown
 }
 
 interface AuditLog {
@@ -61,7 +77,7 @@ interface AuditLog {
   resource: string
   timestamp: string
   ip_address?: string
-  details?: any
+  details?: unknown
 }
 
 export default function SecurityPage() {

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
@@ -66,7 +82,7 @@ export async function GET(request: NextRequest) {
 
         if (!contahubError && contahubData && contahubData.length > 0) {
           console.log(`Ã°Å¸â€œÅ¾ Dados ContaHub encontrados: ${contahubData.length}`)
-          dadosReservas = contahubData.map((item: any) => ({
+          dadosReservas = contahubData.map((item: unknown) => ({
             phone: item.tel_cli,
             name: item.nm_cli,
             date: item.vd_dtgerencial,
@@ -99,7 +115,7 @@ export async function GET(request: NextRequest) {
       // Analisar recorrÃ¡Âªncia por telefone
       const clientesPorTelefone = new Map()
 
-      dadosReservas.forEach((reserva: any) => {
+      dadosReservas.forEach((reserva: unknown) => {
         const telefone = String(reserva.phone).replace(/\D/g, '') // remover caracteres nÃ¡Â£o numÃ¡Â©ricos
         
         if (telefone.length >= 8) { // telefone vÃ¡Â¡lido
@@ -161,7 +177,7 @@ export async function GET(request: NextRequest) {
           total_pessoas: cliente.total_pessoas,
           primeira_visita: cliente.visitas[0]?.data,
           ultima_visita: cliente.visitas[cliente.visitas.length - 1]?.data,
-          datas_visitas: cliente.visitas.map((v: any) => v.data).join(', ')
+          datas_visitas: cliente.visitas.map((v: unknown) => v.data).join(', ')
         }))
 
       const recorrencia = {

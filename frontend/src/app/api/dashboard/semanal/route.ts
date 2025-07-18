@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
@@ -164,7 +180,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
           .gte('data_evento', data_inicio)
           .lte('data_evento', data_fim)
           .not('total_liquido', 'is', null)
-          .then((result: any) => result.data || []),
+          .then((result: unknown) => result.data || []),
 
         // 3. PerÃ­odo para clientes E faturamento adicional + SEM LIMITE
         supabase
@@ -173,7 +189,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
           .eq('bar_id', parseInt(bar_id))
           .gte('dt_gerencial', data_inicio)
           .lte('dt_gerencial', data_fim)
-          .then((result: any) => result.data || [])
+          .then((result: unknown) => result.data || [])
       ])
 
       const sympla = symplaResult

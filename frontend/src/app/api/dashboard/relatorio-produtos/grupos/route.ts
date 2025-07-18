@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -26,7 +42,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Extrair grupos Ã¡Âºnicos
-    const gruposUnicos = [...new Set(grupos?.map((g: any) => g.grp_desc))].filter(Boolean).sort();
+    const gruposUnicos = [...new Set(grupos?.map((g: unknown) => g.grp_desc))].filter(Boolean).sort();
 
     return NextResponse.json({
       success: true,

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase-admin'
 
@@ -9,7 +25,7 @@ interface SecurityEvent {
   event_type: string;
   details?: {
     message?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   ip_address?: string;
   user_id?: string;

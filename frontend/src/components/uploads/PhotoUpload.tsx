@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import React, { useState, useRef } from 'react'
@@ -5,7 +21,7 @@ import { Camera, Upload, X, Image as ImageIcon } from 'lucide-react'
 import { useFileUpload, UploadOptions } from '@/hooks/useFileUpload'
 
 interface PhotoUploadProps {
-  onUploadComplete?: (result: any) => void
+  onUploadComplete?: (result: unknown) => void
   onError?: (error: string) => void
   folder?: 'checklist_photos' | 'signatures' | 'profile_photos'
   compress?: boolean
@@ -86,7 +102,7 @@ export default function PhotoUpload({
           console.error('ÂÅ’ Erro no upload:', error)
           
           if (onError) {
-            onError((error as any).message)
+            onError((error as unknown).message)
           }
         }
       }
@@ -95,7 +111,7 @@ export default function PhotoUpload({
       console.error('ÂÅ’ Erro no processamento:', error)
       
       if (onError) {
-        onError((error as any).message)
+        onError((error as unknown).message)
       }
     } finally {
       setIsUploading(false)

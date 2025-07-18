@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
@@ -33,7 +49,7 @@ interface TesteResult {
     contahub_tempo?: number;
     contahub_nfs?: number;
     contahub_clientes_cpf?: number;
-    exemplo_registro?: any;
+    exemplo_registro?: unknown;
   };
   estatisticas?: {
     totalRegistros?: number;
@@ -56,34 +72,34 @@ interface TesteResult {
     tabelas_limpas: number;
     tabelas_com_erro: number;
   };
-  debug_env?: any;
+  debug_env?: unknown;
   resumo?: {
     tabelas_com_sucesso: number;
     tabelas_com_erro: number;
     total_campos: number;
     campos_aceitos: string[];
     campos_testados: string[];
-    detalhes?: any;
+    detalhes?: unknown;
     // Propriedades do debug API
     tipos_encontrados?: string[];
     datas_referencia?: string[];
     bar_ids?: number[];
   };
   // Propriedades do debug API
-  analises?: any[];
+  analises?: unknown[];
   total_registros?: number;
-  resultados?: any;
-  amostra_estrutura?: any[];
-  ultimos_registros?: any[];
+  resultados?: unknown;
+  amostra_estrutura?: unknown[];
+  ultimos_registros?: unknown[];
   estrutura_tabela?: {
     colunas_disponiveis: string[];
     total_colunas: number;
-    exemplo_registro?: any;
+    exemplo_registro?: unknown;
   };
   analise?: {
     total_registros: number;
     tipos_encontrados: Record<string, number>;
-    amostras_por_tipo: Record<string, any>;
+    amostras_por_tipo: Record<string, unknown>;
   };
 }
 
@@ -727,11 +743,11 @@ export default function ContaHubTestePage() {
             )}
 
             {/* Erros do servidor (se houver) */}
-            {(result as any).errors && Array.isArray((result as any).errors) && (result as any).errors.length > 0 && (
+            {(result as unknown).errors && Array.isArray((result as unknown).errors) && (result as unknown).errors.length > 0 && (
               <div className="mb-4">
                 <h3 className="font-semibold text-red-600 dark:text-red-400 mb-2">❌ Erros Detectados:</h3>
                 <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 p-3 rounded">
-                  {(result as any).errors.map((error: string, index: number) => (
+                  {(result as unknown).errors.map((error: string, index: number) => (
                     <div key={index} className="text-red-700 dark:text-red-300 mb-1 text-sm">{error}</div>
                   ))}
                 </div>
@@ -749,7 +765,7 @@ export default function ContaHubTestePage() {
                   </div>
                   <div className="bg-green-50 dark:bg-green-900 p-3 rounded">
                     <div className="text-sm text-green-600 dark:text-green-300">Sucessos</div>
-                    <div className="font-bold text-green-800 dark:text-green-200">{(result.estatisticas as any).sucessos || 0}</div>
+                    <div className="font-bold text-green-800 dark:text-green-200">{(result.estatisticas as unknown).sucessos || 0}</div>
                   </div>
                   <div className="bg-red-50 dark:bg-red-900 p-3 rounded">
                     <div className="text-sm text-red-600 dark:text-red-300">Erros</div>
@@ -999,7 +1015,7 @@ export default function ContaHubTestePage() {
                         <div className="p-3 bg-yellow-50 dark:bg-yellow-900 rounded">
                           <div className="font-medium text-yellow-800 dark:text-yellow-200 mb-2">❌ Outros Arrays Encontrados:</div>
                           <div className="space-y-2">
-                            {amostra.estrutura_json.outros_arrays.map((arr: any, idx: number) => (
+                            {amostra.estrutura_json.outros_arrays.map((arr: unknown, idx: number) => (
                               <div key={idx} className="text-sm text-yellow-700 dark:text-yellow-200">
                                 <div className="font-medium card-title-dark">Campo: {arr.campo} ({arr.length} itens)</div>
                                 {arr.primeiro_item_keys && (
@@ -1068,8 +1084,8 @@ export default function ContaHubTestePage() {
                     <div className="bg-blue-50 dark:bg-blue-900 p-3 rounded">
                       <h4 className="font-medium text-blue-800 dark:text-blue-200">sistema_raw</h4>
                       <div className="text-sm text-blue-600 dark:text-blue-300">
-                        {typeof result.status.sistema_raw === 'object' && (result.status.sistema_raw as any).existe ? 
-                          `${(result.status.sistema_raw as any).registros} registros` : 
+                        {typeof result.status.sistema_raw === 'object' && (result.status.sistema_raw as unknown).existe ? 
+                          `${(result.status.sistema_raw as unknown).registros} registros` : 
                           typeof result.status.sistema_raw === 'number' ? 
                             `${result.status.sistema_raw} registros` : 
                             'Tabela não encontrada'
@@ -1079,7 +1095,7 @@ export default function ContaHubTestePage() {
                   )}
 
                   {/* Tabelas ContaHub */}
-                  {(result.status as any).tabelas_contahub && Object.entries((result.status as any).tabelas_contahub).map(([tabela, info]: [string, any]) => (
+                  {(result.status as unknown).tabelas_contahub && Object.entries((result.status as unknown).tabelas_contahub).map(([tabela, info]: [string, any]) => (
                     <div key={tabela} className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
                       <h4 className="font-medium card-title-dark font-mono text-sm">{tabela}</h4>
                       <div className="text-sm card-description-dark">

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -17,8 +33,8 @@ function createSupabaseClient() {
 }
 
 // FunÃ¡Â§Ã¡Â£o para buscar todos os dados com paginaÃ¡Â§Ã¡Â£o
-async function buscarTodosEventosFinanceiros(supabase: any, barId: number) {
-  const todosEventos: any[] = []
+async function buscarTodosEventosFinanceiros(supabase: unknown, barId: number) {
+  const todosEventos: unknown[] = []
   let pagina = 0
   const LIMITE_POR_PAGINA = 1000
 
@@ -88,22 +104,22 @@ export async function GET(request: NextRequest) {
     }
 
     // 3. CALCULAR TOTAIS
-    const totalReceitas = todosEventos.filter((e: any) => e.tipo === 'receita').reduce((sum: number, e: any) => sum + (parseFloat(e.valor) || 0), 0)
-    const totalDespesas = todosEventos.filter((e: any) => e.tipo === 'despesa').reduce((sum: number, e: any) => sum + (parseFloat(e.valor) || 0), 0)
+    const totalReceitas = todosEventos.filter((e: unknown) => e.tipo === 'receita').reduce((sum: number, e: unknown) => sum + (parseFloat(e.valor) || 0), 0)
+    const totalDespesas = todosEventos.filter((e: unknown) => e.tipo === 'despesa').reduce((sum: number, e: unknown) => sum + (parseFloat(e.valor) || 0), 0)
     const saldoLiquido = totalReceitas - totalDespesas
 
     // 4. MAPEAR CATEGORIAS
-    const mapaCategorias = categorias?.reduce((acc: any, categoria: any) => {
+    const mapaCategorias = categorias?.reduce((acc: unknown, categoria: unknown) => {
       acc[categoria.id] = categoria
       return acc
     }, {}) || {}
 
     // 5. AGRUPAR EVENTOS POR CATEGORIA
-    const receitasAgrupadas: any = {}
-    const despesasAgrupadas: any = {}
+    const receitasAgrupadas: unknown = {}
+    const despesasAgrupadas: unknown = {}
 
-    todosEventos.forEach((evento: any) => {
-      const categoria = (mapaCategorias as any)[evento.categoria_id]
+    todosEventos.forEach((evento: unknown) => {
+      const categoria = (mapaCategorias as unknown)[evento.categoria_id]
       if (!categoria) return
 
       const valor = parseFloat(evento.valor) || 0
@@ -132,16 +148,16 @@ export async function GET(request: NextRequest) {
 
     // 6. TRANSFORMAR EM ARRAYS E ORDENAR
     const topReceitas = Object.values(receitasAgrupadas)
-      .sort((a: any, b: any) => b.total - a.total)
+      .sort((a: unknown, b: unknown) => b.total - a.total)
       .slice(0, 10)
 
     const topDespesas = Object.values(despesasAgrupadas)
-      .sort((a: any, b: any) => b.total - a.total)
+      .sort((a: unknown, b: unknown) => b.total - a.total)
       .slice(0, 10)
 
     // 7. TRANSAÃ¡â€¡Ã¡â€¢ES RECENTES (primeiras 20)
-    const transacoesRecentes = todosEventos.slice(0, 20).map((evento: any) => {
-      const categoria = (mapaCategorias as any)[evento.categoria_id]
+    const transacoesRecentes = todosEventos.slice(0, 20).map((evento: unknown) => {
+      const categoria = (mapaCategorias as unknown)[evento.categoria_id]
       return {
         id: evento.evento_id,
         tipo: evento.tipo,

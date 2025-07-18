@@ -108,7 +108,7 @@ export default function DashboardUnificado() {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('dashboard-widgets')
       if (saved) {
-        return JSON.parse(saved)
+        return JSON.parse(saved) as unknown
       }
     }
     return Object.values(WIDGET_PRESETS)

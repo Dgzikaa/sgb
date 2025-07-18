@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js';
 import { randomBytes } from 'crypto';
@@ -178,7 +194,7 @@ async function handleCallback(searchParams: URLSearchParams) {
         console.log('Ã°Å¸â€Â CALLBACK - State length:', state.length);
         const decoded = Buffer.from(state, 'base64').toString();
         console.log('Ã°Å¸â€Â CALLBACK - State decodificado string:', decoded);
-        const stateData = JSON.parse(decoded);
+        const stateData = JSON.parse(decoded) as unknown;
         console.log('Ã°Å¸â€Â CALLBACK - State decodificado objeto:', stateData);
         barId = stateData.barId?.toString();
         console.log('Ã°Å¸â€Â CALLBACK - Bar ID extraÃ¡Â­do:', barId);
@@ -199,7 +215,7 @@ async function handleCallback(searchParams: URLSearchParams) {
       try {
         const finalDecoded = Buffer.from(state, 'base64').toString();
         console.error('ÂÅ’ CALLBACK - State final decodificado:', finalDecoded);
-        const finalStateData = JSON.parse(finalDecoded);
+        const finalStateData = JSON.parse(finalDecoded) as unknown;
         console.error('ÂÅ’ CALLBACK - Objeto final:', finalStateData);
         console.error('ÂÅ’ CALLBACK - barId no objeto:', finalStateData.barId);
       } catch (e) {
@@ -322,7 +338,7 @@ async function handleCallback(searchParams: URLSearchParams) {
 }
 
 // Trocar cÃ¡Â³digo por token
-async function exchangeCodeForToken(code: string, credentials: any) {
+async function exchangeCodeForToken(code: string, credentials: unknown) {
   try {
     console.log('Ã°Å¸â€Â TOKEN - Iniciando troca de cÃ¡Â³digo por token');
     console.log('Ã°Å¸â€Â TOKEN - Client ID:', credentials.client_id);
@@ -595,7 +611,7 @@ async function handleRefresh(barId: string) {
 }
 
 // Configurar credenciais
-async function handleConfigure(body: any) {
+async function handleConfigure(body: unknown) {
   try {
     const { barId, clientId, clientSecret, redirectUri } = body;
 

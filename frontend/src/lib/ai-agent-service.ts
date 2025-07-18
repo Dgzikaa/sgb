@@ -1,18 +1,51 @@
-﻿import { createClient } from '@supabase/supabase-js';
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
+﻿import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { createEnhancedNotificationService } from './notifications-enhanced';
 import { sgbDiscordService, isHorarioRelatorioMatinal } from './discord-service';
 import { notifyMarketingUpdate } from './discord-marketing-service';
 import DiscordChecklistService from './discord-checklist-service';
 
 // Configuração do Supabase
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  throw new Error('Supabase URL or Service Role Key not configured');
+}
+
+const supabase: SupabaseClient = createClient(supabaseUrl, supabaseServiceKey);
 
 // ========================================
-// Ã°Å¸Â¤â€“ AI INTELLIGENT AGENT - BACKGROUND SERVICE
+// 🤖 AI INTELLIGENT AGENT - BACKGROUND SERVICE
 // ========================================
+
+// Interfaces para tipagem de dados do Supabase
+interface SupabaseError {
+  code: string;
+  message: string;
+  details?: string;
+  hint?: string;
+}
+
+interface SupabaseResponse<T> {
+  data: T | null;
+  error: SupabaseError | null;
+}
 
 export interface AIAgentConfig {
   bar_id: number;
@@ -82,6 +115,18 @@ export interface AIRecommendation {
   passos_implementacao: string[];
 }
 
+export interface MetricData {
+  nome_metrica: string;
+  categoria: string;
+  tipo_calculo: string;
+  valor: number;
+  data_referencia: string;
+  periodo_inicio: string;
+  periodo_fim: string;
+  meta_valor: number;
+  detalhamento: Record<string, unknown>;
+}
+
 export class AIIntelligentAgent {
   private barId: number;
   private config: AIAgentConfig | null = null;
@@ -93,7 +138,7 @@ export class AIIntelligentAgent {
   }
 
   // ========================================
-  // Ã°Å¸â€Â§ INICIALIZAÃ§Ã£o E CONFIGURAÃ§Ã£o
+  // 🤖 INICIALIZAÇÃO E CONFIGURAÇÃO
   // ========================================
 
   /**
@@ -101,14 +146,19 @@ export class AIIntelligentAgent {
    */
   async initialize(): Promise<boolean> {
     try {
-      const { data: config } = await supabase
+      const { data: config, error } = await supabase
         .from('ai_agent_config')
         .select('*')
         .eq('bar_id', this.barId)
         .single();
 
+      if (error) {
+        console.error('Erro ao buscar configuração do agente:', error);
+        return false;
+      }
+
       if (config && config.agente_ativo) {
-        this.config = config;
+        this.config = config as unknown as AIAgentConfig;
         await this.logProcess('inicializacao', 'Agente IA inicializado', 'concluido');
         return true;
       }
@@ -116,7 +166,7 @@ export class AIIntelligentAgent {
       return false;
     } catch (error: unknown) {
       console.error('Erro ao inicializar agente IA:', error);
-      await this.logProcess('inicializacao', 'Erro na inicializaÃ§Ã£o', 'erro', (error as Error).message || String(error));
+      await this.logProcess('inicializacao', 'Erro na inicialização', 'erro', (error as Error).message || String(error));
       return false;
     }
   }
@@ -130,12 +180,12 @@ export class AIIntelligentAgent {
     }
 
     this.isRunning = true;
-    console.log(`Ã°Å¸Â¤â€“ Agente IA iniciado para bar ${this.barId} - Executando a cada ${this.config.frequencia_analise_minutos} minutos`);
+    console.log(`🤖 Agente IA iniciado para bar ${this.barId} - Executando a cada ${this.config.frequencia_analise_minutos} minutos`);
 
-    // ExecuÃ§Ã£o inicial
+    // Execução inicial
     await this.runAnalysisLoop();
 
-    // Configurar execuÃ§Ã£o periÃ³dica
+    // Configurar execução periódica
     this.intervalId = setInterval(async () => {
       await this.runAnalysisLoop();
     }, this.config.frequencia_analise_minutos * 60 * 1000);
@@ -150,15 +200,15 @@ export class AIIntelligentAgent {
       this.intervalId = null;
     }
     this.isRunning = false;
-    console.log(`Ã°Å¸Â¤â€“ Agente IA parado para bar ${this.barId}`);
+    console.log(`🤖 Agente IA parado para bar ${this.barId}`);
   }
 
   // ========================================
-  // Ã°Å¸â€â€ž LOOP PRINCIPAL DE ANÃLISSE
+  // 🤖 LOOP PRINCIPAL DE ANÁLISE
   // ========================================
 
   /**
-   * Loop principal de anÃ¡lise do agente
+   * Loop principal de análise do agente
    */
   private async runAnalysisLoop(): Promise<void> {
     if (!this.config) return;
@@ -167,14 +217,14 @@ export class AIIntelligentAgent {
     let logId: number | null = null;
 
     try {
-      // Verificar se estÃ¡ no horÃ¡rio de funcionamento
+      // Verificar se está no horário de funcionamento
       if (!this.isWithinWorkingHours()) {
         return;
       }
 
       logId = await this.startProcessLog('analise_completa');
 
-      console.log(`Ã°Å¸Â¤â€“ [${new Date().toISOString()}] Iniciando anÃ¡lise IA para bar ${this.barId}`);
+      console.log(`🤖 [${new Date().toISOString()}] Iniciando análise IA para bar ${this.barId}`);
 
       const results = {
         insights: 0,
@@ -184,7 +234,7 @@ export class AIIntelligentAgent {
         metricas: 0
       };
 
-      // 1. Calcular mÃ©tricas automaticamente
+      // 1. Calcular métricas automaticamente
       if (this.config.gerar_insights) {
         results.metricas = await this.calculateAutomaticMetrics();
       }
@@ -199,20 +249,20 @@ export class AIIntelligentAgent {
         results.insights = await this.generateInsights();
       }
 
-      // 4. Fazer previsÃµes
+      // 4. Fazer previsões
       if (this.config.gerar_predicoes) {
         results.predicoes = await this.generatePredictions();
       }
 
-      // 5. Gerar recomendaÃ§Ãµes
+      // 5. Gerar recomendações
       if (this.config.gerar_recomendacoes) {
         results.recomendacoes = await this.generateRecommendations();
       }
 
-      // 6. Enviar notificaÃ§Ãµes se necessÃ¡rio
+      // 6. Enviar notificações se necessário
       await this.sendAINotifications();
 
-      // 7. Ã°Å¸Å’â€¦ VERIFICAR SE Ã¡â€° HORA DO RELATÃ“RIO MATINAL (8H)
+      // 7. 🤖 VERIFICAR SE É HORA DO RELATÓRIO MATINAL (8H)
       if (isHorarioRelatorioMatinal()) {
         await this.enviarRelatorioMatinal();
         await this.enviarRelatorioMarketingMatinal();
@@ -228,13 +278,13 @@ export class AIIntelligentAgent {
         total_anomalias_detectadas: results.anomalias,
         total_predicoes_feitas: results.predicoes,
         total_recomendacoes_criadas: results.recomendacoes,
-        resultado_resumo: `AnÃ¡lise concluÃ­da: ${results.insights} insights, ${results.anomalias} anomalias, ${results.predicoes} previsÃµes, ${results.recomendacoes} recomendaÃ§Ãµes`
+        resultado_resumo: `Análise concluída: ${results.insights} insights, ${results.anomalias} anomalias, ${results.predicoes} previsões, ${results.recomendacoes} recomendações`
       });
 
-      console.log(`Å“â€¦ AnÃ¡lise IA concluÃ­da em ${duration}s: ${results.insights} insights, ${results.anomalias} anomalias`);
+      console.log(`✅ Análise IA concluída em ${duration}s: ${results.insights} insights, ${results.anomalias} anomalias`);
 
     } catch (error: unknown) {
-      console.error('Erro no loop de anÃ¡lise IA:', error);
+      console.error('Erro no loop de análise IA:', error);
       if (logId) {
         await this.completeProcessLog(logId, 'erro', { erro_detalhes: (error as Error).message || String(error) });
       }
@@ -242,60 +292,60 @@ export class AIIntelligentAgent {
   }
 
   // ========================================
-  // Ã°Å¸â€œÅ  CÃ¡lculo de MÃ©tricas AUTOMÃTICAS
+  // 🤖 CÁLCULO DE MÉTRICAS AUTOMÁTICAS
   // ========================================
 
   /**
-   * Calcula mÃ©tricas automaticamente
+   * Calcula métricas automaticamente
    */
   private async calculateAutomaticMetrics(): Promise<number> {
     const today = new Date().toISOString().split('T')[0];
     const metricsCalculated = [];
 
     try {
-      // MÃ©trica 1: Taxa de conclusÃ£o de checklists
+      // Métrica 1: Taxa de conclusão de checklists
       const checklistMetric = await this.calculateChecklistCompletionRate(today);
       if (checklistMetric) {
         await this.saveMetric(checklistMetric);
         metricsCalculated.push('checklist_completion_rate');
       }
 
-      // MÃ©trica 2: Tempo mÃ©dio de execuÃ§Ã£o
+      // Métrica 2: Tempo médio de execução
       const timeMetric = await this.calculateAverageExecutionTime(today);
       if (timeMetric) {
         await this.saveMetric(timeMetric);
         metricsCalculated.push('average_execution_time');
       }
 
-      // MÃ©trica 3: Score mÃ©dio de qualidade
+      // Métrica 3: Score médio de qualidade
       const qualityMetric = await this.calculateAverageQualityScore(today);
       if (qualityMetric) {
         await this.saveMetric(qualityMetric);
         metricsCalculated.push('average_quality_score');
       }
 
-      // MÃ©trica 4: Engagement WhatsApp
+      // Métrica 4: Engagement WhatsApp
       const whatsappMetric = await this.calculateWhatsAppEngagement(today);
       if (whatsappMetric) {
         await this.saveMetric(whatsappMetric);
         metricsCalculated.push('whatsapp_engagement');
       }
 
-      // MÃ©trica 5: Produtividade por funcionÃ¡rio
+      // Métrica 5: Produtividade por funcionário
       const productivityMetric = await this.calculateEmployeeProductivity(today);
       if (productivityMetric) {
         await this.saveMetric(productivityMetric);
         metricsCalculated.push('employee_productivity');
       }
 
-      // MÃ©trica 6: Engajamento das Redes Sociais
+      // Métrica 6: Engajamento das Redes Sociais
       const socialMetric = await this.calculateSocialMediaEngagement(today);
       if (socialMetric) {
         await this.saveMetric(socialMetric);
         metricsCalculated.push('social_media_engagement');
       }
 
-      // MÃ©trica 7: Crescimento de Seguidores
+      // Métrica 7: Crescimento de Seguidores
       const growthMetric = await this.calculateFollowersGrowth(today);
       if (growthMetric) {
         await this.saveMetric(growthMetric);
@@ -305,15 +355,15 @@ export class AIIntelligentAgent {
       return metricsCalculated.length;
 
     } catch (error: unknown) {
-      console.error('Erro ao calcular mÃ©tricas automÃ¡ticas:', error);
+      console.error('Erro ao calcular métricas automáticas:', error);
       return 0;
     }
   }
 
   /**
-   * Calcula taxa de conclusÃ£o de checklists
+   * Calcula taxa de conclusão de checklists
    */
-  private async calculateChecklistCompletionRate(date: string): Promise<any> {
+  private async calculateChecklistCompletionRate(date: string): Promise<MetricData | null> {
     const { data: executions } = await supabase
       .from('checklist_execucoes')
       .select('status')
@@ -324,7 +374,7 @@ export class AIIntelligentAgent {
     if (!executions || executions.length === 0) return null;
 
     const total = executions.length;
-    const concluidas = executions.filter((e: any) => e.status === 'concluido').length;
+    const concluidas = (executions as Array<{ status: string }>).filter((e) => e.status === 'concluido').length;
     const taxa = (concluidas / total) * 100;
 
     return {
@@ -345,9 +395,9 @@ export class AIIntelligentAgent {
   }
 
   /**
-   * Calcula tempo mÃ©dio de execuÃ§Ã£o
+   * Calcula tempo médio de execução
    */
-  private async calculateAverageExecutionTime(date: string): Promise<any> {
+  private async calculateAverageExecutionTime(date: string): Promise<MetricData | null> {
     const { data: executions } = await supabase
       .from('checklist_execucoes')
       .select('tempo_execucao_minutos')
@@ -359,8 +409,8 @@ export class AIIntelligentAgent {
 
     if (!executions || executions.length === 0) return null;
 
-    const tempos = executions.map((e: any) => e.tempo_execucao_minutos);
-    const tempoMedio = tempos.reduce((a: any, b: any) => a + b, 0) / tempos.length;
+    const tempos = (executions as Array<{ tempo_execucao_minutos: number }>).map((e) => e.tempo_execucao_minutos);
+    const tempoMedio = tempos.reduce((a, b) => a + b, 0) / tempos.length;
 
     return {
       nome_metrica: 'tempo_medio_execucao',
@@ -381,9 +431,9 @@ export class AIIntelligentAgent {
   }
 
   /**
-   * Calcula score mÃ©dio de qualidade
+   * Calcula score médio de qualidade
    */
-  private async calculateAverageQualityScore(date: string): Promise<any> {
+  private async calculateAverageQualityScore(date: string): Promise<MetricData | null> {
     const { data: executions } = await supabase
       .from('checklist_execucoes')
       .select('pontuacao_final')
@@ -395,8 +445,8 @@ export class AIIntelligentAgent {
 
     if (!executions || executions.length === 0) return null;
 
-    const scores = executions.map((e: any) => e.pontuacao_final);
-    const scoreMedio = scores.reduce((a: any, b: any) => a + b, 0) / scores.length;
+    const scores = (executions as Array<{ pontuacao_final: number }>).map((e) => e.pontuacao_final);
+    const scoreMedio = scores.reduce((a, b) => a + b, 0) / scores.length;
 
     return {
       nome_metrica: 'score_medio_qualidade',
@@ -411,8 +461,8 @@ export class AIIntelligentAgent {
         total_execucoes: executions.length,
         score_minimo: Math.min(...scores),
         score_maximo: Math.max(...scores),
-        scores_acima_90: scores.filter((s: any) => s >= 90).length,
-        scores_abaixo_70: scores.filter((s: any) => s < 70).length
+        scores_acima_90: scores.filter((s) => s >= 90).length,
+        scores_abaixo_70: scores.filter((s) => s < 70).length
       }
     };
   }
@@ -420,7 +470,7 @@ export class AIIntelligentAgent {
   /**
    * Calcula engagement do WhatsApp
    */
-  private async calculateWhatsAppEngagement(date: string): Promise<any> {
+  private async calculateWhatsAppEngagement(date: string): Promise<MetricData | null> {
     const { data: messages } = await supabase
       .from('whatsapp_mensagens')
       .select('status')
@@ -431,8 +481,8 @@ export class AIIntelligentAgent {
     if (!messages || messages.length === 0) return null;
 
     const total = messages.length;
-    const lidas = messages.filter((m: any) => m.status === 'read').length;
-    const entregues = messages.filter((m: any) => ['delivered', 'read'].includes(m.status)).length;
+    const lidas = (messages as Array<{ status: string }>).filter((m) => m.status === 'read').length;
+    const entregues = (messages as Array<{ status: string }>).filter((m) => ['delivered', 'read'].includes(m.status)).length;
     
     const taxaLeitura = (lidas / total) * 100;
     const taxaEntrega = (entregues / total) * 100;
@@ -458,9 +508,9 @@ export class AIIntelligentAgent {
   }
 
   /**
-   * Calcula produtividade por funcionÃ¡rio
+   * Calcula produtividade por funcionário
    */
-  private async calculateEmployeeProductivity(date: string): Promise<any> {
+  private async calculateEmployeeProductivity(date: string): Promise<MetricData | null> {
     const { data: executions } = await supabase
       .from('checklist_execucoes')
       .select(`
@@ -476,9 +526,21 @@ export class AIIntelligentAgent {
 
     if (!executions || executions.length === 0) return null;
 
-    // Agrupar por funcionÃ¡rio
-    const funcionarios: Record<string, any> = {};
-    executions.forEach((exec: any) => {
+    // Agrupar por funcionário
+    const funcionarios: Record<string, {
+      nome: string;
+      total: number;
+      concluidos: number;
+      score_total: number;
+      tempo_total: number;
+    }> = {};
+    (executions as Array<{
+      executado_por: string;
+      status: string;
+      pontuacao_final?: number;
+      tempo_execucao_minutos?: number;
+      usuarios_bar: { nome: string };
+    }>).forEach((exec) => {
       const id = exec.executado_por;
       if (!funcionarios[id]) {
         funcionarios[id] = {
@@ -502,7 +564,7 @@ export class AIIntelligentAgent {
       }
     });
 
-    // Calcular produtividade mÃ©dia
+    // Calcular produtividade média
     let produtividadeTotal = 0;
     let funcionariosAtivos = 0;
 
@@ -512,7 +574,7 @@ export class AIIntelligentAgent {
         const scoreMedia = func.concluidos > 0 ? func.score_total / func.concluidos : 0;
         const tempoMedio = func.concluidos > 0 ? func.tempo_total / func.concluidos : 0;
         
-        // FÃ³rmula de produtividade: (Taxa de ConclusÃ£o * Score MÃ©dio) / Tempo MÃ©dio
+        // Fórmula de produtividade: (Taxa de Conclusão * Score Médio) / Tempo Médio
         const produtividade = tempoMedio > 0 ? (taxaConclusao * scoreMedia) / tempoMedio : 0;
         produtividadeTotal += produtividade;
         funcionariosAtivos++;
@@ -541,9 +603,9 @@ export class AIIntelligentAgent {
   /**
    * Calcula engajamento das redes sociais
    */
-  private async calculateSocialMediaEngagement(date: string): Promise<any> {
+  private async calculateSocialMediaEngagement(date: string): Promise<MetricData | null> {
     try {
-      // Buscar mÃ©tricas consolidadas do dia
+      // Buscar métricas consolidadas do dia
       const { data: socialMetrics } = await supabase
         .from('social_metrics_consolidated')
         .select('*')
@@ -587,9 +649,9 @@ export class AIIntelligentAgent {
   /**
    * Calcula crescimento de seguidores
    */
-  private async calculateFollowersGrowth(date: string): Promise<any> {
+  private async calculateFollowersGrowth(date: string): Promise<MetricData | null> {
     try {
-      // Buscar mÃ©tricas de hoje
+      // Buscar métricas de hoje
       const { data: today } = await supabase
         .from('social_metrics_consolidated')
         .select('total_followers')
@@ -600,7 +662,7 @@ export class AIIntelligentAgent {
 
       if (!today) return null;
 
-      // Buscar mÃ©tricas de ontem
+      // Buscar métricas de ontem
       const yesterday = new Date(date);
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = yesterday.toISOString().split('T')[0];
@@ -626,7 +688,7 @@ export class AIIntelligentAgent {
         data_referencia: date,
         periodo_inicio: yesterdayStr,
         periodo_fim: date,
-        meta_valor: 1.0, // Meta de 1% de crescimento diÃ¡rio
+        meta_valor: 1.0, // Meta de 1% de crescimento diário
         detalhamento: {
           seguidores_hoje: seguidoresHoje,
           seguidores_ontem: seguidoresOntem,
@@ -643,7 +705,7 @@ export class AIIntelligentAgent {
   }
 
   // ========================================
-  // Ã°Å¸Å¡Â¨ DETECÃ§Ã£o DE ANOMALIAS
+  // 🤖 DETECÇÃO DE ANOMALIAS
   // ========================================
 
   /**
@@ -653,14 +715,14 @@ export class AIIntelligentAgent {
     let anomaliasDetectadas = 0;
 
     try {
-      // Anomalia 1: Queda abrupta na taxa de conclusÃ£o
+      // Anomalia 1: Queda abrupta na taxa de conclusão
       const anomaliaCompletionRate = await this.detectCompletionRateAnomaly();
       if (anomaliaCompletionRate) {
         await this.saveAnomaly(anomaliaCompletionRate);
         anomaliasDetectadas++;
       }
 
-      // Anomalia 2: Pico no tempo de execuÃ§Ã£o
+      // Anomalia 2: Pico no tempo de execução
       const anomaliaExecutionTime = await this.detectExecutionTimeAnomaly();
       if (anomaliaExecutionTime) {
         await this.saveAnomaly(anomaliaExecutionTime);
@@ -674,7 +736,7 @@ export class AIIntelligentAgent {
         anomaliasDetectadas++;
       }
 
-      // Anomalia 4: Comportamento atÃ­pico de funcionÃ¡rio
+      // Anomalia 4: Comportamento atípico de funcionário
       const anomaliaEmployee = await this.detectEmployeeBehaviorAnomaly();
       if (anomaliaEmployee) {
         await this.saveAnomaly(anomaliaEmployee);
@@ -684,13 +746,13 @@ export class AIIntelligentAgent {
       return anomaliasDetectadas;
 
     } catch (error: unknown) {
-      console.error('Erro na detecÃ§Ã£o de anomalias:', error);
+      console.error('Erro na detecção de anomalias:', error);
       return 0;
     }
   }
 
   /**
-   * Detecta anomalia na taxa de conclusÃ£o
+   * Detecta anomalia na taxa de conclusão
    */
   private async detectCompletionRateAnomaly(): Promise<AIAnomaly | null> {
     if (!this.config) return null;
@@ -698,7 +760,7 @@ export class AIIntelligentAgent {
     const today = new Date();
     const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-    // Buscar mÃ©tricas dos Ãºltimos 7 dias
+    // Buscar métricas dos últimos 7 dias
     const { data: metrics } = await supabase
       .from('ai_metrics')
       .select('valor, data_referencia')
@@ -709,16 +771,16 @@ export class AIIntelligentAgent {
 
     if (!metrics || metrics.length < 3) return null;
 
-    // Calcular mÃ©dia e desvio padrÃ£o histÃ³rico
-    const valores = metrics.slice(0, -1).map((m: any) => m.valor); // Excluir hoje
-    const media = valores.reduce((a: any, b: any) => a + b, 0) / valores.length;
-    const variance = valores.reduce((a: any, b: any) => a + Math.pow(b - media, 2), 0) / valores.length;
+    // Calcular média e desvio padrão histórico
+    const valores = metrics.slice(0, -1).map((m: unknown) => m.valor); // Excluir hoje
+    const media = valores.reduce((a: unknown, b: unknown) => a + b, 0) / valores.length;
+    const variance = valores.reduce((a: unknown, b: unknown) => a + Math.pow(b - media, 2), 0) / valores.length;
     const desvio = Math.sqrt(variance);
 
     const valorHoje = metrics[metrics.length - 1].valor;
     const limiteInferior = media - (this.config.sensibilidade_anomalias * desvio);
 
-    // Se valor de hoje estiver muito abaixo da mÃ©dia
+    // Se valor de hoje estiver muito abaixo da média
     if (valorHoje < limiteInferior && desvio > 0) {
       const desvioPercentual = ((media - valorHoje) / media) * 100;
 
@@ -726,19 +788,19 @@ export class AIIntelligentAgent {
         tipo_anomalia: 'performance',
         subtipo: 'queda_produtividade',
         severidade: desvioPercentual > 30 ? 'alta' : 'media',
-        titulo: 'Queda na Taxa de ConclusÃ£o de Checklists',
-        descricao: `A taxa de conclusÃ£o hoje (${valorHoje.toFixed(1)}%) estÃ¡ significativamente abaixo da mÃ©dia histÃ³rica (${media.toFixed(1)}%)`,
+        titulo: 'Queda na Taxa de Conclusão de Checklists',
+        descricao: `A taxa de conclusão hoje (${valorHoje.toFixed(1)}%) está significativamente abaixo da média histórica (${media.toFixed(1)}%)`,
         valor_esperado: media,
         valor_observado: valorHoje,
         desvio_percentual: desvioPercentual,
         confianca_deteccao: 85,
-        possivel_causa: 'PossÃ­veis causas: sobrecarga de trabalho, problemas tÃ©cnicos, falta de treinamento ou desmotivaÃ§Ã£o da equipe',
-        impacto_estimado: 'Pode impactar negativamente a qualidade do serviÃ§o e satisfaÃ§Ã£o dos clientes',
+        possivel_causa: 'Possíveis causas: sobrecarga de trabalho, problemas técnicos, falta de treinamento ou desmotivação da equipe',
+        impacto_estimado: 'Pode impactar negativamente a qualidade do serviço e satisfação dos clientes',
         acoes_sugeridas: [
-          'Verificar carga de trabalho dos funcionÃ¡rios',
+          'Verificar carga de trabalho dos funcionários',
           'Revisar processos e identificar gargalos',
-          'Providenciar treinamento adicional se necessÃ¡rio',
-          'Investigar problemas tÃ©cnicos no sistema'
+          'Providenciar treinamento adicional se necessário',
+          'Investigar problemas técnicos no sistema'
         ],
         metricas_anomala: {
           valor_atual: valorHoje,
@@ -754,7 +816,7 @@ export class AIIntelligentAgent {
   }
 
   /**
-   * Detecta anomalia no tempo de execuÃ§Ã£o
+   * Detecta anomalia no tempo de execução
    */
   private async detectExecutionTimeAnomaly(): Promise<AIAnomaly | null> {
     if (!this.config) return null;
@@ -769,9 +831,9 @@ export class AIIntelligentAgent {
 
     if (!metrics || metrics.length < 3) return null;
 
-    const valores = metrics.slice(0, -1).map((m: any) => m.valor);
-    const media = valores.reduce((a: any, b: any) => a + b, 0) / valores.length;
-    const variance = valores.reduce((a: any, b: any) => a + Math.pow(b - media, 2), 0) / valores.length;
+    const valores = metrics.slice(0, -1).map((m: unknown) => m.valor);
+    const media = valores.reduce((a: unknown, b: unknown) => a + b, 0) / valores.length;
+    const variance = valores.reduce((a: unknown, b: unknown) => a + Math.pow(b - media, 2), 0) / valores.length;
     const desvio = Math.sqrt(variance);
 
     const valorHoje = metrics[metrics.length - 1].valor;
@@ -784,19 +846,19 @@ export class AIIntelligentAgent {
         tipo_anomalia: 'performance',
         subtipo: 'aumento_tempo_execucao',
         severidade: desvioPercentual > 50 ? 'alta' : 'media',
-        titulo: 'Aumento no Tempo de ExecuÃ§Ã£o',
-        descricao: `O tempo mÃ©dio de execuÃ§Ã£o hoje (${valorHoje.toFixed(1)} min) estÃ¡ muito acima da mÃ©dia histÃ³rica (${media.toFixed(1)} min)`,
+        titulo: 'Aumento no Tempo de Execução',
+        descricao: `O tempo médio de execução hoje (${valorHoje.toFixed(1)} min) está muito acima da média histórica (${media.toFixed(1)} min)`,
         valor_esperado: media,
         valor_observado: valorHoje,
         desvio_percentual: desvioPercentual,
         confianca_deteccao: 80,
-        possivel_causa: 'PossÃ­veis causas: processos complexos, falta de treinamento, problemas tÃ©cnicos ou procedimentos inadequados',
-        impacto_estimado: 'ReduÃ§Ã£o da eficiÃªncia operacional e possÃ­vel impacto na experiÃªncia do cliente',
+        possivel_causa: 'Possíveis causas: processos complexos, falta de treinamento, problemas técnicos ou procedimentos inadequados',
+        impacto_estimado: 'Redução da eficiência operacional e possível impacto na experiência do cliente',
         acoes_sugeridas: [
           'Revisar e simplificar processos complexos',
-          'Verificar se hÃ¡ gargalos tÃ©cnicos',
-          'Providenciar treinamento para acelerar execuÃ§Ã£o',
-          'Analisar checklists com maior tempo de execuÃ§Ã£o'
+          'Verificar se há gargalos técnicos',
+          'Providenciar treinamento para acelerar execução',
+          'Analisar checklists com maior tempo de execução'
         ],
         metricas_anomala: {
           valor_atual: valorHoje,
@@ -827,9 +889,9 @@ export class AIIntelligentAgent {
 
     if (!metrics || metrics.length < 3) return null;
 
-    const valores = metrics.slice(0, -1).map((m: any) => m.valor);
-    const media = valores.reduce((a: any, b: any) => a + b, 0) / valores.length;
-    const variance = valores.reduce((a: any, b: any) => a + Math.pow(b - media, 2), 0) / valores.length;
+    const valores = metrics.slice(0, -1).map((m: unknown) => m.valor);
+    const media = valores.reduce((a: unknown, b: unknown) => a + b, 0) / valores.length;
+    const variance = valores.reduce((a: unknown, b: unknown) => a + Math.pow(b - media, 2), 0) / valores.length;
     const desvio = Math.sqrt(variance);
 
     const valorHoje = metrics[metrics.length - 1].valor;
@@ -843,18 +905,18 @@ export class AIIntelligentAgent {
         subtipo: 'queda_qualidade',
         severidade: valorHoje < 70 ? 'critica' : (desvioPercentual > 15 ? 'alta' : 'media'),
         titulo: 'Queda na Qualidade dos Checklists',
-        descricao: `O score mÃ©dio de qualidade hoje (${valorHoje.toFixed(1)}%) estÃ¡ abaixo da mÃ©dia histÃ³rica (${media.toFixed(1)}%)`,
+        descricao: `O score médio de qualidade hoje (${valorHoje.toFixed(1)}%) está abaixo da média histórica (${media.toFixed(1)}%)`,
         valor_esperado: media,
         valor_observado: valorHoje,
         desvio_percentual: desvioPercentual,
         confianca_deteccao: 90,
-        possivel_causa: 'PossÃ­veis causas: pressa na execuÃ§Ã£o, falta de atenÃ§Ã£o, treinamento inadequado ou problemas nos processos',
-        impacto_estimado: 'Impacto direto na qualidade do serviÃ§o e satisfaÃ§Ã£o dos clientes',
+        possivel_causa: 'Possíveis causas: pressa na execução, falta de atenção, treinamento inadequado ou problemas nos processos',
+        impacto_estimado: 'Impacto direto na qualidade do serviço e satisfação dos clientes',
         acoes_sugeridas: [
-          'Revisar execuÃ§Ãµes com baixo score',
-          'Providenciar feedback individual aos funcionÃ¡rios',
-          'Reforar treinamento em pontos crÃ­ticos',
-          'Investigar se hÃ¡ problemas nos checklists'
+          'Revisar execuções com baixo score',
+          'Providenciar feedback individual aos funcionários',
+          'Reforar treinamento em pontos críticos',
+          'Investigar se há problemas nos checklists'
         ],
         metricas_anomala: {
           valor_atual: valorHoje,
@@ -870,12 +932,12 @@ export class AIIntelligentAgent {
   }
 
   /**
-   * Detecta comportamento atÃ­pico de funcionÃ¡rio
+   * Detecta comportamento atípico de funcionário
    */
   private async detectEmployeeBehaviorAnomaly(): Promise<AIAnomaly | null> {
     const today = new Date().toISOString().split('T')[0];
     
-    // Buscar produtividade por funcionÃ¡rio hoje
+    // Buscar produtividade por funcionário hoje
     const { data: todayMetric } = await supabase
       .from('ai_metrics')
       .select('detalhamento')
@@ -888,7 +950,7 @@ export class AIIntelligentAgent {
 
     const funcionariosHoje = todayMetric.detalhamento.breakdown_funcionarios;
 
-    // Buscar histÃ³rico para comparaÃ§Ã£o
+    // Buscar histórico para comparação
     const { data: historicMetrics } = await supabase
       .from('ai_metrics')
       .select('detalhamento')
@@ -899,20 +961,20 @@ export class AIIntelligentAgent {
 
     if (!historicMetrics || historicMetrics.length < 3) return null;
 
-    // Analisar cada funcionÃ¡rio
+    // Analisar cada funcionário
     for (const [funcionarioId, dadosHoje] of Object.entries(funcionariosHoje)) {
-      const func = dadosHoje as any;
+      const func = dadosHoje as unknown;
       
-      if (func.total < 3) continue; // Pular funcionÃ¡rios com poucas execuÃ§Ãµes
+      if (func.total < 3) continue; // Pular funcionários com poucas execuções
 
       const taxaConclusaoHoje = (func.concluidos / func.total) * 100;
       const scoreHoje = func.concluidos > 0 ? func.score_total / func.concluidos : 0;
 
-      // Calcular mÃ©dias histÃ³ricas
+      // Calcular médias históricas
       const taxasHistoricas: number[] = [];
       const scoresHistoricos: number[] = [];
 
-      historicMetrics.forEach((metric: any) => {
+      historicMetrics.forEach((metric: unknown) => {
         const breakdown = metric.detalhamento?.breakdown_funcionarios;
         if (breakdown && breakdown[funcionarioId]) {
           const dadosHistoricos = breakdown[funcionarioId];
@@ -927,8 +989,8 @@ export class AIIntelligentAgent {
 
       if (taxasHistoricas.length < 3) continue;
 
-      const mediaTaxa = taxasHistoricas.reduce((a: any, b: any) => a + b, 0) / taxasHistoricas.length;
-      const mediaScore = scoresHistoricos.length > 0 ? scoresHistoricos.reduce((a: any, b: any) => a + b, 0) / scoresHistoricos.length : 0;
+      const mediaTaxa = taxasHistoricas.reduce((a: unknown, b: unknown) => a + b, 0) / taxasHistoricas.length;
+      const mediaScore = scoresHistoricos.length > 0 ? scoresHistoricos.reduce((a: unknown, b: unknown) => a + b, 0) / scoresHistoricos.length : 0;
 
       // Detectar anomalias significativas
       const quedaTaxa = mediaTaxa - taxaConclusaoHoje;
@@ -943,18 +1005,18 @@ export class AIIntelligentAgent {
           objeto_tipo: 'funcionario',
           objeto_nome: func.nome,
           titulo: `Queda de Performance: ${func.nome}`,
-          descricao: `${func.nome} apresenta queda significativa na performance: taxa de conclusÃ£o hoje ${taxaConclusaoHoje.toFixed(1)}% vs mÃ©dia ${mediaTaxa.toFixed(1)}%`,
+          descricao: `${func.nome} apresenta queda significativa na performance: taxa de conclusão hoje ${taxaConclusaoHoje.toFixed(1)}% vs média ${mediaTaxa.toFixed(1)}%`,
           valor_esperado: mediaTaxa,
           valor_observado: taxaConclusaoHoje,
           desvio_percentual: (quedaTaxa / mediaTaxa) * 100,
           confianca_deteccao: 75,
-          possivel_causa: 'PossÃ­veis causas: problemas pessoais, desmotivaÃ§Ã£o, sobrecarga, falta de treinamento ou questÃµes tÃ©cnicas',
-          impacto_estimado: 'Impacto na produtividade da equipe e qualidade do serviÃ§o',
+          possivel_causa: 'Possíveis causas: problemas pessoais, desmotivação, sobrecarga, falta de treinamento ou questões técnicas',
+          impacto_estimado: 'Impacto na produtividade da equipe e qualidade do serviço',
           acoes_sugeridas: [
-            'Conversar individualmente com o funcionÃ¡rio',
-            'Verificar carga de trabalho e distribuiÃ§Ã£o de tarefas',
+            'Conversar individualmente com o funcionário',
+            'Verificar carga de trabalho e distribuição de tarefas',
             'Oferecer suporte ou treinamento adicional',
-            'Investigar possÃ­veis problemas pessoais ou tÃ©cnicos'
+            'Investigar possíveis problemas pessoais ou técnicos'
           ],
           metricas_anomala: {
             taxa_conclusao_hoje: taxaConclusaoHoje,
@@ -973,11 +1035,11 @@ export class AIIntelligentAgent {
   }
 
   // ========================================
-  // Ã°Å¸â€Â§ MÃ©todos Auxiliares
+  // 🤖 MÉTODOS AUXILIARES
   // ========================================
 
   /**
-   * Verifica se estÃ¡ no horÃ¡rio de funcionamento
+   * Verifica se está no horário de funcionamento
    */
   private isWithinWorkingHours(): boolean {
     if (!this.config) return false;
@@ -990,9 +1052,9 @@ export class AIIntelligentAgent {
   }
 
   /**
-   * Salva mÃ©trica no banco
+   * Salva métrica no banco
    */
-  private async saveMetric(metric: any): Promise<void> {
+  private async saveMetric(metric: MetricData): Promise<void> {
     await supabase
       .from('ai_metrics')
       .insert({
@@ -1025,7 +1087,7 @@ export class AIIntelligentAgent {
       .insert({
         bar_id: this.barId,
         tipo_processamento: tipo,
-        nome_processo: `AnÃ¡lise IA AutomÃ¡tica - ${tipo}`,
+        nome_processo: `Análise IA Automática - ${tipo}`,
         status: 'processando'
       })
       .select('id')
@@ -1066,14 +1128,14 @@ export class AIIntelligentAgent {
   }
 
   /**
-   * Envia notificaÃ§Ãµes de IA
+   * Envia notificações de IA
    */
   private async sendAINotifications(): Promise<void> {
     if (!this.config?.notificar_insights && !this.config?.notificar_anomalias) {
       return;
     }
 
-    // Buscar anomalias crÃ­ticas nÃ£o notificadas
+    // Buscar anomalias críticas não notificadas
     if (this.config.notificar_anomalias) {
       const { data: anomalias } = await supabase
         .from('ai_anomalies')
@@ -1081,21 +1143,21 @@ export class AIIntelligentAgent {
         .eq('bar_id', this.barId)
         .eq('severidade', 'critica')
         .eq('ainda_ativa', true)
-        .gte('created_at', new Date(Date.now() - 60 * 60 * 1000).toISOString()); // Ãºltima hora
+        .gte('created_at', new Date(Date.now() - 60 * 60 * 1000).toISOString()); // última hora
 
       if (anomalias && anomalias.length > 0) {
         const notificationService = createEnhancedNotificationService(this.barId);
         
         for (const anomalia of anomalias) {
-          // Ã°Å¸Å½Â® ENVIAR PARA DISCORD
+          // 🤖 ENVIAR PARA DISCORD
           try {
             await sgbDiscordService.enviarAlertaAnomalia(anomalia);
-            console.log(`Ã°Å¸â€œÂ¨ Anomalia crÃ­tica enviada para Discord: ${anomalia.titulo}`);
+            console.log(`🤖 Anomalia crítica enviada para Discord: ${anomalia.titulo}`);
           } catch (error: unknown) {
             console.error('Erro ao enviar anomalia para Discord:', error);
           }
 
-          // Notificar admins sobre anomalias crÃ­ticas
+          // Notificar admins sobre anomalias críticas
           const { data: admins } = await supabase
             .from('usuarios_bar')
             .select('id')
@@ -1107,7 +1169,7 @@ export class AIIntelligentAgent {
               await notificationService.sendMultiChannelNotification({
                 usuario_id: admin.id,
                 bar_id: this.barId,
-                titulo: `Ã°Å¸Å¡Â¨ Anomalia CrÃ­tica Detectada`,
+                titulo: `🤖 Anomalia Crítica Detectada`,
                 conteudo: anomalia.descricao,
                 tipo: 'anomalia_critica',
                 modulo: 'ai_analytics',
@@ -1128,11 +1190,11 @@ export class AIIntelligentAgent {
   }
 
   /**
-   * Ã°Å¸Å’â€¦ Enviar relatÃ³rio matinal Ã s 8h
+   * 🤖 Enviar relatório matinal às 8h
    */
   private async enviarRelatorioMatinal(): Promise<void> {
     try {
-      console.log('Ã°Å¸Å’â€¦ Enviando relatÃ³rio matinal para Discord...');
+      console.log('🤖 Enviando relatório matinal para Discord...');
 
       // Buscar dados do dashboard
       const { data: dashboardData } = await fetch(`${process.env.NEXTAUTH_URL}/api/ai/dashboard?periodo_dias=1`, {
@@ -1150,24 +1212,24 @@ export class AIIntelligentAgent {
         const sucesso = await sgbDiscordService.enviarRelatorioMatinal(dashboardData.data);
         
         if (sucesso) {
-          console.log('Å“â€¦ RelatÃ³rio matinal enviado com sucesso para Discord!');
+          console.log('✅ Relatório matinal enviado com sucesso para Discord!');
           
-          // Log da aÃ§Ã£o
+          // Log da ação
           await this.logProcess(
             'relatorio_discord',
-            'RelatÃ³rio Matinal Enviado',
+            'Relatório Matinal Enviado',
             'concluido'
           );
         } else {
-          console.error('ÂÅ’ Erro ao enviar relatÃ³rio matinal para Discord');
+          console.error('❌ Erro ao enviar relatório matinal para Discord');
         }
       }
 
     } catch (error: unknown) {
-      console.error('Erro ao enviar relatÃ³rio matinal:', error);
+      console.error('Erro ao enviar relatório matinal:', error);
       await this.logProcess(
         'relatorio_discord',
-        'Erro no RelatÃ³rio Matinal',
+        'Erro no Relatório Matinal',
         'erro',
         (error as Error).message || String(error)
       );
@@ -1175,18 +1237,18 @@ export class AIIntelligentAgent {
   }
 
   /**
-   * Ã°Å¸â€œâ€¹ Enviar relatÃ³rio matinal de checklists Ã s 8h
+   * 🤖 Enviar relatório matinal de checklists às 8h
    */
   private async enviarRelatorioChecklistMatinal(): Promise<void> {
     try {
-      console.log('Ã°Å¸â€œâ€¹ Gerando relatÃ³rio matinal de checklists...')
+      console.log('🤖 Gerando relatório matinal de checklists...')
 
-      // Buscar estatÃ­sticas de ontem
+      // Buscar estatísticas de ontem
       const ontem = new Date()
       ontem.setDate(ontem.getDate() - 1)
       const dataOntem = ontem.toISOString().split('T')[0]
 
-      // Buscar execuÃ§Ãµes de ontem
+      // Buscar execuções de ontem
       const { data: execucoes } = await supabase
         .from('checklist_execucoes')
         .select('status, tempo_execucao_minutos, score_final')
@@ -1200,17 +1262,17 @@ export class AIIntelligentAgent {
         .catch(() => ({ alerts: [] }))
 
       const totalExecucoes = execucoes?.length || 0
-      const execucoesConcluidas = execucoes?.filter((e: any) => e.status === 'concluido').length || 0
+      const execucoesConcluidas = execucoes?.filter((e: unknown) => e.status === 'concluido').length || 0
       const execucoesPendentes = totalExecucoes - execucoesConcluidas
 
-      const temposExecucao = execucoes?.filter((e: any) => e.tempo_execucao_minutos).map((e: any) => e.tempo_execucao_minutos) || []
-      const tempoMedio = temposExecucao.length > 0 ? temposExecucao.reduce((a: any, b: any) => a + b, 0) / temposExecucao.length : 0
+      const temposExecucao = execucoes?.filter((e: unknown) => e.tempo_execucao_minutos).map((e: unknown) => e.tempo_execucao_minutos) || []
+      const tempoMedio = temposExecucao.length > 0 ? temposExecucao.reduce((a: unknown, b: unknown) => a + b, 0) / temposExecucao.length : 0
 
-      const scores = execucoes?.filter((e: any) => e.score_final).map((e: any) => e.score_final) || []
-      const scoreMedio = scores.length > 0 ? scores.reduce((a: any, b: any) => a + b, 0) / scores.length : 0
+      const scores = execucoes?.filter((e: unknown) => e.score_final).map((e: unknown) => e.score_final) || []
+      const scoreMedio = scores.length > 0 ? scores.reduce((a: unknown, b: unknown) => a + b, 0) / scores.length : 0
 
       const alertasAtivos = alertasData?.alerts?.length || 0
-      const alertasCriticos = alertasData?.alerts?.filter((a: any) => a.nivel === 'critico').length || 0
+      const alertasCriticos = alertasData?.alerts?.filter((a: unknown) => a.nivel === 'critico').length || 0
 
       const checklistStats = {
         total_execucoes: totalExecucoes,
@@ -1224,20 +1286,20 @@ export class AIIntelligentAgent {
 
       // Enviar para Discord
       await DiscordChecklistService.sendDailyReport(checklistStats)
-      console.log('Å“â€¦ RelatÃ³rio matinal de checklists enviado para Discord')
+      console.log('✅ Relatório matinal de checklists enviado para Discord')
 
-      // Log da aÃ§Ã£o
+      // Log da ação
       await this.logProcess(
         'relatorio_checklist',
-        'RelatÃ³rio Checklist Matinal Enviado',
+        'Relatório Checklist Matinal Enviado',
         'concluido'
       )
 
     } catch (error: unknown) {
-      console.error('ÂÅ’ Erro ao enviar relatÃ³rio matinal de checklists:', error)
+      console.error('❌ Erro ao enviar relatório matinal de checklists:', error)
       await this.logProcess(
         'relatorio_checklist',
-        'Erro no RelatÃ³rio Checklist Matinal',
+        'Erro no Relatório Checklist Matinal',
         'erro',
         (error as Error).message || String(error)
       )
@@ -1245,13 +1307,13 @@ export class AIIntelligentAgent {
   }
 
   /**
-   * Ã°Å¸â€œÂ± Enviar relatÃ³rio matinal de marketing Ã s 8h
+   * 🤖 Enviar relatório matinal de marketing às 8h
    */
   private async enviarRelatorioMarketingMatinal(): Promise<void> {
     try {
-      console.log('Ã°Å¸â€œÂ± Enviando relatÃ³rio matinal de marketing...');
+      console.log('🤖 Enviando relatório matinal de marketing...');
 
-      // Buscar mÃ©tricas sociais de hoje
+      // Buscar métricas sociais de hoje
       const today = new Date().toISOString().split('T')[0];
       
       const { data: socialMetrics } = await supabase
@@ -1262,7 +1324,7 @@ export class AIIntelligentAgent {
         .eq('periodo', 'daily')
         .single();
 
-      // Buscar mÃ©tricas de ontem para comparaÃ§Ã£o
+      // Buscar métricas de ontem para comparação
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = yesterday.toISOString().split('T')[0];
@@ -1302,7 +1364,7 @@ export class AIIntelligentAgent {
           .order('reach', { ascending: false })
           .limit(1);
 
-        // Preparar dados para o relatÃ³rio
+        // Preparar dados para o relatório
         const marketingData = {
           facebook: {
             followers: socialMetrics.facebook_followers,
@@ -1333,26 +1395,26 @@ export class AIIntelligentAgent {
         const sucesso = await notifyMarketingUpdate('relatorio', { metrics: marketingData });
         
         if (sucesso) {
-          console.log('Å“â€¦ RelatÃ³rio matinal de marketing enviado com sucesso!');
+          console.log('✅ Relatório matinal de marketing enviado com sucesso!');
           
-          // Log da aÃ§Ã£o
+          // Log da ação
           await this.logProcess(
             'relatorio_marketing',
-            'RelatÃ³rio Marketing Matinal Enviado',
+            'Relatório Marketing Matinal Enviado',
             'concluido'
           );
         } else {
-          console.error('ÂÅ’ Erro ao enviar relatÃ³rio matinal de marketing');
+          console.error('❌ Erro ao enviar relatório matinal de marketing');
         }
       } else {
-        console.log('Ã°Å¸â€œÂ± Nenhuma mÃ©trica social encontrada para hoje - pulando relatÃ³rio marketing');
+        console.log('🤖 Nenhuma métrica social encontrada para hoje - pulando relatório marketing');
       }
 
     } catch (error: unknown) {
-      console.error('Erro ao enviar relatÃ³rio matinal de marketing:', error);
+      console.error('Erro ao enviar relatório matinal de marketing:', error);
       await this.logProcess(
         'relatorio_marketing',
-        'Erro no RelatÃ³rio Marketing Matinal',
+        'Erro no Relatório Marketing Matinal',
         'erro',
         (error as Error).message || String(error)
       );
@@ -1360,27 +1422,27 @@ export class AIIntelligentAgent {
   }
 
   // ========================================
-  // Ã°Å¸â€™Â¡ GERAÃ§Ã£o DE INSIGHTS (PLACEHOLDER)
+  // 🤖 GERAÇÃO DE INSIGHTS (PLACEHOLDER)
   // ========================================
 
   private async generateInsights(): Promise<number> {
-    // TODO: Implementar geraÃ§Ã£o de insights inteligentes
+    // TODO: Implementar geração de insights inteligentes
     return 0;
   }
 
   private async generatePredictions(): Promise<number> {
-    // TODO: Implementar previsÃµes de ML
+    // TODO: Implementar previsões de ML
     return 0;
   }
 
   private async generateRecommendations(): Promise<number> {
-    // TODO: Implementar recomendaÃ§Ãµes inteligentes
+    // TODO: Implementar recomendações inteligentes
     return 0;
   }
 }
 
 // ========================================
-// Ã°Å¸Å¡â‚¬ FACTORY E MANAGER DE AGENTES
+// 🤖 FACTORY E MANAGER DE AGENTES
 // ========================================
 
 /**
@@ -1394,7 +1456,7 @@ export class AIAgentManager {
    */
   async startAgent(barId: number): Promise<boolean> {
     if (this.agents.has(barId)) {
-      return true; // JÃ¡ estÃ¡ rodando
+      return true; // Já está rodando
     }
 
     const agent = new AIIntelligentAgent(barId);
@@ -1441,18 +1503,18 @@ export class AIAgentManager {
   }
 }
 
-// InstÃ¢ncia global do manager
+// Instância global do manager
 export const aiAgentManager = new AIAgentManager();
 
 /**
- * FunÃ§Ã£o para iniciar agente IA
+ * Função para iniciar agente IA
  */
 export async function startAIAgent(barId: number): Promise<boolean> {
   return aiAgentManager.startAgent(barId);
 }
 
 /**
- * FunÃ§Ã£o para parar agente IA
+ * Função para parar agente IA
  */
 export function stopAIAgent(barId: number): void {
   aiAgentManager.stopAgent(barId);

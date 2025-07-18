@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -44,7 +60,7 @@ export async function POST(request: NextRequest) {
         ? usuario.biometric_credentials 
         : []
       
-      const foundCredential = credentials.find((cred: any) => cred.id === credentialId)
+      const foundCredential = credentials.find((cred: unknown) => cred.id === credentialId)
       if (foundCredential) {
         usuarioEncontrado = usuario
         credentialData = foundCredential
@@ -75,7 +91,7 @@ export async function POST(request: NextRequest) {
     console.log('Å“â€¦ AutenticaÃ¡Â§Ã¡Â£o biomÃ¡Â©trica bem-sucedida para:', usuarioEncontrado.email)
 
     // Atualizar last_used da credencial
-    const updatedCredentials = usuarioEncontrado.biometric_credentials.map((cred: any) => 
+    const updatedCredentials = usuarioEncontrado.biometric_credentials.map((cred: unknown) => 
       cred.id === credentialId 
         ? { ...cred, lastUsed: new Date().toISOString() }
         : cred

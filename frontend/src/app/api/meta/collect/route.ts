@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { createMetaSocialService } from '@/lib/meta-social-service'
@@ -127,7 +143,7 @@ export async function PUT(request: NextRequest) {
 // Coletar dados reais do Meta e inserir JSON bruto na meta_raw (teste)
 // ========================================
 export async function PATCH(request: NextRequest) {
-  const inserts: any[] = [];
+  const inserts: unknown[] = [];
   try {
     // Recebe bar_id (ou usa padrÃ£o)
     const body = await request.json()
@@ -179,9 +195,9 @@ export async function PATCH(request: NextRequest) {
     // 2. Instagram - Coleta estruturada expandida (posts, stories, reels)
     let instagramProfileData = null;
     let instagramInsightsData = null;
-    const instagramPostsData: any[] = [];
-    const instagramStoriesData: any[] = [];
-    const instagramReelsData: any[] = [];
+    const instagramPostsData: unknown[] = [];
+    const instagramStoriesData: unknown[] = [];
+    const instagramReelsData: unknown[] = [];
     const estimativasData = { engagement_total: 0, views_total: 0 };
     const limitacoesData: string[] = [
       'NÃ£o hÃ¡ variaÃ§Ã£o de seguidores por perÃ­odo',
@@ -208,7 +224,7 @@ export async function PATCH(request: NextRequest) {
       instagramInsightsData = {};
       if (insightsJson.data && Array.isArray(insightsJson.data)) {
         for (const metric of insightsJson.data) {
-          (instagramInsightsData as any)[metric.name] = metric.values;
+          (instagramInsightsData as unknown)[metric.name] = metric.values;
         }
       }
       // 3. Coleta de posts, stories e reels recentes (expandido)
@@ -225,13 +241,13 @@ export async function PATCH(request: NextRequest) {
           let metrics = 'impressions,reach,engagement,saved';
           if (isVideo || isReel) metrics += ',video_views';
           const urlPostInsights = `https://graph.facebook.com/v19.0/${media.id}/insights?metric=${metrics}&access_token=${metaConfig.access_token}`;
-          let postInsights: any = {};
+          let postInsights: unknown = {};
           try {
             const resPostInsights = await fetch(urlPostInsights);
             const postInsightsJson = await resPostInsights.json();
             if (postInsightsJson.data && Array.isArray(postInsightsJson.data)) {
               for (const metric of postInsightsJson.data) {
-                postInsights[(metric as any).name] = (metric as any).values?.[0]?.value ?? null;
+                postInsights[(metric as unknown).name] = (metric as unknown).values?.[0]?.value ?? null;
                 // Somar para estimativas
                 if (metric.name === 'engagement') estimativasData.engagement_total += Number(metric.values?.[0]?.value || 0);
                 if (metric.name === 'impressions') estimativasData.views_total += Number(metric.values?.[0]?.value || 0);
@@ -392,8 +408,8 @@ export async function PATCH(request: NextRequest) {
         console.log('[Instagram] follower_count_day salvo.');
       }
       console.log('[Instagram] Salvando profile_views_website_clicks...');
-      if ((instagramInsightsData as any)?.profile_views || (instagramInsightsData as any)?.website_clicks) {
-        inserts.push({ bar_id, data_coleta: hoje, tipo: 'instagram_profile_views_website_clicks', json_raw: { tipo: 'preciso', data: { profile_views: (instagramInsightsData as any).profile_views, website_clicks: (instagramInsightsData as any).website_clicks } } });
+      if ((instagramInsightsData as unknown)?.profile_views || (instagramInsightsData as unknown)?.website_clicks) {
+        inserts.push({ bar_id, data_coleta: hoje, tipo: 'instagram_profile_views_website_clicks', json_raw: { tipo: 'preciso', data: { profile_views: (instagramInsightsData as unknown).profile_views, website_clicks: (instagramInsightsData as unknown).website_clicks } } });
         console.log('[Instagram] profile_views_website_clicks salvo.');
       }
       console.log('[Instagram] Salvando posts_summary...');
@@ -459,7 +475,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'UsuÃ¡Â¡rio nÃ£o autenticado' }, { status: 401 })
     }
 
-    const { bar_id } = JSON.parse(userData)
+    const { bar_id } = JSON.parse(userData) as unknown
 
     // Buscar Ã¡Âºltimas coletas
     const supabase = await import('@supabase/supabase-js').then(m => 
@@ -482,7 +498,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Agrupar por tipo
-    const statusByType = coletas?.reduce((acc: any, coleta: any) => {
+    const statusByType = coletas?.reduce((acc: unknown, coleta: unknown) => {
       if (!acc[coleta.tipo_coleta]) {
         acc[coleta.tipo_coleta] = []
       }
@@ -499,7 +515,7 @@ export async function GET(request: NextRequest) {
         tipo: ultimaColeta.tipo_coleta,
         registros: ultimaColeta.registros_processados
       } : null,
-      total_coletas_hoje: coletas?.filter((c: any) => 
+      total_coletas_hoje: coletas?.filter((c: unknown) => 
         new Date(c.iniciada_em).toDateString() === new Date().toDateString()
       ).length || 0,
       por_tipo: statusByType,

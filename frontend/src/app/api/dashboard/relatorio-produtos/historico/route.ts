@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -60,7 +76,7 @@ export async function GET(request: NextRequest) {
     // Agrupar dados por data
     const dadosPorData = new Map();
 
-    dadosHistorico?.forEach((item: any) => {
+    dadosHistorico?.forEach((item: unknown) => {
       const data = item.t0_lancamento.split('T')[0];
       
       if (!dadosPorData.has(data)) {

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
@@ -31,7 +47,7 @@ export function PWAInstaller({
   useEffect(() => {
     // Check if already installed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-    const isInWebAppiOS = (window.navigator as any).standalone === true
+    const isInWebAppiOS = (window.navigator as unknown).standalone === true
     
     if (isStandalone || isInWebAppiOS) {
       setIsInstalled(true)
@@ -121,7 +137,7 @@ export function usePWAInstaller() {
   useEffect(() => {
     // Check if already installed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-    const isInWebAppiOS = (window.navigator as any).standalone === true
+    const isInWebAppiOS = (window.navigator as unknown).standalone === true
     
     if (isStandalone || isInWebAppiOS) {
       setIsInstalled(true)

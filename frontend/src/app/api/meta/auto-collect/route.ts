@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -83,7 +99,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Coleta automÃ¡Â¡tica Meta executada com sucesso!',
       timestamp: startTime.toISOString(),
-      collections: {} as any,
+      collections: {} as unknown,
       summary: {
         instagram_success: false,
         facebook_success: false,
@@ -127,9 +143,9 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       results.collections.instagram = {
         success: false,
-        error: (error as any).message
+        error: (error as unknown).message
       }
-      results.summary.errors.push(`Instagram: ${(error as any).message}`)
+      results.summary.errors.push(`Instagram: ${(error as unknown).message}`)
       console.log('ÂÅ’ Instagram: Erro crÃ­tico')
     }
 
@@ -167,9 +183,9 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       results.collections.facebook = {
         success: false,
-        error: (error as any).message
+        error: (error as unknown).message
       }
-      results.summary.errors.push(`Facebook: ${(error as any).message}`)
+      results.summary.errors.push(`Facebook: ${(error as unknown).message}`)
       console.log('ÂÅ’ Facebook: Erro crÃ­tico')
     }
 
@@ -245,7 +261,7 @@ export async function POST(request: NextRequest) {
     console.error('Ã°Å¸â€™Â¥ Erro crÃ­tico na coleta automÃ¡Â¡tica:', error)
     
     // Notificar Discord sobre erro crÃ­tico
-    await enviarNotificacaoDiscord(3, `Ã°Å¸â€™Â¥ **Erro CrÃ­tico na Coleta Meta!**\n\nÃ°Å¸Å¡Â¨ **Erro:** ${(error as any).message}\nÂÂ° **HorÃ¡Â¡rio:** ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`, true)
+    await enviarNotificacaoDiscord(3, `Ã°Å¸â€™Â¥ **Erro CrÃ­tico na Coleta Meta!**\n\nÃ°Å¸Å¡Â¨ **Erro:** ${(error as unknown).message}\nÂÂ° **HorÃ¡Â¡rio:** ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`, true)
     
     // Log de erro crÃ­tico
     await supabase
@@ -256,14 +272,14 @@ export async function POST(request: NextRequest) {
         iniciada_em: new Date().toISOString(),
         finalizada_em: new Date().toISOString(),
         status: 'erro_critico',
-        erro_detalhes: (error as any).message,
+        erro_detalhes: (error as unknown).message,
         observacoes: 'Erro crÃ­tico na execuÃ§Ã£o automÃ¡Â¡tica'
       })
 
     return NextResponse.json({ 
       success: false,
       error: 'Erro crÃ­tico na coleta automÃ¡Â¡tica Meta',
-      details: (error as any).message,
+      details: (error as unknown).message,
       timestamp: new Date().toISOString()
     }, { status: 500 })
   }
@@ -306,7 +322,7 @@ export async function GET(request: NextRequest) {
     console.error('Erro ao buscar schedule:', error)
     return NextResponse.json({
       enabled: false,
-      error: (error as any).message
+      error: (error as unknown).message
     }, { status: 500 })
   }
 }

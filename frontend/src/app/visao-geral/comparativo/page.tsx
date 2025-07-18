@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
@@ -127,7 +143,7 @@ export default function ComparativoPage() {
         .neq('nome_artista', '')
 
       if (!error && data) {
-        const artistasUnicos = [...new Set(data.map((item: any) => item.nome_artista))] as string[]
+        const artistasUnicos = [...new Set(data.map((item: unknown) => item.nome_artista))] as string[]
         setListaArtistas(artistasUnicos.sort())
         console.log('Ã°Å¸Å½Â¤ Artistas encontrados:', artistasUnicos)
       } else {
@@ -145,8 +161,8 @@ export default function ComparativoPage() {
   }
 
   // FunÃ¡Â§Ã¡Â£o para buscar TODOS os registros com paginaÃ¡Â§Ã¡Â£o automÃ¡Â¡tica
-  const buscarTodosRegistros = async (query: any, chunkSize = 1000) => {
-    let todosRegistros: any[] = []
+  const buscarTodosRegistros = async (query: unknown, chunkSize = 1000) => {
+    let todosRegistros: unknown[] = []
     let offset = 0
     let hasMore = true
 
@@ -224,7 +240,7 @@ export default function ComparativoPage() {
       const yuzerTotalData = await buscarTodosRegistros(queryYuzerTotal)
       console.log(`Ã°Å¸"Â¦ Total de registros Yuzer encontrados: ${yuzerTotalData.length}`)
 
-      const yuzerFaturamentoTotal = yuzerTotalData?.reduce((sum: number, item: any) => sum + (parseFloat(item.valor_total) || 0), 0) || 0
+      const yuzerFaturamentoTotal = yuzerTotalData?.reduce((sum: number, item: unknown) => sum + (parseFloat(item.valor_total) || 0), 0) || 0
       const yuzerRegistrosTotal = yuzerTotalData?.length || 0
 
       // 1.2. Verificar TOTAL COMPLETO do ContaHub (fatporhora)
@@ -234,7 +250,7 @@ export default function ComparativoPage() {
         .eq('bar_id', selectedBar?.id)
         .eq('vd_dtgerencial', data)
 
-      const contahubFaturamentoTotal = fatHoraTotalData?.reduce((sum: number, item: any) => sum + (parseFloat(item.valor) || 0), 0) || 0
+      const contahubFaturamentoTotal = fatHoraTotalData?.reduce((sum: number, item: unknown) => sum + (parseFloat(item.valor) || 0), 0) || 0
       const contahubRegistrosTotal = fatHoraTotalData?.length || 0
 
       // 1.3. Decidir qual sistema usar baseado nos TOTAIS COMPLETOS
@@ -270,7 +286,7 @@ export default function ComparativoPage() {
           .eq('data_evento', data)
 
         if (yuzerEstatisticas && yuzerEstatisticas.length > 0) {
-          faturamentoYuzer = yuzerEstatisticas.reduce((sum: number, item: any) => sum + (parseFloat(item.total) || 0), 0)
+          faturamentoYuzer = yuzerEstatisticas.reduce((sum: number, item: unknown) => sum + (parseFloat(item.total) || 0), 0)
           console.log(`Ã°Å¸ÂÂº Faturamento Yuzer (estatÃ¡Â­sticas): R$ ${faturamentoYuzer.toFixed(2)}`)
         }
 
@@ -288,12 +304,12 @@ export default function ComparativoPage() {
           if (!fatData || fatData.length === 0) break
 
           const chunkSympla = fatData
-            .filter((item: any) => item.origem?.toLowerCase().includes('sympla'))
-            .reduce((sum: number, item: any) => sum + (parseFloat(item.liquido) || 0), 0)
+            .filter((item: unknown) => item.origem?.toLowerCase().includes('sympla'))
+            .reduce((sum: number, item: unknown) => sum + (parseFloat(item.liquido) || 0), 0)
           
           const chunkContaHub = fatData
-            .filter((item: any) => !item.origem?.toLowerCase().includes('sympla'))
-            .reduce((sum: number, item: any) => sum + (parseFloat(item.liquido) || 0), 0)
+            .filter((item: unknown) => !item.origem?.toLowerCase().includes('sympla'))
+            .reduce((sum: number, item: unknown) => sum + (parseFloat(item.liquido) || 0), 0)
 
           faturamentoSympla += chunkSympla
           faturamentoContaHub += chunkContaHub
@@ -321,9 +337,9 @@ export default function ComparativoPage() {
 
         if (periodoData && periodoData.length > 0) {
           // Filtrar apenas valores nÃ¡Â£o nulos no JavaScript
-          const dadosValidos = periodoData.filter((item: any) => item.liquido_netto != null)
+          const dadosValidos = periodoData.filter((item: unknown) => item.liquido_netto != null)
           if (dadosValidos.length > 0) {
-            faturamentoPeriodo = dadosValidos.reduce((sum: number, item: any) => sum + (parseFloat(item.liquido_netto) || 0), 0)
+            faturamentoPeriodo = dadosValidos.reduce((sum: number, item: unknown) => sum + (parseFloat(item.liquido_netto) || 0), 0)
             console.log(`Ã°Å¸'Â° Faturamento perÃ¡Â­odo encontrado: R$ ${faturamentoPeriodo.toFixed(2)} (${dadosValidos.length} registros)`)
             faturamento += faturamentoPeriodo
           } else {
@@ -348,7 +364,7 @@ export default function ComparativoPage() {
           .not('total_liquido', 'is', null)
 
         if (bilheteriaData && bilheteriaData.length > 0) {
-          faturamentoBilheteriaSympla = bilheteriaData.reduce((sum: number, item: any) => sum + (parseFloat(item.total_liquido) || 0), 0)
+          faturamentoBilheteriaSympla = bilheteriaData.reduce((sum: number, item: unknown) => sum + (parseFloat(item.total_liquido) || 0), 0)
           console.log(`Ã°Å¸Å½Â« Faturamento bilheteria Sympla encontrado: R$ ${faturamentoBilheteriaSympla.toFixed(2)} (${bilheteriaData.length} registros)`)
           faturamento += faturamentoBilheteriaSympla
           faturamentoSympla += faturamentoBilheteriaSympla // Adicionar ao total Sympla
@@ -525,7 +541,7 @@ export default function ComparativoPage() {
         console.log(`ÂÂ±Ã¯Â¸Â Dados de tempo encontrados: ${tempoData.length} registros`)
         
         // Filtrar dados de bar/bebidas
-        const temposBar = tempoData.filter((item: any) => {
+        const temposBar = tempoData.filter((item: unknown) => {
           const tempo = parseFloat(item.t1_t2) || 0
           const grupo = (item.grp_desc || '').toLowerCase()
           
@@ -541,7 +557,7 @@ export default function ComparativoPage() {
         })
         
         // Filtrar dados de cozinha
-        const temposCozinha = tempoData.filter((item: any) => {
+        const temposCozinha = tempoData.filter((item: unknown) => {
           const tempo = parseFloat(item.t1_t2) || 0
           const grupo = (item.grp_desc || '').toLowerCase()
           
@@ -555,11 +571,11 @@ export default function ComparativoPage() {
         })
         
         tempoMedioBar = temposBar.length > 0 
-          ? temposBar.reduce((sum: number, item: any) => sum + parseFloat(item.t1_t2), 0) / temposBar.length 
+          ? temposBar.reduce((sum: number, item: unknown) => sum + parseFloat(item.t1_t2), 0) / temposBar.length 
           : 0
         
         tempoMedioCozinha = temposCozinha.length > 0 
-          ? temposCozinha.reduce((sum: number, item: any) => sum + parseFloat(item.t1_t2), 0) / temposCozinha.length 
+          ? temposCozinha.reduce((sum: number, item: unknown) => sum + parseFloat(item.t1_t2), 0) / temposCozinha.length 
           : 0
         
         console.log(`ÂÂ±Ã¯Â¸Â Tempo mÃ¡Â©dio cozinha: ${tempoMedioCozinha.toFixed(1)}min (${temposCozinha.length} registros)`)
@@ -567,7 +583,7 @@ export default function ComparativoPage() {
         
         if (temposCozinha.length === 0 && temposBar.length === 0) {
           console.log(`Å¡Â Ã¯Â¸Â Nenhum tempo vÃ¡Â¡lido encontrado nos ${tempoData.length} registros para ${data}`)
-          console.log(`Ã°Å¸"â€¹ Grupos encontrados: ${[...new Set(tempoData.map((t: any) => t.grp_desc))].slice(0,5).join(', ')}`)
+          console.log(`Ã°Å¸"â€¹ Grupos encontrados: ${[...new Set(tempoData.map((t: unknown) => t.grp_desc))].slice(0,5).join(', ')}`)
         }
       } else {
         console.log(`ÂÂ±Ã¯Â¸Â Nenhum dado de tempo encontrado para ${data}`)
@@ -605,7 +621,7 @@ export default function ComparativoPage() {
           // Agrupar faturamento por hora
           const dadosPorHora: {[hora: string]: {faturamento: number, pedidos: Set<string>}} = {}
           
-          yuzerHoraData.forEach((item: any) => {
+          yuzerHoraData.forEach((item: unknown) => {
             if (item.data_hora_pedido) {
               // CORREÃ¡â€¡Ã¡Æ'O: Extrair hora diretamente da string para evitar problemas de timezone
               const horaString = item.data_hora_pedido.split('T')[1] || '00:00:00'
@@ -623,7 +639,7 @@ export default function ComparativoPage() {
           })
 
           // Calcular faturamento total para proporÃ¡Â§Ã¡Â£o
-          const faturamentoTotal = Object.values(dadosPorHora).reduce((sum, dados: any) => sum + dados.faturamento, 0)
+          const faturamentoTotal = Object.values(dadosPorHora).reduce((sum, dados: unknown) => sum + dados.faturamento, 0)
           
           // Distribuir clientes proporcionalmente ao faturamento
           const clientesPorHora: {[hora: string]: number} = {}
@@ -653,7 +669,7 @@ export default function ComparativoPage() {
           let clientesAcumulados = 0
 
           faturamento_horas = horasOrdenadas.map((hora: string) => {
-            const dados: any = dadosPorHora[hora]
+            const dados: unknown = dadosPorHora[hora]
             const faturamento = dados.faturamento
             // CORREÃ¡â€¡Ã¡Æ'O: Para dias Yuzer, usar clientes distribuÃ¡Â­dos proporcionalmente
             const vendas = clientesPorHora[hora] || 0
@@ -710,7 +726,7 @@ export default function ComparativoPage() {
           // Agrupar clientes Ã¡Âºnicos por hora
           const clientesUnicos = new Map()
           
-          clientesHoraData.forEach((item: any) => {
+          clientesHoraData.forEach((item: unknown) => {
             if (item.created_at && item.vd) {
               // CORREÃ¡â€¡Ã¡Æ'O: Extrair hora diretamente da string para evitar problemas de timezone
               const horaString = item.created_at.split('T')[1] || '00:00:00'
@@ -738,7 +754,7 @@ export default function ComparativoPage() {
         if (fatHoraData && fatHoraData.length > 0) {
           // Ordenar por hora para calcular acumulados corretamente
           const dadosOrdenados = fatHoraData
-            .map((f: any) => {
+            .map((f: unknown) => {
               const hora = f.hora
               const faturamento = parseFloat(f.valor) || 0
               // CORREÃ¡â€¡Ã¡Æ'O: Usar qtd da fatporhora ou clientes da analitico
@@ -750,13 +766,13 @@ export default function ComparativoPage() {
                 vendas
               }
             })
-            .sort((a: any, b: any) => a.hora.localeCompare(b.hora))
+            .sort((a: unknown, b: unknown) => a.hora.localeCompare(b.hora))
 
           // Calcular valores acumulados
           let faturamentoAcumulado = 0
           let clientesAcumulados = 0
 
-          faturamento_horas = dadosOrdenados.map((item: any) => {
+          faturamento_horas = dadosOrdenados.map((item: unknown) => {
             faturamentoAcumulado += item.faturamento
             clientesAcumulados += item.vendas
 
@@ -776,7 +792,7 @@ export default function ComparativoPage() {
       // Debug dos primeiros horÃ¡Â¡rios
       if (faturamento_horas.length > 0) {
         console.log(`ÂÂ° Primeiros horÃ¡Â¡rios:`)
-        faturamento_horas.slice(0, 3).forEach((h: any) => {
+        faturamento_horas.slice(0, 3).forEach((h: unknown) => {
           console.log(`   ${h.hora}: R$ ${h.faturamento.toFixed(2)} | ${h.vendas} clientes | Acum: R$ ${h.faturamento_acumulado?.toFixed(2)} | ${h.clientes_acumulados} clientes`)
         })
       } else {
@@ -849,7 +865,7 @@ export default function ComparativoPage() {
       // Buscar anÃ¡Â¡lise de recorrÃ¡Âªncia de clientes
       try {
         const response = await fetch(
-          `/api/dashboard/recorrencia-clientes?bar_id=${selectedBar.id}&data1=${data1}&data2=${data2}&artista1=${(dados1 as any).artista || 'N/A'}&artista2=${(dados2 as any).artista || 'N/A'}`
+          `/api/dashboard/recorrencia-clientes?bar_id=${selectedBar.id}&data1=${data1}&data2=${data2}&artista1=${(dados1 as unknown).artista || 'N/A'}&artista2=${(dados2 as unknown).artista || 'N/A'}`
         )
         const result = await response.json()
         if (result.success) {
@@ -924,7 +940,7 @@ export default function ComparativoPage() {
 
       console.log(`Ã°Å¸"â€¦ TOTAL de eventos encontrados para ${nomeArtista}: ${eventos.length}`)
       console.log(`Ã°Å¸"â€¦ Eventos completos:`, eventos)
-      const datasEventos = eventos.map((e: any) => e.data_evento)
+      const datasEventos = eventos.map((e: unknown) => e.data_evento)
       console.log(`Ã°Å¸"â€  TODAS as datas dos eventos (${datasEventos.length}): ${datasEventos.join(', ')}`)
 
       // Buscar dados de todas as datas
@@ -940,7 +956,7 @@ export default function ComparativoPage() {
 
       // LOGS DETALHADOS para debug
       console.log(`Ã°Å¸"Â ANÃ¡LISE DETALHADA DOS EVENTOS DE ${nomeArtista}:`)
-      dadosEventos.forEach((dados: any, index: any) => {
+      dadosEventos.forEach((dados: unknown, index: unknown) => {
         const isValido = dados.faturamento > 0 || dados.clientes > 0
         console.log(`Ã°Å¸"â€¦ ${dados.data}: Faturamento R$ ${dados.faturamento.toFixed(2)}, Clientes: ${dados.clientes}, VÃ¡Â¡lido: ${isValido ? 'Å"â€¦' : 'ÂÅ'}`)
         if (!isValido) {

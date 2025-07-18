@@ -82,7 +82,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       const userData = localStorage.getItem('sgb_user')
       
       if (userData) {
-        const parsedUser = JSON.parse(userData)
+        const parsedUser = JSON.parse(userData) as unknown
         
         // Validar se os dados do usuÃ¡Â¡rio sÃ¡Â£o vÃ¡Â¡lidos
         if (parsedUser && parsedUser.id && parsedUser.email && parsedUser.nome) {
@@ -139,7 +139,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     try {
       const userData = localStorage.getItem('sgb_user')
       if (userData) {
-        const parsedUser = JSON.parse(userData)
+        const parsedUser = JSON.parse(userData) as unknown
         setUser(parsedUser)
       } else {
         setUser(null)

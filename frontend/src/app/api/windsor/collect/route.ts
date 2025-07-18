@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -158,7 +174,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Processar dados do Windsor.ai para formato padronizado
-async function processWindsorData(windsorData: any, barId: number, platform: string) {
+async function processWindsorData(windsorData: unknown, barId: number, platform: string) {
   const processed: Array<{
     bar_id: number
     platform: string
@@ -173,7 +189,7 @@ async function processWindsorData(windsorData: any, barId: number, platform: str
     ctr: number
     cpc: number
     cpm: number
-    raw_row: any
+    raw_row: unknown
   }> = []
   
   if (!windsorData.data || !Array.isArray(windsorData.data)) {

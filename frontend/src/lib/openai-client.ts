@@ -73,7 +73,7 @@ export class OpenAIClient {
     if (!data) return data
 
     // Criar cópia dos dados
-    const sanitized = JSON.parse(JSON.stringify(data))
+    const sanitized = JSON.parse(JSON.stringify(data) as unknown)
 
     // Remover/anonimizar campos sensíveis
     const sensitiveFields = ['cpf', 'senha', 'token', 'password', 'secret']

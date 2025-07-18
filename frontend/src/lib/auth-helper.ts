@@ -44,7 +44,7 @@ export async function getUserAuth(request?: NextRequest): Promise<UserAuth | nul
 
     // Decodificar URL encoding antes de fazer JSON.parse
     const decodedUserData = decodeURIComponent(userData)
-    const parsedUser = JSON.parse(decodedUserData)
+    const parsedUser = JSON.parse(decodedUserData) as unknown
     
     if (!parsedUser || !parsedUser.email || !parsedUser.id) {
       return null

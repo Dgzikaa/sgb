@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -16,7 +32,7 @@ export async function GET(request: NextRequest) {
     
     if (userData) {
       try {
-        const parsedUser = JSON.parse(decodeURIComponent(userData))
+        const parsedUser = JSON.parse(decodeURIComponent(userData) as unknown)
         barId = parsedUser.bar_id || 3
         console.log(`Ã°Å¸â€˜Â¤ Radar de Oportunidades - Usando bar_id: ${barId}`)
       } catch (e) {
@@ -42,7 +58,7 @@ export async function GET(request: NextRequest) {
       .limit(30)
 
     // 2. DETECTAR GAPS DE ATIVIDADE
-    const detectarGapsAtividade = (dados: any[]) => {
+    const detectarGapsAtividade = (dados: unknown[]) => {
       const agora = new Date()
       const gaps = []
       
@@ -92,7 +108,7 @@ export async function GET(request: NextRequest) {
         { nome: 'Bar C', atividade: 'media', ultima_campanha: '2 dias atrÃ¡Â¡s' }
       ]
       
-      const oportunidades: any[] = []
+      const oportunidades: unknown[] = []
       
       concorrentes.forEach(concorrente => {
         if (concorrente.atividade === 'baixa') {
@@ -114,7 +130,7 @@ export async function GET(request: NextRequest) {
       const diaSemana = agora.getDay()
       const hora = agora.getHours()
       
-      const oportunidades: any[] = []
+      const oportunidades: unknown[] = []
       
       // AnÃ¡Â¡lise por dia da semana
       if (diaSemana === 5 || diaSemana === 6) { // Sexta ou SÃ¡Â¡bado
@@ -160,7 +176,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 6. SCORE DE OPORTUNIDADE
-    const calcularScore = (oportunidades: any[]) => {
+    const calcularScore = (oportunidades: unknown[]) => {
       const pesos = { alta: 3, media: 2, baixa: 1 }
       const total = oportunidades.reduce((sum, opp) => sum + pesos[opp.urgencia as keyof typeof pesos], 0)
       const maximo = oportunidades.length * 3

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -17,7 +33,7 @@ interface FacebookMetric {
   page_impressions: number;
   page_engaged_users: number;
   post_impressions: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface InstagramMetric {
@@ -28,7 +44,7 @@ interface InstagramMetric {
   impressions: number;
   profile_views: number;
   posts_impressions: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Campaign {
@@ -37,7 +53,7 @@ interface Campaign {
   status: string;
   spend: string;
   clicks: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export async function GET(request: NextRequest) {
@@ -50,7 +66,7 @@ export async function GET(request: NextRequest) {
 
     if (userData) {
       try {
-        const parsedUser = JSON.parse(decodeURIComponent(userData))
+        const parsedUser = JSON.parse(decodeURIComponent(userData) as unknown)
         barId = parsedUser.bar_id || 3
         console.log(`Ã°Å¸â€˜Â¤ Usando bar_id: ${barId}`)
       } catch (e) {
@@ -68,7 +84,7 @@ export async function GET(request: NextRequest) {
       .select('*')
       .eq('bar_id', barId)
       .gte('data_referencia', diasAtras.toISOString().split('T')[0])
-      .order('data_referencia', { ascending: false }) as { data: FacebookMetric[] | null, error: any };
+      .order('data_referencia', { ascending: false }) as { data: FacebookMetric[] | null, error: unknown };
 
     if (fbError) {
       console.error('ÂÅ’ Erro ao buscar facebook_metrics:', fbError)
@@ -80,7 +96,7 @@ export async function GET(request: NextRequest) {
       .select('*')
       .eq('bar_id', barId)
       .gte('data_referencia', diasAtras.toISOString().split('T')[0])
-      .order('data_referencia', { ascending: false }) as { data: InstagramMetric[] | null, error: any };
+      .order('data_referencia', { ascending: false }) as { data: InstagramMetric[] | null, error: unknown };
 
     if (igError) {
       console.error('ÂÅ’ Erro ao buscar instagram_metrics:', igError)

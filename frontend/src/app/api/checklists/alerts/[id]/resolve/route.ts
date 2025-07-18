@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser, authErrorResponse, permissionErrorResponse } from '@/middleware/auth'
@@ -84,7 +100,7 @@ export async function GET(request: NextRequest) {
 
     // Buscar prÃÂ¡ÃÂ³ximas execuÃÂ¡ÃÂ§ÃÂ¡ÃÂµes para cada agendamento
     const agendamentosComProximaExecucao = await Promise.all(
-      (agendamentos || []).map(async (agendamento: any) => {
+      (agendamentos || []).map(async (agendamento: unknown) => {
         const proximaExecucao = calcularProximaExecucao(agendamento)
         const ultimaExecucao = await buscarUltimaExecucao(supabase, agendamento.id)
         
@@ -111,7 +127,7 @@ export async function GET(request: NextRequest) {
     console.error('Erro na API de agendamentos GET:', error)
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
-      details: (error as any).message 
+      details: (error as unknown).message 
     }, { status: 500 })
   }
 }
@@ -201,7 +217,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
-      details: (error as any).message 
+      details: (error as unknown).message 
     }, { status: 500 })
   }
 }
@@ -210,7 +226,7 @@ export async function POST(request: NextRequest) {
 // FUNÃÂ¡Ã¢â¬Â¡ÃÂ¡Ã¢â¬Â¢ES AUXILIARES
 // =====================================================
 
-function calcularProximaExecucao(agendamento: any): string | null {
+function calcularProximaExecucao(agendamento: unknown): string | null {
   if (!agendamento.ativo) return null
 
   const agora = new Date()
@@ -270,7 +286,7 @@ function calcularProximaExecucao(agendamento: any): string | null {
   }
 }
 
-async function buscarUltimaExecucao(supabase: any, agendamentoId: string) {
+async function buscarUltimaExecucao(supabase: unknown, agendamentoId: string) {
   const { data, error } = await supabase
     .from('checklist_execucoes')
     .select('id, status, iniciado_em, concluido_em')
@@ -282,7 +298,7 @@ async function buscarUltimaExecucao(supabase: any, agendamentoId: string) {
   return error ? null : data
 }
 
-function determinarStatusAtual(agendamento: any, proximaExecucao: string | null, ultimaExecucao: any) {
+function determinarStatusAtual(agendamento: unknown, proximaExecucao: string | null, ultimaExecucao: unknown) {
   if (!agendamento.ativo) return 'inativo'
   if (!proximaExecucao) return 'manual'
   
@@ -296,7 +312,7 @@ function determinarStatusAtual(agendamento: any, proximaExecucao: string | null,
   return 'agendado'
 }
 
-async function verificarConflitoAgendamento(supabase: any, data: any, barId: number) {
+async function verificarConflitoAgendamento(supabase: unknown, data: unknown, barId: number) {
   const { data: conflitos, error } = await supabase
     .from('checklist_schedules')
     .select('id, titulo, horario')

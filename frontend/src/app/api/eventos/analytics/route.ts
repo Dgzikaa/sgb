@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -46,8 +62,8 @@ export async function GET(request: NextRequest) {
         if (errorArtistas) throw errorArtistas;
 
         // Agrupar por artista
-        const artistasStats: Record<string, any> = {};
-        eventosPorArtista?.forEach((evento: any) => {
+        const artistasStats: Record<string, unknown> = {};
+        eventosPorArtista?.forEach((evento: unknown) => {
           const artista = evento.nome_artista || evento.nome_banda || 'NÃ¡o informado';
           
           if (!artistasStats[artista]) {
@@ -83,13 +99,13 @@ export async function GET(request: NextRequest) {
         });
 
         // Calcular mÃ©dias e converter Set para Array
-        dados = Object.values(artistasStats).map((stats: any) => ({
+        dados = Object.values(artistasStats).map((stats: unknown) => ({
           ...stats,
           publico_medio: stats.total_eventos > 0 ? stats.publico_total / stats.total_eventos : 0,
           faturamento_medio: stats.total_eventos > 0 ? stats.faturamento_total / stats.total_eventos : 0,
           ticket_medio_geral: stats.publico_total > 0 ? stats.faturamento_total / stats.publico_total : 0,
           generos: Array.from(stats.generos)
-        })).sort((a: any, b: any) => b.faturamento_total - a.faturamento_total);
+        })).sort((a: unknown, b: unknown) => b.faturamento_total - a.faturamento_total);
 
         break;
 
@@ -114,8 +130,8 @@ export async function GET(request: NextRequest) {
         if (errorGeneros) throw errorGeneros;
 
         // Agrupar por gÃªnero
-        const generosStats: Record<string, any> = {};
-        eventosPorGenero?.forEach((evento: any) => {
+        const generosStats: Record<string, unknown> = {};
+        eventosPorGenero?.forEach((evento: unknown) => {
           const genero = evento.genero_musical || 'NÃ¡o informado';
           
           if (!generosStats[genero]) {
@@ -143,14 +159,14 @@ export async function GET(request: NextRequest) {
           }
         });
 
-        dados = Object.values(generosStats).map((stats: any) => ({
+        dados = Object.values(generosStats).map((stats: unknown) => ({
           ...stats,
           publico_medio: stats.total_eventos > 0 ? stats.publico_total / stats.total_eventos : 0,
           faturamento_medio: stats.total_eventos > 0 ? stats.faturamento_total / stats.total_eventos : 0,
           ticket_medio_geral: stats.publico_total > 0 ? stats.faturamento_total / stats.publico_total : 0,
           total_artistas: stats.artistas_unicos.size,
           artistas_unicos: Array.from(stats.artistas_unicos)
-        })).sort((a: any, b: any) => b.faturamento_total - a.faturamento_total);
+        })).sort((a: unknown, b: unknown) => b.faturamento_total - a.faturamento_total);
 
         break;
 
@@ -175,8 +191,8 @@ export async function GET(request: NextRequest) {
         if (errorPeriodo) throw errorPeriodo;
 
         // Agrupar por mÃªs
-        const periodosStats: Record<string, any> = {};
-        eventosPorPeriodo?.forEach((evento: any) => {
+        const periodosStats: Record<string, unknown> = {};
+        eventosPorPeriodo?.forEach((evento: unknown) => {
           const data = new Date(evento.data_evento);
           const mesAno = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`;
           const mesLabel = data.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long' });
@@ -206,13 +222,13 @@ export async function GET(request: NextRequest) {
           }
         });
 
-        dados = Object.values(periodosStats).map((stats: any) => ({
+        dados = Object.values(periodosStats).map((stats: unknown) => ({
           ...stats,
           publico_medio: stats.total_eventos > 0 ? stats.publico_total / stats.total_eventos : 0,
           faturamento_medio: stats.total_eventos > 0 ? stats.faturamento_total / stats.total_eventos : 0,
           ticket_medio_geral: stats.publico_total > 0 ? stats.faturamento_total / stats.publico_total : 0,
           generos: Array.from(stats.generos)
-        })).sort((a: any, b: any) => b.periodo.localeCompare(a.periodo));
+        })).sort((a: unknown, b: unknown) => b.periodo.localeCompare(a.periodo));
 
         break;
 

@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -117,7 +133,7 @@ export async function GET(request: NextRequest) {
           }
 
           // 3. Processar receitas com dados corretos do banco
-          const receitasFormatadas: Receita[] = (receitasData || []).map((receita: any) => {
+          const receitasFormatadas: Receita[] = (receitasData || []).map((receita: unknown) => {
             return {
               id: receita.id,
               quantidade_necessaria: receita.quantidade_necessaria,

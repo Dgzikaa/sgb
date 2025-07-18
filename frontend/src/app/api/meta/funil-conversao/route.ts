@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -16,7 +32,7 @@ export async function GET(request: NextRequest) {
     
     if (userData) {
       try {
-        const parsedUser = JSON.parse(decodeURIComponent(userData))
+        const parsedUser = JSON.parse(decodeURIComponent(userData) as unknown)
         barId = parsedUser.bar_id || 3
         console.log(`Ã°Å¸â€˜Â¤ Funil de ConversÃ¡Â£o - Usando bar_id: ${barId}`)
       } catch (e) {
@@ -92,7 +108,7 @@ export async function GET(request: NextRequest) {
       .gte('updated_at', dataLimite.toISOString())
 
     // 3. CALCULAR MÃ¡â€°TRICAS DO FUNIL
-    const calcularMetricasFunil = (dadosIG: any[], dadosFB: any[]) => {
+    const calcularMetricasFunil = (dadosIG: unknown[], dadosFB: unknown[]) => {
       const todosOsDados = [...(dadosIG || []), ...(dadosFB || [])]
       
       if (todosOsDados.length === 0) {
@@ -156,7 +172,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 4. ANALISAR PONTOS DE VAZAMENTO
-    const analisarVazamentos = (metricasFunil: any[]) => {
+    const analisarVazamentos = (metricasFunil: unknown[]) => {
       const vazamentos = []
       
       for (let i = 0; i < metricasFunil.length - 1; i++) {
@@ -217,7 +233,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 6. CALCULAR ROI DETALHADO
-    const calcularROIDetalhado = (metricasFunil: any[], custoTotal = 500) => {
+    const calcularROIDetalhado = (metricasFunil: unknown[], custoTotal = 500) => {
       const conversoes = metricasFunil[metricasFunil.length - 1].valor
       const receitaTotal = conversoes * 85 // R$ 85 por conversÃ¡Â£o
       const roi = ((receitaTotal - custoTotal) / custoTotal) * 100
@@ -236,7 +252,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 7. SUGERIR OTIMIZAÃ¡â€¡Ã¡â€¢ES
-    const sugerirOtimizacoes = (metricasFunil: any[], vazamentos: any[], roi: any) => {
+    const sugerirOtimizacoes = (metricasFunil: unknown[], vazamentos: unknown[], roi: unknown) => {
       const otimizacoes = []
       
       // OtimizaÃ¡Â§Ã¡Âµes baseadas em ROI
@@ -292,7 +308,7 @@ export async function GET(request: NextRequest) {
     const otimizacoes = sugerirOtimizacoes(metricasFunil, vazamentos, roiDetalhado)
 
     // 8. CALCULAR PROJEÃ¡â€¡Ã¡â€¢ES
-    const calcularProjecoes = (metricasFunil: any[], otimizacoes: any[]) => {
+    const calcularProjecoes = (metricasFunil: unknown[], otimizacoes: unknown[]) => {
       const conversaoAtual = metricasFunil[metricasFunil.length - 1].valor
       const melhoriaEstimada = otimizacoes.reduce((acc, opt) => {
         if (opt.categoria === 'Vazamento') return acc + 0.15 // 15% melhoria

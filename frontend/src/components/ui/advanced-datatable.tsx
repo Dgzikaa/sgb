@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useMemo, ReactNode } from 'react'
@@ -45,7 +61,7 @@ interface AdvancedDataTableProps<T> {
 
 type SortDirection = 'asc' | 'desc' | null
 
-export function AdvancedDataTable<T extends Record<string, any>>({
+export function AdvancedDataTable<T extends Record<string, unknown>>({
   data,
   columns,
   pageSize = 10,

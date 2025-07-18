@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿// =====================================================
 // Ã°Å¸â€â€ž SISTEMA DE LÃ¡â€œGICA CONDICIONAL PARA CHECKLISTS
 // =====================================================
@@ -17,7 +33,7 @@ interface CondicaoItem {
     operador: 'igual' | 'diferente' | 'maior_que' | 'menor_que' | 'contem' | 'nao_contem'
     
     // Valor para comparaÃ§Ã£o
-    valor: any
+    valor: unknown
     
     // Tipo de aÃ§Ã£o
     acao: 'mostrar' | 'ocultar' | 'obrigar' | 'opcional'
@@ -32,7 +48,7 @@ interface ItemCondicional {
   titulo: string
   tipo: string
   obrigatorio: boolean
-  valor?: any
+  valor?: unknown
   visivel: boolean
   obrigatorioCondicional?: boolean
   condicoes?: CondicaoItem['condicoes']
@@ -162,9 +178,9 @@ function avaliarCondicoesItem(
 }
 
 function avaliarCondicaoSimples(
-  valorAtual: any,
+  valorAtual: unknown,
   operador: CondicaoItem['condicoes'][0]['operador'],
-  valorComparacao: any
+  valorComparacao: unknown
 ): boolean {
   
   // Tratar valores undefined/null
@@ -204,7 +220,7 @@ export function criarRegraCondicional(
   itemId: string,
   itemDependencia: string,
   operador: CondicaoItem['condicoes'][0]['operador'],
-  valor: any,
+  valor: unknown,
   acao: CondicaoItem['condicoes'][0]['acao'] = 'mostrar'
 ): CondicaoItem {
   return {
@@ -224,7 +240,7 @@ export function criarRegraCondicionalMultipla(
   condicoes: Array<{
     itemDependencia: string
     operador: CondicaoItem['condicoes'][0]['operador']
-    valor: any
+    valor: unknown
     acao?: CondicaoItem['condicoes'][0]['acao']
   }>,
   operadorLogico: 'E' | 'OU' = 'E'
@@ -288,7 +304,7 @@ export function useConditionalLogic(
   const atualizarItemValor = (
     itens: ItemCondicional[],
     itemId: string,
-    novoValor: any
+    novoValor: unknown
   ): ItemCondicional[] => {
     const itensAtualizados = itens.map((item) =>
       item.id === itemId ? { ...item, valor: novoValor } : item

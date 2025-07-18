@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client';
 
 import { useState, useEffect } from 'react';
@@ -144,13 +160,13 @@ export default function AdminPage() {
     try {
       const saved = localStorage.getItem('sgb-admin-configs');
       if (saved) {
-        setConfigs({ ...configs, ...JSON.parse(saved) });
+        setConfigs({ ...configs, ...JSON.parse(saved) as unknown });
       }
 
       // Carregar configurações dos bares
       const savedBarConfigs = localStorage.getItem('sgb-bar-configs');
       if (savedBarConfigs) {
-        setBarConfigs(JSON.parse(savedBarConfigs));
+        setBarConfigs(JSON.parse(savedBarConfigs) as unknown);
       }
     } catch (error) {
       console.error('Erro ao carregar configurações:', error);
@@ -408,7 +424,7 @@ export default function AdminPage() {
       const currentBarConfig = barConfigs[barId] || {};
       
       // Salvar no localStorage (depois pode integrar com API)
-      const savedBarConfigs = JSON.parse(localStorage.getItem('sgb-bar-configs') || '{}');
+      const savedBarConfigs = JSON.parse(localStorage.getItem('sgb-bar-configs') as unknown || '{}');
       savedBarConfigs[barId] = currentBarConfig;
       localStorage.setItem('sgb-bar-configs', JSON.stringify(savedBarConfigs));
       

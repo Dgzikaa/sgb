@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { useState, useEffect, useCallback } from 'react'
 
 interface BeforeInstallPromptEvent extends Event {
@@ -43,7 +59,7 @@ export function usePWA(): PWAState & PWAActions {
     
     const isInstalled = 
       window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as any).standalone === true ||
+      (window.navigator as unknown).standalone === true ||
       document.referrer.includes('android-app://')
 
     setState(prev => ({ ...prev, isInstalled }))

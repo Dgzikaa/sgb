@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -28,7 +44,7 @@ function euclideanDistance(desc1: number[], desc2: number[]): number {
 }
 
 // FunÃ¡Â§Ã¡Â£o para encontrar a melhor correspondÃ¡Âªncia
-function findBestMatch(inputDescriptor: number[], storedDescriptors: any[]) {
+function findBestMatch(inputDescriptor: number[], storedDescriptors: unknown[]) {
   let bestMatch = null
   let bestDistance = Infinity
   
@@ -121,7 +137,7 @@ export async function POST(request: NextRequest) {
     console.log(`Ã°Å¸â€Â Comparando com ${faceDescriptors.length} faces registradas`)
 
     // Preparar dados para comparaÃ§Ã£o
-    const storedDescriptors = faceDescriptors.map((face: any) => ({
+    const storedDescriptors = faceDescriptors.map((face: unknown) => ({
       user_id: face.user_id,
       user_nome: face.usuarios_bar.nome,
       user_email: face.usuarios_bar.email,
@@ -180,7 +196,7 @@ export async function POST(request: NextRequest) {
       console.error('ÂÅ’ Erro ao buscar bares do usuÃ¡rio:', barsError)
     }
 
-    const availableBars = allUserBars?.map((bar: any) => ({
+    const availableBars = allUserBars?.map((bar: unknown) => ({
       bar_id: bar.bar_id,
       id: bar.bar_id,
       nome: bar.bars.nome,

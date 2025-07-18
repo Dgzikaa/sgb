@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -102,8 +118,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Calcular estatÃ¡Â­sticas gerais
-    const temposPeriodo = dadosPeriodo?.map((item: any) => item.t1_t2) || [];
-    const temposComparacao = dadosComparacao?.map((item: any) => item.t1_t2) || [];
+    const temposPeriodo = dadosPeriodo?.map((item: unknown) => item.t1_t2) || [];
+    const temposComparacao = dadosComparacao?.map((item: unknown) => item.t1_t2) || [];
 
     console.log(`Ã°Å¸â€Â¢ Tempos extraÃ¡Â­dos - PerÃ¡Â­odo: ${temposPeriodo.length}, ComparaÃ¡Â§Ã¡Â£o: ${temposComparacao.length}`);
 
@@ -122,7 +138,7 @@ export async function GET(request: NextRequest) {
       : 0;
 
     // Contar produtos Ã¡Âºnicos
-    const produtosUnicos = new Set(dadosPeriodo?.map((item: any) => `${item.prd_desc}_${item.grp_desc}`));
+    const produtosUnicos = new Set(dadosPeriodo?.map((item: unknown) => `${item.prd_desc}_${item.grp_desc}`));
     const totalProdutos = produtosUnicos.size;
 
     // Identificar produtos problema (com variaÃ¡Â§Ã¡Â£o > 25% ou tempo > 20 min)
@@ -130,7 +146,7 @@ export async function GET(request: NextRequest) {
     
     // Agrupar por produto para anÃ¡Â¡lise individual
     const produtoMap = new Map();
-    dadosPeriodo?.forEach((item: any) => {
+    dadosPeriodo?.forEach((item: unknown) => {
       const key = `${item.prd_desc}_${item.grp_desc}`;
       if (!produtoMap.has(key)) {
         produtoMap.set(key, { tempos: [], produto: item.prd_desc, pedidos: 0 });
@@ -142,7 +158,7 @@ export async function GET(request: NextRequest) {
 
     // Verificar produtos do dia especÃ¡Â­fico/comparaÃ¡Â§Ã¡Â£o
     const produtosComparacaoMap = new Map();
-    dadosComparacao?.forEach((item: any) => {
+    dadosComparacao?.forEach((item: unknown) => {
       const key = `${item.prd_desc}_${item.grp_desc}`;
       if (!produtosComparacaoMap.has(key)) {
         produtosComparacaoMap.set(key, { tempos: [], produto: item.prd_desc, pedidos: 0 });

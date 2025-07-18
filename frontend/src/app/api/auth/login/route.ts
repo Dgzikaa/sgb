@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { createClient } from '@supabase/supabase-js'
@@ -239,7 +255,7 @@ export async function POST(request: NextRequest) {
       })
     }
     
-    const baresAcesso = usuarios.map((u: any) => ({
+    const baresAcesso = usuarios.map((u: unknown) => ({
       bar_id: u.bar_id,
       role: u.role,
       modulos_permitidos: u.modulos_permitidos
@@ -248,7 +264,7 @@ export async function POST(request: NextRequest) {
     console.log('Ã°Å¸â€Â Buscando dados completos dos bares...')
     
     // Buscar dados completos dos bares (incluindo nome)
-    const barIds = [...new Set(baresAcesso.map((b: any) => b.bar_id))]
+    const barIds = [...new Set(baresAcesso.map((b: unknown) => b.bar_id))]
     const { data: barsData, error: barsError } = await adminClient
       .from('bars')
       .select('id, nome')
@@ -262,8 +278,8 @@ export async function POST(request: NextRequest) {
     console.log('Å“â€¦ Dados dos bares encontrados:', barsData?.length || 0)
 
     // Enriquecer baresAcesso com nome dos bares
-    const baresComNome = baresAcesso.map((bar: any) => {
-      const barData = barsData?.find((b: any) => b.id === bar.bar_id)
+    const baresComNome = baresAcesso.map((bar: unknown) => {
+      const barData = barsData?.find((b: unknown) => b.id === bar.bar_id)
       return {
         ...bar,
         id: bar.bar_id, // Para compatibilidade com BarContext
@@ -274,7 +290,7 @@ export async function POST(request: NextRequest) {
     console.log('Ã°Å¸â€Â Buscando credenciais de APIs...')
     
     // Buscar credenciais de APIs
-    const credenciaisPromises = baresComNome.map(async (bar: any) => {
+    const credenciaisPromises = baresComNome.map(async (bar: unknown) => {
       const { data: credenciais } = await adminClient
         .from('api_credentials')
         .select('*')
@@ -342,7 +358,7 @@ export async function POST(request: NextRequest) {
     // Log de erro interno 
     await logLoginFailure({
       email: 'unknown',
-      reason: `Erro interno do servidor: ${(error as any).message}`,
+      reason: `Erro interno do servidor: ${(error as unknown).message}`,
       ipAddress: clientIp,
       userAgent,
       sessionId

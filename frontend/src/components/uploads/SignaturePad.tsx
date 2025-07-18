@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import React, { useRef, useState, useEffect, useCallback } from 'react'
@@ -5,7 +21,7 @@ import { Pen, RotateCcw, Check, X } from 'lucide-react'
 import { useFileUpload } from '@/hooks/useFileUpload'
 
 interface SignaturePadProps {
-  onSignatureComplete?: (result: any) => void
+  onSignatureComplete?: (result: unknown) => void
   onSignatureCancel?: () => void
   onError?: (error: string) => void
   width?: number
@@ -224,7 +240,7 @@ export default function SignaturePad({
       console.error('ÂÅ’ Erro ao salvar assinatura:', error)
       
       if (onError) {
-        onError((error as any).message)
+        onError((error as unknown).message)
       }
     } finally {
       setIsUploading(false)

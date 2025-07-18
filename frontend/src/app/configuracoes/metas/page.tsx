@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client';
 
 import { useState, useEffect } from 'react';
@@ -263,7 +279,7 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
 };
 
 // Adicionar index signature em METAS_BASE para acesso dinâmico
-const METAS_BASE: Record<string, Record<string, any>> = {
+const METAS_BASE: Record<string, Record<string, unknown>> = {
   indicadores_estrategicos: {
     faturamento_total: 222000,
     faturamento_couvert: 38000,
@@ -510,7 +526,7 @@ export default function MetasPage() {
   // Cancelar edição
   const handleCancelEdit = (cat: string) => {
     setEditKey((prev) => ({ ...prev, [cat]: null }));
-    setEditState((prev: Record<string, any>) => ({ ...prev, [cat]: { ...metas[cat] } }));
+    setEditState((prev: Record<string, unknown>) => ({ ...prev, [cat]: { ...metas[cat] } }));
   };
 
   const getTabIcon = (categoria: string) => {
@@ -644,7 +660,7 @@ export default function MetasPage() {
                                   <NumericFormat
                                     {...getFormatProps(key)}
                                     value={value}
-                                    onValueChange={(vals: { floatValue: number | undefined }) => setEditState((prev: Record<string, any>) => ({
+                                    onValueChange={(vals: { floatValue: number | undefined }) => setEditState((prev: Record<string, unknown>) => ({
                                       ...prev,
                                       [cat.key]: {
                                         ...prev[cat.key],

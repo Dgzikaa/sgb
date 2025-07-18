@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client';
 
 import { useState, useEffect } from 'react';
@@ -29,7 +45,7 @@ interface ColecaoResultV3 {
     registros_inseridos: number;
     screenshots_salvos: string[];
     melhorias_v3: string[];
-    primeiros_registros: any[];
+    primeiros_registros: unknown[];
   };
   error?: string;
 }

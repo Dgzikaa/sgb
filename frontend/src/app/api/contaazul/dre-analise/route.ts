@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -260,7 +276,7 @@ export async function GET(request: NextRequest) {
 
     // Ã°Å¸â€Â FUNÃ¡â€¡Ã¡Æ’O PARA BUSCAR TODOS OS EVENTOS FINANCEIROS COM PAGINAÃ¡â€¡Ã¡Æ’O
     async function buscarTodosEventosFinanceiros() {
-      const allEventos: any[] = []
+      const allEventos: unknown[] = []
       let offset = 0
       const limit = 1000
       let hasMore = true

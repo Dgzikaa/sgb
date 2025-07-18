@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
@@ -607,7 +623,7 @@ function EventForm({
 
         <div>
           <Label htmlFor="status">Status *</Label>
-          <Select value={formData.status as any} onValueChange={(value) => setFormData({ ...formData, status: value as any })}>
+          <Select value={formData.status as unknown} onValueChange={(value) => setFormData({ ...formData, status: value as unknown })}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>

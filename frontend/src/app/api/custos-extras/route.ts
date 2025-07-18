@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
@@ -77,7 +93,7 @@ export async function GET(request: NextRequest) {
       success: true,
       custos: custos || [],
       total_custos: custos?.length || 0,
-      total_valor: custos?.reduce((sum: number, custo: any) => sum + parseFloat(custo.valor || 0), 0) || 0
+      total_valor: custos?.reduce((sum: number, custo: unknown) => sum + parseFloat(custo.valor || 0), 0) || 0
     })
 
   } catch (error) {
@@ -268,7 +284,7 @@ export async function PUT(request: NextRequest) {
       forma_pagamento
     } = body
 
-    const updateData: any = {
+    const updateData: unknown = {
       atualizado_em: new Date().toISOString()
     }
 

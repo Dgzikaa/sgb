@@ -74,7 +74,7 @@ export function DropZone({
     try {
       const data = e.dataTransfer.getData('text/plain')
       if (data) {
-        const item: DropItem = JSON.parse(data)
+        const item: DropItem = JSON.parse(data) as unknown
         
         // Check if item type is accepted
         if (accepts.length > 0 && item.type && !accepts.includes(item.type)) {

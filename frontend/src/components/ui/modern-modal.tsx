@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 import * as React from 'react'
@@ -137,7 +153,7 @@ interface ChecklistModalProps {
     tempo_estimado: number
     responsavel_padrao: string
   }
-  onSave: (data: any) => void
+  onSave: (data: unknown) => void
   mode: 'create' | 'edit'
 }
 

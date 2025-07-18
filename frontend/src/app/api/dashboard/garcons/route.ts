@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -73,7 +89,7 @@ export async function GET(request: NextRequest) {
     const garconsMap = new Map();
 
     // Processar vendas
-    vendasData?.forEach((venda: any) => {
+    vendasData?.forEach((venda: unknown) => {
       const garcom = venda.usr_lancou;
       if (!garconsMap.has(garcom)) {
         garconsMap.set(garcom, {
@@ -106,7 +122,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Processar tempos de atendimento
-    temposData?.forEach((tempo: any) => {
+    temposData?.forEach((tempo: unknown) => {
       const garcom = tempo.usr_lancou;
       if (garconsMap.has(garcom)) {
         const dadosGarcom = garconsMap.get(garcom);
@@ -115,7 +131,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Calcular estatÃ¡Â­sticas finais
-    const garcons = Array.from(garconsMap.values()).map((garcom: any, index: number) => {
+    const garcons = Array.from(garconsMap.values()).map((garcom: unknown, index: number) => {
       const clientes_atendidos = garcom.mesas_atendidas.size;
       const dias_trabalhados = garcom.dias_trabalhados.size;
       const ticket_medio = clientes_atendidos > 0 ? garcom.vendas_periodo / clientes_atendidos : 0;
@@ -124,10 +140,10 @@ export async function GET(request: NextRequest) {
         : 0;
 
       // Converter vendas por dia para array
-      const vendas_por_dia = Array.from(garcom.vendas_por_dia.entries()).map((entry: any) => ({
+      const vendas_por_dia = Array.from(garcom.vendas_por_dia.entries()).map((entry: unknown) => ({
         data: entry[0],
         vendas: entry[1]
-      })).sort((a: any, b: any) => a.data.localeCompare(b.data));
+      })).sort((a: unknown, b: unknown) => a.data.localeCompare(b.data));
 
       return {
         nome: garcom.nome,
@@ -143,10 +159,10 @@ export async function GET(request: NextRequest) {
     });
 
     // Ordenar por vendas (maior para menor)
-    garcons.sort((a: any, b: any) => b.vendas_periodo - a.vendas_periodo);
+    garcons.sort((a: unknown, b: unknown) => b.vendas_periodo - a.vendas_periodo);
 
     // Atualizar posiÃ¡Â§Ã¡Âµes do ranking
-    garcons.forEach((garcom: any, index: number) => {
+    garcons.forEach((garcom: unknown, index: number) => {
       garcom.ranking_posicao = index + 1;
     });
 
@@ -159,8 +175,8 @@ export async function GET(request: NextRequest) {
         data_inicio: dataInicio,
         data_fim: dataFim,
         total_garcons: garcons.length,
-        total_vendas: garcons.reduce((sum: number, g: any) => sum + g.vendas_periodo, 0),
-        total_clientes: garcons.reduce((sum: number, g: any) => sum + g.clientes_atendidos, 0)
+        total_vendas: garcons.reduce((sum: number, g: unknown) => sum + g.vendas_periodo, 0),
+        total_clientes: garcons.reduce((sum: number, g: unknown) => sum + g.clientes_atendidos, 0)
       }
     });
 

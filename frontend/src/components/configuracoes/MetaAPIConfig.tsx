@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client'
 
 // ========================================
@@ -31,14 +47,14 @@ import {
 
 interface MetaTestResults {
   access_token_valid: boolean;
-  user_info: any; // Defina um tipo mais especÃ­fico se possÃ­vel
-  accounts: any[]; // Defina um tipo mais especÃ­fico se possÃ­vel
+  user_info: unknown; // Defina um tipo mais especÃ­fico se possÃ­vel
+  accounts: unknown[]; // Defina um tipo mais especÃ­fico se possÃ­vel
   pages: Array<{
     id: string;
     name: string;
     category?: string;
     access_token?: string;
-    instagram_business_account?: any;
+    instagram_business_account?: unknown;
   }>;
   instagram_accounts: Array<{
     instagram_account: {
@@ -58,7 +74,7 @@ interface MetaTestResults {
     name: string;
     status: string;
   }>;
-  error_details: any; // Defina um tipo mais especÃ­fico se possÃ­vel
+  error_details: unknown; // Defina um tipo mais especÃ­fico se possÃ­vel
 }
 
 interface MetaConfig {

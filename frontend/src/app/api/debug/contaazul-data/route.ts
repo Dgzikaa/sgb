@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -43,7 +59,7 @@ export async function GET(request: Request) {
       .select('bar_id')
       .limit(100)
 
-    const barIds = distinctBars ? [...new Set(distinctBars.map((item: any) => item.bar_id))] : []
+    const barIds = distinctBars ? [...new Set(distinctBars.map((item: unknown) => item.bar_id))] : []
 
     // 4. Verificar Ã¡Âºltimas sincronizaÃ¡Â§Ã¡Âµes
     const { data: recentData, error: recentError } = await supabase
@@ -81,7 +97,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       success: false,
       error: 'Erro interno do servidor',
-      details: (error as any).message
+      details: (error as unknown).message
     }, { status: 500 })
   }
 } 

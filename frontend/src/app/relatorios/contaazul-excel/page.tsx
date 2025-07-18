@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿'use client';
 
 import { useState } from 'react';
@@ -23,8 +39,8 @@ interface ColecaoResult {
     arquivo_json: string;
     registros_inseridos?: number;
     tabela_raw?: string;
-    primeiros_registros?: any[];
-    metadados?: any;
+    primeiros_registros?: unknown[];
+    metadados?: unknown;
   };
   error?: string;
   details?: string;

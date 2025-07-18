@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -26,8 +42,8 @@ export async function GET(request: NextRequest) {
   // Exemplo de agregaÃ¡Â§Ã¡Â£o: soma, mÃ¡Â©dia, variaÃ¡Â§Ã¡Â£o
   const first = data[0]
   const last = data[data.length - 1]
-  const sum = (arr: any[], key: string) => arr.reduce((acc, d) => acc + (d[key] || 0), 0)
-  const avg = (arr: any[], key: string) => arr.length ? sum(arr, key) / arr.length : 0
+  const sum = (arr: unknown[], key: string) => arr.reduce((acc, d) => acc + (d[key] || 0), 0)
+  const avg = (arr: unknown[], key: string) => arr.length ? sum(arr, key) / arr.length : 0
   const kpis = {
     total_followers: last.instagram_followers,
     followers_gained: last.instagram_followers - first.instagram_followers,

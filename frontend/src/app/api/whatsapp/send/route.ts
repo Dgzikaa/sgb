@@ -1,3 +1,19 @@
+import type {
+  SupabaseResponse,
+  SupabaseError,
+  ApiResponse,
+  User,
+  UserInfo,
+  Bar,
+  Checklist,
+  ChecklistItem,
+  Event,
+  Notification,
+  DashboardData,
+  AIAgentConfig,
+  AgentStatus
+} from '@/types/global'
+
 ﻿import { NextRequest, NextResponse } from 'next/server'
 
 const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || 'http://localhost:8080'
@@ -40,7 +56,7 @@ export async function POST(req: NextRequest) {
       numbers: string[]
       message?: string
       type?: 'text' | 'template' | 'checklist_notification'
-      media?: any
+      media?: unknown
       checklist_data?: ChecklistNotification
     } = body
 
