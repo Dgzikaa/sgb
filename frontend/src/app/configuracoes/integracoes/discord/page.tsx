@@ -324,7 +324,7 @@ export default function DiscordPage() {
   if (!selectedBar) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="container mx-auto px-4 py-6">
+        <div className="container-modern py-6">
           <Card className="card-dark">
             <CardContent className="p-6">
               <p className="text-center text-gray-600 dark:text-gray-400">
@@ -339,72 +339,56 @@ export default function DiscordPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-6">
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-2xl shadow-2xl">
-              <MessageSquare className="h-8 w-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                Discord Webhooks
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 text-lg mt-1">
-                Configure webhooks do Discord para receber notificações automáticas
-              </p>
-            </div>
+      <div className="container-modern py-6">
+        {/* Header da Seção */}
+        <div className="section-header">
+          <div>
+            <button
+              onClick={() => router.push('/configuracoes/integracoes')}
+              className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-2 transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar para Integrações
+            </button>
+            <h1 className="section-title">Discord Webhooks</h1>
+            <p className="section-subtitle">
+              Configure webhooks do Discord para receber notificações automáticas
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <Badge className="badge-status warning">
+              Configuração
+            </Badge>
           </div>
         </div>
 
-        {/* Botão Voltar */}
-        <div className="flex justify-start mb-8">
-          <Button
-            onClick={() => router.push('/configuracoes/integracoes')}
-            className="flex items-center gap-3 bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 text-white border-0 shadow-xl hover:shadow-2xl transition-all duration-300 px-6 py-3 rounded-xl font-medium"
-          >
-            <ArrowLeft className="h-5 w-5" />
-            Voltar para Integrações
-          </Button>
-        </div>
-
         {/* Webhooks */}
-        <div className="grid gap-8">
+        <div className="grid gap-6 lg:grid-cols-1 xl:grid-cols-2">
           {webhooks.map((webhook) => (
-            <Card key={webhook.id} className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 rounded-2xl overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              
-              <CardHeader className="pb-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-6">
-                    <div className="relative">
-                      <div className="p-4 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-2xl shadow-2xl transform group-hover:scale-110 transition-all duration-300">
-                        <div className="text-white">
-                          {webhook.icon}
-                        </div>
-                      </div>
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            <Card key={webhook.id} className="card-dark group hover:shadow-xl transition-all duration-300">
+              <CardHeader className="pb-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className={`icon-integration bg-gradient-to-br ${getCategoryColor(webhook.category)} shadow-lg`}>
+                      {webhook.icon}
                     </div>
                     <div className="flex-1">
-                      <CardTitle className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                      <CardTitle className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                         {webhook.name}
                       </CardTitle>
-                      <CardDescription className="text-gray-600 dark:text-gray-400 text-base mt-2">
+                      <CardDescription className="text-gray-600 dark:text-gray-400 mt-2">
                         {webhook.description}
                       </CardDescription>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <Badge className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-lg">
+                  <div className="flex items-center gap-2">
+                    <Badge className="badge-status inactive text-xs">
                       {categories.find(c => c.id === webhook.category)?.name}
                     </Badge>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Ativo</span>
-                      <Switch
-                        checked={webhook.enabled}
-                        onCheckedChange={(checked) => updateWebhook(webhook.id, 'enabled', checked)}
-                        className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-blue-500 data-[state=checked]:to-purple-500"
-                      />
-                    </div>
+                    <Switch
+                      checked={webhook.enabled}
+                      onCheckedChange={(checked) => updateWebhook(webhook.id, 'enabled', checked)}
+                    />
                   </div>
                 </div>
               </CardHeader>

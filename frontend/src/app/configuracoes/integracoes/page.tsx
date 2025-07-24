@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useRouter } from 'next/navigation'
 import { useBar } from '@/contexts/BarContext'
+import { useUser } from '@/contexts/UserContext'
 import {
   Building2,
   CreditCard,
@@ -42,37 +43,91 @@ interface Integration {
 
 export default function IntegracoesPage() {
   const router = useRouter()
-  const { selectedBar } = useBar()
+  const { selectedBar, isLoading: barLoading, availableBars } = useBar()
+  const { user, loading: userLoading, isInitialized: userInitialized } = useUser()
   const [integrations, setIntegrations] = useState<Integration[]>([])
   const [loading, setLoading] = useState(true)
 
+  console.log('🏪 BarContext:', { 
+    selectedBar, 
+    barLoading, 
+    availableBarsCount: availableBars?.length 
+  })
+  
+  console.log('👤 UserContext:', { 
+    user, 
+    userLoading, 
+    userInitialized 
+  })
+
   useEffect(() => {
-    if (selectedBar?.id) {
-      loadIntegrationsStatus()
+    console.log('🔄 useEffect executado:', { 
+      selectedBarId: selectedBar?.id, 
+      selectedBarName: selectedBar?.nome,
+      userId: user?.id,
+      userName: user?.nome,
+      userEmail: user?.email,
+      userRole: user?.role,
+      barLoading,
+      userLoading,
+      userInitialized
+    })
+    
+    // Aguardar que os contextos sejam inicializados
+    if (barLoading || userLoading || !userInitialized) {
+      console.log('⏳ Aguardando inicialização dos contextos...')
+      return
     }
-  }, [selectedBar?.id])
+    
+    if (selectedBar?.id && user) {
+      console.log('✅ Condições atendidas, chamando loadIntegrationsStatus...')
+      loadIntegrationsStatus()
+    } else {
+      console.log('❌ Condições não atendidas:', {
+        hasSelectedBar: !!selectedBar?.id,
+        selectedBarValue: selectedBar,
+        hasUser: !!user,
+        userValue: user
+      })
+    }
+  }, [selectedBar?.id, user, barLoading, userLoading, userInitialized])
 
   const loadIntegrationsStatus = async () => {
     try {
+      console.log('🔄 Iniciando carregamento de integrações...')
+      console.log('👤 Usuário:', user?.nome)
+      console.log('🏪 Bar selecionado:', selectedBar?.id)
+      
       setLoading(true)
       
       // Sempre definir as integrações padrão primeiro
       setDefaultIntegrations()
       
+      console.log('📡 Fazendo requisição para /api/integracoes/status...')
       const response = await fetch('/api/integracoes/status', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-data': encodeURIComponent(JSON.stringify(user))
+        },
         body: JSON.stringify({ bar_id: selectedBar?.id })
       })
 
+      console.log('📊 Status da resposta:', response.status, response.statusText)
+      
       if (response.ok) {
         const data = await response.json()
+        console.log('✅ Dados recebidos:', data)
         updateIntegrationsWithStatus(data.integrations)
+      } else {
+        const errorText = await response.text()
+        console.error('❌ Erro na resposta:', response.status, errorText)
       }
     } catch (error) {
-      console.error('Erro ao carregar status das integrações:', error)
+      console.error('❌ Erro ao carregar status das integrações:', error)
       // As integrações padrão já foram definidas acima
     } finally {
+      console.log('🏁 Finalizando carregamento...')
       setLoading(false)
     }
   }

@@ -1,14 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { getAdminClient } from '@/lib/supabase-admin'
+import { authenticateUser, authErrorResponse } from '@/middleware/auth'
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔍 Iniciando API de status das integrações...')
+    
+    const user = await authenticateUser(request);
+    if (!user) {
+      console.log('❌ Usuário não autenticado')
+      return authErrorResponse('Usuário não autenticado');
+    }
+
+    console.log('✅ Usuário autenticado:', user.id)
+
     const { bar_id } = await request.json()
+    console.log('📋 Bar ID recebido:', bar_id)
 
     if (!bar_id) {
       return NextResponse.json({ 
@@ -16,7 +23,11 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
+    const supabase = await getAdminClient();
+    console.log('🔗 Cliente Supabase conectado')
+
     // Buscar credenciais configuradas
+    console.log('🔍 Buscando credenciais para bar_id:', bar_id)
     const { data: credentials, error: credentialsError } = await supabase
       .from('api_credentials')
       .select('*')
@@ -29,6 +40,8 @@ export async function POST(request: NextRequest) {
         error: 'Erro ao buscar credenciais' 
       }, { status: 500 })
     }
+
+    console.log('✅ Credenciais encontradas:', credentials?.length || 0)
 
     // Buscar webhooks do Discord configurados
     const { data: discordWebhooks, error: discordError } = await supabase

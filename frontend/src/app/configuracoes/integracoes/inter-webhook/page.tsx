@@ -131,20 +131,20 @@ export default function InterWebhookPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Ativo</Badge>
+        return <Badge className="badge-status active">Ativo</Badge>
       case 'inactive':
-        return <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">Inativo</Badge>
+        return <Badge className="badge-status inactive">Inativo</Badge>
       case 'error':
-        return <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">Erro</Badge>
+        return <Badge className="badge-status error">Erro</Badge>
       default:
-        return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">Desconhecido</Badge>
+        return <Badge className="badge-status warning">Desconhecido</Badge>
     }
   }
 
   if (!selectedBar) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="container mx-auto px-4 py-6">
+        <div className="container-modern py-6">
           <Card className="card-dark">
             <CardContent className="p-6">
               <p className="text-center text-gray-600 dark:text-gray-400">
@@ -159,54 +159,74 @@ export default function InterWebhookPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Webhook Banco Inter
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Configure e teste o webhook para receber notificações do Banco Inter
-          </p>
+      <div className="container mx-auto px-6 py-8">
+        {/* Header Moderno */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between">
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl shadow-2xl">
+                  <Webhook className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+                    Webhook Banco Inter
+                  </h1>
+                  <p className="text-gray-600 dark:text-gray-400 text-lg mt-2">
+                    Configure e teste o webhook para receber notificações do Banco Inter
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <Badge className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white border-0 shadow-lg">
+                Configuração
+              </Badge>
+            </div>
+          </div>
         </div>
 
-        <div className="grid gap-6">
+        {/* Grid Moderno */}
+        <div className="grid gap-8 lg:grid-cols-2">
           {/* Status do Webhook */}
-          <Card className="card-dark">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Webhook className="h-5 w-5" />
+          <Card className="card-modern-advanced">
+            <CardHeader className="relative">
+              <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
+                <div className="icon-modern">
+                  <Webhook className="h-5 w-5 text-white" />
+                </div>
                 Status do Webhook
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-gray-600 dark:text-gray-400">
                 Informações sobre o webhook configurado no Banco Inter
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="relative space-y-6">
               {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <div className="flex items-center justify-center py-12">
+                  <div className="loading-modern"></div>
                 </div>
               ) : webhookStatus ? (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Status:</span>
+                <div className="space-y-6">
+                  <div className="status-container">
+                    <span className="status-label">Status:</span>
                     {getStatusBadge(webhookStatus.status)}
                   </div>
                   
                   {webhookStatus.lastTest && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Último teste:</span>
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                    <div className="status-container">
+                      <span className="status-label">Último teste:</span>
+                      <span className="status-value">
                         {new Date(webhookStatus.lastTest).toLocaleString('pt-BR')}
                       </span>
                     </div>
                   )}
 
-                  <div>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Eventos configurados:</span>
-                    <div className="mt-2 flex flex-wrap gap-2">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
+                    <span className="status-label mb-3 block">Eventos configurados:</span>
+                    <div className="flex flex-wrap gap-2">
                       {webhookStatus.events.map((event, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
+                        <Badge key={index} className="badge-modern">
                           {event}
                         </Badge>
                       ))}
@@ -214,9 +234,11 @@ export default function InterWebhookPage() {
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-                  <p className="text-gray-600 dark:text-gray-400">
+                <div className="error-state-modern">
+                  <div className="error-icon-modern">
+                    <AlertCircle className="h-16 w-16 text-yellow-500" />
+                  </div>
+                  <p className="error-text-modern">
                     Webhook não configurado no Banco Inter
                   </p>
                 </div>
@@ -225,42 +247,45 @@ export default function InterWebhookPage() {
           </Card>
 
           {/* URL do Webhook */}
-          <Card className="card-dark">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
+          <Card className="card-modern-advanced">
+            <CardHeader className="relative">
+              <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
+                <div className="icon-modern-blue">
+                  <Settings className="h-5 w-5 text-white" />
+                </div>
                 URL do Webhook
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-gray-600 dark:text-gray-400">
                 Configure esta URL no painel do Banco Inter
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="webhook-url">URL do Webhook</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="webhook-url"
-                    value={webhookUrl}
-                    readOnly
-                    className="font-mono text-sm"
-                  />
+            <CardContent className="relative space-y-6">
+              <div className="space-y-4">
+                                 <Label htmlFor="webhook-url" className="text-gray-900 dark:text-white font-medium">URL do Webhook</Label>
+                 <div className="flex gap-3">
+                   <Input
+                     id="webhook-url"
+                     value={webhookUrl}
+                     readOnly
+                     className="input-modern"
+                   />
                   <Button
                     variant="outline"
                     size="icon"
                     onClick={copyWebhookUrl}
                     title="Copiar URL"
+                    className="btn-gradient-copy"
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <Button
                   onClick={testWebhook}
                   disabled={testing}
-                  className="btn-primary-dark"
+                  className="btn-gradient-primary"
                 >
                   {testing ? (
                     <>
@@ -278,7 +303,7 @@ export default function InterWebhookPage() {
                 <Button
                   variant="outline"
                   onClick={() => window.open('https://cdpj.partners.bancointer.com.br/', '_blank')}
-                  className="btn-outline-dark"
+                  className="btn-gradient-secondary"
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Painel Inter
@@ -288,10 +313,10 @@ export default function InterWebhookPage() {
           </Card>
 
           {/* Instruções */}
-          <Card className="card-dark">
+          <Card className="card-modern-advanced">
             <CardHeader>
-              <CardTitle>📋 Como Configurar</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-gray-900 dark:text-white">📋 Como Configurar</CardTitle>
+              <CardDescription className="text-gray-600 dark:text-gray-400">
                 Siga estes passos para configurar o webhook no Banco Inter
               </CardDescription>
             </CardHeader>

@@ -42,6 +42,12 @@ interface Meta {
   meta_mensal: number;
   valor_atual: any;
   ordem_exibicao: number;
+  ticket_entrada?: number;
+  ticket_bar?: number;
+  meta_pessoas?: number;
+  custo_artistico?: number;
+  custo_producao?: number;
+  percent_art_fat?: number;
 }
 
 interface MetasOrganizadas {
@@ -52,6 +58,7 @@ interface MetasOrganizadas {
   cockpit_marketing: Meta[];
   indicadores_qualidade: Meta[];
   indicadores_mensais: Meta[];
+  metas_diarias: Meta[];
 }
 
 const formatarValor = (valor: number | null, tipo: string): string => {
@@ -184,48 +191,168 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
       </CardHeader>
       
       <CardContent className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[
-            { key: 'diario', label: 'Diário', valor: meta.meta_diaria },
-            { key: 'semanal', label: 'Semanal', valor: meta.meta_semanal },
-            { key: 'mensal', label: 'Mensal', valor: meta.meta_mensal }
-          ].map((periodo) => {
-            const chaveValor = `meta_${periodo.key}` as keyof typeof valores;
-            
-            return (
-              <div key={periodo.key} className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
-                <Label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-                  {periodo.label}
-                </Label>
-                {isEditing ? (
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={valores[chaveValor]}
-                    onChange={(e) => setValores(prev => ({
-                      ...prev,
-                      [chaveValor]: e.target.value
-                    }))}
-                    placeholder="0.00"
-                    className="mt-2 bg-white dark:bg-gray-800"
-                  />
-                ) : (
-                  <div className="mt-2">
-                    <span className="text-xl font-bold text-gray-900 dark:text-white">
-                      {periodo.valor || 0}
-                    </span>
+        <div className={`grid gap-4 ${
+          meta.categoria === 'metas_diarias' || meta.categoria === 'indicadores_mensais' 
+            ? 'grid-cols-1 md:grid-cols-1' 
+            : 'grid-cols-1 md:grid-cols-3'
+        }`}>
+          {(() => {
+            // Para metas diárias, mostrar apenas meta diária
+            if (meta.categoria === 'metas_diarias') {
+              return [
+                { key: 'diario', label: 'Meta Diária', valor: meta.meta_diaria }
+              ].map((periodo) => {
+                const chaveValor = `meta_${periodo.key}` as keyof typeof valores;
+                
+                return (
+                  <div key={periodo.key} className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
+                    <Label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                      {periodo.label}
+                    </Label>
+                    {isEditing ? (
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={valores[chaveValor]}
+                        onChange={(e) => setValores(prev => ({
+                          ...prev,
+                          [chaveValor]: e.target.value
+                        }))}
+                        placeholder="0.00"
+                        className="mt-2 bg-white dark:bg-gray-800"
+                      />
+                    ) : (
+                      <div className="mt-2">
+                        <span className="text-xl font-bold text-gray-900 dark:text-white">
+                          {periodo.valor || 0}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            );
-          })}
+                );
+              });
+            }
+            
+            // Para indicadores mensais, mostrar apenas meta mensal
+            if (meta.categoria === 'indicadores_mensais') {
+              return [
+                { key: 'mensal', label: 'Meta Mensal', valor: meta.meta_mensal }
+              ].map((periodo) => {
+                const chaveValor = `meta_${periodo.key}` as keyof typeof valores;
+                
+                return (
+                  <div key={periodo.key} className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
+                    <Label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                      {periodo.label}
+                    </Label>
+                    {isEditing ? (
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={valores[chaveValor]}
+                        onChange={(e) => setValores(prev => ({
+                          ...prev,
+                          [chaveValor]: e.target.value
+                        }))}
+                        placeholder="0.00"
+                        className="mt-2 bg-white dark:bg-gray-800"
+                      />
+                    ) : (
+                      <div className="mt-2">
+                        <span className="text-xl font-bold text-gray-900 dark:text-white">
+                          {periodo.valor || 0}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+              });
+            }
+            
+            // Para outras categorias, mostrar os três períodos
+            return [
+              { key: 'diario', label: 'Diário', valor: meta.meta_diaria },
+              { key: 'semanal', label: 'Semanal', valor: meta.meta_semanal },
+              { key: 'mensal', label: 'Mensal', valor: meta.meta_mensal }
+            ].map((periodo) => {
+              const chaveValor = `meta_${periodo.key}` as keyof typeof valores;
+              
+              return (
+                <div key={periodo.key} className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
+                  <Label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                    {periodo.label}
+                  </Label>
+                  {isEditing ? (
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={valores[chaveValor]}
+                      onChange={(e) => setValores(prev => ({
+                        ...prev,
+                        [chaveValor]: e.target.value
+                      }))}
+                      placeholder="0.00"
+                      className="mt-2 bg-white dark:bg-gray-800"
+                    />
+                  ) : (
+                    <div className="mt-2">
+                      <span className="text-xl font-bold text-gray-900 dark:text-white">
+                        {periodo.valor || 0}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            });
+          })()}
         </div>
         
-        <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-          <p className="text-sm text-blue-700 dark:text-blue-300">
-            <strong>Valor Atual:</strong> {meta.valor_atual || 'N/A'}
-          </p>
-        </div>
+        {meta.categoria === 'metas_diarias' ? (
+          <div className="mt-4 space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 bg-green-50 dark:bg-green-900/30 rounded-lg">
+                <p className="text-sm text-green-700 dark:text-green-300">
+                  <strong>Ticket Entrada:</strong> R$ {meta.ticket_entrada?.toFixed(2) || '0.00'}
+                </p>
+              </div>
+              <div className="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
+                <p className="text-sm text-purple-700 dark:text-purple-300">
+                  <strong>Ticket Bar:</strong> R$ {meta.ticket_bar?.toFixed(2) || '0.00'}
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 bg-orange-50 dark:bg-orange-900/30 rounded-lg">
+                <p className="text-sm text-orange-700 dark:text-orange-300">
+                  <strong>Meta Pessoas:</strong> {meta.meta_pessoas || 0} pessoas
+                </p>
+              </div>
+              <div className="p-3 bg-red-50 dark:bg-red-900/30 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-300">
+                  <strong>% Art/Fat:</strong> {meta.percent_art_fat || 0}%
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+                <p className="text-sm text-indigo-700 dark:text-indigo-300">
+                  <strong>Custo Artístico:</strong> R$ {meta.custo_artistico?.toFixed(2) || '0.00'}
+                </p>
+              </div>
+              <div className="p-3 bg-teal-50 dark:bg-teal-900/30 rounded-lg">
+                <p className="text-sm text-teal-700 dark:text-teal-300">
+                  <strong>Custo Produção:</strong> R$ {meta.custo_producao?.toFixed(2) || '0.00'}
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              <strong>Valor Atual:</strong> {meta.valor_atual || 'N/A'}
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -242,7 +369,8 @@ export default function MetasPage() {
     cockpit_financeiro: [],
     cockpit_marketing: [],
     indicadores_qualidade: [],
-    indicadores_mensais: []
+    indicadores_mensais: [],
+    metas_diarias: []
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -345,6 +473,8 @@ export default function MetasPage() {
         return <Star className="w-4 h-4" />
       case 'indicadores_mensais':
         return <Calendar className="w-4 h-4" />
+      case 'metas_diarias':
+        return <Activity className="w-4 h-4" />
       default:
         return <Target className="w-4 h-4" />
     }
@@ -405,7 +535,7 @@ export default function MetasPage() {
         </div>
 
                  {/* Overview Cards */}
-         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-6">
            {metas && typeof metas === 'object' ? (Object.entries(metas) as [keyof MetasOrganizadas, Meta[]][]).map(([categoria, metasCategoria]) => {
              const stats = getCategoryStats(categoria);
              return (
@@ -444,7 +574,7 @@ export default function MetasPage() {
                 </CardTitle>
               </div>
               
-                             <TabsList className="grid w-full grid-cols-5 bg-gray-100 dark:bg-gray-700">
+                             <TabsList className="grid w-full grid-cols-8 bg-gray-100 dark:bg-gray-700">
                  {metas && typeof metas === 'object' ? (Object.entries(metas) as [keyof MetasOrganizadas, Meta[]][]).map(([categoria, metasCategoria]) => (
                    <TabsTrigger 
                      key={categoria}
@@ -452,7 +582,17 @@ export default function MetasPage() {
                      className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600"
                    >
                      {getTabIcon(categoria)}
-                     <span className="capitalize">{categoria.replace('_', ' ')}</span>
+                     <span className="capitalize">
+                       {categoria === 'indicadores_estrategicos' ? 'Estratégicos' :
+                        categoria === 'cockpit_produtos' ? 'Produtos' :
+                        categoria === 'cockpit_vendas' ? 'Vendas' :
+                        categoria === 'cockpit_financeiro' ? 'Financeiro' :
+                        categoria === 'cockpit_marketing' ? 'Marketing' :
+                        categoria === 'indicadores_qualidade' ? 'Qualidade' :
+                        categoria === 'indicadores_mensais' ? 'Mensais' :
+                        categoria === 'metas_diarias' ? 'Diárias' :
+                        String(categoria).replace('_', ' ')}
+                     </span>
                      <Badge variant="outline" className="ml-1 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700">
                        {metasCategoria.length}
                      </Badge>

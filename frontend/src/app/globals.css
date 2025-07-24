@@ -337,4 +337,113 @@
   .actions-group {
     @apply flex-col;
   }
+}
+
+/* ===== SISTEMA DE CARDS MODERNOS AVANÇADOS - SGB_V2 ===== */
+
+/* Card com Efeitos Modernos */
+.card-modern-advanced {
+  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700;
+  @apply shadow-2xl transition-all duration-500 rounded-3xl overflow-hidden;
+  @apply relative;
+}
+
+.card-modern-advanced:hover {
+  @apply shadow-2xl;
+}
+
+.card-modern-advanced.group::before {
+  @apply absolute inset-0 bg-gradient-to-r from-orange-500/5 to-red-500/5;
+  @apply opacity-0 transition-opacity duration-500;
+  content: "";
+}
+
+.card-modern-advanced.group:hover::before {
+  @apply opacity-100;
+}
+
+/* Card com Gradiente Sutil */
+.card-gradient-subtle {
+  @apply bg-gradient-to-br from-white/10 to-white/5 dark:from-gray-800/10 dark:to-gray-800/5;
+  @apply backdrop-blur-xl border border-white/20 dark:border-gray-700/20;
+  @apply shadow-2xl transition-all duration-500 rounded-3xl overflow-hidden;
+}
+
+.card-gradient-subtle:hover {
+  @apply shadow-2xl;
+}
+
+/* Botões Modernos com Gradiente */
+.btn-gradient-primary {
+  @apply bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700;
+  @apply text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300;
+  @apply px-6 py-3 rounded-xl font-medium;
+}
+
+.btn-gradient-secondary {
+  @apply bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700;
+  @apply text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300;
+  @apply px-6 py-3 rounded-xl font-medium;
+}
+
+.btn-gradient-copy {
+  @apply bg-gradient-to-br from-blue-500 to-purple-600 border-0 text-white;
+  @apply hover:from-blue-600 hover:to-purple-700 shadow-lg;
+}
+
+/* Inputs Modernos */
+.input-modern {
+  @apply bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600;
+  @apply text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400;
+  @apply font-mono text-sm;
+}
+
+/* Containers de Status Modernos */
+.status-container {
+  @apply p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700;
+  @apply flex items-center justify-between;
+}
+
+.status-label {
+  @apply text-sm font-medium text-gray-900 dark:text-white;
+}
+
+.status-value {
+  @apply text-sm text-gray-600 dark:text-gray-300;
+}
+
+/* Badges Modernos */
+.badge-modern {
+  @apply bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200;
+  @apply border-gray-300 dark:border-gray-600;
+}
+
+/* Ícones Modernos */
+.icon-modern {
+  @apply p-2 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl shadow-lg;
+  @apply text-white;
+}
+
+.icon-modern-blue {
+  @apply p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg;
+  @apply text-white;
+}
+
+/* Estados de Loading Modernos */
+.loading-modern {
+  @apply animate-spin rounded-full h-10 w-10 border-4 border-orange-500 border-t-transparent;
+}
+
+/* Estados de Erro Modernos */
+.error-state-modern {
+  @apply text-center py-12;
+}
+
+.error-icon-modern {
+  @apply p-4 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-3xl;
+  @apply border border-yellow-500/30 inline-block mb-6;
+}
+
+.error-text-modern {
+  @apply text-gray-600 dark:text-gray-300 text-lg;
 } 

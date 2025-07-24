@@ -139,62 +139,55 @@ export function BarProvider({ children }: { children: ReactNode }) {
           return
         }
 
-        // Buscar os bares do usuário no banco
-        const { data: userData, error: userError } = await supabase
-          .from('usuarios_bar')
-          .select('id, email, nome, role, bar_id')
-          .eq('email', userEmail)
-          .eq('ativo', true)
-
-        if (userError) {
-          console.error('Erro ao buscar dados do usuário:', userError)
-          if (mounted) setIsLoading(false)
-          return
-        }
-
-        if (!userData || userData.length === 0) {
-          console.log('Usuário não tem acesso a nenhum bar')
-          if (mounted) setIsLoading(false)
-          return
-        }
-
-        // Extrair IDs únicos dos bares (caso usuário tenha acesso a múltiplos bares)
-        const barIds = [...new Set(userData.map((user: unknown) => user.bar_id))]
+        console.log('🔍 BarContext: Usando API para buscar bares...')
         
-        // Buscar detalhes dos bares
-        const { data: barsData, error: barsError } = await supabase
-          .from('bars')
-          .select('id, nome')
-          .in('id', barIds)
-          .eq('ativo', true)
-
-        if (barsError) {
-          console.error('Erro ao buscar bares:', barsError)
-          if (mounted) setIsLoading(false)
-          return
+        try {
+          const response = await fetch('/api/bars/user-bars', {
+            headers: {
+              'x-user-data': encodeURIComponent(JSON.stringify(user))
+            }
+          })
+          
+          if (response.ok) {
+            const data = await response.json()
+            console.log('✅ BarContext: Dados recebidos da API:', data)
+            
+            if (data.bars && data.bars.length > 0) {
+              if (mounted) {
+                setAvailableBars(data.bars)
+                
+                // Verificar se há um bar selecionado no localStorage
+                const selectedBarId = localStorage.getItem('sgb_selected_bar_id')
+                if (selectedBarId) {
+                  const selectedBar = data.bars.find((bar: Bar) => bar.id === parseInt(selectedBarId))
+                  if (selectedBar) {
+                    setSelectedBar(selectedBar)
+                    updateFavicon(selectedBar.nome)
+                  } else {
+                    const defaultBar = data.bars[0]
+                    setSelectedBar(defaultBar)
+                    updateFavicon(defaultBar.nome)
+                  }
+                } else {
+                  const defaultBar = data.bars[0]
+                  setSelectedBar(defaultBar)
+                  updateFavicon(defaultBar.nome)
+                }
+                
+                setIsLoading(false)
+                return
+              }
+            } else {
+              console.log('❌ BarContext: Nenhum bar encontrado na API')
+            }
+          } else {
+            console.error('❌ BarContext: Erro na API:', response.status)
+          }
+        } catch (error) {
+          console.error('❌ BarContext: Erro ao chamar API:', error)
         }
 
         if (mounted) {
-          setAvailableBars(barsData || [])
-          
-                     // Verificar se há um bar selecionado no localStorage
-           const selectedBarId = localStorage.getItem('sgb_selected_bar_id')
-           if (selectedBarId && barsData) {
-             const selectedBar = barsData.find((bar: Bar) => bar.id === parseInt(selectedBarId))
-            if (selectedBar) {
-              setSelectedBar(selectedBar)
-              updateFavicon(selectedBar.nome)
-            } else {
-              const defaultBar = barsData[0] || null
-              setSelectedBar(defaultBar)
-              updateFavicon(defaultBar?.nome)
-            }
-          } else if (barsData && barsData.length > 0) {
-            const defaultBar = barsData[0]
-            setSelectedBar(defaultBar)
-            updateFavicon(defaultBar.nome)
-          }
-          
           setIsLoading(false)
         }
       } catch (error) {

@@ -46,11 +46,14 @@ export async function GET(request: NextRequest) {
 
     // Organizar por categoria
     const metasOrganizadas = {
-      financeiro: metasFiltradas.filter((m: any) => m.categoria === 'financeiro') || [],
-      clientes: metasFiltradas.filter((m: any) => m.categoria === 'clientes') || [],
-      avaliacoes: metasFiltradas.filter((m: any) => m.categoria === 'avaliacoes') || [],
+      indicadores_estrategicos: metasFiltradas.filter((m: any) => m.categoria === 'indicadores_estrategicos') || [],
       cockpit_produtos: metasFiltradas.filter((m: any) => m.categoria === 'cockpit_produtos') || [],
-      marketing: metasFiltradas.filter((m: any) => m.categoria === 'marketing') || [],
+      cockpit_vendas: metasFiltradas.filter((m: any) => m.categoria === 'cockpit_vendas') || [],
+      cockpit_financeiro: metasFiltradas.filter((m: any) => m.categoria === 'cockpit_financeiro') || [],
+      cockpit_marketing: metasFiltradas.filter((m: any) => m.categoria === 'cockpit_marketing') || [],
+      indicadores_qualidade: metasFiltradas.filter((m: any) => m.categoria === 'indicadores_qualidade') || [],
+      indicadores_mensais: metasFiltradas.filter((m: any) => m.categoria === 'indicadores_mensais') || [],
+      metas_diarias: metasFiltradas.filter((m: any) => m.categoria === 'metas_diarias') || [],
     };
 
     return NextResponse.json({
@@ -169,6 +172,71 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         ordem_exibicao: ordemExibicao++
       });
     }
+    if (produtos.percent_bebidas !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_produtos_percent_bebidas`,
+        categoria: 'cockpit_produtos',
+        nome: '% BEBIDAS',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: produtos.percent_bebidas,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (produtos.percent_drinks !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_produtos_percent_drinks`,
+        categoria: 'cockpit_produtos',
+        nome: '% DRINKS',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: produtos.percent_drinks,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (produtos.percent_comida !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_produtos_percent_comida`,
+        categoria: 'cockpit_produtos',
+        nome: '% COMIDA',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: produtos.percent_comida,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (produtos.percent_happyhour !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_produtos_percent_happyhour`,
+        categoria: 'cockpit_produtos',
+        nome: '% HappyHour',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: produtos.percent_happyhour,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (produtos.qtde_itens_bar !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_produtos_qtde_itens_bar`,
+        categoria: 'cockpit_produtos',
+        nome: 'Qtde Itens Bar',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: produtos.qtde_itens_bar,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
     if (produtos.tempo_saida_bar !== undefined) {
       metasConvertidas.push({
         id: `cockpit_produtos_tempo_bar`,
@@ -179,6 +247,19 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: produtos.tempo_saida_bar,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (produtos.qtde_itens_cozinha !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_produtos_qtde_itens_cozinha`,
+        categoria: 'cockpit_produtos',
+        nome: 'Qtde Itens Cozinha',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: produtos.qtde_itens_cozinha,
         ordem_exibicao: ordemExibicao++
       });
     }
@@ -239,6 +320,123 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         ordem_exibicao: ordemExibicao++
       });
     }
+    if (qualidade.nps_ambiente !== undefined) {
+      metasConvertidas.push({
+        id: `indicadores_qualidade_nps_ambiente`,
+        categoria: 'indicadores_qualidade',
+        nome: 'NPS Ambiente',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: qualidade.nps_ambiente,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (qualidade.nps_atendimento !== undefined) {
+      metasConvertidas.push({
+        id: `indicadores_qualidade_nps_atendimento`,
+        categoria: 'indicadores_qualidade',
+        nome: 'NPS Atendimento',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: qualidade.nps_atendimento,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (qualidade.nps_limpeza !== undefined) {
+      metasConvertidas.push({
+        id: `indicadores_qualidade_nps_limpeza`,
+        categoria: 'indicadores_qualidade',
+        nome: 'NPS Limpeza',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: qualidade.nps_limpeza,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (qualidade.nps_musica !== undefined) {
+      metasConvertidas.push({
+        id: `indicadores_qualidade_nps_musica`,
+        categoria: 'indicadores_qualidade',
+        nome: 'NPS Música',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: qualidade.nps_musica,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (qualidade.nps_comida !== undefined) {
+      metasConvertidas.push({
+        id: `indicadores_qualidade_nps_comida`,
+        categoria: 'indicadores_qualidade',
+        nome: 'NPS Comida',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: qualidade.nps_comida,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (qualidade.nps_drink !== undefined) {
+      metasConvertidas.push({
+        id: `indicadores_qualidade_nps_drink`,
+        categoria: 'indicadores_qualidade',
+        nome: 'NPS Drink',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: qualidade.nps_drink,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (qualidade.nps_preco !== undefined) {
+      metasConvertidas.push({
+        id: `indicadores_qualidade_nps_preco`,
+        categoria: 'indicadores_qualidade',
+        nome: 'NPS Preço',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: qualidade.nps_preco,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (qualidade.nps_reservas !== undefined) {
+      metasConvertidas.push({
+        id: `indicadores_qualidade_nps_reservas`,
+        categoria: 'indicadores_qualidade',
+        nome: 'NPS Reservas',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: qualidade.nps_reservas,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (qualidade.nps_felicidade_equipe !== undefined) {
+      metasConvertidas.push({
+        id: `indicadores_qualidade_nps_felicidade_equipe`,
+        categoria: 'indicadores_qualidade',
+        nome: 'NPS Felicidade Equipe',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: qualidade.nps_felicidade_equipe,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
   }
 
   // Converter indicadores_estrategicos
@@ -283,6 +481,32 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         ordem_exibicao: ordemExibicao++
       });
     }
+    if (estrategicos.faturamento_cmovel !== undefined) {
+      metasConvertidas.push({
+        id: `indicadores_estrategicos_faturamento_cmovel`,
+        categoria: 'indicadores_estrategicos',
+        nome: 'Faturamento CMvível',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: estrategicos.faturamento_cmovel,
+        meta_mensal: 0,
+        valor_atual: estrategicos.faturamento_cmovel,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (estrategicos.cmv_rs !== undefined) {
+      metasConvertidas.push({
+        id: `indicadores_estrategicos_cmv_rs`,
+        categoria: 'indicadores_estrategicos',
+        nome: 'CMV R$',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: estrategicos.cmv_rs,
+        meta_mensal: 0,
+        valor_atual: estrategicos.cmv_rs,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
     if (estrategicos.ticket_medio_contahub !== undefined) {
       metasConvertidas.push({
         id: `indicadores_estrategicos_ticket_medio`,
@@ -293,6 +517,110 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: estrategicos.ticket_medio_contahub,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (estrategicos.tm_entrada !== undefined) {
+      metasConvertidas.push({
+        id: `indicadores_estrategicos_tm_entrada`,
+        categoria: 'indicadores_estrategicos',
+        nome: 'TM Entrada',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: estrategicos.tm_entrada,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (estrategicos.tm_bar !== undefined) {
+      metasConvertidas.push({
+        id: `indicadores_estrategicos_tm_bar`,
+        categoria: 'indicadores_estrategicos',
+        nome: 'TM Bar',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: estrategicos.tm_bar,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (estrategicos.cmv_limpo_percent !== undefined) {
+      metasConvertidas.push({
+        id: `indicadores_estrategicos_cmv_limpo_percent`,
+        categoria: 'indicadores_estrategicos',
+        nome: 'CMV Limpo %',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: estrategicos.cmv_limpo_percent,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (estrategicos.cmv_global_real !== undefined) {
+      metasConvertidas.push({
+        id: `indicadores_estrategicos_cmv_global_real`,
+        categoria: 'indicadores_estrategicos',
+        nome: 'CMV Global Real',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: estrategicos.cmv_global_real,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (estrategicos.cmv_teorico !== undefined) {
+      metasConvertidas.push({
+        id: `indicadores_estrategicos_cmv_teorico`,
+        categoria: 'indicadores_estrategicos',
+        nome: 'CMV Teórico',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: estrategicos.cmv_teorico,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (estrategicos.cmo_percent !== undefined) {
+      metasConvertidas.push({
+        id: `indicadores_estrategicos_cmo_percent`,
+        categoria: 'indicadores_estrategicos',
+        nome: 'CMO%',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: estrategicos.cmo_percent,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (estrategicos.atracao_faturamento !== undefined) {
+      metasConvertidas.push({
+        id: `indicadores_estrategicos_atracao_faturamento`,
+        categoria: 'indicadores_estrategicos',
+        nome: 'Atração/Faturamento',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: estrategicos.atracao_faturamento,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (estrategicos.retencao !== undefined) {
+      metasConvertidas.push({
+        id: `indicadores_estrategicos_retencao`,
+        categoria: 'indicadores_estrategicos',
+        nome: 'Retenção',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: estrategicos.retencao,
         ordem_exibicao: ordemExibicao++
       });
     }
@@ -345,6 +673,432 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: estrategicos.reservas_presentes,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+  }
+
+  // Converter cockpit_financeiro
+  if (metasOriginais.cockpit_financeiro) {
+    const financeiro = metasOriginais.cockpit_financeiro;
+    if (financeiro.imposto !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_financeiro_imposto`,
+        categoria: 'cockpit_financeiro',
+        nome: 'Imposto',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: financeiro.imposto,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (financeiro.comissao !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_financeiro_comissao`,
+        categoria: 'cockpit_financeiro',
+        nome: 'Comissão',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: financeiro.comissao,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (financeiro.cmv !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_financeiro_cmv`,
+        categoria: 'cockpit_financeiro',
+        nome: 'CMV',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: financeiro.cmv,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (financeiro.cmo !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_financeiro_cmo`,
+        categoria: 'cockpit_financeiro',
+        nome: 'CMO',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: financeiro.cmo,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (financeiro.pro_labore !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_financeiro_pro_labore`,
+        categoria: 'cockpit_financeiro',
+        nome: 'PRO LABORE',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: financeiro.pro_labore,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (financeiro.ocupacao !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_financeiro_ocupacao`,
+        categoria: 'cockpit_financeiro',
+        nome: 'Ocupação',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: financeiro.ocupacao,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (financeiro.adm_fixo !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_financeiro_adm_fixo`,
+        categoria: 'cockpit_financeiro',
+        nome: 'Adm Fixo',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: financeiro.adm_fixo,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (financeiro.marketing_fixo !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_financeiro_marketing_fixo`,
+        categoria: 'cockpit_financeiro',
+        nome: 'Marketing Fixo',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: financeiro.marketing_fixo,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (financeiro.escritorio_central !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_financeiro_escritorio_central`,
+        categoria: 'cockpit_financeiro',
+        nome: 'Escritório Central',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: financeiro.escritorio_central,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (financeiro.adm_mkt_semana !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_financeiro_adm_mkt_semana`,
+        categoria: 'cockpit_financeiro',
+        nome: 'Adm e Mkt da Semana',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: financeiro.adm_mkt_semana,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (financeiro.rh_estorno_outros_operacao !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_financeiro_rh_estorno_outros_operacao`,
+        categoria: 'cockpit_financeiro',
+        nome: 'RH+Estorno+Outros Operação',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: financeiro.rh_estorno_outros_operacao,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (financeiro.materiais !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_financeiro_materiais`,
+        categoria: 'cockpit_financeiro',
+        nome: 'Materiais',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: financeiro.materiais,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (financeiro.manutencao !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_financeiro_manutencao`,
+        categoria: 'cockpit_financeiro',
+        nome: 'Manutenção',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: financeiro.manutencao,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (financeiro.atracoes_eventos !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_financeiro_atracoes_eventos`,
+        categoria: 'cockpit_financeiro',
+        nome: 'Atrações/Eventos',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: financeiro.atracoes_eventos,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (financeiro.utensilios !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_financeiro_utensilios`,
+        categoria: 'cockpit_financeiro',
+        nome: 'Utensílios',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: financeiro.utensilios,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (financeiro.consumacao_sem_socio !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_financeiro_consumacao_sem_socio`,
+        categoria: 'cockpit_financeiro',
+        nome: 'Consumação (sem sócio)',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: financeiro.consumacao_sem_socio,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (financeiro.lucro_rs !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_financeiro_lucro_rs`,
+        categoria: 'cockpit_financeiro',
+        nome: 'Lucro (R$)',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: financeiro.lucro_rs,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+  }
+
+  // Converter cockpit_marketing
+  if (metasOriginais.cockpit_marketing) {
+    const marketing = metasOriginais.cockpit_marketing;
+    if (marketing.o_num_posts !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_marketing_o_num_posts`,
+        categoria: 'cockpit_marketing',
+        nome: '[O] Nº de Posts',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: marketing.o_num_posts,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (marketing.o_alcance !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_marketing_o_alcance`,
+        categoria: 'cockpit_marketing',
+        nome: '[O] Alcance',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: marketing.o_alcance,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (marketing.o_interacao !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_marketing_o_interacao`,
+        categoria: 'cockpit_marketing',
+        nome: '[O] Interação',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: marketing.o_interacao,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (marketing.o_compartilhamento !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_marketing_o_compartilhamento`,
+        categoria: 'cockpit_marketing',
+        nome: '[O] Compartilhamento',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: marketing.o_compartilhamento,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (marketing.o_engajamento !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_marketing_o_engajamento`,
+        categoria: 'cockpit_marketing',
+        nome: '[O] Engajamento',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: marketing.o_engajamento,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (marketing.o_num_stories !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_marketing_o_num_stories`,
+        categoria: 'cockpit_marketing',
+        nome: '[O] Nº Stories',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: marketing.o_num_stories,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (marketing.o_visu_stories !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_marketing_o_visu_stories`,
+        categoria: 'cockpit_marketing',
+        nome: '[O] Visu Stories',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: marketing.o_visu_stories,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (marketing.m_valor_investido !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_marketing_m_valor_investido`,
+        categoria: 'cockpit_marketing',
+        nome: '[M] Valor Investido',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: marketing.m_valor_investido,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (marketing.m_alcance !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_marketing_m_alcance`,
+        categoria: 'cockpit_marketing',
+        nome: '[M] Alcance',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: marketing.m_alcance,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (marketing.m_frequencia !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_marketing_m_frequencia`,
+        categoria: 'cockpit_marketing',
+        nome: '[M] Frequencia',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: marketing.m_frequencia,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (marketing.m_cpm !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_marketing_m_cpm`,
+        categoria: 'cockpit_marketing',
+        nome: '[M] CPM (Custo por Visu)',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: marketing.m_cpm,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (marketing.m_cliques !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_marketing_m_cliques`,
+        categoria: 'cockpit_marketing',
+        nome: '[M] Cliques',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: marketing.m_cliques,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (marketing.m_ctr !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_marketing_m_ctr`,
+        categoria: 'cockpit_marketing',
+        nome: '[M] CTR (Taxa de Clique)',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: marketing.m_ctr,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (marketing.m_custo_por_clique !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_marketing_m_custo_por_clique`,
+        categoria: 'cockpit_marketing',
+        nome: '[M] Custo por Clique',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: marketing.m_custo_por_clique,
+        ordem_exibicao: ordemExibicao++
+      });
+    }
+    if (marketing.m_conversas_iniciadas !== undefined) {
+      metasConvertidas.push({
+        id: `cockpit_marketing_m_conversas_iniciadas`,
+        categoria: 'cockpit_marketing',
+        nome: '[M] Conversas Iniciadas',
+        meta_ativa: true,
+        meta_diaria: 0,
+        meta_semanal: 0,
+        meta_mensal: 0,
+        valor_atual: marketing.m_conversas_iniciadas,
         ordem_exibicao: ordemExibicao++
       });
     }
@@ -407,7 +1161,113 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
     }
   }
 
-  return metasConvertidas;
+  // Adicionar metas diárias por dia da semana
+  const metasDiarias = [
+    {
+      id: 'meta_diaria_segunda',
+      categoria: 'metas_diarias',
+      nome: 'Segunda-feira',
+      meta_ativa: true,
+      meta_diaria: 5066.67,
+      meta_semanal: 0,
+      meta_mensal: 0,
+      valor_atual: 5000.00,
+      ticket_entrada: 21.00,
+      ticket_bar: 82.50,
+      meta_pessoas: Math.round(5066.67 / (21.00 + 82.50)), // 49 pessoas
+      custo_artistico: 1500.00,
+      custo_producao: 330.00,
+      percent_art_fat: 36,
+      ordem_exibicao: ordemExibicao++
+    },
+    {
+      id: 'meta_diaria_quarta',
+      categoria: 'metas_diarias',
+      nome: 'Quarta-feira',
+      meta_ativa: true,
+      meta_diaria: 38506.67,
+      meta_semanal: 0,
+      meta_mensal: 0,
+      valor_atual: 38000.00,
+      ticket_entrada: 21.00,
+      ticket_bar: 87.50,
+      meta_pessoas: Math.round(38506.67 / (21.00 + 87.50)), // 355 pessoas
+      custo_artistico: 5776.00,
+      custo_producao: 396.00,
+      percent_art_fat: 16,
+      ordem_exibicao: ordemExibicao++
+    },
+    {
+      id: 'meta_diaria_quinta',
+      categoria: 'metas_diarias',
+      nome: 'Quinta-feira',
+      meta_ativa: true,
+      meta_diaria: 18240.00,
+      meta_semanal: 0,
+      meta_mensal: 0,
+      valor_atual: 18000.00,
+      ticket_entrada: 18.00,
+      ticket_bar: 82.50,
+      meta_pessoas: Math.round(18240.00 / (18.00 + 82.50)), // 181 pessoas
+      custo_artistico: 440.00,
+      custo_producao: 680.00,
+      percent_art_fat: 6,
+      ordem_exibicao: ordemExibicao++
+    },
+    {
+      id: 'meta_diaria_sexta',
+      categoria: 'metas_diarias',
+      nome: 'Sexta-feira',
+      meta_ativa: true,
+      meta_diaria: 62826.67,
+      meta_semanal: 0,
+      meta_mensal: 0,
+      valor_atual: 62000.00,
+      ticket_entrada: 16.00,
+      ticket_bar: 75.00,
+      meta_pessoas: Math.round(62826.67 / (16.00 + 75.00)), // 690 pessoas
+      custo_artistico: 10565.33,
+      custo_producao: 396.00,
+      percent_art_fat: 17,
+      ordem_exibicao: ordemExibicao++
+    },
+    {
+      id: 'meta_diaria_sabado',
+      categoria: 'metas_diarias',
+      nome: 'Sábado',
+      meta_ativa: true,
+      meta_diaria: 52693.33,
+      meta_semanal: 0,
+      meta_mensal: 0,
+      valor_atual: 52000.00,
+      ticket_entrada: 21.00,
+      ticket_bar: 75.00,
+      meta_pessoas: Math.round(52693.33 / (21.00 + 75.00)), // 549 pessoas
+      custo_artistico: 5500.00,
+      custo_producao: 1446.00,
+      percent_art_fat: 13,
+      ordem_exibicao: ordemExibicao++
+    },
+    {
+      id: 'meta_diaria_domingo',
+      categoria: 'metas_diarias',
+      nome: 'Domingo',
+      meta_ativa: true,
+      meta_diaria: 55733.33,
+      meta_semanal: 0,
+      meta_mensal: 0,
+      valor_atual: 55000.00,
+      ticket_entrada: 21.00,
+      ticket_bar: 75.00,
+      meta_pessoas: Math.round(55733.33 / (21.00 + 75.00)), // 580 pessoas
+      custo_artistico: 11704.00,
+      custo_producao: 4000.00,
+      percent_art_fat: 28,
+      ordem_exibicao: ordemExibicao++
+    }
+  ];
+
+  return [...metasConvertidas, ...metasDiarias];
 }
 
 // =====================================================
