@@ -142,54 +142,7 @@ export default function AdminChecklists() {
     }
   ]
 
-  // Dados mockados - depois vir do banco
-  const checklistsMock: ChecklistTemplate[] = [
-    {
-      id: '1',
-      nome: 'Checklist de Abertura Geral',
-      setor: 'administrativo',
-      descricao: 'Verificações gerais para abertura do estabelecimento',
-      tipo: 'abertura',
-      frequencia: 'diaria',
-      tempo_estimado: 45,
-      itens_total: 22,
-      responsavel_padrao: 'Gerente',
-      ativo: true,
-      ultima_edicao: '2024-01-15',
-      criado_por: 'Admin',
-      usado_recentemente: true
-    },
-    {
-      id: '2',
-      nome: 'Limpeza Profunda Cozinha',
-      setor: 'cozinha',
-      descricao: 'Procedimentos de sanitização e limpeza da cozinha',
-      tipo: 'qualidade',
-      frequencia: 'semanal',
-      tempo_estimado: 90,
-      itens_total: 15,
-      responsavel_padrao: 'Chef',
-      ativo: true,
-      ultima_edicao: '2024-01-14',
-      criado_por: 'Chef',
-      usado_recentemente: false
-    },
-    {
-      id: '3',
-      nome: 'Segurança do Bar',
-      setor: 'bar',
-      descricao: 'Verificações de segurança específicas do bar',
-      tipo: 'seguranca',
-      frequencia: 'diaria',
-      tempo_estimado: 20,
-      itens_total: 8,
-      responsavel_padrao: 'Bartender',
-      ativo: true,
-      ultima_edicao: '2024-01-13',
-      criado_por: 'Gerente',
-      usado_recentemente: true
-    }
-  ]
+  // Dados reais do banco - sem fallback para mock
 
   const carregarChecklists = useCallback(async () => {
     if (!selectedBar?.id) return
@@ -201,15 +154,13 @@ export default function AdminChecklists() {
         setChecklists(data)
       } else {
         console.error('Erro ao carregar checklists')
-        // Fallback para dados mock
-        setChecklists(checklistsMock)
+        setChecklists([])
       }
     } catch (error) {
       console.error('Erro ao carregar checklists:', error)
-      // Fallback para dados mock
-      setChecklists(checklistsMock)
+      setChecklists([])
     }
-  }, [selectedBar?.id, checklistsMock]);
+  }, [selectedBar?.id]);
 
   useEffect(() => {
     carregarChecklists()
@@ -795,7 +746,7 @@ export default function AdminChecklists() {
                           <Settings className="w-4 h-4 text-orange-600" />
                           Tipo *
                         </Label>
-                        <Select value={checklistSelecionado.tipo} onValueChange={(value: unknown) => setChecklistSelecionado({...checklistSelecionado, tipo: value})}>
+                        <Select value={checklistSelecionado.tipo} onValueChange={(value: 'abertura' | 'fechamento' | 'manutencao' | 'qualidade' | 'seguranca' | 'limpeza') => setChecklistSelecionado({...checklistSelecionado, tipo: value})}>
                           <SelectTrigger className="h-11 border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500">
                             <SelectValue />
                           </SelectTrigger>
@@ -845,7 +796,7 @@ export default function AdminChecklists() {
                           <Calendar className="w-4 h-4 text-indigo-600" />
                           Frequência *
                         </Label>
-                        <Select value={checklistSelecionado.frequencia} onValueChange={(value: unknown) => setChecklistSelecionado({...checklistSelecionado, frequencia: value})}>
+                        <Select value={checklistSelecionado.frequencia} onValueChange={(value: 'diaria' | 'semanal' | 'mensal' | 'conforme_necessario' | 'quinzenal' | 'bimestral' | 'trimestral') => setChecklistSelecionado({...checklistSelecionado, frequencia: value})}>
                           <SelectTrigger className="h-11 border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500">
                             <SelectValue />
                           </SelectTrigger>
@@ -1064,7 +1015,7 @@ export default function AdminChecklists() {
                       <Settings className="w-4 h-4 text-orange-600" />
                       Tipo *
                     </Label>
-                    <Select value={novoChecklist.tipo} onValueChange={(value: unknown) => setNovoChecklist({...novoChecklist, tipo: value})}>
+                    <Select value={novoChecklist.tipo} onValueChange={(value: 'abertura' | 'fechamento' | 'manutencao' | 'qualidade' | 'seguranca' | 'limpeza') => setNovoChecklist({...novoChecklist, tipo: value})}>
                       <SelectTrigger className="h-11 border-gray-300 text-gray-900 focus:border-green-500 focus:ring-green-500">
                         <SelectValue />
                       </SelectTrigger>
@@ -1114,7 +1065,7 @@ export default function AdminChecklists() {
                       <Calendar className="w-4 h-4 text-indigo-600" />
                       Frequência *
                     </Label>
-                    <Select value={novoChecklist.frequencia} onValueChange={(value: unknown) => setNovoChecklist({...novoChecklist, frequencia: value})}>
+                    <Select value={novoChecklist.frequencia} onValueChange={(value: 'diaria' | 'semanal' | 'mensal' | 'conforme_necessario' | 'quinzenal' | 'bimestral' | 'trimestral') => setNovoChecklist({...novoChecklist, frequencia: value})}>
                       <SelectTrigger className="h-11 border-gray-300 text-gray-900 focus:border-green-500 focus:ring-green-500">
                         <SelectValue />
                       </SelectTrigger>

@@ -561,7 +561,7 @@ export default function AgendamentoPage() {
             : p
         ))
         
-        // Toast removido para evitar duplicação - apenas a mensagem geral será exibida
+        // Toast individual removido - apenas a mensagem geral será exibida
       } else {
         throw new Error(data.error || 'Erro desconhecido na resposta do NIBO')
       }
@@ -594,7 +594,7 @@ export default function AgendamentoPage() {
       // Converter valor para positivo para o Inter (mesmo que seja negativo no NIBO)
       const valorLimpo = pagamento.valor.replace('R$', '').replace('.', '').replace(',', '.').trim()
       const valorNumerico = parseFloat(valorLimpo)
-      const valorParaInter = Math.abs(valorNumerico).toString() // Sempre positivo para Inter
+      const valorParaInter = Math.abs(valorNumerico).toFixed(2) // Sempre positivo para Inter, com 2 casas decimais
 
       const pagamentoInter = {
         valor: valorParaInter,
@@ -604,7 +604,13 @@ export default function AgendamentoPage() {
         data_pagamento: pagamento.data_pagamento
       }
 
-      console.log('🚀 Enviando pagamento para Inter:', pagamentoInter)
+      console.log('🚀 Enviando pagamento para Inter:', {
+        valorOriginal: pagamento.valor,
+        valorLimpo: valorLimpo,
+        valorNumerico: valorNumerico,
+        valorParaInter: valorParaInter,
+        pagamentoInter: pagamentoInter
+      })
 
       const response = await fetch('/api/financeiro/inter/pix', {
         method: 'POST',
@@ -615,13 +621,13 @@ export default function AgendamentoPage() {
       const data = await response.json()
       
       // Verifica se a resposta tem o formato de sucesso esperado
-      if (data.tipoRetorno === "APROVACAO" && data.codigoSolicitacao) {
+      if (data.success && data.data?.tipoRetorno === "APROVACAO" && data.data?.codigoSolicitacao) {
         setPagamentos(prev => prev.map(p => 
           p.id === pagamento.id 
             ? { 
                 ...p, 
                 status: 'aguardando_aprovacao', 
-                inter_aprovacao_id: data.codigoSolicitacao,
+                inter_aprovacao_id: data.data.codigoSolicitacao,
                 updated_at: new Date().toISOString()
               }
             : p
@@ -898,10 +904,7 @@ export default function AgendamentoPage() {
           chave_pix: stakeholder.pixKey
         }))
         
-        toast({
-          title: "Stakeholder encontrado",
-          description: `Nome: ${stakeholder.name} | Chave PIX: ${stakeholder.pixKey}`,
-        })
+        // Toast removido para evitar duplicação - apenas a mensagem geral será exibida
       } else {
         // Stakeholder não encontrado, abrir modal de cadastro
         setStakeholderEmCadastro({
@@ -958,10 +961,7 @@ export default function AgendamentoPage() {
         setModalStakeholder(false)
         setStakeholderEmCadastro({ document: '', name: '' })
 
-        toast({
-          title: "👤 Stakeholder cadastrado com sucesso!",
-          description: `${data.data.name} foi cadastrado no sistema`,
-        })
+        // Toast removido para evitar duplicação - apenas a mensagem geral será exibida
       } else {
         throw new Error(data.error)
       }
@@ -1000,10 +1000,7 @@ export default function AgendamentoPage() {
             chave_pix: stakeholderData.bankAccountInformation.pixKey
           }))
           
-          toast({
-            title: "🔑 Chave PIX encontrada!",
-            description: `Chave PIX: ${stakeholderData.bankAccountInformation.pixKey}`,
-          })
+          // Toast removido para evitar duplicação - apenas a mensagem geral será exibida
         } else {
           // Não tem chave PIX, abrir modal para adicionar
           setStakeholderParaPix(stakeholder)

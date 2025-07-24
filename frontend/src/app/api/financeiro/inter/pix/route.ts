@@ -2,10 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getInterCredentials } from '@/lib/api-credentials'
 import { getUserAuth } from '@/lib/auth-helper'
 import { createClient } from '@supabase/supabase-js'
-import https from 'https'
-import fs from 'fs'
-import path from 'path'
-import crypto from 'crypto'
+import { getInterAccessToken } from '@/lib/inter/getAccessToken'
+import { realizarPagamentoPixInter } from '@/lib/inter/pixPayment'
 
 interface PagamentoInter {
   valor: string
@@ -20,14 +18,6 @@ interface InterResponse {
   status: string
   message?: string
 }
-
-// Configurações do Inter
-const INTER_CONFIG = {
-  BASE_URL: "https://cdpj.partners.bancointer.com.br"
-}
-
-// Cache do access token por bar
-const tokenCache: Record<string, { token: string; expiry: number }> = {}
 
 // Cliente Supabase
 const supabase = createClient(
@@ -77,8 +67,17 @@ export async function POST(request: NextRequest) {
       conta_corrente: credenciais.conta_corrente 
     })
 
-    // Obter access token com mTLS
-    const token = await obterAccessToken(barId, credenciais)
+    console.log('✅ Credenciais encontradas:', { 
+      client_id: credenciais.client_id.substring(0, 8) + '...',
+      conta_corrente: credenciais.conta_corrente 
+    })
+
+    // Obter access token com mTLS usando função da lib
+    const token = await getInterAccessToken(
+      credenciais.client_id,
+      credenciais.client_secret,
+      'pagamento-pix.write'
+    )
     if (!token) {
       console.log('❌ Falha ao obter token de acesso')
       return NextResponse.json(
@@ -112,15 +111,13 @@ export async function POST(request: NextRequest) {
     console.log('   - Conta Corrente:', credenciais.conta_corrente)
     console.log('   - Token:', token.substring(0, 20) + '...')
 
-    // Realizar pagamento PIX real
-    const resultadoPagamento = await realizarPagamentoPix({
-      valor,
-      descricao,
-      destinatario,
-      chave: tipoChave.chave,
+    // Realizar pagamento PIX real usando nova função
+    const resultadoPagamento = await realizarPagamentoPixInter({
       token,
-      conta_corrente: credenciais.conta_corrente,
-      barId
+      contaCorrente: credenciais.conta_corrente, // Enviar conta completa
+      valor: parseFloat(valor),
+      descricao,
+      chave: tipoChave.chave
     })
 
     if (!resultadoPagamento.success) {
@@ -131,17 +128,66 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('✅ Pagamento PIX realizado com sucesso!')
+    // Verificar se o pagamento foi aprovado
+    const isAprovado = resultadoPagamento.data?.tipoRetorno === 'APROVACAO'
+    const status = isAprovado ? 'APROVADO' : 'ENVIADO_PARA_APROVACAO'
+    const message = isAprovado ? 'Pagamento PIX aprovado com sucesso' : 'Pagamento PIX enviado para aprovação'
+
+    console.log(`✅ Pagamento PIX ${isAprovado ? 'aprovado' : 'enviado para aprovação'}!`)
+    
+    // Salvar pagamento na tabela pix_enviados
+    const { data: pixData, error: pixError } = await supabase
+      .from('pix_enviados')
+      .insert({
+        txid: resultadoPagamento.data?.codigoSolicitacao || `inter_${Date.now()}`,
+        valor: parseFloat(valor),
+        beneficiario: {
+          nome: destinatario,
+          chave: tipoChave.chave,
+          tipo: tipoChave.tipo
+        },
+        data_envio: new Date().toISOString(),
+        status: isAprovado ? 'APROVADO' : 'ENVIADO',
+        bar_id: parseInt(barId),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
+
+    if (pixError) {
+      console.error('❌ Erro ao salvar PIX:', pixError)
+    } else {
+      console.log('✅ PIX salvo na tabela:', pixData)
+    }
+    
+    // Enviar notificação para Discord
+    try {
+      await enviarNotificacaoDiscord({
+        valor: parseFloat(valor),
+        descricao: descricao || 'Pagamento PIX',
+        destinatario: destinatario,
+        chave: tipoChave.chave,
+        codigoSolicitacao: resultadoPagamento.data?.codigoSolicitacao || `inter_${Date.now()}`,
+        status: status,
+        barId: barId
+      })
+      console.log('✅ Notificação Discord enviada com sucesso')
+    } catch (discordError) {
+      console.log('⚠️ Erro ao enviar notificação Discord:', discordError)
+      // Não falhar o pagamento se o Discord der erro
+    }
+
     return NextResponse.json({
       success: true,
       data: resultadoPagamento.data,
-      message: 'Pagamento PIX realizado com sucesso',
+      message: message,
+      status: status,
       logs: [
         '✅ Credenciais carregadas da tabela api_credentials',
-        '✅ Token obtido via mTLS com certificados',
+        '✅ Token obtido via mTLS com certificados PEM',
         '✅ Tipo de chave PIX identificado',
         '✅ Validações de dados passaram',
-        '✅ Pagamento PIX realizado com sucesso no Inter'
+        `✅ Pagamento PIX ${isAprovado ? 'aprovado' : 'enviado para aprovação'} no Inter`
       ]
     })
 
@@ -151,125 +197,6 @@ export async function POST(request: NextRequest) {
       { success: false, error: 'Erro interno do servidor' },
       { status: 500 }
     )
-  }
-}
-
-// Função para obter access token com mTLS (como no Python)
-async function obterAccessToken(
-  barId: string, 
-  credenciais: { client_id: string; client_secret: string; conta_corrente: string }
-): Promise<string | null> {
-  try {
-    // Verificar se já temos um token válido para este bar
-    const cached = tokenCache[barId]
-    if (cached && Date.now() < cached.expiry) {
-      return cached.token
-    }
-
-    console.log('🔐 Obtendo token de acesso via mTLS...')
-
-    // Carregar certificados base64
-    const certPath = path.join(process.cwd(), 'public', 'inter', 'cert_base64.txt')
-    const keyPath = path.join(process.cwd(), 'public', 'inter', 'key_base64.txt')
-
-    // Verificar se os certificados existem
-    if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
-      console.error('❌ Certificados não encontrados:', { certPath, keyPath })
-      throw new Error('Certificados mTLS não encontrados')
-    }
-
-    // Decodificar certificados base64
-    const certBase64 = fs.readFileSync(certPath, 'utf8').trim()
-    const keyBase64 = fs.readFileSync(keyPath, 'utf8').trim()
-    
-    console.log('📄 Certificado carregado:', certBase64.substring(0, 50) + '...')
-    console.log('🔑 Chave privada carregada:', keyBase64.substring(0, 50) + '...')
-    
-    const cert = Buffer.from(certBase64, 'base64')
-    const key = Buffer.from(keyBase64, 'base64')
-    
-    console.log('📏 Tamanho do certificado:', cert.length, 'bytes')
-    console.log('📏 Tamanho da chave:', key.length, 'bytes')
-
-    // Preparar dados para OAuth2
-    const data = new URLSearchParams({
-      grant_type: 'client_credentials',
-      client_id: credenciais.client_id,
-      client_secret: credenciais.client_secret,
-      scope: 'pagamento-pix.write' // Escopo correto conforme Python que funciona
-    }).toString()
-    
-    console.log('🔐 Dados OAuth2:', {
-      grant_type: 'client_credentials',
-      client_id: credenciais.client_id,
-      client_secret: credenciais.client_secret,
-      scope: 'pagamento-pix.write'
-    })
-
-    // Configurar requisição HTTPS com mTLS
-    const options = {
-      hostname: 'cdpj.partners.bancointer.com.br',
-      port: 443,
-      path: '/oauth/v2/token',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Content-Length': Buffer.byteLength(data),
-      },
-      cert: cert,
-      key: key,
-    }
-
-    // Fazer requisição HTTPS
-    const token = await new Promise<string>((resolve, reject) => {
-      const request = https.request(options, (response) => {
-        console.log('📡 Status da resposta:', response.statusCode)
-        console.log('📡 Headers da resposta:', response.headers)
-        
-        let body = ''
-        response.on('data', (chunk) => (body += chunk))
-        response.on('end', () => {
-          console.log('📡 Corpo da resposta:', body)
-          
-          try {
-            const parsed = JSON.parse(body)
-            console.log('🔐 Resposta completa do token:', parsed)
-            if (parsed.access_token) {
-              console.log('🔐 Token obtido com sucesso:', parsed.access_token)
-              console.log('🔐 Scope do token:', parsed.scope)
-              resolve(parsed.access_token)
-            } else {
-              console.log('❌ Resposta sem access_token:', parsed)
-              reject(new Error('Token não encontrado na resposta'))
-            }
-          } catch (error) {
-            console.log('❌ Erro ao parsear resposta:', error)
-            reject(new Error(`Erro ao parsear resposta: ${body}`))
-          }
-        })
-      })
-
-      request.on('error', (error) => {
-        console.log('❌ Erro na requisição HTTPS:', error)
-        reject(error)
-      })
-
-      request.write(data)
-      request.end()
-    })
-
-    // Cache do token por bar (expira em 1 hora)
-    tokenCache[barId] = {
-      token,
-      expiry: Date.now() + (60 * 60 * 1000) - 60000 // 1 hora - 1 minuto
-    }
-
-    console.log('✅ Token obtido com sucesso via mTLS')
-    return token
-
-  } catch (error) {
-    console.error('❌ Erro ao obter access token:', error)
-    return null
   }
 }
 
@@ -286,24 +213,34 @@ async function enviarNotificacaoDiscord(params: {
   try {
     const { valor, descricao, destinatario, chave, codigoSolicitacao, status, barId } = params
     
+    console.log('🔍 Buscando webhook Discord para bar_id:', barId)
+    
     // Buscar webhook do Discord da tabela api_credentials
     const { data: credenciaisDiscord, error } = await supabase
       .from('api_credentials')
       .select('configuracoes')
       .eq('bar_id', barId)
-      .eq('provider', 'banco_inter')
+      .eq('sistema', 'inter')
       .single()
 
-    if (error || !credenciaisDiscord?.configuracoes?.discord_webhook) {
+    console.log('📋 Resultado da busca webhook:', { 
+      error: error?.message, 
+      configuracoes: credenciaisDiscord?.configuracoes 
+    })
+
+    if (error || !credenciaisDiscord?.configuracoes?.webhook_url) {
       console.log('⚠️ Webhook do Discord não encontrado nas configurações')
+      console.log('❌ Erro:', error?.message)
+      console.log('📋 Configurações:', credenciaisDiscord?.configuracoes)
       return false
     }
 
-    const webhookUrl = credenciaisDiscord.configuracoes.discord_webhook
+    const webhookUrl = credenciaisDiscord.configuracoes.webhook_url
+    console.log('✅ Webhook encontrado:', webhookUrl)
     
     const embed = {
-      title: "💰 Pagamento PIX Enviado para Aprovação",
-      color: 0x00ff00, // Verde
+      title: "📋 Novo Pagamento PIX Agendado",
+      color: 0x0099ff, // Azul para agendamento
       fields: [
         {
           name: "Valor",
@@ -332,7 +269,7 @@ async function enviarNotificacaoDiscord(params: {
         },
         {
           name: "Status",
-          value: "⏳ Aguardando Aprovação",
+          value: "⏳ Aguardando Aprovação do Gestor",
           inline: true
         }
       ],
@@ -346,6 +283,10 @@ async function enviarNotificacaoDiscord(params: {
       embeds: [embed]
     }
 
+    console.log('📤 Enviando notificação para Discord...')
+    console.log('🔗 Webhook URL:', webhookUrl)
+    console.log('📦 Payload:', JSON.stringify(payload, null, 2))
+
     // Enviar diretamente para o webhook do Discord
     const response = await fetch(webhookUrl, {
       method: 'POST',
@@ -355,8 +296,13 @@ async function enviarNotificacaoDiscord(params: {
       body: JSON.stringify(payload)
     })
 
+    console.log('📡 Status da resposta Discord:', response.status)
+    console.log('📡 Headers da resposta Discord:', Object.fromEntries(response.headers.entries()))
+
     if (!response.ok) {
-      throw new Error(`Discord webhook error: ${response.status}`)
+      const errorText = await response.text()
+      console.error('❌ Erro no Discord:', errorText)
+      throw new Error(`Discord webhook error: ${response.status} - ${errorText}`)
     }
 
     console.log('✅ Notificação enviada para Discord via webhook')
@@ -527,234 +473,4 @@ function validarCNPJ(cnpj: string): boolean {
   const digito2 = resto < 2 ? 0 : 11 - resto
   
   return parseInt(cnpj[13]) === digito2
-}
-
-// Função para realizar pagamento PIX com mTLS
-async function realizarPagamentoPix(params: {
-  valor: string
-  descricao: string
-  destinatario: string
-  chave: string
-  token: string
-  conta_corrente: string
-  barId: string
-}): Promise<{ success: boolean; data?: InterResponse; error?: string }> {
-  try {
-    const { valor, descricao, destinatario, chave, token, conta_corrente, barId } = params
-    
-    console.log('🔐 Token recebido na função realizarPagamentoPix:', token)
-    console.log('🔐 Token length:', token.length)
-    console.log('🔐 Conta corrente:', conta_corrente)
-    console.log('🔐 Tipo de conta:', typeof conta_corrente)
-
-    // Limpar valor (como no Python)
-    const valorLimpo = valor.replace('R$', '').replace('.', '').replace(',', '.').trim()
-    const valorNumerico = parseFloat(valorLimpo).toFixed(2)
-
-    // Validar valor (não pode ser zero, mas pode ser negativo - será convertido)
-    if (parseFloat(valorNumerico) === 0) {
-      throw new Error('Valor deve ser diferente de zero')
-    }
-
-    // Converter para positivo para o Inter (mesmo que seja negativo no NIBO)
-    const valorParaInter = Math.abs(parseFloat(valorNumerico)).toFixed(2) // Garantir 2 casas decimais
-    
-    // Validação de valor mínimo removida
-
-    // Gerar ID idempotente único
-    const idempotenteId = crypto.randomUUID()
-    
-    const payload = {
-      valor: valorParaInter, // String conforme Python que funciona
-      descricao: descricao || 'Pagamento PIX',
-      destinatario: {
-        tipo: "CHAVE",
-        chave: chave
-      }
-    }
-    
-    // Log do payload para debug
-    console.log('📦 PAYLOAD FINAL PARA O INTER:')
-    console.log('   - valor (tipo):', typeof payload.valor, payload.valor)
-    console.log('   - descricao:', payload.descricao)
-    console.log('   - destinatario.tipo:', payload.destinatario.tipo)
-    console.log('   - destinatario.chave:', payload.destinatario.chave)
-    console.log('   - JSON stringificado:', JSON.stringify(payload))
-    console.log('🔍 COMPARAÇÃO COM PYTHON:')
-    console.log('   - Python scope: pagamento-pix.write')
-    console.log('   - Python valor: string')
-    console.log('   - Python x-conta-corrente: SIM')
-    console.log('   - Python x-id-idempotente: NÃO')
-
-    const headers = {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      'x-conta-corrente': conta_corrente,
-      'x-id-idempotente': idempotenteId
-    }
-
-    console.log('💸 Realizando pagamento PIX com mTLS...')
-    console.log('📤 Payload:', JSON.stringify(payload, null, 2))
-    console.log('🔐 Token completo:', token)
-    console.log('🔐 Token type:', typeof token)
-    console.log('🔐 Token length:', token.length)
-    console.log('🔐 Authorization header completo:', `Bearer ${token}`)
-    console.log('🔐 Token sem Bearer:', token)
-    console.log('🔐 Token sem espaços:', token.trim())
-    console.log('🔐 Token bytes:', Buffer.from(token).toString('hex'))
-    console.log('🔐 Headers da requisição PIX:', {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      'x-conta-corrente': conta_corrente,
-      'x-id-idempotente': idempotenteId
-    })
-    console.log('🔐 URL da requisição:', 'https://cdpj.partners.bancointer.com.br/banking/v2/pix')
-
-    // Carregar certificados base64
-    const certPath = path.join(process.cwd(), 'public', 'inter', 'cert_base64.txt')
-    const keyPath = path.join(process.cwd(), 'public', 'inter', 'key_base64.txt')
-
-    // Decodificar certificados base64
-    const certBase64 = fs.readFileSync(certPath, 'utf8').trim()
-    const keyBase64 = fs.readFileSync(keyPath, 'utf8').trim()
-    
-    const cert = Buffer.from(certBase64, 'base64')
-    const key = Buffer.from(keyBase64, 'base64')
-
-    // Configurar requisição HTTPS com mTLS
-    const options = {
-      hostname: 'cdpj.partners.bancointer.com.br',
-      port: 443,
-      path: '/banking/v2/pix',
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token.trim()}`, // Com prefixo Bearer conforme documentação do Inter
-        'Content-Type': 'application/json', // Voltar para minúsculo
-        'x-conta-corrente': conta_corrente.toString().trim(), // Necessário conforme Python que funciona
-        // 'x-id-idempotente': idempotenteId, // Removido conforme Python que funciona
-      },
-      cert: cert,
-      key: key,
-    }
-    
-    // Log detalhado dos headers para debug
-    console.log('🔍 HEADERS FINAIS DA REQUISIÇÃO PIX:')
-    console.log('   - Authorization:', `Bearer ${token.trim().substring(0, 20)}...`)
-    console.log('   - Content-Type:', 'application/json')
-    console.log('   - x-conta-corrente:', conta_corrente.toString().trim())
-    console.log('   - x-id-idempotente:', 'REMOVIDO (conforme Python)')
-    console.log('   - Payload JSON:', JSON.stringify(payload))
-    
-    console.log('🔐 Configuração mTLS para PIX:')
-    console.log('   - Certificado presente:', !!cert)
-    console.log('   - Chave privada presente:', !!key)
-    console.log('   - Tamanho do certificado:', cert.length, 'bytes')
-    console.log('   - Tamanho da chave:', key.length, 'bytes')
-
-    // Fazer requisição HTTPS
-    const response = await new Promise<{ statusCode: number; body: string }>((resolve, reject) => {
-      const request = https.request(options, (response) => {
-        console.log('📡 Status da resposta PIX:', response.statusCode)
-        console.log('📡 Headers da resposta PIX:', response.headers)
-        console.log('📡 Headers de erro (se houver):', {
-          'www-authenticate': response.headers['www-authenticate'],
-          'x-error-code': response.headers['x-error-code'],
-          'x-error-message': response.headers['x-error-message']
-        })
-        
-        let body = ''
-        response.on('data', (chunk) => (body += chunk))
-        response.on('end', () => {
-          console.log('📡 Corpo da resposta PIX:', body)
-          console.log('📡 Content-Type da resposta:', response.headers['content-type'])
-          console.log('📡 Content-Length da resposta:', response.headers['content-length'])
-          
-          // Log adicional para erro 401
-          if (response.statusCode === 401) {
-            console.log('🔍 DIAGNÓSTICO ERRO 401:')
-            console.log('   - Token usado:', token.substring(0, 20) + '...')
-            console.log('   - Token completo:', token)
-            console.log('   - Conta corrente:', conta_corrente)
-            console.log('   - Payload enviado:', JSON.stringify(payload))
-            console.log('   - Headers enviados:', options.headers)
-            console.log('   - URL:', options.hostname + options.path)
-            console.log('   - Tempo desde obtenção do token:', Date.now() - (tokenCache[barId]?.expiry || 0), 'ms')
-            
-            // Tentar obter novo token se o atual expirou
-            if (Date.now() > (tokenCache[barId]?.expiry || 0)) {
-              console.log('⚠️ Token pode ter expirado, tentando renovar...')
-            }
-          }
-          
-          resolve({
-            statusCode: response.statusCode || 500,
-            body
-          })
-        })
-      })
-
-      request.on('error', (error) => {
-        console.log('❌ Erro na requisição HTTPS PIX:', error)
-        reject(error)
-      })
-
-      request.write(JSON.stringify(payload))
-      request.end()
-    })
-
-    if (response.statusCode === 200) {
-      const data = JSON.parse(response.body)
-      console.log('✅ Pagamento PIX realizado com sucesso')
-      
-      // Enviar notificação para Discord
-      try {
-        await enviarNotificacaoDiscord({
-          valor: parseFloat(valorParaInter),
-          descricao: descricao || 'Pagamento PIX',
-          destinatario: destinatario,
-          chave: chave,
-          codigoSolicitacao: data.codigoSolicitacao,
-          status: 'ENVIADO_PARA_APROVACAO',
-          barId: barId
-        })
-        console.log('✅ Notificação Discord enviada com sucesso')
-      } catch (discordError) {
-        console.log('⚠️ Erro ao enviar notificação Discord:', discordError)
-        // Não falhar o pagamento se o Discord der erro
-      }
-      
-      return {
-        success: true,
-        data: {
-          codigoSolicitacao: data.codigoSolicitacao || `inter_${Date.now()}`,
-          status: 'success'
-        }
-      }
-    } else {
-      console.error('❌ Erro no pagamento PIX:', response.body)
-      
-      // Tratar resposta vazia ou não-JSON
-      let errorMessage = `Erro ${response.statusCode}`
-      
-      if (response.body && response.body.trim()) {
-        try {
-          const errorData = JSON.parse(response.body)
-          errorMessage = errorData.error_description || errorData.title || errorMessage
-        } catch (parseError) {
-          errorMessage = `Erro ${response.statusCode}: ${response.body}`
-        }
-      }
-      
-      return {
-        success: false,
-        error: errorMessage
-      }
-    }
-  } catch (error) {
-    console.error('❌ Erro ao realizar pagamento PIX:', error)
-    return {
-      success: false,
-      error: 'Erro na comunicação com o banco'
-    }
-  }
 } 

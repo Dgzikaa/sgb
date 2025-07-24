@@ -58,7 +58,7 @@ export async function getInterCredentials(barId: string): Promise<{
   client_secret: string
   conta_corrente: string
 } | null> {
-  const creds = await getApiCredentials(barId, 'banco_inter')
+  const creds = await getApiCredentials(barId, 'inter')
   
   if (!creds || !creds.client_id || !creds.client_secret || !creds.configuracoes?.conta_corrente) {
     console.error('❌ Credenciais do Inter incompletas ou não encontradas')
