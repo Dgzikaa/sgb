@@ -193,8 +193,8 @@ async function obterAccessToken(
         'Content-Type': 'application/x-www-form-urlencoded',
         'Content-Length': Buffer.byteLength(data),
       },
-      cert: fs.readFileSync(certPath),
-      key: fs.readFileSync(keyPath),
+      cert: cert,
+      key: key,
     }
 
     // Fazer requisição HTTPS
@@ -435,9 +435,16 @@ async function realizarPagamentoPix(params: {
     console.log('💸 Realizando pagamento PIX com mTLS...')
     console.log('📤 Payload:', JSON.stringify(payload, null, 2))
 
-    // Caminhos dos certificados
-    const certPath = path.join(process.cwd(), 'public', 'inter', 'fullchain.pem')
-    const keyPath = path.join(process.cwd(), 'public', 'inter', 'key.pem')
+    // Carregar certificados base64
+    const certPath = path.join(process.cwd(), 'public', 'inter', 'cert_base64.txt')
+    const keyPath = path.join(process.cwd(), 'public', 'inter', 'key_base64.txt')
+
+    // Decodificar certificados base64
+    const certBase64 = fs.readFileSync(certPath, 'utf8').trim()
+    const keyBase64 = fs.readFileSync(keyPath, 'utf8').trim()
+    
+    const cert = Buffer.from(certBase64, 'base64')
+    const key = Buffer.from(keyBase64, 'base64')
 
     // Configurar requisição HTTPS com mTLS
     const options = {
@@ -451,8 +458,8 @@ async function realizarPagamentoPix(params: {
         'x-conta-corrente': conta_corrente,
         'Content-Length': Buffer.byteLength(JSON.stringify(payload)),
       },
-      cert: fs.readFileSync(certPath),
-      key: fs.readFileSync(keyPath),
+      cert: cert,
+      key: key,
     }
 
     // Fazer requisição HTTPS

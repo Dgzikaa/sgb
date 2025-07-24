@@ -43,7 +43,7 @@ interface PagamentoAgendamento {
   categoria_id: string
   centro_custo_id: string
   codigo_solic?: string
-  status: 'pendente' | 'agendado' | 'aprovado' | 'erro'
+  status: 'pendente' | 'agendado' | 'aguardando_aprovacao' | 'aprovado' | 'erro'
   stakeholder_id?: string
   nibo_agendamento_id?: string
   inter_aprovacao_id?: string
@@ -335,10 +335,11 @@ export default function AgendamentoPage() {
     const total = pagamentos.length
     const pendentes = pagamentos.filter(p => p.status === 'pendente').length
     const agendados = pagamentos.filter(p => p.status === 'agendado').length
+    const aguardandoAprovacao = pagamentos.filter(p => p.status === 'aguardando_aprovacao').length
     const aprovados = pagamentos.filter(p => p.status === 'aprovado').length
     const erros = pagamentos.filter(p => p.status === 'erro').length
 
-    return { total, pendentes, agendados, aprovados, erros }
+    return { total, pendentes, agendados, aguardandoAprovacao, aprovados, erros }
   }
 
   const metricas = getMetricas()
@@ -603,7 +604,7 @@ export default function AgendamentoPage() {
           p.id === pagamento.id 
             ? { 
                 ...p, 
-                status: 'aprovado', 
+                status: 'aguardando_aprovacao', 
                 inter_aprovacao_id: data.data.codigoSolicitacao,
                 updated_at: new Date().toISOString()
               }
@@ -611,8 +612,8 @@ export default function AgendamentoPage() {
         ))
         
         toast({
-          title: "✅ Pagamento aprovado no Inter!",
-          description: `Código de solicitação: ${data.data.codigoSolicitacao}`,
+          title: "⏳ Pagamento enviado para aprovação!",
+          description: `Código de solicitação: ${data.data.codigoSolicitacao} - Aguardando aprovação do gestor`,
         })
       } else {
         throw new Error(data.error || 'Erro desconhecido')
@@ -659,8 +660,8 @@ export default function AgendamentoPage() {
       }
 
       toast({
-        title: "🚀 Pagamentos enviados para Inter!",
-        description: `${agendados.length} pagamento(s) foram enviados com sucesso`,
+        title: "⏳ Pagamentos enviados para aprovação!",
+        description: `${agendados.length} pagamento(s) foram enviados e aguardam aprovação do gestor`,
       })
 
     } catch (error) {
@@ -772,6 +773,8 @@ export default function AgendamentoPage() {
         return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">Pendente</Badge>
       case 'agendado':
         return <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">Agendado</Badge>
+      case 'aguardando_aprovacao':
+        return <Badge variant="secondary" className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400">Aguardando Aprovação</Badge>
       case 'aprovado':
         return <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Aprovado</Badge>
       case 'erro':
@@ -1165,6 +1168,16 @@ export default function AgendamentoPage() {
                     <span className="text-lg font-bold text-blue-600 dark:text-blue-400">{metricas.agendados}</span>
                   </div>
 
+                  <div className="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                        <Clock className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                      </div>
+                      <span className="text-sm font-medium text-orange-700 dark:text-orange-300">Aguardando Aprovação</span>
+                    </div>
+                    <span className="text-lg font-bold text-orange-600 dark:text-orange-400">{metricas.aguardandoAprovacao}</span>
+                  </div>
+
                   <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
@@ -1202,7 +1215,7 @@ export default function AgendamentoPage() {
                       className="w-full btn-secondary"
                     >
                       <ArrowRight className="w-4 h-4 mr-2" />
-                      Enviar para Inter
+                      Enviar para Aprovação
                     </Button>
 
 
@@ -1461,7 +1474,7 @@ export default function AgendamentoPage() {
                                     onClick={() => enviarParaInter(pagamento)}
                                     size="sm"
                                     className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white h-8 w-8 p-0 rounded-lg shadow-sm"
-                                    title="Enviar para Inter"
+                                    title="Enviar para Aprovação"
                                   >
                                     <ArrowRight className="w-4 h-4" />
                                   </Button>

@@ -85,13 +85,18 @@ export default function SecurityPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [loading, setLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false) // Novo estado para controlar requisições
   const [metrics, setMetrics] = useState<SecurityMetrics | null>(null)
   const [events, setEvents] = useState<SecurityEvent[]>([])
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([])
   const [autoRefresh, setAutoRefresh] = useState(false)
 
   const loadSecurityData = useCallback(async () => {
+    // Evitar requisições duplicadas
+    if (isLoading) return
+    
     try {
+      setIsLoading(true)
       setLoading(true)
       
       // Carregar métricas, eventos e logs em paralelo
@@ -124,6 +129,7 @@ export default function SecurityPage() {
 
     } catch (error) {
       console.error('Erro ao carregar dados de segurança:', error)
+      // Usar toast diretamente sem dependência
       toast({
         title: "❌ Erro",
         description: "Erro ao carregar dados de segurança",
@@ -131,8 +137,9 @@ export default function SecurityPage() {
       })
     } finally {
       setLoading(false)
+      setIsLoading(false)
     }
-  }, [toast]);
+  }, []); // Sem dependências para evitar recriações
 
   useEffect(() => {
     loadSecurityData()
@@ -145,7 +152,7 @@ export default function SecurityPage() {
     return () => {
       if (interval) clearInterval(interval)
     }
-  }, [autoRefresh, loadSecurityData])
+  }, [autoRefresh]) // Removido loadSecurityData das dependências
 
   const getLevelColor = (level: string) => {
     switch (level) {
@@ -218,10 +225,10 @@ export default function SecurityPage() {
                   variant="outline"
                   size="sm"
                   onClick={loadSecurityData}
-                  disabled={loading}
+                  disabled={isLoading}
                   className="border-white/20 text-white hover:bg-white/10 bg-white/5"
                 >
-                  <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
                   Atualizar
                 </Button>
               </div>
