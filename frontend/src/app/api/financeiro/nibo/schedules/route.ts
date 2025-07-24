@@ -1,4 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 interface NiboScheduleRequest {
   stakeholderId: string
@@ -166,6 +172,22 @@ export async function POST(request: NextRequest) {
 
     // Criar agendamento no NIBO
     const niboResponse = await createScheduleInNibo(body)
+
+    // Enviar notificação para Discord
+    try {
+      await enviarNotificacaoDiscord({
+        valor: body.value,
+        descricao: body.description || 'Agendamento NIBO',
+        destinatario: 'NIBO',
+        chave: 'N/A',
+        codigoSolicitacao: niboResponse.id,
+        status: 'AGENDADO',
+        barId: '3' // TODO: Pegar do contexto
+      })
+    } catch (discordError) {
+      console.error('Erro ao enviar notificação Discord:', discordError)
+      // Não falhar o agendamento por erro no Discord
+    }
 
     return NextResponse.json({
       success: true,
@@ -393,8 +415,110 @@ async function getCategoriaById(categoriaId: string) {
       return null
     }
 
-    return data
-  } catch (error) {
+      return data
+}
+
+// Função para enviar notificação para Discord
+async function enviarNotificacaoDiscord(params: {
+  valor: number
+  descricao: string
+  destinatario: string
+  chave: string
+  codigoSolicitacao: string
+  status: string
+  barId: string
+}) {
+  try {
+    const { valor, descricao, destinatario, chave, codigoSolicitacao, status, barId } = params
+    
+    console.log('🔍 Buscando webhook Discord para bar_id:', barId)
+    
+    // Buscar webhook do Discord da tabela api_credentials
+    const { data: credenciaisDiscord, error } = await supabase
+      .from('api_credentials')
+      .select('configuracoes')
+      .eq('bar_id', barId)
+      .eq('sistema', 'inter')
+      .single()
+
+    console.log('📋 Resultado da busca webhook:', { 
+      error: error?.message, 
+      configuracoes: credenciaisDiscord?.configuracoes 
+    })
+
+    if (error || !credenciaisDiscord?.configuracoes?.webhook_url) {
+      console.log('⚠️ Webhook do Discord não encontrado nas configurações')
+      console.log('❌ Erro:', error?.message)
+      console.log('📋 Configurações:', credenciaisDiscord?.configuracoes)
+      return false
+    }
+
+    const webhookUrl = credenciaisDiscord.configuracoes.webhook_url
+    console.log('✅ Webhook encontrado:', webhookUrl)
+    
+    const embed = {
+      title: "📋 Novo Agendamento NIBO",
+      color: 0x00ff00, // Verde para NIBO
+      fields: [
+        {
+          name: "Valor",
+          value: `R$ ${valor.toFixed(2)}`,
+          inline: true
+        },
+        {
+          name: "Descrição",
+          value: descricao,
+          inline: true
+        },
+        {
+          name: "Código de Solicitação",
+          value: codigoSolicitacao,
+          inline: true
+        },
+        {
+          name: "Status",
+          value: "✅ Agendado no NIBO",
+          inline: true
+        }
+      ],
+      timestamp: new Date().toISOString(),
+      footer: {
+        text: "SGB - Sistema de Gestão de Bares"
+      }
+    }
+
+    const payload = {
+      embeds: [embed]
+    }
+
+    console.log('📤 Enviando notificação para Discord...')
+    console.log('🔗 Webhook URL:', webhookUrl)
+
+    // Enviar diretamente para o webhook do Discord
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    })
+
+    console.log('📡 Status da resposta Discord:', response.status)
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('❌ Erro no Discord:', errorText)
+      return false
+    }
+
+    console.log('✅ Notificação enviada para Discord com sucesso!')
+    return true
+
+  } catch (error: any) {
+    console.error('❌ Erro ao enviar notificação Discord:', error)
+    return false
+  }
+} catch (error) {
     console.error('Erro ao buscar categoria:', error)
     return null
   }
