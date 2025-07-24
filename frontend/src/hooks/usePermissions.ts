@@ -78,7 +78,7 @@ export function usePermissions(): PermissionsHook {
   // Memoizar as permissões do usuário para evitar recálculos desnecessários
   const userPermissions = useMemo(() => {
     if (!user || !user.ativo) return new Set<string>()
-    return new Set(user.modulos_permitidos || [])
+    return new Set(Array.isArray(user.modulos_permitidos) ? user.modulos_permitidos : [])
   }, [user?.id, user?.ativo, user?.modulos_permitidos])
 
   // Memoizar se o admin tem permissões específicas

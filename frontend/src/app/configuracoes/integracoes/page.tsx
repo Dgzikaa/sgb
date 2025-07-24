@@ -1,147 +1,266 @@
 ﻿'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { Separator } from '@/components/ui/separator'
-import { 
-  ArrowLeft, 
-  Settings, 
-  CheckCircle, 
-  Link, 
-  Clock, 
-  Shield, 
-  AlertCircle,
-  Wrench,
-  Database,
-  Zap,
-  Globe,
-  MessageSquare,
-  Calendar,
-  BarChart3,
-  CreditCard,
-  Building2
-} from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import NiboIntegrationCard from '@/components/configuracoes/NiboIntegrationCard'
+import { useBar } from '@/contexts/BarContext'
+import {
+  Building2,
+  CreditCard,
+  Database,
+  Webhook,
+  Settings,
+  ExternalLink,
+  CheckCircle,
+  AlertCircle,
+  MessageSquare,
+  Zap,
+  Bell,
+  Calendar,
+  Users,
+  BarChart3,
+  Clock,
+  Smartphone
+} from 'lucide-react'
+
+interface Integration {
+  id: string
+  name: string
+  description: string
+  icon: React.ReactNode
+  status: 'active' | 'inactive' | 'error' | 'not-configured' | 'pending'
+  route: string
+  externalUrl?: string
+  features: string[]
+  category: string
+  hasCredentials?: boolean
+  hasWebhook?: boolean
+  webhookCount?: number
+}
 
 export default function IntegracoesPage() {
   const router = useRouter()
-  const [selectedBar, setSelectedBar] = useState<unknown>(null)
-  const [activeTab, setActiveTab] = useState('discord')
+  const { selectedBar } = useBar()
+  const [integrations, setIntegrations] = useState<Integration[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadBarInfo()
-  }, [])
+    if (selectedBar?.id) {
+      loadIntegrationsStatus()
+    }
+  }, [selectedBar?.id])
 
-  const loadBarInfo = async () => {
+  const loadIntegrationsStatus = async () => {
     try {
-      const response = await fetch('/api/bars/current')
-      const data = await response.json()
-      setSelectedBar(data.bar)
+      setLoading(true)
+      
+      // Sempre definir as integrações padrão primeiro
+      setDefaultIntegrations()
+      
+      const response = await fetch('/api/integracoes/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bar_id: selectedBar?.id })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        updateIntegrationsWithStatus(data.integrations)
+      }
     } catch (error) {
-      console.error('Erro ao carregar informações do bar:', error)
+      console.error('Erro ao carregar status das integrações:', error)
+      // As integrações padrão já foram definidas acima
     } finally {
       setLoading(false)
     }
   }
 
-  const integrations = [
-    {
-      id: 'discord',
-      name: 'Discord',
-      description: 'Notificações automáticas',
-      icon: MessageSquare,
-      color: 'bg-blue-500',
-      status: 'active',
-      category: 'communication'
-    },
-    {
-      id: 'whatsapp',
-      name: 'WhatsApp',
-      description: 'Integração Business API',
-      icon: MessageSquare,
-      color: 'bg-green-500',
-      status: 'active',
-      category: 'communication'
-    },
-    {
-      id: 'windsor',
-      name: 'Windsor.ai',
-      description: 'Marketing Analytics & Attribution',
-      icon: BarChart3,
-      color: 'bg-purple-500',
-      status: 'construction',
-      category: 'analytics'
-    },
-    {
-      id: 'nibo',
-      name: 'NIBO',
-      description: 'Gestão Financeira',
-      icon: CreditCard,
-      color: 'bg-orange-500',
-      status: 'construction',
-      category: 'finance'
-    },
-    {
-      id: 'getin',
-      name: 'GetIn',
-      description: 'Gestão de Eventos',
-      icon: Calendar,
-      color: 'bg-emerald-500',
-      status: 'active',
-      category: 'events'
-    },
-    {
-      id: 'eventos',
-      name: 'Eventos',
-      description: 'Sistema de Eventos',
-      icon: Calendar,
-      color: 'bg-indigo-500',
-      status: 'active',
-      category: 'events'
-    }
-  ]
+  const setDefaultIntegrations = () => {
+    const defaultIntegrations: Integration[] = [
+      {
+        id: 'inter',
+        name: 'Banco Inter',
+        description: 'Integração com o Banco Inter para receber notificações de pagamentos PIX e boletos',
+        icon: <Building2 className="h-6 w-6" />,
+        status: 'not-configured',
+        route: '/configuracoes/integracoes/inter-webhook',
+        externalUrl: 'https://cdpj.partners.bancointer.com.br/',
+        category: 'financeiro',
+        features: [
+          'Webhook para PIX recebidos',
+          'Webhook para PIX enviados',
+          'Webhook para boletos vencidos',
+          'Webhook para boletos pagos',
+          'Autenticação automática'
+        ]
+      },
+      {
+        id: 'discord',
+        name: 'Discord',
+        description: 'Configuração de webhooks do Discord para notificações automáticas',
+        icon: <MessageSquare className="h-6 w-6" />,
+        status: 'not-configured',
+        route: '/configuracoes/integracoes/discord',
+        externalUrl: 'https://discord.com/developers/applications',
+        category: 'notificacoes',
+        features: [
+          'Webhooks para PIX recebidos',
+          'Webhooks para boletos',
+          'Notificações de checklists',
+          'Alertas do sistema',
+          'Relatórios automáticos'
+        ]
+      },
+      {
+        id: 'nibo',
+        name: 'NIBO',
+        description: 'Integração com o NIBO para gestão contábil',
+        icon: <CreditCard className="h-6 w-6" />,
+        status: 'not-configured',
+        route: '/configuracoes/integracoes/nibo',
+        category: 'contabil',
+        features: [
+          'API de dados contábeis',
+          'Sincronização de lançamentos',
+          'Relatórios contábeis'
+        ]
+      },
+      {
+        id: 'contahub',
+        name: 'ContaHub',
+        description: 'Integração com o ContaHub para sincronização de dados contábeis',
+        icon: <Database className="h-6 w-6" />,
+        status: 'not-configured',
+        route: '/configuracoes/integracoes/contahub',
+        category: 'contabil',
+        features: [
+          'Sincronização automática',
+          'Importação de dados',
+          'Relatórios integrados'
+        ]
+      },
+      {
+        id: 'whatsapp',
+        name: 'WhatsApp',
+        description: 'Integração com WhatsApp via Evolution API',
+        icon: <Smartphone className="h-6 w-6" />,
+        status: 'not-configured',
+        route: '/configuracoes/integracoes/whatsapp',
+        category: 'comunicacao',
+        features: [
+          'Envio de mensagens',
+          'Recebimento de mensagens',
+          'Automação de respostas',
+          'Integração com checklists'
+        ]
+      },
+      {
+        id: 'windsor',
+        name: 'Windsor.AI',
+        description: 'Plataforma de analytics e inteligência artificial',
+        icon: <BarChart3 className="h-6 w-6" />,
+        status: 'pending',
+        route: '/configuracoes/integracoes/windsor',
+        category: 'analytics',
+        features: [
+          'Analytics avançado',
+          'Inteligência artificial',
+          'Relatórios preditivos',
+          'Automação de insights'
+        ]
+      }
+    ]
+    setIntegrations(defaultIntegrations)
+  }
+
+  const updateIntegrationsWithStatus = (statusData: any) => {
+    setIntegrations(prevIntegrations => 
+      prevIntegrations.map(integration => {
+        const status = statusData[integration.id]
+        if (status) {
+          return {
+            ...integration,
+            status: status.status,
+            hasCredentials: status.hasCredentials,
+            hasWebhook: status.hasWebhook,
+            webhookCount: status.activeWebhooks || 0
+          }
+        }
+        return integration
+      })
+    )
+  }
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Ativo</Badge>
-      case 'construction':
-        return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">Em Construção</Badge>
+        return <Badge className="badge-status active">Ativo</Badge>
       case 'inactive':
-        return <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200">Inativo</Badge>
+        return <Badge className="badge-status inactive">Inativo</Badge>
+      case 'error':
+        return <Badge className="badge-status error">Erro</Badge>
+      case 'not-configured':
+        return <Badge className="badge-status warning">Não Configurado</Badge>
+      case 'pending':
+        return <Badge className="badge-status pending">Em Construção</Badge>
       default:
-        return <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200">Desconhecido</Badge>
+        return <Badge className="badge-status inactive">Desconhecido</Badge>
     }
   }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'active':
-        return <CheckCircle className="h-4 w-4 text-green-600" />
-      case 'construction':
-        return <Wrench className="h-4 w-4 text-yellow-600" />
-      case 'inactive':
-        return <AlertCircle className="h-4 w-4 text-gray-600" />
+        return <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+      case 'error':
+        return <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+      case 'pending':
+        return <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
       default:
-        return <AlertCircle className="h-4 w-4 text-gray-600" />
+        return <Settings className="h-4 w-4 text-gray-600 dark:text-gray-400" />
     }
   }
 
-  if (loading) {
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'financeiro': return 'from-green-500 to-green-600'
+      case 'contabil': return 'from-blue-500 to-blue-600'
+      case 'notificacoes': return 'from-purple-500 to-purple-600'
+      case 'comunicacao': return 'from-teal-500 to-teal-600'
+      case 'analytics': return 'from-orange-500 to-orange-600'
+      default: return 'from-gray-500 to-gray-600'
+    }
+  }
+
+  const getCategoryName = (category: string) => {
+    switch (category) {
+      case 'financeiro': return 'Financeiro'
+      case 'contabil': return 'Contábil'
+      case 'notificacoes': return 'Notificações'
+      case 'comunicacao': return 'Comunicação'
+      case 'analytics': return 'Analytics'
+      default: return 'Geral'
+    }
+  }
+
+    if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="container mx-auto px-4 py-6">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4"></div>
-            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        <div className="container-modern py-6">
+          <div className="section-header">
+            <div>
+              <h1 className="section-title">Integrações</h1>
+              <p className="section-subtitle">Carregando status das integrações...</p>
+            </div>
+          </div>
+          <div className="grid-integrations">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="card-integration animate-pulse">
+                <div className="h-48 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -150,315 +269,207 @@ export default function IntegracoesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+      <div className="container-modern py-6">
+        {/* Header da Seção */}
+        <div className="section-header">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Central de Integrações</h1>
-            <p className="text-gray-600 dark:text-gray-400">Configure todas as integrações do seu estabelecimento</p>
+            <h1 className="section-title">Integrações</h1>
+            <p className="section-subtitle">
+              Gerencie as integrações com serviços externos e APIs
+            </p>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={() => router.back()}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Voltar
-          </Button>
+          <div className="flex items-center gap-4">
+            <Badge className="badge-status active">
+              {integrations.filter(i => i.status === 'active').length} Ativas
+            </Badge>
+            <Badge className="badge-status warning">
+              {integrations.filter(i => i.status === 'not-configured').length} Pendentes
+            </Badge>
+          </div>
         </div>
 
-        {/* Status Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <CheckCircle className="h-8 w-8 text-green-600" />
-                <div>
-                  <p className="font-semibold text-green-800 dark:text-green-200">Ativas</p>
-                  <p className="text-sm text-green-600 dark:text-green-300">4 integrações</p>
+        {/* Grid de Integrações */}
+        <div className="grid-integrations">
+          {integrations.map((integration) => (
+            <Card key={integration.id} className="card-integration group hover:shadow-xl transition-all duration-300">
+              <CardHeader className="pb-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className={`icon-integration bg-gradient-to-br ${getCategoryColor(integration.category)} shadow-lg`}>
+                      {integration.icon}
+                    </div>
+                    <div className="flex-1">
+                      <CardTitle className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {integration.name}
+                      </CardTitle>
+                      <div className="flex items-center gap-2 mt-2">
+                        {getStatusIcon(integration.status)}
+                        {getStatusBadge(integration.status)}
+                        <Badge className="badge-status inactive text-xs">
+                          {getCategoryName(integration.category)}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+                <CardDescription className="text-gray-600 dark:text-gray-400 mt-3 leading-relaxed">
+                  {integration.description}
+                </CardDescription>
+              </CardHeader>
 
-          <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <Link className="h-8 w-8 text-blue-600" />
-                <div>
-                  <p className="font-semibold text-blue-800 dark:text-blue-200">Conectadas</p>
-                  <p className="text-sm text-blue-600 dark:text-blue-300">Discord, WhatsApp</p>
+              <CardContent className="space-y-6">
+                {/* Status Details */}
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-4">
+                    {integration.hasCredentials && (
+                      <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                        <CheckCircle className="h-4 w-4" />
+                        <span className="text-sm font-medium">Credenciais</span>
+                      </div>
+                    )}
+                    {integration.hasWebhook && (
+                      <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
+                        <Webhook className="h-4 w-4" />
+                        <span className="text-sm font-medium">Webhook</span>
+                      </div>
+                    )}
+                    {integration.webhookCount && integration.webhookCount > 0 && (
+                      <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
+                        <Bell className="h-4 w-4" />
+                        <span className="text-sm font-medium">{integration.webhookCount} webhooks</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <Clock className="h-8 w-8 text-yellow-600" />
+                {/* Features List */}
                 <div>
-                  <p className="font-semibold text-yellow-800 dark:text-yellow-200">Em Construção</p>
-                  <p className="text-sm text-yellow-600 dark:text-yellow-300">2 integrações</p>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    Funcionalidades
+                  </h4>
+                  <ul className="features-list">
+                    {integration.features.map((feature, index) => (
+                      <li key={index} className="feature-item">
+                        <CheckCircle className="h-3 w-3 text-green-600 dark:text-green-400 mr-2 flex-shrink-0" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          <Card className="bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <Shield className="h-8 w-8 text-purple-600" />
-                <div>
-                  <p className="font-semibold text-purple-800 dark:text-purple-200">Seguras</p>
-                  <p className="text-sm text-purple-600 dark:text-purple-300">100% protegidas</p>
+                {/* Action Buttons */}
+                <div className="actions-group">
+                  <Button
+                    onClick={() => router.push(integration.route)}
+                    className="action-primary shadow-lg hover:shadow-xl transition-all duration-200"
+                    disabled={integration.status === 'pending'}
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    {integration.status === 'pending' ? 'Em Breve' : 'Configurar'}
+                  </Button>
+
+                  {integration.externalUrl && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => window.open(integration.externalUrl, '_blank')}
+                      className="action-icon hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                      title="Abrir site externo"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+                </div>
+
+        {/* Seção de Informações */}
+        <div className="mt-12">
+          <Card className="card-gradient">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
+                <div className="icon-integration bg-gradient-to-br from-purple-500 to-purple-600">
+                  <Webhook className="h-5 w-5" />
+                </div>
+                Sobre Integrações
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6 text-gray-600 dark:text-gray-400">
+                <p className="text-base leading-relaxed">
+                  As integrações permitem conectar o SGB com serviços externos para automatizar
+                  processos e sincronizar dados. Cada integração pode ter diferentes níveis de
+                  configuração e funcionalidades.
+                </p>
+
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      Status das Integrações
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <Badge className="badge-status active">Ativo</Badge>
+                        <span className="text-sm">Funcionando corretamente</span>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                        <Badge className="badge-status warning">Não Configurado</Badge>
+                        <span className="text-sm">Precisa de configuração</span>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <Badge className="badge-status inactive">Inativo</Badge>
+                        <span className="text-sm">Configurado mas inativo</span>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                        <Badge className="badge-status error">Erro</Badge>
+                        <span className="text-sm">Problema na integração</span>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <Badge className="badge-status pending">Em Construção</Badge>
+                        <span className="text-sm">Funcionalidade em desenvolvimento</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      Como Configurar
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <div className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                          1
+                        </div>
+                        <span className="text-sm">Clique em "Configurar" na integração desejada</span>
+                      </div>
+                      <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <div className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                          2
+                        </div>
+                        <span className="text-sm">Siga as instruções específicas de cada serviço</span>
+                      </div>
+                      <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <div className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                          3
+                        </div>
+                        <span className="text-sm">Teste a integração para verificar se está funcionando</span>
+                      </div>
+                      <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <div className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                          4
+                        </div>
+                        <span className="text-sm">Monitore o status regularmente</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
-
-        {/* Integration Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
-            {integrations.map((integration) => (
-              <TabsTrigger 
-                key={integration.id} 
-                value={integration.id}
-                className="flex items-center gap-2"
-              >
-                <div className={`w-3 h-3 rounded-full ${integration.color}`}></div>
-                {integration.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          {/* Discord Tab */}
-          <TabsContent value="discord" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                    <MessageSquare className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">Discord Webhooks</CardTitle>
-                    <CardDescription>Configure notificações automáticas para o Discord</CardDescription>
-                  </div>
-                  <div className="ml-auto">
-                    {getStatusBadge('active')}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    {getStatusIcon('active')}
-                    <span className="text-green-800 dark:text-green-200 font-medium">Configurado</span>
-                  </div>
-                  <Button variant="outline" size="sm">Configurar</Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* WhatsApp Tab */}
-          <TabsContent value="whatsapp" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-                    <MessageSquare className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">WhatsApp Business API</CardTitle>
-                    <CardDescription>Integração com WhatsApp Business</CardDescription>
-                  </div>
-                  <div className="ml-auto">
-                    {getStatusBadge('active')}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    {getStatusIcon('active')}
-                    <span className="text-green-800 dark:text-green-200 font-medium">Configurado</span>
-                  </div>
-                  <Button variant="outline" size="sm">Configurar</Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Windsor.ai Tab */}
-          <TabsContent value="windsor" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
-                    <BarChart3 className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">Windsor.ai</CardTitle>
-                    <CardDescription>Marketing Analytics & Attribution Platform</CardDescription>
-                  </div>
-                  <div className="ml-auto">
-                    {getStatusBadge('construction')}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center justify-between p-6 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border-2 border-dashed border-yellow-300 dark:border-yellow-700">
-                  <div className="flex items-center gap-4">
-                    <Wrench className="h-8 w-8 text-yellow-600" />
-                    <div>
-                      <h3 className="font-semibold text-yellow-800 dark:text-yellow-200">Em Construção</h3>
-                      <p className="text-sm text-yellow-600 dark:text-yellow-300">
-                        Integração com Windsor.ai está sendo desenvolvida
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <h4 className="font-medium text-gray-900 dark:text-white">Funcionalidades Planejadas:</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <BarChart3 className="h-5 w-5 text-blue-600" />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">Marketing Attribution</span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <Globe className="h-5 w-5 text-green-600" />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">Multi-Channel Analytics</span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <Zap className="h-5 w-5 text-yellow-600" />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">Real-time Data</span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <Database className="h-5 w-5 text-purple-600" />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">Data Integration</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* NIBO Tab */}
-          <TabsContent value="nibo" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-                    <CreditCard className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">NIBO</CardTitle>
-                    <CardDescription>Sistema de Gestão Financeira</CardDescription>
-                  </div>
-                  <div className="ml-auto">
-                    {getStatusBadge('construction')}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center justify-between p-6 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border-2 border-dashed border-yellow-300 dark:border-yellow-700">
-                  <div className="flex items-center gap-4">
-                    <Wrench className="h-8 w-8 text-yellow-600" />
-                    <div>
-                      <h3 className="font-semibold text-yellow-800 dark:text-yellow-200">Em Construção</h3>
-                      <p className="text-sm text-yellow-600 dark:text-yellow-300">
-                        Integração com NIBO está sendo desenvolvida
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <h4 className="font-medium text-gray-900 dark:text-white">Funcionalidades Planejadas:</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <CreditCard className="h-5 w-5 text-green-600" />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">Gestão Financeira</span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <Building2 className="h-5 w-5 text-blue-600" />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">Contabilidade</span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <BarChart3 className="h-5 w-5 text-purple-600" />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">Relatórios</span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <Database className="h-5 w-5 text-orange-600" />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">Sincronização</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* GetIn Tab */}
-          <TabsContent value="getin" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center">
-                    <Calendar className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">GetIn</CardTitle>
-                    <CardDescription>Gestão de Eventos e Reservas</CardDescription>
-                  </div>
-                  <div className="ml-auto">
-                    {getStatusBadge('active')}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    {getStatusIcon('active')}
-                    <span className="text-green-800 dark:text-green-200 font-medium">Configurado</span>
-                  </div>
-                  <Button variant="outline" size="sm">Configurar</Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Eventos Tab */}
-          <TabsContent value="eventos" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center">
-                    <Calendar className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">Sistema de Eventos</CardTitle>
-                    <CardDescription>Gestão interna de eventos</CardDescription>
-                  </div>
-                  <div className="ml-auto">
-                    {getStatusBadge('active')}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    {getStatusIcon('active')}
-                    <span className="text-green-800 dark:text-green-200 font-medium">Configurado</span>
-                  </div>
-                  <Button variant="outline" size="sm">Configurar</Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
       </div>
     </div>
   )

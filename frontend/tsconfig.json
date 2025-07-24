@@ -38,13 +38,19 @@
     "exactOptionalPropertyTypes": false,
     "noImplicitOverride": false,
     "forceConsistentCasingInFileNames": true,
-    "types": ["node", "react", "react-dom"]
+    "types": [
+      "node",
+      "react",
+      "react-dom"
+    ],
+    "strictNullChecks": true
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "public/inter/teste.js"
   ],
   "exclude": [
     "node_modules"

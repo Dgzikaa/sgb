@@ -1,163 +1,178 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { processDiscordCommand } from '@/lib/discord-bot-service';
-import { sgbDiscordService } from '@/lib/discord-service';
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
-// ========================================
-// 🧪 TESTES DO DISCORD BOT - SGB
-// ========================================
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
-// Lista de comandos para testar
-const COMANDOS_TESTE = [
-  'qual o maior faturamento?',
-  'dashboard executivo',
-  'status dos checklists', 
-  'stats do whatsapp',
-  'tempo de produção',
-  'score de saúde',
-  'visão 360',
-  'top 5 clientes',
-  'resumo do dia',
-  'performance dos funcionários',
-  'ajuda'
-];
-
-// ========================================
-// 🧪 GET /api/discord/test (Teste Completo)
-// ========================================
-export async function GET(request: NextRequest) {
-  const url = new URL(request.url);
-  const comando = url.searchParams.get('cmd');
-  const testarTodos = url.searchParams.get('all') === 'true';
-  
-  try {
-    if (testarTodos) {
-      // Testar todos os comandos
-      console.log('🧪 Iniciando teste completo do Discord Bot...');
-      
-      const resultados = [];
-      
-      for (const cmd of COMANDOS_TESTE) {
-        console.log(`🤖 Testando comando: "${cmd}"`);
-        
-        try {
-          const success = await processDiscordCommand(cmd, 'Sistema de Teste', 3);
-          resultados.push({
-            comando: cmd,
-            sucesso: success,
-            timestamp: new Date().toISOString()
-          });
-          
-          // Pausa entre comandos para não sobrecarregar
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          
-        } catch (error) {
-          resultados.push({
-            comando: cmd,
-            sucesso: false,
-            erro: error instanceof Error ? error.message : 'Erro desconhecido',
-            timestamp: new Date().toISOString()
-          });
-        }
-      }
-      
-      return NextResponse.json({
-        success: true,
-        message: 'Teste completo executado',
-        total_comandos: COMANDOS_TESTE.length,
-        resultados
-      });
-      
-    } else if (comando) {
-      // Testar comando específico
-      console.log(`🧪 Testando comando específico: "${comando}"`);
-      
-      const success = await processDiscordCommand(comando, 'Sistema de Teste', 3);
-      
-      return NextResponse.json({
-        success,
-        comando,
-        message: success ? 'Comando executado com sucesso' : 'Erro ao executar comando',
-        timestamp: new Date().toISOString()
-      });
-      
-    } else {
-      // Mostrar informações de teste
-      return NextResponse.json({
-        success: true,
-        message: 'Discord Bot SGB - Sistema de Testes',
-        comandos_disponiveis: COMANDOS_TESTE,
-        exemplos: {
-          comando_especifico: '/api/discord/test?cmd=dashboard executivo',
-          todos_comandos: '/api/discord/test?all=true',
-          webhook_teste: '/api/discord/webhook?test=qual o maior faturamento'
-        },
-        instrucoes: [
-          '1. Use ?cmd= para testar um comando específico',
-          '2. Use ?all=true para testar todos os comandos',
-          '3. O bot processará e enviará a resposta no Discord'
-        ]
-      });
-    }
-
-  } catch (error) {
-    console.error('❌ Erro no teste do Discord Bot:', error);
-    
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Erro desconhecido',
-      timestamp: new Date().toISOString()
-    }, { status: 500 });
-  }
-}
-
-// ========================================
-// 🚀 POST /api/discord/test (Teste de Conexão)
-// ========================================
 export async function POST(request: NextRequest) {
   try {
-    console.log('🚀 Testando conexão Discord...');
-    
-    const body = await request.json();
-    const { teste_conexao, comando_personalizado } = body;
-    
-    if (teste_conexao) {
-      // Testar conexão do webhook Discord
-      const success = await sgbDiscordService.testarConexao();
-      
-      return NextResponse.json({
-        success,
-        message: success ? 'Conexão Discord OK' : 'Falha na conexão Discord',
-        webhook_status: success ? 'Ativo' : 'Inativo',
-        timestamp: new Date().toISOString()
-      });
+    const { webhook_url, webhook_type, bar_id } = await request.json()
+
+    if (!webhook_url || !webhook_type || !bar_id) {
+      return NextResponse.json({ 
+        error: 'webhook_url, webhook_type e bar_id são obrigatórios' 
+      }, { status: 400 })
     }
-    
-    if (comando_personalizado) {
-      // Testar comando personalizado
-      console.log(`🧪 Comando personalizado: "${comando_personalizado}"`);
-      
-      const success = await processDiscordCommand(comando_personalizado, 'Teste POST', 3);
-      
-      return NextResponse.json({
-        success,
-        comando: comando_personalizado,
-        message: success ? 'Comando personalizado executado' : 'Erro no comando personalizado',
-        timestamp: new Date().toISOString()
-      });
+
+    // Buscar configuração do webhook específico
+    const { data: webhookConfig, error: configError } = await supabase
+      .from('discord_webhooks')
+      .select('*')
+      .eq('bar_id', bar_id)
+      .eq('webhook_type', webhook_type)
+      .eq('enabled', true)
+      .single()
+
+    if (configError || !webhookConfig) {
+      return NextResponse.json({ 
+        error: 'Webhook não configurado ou desabilitado' 
+      }, { status: 404 })
     }
-    
+
+    // Criar mensagem de teste baseada no tipo
+    let testMessage = ''
+    let embedColor = 0x00D084 // Verde padrão
+
+    switch (webhook_type) {
+      case 'pix_recebido':
+        testMessage = `💰 **TESTE - PIX RECEBIDO**\n\n` +
+          `**Valor:** R$ 100,00\n` +
+          `**Pagador:** João Silva\n` +
+          `**TXID:** \`test_${Date.now()}\`\n` +
+          `**Data:** ${new Date().toLocaleString('pt-BR')}\n` +
+          `**Bar ID:** ${bar_id}`
+        embedColor = 0x00FF00 // Verde
+        break
+
+      case 'pix_enviado':
+        testMessage = `💸 **TESTE - PIX ENVIADO**\n\n` +
+          `**Valor:** R$ 50,00\n` +
+          `**Beneficiário:** Maria Santos\n` +
+          `**TXID:** \`test_${Date.now()}\`\n` +
+          `**Data:** ${new Date().toLocaleString('pt-BR')}\n` +
+          `**Bar ID:** ${bar_id}`
+        embedColor = 0x0000FF // Azul
+        break
+
+      case 'boleto_vencido':
+        testMessage = `📅 **TESTE - BOLETO VENCIDO**\n\n` +
+          `**Nosso Número:** \`123456789\`\n` +
+          `**Valor:** R$ 200,00\n` +
+          `**Data:** ${new Date().toLocaleString('pt-BR')}\n` +
+          `**Bar ID:** ${bar_id}`
+        embedColor = 0xFFA500 // Laranja
+        break
+
+      case 'boleto_pago':
+        testMessage = `✅ **TESTE - BOLETO PAGO**\n\n` +
+          `**Nosso Número:** \`123456789\`\n` +
+          `**Valor Pago:** R$ 200,00\n` +
+          `**Data:** ${new Date().toLocaleString('pt-BR')}\n` +
+          `**Bar ID:** ${bar_id}`
+        embedColor = 0x00FF00 // Verde
+        break
+
+      case 'checklist':
+        testMessage = `✅ **TESTE - CHECKLIST**\n\n` +
+          `**Tarefa:** Checklist de Abertura\n` +
+          `**Status:** Concluído\n` +
+          `**Responsável:** Funcionário Teste\n` +
+          `**Data:** ${new Date().toLocaleString('pt-BR')}\n` +
+          `**Bar ID:** ${bar_id}`
+        embedColor = 0x800080 // Roxo
+        break
+
+      case 'contahub':
+        testMessage = `🔄 **TESTE - CONTAHUB**\n\n` +
+          `**Sincronização:** Dados contábeis\n` +
+          `**Status:** Sucesso\n` +
+          `**Registros:** 150 lançamentos\n` +
+          `**Data:** ${new Date().toLocaleString('pt-BR')}\n` +
+          `**Bar ID:** ${bar_id}`
+        embedColor = 0x008080 // Teal
+        break
+
+      case 'erros':
+        testMessage = `⚠️ **TESTE - ERRO DO SISTEMA**\n\n` +
+          `**Erro:** Teste de notificação\n` +
+          `**Módulo:** Sistema de Testes\n` +
+          `**Severidade:** Baixa\n` +
+          `**Data:** ${new Date().toLocaleString('pt-BR')}\n` +
+          `**Bar ID:** ${bar_id}`
+        embedColor = 0xFF0000 // Vermelho
+        break
+
+      default:
+        testMessage = `🔔 **TESTE - NOTIFICAÇÃO GERAL**\n\n` +
+          `**Tipo:** ${webhook_type}\n` +
+          `**Mensagem:** Teste de webhook\n` +
+          `**Data:** ${new Date().toLocaleString('pt-BR')}\n` +
+          `**Bar ID:** ${bar_id}`
+        embedColor = 0x00D084 // Verde padrão
+    }
+
+    // Criar embed para Discord
+    const embed = {
+      title: `Teste de Webhook - ${webhook_type.toUpperCase()}`,
+      description: testMessage,
+      color: embedColor,
+      footer: {
+        text: `SGB • Bar ${bar_id} • ${new Date().toLocaleDateString('pt-BR')}`
+      },
+      timestamp: new Date().toISOString()
+    }
+
+    // Enviar para Discord
+    const discordResponse = await fetch(webhook_url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        content: `🧪 **TESTE DE WEBHOOK**\n\nEste é um teste do webhook \`${webhook_type}\` do SGB.`,
+        embeds: [embed],
+        username: 'SGB Test Bot',
+        avatar_url: 'https://cdn.discordapp.com/attachments/1234567890/1234567890/sgb-logo.png'
+      })
+    })
+
+    if (!discordResponse.ok) {
+      const errorText = await discordResponse.text()
+      console.error('❌ Erro na resposta do Discord:', discordResponse.status, errorText)
+      return NextResponse.json({ 
+        error: `Erro ao enviar para Discord: ${discordResponse.status}` 
+      }, { status: 500 })
+    }
+
+    // Salvar log do teste
+    await supabase
+      .from('webhook_test_logs')
+      .insert({
+        webhook_type,
+        webhook_url: webhook_url.substring(0, 50) + '...',
+        bar_id,
+        status: 'success',
+        response_status: discordResponse.status,
+        test_data: {
+          message: testMessage,
+          embed: embed
+        },
+        created_at: new Date().toISOString()
+      })
+
     return NextResponse.json({
-      success: false,
-      message: 'Parâmetros inválidos',
-      parametros_aceitos: ['teste_conexao', 'comando_personalizado']
-    }, { status: 400 });
+      success: true,
+      message: `Webhook ${webhook_type} testado com sucesso!`,
+      webhook_type,
+      bar_id
+    })
 
   } catch (error) {
-    console.error('❌ Erro no teste POST:', error);
-    
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Erro desconhecido'
-    }, { status: 500 });
+    console.error('❌ Erro ao testar webhook Discord:', error)
+    return NextResponse.json({ 
+      error: 'Erro interno do servidor' 
+    }, { status: 500 })
   }
 } 
