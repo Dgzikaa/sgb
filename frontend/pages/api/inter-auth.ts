@@ -7,16 +7,16 @@ import path from 'path'
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const {
-      inter_cert,
-      inter_key,
-      inter_ca,
-      inter_client_id,
-      inter_client_secret,
-    } = process.env
-
-    if (!inter_cert || !inter_key || !inter_ca || !inter_client_id || !inter_client_secret) {
-      return res.status(500).json({ error: 'Variáveis de ambiente ausentes' })
-    }
+        INTER_CERT,
+        INTER_KEY,
+        INTER_CA_CERT,
+        INTER_CLIENT_ID,
+        INTER_CLIENT_SECRET,
+      } = process.env
+      
+      if (!INTER_CERT || !INTER_KEY || !INTER_CA_CERT || !INTER_CLIENT_ID || !INTER_CLIENT_SECRET) {
+        return res.status(500).json({ error: 'Variáveis de ambiente ausentes' })
+      }
 
     // Criar arquivos temporários com os certificados decodificados
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'inter-'))
@@ -24,14 +24,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const keyPath = path.join(tempDir, 'key.pem')
     const caPath = path.join(tempDir, 'ca.pem')
 
-    fs.writeFileSync(certPath, Buffer.from(inter_cert, 'base64'))
-    fs.writeFileSync(keyPath, Buffer.from(inter_key, 'base64'))
-    fs.writeFileSync(caPath, Buffer.from(inter_ca, 'base64'))
+    fs.writeFileSync(certPath, Buffer.from(INTER_CERT, 'base64'))
+    fs.writeFileSync(keyPath, Buffer.from(INTER_KEY, 'base64'))
+    fs.writeFileSync(caPath, Buffer.from(INTER_CA_CERT, 'base64'))
 
     const data = new URLSearchParams({
       grant_type: 'client_credentials',
-      client_id: inter_client_id,
-      client_secret: inter_client_secret,
+      client_id: INTER_CLIENT_ID,
+      client_secret: INTER_CLIENT_SECRET,
     }).toString()
 
     const options = {
