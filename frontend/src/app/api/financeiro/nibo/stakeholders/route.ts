@@ -42,11 +42,19 @@ interface NiboStakeholderResponse {
 // Configurações do NIBO (em produção viriam de variáveis de ambiente)
 const NIBO_CONFIG = {
   BASE_URL: "https://api.nibo.com.br/empresas/v1",
-  API_TOKEN: "02D8F9B964E74ADAA1A595909A67BA46" // Em produção: process.env.NIBO_API_TOKEN
+  API_TOKEN: process.env.NIBO_API_TOKEN
 }
 
 export async function POST(request: NextRequest) {
   try {
+    // Validar se o token do NIBO está configurado
+    if (!NIBO_CONFIG.API_TOKEN) {
+      return NextResponse.json(
+        { success: false, error: 'Token do NIBO não configurado. Configure NIBO_API_TOKEN no Vercel.' },
+        { status: 500 }
+      )
+    }
+
     const body: NiboStakeholderRequest = await request.json()
     const { name, document, email, phone, type, address } = body
 
@@ -171,11 +179,11 @@ export async function GET(request: NextRequest) {
 
 // Função para criar stakeholder no NIBO
 async function createStakeholderInNibo(stakeholder: NiboStakeholderRequest): Promise<NiboStakeholderResponse> {
-  const headers = {
-    'accept': 'application/json',
-    'apitoken': NIBO_CONFIG.API_TOKEN,
-    'content-type': 'application/json'
-  }
+      const headers = {
+      'accept': 'application/json',
+      'apitoken': NIBO_CONFIG.API_TOKEN!,
+      'content-type': 'application/json'
+    }
 
   // Mapear tipo para endpoint correto do NIBO
   let endpoint = ''
@@ -272,7 +280,7 @@ async function getStakeholdersFromNibo(params: {
 }): Promise<NiboStakeholderResponse[]> {
   const headers = {
     'accept': 'application/json',
-    'apitoken': NIBO_CONFIG.API_TOKEN
+    'apitoken': NIBO_CONFIG.API_TOKEN!
   }
 
   // Buscar em todos os tipos de stakeholders

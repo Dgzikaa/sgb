@@ -68,14 +68,22 @@ interface NiboScheduleResponse {
   isFlagged?: boolean
 }
 
-// Configurações do NIBO (em produção viriam de variáveis de ambiente)
+// Configurações do NIBO
 const NIBO_CONFIG = {
   BASE_URL: "https://api.nibo.com.br/empresas/v1",
-  API_TOKEN: "02D8F9B964E74ADAA1A595909A67BA46" // Em produção: process.env.NIBO_API_TOKEN
+  API_TOKEN: process.env.NIBO_API_TOKEN
 }
 
 export async function POST(request: NextRequest) {
   try {
+    // Validar se o token do NIBO está configurado
+    if (!NIBO_CONFIG.API_TOKEN) {
+      return NextResponse.json(
+        { success: false, error: 'Token do NIBO não configurado. Configure NIBO_API_TOKEN no Vercel.' },
+        { status: 500 }
+      )
+    }
+
     const body: NiboScheduleRequest = await request.json()
     const { stakeholderId, dueDate, scheduleDate, categoria_id, centro_custo_id, categories, accrualDate, value } = body
 
@@ -218,7 +226,7 @@ async function createScheduleInNibo(schedule: NiboScheduleRequest): Promise<Nibo
     
     const headers = {
       'accept': 'application/json',
-      'apitoken': NIBO_CONFIG.API_TOKEN,
+      'apitoken': NIBO_CONFIG.API_TOKEN!,
       'content-type': 'application/json'
     }
 
@@ -317,7 +325,7 @@ async function getSchedulesFromNibo(params: {
 }): Promise<NiboScheduleResponse[]> {
   const headers = {
     'accept': 'application/json',
-    'apitoken': NIBO_CONFIG.API_TOKEN
+    'apitoken': NIBO_CONFIG.API_TOKEN!
   }
 
   let url = `${NIBO_CONFIG.BASE_URL}/schedules/debit`

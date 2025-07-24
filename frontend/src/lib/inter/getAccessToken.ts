@@ -29,7 +29,7 @@ export async function getInterAccessToken(
   }).toString()
 
   console.log('🔐 Dados OAuth2:', {
-    grant_type: 'client_credentials',
+      grant_type: 'client_credentials',
     client_id: clientId,
     client_secret: clientSecret.substring(0, 8) + '...',
     scope: scope

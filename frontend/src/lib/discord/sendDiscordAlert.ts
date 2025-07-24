@@ -9,13 +9,13 @@ export async function sendDiscordAlert(content: string, barId?: number) {
   try {
     // Se não tiver barId, usar webhook padrão (fallback)
     if (!barId) {
-      if (!process.env.DISCORD_INTER_WEBHOOK_URL) return
-      
-      await fetch(process.env.DISCORD_INTER_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content })
-      })
+  if (!process.env.DISCORD_INTER_WEBHOOK_URL) return
+
+  await fetch(process.env.DISCORD_INTER_WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content })
+  })
       return
     }
 

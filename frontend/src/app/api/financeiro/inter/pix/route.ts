@@ -328,7 +328,7 @@ function identificarTipoChave(chave: string): { tipo: string; chave: string } | 
     console.log(`✅ Identificado como EMAIL: ${chaveLimpa}`)
     return { tipo: 'EMAIL', chave: chaveLimpa.toLowerCase() }
   }
-  
+
   // Remover formatação para análise numérica
   const chaveNumerica = chaveLimpa.replace(/\D/g, '')
   
@@ -339,7 +339,7 @@ function identificarTipoChave(chave: string): { tipo: string; chave: string } | 
   }
   
   console.log(`🧹 Chave limpa: '${chaveNumerica}' (tamanho: ${chaveNumerica.length})`)
-  
+
   // CNPJ (14 dígitos)
   if (chaveNumerica.length === 14) {
     if (validarCNPJ(chaveNumerica)) {
@@ -361,7 +361,7 @@ function identificarTipoChave(chave: string): { tipo: string; chave: string } | 
       return { tipo: 'CPF', chave: chaveNumerica } // Retorna mesmo se inválido
     }
   }
-  
+
   // Telefone (10 ou 11 dígitos)
   if (chaveNumerica.length === 10 || chaveNumerica.length === 11 || telefoneInternacional) {
     let telefone = chaveNumerica
@@ -382,20 +382,20 @@ function identificarTipoChave(chave: string): { tipo: string; chave: string } | 
       const ddd = telefone.slice(0, 2)
       if (parseInt(ddd) >= 11 && parseInt(ddd) <= 99) {
         console.log(`✅ Identificado como TELEFONE FIXO válido: ${telefone}`)
-        return { tipo: 'TELEFONE', chave: `+55${telefone}` }
+    return { tipo: 'TELEFONE', chave: `+55${telefone}` }
       }
     }
     
     console.log(`⚠️ Telefone com formato suspeito: ${chaveOriginal} -> ${telefone}`)
     return { tipo: 'TELEFONE', chave: `+55${telefone}` } // Retorna mesmo se formato suspeito
   }
-  
+
   // Chave aleatória (UUID)
   if (chaveLimpa.length >= 32 || chaveLimpa.includes('-')) {
     console.log(`✅ Identificado como CHAVE ALEATÓRIA: ${chaveLimpa}`)
     return { tipo: 'ALEATORIA', chave: chaveLimpa }
   }
-  
+
   // Caso não consiga identificar claramente
   console.log(`⚠️ Tipo de chave não identificado: ${chaveOriginal} -> ${chaveNumerica}`)
   
