@@ -9,12 +9,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const {
         INTER_CERT,
         INTER_KEY,
-        INTER_CA_CERT,
+        INTER_CA,
         INTER_CLIENT_ID,
         INTER_CLIENT_SECRET,
       } = process.env
       
-      if (!INTER_CERT || !INTER_KEY || !INTER_CA_CERT || !INTER_CLIENT_ID || !INTER_CLIENT_SECRET) {
+      if (!INTER_CERT || !INTER_KEY || !INTER_CA || !INTER_CLIENT_ID || !INTER_CLIENT_SECRET) {
         return res.status(500).json({ error: 'Variáveis de ambiente ausentes' })
       }
 
@@ -26,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     fs.writeFileSync(certPath, Buffer.from(INTER_CERT, 'base64'))
     fs.writeFileSync(keyPath, Buffer.from(INTER_KEY, 'base64'))
-    fs.writeFileSync(caPath, Buffer.from(INTER_CA_CERT, 'base64'))
+    fs.writeFileSync(caPath, Buffer.from(INTER_CA, 'base64'))
 
     const data = new URLSearchParams({
       grant_type: 'client_credentials',
