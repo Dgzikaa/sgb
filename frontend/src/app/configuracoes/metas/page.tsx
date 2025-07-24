@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,9 @@ import {
   Loader2,
   BarChart3,
   Award,
-  Zap
+  Zap,
+  Share2,
+  Calendar
 } from 'lucide-react';
 
 // Tipos
@@ -49,11 +51,13 @@ interface Meta {
 }
 
 interface MetasOrganizadas {
-  financeiro: Meta[];
-  clientes: Meta[];
-  avaliacoes: Meta[];
+  indicadores_estrategicos: Meta[];
   cockpit_produtos: Meta[];
-  marketing: Meta[];
+  cockpit_vendas: Meta[];
+  cockpit_financeiro: Meta[];
+  cockpit_marketing: Meta[];
+  indicadores_qualidade: Meta[];
+  indicadores_mensais: Meta[];
 }
 
 const formatarValor = (valor: number | null, tipo: string): string => {
@@ -253,11 +257,13 @@ export default function MetasPage() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [metas, setMetas] = useState<MetasOrganizadas>({
-    financeiro: [],
-    clientes: [],
-    avaliacoes: [],
+    indicadores_estrategicos: [],
     cockpit_produtos: [],
-    marketing: []
+    cockpit_vendas: [],
+    cockpit_financeiro: [],
+    cockpit_marketing: [],
+    indicadores_qualidade: [],
+    indicadores_mensais: []
   });
   const [editingId, setEditingId] = useState<number | null>(null);
   const [savingId, setSavingId] = useState<number | null>(null);
@@ -271,27 +277,40 @@ export default function MetasPage() {
       if (data.success) {
         setMetas(data.data);
       } else {
-        toast({
-          title: "❌ Erro",
-          description: "Erro ao carregar metas",
-          variant: "destructive"
-        });
+        console.error('Erro ao carregar metas:', data.error);
       }
     } catch (error) {
       console.error('Erro ao carregar metas:', error);
-      toast({
-        title: "❌ Erro",
-        description: "Erro ao carregar metas",
-        variant: "destructive"
-      });
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, []); // Removida dependência do toast
 
   useEffect(() => {
     carregarMetas();
   }, [carregarMetas]);
+
+  // Otimizar cálculo de estatísticas com useMemo
+  const categoryStats = useMemo(() => {
+    const stats: Record<string, { total: number; ativas: number }> = {};
+    
+    Object.entries(metas).forEach(([categoria, metasCategoria]) => {
+      const total = metasCategoria.length;
+      const ativas = metasCategoria.filter(m => m.meta_ativa).length;
+      stats[categoria] = { total, ativas };
+    });
+    
+    return stats;
+  }, [metas]);
+
+  // Otimizar cálculo do total de metas
+  const totalMetas = useMemo(() => {
+    return Object.values(metas).reduce((acc, curr) => acc + curr.length, 0);
+  }, [metas]);
+
+  const getCategoryStats = useCallback((categoria: keyof MetasOrganizadas) => {
+    return categoryStats[categoria] || { total: 0, ativas: 0 };
+  }, [categoryStats]);
 
   const salvarMeta = async (metaId: number, valores: Record<string, number | null>) => {
     try {
@@ -333,26 +352,23 @@ export default function MetasPage() {
 
   const getTabIcon = (categoria: string) => {
     switch (categoria.toLowerCase()) {
-      case 'financeiro':
-        return <DollarSign className="w-4 h-4" />
-      case 'clientes':
-        return <Users className="w-4 h-4" />
-      case 'avaliacoes':
-        return <Star className="w-4 h-4" />
+      case 'indicadores_estrategicos':
+        return <Target className="w-4 h-4" />
       case 'cockpit_produtos':
         return <Coffee className="w-4 h-4" />
-      case 'marketing':
+      case 'cockpit_vendas':
         return <TrendingUp className="w-4 h-4" />
+      case 'cockpit_financeiro':
+        return <DollarSign className="w-4 h-4" />
+      case 'cockpit_marketing':
+        return <Share2 className="w-4 h-4" />
+      case 'indicadores_qualidade':
+        return <Star className="w-4 h-4" />
+      case 'indicadores_mensais':
+        return <Calendar className="w-4 h-4" />
       default:
         return <Target className="w-4 h-4" />
     }
-  };
-
-  const getCategoryStats = (categoria: keyof MetasOrganizadas) => {
-    const metasCategoria = metas[categoria];
-    const total = metasCategoria.length;
-    const ativas = metasCategoria.filter(m => m.meta_ativa).length;
-    return { total, ativas };
   };
 
   if (loading) {
@@ -398,7 +414,7 @@ export default function MetasPage() {
                 <div className="text-right">
                   <div className="text-sm text-orange-200">Total de Metas</div>
                   <div className="text-2xl font-bold">
-                    {metas && typeof metas === 'object' ? Object.values(metas).reduce((acc, curr) => acc + curr.length, 0) : 0}
+                    {totalMetas}
                   </div>
                 </div>
                 <div className="p-3 bg-white/10 rounded-xl">

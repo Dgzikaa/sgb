@@ -23,15 +23,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Buscar metas do bar no banco
-    const { data: metasBar, error } = await supabase
-      .from('metas_negocio')
-      .select('*')
-      .eq('bar_id', parseInt(bar_id))
+    const { data: bar, error } = await supabase
+      .from('bars')
+      .select('metas')
+      .eq('id', parseInt(bar_id))
+      .single()
 
     if (error) {
       console.error('❌ Erro ao buscar metas:', error)
       
-      // Se não encontrou metas para o bar, retornar estrutura vazia
+      // Se não encontrou o bar, retornar estrutura vazia
       if (error.code === 'PGRST116') {
         return NextResponse.json({
           success: true,
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: metasBar,
+      data: bar?.metas || [],
       message: 'Metas carregadas com sucesso'
     })
 
@@ -81,18 +82,35 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Tentar inserir ou atualizar metas
-    const { data, error } = await supabase
-      .from('metas_negocio')
-      .upsert([{
-        bar_id: body.bar_id,
-        ...body
-      }])
-      .select()
+    // Buscar metas existentes
+    const { data: bar, error: fetchError } = await supabase
+      .from('bars')
+      .select('metas')
+      .eq('id', body.bar_id)
       .single()
 
-    if (error) {
-      console.error('❌ Erro ao salvar metas:', error)
+    if (fetchError) {
+      console.error('❌ Erro ao buscar metas existentes:', fetchError)
+      return NextResponse.json(
+        { success: false, error: 'Erro ao buscar metas existentes' },
+        { status: 500 }
+      )
+    }
+
+    const metasExistentes = bar?.metas || []
+    const novasMetas = body.metas || []
+
+    // Atualizar a coluna metas
+    const { error: updateError } = await supabase
+      .from('bars')
+      .update({ 
+        metas: novasMetas,
+        atualizado_em: new Date().toISOString()
+      })
+      .eq('id', body.bar_id)
+
+    if (updateError) {
+      console.error('❌ Erro ao salvar metas:', updateError)
       return NextResponse.json(
         { success: false, error: 'Erro ao salvar metas no banco' },
         { status: 500 }
@@ -101,7 +119,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: data,
+      data: novasMetas,
       message: 'Metas salvas com sucesso'
     })
 

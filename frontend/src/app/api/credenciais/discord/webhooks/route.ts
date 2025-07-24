@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       .select('sistema, configuracoes')
       .eq('bar_id', bar_id)
       .eq('ativo', true)
-      .in('sistema', ['banco_inter', 'nibo', 'contahub', 'checklists', 'sistema'])
+      .in('sistema', ['banco_inter', 'nibo', 'contahub', 'checklists', 'sistema', 'sympla', 'yuzer'])
 
     if (error) {
       console.error('❌ Erro ao buscar credenciais:', error)
@@ -37,7 +37,9 @@ export async function POST(request: NextRequest) {
       nibo: null,
       contahub: null,
       checklists: null,
-      sistema: null
+      sistema: null,
+      sympla: null,
+      yuzer: null
     }
 
     credentials?.forEach(cred => {

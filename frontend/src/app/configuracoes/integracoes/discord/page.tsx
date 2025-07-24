@@ -19,17 +19,12 @@ import {
   Copy,
   ExternalLink,
   CheckCircle,
-  AlertCircle,
   Bell,
   Zap,
-  Activity,
   Database,
   CreditCard,
-  Building2,
-  Users,
-  Calendar,
-  BarChart3,
-  ArrowLeft
+  ArrowLeft,
+  Calendar
 } from 'lucide-react'
 
 interface DiscordWebhook {
@@ -73,19 +68,10 @@ export default function DiscordPage() {
       category: 'financeiro'
     },
     {
-      id: 'nibo_notificacoes',
-      name: 'NIBO Notificações',
-      description: 'Notificações de sincronização NIBO',
+      id: 'nibo',
+      name: 'NIBO',
+      description: 'Todas as notificações do NIBO (sincronização, status, etc.)',
       icon: <CreditCard className="h-5 w-5" />,
-      webhook_url: '',
-      enabled: true,
-      category: 'contabil'
-    },
-    {
-      id: 'nibo_sync',
-      name: 'NIBO Sincronização',
-      description: 'Status de sincronização NIBO',
-      icon: <Database className="h-5 w-5" />,
       webhook_url: '',
       enabled: true,
       category: 'contabil'
@@ -109,49 +95,22 @@ export default function DiscordPage() {
       category: 'integracao'
     },
     {
-      id: 'nibo',
-      name: 'NIBO',
-      description: 'Notificações de sincronização NIBO',
-      icon: <CreditCard className="h-5 w-5" />,
-      webhook_url: '',
-      enabled: true,
-      category: 'integracao'
-    },
-    {
-      id: 'funcionarios',
-      name: 'Funcionários',
-      description: 'Notificações relacionadas a funcionários',
-      icon: <Users className="h-5 w-5" />,
-      webhook_url: '',
-      enabled: true,
-      category: 'rh'
-    },
-    {
-      id: 'eventos',
-      name: 'Eventos',
-      description: 'Notificações de eventos e reservas',
+      id: 'sympla',
+      name: 'Sympla',
+      description: 'Notificações de eventos e vendas Sympla',
       icon: <Calendar className="h-5 w-5" />,
       webhook_url: '',
       enabled: true,
       category: 'eventos'
     },
     {
-      id: 'analytics',
-      name: 'Analytics',
-      description: 'Relatórios e análises automáticas',
-      icon: <BarChart3 className="h-5 w-5" />,
+      id: 'yuzer',
+      name: 'Yuzer',
+      description: 'Notificações de eventos e reservas Yuzer',
+      icon: <Calendar className="h-5 w-5" />,
       webhook_url: '',
       enabled: true,
-      category: 'analytics'
-    },
-    {
-      id: 'erros',
-      name: 'Erros do Sistema',
-      description: 'Alertas de erros e problemas técnicos',
-      icon: <AlertCircle className="h-5 w-5" />,
-      webhook_url: '',
-      enabled: true,
-      category: 'sistema'
+      category: 'eventos'
     }
   ]
 
@@ -187,12 +146,16 @@ export default function DiscordPage() {
           // Mapear IDs para sistemas específicos
           if (webhook.id === 'inter') {
             webhookUrl = data.banco_inter?.webhook_url || ''
-          } else if (webhook.id === 'nibo_notificacoes' || webhook.id === 'nibo_sync') {
+          } else if (webhook.id === 'nibo') {
             webhookUrl = data.nibo?.webhook_url || ''
           } else if (webhook.id === 'checklist') {
             webhookUrl = data.checklists?.webhook_url || ''
           } else if (webhook.id === 'contahub') {
             webhookUrl = data.contahub?.webhook_url || ''
+          } else if (webhook.id === 'sympla') {
+            webhookUrl = data.sympla?.webhook_url || ''
+          } else if (webhook.id === 'yuzer') {
+            webhookUrl = data.yuzer?.webhook_url || ''
           } else if (webhook.id === 'geral') {
             webhookUrl = data.sistema?.webhook_url || ''
           }
@@ -352,11 +315,10 @@ export default function DiscordPage() {
   const categories = [
     { id: 'sistema', name: 'Sistema', icon: <Settings className="h-4 w-4" /> },
     { id: 'financeiro', name: 'Financeiro', icon: <CreditCard className="h-4 w-4" /> },
-    { id: 'operacional', name: 'Operacional', icon: <Activity className="h-4 w-4" /> },
+    { id: 'operacional', name: 'Operacional', icon: <CheckCircle className="h-4 w-4" /> },
     { id: 'integracao', name: 'Integrações', icon: <Database className="h-4 w-4" /> },
-    { id: 'rh', name: 'RH', icon: <Users className="h-4 w-4" /> },
-    { id: 'eventos', name: 'Eventos', icon: <Calendar className="h-4 w-4" /> },
-    { id: 'analytics', name: 'Analytics', icon: <BarChart3 className="h-4 w-4" /> }
+    { id: 'contabil', name: 'Contábil', icon: <CreditCard className="h-4 w-4" /> },
+    { id: 'eventos', name: 'Eventos', icon: <Calendar className="h-4 w-4" /> }
   ]
 
   if (!selectedBar) {
@@ -378,89 +340,107 @@ export default function DiscordPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Discord Webhooks
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Configure webhooks do Discord para receber notificações automáticas
-          </p>
+        <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-2xl shadow-2xl">
+              <MessageSquare className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                Discord Webhooks
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 text-lg mt-1">
+                Configure webhooks do Discord para receber notificações automáticas
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Botão Voltar */}
-        <div className="flex justify-start mb-6">
+        <div className="flex justify-start mb-8">
           <Button
-            variant="outline"
             onClick={() => router.push('/configuracoes/integracoes')}
-            className="flex items-center gap-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors"
+            className="flex items-center gap-3 bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 text-white border-0 shadow-xl hover:shadow-2xl transition-all duration-300 px-6 py-3 rounded-xl font-medium"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-5 w-5" />
             Voltar para Integrações
           </Button>
         </div>
 
         {/* Webhooks */}
-        <div className="grid gap-6">
+        <div className="grid gap-8">
           {webhooks.map((webhook) => (
-            <Card key={webhook.id} className="card-dark hover:shadow-lg transition-all duration-300">
-              <CardHeader>
+            <Card key={webhook.id} className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 rounded-2xl overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              
+              <CardHeader className="pb-6">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
-                      {webhook.icon}
+                  <div className="flex items-center gap-6">
+                    <div className="relative">
+                      <div className="p-4 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-2xl shadow-2xl transform group-hover:scale-110 transition-all duration-300">
+                        <div className="text-white">
+                          {webhook.icon}
+                        </div>
+                      </div>
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                     </div>
                     <div className="flex-1">
-                      <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">{webhook.name}</CardTitle>
-                      <CardDescription className="text-gray-600 dark:text-gray-400">{webhook.description}</CardDescription>
+                      <CardTitle className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                        {webhook.name}
+                      </CardTitle>
+                      <CardDescription className="text-gray-600 dark:text-gray-400 text-base mt-2">
+                        {webhook.description}
+                      </CardDescription>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Badge className={`${getCategoryColor(webhook.category)} shadow-sm`}>
+                  <div className="flex items-center gap-4">
+                    <Badge className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-lg">
                       {categories.find(c => c.id === webhook.category)?.name}
                     </Badge>
-                    <Switch
-                      checked={webhook.enabled}
-                      onCheckedChange={(checked) => updateWebhook(webhook.id, 'enabled', checked)}
-                    />
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Ativo</span>
+                      <Switch
+                        checked={webhook.enabled}
+                        onCheckedChange={(checked) => updateWebhook(webhook.id, 'enabled', checked)}
+                        className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-blue-500 data-[state=checked]:to-purple-500"
+                      />
+                    </div>
                   </div>
                 </div>
               </CardHeader>
               
               <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  <Label htmlFor={`webhook-${webhook.id}`} className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                <div className="space-y-4">
+                  <Label htmlFor={`webhook-${webhook.id}`} className="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                     URL do Webhook
                   </Label>
-                  <div className="flex gap-3">
+                  <div className="flex gap-4">
                     <Input
                       id={`webhook-${webhook.id}`}
                       value={webhook.webhook_url}
                       onChange={(e) => updateWebhook(webhook.id, 'webhook_url', e.target.value)}
                       placeholder="https://discord.com/api/webhooks/..."
-                      className="font-mono text-sm flex-1"
+                      className="font-mono text-sm flex-1 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300 shadow-lg"
                     />
                     <Button
-                      variant="outline"
-                      size="icon"
                       onClick={() => copyWebhookUrl(webhook.webhook_url)}
                       title="Copiar URL"
                       disabled={!webhook.webhook_url}
-                      className="hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                      className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 px-4 rounded-xl"
                     >
-                      <Copy className="h-4 w-4" />
+                      <Copy className="h-5 w-5" />
                     </Button>
                     <Button
-                      variant="outline"
-                      size="icon"
                       onClick={() => testWebhook(webhook.id)}
                       title="Testar webhook"
                       disabled={!webhook.webhook_url || testing === webhook.id}
-                      className="hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
+                      className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 px-4 rounded-xl"
                     >
                       {testing === webhook.id ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                       ) : (
-                        <TestTube className="h-4 w-4" />
+                        <TestTube className="h-5 w-5" />
                       )}
                     </Button>
                   </div>
@@ -471,85 +451,99 @@ export default function DiscordPage() {
         </div>
 
         {/* Botões de Ação */}
-        <div className="mt-8 flex gap-4">
+        <div className="mt-12 flex gap-6">
           <Button
             onClick={saveWebhooks}
             disabled={saving}
-            className="btn-primary shadow-lg hover:shadow-xl transition-all duration-200"
+            className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 shadow-2xl hover:shadow-3xl transition-all duration-300 px-8 py-4 rounded-xl font-semibold text-lg"
           >
             {saving ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
                 Salvando...
               </>
             ) : (
               <>
-                <Save className="h-4 w-4 mr-2" />
+                <Save className="h-5 w-5 mr-3" />
                 Salvar Configurações
               </>
             )}
           </Button>
 
           <Button
-            variant="outline"
             onClick={() => window.open('https://discord.com/developers/applications', '_blank')}
-            className="btn-secondary hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+            className="bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white border-0 shadow-2xl hover:shadow-3xl transition-all duration-300 px-8 py-4 rounded-xl font-semibold text-lg"
           >
-            <ExternalLink className="h-4 w-4 mr-2" />
+            <ExternalLink className="h-5 w-5 mr-3" />
             Discord Developer Portal
           </Button>
         </div>
 
         {/* Instruções */}
-        <Card className="card-gradient mt-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
-              <div className="p-2 bg-blue-500 rounded-lg">
-                <MessageSquare className="h-5 w-5 text-white" />
+        <Card className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border-0 shadow-2xl mt-12 rounded-2xl overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+            <CardTitle className="flex items-center gap-4 text-gray-900 dark:text-white text-xl">
+              <div className="p-3 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl shadow-lg">
+                <MessageSquare className="h-6 w-6 text-white" />
               </div>
               Como Configurar Webhooks do Discord
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-6 text-gray-600 dark:text-gray-400">
-              <div className="grid md:grid-cols-2 gap-8">
-                <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                    <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
+          <CardContent className="p-8">
+            <div className="space-y-8 text-gray-600 dark:text-gray-400">
+              <div className="grid md:grid-cols-2 gap-12">
+                <div className="space-y-6">
+                  <h4 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-3">
+                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-lg">1</div>
                     Criar Webhook no Discord
                   </h4>
-                  <ol className="space-y-2 list-none">
-                    <li className="flex items-start gap-2">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                      <span>Acesse o Discord Developer Portal</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                      <span>Crie uma nova aplicação</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                      <span>Vá em "Webhooks"</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                      <span>Clique em "New Webhook"</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                      <span>Copie a URL do webhook</span>
-                    </li>
-                  </ol>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                      <div className="w-3 h-3 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                      <span className="font-medium">Acesse o Discord Developer Portal</span>
+                    </div>
+                    <div className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                      <div className="w-3 h-3 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                      <span className="font-medium">Crie uma nova aplicação</span>
+                    </div>
+                    <div className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                      <div className="w-3 h-3 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                      <span className="font-medium">Vá em "Webhooks"</span>
+                    </div>
+                    <div className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                      <div className="w-3 h-3 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                      <span className="font-medium">Clique em "New Webhook"</span>
+                    </div>
+                    <div className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                      <div className="w-3 h-3 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                      <span className="font-medium">Copie a URL do webhook</span>
+                    </div>
+                  </div>
                 </div>
                 
-                <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">2. Configurar no SGB:</h4>
-                  <ol className="space-y-1 list-decimal list-inside">
-                    <li>Cole a URL do webhook no campo correspondente</li>
-                    <li>Ative o webhook usando o switch</li>
-                    <li>Teste o webhook para verificar se está funcionando</li>
-                    <li>Salve as configurações</li>
-                  </ol>
+                <div className="space-y-6">
+                  <h4 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-3">
+                    <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-lg">2</div>
+                    Configurar no SGB
+                  </h4>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl">
+                      <div className="w-3 h-3 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                      <span className="font-medium">Cole a URL do webhook no campo correspondente</span>
+                    </div>
+                    <div className="flex items-start gap-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl">
+                      <div className="w-3 h-3 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                      <span className="font-medium">Ative o webhook usando o switch</span>
+                    </div>
+                    <div className="flex items-start gap-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl">
+                      <div className="w-3 h-3 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                      <span className="font-medium">Teste o webhook para verificar se está funcionando</span>
+                    </div>
+                    <div className="flex items-start gap-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl">
+                      <div className="w-3 h-3 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                      <span className="font-medium">Salve as configurações</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

@@ -19,14 +19,22 @@ export async function GET(
     const { id: metaId } = await params
     const supabase = await getAdminClient();
 
-    const { data: meta, error } = await supabase
-      .from('metas_negocio')
-      .select('*')
-      .eq('id', metaId)
-      .eq('bar_id', user.bar_id)
+    // Buscar metas da coluna 'metas' da tabela bars
+    const { data: bar, error } = await supabase
+      .from('bars')
+      .select('metas')
+      .eq('id', user.bar_id)
       .single();
 
-    if (error || !meta) {
+    if (error) {
+      console.error('❌ Erro ao buscar metas:', error);
+      return NextResponse.json({ error: 'Erro ao buscar metas' }, { status: 500 });
+    }
+
+    const metas = bar?.metas || [];
+    const meta = metas.find((m: any) => m.id === metaId);
+
+    if (!meta) {
       return NextResponse.json({ error: 'Meta não encontrada' }, { status: 404 });
     }
 
@@ -59,25 +67,47 @@ export async function PUT(
     const body = await request.json();
     const supabase = await getAdminClient();
 
-    // Atualizar meta
-    const { data: metaAtualizada, error } = await supabase
-      .from('metas_negocio')
-      .update({
-        ...body,
-        atualizado_por: user.user_id
-      })
-      .eq('id', metaId)
-      .eq('bar_id', user.bar_id)
-      .select()
+    // Buscar metas existentes
+    const { data: bar, error: fetchError } = await supabase
+      .from('bars')
+      .select('metas')
+      .eq('id', user.bar_id)
       .single();
 
-    if (error) {
-      console.error('❌ Erro ao atualizar meta:', error);
-      return NextResponse.json({ error: 'Erro ao atualizar meta' }, { status: 500 });
+    if (fetchError) {
+      console.error('❌ Erro ao buscar metas existentes:', fetchError);
+      return NextResponse.json({ error: 'Erro ao buscar metas existentes' }, { status: 500 });
     }
 
-    if (!metaAtualizada) {
+    const metasExistentes = bar?.metas || [];
+    const metaIndex = metasExistentes.findIndex((m: any) => m.id === metaId);
+
+    if (metaIndex === -1) {
       return NextResponse.json({ error: 'Meta não encontrada' }, { status: 404 });
+    }
+
+    // Atualizar a meta específica
+    const metaAtualizada = {
+      ...metasExistentes[metaIndex],
+      ...body,
+      atualizado_por: user.user_id,
+      atualizado_em: new Date().toISOString()
+    };
+
+    metasExistentes[metaIndex] = metaAtualizada;
+
+    // Atualizar a coluna metas
+    const { error: updateError } = await supabase
+      .from('bars')
+      .update({ 
+        metas: metasExistentes,
+        atualizado_em: new Date().toISOString()
+      })
+      .eq('id', user.bar_id);
+
+    if (updateError) {
+      console.error('❌ Erro ao atualizar meta:', updateError);
+      return NextResponse.json({ error: 'Erro ao atualizar meta' }, { status: 500 });
     }
 
     console.log(`✅ Meta atualizada: ${metaAtualizada.nome_meta}`);
@@ -110,15 +140,37 @@ export async function DELETE(
     const { id: metaId } = await params
     const supabase = await getAdminClient();
 
-    // Deletar meta
-    const { error } = await supabase
-      .from('metas_negocio')
-      .delete()
-      .eq('id', metaId)
-      .eq('bar_id', user.bar_id);
+    // Buscar metas existentes
+    const { data: bar, error: fetchError } = await supabase
+      .from('bars')
+      .select('metas')
+      .eq('id', user.bar_id)
+      .single();
 
-    if (error) {
-      console.error('❌ Erro ao deletar meta:', error);
+    if (fetchError) {
+      console.error('❌ Erro ao buscar metas existentes:', fetchError);
+      return NextResponse.json({ error: 'Erro ao buscar metas existentes' }, { status: 500 });
+    }
+
+    const metasExistentes = bar?.metas || [];
+    const metasFiltradas = metasExistentes.filter((m: any) => m.id !== metaId);
+
+    // Verificar se a meta foi encontrada
+    if (metasFiltradas.length === metasExistentes.length) {
+      return NextResponse.json({ error: 'Meta não encontrada' }, { status: 404 });
+    }
+
+    // Atualizar a coluna metas removendo a meta
+    const { error: updateError } = await supabase
+      .from('bars')
+      .update({ 
+        metas: metasFiltradas,
+        atualizado_em: new Date().toISOString()
+      })
+      .eq('id', user.bar_id);
+
+    if (updateError) {
+      console.error('❌ Erro ao deletar meta:', updateError);
       return NextResponse.json({ error: 'Erro ao deletar meta' }, { status: 500 });
     }
 

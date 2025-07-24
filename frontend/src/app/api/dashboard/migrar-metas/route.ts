@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase';
 
-// POST - Migrar dados do localStorage para a tabela metas_negocio
+// POST - Migrar dados do localStorage para a coluna metas da tabela bars
 export async function POST(request: NextRequest) {
   try {
     // Inicializar cliente Supabase
@@ -20,10 +20,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar se já existe configuração para este bar
-    const { data: existingMetas, error: checkError } = await supabase
-      .from('metas_negocio')
-      .select('*')
-      .eq('bar_id', parseInt(bar_id))
+    const { data: bar, error: checkError } = await supabase
+      .from('bars')
+      .select('metas')
+      .eq('id', parseInt(bar_id))
+      .single()
 
     if (checkError && checkError.code !== 'PGRST116') {
       console.error('Erro ao verificar metas existentes:', checkError)
@@ -35,7 +36,6 @@ export async function POST(request: NextRequest) {
 
     // Preparar dados para inserção/atualização
     const metasData = {
-      bar_id: parseInt(bar_id),
       faturamento_diario: metas_config.faturamento_diario || metas_config.faturamentoDiario || 5000,
       clientes_diario: metas_config.clientes_diario || metas_config.clientesDiario || 80,
       ticket_entrada: metas_config.ticket_entrada || metas_config.ticketEntrada || 25,
@@ -64,16 +64,16 @@ export async function POST(request: NextRequest) {
 
     let result
 
-    if (existingMetas) {
+    if (bar?.metas) {
       // Atualizar registro existente
       const { data, error } = await supabase
-        .from('metas_negocio')
+        .from('bars')
         .update({
-          ...metasData,
-          updated_at: new Date().toISOString()
+          metas: metasData,
+          atualizado_em: new Date().toISOString()
         })
-        .eq('bar_id', parseInt(bar_id))
-        .select()
+        .eq('id', parseInt(bar_id))
+        .select('metas')
         .single()
 
       if (error) {
@@ -84,13 +84,17 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      result = data
+      result = data.metas
     } else {
       // Inserir novo registro
       const { data, error } = await supabase
-        .from('metas_negocio')
-        .insert(metasData)
-        .select()
+        .from('bars')
+        .update({
+          metas: metasData,
+          atualizado_em: new Date().toISOString()
+        })
+        .eq('id', parseInt(bar_id))
+        .select('metas')
         .single()
 
       if (error) {
@@ -101,12 +105,12 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      result = data
+      result = data.metas
     }
 
     return NextResponse.json({
       success: true,
-      message: existingMetas ? 'Metas atualizadas com sucesso' : 'Metas criadas com sucesso',
+      message: bar?.metas ? 'Metas atualizadas com sucesso' : 'Metas criadas com sucesso',
       data: result
     })
 
@@ -138,10 +142,11 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const { data: metas, error } = await supabase
-      .from('metas_negocio')
-      .select('*')
-      .eq('bar_id', parseInt(bar_id))
+    const { data: bar, error } = await supabase
+      .from('bars')
+      .select('metas')
+      .eq('id', parseInt(bar_id))
+      .single()
 
     if (error && error.code !== 'PGRST116') {
       console.error('Erro ao buscar metas:', error)
@@ -153,8 +158,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      migrated: !!metas,
-      data: metas || null
+      migrated: !!bar?.metas,
+      data: bar?.metas || null
     })
 
   } catch (error) {
