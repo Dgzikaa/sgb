@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,7 +28,8 @@ import {
   Building2,
   Users,
   Calendar,
-  BarChart3
+  BarChart3,
+  ArrowLeft
 } from 'lucide-react'
 
 interface DiscordWebhook {
@@ -42,6 +44,7 @@ interface DiscordWebhook {
 }
 
 export default function DiscordPage() {
+  const router = useRouter()
   const { toast } = useToast()
   const { user } = useAuth()
   const { selectedBar } = useBar()
@@ -384,25 +387,16 @@ export default function DiscordPage() {
           </p>
         </div>
 
-        {/* Categorias */}
-        <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            Categorias de Webhooks
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-            {categories.map((category) => (
-              <div
-                key={category.id}
-                className="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-200 cursor-pointer"
-              >
-                {category.icon}
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
-                  {category.name}
-                </span>
-              </div>
-            ))}
-          </div>
+        {/* Botão Voltar */}
+        <div className="flex justify-start mb-6">
+          <Button
+            variant="outline"
+            onClick={() => router.push('/configuracoes/integracoes')}
+            className="flex items-center gap-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar para Integrações
+          </Button>
         </div>
 
         {/* Webhooks */}
