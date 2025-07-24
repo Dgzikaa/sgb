@@ -33,27 +33,21 @@ interface NiboPaymentSchedule {
   stakeholderId: string
   dueDate: string
   scheduleDate: string
-  value: number
-  description?: string
-  reference?: string
-  isFlagged?: boolean
   categories: Array<{
-    description: string
-    reference?: string
+    categoryId: string
+    value: number
+    description?: string
   }>
   costCenters?: Array<{
     costCenterId: string
-    value?: number
-    percent?: number
+    value?: string
+    percent?: string
   }>
   costCenterValueType?: number // 0 para valor, 1 para percentagem
   accrualDate?: string
-  recurrence?: {
-    instalment?: Array<{
-      dueDate: string
-      value: number
-    }>
-  }
+  description?: string
+  reference?: string
+  isFlagged?: boolean
 }
 
 interface NiboScheduleResponse {
@@ -64,8 +58,9 @@ interface NiboScheduleResponse {
   status: 'pending' | 'approved' | 'rejected'
   value: number
   categories: Array<{
-    description: string
-    reference?: string
+    categoryId: string
+    value: number
+    description?: string
   }>
   accrualDate?: string
   description?: string
@@ -92,10 +87,43 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validar valor
-    if (!value || value <= 0) {
+    // Buscar categoria para validar tipo
+    const categoriaValidacao = await getCategoriaById(categoria_id.toString())
+    
+    if (!categoriaValidacao) {
       return NextResponse.json(
-        { success: false, error: 'Valor deve ser maior que zero' },
+        { success: false, error: 'Categoria não encontrada' },
+        { status: 400 }
+      )
+    }
+
+    // Validar valor baseado no tipo da categoria
+    if (!value || value === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Valor deve ser diferente de zero' },
+        { status: 400 }
+      )
+    }
+
+    // Validar se o valor está correto para o tipo da categoria
+    if (categoriaValidacao.tipo === 'in' && value < 0) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: `Para categoria de entrada (${categoriaValidacao.nome}), o valor deve ser positivo. Valor atual: ${value}`,
+          suggestion: `Use valor positivo: ${Math.abs(value)}`
+        },
+        { status: 400 }
+      )
+    }
+
+    if (categoriaValidacao.tipo === 'out' && value > 0) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: `Para categoria de saída (${categoriaValidacao.nome}), o valor deve ser negativo. Valor atual: ${value}`,
+          suggestion: `Use valor negativo: -${value}`
+        },
         { status: 400 }
       )
     }
@@ -198,6 +226,7 @@ async function createScheduleInNibo(schedule: NiboScheduleRequest): Promise<Nibo
     console.log('Buscando categoria:', schedule.categoria_id)
     const categoria = await getCategoriaById(schedule.categoria_id)
     console.log('Categoria encontrada:', categoria)
+    console.log('Tipo da categoria:', categoria?.tipo, '- Valor será:', categoria?.tipo === 'in' ? 'POSITIVO (entrada)' : 'NEGATIVO (saída)')
     
     console.log('Buscando centro de custo:', schedule.centro_custo_id)
     const centroCusto = await getCentroCustoById(schedule.centro_custo_id)
@@ -212,36 +241,42 @@ async function createScheduleInNibo(schedule: NiboScheduleRequest): Promise<Nibo
       throw new Error('Centro de custo não encontrado')
     }
 
+    // Determinar o endpoint baseado no tipo da categoria
+    const isCredit = categoria?.tipo === 'in'
+    const endpoint = isCredit ? '/schedules/credit' : '/schedules/debit'
+    const url = `${NIBO_CONFIG.BASE_URL}${endpoint}`
+
+    console.log(`Usando endpoint: ${endpoint} (${isCredit ? 'CRÉDITO' : 'DÉBITO'})`)
+
     // Montar payload seguindo a documentação oficial do NIBO
     const niboPayload: NiboPaymentSchedule = {
       stakeholderId: schedule.stakeholderId,
       dueDate: schedule.dueDate,
       scheduleDate: schedule.scheduleDate,
-      value: schedule.value,
-      description: schedule.description || schedule.categories?.[0]?.description || 'Pagamento PIX',
-      reference: schedule.reference,
-      isFlagged: schedule.isFlagged || false,
       categories: [
         {
-          description: categoria?.nome || 'Categoria não encontrada',
-          reference: categoria?.nibo_id?.toString() || categoria?.id?.toString() || schedule.categoria_id
+          categoryId: categoria?.nibo_id || categoria?.id?.toString() || schedule.categoria_id,
+          value: Math.abs(schedule.value), // Sempre positivo, o endpoint determina se é crédito ou débito
+          description: categoria?.nome || 'Categoria não encontrada'
         }
       ],
       costCenters: centroCusto ? [
         {
-          costCenterId: centroCusto.nibo_id?.toString() || centroCusto.id.toString(), // Usar nibo_id se disponível
-          value: schedule.value // Como costCenterValueType é 0, usamos value
+          costCenterId: centroCusto.nibo_id || centroCusto.id.toString(),
+          value: Math.abs(schedule.value).toString() // Sempre positivo
         }
       ] : undefined,
       costCenterValueType: 0, // 0 para valor fixo
-      accrualDate: schedule.accrualDate
+      accrualDate: schedule.accrualDate,
+      description: schedule.description || schedule.categories?.[0]?.description || 'Pagamento PIX',
+      reference: schedule.reference,
+      isFlagged: schedule.isFlagged || false
     }
 
     console.log('Payload para NIBO (formato oficial):', JSON.stringify(niboPayload, null, 2))
-
     console.log('Payload para NIBO (formato oficial):', niboPayload)
 
-    const response = await fetch(`${NIBO_CONFIG.BASE_URL}/schedules/debit`, {
+    const response = await fetch(url, {
       method: 'POST',
       headers,
       body: JSON.stringify(niboPayload)

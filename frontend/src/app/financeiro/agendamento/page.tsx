@@ -124,8 +124,8 @@ export default function AgendamentoPage() {
   })
 
   // Estados para categorias e centros de custo
-  const [categorias, setCategorias] = useState([])
-  const [centrosCusto, setCentrosCusto] = useState([])
+  const [categorias, setCategorias] = useState<any[]>([])
+  const [centrosCusto, setCentrosCusto] = useState<any[]>([])
   const [isLoadingOptions, setIsLoadingOptions] = useState(false)
 
   // Carregar dados salvos ao inicializar
@@ -215,7 +215,7 @@ export default function AgendamentoPage() {
       
       // Primeiro, tentar carregar da chave atual
       let savedData = localStorage.getItem(STORAGE_KEYS.PAGAMENTOS)
-      let parsed = null
+      let parsed: any = null
       let isMigration = false
       
       if (savedData) {
@@ -289,7 +289,7 @@ export default function AgendamentoPage() {
     try {
       const backupData = localStorage.getItem(STORAGE_KEYS.BACKUP)
       if (backupData) {
-        const parsed = JSON.parse(backupData)
+        const parsed: any = JSON.parse(backupData)
         if (parsed.pagamentos && Array.isArray(parsed.pagamentos)) {
           setPagamentos(parsed.pagamentos)
           setLastSave(new Date(parsed.timestamp).toLocaleString('pt-BR'))
@@ -350,6 +350,19 @@ export default function AgendamentoPage() {
       toast({
         title: "❌ Campos obrigatórios",
         description: "Preencha CPF/CNPJ, nome, valor, data de pagamento, categoria e centro de custo",
+        variant: "destructive"
+      })
+      return
+    }
+
+    // Validar valor (pode ser negativo para categorias de saída no NIBO)
+    const valorLimpo = novoPagamento.valor.replace('R$', '').replace('.', '').replace(',', '.').trim()
+    const valorNumerico = parseFloat(valorLimpo)
+    
+    if (isNaN(valorNumerico) || valorNumerico === 0) {
+      toast({
+        title: "❌ Valor inválido",
+        description: "O valor deve ser um número diferente de zero",
         variant: "destructive"
       })
       return
@@ -548,10 +561,7 @@ export default function AgendamentoPage() {
             : p
         ))
         
-        toast({
-          title: "✅ Agendado no NIBO!",
-          description: `${pagamento.nome_beneficiario} foi agendado com sucesso`,
-        })
+        // Toast removido para evitar duplicação - apenas a mensagem geral será exibida
       } else {
         throw new Error(data.error || 'Erro desconhecido na resposta do NIBO')
       }
@@ -581,8 +591,13 @@ export default function AgendamentoPage() {
 
   const enviarParaInter = async (pagamento: PagamentoAgendamento) => {
     try {
+      // Converter valor para positivo para o Inter (mesmo que seja negativo no NIBO)
+      const valorLimpo = pagamento.valor.replace('R$', '').replace('.', '').replace(',', '.').trim()
+      const valorNumerico = parseFloat(valorLimpo)
+      const valorParaInter = Math.abs(valorNumerico).toString() // Sempre positivo para Inter
+
       const pagamentoInter = {
-        valor: pagamento.valor,
+        valor: valorParaInter,
         descricao: pagamento.descricao || `Pagamento para ${pagamento.nome_beneficiario}`,
         destinatario: pagamento.nome_beneficiario,
         chave: pagamento.chave_pix,
@@ -599,24 +614,23 @@ export default function AgendamentoPage() {
 
       const data = await response.json()
       
-      if (data.success) {
+      // Verifica se a resposta tem o formato de sucesso esperado
+      if (data.tipoRetorno === "APROVACAO" && data.codigoSolicitacao) {
         setPagamentos(prev => prev.map(p => 
           p.id === pagamento.id 
             ? { 
                 ...p, 
                 status: 'aguardando_aprovacao', 
-                inter_aprovacao_id: data.data.codigoSolicitacao,
+                inter_aprovacao_id: data.codigoSolicitacao,
                 updated_at: new Date().toISOString()
               }
             : p
         ))
         
-        toast({
-          title: "⏳ Pagamento enviado para aprovação!",
-          description: `Código de solicitação: ${data.data.codigoSolicitacao} - Aguardando aprovação do gestor`,
-        })
+        // Toast removido para evitar duplicação - apenas a mensagem geral será exibida
+        return true // Indica sucesso
       } else {
-        throw new Error(data.error || 'Erro desconhecido')
+        throw new Error(data.error || 'Resposta inválida do Inter')
       }
     } catch (error) {
       console.error('❌ Erro ao enviar para Inter:', error)
@@ -630,11 +644,8 @@ export default function AgendamentoPage() {
           : p
       ))
       
-      toast({
-        title: "❌ Erro no pagamento Inter",
-        description: error instanceof Error ? error.message : "Erro ao enviar pagamento para Inter",
-        variant: "destructive"
-      })
+      // Toast removido para evitar duplicação - apenas a mensagem geral será exibida
+      throw error // Re-lança o erro para ser capturado pela função chamadora
     }
   }
 
@@ -653,22 +664,50 @@ export default function AgendamentoPage() {
     setIsProcessing(true)
 
     try {
+      let sucessos = 0
+      let erros = 0
+
       for (const pagamento of agendados) {
-        await enviarParaInter(pagamento)
+        try {
+          const resultado = await enviarParaInter(pagamento)
+          if (resultado === true) {
+            sucessos++
+          } else {
+            erros++
+          }
+        } catch (error) {
+          console.error(`Erro ao enviar pagamento ${pagamento.nome_beneficiario}:`, error)
+          erros++
+          // Não mostrar toast aqui - apenas contar o erro
+        }
         // Pequeno delay para não sobrecarregar a API
         await new Promise(resolve => setTimeout(resolve, 500))
       }
 
-      toast({
-        title: "⏳ Pagamentos enviados para aprovação!",
-        description: `${agendados.length} pagamento(s) foram enviados e aguardam aprovação do gestor`,
-      })
+      // Mostrar resultado baseado no que aconteceu
+      if (sucessos > 0 && erros === 0) {
+        toast({
+          title: "⏳ Pagamentos enviados para aprovação!",
+          description: `${sucessos} pagamento(s) foram enviados e aguardam aprovação do gestor`,
+        })
+      } else if (sucessos > 0 && erros > 0) {
+        toast({
+          title: "⚠️ Envio parcial",
+          description: `${sucessos} enviados com sucesso, ${erros} com erro`,
+        })
+      } else if (erros > 0) {
+        toast({
+          title: "❌ Erro no envio para Inter",
+          description: `${erros} pagamento(s) falharam no envio`,
+          variant: "destructive"
+        })
+      }
 
     } catch (error) {
-      console.error('Erro ao enviar pagamentos para Inter:', error)
+      console.error('Erro geral ao enviar pagamentos para Inter:', error)
       toast({
         title: "❌ Erro no envio para Inter",
-        description: "Erro ao enviar pagamentos para o banco Inter",
+        description: "Erro geral ao enviar pagamentos para o banco Inter",
         variant: "destructive"
       })
     } finally {
@@ -685,7 +724,7 @@ export default function AgendamentoPage() {
     if (!pagamentoEmEdicao) return
 
     // Validação mais detalhada
-    const camposObrigatorios = []
+    const camposObrigatorios: string[] = []
     if (!pagamentoEmEdicao.categoria_id) camposObrigatorios.push('Categoria')
     if (!pagamentoEmEdicao.centro_custo_id) camposObrigatorios.push('Centro de Custo')
     if (!pagamentoEmEdicao.nome_beneficiario) camposObrigatorios.push('Nome do Beneficiário')
@@ -701,11 +740,49 @@ export default function AgendamentoPage() {
       return
     }
 
+    // Validar valor positivo (antes do ajuste automático)
+    const valorLimpo = pagamentoEmEdicao.valor.replace('R$', '').replace('.', '').replace(',', '.').trim()
+    const valorNumerico = parseFloat(valorLimpo)
+    
+    if (isNaN(valorNumerico) || valorNumerico === 0) {
+      toast({
+        title: "❌ Valor inválido",
+        description: "O valor deve ser um número diferente de zero",
+        variant: "destructive"
+      })
+      return
+    }
+
+    // Ajustar valor automaticamente baseado no tipo da categoria
+    let valorAjustado = pagamentoEmEdicao.valor
+    const categoria = categorias.find(cat => cat.id === pagamentoEmEdicao.categoria_id)
+    
+    if (categoria) {
+      const valorNumerico = parseFloat(pagamentoEmEdicao.valor)
+      
+      if (categoria.tipo === 'out' && valorNumerico > 0) {
+        // Para categoria de saída, valor deve ser negativo
+        valorAjustado = (-valorNumerico).toString()
+        toast({
+          title: "🔄 Valor ajustado automaticamente",
+          description: `Valor alterado para ${valorAjustado} (categoria de saída)`,
+        })
+      } else if (categoria.tipo === 'in' && valorNumerico < 0) {
+        // Para categoria de entrada, valor deve ser positivo
+        valorAjustado = Math.abs(valorNumerico).toString()
+        toast({
+          title: "🔄 Valor ajustado automaticamente",
+          description: `Valor alterado para ${valorAjustado} (categoria de entrada)`,
+        })
+      }
+    }
+
     setPagamentos(prev => {
       const novosPagamentos = prev.map(p => 
         p.id === pagamentoEmEdicao.id 
           ? { 
               ...pagamentoEmEdicao, 
+              valor: valorAjustado, // Usar o valor ajustado
               updated_at: new Date().toISOString()
             }
           : p

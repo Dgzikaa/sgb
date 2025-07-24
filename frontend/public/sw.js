@@ -29,7 +29,13 @@ const OFFLINE_FALLBACK_APIS = [
   '/api/bars',
   '/api/usuarios',
   '/api/checklists',
-  '/api/cache/metricas'
+  '/api/cache/metricas',
+  '/api/financeiro/nibo/schedules',
+  '/api/financeiro/nibo/stakeholders',
+  '/api/financeiro/nibo/categorias',
+  '/api/financeiro/nibo/centros-custo',
+  '/api/financeiro/inter/pix',
+  '/api/webhook-inter-banking'
 ]
 
 // Instalar Service Worker
@@ -164,7 +170,7 @@ async function handleApiRequest(request, url) {
   
   try {
     // Network First para APIs
-    const networkResponse = await fetch(request, { timeout: 5000 })
+    const networkResponse = await fetch(request, { timeout: 10000 })
     
     if (networkResponse.ok) {
       // Cachear apenas respostas GET bem-sucedidas
@@ -176,7 +182,9 @@ async function handleApiRequest(request, url) {
     
     throw new Error('API response not ok')
   } catch (error) {
-    // Fallback para cache apenas para APIs específicas
+    console.log('❌ SW: Erro na API:', url.pathname, error.message)
+    
+    // Fallback para cache apenas para APIs específicas e GET
     if (request.method === 'GET' && isOfflineCompatibleApi(url.pathname)) {
       const cachedResponse = await cache.match(request)
       if (cachedResponse) {
@@ -195,7 +203,13 @@ async function handleApiRequest(request, url) {
       }
     }
     
-    // Retornar erro estruturado para APIs
+    // Para APIs que não são compatíveis com offline, deixar passar
+    if (!isOfflineCompatibleApi(url.pathname)) {
+      console.log('🌐 SW: API não compatível com offline, tentando rede:', url.pathname)
+      throw error // Re-throw para deixar o erro original passar
+    }
+    
+    // Retornar erro estruturado apenas para APIs compatíveis com offline
     return new Response(JSON.stringify({
       success: false,
       error: 'Funcionalidade não disponível offline',
