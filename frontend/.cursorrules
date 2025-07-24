@@ -1,0 +1,84 @@
+# REGRAS DE ORGANIZAÇÃO - SGB_V2
+
+## ESTRUTURA OBRIGATÓRIA
+
+### Frontend (frontend/src/app/)
+- APIs: SEMPRE em `/api/[funcionalidade]/route.ts`
+- Páginas: SEMPRE direto em `/[categoria]/page.tsx` (SEM /paginas/)
+
+### NUNCA CRIAR:
+- /admin/ (ELIMINADA COMPLETAMENTE)
+- /api/admin/ (ELIMINADA COMPLETAMENTE)
+- /paginas/ (NUNCA USAR - ELIMINADA COMPLETAMENTE)
+- APIs fora de /api/
+
+### ESTRUTURA CORRETA:
+```
+src/app/
+├── api/                    ← TODAS AS APIS (route.ts)
+│   ├── usuarios/
+│   ├── bars/
+│   ├── eventos/
+│   ├── contahub/
+│   └── [outras-apis]/
+├── configuracoes/          ← Ex-admin (DIRETO EM APP)
+├── relatorios/             ← Relatórios (DIRETO EM APP)
+├── operacoes/              ← Operações (DIRETO EM APP)
+├── funcionario/            ← Funcionário (DIRETO EM APP)
+└── [outras-páginas]/       ← Todas direto em app
+```
+
+### ROTAS NO CÓDIGO:
+- Sidebar: `/[categoria]/[página]` (SEM /paginas/)
+- Fetch: `/api/[funcionalidade]`
+- Router: `router.push('/[categoria]')` (SEM /paginas/)
+
+### CHECKLIST OBRIGATÓRIO:
+1. É API? → `/api/[nome]/route.ts`
+2. É página? → `/[categoria]/page.tsx` (DIRETO em src/app)
+3. Não duplica estrutura existente?
+4. Segue nomenclatura kebab-case?
+5. NUNCA usar /paginas/ ou /admin/
+
+### BACKEND (backend/supabase/functions/)
+- Edge Functions: `[nome-function]/index.ts`
+- Sempre TypeScript + Deno imports
+- CORS obrigatório em todas as functions
+
+### REGRAS DE CSS/TAILWIND OBRIGATÓRIAS
+
+#### CORES PERMITIDAS:
+- **Grays**: gray-50, gray-100, gray-200, gray-300, gray-400, gray-500, gray-600, gray-700, gray-800, gray-900
+- **Blues**: blue-50, blue-100, blue-500, blue-600, blue-700, blue-800, blue-900
+- **Greens**: green-50, green-100, green-500, green-600, green-700, green-800, green-900
+- **Reds**: red-50, red-100, red-500, red-600, red-700, red-800, red-900
+- **Indigo**: indigo-100, indigo-500, indigo-600, indigo-700, indigo-800, indigo-900
+- **Slate**: slate-50, slate-100, slate-200, slate-300, slate-400, slate-500, slate-600, slate-700, slate-800, slate-900
+
+#### CORES PROIBIDAS (NUNCA USAR):
+- ❌ **Orange**: orange-*, laranja-*
+- ❌ **Pink**: pink-*, rosa-*
+- ❌ **Purple**: purple-*, roxo-*
+- ❌ **Yellow**: yellow-*, amarelo-*
+- ❌ **Lime**: lime-*
+- ❌ **Cyan**: cyan-*
+- ❌ **Emerald**: emerald-*
+- ❌ **Teal**: teal-*
+
+#### PADRÃO DARK MODE:
+- SEMPRE aplicar dark mode por padrão
+- Classes obrigatórias: `bg-white dark:bg-gray-800`, `text-gray-900 dark:text-white`
+- Cards: `card-dark` (classe pré-definida)
+- Botões: `btn-primary-dark`, `btn-secondary-dark`
+
+#### ESTRUTURA PADRÃO DE PÁGINA:
+```tsx
+<div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <div className="container mx-auto px-4 py-6">
+    <div className="card-dark p-6">
+      <h1 className="card-title-dark mb-4">Título</h1>
+      {/* Conteúdo */}
+    </div>
+  </div>
+</div>
+``` 

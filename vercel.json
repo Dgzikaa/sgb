@@ -1,0 +1,28 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/meta-social-collect",
+      "schedule": "0 */6 * * *"
+    }
+  ],
+  "functions": {
+    "frontend/src/app/api/cron/meta-social-collect/route.ts": {
+      "maxDuration": 300
+    },
+    "frontend/src/app/api/meta/collect/route.ts": {
+      "maxDuration": 180
+    }
+  },
+  "env": {
+    "CRON_SECRET": "@cron_secret",
+    "TZ": "America/Sao_Paulo"
+  },
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  },
+  "github": {
+    "autoAlias": false
+  }
+} 

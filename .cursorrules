@@ -1,0 +1,602 @@
+# REGRAS DE ORGANIZAÇÃO ATUALIZADAS - SGB_V2
+
+## Estrutura do Projeto
+Este é um projeto fullstack com:
+- **Frontend**: Next.js 14+ com TypeScript (pasta `frontend/`)
+- **Backend**: Supabase Edge Functions com Deno (pasta `backend/`)
+- **Documentação**: Pasta `docs/`
+- **Testes e Exemplos**: Pasta `exemplo_teste/` para protótipos, testes e dados de exemplo
+
+## ESTRUTURA OBRIGATÓRIA ATUALIZADA
+
+### 1. FRONTEND - ESTRUTURA DEFINITIVA (`frontend/src/app/`)
+
+```
+src/app/
+├── api/                    ← 🔗 TODAS AS APIS (route.ts)
+│   ├── usuarios/           ← Gerenciamento de usuários
+│   ├── bars/              ← Gerenciamento de bares
+│   ├── eventos/           ← Gerenciamento de eventos
+│   ├── contahub/          ← APIs ContaHub
+│   ├── credenciais/       ← Gerenciamento de credenciais
+│   ├── auth/              ← Autenticação
+│   ├── checklists/        ← APIs de checklists
+│   ├── desempenho/        ← APIs de desempenho
+│   └── meta/              ← APIs Meta
+│
+├── configuracoes/         ← 📄 Admin: checklists, templates, desempenho
+├── relatorios/            ← Todos os relatórios
+├── operacoes/             ← Funcionalidades operacionais
+├── funcionario/           ← Área do funcionário
+├── dashboard/             ← Dashboards
+├── home/                  ← Página inicial
+├── login/                 ← Login
+├── auth/                  ← Páginas de autenticação
+├── minha-conta/           ← Conta do usuário
+└── visao-geral/           ← Visão geral e análises
+│
+├── layout.tsx            ← Layout raiz
+├── page.tsx             ← Página raiz ("/")
+└── globals.css          ← Estilos globais
+```
+
+### 2. BACKEND - EDGE FUNCTIONS (`backend/supabase/functions/`)
+
+```
+backend/supabase/functions/
+├── contaazul-sync-automatico/    ← Sync automático ContaAzul
+├── discord-notification/         ← Notificações Discord
+├── login/                       ← Login/Auth
+└── [outras-functions]/          ← Sempre em snake_case
+```
+
+### 3. OUTRAS PASTAS
+
+**Componentes (`frontend/src/components/`):**
+- `ui/` - Componentes base (Button, Input, etc.)
+- `forms/` - Formulários específicos
+- `layouts/` - Layouts reutilizáveis
+- `uploads/` - Componentes de upload
+
+**Documentação (`docs/`):**
+- Documentação técnica e resumos
+
+**Testes e Exemplos (`exemplo_teste/`):**
+- Mockups e protótipos
+- Dados de exemplo/teste
+- Exemplos de APIs externas
+
+## REGRAS OBRIGATÓRIAS
+
+### 🔗 PARA APIS (route.ts):
+```
+✅ SEMPRE: /api/[funcionalidade]/route.ts
+✅ EXEMPLOS:
+   - frontend/src/app/api/usuarios/route.ts
+   - frontend/src/app/api/usuarios/[id]/route.ts
+   - frontend/src/app/api/contahub/teste-5-dias/route.ts
+   - frontend/src/app/api/bars/route.ts
+
+❌ NUNCA: 
+   - /api/admin/[qualquer-coisa] (ELIMINADO COMPLETAMENTE)
+   - /[funcionalidade]/route.ts (fora de api)
+   - APIs duplicadas fora de /api/
+```
+
+### 📄 PARA PÁGINAS (page.tsx):
+```
+✅ SEMPRE: /[categoria]/page.tsx (direto em src/app)
+✅ EXEMPLOS:
+   - frontend/src/app/configuracoes/page.tsx
+   - frontend/src/app/configuracoes/checklists/page.tsx
+   - frontend/src/app/relatorios/contahub-teste/page.tsx
+   - frontend/src/app/operacoes/receitas/page.tsx
+
+❌ NUNCA:
+   - /admin/[qualquer-coisa] (ELIMINADO COMPLETAMENTE)
+   - /paginas/[categoria]/page.tsx (NUNCA usar /paginas/)
+   - Páginas duplicadas ou estrutura confusa
+```
+
+### 🎯 CATEGORIAS DE PÁGINAS DEFINIDAS:
+- **`configuracoes/`** - Páginas administrativas (ex-admin)
+  - checklists, templates, desempenho, contahub-automatico
+- **`relatorios/`** - Todos os relatórios
+  - contahub-teste, contaazul-*, analitico, etc.
+- **`operacoes/`** - Funcionalidades operacionais
+  - receitas, produtos, planejamento, tempo
+- **`funcionario/`** - Área do funcionário
+  - checklists do funcionário
+- **`dashboard/`** - Dashboards específicos
+- **`auth/`** - Páginas de autenticação
+- **`visao-geral/`** - Análises e visões gerais
+
+### 🔄 ROTAS NO CÓDIGO:
+```typescript
+// ✅ CORRETO - Estrutura direta em src/app
+{ route: '/configuracoes/checklists' }
+{ route: '/relatorios/contahub-teste' }
+{ route: '/operacoes/receitas' }
+{ route: '/funcionario/checklists' }
+
+// ❌ ERRADO - Estruturas antigas (eliminadas)
+{ route: '/admin/checklists' }
+{ route: '/paginas/configuracoes/checklists' }
+{ route: '/paginas/relatorios/contahub-teste' }
+```
+
+### 📞 FETCH DE APIS:
+```typescript
+// ✅ CORRETO - APIs sempre em /api/
+await fetch('/api/usuarios')
+await fetch('/api/usuarios/1')
+await fetch('/api/contahub/teste-5-dias')
+await fetch('/api/credenciais')
+await fetch('/api/bars')
+
+// ❌ ERRADO - Estrutura antiga (eliminada)
+await fetch('/api/admin/usuarios')
+await fetch('/usuarios')
+await fetch('/admin/contahub-teste')
+```
+
+### 🧾 CHECKLIST OBRIGATÓRIO:
+
+Antes de criar qualquer arquivo, SEMPRE verificar:
+
+1. ✅ **É uma API?** → `/api/[funcionalidade]/route.ts`
+2. ✅ **É uma página?** → `/[categoria]/page.tsx` (direto em src/app)
+3. ✅ **É um componente?** → `/src/components/[categoria]/`
+4. ✅ **É um hook?** → `/src/hooks/`
+5. ✅ **É Edge Function?** → `/backend/supabase/functions/[nome]/index.ts`
+6. ✅ **Não duplica** funcionalidade existente?
+7. ✅ **Segue nomenclatura** kebab-case?
+8. ✅ **Está na pasta correta** conforme estrutura?
+
+### 🚫 ELIMINAÇÕES PERMANENTES:
+- ❌ `/admin/` - **COMPLETAMENTE ELIMINADA**
+- ❌ `/api/admin/` - **COMPLETAMENTE ELIMINADA**  
+- ❌ `/paginas/` - **NUNCA USAR**
+- ❌ APIs fora de `/api/`
+- ❌ Estruturas duplicadas ou confusas
+
+### CONVENÇÕES DE NOMENCLATURA
+
+#### Arquivos e Pastas:
+- **Pastas**: `kebab-case` (ex: `user-management`, `contahub-teste`)
+- **Componentes**: `PascalCase` (ex: `UserForm.tsx`, `DataTable.tsx`)
+- **Páginas**: `page.tsx` (padrão App Router)
+- **Layouts**: `layout.tsx` (padrão App Router)
+- **APIs**: `route.ts` (padrão App Router)
+- **Edge Functions**: `index.ts` dentro da pasta da função
+
+### REGRAS DE IMPORTS
+
+#### Frontend:
+```typescript
+// ✅ CORRETO - imports relativos do projeto
+import { Button } from '@/components/ui/button'
+import { useAuth } from '@/hooks/useAuth'
+import { supabase } from '@/lib/supabase'
+
+// Para páginas, rotas direto em src/app
+router.push('/configuracoes/checklists')
+```
+
+#### Backend (Edge Functions):
+```typescript
+// ✅ CORRETO - imports do Deno
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+```
+
+### ESTRUTURA DE COMMITS
+
+Sempre seguir o padrão:
+```
+feat(frontend): adiciona componente de upload
+fix(backend): corrige autenticação OAuth
+docs: atualiza documentação da API
+```
+
+## 🎯 OBJETIVO PRINCIPAL:
+**ZERO CONFUSÃO NA ESTRUTURA**
+- **APIs** = `/api/`
+- **Páginas** = direto em `/src/app/` (SEM /paginas/)
+- **Estrutura sempre clara e lógica**
+- **Manutenção facilitada**
+- **Desenvolvimento profissional**
+
+---
+
+**IMPORTANTE**: Sempre que houver dúvida sobre onde colocar um arquivo, seguir esta estrutura atualizada. As pastas `/admin/` e `/paginas/` foram COMPLETAMENTE ELIMINADAS - páginas ficam direto em `/src/app/`. 
+
+---
+
+# 🌙 REGRAS DE DARK MODE - SGB_V2
+
+## 📋 **REGRAS OBRIGATÓRIAS PARA DARK MODE**
+
+### 🎯 **Classes Universais (SEMPRE USE)**
+
+#### **Textos:**
+```tsx
+// ✅ CORRETO
+className="text-gray-900 dark:text-white"        // Título principal
+className="text-gray-700 dark:text-gray-300"     // Subtítulo
+className="text-gray-600 dark:text-gray-400"     // Texto secundário
+className="text-gray-500 dark:text-gray-500"     // Texto muted
+
+// ❌ ERRADO
+className="text-black"
+className="text-gray-900"
+className="text-gray-600"
+```
+
+#### **Backgrounds:**
+```tsx
+// ✅ CORRETO
+className="bg-white dark:bg-gray-800"           // Card/Modal principal
+className="bg-gray-50 dark:bg-gray-900"         // Background secundário
+className="bg-gray-100 dark:bg-gray-700"        // Background input/select
+
+// ❌ ERRADO
+className="bg-white"
+className="bg-gray-50"
+className="bg-gray-100"
+```
+
+#### **Bordas:**
+```tsx
+// ✅ CORRETO
+className="border-gray-200 dark:border-gray-700"  // Borda principal
+className="border-gray-300 dark:border-gray-600"  // Borda secundária
+
+// ❌ ERRADO
+className="border-gray-200"
+className="border-gray-300"
+```
+
+### 🔧 **Classes Pré-definidas (USE QUANDO POSSÍVEL)**
+
+#### **Cards:**
+```tsx
+// Substitua múltiplas classes por:
+className="card-dark"                          // bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm
+className="card-title-dark"                    // text-lg font-semibold text-gray-900 dark:text-white
+className="card-description-dark"              // text-sm text-gray-600 dark:text-gray-400
+```
+
+#### **Botões:**
+```tsx
+className="btn-primary-dark"                   // Azul primário
+className="btn-secondary-dark"                 // Cinza secundário
+className="btn-success-dark"                   // Verde sucesso
+className="btn-danger-dark"                    // Vermelho perigo
+className="btn-outline-dark"                   // Contorno
+```
+
+#### **Inputs/Forms:**
+```tsx
+className="input-dark"                         // Input padrão
+className="textarea-dark"                      // Textarea padrão
+className="select-dark"                        // Select padrão
+```
+
+#### **Status/States:**
+```tsx
+className="status-success"                     // text-green-600 dark:text-green-400
+className="status-error"                       // text-red-600 dark:text-red-400
+className="status-warning"                     // text-yellow-600 dark:text-yellow-400
+className="status-info"                        // text-blue-600 dark:text-blue-400
+```
+
+#### **Ícones:**
+```tsx
+className="icon-primary"                       // text-gray-600 dark:text-gray-400
+className="icon-secondary"                     // text-gray-500 dark:text-gray-500
+className="icon-muted"                         // text-gray-400 dark:text-gray-600
+```
+
+### 🎨 **Componentes Específicos**
+
+#### **Badges:**
+```tsx
+// Use as classes badge existentes (já têm dark mode)
+className="badge-primary"
+className="badge-success"
+className="badge-warning"
+className="badge-error"
+```
+
+#### **Tabs:**
+```tsx
+<TabsList className="tabs-list-dark">
+  <TabsTrigger className="tabs-trigger-dark">
+```
+
+#### **Modais:**
+```tsx
+<DialogContent className="modal-dark">
+<DialogOverlay className="modal-overlay-dark">
+```
+
+#### **Tabelas:**
+```tsx
+<table className="table-dark">
+  <thead className="table-header-dark">
+    <tr className="table-row-dark">
+      <td className="table-cell-dark">
+```
+
+## 🚨 **CHECKLIST DARK MODE OBRIGATÓRIO**
+
+Antes de fazer commit, SEMPRE verificar:
+
+### ✅ **Textos**
+- [ ] Todos os `text-black` têm `dark:text-white`
+- [ ] Todos os `text-gray-900` têm `dark:text-white`
+- [ ] Todos os `text-gray-700` têm `dark:text-gray-300`
+- [ ] Todos os `text-gray-600` têm `dark:text-gray-400`
+- [ ] Todos os `text-gray-500` têm `dark:text-gray-500`
+
+### ✅ **Backgrounds**
+- [ ] Todos os `bg-white` têm `dark:bg-gray-800`
+- [ ] Todos os `bg-gray-50` têm `dark:bg-gray-900`
+- [ ] Todos os `bg-gray-100` têm `dark:bg-gray-700`
+
+### ✅ **Bordas**
+- [ ] Todas as `border-gray-200` têm `dark:border-gray-700`
+- [ ] Todas as `border-gray-300` têm `dark:border-gray-600`
+
+### ✅ **Cards/Componentes**
+- [ ] Todos os `Card` têm classes dark mode
+- [ ] Todos os `Button` têm variantes dark
+- [ ] Todos os `Input/Textarea` têm classes dark
+
+### ✅ **Estados**
+- [ ] Hover states têm variantes dark
+- [ ] Focus states têm variantes dark
+- [ ] Active states têm variantes dark
+
+## 🛠️ **Script de Verificação Dark Mode**
+
+Para verificar se uma página está compliant:
+
+```bash
+# Buscar por classes sem dark mode
+grep -r "text-black\|text-gray-900\|text-gray-700\|text-gray-600" src/ --include="*.tsx" | grep -v "dark:"
+grep -r "bg-white\|bg-gray-50\|bg-gray-100" src/ --include="*.tsx" | grep -v "dark:"
+grep -r "border-gray-200\|border-gray-300" src/ --include="*.tsx" | grep -v "dark:"
+```
+
+## 📝 **Exemplos de Conversão Dark Mode**
+
+### Antes (❌):
+```tsx
+<div className="bg-white border border-gray-200 p-4">
+  <h2 className="text-black text-lg font-semibold">Título</h2>
+  <p className="text-gray-600">Descrição</p>
+  <button className="bg-blue-600 text-white px-4 py-2">
+    Ação
+  </button>
+</div>
+```
+
+### Depois (✅):
+```tsx
+<div className="card-dark p-4">
+  <h2 className="card-title-dark">Título</h2>
+  <p className="card-description-dark">Descrição</p>
+  <button className="btn-primary-dark px-4 py-2">
+    Ação
+  </button>
+</div>
+```
+
+## 🎯 **REGRAS ESPECÍFICAS POR COMPONENTE**
+
+### **Cards:**
+```tsx
+// ✅ SEMPRE usar
+<Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+  <CardHeader className="border-b border-gray-200 dark:border-gray-700">
+    <CardTitle className="text-gray-900 dark:text-white">
+    <CardDescription className="text-gray-600 dark:text-gray-400">
+  </CardHeader>
+</Card>
+```
+
+### **Buttons:**
+```tsx
+// ✅ SEMPRE incluir variantes dark
+<Button className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white">
+<Button className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" variant="secondary">
+```
+
+### **Inputs:**
+```tsx
+// ✅ SEMPRE incluir dark mode
+<Input className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
+<Textarea className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
+```
+
+### **Modals/Dialogs:**
+```tsx
+// ✅ SEMPRE incluir dark mode
+<DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+  <DialogTitle className="text-gray-900 dark:text-white">
+  <DialogDescription className="text-gray-600 dark:text-gray-400">
+</DialogContent>
+```
+
+### **Tabs:**
+```tsx
+// ✅ SEMPRE incluir dark mode
+<TabsList className="bg-gray-100 dark:bg-gray-700">
+  <TabsTrigger className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white dark:text-gray-300">
+</TabsList>
+```
+
+## 🔥 **METAS DE DARK MODE**
+
+- ✅ **100% das páginas** com dark mode funcional
+- ✅ **Transições suaves** entre temas (ThemeContext)
+- ✅ **Consistência visual** em todos os componentes
+- ✅ **Performance otimizada** sem re-renders desnecessários
+- ✅ **Acessibilidade** mantida em ambos os temas
+- ✅ **Persistência** entre navegação de páginas
+
+---
+
+## 🚨 **IMPORTANTE - DARK MODE É OBRIGATÓRIO**
+
+**TODA NOVA PÁGINA OU COMPONENTE DEVE:**
+1. ✅ Ter suporte completo a dark mode
+2. ✅ Usar as classes pré-definidas quando possível
+3. ✅ Seguir o checklist de verificação
+4. ✅ Ser testado em ambos os temas
+5. ✅ Manter consistência visual com o resto do app 
+
+---
+
+# 🚀 REGRAS DE WORKFLOW E DESENVOLVIMENTO - SGB_V2
+
+## 📋 **REGRAS OBRIGATÓRIAS DE WORKFLOW**
+
+### 🔧 **1. BUILD E COMANDOS**
+```bash
+# ✅ CORRETO - SEMPRE usar npx
+npx run build
+npx next build
+npx eslint .
+npx prettier --write .
+
+# ❌ ERRADO - NUNCA usar npm run
+npm run build
+npm run dev
+npm run lint
+```
+
+### 🗄️ **2. BANCO DE DADOS E SUPABASE MCP**
+```typescript
+// ✅ SEMPRE verificar via MCP para qualquer dúvida sobre BD
+// PROJECT ID FIXO (NUNCA ALTERAR): 
+// [Manter salvo na memória o project_id específico do projeto]
+
+// Para verificar tabelas, dados, estrutura:
+- Use mcp_supabase_list_tables
+- Use mcp_supabase_execute_sql  
+- Use mcp_supabase_generate_typescript_types
+- Use mcp_supabase_sql_query
+
+// ❌ NUNCA criar scripts externos para consultas BD
+// ❌ NUNCA assumir estrutura de tabelas sem verificar via MCP
+```
+
+### 📊 **3. QUERIES E VERIFICAÇÕES**
+```typescript
+// ✅ CORRETO - SEMPRE usar MCP direto nas tabelas
+await mcp_supabase_sql_query({
+  sql: "SELECT * FROM usuarios WHERE ativo = true"
+})
+
+// ✅ Verificar estrutura via MCP antes de criar código
+await mcp_supabase_list_tables({ project_id })
+
+// ❌ ERRADO - Criar scripts separados
+// ❌ ERRADO - Assumir estrutura sem verificar
+```
+
+### 🔄 **4. GIT WORKFLOW OBRIGATÓRIO**
+```bash
+# ✅ SEMPRE ao finalizar demandas:
+git add .
+git pull origin main  
+git commit -m "feat: [descrição da feature]"
+git push origin main
+
+# Manter sistema em produção sempre atualizado
+# NUNCA deixar commits pendentes por muito tempo
+# SEMPRE testar antes do push final
+```
+
+### 🎨 **5. PADRÃO DE LAYOUT E CSS**
+```tsx
+// ✅ SEMPRE seguir padrão consistente em TODAS as páginas:
+
+// Layout padrão de página:
+<div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <div className="container mx-auto px-4 py-6">
+    <div className="card-dark p-6">
+      <h1 className="card-title-dark mb-4">Título da Página</h1>
+      {/* Conteúdo */}
+    </div>
+  </div>
+</div>
+
+// Spacing consistente:
+- Containers: px-4 py-6
+- Cards: p-6
+- Elementos: mb-4, gap-4, space-y-4
+- Titles: card-title-dark mb-4
+- Descriptions: card-description-dark mb-6
+
+// Grid padrão:
+- Desktop: grid-cols-1 lg:grid-cols-2 xl:grid-cols-3
+- Mobile: Sempre responsivo
+- Gap: gap-4 ou gap-6
+```
+
+## 🎯 **CHECKLIST FINAL DE DESENVOLVIMENTO**
+
+Antes de qualquer commit, SEMPRE verificar:
+
+### ✅ **Build e Comandos**
+- [ ] Usei `npx run build` em vez de `npm run build`?
+- [ ] Todos os comandos usam `npx` quando necessário?
+
+### ✅ **Banco de Dados**
+- [ ] Verifiquei estrutura via MCP antes de código?
+- [ ] Usei MCP para queries em vez de scripts?
+- [ ] Project ID está correto e fixo?
+- [ ] Testei queries direto no MCP antes de implementar?
+
+### ✅ **Código e Layout**
+- [ ] Segue padrão de layout consistente?
+- [ ] Dark mode implementado em todos os componentes?
+- [ ] Classes CSS seguem padrão definido?
+- [ ] Responsividade testada?
+
+### ✅ **Git e Deploy**
+- [ ] Fiz `git add .`?
+- [ ] Fiz `git pull origin main`?
+- [ ] Commit com mensagem descritiva?
+- [ ] `git push origin main` executado?
+- [ ] Sistema em produção atualizado?
+
+## 🚨 **PRIORIDADES CRÍTICAS**
+
+1. **MCP FIRST**: Sempre verificar BD via MCP antes de qualquer implementação
+2. **NPX ONLY**: Nunca usar `npm run`, sempre `npx`
+3. **LAYOUT CONSISTENCY**: Toda página deve seguir padrão visual
+4. **GIT DISCIPLINE**: Sempre finalizar com sequência completa de git
+5. **PRODUCTION READY**: Código sempre pronto para produção
+
+---
+
+## 🎯 **SUPABASE PROJECT CONFIG**
+
+```typescript
+// PROJECT ID FIXO (MEMORIZAR):
+const SUPABASE_PROJECT_ID = "uqtgsvujwcbymjmvkjhy"
+
+// SEMPRE usar este ID em consultas MCP
+// NUNCA alterar ou pedir novamente
+// Manter consistência em todas as operações
+// Projeto: SGB (sa-east-1)
+```
+
+---
+
+**IMPORTANTE**: Essas regras são OBRIGATÓRIAS e devem ser seguidas em 100% do desenvolvimento. Qualquer desvio deve ser discutido e aprovado antes da implementação. 

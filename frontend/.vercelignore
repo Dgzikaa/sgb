@@ -1,0 +1,26 @@
+# Vercel Ignore Configuration
+# Arquivos e diretórios que não precisam ser deployados
+
+# Scripts de desenvolvimento
+scripts/
+.cursorrules
+
+# Arquivos de configuração local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs e cache
+*.log
+.DS_Store
+.vscode/
+.idea/
+
+# Arquivos de exemplo
+exemplo_teste/
+docs/
+
+# Arquivos de desenvolvimento
+**/*.md
+!README.md 
