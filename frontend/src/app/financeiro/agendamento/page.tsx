@@ -588,6 +588,8 @@ export default function AgendamentoPage() {
         data_pagamento: pagamento.data_pagamento
       }
 
+      console.log('🚀 Enviando pagamento para Inter:', pagamentoInter)
+
       const response = await fetch('/api/financeiro/inter/pix', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -609,14 +611,14 @@ export default function AgendamentoPage() {
         ))
         
         toast({
-          title: "Pagamento aprovado",
-          description: `Pagamento enviado para Inter: ${data.data.codigoSolicitacao}`,
+          title: "✅ Pagamento aprovado no Inter!",
+          description: `Código de solicitação: ${data.data.codigoSolicitacao}`,
         })
       } else {
-        throw new Error(data.error)
+        throw new Error(data.error || 'Erro desconhecido')
       }
     } catch (error) {
-      console.error('Erro ao enviar para Inter:', error)
+      console.error('❌ Erro ao enviar para Inter:', error)
       setPagamentos(prev => prev.map(p => 
         p.id === pagamento.id 
           ? { 
@@ -628,8 +630,8 @@ export default function AgendamentoPage() {
       ))
       
       toast({
-        title: "Erro no pagamento",
-        description: "Erro ao enviar pagamento para Inter",
+        title: "❌ Erro no pagamento Inter",
+        description: error instanceof Error ? error.message : "Erro ao enviar pagamento para Inter",
         variant: "destructive"
       })
     }

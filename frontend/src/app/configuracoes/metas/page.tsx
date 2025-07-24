@@ -33,21 +33,15 @@ import {
 
 // Tipos
 interface Meta {
-  id: number;
+  id: string;
   categoria: string;
-  subcategoria: string;
-  nome_meta: string;
-  tipo_valor: string;
-  valor_semanal: number | null;
-  valor_mensal: number | null;
-  valor_unico: number | null;
-  valor_diario: number | null;
-  unidade: string;
+  nome: string;
   meta_ativa: boolean;
-  descricao: string;
+  meta_diaria: number;
+  meta_semanal: number;
+  meta_mensal: number;
+  valor_atual: any;
   ordem_exibicao: number;
-  cor_categoria: string;
-  icone_categoria: string;
 }
 
 interface MetasOrganizadas {
@@ -86,18 +80,16 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
   isSaving: boolean;
 }) => {
   const [valores, setValores] = useState({
-    valor_diario: meta.valor_diario || '',
-    valor_semanal: meta.valor_semanal || '',
-    valor_mensal: meta.valor_mensal || '',
-    valor_unico: meta.valor_unico || ''
+    meta_diaria: meta.meta_diaria || '',
+    meta_semanal: meta.meta_semanal || '',
+    meta_mensal: meta.meta_mensal || ''
   });
 
   const handleSave = () => {
     const valoresParaSalvar = {
-      valor_diario: valores.valor_diario ? parseFloat(valores.valor_diario.toString()) : null,
-      valor_semanal: valores.valor_semanal ? parseFloat(valores.valor_semanal.toString()) : null,
-      valor_mensal: valores.valor_mensal ? parseFloat(valores.valor_mensal.toString()) : null,
-      valor_unico: valores.valor_unico ? parseFloat(valores.valor_unico.toString()) : null
+      meta_diaria: valores.meta_diaria ? parseFloat(valores.meta_diaria.toString()) : 0,
+      meta_semanal: valores.meta_semanal ? parseFloat(valores.meta_semanal.toString()) : 0,
+      meta_mensal: valores.meta_mensal ? parseFloat(valores.meta_mensal.toString()) : 0
     };
     onSave(valoresParaSalvar);
   };
@@ -142,10 +134,10 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
             </div>
             <div>
               <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
-                {meta.nome_meta}
+                {meta.nome}
               </CardTitle>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {meta.subcategoria}
+                {meta.categoria}
               </p>
             </div>
           </div>
@@ -192,60 +184,47 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
       </CardHeader>
       
       <CardContent className="p-6">
-        {meta.descricao && (
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
-            {meta.descricao}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            { key: 'diario', label: 'Diário', valor: meta.meta_diaria },
+            { key: 'semanal', label: 'Semanal', valor: meta.meta_semanal },
+            { key: 'mensal', label: 'Mensal', valor: meta.meta_mensal }
+          ].map((periodo) => {
+            const chaveValor = `meta_${periodo.key}` as keyof typeof valores;
+            
+            return (
+              <div key={periodo.key} className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
+                <Label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                  {periodo.label}
+                </Label>
+                {isEditing ? (
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={valores[chaveValor]}
+                    onChange={(e) => setValores(prev => ({
+                      ...prev,
+                      [chaveValor]: e.target.value
+                    }))}
+                    placeholder="0.00"
+                    className="mt-2 bg-white dark:bg-gray-800"
+                  />
+                ) : (
+                  <div className="mt-2">
+                    <span className="text-xl font-bold text-gray-900 dark:text-white">
+                      {periodo.valor || 0}
+                    </span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        
+        <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+          <p className="text-sm text-blue-700 dark:text-blue-300">
+            <strong>Valor Atual:</strong> {meta.valor_atual || 'N/A'}
           </p>
-        )}
-
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-           {[
-             { key: 'diario', label: 'Diário', valor: meta.valor_diario },
-             { key: 'semanal', label: 'Semanal', valor: meta.valor_semanal },
-             { key: 'mensal', label: 'Mensal', valor: meta.valor_mensal },
-             { key: 'unico', label: 'Único', valor: meta.valor_unico }
-           ]
-           .filter(periodo => {
-             // Filtro inteligente baseado no tipo_valor
-             if (meta.tipo_valor === 'unico') {
-               return periodo.key === 'unico';
-             } else {
-               return periodo.key !== 'unico'; // Mostra diário, semanal e mensal
-             }
-           })
-           .map((periodo) => {
-             const chaveValor = `valor_${periodo.key}` as keyof typeof valores;
-             
-             return (
-               <div key={periodo.key} className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
-                 <Label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-                   {periodo.label}
-                 </Label>
-                 {isEditing ? (
-                   <Input
-                     type="number"
-                     step="0.01"
-                     value={valores[chaveValor]}
-                     onChange={(e) => setValores(prev => ({
-                       ...prev,
-                       [chaveValor]: e.target.value
-                     }))}
-                     placeholder="0.00"
-                     className="mt-2 bg-white dark:bg-gray-800"
-                   />
-                 ) : (
-                   <div className="mt-2">
-                     <span className="text-xl font-bold text-gray-900 dark:text-white">
-                       {formatarValor(periodo.valor, meta.tipo_valor)}
-                     </span>
-                     <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
-                       {meta.unidade === 'porcentagem' ? '%' : meta.unidade}
-                     </span>
-                   </div>
-                 )}
-               </div>
-             );
-           })}
         </div>
       </CardContent>
     </Card>
@@ -265,8 +244,8 @@ export default function MetasPage() {
     indicadores_qualidade: [],
     indicadores_mensais: []
   });
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [savingId, setSavingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   const carregarMetas = useCallback(async () => {
     try {
@@ -312,7 +291,7 @@ export default function MetasPage() {
     return categoryStats[categoria] || { total: 0, ativas: 0 };
   }, [categoryStats]);
 
-  const salvarMeta = async (metaId: number, valores: Record<string, number | null>) => {
+  const salvarMeta = async (metaId: string, valores: Record<string, number | null>) => {
     try {
       setSavingId(metaId);
       
@@ -454,7 +433,7 @@ export default function MetasPage() {
 
         {/* Tabs de Categorias */}
         <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
-          <Tabs defaultValue="financeiro" className="w-full">
+          <Tabs defaultValue="indicadores_estrategicos" className="w-full">
             <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
