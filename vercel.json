@@ -1,10 +1,4 @@
 {
-  "crons": [
-    {
-      "path": "/api/cron/meta-social-collect",
-      "schedule": "0 */6 * * *"
-    }
-  ],
   "functions": {
     "frontend/src/app/api/cron/meta-social-collect/route.ts": {
       "maxDuration": 300
