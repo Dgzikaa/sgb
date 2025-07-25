@@ -1,6 +1,38 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+// Interfaces TypeScript
+interface FaceDescriptor {
+  id: string;
+  user_id: string;
+  descriptor: number[];
+  confidence_threshold: number;
+  usuarios_bar: {
+    id: string;
+    nome: string;
+    email: string;
+    role: string;
+    modulos_permitidos: string[];
+  };
+}
+
+interface BestMatch {
+  id: string;
+  user_id: string;
+  descriptor: number[];
+  confidence_threshold: number;
+  user_nome: string;
+  distance: number;
+  similarity: number;
+  usuarios_bar: {
+    id: string;
+    nome: string;
+    email: string;
+    role: string;
+    modulos_permitidos: string[];
+  };
+}
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -28,26 +60,27 @@ function euclideanDistance(desc1: number[], desc2: number[]): number {
 }
 
 // Função para encontrar a melhor correspondência
-function findBestMatch(inputDescriptor: number[], storedDescriptors: any[]) {
-  let bestMatch = null
+function findBestMatch(inputDescriptor: number[], storedDescriptors: FaceDescriptor[]): BestMatch | null {
+  let bestMatch: BestMatch | null = null
   let bestDistance = Infinity
   
   for (const stored of storedDescriptors) {
     try {
       const distance = euclideanDistance(inputDescriptor, stored.descriptor)
       
-      console.log(`📏 Distância para ${stored.user_nome}: ${distance.toFixed(4)} (threshold: ${stored.confidence_threshold})`)
+      console.log(`📏 Distância para ${stored.usuarios_bar.nome}: ${distance.toFixed(4)} (threshold: ${stored.confidence_threshold})`)
       
       if (distance < stored.confidence_threshold && distance < bestDistance) {
         bestDistance = distance
         bestMatch = {
           ...stored,
+          user_nome: stored.usuarios_bar.nome,
           distance,
           similarity: (1 - distance) * 100 // Porcentagem de similaridade
         }
       }
     } catch (error) {
-      console.error(`❌ Erro ao calcular distância para usuário ${stored.user_nome}:`, error)
+      console.error(`❌ Erro ao calcular distância para usuário ${stored.usuarios_bar.nome}:`, error)
     }
   }
   
@@ -99,41 +132,29 @@ export async function POST(request: NextRequest) {
           modulos_permitidos
         )
       `)
-      .eq('bar_id', barId)
-      .eq('active', true)
+      .eq('usuarios_bar.bar_id', barId)
       .eq('usuarios_bar.ativo', true)
 
     if (faceError) {
       console.error('❌ Erro ao buscar descritores faciais:', faceError)
       return NextResponse.json(
-        { success: false, error: 'Erro interno do servidor' },
+        { success: false, error: 'Erro ao buscar dados de autenticação' },
         { status: 500 }
       )
     }
 
     if (!faceDescriptors || faceDescriptors.length === 0) {
+      console.log('❌ Nenhum descritor facial encontrado para este bar')
       return NextResponse.json(
-        { success: false, error: 'Nenhuma face registrada encontrada para este bar' },
+        { success: false, error: 'Nenhum usuário cadastrado com reconhecimento facial' },
         { status: 404 }
       )
     }
 
-    console.log(`🔍 Comparando com ${faceDescriptors.length} faces registradas`)
-
-    // Preparar dados para comparação
-    const storedDescriptors = faceDescriptors.map(face => ({
-      user_id: face.user_id,
-      user_nome: face.usuarios_bar[0]?.nome || 'Usuário',
-      user_email: face.usuarios_bar[0]?.email || '',
-      user_role: face.usuarios_bar[0]?.role || 'user',
-      user_modulos: face.usuarios_bar[0]?.modulos_permitidos || [],
-      descriptor: face.descriptor,
-      confidence_threshold: face.confidence_threshold,
-      face_id: face.id
-    }))
+    console.log(`📊 ${faceDescriptors.length} descritores faciais encontrados`)
 
     // Encontrar a melhor correspondência
-    const bestMatch = findBestMatch(descriptor, storedDescriptors)
+    const bestMatch = findBestMatch(descriptor, faceDescriptors as unknown as FaceDescriptor[])
 
     if (!bestMatch) {
       console.log('❌ Nenhuma correspondência encontrada')
@@ -220,7 +241,7 @@ export async function POST(request: NextRequest) {
         method: 'facial_recognition',
         similarity: bestMatch.similarity,
         distance: bestMatch.distance,
-        face_id: bestMatch.face_id
+        face_id: bestMatch.id
       }
     }
 

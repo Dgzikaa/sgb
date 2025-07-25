@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { logLogout } from '@/lib/audit-logger'
 
+// Interfaces TypeScript
+interface UserInfo {
+  id: string;
+  email: string;
+  nome: string;
+  bar_id: number;
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Capturar informações do cliente para logging
@@ -10,11 +18,11 @@ export async function POST(request: NextRequest) {
     const sessionId = request.headers.get('x-session-id') || `session_${Date.now()}`;
     
     // Tentar obter dados do usuário do cookie antes de limpar
-    let userInfo = null;
+    let userInfo: UserInfo | null = null;
     try {
       const userCookie = request.cookies.get('sgb_user');
       if (userCookie?.value) {
-        userInfo = JSON.parse(userCookie.value);
+        userInfo = JSON.parse(userCookie.value) as UserInfo;
       }
     } catch {
       // Ignorar erro do cookie

@@ -367,7 +367,7 @@ async function gerarMensagemWhatsApp(execucao: ExecucaoChecklist, dados: DadosNo
       mensagem += `
 ⚠️ *Problemas:* ${stats.problemas_encontrados} item(s) com observações`
     }
-  } else if (dados.tipo_notificacao === 'atrasado') {
+  } else if (dados.tipo_notificacao === 'atrasado' && execucao.prazo_conclusao) {
     const horasAtraso = Math.round(
       (new Date().getTime() - new Date(execucao.prazo_conclusao).getTime()) / (1000 * 60 * 60)
     )
@@ -408,7 +408,7 @@ async function enviarNotificacoesWhatsApp(supabase: SupabaseClient, destinatario
           checklist_execucao_id: execucao.id,
           prioridade: 'alta'
         }
-      })
+      } as any)
 
       if (error) {
         falhas.push({ destinatario, erro: error.message })

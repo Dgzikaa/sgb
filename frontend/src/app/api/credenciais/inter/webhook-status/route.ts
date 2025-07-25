@@ -30,7 +30,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Obter token de acesso
-    const accessToken = await getInterAccessToken()
+    const accessToken = await getInterAccessToken(
+      credentials.client_id,
+      credentials.client_secret
+    )
     if (!accessToken) {
       return NextResponse.json({ 
         error: 'Falha ao obter token de acesso',

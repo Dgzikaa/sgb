@@ -48,14 +48,14 @@ export async function GET(request: NextRequest) {
     // 3. Registrar eventos detectados
     for (const pattern of suspiciousPatterns) {
       await securityMonitor.logEvent({
-        level: pattern.level,
-        category: pattern.category,
-        event_type: pattern.event_type,
-        ip_address: pattern.ip_address,
-        user_agent: pattern.user_agent,
-        endpoint: pattern.endpoint,
-        details: pattern.details,
-        risk_score: pattern.risk_score
+        level: (pattern as any).level,
+        category: (pattern as any).category,
+        event_type: (pattern as any).event_type,
+        ip_address: (pattern as any).ip_address,
+        user_agent: (pattern as any).user_agent,
+        endpoint: (pattern as any).endpoint,
+        details: (pattern as any).details,
+        risk_score: (pattern as any).risk_score
       })
     }
 
@@ -94,7 +94,7 @@ async function analyzeSuspiciousPatterns(events: unknown[]) {
   const patterns = []
   
   // Múltiplas tentativas de login do mesmo IP
-  const loginAttempts = events.filter(e => e.event_type === 'failed_login')
+  const loginAttempts = events.filter((e: any) => e.event_type === 'failed_login')
   const ipGroups = groupByIP(loginAttempts)
   
   for (const [ip, attempts] of Object.entries(ipGroups)) {
@@ -112,7 +112,7 @@ async function analyzeSuspiciousPatterns(events: unknown[]) {
           pattern: 'brute_force'
         },
         risk_score: 90
-      })
+      } as any)
     }
   }
 

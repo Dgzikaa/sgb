@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
       success: true,
       custos: custos || [],
       total_custos: custos?.length || 0,
-      total_valor: custos?.reduce((sum: number, custo: unknown) => sum + parseFloat(custo.valor || 0), 0) || 0
+      total_valor: custos?.reduce((sum: number, custo: any) => sum + parseFloat(custo.valor || 0), 0) || 0
     })
 
   } catch (error) {
@@ -268,7 +268,7 @@ export async function PUT(request: NextRequest) {
       forma_pagamento
     } = body
 
-    const updateData: unknown = {
+    const updateData: any = {
       atualizado_em: new Date().toISOString()
     }
 

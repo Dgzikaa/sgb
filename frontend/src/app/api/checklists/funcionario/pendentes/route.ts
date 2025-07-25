@@ -1,6 +1,15 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase'
 
+// Interfaces TypeScript
+interface ChecklistFuncionario {
+  id: string;
+  titulo: string;
+  status: string;
+  prazo: string;
+  created_at: string;
+}
+
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
@@ -16,6 +25,14 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await getSupabaseClient()
+    
+    if (!supabase) {
+      console.error('❌ Erro: Cliente Supabase não disponível')
+      return NextResponse.json(
+        { error: 'Erro de configuração do banco de dados' },
+        { status: 500 }
+      )
+    }
     
     // Buscar checklists atribuídos ao funcionário atual
     const { data: checklists, error } = await supabase
@@ -35,14 +52,14 @@ export async function POST(request: NextRequest) {
 
     // Separar por urgência baseado no prazo
     const agora = new Date()
-    const urgentes = checklists?.filter((c: any) => {
+    const urgentes = checklists?.filter((c: ChecklistFuncionario) => {
       if (!c.prazo) return false
       const prazo = new Date(c.prazo)
       const horasRestantes = (prazo.getTime() - agora.getTime()) / (1000 * 60 * 60)
       return horasRestantes <= 2 && horasRestantes > 0
     }) || []
 
-    const atrasados = checklists?.filter((c: any) => {
+    const atrasados = checklists?.filter((c: ChecklistFuncionario) => {
       if (!c.prazo) return false
       const prazo = new Date(c.prazo)
       return prazo < agora
@@ -51,8 +68,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       meus_pendentes: meusPendentes,
       detalhes: {
-        pending: checklists?.filter((c: any) => c.status === 'pending').length || 0,
-        doing: checklists?.filter((c: any) => c.status === 'doing').length || 0,
+        pending: checklists?.filter((c: ChecklistFuncionario) => c.status === 'pending').length || 0,
+        doing: checklists?.filter((c: ChecklistFuncionario) => c.status === 'doing').length || 0,
         urgentes: urgentes.length,
         atrasados: atrasados.length,
         no_prazo: meusPendentes - urgentes.length - atrasados.length

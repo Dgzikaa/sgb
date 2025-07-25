@@ -214,7 +214,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Agora buscar visitas apenas para as datas onde cada telefone teve atividade
-    const clientesTelefone = [];
+    const clientesTelefone: any[] = [];
 
     for (const [, dadosTelefone] of telefoneMap.entries()) {
       const datasAtividade = Array.from(dadosTelefone.datas_atividade);
@@ -253,7 +253,7 @@ export async function GET(request: NextRequest) {
         .eq('bar_id', barId);
 
       if (clientesPorTelefone && clientesPorTelefone.length > 0) {
-        const clienteIds = clientesPorTelefone.map((c: unknown) => c.id);
+        const clienteIds = clientesPorTelefone.map((c: any) => c.id);
         
         const { data: visitasPorTelefone } = await supabase
           .from('cliente_visitas')
@@ -279,11 +279,11 @@ export async function GET(request: NextRequest) {
 
       // Remover duplicatas baseado em cliente_id + data_visita
       const visitasUnicas = visitasCliente
-        .filter((visita: unknown, index: number, array: unknown[]) => {
+        .filter((visita: any, index: number, array: any[]) => {
           const key = `${visita.cliente_id}-${visita.data_visita}`;
-          return array.findIndex((v: unknown) => `${v.cliente_id}-${v.data_visita}` === key) === index;
+          return array.findIndex((v: any) => `${v.cliente_id}-${v.data_visita}` === key) === index;
         })
-        .sort((a: unknown, b: unknown) => new Date(a.data_visita).getTime() - new Date(b.data_visita).getTime())
+        .sort((a: any, b: any) => new Date(a.data_visita).getTime() - new Date(b.data_visita).getTime())
         .slice(0, 100); // Máximo de 100 visitas por telefone
 
       if (visitasUnicas.length === 0) continue;
@@ -291,7 +291,7 @@ export async function GET(request: NextRequest) {
       const totalVisitas = visitasUnicas.length;
       const primeiraVisita = visitasUnicas[0]?.data_visita;
       const ultimaVisita = visitasUnicas[visitasUnicas.length - 1]?.data_visita;
-      const valorTotal = visitasUnicas.reduce((sum: number, v: unknown) => sum + parseFloat(v.valor_gasto || 0), 0);
+      const valorTotal: number = visitasUnicas.reduce((sum: number, v: any) => sum + parseFloat(v.valor_gasto || 0), 0);
       const ticketMedio = totalVisitas > 0 ? valorTotal / totalVisitas : 0;
 
       // Calcular dias sem visitar
@@ -362,7 +362,7 @@ export async function GET(request: NextRequest) {
 
       if (!errorEvento && visitasEvento) {
         // Mapear dados do evento para formato compatível
-        clientesEvento = visitasEvento.map((visita: unknown) => ({
+        clientesEvento = visitasEvento.map((visita: any) => ({
           telefone: visita.clientes.telefone,
           nome: visita.clientes.nome,
           total_visitas: visita.clientes.total_visitas,

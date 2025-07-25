@@ -57,9 +57,9 @@ export async function POST(request: NextRequest) {
 
       const tokenData = await tokenResponse.json()
       accessToken = tokenData.data.access_token
-      console.log('✅ Novo token OAuth gerado:', accessToken.substring(0, 20) + '...')
+      console.log('✅ Novo token OAuth gerado:', accessToken?.substring(0, 20) + '...')
     } else {
-      console.log('✅ Usando token fornecido:', accessToken.substring(0, 20) + '...')
+      console.log('✅ Usando token fornecido:', accessToken?.substring(0, 20) + '...')
     }
 
     // Pequeno delay para garantir que o token seja processado
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
       'x-conta-corrente': options.headers['x-conta-corrente']
     });
 
-    return new Promise((resolve) => {
+    return new Promise<Response>((resolve) => {
       const req = https.request(options, (res) => {
         console.log('📡 Resposta do Inter:', res.statusCode, res.statusMessage);
         console.log('📡 Headers da resposta:', res.headers);

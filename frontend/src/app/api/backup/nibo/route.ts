@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+// Interfaces TypeScript
+interface BackupResultado {
+  tabela: string;
+  registros: number;
+  arquivo: string | null;
+  sucesso: boolean;
+  erro?: string;
+}
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -20,7 +29,7 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🚀 Iniciando backup das tabelas NIBO...')
     
-    const resultados = []
+    const resultados: BackupResultado[] = []
     
     for (const tabela of tabelas) {
       try {
@@ -128,28 +137,33 @@ export async function GET() {
       .list()
     
     if (error) {
+      console.error('❌ Erro ao listar arquivos:', error)
       return NextResponse.json({
         success: false,
-        error: 'Erro ao verificar bucket',
-        details: error.message
+        error: 'Erro ao verificar backups'
       }, { status: 500 })
     }
     
+    const backups = files?.map(file => ({
+      nome: file.name,
+      tamanho: file.metadata?.size || 0,
+      criado_em: file.created_at,
+      atualizado_em: file.updated_at
+    })) || []
+    
     return NextResponse.json({
       success: true,
-      bucket: 'nibo',
-      total_arquivos: files.length,
-      arquivos: files.map(file => ({
-        nome: file.name,
-        tamanho: file.metadata?.size,
-        criado_em: file.created_at
-      }))
+      data: {
+        total_backups: backups.length,
+        backups: backups
+      }
     })
     
   } catch (error) {
+    console.error('❌ Erro ao verificar backups:', error)
     return NextResponse.json({
       success: false,
-      error: 'Erro ao verificar status do bucket'
+      error: 'Erro interno do servidor'
     }, { status: 500 })
   }
 } 

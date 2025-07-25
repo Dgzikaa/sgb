@@ -380,9 +380,16 @@ async function calcularEstatisticasDetalhadas(supabase: SupabaseClient, atribuic
   }
 }
 
-function calcularEvolucaoMensal(agendamentos: Array<Record<string, unknown>>) {
+interface EvolucaoMensal {
+  mes: string;
+  total: number;
+  concluidos: number;
+  taxa_conclusao: number;
+}
+
+function calcularEvolucaoMensal(agendamentos: Array<Record<string, unknown>>): EvolucaoMensal[] {
   const agora = new Date()
-  const evolucao = []
+  const evolucao: EvolucaoMensal[] = []
 
   for (let i = 5; i >= 0; i--) {
     const mes = new Date(agora.getFullYear(), agora.getMonth() - i, 1)

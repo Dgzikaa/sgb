@@ -1,6 +1,14 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+// Interfaces TypeScript
+interface BulkResult {
+  id?: string;
+  success: boolean;
+  error?: string;
+  affected?: number;
+}
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -16,7 +24,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const results = []
+    const results: BulkResult[] = []
     let successCount = 0
     let errorCount = 0
 
@@ -130,7 +138,17 @@ export async function POST(request: NextRequest) {
 
             if (fetchError) throw fetchError
 
-            // Criar cópia
+            if (!originalChecklist) {
+              results.push({ 
+                id: checklistId, 
+                success: false, 
+                error: 'Checklist não encontrado' 
+              })
+              errorCount++
+              continue
+            }
+
+            // Criar novo checklist
             const { data: newChecklist, error: createError } = await supabase
               .from('checklists')
               .insert({
@@ -139,38 +157,37 @@ export async function POST(request: NextRequest) {
                 tipo: originalChecklist.tipo,
                 bar_id: originalChecklist.bar_id,
                 agendamento_config: originalChecklist.agendamento_config,
-                ativo: false // Começar desativado
+                ativo: false,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
               })
               .select()
               .single()
 
             if (createError) throw createError
 
-            // Copiar itens
-            if (originalChecklist.checklist_items?.length > 0) {
-              const itemsToInsert = originalChecklist.checklist_items.map((item: any) => ({
+            // Duplicar itens do checklist
+            if (originalChecklist.checklist_items && originalChecklist.checklist_items.length > 0) {
+              const newItems = originalChecklist.checklist_items.map((item: any) => ({
                 checklist_id: newChecklist.id,
                 nome: item.nome,
                 descricao: item.descricao,
                 tipo: item.tipo,
                 obrigatorio: item.obrigatorio,
                 ordem: item.ordem,
-                opcoes: item.opcoes
+                opcoes: item.opcoes,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
               }))
 
               const { error: itemsError } = await supabase
                 .from('checklist_items')
-                .insert(itemsToInsert)
+                .insert(newItems)
 
               if (itemsError) throw itemsError
             }
-            
-            results.push({ 
-              id: checklistId, 
-              success: true, 
-              newId: newChecklist.id,
-              newName: newChecklist.nome
-            })
+
+            results.push({ id: checklistId, success: true })
             successCount++
           } catch (error) {
             results.push({ 
@@ -183,18 +200,12 @@ export async function POST(request: NextRequest) {
         }
         break
 
-      case 'update_bar':
-        if (!data.bar_id) {
-          return NextResponse.json({ 
-            error: 'ID do bar é obrigatório para esta ação' 
-          }, { status: 400 })
-        }
-
+      case 'update':
         try {
           const { error } = await supabase
             .from('checklists')
             .update({ 
-              bar_id: data.bar_id, 
+              ...data, 
               updated_at: new Date().toISOString() 
             })
             .in('id', checklistIds)
@@ -212,124 +223,66 @@ export async function POST(request: NextRequest) {
         }
         break
 
-      case 'export':
-        try {
-          const { data: checklists, error } = await supabase
-            .from('checklists')
-            .select(`
-              id,
-              nome,
-              descricao,
-              tipo,
-              ativo,
-              created_at,
-              bars (nome),
-              checklist_items (
-                nome,
-                tipo,
-                obrigatorio
-              )
-            `)
-            .in('id', checklistIds)
-
-          if (error) throw error
-
-          const exportData = checklists.map(checklist => ({
-            'ID': checklist.id,
-            'Nome': checklist.nome,
-            'Descrição': checklist.descricao,
-            'Tipo': checklist.tipo,
-            'Ativo': checklist.ativo ? 'Sim' : 'Não',
-            'Bar': checklist.bars?.[0]?.nome || 'N/A',
-            'Total de Itens': checklist.checklist_items?.length || 0,
-            'Itens Obrigatórios': checklist.checklist_items?.filter((item: any) => item.obrigatorio).length || 0,
-            'Criado em': new Date(checklist.created_at).toLocaleDateString('pt-BR')
-          }))
-
-          return NextResponse.json({
-            success: true,
-            data: exportData,
-            filename: `checklists_${new Date().toISOString().split('T')[0]}.csv`
-          })
-        } catch (error) {
-          return NextResponse.json({ 
-            error: error instanceof Error ? error.message : 'Erro ao exportar' 
-          }, { status: 500 })
-        }
-
       default:
         return NextResponse.json({ 
-          error: `Ação '${action}' não suportada` 
+          error: 'Ação não suportada' 
         }, { status: 400 })
     }
 
-    console.log(`Bulk checklist operation ${action}:`, {
-      total: checklistIds.length,
-      success: successCount,
-      errors: errorCount,
-      timestamp: new Date().toISOString()
-    })
-
     return NextResponse.json({
       success: true,
-      results,
-      summary: {
+      message: `Operação concluída: ${successCount} sucessos, ${errorCount} erros`,
+      data: {
         total: checklistIds.length,
-        success: successCount,
-        errors: errorCount,
-        action
+        successCount,
+        errorCount,
+        results
       }
     })
 
   } catch (error) {
-    console.error('Erro na operação em lote de checklists:', error)
-    return NextResponse.json({ 
-      error: 'Erro interno do servidor' 
+    console.error('❌ Erro na operação bulk:', error)
+    return NextResponse.json({
+      success: false,
+      error: 'Erro interno do servidor',
+      details: error instanceof Error ? error.message : 'Erro desconhecido'
     }, { status: 500 })
   }
 }
 
 export async function GET() {
-  return NextResponse.json({
-    actions: [
-      {
-        id: 'delete',
-        label: 'Excluir checklists',
-        description: 'Remove permanentemente os checklists selecionados',
-        requiresConfirmation: true,
-        destructive: true
-      },
-      {
-        id: 'activate',
-        label: 'Ativar checklists',
-        description: 'Ativa os checklists selecionados',
-        requiresConfirmation: false
-      },
-      {
-        id: 'deactivate',
-        label: 'Desativar checklists',
-        description: 'Desativa os checklists selecionados',
-        requiresConfirmation: true
-      },
-      {
-        id: 'duplicate',
-        label: 'Duplicar checklists',
-        description: 'Cria cópias dos checklists selecionados',
-        requiresConfirmation: true
-      },
-      {
-        id: 'update_bar',
-        label: 'Alterar bar',
-        description: 'Altera o bar dos checklists selecionados',
-        requiresData: ['bar_id'],
-        requiresConfirmation: true
-      },
-      {
-        id: 'export',
-        label: 'Exportar checklists',
-        description: 'Exporta dados dos checklists selecionados',
-        requiresConfirmation: false
-      }
-    ]
-  })
+  try {
+    const { data: checklists, error } = await supabase
+      .from('checklists')
+      .select(`
+        id,
+        nome,
+        tipo,
+        ativo,
+        created_at,
+        updated_at,
+        checklist_items (id)
+      `)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+
+    const checklistsWithCount = checklists?.map(checklist => ({
+      ...checklist,
+      items_count: checklist.checklist_items?.length || 0
+    })) || []
+
+    return NextResponse.json({
+      success: true,
+      data: checklistsWithCount
+    })
+
+  } catch (error) {
+    console.error('❌ Erro ao buscar checklists:', error)
+    return NextResponse.json({
+      success: false,
+      error: 'Erro interno do servidor',
+      details: error instanceof Error ? error.message : 'Erro desconhecido'
+    }, { status: 500 })
+  }
 } 
