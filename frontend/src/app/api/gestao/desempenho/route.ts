@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
+import { authenticateUser, authErrorResponse } from '@/middleware/auth'
 
 // Interfaces baseadas na planilha CSV
 interface IndicadorDesempenho {
@@ -443,22 +444,13 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
 
 export async function GET(request: NextRequest) {
   try {
-    // Verificar se é admin
-    const supabase = await getAdminClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    const user = await authenticateUser(request);
+    if (!user) {
+      return authErrorResponse('Usuário não autenticado');
     }
 
     // Verificar se é admin
-    const { data: profile } = await supabase
-      .from('usuarios')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile || profile.role !== 'admin') {
+    if (user.role !== 'admin') {
       return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
     }
 

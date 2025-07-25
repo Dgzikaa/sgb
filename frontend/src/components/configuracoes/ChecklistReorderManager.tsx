@@ -73,7 +73,7 @@ export function ChecklistReorderManager({
   // Save to server
   const handleSave = async () => {
     try {
-      const response = await fetch('/api/checklists/reorder', {
+      const response = await fetch('/api/operacoes/checklists/reorder', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

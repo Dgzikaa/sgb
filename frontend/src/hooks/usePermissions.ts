@@ -36,6 +36,7 @@ export function usePermissions(): PermissionsHook {
 
       try {
         const userData = safeLocalStorage.getItem('sgb_user');
+        
         if (userData) {
           const parsedUser = JSON.parse(userData);
           setUser(parsedUser);
@@ -258,7 +259,6 @@ export function usePermissions(): PermissionsHook {
           // Atualizar localStorage
           safeLocalStorage.setItem('sgb_user', JSON.stringify(userData.user));
           setUser(userData.user);
-          console.log('✅ Dados do usuário atualizados:', userData.user.nome);
         }
       }
     } catch (error) {

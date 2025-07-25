@@ -193,7 +193,7 @@ export default function AdminChecklists() {
     if (!selectedBar?.id) return;
 
     try {
-      const response = await fetch('/api/checklists');
+      const response = await fetch('/api/operacoes/checklists');
       if (response.ok) {
         const data = await response.json();
         setChecklists(data);
@@ -234,7 +234,7 @@ export default function AdminChecklists() {
   // Bulk actions
   const handleBulkDelete = async (selectedItems: ChecklistTemplate[]) => {
     try {
-      const response = await fetch('/api/checklists/bulk', {
+      const response = await fetch('/api/operacoes/checklists/bulk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -254,7 +254,7 @@ export default function AdminChecklists() {
 
   const handleBulkActivate = async (selectedItems: ChecklistTemplate[]) => {
     try {
-      const response = await fetch('/api/checklists/bulk', {
+      const response = await fetch('/api/operacoes/checklists/bulk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -274,7 +274,7 @@ export default function AdminChecklists() {
 
   const handleBulkDeactivate = async (selectedItems: ChecklistTemplate[]) => {
     try {
-      const response = await fetch('/api/checklists/bulk', {
+      const response = await fetch('/api/operacoes/checklists/bulk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -294,7 +294,7 @@ export default function AdminChecklists() {
 
   const handleBulkDuplicate = async (selectedItems: ChecklistTemplate[]) => {
     try {
-      const response = await fetch('/api/checklists/bulk', {
+      const response = await fetch('/api/operacoes/checklists/bulk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -380,7 +380,7 @@ export default function AdminChecklists() {
 
   const handleSalvarNovoChecklist = async () => {
     try {
-      const response = await fetch('/api/checklists', {
+      const response = await fetch('/api/operacoes/checklists', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

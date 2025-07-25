@@ -434,7 +434,7 @@ export default function MetasPage() {
   const carregarMetas = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/metas');
+      const response = await fetch('/api/configuracoes/metas');
       const data = await response.json();
 
       if (data.success) {
@@ -485,7 +485,7 @@ export default function MetasPage() {
     try {
       setSavingId(metaId);
 
-      const response = await fetch('/api/metas', {
+      const response = await fetch('/api/configuracoes/metas', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(Object.assign({ id: metaId }, valores)),

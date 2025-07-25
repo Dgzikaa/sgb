@@ -516,7 +516,7 @@ export function useAlerts() {
     setError(null);
 
     try {
-      const response = await fetch('/api/checklists/alerts');
+      const response = await fetch('/api/operacoes/checklists/alerts');
       if (!response.ok) {
         throw new Error('Erro ao buscar alertas');
       }

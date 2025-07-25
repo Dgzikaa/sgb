@@ -207,7 +207,7 @@ export default function ReceitasPage() {
 
     try {
       console.log('🔄 Carregando insumos do banco...');
-      const response = await fetch(`/api/receitas/insumos?ativo=true`);
+              const response = await fetch(`/api/operacoes/receitas/insumos?ativo=true`);
 
       if (!response.ok) {
         throw new Error(`Erro na API: ${response.status}`);
@@ -457,7 +457,7 @@ export default function ReceitasPage() {
     try {
       setIsLoading(true);
 
-      const response = await fetch('/api/receitas/insumos', {
+      const response = await fetch('/api/operacoes/receitas/insumos', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

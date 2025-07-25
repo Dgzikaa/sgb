@@ -117,7 +117,7 @@ export default function EventosPage() {
     try {
       setLoading(true);
       const response = await fetch(
-        `/api/eventos?bar_id=${selectedBar.id}&ano=${currentDate.getFullYear()}&mes=${currentDate.getMonth() + 1}`
+        `/api/gestao/eventos?bar_id=${selectedBar.id}&ano=${currentDate.getFullYear()}&mes=${currentDate.getMonth() + 1}`
       );
       const data = await response.json();
 
@@ -160,7 +160,7 @@ export default function EventosPage() {
         bar_id: selectedBar.id,
       };
 
-      const response = await fetch('/api/eventos', {
+      const response = await fetch('/api/gestao/eventos', {
         method: editingEvent ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(
@@ -198,7 +198,7 @@ export default function EventosPage() {
 
     try {
       setLoading(true);
-      const response = await fetch(`/api/eventos?id=${id}`, {
+      const response = await fetch(`/api/gestao/eventos/${id}`, {
         method: 'DELETE',
       });
 

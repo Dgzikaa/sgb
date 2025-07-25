@@ -14,7 +14,7 @@ interface GestaoLayoutProps {
 
 export default function GestaoLayout({ children }: GestaoLayoutProps) {
   const router = useRouter();
-  const { isRole } = usePermissions();
+  const { isRole, user, loading } = usePermissions();
   const { setPageTitle } = usePageTitle();
 
   const isAdmin = isRole('admin');
@@ -26,13 +26,14 @@ export default function GestaoLayout({ children }: GestaoLayoutProps) {
 
   // Verificar permissão de admin
   useEffect(() => {
-    if (!isAdmin) {
+    // Só verificar após o carregamento estar completo
+    if (!loading && !isAdmin) {
       router.push('/home');
     }
-  }, [isAdmin, router]);
+  }, [isAdmin, router, loading]);
 
   // Se não for admin, mostrar aviso
-  if (!isAdmin) {
+  if (!loading && !isAdmin) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 py-6">
@@ -57,6 +58,20 @@ export default function GestaoLayout({ children }: GestaoLayoutProps) {
               </Alert>
             </CardContent>
           </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar loading enquanto carrega
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">
+            Carregando permissões...
+          </p>
         </div>
       </div>
     );

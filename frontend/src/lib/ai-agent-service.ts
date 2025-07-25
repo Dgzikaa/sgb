@@ -1363,7 +1363,7 @@ export class AIIntelligentAgent {
         .lt('created_at', `${dataOntem}T23:59:59Z`);
 
       // Buscar alertas ativos agora
-      const { data: alertasData } = await fetch('/api/checklists/alerts')
+      const { data: alertasData } = await fetch('/api/operacoes/checklists/alerts')
         .then(res => res.json())
         .catch(() => ({ alerts: [] }));
 

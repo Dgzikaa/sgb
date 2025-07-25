@@ -550,7 +550,7 @@ export function useCopyItems() {
     setError(null);
 
     try {
-      const response = await fetch('/api/checklists/copy-items', {
+      const response = await fetch('/api/operacoes/checklists/copy-items', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
